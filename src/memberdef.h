@@ -76,7 +76,7 @@ class MemberDef : public Definition
    QString initializer() const;
 
    int initializerLines() const;
-   Entry::SpecifierFlags getMemberSpecifiers() const;
+   Entry::Traits getMemberTraits() const;
 
    QSharedPointer<MemberList> getSectionList(QSharedPointer<Definition> d) const;
    QString displayDefinition() const;
@@ -173,8 +173,8 @@ class MemberDef : public Definition
    bool isDefault() const;
    bool isDelete() const;
    bool isNoExcept() const;
-   bool isAttribute() const; // UNO IDL attribute
-   bool isUNOProperty() const; // UNO IDL property
+   bool isAttribute() const;            // UNO IDL attribute
+   bool isUNOProperty() const;          // UNO IDL property
    bool isReadonly() const;
    bool isBound() const;
    bool isConstrained() const;
@@ -182,7 +182,7 @@ class MemberDef : public Definition
    bool isMaybeVoid() const;
    bool isMaybeDefault() const;
    bool isMaybeAmbiguous() const;
-   bool isPublished() const; // UNO IDL published
+   bool isPublished() const;            // UNO IDL published
    bool isTemplateSpecialization() const;
    bool hasDocumentedParams() const;
    bool hasDocumentedReturnType() const;
@@ -289,8 +289,10 @@ class MemberDef : public Definition
    void setFileDef(QSharedPointer<FileDef> fd);
    void setAnchor();
    void setProtection(Protection p);
-   void setMemberSpecifiers(Entry::SpecifierFlags s);
-   void mergeMemberSpecifiers(Entry::SpecifierFlags s);
+
+   void setMemberTraits(Entry::Traits traits);
+   void mergeMemberTraits(Entry::Traits traits);
+
    void setInitializer(const QString &i);
    void setBitfields(const QString &s);
    void setMaxInitLines(int lines);

@@ -47,7 +47,7 @@ void marshalUInt(StorageIntf *s, uint v)
    s->write((const char *)b, 4);
 }
 
-void marshalFlags(StorageIntf *s, Entry::SpecifierFlags v)
+void marshalTraits(StorageIntf *s, Entry::Traits v)
 {
    marshalQByteArray(s, v.toQByteArray());  
 }
@@ -194,7 +194,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalInt(s,     e->section);
    marshalInt(s,     e->protection);
    marshalInt(s,     e->mtype);
-   marshalFlags(s,   e->m_specFlags);
+   marshalTraits(s,  e->m_traits);
    marshalInt(s,     e->initLines);
    marshalBool(s,    e->stat);
    marshalBool(s,    e->explicitExternal);
@@ -215,16 +215,16 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalQString(s, e->includeFile);
    marshalQString(s, e->includeName);
    marshalQString(s, e->doc);
-   marshalInt(s, e->docLine);
+   marshalInt(s,     e->docLine);
    marshalQString(s, e->docFile);
    marshalQString(s, e->brief);
-   marshalInt(s, e->briefLine);
+   marshalInt(s,     e->briefLine);
    marshalQString(s, e->briefFile);
    marshalQString(s, e->inbodyDocs);
-   marshalInt(s, e->inbodyLine);
+   marshalInt(s,     e->inbodyLine);
    marshalQString(s, e->inbodyFile);
    marshalQString(s, e->relates);
-   marshalInt(s, e->relatesType);
+   marshalInt(s,     e->relatesType);
 
    marshalQString(s, e->m_read);
    marshalQString(s, e->m_write);
@@ -280,10 +280,10 @@ uint unmarshalUInt(StorageIntf *s)
    return result;
 }
 
-Entry::SpecifierFlags unmarshalFlags(StorageIntf *s)
+Entry::Traits unmarshalTraits(StorageIntf *s)
 {
-   QByteArray temp = unmarshalQByteArray(s);  
-   Entry::SpecifierFlags result = Entry::SpecifierFlags::fromQByteArray(temp);
+   QByteArray temp = unmarshalQByteArray(s);
+   Entry::Traits result = Entry::Traits::fromQByteArray(temp);
   
    return result;
 }
@@ -483,7 +483,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->section          = unmarshalInt(s);
    e->protection       = (Protection)unmarshalInt(s);
    e->mtype            = (MethodTypes)unmarshalInt(s);
-   e->m_specFlags      = unmarshalFlags(s);
+   e->m_traits         = unmarshalTraits(s);
    e->initLines        = unmarshalInt(s);
    e->stat             = unmarshalBool(s);
    e->explicitExternal = unmarshalBool(s);
@@ -491,7 +491,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->subGrouping      = unmarshalBool(s);
    e->callGraph        = unmarshalBool(s);
    e->callerGraph      = unmarshalBool(s);
-   e->virt             = (Specifier)unmarshalInt(s);
+   e->virt             = (Specifier)unmarshalInt(s);    
    e->args             = unmarshalQString(s);
    e->bitfields        = unmarshalQString(s);
   

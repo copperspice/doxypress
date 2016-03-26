@@ -57478,18 +57478,21 @@ YY_DECL {
 
             {}
             YY_BREAK
+
          case 40:
             YY_RULE_SETUP
 
             {}
             YY_BREAK
+
          case 41:
             YY_RULE_SETUP
 
             {
-               current->m_specFlags.m_isAbstractClass = true;              
+               current->m_traits.setTrait(Entry::Virtue::AbstractClass);
             }
             YY_BREAK
+
          case 42:
             /* rule 42 can match eol */
             YY_RULE_SETUP
@@ -57526,17 +57529,16 @@ YY_DECL {
             YY_RULE_SETUP
 
             { /* type name found */
-               current->section = Entry::CLASS_SEC;
-               current->m_specFlags.spec |= Entry::Struct;
+               current->section = Entry::CLASS_SEC;             
                current->name      = fortranscannerYYtext;
                current->fileName  = yyFileName;
                current->bodyLine  = yyLineNr;
 
+              current->m_traits.setTrait(Entry::Virtue::Struct);
+
                /* if type is part of a module, mod name is necessary for output */
-               if ((current_root) &&
-               (current_root->section == Entry::CLASS_SEC
-               || current_root->section == Entry::NAMESPACE_SEC))
-               {
+               if ((current_root) && (current_root->section == Entry::CLASS_SEC
+                        || current_root->section == Entry::NAMESPACE_SEC)) {
                   current->name = current_root->name + "::" + current->name;
                }
 
@@ -57559,10 +57561,11 @@ YY_DECL {
             YY_RULE_SETUP
 
             {
-               current->m_specFlags.m_isFinal = true;
+               current->m_traits.setTrait(Entry::Virtue::Final);
                current->type = QString(fortranscannerYYtext).simplified();
             }
             YY_BREAK
+
          case 49:
             YY_RULE_SETUP
 
@@ -57643,19 +57646,16 @@ YY_DECL {
             /* rule 57 can match eol */
             YY_RULE_SETUP
 
-            {
-               //
+            {               
                // ABSTRACT and specific interfaces are stored
                // in a scope of their own, even if multiple
                // are group in one INTERFACE/END INTERFACE block.
-               //
-               if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC)
-               {
+            
+               if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
                   endScope(current_root);
                }
 
-               if (! endScope(current_root))
-               {
+               if (! endScope(current_root)) {
                   yyterminate();
                }
 
@@ -60363,12 +60363,14 @@ static void addInterface(const QString &name, InterfaceType type)
 {
    if (YY_START == Start) {
       addModule(NULL);
-      yy_push_state(ModuleBody); //anon program
+      yy_push_state(ModuleBody);   //anon program
    }
 
-   current->section = Entry::CLASS_SEC; // was Entry::INTERFACE_SEC;
-   current->m_specFlags.spec = Entry::Interface;
+   current->section = Entry::CLASS_SEC; 
    current->name  = name;
+
+  current->m_traits.clear();
+  current->m_traits.setTrait(Entry::Virtue::Interface);
 
    switch (type) {
       case IF_ABSTRACT:

@@ -23,7 +23,7 @@
  */
 
 /** Protection level of members */
-enum Protection   { Public, Protected, Private, Package } ;
+enum Protection   { Public, Protected, Private, Package };
 
 /** Virtualness of a member. */
 enum Specifier    { Normal, Virtual, Pure } ;

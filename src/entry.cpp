@@ -63,7 +63,7 @@ Entry::Entry(const Entry &e)
    tagInfo     = e.tagInfo;
    protection  = e.protection;
    mtype       = e.mtype;
-   m_specFlags = e.m_specFlags;
+   m_traits    = e.m_traits;
    initLines   = e.initLines;
    stat        = e.stat;
    explicitExternal = e.explicitExternal;
@@ -230,7 +230,7 @@ void Entry::reset()
    proto   = false;
    explicitExternal = false;
   
-   m_specFlags = Entry::SpecifierFlags{};
+   m_traits.clear();
 
    lang         = SrcLangExt_Unknown;
    hidden       = false;

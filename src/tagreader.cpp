@@ -1222,7 +1222,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       }
 
       if (tmi.enumValues.count() > 0) {
-         me->m_specFlags.spec |= Entry::Strong;        
+         me->m_traits.setTrait(Entry::Virtue::Strong);          
 
          for (auto evi : tmi.enumValues) {
             QSharedPointer<Entry> ev = QMakeShared<Entry>();
@@ -1348,39 +1348,48 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
             break;
 
          case TagClassInfo::Struct:
-            ce->m_specFlags.spec = Entry::Struct;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Struct);             
             break;
 
          case TagClassInfo::Union:
-            ce->m_specFlags.spec = Entry::Union;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Union);
             break;
 
          case TagClassInfo::Interface:
-            ce->m_specFlags.spec = Entry::Interface;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Interface);            
             break;
 
          case TagClassInfo::Enum:
-            ce->m_specFlags.spec = Entry::Enum;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Enum);
             break;
 
          case TagClassInfo::Exception:
-            ce->m_specFlags.spec = Entry::Exception;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Exception);
             break;
 
          case TagClassInfo::Protocol:
-            ce->m_specFlags.spec = Entry::Protocol;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Protocol);
             break;
 
          case TagClassInfo::Category:
-            ce->m_specFlags.spec = Entry::Category;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Category);
             break;
 
          case TagClassInfo::Service:
-            ce->m_specFlags.spec = Entry::Service;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Service);
             break;
 
          case TagClassInfo::Singleton:
-            ce->m_specFlags.spec = Entry::Singleton;
+            ce->m_traits.clear();
+            ce->m_traits.setTrait(Entry::Virtue::Singleton);            
             break;
       }
 

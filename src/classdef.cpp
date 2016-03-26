@@ -81,10 +81,9 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
    m_membersMerged = false;  
    m_usedOnly      = false;
 
-   m_isSimple = Config::getBool("inline-simple-struct");
-   
+   m_isSimple = Config::getBool("inline-simple-struct");   
    m_taggedInnerClasses = 0; 
-   m_spec = Entry::SpecifierFlags{};  
+   m_classTraits = Entry::Traits{};  
 
    // can not use getLanguage at this point, setLanguage() has not been called
    SrcLangExt lang = getLanguageFromFileName(defFileName);
@@ -3288,7 +3287,7 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
          imd->setDocumentation(md->documentation(), md->docFile(), md->docLine());
          imd->setBriefDescription(md->briefDescription(), md->briefFile(), md->briefLine());
          imd->setInbodyDocumentation(md->inbodyDocumentation(), md->inbodyFile(), md->inbodyLine());
-         imd->setMemberSpecifiers(md->getMemberSpecifiers());
+         imd->setMemberTraits(md->getMemberTraits());
          imd->setMemberGroupId(md->getMemberGroupId());
 
          insertMember(imd);
@@ -3921,27 +3920,27 @@ bool ClassDef::isTemplateArgument() const
 
 bool ClassDef::isAbstract() const
 {
-   return m_isAbstract || (m_spec.spec & Entry::Abstract);
+   return m_isAbstract || (m_classTraits.hasTrait(Entry::Virtue::Abstract));
 }
 
 bool ClassDef::isFinal() const
 {
-   return m_spec.m_isFinal;
+   return m_classTraits.hasTrait(Entry::Virtue::Final);   
 }
 
 bool ClassDef::isSealed() const
 {
-   return m_spec.spec & Entry::Sealed;
+   return m_classTraits.hasTrait(Entry::Virtue::Sealed);
 }
 
 bool ClassDef::isPublished() const
 {
-   return m_spec.spec & Entry::Published;
+   return m_classTraits.hasTrait(Entry::Virtue::Published);
 }
 
 bool ClassDef::isForwardDeclared() const
 {
-   return m_spec.spec & Entry::ForwardDecl;
+   return m_classTraits.hasTrait(Entry::Virtue::ForwardDecl);
 }
 
 bool ClassDef::isObjectiveC() const
@@ -4126,9 +4125,9 @@ bool ClassDef::isGeneric() const
    return m_isGeneric;
 }
 
-void ClassDef::setClassSpecifier(Entry::SpecifierFlags spec)
-{
-   m_spec = spec;
+void ClassDef::setClassTraits(Entry::Traits traits)
+{   
+   m_classTraits = traits;
 }
 
 bool ClassDef::isExtension() const

@@ -339,7 +339,8 @@ class ClassDef : public Definition
    void setIsStatic(bool b);
    void setCompoundType(CompoundType t);
    void setClassName(const QString &name);
-   void setClassSpecifier(Entry::SpecifierFlags spec);
+
+   void setClassTraits(Entry::Traits traits);
 
    void setTemplateArguments(ArgumentList *al);
    void setTemplateBaseClassNames(QHash<QString, int> *templateNames);
@@ -538,13 +539,13 @@ class ClassDef : public Definition
    /*! Is this an abstact class? */
    bool m_isAbstract;
 
-   /*! Is the class part of an unnamed namespace? */
+   // Is the class part of an unnamed namespace?
    bool m_isStatic;
 
-   /*! true if classes members are merged with those of the base classes. */
+   // true if classes members are merged with those of the base classes.
    bool m_membersMerged;
 
-   /*! true if the class is defined in a source file rather than a header file. */
+   // true if the class is defined in a source file rather than a header file.
    bool m_isLocal;
 
    bool m_isTemplArg;
@@ -573,7 +574,7 @@ class ClassDef : public Definition
    bool m_isGeneric;
    bool m_isAnonymous;
 
-   Entry::SpecifierFlags m_spec;
+   Entry::Traits m_classTraits;
 };
 
 /** Class that contains information about a usage relation.

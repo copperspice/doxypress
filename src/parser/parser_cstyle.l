@@ -34,9 +34,10 @@
 #define YY_NEVER_INTERACTIVE 1
 
 static ParserInterface *s_thisParser;
-static QString          inputString;
-static int              inputPosition;
-static QFile            inputFile;
+static QString          s_inputString;
+static int              s_inputPosition;
+static QFile            s_inputFile;
+
 static int              lastContext;
 static int              lastCContext;
 static int              lastDocContext;
@@ -58,6 +59,7 @@ static int              lastHereDocContext;
 static int              lastDefineContext;
 static int              lastAlignAsContext;
 static int              lastC11AttributeContext;
+
 static Protection       protection;
 static Protection       baseProt;
 
@@ -205,22 +207,26 @@ static void initParser()
    isTypedef  = false;
 
    autoGroupStack.clear();
+
    insideTryBlock = false;
    insideFormula  = false;
    insideCode     = false;
 
    insideCli      = Config::getBool("cpp-cli-support");
 
-   firstTypedefEntry = QSharedPointer<Entry>();
    previous          = QSharedPointer<Entry>();
+   firstTypedefEntry = QSharedPointer<Entry>();   
    tempEntry         = QSharedPointer<Entry>();
    memspecEntry      = QSharedPointer<Entry>();
 }
 
 static void initEntry()
 {
-  if (insideJava)  {
-    protection = (current_root->m_specFlags.spec & (Entry::Interface | Entry::Enum)) ? Public : Package;
+   if (insideJava)  {
+      bool isEnum      = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
+      bool isInterface = current_root->m_traits.hasTrait(Entry::Virtue::Interface);
+
+      protection = (isEnum || isInterface) ? Public : Package;
   }
 
   current->protection = protection;
@@ -326,10 +332,10 @@ static void addType(QSharedPointer<Entry> ce)
    tl = ce->type.length();
 
    if ( tl > 0 && ! ce->args.isEmpty() && ce->type.at(tl - 1) != '.') {
-      ce->type += ' ' ;
+      ce->type += ' ';
    }
 
-   ce->type += ce->args ;
+   ce->type += ce->args;
    ce->args.resize(0) ;
    ce->argList.clear();    
 }
@@ -389,16 +395,16 @@ static void setContext()
   QString fileName = yyFileName;
 
   language     = getLanguageFromFileName(fileName);
-  insideIDL    = language==SrcLangExt_IDL;
-  insideJava   = language==SrcLangExt_Java;
-  insideCSharp = language==SrcLangExt_CSharp;
-  insideD      = language==SrcLangExt_D;
-  insidePHP    = language==SrcLangExt_PHP;
-  insideObjC   = language==SrcLangExt_ObjC;
-  insideJS     = language==SrcLangExt_JS;
-  insideCpp    = language==SrcLangExt_Cpp;
+  insideIDL    = language == SrcLangExt_IDL;
+  insideJava   = language == SrcLangExt_Java;
+  insideCSharp = language == SrcLangExt_CSharp;
+  insideD      = language == SrcLangExt_D;
+  insidePHP    = language == SrcLangExt_PHP;
+  insideObjC   = language == SrcLangExt_ObjC;
+  insideJS     = language == SrcLangExt_JS;
+  insideCpp    = language == SrcLangExt_Cpp;
 
-  if ( insidePHP ) {
+  if (insidePHP) {
     useOverrideCommands = true;
   }
 }
@@ -597,9 +603,9 @@ static int yyread(char *buf, int max_size)
 {
    int c = 0;
 
-   while (inputString[inputPosition] != 0) {
+   while (s_inputString[s_inputPosition] != 0) {
 
-      QString tmp1    = inputString.at(inputPosition);
+      QString tmp1    = s_inputString.at(s_inputPosition);
       QByteArray tmp2 = tmp1.toUtf8();
 
       if (c + tmp2.length() >= max_size) {
@@ -614,7 +620,7 @@ static int yyread(char *buf, int max_size)
           buf++;
       }
 
-      inputPosition++;     
+      s_inputPosition++;     
    }
 
    return c;
@@ -1373,18 +1379,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          // Java annotation
          lineCount();
          lastSkipRoundContext = YY_START;
-         roundCount=0;
+         roundCount = 0;
          BEGIN( SkipRound );
 
       } else if (text.startsWith("@property")) {
          // ObjC 2.0 property
       
-         current->mtype = mtype = MethodTypes::Property;
-         current->m_specFlags.m_isReadable = true;
-         current->m_specFlags.m_isWritable = true;
-         current->m_specFlags.m_isAssign = true;
+         current->mtype      = mtype = MethodTypes::Property;     
+         current->protection = Public;
+
+         current->m_traits.setTrait(Entry::Virtue::Readable);
+         current->m_traits.setTrait(Entry::Virtue::Writable);
+         current->m_traits.setTrait(Entry::Virtue::Assign);
       
-         current->protection = Public ;
          unput('(');
          BEGIN( ObjCPropAttr );
 
@@ -1404,7 +1411,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ObjCPropAttr>"readonly"      {
-      current->m_specFlags.m_isWritable = false;
+      current->m_traits.setTrait(Entry::Virtue::Writable, false);
    }
 
 <ObjCPropAttr>"readwrite"     { 
@@ -1416,31 +1423,32 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ObjCPropAttr>"unsafe_unretained"       {
-      current->m_specFlags.m_isAssign  = false;
-      current->m_specFlags.spec |=Entry::Unretained;
+      current->m_traits.setTrait(Entry::Virtue::Assign, false);
+      current->m_traits.setTrait(Entry::Virtue::Unretained);     
    }
 
 <ObjCPropAttr>"retain"        {
-      current->m_specFlags.m_isAssign  = false;
-      current->m_specFlags.spec |=Entry::Retain;
+      current->m_traits.setTrait(Entry::Virtue::Assign, false);
+      current->m_traits.setTrait(Entry::Virtue::Retain);
    }
 
 <ObjCPropAttr>"copy"          {
-      current->m_specFlags.m_isAssign  = false;
-      current->m_specFlags.spec |=Entry::Copy;
+      current->m_traits.setTrait(Entry::Virtue::Assign, false);
+      current->m_traits.setTrait(Entry::Virtue::Copy);
    }
 
 <ObjCPropAttr>"weak"                    {
-      current->m_specFlags.m_isAssign  = false;
-      current->m_specFlags.spec |=Entry::Weak;
-                                        }
+      current->m_traits.setTrait(Entry::Virtue::Assign, false);
+      current->m_traits.setTrait(Entry::Virtue::Weak);
+   }
+
 <ObjCPropAttr>"strong"                  {
-      current->m_specFlags.m_isAssign  = false;
-      current->m_specFlags.spec |=Entry::Strong;
+      current->m_traits.setTrait(Entry::Virtue::Assign, false);
+      current->m_traits.setTrait(Entry::Virtue::Strong);
    }
 
 <ObjCPropAttr>"nonatomic"     {
-      current->m_specFlags.spec |= Entry::NonAtomic;
+      current->m_traits.setTrait(Entry::Virtue::NonAtomic);
    }
 
 <ObjCPropAttr>")"          {
@@ -1458,9 +1466,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          // ObjC 2.0 property 
       
          current->mtype = mtype = MethodTypes::Property;
-         current->m_specFlags.m_isReadable = true;
-         current->m_specFlags.m_isWritable = true;
-         current->protection = Public;
+         current->protection    = Public;
+         current->m_traits.setTrait(Entry::Virtue::Readable);
+         current->m_traits.setTrait(Entry::Virtue::Writable);
 
       } else if ( text == "@synthesize") {
          BEGIN( ObjCSkipStatement );
@@ -1507,7 +1515,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*"initonly"{BN}+    {
       current->type += " initonly ";
-      if (insideCli) current->m_specFlags.spec |= Entry::Initonly;
+
+      if (insideCli)  {      
+         current->m_traits.setTrait(Entry::Virtue::Initonly);
+      }
+
       lineCount();
    }
 
@@ -1533,7 +1545,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // UNO IDL published keyword
       if (insideIDL) {
          lineCount();
-         current->m_specFlags.spec |= Entry::Published;
+         current->m_traits.setTrait(Entry::Virtue::Published);         
 
       } else {
          REJECT;
@@ -1546,40 +1558,47 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
          if (! insideJava) {
             current->virt = Pure; 
+
          } else {
-            current->m_specFlags.spec |= Entry::Abstract;
+            current->m_traits.setTrait(Entry::Virtue::Abstract);            
          }
 
       } else {
-         current->m_specFlags.spec |= Entry::Abstract;
+         current->m_traits.setTrait(Entry::Virtue::Abstract);
       }
+
       lineCount();
    }
 
 <FindMembers>{B}*"inline"{BN}+      { 
-      current->m_specFlags.spec |=Entry::Inline;
+      current->m_traits.setTrait(Entry::Virtue::Inline);
       lineCount();
    }
 
 <FindMembers>{B}*"mutable"{BN}+     { 
-      current->m_specFlags.spec |=Entry::Mutable;
+      current->m_traits.setTrait(Entry::Virtue::Mutable);
       lineCount();
    }
 
 <FindMembers>{B}*"explicit"{BN}+    { 
-      current->m_specFlags.spec |=Entry::Explicit;
+      current->m_traits.setTrait(Entry::Virtue::Explicit);
       lineCount();
    }
 
 <FindMembers>{B}*"@required"{BN}+   { 
       // Objective C 2.0 protocol required section
-      current->m_specFlags.spec = (current->m_specFlags.spec & ~Entry::Optional) | Entry::Required;
+
+      current->m_traits.setTrait(Entry::Virtue::Optional, false);
+      current->m_traits.setTrait(Entry::Virtue::Required);  
+
       lineCount();
    }
 
 <FindMembers>{B}*"@optional"{BN}+   {  
       // Objective C 2.0 protocol optional section
-      current->m_specFlags.spec = (current->m_specFlags.spec & ~Entry::Required) | Entry::Optional;
+
+      current->m_traits.setTrait(Entry::Virtue::Optional);
+      current->m_traits.setTrait(Entry::Virtue::Required, false); 
       lineCount();
    }
 
@@ -1684,13 +1703,22 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          isTypedef = false;
          current->section = Entry::CLASS_SEC;
 
-         // preserve UNO IDL [optional] or published
-         current->m_specFlags.spec = Entry::Service | (current->m_specFlags.spec & (Entry::Optional|Entry::Published));
+         // preserve UNO IDL -optional and published
+         bool isOptional  = current->m_traits.hasTrait(Entry::Virtue::Optional);
+         bool isPublished = current->m_traits.hasTrait(Entry::Virtue::Published);
+
+         current->m_traits.clear();
+         current->m_traits.setTrait(Entry::Virtue::Service); 
+
+         current->m_traits.setTrait(Entry::Virtue::Optional,  isOptional);
+         current->m_traits.setTrait(Entry::Virtue::Published, isPublished);  
+
          addType(current);
          current->type      += " service " ;
          current->fileName  = yyFileName;
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
+
          BEGIN( CompoundName );
 
       } else  {
@@ -1709,12 +1737,21 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       if (insideIDL) {
          isTypedef = false;
          current->section = Entry::CLASS_SEC;
-         current->m_specFlags.spec = Entry::Singleton | (current->m_specFlags.spec & Entry::Published); // preserve
-         addType( current ) ;
+
+         // preserve
+         bool isPublished = current->m_traits.hasTrait(Entry::Virtue::Published);
+
+         current->m_traits.clear();
+         current->m_traits.setTrait(Entry::Virtue::Singleton); 
+         
+         current->m_traits.setTrait(Entry::Virtue::Published, isPublished);  
+
+         addType( current );
          current->type      += " singleton " ;
          current->fileName  = yyFileName;
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
+
          BEGIN( CompoundName );
 
       } else  {
@@ -1735,41 +1772,50 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
 
       if (insideIDL || insideJava || insideCSharp || insideD || insidePHP) {
-      isTypedef = false;
-      current->section = Entry::CLASS_SEC;
-      
-      current->m_specFlags.spec = Entry::Interface |
-      // preserve UNO IDL [optional] or published
-      (current->m_specFlags.spec & (Entry::Optional|Entry::Published));
-      
-      addType( current ) ;
-      current->type += " interface" ;
-      current->fileName    = yyFileName;
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
-      BEGIN( CompoundName );
-      }
-      else
-      {
-      addType( current ) ;
-      current->name = text.trimmed();
+         isTypedef = false;
+         current->section = Entry::CLASS_SEC;
+
+         // preserve UNO IDL optional and published
+         bool isOptional  = current->m_traits.hasTrait(Entry::Virtue::Optional);
+         bool isPublished = current->m_traits.hasTrait(Entry::Virtue::Published);
+   
+         current->m_traits.clear();
+         current->m_traits.setTrait(Entry::Virtue::Interface); 
+   
+         current->m_traits.setTrait(Entry::Virtue::Optional,  isOptional);
+         current->m_traits.setTrait(Entry::Virtue::Published, isPublished);  
+     
+         addType( current );
+         current->type += " interface";
+         current->fileName    = yyFileName;
+         current->startLine   = yyLineNr;
+         current->startColumn = yyColNr;
+         current->bodyLine    = yyLineNr;
+
+         BEGIN( CompoundName );
+
+      } else {
+         addType( current ) ;
+         current->name = text.trimmed();
       }
    }
 
 <FindMembers>{B}*"@implementation"{BN}+   { 
       // Objective-C class implementation
       lineCount();
+
       isTypedef = false;
-      current->section = Entry::OBJCIMPL_SEC;
-      language = current->lang = SrcLangExt_ObjC;
-      insideObjC = true;
-      current->protection = protection = Public ;
-      addType( current ) ;
-      current->type += " implementation" ;
+      current->section    = Entry::OBJCIMPL_SEC;
+      language            = current->lang = SrcLangExt_ObjC;
+      insideObjC          = true;
+      current->protection = protection = Public;
+
+      addType(current);
+      current->type += " implementation";
       current->fileName  = yyFileName;
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
+
       BEGIN( CompoundName );
    }
 
@@ -1778,19 +1824,24 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Interface;
-      if (!insideJava)
-      {
-      language = current->lang = SrcLangExt_ObjC;
-      insideObjC = true;
+      
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Interface); 
+
+      if (! insideJava) {
+         language   = current->lang = SrcLangExt_ObjC;
+         insideObjC = true;
       }
-      current->protection = protection = Public ;
-      addType( current ) ;
-      current->type += " interface" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+
+      current->protection = protection = Public;
+
+      addType(current);
+      current->type        += " interface";
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
+
       BEGIN( CompoundName );
    }
 
@@ -1799,16 +1850,22 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Protocol;
+
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Protocol); 
+
       language = current->lang = SrcLangExt_ObjC;
+
       insideObjC = true;
-      current->protection = protection = Public ;
-      addType( current ) ;
-      current->type += " protocol" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+      current->protection = protection = Public;
+
+      addType(current);
+      current->type        += " protocol";
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
+
       BEGIN( CompoundName );
    }
 
@@ -1816,14 +1873,22 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // Corba IDL exception
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Exception | (current->m_specFlags.spec & Entry::Published); // preserve UNO IDL
-      addType( current ) ;
-      current->type += " exception" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+
+      bool isPublished = current->m_traits.hasTrait(Entry::Virtue::Published);
+   
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Exception); 
+  
+      current->m_traits.setTrait(Entry::Virtue::Published, isPublished);  
+
+      addType(current);
+      current->type        += " exception";
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount();
+
       BEGIN( CompoundName );
    }
 
@@ -1855,23 +1920,24 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->bodyLine    = yyLineNr;
       
       if (text[0] == '@') {
-       language = current->lang = SrcLangExt_ObjC;
-       insideObjC = true;
+         language   = current->lang = SrcLangExt_ObjC;
+         insideObjC = true;
       }
       
       lineCount();
       if (text.endsWith('{')) {
         unput('{');
       } 
+
+      bool isAbstract = current->m_traits.hasTrait(Entry::Virtue::Abstract);
       
-      if (insidePHP && current->m_specFlags.spec & Entry::Abstract) {
-       // convert Abstract to AbstractClass
-      
-       current->m_specFlags.m_isAbstractClass = true;
-       current->m_specFlags.spec = current->m_specFlags.spec & ~Entry::Abstract;
+      if (insidePHP && isAbstract) {
+         // convert Abstract to AbstractClass      
+         current->m_traits.setTrait(Entry::Virtue::AbstractClass);
+         current->m_traits.setTrait(Entry::Virtue::Abstract, false);
       }
 
-      BEGIN( CompoundName ) ;
+      BEGIN( CompoundName );
    }
 
 <FindMembers>{B}*"value class{" |         // C++/CLI extension
@@ -1879,14 +1945,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       isTypedef = false;
-      current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Value;
-      addType( current ) ;
-      current->type += " value class" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+      current->section   = Entry::CLASS_SEC;
+
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Value); 
+
+      addType(current);
+      current->type        += " value class";
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount() ;
       
       if (text.endsWith('{')) {
@@ -1897,17 +1966,20 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>{B}*"ref class{" |          // C++/CLI extension
-<FindMembers>{B}*"ref class"{BN}+       {
+<FindMembers>{B}*"ref class"{BN}+      {
       QString text = QString::fromUtf8(yytext); 
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Ref;
-      addType( current ) ;
-      current->type += " ref class" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Ref); 
+
+      addType(current);
+      current->type        += " ref class" ;
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount();
       
       if (text.endsWith('{')) {
@@ -1921,7 +1993,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);  
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Interface;
+
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Interface); 
+
       addType( current ) ;
       current->type += " interface class" ;
       current->fileName  = yyFileName;
@@ -1933,27 +2008,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       if (text.endsWith('{')) {
          unput('{');
       } 
+
       BEGIN( CompoundName ) ;
    }
 
 <FindMembers>{B}*"coclass"{BN}+     {
       QString text = QString::fromUtf8(yytext);
       if (insideIDL) {
-      isTypedef = false;
-      current->section = Entry::CLASS_SEC;
-      addType( current ) ;
-      current->type += " coclass" ;
-      current->fileName    = yyFileName;
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
-      lineCount() ;
-      BEGIN( CompoundName ) ;
+         isTypedef = false;
+         current->section = Entry::CLASS_SEC;
+   
+         addType(current);
+         current->type += " coclass" ;
+         current->fileName    = yyFileName;
+         current->startLine   = yyLineNr;
+         current->startColumn = yyColNr;
+         current->bodyLine    = yyLineNr;
+   
+         lineCount();
+         BEGIN( CompoundName );
+
       } else  { 
-      addType(current);
-      current->name = text;
-      current->name = current->name.trimmed();
-      lineCount();
+         addType(current);
+         current->name = text;
+         current->name = current->name.trimmed();
+         lineCount();
       }
    }
 
@@ -1967,11 +2046,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       bool isVolatile = text.indexOf("volatile") != -1;
       
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Struct | (current->m_specFlags.spec & Entry::Published);
+
+      bool isPublished = current->m_traits.hasTrait(Entry::Virtue::Published);
+   
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Struct); 
+         
+      current->m_traits.setTrait(Entry::Virtue::Published, isPublished);  
       
       // preserve UNO IDL
       // bug 582676: can be a struct nested in an interface so keep insideObjC state
-      //current->objc    = insideObjC = false;
+      //current->objc = insideObjC = false;
 
       addType( current ) ;
       if (isConst) {
@@ -1998,20 +2083,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"value struct{" |      // C++/CLI extension
 <FindMembers>{B}*"value struct"{BN}+     {
       QString text = QString::fromUtf8(yytext);
-      isTypedef = false;
-      current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec  = Entry::Struct | Entry::Value;
-      addType( current ) ;
-      current->type += " value struct" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+
+      isTypedef        = false;
+      current->section = Entry::CLASS_SEC;    
+   
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Struct); 
+      current->m_traits.setTrait(Entry::Virtue::Value);
+
+      addType(current);
+      current->type        += " value struct";
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount();
       
       if (text.endsWith('{')) {
-      unput('{');
+         unput('{');
       }  
+
       BEGIN( CompoundName ) ;
    }
 
@@ -2020,18 +2111,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Struct | Entry::Ref;
-      addType( current ) ;
-      current->type += " ref struct" ;
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Struct); 
+      current->m_traits.setTrait(Entry::Virtue::Ref);
+
+      addType(current);
+      current->type        += " ref struct" ;
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount();
       
       if (text.endsWith('{')) {
          unput('{');
       } 
+
       BEGIN( CompoundName ) ;
    }
 
@@ -2041,18 +2137,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Struct | Entry::Interface;
-      addType( current ) ;
-      current->type += " interface struct";
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Struct); 
+      current->m_traits.setTrait(Entry::Virtue::Interface);
+
+      addType(current);
+      current->type        += " interface struct";
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount();
       
       if (text.endsWith('{')) {
          unput('{');
       } 
+
       BEGIN( CompoundName ) ;
    }
 
@@ -2064,16 +2165,20 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       bool isConst     = text.indexOf("const")!=-1;
       bool isVolatile  = text.indexOf("volatile")!=-1;
       current->section = Entry::CLASS_SEC;
-      current->m_specFlags.spec = Entry::Union;
+
+      current->m_traits.clear();
+      current->m_traits.setTrait(Entry::Virtue::Union); 
       
       // bug 582676: can be a struct nested in an interface so keep insideObjC state
       // current->objc    = insideObjC = false;
 
-      addType( current );
+      addType(current);
       if (isConst) {
          current->type += " const";
+
       } else if (isVolatile) {
          current->type += " volatile";
+
       }
 
       current->type += " union" ;
@@ -2100,20 +2205,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (insideJava) {
          current->section = Entry::CLASS_SEC;
-         current->m_specFlags.spec = Entry::Enum;
+
+         current->m_traits.clear();
+         current->m_traits.setTrait(Entry::Virtue::Enum); 
+
       } else {
-         current->section = Entry::ENUM_SEC ;
+         current->section = Entry::ENUM_SEC;
+
       }
 
       addType( current ) ;
       current->type += " enum";
-      if (isStrongEnum) {
-         current->m_specFlags.spec |= Entry::Strong;
+
+      if (isStrongEnum) {         
+         current->m_traits.setTrait(Entry::Virtue::Strong); 
       }
-      current->fileName  = yyFileName;
-      current->startLine = yyLineNr;
+
+      current->fileName    = yyFileName;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
-      current->bodyLine  = yyLineNr;
+      current->bodyLine    = yyLineNr;
       lineCount();
       
       if (text.endsWith('{')) {
@@ -2140,7 +2251,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <Operator>";"           { 
       // can occur when importing members
       unput(';');
-      BEGIN( FindMembers ) ;
+      BEGIN( FindMembers );
    }
 
 <Operator>[^(]             {
@@ -2334,13 +2445,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <UsingAlias>";"                         {
-      previous->section=Entry::VARIABLE_SEC;
-      previous->type = "typedef "+previous->args;
-      previous->type=previous->type.simplified();
-      previous->args.resize(0);
-      previous->name=previous->name.trimmed();
+      previous->section = Entry::VARIABLE_SEC;
+      previous->type       = "typedef " + previous->args;
+      previous->type       = previous->type.simplified();     
+      previous->name     = previous->name.trimmed();
       previous->bodyLine = yyLineNr;
-      previous->m_specFlags.spec |= Entry::Alias;
+
+      previous->args.clear();
+      previous->m_traits.setTrait(Entry::Virtue::Alias); 
+
       BEGIN(FindMembers);
    }
 
@@ -2639,30 +2752,30 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <QtPropType>{B}+           {
-                 QString text = QString::fromUtf8(yytext);
-                 current->type += text;
+      QString text = QString::fromUtf8(yytext);
+      current->type += text;
    }
 
 <QtPropType>({TSCOPE}"::")*{TSCOPE}    {
-                 QString text = QString::fromUtf8(yytext);
-                 current->type += text;
-                 BEGIN(QtPropName);
+      QString text = QString::fromUtf8(yytext);
+      current->type += text;
+      BEGIN(QtPropName);
    }
 
 <QtPropName>{ID}           {
-                  QString text = QString::fromUtf8(yytext);
-                  current->name = text;
-                  BEGIN(QtPropAttr);
+      QString text = QString::fromUtf8(yytext);
+      current->name = text;
+      BEGIN(QtPropAttr);
    }
 
 <QtPropAttr>"READ"         {
-                 current->m_specFlags.m_isReadable = true;
-                 BEGIN(QtPropRead);
+      current->m_traits.setTrait(Entry::Virtue::Readable);
+      BEGIN(QtPropRead);
    }
 
 <QtPropAttr>"WRITE"        {
-                 current->m_specFlags.m_isWritable = true;
-                 BEGIN(QtPropWrite);
+      current->m_traits.setTrait(Entry::Virtue::Writable);
+      BEGIN(QtPropWrite);
    }
 
 <QtPropAttr>"RESET"{B}+{ID}      { 
@@ -2758,9 +2871,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>"CS_PROPERTY_READ"     {
-     current->protection    = Public;
-     current->mtype = MethodTypes::Property;
-     current->m_specFlags.m_isReadable = true;
+     current->protection = Public;
+     current->mtype      = MethodTypes::Property;
+     current->m_traits.setTrait(Entry::Virtue::Readable);
+     
      current->type.resize(0);
      BEGIN(CsPropReadVar);
    }
@@ -2787,16 +2901,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>"CS_PROPERTY_WRITE"        {
       current->protection = Public;
-      current->mtype = MethodTypes::Property;
-      current->m_specFlags.m_isWritable = true;
+      current->mtype      = MethodTypes::Property;
+      current->m_traits.setTrait(Entry::Virtue::Writable);
       current->type.resize(0);
+
       BEGIN(CsPropWriteVar);
    }
 
 <CsPropWriteVar>"("                  {
    }
 
-<CsPropWriteVar>{ID}                    {
+<CsPropWriteVar>{ID}                 {
       // cs property write name
       QString text = QString::fromUtf8(yytext);
       current->name = text;
@@ -2807,18 +2922,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CsPropWriteMethod>{ID}                 {
-                 QString text = QString::fromUtf8(yytext);
-                 current->m_write = text;
-                 BEGIN(CsPropClose);
+      QString text = QString::fromUtf8(yytext);
+      current->m_write = text;
+      BEGIN(CsPropClose);
    }
 
 <FindMembers>"CS_PROPERTY_RESET"        {
-                 QString text = QString::fromUtf8(yytext);
-                 current->protection = Public;
-                 current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isReset = true;
-                 current->type.resize(0);
-                 BEGIN(CsPropResetVar);
+      QString text = QString::fromUtf8(yytext);
+      current->protection = Public;
+      current->mtype = MethodTypes::Property;
+      current->m_traits.setTrait(Entry::Virtue::Reset);
+      current->type.resize(0);
+
+      BEGIN(CsPropResetVar);
    }
 
 <CsPropResetVar>"("                  {
@@ -2840,51 +2956,54 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>"CS_PROPERTY_NOTIFY"       {
-                 current->protection    = Public;
-                 current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isNotify = true;
-                 current->type.resize(0);
-                 BEGIN(CsPropNotifyVar);
+      current->protection    = Public;
+      current->mtype = MethodTypes::Property;
+      current->m_traits.setTrait(Entry::Virtue::Notify);
+      current->type.resize(0);
+
+      BEGIN(CsPropNotifyVar);
    }
 
 <CsPropNotifyVar>"("                  {
    }
 
 <CsPropNotifyVar>{ID}                 {
-                 QString text = QString::fromUtf8(yytext);
-                 current->name = text;
+      QString text = QString::fromUtf8(yytext);
+      current->name = text;
    }
 
 <CsPropNotifyVar>","                    {
-                 BEGIN(CsPropNotifyMethod);
+      BEGIN(CsPropNotifyMethod);
    }
 
 <CsPropNotifyMethod>{ID}              {
-                 QString text = QString::fromUtf8(yytext);
-                 current->m_notify = text;
-                 BEGIN(CsPropClose);
+      QString text = QString::fromUtf8(yytext);
+      current->m_notify = text;
+      BEGIN(CsPropClose);
    }
 
 <FindMembers>"CS_PROPERTY_REVISION"        {
-                 current->protection    = Public;
-                 current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isRevision = true;
-                 current->type.resize(0);
-                 BEGIN(CsPropVar);
+      current->protection = Public;
+      current->mtype      = MethodTypes::Property;
+      current->m_traits.setTrait(Entry::Virtue::Revision);
+      current->type.resize(0);
+
+      BEGIN(CsPropVar);
    }
 
 <FindMembers>"CS_PROPERTY_DESIGNABLE"      {
-                 current->protection     = Public;
-                 current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isDesignable = true;
-                 current->type.resize(0);
-                 BEGIN(CsPropVar);
+      current->protection = Public;
+      current->mtype      = MethodTypes::Property;
+      current->m_traits.setTrait(Entry::Virtue::Designable);
+      current->type.resize(0);
+
+      BEGIN(CsPropVar);
    }
 
 <FindMembers>"CS_PROPERTY_SCRIPTABLE"      {
                  current->protection    = Public;
                  current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isScriptable = true;
+                 current->m_traits.setTrait(Entry::Virtue::Scriptable);
                  current->type.resize(0);
                  BEGIN(CsPropVar);
    }
@@ -2892,7 +3011,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>"CS_PROPERTY_STORED"       {
                  current->protection    = Public;
                  current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isStored = true;
+                 current->m_traits.setTrait(Entry::Virtue::Stored);
                  current->type.resize(0);
                  BEGIN(CsPropVar);
    }
@@ -2900,23 +3019,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>"CS_PROPERTY_USER"         {
                  current->protection    = Public;
                  current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isUser  = true;
+                 current->m_traits.setTrait(Entry::Virtue::User);
                  current->type.resize(0);
                  BEGIN(CsPropVar);
    }
 
 <FindMembers>"CS_PROPERTY_CONSTANT"     {
-                 current->protection    = Public;
-                 current->mtype = MethodTypes::Property;
-                 current->m_specFlags.m_isConstant  = true;
-                 current->type.resize(0);
-                 BEGIN(CsPropJustVar);
+      current->protection    = Public;
+      current->mtype = MethodTypes::Property;
+      current->m_traits.setTrait(Entry::Virtue::Constant);
+      current->type.resize(0);
+      BEGIN(CsPropJustVar);
    }
 
 <FindMembers>"CS_PROPERTY_FINAL"        {
       current->protection = Public;
       current->mtype = MethodTypes::Property;
-      current->m_specFlags.m_isFinal = true;
+      current->m_traits.setTrait(Entry::Virtue::Final);
       current->type.resize(0);
       BEGIN(CsPropJustVar);
    }
@@ -3789,8 +3908,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadInitializer>[;,]         {                 
       QString text = QString::fromUtf8(yytext);
+
+      bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
       
-      if (text[0] == ';' && (current_root->m_specFlags.spec & Entry::Enum)) {
+      if (text[0] == ';' && isEnum) {
          current->fileName    = yyFileName;
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
@@ -4394,13 +4515,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <EnumBaseType>\n        {
-                                          lineCount();
-                    current->args+=' ';
+      lineCount();
+      current->args+=' ';
    }
 
 <FindMembers>[;,]       {
       QString text = QString::fromUtf8(yytext);  
-                 QString oldType = current->type;
+      QString oldType = current->type;
 
                  if (current->bodyLine == -1) {
                    current->bodyLine = yyLineNr;
@@ -4421,17 +4542,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                    current->args=removeRedundantWhiteSpace(current->args);
                    current->name=current->name.trimmed();
 
-                   if (current->section==Entry::CLASS_SEC) // remove spec for "struct Bla bla;"
-                   {
-                     current->m_specFlags = Entry::SpecifierFlags{};
+                   if (current->section == Entry::CLASS_SEC)  {
+                     // remove spec for "struct Bla bla;"
+                   
+                     current->m_traits.clear();
                    }
 
-                   current->section = Entry::VARIABLE_SEC;
-                   current->fileName = yyFileName;
-                   current->startLine = yyBegLineNr;
+                   current->section     = Entry::VARIABLE_SEC;
+                   current->fileName    = yyFileName;
+                   current->startLine   = yyBegLineNr;
                    current->startColumn = yyBegColNr;
                    current_root->addSubEntry( current, current_root);
-                   needNewCurrent=true;
+                   needNewCurrent = true;
                  }
 
                  if ( text[0] == ',') {
@@ -4472,125 +4594,131 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>"["        {
       QString text = QString::fromUtf8(yytext);  
-                 if (! insideCSharp && (current->name.isEmpty() ||  current->name == "typedef"))  {
-                    // IDL function property
-                   squareCount=1;
-                   lastSquareContext = YY_START;
-                   idlAttr.resize(0);
-                   idlProp.resize(0);
-                   current->mtype = mtype;
 
-                   if (Config::getBool("idl-support") && current->mtype == Property) {
-					       // inside the properties section of a dispinterface
-					      odlProp = true;
-					      current->m_specFlags.spec |= Entry::Gettable;
-					      current->m_specFlags.spec |= Entry::Settable;
-					    }
-
-                   BEGIN( IDLAttribute );
-
-                 } else if (insideCSharp && current->name.isEmpty()) {
-                                          
-                     squareCount=1;
-                     lastSquareContext = YY_START;
-                     // Skip the C# attribute for this member
-                     current->args.resize(0);
-                     BEGIN( SkipSquare );
-
-                 } else {
-                   current->args += text ;
-                   squareCount = 1;
-                   externC = false;
-                   BEGIN( Array ) ;
-                 }
+      if (! insideCSharp && (current->name.isEmpty() ||  current->name == "typedef"))  {
+         // IDL function property
+         squareCount=1;
+         lastSquareContext = YY_START;
+         idlAttr.resize(0);
+         idlProp.resize(0);
+         current->mtype = mtype;
+         
+         if (Config::getBool("idl-support") && current->mtype == Property) {
+            // inside the properties section of a dispinterface
+            odlProp = true;
+            
+            current->m_traits.setTrait(Entry::Virtue::Gettable);
+            current->m_traits.setTrait(Entry::Virtue::Settable);
+         }
+         
+         BEGIN( IDLAttribute );
+         
+      } else if (insideCSharp && current->name.isEmpty()) {
+         
+         squareCount = 1;
+         lastSquareContext = YY_START;
+         // Skip the C# attribute for this member
+         current->args.resize(0);
+         BEGIN( SkipSquare );
+      
+      } else {
+         current->args += text;
+         squareCount = 1;
+         externC = false;
+         BEGIN( Array );
+      }
    }
 
 <IDLAttribute>"]"          {
-                    // end of IDL function attribute
-                 if (--squareCount<=0)
-                 {
-                   lineCount();
-                   if (current->mtype == MethodTypes::Property)
-                     BEGIN( IDLPropName );
-                   else
-                     BEGIN( lastSquareContext );
-                 }
+      // end of IDL function attribute
+      if (--squareCount <= 0) {
+         lineCount();
+
+         if (current->mtype == MethodTypes::Property)
+            BEGIN( IDLPropName );
+         else
+            BEGIN( lastSquareContext );
+      }
    }
 
 <IDLAttribute>"propput"                    {
-                 if (Config::getBool("idl-support")) {
-                   current->mtype = MethodTypes::Property;
-                 }
-                 current->m_specFlags.spec |= Entry::Settable;
+      if (Config::getBool("idl-support")) {
+         current->mtype = MethodTypes::Property;
+      }
+
+      current->m_traits.setTrait(Entry::Virtue::Settable);
    }
 
 <IDLAttribute>"propget"       {
-                 if (Config::getBool("idl-support")) {
-                   current->mtype = MethodTypes::Property;
-                 }
-                 current->m_specFlags.spec |= Entry::Gettable;
+      if (Config::getBool("idl-support")) {
+         current->mtype = MethodTypes::Property;
+      }
+
+      current->m_traits.setTrait(Entry::Virtue::Gettable);
    }
 
 <IDLAttribute>"property" { 
       // UNO IDL property
-      current->m_specFlags.spec |= Entry::Property;
+      current->m_traits.setTrait(Entry::Virtue::Property);
    }
 
 <IDLAttribute>"attribute" { 
       // UNO IDL attribute
-      current->m_specFlags.spec |= Entry::Attribute;
+      current->m_traits.setTrait(Entry::Virtue::Attribute);
    }
 
 <IDLAttribute>"optional" { 
       // on UNO IDL interface/service/attribute/property
-      current->m_specFlags.spec |= Entry::Optional;
+      current->m_traits.setTrait(Entry::Virtue::Optional);      
    }
 
 <IDLAttribute>"readonly" { 
       // on UNO IDL attribute or property
-                 if (Config::getBool("idl-support") && odlProp) {
-					    current->m_specFlags.spec ^= Entry::Settable;
-					  } else {
-					   current->m_specFlags.spec |= Entry::Readonly;
-					  }                 
+      if (Config::getBool("idl-support") && odlProp) {        
+         bool isSettable = current->m_traits.hasTrait(Entry::Virtue::Settable);
+         current->m_traits.setTrait(Entry::Virtue::Settable, ! isSettable); 
+
+      } else {
+         current->m_traits.setTrait(Entry::Virtue::Readonly);
+      }                 
    }
 
 <IDLAttribute>"bound" { 
       // on UNO IDL attribute or property
-      current->m_specFlags.spec |= Entry::Bound;
+      current->m_traits.setTrait(Entry::Virtue::Bound);      
    }
 
 <IDLAttribute>"removable" { 
       // on UNO IDL property
-      current->m_specFlags.spec |= Entry::Removable;
+      current->m_traits.setTrait(Entry::Virtue::Removable);
    }
 
 <IDLAttribute>"constrained" { 
       // on UNO IDL property
-      current->m_specFlags.spec |= Entry::Constrained;
+      current->m_traits.setTrait(Entry::Virtue::Constrained);
    }
 
 <IDLAttribute>"transient" { 
       // on UNO IDL property
-      current->m_specFlags.spec |= Entry::Transient;
+      current->m_traits.setTrait(Entry::Virtue::Transient);
    }
 
 <IDLAttribute>"maybevoid" { 
       // on UNO IDL property
-      current->m_specFlags.spec |= Entry::MaybeVoid;
+      current->m_traits.setTrait(Entry::Virtue::MaybeVoid);
    }
 
 <IDLAttribute>"maybedefault" { 
       // on UNO IDL property
-      current->m_specFlags.spec |= Entry::MaybeDefault;
+      current->m_traits.setTrait(Entry::Virtue::MaybeDefault);
    }
 
 <IDLAttribute>"maybeambiguous" { 
       // on UNO IDL property
-      current->m_specFlags.spec |= Entry::MaybeAmbiguous;
+      current->m_traits.setTrait(Entry::Virtue::MaybeAmbiguous);
    }
 
-<IDLAttribute>.                 {
+<IDLAttribute>.    {
    }
 
 <IDLPropName>{BN}*{ID}{BN}*      {
@@ -4605,29 +4733,30 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <IDLPropName>{ID}{BN}*"("     {
       QString text = QString::fromUtf8(yytext);  
-                 current->name = text;
-                 current->name = current->name.left(current->name.length()-1).trimmed();
-                 current->startLine   = yyLineNr;
-                 current->startColumn = yyColNr;
-                 BEGIN( IDLProp );
+      current->name = text;
+      current->name = current->name.left(current->name.length()-1).trimmed();
+      current->startLine   = yyLineNr;
+      current->startColumn = yyColNr;
+      BEGIN( IDLProp );
    }
 
 <IDLPropName>{BN}*"("{BN}*{ID}{BN}*")"{BN}*	{
       QString text = QString::fromUtf8(yytext);  
-					   if (odlProp) {
-					     idlProp += text;
-					   }
+
+		if (odlProp) {
+		   idlProp += text;
+		}
    }
 
 <IDLPropName>{ID}{BN}*/";"		{
       QString text = QString::fromUtf8(yytext);  
-					   if (odlProp) {
-					     current->name = text;
-					     idlProp = idlProp.trimmed();
-					     odlProp = false;
-
-					     BEGIN( IDLProp );
-					   }
+      if (odlProp) {
+         current->name = text;
+         idlProp = idlProp.trimmed();
+         odlProp = false;
+         
+         BEGIN( IDLProp );
+      }
    }
 
 <IDLProp>{BN}*"["[^\]]*"]"{BN}*     {  
@@ -4787,28 +4916,27 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindFields>";"                         {
-                    if (insideJava)  // last enum field in Java class
-                 {
-                   if (!current->name.isEmpty())
-                   {
-                     current->fileName   = yyFileName;
-                     current->startLine  = yyLineNr;
-                     current->startColumn = yyColNr;
-                     current->type       = "@"; // enum marker
-                     current->args       = current->args.simplified();
-                     current->name       = current->name.trimmed();
-                     current->section    = Entry::VARIABLE_SEC;
-                     current_root->addSubEntry(current, current_root);
-                     current = QMakeShared<Entry>();
-                     initEntry();
-                   }
+      if (insideJava)  // last enum field in Java class
+         {
 
-                   BEGIN( FindMembers );
-                 }
-                 else
-                 {
-                   REJECT;
-                 }
+         if (! current->name.isEmpty()) {
+            current->fileName   = yyFileName;
+            current->startLine  = yyLineNr;
+            current->startColumn = yyColNr;
+            current->type       = "@"; // enum marker
+            current->args       = current->args.simplified();
+            current->name       = current->name.trimmed();
+            current->section    = Entry::VARIABLE_SEC;
+            current_root->addSubEntry(current, current_root);
+            current = QMakeShared<Entry>();
+            initEntry();
+         }
+         
+         BEGIN( FindMembers );
+
+      } else {
+            REJECT;
+      }
    }
 
 <SkipRemainder>\n     {
@@ -4817,42 +4945,46 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <SkipRemainder>[^\n]*
 <FindFields>","       {
-                   if (! current->name.isEmpty()) {
+      if (! current->name.isEmpty()) {
 
-                      current->fileName    = yyFileName;
-                      current->startLine   = yyLineNr;
-                      current->startColumn = yyColNr;
+         current->fileName    = yyFileName;
+         current->startLine   = yyLineNr;
+         current->startColumn = yyColNr;
+         
+         bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
+         
+         if (! isEnum) {
+         // enum marker (this might be Java-style enums
+         current->type = "@";
+         }
+         
+         current->args    = current->args.simplified();
+         current->name    = current->name.trimmed();
+         current->section = Entry::VARIABLE_SEC;
+         
+         // add enum value to the enum data type
+         current_root->addSubEntry(current, current_root);
+         
+         bool isStrong = current_root->m_traits.hasTrait(Entry::Virtue::Strong);
 
-                      if (! (current_root->m_specFlags.spec & Entry::Enum)) {
-                         // enum marker (this might be Java-style enums
-                         current->type     = "@";
-                      }
-
-                      current->args    = current->args.simplified();
-                      current->name    = current->name.trimmed();
-                      current->section = Entry::VARIABLE_SEC;
-
-                      // add enum value to the enum data type
-                      current_root->addSubEntry(current, current_root);
-
-                     if (! insideCSharp && ! insideJava && ! (current_root->m_specFlags.spec & Entry::Strong))  {
-                                  // for C# and Java 1.5+ enum values always have to be explicitly qualified,
-                                  // same for C++11 style enums (enum class Name {})
-
-                        current = QMakeShared<Entry>(*current);
-
-                       // add enum value to the enum data type parent (usually the class the enum belongs to)
-                       current_root->parent()->addSubEntry(current, current_root->parent());
-                     }
-
-                     current = QMakeShared<Entry>();
-                     initEntry();
-
-                 }  else  {
-                   // probably a redundant ","
-                   current->reset();
-                   initEntry();
-                 }
+         if (! insideCSharp && ! insideJava && ! isStrong)  {
+            // for C# and Java 1.5+ enum values always have to be explicitly qualified,
+            // same for C++11 style enums (enum class Name {})
+            
+            current = QMakeShared<Entry>(*current);
+            
+            // add enum value to the enum data type parent (usually the class the enum belongs to)
+            current_root->parent()->addSubEntry(current, current_root->parent());
+         }
+         
+         current = QMakeShared<Entry>();
+         initEntry();
+         
+      }  else  {
+         // probably a redundant ","
+         current->reset();
+         initEntry();
+      }
    }
 
 <FindFields>"["            { 
@@ -4961,8 +5093,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);  
 
       if (insidePHP) {
-         REJECT; // for PHP code single quotes
-         // are used for strings of arbitrary length
+         // for PHP code single quotes are used for strings of arbitrary length
+         REJECT; 
+         
       } else {
          current->m_program += text;
       }
@@ -5000,8 +5133,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             BEGIN( TypedefName );
          
          } else {
+            bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
    
-            if ((current->section == Entry::ENUM_SEC) || (current->m_specFlags.spec & Entry::Enum)) {
+            if ((current->section == Entry::ENUM_SEC) || isEnum) {
                current->m_program += ','; // add field terminator
             }
          
@@ -5011,10 +5145,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             // was: current->args.simplified();
             current->type = current->type.simplified();
             current->name = current->name.trimmed();
+
+            bool isInterface     = current->m_traits.hasTrait(Entry::Virtue::Interface);
+            bool isOnlyCategory  = current->m_traits.onlyHasTrait(Entry::Virtue::Category);
    
-            if (insideObjC && ((current->m_specFlags.spec & Entry::Interface) || 
-                     (current->m_specFlags.spec == Entry::Category)) )  {
-   
+            if (insideObjC && (isInterface || isOnlyCategory) )  {   
                // method definition follows      
                BEGIN( ReadBodyIntf );
    
@@ -5022,8 +5157,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                current_root->addSubEntry(current , current_root);
                memspecEntry = current;
                current = QMakeShared<Entry>(*current);
+
+               bool isOnlyInterface = current->m_traits.onlyHasTrait(Entry::Virtue::Interface);
    
-               if (current->section == Entry::NAMESPACE_SEC || (current->m_specFlags.spec == Entry::Interface) ||
+               if (current->section == Entry::NAMESPACE_SEC || isOnlyInterface ||
                      insideJava || insidePHP || insideCSharp || insideD || insideJS) {
    
                   // namespaces and interfaces and java classes ends with a closing bracket without semicolon
@@ -5084,8 +5221,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <TypedefName>{ID}          {
       QString text = QString::fromUtf8(yytext); 
 
-      if ((current->section == Entry::ENUM_SEC) || (current->m_specFlags.spec & Entry::Enum)) {
-         current->m_program += ","; // add field terminator
+      bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
+
+      if ((current->section == Entry::ENUM_SEC) || isEnum) {
+         current->m_program += ",";    // add field terminator
       }
 
       current->name = text;
@@ -5109,7 +5248,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       /* typedef of anonymous type */
       current->name = QString("@%1").arg(anonCount++);
 
-      if ((current->section == Entry::ENUM_SEC) || (current->m_specFlags.spec & Entry::Enum)) {
+      bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
+
+      if ((current->section == Entry::ENUM_SEC) || isEnum) {
          current->m_program+=','; // add field terminator
       }
       
@@ -5150,14 +5291,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       
       // handle *pName in: typedef { ... } name, *pName;
       if (firstTypedefEntry) {
-         if (firstTypedefEntry->m_specFlags.spec & Entry::Struct) {
-         msType.prepend("struct "+firstTypedefEntry->name);
 
-         } else if (firstTypedefEntry->m_specFlags.spec & Entry::Union) {
-         msType.prepend("union "+firstTypedefEntry->name);
+         bool isStruct = firstTypedefEntry->m_traits.hasTrait(Entry::Virtue::Struct);
+         bool isUnion  = firstTypedefEntry->m_traits.hasTrait(Entry::Virtue::Union);  
+     
+         if (isStruct) {
+            msType.prepend("struct " + firstTypedefEntry->name);
 
-         }  else if (firstTypedefEntry->section==Entry::ENUM_SEC) {
-            msType.prepend("enum "+firstTypedefEntry->name);
+         } else if (isUnion) {
+            msType.prepend("union " + firstTypedefEntry->name);
+
+         }  else if (firstTypedefEntry->section == Entry::ENUM_SEC) {
+            msType.prepend("enum " + firstTypedefEntry->name);
 
          } else {
             msType.prepend(firstTypedefEntry->name);
@@ -5168,8 +5313,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <MemberSpec>"("            { 
       // function with struct return type
       addType(current);
-      current->name = msName;
-      current->m_specFlags = Entry::SpecifierFlags{};
+      current->name = msName;         
+      current->m_traits.clear();
       
       unput('(');
       BEGIN(FindMembers);
@@ -5213,48 +5358,53 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       
          // case 1: typedef struct _S { ... } S_t;
          // -> omit typedef and use S_t as the struct name
-      
-         if (typedefHidesStruct &&  isTypedef && 
-               ((current->m_specFlags.spec & (Entry::Struct|Entry::Union)) ||
-               current->section == Entry::ENUM_SEC ) && msType.trimmed().isEmpty() && memspecEntry) {
 
-            memspecEntry->name=msName;
+         bool isUnion  = current->m_traits.hasTrait(Entry::Virtue::Union);      
+         bool isStruct = current->m_traits.hasTrait(Entry::Virtue::Struct);
+   
+         if (typedefHidesStruct &&  isTypedef && (isUnion || isStruct || current->section == Entry::ENUM_SEC) && 
+                  msType.trimmed().isEmpty() && memspecEntry) {
+
+            memspecEntry->name = msName;
 
          }  else  {
             // case 2: create a typedef field
       
             QSharedPointer<Entry> varEntry = QMakeShared<Entry>();
-            varEntry->lang = language;
-            varEntry->protection = current->protection ;
-            varEntry->mtype = current->mtype;
-            varEntry->virt = current->virt;
-            varEntry->stat = current->stat;
-            varEntry->section = Entry::VARIABLE_SEC;
-            varEntry->name = msName.trimmed();
-            varEntry->type = current->type.simplified()+" ";
-            varEntry->args = msArgs;
+            varEntry->lang       = language;
+            varEntry->protection = current->protection;
+            varEntry->mtype      = current->mtype;
+            varEntry->virt       = current->virt;
+            varEntry->stat       = current->stat;
+            varEntry->section    = Entry::VARIABLE_SEC;
+            varEntry->name       = msName.trimmed();
+            varEntry->type       = current->type.simplified()+" ";
+            varEntry->args       = msArgs;
 
             if (isTypedef) {
                varEntry->type.prepend("typedef ");
             }
 
-            if (typedefHidesStruct && isTypedef && (current->m_specFlags.spec & (Entry::Struct|Entry::Union)) && memspecEntry) {
+            bool isUnion  = current->m_traits.hasTrait(Entry::Virtue::Union);
+            bool isStruct = current->m_traits.hasTrait(Entry::Virtue::Struct);
+   
+            if (typedefHidesStruct && isTypedef && (isUnion || isStruct) && memspecEntry) {
                // case 1: use S_t as type for pS_t in "typedef struct _S {} S_t, *pS_t;"
       
-               varEntry->type+=memspecEntry->name + msType;
+               varEntry->type += memspecEntry->name + msType;
 
-            } else  {
+            } else {
                // case 2: use _S as type for for pS_t
       
-               varEntry->type+=current->name+msType;
-            }
+               varEntry->type += current->name + msType;
+            }   
 
-            varEntry->fileName = yyFileName;
-            varEntry->startLine = yyLineNr;
+            varEntry->fileName    = yyFileName;
+            varEntry->startLine   = yyLineNr;
             varEntry->startColumn = yyColNr;
-            varEntry->doc = current->doc;
-            varEntry->brief = current->brief;
-            varEntry->mGrpId = current->mGrpId;
+            varEntry->doc         = current->doc;
+            varEntry->brief       = current->brief;
+            varEntry->mGrpId      = current->mGrpId;
             varEntry->initializer = current->initializer;
             
             // deep copy group list
@@ -5642,6 +5792,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadFuncArgType>")"          {
       QString text = QString::fromUtf8(yytext);
+
       *copyArgString += text[0];
       fullArgString  += text[0];
       stringToArgumentList(fullArgString, &current->argList);
@@ -5656,7 +5807,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       docBackup   = current->doc;
       briefBackup = current->brief;
       
-      // go back to the saved state5691
+      // go back to the saved state
       BEGIN(currentArgumentContext);
     }
 
@@ -5751,10 +5902,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          lastCommentInArgContext = YY_START;
          fullArgString += tmp;
          
-         if (tmp.indexOf("//") != -1)
-         BEGIN( CopyArgCommentLine );
-         else
-         BEGIN( CopyArgComment );
+         if (tmp.indexOf("//") != -1) {
+            BEGIN( CopyArgCommentLine );
+         }   else {
+            BEGIN( CopyArgComment );
+         }
       }
    }
 
@@ -6020,64 +6172,68 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncQual,TrailingReturn>{BN}*"override"{BN}*          { 
       // C++11 overridden virtual member function
-      lineCount() ;
-      current->m_specFlags.spec |= Entry::Override;
+      lineCount();
+
+      current->m_traits.setTrait(Entry::Virtue::Override);
       current->args += " override ";
+
       BEGIN(FuncQual);
    }
 
 <FuncQual,TrailingReturn>{BN}*"final"{BN}*             { 
       // C++11 final method
-                                          lineCount() ;
-                                          current->m_specFlags.m_isFinal = true;
-                                          current->args += " final ";
-                                          BEGIN(FuncQual);
+      lineCount();
+
+      current->m_traits.setTrait(Entry::Virtue::Final);
+      current->args += " final ";
+
+      BEGIN(FuncQual);
    }
 
 <FuncQual>{BN}*"sealed"{BN}*            { 
       // sealed member function
-                                          lineCount() ;
-                                          current->m_specFlags.spec |= Entry::Sealed;
-                                          current->args += " sealed ";
+      lineCount() ;
+      current->m_traits.setTrait(Entry::Virtue::Sealed);
+      current->args += " sealed ";
    }
 
 <FuncQual>{BN}*"new"{BN}*               { 
       // new member function
-                                          lineCount() ;
-                                          current->m_specFlags.spec |= Entry::New;
-                                          current->args += " new ";
+      lineCount() ;
+      current->m_traits.setTrait(Entry::Virtue::New);
+      current->args += " new ";
    }
 
 <FuncQual>{BN}*"const"{BN}*         { 
       // const member function
-                 lineCount() ;
-                 current->args += " const ";
-                 current->argList.constSpecifier=true;
+      lineCount() ;
+      current->args += " const ";
+      current->argList.constSpecifier = true;
    }
 
 <FuncQual>{BN}*"volatile"{BN}*      { 
       // volatile member function
-                    lineCount() ;
-                    current->args += " volatile ";
-                 current->argList.volatileSpecifier=true;
+      lineCount() ;
+      current->args += " volatile ";
+      current->argList.volatileSpecifier = true;
    }
 
 <FuncQual>{BN}*"noexcept"{BN}*      { 
       // noexcept qualifier
-                    lineCount() ;
-                 current->args += " noexcept ";
-                 current->m_specFlags.spec |= Entry::NoExcept;
+      lineCount() ;
+      current->args += " noexcept ";
+      current->m_traits.setTrait(Entry::Virtue::NoExcept);
    }
 
 <FuncQual>{BN}*"noexcept"{BN}*"("      { 
       // noexcept expression
-                 lineCount() ;
-                 current->args += " noexcept(";
-                 current->m_specFlags.spec |= Entry::NoExcept;
-                 lastRoundContext=FuncQual;
-                 pCopyRoundString=&current->args;
-                 roundCount=0;
-                                          BEGIN(CopyRound);
+      lineCount() ;
+      current->args += " noexcept(";
+      current->m_traits.setTrait(Entry::Virtue::NoExcept);
+      lastRoundContext=FuncQual;
+      pCopyRoundString=&current->args;
+      roundCount = 0;
+      BEGIN(CopyRound);
    }
 
 <FuncQual,TrailingReturn>{BN}*"="{BN}*"0"{BN}*     { 
@@ -6091,26 +6247,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncQual,TrailingReturn>{BN}*"="{BN}*"delete"{BN}*     { 
       // C++11 explicitly delete member
-                 lineCount();
-                 current->args += " = delete";
-                 current->m_specFlags.spec |= Entry::Delete;
-                 current->argList.isDeleted = true;
-                 BEGIN(FuncQual);
+      lineCount();
+      current->args += " = delete";
+      current->m_traits.setTrait(Entry::Virtue::Delete);
+      current->argList.isDeleted = true;
+      BEGIN(FuncQual);
    }
 
 <FuncQual,TrailingReturn>{BN}*"="{BN}*"default"{BN}*     { 
       // C++11 explicitly defaulted constructor/assignment operator
-                 lineCount();
-                 current->args += " = default";
-                 current->m_specFlags.spec |= Entry::Default;
-                 BEGIN(FuncQual);
+      lineCount();
+      current->args += " = default";
+      current->m_traits.setTrait(Entry::Virtue::Default);
+      BEGIN(FuncQual);
    }
 
 <FuncQual>{BN}*"->"{BN}*                {
-                                          lineCount();
-                                          current->argList.trailingReturnType = " -> ";
-                                          current->args += " -> ";
-                                          BEGIN(TrailingReturn);
+      lineCount();
+      current->argList.trailingReturnType = " -> ";
+      current->args += " -> ";
+      BEGIN(TrailingReturn);
    }
 
 <TrailingReturn>[{;]                    {
@@ -6383,135 +6539,148 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <Function>[;{,]            {
-   QString text = QString::fromUtf8(yytext);
-   current->name = current->name.simplified();
-   current->type = current->type.simplified();
-   current->args = removeRedundantWhiteSpace(current->args);
+      QString text = QString::fromUtf8(yytext);
 
-   // was: current->args.simplified();
-
-   current->fileName    = yyFileName;
-   current->startLine   = yyBegLineNr;
-   current->startColumn = yyBegColNr;
-
-                 static QRegExp re("\\([^)]*[*&][^)]*\\)");       // (...*...)     
-
-                 if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
-                   int tempArg = current->name.indexOf('<');
-
-                   int ts = current->type.indexOf('<');
-                   int te = current->type.lastIndexOf('>');
-                   int ti = re.indexIn(current->type, 0);
-
-                   // bug677315: A<int(void *, char *)> get(); is not a function pointer
-                   // not a (...*...) pattern
-                   // (...*...) is part of a template argument list
-
-                   bool isFunction = (ti == -1) || (ts != -1 && ts < te && ts < ti && ti < te); 
-
-                   QString tempName;
-                   if (tempArg == -1) {
-                      tempName = current->name; 
-
-                   } else {
-                      tempName = current->name.left(tempArg);
-                   } 
+      current->name        = current->name.simplified();
+      current->type        = current->type.simplified();
+      current->args        = removeRedundantWhiteSpace(current->args);            
+      current->fileName    = yyFileName;
+      current->startLine   = yyBegLineNr;
+      current->startColumn = yyBegColNr;
+   
+      static QRegExp re("\\([^)]*[*&][^)]*\\)");       // (...*...)     
       
-                   if (! current->type.isEmpty() && (! isFunction || current->type.startsWith("typedef ")) )  {
-                                      
-                     if (isTypedef && ! current->type.startsWith("typedef ")) {
-                        current->type.prepend("typedef ");
-                     }
+      if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
+         int tempArg = current->name.indexOf('<');
+         
+         int ts = current->type.indexOf('<');
+         int te = current->type.lastIndexOf('>');
+         int ti = re.indexIn(current->type, 0);
+         
+         // bug677315: A<int(void *, char *)> get(); is not a function pointer
+         // not a (...*...) pattern
+         // (...*...) is part of a template argument list
+         
+         bool isFunction = (ti == -1) || (ts != -1 && ts < te && ts < ti && ti < te); 
+      
+         QString tempName;
+         if (tempArg == -1) {
+            tempName = current->name; 
+         
+         } else {
+            tempName = current->name.left(tempArg);
 
-                     current->section = Entry::VARIABLE_SEC;
+         } 
+         
+         if (! current->type.isEmpty() && (! isFunction || current->type.startsWith("typedef ")) )  {
+         
+            if (isTypedef && ! current->type.startsWith("typedef ")) {
+               current->type.prepend("typedef ");
+            }
+         
+            current->section = Entry::VARIABLE_SEC;
+         
+         } else {
+            current->section = Entry::FUNCTION_SEC;
+            current->proto   = (text[0] == ';');
+         }
+      
+      } else  {
+         // a global function prototype or function variable
+         
+         if (! current->type.isEmpty() && (re.indexIn(current->type, 0) !=-1 || current->type.left(8) == "typedef ")) {
+         
+            if (isTypedef && current->type.left(8) != "typedef ") {
+               current->type.prepend("typedef ");
+            }
+            
+            current->section = Entry::VARIABLE_SEC;
+            
+         } else {
+            current->section = Entry::FUNCTION_SEC;
+            current->proto = true;
+         }
 
-                   } else {
-                     current->section = Entry::FUNCTION_SEC;
-                     current->proto   = (text[0] == ';');
-                   }
+      }
+      
+      if ( insidePHP) {
+         if (findAndRemoveWord(current->type,"final")) {
+            current->m_traits.setTrait(Entry::Virtue::Final);                      
+         }
+         
+         if (findAndRemoveWord(current->type,"abstract")) {
+            current->m_traits.setTrait(Entry::Virtue::Abstract);
+         }
+      }
+   
+      if ( insidePHP && !containsWord(current->type,"function")) {
+         initEntry();
+      
+         if (text[0] == '{' ) {
+            lastCurlyContext = FindMembers;
+            curlyCount = 0;
+            BEGIN( SkipCurly );
 
-                 } else  {
-                  // a global function prototype or function variable
-                 
-                   if (! current->type.isEmpty() && (re.indexIn(current->type, 0) !=-1 || current->type.left(8) == "typedef ")) {
-                   
-                     if (isTypedef && current->type.left(8) != "typedef ") {
-                        current->type.prepend("typedef ");
-                     }
-                     
-                     current->section = Entry::VARIABLE_SEC;
+         } else {
+            BEGIN( FindMembers );
 
-                   } else {
-                     current->section = Entry::FUNCTION_SEC;
-                     current->proto = true;
-                   }
-                 }
-
-                 if ( insidePHP) {
-                   if (findAndRemoveWord(current->type,"final"))
-                   {
-                      current->m_specFlags.m_isFinal = true;
-                   }
-
-                   if (findAndRemoveWord(current->type,"abstract"))
-                   {
-                     current->m_specFlags.spec |= Entry::Abstract;
-                   }
-                 }
-
-                 if ( insidePHP && !containsWord(current->type,"function"))
-                 {
-                   initEntry();
-
-                   if (text[0] == '{' ) {
-                     lastCurlyContext = FindMembers;
-                     curlyCount=0;
-                     BEGIN( SkipCurly );
-                   } else {
-                     BEGIN( FindMembers );
-                   }
-
-                 } else {
-                   if (insidePHP) {
-                     findAndRemoveWord(current->type,"function");
-                   }
-
-                   previous = current;
-                   current_root->addSubEntry(current, current_root);
-                   current = QMakeShared<Entry>();
-                   initEntry();
-
-                   // Objective C 2.0: Required/Optional section
-                   if (previous->m_specFlags.spec & (Entry::Optional | Entry::Required))
-                   {
-                     current->m_specFlags.spec |= previous->m_specFlags.spec & (Entry::Optional|Entry::Required);
-                   }
-
-                   lastCurlyContext = FindMembers;
-
-                   if (text[0] == ',' ) {
-                     current->type = previous->type;
-                     // we need to strip any trailing * and & (see bugs 623023 and 649103 for test cases)
-                     int i=current->type.length();
-                     while (i > 0 && (current->type[i-1]=='*' || current->type[i-1]=='&' || current->type[i-1]==' ')) i--;
-                     current->type = current->type.left(i);
-                   }
-
-                   if (text[0] == '{' ) {
-                     if (! insidePHP && (current_root->section & Entry::COMPOUND_MASK) ) {
-                        previous->m_specFlags.spec |= Entry::Inline;
-                     }
-
-                     curlyCount=0;
-                     BEGIN( SkipCurly ) ;
-
-                   } else {
-                     if (previous->section != Entry::VARIABLE_SEC) {
-                        previous->bodyLine=-1; // a function/member declaration
-                     }   
-                     BEGIN( FindMembers ) ;
-                   }
-                 }
+         }
+      
+      } else {
+         if (insidePHP) {
+            findAndRemoveWord(current->type,"function");
+         }
+   
+         previous = current;
+         current_root->addSubEntry(current, current_root);
+         current = QMakeShared<Entry>();
+         initEntry();
+   
+         bool isOptional_Prev = previous->m_traits.hasTrait(Entry::Virtue::Optional);
+         bool isRequired_Prev = previous->m_traits.hasTrait(Entry::Virtue::Required);
+   
+         // Objective C 2.0: Required/Optional section
+   
+         if (isOptional_Prev) {       
+            current->m_traits.setTrait(Entry::Virtue::Optional);
+         }
+   
+         if (isRequired_Prev) {   
+            current->m_traits.setTrait(Entry::Virtue::Required);                       
+         }
+         
+         lastCurlyContext = FindMembers;
+         
+         if (text[0] == ',' ) {
+            current->type = previous->type;
+            // we need to strip any trailing * and & (see bugs 623023 and 649103 for test cases)
+            int i = current->type.length();
+               
+            while (i > 0 && (current->type[i-1] == '*' || current->type[i-1] == '&' || current->type[i-1] == ' ')) {
+               i--;
+            }
+         
+            current->type = current->type.left(i);
+         }
+         
+         if (text[0] == '{' ) {
+            if (! insidePHP && (current_root->section & Entry::COMPOUND_MASK) ) {
+               previous->m_traits.setTrait(Entry::Virtue::Inline);
+            }
+   
+            curlyCount = 0;
+            BEGIN( SkipCurly ) ;
+      
+         } else {
+         
+            if (previous->section != Entry::VARIABLE_SEC) {
+               // a function/member declaration
+               previous->bodyLine = -1;
+            }   
+            
+            BEGIN( FindMembers );
+         }
+      }
    }
 
 <SkipInits>{ID}{BN}*"{"               { 
@@ -6779,34 +6948,38 @@ SkipC11Attribute>"]]"                 {
    }
 
 <Bases>";"        {
-      if (insideIDL && (current->m_specFlags.spec & (Entry::Singleton | Entry::Service)))
-                 {
-                   // in UNO IDL a service or singleton may be defined
-                   // completely like this: "service Foo : XFoo;"
-                   if (!current->name.isEmpty() && !current_root->name.isEmpty())
-                   {
-                     prependScope();
-                   }
-                   current->name = current->name.trimmed();
-                   // there can be only one base class here
-                   if (! baseName.isEmpty()) {
-                     current->extends.append(BaseInfo(baseName, Public, Normal));
-                     baseName.resize(0);
-                   }
+      bool isSingleton = current->m_traits.hasTrait(Entry::Virtue::Singleton);
+      bool isService   = current->m_traits.hasTrait(Entry::Virtue::Service);
 
-                   current_root->addSubEntry( current, current_root);
-                   current = QMakeShared<Entry>();
-                 }
-                 else
-                 {
-                   current->section = Entry::EMPTY_SEC ;
-                   current->type.resize(0) ;
-                   current->name.resize(0) ;
-                   current->args.resize(0) ;
-                   current->argList.clear();
-                 }
-                 BEGIN( FindMembers ) ;
-    }
+      if (insideIDL && (isSingleton || isService)) {
+         // in UNO IDL a service or singleton may be defined
+         // completely like this: "service Foo : XFoo;"
+
+         if (! current->name.isEmpty() && ! current_root->name.isEmpty()) {
+            prependScope();
+         }
+
+         current->name = current->name.trimmed();
+
+         // there can be only one base class here
+         if (! baseName.isEmpty()) {
+            current->extends.append(BaseInfo(baseName, Public, Normal));
+            baseName.resize(0);
+         }
+         
+         current_root->addSubEntry( current, current_root);
+         current = QMakeShared<Entry>();
+
+      } else {
+         current->section = Entry::EMPTY_SEC ;
+         current->type.resize(0) ;
+         current->name.resize(0) ;
+         current->args.resize(0) ;
+         current->argList.clear();
+      }
+
+      BEGIN( FindMembers ) ;
+   }
 
 <CompoundName>{SCOPENAME}{BN}*/"<"  {
       QString text = QString::fromUtf8(yytext); 
@@ -6814,7 +6987,9 @@ SkipC11Attribute>"]]"                 {
       sharpCount    = 0;
       current->name = text;
 
-      if (current->m_specFlags.spec & Entry::Protocol) {
+      bool isProtocol = current->m_traits.hasTrait(Entry::Virtue::Protocol);   
+
+      if (isProtocol) {
          current->name += "-p";
       }
 
@@ -6871,10 +7046,12 @@ SkipC11Attribute>"]]"                 {
 
       if (--sharpCount <= 0) {
          current->name = removeRedundantWhiteSpace(current->name);
+
+         bool isProtocol  = current->m_traits.hasTrait(Entry::Virtue::Protocol);
          
-         if (current->m_specFlags.spec & Entry::Protocol) { 
+         if (isProtocol) { 
             // Objective-C protocol
-            unput('{'); // fake start of body
+            unput('{');    // fake start of body
             BEGIN( ClassVar );
             
          } else {
@@ -6886,6 +7063,7 @@ SkipC11Attribute>"]]"                 {
 <ClassTemplSpec>"<"        {
       QString text = QString::fromUtf8(yytext); 
       current->name += text;
+
       if (roundCount == 0) {
          sharpCount++;
       }
@@ -6900,6 +7078,13 @@ SkipC11Attribute>"]]"                 {
       // forward declaration
       QString text = QString::fromUtf8(yytext); 
 
+      bool isInterface      = current->m_traits.hasTrait(Entry::Virtue::Interface);
+      bool isService        = current->m_traits.hasTrait(Entry::Virtue::Service);
+
+      bool isInterface_Root = current_root->m_traits.hasTrait(Entry::Virtue::Interface);
+      bool isService_Root   = current_root->m_traits.hasTrait(Entry::Virtue::Service);
+      bool isSingleton_Root = current_root->m_traits.hasTrait(Entry::Virtue::Singleton);
+
       if (current->tArgLists && current->tArgLists->count() > 0) {
           // found a forward template declaration, this has a purpose of its own
           current->name = text;
@@ -6910,56 +7095,50 @@ SkipC11Attribute>"]]"                 {
          if (! current->name.isEmpty() && ! rn.isEmpty()) {
             prependScope();
          }
-         
-         current->m_specFlags.spec |= Entry::ForwardDecl;
+
+         current->m_traits.setTrait(Entry::Virtue::ForwardDecl);
+        
          current_root->addSubEntry(current, current_root);
          current = QMakeShared<Entry>();
 
-      } else if (insideIDL &&
-               (((current_root->m_specFlags.spec & (Entry::Interface | Entry::Service)) &&
-                (current->m_specFlags.spec & Entry::Interface)) ||
-               ((current_root->m_specFlags.spec & (Entry::Service | Entry::Singleton)) &&
-                (current->m_specFlags.spec & Entry::Service))))  {
+      } else if (insideIDL && ( ( (isInterface_Root || isService_Root) && (isInterface)) || 
+                ( (isService_Root || isSingleton_Root) && (isService))))  {
                  
          // interface inside of UNO IDL service or interface
          // service inside of UNO IDL service or singleton
-         // there may be documentation on the member, so do not throw it away
+         // there may be documentation on the member so do not throw it away
 
          current->name = text;
-         current->name = current->name.left(current->name.length() - 1).trimmed();
-
-         if (current->m_specFlags.spec & Entry::Interface)  {
+         current->name = current->name.left(current->name.length() - 1).trimmed();       
+   
+         if (isInterface)  {
             current->section = Entry::EXPORTED_INTERFACE_SEC;
          } else {
             current->section = Entry::INCLUDED_SERVICE_SEC;
          }
 
-//       current->section = Entry::MEMBERDOC_SEC;
-         current->m_specFlags.spec &= ~(Entry::Interface|Entry::Service);
+         current->m_traits.setTrait(Entry::Virtue::Interface, false); 
+         current->m_traits.setTrait(Entry::Virtue::Service, false);          
 
-// FIXME: not a good solution
-// Interface == Gettable, need to clear it - actually we are mixing values from different enums
-// in this case, granted only Optional and Interface are actually valid in this context
+         current_root->addSubEntry(current, current_root);
+         current = QMakeShared<Entry>();
+       }
 
-            current_root->addSubEntry(current, current_root);
-            current = QMakeShared<Entry>();
-         }
-
-         unput(';');
-         current->reset();
-         initEntry();
-         
-         if (insideObjC) {                                          
-            language = current->lang = SrcLangExt_Cpp;
-            insideObjC = false;
-         }
-         
-         if (isTypedef) {
-            // typedef of a class, put typedef keyword back                 
-            current->type.prepend("typedef");
-         }
-         
-         BEGIN( FindMembers );
+      unput(';');
+      current->reset();
+      initEntry();
+      
+      if (insideObjC) {                                          
+         language = current->lang = SrcLangExt_Cpp;
+         insideObjC = false;
+      }
+      
+      if (isTypedef) {
+         // typedef of a class, put typedef keyword back                 
+         current->type.prepend("typedef");
+      }
+      
+      BEGIN( FindMembers );
    }
 
 <CompoundName>{SCOPENAME}/{BN}*"("  {
@@ -6974,7 +7153,9 @@ SkipC11Attribute>"]]"                 {
          BEGIN( AlignAs );
       
       } else {
-         if (current->m_specFlags.spec & Entry::Protocol) {
+         bool isProtocol = current->m_traits.hasTrait(Entry::Virtue::Protocol);   
+
+         if (isProtocol) {
             current->name += "-p";
          }
       
@@ -7016,7 +7197,7 @@ SkipC11Attribute>"]]"                 {
 
 <CompoundName>{SCOPENAME}     {
       // have a new scope such as a new class
-      QString text = QString::fromUtf8(yytext); 
+      QString text  = QString::fromUtf8(yytext); 
       current->name = text;
 
       if (insideCpp || insideObjC) {
@@ -7024,12 +7205,13 @@ SkipC11Attribute>"]]"                 {
       }
 
       lineCount();
+      bool isProtocol = current->m_traits.hasTrait(Entry::Virtue::Protocol);   
 
-      if (current->m_specFlags.spec & Entry::Protocol) {
+      if (isProtocol) {
          current->name += "-p";
       }
 
-      if ((current->m_specFlags.spec & Entry::Protocol) || current->section == Entry::OBJCIMPL_SEC) {
+      if (isProtocol || current->section == Entry::OBJCIMPL_SEC) {
          unput('{');       // fake start of body
       }
 
@@ -7049,44 +7231,51 @@ SkipC11Attribute>"]]"                 {
 
       if (insideIDL && text.startsWith("switch") == 0 && ! isId(text[6])) {
                  
-                   // Corba IDL style union
-                   roundCount=0;
-                   BEGIN(SkipUnionSwitch);
-
-                 }  else {
-                   addType(current);
-                   current->name = text;
-                   current->name = current->name.trimmed();
-                   lineCount();
-                   BEGIN( FindMembers );
+         // Corba IDL style union
+         roundCount=0;
+         BEGIN(SkipUnionSwitch);
+         
+      }  else {
+         addType(current);
+         current->name = text;
+         current->name = current->name.trimmed();
+         lineCount();
+         BEGIN( FindMembers );
       }
    }
 
 <ClassVar>","           {
-                 if (isTypedef) {
-                   // multiple types in one typedef
-                   unput(',');
-                   current->type.prepend("typedef ");
-                   BEGIN(FindMembers);
-
-                 } else {
-                    // Multiple class forward declaration
-                 }
+      if (isTypedef) {
+         // multiple types in one typedef
+         unput(',');
+         current->type.prepend("typedef ");
+         BEGIN(FindMembers);
+      
+      } else {
+         // Multiple class forward declaration
+      }
    }
 
 <ClassVar>("sealed"|"abstract")/{BN}*(":"|"{") {
-         QString text = QString::fromUtf8(yytext); 
-         if (insideCli) {
-            if ( text[0] == 's')  // sealed
-               current->m_specFlags.spec|= Entry::SealedClass;
-            else // abstract
-               current->m_specFlags.m_isAbstractClass = true;
-            
-            BEGIN( ClassVar );
+      QString text = QString::fromUtf8(yytext); 
+   
+      if (insideCli) {
+         if ( text[0] == 's')   {
+            // sealed, C#
+            current->m_traits.setTrait(Entry::Virtue::SealedClass); 
 
-         } else {
-            REJECT;
+         } else  {
+            // abstract
+            current->m_traits.setTrait(Entry::Virtue::AbstractClass); 
+
          }
+         
+         BEGIN( ClassVar );
+   
+      } else {
+         REJECT;
+
+      }
    }
 
 <ClassVar>{ID}             {
@@ -7102,8 +7291,8 @@ SkipC11Attribute>"]]"                 {
 
       } else if ((insideJava || insidePHP || insideJS) && (text == "implements" || text =="extends") ) {
           current->type.resize(0);
-          baseProt=Public;
-          baseVirt=Normal;
+          baseProt = Public;
+          baseVirt = Normal;
           baseName.resize(0);
           BEGIN( BasesProt );
 
@@ -7117,13 +7306,13 @@ SkipC11Attribute>"]]"                 {
          BEGIN( CSConstraintName );
 
       } else if (insideCli &&  text == "abstract") {
-         current->m_specFlags.spec |= Entry::Abstract;
+         current->m_traits.setTrait(Entry::Virtue::Abstract); 
 
       } else if (insideCli && text == "sealed") {
-         current->m_specFlags.spec |= Entry::Sealed;
+         current->m_traits.setTrait(Entry::Virtue::Sealed); 
 
       } else if (text == "final") {
-         current->m_specFlags.m_isFinal = true;
+         current->m_traits.setTrait(Entry::Virtue::Final); 
 
       } else {
       
@@ -7149,7 +7338,7 @@ SkipC11Attribute>"]]"                 {
          // class category
                  
          current->name += '(';
-         current->m_specFlags.spec |= Entry::Category;
+         current->m_traits.setTrait(Entry::Virtue::Category); 
                                             
          BEGIN( ClassCategory );
 
@@ -7285,10 +7474,12 @@ SkipC11Attribute>"]]"                 {
                  } else {
                   current->type.resize(0);
 
-                  if ((current->m_specFlags.spec & Entry::Interface) ||
-                     (current->m_specFlags.spec & Entry::Struct)    ||
-                     (current->m_specFlags.spec & Entry::Ref)       ||
-                     (current->m_specFlags.spec & Entry::Value)     ||
+                  bool isInterface = current->m_traits.hasTrait(Entry::Virtue::Interface);
+                  bool isStruct    = current->m_traits.hasTrait(Entry::Virtue::Struct);
+                  bool isRef       = current->m_traits.hasTrait(Entry::Virtue::Ref);
+                  bool isValue     = current->m_traits.hasTrait(Entry::Virtue::Value);
+
+                  if (isInterface || isStruct || isRef || isValue ||
                      insidePHP || insideCSharp || insideD || insideObjC || insideIDL) {
 
                       baseProt = Public;
@@ -7300,6 +7491,7 @@ SkipC11Attribute>"]]"                 {
 
                    baseVirt = Normal;
                    baseName.resize(0);
+
                    BEGIN( BasesProt ) ;
                  }
    }
@@ -7307,6 +7499,7 @@ SkipC11Attribute>"]]"                 {
 <ClassVar>[;=*&]        {
       QString text = QString::fromUtf8(yytext);
       unput(*yytext);
+
       if (isTypedef) { 
          // typedef of a class, put typedef keyword back                 
          current->type.prepend("typedef");
@@ -7327,11 +7520,12 @@ SkipC11Attribute>"]]"                 {
 
       } else {
         lineCount();
-        current->m_program += text;
+        current->m_program   += text;
         current->fileName    = yyFileName ;
         current->startLine   = yyLineNr ;
         current->startColumn = yyColNr;
-        curlyCount=0;
+        curlyCount = 0;
+
         BEGIN( ReadBodyIntf );
       }
    }
@@ -7348,11 +7542,12 @@ SkipC11Attribute>"]]"                 {
 
       } else {
          lineCount();
-         current->m_program     += text;
+         current->m_program   += text;
          current->fileName    = yyFileName ;
          current->startLine   = yyLineNr ;
          current->startColumn = yyColNr;
          curlyCount = 0;
+
          BEGIN( ReadBodyIntf );
       }
    }
@@ -7367,7 +7562,7 @@ SkipC11Attribute>"]]"                 {
       if (current->name.isEmpty() && ! isTypedef)  {
          // anonymous compound
                  
-         if (current->section==Entry::NAMESPACE_SEC) {
+         if (current->section == Entry::NAMESPACE_SEC) {
             // allow reopening of anonymous namespaces
          
             if (Config::getBool("extract-anon-namespaces")) { 
@@ -7385,21 +7580,37 @@ SkipC11Attribute>"]]"                 {
       }
  
       curlyCount = 0;
+      bool ok = true;
 
-      if (current_root && // not a nested struct inside an @interface section
-            !(current_root->m_specFlags.spec & Entry::Interface) &&
-            ((current->m_specFlags.spec & (Entry::Interface | Entry::Protocol | Entry::Category) ||
-            current->section==Entry::OBJCIMPL_SEC) ) && insideObjC) { 
-      
-         // ObjC body that ends with @end
-         BEGIN( ReadBodyIntf );
-      
-      } else if (current->section == Entry::NAMESPACE_SEC) { 
-         // namespace body
-         BEGIN( ReadNSBody );
-      
-      } else { 
-         BEGIN( ReadBody );         
+      // not a nested struct inside an @interface section
+      if (current_root) {
+
+         bool isInterface      = current->m_traits.hasTrait(Entry::Virtue::Interface);
+         bool isProtocol       = current->m_traits.hasTrait(Entry::Virtue::Protocol);
+         bool isCategory       = current->m_traits.hasTrait(Entry::Virtue::Category);
+
+         bool isInterface_Root = current_root->m_traits.hasTrait(Entry::Virtue::Interface);
+ 
+         if ( ! isInterface_Root && ( (isInterface || isProtocol || isCategory || 
+               current->section == Entry::OBJCIMPL_SEC) ) && insideObjC) {      
+
+            // ObjC body that ends with @end
+            ok = false;
+   
+            BEGIN( ReadBodyIntf );
+         }
+      }   
+
+      if (ok) {
+
+         if (current->section == Entry::NAMESPACE_SEC) { 
+            // namespace body
+            BEGIN( ReadNSBody );
+         
+         } else { 
+            BEGIN( ReadBody );         
+   
+         }
       }
    }
 
@@ -7630,51 +7841,53 @@ SkipC11Attribute>"]]"                 {
 <Bases>","|(">"({BN}*"{")?)|({BN}+"implements"{BN}*)  { 
       QString text = QString::fromUtf8(yytext);
       lineCount();
-                 if (insideProtocolList)
-                 {
-                   baseName+="-p";
-                 }
-                 else
-                 {
-                    current->args += ',' ;
-                 }
-                 current->name = removeRedundantWhiteSpace(current->name);
-                    if (! baseName.isEmpty())
-                 {
-                     current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
-                 }
 
-                 if ((current->m_specFlags.spec & (Entry::Interface|Entry::Struct)) ||
-                     insideJava || insidePHP || insideCSharp ||
-                     insideD || insideObjC || insideIDL)
-                 {
-                   baseProt=Public;
-                 }
-                 else
-                 {
-                   baseProt=Private;
-                 }
+      if (insideProtocolList) {
+         baseName += "-p";
+      } else {
+         current->args += ',' ;
+      }
+      
+      current->name = removeRedundantWhiteSpace(current->name);
 
-                 baseVirt=Normal;
-                 baseName.resize(0);
+      if (! baseName.isEmpty()) {
+         current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
+      }
 
-                 if (text[0] == '>') {
-                    // end of a ObjC protocol list
-                    insideProtocolList = false;
+      bool isInterface = current->m_traits.hasTrait(Entry::Virtue::Interface);
+      bool isStruct    = current->m_traits.hasTrait(Entry::Virtue::Struct);
+      
+      if ( isInterface || isStruct || insideJava || insidePHP || insideCSharp ||
+               insideD || insideObjC || insideIDL) {
 
-                    if (text.length() == 1) {
-                     unput('{'); // dummy start body
-                   } else {
-                     yyless(1);
-                   }
+         baseProt = Public;
 
-                 } else {
-                   if (text[0] == ',' && insideObjC) {
-                      // Begin of protocol list                   
-                      insideProtocolList=true;
-                   }
-                   BEGIN(BasesProt);
-                 }
+      } else {
+         baseProt = Private;
+      }
+      
+      baseVirt=Normal;
+      baseName.resize(0);
+
+      if (text[0] == '>') {
+         // end of a ObjC protocol list
+         insideProtocolList = false;
+         
+         if (text.length() == 1) {
+            unput('{'); // dummy start body
+         } else {
+            yyless(1);
+         }
+         
+      } else {
+
+         if (text[0] == ',' && insideObjC) {
+            // Begin of protocol list                   
+            insideProtocolList=true;
+         }
+
+         BEGIN(BasesProt);
+      }
    }
 
 <Bases>{B}*"{"{B}*         { 
@@ -7867,6 +8080,9 @@ SkipC11Attribute>"]]"                 {
 
 <FindMembers>"{"        {
       QString text = QString::fromUtf8(yytext);
+
+      bool isAttribute = current->m_traits.hasTrait(Entry::Virtue::Attribute);
+
       if (externC) {
          externC = false;
 
@@ -7884,7 +8100,7 @@ SkipC11Attribute>"]]"                 {
 
          BEGIN( CSAccessorDecl );
 
-      }  else if (insideIDL && (current->m_specFlags.spec & Entry::Attribute)) {
+      }  else if (insideIDL && isAttribute) {
          // UNO IDL: attributes may have setter and getter
          // exception specifications
          current->exception = " {";
@@ -7923,6 +8139,7 @@ SkipC11Attribute>"]]"                 {
 <CSAccessorDecl>"}"        {
       if (curlyCount) {
          curlyCount--;
+
       } else {
          mtype = MethodTypes::Method;
          virt = Normal;
@@ -7932,46 +8149,52 @@ SkipC11Attribute>"]]"                 {
    }
 
 <CSAccessorDecl>"private "{BN}*"set"      { 
-      if (curlyCount == 0) current->m_specFlags.spec |= Entry::PrivateSettable;   
+      if (curlyCount == 0) {
+         current->m_traits.setTrait(Entry::Virtue::PrivateSettable); 
+      } 
    }
 
 <CSAccessorDecl>"protected "{BN}*"set"    { 
-      if (curlyCount == 0) current->m_specFlags.spec |= Entry::ProtectedSettable; 
+      if (curlyCount == 0) {
+         current->m_traits.setTrait(Entry::Virtue::ProtectedSettable); 
+      }
    }
 
 <CSAccessorDecl>"private "{BN}*"get"      { 
-      if (curlyCount == 0) 
-         current->m_specFlags.spec |= Entry::PrivateGettable;    
+      if (curlyCount == 0) {
+         current->m_traits.setTrait(Entry::Virtue::PrivateGettable);    
+      }
    }
 
 <CSAccessorDecl>"protected "{BN}*"get"    { 
-      if (curlyCount == 0) 
-         current->m_specFlags.spec |= Entry::ProtectedGettable; 
+      if (curlyCount == 0)  {
+         current->m_traits.setTrait(Entry::Virtue::ProtectedGettable); 
+      }
    }
 
 <CSAccessorDecl>"set"         { 
       if (curlyCount == 0) 
-         current->m_specFlags.spec |= Entry::Settable;  
+         current->m_traits.setTrait(Entry::Virtue::Settable);
    }
 
 <CSAccessorDecl>"get"         { 
       if (curlyCount == 0) 
-         current->m_specFlags.spec |= Entry::Gettable;  
+         current->m_traits.setTrait(Entry::Virtue::Gettable);  
    }
 
 <CSAccessorDecl>"add"         { 
       if (curlyCount == 0) 
-         current->m_specFlags.spec |= Entry::Addable;   
+         current->m_traits.setTrait(Entry::Virtue::Addable);    
    }
 
 <CSAccessorDecl>"remove"      { 
       if (curlyCount == 0) 
-         current->m_specFlags.spec |= Entry::Removable; 
+         current->m_traits.setTrait(Entry::Virtue::Removable); 
    }
 
 <CSAccessorDecl>"raise"       { 
       if (curlyCount == 0) 
-         current->m_specFlags.spec |= Entry::Raisable;  
+         current->m_traits.setTrait(Entry::Virtue::Raisable); 
    }
 
 <CSAccessorDecl>.          {
@@ -8557,9 +8780,9 @@ static void handleCommentBlock(const QString &doc, bool brief)
    }
 
    while (parseCommentBlock(s_thisParser, docEntry, stripIndentation(doc), yyFileName, 
-                            lineNr,                                       // passed by reference
-                            isBrief, isJavaDocStyle, s_docBlockInBody,               
-                            protection, position, needsEntry) ) {         // last 3 are passed by reference
+                  lineNr,                                       // passed by reference
+                  isBrief, isJavaDocStyle, s_docBlockInBody,               
+                  protection, position, needsEntry) ) {         // last 3 are passed by reference
 
       if (needsEntry) {
          QString docFile = current->docFile;
@@ -8637,12 +8860,14 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          padCount = 0;
          s_column = 0;
 
-         inputString   = ce->m_program;
-         inputPosition = 0;
+         s_inputString   = ce->m_program;
+         s_inputPosition = 0;
 
          yyrestart( yyin );
 
-         if (ce->section == Entry::ENUM_SEC || (ce->m_specFlags.spec & Entry::Enum)) {
+         bool isEnum = ce->m_traits.hasTrait(Entry::Virtue::Enum);
+
+         if (ce->section == Entry::ENUM_SEC || isEnum) {
             BEGIN(FindFields);
          } else {
             BEGIN(FindMembers);
@@ -8657,10 +8882,11 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          current = QMakeShared<Entry>();
          gstat = false;
+
          initEntry();       
 
          // deep copy group list from parent (see bug 727732)
-         if (groupNested && rt->groups && ce->section != Entry::ENUM_SEC && ! (ce->m_specFlags.spec & Entry::Enum)) {
+         if (groupNested && rt->groups && ce->section != Entry::ENUM_SEC && ! isEnum) {
             for (auto g : *rt->groups) {
                ce->groups->append(g);
             }
@@ -8678,13 +8904,22 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          if ( ce->section == Entry::CLASS_SEC ) {
             // class
 
+            bool isEnum      = ce->m_traits.hasTrait(Entry::Virtue::Enum);
+            bool isInterface = ce->m_traits.hasTrait(Entry::Virtue::Interface);
+            bool isRef       = ce->m_traits.hasTrait(Entry::Virtue::Ref);
+            bool isValue     = ce->m_traits.hasTrait(Entry::Virtue::Value);
+            bool isStruct    = ce->m_traits.hasTrait(Entry::Virtue::Struct);
+            bool isUnion     = ce->m_traits.hasTrait(Entry::Virtue::Union);
+
             if (insidePHP || insideD || insideJS || insideIDL) {
                current->protection = protection = Public ;
 
-            } else if (insideJava) {
-               current->protection = protection = (ce->m_specFlags.spec & (Entry::Interface | Entry::Enum)) ? Public : Package;
+            } else if (insideJava) {            
+               protection = (isEnum || isInterface) ? Public : Package;
+               current->protection = protection;
+              
+            } else if (isInterface || isRef || isValue || isStruct || isUnion) {
 
-            } else if (ce->m_specFlags.spec & (Entry::Interface | Entry::Ref | Entry::Value | Entry::Struct | Entry::Union)) {
                if (ce->lang == SrcLangExt_ObjC) {
                   current->protection = protection = Protected;
 
@@ -8696,7 +8931,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
                current->protection = protection = Private;
             }
 
-         } else if (ce->section == Entry::ENUM_SEC ) {
+         } else if (ce->section == Entry::ENUM_SEC) {
             // enum
             current->protection = protection = ce->protection;
 
@@ -8732,78 +8967,65 @@ static void parseCompounds(QSharedPointer<Entry> rt)
    }
 }
 
+
+
+// ****
+
+void cstyleFreeParser()
+{
+   if (s_lexInit) {
+      yylex_destroy();
+   }
+}
+
 static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> rt,
                       enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
-   initParser();
+   s_inputFile.setFileName(fileName);
 
-   inputString   = fileBuf;
-   inputPosition = 0;
-   s_column      = 0;
-
-   protection    = Public;
-   mtype         = MethodTypes::Method;
-   gstat         = false;
-   virt          = Normal;
-   current_root  = rt;
-   global_root   = rt;
-
-   inputFile.setFileName(fileName);
-
-   if (inputFile.open(QIODevice::ReadOnly)) {
-      yyLineNr   = 1;
-      yyFileName = fileName;
-
-      setContext();
-
-      if (useClang && (insideCpp || insideObjC) ) {
-         // user wants clang for parsing
-         s_clangParser = true;
-
-         if (mode == ParserMode::SOURCE_FILE) {
-            // new file
-            ClangParser::instance()->start(fileName, includedFiles);
-
-         } else {
-            ClangParser::instance()->switchToFile(fileName);
-
-         }
-      } else  {
-         s_clangParser = false;
-      }
-      
-      rt->lang = language;
-      current_root = rt ;
-        
+   if (s_inputFile.open(QIODevice::ReadOnly)) {    
       initParser();
+
+      s_inputString   = fileBuf;
+      s_inputPosition = 0;
+      s_column        = 0; 
+
+      current_root    = rt;           
+      global_root     = rt;          
+
+      yyLineNr        = 1;
+      yyFileName      = fileName;
+
+      setContext();        
+      rt->lang = language;            
+      
       groupEnterFile(yyFileName, yyLineNr);
 
       current = QMakeShared<Entry>();     
       int sec = determineSection(yyFileName);
 
-      if (sec) {
+      if (sec != 0) {
          current->name    = yyFileName;
          current->section = sec;
 
-         current_root->addSubEntry(current, current_root);
-         current = QMakeShared<Entry>();
+         current_root->addSubEntry(current, current_root);         
       }
 
       current->reset();
 
       initEntry();
-      yyrestart( yyin );    
+      yyrestart(yyin);    
 
       if (insidePHP) {
          BEGIN( FindMembersPHP );
 
       } else {
          BEGIN( FindMembers );
+
       }
 
       yylex();
       s_lexInit = true;
-
 
       if (YY_START == Comment) {
          warn(yyFileName, yyLineNr, "File ended in the middle of a comment block, Check for a missing \\endcode");
@@ -8817,9 +9039,9 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       }
 
       parseCompounds(rt);
-      inputFile.close();
+      s_inputFile.close();
 
-      anonNSCount++;
+      anonNSCount++;      
    } 
 }
 
@@ -8843,13 +9065,13 @@ static void parsePrototype(const QString &text)
    // save scanner state
    orgState = YY_CURRENT_BUFFER;
    yy_switch_to_buffer(yy_create_buffer(yyin, YY_BUF_SIZE));
-   orgInputString   = inputString;
-   orgInputPosition = inputPosition;
+   orgInputString   = s_inputString;
+   orgInputPosition = s_inputPosition;
    
    // set new string
-   inputString   = text;
-   inputPosition = 0;
-   s_column = 0;
+   s_inputString   = text;
+   s_inputPosition = 0;
+   s_column        = 0;
    
    yyrestart( yyin );
    BEGIN(Prototype);
@@ -8866,41 +9088,47 @@ static void parsePrototype(const QString &text)
    yy_switch_to_buffer(orgState);
    yy_delete_buffer(tmpState);
    
-   inputString   = orgInputString;
-   inputPosition = orgInputPosition;
+   s_inputString   = orgInputString;
+   s_inputPosition = orgInputPosition;
 }
 
-void CPPScanFreeParser()
-{
-   if (s_lexInit) {
-      yylex_destroy();
-   }
-}
 
-void CPPLanguageParser::startTranslationUnit(const QString &)
-{
-}
+// ** 
 
-void CPPLanguageParser::finishTranslationUnit()
+bool CPPLanguageParser::needsPreprocessing(const QString &extension)
 {
-   bool processWithClang = insideCpp || insideObjC;
-   
-   if (processWithClang) {
-      ClangParser::instance()->finish();
-   }
+   QString fe = extension.toLower();
+   SrcLangExt lang = getLanguageFromFileName(extension);
+
+   return (SrcLangExt_Cpp == lang) ||
+                  ! ( fe == ".java" || fe == ".as"  || fe == ".d"    || fe == ".php" ||
+                      fe == ".php4" || fe == ".inc" || fe == ".phtml");
 }
 
 void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode,
-                  QStringList & filesInSameTranslationUnit, bool useClang)
+                  QStringList & filesInSameTU, bool useClang)
 {
-   s_thisParser = this;
+   if (useClang && (insideCpp || insideObjC) ) {         
+
+      if (mode == ParserMode::SOURCE_FILE) {            
+         ClangParser::instance()->start(fileName, filesInSameTU, root);    
+
+      } else {
+         // an include file
+         ClangParser::instance()->switchToFile(fileName);
+
+      }   
+
+   } else { 
+      s_thisParser = this;
    
-   printlex(yy_flex_debug, true, __FILE__, fileName);
+      printlex(yy_flex_debug, true, __FILE__, fileName);
    
-   ::parseMain(fileName,fileBuf,root, mode, filesInSameTranslationUnit, useClang);
+      ::parseMain(fileName, fileBuf, root, mode, filesInSameTU, useClang);
    
-   printlex(yy_flex_debug, false, __FILE__, fileName);
+      printlex(yy_flex_debug, false, __FILE__, fileName);
+   }
 }
 
 void CPPLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
@@ -8912,22 +9140,15 @@ void CPPLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QStrin
                   inlineFragment,memberDef, showLineNumbers,searchCtx,collectXRefs);
 }
 
-bool CPPLanguageParser::needsPreprocessing(const QString &extension)
-{
-   QString fe=extension.toLower();
-   SrcLangExt lang = getLanguageFromFileName(extension);
 
-   return (SrcLangExt_Cpp == lang) ||
-                  ! ( fe == ".java" || fe == ".as"  || fe == ".d"    || fe == ".php" ||
-                      fe == ".php4" || fe == ".inc" || fe == ".phtml");
+void CPPLanguageParser::parsePrototype(const QString &text)
+{
+   ::parsePrototype(text);
 }
+
 
 void CPPLanguageParser::resetCodeParserState()
 {
    ::resetCCodeParserState();
 }
 
-void CPPLanguageParser::parsePrototype(const QString &text)
-{
-   ::parsePrototype(text);
-}

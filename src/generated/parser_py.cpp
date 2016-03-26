@@ -4864,7 +4864,7 @@ static void parsePrototype(const QString &text)
    inputPosition = orgInputPosition; 
 }
 
-void pyScanFreeParser()
+void pyFreeParser()
 {
    if (g_lexInit) {
       pyscannerYYlex_destroy();

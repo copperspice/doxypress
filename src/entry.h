@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -17,6 +17,8 @@
 
 #ifndef ENTRY_H
 #define ENTRY_H
+
+#include <bitset>
 
 #include <QString>
 #include <QFile>
@@ -34,22 +36,19 @@ class StorageIntf;
 struct SectionInfo;
 struct ListItemInfo;
 
-/** This class stores information about an inheritance relation
- */
+// this class stores information about an inheritance relation
 struct BaseInfo {
-   /*! Creates an object representing an inheritance relation */
+   /* Creates an object representing an inheritance relation */
 
-   BaseInfo(const QString &n, Protection p, Specifier v) 
+   BaseInfo(const QString &n, Protection p, Specifier v)
       : name(n), prot(p), virt(v) {}
 
-   QString    name;      //!< the name of the base class
-   Protection prot;      //!< inheritance type
-   Specifier  virt;      //!< virtualness
+   QString    name;      // the name of the base class
+   Protection prot;      // inheritance type
+   Specifier  virt;      //  virtualness
 };
 
-/** This struct is used to capture the tag file information
- *  for an Entry.
- */
+// This struct is used to capture the tag file information for an Entry.
 struct TagInfo {
    QString tagName;
    QString fileName;
@@ -58,13 +57,13 @@ struct TagInfo {
 
 /** Represents some information, about an entity found in the source.
  *
- *  parseMain() in scanner.l will generate a tree of these entries.
+ *  parseMain() will generate a tree of these entries.
  */
 class Entry
 {
  public:
 
-   /*! Kind of entries which are supported */
+   // supported entries
    enum Sections {
       CLASS_SEC        = 0x00000001,
       NAMESPACE_SEC    = 0x00000010,
@@ -118,159 +117,145 @@ class Entry
       INCLUDED_SERVICE_SEC   = 0x1A000000
    };
 
-   // class specifiers (add new items to the end)
-   static const uint64_t Template        = (1ULL << 0);
-   static const uint64_t Generic         = (1ULL << 1);
-   static const uint64_t Ref             = (1ULL << 2);
-   static const uint64_t Value           = (1ULL << 3);
-   static const uint64_t Interface       = (1ULL << 4);
-   static const uint64_t Struct          = (1ULL << 5);
-   static const uint64_t Union           = (1ULL << 6);
-   static const uint64_t Exception       = (1ULL << 7);
-   static const uint64_t Protocol        = (1ULL << 8);
-   static const uint64_t Category        = (1ULL << 9);
-   static const uint64_t SealedClass     = (1ULL << 10);
-  
-   static const uint64_t Enum            = (1ULL << 12); // for Java-style enums
-   static const uint64_t Service         = (1ULL << 13); // UNO IDL
-   static const uint64_t Singleton       = (1ULL << 14); // UNO IDL
-   static const uint64_t ForwardDecl     = (1ULL << 15); // forward declarad template classes
-
-   // member specifiers (add new items to the beginning)
-   static const uint64_t Deprecated          = (1ULL << 19);
-   static const uint64_t PrivateGettable     = (1ULL << 20); // C# private getter
-   static const uint64_t ProtectedGettable   = (1ULL << 21); // C# protected getter
-   static const uint64_t PrivateSettable     = (1ULL << 22); // C# private setter
-   static const uint64_t ProtectedSettable   = (1ULL << 23); // C# protected setter
-   static const uint64_t Inline              = (1ULL << 24);
-   static const uint64_t Explicit            = (1ULL << 25);
-   static const uint64_t Mutable             = (1ULL << 26);
-   static const uint64_t Settable            = (1ULL << 27);
-   static const uint64_t Gettable            = (1ULL << 28);
-  
-   static const uint64_t Abstract        = (1ULL << 32);
-   static const uint64_t Addable         = (1ULL << 33);
-   static const uint64_t Removable       = (1ULL << 34);
-   static const uint64_t Raisable        = (1ULL << 35);
-   static const uint64_t Override        = (1ULL << 36);
-   static const uint64_t New             = (1ULL << 37);
-   static const uint64_t Sealed          = (1ULL << 38);
-   static const uint64_t Initonly        = (1ULL << 39);
-   static const uint64_t Optional        = (1ULL << 40);
-   static const uint64_t Required        = (1ULL << 41);
-   static const uint64_t NonAtomic       = (1ULL << 42);
-   static const uint64_t Copy            = (1ULL << 43);
-   static const uint64_t Retain          = (1ULL << 44);
-   
-   static const uint64_t Strong          = (1ULL << 46);
-   static const uint64_t Weak            = (1ULL << 47);
-   static const uint64_t Unretained      = (1ULL << 48);
-   static const uint64_t Alias           = (1ULL << 49);
-   static const uint64_t ConstExp        = (1ULL << 50);
-   static const uint64_t Default         = (1ULL << 51);
-   static const uint64_t Delete          = (1ULL << 52);
-   static const uint64_t NoExcept        = (1ULL << 53);
-   static const uint64_t Attribute       = (1ULL << 54); // UNO IDL attribute
-   static const uint64_t Property        = (1ULL << 55); // UNO IDL property
-   static const uint64_t Readonly        = (1ULL << 56); // on UNO IDL attribute or property
-   static const uint64_t Bound           = (1ULL << 57); // on UNO IDL attribute or property
-   static const uint64_t Constrained     = (1ULL << 58); // on UNO IDL property
-   static const uint64_t Transient       = (1ULL << 59); // on UNO IDL property
-   static const uint64_t MaybeVoid       = (1ULL << 60); // on UNO IDL property
-   static const uint64_t MaybeDefault    = (1ULL << 61); // on UNO IDL property
-   static const uint64_t MaybeAmbiguous  = (1ULL << 62); // on UNO IDL property
-   static const uint64_t Published       = (1ULL << 63); // UNO IDL keyword
-
-   struct SpecifierFlags {
-
-      SpecifierFlags() {
-         // ensures this struc has no virtual methods
-         static_assert(std::is_standard_layout<SpecifierFlags>::value == true, 
-                  "Struct SpecifierFlags can not have virutal methods");
-
-         // set ever bit field to zero or false
-         memset(this, 0, sizeof(SpecifierFlags));
-      } 
-
-      SpecifierFlags & operator|=(const SpecifierFlags &other) {
-         // old ones
-         this->spec |= other.spec;
-
-         // new ones
-         this->m_isAbstractClass |= other.m_isAbstractClass;
-
-         this->m_isReadable   |= other.m_isReadable;
-         this->m_isWritable   |= other.m_isWritable;
-         this->m_isReset      |= other.m_isReset;       
-         this->m_isNotify     |= other.m_isNotify;
-         this->m_isRevision   |= other.m_isRevision;
-         this->m_isDesignable |= other.m_isDesignable;
-         this->m_isScriptable |= other.m_isScriptable;
-         this->m_isStored     |= other.m_isStored;
-         this->m_isUser       |= other.m_isUser;
-         this->m_isConstant   |= other.m_isConstant;
-         this->m_isFinal      |= other.m_isFinal;
-
-         this->m_isAssign     |= other.m_isAssign;
-
-         return *this;
-      }
-
-      QByteArray toQByteArray() const {
-
-         QByteArray retval; 
-         retval.resize(sizeof(SpecifierFlags));
-
-         memcpy(retval.data(), this, sizeof(SpecifierFlags));
-       
-         return retval;
-      }
-
-      static SpecifierFlags fromQByteArray(const QByteArray &data)  {
-
-         SpecifierFlags retval;
-         memcpy(&retval, data.constData(), sizeof(SpecifierFlags));
-
-         return retval;
-      }
-
-      // old flags, move to new data type
-      uint64_t spec;            // !< class/member specifiers
+   enum Virtue {     
 
       // class specifiers
-      int m_isAbstractClass    : 1;
+      AbstractClass,
+      Template,
+      Generic,
+      Ref,
+      Value,
+      Interface,
+      Struct,
+      Union,
+      Exception,
+      Protocol,
+      Category,
+      SealedClass,
 
-      // member specifiers 
-      int m_isReadable         : 1;    
-      int m_isWritable         : 1;
-      int m_isReset            : 1;
-      int m_isNotify           : 1;
-      int m_isRevision         : 1;
-      int m_isDesignable       : 1;
-      int m_isScriptable       : 1;
-      int m_isStored           : 1;
-      int m_isUser             : 1;
-      int m_isConstant         : 1;
-      int m_isFinal            : 1;
+      Enum,                    // Java-style enums
+      Service,                 // UNO IDL
+      Singleton,               // UNO IDL
+      ForwardDecl,             
 
-      int m_isAssign           : 1;
+      // method specifiers     
+      Readable,
+      Writable,
+      Reset,
+      Notify,
+      Revision,
+      Designable,
+      Scriptable,
+      Stored,
+      User,
+      Constant,
+      Final,
+      Assign,
+
+      // member specifiers
+      Deprecated,
+      PrivateGettable,         // C# private getter
+      ProtectedGettable,       // C# protected getter
+      PrivateSettable,         // C# private setter
+      ProtectedSettable,       // C# protected setter
+
+      Inline,
+      Explicit,
+      Mutable,
+      Settable,
+      Gettable,
+      Abstract,
+      Addable,
+      Removable,
+      Raisable,
+      Override,
+      New,
+      Sealed,
+      Initonly,
+      Optional,
+      Required,
+      NonAtomic,
+      Copy,
+      Retain,
+      Strong,
+      Weak,
+      Unretained,
+
+      Alias,
+      ConstExp,
+      Default,
+      Delete,
+      NoExcept,
+      Attribute,               // UNO IDL attribute
+      Property,                // UNO IDL property
+      Readonly,                // on UNO IDL attribute or property
+      Bound,                   // on UNO IDL attribute or property
+      Constrained,             // on UNO IDL property
+      Transient,               // on UNO IDL property
+      MaybeVoid,               // on UNO IDL property
+      MaybeDefault,            // on UNO IDL property
+      MaybeAmbiguous,          // on UNO IDL property
+      Published,               // UNO IDL keyword
+
+      LastVirtue = Published
    };
 
+   // kind of group
    enum GroupDocType {
-      GROUPDOC_NORMAL,        //!< defgroup
-      GROUPDOC_ADD,           //!< addgroup
-      GROUPDOC_WEAK           //!< weakgroup
-   };                         //!< kind of group
+      GROUPDOC_NORMAL,        // defgroup
+      GROUPDOC_ADD,           // addgroup
+      GROUPDOC_WEAK           // weakgroup
+   };
+
+   class Traits {
+
+      public:
+         Traits & operator|=(const Traits &other) {
+            this->m_flags |= other.m_flags;
+
+            return *this;
+         }
+
+         QByteArray toQByteArray() const {
+            return m_flags.to_string().c_str();
+         }
+
+         static Traits fromQByteArray(const QByteArray &data)  {
+            Traits retval;
+            retval.m_flags = std::bitset<Virtue::LastVirtue> { data.constData() };
+
+            return retval;
+         }
+
+         void clear()  {
+            m_flags.reset();
+         }
+
+         bool hasTrait(Entry::Virtue data)  const {
+            return m_flags[data];
+         }
+
+         void setTrait(Entry::Virtue data, bool value = true)  {
+            m_flags[data] = value;
+         }
+
+         bool onlyHasTrait(Entry::Virtue data)  const {
+            return m_flags[data] && m_flags.count() == 1;
+         }
+
+      private:
+         std::bitset<Virtue::LastVirtue> m_flags;
+   };  
 
    Entry();
    Entry(const Entry &);
    ~Entry();
 
-   /*! Returns the static size of the Entry (so excluding any dynamic memory) */
+   // Returns the static size of the Entry (so excluding any dynamic memory)
    int getSize();
 
    void addSpecialListItem(const QString &listName, int index);
-   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, QSharedPointer<FileDef> fd, 
+   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, QSharedPointer<FileDef> fd,
                               QSharedPointer<Entry> self);
 
    // while parsing a file these function can be used to navigate/build the tree
@@ -278,7 +263,7 @@ class Entry
       m_parent = parent;
    }
 
-   /*! Returns the parent for this Entry or 0 if this entry has no parent. */
+   // Returns the parent for this Entry or 0 if this entry has no parent.
    QSharedPointer<Entry> parent() const {
       return m_parent.toStrongRef();
    }
@@ -290,76 +275,73 @@ class Entry
       return m_sublist;
    }
 
-   /*! Adds entry \a e as a child to this entry */
+   // Adds entry \a e as a child to this entry /
    void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self) ;
 
-   /*! Removes entry \a e from the list of children.    *  
-    */
+   // Removes entry \a e from the list of children
    void removeSubEntry(QSharedPointer<Entry> e);
 
-   /*! Restore the state of this Entry to the default value it has
-    *  at construction time.
-    */
+   // Restore the state of this Entry to the default value it has at construction time.
    void reset();
- 
- public:
-   // identification
-    
-   TagInfo      *tagInfo;    //!< tag file info
-   ArgumentList  argList;    //!< member arguments as a list 
-   ArgumentList  typeConstr; //!< where clause (C#) for type constraints
-   
-   RelatesType  relatesType; //!< how relates is handled
-   Specifier    virt;        //!< virtualness of the entry
-   Protection   protection;  //!< class protection
-   MethodTypes  mtype;       //!< signal, slot, (dcop) method, or property
+
+ public:  
+   TagInfo      *tagInfo;       // tag file info
+   ArgumentList  argList;       // member arguments as a list
+   ArgumentList  typeConstr;    // where clause (C#) for type constraints
+
+   RelatesType  relatesType;    // how relates is handled
+   Specifier    virt;           // virtualness of the entry
+   Protection   protection;     // class protection
+   MethodTypes  mtype;          // signal, slot, (dcop) method, or property
    GroupDocType groupDocType;
-   SrcLangExt   lang;        //!< programming language in which this entry was found 
+   SrcLangExt   lang;           // programming language in which this entry was found
+
+   Traits m_traits;
    
-   SpecifierFlags m_specFlags; 
+   static int num;              // counts the total number of entries
 
-   int  section;             //!< entry type (see Sections);
-   int  initLines;           //!< define/variable initializer lines to show
-   int  docLine;             //!< line number at which the documentation was found
-   int  briefLine;           //!< line number at which the brief desc. was found
-   int  inbodyLine;          //!< line number at which the body doc was found
-   int  bodyLine;            //!< line number of the definition in the source
-   int  endBodyLine;         //!< line number where the definition ends
-   int  mGrpId;              //!< member group id
-   int  startLine;           //!< start line of entry in the source
-   int  startColumn;         //!< start column of entry in the source
+   int  section;                // entry type (see Sections);
+   int  initLines;              // define/variable initializer lines to show
+   int  docLine;                // line number at which the documentation was found
+   int  briefLine;              // line number at which the brief desc. was found
+   int  inbodyLine;             // line number at which the body doc was found
+   int  bodyLine;               // line number of the definition in the source
+   int  endBodyLine;            // line number where the definition ends
+   int  mGrpId;                 // member group id
+   int  startLine;              // start line of entry in the source
+   int  startColumn;            // start column of entry in the source
 
-   bool stat;                //!< static ?
-   bool explicitExternal;    //!< explicitly defined as external ?
-   bool proto;               //!< prototype ?
-   bool subGrouping;         //!< automatically group class members ?
-   bool callGraph;           //!< do we need to draw the call graph ?
-   bool callerGraph;         //!< do we need to draw the caller graph ?
-  
-   QList<ArgumentList>   *tArgLists;    //!< template argument declarations
-   QList<BaseInfo>        extends;      //!< list of base classes
-   QList<Grouping>       *groups;       //!< list of groups this entry belongs to
-   QList<SectionInfo>    *anchors;      //!< list of anchors defined in this entry
-   QList<ListItemInfo>   *sli;          //!< special lists (test/todo/bug/deprecated/..) 
+   bool stat;                   // static ?
+   bool explicitExternal;       // explicitly defined as external ?
+   bool proto;                  // prototype ?
+   bool subGrouping;            // automatically group class members ?
+   bool callGraph;              // do we need to draw the call graph ?
+   bool callerGraph;            // do we need to draw the caller graph ?
 
-   QString	 type;        //!< member type
-   QString	 name;        //!< member name
-   QString   args;        //!< member argument string
-   QString   bitfields;   //!< member's bit fields  
-   QString	 m_program;   //!< the program text
-   QString   initializer; //!< initial value (for variables)
-   QString   includeFile; //!< include file (2 arg of \\class, must be unique)
-   QString   includeName; //!< include name (3 arg of \\class)
-   QString   doc;         //!< documentation block (partly parsed)
-   QString   docFile;     //!< file in which the documentation was found
-   QString   brief;       //!< brief description (doc block)  
-   QString   briefFile;   //!< file in which the brief desc. was found
-   QString   inbodyDocs;  //!< documentation inside the body of a function 
-   QString   inbodyFile;  //!< file in which the body doc was found
-   QString   relates;     //!< related class (doc block)
+   QList<ArgumentList>   *tArgLists;    // template argument declarations
+   QList<BaseInfo>        extends;      // list of base classes
+   QList<Grouping>       *groups;       // list of groups this entry belongs to
+   QList<SectionInfo>    *anchors;      // list of anchors defined in this entry
+   QList<ListItemInfo>   *sli;          // special lists (test/todo/bug/deprecated/..)
 
-   QString   m_read;        //!< property read 
-   QString   m_write;       //!< property write
+   QString   type;              // member type
+   QString   name;              // member name
+   QString   args;              // member argument string
+   QString   bitfields;         // member's bit fields
+   QString   m_program;         // the program text
+   QString   initializer;       // initial value (for variables)
+   QString   includeFile;       // include file (2 arg of \\class, must be unique)
+   QString   includeName;       // include name (3 arg of \\class)
+   QString   doc;               // documentation block (partly parsed)
+   QString   docFile;           // file in which the documentation was found
+   QString   brief;             // brief description (doc block)
+   QString   briefFile;         // file in which the brief desc. was found
+   QString   inbodyDocs;        // documentation inside the body of a function
+   QString   inbodyFile;        // file in which the body doc was found
+   QString   relates;           // related class (doc block)
+
+   QString   m_read;            // property read
+   QString   m_write;           // property write
 
    // copperspice - additional properties
    QString   m_reset;
@@ -368,19 +350,17 @@ class Entry
    QString   m_designable;
    QString   m_scriptable;
    QString   m_stored;
-   QString   m_user;   
+   QString   m_user;
 
-   QString   inside;       //!< name of the class in which documents are found
-   QString   exception;    //!< throw specification
-   QString	 fileName;     //!< file this entry was extracted from
-   QString   id;           //!< libclang id   
-      
-   bool      hidden;       //!< does this represent an entity that is hidden from the output
-   bool      artificial;   //!< Artificially introduced item
+   QString   inside;            // name of the class in which documents are found
+   QString   exception;         // throw specification
+   QString	 fileName;          // file this entry was extracted from
+   QString   id;                // libclang id
 
-   static int  num;        //!< counts the total number of entries
-
-   /// return the command name used to define GROUPDOC_SEC
+   bool      hidden;            // does this represent an entity that is hidden from the output
+   bool      artificial;        // Artificially introduced item
+   
+   // return the command name used to define GROUPDOC_SEC
    QString groupDocCmd() const {
 
       switch ( groupDocType ) {
@@ -406,10 +386,13 @@ class Entry
       switch ( groupDocType ) {
          case GROUPDOC_NORMAL:
             return Grouping::GROUPING_AUTO_DEF;
+
          case GROUPDOC_ADD:
             return Grouping::GROUPING_AUTO_ADD;
+
          case GROUPDOC_WEAK:
             return Grouping::GROUPING_AUTO_WEAK;
+
          default:
             return Grouping::GROUPING_LOWEST;
       }
@@ -418,21 +401,20 @@ class Entry
  private:
    void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
-   QWeakPointer<Entry> m_parent;               //!< parent node in the tree
-   QList<QSharedPointer<Entry>>  m_sublist;    //!< entries that are children 
+   QWeakPointer<Entry> m_parent;               // parent node in the tree
+   QList<QSharedPointer<Entry>>  m_sublist;    // entries that are children
 
    Entry &operator=(const Entry &);
 };
 
 /** Wrapper for a node in the Entry tree.
  *
- *  Allows navigating through the Entry tree and load and storing Entry
- *  objects persistently to disk.
+ *  Allows navigating through the Entry tree to load and storing Entry objects persistently to disk
  */
 class EntryNav
 {
  public:
-   EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e);   
+   EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e);
    ~EntryNav();
 
    void addChild(QSharedPointer<EntryNav> e);
@@ -497,7 +479,7 @@ class EntryNav
    QString	    m_type;        //!< member type
    QString      m_name;        //!< member name
 
-   TagInfo     *m_tagInfo;     //!< tag file info   
+   TagInfo     *m_tagInfo;     //!< tag file info
    SrcLangExt   m_lang;        //!< programming language in which this entry was found
 
    QSharedPointer<FileDef> m_fileDef;

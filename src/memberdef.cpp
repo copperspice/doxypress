@@ -587,7 +587,7 @@ class MemberDefImpl
    QString enumBaseType;       // base type of the enum (C++11)
    int initLines;              // number of lines in the initializer
 
-   Entry::SpecifierFlags memSpec;  // The specifiers present for this member
+   Entry::Traits m_memberTraits;   // specifiers for this member   
 
    MemberType mtype;           // returns the kind of member
    int maxInitLines;           // when the initializer will be displayed
@@ -722,7 +722,8 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
    annScope    = false;
    annUsed     = false;
 
-   memSpec     = Entry::SpecifierFlags{};  
+   m_memberTraits = Entry::Traits{};   
+
    annEnumType = QSharedPointer<MemberDef>();
    groupAlias  = QSharedPointer<MemberDef>();
 
@@ -1871,8 +1872,8 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    bool docFilter = ( extractAll || ! documentation().isEmpty() || ! inbodyDocumentation().isEmpty() );
 
-   docFilter = ( docFilter ||  (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) );
-   docFilter = ( docFilter ||  (m_impl->mtype == MemberType_EnumValue && ! briefDescription().isEmpty() ) );
+   docFilter = ( docFilter || (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) );
+   docFilter = ( docFilter || (m_impl->mtype == MemberType_EnumValue && ! briefDescription().isEmpty() ) );
 
    // has brief docs, visible in detailed section or they are explicitly not shown in brief section
    bool temp_a = (! briefDescription().isEmpty() && (alwaysDetailedSec && (repeatBrief || ! briefMemberDesc) ) ); 
@@ -1881,11 +1882,11 @@ bool MemberDef::isDetailedSectionLinkable() const
    // has one or more documented arguments
    bool temp_c = ( m_impl->defArgList != 0 && m_impl->defArgList->hasDocumentation() );
 
-   // is an attribute or property - need to display tag
-   bool temp_d = (m_impl->memSpec.spec & (Entry::Attribute | Entry::Property)); 
-
-   docFilter = ( docFilter || temp_a || temp_b || temp_c || temp_d ||  Doxy_Globals::userComments); 
+   bool isAttribute = m_impl->m_memberTraits.hasTrait(Entry::Virtue::Attribute);
+   bool isProperty  = m_impl->m_memberTraits.hasTrait(Entry::Virtue::Property);
   
+   docFilter = ( docFilter || temp_a || temp_b || temp_c || (isAttribute || isProperty) || Doxy_Globals::userComments); 
+
 
    // not a global static or global statics should be extracted
    bool staticFilter = getClassDef() != 0 || ! isStatic() || extractStatic;
@@ -1900,7 +1901,7 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    // Step E: hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set       
    bool temp_e = (m_impl->type == "friend class" || m_impl->type == "friend struct" || m_impl->type == "friend union");
-   bool friendCompoundFilter = ( ! hideFriendCompound || ! isFriend() || ! temp_d );       
+   bool friendCompoundFilter = ( ! hideFriendCompound || ! isFriend() || ! (isAttribute || isProperty) );       
 
    bool result = ( docFilter && staticFilter && privateFilter && friendCompoundFilter && ! isHidden() );
   
@@ -4348,9 +4349,9 @@ int MemberDef::initializerLines() const
    return m_impl->initLines;
 }
 
-Entry::SpecifierFlags MemberDef::getMemberSpecifiers() const
+Entry::Traits MemberDef::getMemberTraits() const
 {
-   return m_impl->memSpec;
+   return m_impl->m_memberTraits;
 }
 
 QSharedPointer<ClassDef> MemberDef::getClassDef() const
@@ -4505,187 +4506,187 @@ bool MemberDef::isStatic() const
 
 bool MemberDef::isInline() const
 {
-   return (m_impl->memSpec.spec & Entry::Inline) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Inline);
 }
 
 bool MemberDef::isExplicit() const
 {
-   return (m_impl->memSpec.spec & Entry::Explicit) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Explicit);
 }
 
 bool MemberDef::isDeprecated() const
 {
-   return (m_impl->memSpec.spec & Entry::Deprecated) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Deprecated);   
 }
 
 bool MemberDef::isMutable() const
 {
-   return (m_impl->memSpec.spec & Entry::Mutable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Mutable);
 }
 
 bool MemberDef::isGettable() const
 {
-   return (m_impl->memSpec.spec & Entry::Gettable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Gettable);
 }
 
 bool MemberDef::isPrivateGettable() const
 {
-   return (m_impl->memSpec.spec & Entry::PrivateGettable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::PrivateGettable);
 }
 
 bool MemberDef::isProtectedGettable() const
 {
-   return (m_impl->memSpec.spec & Entry::ProtectedGettable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::ProtectedGettable);
 }
 
 bool MemberDef::isSettable() const
 {
-   return (m_impl->memSpec.spec & Entry::Settable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Settable);
 }
 
 bool MemberDef::isPrivateSettable() const
 {
-   return (m_impl->memSpec.spec & Entry::PrivateSettable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::PrivateSettable);
 }
 
 bool MemberDef::isProtectedSettable() const
 {
-   return (m_impl->memSpec.spec & Entry::ProtectedSettable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::ProtectedSettable);
 }
 
 bool MemberDef::isAddable() const
 {
-   return (m_impl->memSpec.spec & Entry::Addable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Addable);
 }
 
 bool MemberDef::isRemovable() const
 {
-   return (m_impl->memSpec.spec & Entry::Removable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Removable);
 }
 
 bool MemberDef::isRaisable() const
 {
-   return (m_impl->memSpec.spec & Entry::Raisable) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Raisable);
 }
 
 bool MemberDef::isReadable() const
 {
-   return m_impl->memSpec.m_isReadable;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Readable);
 }
 
 bool MemberDef::isWritable() const
 {
-   return m_impl->memSpec.m_isWritable;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Writable);
 }
 
 bool MemberDef::isNotify() const
 {
-   return m_impl->memSpec.m_isNotify;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Notify);
 }
 
 bool MemberDef::isReset() const
 {
-   return m_impl->memSpec.m_isReset;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Reset);
 }
 
 bool MemberDef::isRevision() const
 {
-   return m_impl->memSpec.m_isRevision;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Revision);
 }
 
 bool MemberDef::isDesignable() const
 {
-   return m_impl->memSpec.m_isDesignable;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Designable);
 }
 
 bool MemberDef::isScriptable() const
 {
-   return m_impl->memSpec.m_isScriptable;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Scriptable);
 }
 
 bool MemberDef::isStored() const
 {
-   return m_impl->memSpec.m_isStored;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Stored);
 }
 
 bool MemberDef::isUser() const
 {
-   return m_impl->memSpec.m_isUser;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::User);
 }
 
 bool MemberDef::isConstant() const
 {
-   return m_impl->memSpec.m_isConstant;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Constant);
 }
 
 bool MemberDef::isFinal() const
 {
-   return m_impl->memSpec.m_isFinal;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Final);
 }
 
 bool MemberDef::isNew() const
 {
-   return (m_impl->memSpec.spec & Entry::New) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::New);
 }
 
 bool MemberDef::isSealed() const
 {
-   return (m_impl->memSpec.spec & Entry::Sealed) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Sealed);
 }
 
 bool MemberDef::isOverride() const
 {
-   return (m_impl->memSpec.spec & Entry::Override) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Override);
 }
 
 bool MemberDef::isInitonly() const
 {
-   return (m_impl->memSpec.spec & Entry::Initonly) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Initonly);
 }
 
 bool MemberDef::isAbstract() const
 {
-   return (m_impl->memSpec.spec & Entry::Abstract) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Abstract);
 }
 
 bool MemberDef::isOptional() const
 {
-   return (m_impl->memSpec.spec & Entry::Optional) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Optional);
 }
 
 bool MemberDef::isRequired() const
 {
-   return (m_impl->memSpec.spec & Entry::Required) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Required);
 }
 
 bool MemberDef::isNonAtomic() const
 {
-   return (m_impl->memSpec.spec & Entry::NonAtomic) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::NonAtomic);
 }
 
 bool MemberDef::isCopy() const
 {
-   return (m_impl->memSpec.spec & Entry::Copy) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Copy);
 }
 
 bool MemberDef::isAssign() const
 {
-   return m_impl->memSpec.m_isAssign;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Assign);
 }
 
 bool MemberDef::isRetain() const
 {
-   return (m_impl->memSpec.spec & Entry::Retain) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Retain);
 }
 
 bool MemberDef::isWeak() const
 {
-   return (m_impl->memSpec.spec & Entry::Weak) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Weak);
 }
 
 bool MemberDef::isStrong() const
 {
-   return (m_impl->memSpec.spec & Entry::Strong) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Strong);
 }
 
 bool MemberDef::isStrongEnumValue() const
@@ -4695,77 +4696,77 @@ bool MemberDef::isStrongEnumValue() const
 
 bool MemberDef::isUnretained() const
 {
-   return (m_impl->memSpec.spec & Entry::Unretained) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Unretained);
 }
 
 bool MemberDef::isAlias() const
 {
-   return (m_impl->memSpec.spec & Entry::Alias) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Alias);
 }
 
 bool MemberDef::isDefault() const
 {
-   return (m_impl->memSpec.spec & Entry::Default) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Default);
 }
 
 bool MemberDef::isDelete() const
 {
-   return (m_impl->memSpec.spec & Entry::Delete) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Delete);
 }
 
 bool MemberDef::isNoExcept() const
 {
-   return (m_impl->memSpec.spec & Entry::NoExcept) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::NoExcept);
 }
 
 bool MemberDef::isAttribute() const
 {
-   return (m_impl->memSpec.spec & Entry::Attribute) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Attribute);
 }
 
 bool MemberDef::isUNOProperty() const
 {
-   return (m_impl->memSpec.spec & Entry::Property) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Property);
 }
 
 bool MemberDef::isReadonly() const
 {
-   return (m_impl->memSpec.spec & Entry::Readonly) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Readonly);
 }
 
 bool MemberDef::isBound() const
 {
-   return (m_impl->memSpec.spec & Entry::Bound) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Bound);
 }
 
 bool MemberDef::isConstrained() const
 {
-   return (m_impl->memSpec.spec & Entry::Constrained) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Constrained);
 }
 
 bool MemberDef::isTransient() const
 {
-   return (m_impl->memSpec.spec & Entry::Transient) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Transient);
 }
 
 bool MemberDef::isMaybeVoid() const
 {
-   return (m_impl->memSpec.spec & Entry::MaybeVoid) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::MaybeVoid);
 }
 
 bool MemberDef::isMaybeDefault() const
 {
-   return (m_impl->memSpec.spec & Entry::MaybeDefault) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::MaybeDefault);
 }
 
 bool MemberDef::isMaybeAmbiguous() const
 {
-   return (m_impl->memSpec.spec & Entry::MaybeAmbiguous) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::MaybeAmbiguous);
 }
 
 bool MemberDef::isPublished() const
 {
-   return (m_impl->memSpec.spec & Entry::Published) != 0;
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Published);
 }
 
 bool MemberDef::isImplementation() const
@@ -4967,14 +4968,14 @@ void MemberDef::setProtection(Protection p)
    m_isLinkableCached = 0;
 }
 
-void MemberDef::setMemberSpecifiers(Entry::SpecifierFlags spec)
+void MemberDef::setMemberTraits(Entry::Traits traits)
 {
-   m_impl->memSpec = spec;
+   m_impl->m_memberTraits = traits;
 }
 
-void MemberDef::mergeMemberSpecifiers(Entry::SpecifierFlags spec)
+void MemberDef::mergeMemberTraits(Entry::Traits traits)
 {
-   m_impl->memSpec|= spec;
+   m_impl->m_memberTraits |= traits;
 }
 
 void MemberDef::setBitfields(const QString &s)
@@ -5343,9 +5344,8 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
          
          }
 
-         mdec->mergeMemberSpecifiers(mdef->getMemberSpecifiers());
-         mdef->mergeMemberSpecifiers(mdec->getMemberSpecifiers());
-
+         mdec->mergeMemberTraits(mdef->getMemberTraits());
+         mdef->mergeMemberTraits(mdec->getMemberTraits());
 
          // copy group info.
          if (mdec->getGroupDef() == 0 && mdef->getGroupDef() != 0) {
@@ -5356,6 +5356,7 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
                               mdef->hasDocumentation(),
                               mdef
                              );
+
          } else if (mdef->getGroupDef() == 0 && mdec->getGroupDef() != 0) {
             mdef->setGroupDef(mdec->getGroupDef(),
                               mdec->getGroupPri(),
