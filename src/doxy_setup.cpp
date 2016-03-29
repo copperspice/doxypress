@@ -462,24 +462,28 @@ void readConfiguration(struct CommandLine cmdArgs)
          printf("Usage: doxypress [OPTIONS] [project file name]\n"); 
          printf("doxypress --help for more information\n\n");
 
-         fprintf(stderr, "No project file was specified, default file 'doxypress.json' was not found\n");          
-         Doxy_Work::stopDoxyPress();
+         printf("No project file was specified, default file 'doxypress.json' was not found\n");
+         printf("DoxyPress aborted\n");
+         exit(1);
+        
       }        
    }  
 
    QFileInfo fi(cmdArgs.configName);
 
    if (! fi.exists()) {  
-      err("Project file %s was not found\n", qPrintable(cmdArgs.configName));      
-      Doxy_Work::stopDoxyPress();
+      printf("Project file %s was not found\n", qPrintable(cmdArgs.configName));      
+      printf("DoxyPress aborted\n");
+      exit(1);
    }
   
    // step 1 
    if (! Config::parseConfig(cmdArgs.configName) ) {
-      fprintf(stderr, "\n\nA problem occured when parsing the project file.\n"
-                  "If this is a DoxyPress issue please submit a report to the developers at info@copperspice.com\n");
+      printf("\n\nA problem occured when parsing the project file.\n"
+             "If this is a DoxyPress issue please submit a report to the developers at info@copperspice.com\n");
 
-      Doxy_Work::stopDoxyPress();
+      printf("DoxyPress aborted\n");
+      exit(1);
    }
 
    // set for internal usage
