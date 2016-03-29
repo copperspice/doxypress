@@ -903,7 +903,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ol.startCodeFragment();
 
       if (! sameTu) {
-         ClangParser::instance()->start(getFilePath(), filesInSameTu);
+         ClangParser::instance()->start(getFilePath(), filesInSameTu, QSharedPointer<Entry>());
 
       } else {
          ClangParser::instance()->switchToFile(getFilePath());
@@ -913,7 +913,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ol.endCodeFragment();
 
    } else  {
-      // use lex and not clang
+      // use lex
    
       ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
@@ -944,7 +944,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
 
 void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
+   QSharedPointer<FileDef> self  = sharedFrom(this);
    static bool filterSourceFiles = Config::getBool("filter-source-files");
 
    DevNullCodeDocInterface devNullIntf;  
@@ -953,9 +953,10 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
    auto srcLang = getLanguage();
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
+      // use clang parser
  
       if (! sameTu) {
-         ClangParser::instance()->start(getFilePath(), filesInSameTu);
+         ClangParser::instance()->start(getFilePath(), filesInSameTu, QSharedPointer<Entry>());
 
       } else {
          ClangParser::instance()->switchToFile(getFilePath());
@@ -964,7 +965,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
       ClangParser::instance()->writeSources(devNullIntf, self);
 
    } else {
-      // use lex and not clang         
+      // use lex parser    
    
       ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
       pIntf->resetCodeParserState();

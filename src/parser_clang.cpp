@@ -26,6 +26,7 @@
 
 #include <config.h>
 #include <doxy_globals.h>
+#include <entry.h>
 #include <message.h>
 #include <outputgen.h>
 #include <qfileinfo.h>
@@ -498,7 +499,7 @@ static CXChildVisitResult visitor(CXCursor cursor, CXCursor parentCursor, CXClie
 
 
 // ** entry point
-void ClangParser::start(const QString &fileName, QStringList &includeFiles)
+void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSharedPointer<Entry> root)
 {
    static QStringList includePath = Config::getList("include-path");    
    static QStringList clangFlags  = Config::getList("clang-flags");

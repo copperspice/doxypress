@@ -24,6 +24,7 @@
 #include <clang-c/Documentation.h>
 
 class CodeOutputInterface;
+class Entry;
 class FileDef;
 
 class ClangParser
@@ -36,7 +37,7 @@ class ClangParser
 
    // fileName- name of the file to parse
    // filesInTranslationUnit- other files which are included by this file
-   void start(const QString &fileName, QStringList &includeFiles);
+   void start(const QString &fileName, QStringList &includeFiles, QSharedPointer<Entry> root);
 
    // Switch to another file within the translation unit
    // fileName - name of the file to switch to   

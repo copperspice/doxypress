@@ -62,6 +62,6 @@ extern void parsePythonCode(CodeOutputInterface &, const QString &, const QStrin
 
 extern void resetPythonCodeParserState();
 
-void pyScanFreeParser();
+void pyFreeParser();
 
 #endif

@@ -50,6 +50,6 @@ class CPPLanguageParser : public ParserInterface
    void parsePrototype(const QString &text) override;
 };
 
-void CPPScanFreeParser();
+void cstyleFreeParser();
 
 #endif
