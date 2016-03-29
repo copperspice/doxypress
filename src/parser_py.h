@@ -35,9 +35,8 @@ class PythonLanguageParser : public ParserInterface
 {
  public:
    virtual ~PythonLanguageParser() {}
-
-   void startTranslationUnit(const QString &) override {}
-   void finishTranslationUnit() {}
+   
+   void finishTranslationUnit() override {}
 
    void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                    enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;

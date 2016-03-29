@@ -39,19 +39,8 @@ class ParserInterface
 {
  public:
    virtual ~ParserInterface() {}
-
-   /** Starts processing a translation unit (source files + headers).
-    *  After this call parseInput() is called with sameTranslationUnit
-    *  set to false. If parseInput() returns additional include files,
-    *  these are also processed using parseInput() with
-    *  sameTranslationUnit set to true. After that
-    *  finishTranslationUnit() is called.
-    */
-   virtual void startTranslationUnit(const QString &fileName) = 0;
-
-   /** Called after all files in a translation unit have been
-    *  processed.
-    */
+  
+   // Called after all files in a translation unit have been processed   
    virtual void finishTranslationUnit() = 0;
 
    /** Parses a single input file with the goal to build an Entry tree.

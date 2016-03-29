@@ -28,11 +28,9 @@ QString markdownFileNameToId(const QString &fileName);
 class MarkdownFileParser : public ParserInterface
 {
  public:
-   virtual ~MarkdownFileParser()
-   {}
+   virtual ~MarkdownFileParser() {}
 
-   void startTranslationUnit(const QString &) override {}
-   void finishTranslationUnit() {}
+   void finishTranslationUnit() override {}
 
    void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry>root, 
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;

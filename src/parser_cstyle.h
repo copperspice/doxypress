@@ -21,18 +21,16 @@
 #include <parser_base.h>
 
 /** \brief C-like language parser using state-based lexical scanning.
- *
- *  This is the language parser for DoxyPress.  
- *  It supports C++ and various languages which are closely related to C++,
+ *  
+ *  Language parser for C++ and various languages which are closely related to C++
  *  such as C, C#, Objective-C, Java, PHP, and IDL.
  */
 class CPPLanguageParser : public ParserInterface
 {
  public:
    virtual ~CPPLanguageParser() {}
-
-   void startTranslationUnit(const QString &fileName) override;
-   void finishTranslationUnit() override;
+  
+   void finishTranslationUnit() override {};
 
    void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                    enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;

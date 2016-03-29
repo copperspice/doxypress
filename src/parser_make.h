@@ -30,8 +30,7 @@ class MakeFileParser : public ParserInterface
 {
    public:
       virtual ~MakeFileParser() {}
-   
-      void startTranslationUnit(const QString &) override {}
+    
       void finishTranslationUnit()  override {}
    
       void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
