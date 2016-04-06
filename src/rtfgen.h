@@ -119,11 +119,11 @@ class RTFGenerator : public OutputGenerator
    void startHtmlLink(const QString &url) override;
    void endHtmlLink();
 
-   void startTypewriter() {
+   void startTypewriter()  override {
       m_textStream << "{\\f2 ";
    }
 
-   void endTypewriter()   {
+   void endTypewriter()   override {
       m_textStream << "}";
    }
 

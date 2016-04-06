@@ -132,12 +132,13 @@ class LatexGenerator : public OutputGenerator
    void startHtmlLink(const QString &url) override;
    void endHtmlLink();
 
-   void startTypewriter() {
+   void startTypewriter()  override {
       m_textStream << "{\\ttfamily ";
    }
-   void endTypewriter()   {
+   void endTypewriter()    override {
       m_textStream << "}";
    }
+
    void startGroupHeader(int);
    void endGroupHeader(int);
    void startItemListItem() {

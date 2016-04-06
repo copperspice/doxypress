@@ -201,17 +201,13 @@ class BaseOutputDocInterface : public CodeOutputInterface
    virtual void endHtmlLink() = 0;
 
 
-   /*! Changes the text font to bold face. The bold section ends with
-    *  endBold()
-    */
+   /*! Changes the text font to bold face. The bold section ends with endBold() */
    virtual void startBold()      = 0;
 
    /*! End a section of text displayed in bold face. */
    virtual void endBold()        = 0;
 
-   /*! Changes the text font to fixed size. The section ends with
-    *  endTypewriter()
-    */
+   /*! Changes the text font to fixed size. The section ends with endTypewriter() */
    virtual void startTypewriter() = 0;
 
    /*! End a section of text displayed in typewriter style. */

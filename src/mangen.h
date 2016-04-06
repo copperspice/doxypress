@@ -122,15 +122,15 @@ class ManGenerator : public OutputGenerator
                      const SourceLinkInfo &) override {}
 
    void startTextLink(const QString &, const QString &) override {}
-   void endTextLink() override{}
+   void endTextLink() override {}
    void startHtmlLink(const QString &url) override;
    void endHtmlLink();
 
-   void startTypewriter() {
+   void startTypewriter()  override {
       m_textStream << "\\fC";
       firstCol = false;
    }
-   void endTypewriter()   {
+   void endTypewriter()   override {
       m_textStream << "\\fP";
       firstCol = false;
    }

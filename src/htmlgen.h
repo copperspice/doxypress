@@ -273,11 +273,11 @@ class HtmlGenerator : public OutputGenerator
       m_textStream << "</ul>" << endl;
    }
 
-   void startTypewriter() {
+   void startTypewriter() override {
       m_textStream << "<code>";
    }
 
-   void endTypewriter()   {
+   void endTypewriter()   override {
       m_textStream << "</code>";
    }
    

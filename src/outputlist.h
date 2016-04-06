@@ -232,11 +232,11 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeEndAnnoItem, name);
    }
 
-   void startTypewriter() {
+   void startTypewriter()  override {
       forall(&OutputGenerator::startTypewriter);
    }
 
-   void endTypewriter() {
+   void endTypewriter()  override {
       forall(&OutputGenerator::endTypewriter);
    }
 
@@ -248,8 +248,9 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endGroupHeader, extraLevels);
    }
 
-   //void writeListItem()
-   //{ forall(&OutputGenerator::writeListItem); }
+   // void writeListItem()
+   // { forall(&OutputGenerator::writeListItem); }
+
    void startItemListItem() {
       forall(&OutputGenerator::startItemListItem);
    }

@@ -1,0 +1,23 @@
+DoxyPress and DoxyPressApp are applications derived from Doxygen and DoxyWizard.
+The project file format was enhanced to use a JSON format for ease of use and
+maintainability. The lex parser for handling C++ is being phased out and libClang 
+will be used for all parsing and comment documentation. This will enable DoxyPress
+to parse future versions of C++ as they become available.
+
+Major enhancements include:
+
+ * Removed all Qt 2 classes and containers
+ * Redesigned to use value based containers instead of pointer based containers
+ * Enhanced the layout file to include several new sections
+ * Improved and corrected html output
+ * Added a new parser for makefiles
+ * Command line option to convert older project files
+ * DoxyPress links with the CopperSpice libraries
+ * Code reformatted and modified to use C++11 functionality and syntax 
+ * Updated to leverage variadic templates and shared pointers
+
+Full documentation: http://www.copperspice.com/docs/doxypress/index.html
+
+
+Website: copperspice.com
+Email: info@copperspice.com
