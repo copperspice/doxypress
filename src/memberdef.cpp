@@ -436,6 +436,13 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       ol.docify(" volatile");
    }
 
+   if (defArgList->refSpecifier == RefType::LValueRef) {
+      ol.docify(" &");
+
+   } else if (defArgList->refSpecifier == RefType::RValueRef) {
+      ol.docify(" &&");
+   }
+
    if (!defArgList->trailingReturnType.isEmpty()) {
       linkifyText(TextGeneratorOLImpl(ol), scopeDef,  md->getBodyDef(), md, defArgList->trailingReturnType, false );
    }

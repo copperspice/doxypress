@@ -757,6 +757,13 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << " volatile=\"yes\"";
       }
 
+      if (al && al->refSpecifier == RefType::LValueRef) {
+         t << " ref=\"lvalue\"";
+
+      } else if (al && al->refSpecifier == RefType::RValueRef) {
+         t << " ref=\"rvalue\"";
+      }
+
       t << " virt=\"";
       switch (md->virtualness()) {
          case Normal:

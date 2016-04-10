@@ -25,8 +25,11 @@
 /** Protection level of members */
 enum Protection   { Public, Protected, Private, Package };
 
-/** Virtualness of a member. */
-enum Specifier    { Normal, Virtual, Pure } ;
+/** Virtualness of a member */
+enum Specifier    { Normal, Virtual, Pure };
+
+/** Reference qualifier for a mehtod */
+enum RefType      { NoRef, LValueRef, RValueRef };
 
 /** Kind of method */
 enum MethodTypes  { Method, Signal, Slot, DCOP, Property, Event };
@@ -53,7 +56,8 @@ enum SrcLangExt {
    SrcLangExt_XML      = 0x04000,
    SrcLangExt_Tcl      = 0x08000,
    SrcLangExt_Markdown = 0x10000, 
-   SrcLangExt_Make     = 0x20000
+   SrcLangExt_Make     = 0x20000, 
+   SrcLangExt_Docs     = 0x40000,
 };
 
 /** Grouping info */

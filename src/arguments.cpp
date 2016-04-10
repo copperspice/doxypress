@@ -20,8 +20,7 @@
 #include <arguments.h>
 #include <marshal.h>
 
-/*! the argument list is documented if one of its arguments is documented
- */
+// the argument list is documented if one of its arguments is documented 
 bool ArgumentList::hasDocumentation() const
 {
    for (auto &item : *this)  {
@@ -40,13 +39,12 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return 0;   
+      return 0;
    }
 
    ArgumentList *result = new ArgumentList;
-
    assert(count < 1000000);
-  
+
    for (i = 0; i < count; i++) {
       Argument a;
 
@@ -65,6 +63,7 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
    result->constSpecifier     = unmarshalBool(s);
    result->volatileSpecifier  = unmarshalBool(s);
    result->pureSpecifier      = unmarshalBool(s);
+   result->refSpecifier       = static_cast<RefType>(unmarshalInt(s));
    result->trailingReturnType = unmarshalQString(s);
    result->isDeleted          = unmarshalBool(s);
 
@@ -72,9 +71,9 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
 }
 
 void ArgumentList::marshal(StorageIntf *s, const ArgumentList &argList)
-{     
-   marshalUInt(s, argList.count());    
-   
+{
+   marshalUInt(s, argList.count());
+
    for (auto &item : argList)  {
       marshalQString(s, item.attrib);
       marshalQString(s, item.type);
@@ -85,11 +84,12 @@ void ArgumentList::marshal(StorageIntf *s, const ArgumentList &argList)
       marshalQString(s, item.docs);
       marshalQString(s, item.typeConstraint);
    }
-      
-   marshalBool(s, argList.constSpecifier);
-   marshalBool(s, argList.volatileSpecifier);
-   marshalBool(s, argList.pureSpecifier);
+
+   marshalBool(s,    argList.constSpecifier);
+   marshalBool(s,    argList.volatileSpecifier);
+   marshalBool(s,    argList.pureSpecifier);
+   marshalInt(s,     argList.refSpecifier);
    marshalQString(s, argList.trailingReturnType);
-   marshalBool(s, argList.isDeleted);   
+   marshalBool(s,    argList.isDeleted);
 }
 

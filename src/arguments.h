@@ -21,14 +21,12 @@
 #include <QList>
 #include <QString>
 
+#include <types.h>
+
 class StorageIntf;
 
-/*! \brief This class contains the information about the argument of a
- *         function or template
- *
- */
-struct Argument {
-   /*! Construct a new argument. */
+// class contains the information about the argument of a function or template
+struct Argument {   
    Argument() {}
 
    /*! Copy an argument (does a deep copy of all strings) */
@@ -83,7 +81,8 @@ class ArgumentList : public QList<Argument>
 {
  public:
    /*! Creates an empty argument list */
-   ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false), isDeleted(false) 
+   ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false), 
+                  isDeleted(false), refSpecifier(RefType::NoRef) 
    {
    }
 
@@ -102,7 +101,9 @@ class ArgumentList : public QList<Argument>
    /*! Is this a pure virtual member? default: false */
    bool pureSpecifier;
 
-   /*! C++11 style Trailing return type? */
+   RefType refSpecifier;
+
+   /*! C++11 style Trailing return type */
    QString trailingReturnType;
 
    /*! method with =delete */

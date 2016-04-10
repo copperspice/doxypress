@@ -6248,6 +6248,7 @@ void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempA
    dst->constSpecifier     = src->constSpecifier;
    dst->volatileSpecifier  = src->volatileSpecifier;
    dst->pureSpecifier      = src->pureSpecifier;
+   dst->refSpecifier       = src->refSpecifier;
    dst->trailingReturnType = substituteTemplatesInString(srcTempArgLists, dstTempArgLists, funcTempArgs, src->trailingReturnType);
 }
 

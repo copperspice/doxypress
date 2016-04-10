@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -99,25 +99,25 @@ static void writeServerSearchBox(QTextStream &t, const QString &relPath, bool hi
 /// Clear a text block \a s from \a begin to \a end markers
 QString clearBlock(const QString &output, const QString &begin, const QString &end)
 {
-   QString retval = output;            
+   QString retval = output;
 
    while (true) {
       int beginPos = retval.indexOf(begin);
       int endPos   = retval.indexOf(end, beginPos);
-   
+
       if (beginPos == -1 || endPos == -1 ) {
          break;
       }
-   
+
       int len = (endPos + end.length()) - beginPos;
-      retval.replace(beginPos, len, ""); 
+      retval.replace(beginPos, len, "");
    }
 
-   return retval;     
+   return retval;
 }
 
 static QString selectBlock(const QString &s, const QString &name, bool enable)
-{  
+{
    const QString begin   = "<!--BEGIN " + name + "-->";
    const QString end     = "<!--END " + name + "-->";
 
@@ -157,9 +157,9 @@ static QString getSearchBox(bool serverSide, const QString &relPath, bool highli
 static QString removeEmptyLines(const QString &s)
 {
    QString retval;
-   QString line;  
-  
-   for (auto letter : s) {         
+   QString line;
+
+   for (auto letter : s) {
       line.append(letter);
 
       if (letter == '\n')  {
@@ -169,27 +169,27 @@ static QString removeEmptyLines(const QString &s)
          }
 
          line = "";
-       }    
+       }
    }
 
    if (line.trimmed() != "") {
       retval.append(line);
    }
-   
+
    return retval;
 }
 
-static QString substituteHtmlKeywords(const QString &output, const QString &title, 
+static QString substituteHtmlKeywords(const QString &output, const QString &title,
                   const QString &relPath = QString(), const QString &navPath = QString())
 {
-   // Build CSS/Javascript tags depending on treeview, search engine settings  
+   // Build CSS/Javascript tags depending on treeview, search engine settings
 
    QString generatedBy;
    QString treeViewCssJs;
    QString searchCssJs;
    QString searchBox;
    QString mathJaxJs;
-   
+
    static QString projectName    = Config::getString("project-name");
    static QString projectVersion = Config::getString("project-version");
    static QString projectBrief   = Config::getString("project-brief");
@@ -210,20 +210,20 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    static bool hasProjectLogo    = ! projectLogo.isEmpty();
 
    static bool titleArea = (hasProjectName || hasProjectBrief || hasProjectLogo || (disableIndex && searchEngine));
-    
+
    // always first
-   QString cssFile = "doxypress.css"; 
+   QString cssFile = "doxypress.css";
 
    QString extraCssText = "";
    static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
-   for (auto fileName : extraCssFile) {          
+   for (auto fileName : extraCssFile) {
 
       if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
 
          if (fi.exists()) {
-            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) + 
+            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) +
                   "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
          }
       }
@@ -270,7 +270,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
          searchCssJs += "<link rel=\"search\" href=\"" + relPath +
                         "search_opensearch.php?v=opensearch.xml\" "
                         "type=\"application/opensearchdescription+xml\" title=\"" +
-                        (hasProjectName ? projectName : "DoxyPress") + "\"/>";         
+                        (hasProjectName ? projectName : "DoxyPress") + "\"/>";
       }
       searchBox = getSearchBox(serverBasedSearch, relPath, false);
    }
@@ -292,9 +292,9 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
                   "    extensions: [\"tex2jax.js\"";
 
       const QStringList mathJaxExtensions = Config::getList("mathjax-extensions");
-     
+
       for (auto item : mathJaxExtensions) {
-         mathJaxJs += ", \"" + item + ".js\"";         
+         mathJaxJs += ", \"" + item + ".js\"";
       }
 
       if (mathJaxFormat.isEmpty()) {
@@ -329,7 +329,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    result = result.replace("$doxypressversion", versionString);
    result = result.replace("$doxygenversion",   versionString);      // ok
 
-   result = result.replace("$projectname",    convertToHtml(projectName));  
+   result = result.replace("$projectname",    convertToHtml(projectName));
    result = result.replace("$projectversion", convertToHtml(projectVersion));
    result = result.replace("$projectbrief",   convertToHtml(projectBrief));
    result = result.replace("$projectlogo",    stripPath(projectLogo));
@@ -364,7 +364,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 
 HtmlCodeGenerator::HtmlCodeGenerator(QTextStream &t, const QString &relPath)
    : m_col(0), m_relPath(relPath), m_streamX(t)
-{  
+{
 }
 
 void HtmlCodeGenerator::setRelativePath(const QString &path)
@@ -373,7 +373,7 @@ void HtmlCodeGenerator::setRelativePath(const QString &path)
 }
 
 void HtmlCodeGenerator::codify(const QString &str)
-{ 
+{
    if (str.isEmpty()) {
       return;
    }
@@ -381,10 +381,10 @@ void HtmlCodeGenerator::codify(const QString &str)
    static int tabSize = Config::getInt("tab-size");
    int spacesToNextTabStop;
 
-   bool isBackSlash = false;  
+   bool isBackSlash = false;
 
    for (auto c : str) {
-      
+
       switch (c.unicode()) {
 
          case '\t':
@@ -429,35 +429,35 @@ void HtmlCodeGenerator::codify(const QString &str)
 
          case '\\':
 
-           if (isBackSlash) { 
-              isBackSlash = false;    
+           if (isBackSlash) {
+              isBackSlash = false;
 
               m_streamX << "\\";
               m_col++;
-          
-            } else {  
-              isBackSlash = true;           
 
-            }                      
-           
+            } else {
+              isBackSlash = true;
+
+            }
+
             break;
 
          default:
             m_streamX << c;
             m_col++;
-            break;         
+            break;
       }
 
-      if (isBackSlash && c != '\\') { 
+      if (isBackSlash && c != '\\') {
          isBackSlash = false;
       }
    }
 }
 
 void HtmlCodeGenerator::docify(const QString &text)
-{       
-   bool isBackSlash = false;  
-  
+{
+   bool isBackSlash = false;
+
    for (auto c : text) {
 
       switch (c.unicode()) {
@@ -479,23 +479,23 @@ void HtmlCodeGenerator::docify(const QString &text)
 
          case '\\':
 
-            if (isBackSlash) { 
-              isBackSlash = false;    
+            if (isBackSlash) {
+              isBackSlash = false;
 
               m_streamX << "\\";
-          
-            } else {  
-              isBackSlash = true;           
 
-            }            
+            } else {
+              isBackSlash = true;
+
+            }
 
             break;
 
          default:
             m_streamX << c;
       }
-      
-      if (isBackSlash && c != '\\') { 
+
+      if (isBackSlash && c != '\\') {
          isBackSlash = false;
       }
    }
@@ -525,7 +525,7 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
 
 void HtmlCodeGenerator::writeCodeLink(const QString &ref, const QString &f, const QString &anchor,
                                       const QString &name, const QString &tooltip)
-{    
+{
    _writeCodeLink("code", ref, f, anchor, name, tooltip);
 }
 
@@ -564,7 +564,7 @@ void HtmlCodeGenerator::_writeCodeLink(const QString &className, const QString &
    m_col += name.length();
 }
 
-void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl, 
+void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl,
                                      const QString &desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo)
 {
    m_streamX << "<div class=\"ttc\" id=\"" << id << "\">";
@@ -597,10 +597,10 @@ void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docIn
    }
 
    if (! desc.isEmpty()) {
-      m_streamX << "<div class=\"ttdoc\">";   
+      m_streamX << "<div class=\"ttdoc\">";
 
       // desc is already HTML escaped but there are still < and > signs
-      docify(desc); 
+      docify(desc);
 
       m_streamX << "</div>";
    }
@@ -648,22 +648,22 @@ void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docIn
 
 
 void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
-{  
+{
    if (! hasLineNumbers) {
       m_streamX << "<div class=\"line\">";
    }
 
-   m_col = 0;   
+   m_col = 0;
 }
 
 void HtmlCodeGenerator::endCodeLine()
 {
-   m_streamX << "</div>";  
+   m_streamX << "</div>";
 }
 
 void HtmlCodeGenerator::startFontClass(const QString &s)
 {
-   m_streamX << "<span class=\"" << s << "\">";   
+   m_streamX << "<span class=\"" << s << "\">";
 }
 
 void HtmlCodeGenerator::endFontClass()
@@ -672,18 +672,18 @@ void HtmlCodeGenerator::endFontClass()
 }
 
 void HtmlCodeGenerator::writeCodeAnchor(const QString &anchor)
-{ 
-   m_streamX << "<a name=\"" << anchor << "\"></a>";   
+{
+   m_streamX << "<a name=\"" << anchor << "\"></a>";
 }
 
 HtmlGenerator::HtmlGenerator() : OutputGenerator()
 {
    m_dir = Config::getString("html-output");
-   m_emptySection = false; 
+   m_emptySection = false;
 }
 
 HtmlGenerator::~HtmlGenerator()
-{  
+{
 }
 
 void HtmlGenerator::init()
@@ -693,14 +693,14 @@ void HtmlGenerator::init()
    QDir d(dname);
 
    if (! d.exists() && ! d.mkdir(dname)) {
-      err("HTML Generator, unable to create output directory %s\n", qPrintable(dname));      
+      err("HTML Generator, unable to create output directory %s\n", qPrintable(dname));
       Doxy_Work::stopDoxyPress();
    }
-   
+
    QString htmlHeader = Config::getString("html-header");
 
    if (! htmlHeader.isEmpty()) {
-      g_header = fileToString(htmlHeader);      
+      g_header = fileToString(htmlHeader);
    } else {
       g_header = ResourceMgr::instance().getAsString("html/header.html");
    }
@@ -708,7 +708,7 @@ void HtmlGenerator::init()
    QString htmlFooter = Config::getString("html-footer");
 
    if (! htmlFooter.isEmpty()) {
-      g_footer = fileToString(htmlFooter);      
+      g_footer = fileToString(htmlFooter);
    } else {
       g_footer = ResourceMgr::instance().getAsString("html/footer.html");
    }
@@ -717,7 +717,7 @@ void HtmlGenerator::init()
       QString temp = Config::getString("mathjax-codefile");
 
       if (! temp.isEmpty()) {
-         g_mathjax_code = fileToString(temp);         
+         g_mathjax_code = fileToString(temp);
       }
    }
    createSubDirs(d);
@@ -730,7 +730,7 @@ void HtmlGenerator::init()
       mgr.copyResourceAs("html/svgpan.js", dname, "svgpan.js");
    }
 
-   QString fileName = dname + "/dynsections.js";   
+   QString fileName = dname + "/dynsections.js";
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
@@ -756,11 +756,11 @@ void HtmlGenerator::init()
 
       }
 
-   } else { 
+   } else {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
 
    }
-  
+
 }
 
 /// Additional initialization after indices have been created
@@ -784,14 +784,14 @@ void HtmlGenerator::writeTabData()
    mgr.copyResourceAs("html/open.luma",      dname, "open.png");
    mgr.copyResourceAs("html/bdwn.luma",      dname, "bdwn.png");
    mgr.copyResourceAs("html/sync_on.luma",   dname, "sync_on.png");
-   mgr.copyResourceAs("html/sync_off.luma",  dname, "sync_off.png");    
+   mgr.copyResourceAs("html/sync_off.luma",  dname, "sync_off.png");
    mgr.copyResourceAs("html/nav_g.png",      dname, "nav_g.png");
 }
 
 void HtmlGenerator::writeSearchData(const QString &dir)
 {
    static bool serverBasedSearch = Config::getBool("search-server-based");
-  
+
    ResourceMgr &mgr = ResourceMgr::instance();
 
    mgr.copyResourceAs("html/search_l.png", dir, "search_l.png");
@@ -823,7 +823,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
    if (f.open(QIODevice::WriteOnly)) {
 
       QString resData = mgr.getAsString("html/search.css");
-      
+
       if (! resData.isEmpty()) {
 
          QTextStream t(&f);
@@ -842,19 +842,19 @@ void HtmlGenerator::writeSearchData(const QString &dir)
       }
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error()); 
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
    }
 }
 
 void HtmlGenerator::writeStyleSheetFile(QFile &file)
 {
    QTextStream t(&file);
- 
+
    QString resData = ResourceMgr::instance().getAsString("html/doxypress.css");
 
-   if (resData.isEmpty()) { 
-      fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
-              "the developers at info@copperspice.com\n");        
+   if (resData.isEmpty()) {
+      fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to "
+              "the developers at info@copperspice.com\n");
 
    } else {
       resData.replace("$doxypressversion", versionString);
@@ -881,7 +881,7 @@ void HtmlGenerator::writeFooterFile(QFile &file)
 }
 
 void HtmlGenerator::startFile(const QString &name, const QString &, const QString &title)
-{   
+{
    QString fileName = name;
 
    m_lastTitle    = title;
@@ -892,9 +892,9 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    }
 
    startPlainFile(fileName);
-  
+
    m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath);
-  
+
    //
    Doxy_Globals::indexList->addIndexFile(fileName);
 
@@ -902,7 +902,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
 
    m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->" << endl;
-   
+
    static bool searchEngine = Config::getBool("html-search");
 
    if (searchEngine /*&& !generateTreeView*/) {
@@ -913,7 +913,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
 
       m_textStream << "</script>\n";
    }
-  
+
    m_sectionCount = 0;
 }
 
@@ -953,7 +953,7 @@ QString HtmlGenerator::writeLogoAsString(const QString &path)
    QString result;
 
    if (timeStamp) {
-      result += theTranslator->trGeneratedAt(dateToString(true), Config::getString("project-name")); 
+      result += theTranslator->trGeneratedAt(dateToString(true), Config::getString("project-name"));
 
    } else {
       result += theTranslator->trGeneratedBy();
@@ -1000,15 +1000,15 @@ void HtmlGenerator::endProjectNumber()
 }
 
 void HtmlGenerator::writeStyleInfo(int part)
-{   
+{
    if (part == 0) {
       // write default style sheet
-      startPlainFile("doxypress.css");       
+      startPlainFile("doxypress.css");
       QString resData = ResourceMgr::instance().getAsString("html/doxypress.css");
 
-      if (resData.isEmpty()) { 
-         fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to " 
-               "the developers at info@copperspice.com\n");        
+      if (resData.isEmpty()) {
+         fprintf(stderr, "\n\nIssue loading the default stylesheet file.\nPlease submit a bug report to "
+               "the developers at info@copperspice.com\n");
 
       } else {
          resData.replace("$doxypressversion", versionString);
@@ -1019,13 +1019,13 @@ void HtmlGenerator::writeStyleInfo(int part)
 
       endPlainFile();
 
-      Doxy_Globals::indexList->addStyleSheetFile("doxypress.css");     
+      Doxy_Globals::indexList->addStyleSheetFile("doxypress.css");
 
       // part two
       static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
       for (auto fileName : extraCssFile) {
-         
+
          if (! fileName.isEmpty()) {
             QFileInfo fi(fileName);
 
@@ -1077,7 +1077,7 @@ void HtmlGenerator::endIndexListItem()
 }
 
 void HtmlGenerator::startIndexItem(const QString &ref, const QString &f)
-{   
+{
    if (! ref.isEmpty() || ! f.isEmpty()) {
 
       if (! ref.isEmpty()) {
@@ -1101,7 +1101,7 @@ void HtmlGenerator::startIndexItem(const QString &ref, const QString &f)
 }
 
 void HtmlGenerator::endIndexItem(const QString &ref, const QString &f)
-{  
+{
    if (! ref.isEmpty() || ! f.isEmpty()) {
       m_textStream << "</a>";
 
@@ -1277,11 +1277,11 @@ void HtmlGenerator::docify(const QString &text)
 
 void HtmlGenerator::docify(const QString &text, bool inHtmlComment)
 {
-   bool isBackSlash = false;   
+   bool isBackSlash = false;
 
    for (auto c : text) {
 
-      switch (c.unicode()) {      
+      switch (c.unicode()) {
          case '<':
             m_textStream << "&lt;";
             break;
@@ -1307,22 +1307,22 @@ void HtmlGenerator::docify(const QString &text, bool inHtmlComment)
             break;
 
          case '\\':
-            if (isBackSlash) { 
-              isBackSlash = false;    
+            if (isBackSlash) {
+              isBackSlash = false;
 
               m_textStream << "\\\\";
-          
-            } else {  
-              isBackSlash = true;           
 
-            }            
+            } else {
+              isBackSlash = true;
+
+            }
             break;
 
          default:
             m_textStream << c;
       }
 
-      if (isBackSlash && c != '\\') { 
+      if (isBackSlash && c != '\\') {
          isBackSlash = false;
       }
 
@@ -1339,7 +1339,7 @@ void HtmlGenerator::writeChar(char c)
 }
 
 static void startSectionHeader(QTextStream &t_stream, const QString &relPath, int sectionCount)
-{ 
+{
    static bool dynamicSections = Config::getBool("html-dynamic-sections");
 
    if (dynamicSections) {
@@ -1546,7 +1546,7 @@ void HtmlGenerator::endMemberDescription()
 void HtmlGenerator::startMemberSections()
 {
    DBG_HTML(m_textStream << "<!-- startMemberSections -->" << endl)
-   m_emptySection = true; 
+   m_emptySection = true;
 
    // we postpone writing <table> until we actually
    // write a row to prevent empty tables, which
@@ -1939,7 +1939,7 @@ void HtmlGenerator::startIndent()
 }
 
 void HtmlGenerator::endIndent()
-{ 
+{
    m_textStream << endl << "</div>" << endl << "</div>" << endl;
 }
 
@@ -1948,7 +1948,7 @@ void HtmlGenerator::addIndexItem(const QString &, const QString &)
 }
 
 void HtmlGenerator::writeNonBreakableSpace(int n)
-{ 
+{
    for (int i = 0; i < n; i++) {
       m_textStream << "&#160;";
    }
@@ -2115,7 +2115,7 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
 {
    int count = 0;
 
-   for (auto entry : root->children()) {   
+   for (auto entry : root->children()) {
       if (entry->visible() && quickLinkVisible(entry->kind())) {
          count++;
       }
@@ -2123,8 +2123,8 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
 
    if (count > 0) { // at least one item is visible
       startQuickIndexList(t_stream, false);
-      
-      for (auto entry : root->children()) {  
+
+      for (auto entry : root->children()) {
          if (entry->visible() && quickLinkVisible(entry->kind())) {
             QString url = entry->url();
 
@@ -2143,29 +2143,29 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
 }
 
 
-static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath, LayoutNavEntry *hlEntry, 
+static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath, LayoutNavEntry *hlEntry,
                   LayoutNavEntry::Kind kind, bool highlightParent, bool highlightSearch)
 {
-   if (hlEntry->parent()) { 
+   if (hlEntry->parent()) {
       // first draw the tabs for the parent of hlEntry
       renderQuickLinksAsTabs(t_stream, relPath, hlEntry->parent(), kind, highlightParent, highlightSearch);
    }
 
    if (hlEntry->parent() && hlEntry->parent()->children().count() > 0) { // draw tabs for row containing hlEntry
      bool topLevel = hlEntry->parent()->parent() == 0;
-     int count = 0;    
+     int count = 0;
 
-      for (auto entry : hlEntry->parent()->children()) {  
+      for (auto entry : hlEntry->parent()->children()) {
          if (entry->visible() && quickLinkVisible(entry->kind())) {
             count++;
          }
       }
 
-      if (count > 0) { 
+      if (count > 0) {
          // at least one item is visible
          startQuickIndexList(t_stream, true, topLevel);
 
-         for (auto entry : hlEntry->parent()->children()) {  
+         for (auto entry : hlEntry->parent()->children()) {
             if (entry->visible() && quickLinkVisible(entry->kind())) {
                QString url = entry->url();
 
@@ -2208,7 +2208,7 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
    }
 }
 
-static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, HighlightedItem hli, 
+static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, HighlightedItem hli,
                   const QString &file, const QString &relPath)
 {
    LayoutNavEntry *root = LayoutDocManager::instance().rootNavEntry();
@@ -2217,7 +2217,7 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
 
    bool highlightParent = false;
 
-   switch (hli) { 
+   switch (hli) {
       // map HLI enums to LayoutNavEntry::Kind enums
 
       case HLI_Main:
@@ -2227,7 +2227,7 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
       case HLI_Modules:
          kind = LayoutNavEntry::Modules;
          break;
- 
+
       case HLI_Namespaces:
          kind = LayoutNavEntry::NamespaceList;
          altKind = LayoutNavEntry::Namespaces;
@@ -2314,14 +2314,14 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
          kind = altKind;
       }
 
-      if (! hlEntry) { 
+      if (! hlEntry) {
          // highlighted item not found in the index! -> just show the level 1 index...
          highlightParent = true;
          hlEntry = root->children().first();
 
          if (hlEntry == 0) {
             // argl, empty index
-            return; 
+            return;
          }
       }
 
@@ -2433,7 +2433,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << "</script>\n";
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(configFileName), cf.error()); 
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(configFileName), cf.error());
 
    }
 
@@ -2469,7 +2469,7 @@ void HtmlGenerator::writeSearchPage()
 
       // Write empty navigation path, to make footer connect properly
       if (generateTreeView) {
-         t_stream << "</div><!-- doc-contents -->\n";        
+         t_stream << "</div><!-- doc-contents -->\n";
       }
 
       writePageFooter(t_stream, "Search", QString(), QString());
@@ -2564,12 +2564,12 @@ void HtmlGenerator::writeExternalSearchPage()
 
       // add search mappings
       const QStringList searchMappings = Config::getList("search-mappings");
-     
-      for (auto mapLine : searchMappings) { 
-        
+
+      for (auto mapLine : searchMappings) {
+
          int eqPos = mapLine.indexOf('=');
 
-         if (eqPos != -1) { 
+         if (eqPos != -1) {
             // tag command contains a destination
 
             QString tagName  = mapLine.left(eqPos).trimmed();
@@ -2584,7 +2584,7 @@ void HtmlGenerator::writeExternalSearchPage()
                first = false;
             }
          }
-        
+
       }
 
       if (! first) {
@@ -2684,7 +2684,7 @@ void HtmlGenerator::endTitleHead(const QString &, const QString &)
 
 void HtmlGenerator::endHeaderSection()
 {
-   m_textStream << "  <div class=\"clear-floats\"></div>\n";  
+   m_textStream << "  <div class=\"clear-floats\"></div>\n";
    m_textStream << "</div><!--header-->" << endl;
 }
 
@@ -2760,7 +2760,7 @@ void HtmlGenerator::startLabels()
 
 void HtmlGenerator::writeLabel(const QString &l, bool)
 {
-   DBG_HTML(m_textStream << "<!-- writeLabel(" << l << ") -->" << endl;) 
+   DBG_HTML(m_textStream << "<!-- writeLabel(" << l << ") -->" << endl;)
    m_textStream << "<span class=\"mlabel\">" << l << "</span>";
 }
 
@@ -2770,7 +2770,7 @@ void HtmlGenerator::endLabels()
    m_textStream << "</span>";
 }
 
-void HtmlGenerator::writeInheritedSectionTitle(const QString &id, const QString &ref, const QString &file, const QString &anchor, 
+void HtmlGenerator::writeInheritedSectionTitle(const QString &id, const QString &ref, const QString &file, const QString &anchor,
                                                const QString &title, const QString &name)
 {
    DBG_HTML(m_textStream << "<!-- writeInheritedSectionTitle -->" << endl;)
