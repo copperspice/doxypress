@@ -163,7 +163,7 @@ static void writeMakeBat()
 
    QFile file(fileName);
 
-   bool generateBib = !Doxy_Globals::citeDict->isEmpty();
+   bool generateBib = ! Doxy_Globals::citeDict->isEmpty();
 
    if (! file.open(QIODevice::WriteOnly)) {
       err("Unable to open file %s for writing\n", qPrintable(fileName));
@@ -211,7 +211,9 @@ static void writeMakeBat()
       t << "gswin32c -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite "
         "-sOutputFile=refman.pdf -c save pop -f refman.ps\n";
 
-   } else { // use pdflatex
+   } else { 
+      // use pdflatex
+
       t << "pdflatex refman\n";
       t << "echo ----\n";
       t << mkidx_command << " refman.idx\n";
@@ -2267,7 +2269,7 @@ void LatexGenerator::writeLineNumber(const QString &ref, const QString &fileName
          QString lineAnchor;
 
          lineAnchor = QString("_l%05d").arg(len);
-         lineAnchor.prepend(m_sourceFileName);
+         lineAnchor.prepend(stripExtensionGeneral(m_sourceFileName, ".tex"));
        
          if (usePDFLatex && pdfHyperlinks) {
             m_textStream << "\\hypertarget{" << stripPath(lineAnchor) << "}{}";

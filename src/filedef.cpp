@@ -171,7 +171,6 @@ void FileDef::writeTagFile(QTextStream &tagFile)
       }
    }
      
-
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
       switch (lde->kind())  {
       

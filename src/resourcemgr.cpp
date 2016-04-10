@@ -161,7 +161,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
                QTextStream t(&f);
                QString data = replaceColorMarkers(resData);
 
-               if (fName == "navtree.css") {
+               if (fName.endsWith("navtree.css")) {
                   QString temp = QString::number(Config::getInt("treeview-width")) + "px";
                   t << substitute(data, "$width", temp);         
 

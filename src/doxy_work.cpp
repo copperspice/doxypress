@@ -1494,11 +1494,11 @@ void Doxy_Work::addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<Entr
       scope = stripAnonymousNamespaceScope(scope);
       scope += "::" + pd->name();
 
-      QSharedPointer<Definition> d = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope, 
+      QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope, 
                   QSharedPointer<FileDef>(), rootNav->tagInfo());
 
-      if (d) {
-         pd->setPageScope(d);
+      if (def) {
+         pd->setPageScope(def);
       }
    }
 }
@@ -1628,11 +1628,11 @@ void Doxy_Work::findGroupScope(QSharedPointer<EntryNav> rootNav)
          scope = stripAnonymousNamespaceScope(scope);
          scope += "::" + gd->name();
 
-         QSharedPointer<Definition> d = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope, 
+         QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope, 
                   QSharedPointer<FileDef>(), rootNav->tagInfo());
 
-         if (d) {
-            gd->setGroupScope(d);
+         if (def) {
+            gd->setGroupScope(def);
          }
       }
    }
@@ -2260,13 +2260,14 @@ void Doxy_Work::resolveClassNestingRelations()
          if (! cd->visited) {
             QString name = stripAnonymousNamespaceScope(cd->name());
 
-            // also add class to the correct structural context
-            QSharedPointer<Definition> d = findScopeFromQualifiedName(Doxy_Globals::globalScope, name, cd->getFileDef(), 0);
+            // add class to the correct structural context
+            QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, 
+                  name, cd->getFileDef(), nullptr);
 
-            if (d) {
-               d->addInnerCompound(cd);
+            if (def) {
+               def->addInnerCompound(cd);
 
-               cd->setOuterScope(d);
+               cd->setOuterScope(def);
                cd->visited = true;
 
                done = false;
@@ -2275,14 +2276,13 @@ void Doxy_Work::resolveClassNestingRelations()
       }
    }
 
-   //give warnings for unresolved compounds
+   // give warnings for unresolved compounds
    for (auto cd : *Doxy_Globals::classSDict) {
 
       if (! cd->visited) {
          QString name = stripAnonymousNamespaceScope(cd->name());
 
-         /// create the scope artificially
-         // anyway, so we can at least relate scopes properly.
+         /// create the scope artificially so we can at least relate scopes properly
 
          QSharedPointer<Definition> d = buildScopeFromQualifiedName(name, name.count("::"), cd->getLanguage(), 0);
 
@@ -2320,6 +2320,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
    cd->setBodyDef(templ->getBodyDef());
 
    cd->setOuterScope(rootCd->getOuterScope());
+
    if (rootCd->getOuterScope() != Doxy_Globals::globalScope) {
       rootCd->getOuterScope()->addInnerCompound(cd);
    }
@@ -2795,7 +2796,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
          // with the most inner scope and going to the most outer scope (i.e. file scope).
 
          QString name = substitute(root->name, ".", "::"); //Java/C# scope->internal
-         usingCd = getClass(name);
+         usingCd = getResolvedClass(nd, fd, name);
 
          if (usingCd == 0) {
             usingCd = Doxy_Globals::hiddenClasses->find(name);
@@ -7729,12 +7730,14 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
       if (cd && ! name.isEmpty()) { 
          // found an enum inside a compound        
+
          fd   = QSharedPointer<FileDef>();
          mnsd = Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
       } else if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') { 
-         // found enum inside namespace         
+         // found enum inside namespace       
+  
          mnsd = Doxy_Globals::functionNameSDict;
          isGlobal = true;
 
@@ -9352,8 +9355,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
                   QSharedPointer<FileDef> fd, QString fileName, enum ParserMode mode, QStringList &includedFiles)
 {   
    static bool clangParsing = Config::getBool("clang-parsing");
-   auto srcLang = fd->getLanguage(); 
-        
+          
    QString extension;
    int ei = fileName.lastIndexOf('.');
 
@@ -9366,6 +9368,8 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    QFileInfo fi(fileName);
    QString fileContents;
 
+   // broom - not completed if clangParsing, do not preprocess
+
    if (Config::getBool("enable-preprocessing") && parser->needsPreprocessing(extension)) {      
       msg("Processing %s\n", csPrintable(fileName));
 
@@ -9376,7 +9380,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       // no preprocessing
       msg("Reading %s\n", csPrintable(fileName));
       fileContents = readInputFile(fileName);
-
+ 
    }
 
    if (! fileContents.endsWith("\n")) {
@@ -9386,6 +9390,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    
    // convert multi-line C++ comments to C style comments
    QString convBuf = convertCppComments(fileContents, fileName);
+   auto srcLang    = fd->getLanguage(); 
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {   
       fd->getAllIncludeFilesRecursively(includedFiles);

@@ -83,7 +83,7 @@
       <events title=""/>
     </memberdef>
     <allmemberslink visible="yes"/>
-    <usedfiles visible="$SHOW-FILE-PAGE"/>
+    <usedfiles visible="$SHOW-USED-FILES"/>
     <authorsection visible="yes"/>
   </class>
 
