@@ -27,10 +27,9 @@ error.log
 
 test_build/*.log
 test_build/*.txt
-test_build/docbook
-test_build/html
-test_build/latex
-test_build/man
-test_build/perlmod
-test_build/rtf
-test_build/xml
+
+test_build/output_test
+test_build/output_clang
+
+test_doxy/output_clang
+test_doxy/output_test

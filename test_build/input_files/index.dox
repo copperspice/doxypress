@@ -13,15 +13,22 @@
 *************************************************************************/
 
 /*!
-\mainpage DoxyPress Test Build
+\mainpage DoxyPress Test
 
-The pages in the test suite are designed to test various new features of DoxyPress, 
-how to use some of the enhancements, corrected issues, and overall testing. If there
-are items which should be added to this test feel free to email the development team 
-for consideration. 
+The pages in this test suite are designed to test the features and capabilities of DoxyPress, 
+demonstrate how to use the enhancements, and show improvements in documentation. 
+
+If there are additional items which should you would like added to this test suite please
+email sample code to the development team .
+
 
 info@copperspice.com 
 
+
+Thank you, 
+
+Barbara & Ansel <br>
+Developers of DoxyPress
 
 
 */

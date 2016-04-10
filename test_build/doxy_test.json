@@ -7,7 +7,7 @@
         "allow-unicode-names": false,
         "always-detailed-sec": true,
         "auto-link": true,
-        "brief-member-desc": false,
+        "brief-member-desc": true,
         "built-in-stl-support": false,
         "case-sensitive-fname": false,
         "cpp-cli-support": false,
@@ -16,7 +16,7 @@
         "enabled-sections": [
             ""
         ],
-        "extract-all": false,
+        "extract-all": true,
         "extract-anon-namespaces": false,
         "extract-local-classes": true,
         "extract-local-methods": false,
@@ -45,7 +45,7 @@
         "inline-inherited-member": false,
         "inline-simple-struct": false,
         "internal-docs": false,
-        "javadoc-auto-brief": false,
+        "javadoc-auto-brief": true,
         "language-mapping": [
             ""
         ],
@@ -59,14 +59,14 @@
             ""
         ],
         "qt-auto-brief": true,
-        "repeat-brief": false,
+        "repeat-brief": true,
         "separate-member-pages": false,
         "short-names": false,
         "show-file-page": false,
         "show-grouped-members-inc": false,
         "show-include-files": true,
         "show-namespace-page": true,
-        "show-used-files": true,
+        "show-used-files": false,
         "sip-support": false,
         "sort-brief-docs": true,
         "sort-by-scope-name": false,
@@ -161,7 +161,7 @@
         "optimize-cplus": true,
         "optimize-fortran": false,
         "optimize-java": false,
-        "output-dir": ".",
+        "output-dir": "output_test",
         "output-language": "English",
         "strip-from-inc-path": [
             ""
@@ -169,7 +169,7 @@
         "strip-from-path": [
             ""
         ],
-        "tab-size": 4
+        "tab-size": 8
     },
     "index": {
         "alpha-index": true,
@@ -216,8 +216,7 @@
         ],
         "input-recursive": true,
         "input-source": [
-            "dox",
-            "dox2"
+            "input_files"
         ],
         "mdfile-mainpage": ""
     },
@@ -376,7 +375,7 @@
         ],
         "expand-only-predefined": true,
         "include-path": [
-            ""
+            "images"
         ],
         "include-patterns": [
             ""
@@ -396,7 +395,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.0"
+        "project-version": "1.2.2"
     },
     "source": {
         "clang-flags": [

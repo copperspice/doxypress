@@ -13,12 +13,12 @@
 *************************************************************************/
 
 /*!
-\page dash-test Dash Test
-Test the appearance of a dash in the in the documentation output.
+\page code-block-test Code Block Test
+Test the appearance of code blocks in the documentation output.
 
 
-<h3>Begin Test</h3>
-  
+<h3>Dash Test</h3>
+
 The first test is using an ampersand and ndash which looks like this: &ndash;&ndash;prefix
 
 The following is the ampersand and ndash text in a code block.
@@ -38,8 +38,53 @@ The following is what two plain dashs will look like in a code block.
 \endcode
 
 
+<br>
+
+
+<h3>Code Block Tilde Test</h3>
+
+Test the following code block. Current problem with the tilde being doubled. 
+
+
+\code
+class MyClass {
+
+   public:
+      MyInteger();
+      ~MyInteger();
+
+   private:
+      int d_intValue;
+
+
+   };
+\endcode
+
 
 <br>
+
+
+<h3>Code Block Indent Test</h3>
+
+Test the following code block. Investigate code indentation. 
+
+
+\code
+   for (auto index : myList) {   
+\endcode
+
+ 
+\code
+      std::cout << index;
+\endcode
+
+
+\code
+   }
+\endcode
+
+<br><br>
+
 
 */
 

@@ -18,16 +18,19 @@
 /// docs for testTabs
 class testTabs
 {
-   public:
-      /**
-      * 	Retrieves a list of integers.  ( tab parsing test, No issue found. )
-      * 	caller is responsible for deleting them
-      *
-      * @param myvar	some purpose or other
-      * @return list of integers
-      */
-      int* doSomething(long myvar) const;
+public:
+	/**
+	*	Retrieves the list of ints for id.
+	*	caller is responsible for deleting the container
+	*
+	* @param id	id
+	* @return list of ints
+	*/
+	int* doSomething(long id) const;
 
+
+   /** @brief This is a brief comment for hasABrief() */
+   void hasABrief(double foo);
 };
 
 /// docs for testFriend
@@ -36,7 +39,6 @@ class testFriend
    public:
       /// does this cause a warning about return types? No issue found.
       friend class myFriend;
-
 };
 
 /// docs for testTypeDef
@@ -60,7 +62,6 @@ class dotApple : public dotFruit
 {
    public:
       void chew();
-
 };
 
 
