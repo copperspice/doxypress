@@ -85,13 +85,13 @@ bool Config::parseConfig(const QString &fName)
 
    load_Defaults();
 
-   if (read_ProjectFile(fName)) {
+   if (! read_ProjectFile(fName)) {
       return false;
    }
 
    printf("**  Verify Project Configuration\n"); 
 
-   if (preVerify()) {
+   if (! preVerify()) {
       return false;
    }
 
@@ -100,7 +100,7 @@ bool Config::parseConfig(const QString &fName)
 
    initWarningFormat();   
    
-   if (verify()) {
+   if (! verify()) {
       return false;
    }
 
@@ -482,12 +482,12 @@ void Config::load_Defaults()
 }
 
 bool Config::read_ProjectFile(const QString &fName)
-{  
+{   
    // get existing json data
    QByteArray data = Config::json_ReadFile(fName);
 
    if (data.isEmpty()) {
-      fprintf(stderr, "%s project file could not be read or contained no data\n", qPrintable(fName) );
+      printf("Project file '%s' could not be read or contained no data\n", csPrintable(fName) );
       return false;
    }
    
@@ -495,8 +495,7 @@ bool Config::read_ProjectFile(const QString &fName)
    QJsonObject object = doc.object();
 
    int index;
-   bool isError = false;
-
+   
    // test json format
    int format;
    QJsonValue temp = object.value("doxypress-format");
@@ -510,10 +509,10 @@ bool Config::read_ProjectFile(const QString &fName)
    }
 
    if (format == 0)  {
-      fprintf(stderr, "Error: DoxyPress project file is using an older format.\n"
+      printf("DoxyPress project file is not a JSON format or is using an older project file format.\n"
          "Open your project file in DoxyPressApp, saving will automatically update the format.\n");
-      isError = true;
-      return isError;
+      
+      return false;
    }  
    
    QJsonObject topObj;
@@ -616,5 +615,5 @@ bool Config::read_ProjectFile(const QString &fName)
       }
    }
 
-   return isError;
+   return true;
 }

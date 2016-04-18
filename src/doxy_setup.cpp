@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -55,22 +55,22 @@
 #include <util.h>
 
 namespace Doxy_Setup {
-   QString getValue(QStringList::iterator &iter, QStringList::iterator end);    
+   QString getValue(QStringList::iterator &iter, QStringList::iterator end);
    void usage();
 }
 
 using namespace Doxy_Setup;
 
 enum Options {
-     INVALID,      
+     INVALID,
      BLANK_LAYOUT,
      BLANK_STYLE,
-     DEBUG_DUMP, 
+     DEBUG_DUMP,
      DEBUG_SYMBOLS,
-     DATETIME, 
-     HELP, 
-     OUTPUT_APP,                      
-     DVERSION,      
+     DATETIME,
+     HELP,
+     OUTPUT_APP,
+     DVERSION,
 };
 
 static QHash<QString, int>     s_extLookup;
@@ -78,7 +78,7 @@ static QHash<QString, QString> s_langMapping;
 
 void initDoxyPress()
 {
-   printf("\nInitialization\n"); 
+   printf("\nInitialization\n");
 
    const QString lang = portable_getenv("LC_ALL");
 
@@ -106,7 +106,7 @@ void initDoxyPress()
    Doxy_Globals::parserManager->registerParser("tcl",          new TclLanguageParser);
    Doxy_Globals::parserManager->registerParser("md",           new MarkdownFileParser);
    Doxy_Globals::parserManager->registerParser("make",         new MakeFileParser);
- 
+
    // register additional parsers here
    initDefaultLangMapping();
 
@@ -116,7 +116,7 @@ void initDoxyPress()
    initClassMemberIndices();
    initNamespaceMemberIndices();
    initFileMemberIndices();
- 
+
    Doxy_Globals::inputNameList     = new SortedList<QSharedPointer<FileNameList>>;
 
    Doxy_Globals::memberNameSDict   = new MemberNameSDict();
@@ -128,7 +128,7 @@ void initDoxyPress()
    Doxy_Globals::namespaceSDict    = new NamespaceSDict();
    Doxy_Globals::classSDict        = new ClassSDict(Config::getCase("sort-class-case-sensitive"));
 
-   Doxy_Globals::hiddenClasses     = new ClassSDict();  
+   Doxy_Globals::hiddenClasses     = new ClassSDict();
    Doxy_Globals::pageSDict         = new PageSDict();          // all doc pages
    Doxy_Globals::exampleSDict      = new PageSDict();          // all examples
 
@@ -164,55 +164,55 @@ void shutDownDoxyPress()
    //
    Doxy_Globals::symbolStorage->close();
 
-   QDir thisDir; 
+   QDir thisDir;
    if (! Doxy_Globals::tempA_FName.isEmpty()) {
       thisDir.remove(Doxy_Globals::tempA_FName);
    }
-   
+
    delete Doxy_Globals::sectionDict;
    delete Doxy_Globals::formulaNameDict;
    delete Doxy_Globals::formulaDict;
    delete Doxy_Globals::formulaList;
-   delete Doxy_Globals::indexList;   
+   delete Doxy_Globals::indexList;
    delete Doxy_Globals::inputNameDict;
    delete Doxy_Globals::includeNameDict;
    delete Doxy_Globals::exampleNameDict;
    delete Doxy_Globals::imageNameDict;
    delete Doxy_Globals::dotFileNameDict;
    delete Doxy_Globals::mscFileNameDict;
-   delete Doxy_Globals::diaFileNameDict;  
+   delete Doxy_Globals::diaFileNameDict;
    delete Doxy_Globals::pageSDict;
-   delete Doxy_Globals::exampleSDict;  
+   delete Doxy_Globals::exampleSDict;
    delete Doxy_Globals::xrefLists;
    delete Doxy_Globals::parserManager;
-   
+
    removePreProcessor();
 
    delete Doxy_Globals::g_outputList;
 
    Mappers::freeMappers();
    codeFreeScanner();
-   
+
    delete Doxy_Globals::inputNameList;
    delete Doxy_Globals::memberNameSDict;
    delete Doxy_Globals::functionNameSDict;
    delete Doxy_Globals::groupSDict;
    delete Doxy_Globals::classSDict;
    delete Doxy_Globals::hiddenClasses;
-   delete Doxy_Globals::namespaceSDict;   
+   delete Doxy_Globals::namespaceSDict;
 
    delete Doxy_Globals::symbolStorage;
 }
 
 // **
 struct CommandLine parseCommandLine(QStringList argList)
-{   
+{
    CommandLine cmdArgs;
 
    QMap<QString, Options> argMap;
    argMap.insert( "--b",       OUTPUT_APP      );
-   argMap.insert( "--d",       DEBUG_DUMP      );   
-   argMap.insert( "--h",       HELP            );  
+   argMap.insert( "--d",       DEBUG_DUMP      );
+   argMap.insert( "--h",       HELP            );
    argMap.insert( "--l",       BLANK_LAYOUT    );
    argMap.insert( "--m",       DEBUG_SYMBOLS   );
    argMap.insert( "--w",       BLANK_STYLE     );
@@ -223,45 +223,45 @@ struct CommandLine parseCommandLine(QStringList argList)
 
    QStringList dashList;
 
-   for (auto item : argList)   {      
+   for (auto item : argList)   {
       if (item.startsWith("--")) {
          dashList.append(item);
       }
    }
-   
+
    auto iter = argList.begin();
- 
-   for (auto item : dashList)   {    
+
+   for (auto item : dashList)   {
 
       Options value = INVALID;
-      
+
       if (argMap.contains(item)) {
          value = argMap.value(item);
          ++iter;
-      }  
-                
+      }
+
       switch (value) {
 
-         case INVALID:           
-            err("Option %s is invalid\n", qPrintable(item));             
-            Doxy_Work::stopDoxyPress();                  
-       
+         case INVALID:
+            err("Option %s is invalid\n", qPrintable(item));
+            Doxy_Work::stopDoxyPress();
+
          case BLANK_LAYOUT:
             cmdArgs.generateLayout = true;
             cmdArgs.layoutName = getValue(iter, argList.end());
-           
+
             if (cmdArgs.layoutName.isEmpty()) {
                cmdArgs.layoutName = "doxy_layout.xml";
             }
 
-            cmdArgs.generateDoxy = false; 
+            cmdArgs.generateDoxy = false;
             break;
 
          case BLANK_STYLE:
             cmdArgs.formatName = getValue(iter, argList.end());
 
             if (cmdArgs.formatName.isEmpty()) {
-               err("Option \"-w\" is missing format specifier rtf, html or latex\n");               
+               err("Option \"-w\" is missing format specifier rtf, html or latex\n");
                Doxy_Work::stopDoxyPress();
             }
 
@@ -278,7 +278,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                if (openOutputFile(cmdArgs.rtfExt, f)) {
                    RTFGenerator::writeExtensionsFile(f);
                }
-               f.close();                
+               f.close();
 
             } else if (cmdArgs.formatName == "rtf-style") {
                cmdArgs.rtfStyle = getValue(iter, argList.end());
@@ -352,7 +352,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
             } else if (cmdArgs.formatName == "latex-foot") {
               cmdArgs.latexFoot = getValue(iter, argList.end());
-   
+
                if (cmdArgs.latexFoot.isEmpty()) {
                   cmdArgs.latexFoot = "doxy_footer.latex";
                }
@@ -362,7 +362,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                   LatexGenerator::writeFooterFile(f);
                }
                f.close();
- 
+
 
             } else if (cmdArgs.formatName == "latex-style") {
               cmdArgs.latexStyle = getValue(iter, argList.end());
@@ -379,22 +379,22 @@ struct CommandLine parseCommandLine(QStringList argList)
 
 
             } else  {
-               err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));               
+               err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));
                Doxy_Work::stopDoxyPress();
 
             }
 
-            cmdArgs.generateDoxy = false; 
+            cmdArgs.generateDoxy = false;
             break;
 
          case DEBUG_DUMP:
             cmdArgs.debugLabel = getValue(iter, argList.end());
 
             if (cmdArgs.debugLabel.isEmpty() ) {
-               err("Option \"-d\" is missing a debug specifier\n");                       
+               err("Option \"-d\" is missing a debug specifier\n");
                Doxy_Work::stopDoxyPress();
             }
-           
+
             if (! Debug::setFlag(cmdArgs.debugLabel)) {
                err("Option \"-d\" has an unknown debug specifier: \"%s\".\n", csPrintable(cmdArgs.debugLabel));
                Doxy_Work::stopDoxyPress();
@@ -404,101 +404,96 @@ struct CommandLine parseCommandLine(QStringList argList)
 
          case DEBUG_SYMBOLS:
             Doxy_Globals::dumpGlossary = true;
-            break;              
-                  
+            break;
+
          case OUTPUT_APP:
             setvbuf(stdout, NULL, _IONBF, 0);
             setvbuf(stderr, NULL, _IONBF, 0);
-   
+
             Doxy_Globals::outputToApp = true;
             break;
 
-         case DATETIME:  
+         case DATETIME:
             cmdArgs.dateTimeStr = getValue(iter, argList.end());
             break;
 
-         case HELP:       
+         case HELP:
             usage();
-            exit(0);                    
+            exit(0);
 
          case DVERSION:
-            printf("\nDoxyPress Version: %s\n", versionString);   
-            printf("email: info@copperspice.com\n");         
+            printf("\nDoxyPress Version: %s\n", versionString);
+            printf("email: info@copperspice.com\n");
             exit(0);
-      }      
+      }
    }
 
    // is there anything left in the arguemnent list
    cmdArgs.configName = getValue(iter, argList.end());
- 
+
    return cmdArgs;
 }
 
 void readConfiguration(struct CommandLine cmdArgs)
-{      
+{
    // parse project file
-   printf("\nDoxyPress Version: %s\n\n", versionString);   
-      
+   printf("\nDoxyPress Version: %s\n\n", versionString);
+
    if (cmdArgs.generateLayout) {
-      writeDefaultLayoutFile(cmdArgs.layoutName);            
+      writeDefaultLayoutFile(cmdArgs.layoutName);
    }
 
-   if (! cmdArgs.generateDoxy) {            
-      exit(0);      
+   if (! cmdArgs.generateDoxy) {
+      exit(0);
    }
 
    if (cmdArgs.configName.isEmpty()) {
-   
-      for (auto item : QDir::current().entryList()) {          
+
+      for (auto item : QDir::current().entryList()) {
 
          if (item.compare("doxypress.json", Qt::CaseInsensitive) == 0) {
             cmdArgs.configName = item;
             break;
-         } 
+         }
       }
-     
+
       if (cmdArgs.configName.isEmpty()) {
-      
-         printf("Usage: doxypress [OPTIONS] [project file name]\n"); 
+
+         printf("Usage: doxypress [OPTIONS] [project file name]\n");
          printf("doxypress --help for more information\n\n");
 
-         printf("No project file was specified, default file 'doxypress.json' was not found\n");
-         printf("DoxyPress aborted\n");
+         printf("No project file was specified, default file 'doxypress.json' was not found\n\n");
          exit(1);
-        
-      }        
-   }  
+      }
+   }
 
    QFileInfo fi(cmdArgs.configName);
 
-   if (! fi.exists()) {  
-      printf("Project file %s was not found\n", qPrintable(cmdArgs.configName));      
-      printf("DoxyPress aborted\n");
+   if (! fi.exists()) {
+      printf("Project file %s was not found\n", qPrintable(cmdArgs.configName));
       exit(1);
    }
-  
-   // step 1 
-   if (! Config::parseConfig(cmdArgs.configName) ) {
-      printf("\n\nA problem occured when parsing the project file.\n"
-             "If this is a DoxyPress issue please submit a report to the developers at info@copperspice.com\n");
 
-      printf("DoxyPress aborted\n");
+   // step 1
+   if (! Config::parseConfig(cmdArgs.configName) ) {
+      printf("\n\nUnable to parse the project file, please veify the syntax. \n"
+             "For additional assistence submit a report to the developers.\nEmail: info@copperspice.com\n\n");
       exit(1);
    }
 
    // set for internal usage
    const QString dateTimeFormat = "yyyy/MM/dd HH:mm:ss";
 
-   if (cmdArgs.dateTimeStr.isEmpty()) {    
+   if (cmdArgs.dateTimeStr.isEmpty()) {
       QDateTime dt = QDateTime::currentDateTime();
       cmdArgs.dateTimeStr = dt.toString(dateTimeFormat);
-   } 
+   }
 
-   Doxy_Globals::dateTime = QDateTime::fromString(cmdArgs.dateTimeStr, dateTimeFormat);   
-        
+   Doxy_Globals::dateTime = QDateTime::fromString(cmdArgs.dateTimeStr, dateTimeFormat);
+
    // Perlmod path to the project file
    QFileInfo configFileInfo(cmdArgs.configName);
-   setPerlModDoxyfile(configFileInfo.absoluteFilePath());  
+   setPerlModDoxyfile(configFileInfo.absoluteFilePath());
 }
 
 QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator end)
@@ -507,8 +502,8 @@ QString Doxy_Setup::getValue(QStringList::iterator &iter, QStringList::iterator 
 
    if (iter == end) {
       // nothing
-      
-   } else {     
+
+   } else {
 
       if (! iter->startsWith("--")) {
          retval = *iter;
@@ -524,21 +519,21 @@ bool openOutputFile(const QString &outFile, QFile &f)
    bool fileOpened = false;
    bool writeToStdout = (outFile[0] == '-' && outFile[1] == '\0');
 
-   if (writeToStdout) { 
+   if (writeToStdout) {
       // write to stdout
       fileOpened = f.open(stdout, QIODevice::WriteOnly);
 
-   } else { 
+   } else {
       // write to file
       QFileInfo fi(outFile);
 
-      if (fi.exists()) { 
+      if (fi.exists()) {
          // create a backup
 
          QDir dir = fi.dir();
          QFileInfo backup(fi.fileName() + ".bak");
 
-         if (backup.exists()) { 
+         if (backup.exists()) {
             // remove existing backup
             dir.remove(backup.fileName());
          }
@@ -553,84 +548,72 @@ bool openOutputFile(const QString &outFile, QFile &f)
    return fileOpened;
 }
 
-static struct Lang2ExtMap {
-   const char *langName;
-   const char *parserName;
-   SrcLangExt parserId;
-}
-
-s_lang2extMap[] = {
-   //  language       parser           parser option
-   { "idl",          "c",             SrcLangExt_IDL      },
-   { "java",         "c",             SrcLangExt_Java     },
-   { "csharp",       "c",             SrcLangExt_CSharp   },
-   { "d",            "c",             SrcLangExt_D        },
-   { "php",          "c",             SrcLangExt_PHP      },
-   { "objective-c",  "c",             SrcLangExt_ObjC     },
-   { "c",            "c",             SrcLangExt_Cpp      },
-   { "c++",          "c",             SrcLangExt_Cpp      },  
-   { "fortran",      "fortran",       SrcLangExt_Fortran  },
-   { "fortranfree",  "fortranfree",   SrcLangExt_Fortran  },
-   { "fortranfixed", "fortranfixed",  SrcLangExt_Fortran  },
-   { "javascript",   "c",             SrcLangExt_JS       },
-   { "python",       "python",        SrcLangExt_Python   },    
-   { "md",           "md",            SrcLangExt_Markdown },
-   { "make",         "make",          SrcLangExt_Make     },
-   { "tcl",          "tcl",           SrcLangExt_Tcl      },   
-   { 0,              0,               (SrcLangExt)0       }
+struct LangStruct {
+   const QString parserName;
+   SrcLangExt    parserEnum;
 };
 
-bool updateLanguageMapping(const QString &extension, const QString &language, bool userParser)
+//  language       parser Name        parser enum
+static std::map<QString, LangStruct> s_languageTable{
+
+   { "idl",          {"c",            SrcLangExt_IDL      }},
+   { "java",         {"c",            SrcLangExt_Java     }},
+   { "csharp",       {"c",            SrcLangExt_CSharp   }},
+   { "d",            {"c",            SrcLangExt_D        }},
+   { "docs",         {"c",            SrcLangExt_Docs     }},
+   { "php",          {"c",            SrcLangExt_PHP      }},
+   { "objective-c",  {"c",            SrcLangExt_ObjC     }},
+   { "c",            {"c",            SrcLangExt_Cpp      }},
+   { "c++",          {"c",            SrcLangExt_Cpp      }},
+   { "fortran",      {"fortran",      SrcLangExt_Fortran  }},
+   { "fortranfree",  {"fortranfree",  SrcLangExt_Fortran  }},
+   { "fortranfixed", {"fortranfixed", SrcLangExt_Fortran  }},
+   { "javascript",   {"c",            SrcLangExt_JS       }},
+   { "python",       {"python",       SrcLangExt_Python   }},
+   { "md",           {"md",           SrcLangExt_Markdown }},
+   { "make",         {"make",         SrcLangExt_Make     }},
+   { "tcl",          {"tcl",          SrcLangExt_Tcl      }}
+};
+
+bool updateLanguageMapping(const QString &ext, const QString &language, bool userParser)
 {
-   if (extension.isEmpty()) {
+   if (ext.isEmpty()) {
       return false;
    }
 
    // part 1
-   const Lang2ExtMap *p = s_lang2extMap;
    QString searchName = language.toLower();
+   auto i = s_languageTable.find(searchName);
 
-   while (p->langName) {
-      if (searchName == p->langName) {
-         break;
-      }
-
-      p++;
-   }
-
-   if (! p->langName) {
+   if (i == s_languageTable.end()) {
       return false;
    }
 
    // found the language
-   SrcLangExt parserId = p->parserId;
+   SrcLangExt parserId = i->second.parserEnum;
 
    // part 2
-   QString searchExt = extension.toLower();
+   QString extension = ext.toLower();
 
-   if (searchExt.at(0) != '.') {
-      searchExt.prepend(".");
+   if (! extension.startsWith('.')) {
+      extension.prepend(".");
    }
-    
-   // update or adds the new values 
-   s_extLookup.insert(searchExt, parserId);
 
-   if (userParser) {   
+   s_extLookup.insert(extension, parserId);
+
+   if (userParser) {
       // user parsers will be registered later
-      s_langMapping.insert(searchExt, p->parserName); 
+      s_langMapping.insert(extension, i->second.parserName);
 
-   } else {
-
-      if (! Doxy_Globals::parserManager->registerExtension(searchExt, p->parserName)) {   
-         msg("Unable to assign extension %-4s (%-7s), currently unsupported\n",
-             csPrintable(searchExt), csPrintable(p->parserName));
-      }
+   } else if (! Doxy_Globals::parserManager->registerExtension(extension, i->second.parserName)) {
+      msg("Unable to assign extension %-4s (%-7s), currently unsupported\n",
+                  csPrintable(extension), csPrintable(i->second.parserName));
    }
-   
+
    return true;
 }
 
-void initUserLangMapping() 
+void initUserLangMapping()
 {
    for (auto item = s_langMapping.begin(); item != s_langMapping.end(); item++)  {
 
@@ -638,7 +621,7 @@ void initUserLangMapping()
       QString parserName = item.value();
 
       if (! Doxy_Globals::parserManager->registerExtension(extension, parserName)) {
-   
+
          msg("Unable to assign extension %-4s (%-7s), currently unsupported\n",
              csPrintable(extension), csPrintable(parserName));
       }
@@ -648,9 +631,9 @@ void initUserLangMapping()
 void initDefaultLangMapping()
 {
    //                   extension      parser id
-   updateLanguageMapping(".dox",      "c");
-   updateLanguageMapping(".txt",      "c");
-   updateLanguageMapping(".doc",      "c");
+   updateLanguageMapping(".dox",      "docs");
+   updateLanguageMapping(".txt",      "docs");
+   updateLanguageMapping(".doc",      "docs");
    updateLanguageMapping(".c",        "c");
    updateLanguageMapping(".C",        "c");
    updateLanguageMapping(".cc",       "c");
@@ -674,7 +657,7 @@ void initDefaultLangMapping()
    updateLanguageMapping(".ddl",      "idl");
    updateLanguageMapping(".odl",      "idl");
    updateLanguageMapping(".java",     "java");
-   updateLanguageMapping(".as",       "javascript"); 
+   updateLanguageMapping(".as",       "javascript");
    updateLanguageMapping(".js",       "javascript");
    updateLanguageMapping(".cs",       "csharp");
    updateLanguageMapping(".d",        "d");
@@ -690,8 +673,8 @@ void initDefaultLangMapping()
    updateLanguageMapping(".pyw",      "python");
    updateLanguageMapping(".f",        "fortran");
    updateLanguageMapping(".for",      "fortran");
-   updateLanguageMapping(".f90",      "fortran");  
-   updateLanguageMapping(".tcl",      "tcl");  
+   updateLanguageMapping(".f90",      "fortran");
+   updateLanguageMapping(".tcl",      "tcl");
    updateLanguageMapping(".md",       "md");
    updateLanguageMapping(".markdown", "md");
    updateLanguageMapping(".mk",       "make");
@@ -701,21 +684,21 @@ SrcLangExt getLanguageFromFileName(const QString &fileName)
 {
    int i = fileName.lastIndexOf('.');
 
-   if (i != -1) { 
-      // name has an extension
-      QString extStr = fileName.right(fileName.length() - i).toLower();
+   if (i != -1) {
+      // get the filename extension
+      QString key = fileName.right(fileName.length() - i).toLower();
 
-      if (! extStr.isEmpty()) { 
-         // non-empty extension
-         auto pVal = s_extLookup.find(extStr);
+      if (! key.isEmpty()) {
+         // s_extLookUp data obtained from initDefaultLangMapping, and user mapping
+         auto i = s_extLookup.find(key);
 
-         if (pVal != s_extLookup.end() ) { 
-            // listed extension           
-            return (SrcLangExt) * pVal;
+         if (i != s_extLookup.end() ) {
+            // listed extension
+            return (SrcLangExt) *i;
          }
       }
    }
-   
+
    return SrcLangExt_Cpp; // not listed => assume C language
 }
 
@@ -723,15 +706,15 @@ void Doxy_Setup::usage()
 {
    printf("\n");
    printf("DoxyPress: Version %s\n", versionString);
-   printf("email: info@copperspice.com\n");  
+   printf("email: info@copperspice.com\n");
 
-   printf("\n"); 
-   printf("Usage: doxypess [OPTIONS] [project file name]\n"); 
-      
+   printf("\n");
+   printf("Usage: doxypess [OPTIONS] [project file name]\n");
+
    printf("\n\n");
    printf("Generate default layout file to configure documentation:\n");
    printf("   --l  [layout file name]   Default is `doxy_layout.xml'\n");
-     
+
    printf("\n");
    printf("Generate a style sheet file for RTF, HTML or Latex:\n");
    printf("   RTF:    --w  rtf-ext     [extensions file name]   Default is 'doxy_ext.rtf'\n");
@@ -741,12 +724,12 @@ void Doxy_Setup::usage()
    printf("   HTML:   --w  html-head   [header file name]       Default is 'doxy_header.html'\n");
    printf("   HTML:   --w  html-foot   [footer file name]       Default is 'doxy_footer.html'\n");
    printf("   HTML:   --w  html-style  [styleSheet file name]   Default is 'doxypress.css'\n");
-  
+
    printf("\n");
    printf("   LaTeX:  --w  latex-head  [header file name]       Default is 'doxy_header.latex'\n");
    printf("   LaTeX:  --w  latex-foot  [footer file name]       Default is 'doxy_footer.latex'\n");
    printf("   LaTeX:  --w  latex-style [styleSheet file name]   Default is 'doxypress.sty'\n");
-   
+
    printf("\n\n");
    printf("Use the passed date/time value in the documentation:\n");
    printf("   --dt  [date_time]   Default is current date and time\n");
@@ -755,11 +738,11 @@ void Doxy_Setup::usage()
    printf("Other Options:\n");
    printf("   --h  display usage\n");
    printf("   --v  display version\n");
-    
+
    printf("\n");
-   printf("   --b  output for DoxyPressApp\n"); 
-   printf("   --m  dump symbol map\n");  
+   printf("   --b  output for DoxyPressApp\n");
+   printf("   --m  dump symbol map\n");
    printf("   --d  <level> enable one or more of the following debug levels\n");
 
-   Debug::printFlags();  
+   Debug::printFlags();
 }

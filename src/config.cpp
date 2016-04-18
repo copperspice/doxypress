@@ -122,7 +122,7 @@ void Config::setList(const QString &name, const QStringList &data)
 // **
 bool Config::preVerify()
 { 
-   bool isError = false;
+   bool isOk = true;
 
    // **
    if (! (Config::getBool("generate-html") || Config::getBool("generate-latex") || Config::getBool("generate-man") ||
@@ -130,7 +130,7 @@ bool Config::preVerify()
           Config::getBool("generate-docbook")) && Config::getString("generate-tagfile").isEmpty() ) {
 
       err("No output format was indicated, at least one output format must be selected\n");
-      isError = true;
+      isOk = false;
    }
  
    // ** 
@@ -142,7 +142,7 @@ bool Config::preVerify()
 
       if (! fi.exists()) {
          err("HTML Header file `%s' does not exist\n", qPrintable(headerFile)); 
-         isError = true;
+         isOk = false;
       }
    }
 
@@ -155,7 +155,7 @@ bool Config::preVerify()
 
       if (! fi.exists()) {
          err("HTML Footer file `%s' does not exist\n", qPrintable(footerFile));
-         isError = true;
+         isOk = false;
       }
    }
 
@@ -168,7 +168,7 @@ bool Config::preVerify()
 
       if (! fi.exists()) {
          err("LaTeX Header file `%s' does not exist\n", qPrintable(latexHeaderFile));
-         isError = true;
+         isOk = false;
       }
    }
 
@@ -181,7 +181,7 @@ bool Config::preVerify()
 
       if (! fi.exists()) {
          err("LaTeX Footer file `%s' does not exist\n", qPrintable(latexFooterFile));
-         isError = true;
+         isOk = false;
       }
    }
 
@@ -195,22 +195,21 @@ bool Config::preVerify()
 
          if (! fi.exists()) {
             err("MathJax Codefile file `%s' does not exist\n", qPrintable(mathJaxCodefile));
-            isError = true;
+            isOk = false;
          }
       }
    }
 
-   return isError;
+   return isOk;
 }
 
 bool Config::verify()
 {
-
    const static QStringList s_dotImageFormat = getDotImageFormat();
    const static QStringList s_mathJaxFormat  = getMathJaxFormat();
    const static QStringList s_latexPaperType = getLatexPaperType();
 
-   bool isError = false;
+   bool isOk = true;
  
    // ** project
    auto iterString = m_cfgString.find("output-dir");
@@ -227,7 +226,7 @@ bool Config::verify()
 
          if (! dir.mkdir(outputDirectory)) {
             err("Output directory `%s' does not exist and can not be created\n", csPrintable(outputDirectory));            
-            isError = true;
+            isOk = false;
 
          } else {
             msg("Output directory `%s' was automatically created\n", csPrintable(outputDirectory));
@@ -340,7 +339,7 @@ bool Config::verify()
 
       if (! fi.exists()) {
          err("Layout file `%s' does not exist\n", qPrintable(layoutFileName));
-         isError = true;
+         isOk = false;
       }
    }
 
@@ -904,7 +903,7 @@ bool Config::verify()
    // read namespace aliases, store in a dictionary
    loadRenameNS_Aliases();
 
-   return isError;
+   return isOk;
 }
 
 void Config::cleanUpPaths(QStringList &str)
