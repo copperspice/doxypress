@@ -63,6 +63,7 @@ class Debug
 void err(const QString &fmt, ...);
 void msg(const QString &fmt, ...);
 void warnMsg(const QString &fmt, ...);
+void warnAll(const QString &fmt, ...);
 
 void initWarningFormat();
 

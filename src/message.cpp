@@ -219,25 +219,13 @@ void err(const QString &fmt, ...)
 
 void msg(const QString &fmt, ...)
 {
-   if (! Config::getBool("quiet")) {
-    
+   if (! Config::getBool("quiet")) {    
       va_list args;
       va_start(args, fmt);
 
       vfprintf(stdout, fmt.toUtf8().constData(), args);
       va_end(args);
    }
-}
-
-void warnMsg(const QString &fmt, ...)
-{
-   va_list args;
-   va_start(args, fmt);
-
-   static const QString temp = "Warning: ";      
-   vfprintf(warnFile, (temp + fmt).toUtf8().constData(), args);
-
-   va_end(args);
 }
 
 void warn(const QString &file, int line, const QString &fmt, ...)
@@ -251,10 +239,31 @@ void warn(const QString &file, int line, const QString &fmt, ...)
    va_end(args);
 }
 
-void va_warn(const QString &file, int line, const QString &fmt, va_list args)
+void warnMsg(const QString &fmt, ...)
 {
-   static const QString warning_str = "Warning: ";
-   warn_internal("warnings", file, line, warning_str, fmt, args);
+   va_list args;
+   va_start(args, fmt);
+
+   static const QString temp = "Warning: ";      
+   vfprintf(warnFile, (temp + fmt).toUtf8().constData(), args);
+
+   va_end(args);
+}
+
+void warnAll(const QString &fmt, ...)
+{
+   va_list args;
+   va_start(args, fmt);
+
+   const QString temp = "\nWarning: " + fmt + "\n";   
+   vfprintf(warnFile, temp.toUtf8().constData(), args);
+
+   // ensure the message is sent to the warning log file
+   if (warnFile != stderr) {   
+      vfprintf(stderr, temp.toUtf8().constData(), args);
+   }
+
+   va_end(args);
 }
 
 void warn_simple(const QString &file, int line, const QString &text)
@@ -267,15 +276,10 @@ void warn_simple(const QString &file, int line, const QString &text)
    format_warn(file, line, warning_str + text);
 }
 
-void warn_undoc(const QString &file, int line, const QString &fmt, ...)
-{   
-   va_list args;
-   va_start(args, fmt);
-
+void va_warn(const QString &file, int line, const QString &fmt, va_list args)
+{
    static const QString warning_str = "Warning: ";
-   warn_internal("warn-undoc", file, line, warning_str, fmt, args);
-
-   va_end(args);
+   warn_internal("warnings", file, line, warning_str, fmt, args);
 }
 
 void warn_doc_error(const QString &file, int line, const QString &fmt, ...)
@@ -285,6 +289,17 @@ void warn_doc_error(const QString &file, int line, const QString &fmt, ...)
 
    static QString warning_str = "Warning: ";
    warn_internal("warn-doc-error", file, line, warning_str, fmt, args);
+
+   va_end(args);
+}
+
+void warn_undoc(const QString &file, int line, const QString &fmt, ...)
+{   
+   va_list args;
+   va_start(args, fmt);
+
+   static const QString warning_str = "Warning: ";
+   warn_internal("warn-undoc", file, line, warning_str, fmt, args);
 
    va_end(args);
 }
@@ -329,4 +344,3 @@ void printlex(int dbg, bool enter, const QString &lexName, const QString &fileNa
       }
    }
 }
-

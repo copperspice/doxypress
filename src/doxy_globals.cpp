@@ -34,13 +34,13 @@ QSharedPointer<GenericsSDict> Doxy_Globals::genericsDict;
 
 GroupSDict      *Doxy_Globals::groupSDict        = 0;
 
-FileNameDict    *Doxy_Globals::diaFileNameDict = 0;     // dia files
-FileNameDict    *Doxy_Globals::dotFileNameDict = 0;     // dot files
-FileNameDict    *Doxy_Globals::exampleNameDict = 0;     // examples
-FileNameDict    *Doxy_Globals::inputNameDict   = 0;
-FileNameDict    *Doxy_Globals::includeNameDict = 0;     // include names
-FileNameDict    *Doxy_Globals::imageNameDict   = 0;     // images
-FileNameDict    *Doxy_Globals::mscFileNameDict = 0;     // msc files
+FileNameDict    *Doxy_Globals::diaFileNameDict   = 0;     // dia files
+FileNameDict    *Doxy_Globals::dotFileNameDict   = 0;     // dot files
+FileNameDict    *Doxy_Globals::exampleNameDict   = 0;     // examples
+FileNameDict    *Doxy_Globals::inputNameDict     = 0;
+FileNameDict    *Doxy_Globals::includeNameDict   = 0;     // include names
+FileNameDict    *Doxy_Globals::imageNameDict     = 0;     // images
+FileNameDict    *Doxy_Globals::mscFileNameDict   = 0;     // msc files
 
 MemberNameSDict *Doxy_Globals::memberNameSDict   = 0;
 MemberNameSDict *Doxy_Globals::functionNameSDict = 0;

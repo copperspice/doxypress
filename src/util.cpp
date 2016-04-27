@@ -1581,7 +1581,7 @@ QString removeRedundantWhiteSpace(const QString &str)
       c = str.at(i);
 
       // search for "const"
-      if (csp < 6 && c == constScope[csp] && (csp > 0 || i == 0  || ! isId(str.at(i - 1))) ) {
+      if (csp < 6 && c == constScope[csp] && (csp > 0 || i == 0 || ! isId(str.at(i - 1))) ) {
          // character matches substring "const", if it is the first character, the previous may not be a digit
          csp++;
 
@@ -1591,7 +1591,7 @@ QString removeRedundantWhiteSpace(const QString &str)
       }
 
       // search for "virtual"
-      if (vsp < 8 && c == virtualScope[vsp] && (vsp > 0 || i == 0  || ! isId(str.at(i - 1))) ) {
+      if (vsp < 8 && c == virtualScope[vsp] && (vsp > 0 || i == 0 || ! isId(str.at(i - 1))) ) {
          // character matches substring "virtual", it is the first character, the previous may not be a digit
          vsp++;
 
@@ -1732,7 +1732,7 @@ QString removeRedundantWhiteSpace(const QString &str)
                // avoid splitting operator* and operator->* and operator&
                retval += ' ';
 
-            } else if (c == '&' && (str.at(i-1) == ' ' || str.at(i-1) == ')') ) {
+            } else if (c == '&' && i > 0 && (str.at(i-1) == ' ' || str.at(i-1) == ')') ) {
                retval += ' ';
 
             }
@@ -2353,15 +2353,22 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
 
    } else {
       // read from file
+      static const QDir configDir = Config::getConfigDir();
+
       QFileInfo fi(name);
 
+      if (! fi.isAbsolute() )  {
+         QString oldDir = QDir::currentPath();
+         fi = QFileInfo(configDir, name);
+      }
+
       if (! fi.exists() || ! fi.isFile()) {
-         err("Unable to find file `%s'\n", qPrintable(name));
+         err("Unable to find file '%s'\n", csPrintable(fi.absoluteFilePath()));
          return "";
       }
 
       QString fileContents;
-      isFileOpened = readInputFile(name, fileContents, filter, isSourceCode);
+      isFileOpened = readInputFile(fi.absoluteFilePath(), fileContents, filter, isSourceCode);
 
       if (isFileOpened) {
          int s = fileContents.size();
@@ -2375,7 +2382,7 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
    }
 
    if (! isFileOpened) {
-      err("Unable to open file `%s' for reading\n", qPrintable(name));
+      err("Unable to open file `%s' for reading\n", csPrintable(name));
    }
 
    return "";
@@ -3017,7 +3024,8 @@ QString getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<Fi
 
    QString resolvedType = resolveTypeDef(d, templSpec);
 
-   if (! resolvedType.isEmpty()) { // not known as a typedef either
+   if (! resolvedType.isEmpty()) {
+      // not known as a typedef either
       templSpec = resolvedType;
    }
 
@@ -3187,7 +3195,7 @@ static QString extractCanonicalType(QSharedPointer<Definition> def, QSharedPoint
          canType += ct;
       }
 
-      if (!templSpec.isEmpty())  {
+      if (! templSpec.isEmpty())  {
          // if we did not use up the templSpec already (i.e. type is not a template specialization)
          // then resolve any identifiers inside
 
@@ -3271,7 +3279,6 @@ static bool matchArgument2(QSharedPointer<Definition> srcScope, QSharedPointer<F
       srcA->canType = extractCanonicalArgType(srcScope, srcFileScope, srcA);
    }
 
-
    if (dstA->canType.isEmpty()) {
       dstA->canType = extractCanonicalArgType(dstScope, dstFileScope, dstA);
    }
@@ -3288,7 +3295,7 @@ static bool matchArgument2(QSharedPointer<Definition> srcScope, QSharedPointer<F
 
 // algorithm for argument matching
 bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, ArgumentList *srcAl,
-                     QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, ArgumentList *dstAl, bool checkCV )
+                     QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, ArgumentList *dstAl, bool checkCV)
 {
    assert(srcScope != 0 && dstScope != 0);
 
@@ -3362,6 +3369,7 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 
       ++item;
    }
+
 
    DOX_MATCH
    return true; // all arguments match
@@ -6971,7 +6979,7 @@ void stackTrace()
 #endif
 }
 
-//! read a file name \a fileName and optionally filter and transcode it
+//! read a file name \a fileName
 QString readInputFile(const QString &fileName)
 {
    QString retval;
@@ -6980,7 +6988,7 @@ QString readInputFile(const QString &fileName)
    return retval;
 }
 
-//! read a file name \a fileName and optionally filter and transcode it
+//! read a file name \a fileName
 bool readInputFile(const QString &fileName, QString &fileContents, bool filter, bool isSourceCode)
 {
    int size = 0;

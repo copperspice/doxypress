@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -28,48 +28,48 @@
 
 bool Config::getBool(const QString &name)
 {
-   bool retval   = false;  
+   bool retval   = false;
    auto hashIter = m_cfgBool.find(name);
 
     if (hashIter != m_cfgBool.end()) {
       retval = hashIter.value().value;
 
-   } else { 
+   } else {
       fprintf(stderr, "Warning: %s was not retrieved from the project bool table\n", qPrintable(name) );
-       
-   }   
-  
+
+   }
+
    return retval;
 }
 
 QString Config::getEnum(const QString &name)
 {
-   QString retval;   
+   QString retval;
    auto hashIter = m_cfgEnum.find(name);
 
     if (hashIter != m_cfgEnum.end()) {
       retval = hashIter.value().value;
 
-   } else { 
+   } else {
       fprintf(stderr, "Warning: %s was not retrieved from the project enum table\n", qPrintable(name) );
-   
-   }   
+
+   }
 
    return retval;
 }
 
 int Config::getInt(const QString &name)
 {
-   int retval    = 0;   
+   int retval    = 0;
    auto hashIter = m_cfgInt.find(name);
 
     if (hashIter != m_cfgInt.end()) {
       retval = hashIter.value().value;
 
-   } else { 
+   } else {
       fprintf(stderr, "Warning: %s was not retrieved from the project integer table\n", qPrintable(name) );
-   
-   }   
+
+   }
 
    return retval;
 }
@@ -82,11 +82,11 @@ QStringList Config::getList(const QString &name)
     if (hashIter != m_cfgList.end()) {
       retval = hashIter.value().value;
 
-   } else { 
+   } else {
       fprintf(stderr, "Warning: %s was not retrieved from the project list table\n", qPrintable(name) );
-   
-   }   
-  
+
+   }
+
    return retval;
 }
 
@@ -98,30 +98,59 @@ QString Config::getString(const QString &name)
     if (hashIter != m_cfgString.end()) {
       retval = hashIter.value().value;
 
-   } else { 
+   } else {
       fprintf(stderr, "Warning: %s was not retrieved from the project string table\n", qPrintable(name) );
-   
-   }   
-  
+
+   }
+
    return retval;
 }
 
 // update project data
 void Config::setBool(const QString &name, bool data)
 {
-   auto hashBool = m_cfgBool.find(name);     
+   auto hashBool = m_cfgBool.find(name);
    hashBool.value().value = data;
 }
 
 void Config::setList(const QString &name, const QStringList &data)
 {
-   auto hashIter = m_cfgList.find(name);     
+   auto hashIter = m_cfgList.find(name);
    hashIter.value().value = data;
 }
 
 // **
+void Config::msgVerify()
+{
+   // ** messages
+   auto iterString    = m_cfgString.find("warn-format");
+   QString warnFormat = iterString.value().value.trimmed();
+
+   if (warnFormat.isEmpty()) {
+      warnFormat = "$file:$line $text";
+
+   } else {
+      if (warnFormat.indexOf("$file") == -1) {
+         warnMsg("WARN FORMAT does not contain $file\n");
+      }
+
+      if (warnFormat.indexOf("$line") == -1) {
+         warnMsg("WARN FORMAT does not contain $line\n");
+      }
+
+      if (warnFormat.indexOf("$text") == -1) {
+         warnMsg("WARN FORMAT foes not contain $text\n");
+      }
+   }
+
+   iterString.value().value = warnFormat;
+
+   // set up messages
+   initWarningFormat();
+}
+
 bool Config::preVerify()
-{ 
+{
    bool isOk = true;
 
    // **
@@ -132,8 +161,8 @@ bool Config::preVerify()
       err("No output format was indicated, at least one output format must be selected\n");
       isOk = false;
    }
- 
-   // ** 
+
+   // **
    auto iterString = m_cfgString.find("html-header");
    QString headerFile = iterString.value().value;
 
@@ -141,12 +170,12 @@ bool Config::preVerify()
       QFileInfo fi(headerFile);
 
       if (! fi.exists()) {
-         err("HTML Header file `%s' does not exist\n", qPrintable(headerFile)); 
+         err("HTML Header file `%s' does not exist\n", qPrintable(headerFile));
          isOk = false;
       }
    }
 
-   // ** 
+   // **
    iterString = m_cfgString.find("html-footer");
    QString footerFile = iterString.value().value;
 
@@ -185,9 +214,9 @@ bool Config::preVerify()
       }
    }
 
-   // **   
+   // **
    if (Config::getBool("use-mathjax")) {
-      iterString = m_cfgString.find("mathjax-codefile");   
+      iterString = m_cfgString.find("mathjax-codefile");
       QString mathJaxCodefile = iterString.value().value;
 
       if (! mathJaxCodefile.isEmpty()) {
@@ -200,6 +229,11 @@ bool Config::preVerify()
       }
    }
 
+   // ** temporary
+   if (Config::getBool("clang-parsing")) {
+      warnAll("Clang parsing is currently under development, some aspects may not be enabled");
+   }
+
    return isOk;
 }
 
@@ -210,14 +244,14 @@ bool Config::verify()
    const static QStringList s_latexPaperType = getLatexPaperType();
 
    bool isOk = true;
- 
+
    // ** project
    auto iterString = m_cfgString.find("output-dir");
    QString outputDirectory = iterString.value().value;
 
    if (outputDirectory.isEmpty()) {
        outputDirectory = QDir::currentPath();
-   
+
    } else {
       QDir dir(outputDirectory);
 
@@ -225,7 +259,7 @@ bool Config::verify()
          dir.setPath(QDir::currentPath());
 
          if (! dir.mkdir(outputDirectory)) {
-            err("Output directory `%s' does not exist and can not be created\n", csPrintable(outputDirectory));            
+            err("Output directory `%s' does not exist and can not be created\n", csPrintable(outputDirectory));
             isOk = false;
 
          } else {
@@ -247,7 +281,7 @@ bool Config::verify()
    QString outputLanguage = iterEnum.value().value;
 
    if (outputLanguage.isEmpty()) {
-      warn_uncond("Output language %s was not specified, using English\n", qPrintable(outputLanguage));      
+      warn_uncond("Output language %s was not specified, using English\n", qPrintable(outputLanguage));
       outputLanguage = "English";
    }
 
@@ -257,19 +291,19 @@ bool Config::verify()
    // **
    auto iterList = m_cfgList.find("abbreviate-brief");
    QStringList abbreviatebrief = iterList.value().value;
- 
+
    if (abbreviatebrief.isEmpty()) {
      abbreviatebrief = getAbbreviateBrief();
-    
+
      iterList.value().value = abbreviatebrief;
    }
 
 
-   // ** 
+   // **
    iterList = m_cfgList.find("strip-from-path");
    QStringList stripFromPath = iterList.value().value;
-  
-   if (stripFromPath.isEmpty()) {       
+
+   if (stripFromPath.isEmpty()) {
       stripFromPath.append(QDir::currentPath() + "/");
 
    } else {
@@ -280,7 +314,7 @@ bool Config::verify()
    iterList.value().value = stripFromPath;
 
 
-   // ** 
+   // **
    iterList = m_cfgList.find("strip-from-inc-path");
    QStringList stripFromIncPath = iterList.value().value;
 
@@ -290,26 +324,26 @@ bool Config::verify()
    iterList.value().value = stripFromIncPath;
 
 
-   // ** 
+   // **
    iterList = m_cfgList.find("aliases");
    QStringList aliasList = iterList.value().value;
- 
+
    for (auto alias: aliasList) {
       QRegExp re1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");               // alias without argument
       QRegExp re2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*=");   // alias with argument
-      
+
       alias = alias.trimmed();
 
       if (! (re1.indexIn(alias) == 0 || re2.indexIn(alias) == 0)) {
          err("Alias format: `%s' \n is invalid, use \"name=value\" or \"name{n}=value\", where n "
                   "is the number of arguments\n\n", qPrintable(alias));
-      }      
+      }
    }
 
-   // ** 
+   // **
    const QStringList extMaps = Config::getList("language-mapping");
-  
-   for (auto mapStr : extMaps) { 
+
+   for (auto mapStr : extMaps) {
       int i = mapStr.indexOf('=');
 
       if (i != -1) {
@@ -317,24 +351,24 @@ bool Config::verify()
          QString language  = mapStr.mid(i + 1).trimmed().toLower();
 
          if (! updateLanguageMapping(extension, language, true)) {
-            err("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n", 
+            err("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n",
                   qPrintable(extension), qPrintable(language));
 
          } else {
-            msg("Adding custom extension mapping: .%s, will be treated as language %s\n", 
+            msg("Adding custom extension mapping: .%s, will be treated as language %s\n",
                   qPrintable(extension), qPrintable(language));
          }
       }
    }
 
-   // **  build                                                 
+   // **  build
    iterString = m_cfgString.find("layout-file");
    QString layoutFileName = iterString.value().value;
 
    if (layoutFileName.isEmpty()) {
-      layoutFileName = "doxy_layout.xml";  
-    
-   } else { 
+      layoutFileName = "doxy_layout.xml";
+
+   } else {
       QFileInfo fi(layoutFileName);
 
       if (! fi.exists()) {
@@ -346,31 +380,7 @@ bool Config::verify()
    iterString.value().value = layoutFileName;
 
 
-   // ** messages
-   iterString = m_cfgString.find("warn-format");
-   QString warnFormat = iterString.value().value.trimmed();
-
-   if (warnFormat.isEmpty()) {
-      warnFormat = "$file:$line $text";
-
-   } else {
-      if (warnFormat.indexOf("$file") == -1) {
-         warnMsg("WARN FORMAT does not contain $file\n");
-      }
-
-      if (warnFormat.indexOf("$line") == -1) {
-         warnMsg("WARN FORMAT does not contain $line\n");
-      }
-
-      if (warnFormat.indexOf("$text") == -1) {
-         warnMsg("WARN FORMAT foes not contain $text\n");
-      }
-   }
-
-   iterString.value().value = warnFormat;
-
-
-   // ** input                                            
+   // ** input
    iterList = m_cfgList.find("input-source");
    QStringList inputSource = iterList.value().value;
 
@@ -378,27 +388,27 @@ bool Config::verify()
       // use current dir as the default
       inputSource.append(QDir::currentPath());
 
-   } else {    
+   } else {
 
       for (auto item : inputSource) {
          QFileInfo fi(item.trimmed());
 
          if (! fi.exists()) {
             warnMsg("INPUT SOURCE `%s' does not exist\n", qPrintable(item));
-         }         
+         }
       }
    }
    iterList.value().value = inputSource;
 
-   // **   
+   // **
    iterList = m_cfgList.find("example-patterns");
    QStringList examplePatterns = iterList.value().value;
 
    if (examplePatterns.isEmpty()) {
       // add one
-      examplePatterns.append("*");   
-      
-      iterList.value().value = examplePatterns;   
+      examplePatterns.append("*");
+
+      iterList.value().value = examplePatterns;
    }
 
    // **
@@ -407,7 +417,7 @@ bool Config::verify()
 
    if (inputPatterns.isEmpty()) {
       inputPatterns = getFilePatterns();
-      iterList.value().value = inputPatterns;   
+      iterList.value().value = inputPatterns;
    }
 
 
@@ -417,11 +427,11 @@ bool Config::verify()
 
    if (suffixSource.isEmpty()) {
       suffixSource = getSuffixSource();
-      iterList.value().value = suffixSource;   
+      iterList.value().value = suffixSource;
 
    } else  {
 
-      for (auto &item: suffixSource) {      
+      for (auto &item: suffixSource) {
           item = item.trimmed();
 
           if (item.startsWith('.')) {
@@ -429,7 +439,7 @@ bool Config::verify()
           }
       }
 
-      iterList.value().value = suffixSource;  
+      iterList.value().value = suffixSource;
    }
 
    iterList = m_cfgList.find("suffix-header-navtree");
@@ -437,11 +447,11 @@ bool Config::verify()
 
    if (suffixHeader.isEmpty()) {
       suffixHeader = getSuffixHeader();
-      iterList.value().value = suffixHeader;   
+      iterList.value().value = suffixHeader;
 
    } else  {
 
-      for (auto &item: suffixHeader) {      
+      for (auto &item: suffixHeader) {
           item = item.trimmed();
 
           if (item.startsWith('.')) {
@@ -449,7 +459,7 @@ bool Config::verify()
           }
       }
 
-      iterList.value().value = suffixHeader;  
+      iterList.value().value = suffixHeader;
    }
 
    iterList = m_cfgList.find("suffix-exclude-navtree");
@@ -457,11 +467,11 @@ bool Config::verify()
 
    if (suffixExclude.isEmpty()) {
       suffixExclude = getSuffixExclude();
-      iterList.value().value = suffixExclude;   
+      iterList.value().value = suffixExclude;
 
    } else  {
 
-      for (auto &item: suffixExclude) {      
+      for (auto &item: suffixExclude) {
           item = item.trimmed();
 
           if (item.startsWith('.')) {
@@ -469,7 +479,7 @@ bool Config::verify()
           }
       }
 
-      iterList.value().value = suffixExclude;  
+      iterList.value().value = suffixExclude;
    }
 
 
@@ -477,22 +487,22 @@ bool Config::verify()
    iterList = m_cfgList.find("include-path");
    QStringList includePath = iterList.value().value;
 
-   for (auto item : includePath) {   
+   for (auto item : includePath) {
       QFileInfo fi(item.trimmed());
 
       if (fi.exists()) {
-         addSearchDir(fi.absoluteFilePath());   
+         addSearchDir(fi.absoluteFilePath());
 
       } else {
          warnMsg("INCLUDE PATH `%s' does not exist\n", qPrintable(item));
 
-      }          
+      }
    }
    iterList.value().value = includePath;
 
 
-   // ** dot    
-   iterEnum = m_cfgEnum.find("dot-image-format");             
+   // ** dot
+   iterEnum = m_cfgEnum.find("dot-image-format");
    QString dotImageFormat = iterEnum.value().value;
 
    dotImageFormat = dotImageFormat.trimmed();
@@ -511,9 +521,9 @@ bool Config::verify()
       dotImageFormat = dotImageFormat.replace( QRegExp(":.*"), "");
    }
 
-   iterEnum.value().value = dotImageFormat;   
+   iterEnum.value().value = dotImageFormat;
 
-   // 
+   //
    iterString = m_cfgString.find("mscgen-path");
    QString mscgenPath = iterString.value().value;
 
@@ -531,7 +541,7 @@ bool Config::verify()
 
       iterString.value().value = mscgenPath;
    }
-  
+
 
    // **
    iterString = m_cfgString.find("dia-path");
@@ -547,11 +557,11 @@ bool Config::verify()
       } else {
          diaPath = dp.absolutePath() + "/";
 
-      }  
+      }
 
       iterString.value().value = diaPath;
    }
-  
+
 
    // **
    iterString = m_cfgString.find("dot-path");
@@ -560,12 +570,12 @@ bool Config::verify()
    if (! dotPath.isEmpty()) {
       QFileInfo fi(dotPath);
 
-      if (fi.exists() && fi.isFile()) { 
+      if (fi.exists() && fi.isFile()) {
          // user specified path + exec
          dotPath = fi.absoluteFilePath();
 
       } else {
-         QFileInfo dp(dotPath + "/dot" + portable_commandExtension());            
+         QFileInfo dp(dotPath + "/dot" + portable_commandExtension());
 
          if (! dp.exists() || ! dp.isFile()) {
             warnMsg("Unable to locate the dot program in %s\n", csPrintable(dotPath));
@@ -578,12 +588,12 @@ bool Config::verify()
 
    } else {
       // changed to store the dot program
-      dotPath = "dot" + portable_commandExtension();  
-   
+      dotPath = "dot" + portable_commandExtension();
+
    }
 
    iterString.value().value = dotPath;
-         
+
 
    // ** dot
    iterString = m_cfgString.find("plantuml-jar-path");
@@ -592,7 +602,7 @@ bool Config::verify()
    if (! plantumlJarPath.isEmpty()) {
       QFileInfo file(plantumlJarPath);
 
-      if (file.exists() && file.isDir()) { 
+      if (file.exists() && file.isDir()) {
          // plantuml-jar-path is directory
 
          QFileInfo jar(plantumlJarPath + QDir::separator() + "plantuml.jar");
@@ -607,14 +617,14 @@ bool Config::verify()
             iterString.value().value = QString();
          }
 
-      } else if (file.exists() && file.isFile() && plantumlJarPath.endsWith(".jar")) { 
+      } else if (file.exists() && file.isFile() && plantumlJarPath.endsWith(".jar")) {
          // plantuml-jar-path is a file
 
          plantumlJarPath = file.absolutePath() + QDir::separator() ;
          iterString.value().value = plantumlJarPath;
 
       } else {
-         err("PlantUml Jar Path does not exist and is not a directory: %s\n", qPrintable(plantumlJarPath));         
+         err("PlantUml Jar Path does not exist and is not a directory: %s\n", qPrintable(plantumlJarPath));
          iterString.value().value = QString();
       }
    }
@@ -622,12 +632,12 @@ bool Config::verify()
    // **
    auto iterInt = m_cfgInt.find("dot-graph-max-depth");
    int depth = iterInt.value().value;
-   
-   if (depth == 0 || depth > 1000) {    
+
+   if (depth == 0 || depth > 1000) {
       iterInt.value().value = 1000;
    }
-   
-   
+
+
    // ** html
    iterString = m_cfgString.find("html-file-extension");
    QString htmlFileExtension = iterString.value().value.trimmed();
@@ -670,7 +680,7 @@ bool Config::verify()
    iterInt.value().value = sat;
 
 
-   // ** 
+   // **
    iterInt = m_cfgInt.find("html-colorstyle-gamma");
    int gamma = iterInt.value().value;
 
@@ -684,9 +694,9 @@ bool Config::verify()
 
    iterInt.value().value = gamma;
 
-  
+
    // **
-   iterEnum = m_cfgEnum.find("mathjax-format");   
+   iterEnum = m_cfgEnum.find("mathjax-format");
    QString mathJaxFormat = iterEnum.value().value;
 
    if (! s_mathJaxFormat.contains(mathJaxFormat)) {
@@ -698,7 +708,7 @@ bool Config::verify()
          err("Invalid value of %s for MathJax Format, setting to the default value of HTML-CSS\n", qPrintable(mathJaxFormat));
 
       }
-  
+
       iterEnum.value().value = "HTML-CSS";
    }
 
@@ -713,7 +723,7 @@ bool Config::verify()
    }
    iterString.value().value = docset;
 
-   // * 
+   // *
    iterString = m_cfgString.find("docset-bundle-id");
    docset = iterString.value().value;
 
@@ -783,7 +793,7 @@ bool Config::verify()
    // **  man
    iterString = m_cfgString.find("man-extension");
    QString manExtension = iterString.value().value;
- 
+
    if (manExtension.isEmpty()) {
       manExtension = "3";
 
@@ -792,13 +802,13 @@ bool Config::verify()
       if (manExtension.startsWith('.')) {
          if (manExtension.length() == 1) {
             manExtension = "3";
-   
-         } else { 
+
+         } else {
             // strip .
             manExtension = manExtension.mid(1);
          }
       }
-   
+
       if (manExtension.at(0) < '0' || manExtension.at(0) > '9') {
          manExtension.prepend("3");
       }
@@ -814,7 +824,7 @@ bool Config::verify()
       QString temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When Generate QtHelp is set, QHP Namespace can not be empty. Setting to the default value of 'org.doxypress.doc'\n");      
+         err("When Generate QtHelp is set, QHP Namespace can not be empty. Setting to the default value of 'org.doxypress.doc'\n");
 
          iterString.value().value = "org.doxypress.doc";
       }
@@ -823,13 +833,13 @@ bool Config::verify()
       temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of 'doc'\n");      
-         
+         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of 'doc'\n");
+
          iterString.value().value = "doc";
       }
    }
 
-   // **********  
+   // **********
 
    // **
    if (Config::getBool("generate-treeview") && Config::getBool("generate-chm")) {
@@ -861,42 +871,42 @@ bool Config::verify()
       iterBool.value().value = false;
    }
 
-   // ** 
+   // **
    if (! Config::getBool("generate-html") && Config::getBool("generate-chm")) {
       warnMsg("GENERATE CHM requires Generate HTML to be set\n");
    }
-  
+
    // **
    if (Config::getBool("optimize-java") && Config::getBool("inline-info")) {
       warnMsg("Java does have an inline concept, setting Inline Info to false\n");
-     
+
       auto iterBool = m_cfgBool.find("inline-info");
       bool data = iterBool.value().value;
 
       iterBool.value().value = false;
    }
 
-  
 
-   // ********** save data to structers and variables   
-  
+
+   // ********** save data to structers and variables
+
    Doxy_Globals::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
                   Config::getBool("ref-relation") || Config::getBool("ref-by-relation");
-   
+
    Doxy_Globals::markdownSupport = Config::getBool("markdown");
 
-   // ** 
+   // **
    const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
 
    for (auto item : expandAsDefinedList) {
       // add predefined macro names to dictionary
 
-      if (! Doxy_Globals::expandAsDefinedDict.contains(item)) {         
+      if (! Doxy_Globals::expandAsDefinedDict.contains(item)) {
          Doxy_Globals::expandAsDefinedDict.insert(item);
-      }      
+      }
 
-   }  
-   
+   }
+
    // read command aliases, store in a dictionary
    loadCmd_Aliases();
 
@@ -908,22 +918,22 @@ bool Config::verify()
 
 void Config::cleanUpPaths(QStringList &str)
 {
-   for (auto &item : str) {  
+   for (auto &item : str) {
       item = item.trimmed();
 
       if (item.isEmpty()) {
          continue;
       }
 
-      item.replace("\\", "/");         
+      item.replace("\\", "/");
 
       if ((item.at(0) != '/' && (item.length() <= 2 || item.at(1) != ':')) || item.at(item.length() - 1) != '/' ) {
          QFileInfo fi(item);
 
          if (fi.exists() && fi.isDir()) {
-            item = fi.absoluteFilePath() + "/";           
+            item = fi.absoluteFilePath() + "/";
          }
-      }      
+      }
    }
 }
 
@@ -935,7 +945,7 @@ QStringList Config::getDotImageFormat()
    list.append("jpg");
    list.append("png");
    list.append("svg");
-   
+
    return list;
 }
 
@@ -945,7 +955,7 @@ QStringList Config::getMathJaxFormat()
 
    list.append("HTML-CSS");
    list.append("NativeMML");
-   list.append("SVG");  
+   list.append("SVG");
 
    return list;
 }
@@ -958,7 +968,7 @@ QStringList Config::getLatexPaperType()
    list.append("letter");
    list.append("legal");
    list.append("executive");
-  
+
    return list;
 }
 
@@ -985,7 +995,7 @@ QStringList Config::getFilePatterns()
 {
    QStringList list;
 
-   list.append("*.as");   
+   list.append("*.as");
    list.append("*.c");
    list.append("*.cc");
    list.append("*.cpp");
@@ -1009,7 +1019,7 @@ QStringList Config::getFilePatterns()
    list.append("*.ipp");
    list.append("*.i++");
    list.append("*.inc");
-   list.append("*.inl");  
+   list.append("*.inl");
    list.append("*.java");
    list.append("*.js");
    list.append("*.m");
@@ -1035,17 +1045,17 @@ QStringList Config::getSuffixSource()
 {
    QStringList list;
 
-   list.append("c");   
+   list.append("c");
    list.append("cc");
    list.append("cxx");
    list.append("cpp");
-   list.append("c++");   
+   list.append("c++");
    list.append("ii");
    list.append("ixx");
    list.append("ipp");
    list.append("i++");
    list.append("inl");
-   list.append("java"); 
+   list.append("java");
    list.append("m");
    list.append("mm");
    list.append("xml");
@@ -1057,7 +1067,7 @@ QStringList Config::getSuffixHeader()
 {
    QStringList list;
 
-   list.append("h");   
+   list.append("h");
    list.append("hh");
    list.append("hxx");
    list.append("hpp");
@@ -1073,7 +1083,7 @@ QStringList Config::getSuffixExclude()
 {
    QStringList list;
 
-   list.append("doc");   
+   list.append("doc");
    list.append("dox");
    list.append("md");
    list.append("markdown");
@@ -1142,7 +1152,7 @@ void Config::escapeAliases()
          // expand \n's except if \n is part of a built-in command
 
 
-         if (value.mid(in, 5) != "\\note" && value.mid(in, 5) != "\\name" && 
+         if (value.mid(in, 5) != "\\note" && value.mid(in, 5) != "\\name" &&
                value.mid(in, 10) != "\\namespace" && value.mid(in, 14) != "\\nosubgrouping") {
 
             newValue += "\\_linebr ";
@@ -1166,7 +1176,7 @@ void Config::loadRenameNS_Aliases()
    const QStringList list = Config::getList("ns-alias");
 
    for (auto item : list) {
-     
+
       int i = item.indexOf('=');
 
       if (i > 0) {

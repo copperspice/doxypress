@@ -294,7 +294,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                f.close();
 
 
-            } else  if (cmdArgs.formatName == "html-head") {
+            } else if (cmdArgs.formatName == "html-head") {
                cmdArgs.htmlHead = getValue(iter, argList.end());
 
                if (cmdArgs.htmlHead.isEmpty()) {
@@ -308,7 +308,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                f.close();
 
 
-            } else  if (cmdArgs.formatName == "html-foot") {
+            } else if (cmdArgs.formatName == "html-foot") {
                cmdArgs.htmlFoot = getValue(iter, argList.end());
 
                if (cmdArgs.htmlFoot.isEmpty()) {
@@ -322,7 +322,7 @@ struct CommandLine parseCommandLine(QStringList argList)
                f.close();
 
 
-            } else  if (cmdArgs.formatName == "html-style") {
+            } else if (cmdArgs.formatName == "html-style") {
               cmdArgs.htmlStyle = getValue(iter, argList.end());
 
               if (cmdArgs.htmlStyle.isEmpty()) {
@@ -738,10 +738,10 @@ void Doxy_Setup::usage()
    printf("Other Options:\n");
    printf("   --h  display usage\n");
    printf("   --v  display version\n");
-
-   printf("\n");
    printf("   --b  output for DoxyPressApp\n");
    printf("   --m  dump symbol map\n");
+
+   printf("\n");
    printf("   --d  <level> enable one or more of the following debug levels\n");
 
    Debug::printFlags();

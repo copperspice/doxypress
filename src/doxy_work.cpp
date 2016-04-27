@@ -4262,14 +4262,13 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                   bool tmp = matchArguments2(item->getOuterScope(), mfd, mdAl, 
                            rnd ? rnd : Doxy_Globals::globalScope, rfd, &root->argList, false);
 
-
                   if (tmp && sameNumTemplateArgs && matchingReturnTypes && ! staticsInDifferentFiles) {
+
                      QSharedPointer<GroupDef> gd;
 
                      if (! root->groups->isEmpty()) {
                         gd = Doxy_Globals::groupSDict->find(root->groups->first().groupname);
                      }
-
 
                      // see if we need to create a new member
                      found = (mnd && rnd && nsName == rnsName) ||        // members are in the same namespace
