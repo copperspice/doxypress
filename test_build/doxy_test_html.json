@@ -184,7 +184,7 @@
         ],
         "example-recursive": false,
         "example-source": [
-            "dox"
+            "input_files"
         ],
         "exclude-files": [
             ""

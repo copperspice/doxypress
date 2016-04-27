@@ -1,16 +1,16 @@
 /* Custom Styling for DoxyPress Test Suite */
 
-h1, h2, h3, h4, h5, h6 { 
-   margin-top: 2em; 
+h1, h2, h3, h4, h5, h6 {
+   margin-top: 2em;
 }
 
 h3 {
    font-size: 110%;
-} 
+}
 
 h4 {
    font-size: 100%;
-} 
+}
 
 /* table 1 */
 table.doxtable {
@@ -44,7 +44,7 @@ table.generic
    font-size: 16px;
    border-collapse: collapse;
    border-radius: 7px 7px 7px 7px;
-   border: 1px solid #C0C0C0;    
+   border: 1px solid #C0C0C0;
 }
 
 table.generic th
@@ -52,11 +52,11 @@ table.generic th
    margin: 0px;
    padding: 5px 15px 5px 10px;
    background-color: #E1E1E1;
-   color: #333333;   
+   color: #333333;
 }
 
 table.generic tr
-{ 
+{
    color: #333333;
    vertical-align: top;
 }
@@ -81,27 +81,27 @@ div.fragment {
    margin-right: 18px;
 }
 
-div.md {      
+div.md {
    margin-top: 40px;
-   margin-bottom: 15px;  
-   padding-top: 3px;   
+   margin-bottom: 15px;
+   padding-top: 3px;
    padding-left: 12px;
    padding-bottom: 3px;
    padding-right: 12px;
    display: inline-block;
 
    background-color: #777777;
-   color: #FFFFFF;   
+   color: #FFFFFF;
 }
 
 div.md p {
-   font-size: 125%;   
+   font-size: 125%;
    margin-top: 0px;
    margin-bottom: 0px;
 }
 
 div.list_page
-{   
+{
    margin-top: 35px;
    margin-left: 30px;
    margin-right: 50px;
@@ -112,13 +112,13 @@ div.list_page
 
 div.one-line
 {
-   margin: 0px;     
+   margin: 0px;
 }
 
 /* cs classes */
 .cs_heading {
    background-color: #CCCCCC;
-   color: #000000;   
+   color: #000000;
    margin-right: 300px;
 	padding-left: 6px;
 	padding-bottom: 4px;
@@ -131,7 +131,7 @@ div.one-line
 
 .cs_note1
 {
-   font-style:italic;  
+   font-style:italic;
    margin-top:5px;
    margin-left:-2px;
    margin-bottom:20px;
@@ -176,13 +176,13 @@ a.www-link {
 
 
 /* footer  */
-div.navpath {  
+div.navpath {
    line-height: 100%;
    float:bottom;
 }
 
 .navpath li
-{  
+{
    background-image:none;
    background-repeat:no-repeat;
    background-position:right;

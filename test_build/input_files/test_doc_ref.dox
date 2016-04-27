@@ -16,24 +16,25 @@
 \page ref-test Command Ref Test
 
 The following is a test of the \\ref command when the physical page name is not the same as the \\page name.
-<br>
+
 
 <h3>Test One</h3>
 
 <dl class="project">
 
    <dt>\ref cppblock</dt>
-      <dd>Various styles of comment blocks supported by DoxyPress for C</dd>
+      <dd>This example is a \\ref in a dl.</dd>
   
 </dl>
 
 <h3>Test Two</h3>
 
-This test is using an href wtih hard coded HTML. &nbsp;&nbsp; <a class="el" href="topic-source.html#cppblock">Comments in C</a>
+<a class="el" href="topic-source.html#cppblock">Comments in C Source Code</a> 
+<br>This example is using the href tag with hard coded HTML.
 
 
 
-\section cppblock Comments in C
+\section cppblock Comments in C Source Code
 
 For each entity (class, method, function, etc) in the code there are two categories of documentation, 
 brief documentation and detailed documentation. If both are supplied the brief will come first. 
