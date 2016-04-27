@@ -190,6 +190,8 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    QString searchBox;
    QString mathJaxJs;
 
+   static const QDir configDir   = Config::getConfigDir();
+
    static QString projectName    = Config::getString("project-name");
    static QString projectVersion = Config::getString("project-version");
    static QString projectBrief   = Config::getString("project-brief");
@@ -220,11 +222,13 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    for (auto fileName : extraCssFile) {
 
       if (! fileName.isEmpty()) {
-         QFileInfo fi(fileName);
+         QFileInfo fi(configDir, fileName);
 
          if (fi.exists()) {
             extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) +
                   "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
+         } else {
+            err("Unable to find stylesheet '%s'\n", csPrintable(fi.absoluteFilePath()));
          }
       }
    }
@@ -1012,7 +1016,7 @@ void HtmlGenerator::writeStyleInfo(int part)
 
       } else {
          resData.replace("$doxypressversion", versionString);
-         resData.replace("$doxygenversion", versionString);            // ok
+         resData.replace("$doxygenversion",   versionString);            // ok
          m_textStream << replaceColorMarkers(resData);
 
       }
@@ -1022,15 +1026,18 @@ void HtmlGenerator::writeStyleInfo(int part)
       Doxy_Globals::indexList->addStyleSheetFile("doxypress.css");
 
       // part two
+      static const QDir configDir = Config::getConfigDir();
       static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
       for (auto fileName : extraCssFile) {
 
          if (! fileName.isEmpty()) {
-            QFileInfo fi(fileName);
+            QFileInfo fi(configDir, fileName);
 
             if (fi.exists()) {
                Doxy_Globals::indexList->addStyleSheetFile(fi.fileName());
+            } else {
+               err("Unable to find stylesheet '%s'\n", csPrintable(fi.absoluteFilePath()));
             }
          }
       }

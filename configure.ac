@@ -1,5 +1,5 @@
 # project name, version, email
-AC_INIT([DoxyPress], 1.2.1, [info@copperspice.com])
+AC_INIT([DoxyPress], 1.2.2, [info@copperspice.com])
 
 # location of temp autotools files
 # note: space can not exist between ] and  )
