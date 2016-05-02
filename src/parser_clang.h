@@ -53,12 +53,14 @@ class ClangParser
    // ol- output generator list to write to, fd- file to write sources for    
    void writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> fd);
 
-  private:
+   class Private;
+   Private *getPrivate();
+   
+ private:
    ClangParser();
    virtual ~ClangParser();
 
-   class Private;
-   Private *p; 
+   Private *p;
 
    void linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, 
                   uint &column, const QString &text, int tokenIndex);

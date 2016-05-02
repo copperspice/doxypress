@@ -27,9 +27,9 @@ if OSTYPE_WIN
 
    clang_dll=$(clang_path)/bin/libclang.dll
    clang_hdr=$(clang_path)/include
-   clang_lib=$(clang_path)/lib/liblibclang.dll.a
+   clang_lib=$(clang_path)/lib/liblibclang.dll.a  
 
-   clang_link=-L$(clang_path)/lib -llibclang
+   clang_link=-L$(clang_path)/lib  -llibclang
 
    AM_CXXFLAGS+=-I$(clang_hdr)
 
@@ -49,7 +49,7 @@ deploy : all
 
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
-	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.so*,$(cslibs)) $(deploydir)	
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.so*,$(cslibs)) $(deploydir)
 endif
 
 if OSTYPE_DARWIN
@@ -58,11 +58,15 @@ endif
 if OSTYPE_WIN
 deploy : all
 	mkdir -p $(deploydir)
+	mkdir -p $(deploydir)/include/
+
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)%.dll,$(gcclibs))  $(deploydir)
-	rsync -W -a --modify-window=2  $(clang_dll) $(deploydir)
 	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
+
+	rsync -W -a --modify-window=2  $(clang_dll)        $(deploydir)
+	rsync -W -a --modify-window=2  $(clang_hdr)/3.7.1  $(deploydir)/include/
 endif
 
 # search path for source
@@ -368,6 +372,6 @@ dist-test-project:
 	cd ..  ; \
 \
 	rm  -f   DoxyPress-Test-Project-$(VERSION).zip         ; \
-	zip -r   DoxyPress-Test-Project-$(VERSION).zip test_build/{dox,dox2,images,*.css,*.html,*.json,*.xml}
+	zip -r   DoxyPress-Test-Project-$(VERSION).zip test_build/{input_files,images,*.css,*.html,*.json,*.xml}
 
 

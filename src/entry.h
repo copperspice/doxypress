@@ -117,28 +117,28 @@ class Entry
       INCLUDED_SERVICE_SEC   = 0x1A000000
    };
 
-   enum Virtue {     
+   enum Virtue {
 
       // class specifiers
       AbstractClass,
-      Template,
-      Generic,
-      Ref,
-      Value,
-      Interface,
-      Struct,
-      Union,
       Exception,
+      Generic,
+      Interface,
       Protocol,
-      Category,
+      Ref,
       SealedClass,
+      Struct,
+      Template,
+      Union,
+      Value,
 
+      Category,
       Enum,                    // Java-style enums
       Service,                 // UNO IDL
       Singleton,               // UNO IDL
-      ForwardDecl,             
+      ForwardDecl,
 
-      // method specifiers     
+      // method properties for CopperSpice
       Readable,
       Writable,
       Reset,
@@ -149,7 +149,8 @@ class Entry
       Stored,
       User,
       Constant,
-      Final,
+      Final_Property,
+
       Assign,
 
       // member specifiers
@@ -160,6 +161,7 @@ class Entry
       ProtectedSettable,       // C# protected setter
 
       Inline,
+      Final,
       Explicit,
       Mutable,
       Settable,
@@ -186,6 +188,7 @@ class Entry
       Default,
       Delete,
       NoExcept,
+
       Attribute,               // UNO IDL attribute
       Property,                // UNO IDL property
       Readonly,                // on UNO IDL attribute or property
@@ -202,9 +205,9 @@ class Entry
 
    // kind of group
    enum GroupDocType {
-      GROUPDOC_NORMAL,        // defgroup
-      GROUPDOC_ADD,           // addgroup
-      GROUPDOC_WEAK           // weakgroup
+      GROUPDOC_NORMAL,        // def group
+      GROUPDOC_ADD,           // add group
+      GROUPDOC_WEAK           // weak group
    };
 
    class Traits {
@@ -245,7 +248,7 @@ class Entry
 
       private:
          std::bitset<Virtue::LastVirtue> m_flags;
-   };  
+   };
 
    Entry();
    Entry(const Entry &);
@@ -276,7 +279,7 @@ class Entry
    }
 
    // Adds entry \a e as a child to this entry /
-   void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self) ;
+   void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self);
 
    // Removes entry \a e from the list of children
    void removeSubEntry(QSharedPointer<Entry> e);
@@ -284,7 +287,7 @@ class Entry
    // Restore the state of this Entry to the default value it has at construction time.
    void reset();
 
- public:  
+ public:
    TagInfo      *tagInfo;       // tag file info
    ArgumentList  argList;       // member arguments as a list
    ArgumentList  typeConstr;    // where clause (C#) for type constraints
@@ -297,7 +300,7 @@ class Entry
    SrcLangExt   lang;           // programming language in which this entry was found
 
    Traits m_traits;
-   
+
    static int num;              // counts the total number of entries
 
    int  section;                // entry type (see Sections);
@@ -359,7 +362,7 @@ class Entry
 
    bool      hidden;            // does this represent an entity that is hidden from the output
    bool      artificial;        // Artificially introduced item
-   
+
    // return the command name used to define GROUPDOC_SEC
    QString groupDocCmd() const {
 
@@ -399,7 +402,8 @@ class Entry
    }
 
  private:
-   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
+   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage,
+                  QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
    QWeakPointer<Entry> m_parent;               // parent node in the tree
    QList<QSharedPointer<Entry>>  m_sublist;    // entries that are children
@@ -468,13 +472,9 @@ class EntryNav
    }
 
  private:
-
-   // navigation
    QWeakPointer<EntryNav> m_parent;              //!< parent node in the tree
+   QList<QSharedPointer<EntryNav>>  m_subList;   //!< entries that are children
 
-   QList<QSharedPointer<EntryNav>>  m_subList;   //!< entries that are children of this one
-
-   // identification
    int          m_section;     //!< entry type (see Sections);
    QString	    m_type;        //!< member type
    QString      m_name;        //!< member name
@@ -483,7 +483,7 @@ class EntryNav
    SrcLangExt   m_lang;        //!< programming language in which this entry was found
 
    QSharedPointer<FileDef> m_fileDef;
-   QSharedPointer<Entry> m_info;
+   QSharedPointer<Entry>   m_info;
 
    int64_t      m_offset;
    bool         m_noLoad;

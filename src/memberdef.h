@@ -148,9 +148,10 @@ class MemberDef : public Definition
    bool isStored() const;
    bool isUser() const;
    bool isConstant() const;
-   bool isFinal() const;
+   bool isFinal_Property() const;
  
    bool isAddable() const;
+   bool isFinal() const;
    bool isRemovable() const;
    bool isRaisable() const;   
    bool isAbstract() const;

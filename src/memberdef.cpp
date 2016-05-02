@@ -2078,12 +2078,16 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
            sl.append("constant");
          }
 
-         if (isFinal()) {
-            sl.append("final");
+         if (isFinal_Property()) {
+            sl.append("final_property");
          }
 
          if (isAbstract()) {
             sl.append("abstract");
+         }
+
+         if (isFinal()) {
+            sl.append("final");
          }
 
          if (isOverride()) {
@@ -3094,11 +3098,12 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          } else if (s == "constant") {
             isProperty  = true;
 
+         } else if (s == "final_property") {
+            temp.first  = "final";
+            isProperty  = true;
 
-         } else if (s == "final") {
-            isProperty  = true; 
+         }
 
-         }                                   
          ++nextItem;
 
          if (isProperty) {
@@ -4652,6 +4657,11 @@ bool MemberDef::isUser() const
 bool MemberDef::isConstant() const
 {
    return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Constant);
+}
+
+bool MemberDef::isFinal_Property() const
+{
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Final_Property);
 }
 
 bool MemberDef::isFinal() const
