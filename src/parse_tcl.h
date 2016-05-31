@@ -1,6 +1,7 @@
 /*************************************************************************
  *
  * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2010-2011 by Rene Zaumseil
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -15,31 +16,23 @@
  *
 *************************************************************************/
 
-#ifndef PARSER_PY_H
-#define PARSER_PY_H
+#ifndef PARSE_TCL_H
+#define PARSE_TCL_H
 
-#include <QByteArray>
-#include <QStringList>
+#include <parse_base.h>
 
-#include <types.h>
-
-#include <definition.h>
-#include <outputgen.h>
-#include <parser_base.h>
-
-/** \brief Python Parser using state-based lexical scanning.
+/** \brief Tcl language parser using state-based lexical scanning.
  *
- * This is the Python language parser for doxyPress.
+ *  This is the Tcl language parser for doxyPress.
  */
-class PythonLanguageParser : public ParserInterface
+class TclLanguageParser : public ParserInterface
 {
  public:
-   virtual ~PythonLanguageParser() {}
-   
-   void finishTranslationUnit() override {}
+   virtual ~TclLanguageParser() {}
 
-   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
-                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
+   void finishTranslationUnit() override {}
+   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root, 
+                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
    bool needsPreprocessing(const QString &extension) override;
 
@@ -53,14 +46,5 @@ class PythonLanguageParser : public ParserInterface
    void resetCodeParserState();
    void parsePrototype(const QString &text) override;
 };
-
-extern void parsePythonCode(CodeOutputInterface &, const QString &, const QString &,
-                            bool , const QString &, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
-                            QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
-                            bool collectXRefs);
-
-extern void resetPythonCodeParserState();
-
-void pyFreeParser();
 
 #endif

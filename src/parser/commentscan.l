@@ -29,9 +29,9 @@
 #include <membergroup.h>
 #include <message.h>
 #include <outputlist.h>
-#include <parser_base.h>
-#include <parser_cstyle.h>
-#include <parser_md.h>
+#include <parse_base.h>
+#include <parse_cstyle.h>
+#include <parse_md.h>
 #include <util.h>
 
 #define YY_NO_INPUT 1
@@ -977,7 +977,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    *   commands (e.g. @page, or \page)
    *   escaped commands (e.g. @@page or \\page).
    *   formulas (e.g. \f$ \f[ \f{..)
-   *   directories (e.g. \doxygen\src\)
+   *   directories (e.g. \doxy\src\)
    *   autolist end. (e.g. a dot on an otherwise empty line)
    *   newlines.
    *   end of brief description due to blank line.

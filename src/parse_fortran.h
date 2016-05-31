@@ -15,44 +15,52 @@
  *
 *************************************************************************/
 
-#ifndef PARSER_MAKE_H
-#define PARSER_MAKE_H
+#ifndef PARSE_FORTRAN_H
+#define PARSE_FORTRAN_H
 
-#include <QStringList>
+#include <parse_base.h>
 
-#include <parser_base.h>
-
-/** \brief Make Language parser using state-based lexical scanning.
+/** \brief Fortran language parser using state-based lexical scanning.
  *
- * This is the Make language parser for doxyPress.
+ *  This is the Fortran language parser for doxyPress.
  */
-class MakeFileParser : public ParserInterface
+class FortranLanguageParser : public ParserInterface
 {
-   public:
-      virtual ~MakeFileParser() {}
-    
-      void finishTranslationUnit()  override {}
-   
-      void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
-                      enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
-   
-      bool needsPreprocessing(const QString &extension);
+ public:
+   FortranLanguageParser(FortranFormat format = FortranFormat_Unknown) : m_format(format) { }
+   virtual ~FortranLanguageParser() {}
+ 
+   void finishTranslationUnit() override {}
 
-      void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
+   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root, 
+                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
+
+   bool needsPreprocessing(const QString &extension) override;
+
+   void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                   bool isExampleBlock, const QString &exampleName = QString(), 
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                   int startLine = -1, int endLine = -1, bool inlineFragment = false,
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
-     
-      void resetCodeParserState() override ;
-      void parsePrototype(const QString &text) override;
 
-   private: 
-        void endCodeLine();
-        void startCodeLine();
-        void endFontClass();
-        void startFontClass(const QString &s);
+   void resetCodeParserState();
+   void parsePrototype(const QString &text) override;
+
+ private:
+   FortranFormat m_format;
+};
+
+class FortranLanguageParserFree : public FortranLanguageParser
+{
+ public:
+   FortranLanguageParserFree() : FortranLanguageParser(FortranFormat_Free) { }
+};
+
+class FortranLanguageParserFixed : public FortranLanguageParser
+{
+ public:
+   FortranLanguageParserFixed() : FortranLanguageParser(FortranFormat_Fixed) { }
 };
 
 #endif

@@ -1,19 +1,3 @@
-/*************************************************************************
- *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation under the terms of the GNU General Public License version 2
- * is hereby granted. No representations are made about the suitability of
- * this software for any purpose. It is provided "as is" without express or
- * implied warranty. See the GNU General Public License for more details.
- *
- * Documents produced by DoxyPress are derivative works derived from the
- * input used in their production; they are not affected by this license.
- *
-*************************************************************************/
 
 #line 3 "<stdout>"
 
@@ -183,7 +167,7 @@ typedef unsigned int flex_uint32_t;
  */
 #define YY_BUF_SIZE 32768
 #else
-#define YY_BUF_SIZE 262144
+#define YY_BUF_SIZE 16384
 #endif /* __ia64__ */
 #endif
 
@@ -12191,14 +12175,14 @@ goto find_rule; \
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *cstyleYYtext;
-#line 1 "parser_cstyle.l"
+#line 1 "parse_cstyle.l"
 /*************************************************************************
  *
  * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch. 
    
 *************************************************************************/
-#line 9 "parser_cstyle.l"
+#line 9 "parse_cstyle.l"
 
 #include <QFile>
 #include <QHash>
@@ -12219,8 +12203,8 @@ char *cstyleYYtext;
 #include <entry.h>
 #include <language.h>
 #include <message.h>
-#include <parser_clang.h>
-#include <parser_cstyle.h>
+#include <parse_clang.h>
+#include <parse_cstyle.h>
 #include <util.h>
 
 #define YY_NO_INPUT 1
@@ -13348,7 +13332,7 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 842 "parser_cstyle.l"
+#line 842 "parse_cstyle.l"
 
 
 #line 13339 "<stdout>"
@@ -13469,7 +13453,7 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 844 "parser_cstyle.l"
+#line 844 "parse_cstyle.l"
 {
       curlyCount=0;
       needsSemi = true;
@@ -13478,7 +13462,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 850 "parser_cstyle.l"
+#line 850 "parse_cstyle.l"
 {
       roundCount=0;
       BEGIN(SkipRoundBlock);
@@ -13486,14 +13470,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 855 "parser_cstyle.l"
+#line 855 "parse_cstyle.l"
 {
       ++roundCount;
    }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 859 "parser_cstyle.l"
+#line 859 "parse_cstyle.l"
 {
       if (roundCount != 0) {
          --roundCount;
@@ -13504,14 +13488,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 867 "parser_cstyle.l"
+#line 867 "parse_cstyle.l"
 {
       ++curlyCount ;
    }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 871 "parser_cstyle.l"
+#line 871 "parse_cstyle.l"
 {
       if( curlyCount ) {
        --curlyCount ;
@@ -13526,7 +13510,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 883 "parser_cstyle.l"
+#line 883 "parse_cstyle.l"
 {
       if (insidePHP) {
          lastStringContext=NextSemi;
@@ -13536,7 +13520,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 890 "parser_cstyle.l"
+#line 890 "parse_cstyle.l"
 { 
       if (insidePHP) {
          REJECT;
@@ -13545,7 +13529,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 896 "parser_cstyle.l"
+#line 896 "parse_cstyle.l"
 {
       lastStringContext=NextSemi;
       BEGIN(SkipString);
@@ -13553,7 +13537,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 901 "parser_cstyle.l"
+#line 901 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN( FindMembers );
@@ -13561,7 +13545,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 905 "parser_cstyle.l"
+#line 905 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN( FindMembers );
@@ -13569,7 +13553,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 910 "parser_cstyle.l"
+#line 910 "parse_cstyle.l"
 {
       current->args = current->args.simplified();
       unput(*cstyleYYtext);
@@ -13578,7 +13562,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 916 "parser_cstyle.l"
+#line 916 "parse_cstyle.l"
 { 
       // PHP code with unsupported extension?
       insidePHP = true;
@@ -13586,7 +13570,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 921 "parser_cstyle.l"
+#line 921 "parse_cstyle.l"
 { 
       // PHP code start
       BEGIN( FindMembers );
@@ -13595,7 +13579,7 @@ YY_RULE_SETUP
 case 15:
 /* rule 15 can match eol */
 YY_RULE_SETUP
-#line 926 "parser_cstyle.l"
+#line 926 "parse_cstyle.l"
 { 
       // PHP code start
       lineCount() ;
@@ -13604,7 +13588,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 932 "parser_cstyle.l"
+#line 932 "parse_cstyle.l"
 { 
       // Non-PHP code text, ignore
    }
@@ -13612,7 +13596,7 @@ YY_RULE_SETUP
 case 17:
 /* rule 17 can match eol */
 YY_RULE_SETUP
-#line 936 "parser_cstyle.l"
+#line 936 "parse_cstyle.l"
 { 
       // Non-PHP code text, ignore
       lineCount();
@@ -13620,14 +13604,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 941 "parser_cstyle.l"
+#line 941 "parse_cstyle.l"
 { 
       // Non-PHP code text, ignore
    }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 945 "parser_cstyle.l"
+#line 945 "parse_cstyle.l"
 { 
       // PHP code end
       if (insidePHP)
@@ -13639,7 +13623,7 @@ YY_RULE_SETUP
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 953 "parser_cstyle.l"
+#line 953 "parse_cstyle.l"
 { 
       if (insidePHP)
          BEGIN( NextSemi );
@@ -13649,7 +13633,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 960 "parser_cstyle.l"
+#line 960 "parse_cstyle.l"
 { 
       // Mozilla XPIDL lang-specific block
       if (! insideIDL)
@@ -13658,7 +13642,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 966 "parser_cstyle.l"
+#line 966 "parse_cstyle.l"
 { 
       // Mozilla XPIDL lang-specific block end
       if (! insideIDL) {
@@ -13669,7 +13653,7 @@ YY_RULE_SETUP
 case 23:
 /* rule 23 can match eol */
 YY_RULE_SETUP
-#line 973 "parser_cstyle.l"
+#line 973 "parse_cstyle.l"
 { 
       // IDL or Borland C++ builder property
       current->mtype = mtype = MethodTypes::Property;
@@ -13684,7 +13668,7 @@ YY_RULE_SETUP
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
-#line 984 "parser_cstyle.l"
+#line 984 "parse_cstyle.l"
 {
       current->mtype = mtype = MethodTypes::DCOP;
       current->protection = protection = Public ;
@@ -13698,7 +13682,7 @@ YY_RULE_SETUP
 case 25:
 /* rule 25 can match eol */
 YY_RULE_SETUP
-#line 994 "parser_cstyle.l"
+#line 994 "parse_cstyle.l"
 {
       current->mtype = mtype = MethodTypes::Signal;
       current->protection = protection = Public ;
@@ -13712,7 +13696,7 @@ YY_RULE_SETUP
 case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
-#line 1004 "parser_cstyle.l"
+#line 1004 "parse_cstyle.l"
 {
       current->mtype = mtype = MethodTypes::Slot;
       current->protection = protection = Public ;
@@ -13726,7 +13710,7 @@ YY_RULE_SETUP
 case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
-#line 1014 "parser_cstyle.l"
+#line 1014 "parse_cstyle.l"
 {
       current->protection = protection = Protected ;
       current->mtype = mtype = MethodTypes::Slot;
@@ -13740,7 +13724,7 @@ YY_RULE_SETUP
 case 28:
 /* rule 28 can match eol */
 YY_RULE_SETUP
-#line 1024 "parser_cstyle.l"
+#line 1024 "parse_cstyle.l"
 {
       current->protection = protection = Private ;
       current->mtype = mtype = MethodTypes::Slot;
@@ -13754,7 +13738,7 @@ YY_RULE_SETUP
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 1034 "parser_cstyle.l"
+#line 1034 "parse_cstyle.l"
 {
       current->protection = protection = Public ;
       current->mtype = mtype = MethodTypes::Method;
@@ -13768,7 +13752,7 @@ YY_RULE_SETUP
 case 30:
 /* rule 30 can match eol */
 YY_RULE_SETUP
-#line 1044 "parser_cstyle.l"
+#line 1044 "parse_cstyle.l"
 {  
       // for now treat C++/CLI's internal as package...
       if (insideCli) {
@@ -13788,7 +13772,7 @@ YY_RULE_SETUP
 case 31:
 /* rule 31 can match eol */
 YY_RULE_SETUP
-#line 1060 "parser_cstyle.l"
+#line 1060 "parse_cstyle.l"
 {
       current->protection = protection = Protected ;
       current->mtype = mtype = MethodTypes::Method;
@@ -13802,7 +13786,7 @@ YY_RULE_SETUP
 case 32:
 /* rule 32 can match eol */
 YY_RULE_SETUP
-#line 1070 "parser_cstyle.l"
+#line 1070 "parse_cstyle.l"
 {
       current->protection = protection = Private ;
       current->mtype = mtype = MethodTypes::Method;
@@ -13816,7 +13800,7 @@ YY_RULE_SETUP
 case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
-#line 1080 "parser_cstyle.l"
+#line 1080 "parse_cstyle.l"
 {
       if (insideCli) {
          // C++/CLI event
@@ -13840,7 +13824,7 @@ YY_RULE_SETUP
 case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
-#line 1100 "parser_cstyle.l"
+#line 1100 "parse_cstyle.l"
 {
       if (insideCli) {
          // C++/CLI property
@@ -13858,7 +13842,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 1115 "parser_cstyle.l"
+#line 1115 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       addType( current );
@@ -13867,7 +13851,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 1121 "parser_cstyle.l"
+#line 1121 "parse_cstyle.l"
 { 
       // C++/CLI indexed property
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -13877,7 +13861,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 1128 "parser_cstyle.l"
+#line 1128 "parse_cstyle.l"
 {
       curlyCount=0;
       BEGIN( CSAccessorDecl );
@@ -13885,7 +13869,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 1133 "parser_cstyle.l"
+#line 1133 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN( FindMembers );
@@ -13894,20 +13878,20 @@ YY_RULE_SETUP
 case 39:
 /* rule 39 can match eol */
 YY_RULE_SETUP
-#line 1138 "parser_cstyle.l"
+#line 1138 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 1142 "parser_cstyle.l"
+#line 1142 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 1145 "parser_cstyle.l"
+#line 1145 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       addType( current );
@@ -13916,7 +13900,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 1151 "parser_cstyle.l"
+#line 1151 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       BEGIN( CliPropertyType );
@@ -13925,7 +13909,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 1156 "parser_cstyle.l"
+#line 1156 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text;
@@ -13944,7 +13928,7 @@ YY_RULE_SETUP
 case 44:
 /* rule 44 can match eol */
 YY_RULE_SETUP
-#line 1172 "parser_cstyle.l"
+#line 1172 "parse_cstyle.l"
 {
       current->protection = protection = Private ;
       current->mtype = mtype = MethodTypes::Method;
@@ -13958,7 +13942,7 @@ YY_RULE_SETUP
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 1182 "parser_cstyle.l"
+#line 1182 "parse_cstyle.l"
 {
       current->protection = protection = Protected ;
       current->mtype = mtype = MethodTypes::Method;
@@ -13972,7 +13956,7 @@ YY_RULE_SETUP
 case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
-#line 1192 "parser_cstyle.l"
+#line 1192 "parse_cstyle.l"
 {
       current->protection = protection = Public ;
       current->mtype = mtype = MethodTypes::Method;
@@ -13986,7 +13970,7 @@ YY_RULE_SETUP
 case 47:
 /* rule 47 can match eol */
 YY_RULE_SETUP
-#line 1202 "parser_cstyle.l"
+#line 1202 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       
@@ -14018,7 +14002,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 1231 "parser_cstyle.l"
+#line 1231 "parse_cstyle.l"
 {
       // start of method's return type
       BEGIN( ObjCReturnType );
@@ -14026,7 +14010,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 1236 "parser_cstyle.l"
+#line 1236 "parse_cstyle.l"
 { 
       // found method name
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -14043,7 +14027,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 1250 "parser_cstyle.l"
+#line 1250 "parse_cstyle.l"
 { 
       // start of parameter list
       current->name += ':';
@@ -14057,7 +14041,7 @@ YY_RULE_SETUP
 case 51:
 /* rule 51 can match eol */
 YY_RULE_SETUP
-#line 1260 "parser_cstyle.l"
+#line 1260 "parse_cstyle.l"
 { 
       // TODO: check if nested braches are possible.
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -14066,14 +14050,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 1266 "parser_cstyle.l"
+#line 1266 "parse_cstyle.l"
 {
       BEGIN( ObjCMethod );
    }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 1270 "parser_cstyle.l"
+#line 1270 "parse_cstyle.l"
 { 
       // Keyword of parameter
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -14099,7 +14083,7 @@ YY_RULE_SETUP
 case 54:
 /* rule 54 can match eol */
 YY_RULE_SETUP
-#line 1292 "parser_cstyle.l"
+#line 1292 "parse_cstyle.l"
 { 
       // name of parameter
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -14110,7 +14094,7 @@ YY_RULE_SETUP
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 1299 "parser_cstyle.l"
+#line 1299 "parse_cstyle.l"
 { 
       // name of parameter
       lineCount();
@@ -14131,7 +14115,7 @@ YY_RULE_SETUP
    */
 case 56:
 YY_RULE_SETUP
-#line 1318 "parser_cstyle.l"
+#line 1318 "parse_cstyle.l"
 {
       roundCount=0;
       current->argList.last().type.resize(0);
@@ -14140,7 +14124,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 1324 "parser_cstyle.l"
+#line 1324 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       roundCount++;
@@ -14152,7 +14136,7 @@ case 58:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 1330 "parser_cstyle.l"
+#line 1330 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
 
@@ -14167,7 +14151,7 @@ YY_RULE_SETUP
 case 59:
 /* rule 59 can match eol */
 YY_RULE_SETUP
-#line 1341 "parser_cstyle.l"
+#line 1341 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->argList.last().type += QString(text).trimmed();
@@ -14175,7 +14159,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 1346 "parser_cstyle.l"
+#line 1346 "parse_cstyle.l"
 { 
       // end of method declaration
       if (! current->argList.isEmpty() && current->argList.last().type.isEmpty()) {
@@ -14191,7 +14175,7 @@ YY_RULE_SETUP
 case 61:
 /* rule 61 can match eol */
 YY_RULE_SETUP
-#line 1358 "parser_cstyle.l"
+#line 1358 "parse_cstyle.l"
 { 
       // start of a method body
       lineCount();
@@ -14208,7 +14192,7 @@ YY_RULE_SETUP
 case 62:
 /* rule 62 can match eol */
 YY_RULE_SETUP
-#line 1371 "parser_cstyle.l"
+#line 1371 "parse_cstyle.l"
 {
       lineCount();
    }
@@ -14216,7 +14200,7 @@ YY_RULE_SETUP
 case 63:
 /* rule 63 can match eol */
 YY_RULE_SETUP
-#line 1375 "parser_cstyle.l"
+#line 1375 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       if (insideJava) {
@@ -14246,7 +14230,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 1402 "parser_cstyle.l"
+#line 1402 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->m_read = text.mid(7);
@@ -14254,7 +14238,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 1407 "parser_cstyle.l"
+#line 1407 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->m_write = text.mid(7);
@@ -14262,28 +14246,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 1412 "parser_cstyle.l"
+#line 1412 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Writable, false);
    }
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 1416 "parser_cstyle.l"
+#line 1416 "parse_cstyle.l"
 { 
       // default
    }
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 1420 "parser_cstyle.l"
+#line 1420 "parse_cstyle.l"
 { 
       // default
    }
 	YY_BREAK
 case 69:
 YY_RULE_SETUP
-#line 1424 "parser_cstyle.l"
+#line 1424 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Assign, false);
       current->m_traits.setTrait(Entry::Virtue::Unretained);     
@@ -14291,7 +14275,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 1429 "parser_cstyle.l"
+#line 1429 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Assign, false);
       current->m_traits.setTrait(Entry::Virtue::Retain);
@@ -14299,7 +14283,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 1434 "parser_cstyle.l"
+#line 1434 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Assign, false);
       current->m_traits.setTrait(Entry::Virtue::Copy);
@@ -14307,7 +14291,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 72:
 YY_RULE_SETUP
-#line 1439 "parser_cstyle.l"
+#line 1439 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Assign, false);
       current->m_traits.setTrait(Entry::Virtue::Weak);
@@ -14315,7 +14299,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 1444 "parser_cstyle.l"
+#line 1444 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Assign, false);
       current->m_traits.setTrait(Entry::Virtue::Strong);
@@ -14323,21 +14307,21 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 1449 "parser_cstyle.l"
+#line 1449 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::NonAtomic);
    }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 1453 "parser_cstyle.l"
+#line 1453 "parse_cstyle.l"
 {
       BEGIN(FindMembers);
    }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 1457 "parser_cstyle.l"
+#line 1457 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
 
@@ -14366,14 +14350,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 1483 "parser_cstyle.l"
+#line 1483 "parse_cstyle.l"
 {
       BEGIN(FindMembers);
    }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 1487 "parser_cstyle.l"
+#line 1487 "parse_cstyle.l"
 {
       QString text  = QString::fromUtf8(cstyleYYtext); 
       isTypedef     = false;
@@ -14391,7 +14375,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 1502 "parser_cstyle.l"
+#line 1502 "parse_cstyle.l"
 {
       current_root->addSubEntry(current, current_root);
       current_root = current ;
@@ -14402,7 +14386,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 80:
 YY_RULE_SETUP
-#line 1510 "parser_cstyle.l"
+#line 1510 "parse_cstyle.l"
 {
       curlyCount=0;
       BEGIN( ReadNSBody );
@@ -14411,7 +14395,7 @@ YY_RULE_SETUP
 case 81:
 /* rule 81 can match eol */
 YY_RULE_SETUP
-#line 1515 "parser_cstyle.l"
+#line 1515 "parse_cstyle.l"
 {
       current->type += " initonly ";
 
@@ -14425,7 +14409,7 @@ YY_RULE_SETUP
 case 82:
 /* rule 82 can match eol */
 YY_RULE_SETUP
-#line 1525 "parser_cstyle.l"
+#line 1525 "parse_cstyle.l"
 { 
       current->type += " static ";
       current->stat = true;
@@ -14435,7 +14419,7 @@ YY_RULE_SETUP
 case 83:
 /* rule 83 can match eol */
 YY_RULE_SETUP
-#line 1531 "parser_cstyle.l"
+#line 1531 "parse_cstyle.l"
 {
       current->stat = false;
       current->explicitExternal = true;
@@ -14445,7 +14429,7 @@ YY_RULE_SETUP
 case 84:
 /* rule 84 can match eol */
 YY_RULE_SETUP
-#line 1537 "parser_cstyle.l"
+#line 1537 "parse_cstyle.l"
 { 
       current->type += " virtual ";
       current->virt = Virtual;
@@ -14455,7 +14439,7 @@ YY_RULE_SETUP
 case 85:
 /* rule 85 can match eol */
 YY_RULE_SETUP
-#line 1543 "parser_cstyle.l"
+#line 1543 "parse_cstyle.l"
 { 
       // UNO IDL published keyword
       if (insideIDL) {
@@ -14470,7 +14454,7 @@ YY_RULE_SETUP
 case 86:
 /* rule 86 can match eol */
 YY_RULE_SETUP
-#line 1554 "parser_cstyle.l"
+#line 1554 "parse_cstyle.l"
 {
       if (! insidePHP) {
          current->type += " abstract ";
@@ -14492,7 +14476,7 @@ YY_RULE_SETUP
 case 87:
 /* rule 87 can match eol */
 YY_RULE_SETUP
-#line 1572 "parser_cstyle.l"
+#line 1572 "parse_cstyle.l"
 { 
       current->m_traits.setTrait(Entry::Virtue::Inline);
       lineCount();
@@ -14501,7 +14485,7 @@ YY_RULE_SETUP
 case 88:
 /* rule 88 can match eol */
 YY_RULE_SETUP
-#line 1577 "parser_cstyle.l"
+#line 1577 "parse_cstyle.l"
 { 
       current->m_traits.setTrait(Entry::Virtue::Mutable);
       lineCount();
@@ -14510,7 +14494,7 @@ YY_RULE_SETUP
 case 89:
 /* rule 89 can match eol */
 YY_RULE_SETUP
-#line 1582 "parser_cstyle.l"
+#line 1582 "parse_cstyle.l"
 { 
       current->m_traits.setTrait(Entry::Virtue::Explicit);
       lineCount();
@@ -14519,7 +14503,7 @@ YY_RULE_SETUP
 case 90:
 /* rule 90 can match eol */
 YY_RULE_SETUP
-#line 1587 "parser_cstyle.l"
+#line 1587 "parse_cstyle.l"
 { 
       // Objective C 2.0 protocol required section
 
@@ -14532,7 +14516,7 @@ YY_RULE_SETUP
 case 91:
 /* rule 91 can match eol */
 YY_RULE_SETUP
-#line 1596 "parser_cstyle.l"
+#line 1596 "parse_cstyle.l"
 {  
       // Objective C 2.0 protocol optional section
 
@@ -14551,7 +14535,7 @@ YY_RULE_SETUP
 case 92:
 /* rule 92 can match eol */
 YY_RULE_SETUP
-#line 1612 "parser_cstyle.l"
+#line 1612 "parse_cstyle.l"
 { 
       lineCount(); 
    }
@@ -14562,7 +14546,7 @@ case 93:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 1616 "parser_cstyle.l"
+#line 1616 "parse_cstyle.l"
 {
       isTypedef = false;
       current->section     = Entry::NAMESPACE_SEC;
@@ -14583,7 +14567,7 @@ YY_RULE_SETUP
 case 94:
 /* rule 94 can match eol */
 YY_RULE_SETUP
-#line 1633 "parser_cstyle.l"
+#line 1633 "parse_cstyle.l"
 {
       lineCount();
 
@@ -14611,7 +14595,7 @@ YY_RULE_SETUP
 case 95:
 /* rule 95 can match eol */
 YY_RULE_SETUP
-#line 1657 "parser_cstyle.l"
+#line 1657 "parse_cstyle.l"
 {
       lineCount();
       if (insideIDL) {
@@ -14634,7 +14618,7 @@ YY_RULE_SETUP
 case 96:
 /* rule 96 can match eol */
 YY_RULE_SETUP
-#line 1676 "parser_cstyle.l"
+#line 1676 "parse_cstyle.l"
 {  
       // UNO IDL constant group
       lineCount();
@@ -14659,7 +14643,7 @@ YY_RULE_SETUP
 case 97:
 /* rule 97 can match eol */
 YY_RULE_SETUP
-#line 1697 "parser_cstyle.l"
+#line 1697 "parse_cstyle.l"
 { 
       // UNO IDL service
       lineCount();
@@ -14698,7 +14682,7 @@ YY_RULE_SETUP
 case 98:
 /* rule 98 can match eol */
 YY_RULE_SETUP
-#line 1732 "parser_cstyle.l"
+#line 1732 "parse_cstyle.l"
 { 
       // UNO IDL singleton
       lineCount();
@@ -14735,7 +14719,7 @@ YY_RULE_SETUP
 case 99:
 /* rule 99 can match eol */
 YY_RULE_SETUP
-#line 1765 "parser_cstyle.l"
+#line 1765 "parse_cstyle.l"
 { 
       // M$/Corba/UNO IDL/Java interface
 
@@ -14776,7 +14760,7 @@ YY_RULE_SETUP
 case 100:
 /* rule 100 can match eol */
 YY_RULE_SETUP
-#line 1802 "parser_cstyle.l"
+#line 1802 "parse_cstyle.l"
 { 
       // Objective-C class implementation
       lineCount();
@@ -14799,7 +14783,7 @@ YY_RULE_SETUP
 case 101:
 /* rule 101 can match eol */
 YY_RULE_SETUP
-#line 1821 "parser_cstyle.l"
+#line 1821 "parse_cstyle.l"
 { 
       // Objective-C class interface, or Java attribute
       lineCount();
@@ -14829,7 +14813,7 @@ YY_RULE_SETUP
 case 102:
 /* rule 102 can match eol */
 YY_RULE_SETUP
-#line 1847 "parser_cstyle.l"
+#line 1847 "parse_cstyle.l"
 { 
       // Objective-C protocol definition
       lineCount();
@@ -14857,7 +14841,7 @@ YY_RULE_SETUP
 case 103:
 /* rule 103 can match eol */
 YY_RULE_SETUP
-#line 1871 "parser_cstyle.l"
+#line 1871 "parse_cstyle.l"
 { 
       // Corba IDL exception
       isTypedef = false;
@@ -14882,14 +14866,14 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 104:
-#line 1895 "parser_cstyle.l"
+#line 1895 "parse_cstyle.l"
 case 105:
 /* rule 105 can match eol */
-#line 1896 "parser_cstyle.l"
+#line 1896 "parse_cstyle.l"
 case 106:
 /* rule 106 can match eol */
 YY_RULE_SETUP
-#line 1896 "parser_cstyle.l"
+#line 1896 "parse_cstyle.l"
 {
       // add a new class
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -14938,11 +14922,11 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 107:
-#line 1944 "parser_cstyle.l"
+#line 1944 "parse_cstyle.l"
 case 108:
 /* rule 108 can match eol */
 YY_RULE_SETUP
-#line 1944 "parser_cstyle.l"
+#line 1944 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -14968,11 +14952,11 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 109:
-#line 1969 "parser_cstyle.l"
+#line 1969 "parse_cstyle.l"
 case 110:
 /* rule 110 can match eol */
 YY_RULE_SETUP
-#line 1969 "parser_cstyle.l"
+#line 1969 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       isTypedef = false;
@@ -14996,11 +14980,11 @@ YY_RULE_SETUP
     }
 	YY_BREAK
 case 111:
-#line 1992 "parser_cstyle.l"
+#line 1992 "parse_cstyle.l"
 case 112:
 /* rule 112 can match eol */
 YY_RULE_SETUP
-#line 1992 "parser_cstyle.l"
+#line 1992 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       isTypedef = false;
@@ -15027,7 +15011,7 @@ YY_RULE_SETUP
 case 113:
 /* rule 113 can match eol */
 YY_RULE_SETUP
-#line 2015 "parser_cstyle.l"
+#line 2015 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insideIDL) {
@@ -15054,11 +15038,11 @@ YY_RULE_SETUP
 	YY_BREAK
 case 114:
 /* rule 114 can match eol */
-#line 2040 "parser_cstyle.l"
+#line 2040 "parse_cstyle.l"
 case 115:
 /* rule 115 can match eol */
 YY_RULE_SETUP
-#line 2040 "parser_cstyle.l"
+#line 2040 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       
@@ -15103,11 +15087,11 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 116:
-#line 2084 "parser_cstyle.l"
+#line 2084 "parse_cstyle.l"
 case 117:
 /* rule 117 can match eol */
 YY_RULE_SETUP
-#line 2084 "parser_cstyle.l"
+#line 2084 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -15134,11 +15118,11 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 118:
-#line 2110 "parser_cstyle.l"
+#line 2110 "parse_cstyle.l"
 case 119:
 /* rule 119 can match eol */
 YY_RULE_SETUP
-#line 2110 "parser_cstyle.l"
+#line 2110 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       isTypedef = false;
@@ -15164,11 +15148,11 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 120:
-#line 2135 "parser_cstyle.l"
+#line 2135 "parse_cstyle.l"
 case 121:
 /* rule 121 can match eol */
 YY_RULE_SETUP
-#line 2135 "parser_cstyle.l"
+#line 2135 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       
@@ -15196,11 +15180,11 @@ YY_RULE_SETUP
 	YY_BREAK
 case 122:
 /* rule 122 can match eol */
-#line 2161 "parser_cstyle.l"
+#line 2161 "parse_cstyle.l"
 case 123:
 /* rule 123 can match eol */
 YY_RULE_SETUP
-#line 2161 "parser_cstyle.l"
+#line 2161 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);        
 
@@ -15240,11 +15224,11 @@ YY_RULE_SETUP
 	YY_BREAK
 case 124:
 /* rule 124 can match eol */
-#line 2199 "parser_cstyle.l"
+#line 2199 "parse_cstyle.l"
 case 125:
 /* rule 125 can match eol */
 YY_RULE_SETUP
-#line 2199 "parser_cstyle.l"
+#line 2199 "parse_cstyle.l"
 { 
       // for IDL: typedef [something] enum
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15288,7 +15272,7 @@ case 126:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 2236 "parser_cstyle.l"
+#line 2236 "parse_cstyle.l"
 {  
       // A::operator()<int>(int arg)
       lineCount();
@@ -15302,7 +15286,7 @@ case 127:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 2243 "parser_cstyle.l"
+#line 2243 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -15313,7 +15297,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 2251 "parser_cstyle.l"
+#line 2251 "parse_cstyle.l"
 { 
       // can occur when importing members
       unput(';');
@@ -15323,7 +15307,7 @@ YY_RULE_SETUP
 case 129:
 /* rule 129 can match eol */
 YY_RULE_SETUP
-#line 2257 "parser_cstyle.l"
+#line 2257 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -15332,14 +15316,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 2263 "parser_cstyle.l"
+#line 2263 "parse_cstyle.l"
 { 
       /* skip guided templ specifiers */ 
    }
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 2267 "parser_cstyle.l"
+#line 2267 "parse_cstyle.l"
 {
       current->name = current->name.simplified();
       unput(*cstyleYYtext);
@@ -15349,7 +15333,7 @@ YY_RULE_SETUP
 case 132:
 /* rule 132 can match eol */
 YY_RULE_SETUP
-#line 2273 "parser_cstyle.l"
+#line 2273 "parse_cstyle.l"
 {  
       // generic is a C++ / CLI extension
       lineCount();
@@ -15376,7 +15360,7 @@ YY_RULE_SETUP
 case 133:
 /* rule 133 can match eol */
 YY_RULE_SETUP
-#line 2296 "parser_cstyle.l"
+#line 2296 "parse_cstyle.l"
 { 
       // namespace alias
       lineCount();
@@ -15385,7 +15369,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 2302 "parser_cstyle.l"
+#line 2302 "parse_cstyle.l"
 {      
       aliasName = QString::fromUtf8(cstyleYYtext);
       BEGIN( NSAliasArg );
@@ -15393,7 +15377,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 2307 "parser_cstyle.l"
+#line 2307 "parse_cstyle.l"
 {
       // TODO: namespace aliases are now treated as global entities
       // while they should be aware of the scope they are in
@@ -15403,7 +15387,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 2314 "parser_cstyle.l"
+#line 2314 "parse_cstyle.l"
 {
       BEGIN( FindMembers );
    }
@@ -15411,7 +15395,7 @@ YY_RULE_SETUP
 case 137:
 /* rule 137 can match eol */
 YY_RULE_SETUP
-#line 2318 "parser_cstyle.l"
+#line 2318 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -15422,7 +15406,7 @@ YY_RULE_SETUP
 case 138:
 /* rule 138 can match eol */
 YY_RULE_SETUP
-#line 2325 "parser_cstyle.l"
+#line 2325 "parse_cstyle.l"
 {      
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -15446,14 +15430,14 @@ YY_RULE_SETUP
 case 139:
 /* rule 139 can match eol */
 YY_RULE_SETUP
-#line 2345 "parser_cstyle.l"
+#line 2345 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 2349 "parser_cstyle.l"
+#line 2349 "parse_cstyle.l"
 {                 
       QString text = QString::fromUtf8(cstyleYYtext);   
       
@@ -15465,7 +15449,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 2358 "parser_cstyle.l"
+#line 2358 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -15479,7 +15463,7 @@ YY_RULE_SETUP
 case 142:
 /* rule 142 can match eol */
 YY_RULE_SETUP
-#line 2368 "parser_cstyle.l"
+#line 2368 "parse_cstyle.l"
 { 
       // package import => add as a using directive
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15497,7 +15481,7 @@ YY_RULE_SETUP
 case 143:
 /* rule 143 can match eol */
 YY_RULE_SETUP
-#line 2382 "parser_cstyle.l"
+#line 2382 "parse_cstyle.l"
 { 
       // class import => add as a using declaration
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15521,7 +15505,7 @@ YY_RULE_SETUP
 case 144:
 /* rule 144 can match eol */
 YY_RULE_SETUP
-#line 2402 "parser_cstyle.l"
+#line 2402 "parse_cstyle.l"
 {
       current->startLine=yyLineNr;
       current->startColumn = yyColNr;
@@ -15532,7 +15516,7 @@ YY_RULE_SETUP
 case 145:
 /* rule 145 can match eol */
 YY_RULE_SETUP
-#line 2409 "parser_cstyle.l"
+#line 2409 "parse_cstyle.l"
 { 
       lineCount(); 
       BEGIN(UsingDirective); 
@@ -15541,7 +15525,7 @@ YY_RULE_SETUP
 case 146:
 /* rule 146 can match eol */
 YY_RULE_SETUP
-#line 2414 "parser_cstyle.l"
+#line 2414 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -15573,7 +15557,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 2443 "parser_cstyle.l"
+#line 2443 "parse_cstyle.l"
 { 
       // C++11 style template alias?
       BEGIN(UsingAlias);
@@ -15581,7 +15565,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 2448 "parser_cstyle.l"
+#line 2448 "parse_cstyle.l"
 {
       previous->section  = Entry::VARIABLE_SEC;
       previous->type     = "typedef " + previous->args;
@@ -15598,7 +15582,7 @@ YY_RULE_SETUP
 case 149:
 /* rule 149 can match eol */
 YY_RULE_SETUP
-#line 2461 "parser_cstyle.l"
+#line 2461 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15630,7 +15614,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
-#line 2490 "parser_cstyle.l"
+#line 2490 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       previous->args += text;
@@ -15639,7 +15623,7 @@ YY_RULE_SETUP
 case 151:
 /* rule 151 can match eol */
 YY_RULE_SETUP
-#line 2495 "parser_cstyle.l"
+#line 2495 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       previous->args += text;
@@ -15648,7 +15632,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-#line 2501 "parser_cstyle.l"
+#line 2501 "parse_cstyle.l"
 {
       previous->doc   = current->doc;
       previous->brief = current->brief;
@@ -15662,7 +15646,7 @@ YY_RULE_SETUP
 case 153:
 /* rule 153 can match eol */
 YY_RULE_SETUP
-#line 2511 "parser_cstyle.l"
+#line 2511 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = removeRedundantWhiteSpace(text);
@@ -15676,7 +15660,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 154:
 YY_RULE_SETUP
-#line 2522 "parser_cstyle.l"
+#line 2522 "parse_cstyle.l"
 { 
       BEGIN(FindMembers); 
    }
@@ -15684,7 +15668,7 @@ YY_RULE_SETUP
 case 155:
 /* rule 155 can match eol */
 YY_RULE_SETUP
-#line 2526 "parser_cstyle.l"
+#line 2526 "parse_cstyle.l"
 { 
       // guided template decl
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15698,7 +15682,7 @@ case 156:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 2533 "parser_cstyle.l"
+#line 2533 "parse_cstyle.l"
 { 
       // Note: this could be a return type
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15722,7 +15706,7 @@ case 157:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 2550 "parser_cstyle.l"
+#line 2550 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       sharpCount = 0;
@@ -15739,7 +15723,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 158:
 YY_RULE_SETUP
-#line 2564 "parser_cstyle.l"
+#line 2564 "parse_cstyle.l"
 {
       if (! insidePHP) {
          REJECT;
@@ -15751,7 +15735,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 159:
 YY_RULE_SETUP
-#line 2573 "parser_cstyle.l"
+#line 2573 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       current->name += text;                    
@@ -15759,7 +15743,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
-#line 2578 "parser_cstyle.l"
+#line 2578 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (roundCount == 0) {                    
@@ -15770,7 +15754,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 161:
 YY_RULE_SETUP
-#line 2586 "parser_cstyle.l"
+#line 2586 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insideJava || insideCSharp || insideCli || roundCount == 0) {
@@ -15784,7 +15768,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
-#line 2597 "parser_cstyle.l"
+#line 2597 "parse_cstyle.l"
 {
       current->name += '>';                 
       if (roundCount==0 && --sharpCount <= 0) {
@@ -15795,7 +15779,7 @@ YY_RULE_SETUP
 case 163:
 /* rule 163 can match eol */
 YY_RULE_SETUP
-#line 2604 "parser_cstyle.l"
+#line 2604 "parse_cstyle.l"
 {
       lineCount();
       current->name += '>';
@@ -15813,7 +15797,7 @@ YY_RULE_SETUP
 case 164:
 /* rule 164 can match eol */
 YY_RULE_SETUP
-#line 2618 "parser_cstyle.l"
+#line 2618 "parse_cstyle.l"
 { 
       // function pointer returning a template instance
       lineCount();
@@ -15830,7 +15814,7 @@ case 165:
 (yy_c_buf_p) = yy_cp -= 2;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 2628 "parser_cstyle.l"
+#line 2628 "parse_cstyle.l"
 {
       lineCount();
       current->name += '>';
@@ -15842,7 +15826,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 166:
 YY_RULE_SETUP
-#line 2637 "parser_cstyle.l"
+#line 2637 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text[0];
@@ -15851,7 +15835,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 167:
 YY_RULE_SETUP
-#line 2643 "parser_cstyle.l"
+#line 2643 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text[0];
@@ -15863,7 +15847,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 168:
 YY_RULE_SETUP
-#line 2652 "parser_cstyle.l"
+#line 2652 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text[0];
@@ -15872,7 +15856,7 @@ YY_RULE_SETUP
 case 169:
 /* rule 169 can match eol */
 YY_RULE_SETUP
-#line 2657 "parser_cstyle.l"
+#line 2657 "parse_cstyle.l"
 {
       if (insidePHP) {
          current->bodyLine = yyLineNr;
@@ -15884,7 +15868,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 170:
 YY_RULE_SETUP
-#line 2666 "parser_cstyle.l"
+#line 2666 "parse_cstyle.l"
 { 
       // PHP heredoc
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15898,7 +15882,7 @@ case 171:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 2674 "parser_cstyle.l"
+#line 2674 "parse_cstyle.l"
 { 
       // PHP nowdoc
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -15909,7 +15893,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 172:
 YY_RULE_SETUP
-#line 2682 "parser_cstyle.l"
+#line 2682 "parse_cstyle.l"
 { 
       // PHP heredoc
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15922,7 +15906,7 @@ case 173:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 2689 "parser_cstyle.l"
+#line 2689 "parse_cstyle.l"
 { 
       // PHP nowdoc
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15932,7 +15916,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 174:
 YY_RULE_SETUP
-#line 2696 "parser_cstyle.l"
+#line 2696 "parse_cstyle.l"
 { 
       // id at start of the line could mark the end of the block
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15945,13 +15929,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
-#line 2706 "parser_cstyle.l"
+#line 2706 "parse_cstyle.l"
 { 
    }
 	YY_BREAK
 case 176:
 YY_RULE_SETUP
-#line 2709 "parser_cstyle.l"
+#line 2709 "parse_cstyle.l"
 { 
       // id at start of the line could mark the end of the block
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -15966,7 +15950,7 @@ YY_RULE_SETUP
 case 177:
 /* rule 177 can match eol */
 YY_RULE_SETUP
-#line 2720 "parser_cstyle.l"
+#line 2720 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyHereDocGString += text;
@@ -15974,7 +15958,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 178:
 YY_RULE_SETUP
-#line 2725 "parser_cstyle.l"
+#line 2725 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyHereDocGString += text;
@@ -15982,14 +15966,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 179:
 YY_RULE_SETUP
-#line 2730 "parser_cstyle.l"
+#line 2730 "parse_cstyle.l"
 { 
       // Q_object, ignore
    }
 	YY_BREAK
 case 180:
 YY_RULE_SETUP
-#line 2734 "parser_cstyle.l"
+#line 2734 "parse_cstyle.l"
 { 
       // Q_property
      current->protection = Public;
@@ -16000,14 +15984,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 181:
 YY_RULE_SETUP
-#line 2742 "parser_cstyle.l"
+#line 2742 "parse_cstyle.l"
 { 
       // start of property arguments
    }
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 2746 "parser_cstyle.l"
+#line 2746 "parse_cstyle.l"
 { 
       // end of property arguments
       unput(';');
@@ -16016,7 +16000,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 2752 "parser_cstyle.l"
+#line 2752 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += text;
@@ -16024,7 +16008,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 2757 "parser_cstyle.l"
+#line 2757 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += text;
@@ -16032,7 +16016,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-#line 2762 "parser_cstyle.l"
+#line 2762 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += text;
@@ -16041,7 +16025,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 186:
 YY_RULE_SETUP
-#line 2768 "parser_cstyle.l"
+#line 2768 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = text;
@@ -16050,7 +16034,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 187:
 YY_RULE_SETUP
-#line 2774 "parser_cstyle.l"
+#line 2774 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Readable);
       BEGIN(QtPropRead);
@@ -16058,7 +16042,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 2779 "parser_cstyle.l"
+#line 2779 "parse_cstyle.l"
 {
       current->m_traits.setTrait(Entry::Virtue::Writable);
       BEGIN(QtPropWrite);
@@ -16066,28 +16050,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 189:
 YY_RULE_SETUP
-#line 2784 "parser_cstyle.l"
+#line 2784 "parse_cstyle.l"
 { 
       // reset method => not supported yet
    }
 	YY_BREAK
 case 190:
 YY_RULE_SETUP
-#line 2788 "parser_cstyle.l"
+#line 2788 "parse_cstyle.l"
 { 
       // scriptable property => not supported yet
    }
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
-#line 2792 "parser_cstyle.l"
+#line 2792 "parse_cstyle.l"
 { 
       // designable property => not supported yet
    }
 	YY_BREAK
 case 192:
 YY_RULE_SETUP
-#line 2796 "parser_cstyle.l"
+#line 2796 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_read = text;
@@ -16096,7 +16080,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 193:
 YY_RULE_SETUP
-#line 2802 "parser_cstyle.l"
+#line 2802 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_write = text;
@@ -16106,7 +16090,7 @@ YY_RULE_SETUP
 /* begin CopperSpice specific parsing */
 case 194:
 YY_RULE_SETUP
-#line 2810 "parser_cstyle.l"
+#line 2810 "parse_cstyle.l"
 { 
       // cs_object
       BEGIN(CsObject);
@@ -16114,14 +16098,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 195:
 YY_RULE_SETUP
-#line 2815 "parser_cstyle.l"
+#line 2815 "parse_cstyle.l"
 {
       BEGIN(CsObjectName);
    }
 	YY_BREAK
 case 196:
 YY_RULE_SETUP
-#line 2819 "parser_cstyle.l"
+#line 2819 "parse_cstyle.l"
 {
       // class name, do nothing
       BEGIN(CsObjectClose);
@@ -16129,7 +16113,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 197:
 YY_RULE_SETUP
-#line 2824 "parser_cstyle.l"
+#line 2824 "parse_cstyle.l"
 { 
       // end of cs_object
       BEGIN(FindMembers);
@@ -16137,7 +16121,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 198:
 YY_RULE_SETUP
-#line 2829 "parser_cstyle.l"
+#line 2829 "parse_cstyle.l"
 { 
       // ignore this macro
       roundCount = 0;
@@ -16146,14 +16130,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 199:
 YY_RULE_SETUP
-#line 2835 "parser_cstyle.l"
+#line 2835 "parse_cstyle.l"
 {
       ++roundCount;
    }
 	YY_BREAK
 case 200:
 YY_RULE_SETUP
-#line 2839 "parser_cstyle.l"
+#line 2839 "parse_cstyle.l"
 { 
       // end of macro ignore
       --roundCount;
@@ -16165,7 +16149,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
-#line 2848 "parser_cstyle.l"
+#line 2848 "parse_cstyle.l"
 { 
       // cs_register_enum
       BEGIN(CsRegEnum);
@@ -16173,14 +16157,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 202:
 YY_RULE_SETUP
-#line 2853 "parser_cstyle.l"
+#line 2853 "parse_cstyle.l"
 {
       BEGIN(FindMembers);
    }
 	YY_BREAK
 case 203:
 YY_RULE_SETUP
-#line 2857 "parser_cstyle.l"
+#line 2857 "parse_cstyle.l"
 { 
       // end property
      lineCount();
@@ -16202,7 +16186,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 204:
 YY_RULE_SETUP
-#line 2876 "parser_cstyle.l"
+#line 2876 "parse_cstyle.l"
 {
      current->protection = Public;
      current->mtype      = MethodTypes::Property;
@@ -16214,13 +16198,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 205:
 YY_RULE_SETUP
-#line 2885 "parser_cstyle.l"
+#line 2885 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 206:
 YY_RULE_SETUP
-#line 2888 "parser_cstyle.l"
+#line 2888 "parse_cstyle.l"
 {   
       // cs property read name
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -16229,14 +16213,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 207:
 YY_RULE_SETUP
-#line 2894 "parser_cstyle.l"
+#line 2894 "parse_cstyle.l"
 {
       BEGIN(CsPropReadMethod);
    }
 	YY_BREAK
 case 208:
 YY_RULE_SETUP
-#line 2898 "parser_cstyle.l"
+#line 2898 "parse_cstyle.l"
 {
       // cs property read method
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -16246,7 +16230,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 209:
 YY_RULE_SETUP
-#line 2905 "parser_cstyle.l"
+#line 2905 "parse_cstyle.l"
 {
       current->protection = Public;
       current->mtype      = MethodTypes::Property;
@@ -16258,13 +16242,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 210:
 YY_RULE_SETUP
-#line 2914 "parser_cstyle.l"
+#line 2914 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 211:
 YY_RULE_SETUP
-#line 2917 "parser_cstyle.l"
+#line 2917 "parse_cstyle.l"
 {
       // cs property write name
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -16273,14 +16257,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 212:
 YY_RULE_SETUP
-#line 2923 "parser_cstyle.l"
+#line 2923 "parse_cstyle.l"
 {
       BEGIN(CsPropWriteMethod);
    }
 	YY_BREAK
 case 213:
 YY_RULE_SETUP
-#line 2927 "parser_cstyle.l"
+#line 2927 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_write = text;
@@ -16289,7 +16273,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 214:
 YY_RULE_SETUP
-#line 2933 "parser_cstyle.l"
+#line 2933 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->protection = Public;
@@ -16302,13 +16286,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 215:
 YY_RULE_SETUP
-#line 2943 "parser_cstyle.l"
+#line 2943 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 216:
 YY_RULE_SETUP
-#line 2946 "parser_cstyle.l"
+#line 2946 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = text;
@@ -16316,14 +16300,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 217:
 YY_RULE_SETUP
-#line 2951 "parser_cstyle.l"
+#line 2951 "parse_cstyle.l"
 {
       BEGIN(CsPropResetMethod);
    }
 	YY_BREAK
 case 218:
 YY_RULE_SETUP
-#line 2955 "parser_cstyle.l"
+#line 2955 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_reset = text;
@@ -16332,7 +16316,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 219:
 YY_RULE_SETUP
-#line 2961 "parser_cstyle.l"
+#line 2961 "parse_cstyle.l"
 {
       current->protection    = Public;
       current->mtype = MethodTypes::Property;
@@ -16344,13 +16328,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 220:
 YY_RULE_SETUP
-#line 2970 "parser_cstyle.l"
+#line 2970 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 221:
 YY_RULE_SETUP
-#line 2973 "parser_cstyle.l"
+#line 2973 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = text;
@@ -16358,14 +16342,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 222:
 YY_RULE_SETUP
-#line 2978 "parser_cstyle.l"
+#line 2978 "parse_cstyle.l"
 {
       BEGIN(CsPropNotifyMethod);
    }
 	YY_BREAK
 case 223:
 YY_RULE_SETUP
-#line 2982 "parser_cstyle.l"
+#line 2982 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_notify = text;
@@ -16374,7 +16358,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 224:
 YY_RULE_SETUP
-#line 2988 "parser_cstyle.l"
+#line 2988 "parse_cstyle.l"
 {
       current->protection = Public;
       current->mtype      = MethodTypes::Property;
@@ -16386,7 +16370,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 225:
 YY_RULE_SETUP
-#line 2997 "parser_cstyle.l"
+#line 2997 "parse_cstyle.l"
 {
       current->protection = Public;
       current->mtype      = MethodTypes::Property;
@@ -16398,7 +16382,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 226:
 YY_RULE_SETUP
-#line 3006 "parser_cstyle.l"
+#line 3006 "parse_cstyle.l"
 {
       current->protection    = Public;
       current->mtype = MethodTypes::Property;
@@ -16409,7 +16393,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 227:
 YY_RULE_SETUP
-#line 3014 "parser_cstyle.l"
+#line 3014 "parse_cstyle.l"
 {
       current->protection    = Public;
       current->mtype = MethodTypes::Property;
@@ -16420,7 +16404,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 228:
 YY_RULE_SETUP
-#line 3022 "parser_cstyle.l"
+#line 3022 "parse_cstyle.l"
 {
       current->protection    = Public;
       current->mtype = MethodTypes::Property;
@@ -16431,7 +16415,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 229:
 YY_RULE_SETUP
-#line 3030 "parser_cstyle.l"
+#line 3030 "parse_cstyle.l"
 {
       current->protection    = Public;
       current->mtype = MethodTypes::Property;
@@ -16442,7 +16426,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 230:
 YY_RULE_SETUP
-#line 3038 "parser_cstyle.l"
+#line 3038 "parse_cstyle.l"
 {
       current->protection = Public;
       current->mtype = MethodTypes::Property;
@@ -16453,14 +16437,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 231:
 YY_RULE_SETUP
-#line 3046 "parser_cstyle.l"
+#line 3046 "parse_cstyle.l"
 {
       roundCount = 1;
    }
 	YY_BREAK
 case 232:
 YY_RULE_SETUP
-#line 3050 "parser_cstyle.l"
+#line 3050 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = text;
@@ -16468,27 +16452,27 @@ YY_RULE_SETUP
 	YY_BREAK
 case 233:
 YY_RULE_SETUP
-#line 3055 "parser_cstyle.l"
+#line 3055 "parse_cstyle.l"
 {
       BEGIN(CsPropMethod);
    }
 	YY_BREAK
 case 234:
 YY_RULE_SETUP
-#line 3059 "parser_cstyle.l"
+#line 3059 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 235:
 YY_RULE_SETUP
-#line 3062 "parser_cstyle.l"
+#line 3062 "parse_cstyle.l"
 {
       ++roundCount;
    }
 	YY_BREAK
 case 236:
 YY_RULE_SETUP
-#line 3066 "parser_cstyle.l"
+#line 3066 "parse_cstyle.l"
 {
       --roundCount;
       
@@ -16510,13 +16494,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 237:
 YY_RULE_SETUP
-#line 3085 "parser_cstyle.l"
+#line 3085 "parse_cstyle.l"
 {                
    }
 	YY_BREAK
 case 238:
 YY_RULE_SETUP
-#line 3088 "parser_cstyle.l"
+#line 3088 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = text;
@@ -16525,7 +16509,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 239:
 YY_RULE_SETUP
-#line 3094 "parser_cstyle.l"
+#line 3094 "parse_cstyle.l"
 {
       current->mtype = MethodTypes::Signal;
       current->type.resize(0);
@@ -16534,14 +16518,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 240:
 YY_RULE_SETUP
-#line 3100 "parser_cstyle.l"
+#line 3100 "parse_cstyle.l"
 {
       BEGIN(CsSignalProtection);
    }
 	YY_BREAK
 case 241:
 YY_RULE_SETUP
-#line 3104 "parser_cstyle.l"
+#line 3104 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       Protection visibility = getProtection(text);
@@ -16550,7 +16534,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 242:
 YY_RULE_SETUP
-#line 3110 "parser_cstyle.l"
+#line 3110 "parse_cstyle.l"
 {
       BEGIN(CsSignalSlotMethod);
    }
@@ -16558,7 +16542,7 @@ YY_RULE_SETUP
 case 243:
 /* rule 243 can match eol */
 YY_RULE_SETUP
-#line 3114 "parser_cstyle.l"
+#line 3114 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       yyBegColNr  = yyColNr;
@@ -16612,7 +16596,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 244:
 YY_RULE_SETUP
-#line 3165 "parser_cstyle.l"
+#line 3165 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -16628,7 +16612,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 245:
 YY_RULE_SETUP
-#line 3178 "parser_cstyle.l"
+#line 3178 "parse_cstyle.l"
 {  
       // end of cs signal
       lineCount();
@@ -16649,7 +16633,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 246:
 YY_RULE_SETUP
-#line 3196 "parser_cstyle.l"
+#line 3196 "parse_cstyle.l"
 {  
       // cs_signal_2, do nothing
       BEGIN(CsSignalSlot2);
@@ -16657,7 +16641,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 247:
 YY_RULE_SETUP
-#line 3201 "parser_cstyle.l"
+#line 3201 "parse_cstyle.l"
 {  
       // cs_slot_2, do nothing
       BEGIN(CsSignalSlot2);
@@ -16665,7 +16649,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 248:
 YY_RULE_SETUP
-#line 3206 "parser_cstyle.l"
+#line 3206 "parse_cstyle.l"
 {  
       // cs_signal_overload, do nothing
       BEGIN(CsSignalSlot2);
@@ -16673,7 +16657,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 249:
 YY_RULE_SETUP
-#line 3211 "parser_cstyle.l"
+#line 3211 "parse_cstyle.l"
 {  
       // cs_slot_overload, do nothing
       BEGIN(CsSignalSlot2);
@@ -16681,7 +16665,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 250:
 YY_RULE_SETUP
-#line 3216 "parser_cstyle.l"
+#line 3216 "parse_cstyle.l"
 {
       roundCount = 1;
       BEGIN(CsSignalSlot2Name);
@@ -16689,7 +16673,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 251:
 YY_RULE_SETUP
-#line 3221 "parser_cstyle.l"
+#line 3221 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       current->name += text;
@@ -16697,27 +16681,27 @@ YY_RULE_SETUP
 	YY_BREAK
 case 252:
 YY_RULE_SETUP
-#line 3226 "parser_cstyle.l"
+#line 3226 "parse_cstyle.l"
 {
       BEGIN(CsSignalSlot2Extra);
    }
 	YY_BREAK
 case 253:
 YY_RULE_SETUP
-#line 3230 "parser_cstyle.l"
+#line 3230 "parse_cstyle.l"
 {
       ++roundCount;
    }
 	YY_BREAK
 case 254:
 YY_RULE_SETUP
-#line 3234 "parser_cstyle.l"
+#line 3234 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 255:
 YY_RULE_SETUP
-#line 3237 "parser_cstyle.l"
+#line 3237 "parse_cstyle.l"
 { 
       // end of signal2 or slot2 or overload
       --roundCount;
@@ -16731,7 +16715,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 256:
 YY_RULE_SETUP
-#line 3248 "parser_cstyle.l"
+#line 3248 "parse_cstyle.l"
 {
       current->mtype = MethodTypes::Slot;
       current->type.resize(0);
@@ -16740,7 +16724,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 257:
 YY_RULE_SETUP
-#line 3254 "parser_cstyle.l"
+#line 3254 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       Protection visibility = getProtection(text);
@@ -16749,7 +16733,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 258:
 YY_RULE_SETUP
-#line 3260 "parser_cstyle.l"
+#line 3260 "parse_cstyle.l"
 {
       BEGIN(CsSignalSlotMethod);
    }
@@ -16758,7 +16742,7 @@ YY_RULE_SETUP
 case 259:
 /* rule 259 can match eol */
 YY_RULE_SETUP
-#line 3266 "parser_cstyle.l"
+#line 3266 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = text;
@@ -16768,7 +16752,7 @@ YY_RULE_SETUP
 case 260:
 /* rule 260 can match eol */
 YY_RULE_SETUP
-#line 3272 "parser_cstyle.l"
+#line 3272 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -16911,7 +16895,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 261:
 YY_RULE_SETUP
-#line 3412 "parser_cstyle.l"
+#line 3412 "parse_cstyle.l"
 {
       lastSkipRoundContext = FindMembers;
       roundCount=0;
@@ -16921,14 +16905,14 @@ YY_RULE_SETUP
 case 262:
 /* rule 262 can match eol */
 YY_RULE_SETUP
-#line 3418 "parser_cstyle.l"
+#line 3418 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 263:
 YY_RULE_SETUP
-#line 3422 "parser_cstyle.l"
+#line 3422 "parse_cstyle.l"
 { 
       // variable with static_assert as name?
       unput(*cstyleYYtext);
@@ -16937,7 +16921,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 264:
 YY_RULE_SETUP
-#line 3428 "parser_cstyle.l"
+#line 3428 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += text;
@@ -16950,14 +16934,14 @@ YY_RULE_SETUP
 case 265:
 /* rule 265 can match eol */
 YY_RULE_SETUP
-#line 3437 "parser_cstyle.l"
+#line 3437 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 266:
 YY_RULE_SETUP
-#line 3441 "parser_cstyle.l"
+#line 3441 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN(FindMembers);
@@ -16965,7 +16949,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 267:
 YY_RULE_SETUP
-#line 3446 "parser_cstyle.l"
+#line 3446 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += removeRedundantWhiteSpace(text);
@@ -16974,14 +16958,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 268:
 YY_RULE_SETUP
-#line 3452 "parser_cstyle.l"
+#line 3452 "parse_cstyle.l"
 { 
       // some number where we did not expect one
    }
 	YY_BREAK
 case 269:
 YY_RULE_SETUP
-#line 3456 "parser_cstyle.l"
+#line 3456 "parse_cstyle.l"
 {
       if (insideJava || insideCSharp || insideD)  {
          current->name+=".";
@@ -16990,7 +16974,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 270:
 YY_RULE_SETUP
-#line 3462 "parser_cstyle.l"
+#line 3462 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text;
@@ -16998,7 +16982,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 271:
 YY_RULE_SETUP
-#line 3467 "parser_cstyle.l"
+#line 3467 "parse_cstyle.l"
 {
       insideCppQuote = true;
       BEGIN(FindMembers);
@@ -17006,12 +16990,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 272:
 YY_RULE_SETUP
-#line 3472 "parser_cstyle.l"
+#line 3472 "parse_cstyle.l"
 
 	YY_BREAK
 case 273:
 YY_RULE_SETUP
-#line 3473 "parser_cstyle.l"
+#line 3473 "parse_cstyle.l"
 { 
       BEGIN(FindMembers); 
    }
@@ -17019,27 +17003,27 @@ YY_RULE_SETUP
 case 274:
 /* rule 274 can match eol */
 YY_RULE_SETUP
-#line 3477 "parser_cstyle.l"
+#line 3477 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 275:
 YY_RULE_SETUP
-#line 3481 "parser_cstyle.l"
+#line 3481 "parse_cstyle.l"
 
 	YY_BREAK
 case 276:
 /* rule 276 can match eol */
 YY_RULE_SETUP
-#line 3482 "parser_cstyle.l"
+#line 3482 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 277:
 YY_RULE_SETUP
-#line 3486 "parser_cstyle.l"
+#line 3486 "parse_cstyle.l"
 {
       curlyCount = 0;
       lastCurlyContext = TryFunctionBlockEnd ;
@@ -17048,13 +17032,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 278:
 YY_RULE_SETUP
-#line 3492 "parser_cstyle.l"
+#line 3492 "parse_cstyle.l"
 
 	YY_BREAK
 case 279:
 /* rule 279 can match eol */
 YY_RULE_SETUP
-#line 3493 "parser_cstyle.l"
+#line 3493 "parse_cstyle.l"
 { 
       // {BN}* added to fix bug 611193
       lineCount(); 
@@ -17064,7 +17048,7 @@ YY_RULE_SETUP
 case 280:
 /* rule 280 can match eol */
 YY_RULE_SETUP
-#line 3499 "parser_cstyle.l"
+#line 3499 "parse_cstyle.l"
 { 
       unput(*cstyleYYtext); // rule added to fix bug id 601138
       BEGIN( FindMembers );
@@ -17072,7 +17056,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 281:
 YY_RULE_SETUP
-#line 3504 "parser_cstyle.l"
+#line 3504 "parse_cstyle.l"
 { 
       unput(*cstyleYYtext);
       BEGIN( FindMembers );
@@ -17080,7 +17064,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 282:
 YY_RULE_SETUP
-#line 3509 "parser_cstyle.l"
+#line 3509 "parse_cstyle.l"
 {
       insideCppQuote = false;
       BEGIN(FindMembers);
@@ -17088,7 +17072,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 283:
 YY_RULE_SETUP
-#line 3514 "parser_cstyle.l"
+#line 3514 "parse_cstyle.l"
 { 
       if (insidePHP) {
          REJECT;
@@ -17099,7 +17083,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 284:
 YY_RULE_SETUP
-#line 3522 "parser_cstyle.l"
+#line 3522 "parse_cstyle.l"
 {
       if (insidePHP) {
          REJECT;
@@ -17115,7 +17099,7 @@ case 285:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 3532 "parser_cstyle.l"
+#line 3532 "parse_cstyle.l"
 {
       /* line control directive */
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -17136,7 +17120,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 286:
 YY_RULE_SETUP
-#line 3550 "parser_cstyle.l"
+#line 3550 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       yyFileName = stripQuotes(text);
@@ -17148,7 +17132,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 287:
 YY_RULE_SETUP
-#line 3559 "parser_cstyle.l"
+#line 3559 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
@@ -17159,7 +17143,7 @@ YY_RULE_SETUP
 case 288:
 /* rule 288 can match eol */
 YY_RULE_SETUP
-#line 3566 "parser_cstyle.l"
+#line 3566 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (lastPreLineCtrlContext == ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
@@ -17172,13 +17156,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 289:
 YY_RULE_SETUP
-#line 3576 "parser_cstyle.l"
+#line 3576 "parse_cstyle.l"
 
 	YY_BREAK
 case 290:
 /* rule 290 can match eol */
 YY_RULE_SETUP
-#line 3577 "parser_cstyle.l"
+#line 3577 "parse_cstyle.l"
 { 
       lineCount();
    }
@@ -17186,7 +17170,7 @@ YY_RULE_SETUP
 case 291:
 /* rule 291 can match eol */
 YY_RULE_SETUP
-#line 3581 "parser_cstyle.l"
+#line 3581 "parse_cstyle.l"
 { 
       lineCount();
       BEGIN( lastCPPContext) ;
@@ -17194,7 +17178,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 292:
 YY_RULE_SETUP
-#line 3586 "parser_cstyle.l"
+#line 3586 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -17222,7 +17206,7 @@ YY_RULE_SETUP
  */
 case 293:
 YY_RULE_SETUP
-#line 3612 "parser_cstyle.l"
+#line 3612 "parse_cstyle.l"
 {     
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -17234,7 +17218,7 @@ YY_RULE_SETUP
 case 294:
 /* rule 294 can match eol */
 YY_RULE_SETUP
-#line 3620 "parser_cstyle.l"
+#line 3620 "parse_cstyle.l"
 {                   
       lineCount();
       current->fileName   = yyFileName;
@@ -17253,7 +17237,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 295:
 YY_RULE_SETUP
-#line 3636 "parser_cstyle.l"
+#line 3636 "parse_cstyle.l"
 {
       current->fileName   = yyFileName;
       current->startLine  = yyLineNr;
@@ -17277,20 +17261,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 296:
 YY_RULE_SETUP
-#line 3657 "parser_cstyle.l"
+#line 3657 "parse_cstyle.l"
 
 	YY_BREAK
 case 297:
 /* rule 297 can match eol */
 YY_RULE_SETUP
-#line 3658 "parser_cstyle.l"
+#line 3658 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 298:
 YY_RULE_SETUP
-#line 3662 "parser_cstyle.l"
+#line 3662 "parse_cstyle.l"
 {
       if (insideIDL && insideCppQuote) {
          BEGIN(EndCppQuote);
@@ -17302,13 +17286,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 299:
 YY_RULE_SETUP
-#line 3671 "parser_cstyle.l"
+#line 3671 "parse_cstyle.l"
 
 	YY_BREAK
 case 300:
 /* rule 300 can match eol */
 YY_RULE_SETUP
-#line 3672 "parser_cstyle.l"
+#line 3672 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name = text;
@@ -17324,7 +17308,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 301:
 YY_RULE_SETUP
-#line 3685 "parser_cstyle.l"
+#line 3685 "parse_cstyle.l"
 {  
       // ^ and % are C++/CLI extensions
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -17339,7 +17323,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 302:
 YY_RULE_SETUP
-#line 3697 "parser_cstyle.l"
+#line 3697 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text;
@@ -17349,7 +17333,7 @@ YY_RULE_SETUP
 case 303:
 /* rule 303 can match eol */
 YY_RULE_SETUP
-#line 3703 "parser_cstyle.l"
+#line 3703 "parse_cstyle.l"
 {    
       // */ (editor syntax fix)  comment found after a member
       
@@ -17392,7 +17376,7 @@ YY_RULE_SETUP
 case 304:
 /* rule 304 can match eol */
 YY_RULE_SETUP
-#line 3742 "parser_cstyle.l"
+#line 3742 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       
@@ -17430,7 +17414,7 @@ YY_RULE_SETUP
 case 305:
 /* rule 305 can match eol */
 YY_RULE_SETUP
-#line 3776 "parser_cstyle.l"
+#line 3776 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       
@@ -17460,7 +17444,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 306:
 YY_RULE_SETUP
-#line 3803 "parser_cstyle.l"
+#line 3803 "parse_cstyle.l"
 {
       // */ (editor syntax fix)      
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -17520,7 +17504,7 @@ YY_RULE_SETUP
 case 307:
 /* rule 307 can match eol */
 YY_RULE_SETUP
-#line 3859 "parser_cstyle.l"
+#line 3859 "parse_cstyle.l"
 {
       closeGroup(current, yyFileName, yyLineNr);
 
@@ -17532,7 +17516,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 308:
 YY_RULE_SETUP
-#line 3868 "parser_cstyle.l"
+#line 3868 "parse_cstyle.l"
 { 
       // in PHP code this could also be due to "<?="
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -17546,7 +17530,7 @@ YY_RULE_SETUP
 case 309:
 /* rule 309 can match eol */
 YY_RULE_SETUP
-#line 3878 "parser_cstyle.l"
+#line 3878 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -17556,7 +17540,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 310:
 YY_RULE_SETUP
-#line 3885 "parser_cstyle.l"
+#line 3885 "parse_cstyle.l"
 {
       current->exception += " }";
       BEGIN(FindMembers);
@@ -17565,7 +17549,7 @@ YY_RULE_SETUP
 /* Read initializer rules */
 case 311:
 YY_RULE_SETUP
-#line 3891 "parser_cstyle.l"
+#line 3891 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lastRoundContext  = YY_START;
@@ -17577,7 +17561,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 312:
 YY_RULE_SETUP
-#line 3900 "parser_cstyle.l"
+#line 3900 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lastCurlyContext  = YY_START;
@@ -17589,7 +17573,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 313:
 YY_RULE_SETUP
-#line 3909 "parser_cstyle.l"
+#line 3909 "parse_cstyle.l"
 {                 
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -17629,7 +17613,7 @@ YY_RULE_SETUP
 case 314:
 /* rule 314 can match eol */
 YY_RULE_SETUP
-#line 3945 "parser_cstyle.l"
+#line 3945 "parse_cstyle.l"
 { 
       // C++11 raw string
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -17653,7 +17637,7 @@ YY_RULE_SETUP
 case 315:
 /* rule 315 can match eol */
 YY_RULE_SETUP
-#line 3965 "parser_cstyle.l"
+#line 3965 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawGString += text;
@@ -17668,7 +17652,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 316:
 YY_RULE_SETUP
-#line 3977 "parser_cstyle.l"
+#line 3977 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawGString += text;
@@ -17676,7 +17660,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 317:
 YY_RULE_SETUP
-#line 3982 "parser_cstyle.l"
+#line 3982 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawGString += text;
@@ -17685,7 +17669,7 @@ YY_RULE_SETUP
 case 318:
 /* rule 318 can match eol */
 YY_RULE_SETUP
-#line 3987 "parser_cstyle.l"
+#line 3987 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawGString += text;
@@ -17695,7 +17679,7 @@ YY_RULE_SETUP
 case 319:
 /* rule 319 can match eol */
 YY_RULE_SETUP
-#line 3993 "parser_cstyle.l"
+#line 3993 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawString += text;
@@ -17711,7 +17695,7 @@ YY_RULE_SETUP
 case 320:
 /* rule 320 can match eol */
 YY_RULE_SETUP
-#line 4005 "parser_cstyle.l"
+#line 4005 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawString += text;
@@ -17720,7 +17704,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 321:
 YY_RULE_SETUP
-#line 4011 "parser_cstyle.l"
+#line 4011 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawString += text;
@@ -17730,7 +17714,7 @@ YY_RULE_SETUP
 case 322:
 /* rule 322 can match eol */
 YY_RULE_SETUP
-#line 4017 "parser_cstyle.l"
+#line 4017 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRawString += text;
@@ -17740,7 +17724,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 323:
 YY_RULE_SETUP
-#line 4024 "parser_cstyle.l"
+#line 4024 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insideIDL && insideCppQuote) {
@@ -17755,7 +17739,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 324:
 YY_RULE_SETUP
-#line 4036 "parser_cstyle.l"
+#line 4036 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->initializer += text;
@@ -17763,7 +17747,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 325:
 YY_RULE_SETUP
-#line 4041 "parser_cstyle.l"
+#line 4041 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->initializer += text;
@@ -17771,7 +17755,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 326:
 YY_RULE_SETUP
-#line 4046 "parser_cstyle.l"
+#line 4046 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->initializer += text;
@@ -17779,7 +17763,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 327:
 YY_RULE_SETUP
-#line 4051 "parser_cstyle.l"
+#line 4051 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       initBracketCount++;
@@ -17788,7 +17772,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 328:
 YY_RULE_SETUP
-#line 4057 "parser_cstyle.l"
+#line 4057 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       initBracketCount--;
@@ -17797,7 +17781,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 329:
 YY_RULE_SETUP
-#line 4063 "parser_cstyle.l"
+#line 4063 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insidePHP) {
@@ -17812,7 +17796,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 330:
 YY_RULE_SETUP
-#line 4075 "parser_cstyle.l"
+#line 4075 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insidePHP) {
@@ -17825,7 +17809,7 @@ YY_RULE_SETUP
 case 331:
 /* rule 331 can match eol */
 YY_RULE_SETUP
-#line 4084 "parser_cstyle.l"
+#line 4084 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->initializer += text[0];
@@ -17834,7 +17818,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 332:
 YY_RULE_SETUP
-#line 4090 "parser_cstyle.l"
+#line 4090 "parse_cstyle.l"
 {                   
       QString text = QString::fromUtf8(cstyleYYtext);
       current->initializer += text;
@@ -17851,7 +17835,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 333:
 YY_RULE_SETUP
-#line 4104 "parser_cstyle.l"
+#line 4104 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pSkipVerbString += text;
@@ -17859,7 +17843,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 334:
 YY_RULE_SETUP
-#line 4109 "parser_cstyle.l"
+#line 4109 "parse_cstyle.l"
 { 
       // quote escape
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -17868,7 +17852,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 335:
 YY_RULE_SETUP
-#line 4115 "parser_cstyle.l"
+#line 4115 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pSkipVerbString += text[0];
@@ -17878,7 +17862,7 @@ YY_RULE_SETUP
 case 336:
 /* rule 336 can match eol */
 YY_RULE_SETUP
-#line 4121 "parser_cstyle.l"
+#line 4121 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pSkipVerbString += text[0];
@@ -17887,7 +17871,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 337:
 YY_RULE_SETUP
-#line 4127 "parser_cstyle.l"
+#line 4127 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pSkipVerbString += text[0];
@@ -17895,7 +17879,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 338:
 YY_RULE_SETUP
-#line 4132 "parser_cstyle.l"
+#line 4132 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insidePHP) {
@@ -17907,7 +17891,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 339:
 YY_RULE_SETUP
-#line 4141 "parser_cstyle.l"
+#line 4141 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->initializer += text[0];
@@ -17916,7 +17900,7 @@ YY_RULE_SETUP
 /* generic quoted string copy rules */
 case 340:
 YY_RULE_SETUP
-#line 4147 "parser_cstyle.l"
+#line 4147 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedString += text;
@@ -17924,7 +17908,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 341:
 YY_RULE_SETUP
-#line 4152 "parser_cstyle.l"
+#line 4152 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedString += text[0];
@@ -17933,7 +17917,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 342:
 YY_RULE_SETUP
-#line 4158 "parser_cstyle.l"
+#line 4158 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedString += text[0];
@@ -17942,7 +17926,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 343:
 YY_RULE_SETUP
-#line 4164 "parser_cstyle.l"
+#line 4164 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedString += text;
@@ -17951,7 +17935,7 @@ YY_RULE_SETUP
 case 344:
 /* rule 344 can match eol */
 YY_RULE_SETUP
-#line 4169 "parser_cstyle.l"
+#line 4169 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedString += text[0];
@@ -17960,7 +17944,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 345:
 YY_RULE_SETUP
-#line 4175 "parser_cstyle.l"
+#line 4175 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedString += text[0];
@@ -17969,7 +17953,7 @@ YY_RULE_SETUP
 /* generic quoted growable string copy rules */
 case 346:
 YY_RULE_SETUP
-#line 4181 "parser_cstyle.l"
+#line 4181 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedGString += text;
@@ -17977,7 +17961,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 347:
 YY_RULE_SETUP
-#line 4186 "parser_cstyle.l"
+#line 4186 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedGString += text[0];
@@ -17986,7 +17970,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 348:
 YY_RULE_SETUP
-#line 4192 "parser_cstyle.l"
+#line 4192 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedGString += text[0];
@@ -17995,7 +17979,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 349:
 YY_RULE_SETUP
-#line 4198 "parser_cstyle.l"
+#line 4198 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedGString += text;
@@ -18004,7 +17988,7 @@ YY_RULE_SETUP
 case 350:
 /* rule 350 can match eol */
 YY_RULE_SETUP
-#line 4203 "parser_cstyle.l"
+#line 4203 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedGString += text[0];
@@ -18013,7 +17997,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 351:
 YY_RULE_SETUP
-#line 4209 "parser_cstyle.l"
+#line 4209 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyQuotedGString += text[0];
@@ -18022,7 +18006,7 @@ YY_RULE_SETUP
 /* generic round bracket list copy rules */
 case 352:
 YY_RULE_SETUP
-#line 4215 "parser_cstyle.l"
+#line 4215 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRoundString += text[0];
@@ -18033,7 +18017,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 353:
 YY_RULE_SETUP
-#line 4223 "parser_cstyle.l"
+#line 4223 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRoundString += text[0];
@@ -18042,7 +18026,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 354:
 YY_RULE_SETUP
-#line 4229 "parser_cstyle.l"
+#line 4229 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRoundString += text[0];
@@ -18054,7 +18038,7 @@ YY_RULE_SETUP
 case 355:
 /* rule 355 can match eol */
 YY_RULE_SETUP
-#line 4237 "parser_cstyle.l"
+#line 4237 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -18063,7 +18047,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 356:
 YY_RULE_SETUP
-#line 4243 "parser_cstyle.l"
+#line 4243 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insidePHP) {
@@ -18078,7 +18062,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 357:
 YY_RULE_SETUP
-#line 4255 "parser_cstyle.l"
+#line 4255 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (insidePHP)  {
@@ -18090,7 +18074,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 358:
 YY_RULE_SETUP
-#line 4264 "parser_cstyle.l"
+#line 4264 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRoundString += text;
@@ -18098,7 +18082,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 359:
 YY_RULE_SETUP
-#line 4269 "parser_cstyle.l"
+#line 4269 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *pCopyRoundString += text[0];
@@ -18107,7 +18091,7 @@ YY_RULE_SETUP
 /* generic round bracket list copy rules for growable strings */
 case 360:
 YY_RULE_SETUP
-#line 4275 "parser_cstyle.l"
+#line 4275 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);       
       *pCopyRoundGString += text[0];
@@ -18118,7 +18102,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 361:
 YY_RULE_SETUP
-#line 4283 "parser_cstyle.l"
+#line 4283 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       *pCopyRoundGString += text[0];
@@ -18127,7 +18111,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 362:
 YY_RULE_SETUP
-#line 4289 "parser_cstyle.l"
+#line 4289 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyRoundGString += text[0];
@@ -18138,7 +18122,7 @@ YY_RULE_SETUP
 case 363:
 /* rule 363 can match eol */
 YY_RULE_SETUP
-#line 4296 "parser_cstyle.l"
+#line 4296 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       lineCount();
@@ -18147,7 +18131,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 364:
 YY_RULE_SETUP
-#line 4302 "parser_cstyle.l"
+#line 4302 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       if (insidePHP) {
@@ -18163,7 +18147,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 365:
 YY_RULE_SETUP
-#line 4315 "parser_cstyle.l"
+#line 4315 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -18176,7 +18160,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 366:
 YY_RULE_SETUP
-#line 4325 "parser_cstyle.l"
+#line 4325 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyRoundGString += text;
@@ -18184,7 +18168,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 367:
 YY_RULE_SETUP
-#line 4330 "parser_cstyle.l"
+#line 4330 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyRoundGString += text[0];
@@ -18193,7 +18177,7 @@ YY_RULE_SETUP
 /* generic curly bracket list copy rules */
 case 368:
 YY_RULE_SETUP
-#line 4336 "parser_cstyle.l"
+#line 4336 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyString += text[0];
@@ -18204,7 +18188,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 369:
 YY_RULE_SETUP
-#line 4344 "parser_cstyle.l"
+#line 4344 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyString += text[0];
@@ -18218,7 +18202,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 370:
 YY_RULE_SETUP
-#line 4355 "parser_cstyle.l"
+#line 4355 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyString += text[0];
@@ -18227,7 +18211,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 371:
 YY_RULE_SETUP
-#line 4361 "parser_cstyle.l"
+#line 4361 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyString += text[0];
@@ -18239,7 +18223,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 372:
 YY_RULE_SETUP
-#line 4370 "parser_cstyle.l"
+#line 4370 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       if (insidePHP) {
@@ -18251,7 +18235,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 373:
 YY_RULE_SETUP
-#line 4379 "parser_cstyle.l"
+#line 4379 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyString += text;
@@ -18259,7 +18243,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 374:
 YY_RULE_SETUP
-#line 4384 "parser_cstyle.l"
+#line 4384 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyString += cstyleYYtext; 
@@ -18268,7 +18252,7 @@ YY_RULE_SETUP
 case 375:
 /* rule 375 can match eol */
 YY_RULE_SETUP
-#line 4388 "parser_cstyle.l"
+#line 4388 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       lineCount();
@@ -18277,7 +18261,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 376:
 YY_RULE_SETUP
-#line 4394 "parser_cstyle.l"
+#line 4394 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyString += text[0];
@@ -18287,7 +18271,7 @@ YY_RULE_SETUP
 case 377:
 /* rule 377 can match eol */
 YY_RULE_SETUP
-#line 4400 "parser_cstyle.l"
+#line 4400 "parse_cstyle.l"
 {
        // start of included file marker
    }
@@ -18295,7 +18279,7 @@ YY_RULE_SETUP
 case 378:
 /* rule 378 can match eol */
 YY_RULE_SETUP
-#line 4404 "parser_cstyle.l"
+#line 4404 "parse_cstyle.l"
 { 
       // end of included file marker
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -18311,7 +18295,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 379:
 YY_RULE_SETUP
-#line 4417 "parser_cstyle.l"
+#line 4417 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyGString += text[0];
@@ -18322,7 +18306,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 380:
 YY_RULE_SETUP
-#line 4425 "parser_cstyle.l"
+#line 4425 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyGString += text[0];
@@ -18335,7 +18319,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 381:
 YY_RULE_SETUP
-#line 4435 "parser_cstyle.l"
+#line 4435 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyGString += text[0];
@@ -18344,7 +18328,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 382:
 YY_RULE_SETUP
-#line 4441 "parser_cstyle.l"
+#line 4441 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyGString += text[0];
@@ -18356,7 +18340,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 383:
 YY_RULE_SETUP
-#line 4450 "parser_cstyle.l"
+#line 4450 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -18370,7 +18354,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 384:
 YY_RULE_SETUP
-#line 4461 "parser_cstyle.l"
+#line 4461 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyGString += text;
@@ -18378,7 +18362,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 385:
 YY_RULE_SETUP
-#line 4466 "parser_cstyle.l"
+#line 4466 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyGString +=text;
@@ -18386,7 +18370,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 386:
 YY_RULE_SETUP
-#line 4471 "parser_cstyle.l"
+#line 4471 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       *pCopyCurlyGString += text; 
@@ -18395,7 +18379,7 @@ YY_RULE_SETUP
 case 387:
 /* rule 387 can match eol */
 YY_RULE_SETUP
-#line 4476 "parser_cstyle.l"
+#line 4476 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       lineCount();
@@ -18404,7 +18388,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 388:
 YY_RULE_SETUP
-#line 4482 "parser_cstyle.l"
+#line 4482 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       *pCopyCurlyGString += text[0];
@@ -18412,7 +18396,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 389:
 YY_RULE_SETUP
-#line 4487 "parser_cstyle.l"
+#line 4487 "parse_cstyle.l"
 {
       if (current->type.isEmpty() && current->name == "enum")  {
          // see bug 69041, C++11 style anon enum: 'enum : unsigned int {...}'
@@ -18438,7 +18422,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 390:
 YY_RULE_SETUP
-#line 4510 "parser_cstyle.l"
+#line 4510 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->bitfields += text[0];
@@ -18446,7 +18430,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 391:
 YY_RULE_SETUP
-#line 4515 "parser_cstyle.l"
+#line 4515 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->args += text[0];
@@ -18455,7 +18439,7 @@ YY_RULE_SETUP
 case 392:
 /* rule 392 can match eol */
 YY_RULE_SETUP
-#line 4520 "parser_cstyle.l"
+#line 4520 "parse_cstyle.l"
 {
       lineCount();
       current->args+=' ';
@@ -18463,7 +18447,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 393:
 YY_RULE_SETUP
-#line 4525 "parser_cstyle.l"
+#line 4525 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       QString oldType = current->type;
@@ -18539,7 +18523,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 394:
 YY_RULE_SETUP
-#line 4598 "parser_cstyle.l"
+#line 4598 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -18579,7 +18563,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 395:
 YY_RULE_SETUP
-#line 4635 "parser_cstyle.l"
+#line 4635 "parse_cstyle.l"
 {
       // end of IDL function attribute
       if (--squareCount <= 0) {
@@ -18594,7 +18578,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 396:
 YY_RULE_SETUP
-#line 4647 "parser_cstyle.l"
+#line 4647 "parse_cstyle.l"
 {
       if (Config::getBool("idl-support")) {
          current->mtype = MethodTypes::Property;
@@ -18605,7 +18589,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 397:
 YY_RULE_SETUP
-#line 4655 "parser_cstyle.l"
+#line 4655 "parse_cstyle.l"
 {
       if (Config::getBool("idl-support")) {
          current->mtype = MethodTypes::Property;
@@ -18616,7 +18600,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 398:
 YY_RULE_SETUP
-#line 4663 "parser_cstyle.l"
+#line 4663 "parse_cstyle.l"
 { 
       // UNO IDL property
       current->m_traits.setTrait(Entry::Virtue::Property);
@@ -18624,7 +18608,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 399:
 YY_RULE_SETUP
-#line 4668 "parser_cstyle.l"
+#line 4668 "parse_cstyle.l"
 { 
       // UNO IDL attribute
       current->m_traits.setTrait(Entry::Virtue::Attribute);
@@ -18632,7 +18616,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 400:
 YY_RULE_SETUP
-#line 4673 "parser_cstyle.l"
+#line 4673 "parse_cstyle.l"
 { 
       // on UNO IDL interface/service/attribute/property
       current->m_traits.setTrait(Entry::Virtue::Optional);      
@@ -18640,7 +18624,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 401:
 YY_RULE_SETUP
-#line 4678 "parser_cstyle.l"
+#line 4678 "parse_cstyle.l"
 { 
       // on UNO IDL attribute or property
       if (Config::getBool("idl-support") && odlProp) {        
@@ -18654,7 +18638,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 402:
 YY_RULE_SETUP
-#line 4689 "parser_cstyle.l"
+#line 4689 "parse_cstyle.l"
 { 
       // on UNO IDL attribute or property
       current->m_traits.setTrait(Entry::Virtue::Bound);      
@@ -18662,7 +18646,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 403:
 YY_RULE_SETUP
-#line 4694 "parser_cstyle.l"
+#line 4694 "parse_cstyle.l"
 { 
       // on UNO IDL property
       current->m_traits.setTrait(Entry::Virtue::Removable);
@@ -18670,7 +18654,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 404:
 YY_RULE_SETUP
-#line 4699 "parser_cstyle.l"
+#line 4699 "parse_cstyle.l"
 { 
       // on UNO IDL property
       current->m_traits.setTrait(Entry::Virtue::Constrained);
@@ -18678,7 +18662,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 405:
 YY_RULE_SETUP
-#line 4704 "parser_cstyle.l"
+#line 4704 "parse_cstyle.l"
 { 
       // on UNO IDL property
       current->m_traits.setTrait(Entry::Virtue::Transient);
@@ -18686,7 +18670,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 406:
 YY_RULE_SETUP
-#line 4709 "parser_cstyle.l"
+#line 4709 "parse_cstyle.l"
 { 
       // on UNO IDL property
       current->m_traits.setTrait(Entry::Virtue::MaybeVoid);
@@ -18694,7 +18678,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 407:
 YY_RULE_SETUP
-#line 4714 "parser_cstyle.l"
+#line 4714 "parse_cstyle.l"
 { 
       // on UNO IDL property
       current->m_traits.setTrait(Entry::Virtue::MaybeDefault);
@@ -18702,7 +18686,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 408:
 YY_RULE_SETUP
-#line 4719 "parser_cstyle.l"
+#line 4719 "parse_cstyle.l"
 { 
       // on UNO IDL property
       current->m_traits.setTrait(Entry::Virtue::MaybeAmbiguous);
@@ -18710,14 +18694,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 409:
 YY_RULE_SETUP
-#line 4724 "parser_cstyle.l"
+#line 4724 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 410:
 /* rule 410 can match eol */
 YY_RULE_SETUP
-#line 4727 "parser_cstyle.l"
+#line 4727 "parse_cstyle.l"
 {
       // return type (probably HRESULT) - skip it
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -18731,7 +18715,7 @@ YY_RULE_SETUP
 case 411:
 /* rule 411 can match eol */
 YY_RULE_SETUP
-#line 4737 "parser_cstyle.l"
+#line 4737 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->name = text;
@@ -18744,7 +18728,7 @@ YY_RULE_SETUP
 case 412:
 /* rule 412 can match eol */
 YY_RULE_SETUP
-#line 4746 "parser_cstyle.l"
+#line 4746 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -18759,7 +18743,7 @@ case 413:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 4754 "parser_cstyle.l"
+#line 4754 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       if (odlProp) {
@@ -18774,7 +18758,7 @@ YY_RULE_SETUP
 case 414:
 /* rule 414 can match eol */
 YY_RULE_SETUP
-#line 4765 "parser_cstyle.l"
+#line 4765 "parse_cstyle.l"
 {  
       // attribute of a parameter
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -18784,7 +18768,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 415:
 YY_RULE_SETUP
-#line 4772 "parser_cstyle.l"
+#line 4772 "parse_cstyle.l"
 {  
       // property type
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -18794,7 +18778,7 @@ YY_RULE_SETUP
 case 416:
 /* rule 416 can match eol */
 YY_RULE_SETUP
-#line 4778 "parser_cstyle.l"
+#line 4778 "parse_cstyle.l"
 {  
       // Rare: Another parameter ([propput] HRESULT Item(int index, [in] Type theRealProperty);)
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -18818,14 +18802,14 @@ YY_RULE_SETUP
 case 417:
 /* rule 417 can match eol */
 YY_RULE_SETUP
-#line 4798 "parser_cstyle.l"
+#line 4798 "parse_cstyle.l"
 {
       // the parameter name for the property - just skip.
    }
 	YY_BREAK
 case 418:
 YY_RULE_SETUP
-#line 4802 "parser_cstyle.l"
+#line 4802 "parse_cstyle.l"
 {
       current->fileName   = yyFileName;
       current->type       = idlProp;
@@ -18846,7 +18830,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 419:
 YY_RULE_SETUP
-#line 4820 "parser_cstyle.l"
+#line 4820 "parse_cstyle.l"
 { 
       // spaces, *, or other stuff
       // QString text = QString::fromUtf8(cstyleYYtext);  
@@ -18855,7 +18839,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 420:
 YY_RULE_SETUP
-#line 4826 "parser_cstyle.l"
+#line 4826 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->args += text[0];
@@ -18867,7 +18851,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 421:
 YY_RULE_SETUP
-#line 4835 "parser_cstyle.l"
+#line 4835 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -18879,7 +18863,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 422:
 YY_RULE_SETUP
-#line 4844 "parser_cstyle.l"
+#line 4844 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->args += text[0];
@@ -18888,7 +18872,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 423:
 YY_RULE_SETUP
-#line 4850 "parser_cstyle.l"
+#line 4850 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->args += text[0]; 
@@ -18896,14 +18880,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 424:
 YY_RULE_SETUP
-#line 4855 "parser_cstyle.l"
+#line 4855 "parse_cstyle.l"
 { 
       squareCount++; 
    }
 	YY_BREAK
 case 425:
 YY_RULE_SETUP
-#line 4859 "parser_cstyle.l"
+#line 4859 "parse_cstyle.l"
 {
       if (--squareCount <= 0)  {
          BEGIN( lastSquareContext );
@@ -18912,7 +18896,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 426:
 YY_RULE_SETUP
-#line 4865 "parser_cstyle.l"
+#line 4865 "parse_cstyle.l"
 {
       lastStringContext=YY_START;
       BEGIN( SkipString );
@@ -18920,12 +18904,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 427:
 YY_RULE_SETUP
-#line 4870 "parser_cstyle.l"
+#line 4870 "parse_cstyle.l"
 
 	YY_BREAK
 case 428:
 YY_RULE_SETUP
-#line 4871 "parser_cstyle.l"
+#line 4871 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       addType( current );
@@ -18935,7 +18919,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 429:
 YY_RULE_SETUP
-#line 4878 "parser_cstyle.l"
+#line 4878 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->type += text[0];
@@ -18946,7 +18930,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 430:
 YY_RULE_SETUP
-#line 4886 "parser_cstyle.l"
+#line 4886 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->type += text[0];
@@ -18956,7 +18940,7 @@ YY_RULE_SETUP
 case 431:
 /* rule 431 can match eol */
 YY_RULE_SETUP
-#line 4892 "parser_cstyle.l"
+#line 4892 "parse_cstyle.l"
 {
       current->type += ' ';
       lineCount();
@@ -18964,7 +18948,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 432:
 YY_RULE_SETUP
-#line 4897 "parser_cstyle.l"
+#line 4897 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->type += text[0]; 
@@ -18972,7 +18956,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 433:
 YY_RULE_SETUP
-#line 4902 "parser_cstyle.l"
+#line 4902 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->bodyLine = yyLineNr;
@@ -18981,7 +18965,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 434:
 YY_RULE_SETUP
-#line 4908 "parser_cstyle.l"
+#line 4908 "parse_cstyle.l"
 {
       // Java enum initializer
       unput('(');
@@ -18993,7 +18977,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 435:
 YY_RULE_SETUP
-#line 4917 "parser_cstyle.l"
+#line 4917 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       lastInitializerContext = YY_START;
@@ -19004,7 +18988,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 436:
 YY_RULE_SETUP
-#line 4925 "parser_cstyle.l"
+#line 4925 "parse_cstyle.l"
 {
       if (insideJava)   {
          // last enum field in Java class
@@ -19033,19 +19017,19 @@ YY_RULE_SETUP
 case 437:
 /* rule 437 can match eol */
 YY_RULE_SETUP
-#line 4950 "parser_cstyle.l"
+#line 4950 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 438:
 YY_RULE_SETUP
-#line 4954 "parser_cstyle.l"
+#line 4954 "parse_cstyle.l"
 
 	YY_BREAK
 case 439:
 YY_RULE_SETUP
-#line 4955 "parser_cstyle.l"
+#line 4955 "parse_cstyle.l"
 {
       if (! current->name.isEmpty()) {
 
@@ -19091,7 +19075,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 440:
 YY_RULE_SETUP
-#line 4998 "parser_cstyle.l"
+#line 4998 "parse_cstyle.l"
 { 
       // attribute list in IDL
       squareCount=1;
@@ -19107,7 +19091,7 @@ YY_RULE_SETUP
   */
 case 441:
 YY_RULE_SETUP
-#line 5012 "parser_cstyle.l"
+#line 5012 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->m_program += text; 
@@ -19115,7 +19099,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 442:
 YY_RULE_SETUP
-#line 5017 "parser_cstyle.l"
+#line 5017 "parse_cstyle.l"
 { 
       // read a comment 
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -19124,7 +19108,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 443:
 YY_RULE_SETUP
-#line 5023 "parser_cstyle.l"
+#line 5023 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -19138,7 +19122,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 444:
 YY_RULE_SETUP
-#line 5034 "parser_cstyle.l"
+#line 5034 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       
@@ -19150,7 +19134,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 445:
 YY_RULE_SETUP
-#line 5043 "parser_cstyle.l"
+#line 5043 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -19167,7 +19151,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 446:
 YY_RULE_SETUP
-#line 5057 "parser_cstyle.l"
+#line 5057 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -19179,7 +19163,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 447:
 YY_RULE_SETUP
-#line 5066 "parser_cstyle.l"
+#line 5066 "parse_cstyle.l"
 { 
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -19192,7 +19176,7 @@ YY_RULE_SETUP
 case 448:
 /* rule 448 can match eol */
 YY_RULE_SETUP
-#line 5075 "parser_cstyle.l"
+#line 5075 "parse_cstyle.l"
 { 
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -19205,7 +19189,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 449:
 YY_RULE_SETUP
-#line 5085 "parser_cstyle.l"
+#line 5085 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -19223,7 +19207,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 450:
 YY_RULE_SETUP
-#line 5100 "parser_cstyle.l"
+#line 5100 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -19238,7 +19222,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 451:
 YY_RULE_SETUP
-#line 5112 "parser_cstyle.l"
+#line 5112 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->m_program += text;
@@ -19247,7 +19231,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 452:
 YY_RULE_SETUP
-#line 5118 "parser_cstyle.l"
+#line 5118 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);  
       current->m_program += text;
@@ -19256,7 +19240,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 453:
 YY_RULE_SETUP
-#line 5124 "parser_cstyle.l"
+#line 5124 "parse_cstyle.l"
 {     
       QString text = QString::fromUtf8(cstyleYYtext);
   
@@ -19335,7 +19319,7 @@ YY_RULE_SETUP
 case 454:
 /* rule 454 can match eol */
 YY_RULE_SETUP
-#line 5199 "parser_cstyle.l"
+#line 5199 "parse_cstyle.l"
 {       
       QString text = QString::fromUtf8(cstyleYYtext);  
 
@@ -19361,7 +19345,7 @@ YY_RULE_SETUP
 case 455:
 /* rule 455 can match eol */
 YY_RULE_SETUP
-#line 5221 "parser_cstyle.l"
+#line 5221 "parse_cstyle.l"
 { 
       // late "const" or "volatile" keyword
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -19371,7 +19355,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 456:
 YY_RULE_SETUP
-#line 5228 "parser_cstyle.l"
+#line 5228 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
 
@@ -19400,7 +19384,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 457:
 YY_RULE_SETUP
-#line 5254 "parser_cstyle.l"
+#line 5254 "parse_cstyle.l"
 { 
       /* typedef of anonymous type */
       current->name = QString("@%1").arg(anonCount++);
@@ -19426,7 +19410,7 @@ YY_RULE_SETUP
 case 458:
 /* rule 458 can match eol */
 YY_RULE_SETUP
-#line 5276 "parser_cstyle.l"
+#line 5276 "parse_cstyle.l"
 { 
       // the [] part could be improved.
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -19473,7 +19457,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 459:
 YY_RULE_SETUP
-#line 5320 "parser_cstyle.l"
+#line 5320 "parse_cstyle.l"
 { 
       // function with struct return type
       addType(current);
@@ -19486,7 +19470,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 460:
 YY_RULE_SETUP
-#line 5330 "parser_cstyle.l"
+#line 5330 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
 
@@ -19626,7 +19610,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 461:
 YY_RULE_SETUP
-#line 5467 "parser_cstyle.l"
+#line 5467 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lastInitializerContext = YY_START;
@@ -19645,14 +19629,14 @@ YY_RULE_SETUP
   */
 case 462:
 YY_RULE_SETUP
-#line 5484 "parser_cstyle.l"
+#line 5484 "parse_cstyle.l"
 { 
       BEGIN(MemberSpec); 
    }
 	YY_BREAK
 case 463:
 YY_RULE_SETUP
-#line 5488 "parser_cstyle.l"
+#line 5488 "parse_cstyle.l"
 { 
       unput(';'); 
       BEGIN(MemberSpec); 
@@ -19661,7 +19645,7 @@ YY_RULE_SETUP
 case 464:
 /* rule 464 can match eol */
 YY_RULE_SETUP
-#line 5493 "parser_cstyle.l"
+#line 5493 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->m_program += text;
@@ -19674,7 +19658,7 @@ case 465:
 (yy_c_buf_p) = yy_cp = yy_bp + 4;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5499 "parser_cstyle.l"
+#line 5499 "parse_cstyle.l"
 { 
       // end of Objective C block
       current_root->addSubEntry( current, current_root);
@@ -19689,7 +19673,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 466:
 YY_RULE_SETUP
-#line 5511 "parser_cstyle.l"
+#line 5511 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->m_program += text; 
@@ -19700,11 +19684,11 @@ case 467:
 *yy_cp = (yy_hold_char); /* undo effects of setting up cstyleYYtext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
-#line 5517 "parser_cstyle.l"
+#line 5517 "parse_cstyle.l"
 case 468:
 /* rule 468 can match eol */
 YY_RULE_SETUP
-#line 5517 "parser_cstyle.l"
+#line 5517 "parse_cstyle.l"
 {   
       /* typedef void (A::*ptr_t)(args...) or int (*func(int))[], the ^ is for Obj-C blocks */
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -19725,7 +19709,7 @@ YY_RULE_SETUP
 case 469:
 /* rule 469 can match eol */
 YY_RULE_SETUP
-#line 5534 "parser_cstyle.l"
+#line 5534 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);     
       current->name = text;
@@ -19744,7 +19728,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 470:
 YY_RULE_SETUP
-#line 5550 "parser_cstyle.l"
+#line 5550 "parse_cstyle.l"
 {
       // printf("error: FuncPtr `%c' unexpected at line %d of %s\n",*cstyleYYtext,yyLineNr,yyFileName);
    }
@@ -19755,7 +19739,7 @@ case 471:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5554 "parser_cstyle.l"
+#line 5554 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);    
       current->name += text;
@@ -19766,7 +19750,7 @@ YY_RULE_SETUP
 case 472:
 /* rule 472 can match eol */
 YY_RULE_SETUP
-#line 5561 "parser_cstyle.l"
+#line 5561 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -19775,7 +19759,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 473:
 YY_RULE_SETUP
-#line 5567 "parser_cstyle.l"
+#line 5567 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN( EndFuncPtr );
@@ -19783,7 +19767,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 474:
 YY_RULE_SETUP
-#line 5572 "parser_cstyle.l"
+#line 5572 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text[0];
@@ -19795,7 +19779,7 @@ case 475:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5577 "parser_cstyle.l"
+#line 5577 "parse_cstyle.l"
 { 
       // a variable with extra braces
       lineCount();
@@ -19809,7 +19793,7 @@ case 476:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5584 "parser_cstyle.l"
+#line 5584 "parse_cstyle.l"
 { 
       // a function pointer
       lineCount();
@@ -19823,7 +19807,7 @@ case 477:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5591 "parser_cstyle.l"
+#line 5591 "parse_cstyle.l"
 { 
       // an array of variables
       lineCount();
@@ -19834,7 +19818,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 478:
 YY_RULE_SETUP
-#line 5599 "parser_cstyle.l"
+#line 5599 "parse_cstyle.l"
 { 
       // a function returning a function or
       // a function returning a pointer to an array
@@ -19850,7 +19834,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 479:
 YY_RULE_SETUP
-#line 5612 "parser_cstyle.l"
+#line 5612 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       funcPtrType += text;
@@ -19858,14 +19842,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 480:
 YY_RULE_SETUP
-#line 5617 "parser_cstyle.l"
+#line 5617 "parse_cstyle.l"
 {
       BEGIN(FindMembers);
    }
 	YY_BREAK
 case 481:
 YY_RULE_SETUP
-#line 5621 "parser_cstyle.l"
+#line 5621 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       current->args += text[0];
@@ -19874,7 +19858,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 482:
 YY_RULE_SETUP
-#line 5627 "parser_cstyle.l"
+#line 5627 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0];
@@ -19889,7 +19873,7 @@ YY_RULE_SETUP
 case 483:
 /* rule 483 can match eol */
 YY_RULE_SETUP
-#line 5638 "parser_cstyle.l"
+#line 5638 "parse_cstyle.l"
 {
       lineCount();
       current->type += funcPtrType + ")(";
@@ -19902,7 +19886,7 @@ case 484:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5644 "parser_cstyle.l"
+#line 5644 "parse_cstyle.l"
 {
       lineCount();
       current->type += funcPtrType.mid(1);
@@ -19915,7 +19899,7 @@ case 485:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5650 "parser_cstyle.l"
+#line 5650 "parse_cstyle.l"
 { // function returning a pointer to an array
       lineCount();
       current->type += funcPtrType;
@@ -19925,7 +19909,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 486:
 YY_RULE_SETUP
-#line 5657 "parser_cstyle.l"
+#line 5657 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);     
       current->args += text[0];
@@ -19933,7 +19917,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 487:
 YY_RULE_SETUP
-#line 5662 "parser_cstyle.l"
+#line 5662 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += text[0];
@@ -19942,7 +19926,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 488:
 YY_RULE_SETUP
-#line 5668 "parser_cstyle.l"
+#line 5668 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += text[0];
@@ -19957,7 +19941,7 @@ YY_RULE_SETUP
 case 489:
 /* rule 489 can match eol */
 YY_RULE_SETUP
-#line 5679 "parser_cstyle.l"
+#line 5679 "parse_cstyle.l"
 { 
       lineCount();
       current->type += ", " ; 
@@ -19966,7 +19950,7 @@ YY_RULE_SETUP
 case 490:
 /* rule 490 can match eol */
 YY_RULE_SETUP
-#line 5684 "parser_cstyle.l"
+#line 5684 "parse_cstyle.l"
 { 
       lineCount();
       current->type += ' ' ; 
@@ -19974,7 +19958,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 491:
 YY_RULE_SETUP
-#line 5689 "parser_cstyle.l"
+#line 5689 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += text[0];
@@ -19986,7 +19970,7 @@ case 492:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5694 "parser_cstyle.l"
+#line 5694 "parse_cstyle.l"
 { 
       // for catching typedef void (__stdcall *f)() like definitions
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -20012,7 +19996,7 @@ YY_RULE_SETUP
 case 493:
 /* rule 493 can match eol */
 YY_RULE_SETUP
-#line 5716 "parser_cstyle.l"
+#line 5716 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -20025,7 +20009,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 494:
 YY_RULE_SETUP
-#line 5726 "parser_cstyle.l"
+#line 5726 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -20049,7 +20033,7 @@ YY_RULE_SETUP
 /* Function argument reading rules */
 case 495:
 YY_RULE_SETUP
-#line 5749 "parser_cstyle.l"
+#line 5749 "parse_cstyle.l"
 {       
       QString text = QString::fromUtf8(cstyleYYtext);
       *copyArgString += text;
@@ -20058,7 +20042,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 496:
 YY_RULE_SETUP
-#line 5755 "parser_cstyle.l"
+#line 5755 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       *copyArgString += text;
@@ -20067,7 +20051,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 497:
 YY_RULE_SETUP
-#line 5761 "parser_cstyle.l"
+#line 5761 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *copyArgString += text;
@@ -20077,7 +20061,7 @@ YY_RULE_SETUP
 case 498:
 /* rule 498 can match eol */
 YY_RULE_SETUP
-#line 5767 "parser_cstyle.l"
+#line 5767 "parse_cstyle.l"
 {
       *copyArgString+=" ";
       fullArgString+=" ";
@@ -20087,7 +20071,7 @@ YY_RULE_SETUP
 case 499:
 /* rule 499 can match eol */
 YY_RULE_SETUP
-#line 5773 "parser_cstyle.l"
+#line 5773 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       s_delimiter = text.mid(2);
@@ -20101,7 +20085,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 500:
 YY_RULE_SETUP
-#line 5784 "parser_cstyle.l"
+#line 5784 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *copyArgString += text[0];
@@ -20112,7 +20096,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 501:
 YY_RULE_SETUP
-#line 5792 "parser_cstyle.l"
+#line 5792 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       *copyArgString += text[0];
@@ -20124,7 +20108,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 502:
 YY_RULE_SETUP
-#line 5801 "parser_cstyle.l"
+#line 5801 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -20149,7 +20133,7 @@ YY_RULE_SETUP
 /* a special comment */
 case 503:
 YY_RULE_SETUP
-#line 5823 "parser_cstyle.l"
+#line 5823 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -20182,14 +20166,14 @@ YY_RULE_SETUP
 /* a non-special comment */
 case 504:
 YY_RULE_SETUP
-#line 5853 "parser_cstyle.l"
+#line 5853 "parse_cstyle.l"
 { 
       /* empty comment */ 
    }
 	YY_BREAK
 case 505:
 YY_RULE_SETUP
-#line 5857 "parser_cstyle.l"
+#line 5857 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       lastCContext = YY_START;
@@ -20198,7 +20182,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 506:
 YY_RULE_SETUP
-#line 5863 "parser_cstyle.l"
+#line 5863 "parse_cstyle.l"
 {
       lastCContext = YY_START;
       BEGIN( SkipCxxComment );
@@ -20224,7 +20208,7 @@ YY_RULE_SETUP
 case 507:
 /* rule 507 can match eol */
 YY_RULE_SETUP
-#line 5886 "parser_cstyle.l"
+#line 5886 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -20263,12 +20247,12 @@ YY_RULE_SETUP
 case 508:
 /* rule 508 can match eol */
 YY_RULE_SETUP
-#line 5921 "parser_cstyle.l"
+#line 5921 "parse_cstyle.l"
 
 	YY_BREAK
 case 509:
 YY_RULE_SETUP
-#line 5922 "parser_cstyle.l"
+#line 5922 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       fullArgString += text; 
@@ -20276,7 +20260,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 510:
 YY_RULE_SETUP
-#line 5927 "parser_cstyle.l"
+#line 5927 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       fullArgString += text;
@@ -20290,7 +20274,7 @@ YY_RULE_SETUP
 case 511:
 /* rule 511 can match eol */
 YY_RULE_SETUP
-#line 5937 "parser_cstyle.l"
+#line 5937 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       fullArgString += text;
@@ -20309,7 +20293,7 @@ case 512:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5949 "parser_cstyle.l"
+#line 5949 "parse_cstyle.l"
 { 
       // verbatim command (which could contain nested comments!)
       QString text = QString::fromUtf8(cstyleYYtext);   
@@ -20322,7 +20306,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 513:
 YY_RULE_SETUP
-#line 5959 "parser_cstyle.l"
+#line 5959 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
 
@@ -20346,7 +20330,7 @@ case 514:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 5976 "parser_cstyle.l"
+#line 5976 "parse_cstyle.l"
 { 
       // end of verbatim block
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -20364,7 +20348,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 515:
 YY_RULE_SETUP
-#line 5991 "parser_cstyle.l"
+#line 5991 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       fullArgString += text; 
@@ -20372,7 +20356,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 516:
 YY_RULE_SETUP
-#line 5996 "parser_cstyle.l"
+#line 5996 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       fullArgString += text[0]; 
@@ -20381,7 +20365,7 @@ YY_RULE_SETUP
 case 517:
 /* rule 517 can match eol */
 YY_RULE_SETUP
-#line 6000 "parser_cstyle.l"
+#line 6000 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       fullArgString += text[0]; 
@@ -20390,7 +20374,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 518:
 YY_RULE_SETUP
-#line 6006 "parser_cstyle.l"
+#line 6006 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       fullArgString += text[0]; 
@@ -20398,7 +20382,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 519:
 YY_RULE_SETUP
-#line 6012 "parser_cstyle.l"
+#line 6012 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       warn(yyFileName,yyLineNr, "Ignoring %c brief command inside argument documentation", csPrintable(text[0]) );
@@ -20407,7 +20391,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 520:
 YY_RULE_SETUP
-#line 6018 "parser_cstyle.l"
+#line 6018 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20418,7 +20402,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 521:
 YY_RULE_SETUP
-#line 6026 "parser_cstyle.l"
+#line 6026 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20430,7 +20414,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 522:
 YY_RULE_SETUP
-#line 6035 "parser_cstyle.l"
+#line 6035 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       argRoundCount++;
@@ -20440,7 +20424,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 523:
 YY_RULE_SETUP
-#line 6042 "parser_cstyle.l"
+#line 6042 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20453,7 +20437,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 524:
 YY_RULE_SETUP
-#line 6052 "parser_cstyle.l"
+#line 6052 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20465,7 +20449,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 525:
 YY_RULE_SETUP
-#line 6061 "parser_cstyle.l"
+#line 6061 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       argSharpCount++;
@@ -20475,7 +20459,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 526:
 YY_RULE_SETUP
-#line 6068 "parser_cstyle.l"
+#line 6068 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20493,7 +20477,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 527:
 YY_RULE_SETUP
-#line 6083 "parser_cstyle.l"
+#line 6083 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text;
@@ -20502,7 +20486,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 528:
 YY_RULE_SETUP
-#line 6089 "parser_cstyle.l"
+#line 6089 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20512,7 +20496,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 529:
 YY_RULE_SETUP
-#line 6096 "parser_cstyle.l"
+#line 6096 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20522,7 +20506,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 530:
 YY_RULE_SETUP
-#line 6103 "parser_cstyle.l"
+#line 6103 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       if (insidePHP) {
@@ -20535,7 +20519,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 531:
 YY_RULE_SETUP
-#line 6113 "parser_cstyle.l"
+#line 6113 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text;
@@ -20550,7 +20534,7 @@ YY_RULE_SETUP
 case 532:
 /* rule 532 can match eol */
 YY_RULE_SETUP
-#line 6124 "parser_cstyle.l"
+#line 6124 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       lineCount();
@@ -20560,7 +20544,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 533:
 YY_RULE_SETUP
-#line 6131 "parser_cstyle.l"
+#line 6131 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       *copyArgString += text[0];
@@ -20569,7 +20553,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 534:
 YY_RULE_SETUP
-#line 6137 "parser_cstyle.l"
+#line 6137 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->args += text[0];
@@ -20578,7 +20562,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 535:
 YY_RULE_SETUP
-#line 6143 "parser_cstyle.l"
+#line 6143 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->args += text[0];
@@ -20600,7 +20584,7 @@ YY_RULE_SETUP
   */
 case 536:
 YY_RULE_SETUP
-#line 6163 "parser_cstyle.l"
+#line 6163 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -20617,7 +20601,7 @@ YY_RULE_SETUP
 case 537:
 /* rule 537 can match eol */
 YY_RULE_SETUP
-#line 6176 "parser_cstyle.l"
+#line 6176 "parse_cstyle.l"
 { 
       // pure virtual member function
       lineCount() ;
@@ -20628,7 +20612,7 @@ YY_RULE_SETUP
 case 538:
 /* rule 538 can match eol */
 YY_RULE_SETUP
-#line 6183 "parser_cstyle.l"
+#line 6183 "parse_cstyle.l"
 { 
       // C++11 overridden virtual member function
       lineCount();
@@ -20642,7 +20626,7 @@ YY_RULE_SETUP
 case 539:
 /* rule 539 can match eol */
 YY_RULE_SETUP
-#line 6193 "parser_cstyle.l"
+#line 6193 "parse_cstyle.l"
 { 
       // C++11 final method
       lineCount();
@@ -20656,7 +20640,7 @@ YY_RULE_SETUP
 case 540:
 /* rule 540 can match eol */
 YY_RULE_SETUP
-#line 6203 "parser_cstyle.l"
+#line 6203 "parse_cstyle.l"
 { 
       // sealed member function
       lineCount() ;
@@ -20667,7 +20651,7 @@ YY_RULE_SETUP
 case 541:
 /* rule 541 can match eol */
 YY_RULE_SETUP
-#line 6210 "parser_cstyle.l"
+#line 6210 "parse_cstyle.l"
 { 
       // new member function
       lineCount() ;
@@ -20678,7 +20662,7 @@ YY_RULE_SETUP
 case 542:
 /* rule 542 can match eol */
 YY_RULE_SETUP
-#line 6217 "parser_cstyle.l"
+#line 6217 "parse_cstyle.l"
 { 
       // const member function
       lineCount() ;
@@ -20689,7 +20673,7 @@ YY_RULE_SETUP
 case 543:
 /* rule 543 can match eol */
 YY_RULE_SETUP
-#line 6224 "parser_cstyle.l"
+#line 6224 "parse_cstyle.l"
 { 
       // volatile member function
       lineCount() ;
@@ -20700,7 +20684,7 @@ YY_RULE_SETUP
 case 544:
 /* rule 544 can match eol */
 YY_RULE_SETUP
-#line 6231 "parser_cstyle.l"
+#line 6231 "parse_cstyle.l"
 { 
       // noexcept qualifier
       lineCount() ;
@@ -20711,7 +20695,7 @@ YY_RULE_SETUP
 case 545:
 /* rule 545 can match eol */
 YY_RULE_SETUP
-#line 6238 "parser_cstyle.l"
+#line 6238 "parse_cstyle.l"
 { 
       // noexcept expression
       lineCount() ;
@@ -20726,7 +20710,7 @@ YY_RULE_SETUP
 case 546:
 /* rule 546 can match eol */
 YY_RULE_SETUP
-#line 6249 "parser_cstyle.l"
+#line 6249 "parse_cstyle.l"
 { 
       // pure virtual member function
       lineCount() ;
@@ -20739,7 +20723,7 @@ YY_RULE_SETUP
 case 547:
 /* rule 547 can match eol */
 YY_RULE_SETUP
-#line 6258 "parser_cstyle.l"
+#line 6258 "parse_cstyle.l"
 { 
       // C++11 explicitly delete member
       lineCount();
@@ -20752,7 +20736,7 @@ YY_RULE_SETUP
 case 548:
 /* rule 548 can match eol */
 YY_RULE_SETUP
-#line 6267 "parser_cstyle.l"
+#line 6267 "parse_cstyle.l"
 { 
       // C++11 explicitly defaulted constructor/assignment operator
       lineCount();
@@ -20764,7 +20748,7 @@ YY_RULE_SETUP
 case 549:
 /* rule 549 can match eol */
 YY_RULE_SETUP
-#line 6275 "parser_cstyle.l"
+#line 6275 "parse_cstyle.l"
 {
       lineCount();
       current->argList.trailingReturnType = " -> ";
@@ -20774,7 +20758,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 550:
 YY_RULE_SETUP
-#line 6282 "parser_cstyle.l"
+#line 6282 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN(FuncQual);
@@ -20782,7 +20766,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 551:
 YY_RULE_SETUP
-#line 6287 "parser_cstyle.l"
+#line 6287 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->argList.trailingReturnType += text;
@@ -20792,7 +20776,7 @@ YY_RULE_SETUP
 case 552:
 /* rule 552 can match eol */
 YY_RULE_SETUP
-#line 6293 "parser_cstyle.l"
+#line 6293 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       lineCount();
@@ -20803,7 +20787,7 @@ YY_RULE_SETUP
 case 553:
 /* rule 553 can match eol */
 YY_RULE_SETUP
-#line 6300 "parser_cstyle.l"
+#line 6300 "parse_cstyle.l"
 {
       lineCount();
       current->args += ", " ;
@@ -20812,7 +20796,7 @@ YY_RULE_SETUP
 case 554:
 /* rule 554 can match eol */
 YY_RULE_SETUP
-#line 6305 "parser_cstyle.l"
+#line 6305 "parse_cstyle.l"
 {
       lineCount() ;
       current->args += ' ' ;
@@ -20820,7 +20804,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 555:
 YY_RULE_SETUP
-#line 6310 "parser_cstyle.l"
+#line 6310 "parse_cstyle.l"
 { 
       if (insidePHP)  {
          REJECT;
@@ -20831,7 +20815,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 556:
 YY_RULE_SETUP
-#line 6318 "parser_cstyle.l"
+#line 6318 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -20849,13 +20833,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 557:
 YY_RULE_SETUP
-#line 6333 "parser_cstyle.l"
+#line 6333 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 558:
 YY_RULE_SETUP
-#line 6336 "parser_cstyle.l"
+#line 6336 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN(FuncQual);
@@ -20864,20 +20848,20 @@ YY_RULE_SETUP
 case 559:
 /* rule 559 can match eol */
 YY_RULE_SETUP
-#line 6341 "parser_cstyle.l"
+#line 6341 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 560:
 YY_RULE_SETUP
-#line 6345 "parser_cstyle.l"
+#line 6345 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 561:
 YY_RULE_SETUP
-#line 6348 "parser_cstyle.l"
+#line 6348 "parse_cstyle.l"
 {
       unput(*cstyleYYtext);
       BEGIN(FuncQual);
@@ -20885,7 +20869,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 562:
 YY_RULE_SETUP
-#line 6353 "parser_cstyle.l"
+#line 6353 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0];
@@ -20896,7 +20880,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 563:
 YY_RULE_SETUP
-#line 6361 "parser_cstyle.l"
+#line 6361 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0];
@@ -20909,7 +20893,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 564:
 YY_RULE_SETUP
-#line 6371 "parser_cstyle.l"
+#line 6371 "parse_cstyle.l"
 {
       if (insidePHP) {
          REJECT;
@@ -20920,7 +20904,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 565:
 YY_RULE_SETUP
-#line 6379 "parser_cstyle.l"
+#line 6379 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text;
@@ -20928,7 +20912,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 566:
 YY_RULE_SETUP
-#line 6384 "parser_cstyle.l"
+#line 6384 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0];
@@ -20937,7 +20921,7 @@ YY_RULE_SETUP
 case 567:
 /* rule 567 can match eol */
 YY_RULE_SETUP
-#line 6389 "parser_cstyle.l"
+#line 6389 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0];
@@ -20946,7 +20930,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 568:
 YY_RULE_SETUP
-#line 6395 "parser_cstyle.l"
+#line 6395 "parse_cstyle.l"
 { 
       // typically a K&R style C function
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -20970,7 +20954,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 569:
 YY_RULE_SETUP
-#line 6416 "parser_cstyle.l"
+#line 6416 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       QString oldStyleArgPtr;
@@ -21001,7 +20985,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 570:
 YY_RULE_SETUP
-#line 6444 "parser_cstyle.l"
+#line 6444 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text; 
@@ -21009,7 +20993,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 571:
 YY_RULE_SETUP
-#line 6449 "parser_cstyle.l"
+#line 6449 "parse_cstyle.l"
 {
       current->args = argListToString(&current->argList);
       unput('{');
@@ -21018,7 +21002,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 572:
 YY_RULE_SETUP
-#line 6455 "parser_cstyle.l"
+#line 6455 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);      
       current->args += text[0]; 
@@ -21026,7 +21010,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 573:
 YY_RULE_SETUP
-#line 6460 "parser_cstyle.l"
+#line 6460 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0]; 
@@ -21034,11 +21018,11 @@ YY_RULE_SETUP
 	YY_BREAK
 case 574:
 /* rule 574 can match eol */
-#line 6466 "parser_cstyle.l"
+#line 6466 "parse_cstyle.l"
 case 575:
 /* rule 575 can match eol */
 YY_RULE_SETUP
-#line 6466 "parser_cstyle.l"
+#line 6466 "parse_cstyle.l"
 { 
       /* try-function-block */
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -21054,7 +21038,7 @@ YY_RULE_SETUP
 case 576:
 /* rule 576 can match eol */
 YY_RULE_SETUP
-#line 6478 "parser_cstyle.l"
+#line 6478 "parse_cstyle.l"
 { 
       // C++ style throw clause
       current->exception = " throw (";
@@ -21066,7 +21050,7 @@ YY_RULE_SETUP
 case 577:
 /* rule 577 can match eol */
 YY_RULE_SETUP
-#line 6486 "parser_cstyle.l"
+#line 6486 "parse_cstyle.l"
 {
       current->exception = " raises (" ;
       lineCount() ;
@@ -21077,7 +21061,7 @@ YY_RULE_SETUP
 case 578:
 /* rule 578 can match eol */
 YY_RULE_SETUP
-#line 6493 "parser_cstyle.l"
+#line 6493 "parse_cstyle.l"
 { 
       // Java style throw clause
       current->exception = " throws " ;
@@ -21087,7 +21071,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 579:
 YY_RULE_SETUP
-#line 6500 "parser_cstyle.l"
+#line 6500 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->exception += text[0];
@@ -21096,7 +21080,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 580:
 YY_RULE_SETUP
-#line 6506 "parser_cstyle.l"
+#line 6506 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->exception += text[0];
@@ -21108,7 +21092,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 581:
 YY_RULE_SETUP
-#line 6515 "parser_cstyle.l"
+#line 6515 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->exception += text[0];
@@ -21116,7 +21100,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 582:
 YY_RULE_SETUP
-#line 6520 "parser_cstyle.l"
+#line 6520 "parse_cstyle.l"
 {
       unput('{'); 
       BEGIN( FuncQual );
@@ -21124,7 +21108,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 583:
 YY_RULE_SETUP
-#line 6525 "parser_cstyle.l"
+#line 6525 "parse_cstyle.l"
 {
       unput(';'); 
       BEGIN( FuncQual );
@@ -21133,7 +21117,7 @@ YY_RULE_SETUP
 case 584:
 /* rule 584 can match eol */
 YY_RULE_SETUP
-#line 6530 "parser_cstyle.l"
+#line 6530 "parse_cstyle.l"
 {
       current->exception += ' ';
       lineCount();
@@ -21141,7 +21125,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 585:
 YY_RULE_SETUP
-#line 6535 "parser_cstyle.l"
+#line 6535 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->exception += text[0];
@@ -21149,7 +21133,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 586:
 YY_RULE_SETUP
-#line 6540 "parser_cstyle.l"
+#line 6540 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += current->name;
@@ -21161,7 +21145,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 587:
 YY_RULE_SETUP
-#line 6549 "parser_cstyle.l"
+#line 6549 "parse_cstyle.l"
 {
       if (! insidePHP) {
          BEGIN(SkipInits);
@@ -21170,7 +21154,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 588:
 YY_RULE_SETUP
-#line 6555 "parser_cstyle.l"
+#line 6555 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -21319,7 +21303,7 @@ YY_RULE_SETUP
 case 589:
 /* rule 589 can match eol */
 YY_RULE_SETUP
-#line 6700 "parser_cstyle.l"
+#line 6700 "parse_cstyle.l"
 { 
       // C++11 style initializer (see bug 688647)
       lineCount();
@@ -21329,14 +21313,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 590:
 YY_RULE_SETUP
-#line 6707 "parser_cstyle.l"
+#line 6707 "parse_cstyle.l"
 {
       ++curlyCount;
    }
 	YY_BREAK
 case 591:
 YY_RULE_SETUP
-#line 6711 "parser_cstyle.l"
+#line 6711 "parse_cstyle.l"
 {
       if (--curlyCount <= 0) {
          BEGIN(SkipInits);
@@ -21345,14 +21329,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 592:
 YY_RULE_SETUP
-#line 6717 "parser_cstyle.l"
+#line 6717 "parse_cstyle.l"
 {
       BEGIN(lastC11AttributeContext);
    }
 	YY_BREAK
 case 593:
 YY_RULE_SETUP
-#line 6721 "parser_cstyle.l"
+#line 6721 "parse_cstyle.l"
 { 
       // C++11 style initializer
       unput('{');
@@ -21361,7 +21345,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 594:
 YY_RULE_SETUP
-#line 6727 "parser_cstyle.l"
+#line 6727 "parse_cstyle.l"
 {
       ++curlyCount ;
    }
@@ -21371,11 +21355,11 @@ case 595:
 *yy_cp = (yy_hold_char); /* undo effects of setting up cstyleYYtext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
-#line 6732 "parser_cstyle.l"
+#line 6732 "parse_cstyle.l"
 case 596:
 /* rule 596 can match eol */
 YY_RULE_SETUP
-#line 6732 "parser_cstyle.l"
+#line 6732 "parse_cstyle.l"
 {
       if (curlyCount)  {
          --curlyCount;
@@ -21403,7 +21387,7 @@ YY_RULE_SETUP
 case 597:
 /* rule 597 can match eol */
 YY_RULE_SETUP
-#line 6756 "parser_cstyle.l"
+#line 6756 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -21444,7 +21428,7 @@ YY_RULE_SETUP
 case 598:
 /* rule 598 can match eol */
 YY_RULE_SETUP
-#line 6793 "parser_cstyle.l"
+#line 6793 "parse_cstyle.l"
 { 
 
       // */ (editor syntax fix)
@@ -21474,7 +21458,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 599:
 YY_RULE_SETUP
-#line 6820 "parser_cstyle.l"
+#line 6820 "parse_cstyle.l"
 {
       // addToBody ("}");
       if (tempEntry) {
@@ -21487,7 +21471,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 600:
 YY_RULE_SETUP
-#line 6830 "parser_cstyle.l"
+#line 6830 "parse_cstyle.l"
 {
       lastStringContext = SkipCurly;
       BEGIN( SkipString );
@@ -21495,7 +21479,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 601:
 YY_RULE_SETUP
-#line 6835 "parser_cstyle.l"
+#line 6835 "parse_cstyle.l"
 {
       if (insidePHP) {
          REJECT;
@@ -21507,14 +21491,14 @@ YY_RULE_SETUP
 case 602:
 /* rule 602 can match eol */
 YY_RULE_SETUP
-#line 6843 "parser_cstyle.l"
+#line 6843 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 603:
 YY_RULE_SETUP
-#line 6847 "parser_cstyle.l"
+#line 6847 "parse_cstyle.l"
 {
       if (! insidePHP) {
          REJECT;
@@ -21526,7 +21510,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 604:
 YY_RULE_SETUP
-#line 6856 "parser_cstyle.l"
+#line 6856 "parse_cstyle.l"
 {
       // for s_column updates  
       lineCount();
@@ -21535,7 +21519,7 @@ YY_RULE_SETUP
 case 605:
 /* rule 605 can match eol */
 YY_RULE_SETUP
-#line 6861 "parser_cstyle.l"
+#line 6861 "parse_cstyle.l"
 {
       lineCount();
       lastCurlyContext = FindMembers;
@@ -21545,14 +21529,14 @@ YY_RULE_SETUP
 case 606:
 /* rule 606 can match eol */
 YY_RULE_SETUP
-#line 6867 "parser_cstyle.l"
+#line 6867 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 607:
 YY_RULE_SETUP
-#line 6871 "parser_cstyle.l"
+#line 6871 "parse_cstyle.l"
 {
       // */ (editor syntax fix) 
       lastCContext = YY_START;
@@ -21561,7 +21545,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 608:
 YY_RULE_SETUP
-#line 6877 "parser_cstyle.l"
+#line 6877 "parse_cstyle.l"
 {
       lastCContext = YY_START;
       BEGIN(SkipCxxComment);
@@ -21569,7 +21553,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 609:
 YY_RULE_SETUP
-#line 6882 "parser_cstyle.l"
+#line 6882 "parse_cstyle.l"
 {
       roundCount = 0;
       lastSkipRoundContext = YY_START;
@@ -21578,7 +21562,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 610:
 YY_RULE_SETUP
-#line 6888 "parser_cstyle.l"
+#line 6888 "parse_cstyle.l"
 {
       lastStringContext = YY_START;
       BEGIN( SkipString );
@@ -21586,7 +21570,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 611:
 YY_RULE_SETUP
-#line 6893 "parser_cstyle.l"
+#line 6893 "parse_cstyle.l"
 {
       warn(yyFileName, yyLineNr, "Found a ';' while parsing an initializer list. "
             "Some macros which are used without semicolons may not be parsed accurately.\n");
@@ -21596,7 +21580,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 612:
 YY_RULE_SETUP
-#line 6900 "parser_cstyle.l"
+#line 6900 "parse_cstyle.l"
 {
       if (!insidePHP) {
          REJECT;
@@ -21608,7 +21592,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 613:
 YY_RULE_SETUP
-#line 6909 "parser_cstyle.l"
+#line 6909 "parse_cstyle.l"
 {
       if (! insideCSharp) {
          REJECT;
@@ -21622,7 +21606,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 614:
 YY_RULE_SETUP
-#line 6920 "parser_cstyle.l"
+#line 6920 "parse_cstyle.l"
 {
       if (insidePHP) {
          REJECT;
@@ -21631,7 +21615,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 615:
 YY_RULE_SETUP
-#line 6926 "parser_cstyle.l"
+#line 6926 "parse_cstyle.l"
 {
       if (insidePHP) {
          lastStringContext=YY_START;
@@ -21641,52 +21625,52 @@ YY_RULE_SETUP
 	YY_BREAK
 case 616:
 YY_RULE_SETUP
-#line 6933 "parser_cstyle.l"
+#line 6933 "parse_cstyle.l"
 { 
    }
 	YY_BREAK
 case 617:
 YY_RULE_SETUP
-#line 6936 "parser_cstyle.l"
+#line 6936 "parse_cstyle.l"
 { 
    }
 	YY_BREAK
 case 618:
 YY_RULE_SETUP
-#line 6939 "parser_cstyle.l"
+#line 6939 "parse_cstyle.l"
 {
       BEGIN( lastStringContext );
    }
 	YY_BREAK
 case 619:
 YY_RULE_SETUP
-#line 6943 "parser_cstyle.l"
+#line 6943 "parse_cstyle.l"
 {
       BEGIN( lastStringContext );
    }
 	YY_BREAK
 case 620:
 YY_RULE_SETUP
-#line 6947 "parser_cstyle.l"
+#line 6947 "parse_cstyle.l"
 { 
    }
 	YY_BREAK
 case 621:
 /* rule 621 can match eol */
 YY_RULE_SETUP
-#line 6950 "parser_cstyle.l"
+#line 6950 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 622:
 YY_RULE_SETUP
-#line 6954 "parser_cstyle.l"
+#line 6954 "parse_cstyle.l"
 { }
 	YY_BREAK
 case 623:
 YY_RULE_SETUP
-#line 6955 "parser_cstyle.l"
+#line 6955 "parse_cstyle.l"
 { 
       // for "class : public base {} var;" construct, see bug 608359
       unput(':');
@@ -21695,7 +21679,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 624:
 YY_RULE_SETUP
-#line 6961 "parser_cstyle.l"
+#line 6961 "parse_cstyle.l"
 {
       current->section = Entry::EMPTY_SEC ;
       current->type.resize(0) ;
@@ -21707,7 +21691,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 625:
 YY_RULE_SETUP
-#line 6970 "parser_cstyle.l"
+#line 6970 "parse_cstyle.l"
 {
       bool isSingleton = current->m_traits.hasTrait(Entry::Virtue::Singleton);
       bool isService   = current->m_traits.hasTrait(Entry::Virtue::Service);
@@ -21748,7 +21732,7 @@ case 626:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 7004 "parser_cstyle.l"
+#line 7004 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
 
@@ -21784,7 +21768,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 627:
 YY_RULE_SETUP
-#line 7037 "parser_cstyle.l"
+#line 7037 "parse_cstyle.l"
 {
       if (current->tArgLists == 0) {
          current->tArgLists = new QList<ArgumentList>;
@@ -21806,7 +21790,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 628:
 YY_RULE_SETUP
-#line 7056 "parser_cstyle.l"
+#line 7056 "parse_cstyle.l"
 {
       insideProtocolList=true;
       BEGIN( Bases );
@@ -21815,7 +21799,7 @@ YY_RULE_SETUP
 case 629:
 /* rule 629 can match eol */
 YY_RULE_SETUP
-#line 7061 "parser_cstyle.l"
+#line 7061 "parse_cstyle.l"
 {
       QString text   = QString::fromUtf8(cstyleYYtext); 
       current->name += text;
@@ -21840,7 +21824,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 630:
 YY_RULE_SETUP
-#line 7083 "parser_cstyle.l"
+#line 7083 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->name += text;
@@ -21852,7 +21836,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 631:
 YY_RULE_SETUP
-#line 7092 "parser_cstyle.l"
+#line 7092 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->name += text;
@@ -21861,7 +21845,7 @@ YY_RULE_SETUP
 case 632:
 /* rule 632 can match eol */
 YY_RULE_SETUP
-#line 7097 "parser_cstyle.l"
+#line 7097 "parse_cstyle.l"
 { 
       // forward declaration
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -21932,7 +21916,7 @@ YY_RULE_SETUP
 case 633:
 /* rule 633 can match eol */
 YY_RULE_SETUP
-#line 7164 "parser_cstyle.l"
+#line 7164 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
       current->name = text;
@@ -21957,7 +21941,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 634:
 YY_RULE_SETUP
-#line 7186 "parser_cstyle.l"
+#line 7186 "parse_cstyle.l"
 { 
       roundCount=0;
       BEGIN( AlignAsEnd );
@@ -21966,26 +21950,26 @@ YY_RULE_SETUP
 case 635:
 /* rule 635 can match eol */
 YY_RULE_SETUP
-#line 7191 "parser_cstyle.l"
+#line 7191 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 636:
 YY_RULE_SETUP
-#line 7195 "parser_cstyle.l"
+#line 7195 "parse_cstyle.l"
 
 	YY_BREAK
 case 637:
 YY_RULE_SETUP
-#line 7196 "parser_cstyle.l"
+#line 7196 "parse_cstyle.l"
 { 
       roundCount++; 
    }
 	YY_BREAK
 case 638:
 YY_RULE_SETUP
-#line 7200 "parser_cstyle.l"
+#line 7200 "parse_cstyle.l"
 { 
       if (--roundCount <0 ) {
         BEGIN( lastAlignAsContext );
@@ -21995,20 +21979,20 @@ YY_RULE_SETUP
 case 639:
 /* rule 639 can match eol */
 YY_RULE_SETUP
-#line 7206 "parser_cstyle.l"
+#line 7206 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 640:
 YY_RULE_SETUP
-#line 7210 "parser_cstyle.l"
+#line 7210 "parse_cstyle.l"
 
 	YY_BREAK
 case 641:
 /* rule 641 can match eol */
 YY_RULE_SETUP
-#line 7211 "parser_cstyle.l"
+#line 7211 "parse_cstyle.l"
 {  
       // multiple forward declarations on one line
       // e.g. @protocol A,B;
@@ -22019,7 +22003,7 @@ YY_RULE_SETUP
 case 642:
 /* rule 642 can match eol */
 YY_RULE_SETUP
-#line 7218 "parser_cstyle.l"
+#line 7218 "parse_cstyle.l"
 {
       // have a new scope such as a new class
       QString text  = QString::fromUtf8(cstyleYYtext); 
@@ -22042,7 +22026,7 @@ YY_RULE_SETUP
 case 643:
 /* rule 643 can match eol */
 YY_RULE_SETUP
-#line 7237 "parser_cstyle.l"
+#line 7237 "parse_cstyle.l"
 { 
       // C# style scope
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -22057,7 +22041,7 @@ case 644:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 7245 "parser_cstyle.l"
+#line 7245 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -22078,7 +22062,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 645:
 YY_RULE_SETUP
-#line 7263 "parser_cstyle.l"
+#line 7263 "parse_cstyle.l"
 {
       if (isTypedef) {
          // multiple types in one typedef
@@ -22094,7 +22078,7 @@ YY_RULE_SETUP
 case 646:
 /* rule 646 can match eol */
 YY_RULE_SETUP
-#line 7275 "parser_cstyle.l"
+#line 7275 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
    
@@ -22119,7 +22103,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 647:
 YY_RULE_SETUP
-#line 7297 "parser_cstyle.l"
+#line 7297 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext); 
 
@@ -22172,7 +22156,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 648:
 YY_RULE_SETUP
-#line 7347 "parser_cstyle.l"
+#line 7347 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -22193,14 +22177,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 649:
 YY_RULE_SETUP
-#line 7365 "parser_cstyle.l"
+#line 7365 "parse_cstyle.l"
 {
       /* empty comment */ 
    }
 	YY_BREAK
 case 650:
 YY_RULE_SETUP
-#line 7369 "parser_cstyle.l"
+#line 7369 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       // special comment
@@ -22217,7 +22201,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 651:
 YY_RULE_SETUP
-#line 7383 "parser_cstyle.l"
+#line 7383 "parse_cstyle.l"
 { 
       // artificially inserted token to signal end of comment block
       current->typeConstr.last().docs = fullArgString;
@@ -22225,7 +22209,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 652:
 YY_RULE_SETUP
-#line 7388 "parser_cstyle.l"
+#line 7388 "parse_cstyle.l"
 { 
       // end of type constraint reached
       // parse documentation of the constraints
@@ -22236,7 +22220,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 653:
 YY_RULE_SETUP
-#line 7396 "parser_cstyle.l"
+#line 7396 "parse_cstyle.l"
 {
       handleParametersCommentBlocks(&current->typeConstr);
       unput(';');
@@ -22245,14 +22229,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 654:
 YY_RULE_SETUP
-#line 7402 "parser_cstyle.l"
+#line 7402 "parse_cstyle.l"
 {
       BEGIN( CSConstraintType );
    }
 	YY_BREAK
 case 655:
 YY_RULE_SETUP
-#line 7406 "parser_cstyle.l"
+#line 7406 "parse_cstyle.l"
 {
       // parameter name
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -22261,7 +22245,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 656:
 YY_RULE_SETUP
-#line 7412 "parser_cstyle.l"
+#line 7412 "parse_cstyle.l"
 { 
       // another constraint for a different param
       current->typeConstr.append(Argument());
@@ -22270,7 +22254,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 657:
 YY_RULE_SETUP
-#line 7418 "parser_cstyle.l"
+#line 7418 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       if (current->typeConstr.last().type.isEmpty()) {
@@ -22291,20 +22275,20 @@ YY_RULE_SETUP
 case 658:
 /* rule 658 can match eol */
 YY_RULE_SETUP
-#line 7435 "parser_cstyle.l"
+#line 7435 "parse_cstyle.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 659:
 YY_RULE_SETUP
-#line 7439 "parser_cstyle.l"
+#line 7439 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 660:
 YY_RULE_SETUP
-#line 7442 "parser_cstyle.l"
+#line 7442 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text;
@@ -22316,7 +22300,7 @@ case 661:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 7447 "parser_cstyle.l"
+#line 7447 "parse_cstyle.l"
 {
       current->name += ')';
       BEGIN( ClassVar );
@@ -22328,7 +22312,7 @@ case 662:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 7452 "parser_cstyle.l"
+#line 7452 "parse_cstyle.l"
 {
       current->name+=')';
       BEGIN( ObjCProtocolList );
@@ -22336,7 +22320,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 663:
 YY_RULE_SETUP
-#line 7457 "parser_cstyle.l"
+#line 7457 "parse_cstyle.l"
 {
       current->name += ')';
 
@@ -22354,7 +22338,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 664:
 YY_RULE_SETUP
-#line 7472 "parser_cstyle.l"
+#line 7472 "parse_cstyle.l"
 {
       if (current->section == Entry::VARIABLE_SEC) {
          // enum A B:2, see bug 748208
@@ -22397,7 +22381,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 665:
 YY_RULE_SETUP
-#line 7512 "parser_cstyle.l"
+#line 7512 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       unput(*cstyleYYtext);
@@ -22420,7 +22404,7 @@ case 666:
 (yy_c_buf_p) = yy_cp = yy_bp + 3;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 7528 "parser_cstyle.l"
+#line 7528 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -22444,17 +22428,17 @@ case 667:
 *yy_cp = (yy_hold_char); /* undo effects of setting up cstyleYYtext */
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
-#line 7547 "parser_cstyle.l"
+#line 7547 "parse_cstyle.l"
 case 668:
 /* rule 668 can match eol */
-#line 7548 "parser_cstyle.l"
+#line 7548 "parse_cstyle.l"
 case 669:
 /* rule 669 can match eol */
-#line 7549 "parser_cstyle.l"
+#line 7549 "parse_cstyle.l"
 case 670:
 /* rule 670 can match eol */
 YY_RULE_SETUP
-#line 7549 "parser_cstyle.l"
+#line 7549 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -22476,7 +22460,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 671:
 YY_RULE_SETUP
-#line 7568 "parser_cstyle.l"
+#line 7568 "parse_cstyle.l"
 {
       current->fileName    = yyFileName;
       current->startLine   = yyLineNr;
@@ -22542,7 +22526,7 @@ YY_RULE_SETUP
 case 672:
 /* rule 672 can match eol */
 YY_RULE_SETUP
-#line 7630 "parser_cstyle.l"
+#line 7630 "parse_cstyle.l"
 { 
       lineCount(); 
       baseVirt = Virtual; 
@@ -22551,7 +22535,7 @@ YY_RULE_SETUP
 case 673:
 /* rule 673 can match eol */
 YY_RULE_SETUP
-#line 7635 "parser_cstyle.l"
+#line 7635 "parse_cstyle.l"
 { 
       lineCount(); 
       baseProt = Public; 
@@ -22560,7 +22544,7 @@ YY_RULE_SETUP
 case 674:
 /* rule 674 can match eol */
 YY_RULE_SETUP
-#line 7640 "parser_cstyle.l"
+#line 7640 "parse_cstyle.l"
 { 
       lineCount(); 
       baseProt = Protected; 
@@ -22569,7 +22553,7 @@ YY_RULE_SETUP
 case 675:
 /* rule 675 can match eol */
 YY_RULE_SETUP
-#line 7645 "parser_cstyle.l"
+#line 7645 "parse_cstyle.l"
 { 
       lineCount(); 
       baseProt = Package;    
@@ -22578,7 +22562,7 @@ YY_RULE_SETUP
 case 676:
 /* rule 676 can match eol */
 YY_RULE_SETUP
-#line 7650 "parser_cstyle.l"
+#line 7650 "parse_cstyle.l"
 { 
       lineCount(); 
       baseProt = Private; 
@@ -22587,14 +22571,14 @@ YY_RULE_SETUP
 case 677:
 /* rule 677 can match eol */
 YY_RULE_SETUP
-#line 7655 "parser_cstyle.l"
+#line 7655 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 678:
 YY_RULE_SETUP
-#line 7659 "parser_cstyle.l"
+#line 7659 "parse_cstyle.l"
 { 
       unput(*cstyleYYtext); 
       BEGIN(Bases); 
@@ -22602,7 +22586,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 679:
 YY_RULE_SETUP
-#line 7664 "parser_cstyle.l"
+#line 7664 "parse_cstyle.l"
 {      
       // PHP namespace token, not sure if interspacing is allowed but it gives problems (see bug 640847)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -22622,7 +22606,7 @@ YY_RULE_SETUP
 case 680:
 /* rule 680 can match eol */
 YY_RULE_SETUP
-#line 7680 "parser_cstyle.l"
+#line 7680 "parse_cstyle.l"
 {     
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -22645,7 +22629,7 @@ YY_RULE_SETUP
 case 681:
 /* rule 681 can match eol */
 YY_RULE_SETUP
-#line 7699 "parser_cstyle.l"
+#line 7699 "parse_cstyle.l"
 { 
       // Java style class
       QString text = QString::fromUtf8(cstyleYYtext);            
@@ -22661,7 +22645,7 @@ case 682:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 7708 "parser_cstyle.l"
+#line 7708 "parse_cstyle.l"
 {
       if (!insideObjC) {
          REJECT;
@@ -22673,7 +22657,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 683:
 YY_RULE_SETUP
-#line 7717 "parser_cstyle.l"
+#line 7717 "parse_cstyle.l"
 {
       // empty ObjC interface
       unput('d'); // insert fake body: {}@end
@@ -22686,7 +22670,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 684:
 YY_RULE_SETUP
-#line 7727 "parser_cstyle.l"
+#line 7727 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       current->name += text[0];
@@ -22700,7 +22684,7 @@ YY_RULE_SETUP
 case 685:
 /* rule 685 can match eol */
 YY_RULE_SETUP
-#line 7737 "parser_cstyle.l"
+#line 7737 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       lineCount();
@@ -22728,7 +22712,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 686:
 YY_RULE_SETUP
-#line 7762 "parser_cstyle.l"
+#line 7762 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);   
       *specName += text[0];
@@ -22739,7 +22723,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 687:
 YY_RULE_SETUP
-#line 7770 "parser_cstyle.l"
+#line 7770 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       *specName += text[0];
@@ -22752,7 +22736,7 @@ YY_RULE_SETUP
 case 688:
 /* rule 688 can match eol */
 YY_RULE_SETUP
-#line 7779 "parser_cstyle.l"
+#line 7779 "parse_cstyle.l"
 { 
       lineCount(); 
       *specName +=' '; 
@@ -22760,7 +22744,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 689:
 YY_RULE_SETUP
-#line 7784 "parser_cstyle.l"
+#line 7784 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);   
       *specName += text; 
@@ -22771,7 +22755,7 @@ case 690:
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 7789 "parser_cstyle.l"
+#line 7789 "parse_cstyle.l"
 { 
       // M$ C++ extension to allow >> to close a template...
       unput('>');
@@ -22781,7 +22765,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 691:
 YY_RULE_SETUP
-#line 7796 "parser_cstyle.l"
+#line 7796 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       if (insideCSharp) {
@@ -22807,14 +22791,14 @@ YY_RULE_SETUP
 case 692:
 /* rule 692 can match eol */
 YY_RULE_SETUP
-#line 7818 "parser_cstyle.l"
+#line 7818 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 693:
 YY_RULE_SETUP
-#line 7822 "parser_cstyle.l"
+#line 7822 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);   
       *specName += text[0]; 
@@ -22823,7 +22807,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 694:
 YY_RULE_SETUP
-#line 7828 "parser_cstyle.l"
+#line 7828 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);   
       *specName += text[0]; 
@@ -22832,7 +22816,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 695:
 YY_RULE_SETUP
-#line 7834 "parser_cstyle.l"
+#line 7834 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);   
       *specName += text[0];
@@ -22840,14 +22824,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 696:
 YY_RULE_SETUP
-#line 7839 "parser_cstyle.l"
+#line 7839 "parse_cstyle.l"
 { 
       ++roundCount; 
    }
 	YY_BREAK
 case 697:
 YY_RULE_SETUP
-#line 7843 "parser_cstyle.l"
+#line 7843 "parse_cstyle.l"
 { 
       if (--roundCount < 0) {
          BEGIN ( lastSkipRoundContext );   
@@ -22856,7 +22840,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 698:
 YY_RULE_SETUP
-#line 7849 "parser_cstyle.l"
+#line 7849 "parse_cstyle.l"
 {
       lastStringContext=SkipRound;
       BEGIN(SkipString);
@@ -22865,7 +22849,7 @@ YY_RULE_SETUP
 case 699:
 /* rule 699 can match eol */
 YY_RULE_SETUP
-#line 7854 "parser_cstyle.l"
+#line 7854 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       lineCount();
@@ -22920,7 +22904,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 700:
 YY_RULE_SETUP
-#line 7906 "parser_cstyle.l"
+#line 7906 "parse_cstyle.l"
 { 
       current->fileName    = yyFileName;
       current->startLine   = yyLineNr;
@@ -22942,14 +22926,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 701:
 YY_RULE_SETUP
-#line 7925 "parser_cstyle.l"
+#line 7925 "parse_cstyle.l"
 {
       roundCount++;
    }
 	YY_BREAK
 case 702:
 YY_RULE_SETUP
-#line 7929 "parser_cstyle.l"
+#line 7929 "parse_cstyle.l"
 {
       if (--roundCount == 0 ) {
          BEGIN(ClassVar);
@@ -22959,20 +22943,20 @@ YY_RULE_SETUP
 case 703:
 /* rule 703 can match eol */
 YY_RULE_SETUP
-#line 7935 "parser_cstyle.l"
+#line 7935 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 704:
 YY_RULE_SETUP
-#line 7939 "parser_cstyle.l"
+#line 7939 "parse_cstyle.l"
 
 	YY_BREAK
 case 705:
 /* rule 705 can match eol */
 YY_RULE_SETUP
-#line 7940 "parser_cstyle.l"
+#line 7940 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -22982,7 +22966,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 706:
 YY_RULE_SETUP
-#line 7947 "parser_cstyle.l"
+#line 7947 "parse_cstyle.l"
 { 
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -22991,7 +22975,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 707:
 YY_RULE_SETUP
-#line 7953 "parser_cstyle.l"
+#line 7953 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_program += text; 
@@ -22999,7 +22983,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 708:
 YY_RULE_SETUP
-#line 7958 "parser_cstyle.l"
+#line 7958 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       insideCode=true;
@@ -23008,7 +22992,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 709:
 YY_RULE_SETUP
-#line 7964 "parser_cstyle.l"
+#line 7964 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       insideCode = false;
@@ -23017,7 +23001,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 710:
 YY_RULE_SETUP
-#line 7970 "parser_cstyle.l"
+#line 7970 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_program += text; 
@@ -23025,7 +23009,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 711:
 YY_RULE_SETUP
-#line 7975 "parser_cstyle.l"
+#line 7975 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23037,7 +23021,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 712:
 YY_RULE_SETUP
-#line 7984 "parser_cstyle.l"
+#line 7984 "parse_cstyle.l"
 { 
       QString text = QString::fromUtf8(cstyleYYtext);
       current->m_program += text[0]; 
@@ -23045,7 +23029,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 713:
 YY_RULE_SETUP
-#line 7989 "parser_cstyle.l"
+#line 7989 "parse_cstyle.l"
 { 
  
       // */ (editor syntax fix)
@@ -23085,7 +23069,7 @@ case 714:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8022 "parser_cstyle.l"
+#line 8022 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23116,7 +23100,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 715:
 YY_RULE_SETUP
-#line 8050 "parser_cstyle.l"
+#line 8050 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23143,7 +23127,7 @@ case 716:
 (yy_c_buf_p) = yy_cp = yy_bp + 3;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8070 "parser_cstyle.l"
+#line 8070 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23167,7 +23151,7 @@ YY_RULE_SETUP
 case 717:
 /* rule 717 can match eol */
 YY_RULE_SETUP
-#line 8090 "parser_cstyle.l"
+#line 8090 "parse_cstyle.l"
 {
       lineCount();
       externC = true;
@@ -23175,7 +23159,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 718:
 YY_RULE_SETUP
-#line 8095 "parser_cstyle.l"
+#line 8095 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23232,14 +23216,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 719:
 YY_RULE_SETUP
-#line 8149 "parser_cstyle.l"
+#line 8149 "parse_cstyle.l"
 { 
       curlyCount++; 
    }
 	YY_BREAK
 case 720:
 YY_RULE_SETUP
-#line 8153 "parser_cstyle.l"
+#line 8153 "parse_cstyle.l"
 {
       if (curlyCount) {
          curlyCount--;
@@ -23255,7 +23239,7 @@ YY_RULE_SETUP
 case 721:
 /* rule 721 can match eol */
 YY_RULE_SETUP
-#line 8165 "parser_cstyle.l"
+#line 8165 "parse_cstyle.l"
 { 
       if (curlyCount == 0) {
          current->m_traits.setTrait(Entry::Virtue::PrivateSettable); 
@@ -23265,7 +23249,7 @@ YY_RULE_SETUP
 case 722:
 /* rule 722 can match eol */
 YY_RULE_SETUP
-#line 8171 "parser_cstyle.l"
+#line 8171 "parse_cstyle.l"
 { 
       if (curlyCount == 0) {
          current->m_traits.setTrait(Entry::Virtue::ProtectedSettable); 
@@ -23275,7 +23259,7 @@ YY_RULE_SETUP
 case 723:
 /* rule 723 can match eol */
 YY_RULE_SETUP
-#line 8177 "parser_cstyle.l"
+#line 8177 "parse_cstyle.l"
 { 
       if (curlyCount == 0) {
          current->m_traits.setTrait(Entry::Virtue::PrivateGettable);    
@@ -23285,7 +23269,7 @@ YY_RULE_SETUP
 case 724:
 /* rule 724 can match eol */
 YY_RULE_SETUP
-#line 8183 "parser_cstyle.l"
+#line 8183 "parse_cstyle.l"
 { 
       if (curlyCount == 0)  {
          current->m_traits.setTrait(Entry::Virtue::ProtectedGettable); 
@@ -23294,7 +23278,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 725:
 YY_RULE_SETUP
-#line 8189 "parser_cstyle.l"
+#line 8189 "parse_cstyle.l"
 { 
       if (curlyCount == 0) 
          current->m_traits.setTrait(Entry::Virtue::Settable);
@@ -23302,7 +23286,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 726:
 YY_RULE_SETUP
-#line 8194 "parser_cstyle.l"
+#line 8194 "parse_cstyle.l"
 { 
       if (curlyCount == 0) 
          current->m_traits.setTrait(Entry::Virtue::Gettable);  
@@ -23310,7 +23294,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 727:
 YY_RULE_SETUP
-#line 8199 "parser_cstyle.l"
+#line 8199 "parse_cstyle.l"
 { 
       if (curlyCount == 0) 
          current->m_traits.setTrait(Entry::Virtue::Addable);    
@@ -23318,7 +23302,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 728:
 YY_RULE_SETUP
-#line 8204 "parser_cstyle.l"
+#line 8204 "parse_cstyle.l"
 { 
       if (curlyCount == 0) 
          current->m_traits.setTrait(Entry::Virtue::Removable); 
@@ -23326,7 +23310,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 729:
 YY_RULE_SETUP
-#line 8209 "parser_cstyle.l"
+#line 8209 "parse_cstyle.l"
 { 
       if (curlyCount == 0) 
          current->m_traits.setTrait(Entry::Virtue::Raisable); 
@@ -23334,14 +23318,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 730:
 YY_RULE_SETUP
-#line 8214 "parser_cstyle.l"
+#line 8214 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 731:
 /* rule 731 can match eol */
 YY_RULE_SETUP
-#line 8217 "parser_cstyle.l"
+#line 8217 "parse_cstyle.l"
 { 
       lineCount(); 
    }
@@ -23351,7 +23335,7 @@ YY_RULE_SETUP
 case 732:
 /* rule 732 can match eol */
 YY_RULE_SETUP
-#line 8225 "parser_cstyle.l"
+#line 8225 "parse_cstyle.l"
 { 
       // continuation of multiline C++-style comment          
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23368,7 +23352,7 @@ case 733:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8235 "parser_cstyle.l"
+#line 8235 "parse_cstyle.l"
 { 
       // ignore marker line (see bug700345)
       handleCommentBlock(s_docBlock, current->brief.isEmpty());
@@ -23381,7 +23365,7 @@ case 734:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8241 "parser_cstyle.l"
+#line 8241 "parse_cstyle.l"
 { 
       // whole line
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23394,7 +23378,7 @@ YY_RULE_SETUP
 /* ---- Comments blocks ------ */
 case 735:
 YY_RULE_SETUP
-#line 8252 "parser_cstyle.l"
+#line 8252 "parse_cstyle.l"
 { 
       // end of comment block
       handleCommentBlock(s_docBlock, false);
@@ -23407,7 +23391,7 @@ case 736:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8258 "parser_cstyle.l"
+#line 8258 "parse_cstyle.l"
 {    
       QString text = QString::fromUtf8(cstyleYYtext);     
       s_docBlock += QString(computeIndent(text, s_column), QChar(' '));
@@ -23419,7 +23403,7 @@ case 737:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8263 "parser_cstyle.l"
+#line 8263 "parse_cstyle.l"
 {
       // start of a comment line
       QString text = QString::fromUtf8(cstyleYYtext);  
@@ -23428,14 +23412,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 738:
 YY_RULE_SETUP
-#line 8269 "parser_cstyle.l"
+#line 8269 "parse_cstyle.l"
 { 
       // strip embedded C++ comments when at the start of a line
    }
 	YY_BREAK
 case 739:
 YY_RULE_SETUP
-#line 8273 "parser_cstyle.l"
+#line 8273 "parse_cstyle.l"
 { 
       // slashes in the middle of a comment block
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23444,7 +23428,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 740:
 YY_RULE_SETUP
-#line 8279 "parser_cstyle.l"
+#line 8279 "parse_cstyle.l"
 { 
       // */ (editor syntax fix)
       // start of a new comment in the middle of a comment block
@@ -23458,7 +23442,7 @@ case 741:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8286 "parser_cstyle.l"
+#line 8286 "parse_cstyle.l"
 { 
       // */ (editor syntax fix)
       // escaped command
@@ -23468,7 +23452,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 742:
 YY_RULE_SETUP
-#line 8293 "parser_cstyle.l"
+#line 8293 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23488,7 +23472,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 743:
 YY_RULE_SETUP
-#line 8310 "parser_cstyle.l"
+#line 8310 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23507,7 +23491,7 @@ case 744:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8322 "parser_cstyle.l"
+#line 8322 "parse_cstyle.l"
 { 
       // verbatim command (which could contain nested comments)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23523,7 +23507,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 745:
 YY_RULE_SETUP
-#line 8335 "parser_cstyle.l"
+#line 8335 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
     
@@ -23538,7 +23522,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 746:
 YY_RULE_SETUP
-#line 8347 "parser_cstyle.l"
+#line 8347 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
   
@@ -23553,7 +23537,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 747:
 YY_RULE_SETUP
-#line 8359 "parser_cstyle.l"
+#line 8359 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23571,7 +23555,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 748:
 YY_RULE_SETUP
-#line 8374 "parser_cstyle.l"
+#line 8374 "parse_cstyle.l"
 { 
       // any character that is not special
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23581,7 +23565,7 @@ YY_RULE_SETUP
 case 749:
 /* rule 749 can match eol */
 YY_RULE_SETUP
-#line 8380 "parser_cstyle.l"
+#line 8380 "parse_cstyle.l"
 { 
       // newline
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23592,7 +23576,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 750:
 YY_RULE_SETUP
-#line 8388 "parser_cstyle.l"
+#line 8388 "parse_cstyle.l"
 { 
       // command block
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23602,7 +23586,7 @@ YY_RULE_SETUP
 /* ---- Copy verbatim sections ------ */
 case 751:
 YY_RULE_SETUP
-#line 8396 "parser_cstyle.l"
+#line 8396 "parse_cstyle.l"
 { 
       // end of a <pre> block
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23616,7 +23600,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 752:
 YY_RULE_SETUP
-#line 8407 "parser_cstyle.l"
+#line 8407 "parse_cstyle.l"
 { 
       // end of a <code> block
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23630,7 +23614,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 753:
 YY_RULE_SETUP
-#line 8418 "parser_cstyle.l"
+#line 8418 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23644,7 +23628,7 @@ case 754:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8425 "parser_cstyle.l"
+#line 8425 "parse_cstyle.l"
 { 
       // end of verbatim block
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23659,7 +23643,7 @@ YY_RULE_SETUP
 case 755:
 /* rule 755 can match eol */
 YY_RULE_SETUP
-#line 8436 "parser_cstyle.l"
+#line 8436 "parse_cstyle.l"
 { 
       // start of a comment line
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23678,7 +23662,7 @@ YY_RULE_SETUP
 case 756:
 /* rule 756 can match eol */
 YY_RULE_SETUP
-#line 8451 "parser_cstyle.l"
+#line 8451 "parse_cstyle.l"
 { 
       // start of a comment line with two *'s
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23692,7 +23676,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 757:
 YY_RULE_SETUP
-#line 8462 "parser_cstyle.l"
+#line 8462 "parse_cstyle.l"
 { 
       // Assume *var or *(... is part of source code (see bug723516)
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23708,7 +23692,7 @@ YY_RULE_SETUP
 case 758:
 /* rule 758 can match eol */
 YY_RULE_SETUP
-#line 8474 "parser_cstyle.l"
+#line 8474 "parse_cstyle.l"
 { 
       // start of a comment line with one *
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23733,7 +23717,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 759:
 YY_RULE_SETUP
-#line 8496 "parser_cstyle.l"
+#line 8496 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23746,7 +23730,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 760:
 YY_RULE_SETUP
-#line 8506 "parser_cstyle.l"
+#line 8506 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
 
@@ -23759,7 +23743,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 761:
 YY_RULE_SETUP
-#line 8516 "parser_cstyle.l"
+#line 8516 "parse_cstyle.l"
 { 
       // */ (editor syntax fix)
       // any character that is not special
@@ -23769,7 +23753,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 762:
 YY_RULE_SETUP
-#line 8523 "parser_cstyle.l"
+#line 8523 "parse_cstyle.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(cstyleYYtext); 
@@ -23787,7 +23771,7 @@ YY_RULE_SETUP
 case 763:
 /* rule 763 can match eol */
 YY_RULE_SETUP
-#line 8537 "parser_cstyle.l"
+#line 8537 "parse_cstyle.l"
 { 
       // newline    
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23798,7 +23782,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 764:
 YY_RULE_SETUP
-#line 8545 "parser_cstyle.l"
+#line 8545 "parse_cstyle.l"
 { 
       // any other character
       QString text = QString::fromUtf8(cstyleYYtext);
@@ -23806,7 +23790,7 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case YY_STATE_EOF(DocCopyBlock):
-#line 8551 "parser_cstyle.l"
+#line 8551 "parse_cstyle.l"
 {
       warn(yyFileName,yyLineNr, "Reached end of file while inside a %s block\n"
          "The command which ends the block appears to be missing\n", csPrintable(s_docBlockName)); 
@@ -23816,7 +23800,7 @@ case YY_STATE_EOF(DocCopyBlock):
 /* ------------- Prototype parser -------------- */
 case 765:
 YY_RULE_SETUP
-#line 8560 "parser_cstyle.l"
+#line 8560 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text;
@@ -23824,7 +23808,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 766:
 YY_RULE_SETUP
-#line 8565 "parser_cstyle.l"
+#line 8565 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0];
@@ -23836,7 +23820,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 767:
 YY_RULE_SETUP
-#line 8574 "parser_cstyle.l"
+#line 8574 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->type += current->name + text;
@@ -23847,7 +23831,7 @@ YY_RULE_SETUP
 case 768:
 /* rule 768 can match eol */
 YY_RULE_SETUP
-#line 8581 "parser_cstyle.l"
+#line 8581 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text;
@@ -23855,7 +23839,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 769:
 YY_RULE_SETUP
-#line 8586 "parser_cstyle.l"
+#line 8586 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args+=text[0];
@@ -23867,7 +23851,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 770:
 YY_RULE_SETUP
-#line 8595 "parser_cstyle.l"
+#line 8595 "parse_cstyle.l"
 {
       current->type+=')';
       BEGIN( Prototype );
@@ -23875,7 +23859,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 771:
 YY_RULE_SETUP
-#line 8600 "parser_cstyle.l"
+#line 8600 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text;
@@ -23883,14 +23867,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 772:
 YY_RULE_SETUP
-#line 8605 "parser_cstyle.l"
+#line 8605 "parse_cstyle.l"
 {
       BEGIN( PrototypeSkipLine);
    }
 	YY_BREAK
 case 773:
 YY_RULE_SETUP
-#line 8609 "parser_cstyle.l"
+#line 8609 "parse_cstyle.l"
 {
       current->args += " const ";
       current->argList.constSpecifier=true;
@@ -23898,7 +23882,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 774:
 YY_RULE_SETUP
-#line 8614 "parser_cstyle.l"
+#line 8614 "parse_cstyle.l"
 {
       current->args += " volatile ";
       current->argList.volatileSpecifier=true;
@@ -23906,7 +23890,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 775:
 YY_RULE_SETUP
-#line 8619 "parser_cstyle.l"
+#line 8619 "parse_cstyle.l"
 {
       current->args += " = 0";
       current->virt = Pure;
@@ -23915,7 +23899,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 776:
 YY_RULE_SETUP
-#line 8625 "parser_cstyle.l"
+#line 8625 "parse_cstyle.l"
 {
       current->exception = "throw(";
       BEGIN(PrototypeExc);
@@ -23923,7 +23907,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 777:
 YY_RULE_SETUP
-#line 8630 "parser_cstyle.l"
+#line 8630 "parse_cstyle.l"
 {
       current->exception += ')';
       BEGIN(PrototypeQual);
@@ -23931,7 +23915,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 778:
 YY_RULE_SETUP
-#line 8635 "parser_cstyle.l"
+#line 8635 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->exception += text[0];
@@ -23939,7 +23923,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 779:
 YY_RULE_SETUP
-#line 8640 "parser_cstyle.l"
+#line 8640 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->args += text[0];
@@ -23947,7 +23931,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 780:
 YY_RULE_SETUP
-#line 8645 "parser_cstyle.l"
+#line 8645 "parse_cstyle.l"
 {
       QString text = QString::fromUtf8(cstyleYYtext);
       current->name += text[0];
@@ -23955,7 +23939,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 781:
 YY_RULE_SETUP
-#line 8650 "parser_cstyle.l"
+#line 8650 "parse_cstyle.l"
 {
    }
 	YY_BREAK
@@ -23963,7 +23947,7 @@ YY_RULE_SETUP
 case 782:
 /* rule 782 can match eol */
 YY_RULE_SETUP
-#line 8656 "parser_cstyle.l"
+#line 8656 "parse_cstyle.l"
 {  
       // line continuation
       if (insideCSharp) {
@@ -23979,20 +23963,20 @@ case 783:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up cstyleYYtext again */
 YY_RULE_SETUP
-#line 8665 "parser_cstyle.l"
+#line 8665 "parse_cstyle.l"
 {
       BEGIN( lastCContext ) ;
    }
 	YY_BREAK
 case 784:
 YY_RULE_SETUP
-#line 8669 "parser_cstyle.l"
+#line 8669 "parse_cstyle.l"
 {     
    }
 	YY_BREAK
 case 785:
 YY_RULE_SETUP
-#line 8672 "parser_cstyle.l"
+#line 8672 "parse_cstyle.l"
 { 
       // C++11 attribute
       lastC11AttributeContext = YY_START;
@@ -24002,14 +23986,14 @@ YY_RULE_SETUP
 case 786:
 /* rule 786 can match eol */
 YY_RULE_SETUP
-#line 8678 "parser_cstyle.l"
+#line 8678 "parse_cstyle.l"
 { 
       lineCount(); 
    }
 	YY_BREAK
 case 787:
 YY_RULE_SETUP
-#line 8682 "parser_cstyle.l"
+#line 8682 "parse_cstyle.l"
 {
       if (insideIDL && insideCppQuote) {
          BEGIN(EndCppQuote);
@@ -24018,7 +24002,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 788:
 YY_RULE_SETUP
-#line 8688 "parser_cstyle.l"
+#line 8688 "parse_cstyle.l"
 {
       if (!insidePHP) {
          REJECT;
@@ -24030,7 +24014,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 789:
 YY_RULE_SETUP
-#line 8697 "parser_cstyle.l"
+#line 8697 "parse_cstyle.l"
 {
       if (insidePHP) {
          lastStringContext=YY_START;
@@ -24040,7 +24024,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 790:
 YY_RULE_SETUP
-#line 8704 "parser_cstyle.l"
+#line 8704 "parse_cstyle.l"
 {
       if (insidePHP) {
          lastStringContext=YY_START;
@@ -24050,19 +24034,19 @@ YY_RULE_SETUP
 	YY_BREAK
 case 791:
 YY_RULE_SETUP
-#line 8711 "parser_cstyle.l"
+#line 8711 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 792:
 YY_RULE_SETUP
-#line 8714 "parser_cstyle.l"
+#line 8714 "parse_cstyle.l"
 {
    }
 	YY_BREAK
 case 793:
 YY_RULE_SETUP
-#line 8717 "parser_cstyle.l"
+#line 8717 "parse_cstyle.l"
 { 
       // */ (editor syntax fix)
       lastCContext = YY_START ;
@@ -24071,14 +24055,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 794:
 YY_RULE_SETUP
-#line 8723 "parser_cstyle.l"
+#line 8723 "parse_cstyle.l"
 { 
       BEGIN( lastCContext ); 
    }
 	YY_BREAK
 case 795:
 YY_RULE_SETUP
-#line 8727 "parser_cstyle.l"
+#line 8727 "parse_cstyle.l"
 {
       lastCContext = YY_START;
       BEGIN( SkipCxxComment );
@@ -24086,7 +24070,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 796:
 YY_RULE_SETUP
-#line 8731 "parser_cstyle.l"
+#line 8731 "parse_cstyle.l"
 ECHO;
 	YY_BREAK
 #line 24077 "<stdout>"
@@ -25231,7 +25215,7 @@ void cstyleYYfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 8731 "parser_cstyle.l"
+#line 8731 "parse_cstyle.l"
 
 
 

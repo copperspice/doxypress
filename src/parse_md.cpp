@@ -21,7 +21,7 @@
 
 #include <stdio.h>
 
-#include <parser_md.h>
+#include <parse_md.h>
 
 #include <config.h>
 #include <commentscan.h>

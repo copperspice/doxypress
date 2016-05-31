@@ -747,7 +747,7 @@ char *tclscannerYYtext;
 #include <language.h>
 #include <message.h>
 #include <outputlist.h>
-#include <parser_tcl.h>
+#include <parse_tcl.h>
 #include <pre.h>
 #include <util.h>
 

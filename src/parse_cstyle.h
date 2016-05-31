@@ -1,7 +1,6 @@
 /*************************************************************************
  *
  * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
- * Copyright (C) 2010-2011 by Rene Zaumseil
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -16,23 +15,25 @@
  *
 *************************************************************************/
 
-#ifndef PARSER_TCL_H
-#define PARSER_TCL_H
+#ifndef PARSE_CSTYLE_H
+#define PARSE_CSTYLE_H
 
-#include <parser_base.h>
+#include <parse_base.h>
 
-/** \brief Tcl language parser using state-based lexical scanning.
- *
- *  This is the Tcl language parser for doxyPress.
+/** \brief C-like language parser using state-based lexical scanning.
+ *  
+ *  Language parser for C++ and various languages which are closely related to C++
+ *  such as C, C#, Objective-C, Java, PHP, and IDL.
  */
-class TclLanguageParser : public ParserInterface
+class CPPLanguageParser : public ParserInterface
 {
  public:
-   virtual ~TclLanguageParser() {}
+   virtual ~CPPLanguageParser() {}
+  
+   void finishTranslationUnit() override {};
 
-   void finishTranslationUnit() override {}
-   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root, 
-                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
+   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
+                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
    bool needsPreprocessing(const QString &extension) override;
 
@@ -46,5 +47,7 @@ class TclLanguageParser : public ParserInterface
    void resetCodeParserState();
    void parsePrototype(const QString &text) override;
 };
+
+void cstyleFreeParser();
 
 #endif

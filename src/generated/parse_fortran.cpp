@@ -56464,15 +56464,15 @@ char *fortranscannerYYtext;
 #include <assert.h>
 #include <ctype.h>
 
-#include "arguments.h"
-#include "config.h"
-#include "entry.h"
-#include "message.h"
-#include "defargs.h"
-#include "language.h"
-#include "commentscan.h"
-#include "fortrancode.h"
-#include <parser_fortran.h>
+#include <arguments.h>
+#include <config.h>
+#include <entry.h>
+#include <message.h>
+#include <defargs.h>
+#include <language.h>
+#include <commentscan.h>
+#include <fortrancode.h>
+#include <parse_fortran.h>
 #include <pre.h>
 #include <util.h>
 

@@ -36,7 +36,7 @@
 #include <message.h>
 #include <membergroup.h>
 #include <outputgen.h>
-#include <parser_base.h>
+#include <parse_base.h>
 #include <resourcemgr.h>
 #include <util.h>
 #include <xmldocvisitor.h>

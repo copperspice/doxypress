@@ -26,8 +26,8 @@
 #include <entry.h>
 #include <language.h>
 #include <message.h>
-#include <parser_clang.h>
-#include <parser_cstyle.h>
+#include <parse_clang.h>
+#include <parse_cstyle.h>
 #include <util.h>
 
 #define YY_NO_INPUT 1
@@ -7520,7 +7520,7 @@ SkipC11Attribute>"]]"                 {
       
       if ((text[0] == '*' || text[0] == '&') && current->section == Entry::ENUM_SEC) {
          // found "enum a *b" -> variable
-         current->section = Entry::VARIABLE_SEC ;
+         current->section = Entry::VARIABLE_SEC;
       }
       BEGIN( FindMembers );
    }

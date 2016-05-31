@@ -15,8 +15,8 @@
  *
 *************************************************************************/
 
-#ifndef PARSER_BASE_H
-#define PARSER_BASE_H
+#ifndef PARSE_BASE_H
+#define PARSE_BASE_H
 
 #include <QHash>
 #include <QStringList>

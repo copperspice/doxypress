@@ -37,7 +37,7 @@
 #include <message.h>
 #include <membergroup.h>
 #include <outputgen.h>
-#include <parser_base.h>
+#include <parse_base.h>
 #include <util.h>
 
 class DocbookSectionMapper : public QHash<long, QString>

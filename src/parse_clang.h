@@ -15,8 +15,8 @@
  *
 *************************************************************************/
 
-#ifndef CLANGPARSER_H
-#define CLANGPARSER_H
+#ifndef PARSE_CLANG_H
+#define PARSE_CLANG_H
 
 #include <QStringList>
 

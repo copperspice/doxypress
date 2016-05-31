@@ -37,7 +37,7 @@
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
-#include <parser_md.h>
+#include <parse_md.h>
 #include <portable.h>
 #include <printdocvisitor.h>
 #include <util.h>

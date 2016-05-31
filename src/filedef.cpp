@@ -28,8 +28,8 @@
 #include <language.h>
 #include <message.h>
 #include <outputlist.h>
-#include <parser_base.h>
-#include <parser_clang.h>
+#include <parse_base.h>
+#include <parse_clang.h>
 #include <util.h>
 
 /** Class implementing CodeOutputInterface by throwing away everything. */

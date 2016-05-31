@@ -15,30 +15,34 @@
  *
 *************************************************************************/
 
-#ifndef PARSER_MD_H
-#define PARSER_MD_H
+#ifndef PARSE_PY_H
+#define PARSE_PY_H
 
-#include <parser_base.h>
-class Entry;
+#include <QByteArray>
+#include <QStringList>
 
-/** processes string \a s and converts markdown into DoxyPress html commands. */
-QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointer<Entry> e, const  QString &s);
-QString markdownFileNameToId(const QString &fileName);
+#include <types.h>
 
-class MarkdownFileParser : public ParserInterface
+#include <definition.h>
+#include <outputgen.h>
+#include <parse_base.h>
+
+/** \brief Python Parser using state-based lexical scanning.
+ *
+ * This is the Python language parser for doxyPress.
+ */
+class PythonLanguageParser : public ParserInterface
 {
  public:
-   virtual ~MarkdownFileParser() {}
-
+   virtual ~PythonLanguageParser() {}
+   
    void finishTranslationUnit() override {}
 
-   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry>root, 
-                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
+   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
+                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
-   bool needsPreprocessing(const QString &) override {
-      return false;
-   }
-  
+   bool needsPreprocessing(const QString &extension) override;
+
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                   bool isExampleBlock, const QString &exampleName = QString(), 
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
@@ -49,5 +53,14 @@ class MarkdownFileParser : public ParserInterface
    void resetCodeParserState();
    void parsePrototype(const QString &text) override;
 };
+
+extern void parsePythonCode(CodeOutputInterface &, const QString &, const QString &,
+                            bool , const QString &, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
+                            QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
+                            bool collectXRefs);
+
+extern void resetPythonCodeParserState();
+
+void pyFreeParser();
 
 #endif

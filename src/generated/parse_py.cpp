@@ -1201,15 +1201,15 @@ char *pyscannerYYtext;
 #include <ctype.h>
 #include <unistd.h>
 
-#include "arguments.h"
-#include "commentscan.h"
-#include "config.h"
+#include <arguments.h>
+#include <commentscan.h>
+#include <config.h>
 #include <doxy_globals.h>
-#include "defargs.h"
+#include <defargs.h>
 #include <entry.h>
 #include <language.h>
 #include <message.h>
-#include <parser_py.h>
+#include <parse_py.h>
 #include <util.h>
 
 // Toggle for some debugging info

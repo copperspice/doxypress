@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <parser_make.h>
+#include <parse_make.h>
 
 #include <doxy_globals.h>
 #include <outputgen.h>

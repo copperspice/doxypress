@@ -15,39 +15,35 @@
  *
 *************************************************************************/
 
-#ifndef PARSER_CSTYLE_H
-#define PARSER_CSTYLE_H
+#ifndef PARSE_FILE_H
+#define PARSE_FILE_H
 
-#include <parser_base.h>
+#include <parse_base.h>
 
-/** \brief C-like language parser using state-based lexical scanning.
- *  
- *  Language parser for C++ and various languages which are closely related to C++
- *  such as C, C#, Objective-C, Java, PHP, and IDL.
- */
-class CPPLanguageParser : public ParserInterface
+/** @brief General file parser */
+class FileParser : public ParserInterface
 {
  public:
-   virtual ~CPPLanguageParser() {}
-  
-   void finishTranslationUnit() override {};
+   virtual ~FileParser() {} 
+   void finishTranslationUnit() override {}
 
-   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
-                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
+   void parseInput(const QString &, const QString &, QSharedPointer<Entry>, 
+                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {};
 
-   bool needsPreprocessing(const QString &extension) override;
+   bool needsPreprocessing(const QString &) override {
+      return false;
+   }
 
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                   bool isExampleBlock, const QString &exampleName = QString(), 
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                   int startLine = -1, int endLine = -1, bool inlineFragment = false,
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,
-                  QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
+                  QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override;
 
-   void resetCodeParserState();
-   void parsePrototype(const QString &text) override;
+   void resetCodeParserState() {}
+   void parsePrototype(const QString &) {}
 };
 
-void cstyleFreeParser();
 
 #endif
