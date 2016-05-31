@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <xsd:element name="doxygen" type="DoxygenType"/>
+  <xsd:element name="doxy" type="DoxyType"/>
 
   <!-- Complex types -->
 
-  <xsd:complexType name="DoxygenType">
+  <xsd:complexType name="DoxyType">
     <xsd:sequence maxOccurs="unbounded">
       <xsd:element name="compounddef" type="compounddefType" minOccurs="0" />
     </xsd:sequence>

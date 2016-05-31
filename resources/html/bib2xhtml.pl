@@ -130,7 +130,7 @@ foreach (@ARGV) {
 exit(1) unless defined($htmlfile);
 $bibdatacmd="\\bibdata{".join(',',@bibfiles)."}";
 $label_style = $LABEL_NUMBERED;
-$bstfile = "doxygen";
+$bstfile = "doxypress";
 umask(077);
 open(HTMLFILE,">$htmlfile$$");
 if (open(OHTMLFILE, "$htmlfile")) {
