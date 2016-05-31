@@ -26,7 +26,7 @@
 class StorageIntf;
 
 // class contains the information about the argument of a function or template
-struct Argument {   
+struct Argument {
    Argument() {}
 
    /*! Copy an argument (does a deep copy of all strings) */
@@ -81,8 +81,8 @@ class ArgumentList : public QList<Argument>
 {
  public:
    /*! Creates an empty argument list */
-   ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false), 
-                  isDeleted(false), refSpecifier(RefType::NoRef) 
+   ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false),
+                    isDeleted(false), refSpecifier(RefType::NoRef)
    {
    }
 
@@ -108,7 +108,7 @@ class ArgumentList : public QList<Argument>
 
    /*! method with =delete */
    bool isDeleted;
-   
+
    static ArgumentList *unmarshal(StorageIntf *s);
    static void marshal(StorageIntf *s, const ArgumentList &argList);
 };

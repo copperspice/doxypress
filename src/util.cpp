@@ -3338,18 +3338,18 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 
    if (srcAl->count() != dstAl->count()) {
       DOX_NOMATCH
-      return false; // different number of arguments -> no match
+      return false;       // different number of arguments -> no match
    }
 
    if (checkCV) {
       if (srcAl->constSpecifier != dstAl->constSpecifier) {
          DOX_NOMATCH
-         return false; // one member is const, the other not -> no match
+         return false;    // one member is const, the other not -> no match
       }
 
       if (srcAl->volatileSpecifier != dstAl->volatileSpecifier) {
          DOX_NOMATCH
-         return false; // one member is volatile, the other not -> no match
+         return false;    // one member is volatile, the other not -> no match
       }
    }
 
