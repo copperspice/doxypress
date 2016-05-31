@@ -27,9 +27,35 @@ if OSTYPE_WIN
 
    clang_dll=$(clang_path)/bin/libclang.dll
    clang_hdr=$(clang_path)/include
-   clang_lib=$(clang_path)/lib/liblibclang.dll.a  
-
-   clang_link=-L$(clang_path)/lib  -llibclang
+ 
+   clang_link=-L$(clang_path)/lib  -Wl,--start-group  \
+        -lLLVMSupport \
+        -lclangAST \
+        -lclangBasic \
+        -lclangTooling \
+        -lclangStaticAnalyzerFrontend \
+        -lclangFrontend \
+        -lclangDriver \
+        -lclangParse \
+        -lclangIndex \
+        -lLLVMMCParser \
+        -lclangSerialization \
+        -lclangSema \
+        -lclangEdit  \
+        -lLLVMBitReader \
+        -lLLVMOption \
+        -lclangStaticAnalyzerCheckers \
+        -lclangStaticAnalyzerCore \
+        -lclangAnalysis \
+        -lclangAST \
+        -lclangToolingCore \
+        -lclangLex \
+        -lclangBasic \
+        -lLLVMCore \
+        -lLLVMMC \
+        -lLLVMSupport \
+        -Wl,--end-group \
+        -llibclang
 
    AM_CXXFLAGS+=-I$(clang_hdr)
 
@@ -135,10 +161,11 @@ doxypress_SOURCES = \
    src/objcache.cpp \
    src/outputgen.cpp \
    src/outputlist.cpp \
-   src/parser_clang.cpp \
-   src/parser_file.cpp \
-   src/parser_make.cpp \
-   src/parser_md.cpp \
+   src/parse_clang.cpp \
+   src/parse_lib_tooling.cpp \
+   src/parse_file.cpp \
+   src/parse_make.cpp \
+   src/parse_md.cpp \
    src/pagedef.cpp \
    src/perlmodgen.cpp \
    src/plantuml.cpp \
@@ -169,10 +196,10 @@ doxypress_SOURCES = \
    src/generated/declinfo.cpp  \
    src/generated/doctokenizer.cpp \
    src/generated/fortrancode.cpp \
-   src/generated/parser_cstyle.cpp \
-   src/generated/parser_fortran.cpp \
-   src/generated/parser_py.cpp \
-   src/generated/parser_tcl.cpp \
+   src/generated/parse_cstyle.cpp \
+   src/generated/parse_fortran.cpp \
+   src/generated/parse_py.cpp \
+   src/generated/parse_tcl.cpp \
    src/generated/pre.cpp \
    src/generated/pycode.cpp
 
@@ -246,15 +273,16 @@ noinst_HEADERS = \
    src/outputgen.h \
    src/outputlist.h \
    src/pagedef.h \
-   src/parser_base.h \
-   src/parser_clang.h \
-   src/parser_cstyle.h \
-   src/parser_file.h \
-   src/parser_fortran.h \
-   src/parser_make.h \
-   src/parser_md.h \
-   src/parser_py.h \
-   src/parser_tcl.h \
+   src/parse_base.h \
+   src/parse_clang.h \
+   src/parse_lib_tooling.h \
+   src/parse_cstyle.h \
+   src/parse_file.h \
+   src/parse_fortran.h \
+   src/parse_make.h \
+   src/parse_md.h \
+   src/parse_py.h \
+   src/parse_tcl.h \
    src/perlmodgen.h \
    src/plantuml.h \
    src/portable.h \
