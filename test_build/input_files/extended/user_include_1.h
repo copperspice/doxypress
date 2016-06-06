@@ -17,7 +17,7 @@
 
 /// This documentation is for someTestClass
 template <class T>
-class testInclude
+class test_Include
 {        
    /// docs for a member variable
    bool isOk;

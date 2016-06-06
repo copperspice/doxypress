@@ -12,10 +12,10 @@
 *                                                                         
 *************************************************************************/
 
-class testBrief
+class test_Brief
 {
    public:
-      testBrief();
+      test_Brief();
 
       void myMethod1();
       void myMethod2();

@@ -16,7 +16,7 @@
 #define USER_INCLUDE_2_H
 
 template <class T>
-class testInclude;
+class test_Include;
 
 
 #endif

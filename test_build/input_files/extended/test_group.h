@@ -19,7 +19,7 @@
   * The following notation will translate 'code' to behave like it says <code>true</code>
 */
 
-class groupTest1
+class test_Group1
 {
    public:
 
@@ -45,7 +45,7 @@ class groupTest1
 };
 
 /** Test a single comment for a group, project setting 'duplicate group documentation' must be enabled */
-class groupTest2
+class test_Group2
 {
    public:
    //! This is a comment applied to each member of the group

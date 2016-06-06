@@ -16,7 +16,7 @@
 #define USER_TESTS_H
 
 /// docs for testTabs
-class testTabs
+class test_Tabs
 {
 public:
 	/**
@@ -34,7 +34,7 @@ public:
 };
 
 /// docs for testFriend
-class testFriend
+class test_Friend
 {
    public:
       /// does this cause a warning about return types? No issue found.
@@ -42,7 +42,7 @@ class testFriend
 };
 
 /// docs for testTypeDef
-class testTypeDef
+class test_TypeDef
 {
    public:
       typedef int myTypeDef;      
@@ -51,14 +51,14 @@ class testTypeDef
 
 
 /// base class, test graphViz
-class dotFruit
+class test_dotFruit
 {
    public:
       virtual void chew(void);      ///< describe how to chew a fruit
 };
 
 /// child class, test graphViz
-class dotApple : public dotFruit
+class test_dotApple : public test_dotFruit
 {
    public:
       void chew();

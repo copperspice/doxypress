@@ -95,7 +95,9 @@ class gameSports : public gameBase
       void fencing(int (*funcVar)(bool)) const;   //!< (C-5)  comment two slashes and one exclamation
 
       /// (C-6)  comment with three slashes, before the method
-      void volleyball(float var1[5], const double var2 = 10.9, const int var3 = 15 > sizeof(int) ? 3 + 5 : false);
+      void volleyball(const double var1 = 10.9, const int var2 = 15 > sizeof(int) ? 3 + 5 : false);
+
+      void volleyball(float var1[5][7], float var2[9]);
 
       void swim(int (gameSports::*dataVar)() const);
 
@@ -144,6 +146,7 @@ class gameSports : public gameBase
 
       static bool playersGender;
       int numEvents;
+      int villageStores[42][17][8];
 };
 
 

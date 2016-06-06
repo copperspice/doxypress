@@ -18,7 +18,7 @@
 #include "QString.h"
 class QTextCodec;
 
-class Bucket
+class test_Bucket
 {
 
  public:     
