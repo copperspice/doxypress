@@ -512,7 +512,7 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
    for (auto &item : clangFlags) {
       argList.push_back(item.toUtf8().constData());
    }
-  
+
    argList.push_back("-ferror-limit=0");
    argList.push_back("-x");
 
@@ -553,20 +553,20 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
       case ClangParser::Private::Detected_ObjCpp:
          argList.push_back("objective-c++");
          break;
-   }         
-   
-   argList.push_back(fileName.toUtf8().constData());   
+   }
+
+   argList.push_back(fileName.toUtf8().constData());
 
    // exclude PCH files, disable diagnostics
    p->index    = clang_createIndex(false, false);
 
    p->fileName = fileName;
    p->curLine  = 1;
-   p->curToken = 0;          
+   p->curToken = 0;
 
    // provide the input and their dependencies as unsaved files in memory
    static bool filterSourceFiles = Config::getBool("filter-source-files");
-  
+
    uint numUnsavedFiles = includeFiles.count() + 1;
 
    p->numFiles = numUnsavedFiles;
@@ -598,10 +598,10 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
    std::vector<const char *> argv;
    for (auto &item : argList) {
       argv.push_back(item.c_str());
-   }   
+   }
 
-   int argc = argList.size(); 
-  
+   int argc = argList.size();
+
    CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, &argv[0], argc, p->ufs, numUnsavedFiles,
                   CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
 
@@ -632,21 +632,21 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
       } else {
          // start adding to entry
          s_current_root = root;
-    
+
          argList.erase(argList.end() - 1);
 
-         // pass the list of files to parse                     
-         clang::tooling::FixedCompilationDatabase options(".", argList);    
-     
-         // pass the list of files to parse       
+         // pass the list of files to parse
+         clang::tooling::FixedCompilationDatabase options(".", argList);
+
+         // pass the list of files to parse
          std::vector<std::string> sourceList;
          sourceList.push_back(fileName.toUtf8().constData());
-         
-         // create a new clang tooling instance   
+
+         // create a new clang tooling instance
          clang::tooling::ClangTool tool(options, sourceList);
-         
+
          // run the clang tooling to create a new FrontendAction
-         int result = tool.run(clang::tooling::newFrontendActionFactory<DoxyFrontEnd>().get());   
+         int result = tool.run(clang::tooling::newFrontendActionFactory<DoxyFrontEnd>().get());
       }
 
       // create a source range for the file

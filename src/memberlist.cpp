@@ -311,25 +311,27 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
  
    for (auto md : *this) {
 
-      if ((inheritedFrom == 0 || ! md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
+      if ((inheritedFrom == nullptr || ! md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
          
          switch (md->memberType()) {
-            case MemberType_Define:    // fall through
-            //case MemberType_Prototype: // fall through
-            case MemberType_Typedef:   // fall through
-            case MemberType_Variable:  // fall through
-            case MemberType_Function:  // fall through
-            case MemberType_Signal:    // fall through
-            case MemberType_Slot:      // fall through
-            case MemberType_DCOP:      // fall through
-            case MemberType_Property:  // fall through
-            case MemberType_Interface: // fall through
-            case MemberType_Service:   // fall through
+            //  case MemberType_Prototype:
 
+            case MemberType_Define:
+            case MemberType_Typedef:
+            case MemberType_Variable:
+            case MemberType_Function:
+            case MemberType_Signal: 
+            case MemberType_Slot:   
+            case MemberType_DCOP:   
+            case MemberType_Property:
+            case MemberType_Interface:
+            case MemberType_Service:  
             case MemberType_Event: {
+
                if (first) {
                   ol.startMemberList(), first = false;
                }
+
                md->writeDeclaration(ol, cd, nd, fd, gd, m_inGroup, inheritedFrom, inheritId);
                break;
             }
@@ -344,7 +346,8 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   name = name.right(name.length() - i - 2);   // strip scope (TODO: is this needed?)
                }
 
-               if (name[0] == '@') { // anonymous enum => append variables
+               if (name[0] == '@') { 
+                  // anonymous enum => append variables
                  
                   for (auto vmd : *this) {    
                      QString vtype = vmd->typeString();
@@ -580,6 +583,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
             }
             
             mg.writePlainDeclarations(ol, cd, nd, fd, gd, inheritedFrom, inheritId);
+
             if (inheritId.isEmpty()) {
                ol.endMemberGroup(hasHeader);
             }

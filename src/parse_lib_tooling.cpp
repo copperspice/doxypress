@@ -123,6 +123,10 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
       virtual bool TraverseDecl(clang::Decl *node)  {
          bool retval = true;
 
+         if (node == nullptr) {
+            return retval;
+         }
+
          clang::SourceManager & sourceManager = m_context->getSourceManager();
 
          if (sourceManager.isWrittenInMainFile(node->getLocation()) || std::string(node->getDeclKindName()) == "TranslationUnit") {
@@ -161,6 +165,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             if (node->hasAttr<clang::FinalAttr>())  {
                current->m_traits.setTrait(Entry::Virtue::Final);
+            }
+
+            if (! node->hasDefinition()) {
+               // required, check to ensure bases() container has entries
+               return true;
             }
 
             // inheritance
@@ -224,7 +233,6 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
                   parentEntry->addSubEntry(current, parentEntry);
                }
-
             }
 
          } else if (node->isUnion()) {
@@ -272,9 +280,15 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          QString currentUSR = getUSR_Decl(node);
+
+         if (s_entryMap.contains(currentUSR)) {
+            // can occur when a method is declared in the class and then defined later in the same file
+            return true;
+         }
+
          s_entryMap.insert(currentUSR, current);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location    = m_context->getFullLoc(node->getLocStart());
          clang::CXXMethodDecl *methodDecl = llvm::dyn_cast<clang::CXXMethodDecl>(node);
 
          QString name = toQString(node->getNameInfo().getName());
@@ -302,11 +316,34 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                addComma = true;
             }
 
-            QString tmpType = toQString(item->getType());
-            args += tmpType + " ";
+            auto tQualType  = item->getOriginalType();
 
+            QString tmpType = toQString(tQualType);
             QString tmpName = toQString(item->getName());
-            args += tmpName;
+            QString tmpAfter;
+
+            {
+               // simulate printBefore printAfter
+               std::string tString;
+               llvm::raw_string_ostream tStream(tString);
+
+               llvm::Twine twine("\n");
+
+               clang::QualType::print(tQualType.split(), tStream, m_policy, twine);
+               QString tmpStr1 = toQString(tStream.str());
+
+               int pos = tmpStr1.indexOf("\n");
+
+               if (pos != tmpStr1.length() - 1)  {
+                  tmpType  = tmpStr1.left(pos);
+                  tmpAfter = tmpStr1.mid(pos+1);
+
+                  // handle these case by case
+                  tmpAfter.replace("__attribute__((thiscall))", "");
+               }
+            }
+
+            args += tmpType + " " + tmpName + tmpAfter;
 
             QString tmpDefValue;
             auto tExpr = item->getDefaultArg();
@@ -326,6 +363,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             tmp.type   = tmpType;
             tmp.name   = tmpName;
             tmp.defval = tmpDefValue; 	
+            tmp.array  = tmpAfter;
 
             argList.append(tmp);
          }
@@ -496,13 +534,29 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
+         auto tQualType = node->getType();
+
          QString name = toQString(node->getName());
-         QString type = toQString(node->getType());
+
+         // handle array
+         QString args;
+         const clang::ConstantArrayType *cat = m_context->getAsConstantArrayType(tQualType);
+
+         while (cat != nullptr) {
+            auto size = cat->getSize().getLimitedValue();
+            args += "[" + QString::number(size) + "]";
+
+            tQualType = cat->getElementType();
+            cat       = m_context->getAsConstantArrayType(tQualType);
+         }
+
+         QString type = toQString(tQualType);
 
          current->section     = Entry::VARIABLE_SEC;
          current->name        = name;
          current->type        = type;
 
+         current->args        = args;
          current->protection  = getAccessSpecifier(node);
 
          current->lang        = SrcLangExt_Cpp;

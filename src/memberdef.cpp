@@ -1426,7 +1426,6 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {
    // hide enum value since they appear already as part of the enum, unless they are explicitly grouped
-
    if (! inGroup && m_impl->mtype == MemberType_EnumValue) {
       return;
    }

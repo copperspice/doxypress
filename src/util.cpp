@@ -1633,7 +1633,7 @@ QString removeRedundantWhiteSpace(const QString &str)
             continue;
          }
 
-      // current char is a <
+      // current char is <
       } else if (i < len - 2 && c == '<' &&
                  (isId(str.at(i + 1)) || str.at(i + 1).isSpace()) && (i < 8 || ! findOperator(str, i)) ) {
 
@@ -1641,7 +1641,7 @@ QString removeRedundantWhiteSpace(const QString &str)
          retval += '<';
          retval += ' ';
 
-      // current char is a >
+      // current char is >
       } else if (i > 0 && c == '>' &&
                  (isId(str.at(i - 1)) || str.at(i - 1).isSpace() || str.at(i - 1) == '*'
                       || str.at(i - 1) == '&' || str.at(i-1)=='.') && (i < 8 || ! findOperator(str, i)) ) {
@@ -1650,7 +1650,7 @@ QString removeRedundantWhiteSpace(const QString &str)
          retval += ' ';
          retval += '>';
 
-      // current char is a comma
+      // current char is comma
       } else if (i > 0 && c == ',' && ! str.at(i - 1).isSpace() &&
                   ((i < len - 1 && (isId(str.at(i + 1)) || str.at(i + 1) == '['))
                      || (i < len - 2 && str.at(i + 1) == '$' && isId(str.at(i + 2)))
@@ -1671,7 +1671,7 @@ QString removeRedundantWhiteSpace(const QString &str)
             retval += ' ';
          }
 
-      } else if (c == 't' && csp == 5  &&  i < len -1  &&  ! (isId(str.at(i + 1)) ||
+      } else if (c == 't' && csp == 5  && i < len -1  && ! (isId(str.at(i + 1)) ||
                    str.at(i + 1) == ')' || str.at(i + 1) == ',' ) )  {
 
          // prevent const ::A from being converted to const::A
@@ -1723,6 +1723,11 @@ QString removeRedundantWhiteSpace(const QString &str)
             c = ' ';
          }
 
+         // fix spacing "int(*var"
+         if (c == '(' && ( (i > 1 && isId(str.at(i-1))) || (i > 2 && str.at(i-1) == ' ' && isId(str.at(i-2)) ) ) )   {
+            retval += ' ';
+         }
+
          if (c == '*' || c == '&' || c == '@' || c == '$') {
             uint rl = retval.length();
 
@@ -1746,7 +1751,7 @@ QString removeRedundantWhiteSpace(const QString &str)
             }
 
          } else if (c == '=')  {
-            // deals with "= delete"
+            // deals with "= delete", add space before the equal sign
             retval += ' ';
 
          }
@@ -1754,7 +1759,7 @@ QString removeRedundantWhiteSpace(const QString &str)
          retval += c;
 
          if (c == '=')  {
-            // deals with "= delete"
+            // deals with "= delete", add space after the equal sign
             retval += ' ';
          }
 
@@ -4224,7 +4229,7 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
    }
 
    // strip template specifier, try again
-   // broom - use libClang to match the correct template
+   // so do we need clang to match the correct template
    int posBegin = nameStr.indexOf('<');
    bool tryBaseTemplate = false;
 
@@ -5312,8 +5317,6 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
       return;
    }
 
-   uint index = 0;
-
    for (auto md : *ml) {
 
       if (md->isEnumerate()) {
@@ -5365,16 +5368,21 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
                (*ppMemberGroupSDict)->insert(groupId, mg);
             }
 
-            md = ml->takeAt(index);           // remove from member list
-            mg->insertMember(md);             // insert in member group
+            mg->insertMember(md);             // copy this element to a different member group
             mg->setRefItems(info->m_sli);
             md->setMemberGroup(mg);
-
-            continue;
          }
       }
+   }
 
-      ++index;
+   // remove elements which moved to a new list
+   for (int index = 0; index < ml->length(); ++index) {
+      QSharedPointer<MemberDef> md = ml->at(index);
+
+      if (md->getMemberGroupId() != -1) {
+         ml->removeAt(index);
+         --index;
+      }
    }
 }
 

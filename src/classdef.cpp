@@ -189,7 +189,6 @@ void ClassDef::addMembersToMemberGroup()
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    for (auto item : m_memberLists ) {
-
       if ( (item->listType() & MemberListType_detailedLists) == 0) {
          ::addMembersToMemberGroup(item, &m_memberGroupSDict, self);
       }
@@ -3494,7 +3493,6 @@ QSharedPointer<MemberList> ClassDef::getMemberList(MemberListType lt)
 void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, bool isBrief)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
-
    QSharedPointer<MemberList> ml = createMemberList(lt); 
 
    static bool sortBriefDocs  = Config::getBool("sort-brief-docs");

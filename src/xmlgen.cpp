@@ -782,9 +782,6 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    }
 
    if (md->memberType() == MemberType_Variable) {
-      //ArgumentList *al = md->argumentList();
-      //t << " volatile=\"";
-      //if (al && al->volatileSpecifier) t << "yes"; else t << "no";
 
       t << " mutable=\"";
       if (md->isMutable()) {
