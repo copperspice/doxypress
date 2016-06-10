@@ -226,7 +226,7 @@
         "warn-format": "$file:$line: $text",
         "warn-logfile": "doxy_error.log",
         "warn-undoc": false,
-        "warn-undoc-param": false,
+        "warn-undoc-param": true,
         "warnings": true
     },
     "output-chm": {
