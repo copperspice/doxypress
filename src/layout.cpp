@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -46,7 +46,7 @@ static QString buildMultiTitle(const QString &titleA, enum SrcLangExt langId, co
    QString retval = titleA + "|" + QString::number(langId) + "=" + titleB;
    retval = buildMultiTitle(retval, Vs...);
 
-   return retval;   
+   return retval;
 }
 
 static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
@@ -61,8 +61,8 @@ static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
       // values are in uppercase in the layout file
       QString id = visible.mid(1).toLower();
 
-      bool value = Config::getBool(id); 
-      return value;   
+      bool value = Config::getBool(id);
+      return value;
    }
 
    return visible != "no" && visible != "0";
@@ -71,7 +71,7 @@ static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
 LayoutNavEntry *LayoutNavEntry::find(LayoutNavEntry::Kind kind, const QString &file) const
 {
    LayoutNavEntry *result = 0;
-  
+
    for ( auto entry : m_children) {
       // depth first search, needed to find the entry furthest from the
       // root in case an entry is in the tree twice
@@ -94,7 +94,7 @@ QString LayoutNavEntry::url() const
 {
    QString url = baseFile().trimmed();
 
-   if ((kind() != LayoutNavEntry::User && kind() != LayoutNavEntry::UserGroup) || 
+   if ((kind() != LayoutNavEntry::User && kind() != LayoutNavEntry::UserGroup) ||
          (kind() == LayoutNavEntry::UserGroup && url.left(9) == "usergroup")) {
 
       url += Doxy_Globals::htmlFileExtension;
@@ -123,14 +123,14 @@ QString LayoutNavEntry::url() const
          msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", qPrintable(url.mid(5)), qPrintable(temp));
       }
    }
-  
+
    return url;
 }
 
 class LayoutParser : public QXmlDefaultHandler
 {
  private:
-   class StartElementHandler 
+   class StartElementHandler
    {
     typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib);
 
@@ -154,7 +154,7 @@ class LayoutParser : public QXmlDefaultHandler
 
    class StartElementHandlerKind : public StartElementHandler
    {
-    
+
     typedef void (LayoutParser::*Handler)(LayoutDocEntry::Kind kind, const QXmlAttributes &attrib);
 
     public:
@@ -166,9 +166,9 @@ class LayoutParser : public QXmlDefaultHandler
       }
 
     private:
-      LayoutParser *m_parent;
-      LayoutDocEntry::Kind m_kind;
-      Handler m_handler;
+      LayoutParser         *m_parent;
+      LayoutDocEntry::Kind  m_kind;
+      Handler               m_handler;
    };
 
    class StartElementHandlerSection : public StartElementHandler
@@ -184,16 +184,16 @@ class LayoutParser : public QXmlDefaultHandler
       }
 
     private:
-      LayoutParser *m_parent;
+      LayoutParser        *m_parent;
       LayoutDocEntry::Kind m_kind;
-      Handler m_handler;
-      QString m_title;
+      Handler              m_handler;
+      QString              m_title;
    };
 
    class StartElementHandlerMember : public StartElementHandler
-   {  
-     using Handler = void (LayoutParser::*)(const QXmlAttributes &attrib, MemberListType type, 
-                  const QString &title, const QString &subtitle);     
+   {
+     using Handler = void (LayoutParser::*)(const QXmlAttributes &attrib, MemberListType type,
+                  const QString &title, const QString &subtitle);
 
      public:
        StartElementHandlerMember(LayoutParser *parent, Handler h, MemberListType type,
@@ -255,11 +255,11 @@ class LayoutParser : public QXmlDefaultHandler
       return *theInstance;
    }
 
-   void init() {     
+   void init() {
       m_part    = -1;
       m_rootNav = 0;
 
-      // bool fortranOpt = Config::getBool("optimize-fortran");     
+      // bool fortranOpt = Config::getBool("optimize-fortran");
       // bool javaOpt    = Config::getBool("optimize-java");
 
       // start & end handlers
@@ -274,6 +274,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       // class layout handlers
       m_sHandler.insert("class",                     new StartElementHandler(this, &LayoutParser::startClass));
+
       m_sHandler.insert("class/briefdescription",    new StartElementHandlerKind(
                this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
@@ -300,11 +301,11 @@ class LayoutParser : public QXmlDefaultHandler
                this, LayoutDocEntry::ClassUsedFiles, &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("class/memberdecl",                   new StartElementHandler(this, &LayoutParser::startMemberDecl));
-         
+
       m_sHandler.insert("class/memberdecl/nestedclasses",     new StartElementHandlerSection(this, LayoutDocEntry::ClassNestedClasses,
-               &LayoutParser::startSectionEntry, 
-               buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes())) ); 
-     
+               &LayoutParser::startSectionEntry,
+               buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes())) );
+
       m_sHandler.insert("class/memberdecl/services",          new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_services, theTranslator->trServices()));
 
@@ -314,7 +315,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("class/memberdecl/publictypedefs",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubTypedefs, theTranslator->trPublicTypedefs()));
-      
+
       m_sHandler.insert("class/memberdecl/protectedtypedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proTypedefs, theTranslator->trProtectedTypedefs()));
 
@@ -331,12 +332,12 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("class/memberdecl/publicsignals",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubSignals, theTranslator->trPublicSignals()));
 
-      m_sHandler.insert("class/memberdecl/publicmethods",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry, 
-               MemberListType_pubMethods, 
+      m_sHandler.insert("class/memberdecl/publicmethods",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_pubMethods,
                buildMultiTitle(theTranslator->trPublicMembers(), SrcLangExt_ObjC, theTranslator->trInstanceMethods())));
 
       m_sHandler.insert("class/memberdecl/publicstaticmethods",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
-               MemberListType_pubStaticMethods, 
+               MemberListType_pubStaticMethods,
                buildMultiTitle( theTranslator->trStaticPublicMembers(), SrcLangExt_ObjC, theTranslator->trClassMethods())));
 
       m_sHandler.insert("class/memberdecl/publicattributes",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
@@ -421,8 +422,8 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("class/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
 
-      m_sHandler.insert("class/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::ClassInlineClasses, 
-               &LayoutParser::startSectionEntry, 
+      m_sHandler.insert("class/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::ClassInlineClasses,
+               &LayoutParser::startSectionEntry,
                buildMultiTitle(theTranslator->trClassDocumentation(), SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
       m_sHandler.insert("class/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
@@ -442,7 +443,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("class/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
                MemberListType_functionMembers, buildMultiTitle(theTranslator->trMemberFunctionDocumentation(),
-               SrcLangExt_ObjC, theTranslator->trMethodDocumentation(), 
+               SrcLangExt_ObjC, theTranslator->trMethodDocumentation(),
                SrcLangExt_Fortran, theTranslator->trMemberFunctionDocumentationFortran() )));
 
       m_sHandler.insert("class/memberdef/related", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
@@ -464,7 +465,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       // namespace layout handlers
       m_sHandler.insert("namespace", new StartElementHandler(this, &LayoutParser::startNamespace));
-      m_sHandler.insert("namespace/briefdescription", new StartElementHandlerKind(this, 
+      m_sHandler.insert("namespace/briefdescription", new StartElementHandlerKind(this,
                LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("namespace/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc,
@@ -475,20 +476,20 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("namespace/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("namespace/memberdecl/nestednamespaces", new StartElementHandlerSection(this, 
+      m_sHandler.insert("namespace/memberdecl/nestednamespaces", new StartElementHandlerSection(this,
                LayoutDocEntry::NamespaceNestedNamespaces,
                &LayoutParser::startSectionEntry, buildMultiTitle( theTranslator->trNamespaces(),
-               SrcLangExt_Java, theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(), 
+               SrcLangExt_Java, theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(),
                SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("namespace/memberdecl/constantgroups", new StartElementHandlerSection(this, 
+      m_sHandler.insert("namespace/memberdecl/constantgroups", new StartElementHandlerSection(this,
                LayoutDocEntry::NamespaceNestedConstantGroups, &LayoutParser::startSectionEntry, theTranslator->trConstantGroups()));
 
-      m_sHandler.insert("namespace/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceClasses, 
-               &LayoutParser::startSectionEntry, buildMultiTitle(theTranslator->trCompounds(),                              
+      m_sHandler.insert("namespace/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceClasses,
+               &LayoutParser::startSectionEntry, buildMultiTitle(theTranslator->trCompounds(),
                SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("namespace/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups, 
+      m_sHandler.insert("namespace/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups,
                &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("namespace/memberdecl/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
@@ -531,7 +532,7 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("file", new StartElementHandler(this, &LayoutParser::startFile));
       m_sHandler.insert("file/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("file/detaileddescription", new StartElementHandlerSection(this, 
+      m_sHandler.insert("file/detaileddescription", new StartElementHandlerSection(this,
                LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,theTranslator->trDetailedDescription()));
 
       m_sHandler.insert("file/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
@@ -552,9 +553,9 @@ class LayoutParser : public QXmlDefaultHandler
                &LayoutParser::startSectionEntry,
                buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("file/memberdecl/namespaces", new StartElementHandlerSection(this, LayoutDocEntry::FileNamespaces, 
+      m_sHandler.insert("file/memberdecl/namespaces", new StartElementHandlerSection(this, LayoutDocEntry::FileNamespaces,
                &LayoutParser::startSectionEntry, buildMultiTitle( theTranslator->trNamespaces(), SrcLangExt_Java,
-               theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(), 
+               theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(),
                SrcLangExt_Fortran, theTranslator->trModules() )));
 
       m_sHandler.insert("file/memberdecl/constantgroups", new StartElementHandlerSection(this, LayoutDocEntry::FileConstantGroups,
@@ -570,7 +571,7 @@ class LayoutParser : public QXmlDefaultHandler
                MemberListType_decEnumMembers, theTranslator->trEnumerations()));
 
       m_sHandler.insert("file/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
-               MemberListType_decFuncMembers, 
+               MemberListType_decFuncMembers,
                buildMultiTitle( theTranslator->trFunctions(), SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
       m_sHandler.insert("file/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
@@ -579,7 +580,7 @@ class LayoutParser : public QXmlDefaultHandler
       m_eHandler.insert("file/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
       m_sHandler.insert("file/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
 
-      m_sHandler.insert("file/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::FileInlineClasses, 
+      m_sHandler.insert("file/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::FileInlineClasses,
                &LayoutParser::startSectionEntry,
                buildMultiTitle( theTranslator->trClassDocumentation(), SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
@@ -604,16 +605,16 @@ class LayoutParser : public QXmlDefaultHandler
 
       // group layout handlers
       m_sHandler.insert("group", new StartElementHandler(this, &LayoutParser::startGroup));
-      m_sHandler.insert("group/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, 
+      m_sHandler.insert("group/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc,
                &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("group/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc,
                &LayoutParser::startSectionEntry, theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("group/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, 
+      m_sHandler.insert("group/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/groupgraph", new StartElementHandlerKind(this, LayoutDocEntry::GroupGraph, 
+      m_sHandler.insert("group/groupgraph", new StartElementHandlerKind(this, LayoutDocEntry::GroupGraph,
                &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("group/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups,
@@ -629,13 +630,13 @@ class LayoutParser : public QXmlDefaultHandler
                &LayoutParser::startSectionEntry, buildMultiTitle( theTranslator->trNamespaces(),
                SrcLangExt_Java, theTranslator->trPackages(), SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("group/memberdecl/dirs", new StartElementHandlerSection(this, LayoutDocEntry::GroupDirs, 
+      m_sHandler.insert("group/memberdecl/dirs", new StartElementHandlerSection(this, LayoutDocEntry::GroupDirs,
                &LayoutParser::startSectionEntry, theTranslator->trDirectories() ));
 
-      m_sHandler.insert("group/memberdecl/nestedgroups", new StartElementHandlerSection(this, LayoutDocEntry::GroupNestedGroups, 
+      m_sHandler.insert("group/memberdecl/nestedgroups", new StartElementHandlerSection(this, LayoutDocEntry::GroupNestedGroups,
                &LayoutParser::startSectionEntry, theTranslator->trModules() ));
 
-      m_sHandler.insert("group/memberdecl/files", new StartElementHandlerSection(this, LayoutDocEntry::GroupFiles, 
+      m_sHandler.insert("group/memberdecl/files", new StartElementHandlerSection(this, LayoutDocEntry::GroupFiles,
                &LayoutParser::startSectionEntry, theTranslator->trFile(true, false) ));
 
       m_sHandler.insert("group/memberdecl/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
@@ -651,7 +652,7 @@ class LayoutParser : public QXmlDefaultHandler
                MemberListType_decEnumValMembers, theTranslator->trEnumerationValues()));
 
       m_sHandler.insert("group/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
-               MemberListType_decFuncMembers, 
+               MemberListType_decFuncMembers,
                buildMultiTitle(theTranslator->trFunctions(), SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
       m_sHandler.insert("group/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
@@ -665,7 +666,7 @@ class LayoutParser : public QXmlDefaultHandler
                MemberListType_decProSignalMembers, theTranslator->trProtectedSignals()));
 
      m_sHandler.insert("group/memberdecl/privatesignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
-               MemberListType_decPriSignalMembers, theTranslator->trPrivateSignals()));    
+               MemberListType_decPriSignalMembers, theTranslator->trPrivateSignals()));
 
       m_sHandler.insert("group/memberdecl/publicslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPubSlotMembers, theTranslator->trPublicSlots()));
@@ -691,7 +692,7 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("group/memberdef/pagedocs", new StartElementHandlerKind(this, LayoutDocEntry::GroupPageDocs,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::GroupInlineClasses, 
+      m_sHandler.insert("group/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::GroupInlineClasses,
                &LayoutParser::startSectionEntry, buildMultiTitle(theTranslator->trClassDocumentation(), SrcLangExt_Fortran,
                theTranslator->trTypeDocumentation() )));
 
@@ -749,7 +750,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       // directory layout handlers
       m_sHandler.insert("directory", new StartElementHandler(this, &LayoutParser::startDirectory));
-      m_sHandler.insert("directory/briefdescription", 
+      m_sHandler.insert("directory/briefdescription",
                new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("directory/detaileddescription",
@@ -772,10 +773,10 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void startSimpleEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib) {
- 
+
       bool isVisible = elemIsVisible(attrib);
 
-      if (m_part != -1 && isVisible) { 
+      if (m_part != -1 && isVisible) {
          LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part, new LayoutDocEntrySimple(k));
       }
    }
@@ -783,7 +784,7 @@ class LayoutParser : public QXmlDefaultHandler
    void startSectionEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib, const QString &title) {
       bool isVisible    = elemIsVisible(attrib);
       QString userTitle = attrib.value("title");
-    
+
 
       if (userTitle.isEmpty()) {
          userTitle = title;
@@ -794,9 +795,9 @@ class LayoutParser : public QXmlDefaultHandler
       }
    }
 
-   void startMemberDeclEntry(const QXmlAttributes &attrib, MemberListType type, 
-                             const QString &title, const QString &subscript) {
-     
+   void startMemberDeclEntry(const QXmlAttributes &attrib, MemberListType type,
+                  const QString &title, const QString &subscript) {
+
       QString userTitle     = attrib.value("title");
       QString userSubscript = attrib.value("subtitle");
 
@@ -807,10 +808,10 @@ class LayoutParser : public QXmlDefaultHandler
       if (userSubscript.isEmpty()) {
          userSubscript = subscript;
       }
-      
+
       if (m_part != -1 /*&& isVisible*/) {
          LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part,
-                                               new LayoutDocEntryMemberDecl(type, userTitle, userSubscript));
+                  new LayoutDocEntryMemberDecl(type, userTitle, userSubscript));
       }
    }
 
@@ -851,7 +852,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    struct NavEntryMap {
-         const char *typeStr;         // type attribute name in the XML file
+         const char *key;             // key in the layout xml file
          LayoutNavEntry::Kind kind;   // corresponding enum name
          QString mainName;            // default title for an item if it has children
          QString subName;             // optional name for an item if it is rendered as a child
@@ -862,9 +863,10 @@ class LayoutParser : public QXmlDefaultHandler
    void startNavEntry(const QXmlAttributes &attrib) {
       static bool javaOpt    = Config::getBool("optimize-java");
       static bool fortranOpt = Config::getBool("optimize-fortran");
-     
+      static bool pythonOpt  = Config::getBool("optimize-python");
+
       static bool hasGraphicalHierarchy = Config::getBool("have-dot") && Config::getBool("dot-hierarchy");
-      static bool extractAll = Config::getBool("extract-all");    
+      static bool extractAll = Config::getBool("extract-all");
 
       static NavEntryMap mapping[] = {
          {
@@ -875,6 +877,7 @@ class LayoutParser : public QXmlDefaultHandler
             "",
             "index"
          },
+
          {
             "pages",
             LayoutNavEntry::Pages,
@@ -883,6 +886,7 @@ class LayoutParser : public QXmlDefaultHandler
             theTranslator->trRelatedPagesDescription(),
             "pages"
          },
+
          {
             "modules",
             LayoutNavEntry::Modules,
@@ -891,56 +895,196 @@ class LayoutParser : public QXmlDefaultHandler
             theTranslator->trModulesDescription(),
             "modules"
          },
+
          {
             "namespaces",
             LayoutNavEntry::Namespaces,
-            javaOpt  ? theTranslator->trPackages() : fortranOpt ? theTranslator->trModules() : theTranslator->trNamespaces(),
-            javaOpt  ? theTranslator->trPackages() : fortranOpt ? theTranslator->trModulesList() : theTranslator->trNamespaceList(),
-            javaOpt  ? theTranslator->trPackageListDescription() : fortranOpt ? 
-                                 theTranslator->trModulesListDescription(extractAll) : theTranslator->trNamespaceListDescription(extractAll),
+
+            [=]() {
+               if (javaOpt || pythonOpt) {
+                  return theTranslator->trPackages();
+
+               } else if (fortranOpt) {
+                  return theTranslator->trModules();
+
+               } else  {
+                  return theTranslator->trNamespaces();
+
+               }
+            }(),
+
+            [=]() {
+               if (javaOpt || pythonOpt) {
+                  return theTranslator->trPackages();
+
+               } else if (fortranOpt) {
+                  return theTranslator->trModulesList();
+
+               } else  {
+                  return theTranslator->trNamespaceList();
+               }
+            }(),
+
+            [=]() {
+               if (javaOpt || pythonOpt) {
+                  return theTranslator->trPackagesListDescription();
+
+               } else if (fortranOpt) {
+                  return theTranslator->trModulesListDescription(extractAll);
+
+               } else  {
+                  return theTranslator->trNamespacesListDescription(extractAll);
+
+               }
+            }(),
+
             "namespaces"
          },
+
          {
             "namespacelist",
             LayoutNavEntry::NamespaceList,
-            javaOpt ? theTranslator->trPackages() : fortranOpt ? theTranslator->trModulesList() : theTranslator->trNamespaceList(),
+
+            [=]() {
+               if (javaOpt || pythonOpt) {
+                  return theTranslator->trPackages();
+
+               } else if (fortranOpt) {
+                  return theTranslator->trModulesList();
+
+               } else  {
+                  return theTranslator->trNamespaceList();
+
+               }
+            }(),
+
             "",
-            javaOpt ? theTranslator->trPackageListDescription() : fortranOpt ? 
-                                 theTranslator->trModulesListDescription(extractAll) : theTranslator->trNamespaceListDescription(extractAll),
+
+            [=]() {
+               if (javaOpt || pythonOpt) {
+                  return theTranslator->trPackagesListDescription();
+
+               } else if (fortranOpt) {
+                  return theTranslator->trModulesListDescription(extractAll);
+
+               } else  {
+                  return theTranslator->trNamespacesListDescription(extractAll);
+
+               }
+            }(),
+
             "namespaces"
          },
+
          {
             "namespacemembers",
             LayoutNavEntry::NamespaceMembers,
-            javaOpt ? theTranslator->trPackageMembers() : fortranOpt ? theTranslator->trModulesMembers() : theTranslator->trNamespaceMembers(),
+
+            [=]() {
+               if (javaOpt || pythonOpt) {
+                  return theTranslator->trPackageMembers();
+
+               } else if (fortranOpt) {
+                  return theTranslator->trModuleMembers();
+
+               } else  {
+                  return theTranslator->trNamespaceMembers();
+
+               }
+            }(),
+
             "",
-            fortranOpt ? theTranslator->trModulesMemberDescription(extractAll) : theTranslator->trNamespaceMemberDescription(extractAll),
+
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trModulesMemberDescription(extractAll);
+
+               } else  {
+                  return theTranslator->trNamespaceMemberDescription(extractAll);
+
+               }
+            }(),          
+
             "namespacemembers"
          },
+
          {
             "classindex",
             LayoutNavEntry::ClassIndex,
-            fortranOpt ? theTranslator->trDataTypes() : theTranslator->trCompoundIndex(),
+
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trDataTypes();
+
+               } else  {
+                  return theTranslator->trCompoundIndex();
+
+               }
+            }(),       
+
             "",
             "",
             "classes"
          },
+
          {
             "classes",
             LayoutNavEntry::Classes,
-            fortranOpt ? theTranslator->trCompoundListFortran() : theTranslator->trClasses(),
+
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trCompoundListFortran();
+
+               } else  {
+                  return theTranslator->trClasses();
+
+               }
+            }(),       
+         
             theTranslator->trCompoundList(),
-            fortranOpt ? theTranslator->trCompoundListDescriptionFortran() : theTranslator->trCompoundListDescription(),
+
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trCompoundListDescriptionFortran();
+
+               } else  {
+                  return theTranslator->trCompoundListDescription();
+
+               }
+            }(),       
+
             "annotated"
          },
+
          {
             "classlist",
             LayoutNavEntry::ClassList,
-            fortranOpt ? theTranslator->trCompoundListFortran() : theTranslator->trCompoundList(),
+
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trCompoundListFortran();
+
+               } else  {
+                  return theTranslator->trCompoundList();
+
+               }
+            }(),       
+         
             "",
-            fortranOpt ? theTranslator->trCompoundListDescriptionFortran() : theTranslator->trCompoundListDescription(),
+
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trCompoundListDescriptionFortran();
+
+               } else  {
+                  return theTranslator->trCompoundListDescription();
+
+               }
+            }(),       
+         
             "annotated"
          },
+
          {
             "hierarchy",
             LayoutNavEntry::ClassHierarchy,
@@ -949,13 +1093,33 @@ class LayoutParser : public QXmlDefaultHandler
             theTranslator->trClassHierarchyDescription(),
             hasGraphicalHierarchy ? "inherits" : "hierarchy"
          },
+
          {
             "classmembers",
             LayoutNavEntry::ClassMembers,
-            fortranOpt ? theTranslator->trCompoundMembersFortran() : theTranslator->trCompoundMembers(),
+            
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trCompoundMembersFortran();
+
+               } else  {
+                  return theTranslator->trCompoundMembers();
+
+               }
+            }(),     
+
             "",
-            fortranOpt ? theTranslator->trCompoundMembersDescriptionFortran(extractAll) : 
-                  theTranslator->trCompoundMembersDescription(extractAll), 
+
+            [=]() {             
+               if (fortranOpt) {
+                  return theTranslator->trCompoundMembersDescriptionFortran(extractAll);
+
+               } else  {
+                  return theTranslator->trCompoundMembersDescription(extractAll);
+
+               }
+            }(),     
+
             "functions_all"
          },
 
@@ -967,6 +1131,7 @@ class LayoutParser : public QXmlDefaultHandler
             theTranslator->trFileListDescription(extractAll),
             "files"
          },
+
          {
             "filelist",
             LayoutNavEntry::FileList,
@@ -975,6 +1140,7 @@ class LayoutParser : public QXmlDefaultHandler
             theTranslator->trFileListDescription(extractAll),
             "files"
          },
+
          {
             "globals",
             LayoutNavEntry::FileGlobals,
@@ -991,8 +1157,8 @@ class LayoutParser : public QXmlDefaultHandler
             "",
             theTranslator->trFileSourceDescription(),
             "filesource"
-         },        
-        
+         },
+
          {
             "examples",
             LayoutNavEntry::Examples,
@@ -1010,6 +1176,7 @@ class LayoutParser : public QXmlDefaultHandler
             "",
             "user"
          },
+
          {
             "usergroup",
             LayoutNavEntry::UserGroup,
@@ -1018,8 +1185,9 @@ class LayoutParser : public QXmlDefaultHandler
             "",
             "usergroup"
          },
+
          {
-            0, // end of list
+            nullptr, // end of list
             (LayoutNavEntry::Kind)0,
             "",
             "",
@@ -1028,26 +1196,29 @@ class LayoutParser : public QXmlDefaultHandler
          }
       };
 
-      LayoutNavEntry::Kind kind;
+      LayoutNavEntry::Kind tKind;
 
       // find type in the table
       int i = 0;
       QString type = attrib.value("type");
 
-      while (mapping[i].typeStr) {
-         if (mapping[i].typeStr == type) {
-            kind = mapping[i].kind;
+      while (mapping[i].key) {
+
+         if (mapping[i].key == type) {
+            tKind = mapping[i].kind;
             break;
          }
+
          i++;
       }
 
-      if (mapping[i].typeStr == 0) {
+      if (mapping[i].key == nullptr) {
+
          if (type.isEmpty()) {
-            err("Entry tag within a navindex has no type attribute, verify the layout file\n");
+            err("Entry tag within a navindex has no type attribute, verify the project layout file\n");
 
          } else {
-            err("Type '%s' is not supported for the entry tag within a navindex, verify your layout file\n", 
+            err("Type '%s' is not supported for the entry tag within a navindex, verify the project layout file\n",
                               qPrintable(type));
          }
 
@@ -1056,32 +1227,33 @@ class LayoutParser : public QXmlDefaultHandler
       }
 
       QString baseFile = mapping[i].baseFile;
-      QString title = attrib.value("title");
+      QString title    = attrib.value("title");
 
-      bool isVisible = elemIsVisible(attrib);
+      bool isVisible   = elemIsVisible(attrib);
 
-      if (title.isEmpty()) { 
-         title = mapping[i].mainName; // use title for main row
+      if (title.isEmpty()) {
+         title = mapping[i].mainName;       // use title for main row
 
-         if (m_rootNav != LayoutDocManager::instance().rootNavEntry() && !mapping[i].subName.isEmpty()) {
-            title = mapping[i].subName; // if this is a child of another row, use the subName if available
-            // this is mainly done to get compatible naming with older versions
+         if (m_rootNav != LayoutDocManager::instance().rootNavEntry() && ! mapping[i].subName.isEmpty()) {
+            title = mapping[i].subName;
+
+            // if this is a child of another row, use the subName if available
          }
       }
 
 
       QString intro = attrib.value("intro");
 
-      if (intro.isEmpty()) { 
+      if (intro.isEmpty()) {
          // use default intro text
          intro = mapping[i].intro;
       }
 
       QString url = attrib.value("url");
-      if (mapping[i].kind == LayoutNavEntry::User && !url.isEmpty()) {
+      if (mapping[i].kind == LayoutNavEntry::User && ! url.isEmpty()) {
          baseFile = url;
 
-      } else if (kind == LayoutNavEntry::UserGroup) {
+      } else if (tKind == LayoutNavEntry::UserGroup) {
 
          if (! url.isEmpty()) {
             baseFile = url;
@@ -1093,7 +1265,7 @@ class LayoutParser : public QXmlDefaultHandler
       }
 
       // create new item and make it the new root
-      m_rootNav = new LayoutNavEntry(m_rootNav, kind, isVisible, baseFile, title, intro);
+      m_rootNav = new LayoutNavEntry(m_rootNav, tKind, isVisible, baseFile, title, intro);
    }
 
    void endNavEntry() {
@@ -1101,6 +1273,7 @@ class LayoutParser : public QXmlDefaultHandler
       if (m_rootNav && !m_invalidEntry) {
          m_rootNav = m_rootNav->parent();
       }
+
       m_invalidEntry = false;
    }
 
@@ -1201,30 +1374,30 @@ class LayoutParser : public QXmlDefaultHandler
 
    // reimplemented from QXmlDefaultHandler
    bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib ) {
-      
-      QString temp = m_scope + name;      
+
+      QString temp = m_scope + name;
       StartElementHandler *handler = m_sHandler[temp];
 
-      if (handler) {         
-         (*handler)(attrib);             
-    
+      if (handler) {
+         (*handler)(attrib);
+
       } else {
-         err("Unable to process layout file, XML tag '%s' was found in scope: '%s', \n", 
+         err("Unable to process layout file, XML tag '%s' was found in scope: '%s', \n",
                      qPrintable(name), qPrintable(m_scope));
       }
 
       return true;
    }
 
-   bool endElement( const QString &, const QString &, const QString &name ) {           
+   bool endElement( const QString &, const QString &, const QString &name ) {
       EndElementHandler *handler;
 
-      if (! m_scope.isEmpty() && m_scope.right(name.length() + 1 ) == name + "/") { 
+      if (! m_scope.isEmpty() && m_scope.right(name.length() + 1 ) == name + "/") {
         // element ends current scope
         handler = m_eHandler[m_scope.left(m_scope.length()-1)];
 
       }  else  {
-         // continue with current scope      
+         // continue with current scope
         handler = m_eHandler[m_scope + name];
       }
 
@@ -1257,8 +1430,8 @@ int LayoutParser::m_userGroupCount = 0;
 class LayoutErrorHandler : public QXmlErrorHandler
 {
  public:
-   LayoutErrorHandler(const QString &fn) 
-      : fileName(fn) 
+   LayoutErrorHandler(const QString &fn)
+      : fileName(fn)
    {}
 
    bool warning( const QXmlParseException &exception ) override {
@@ -1289,12 +1462,12 @@ class LayoutErrorHandler : public QXmlErrorHandler
 };
 
 static QString getLayout_Default()
-{  
+{
    QString fileName = ":/resources/layout_default.xml";
    QFile f(fileName);
 
    if (! f.open(QFile::ReadOnly | QFile::Text)) {
-      err("Unable to open file %s, error: %d\n", qPrintable(fileName), f.error());    
+      err("Unable to open file %s, error: %d\n", qPrintable(fileName), f.error());
       return "";
    }
 
@@ -1313,7 +1486,7 @@ LayoutDocManager::LayoutDocManager()
    d = new Private;
 
    int i;
- 
+
    d->rootNav = new LayoutNavEntry;
    LayoutParser::instance().init();
 }
@@ -1324,12 +1497,12 @@ void LayoutDocManager::init()
    LayoutErrorHandler errorHandler("layout_default.xml");
 
    QString layoutData = getLayout_Default();
-  
+
    QXmlInputSource source;
    source.setData(layoutData);
 
    QXmlSimpleReader reader;
-  
+
    reader.setContentHandler( &LayoutParser::instance() );
    reader.setErrorHandler( &errorHandler );
    reader.parse( source );
@@ -1399,7 +1572,7 @@ void writeDefaultLayoutFile(const QString &fileName)
    QTextStream t(&f);
    t << layoutData;
 
-   printf("DoxyPress layout file generated: %s", csPrintable( f.fileName() )); 
+   printf("DoxyPress layout file generated: %s", csPrintable( f.fileName() ));
 }
 
 // Convert input to a title.

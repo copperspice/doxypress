@@ -109,7 +109,7 @@ class Translator
    virtual QString trExceptions() = 0;
    virtual QString trGeneratedBy() = 0;
    virtual QString trNamespaceList() = 0;
-   virtual QString trNamespaceListDescription(bool extractAll) = 0;
+   virtual QString trNamespacesListDescription(bool extractAll) = 0;
    virtual QString trFriends() = 0; 
    virtual QString trRelatedFunctionDocumentation() = 0;
    virtual QString trCompoundReference(const QString &clName, ClassDef::CompoundType compType, bool isTemplate) = 0;
@@ -202,7 +202,7 @@ class Translator
    virtual QString trPackage(const QString &name) = 0;
 
    virtual QString trPackageList() = 0;
-   virtual QString trPackageListDescription() = 0;
+   virtual QString trPackagesListDescription() = 0;
    virtual QString trPackages() = 0;
 
    virtual QString trDefineValue() = 0;
@@ -315,6 +315,7 @@ class Translator
    virtual QString trSubprograms() = 0;
    virtual QString trSubprogramDocumentation() = 0;
    virtual QString trDataTypes() = 0;
+
    virtual QString trModulesList() = 0;
    virtual QString trModulesListDescription(bool extractAll) = 0;
 
@@ -322,10 +323,13 @@ class Translator
                   compType, bool isTemplate) = 0;
 
    virtual QString trModuleReference(const QString &namespaceName) = 0;
-   virtual QString trModulesMembers() = 0;
+
+   virtual QString trModuleMembers() = 0;
    virtual QString trModulesMemberDescription(bool extractAll) = 0;
+
    virtual QString trModulesIndex() = 0;
    virtual QString trModule(bool first_capital, bool singular) = 0;
+
    virtual QString trGeneratedFromFilesFortran(ClassDef::CompoundType compType, bool single) = 0;
    virtual QString trType(bool first_capital, bool singular) = 0;
    virtual QString trSubprogram(bool first_capital, bool singular) = 0;

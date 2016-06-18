@@ -560,7 +560,7 @@ class Translator_Cs : public Translator
    }
 
    /*! used as an introduction to the namespace list */   
-   virtual QString trNamespaceListDescription(bool extractAll) {      
+   virtual QString trNamespacesListDescription(bool extractAll) {      
 
       if (extractAll) {
          return QCoreApplication::translate("doxy-text", "Here is a list of all namespaces with "
@@ -1181,7 +1181,7 @@ class Translator_Cs : public Translator
    }
 
    /*! The description of the package index page */
-   virtual QString trPackageListDescription() {
+   virtual QString trPackagesListDescription() {
       return QCoreApplication::translate("doxy-text", "Here are the packages with " 
                   "brief descriptions (if available):");
    }
@@ -1800,7 +1800,7 @@ class Translator_Cs : public Translator
    }
 
    /*! This is put above each page as a link to all members of modules. (Fortran) */
-   virtual QString trModulesMembers() {
+   virtual QString trModuleMembers() {
       return QCoreApplication::translate("doxy-text", "Module Members");
    }
 
