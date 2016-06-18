@@ -119,6 +119,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("optimize-java",             struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("optimize-c",                struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("optimize-fortran",          struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("optimize-python",           struc_CfgBool   { false,          DEFAULT } );
 
    // tab 2 - general
    m_cfgEnum.insert("output-language",           struc_CfgEnum   { "ENGLISH",      DEFAULT } );

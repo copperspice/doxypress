@@ -516,7 +516,7 @@ bool Config::verify()
       dotImageFormat = "png";
    }
 
-   // BROOM - may want to split this into two config entries (12/2015)
+   // broom - may want to split this into two config entries (12/2015)
    if (dotImageFormat.contains(":"))  {
       dotImageFormat = dotImageFormat.replace( QRegExp(":.*"), "");
    }
@@ -878,7 +878,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("optimize-java") && Config::getBool("inline-info")) {
-      warnMsg("Java does have an inline concept, setting Inline Info to false\n");
+      warnMsg("Java does not have an inline concept, setting 'INLINE INFO' off\n");
 
       auto iterBool = m_cfgBool.find("inline-info");
       bool data = iterBool.value().value;
