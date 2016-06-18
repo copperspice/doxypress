@@ -101,11 +101,11 @@ void OutputList::popGeneratorState()
 bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
                const QString &docStr, bool indexWords, bool isExample, const QString &exampleName, bool singleLine, bool linkFromIndex)
 {
-   int count = 0;
-
    if (docStr.isEmpty()) {
       return true;
    }
+
+   int count = 0;
 
    for (auto item : m_outputs) {
       if (item->isEnabled()) {

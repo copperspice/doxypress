@@ -1901,7 +1901,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
 
    if (sect && sect->hasTypeSpecifier()) {
       m_t << "<td class=\"paramtype\">";
-      ;
+      
       bool first = true;
       
       for (auto type : pl->paramTypes()) { 
@@ -1924,23 +1924,24 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
    }
 
    m_t << "<td class=\"paramname\">";
-   //QStringListIterator li(pl->parameters());
-   //const char *s;
   
    bool first = true;
  
    for (auto param : pl->parameters()) {
-      if (!first) {
+      if (! first) {
          m_t << ",";
       } else {
          first = false;
       }
+
       if (param->kind() == DocNode::Kind_Word) {
          visit((DocWord *)param);
+
       } else if (param->kind() == DocNode::Kind_LinkedWord) {
          visit((DocLinkedWord *)param);
       }
    }
+
    m_t << "</td><td>";
 }
 

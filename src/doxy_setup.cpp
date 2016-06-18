@@ -28,7 +28,7 @@
 
 #include <cite.h>
 #include <cmdmapper.h>
-#include <code.h>
+#include <code_cstyle.h>
 #include <config.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>

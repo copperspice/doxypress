@@ -748,9 +748,11 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_Para>{SPCMD2}      |
 <St_Para>{SPCMD4}      { 
       /* special command */
-      QString text = QString::fromUtf8(yytext);
-      g_token->name = text.mid(1).trimmed();
-      g_token->paramDir=TokenInfo::Unspecified;
+      QString text  = QString::fromUtf8(yytext);
+
+      g_token->name     = text.mid(1).trimmed();
+      g_token->paramDir = TokenInfo::Unspecified;
+
       return TK_COMMAND;
    }
 
@@ -1496,7 +1498,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
       g_token->name = text;
 
       if (g_token->name.at(yyleng-1) == ':') {
-         g_token->name=g_token->name.left(yyleng-1);
+         g_token->name = g_token->name.left(yyleng-1);
       }
 
       return TK_WORD;

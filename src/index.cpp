@@ -478,12 +478,15 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
 
          if (! started) {
             startIndexHierarchy(ol, level);
+
             if (addToIndex) {
                Doxy_Globals::indexList->incContentsDepth();
             }
+
             if (ftv) {
                ftv->incContentsDepth();
             }
+
             started = true;
          }
 
@@ -1102,7 +1105,7 @@ static void writeSingleFileIndex(OutputList &ol, QSharedPointer<FileDef> fd)
 
       ol.endIndexKey();
 
-      bool hasBrief = !fd->briefDescription().isEmpty();
+      bool hasBrief = ! fd->briefDescription().isEmpty();
       ol.startIndexValue(hasBrief);
 
       if (hasBrief) {         
@@ -1284,7 +1287,7 @@ static void writeSingleFileSourceIndex(OutputList &ol, QSharedPointer<FileDef> f
 
       ol.endIndexKey();
 
-      bool hasBrief = !fd->briefDescription().isEmpty();
+      bool hasBrief = ! fd->briefDescription().isEmpty();
       ol.startIndexValue(hasBrief);
 
       if (hasBrief) {         
@@ -1454,7 +1457,7 @@ void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool glob
                if (addToIndex && (cd->getOuterScope() == 0 || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
 
                   bool tmp_addToIndex = cd->partOfGroups() == 0 && ! cd->isSimple();
-                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), false, tmp_addToIndex );
+                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), false, tmp_addToIndex);
                }
 
                if (count > 0) {
@@ -1541,7 +1544,7 @@ static void writeNamespaceIndex(OutputList &ol)
 
    ol.startContents();
    ol.startTextBlock();
-   ol.parseText(lne ? lne->intro() : theTranslator->trNamespaceListDescription(Config::getBool("extract-all")));
+   ol.parseText(lne ? lne->intro() : theTranslator->trNamespacesListDescription(Config::getBool("extract-all")));
    ol.endTextBlock();
 
    bool firstEntry = true;
@@ -1655,15 +1658,10 @@ static void writeAnnotatedClassList(OutputList &ol)
 
          if (hasBrief) {
             ol.generateDoc(cd->briefFile(), cd->briefLine(), cd, QSharedPointer<MemberDef>(), cd->briefDescription(true),
-               false,   // indexWords
-               false,   // isExample
-               0,       // example name
-               true,    // single line
-               true     // link from index
-            );
+               false, false, 0, true, true);
          }
-         ol.endIndexValue(cd->getOutputFileBase(), hasBrief);
-    
+
+         ol.endIndexValue(cd->getOutputFileBase(), hasBrief);    
       }
 
       ol.popGeneratorState();
@@ -2040,7 +2038,7 @@ static void writeAlphabeticalIndex(OutputList &ol)
    ol.startContents();
 
    writeAlphabeticalClassList(ol);
-   endFile(ol); // contains ol.endContents()
+   endFile(ol); 
 
    ol.popGeneratorState();
 }
@@ -2119,8 +2117,7 @@ static void writeAnnotatedIndex(OutputList &ol)
 
    ol.popGeneratorState();
    endFile(ol); 
-
-   // contains ol.endContents()
+   
    ol.popGeneratorState();
 }
 
@@ -3197,10 +3194,9 @@ static void writePages(QSharedPointer<PageDef> pd, FTVHelp *ftv)
       Doxy_Globals::indexList->incContentsDepth();
    }
 
-   if (hasSections) {
-      static bool isStyleBB = Config::getBool("bb-style");
+   if (hasSections) {     
       
-      if (isStyleBB && pd == Doxy_Globals::mainPage) {
+      if (pd == Doxy_Globals::mainPage) {
          // do not add sections from mainpage to treeview
          pd->addSectionsToIndex(false); 
 
@@ -3711,6 +3707,7 @@ static void writeIndex(OutputList &ol)
    ol.startFile(indexName, QString(), title);
 
    if (Doxy_Globals::mainPage) {
+
       if ( (! projectName.isEmpty() && mainPageHasTitle() && title.compare(projectName, Qt::CaseInsensitive) != 0)) { 
 
          Doxy_Globals::indexList->addContentsItem(Doxy_Globals::mainPage->hasSubPages(), title, "", indexName, "", 
@@ -3890,18 +3887,14 @@ static void writeIndex(OutputList &ol)
       if (hierarchyClasses > 0) {
          ol.startIndexSection(isClassHierarchyIndex);
          ol.parseText(/*projPrefix+*/
-            (fortranOpt ? theTranslator->trCompoundIndexFortran() :             
-             theTranslator->trHierarchicalIndex()
-            ));
+            (fortranOpt ? theTranslator->trCompoundIndexFortran() : theTranslator->trHierarchicalIndex()));
          ol.endIndexSection(isClassHierarchyIndex);
       }
 
       if (s_annotatedClassesPrinted > 0) {
          ol.startIndexSection(isCompoundIndex);
          ol.parseText(/*projPrefix+*/
-            (fortranOpt ? theTranslator->trCompoundIndexFortran() :             
-             theTranslator->trCompoundIndex()
-            ));
+            (fortranOpt ? theTranslator->trCompoundIndexFortran() : theTranslator->trCompoundIndex()));
          ol.endIndexSection(isCompoundIndex);
       }
 

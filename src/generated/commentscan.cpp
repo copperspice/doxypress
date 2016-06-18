@@ -1,19 +1,3 @@
-/*************************************************************************
- *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.
- *
- * Permission to use, copy, modify, and distribute this software and its
- * documentation under the terms of the GNU General Public License version 2
- * is hereby granted. No representations are made about the suitability of
- * this software for any purpose. It is provided "as is" without express or
- * implied warranty. See the GNU General Public License for more details.
- *
- * Documents produced by DoxyPress are derivative works derived from the
- * input used in their production; they are not affected by this license.
- *
-*************************************************************************/
 
 #line 3 "<stdout>"
 
@@ -3398,8 +3382,7 @@ static DocCmdMap docCmdMap[] =
 
 /** @brief Command mapper.
  *
- *  Maps a command name (as found in a comment block) onto a
- *  specific handler function.
+ *  Maps a command name (as found in a comment block) onto a specific handler function
  */
 class DocCmdMapper
 {
@@ -3437,9 +3420,10 @@ class DocCmdMapper
             Doxy_Work::stopDoxyPress();
          }
 
-         Cmd *cmd  = new Cmd;
-         cmd->func = p->handler;
+         Cmd *cmd       = new Cmd;
+         cmd->func      = p->handler;
          cmd->endsBrief = p->endsBrief;
+
          m_map.insert(p->cmdName, cmd);
          p++;
       }
@@ -4605,7 +4589,7 @@ YY_RULE_SETUP
 
          s_spaceBeforeCmd = QString(text).left(i);
 
-         if (cmdPtr->endsBrief && (inContext != OutputXRef && cmdName=="parblock")) {
+         if (cmdPtr->endsBrief && (inContext != OutputXRef && cmdName == "parblock")) {
             briefEndsAtDot = false;
 
             // this command forces the end of brief description
@@ -4966,7 +4950,7 @@ YY_RULE_SETUP
 
       if (briefEndsAtDot) {
          setOutput(OutputDoc);
-         briefEndsAtDot=false;
+         briefEndsAtDot = false;
       }
    }
 	YY_BREAK
@@ -5140,7 +5124,7 @@ YY_RULE_SETUP
 #line 1539 "commentscan.l"
 {
       // handle argument
-      QString text = QString::fromUtf8(commentscanYYtext); 
+      QString text  = QString::fromUtf8(commentscanYYtext); 
       current->name = substitute(text,".", "::");
       BEGIN( Comment );
    }
@@ -8297,16 +8281,17 @@ static bool handleCite(const QString &s)
      s_spaceBeforeCmd.resize(0);
    }
 
-   addOutput("@"+s+" ");
+   addOutput("@" + s + " ");
    BEGIN(CiteLabel);
    return false;
 }
 
 static bool handleFormatBlock(const QString &s)
 {
-   addOutput("@"+s+" ");
-   blockName=s;
-   s_commentCount=0;
+   addOutput("@" + s + " ");
+
+   blockName      = s;
+   s_commentCount = 0;
    BEGIN(FormatBlock);
 
    return false;
@@ -8582,7 +8567,7 @@ static void checkFormula()
 
 // main entry point
 bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QString &comment,
-                  const QString &fileName, int &lineNr, bool isBrief, bool isAutoBriefOn, bool isInbody,
+                  const QString &fileName, int &lineNr, bool isBrief, bool isAutoBrief, bool isInbody,
                   Protection &r_protection, int &r_position, bool &r_newEntryNeeded )
 {
    initParser();
@@ -8610,12 +8595,20 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    s_parseMore    = false;
    inBody         = isInbody;
 
-   outputXRef.resize(0);
-   setOutput( isBrief || isAutoBriefOn ? OutputBrief : OutputDoc );
-   briefEndsAtDot = isAutoBriefOn;
+   outputXRef.resize(0); 
+
+   if (isBrief || isAutoBrief) {
+      setOutput(OutputBrief);
+
+   } else {
+      setOutput(OutputDoc);
+   }
+
+   briefEndsAtDot = isAutoBrief;
   
    s_condCount    = 0;
    s_sectionLevel = 0;
+
    s_spaceBeforeCmd.resize(0);
    s_spaceBeforeIf.resize(0);
 

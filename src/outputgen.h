@@ -222,7 +222,7 @@ class BaseOutputDocInterface : public CodeOutputInterface
    virtual void endEmphasis() = 0;
 
    /*! Starts a source code fragment. The fragment will be
-    *  fed to the code parser (see code.h) for syntax highlighting
+    *  fed to the code parser (see code_cstyle..h) for syntax highlighting
     *  and cross-referencing. The fragment ends by a call to
     *  endCodeFragment()
     */

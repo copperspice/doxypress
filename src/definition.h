@@ -280,7 +280,8 @@ class Definition : public DefinitionIntf
    void setId(const QString &name);
 
    /*! Sets the documentation of this definition to \a d. */
-   virtual void setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace = true);
+   virtual void setDocumentation(const QString &d, const QString &docFile, int docLine, 
+                  bool stripWhiteSpace = true, bool atTop = false);
 
    /*! Sets the brief description of this definition to \a b.
     *  A dot is added to the sentence if not available.
@@ -370,8 +371,6 @@ class Definition : public DefinitionIntf
    int  _getXRefListId(const QString &listName) const;
    void _writeSourceRefList(OutputList &ol, const QString &scopeName,const QString &text, MemberSDict *members, bool);
 
-   void _setBriefDescription(const QString &b, const QString &briefFile, int briefLine);
-   void _setDocumentation(const QString &doc, const QString &docFile, int docLine, bool stripWhiteSpace, bool atTop);
    void _setInbodyDocumentation(const QString &d, const QString &docFile, int docLine);
    bool _docsAlreadyAdded(const QString &doc, QString &sigList);
 

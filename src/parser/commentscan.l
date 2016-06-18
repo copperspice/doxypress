@@ -259,8 +259,7 @@ static DocCmdMap docCmdMap[] =
 
 /** @brief Command mapper.
  *
- *  Maps a command name (as found in a comment block) onto a
- *  specific handler function.
+ *  Maps a command name (as found in a comment block) onto a specific handler function
  */
 class DocCmdMapper
 {
@@ -298,9 +297,10 @@ class DocCmdMapper
             Doxy_Work::stopDoxyPress();
          }
 
-         Cmd *cmd  = new Cmd;
-         cmd->func = p->handler;
+         Cmd *cmd       = new Cmd;
+         cmd->func      = p->handler;
          cmd->endsBrief = p->endsBrief;
+
          m_map.insert(p->cmdName, cmd);
          p++;
       }
@@ -1141,7 +1141,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
          s_spaceBeforeCmd = QString(text).left(i);
 
-         if (cmdPtr->endsBrief && (inContext != OutputXRef && cmdName=="parblock")) {
+         if (cmdPtr->endsBrief && (inContext != OutputXRef && cmdName == "parblock")) {
             briefEndsAtDot = false;
 
             // this command forces the end of brief description
@@ -1414,7 +1414,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       if (briefEndsAtDot) {
          setOutput(OutputDoc);
-         briefEndsAtDot=false;
+         briefEndsAtDot = false;
       }
    }
 
@@ -1538,7 +1538,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <NameSpaceDocArg1>{SCOPENAME}       {
       // handle argument
-      QString text = QString::fromUtf8(yytext); 
+      QString text  = QString::fromUtf8(yytext); 
       current->name = substitute(text,".", "::");
       BEGIN( Comment );
    }
@@ -3174,16 +3174,17 @@ static bool handleCite(const QString &s)
      s_spaceBeforeCmd.resize(0);
    }
 
-   addOutput("@"+s+" ");
+   addOutput("@" + s + " ");
    BEGIN(CiteLabel);
    return false;
 }
 
 static bool handleFormatBlock(const QString &s)
 {
-   addOutput("@"+s+" ");
-   blockName=s;
-   s_commentCount=0;
+   addOutput("@" + s + " ");
+
+   blockName      = s;
+   s_commentCount = 0;
    BEGIN(FormatBlock);
 
    return false;
@@ -3459,7 +3460,7 @@ static void checkFormula()
 
 // main entry point
 bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, const QString &comment,
-                  const QString &fileName, int &lineNr, bool isBrief, bool isAutoBriefOn, bool isInbody,
+                  const QString &fileName, int &lineNr, bool isBrief, bool isAutoBrief, bool isInbody,
                   Protection &r_protection, int &r_position, bool &r_newEntryNeeded )
 {
    initParser();
@@ -3487,12 +3488,20 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    s_parseMore    = false;
    inBody         = isInbody;
 
-   outputXRef.resize(0);
-   setOutput( isBrief || isAutoBriefOn ? OutputBrief : OutputDoc );
-   briefEndsAtDot = isAutoBriefOn;
+   outputXRef.resize(0); 
+
+   if (isBrief || isAutoBrief) {
+      setOutput(OutputBrief);
+
+   } else {
+      setOutput(OutputDoc);
+   }
+
+   briefEndsAtDot = isAutoBrief;
   
    s_condCount    = 0;
    s_sectionLevel = 0;
+
    s_spaceBeforeCmd.resize(0);
    s_spaceBeforeIf.resize(0);
 

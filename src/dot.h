@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -150,7 +150,7 @@ class DotNode
 
    friend class DotGfxHierarchyTable;
    friend class DotClassGraph;
-   friend class DotInclDepGraph;   
+   friend class DotInclDepGraph;
    friend class DotCallGraph;
    friend class DotGroupCollaboration;
 
@@ -260,7 +260,7 @@ class DotCallGraph
    ~DotCallGraph();
 
    QString writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
-                         const QString  &path, const QString &fileName, const QString  &relPath, 
+                         const QString  &path, const QString &fileName, const QString  &relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
    void buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int distance);
@@ -345,7 +345,7 @@ class DotGroupCollaboration
 
  private :
    void addCollaborationMember(QSharedPointer<Definition> def, const QString &url, EdgeType eType);
- 
+
    void addMemberList(QSharedPointer<MemberList> ml);
    void writeGraphHeader(QTextStream &t, const QString &title) const;
 
@@ -398,13 +398,13 @@ class DotRunner
    QString m_file;
    QString m_path;
 
-   bool m_checkResult;   
+   bool m_checkResult;
    bool m_cleanUp;
 
    CleanupItem m_cleanupItem;
 };
 
-/** Helper class to insert a set of map file into an output file */
+/** class to insert a set of map files into an output file */
 class DotFilePatcher
 {
  public:
@@ -412,7 +412,7 @@ class DotFilePatcher
       QString    mapFile;
       QString    relPath;
       bool       urlOnly;
-      QString context;
+      QString    context;
       QString    label;
       bool       zoomable;
       int        graphId;
@@ -498,7 +498,7 @@ void generateGraphLegend(const QString &path);
 
 void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, GraphOutputFormat format);
 
-void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
+void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath,
                   const QString &baseName, const QString &context, int graphId = -1);
 
 void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd);

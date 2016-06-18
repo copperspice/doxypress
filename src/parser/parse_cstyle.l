@@ -20,7 +20,7 @@
 #include <arguments.h>
 #include <config.h>
 #include <commentscan.h>
-#include <code.h>
+#include <code_cstyle.h>
 #include <defargs.h>
 #include <doxy_globals.h>
 #include <entry.h>
@@ -2394,6 +2394,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       }
 
       current_root->addSubEntry(current, current_root);
+      previous = current;
+
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(Using);

@@ -15,10 +15,11 @@
  *
 *************************************************************************/
 
-#ifndef FORTRANCODE_H
-#define FORTRANCODE_H
+#ifndef CODE_CSTYLE_H
+#define CODE_CSTYLE_H
 
 #include <QByteArray>
+#include <QSharedPointer>
 
 #include <types.h>
 
@@ -27,12 +28,11 @@ class FileDef;
 class MemberDef;
 class Definition;
 
-void parseFortranCode(CodeOutputInterface &, const QString &, const QString &, bool, const QString &, 
-                  QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
-                  QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
-                  bool collectRefs, FortranFormat format);
+void parseCCode(CodeOutputInterface &, const QString &, const QString &, SrcLangExt lang, bool isExample, 
+                const QString &exName, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
+                QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs);
 
-void resetFortranCodeParserState();
+void resetCCodeParserState();
 void codeFreeScanner();
 
 #endif

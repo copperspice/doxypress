@@ -56452,6 +56452,7 @@ char *fortranscannerYYtext;
  * - Must track yyLineNr when using REJECT, unput() or similar commands.
  */
 
+#include <QByteArray>
 #include <QFile>
 #include <QMap>
 #include <QStack>
@@ -56471,10 +56472,18 @@ char *fortranscannerYYtext;
 #include <defargs.h>
 #include <language.h>
 #include <commentscan.h>
-#include <fortrancode.h>
 #include <parse_fortran.h>
 #include <pre.h>
 #include <util.h>
+
+// forward declarations, source in code_fortran.cpp
+void parseFortranCode(CodeOutputInterface &, const QString &, const QString &, bool, const QString &, 
+                  QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
+                  QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
+                  bool collectRefs, FortranFormat format);
+
+void resetFortranCodeParserState();
+void codeFreeScanner();
 
 // Toggle for some debugging info
 //#define DBG_CTX(x) fprintf x

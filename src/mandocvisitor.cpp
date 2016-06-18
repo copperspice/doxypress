@@ -19,7 +19,7 @@
 
 #include <mandocvisitor.h>
 
-#include <code.h>
+#include <code_cstyle.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>

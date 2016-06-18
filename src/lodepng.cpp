@@ -673,7 +673,7 @@ static unsigned HuffmanTree_makeFromFrequencies(HuffmanTree *tree, const unsigne
       /*keep the coins with lowest weight, so that they add up to the amount of symbols - 1*/
       vector_resized(&coins, numpresent - 1, Coin_cleanup);
 
-      /*calculate the lenghts of each symbol, as the amount of times a coin of each symbol is used*/
+      /*calculate the lengths of each symbol, as the amount of times a coin of each symbol is used*/
       for (i = 0; i < coins.size; i++) {
          Coin *coin = (Coin *)vector_get(&coins, i);
          for (j = 0; j < coin->symbols.size; j++) {

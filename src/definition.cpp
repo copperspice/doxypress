@@ -25,7 +25,7 @@
 
 #include <definition.h>
 
-#include <code.h>
+#include <code_cstyle.h>
 #include <config.h>
 #include <doxy_globals.h>
 #include <htags.h>
@@ -235,8 +235,8 @@ Definition::Definition(const QString &df, int dl, int dc, const QString &name, c
    m_inputOrderId = -1;
    m_sortId = -1;
 
-   _setBriefDescription(briefDoc, df, dl);
-   _setDocumentation(fullDoc, df, dl, true, false);
+   setBriefDescription(briefDoc, df, dl);
+   setDocumentation(fullDoc, df, dl, true, false);
 
    if (matchExcludedSymbols(name)) {
       m_private->hidden = true;
@@ -469,7 +469,7 @@ void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
     // by definition order  
    for (auto si : m_private->sectionList) {   
 
-      if (! si->generated) {
+      if (! si->generated && si->ref.isEmpty()) {
         
          if (definitionType() == TypeMember) {
             tagFile << "  ";
@@ -508,7 +508,7 @@ bool Definition::_docsAlreadyAdded(const QString &doc, QString &sigList)
    }
 }
 
-void Definition::_setDocumentation(const QString &tDoc, const QString &docFile, int docLine, 
+void Definition::setDocumentation(const QString &tDoc, const QString &docFile, int docLine, 
                                    bool stripWhiteSpace, bool atTop)
 {
    QString doc = tDoc;
@@ -553,16 +553,7 @@ void Definition::_setDocumentation(const QString &tDoc, const QString &docFile, 
    }
 }
 
-void Definition::setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace)
-{
-   if (d.isEmpty()) {
-      return;
-   }
-
-   _setDocumentation(d, docFile, docLine, stripWhiteSpace, false);
-}
-
-void Definition::_setBriefDescription(const QString &b, const QString &briefFile, int briefLine)
+void Definition::setBriefDescription(const QString &b, const QString &briefFile, int briefLine)
 {
    static QString outputLanguage = Config::getEnum("output-language");
    static bool needsDot = (outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean");
@@ -572,7 +563,7 @@ void Definition::_setBriefDescription(const QString &b, const QString &briefFile
    if (brief.isEmpty()) {
       return;
    }
-  
+   
    if (needsDot) { 
       // add punctuation if needed
 
@@ -600,7 +591,7 @@ void Definition::_setBriefDescription(const QString &b, const QString &briefFile
    if (! _docsAlreadyAdded(brief, m_private->briefSignatures)) {
 
       if (m_private->brief && ! m_private->brief->doc.isEmpty()) {         
-         _setDocumentation(brief, briefFile, briefLine, false, true);
+         setDocumentation(brief, briefFile, briefLine, false, true);
 
       } else {
          
@@ -619,14 +610,6 @@ void Definition::_setBriefDescription(const QString &b, const QString &briefFile
          }
       }  
    }
-}
-
-void Definition::setBriefDescription(const QString &b, const QString &briefFile, int briefLine)
-{
-   if (b.isEmpty()) {
-      return;
-   }
-   _setBriefDescription(b, briefFile, briefLine);
 }
 
 void Definition::_setInbodyDocumentation(const QString &doc, const QString &inbodyFile, int inbodyLine)
@@ -694,9 +677,8 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
       f = popen(cmd.toUtf8(), "r");
    }
 
-   bool found = lang == SrcLangExt_Tcl | lang == SrcLangExt_Python || lang == SrcLangExt_Fortran;
-
    // for TCL, Python, and Fortran no bracket search is possible
+   bool found = (lang == SrcLangExt_Tcl) || (lang == SrcLangExt_Python) || (lang == SrcLangExt_Fortran);  
 
    if (f) {
       int c      = 0;
@@ -844,6 +826,10 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
    }
 
    result = transcodeToQString(tempResult);
+
+   if (! result.isEmpty() && ! result.endsWith('\n')) {
+      result += "\n";
+   }
    
    return found;
 }
@@ -1730,7 +1716,20 @@ QString abbreviate(const QString &s, const QString &name)
 
 QString Definition::briefDescription(bool abbr) const
 {
-   return m_private->brief ? (abbr ? abbreviate(m_private->brief->doc, displayName()) : m_private->brief->doc) : "";
+   QString retval = ""; 
+
+   if (m_private->brief)  {
+
+      if (abbr) {
+         retval = abbreviate(m_private->brief->doc, displayName());
+
+      } else {
+         retval = m_private->brief->doc; 
+
+      } 
+   }
+
+   return retval;
 }
 
 QString Definition::briefDescriptionAsTooltip() const

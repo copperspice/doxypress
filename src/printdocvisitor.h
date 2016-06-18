@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -30,19 +30,19 @@ class PrintDocVisitor : public DocVisitor
 
    void visit(DocWord *w) {
       indent_leaf();
-      printf("%s", qPrintable(w->word()));
+      printf("%s", csPrintable(w->word()));
    }
 
    void visit(DocLinkedWord *w) {
       indent_leaf();
-      printf("%s", qPrintable(w->word()));
+      printf("%s", csPrintable(w->word()));
    }
 
    void visit(DocWhiteSpace *w) {
       indent_leaf();
 
       if (m_insidePre) {
-         printf("%s", qPrintable(w->chars()));
+         printf("%s", csPrintable(w->chars()));
       } else {
          printf(" ");
       }
@@ -53,14 +53,14 @@ class PrintDocVisitor : public DocVisitor
       QString res = HtmlEntityMapper::instance()->utf8(s->symbol(), true);
 
       if (! res.isEmpty()) {
-         printf("%s", qPrintable(res));
+         printf("%s", csPrintable(res));
       } else {
-         printf("Print: Unsupported HTML-entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+         printf("Print: Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
       }
    }
    void visit(DocURL *u) {
       indent_leaf();
-      printf("%s", qPrintable(u->url()));
+      printf("%s", csPrintable(u->url()));
    }
 
    void visit(DocLineBreak *) {
@@ -100,6 +100,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</code>");
             }
             break;
+
          case DocStyleChange::Subscript:
             if (s->enable()) {
                printf("<sub>");
@@ -107,6 +108,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</sub>");
             }
             break;
+
          case DocStyleChange::Superscript:
             if (s->enable()) {
                printf("<sup>");
@@ -114,6 +116,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</sup>");
             }
             break;
+
          case DocStyleChange::Center:
             if (s->enable()) {
                printf("<center>");
@@ -128,6 +131,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</small>");
             }
             break;
+
          case DocStyleChange::Preformatted:
             if (s->enable()) {
                printf("<pre>");
@@ -143,6 +147,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</div>");
             }
             break;
+
          case DocStyleChange::Span:
             if (s->enable()) {
                printf("<span>");
@@ -160,71 +165,91 @@ class PrintDocVisitor : public DocVisitor
          case DocVerbatim::Code:
             printf("<code>");
             break;
+
          case DocVerbatim::Verbatim:
             printf("<verbatim>");
             break;
+
          case DocVerbatim::HtmlOnly:
             printf("<htmlonly>");
             break;
+
          case DocVerbatim::RtfOnly:
             printf("<rtfonly>");
             break;
+
          case DocVerbatim::ManOnly:
             printf("<manonly>");
             break;
+
          case DocVerbatim::LatexOnly:
             printf("<latexonly>");
             break;
+
          case DocVerbatim::XmlOnly:
             printf("<xmlonly>");
             break;
+
          case DocVerbatim::DocbookOnly:
             printf("<docbookonly>");
             break;
+
          case DocVerbatim::Dot:
             printf("<dot>");
             break;
+
          case DocVerbatim::Msc:
             printf("<msc>");
             break;
+
          case DocVerbatim::PlantUML:
             printf("<plantuml>");
             break;
       }
 
-      printf("%s", qPrintable(s->text()));
+      printf("%s", csPrintable(s->text()));
 
       switch (s->type()) {
          case DocVerbatim::Code:
             printf("</code>");
             break;
+
          case DocVerbatim::Verbatim:
             printf("</verbatim>");
             break;
+
          case DocVerbatim::HtmlOnly:
             printf("</htmlonly>");
             break;
+
          case DocVerbatim::RtfOnly:
             printf("</rtfonly>");
             break;
+
          case DocVerbatim::ManOnly:
             printf("</manonly>");
             break;
+
          case DocVerbatim::LatexOnly:
             printf("</latexonly>");
             break;
+
          case DocVerbatim::XmlOnly:
             printf("</xmlonly>");
             break;
+
          case DocVerbatim::DocbookOnly:
             printf("</docbookonly>");
             break;
+
          case DocVerbatim::Dot:
             printf("</dot>");
             break;
+
          case DocVerbatim::Msc:
             printf("</msc>");
             break;
+
          case DocVerbatim::PlantUML:
             printf("</plantuml>");
             break;
@@ -233,12 +258,12 @@ class PrintDocVisitor : public DocVisitor
 
    void visit(DocAnchor *a) {
       indent_leaf();
-      printf("<anchor name=\"%s\"/>", qPrintable(a->anchor()));
+      printf("<anchor name=\"%s\"/>", csPrintable(a->anchor()));
    }
 
    void visit(DocInclude *inc) {
       indent_leaf();
-      printf("<include file=\"%s\" type=\"", qPrintable(inc->file()));
+      printf("<include file=\"%s\" type=\"", csPrintable(inc->file()));
 
       switch (inc->type()) {
          case DocInclude::Include:
@@ -268,7 +293,7 @@ class PrintDocVisitor : public DocVisitor
 
    void visit(DocIncOperator *op) {
       indent_leaf();
-      printf("<incoperator pattern=\"%s\" type=\"", qPrintable(op->pattern()));
+      printf("<incoperator pattern=\"%s\" type=\"", csPrintable(op->pattern()));
 
       switch (op->type()) {
          case DocIncOperator::Line:
@@ -289,12 +314,12 @@ class PrintDocVisitor : public DocVisitor
 
    void visit(DocFormula *f) {
       indent_leaf();
-      printf("<formula name=%s text=%s/>", qPrintable(f->name()), qPrintable(f->text()));
+      printf("<formula name = %s text = %s/>", csPrintable(f->name()), csPrintable(f->text()));
    }
 
    void visit(DocIndexEntry *i) {
       indent_leaf();
-      printf("<indexentry>%s</indexentry\n", qPrintable(i->entry()));
+      printf("<indexentry>%s</indexentry\n", csPrintable(i->entry()));
    }
 
    void visit(DocSimpleSectSep *) {
@@ -305,7 +330,7 @@ class PrintDocVisitor : public DocVisitor
    void visit(DocCite *cite) {
       indent_leaf();
       printf("<cite ref=\"%s\" file=\"%s\" anchor=\"%s\" text=\"%s\"/>\n",
-             qPrintable(cite->ref()), qPrintable(cite->file()), qPrintable(cite->anchor()), qPrintable(cite->text()) );
+             csPrintable(cite->ref()), csPrintable(cite->file()), csPrintable(cite->anchor()), csPrintable(cite->text()) );
    }
 
 
@@ -334,9 +359,10 @@ class PrintDocVisitor : public DocVisitor
       printf("</li>\n");
    }
 
-   void visitPre(DocPara *) {
+   void visitPre(DocPara *node) {
+      // print the address of the paragraph
       indent_pre();
-      printf("<para>\n");
+      printf("<para> %08x \n", node);
    }
 
    void visitPost(DocPara *) {
@@ -361,54 +387,71 @@ class PrintDocVisitor : public DocVisitor
          case DocSimpleSect::See:
             printf("see");
             break;
-         case DocSimpleSect::Return:
+
+        case DocSimpleSect::Return:
             printf("return");
             break;
+
          case DocSimpleSect::Author:
             printf("author");
             break;
+
          case DocSimpleSect::Authors:
             printf("authors");
             break;
+
          case DocSimpleSect::Version:
             printf("version");
             break;
+
          case DocSimpleSect::Since:
             printf("since");
             break;
+
          case DocSimpleSect::Date:
             printf("date");
             break;
+
          case DocSimpleSect::Note:
             printf("note");
             break;
+
          case DocSimpleSect::Warning:
             printf("warning");
             break;
+
          case DocSimpleSect::Pre:
             printf("pre");
             break;
+
          case DocSimpleSect::Post:
             printf("post");
             break;
+
          case DocSimpleSect::Copyright:
             printf("copyright");
             break;
+
          case DocSimpleSect::Invar:
             printf("invar");
             break;
+
          case DocSimpleSect::Remark:
             printf("remark");
             break;
+
          case DocSimpleSect::Attention:
             printf("attention");
             break;
+
          case DocSimpleSect::User:
             printf("user");
             break;
+
          case DocSimpleSect::Rcs:
             printf("rcs");
             break;
+
          case DocSimpleSect::Unknown:
             printf("unknown");
             break;
@@ -420,26 +463,32 @@ class PrintDocVisitor : public DocVisitor
       indent_post();
       printf("</simplesect>\n");
    }
+
    void visitPre(DocTitle *) {
       indent_pre();
       printf("<title>\n");
    }
+
    void visitPost(DocTitle *) {
       indent_post();
       printf("</title>\n");
    }
+
    void visitPre(DocSimpleList *) {
       indent_pre();
       printf("<ul>\n");
    }
+
    void visitPost(DocSimpleList *) {
       indent_post();
       printf("</ul>\n");
    }
+
    void visitPre(DocSimpleListItem *) {
       indent_pre();
       printf("<li>\n");
    }
+
    void visitPost(DocSimpleListItem *) {
       indent_post();
       printf("</li>\n");
@@ -562,7 +611,7 @@ class PrintDocVisitor : public DocVisitor
    }
    void visitPre(DocHRef *href) {
       indent_pre();
-      printf("<a url=\"%s\">\n", qPrintable(href->url()));
+      printf("<a url=\"%s\">\n", csPrintable(href->url()));
    }
    void visitPost(DocHRef *) {
       indent_post();
@@ -578,7 +627,7 @@ class PrintDocVisitor : public DocVisitor
    }
    void visitPre(DocImage *img) {
       indent_pre();
-      printf("<image src=\"%s\" type=\"", qPrintable(img->name()));
+      printf("<image src=\"%s\" type=\"", csPrintable(img->name()));
 
       switch (img->type()) {
          case DocImage::Html:
@@ -595,7 +644,7 @@ class PrintDocVisitor : public DocVisitor
             break;
       }
 
-      printf("\" width=%s height=%s>\n", qPrintable(img->width()), qPrintable(img->height()));
+      printf("\" width=%s height=%s>\n", csPrintable(img->width()), csPrintable(img->height()));
    }
 
    void visitPost(DocImage *) {
@@ -605,7 +654,7 @@ class PrintDocVisitor : public DocVisitor
 
    void visitPre(DocDotFile *df) {
       indent_pre();
-      printf("<dotfile src=\"%s\">\n", qPrintable(df->name()));
+      printf("<dotfile src=\"%s\">\n", csPrintable(df->name()));
    }
    void visitPost(DocDotFile *) {
       indent_post();
@@ -613,7 +662,7 @@ class PrintDocVisitor : public DocVisitor
    }
    void visitPre(DocMscFile *df) {
       indent_pre();
-      printf("<mscfile src=\"%s\">\n", qPrintable(df->name()));
+      printf("<mscfile src=\"%s\">\n", csPrintable(df->name()));
    }
    void visitPost(DocMscFile *) {
       indent_post();
@@ -621,7 +670,7 @@ class PrintDocVisitor : public DocVisitor
    }
    void visitPre(DocDiaFile *df) {
       indent_pre();
-      printf("<diafile src=\"%s\">\n", qPrintable(df->name()));
+      printf("<diafile src=\"%s\">\n", csPrintable(df->name()));
    }
    void visitPost(DocDiaFile *) {
       indent_post();
@@ -631,7 +680,7 @@ class PrintDocVisitor : public DocVisitor
    void visitPre(DocLink *lnk) {
       indent_pre();
       printf("<link ref=\"%s\" file=\"%s\" anchor=\"%s\">\n",
-             qPrintable(lnk->ref()), qPrintable(lnk->file()), qPrintable(lnk->anchor()));
+             csPrintable(lnk->ref()), csPrintable(lnk->file()), csPrintable(lnk->anchor()));
    }
 
    void visitPost(DocLink *) {
@@ -644,8 +693,8 @@ class PrintDocVisitor : public DocVisitor
       printf("<ref ref=\"%s\" file=\"%s\" "
              "anchor=\"%s\" targetTitle=\"%s\""
              " hasLinkText=\"%s\" refToAnchor=\"%s\" refToSection=\"%s\">\n",
-             qPrintable(ref->ref()), qPrintable(ref->file()), qPrintable(ref->anchor()),
-             qPrintable(ref->targetTitle()), ref->hasLinkText() ? "yes" : "no",
+             csPrintable(ref->ref()), csPrintable(ref->file()), csPrintable(ref->anchor()),
+             csPrintable(ref->targetTitle()), ref->hasLinkText() ? "yes" : "no",
              ref->refToAnchor() ? "yes" : "no", ref->refToSection() ? "yes" : "no");
    }
    void visitPost(DocRef *) {
@@ -654,7 +703,7 @@ class PrintDocVisitor : public DocVisitor
    }
    void visitPre(DocSecRefItem *ref) {
       indent_pre();
-      printf("<secrefitem target=\"%s\">\n", qPrintable(ref->target()));
+      printf("<secrefitem target=\"%s\">\n", csPrintable(ref->target()));
    }
 
    void visitPost(DocSecRefItem *) {
@@ -671,15 +720,15 @@ class PrintDocVisitor : public DocVisitor
       indent_post();
       printf("</secreflist>\n");
    }
-  
+
    void visitPre(DocParamList *pl) {
       indent_pre();
-        
+
       DocNode *param;
 
       printf("<parameters>");
-     
-      for (auto param : pl->parameters()) { 
+
+      for (auto param : pl->parameters()) {
          printf("<param>");
 
          if (param->kind() == DocNode::Kind_Word) {
@@ -731,7 +780,7 @@ class PrintDocVisitor : public DocVisitor
    void visitPre(DocXRefItem *x) {
       indent_pre();
       printf("<xrefitem file=\"%s\" anchor=\"%s\" title=\"%s\"/>\n",
-             qPrintable(x->file()), qPrintable(x->anchor()), qPrintable(x->title()));
+             csPrintable(x->file()), csPrintable(x->anchor()), csPrintable(x->title()));
    }
 
    void visitPost(DocXRefItem *) {
@@ -741,7 +790,7 @@ class PrintDocVisitor : public DocVisitor
 
    void visitPre(DocInternalRef *r) {
       indent_pre();
-      printf("<internalref file=%s anchor=%s>\n", qPrintable(r->file()), qPrintable(r->anchor()));
+      printf("<internalref file=%s anchor=%s>\n", csPrintable(r->file()), csPrintable(r->anchor()));
    }
 
    void visitPost(DocInternalRef *) {
@@ -750,7 +799,7 @@ class PrintDocVisitor : public DocVisitor
    }
    void visitPre(DocCopy *c) {
       indent_pre();
-      printf("<copy link=\"%s\">\n", qPrintable(c->link()));
+      printf("<copy link=\"%s\">\n", csPrintable(c->link()));
    }
    void visitPost(DocCopy *) {
       indent_post();
@@ -770,24 +819,23 @@ class PrintDocVisitor : public DocVisitor
       indent_pre();
       printf("<blockquote>\n");
    }
-   
+
    void visitPost(DocHtmlBlockQuote *) {
       indent_post();
       printf("</blockquote>\n");
    }
-  
+
    void visitPre(DocParBlock *) {
       indent_pre();
       printf("<parblock>\n");
    }
+
    void visitPost(DocParBlock *) {
       indent_post();
       printf("</parblock>\n");
    }
 
  private:
-   // helper functions
-
    void indent() {
       if (m_needsEnter) {
          printf("\n");
@@ -804,6 +852,7 @@ class PrintDocVisitor : public DocVisitor
       if (!m_needsEnter) {
          indent();
       }
+
       m_needsEnter = true;
    }
 
@@ -817,7 +866,7 @@ class PrintDocVisitor : public DocVisitor
       indent();
    }
 
-   // member variables
+
    int m_indent;
    bool m_needsEnter;
    bool m_insidePre;

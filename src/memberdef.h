@@ -386,8 +386,10 @@ class MemberDef : public Definition
    void setCategory(QSharedPointer<ClassDef> cd);
    void setCategoryRelation(QSharedPointer<MemberDef> md);
 
-   void setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace = true);
-   void setBriefDescription(const QString &b, const QString &briefFile, int briefLine);
+   void setDocumentation(const QString &d, const QString &docFile, int docLine, 
+            bool stripWhiteSpace = true, bool atTop = false) override;
+
+   void setBriefDescription(const QString &b, const QString &briefFile, int briefLine)  override;
    void setInbodyDocumentation(const QString &d, const QString &inbodyFile, int inbodyLine);
 
    void setHidden(bool b);

@@ -25,7 +25,7 @@
 #include <arguments.h>
 #include <cite.h>
 #include <cmdmapper.h>
-#include <code.h>
+#include <code_cstyle.h>
 #include <config.h>
 #include <commentcnv.h>
 #include <config.h>

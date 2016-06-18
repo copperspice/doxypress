@@ -23,7 +23,7 @@
 #include <memberdef.h>
 
 #include <arguments.h>
-#include <code.h>
+#include <code_cstyle.h>
 #include <config.h>
 #include <defargs.h>
 #include <docparser.h>
@@ -1169,9 +1169,9 @@ void MemberDef::computeLinkableInProject() const
    return; // linkable!
 }
 
-void MemberDef::setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace)
+void MemberDef::setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace, bool atTop)
 {
-   Definition::setDocumentation(d, docFile, docLine, stripWhiteSpace);
+   Definition::setDocumentation(d, docFile, docLine, stripWhiteSpace, atTop);
    m_isLinkableCached = 0;
 }
 
@@ -2259,11 +2259,13 @@ void MemberDef::_writeCallGraph(OutputList &ol)
          msg("Generating call graph for function %s\n", qPrintable(qualifiedName()));
 
          ol.disable(OutputGenerator::Man);
-         ol.startParagraph();
          ol.startCallGraph();
+
+         ol.startParagraph();        
          ol.parseText(theTranslator->trCallGraph());
-         ol.endCallGraph(callGraph);
          ol.endParagraph();
+
+         ol.endCallGraph(callGraph);         
          ol.enableAll();
       }
    }
@@ -2285,11 +2287,13 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
          msg("Generating caller graph for function %s\n", qPrintable(qualifiedName()));
 
          ol.disable(OutputGenerator::Man);
-         ol.startParagraph();
          ol.startCallGraph();
+
+         ol.startParagraph();        
          ol.parseText(theTranslator->trCallerGraph());
-         ol.endCallGraph(callerGraph);
          ol.endParagraph();
+
+         ol.endCallGraph(callerGraph);         
          ol.enableAll();
       }
    }
@@ -3175,12 +3179,12 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
       ol.endParagraph();
    }
-
-   /* write detailed description */
+  
    if (! detailed.isEmpty() || ! inbodyDocumentation().isEmpty()) {
+      // write detailed description and inbody docs
+
       ol.generateDoc(docFile(), docLine(), scopedContainer, self,
                   detailed + "\n", true, false);
-
 
       if (! inbodyDocumentation().isEmpty()) {
          ol.generateDoc(inbodyFile(), inbodyLine(), scopedContainer, self,
@@ -3188,6 +3192,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       }
 
    } else if (! brief.isEmpty() && (Config::getBool("repeat-brief") || ! Config::getBool("brief-member-desc"))) {
+      // inbody docs
 
       if (! inbodyDocumentation().isEmpty()) {
          ol.generateDoc(inbodyFile(), inbodyLine(), scopedContainer, self,
@@ -3274,6 +3279,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    // enable LaTeX again
    // if Config::getBool("extract-all") && ! hasDocs) ol.enable(OutputGenerator::Latex);
+
    ol.popGeneratorState();
 
    if (! Config::getBool("extract-all") && Config::getBool("warn-undoc") &&
