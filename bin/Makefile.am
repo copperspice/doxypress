@@ -27,7 +27,7 @@ if OSTYPE_WIN
 
    clang_dll=$(clang_path)/bin/libclang.dll
    clang_hdr=$(clang_path)/include
- 
+
    clang_link=-L$(clang_path)/lib  -Wl,--start-group  \
         -lLLVMSupport \
         -lclangAST \
@@ -188,20 +188,21 @@ doxypress_SOURCES = \
    src/xmlgen.cpp  \
    src/portable.cpp  \
    src/ce_parse.cpp \
-   src/generated/code.cpp  \
+   src/generated/code_cstyle.cpp  \
+   src/generated/code_fortran.cpp \
+   src/generated/code_py.cpp  \
    src/generated/commentcnv.cpp  \
    src/generated/commentscan.cpp  \
    src/generated/constexp.cpp \
    src/generated/defargs.cpp \
    src/generated/declinfo.cpp  \
    src/generated/doctokenizer.cpp \
-   src/generated/fortrancode.cpp \
    src/generated/parse_cstyle.cpp \
    src/generated/parse_fortran.cpp \
    src/generated/parse_py.cpp \
    src/generated/parse_tcl.cpp \
-   src/generated/pre.cpp \
-   src/generated/pycode.cpp
+   src/generated/pre.cpp
+
 
 noinst_HEADERS = \
    src/a_define.h \
@@ -211,7 +212,7 @@ noinst_HEADERS = \
    src/classdef.h \
    src/classlist.h \
    src/cmdmapper.h \
-   src/code.h \
+   src/code_cstyle.h \
    src/commentcnv.h \
    src/commentscan.h \
    src/condparser.h \
@@ -242,7 +243,6 @@ noinst_HEADERS = \
    src/filenamelist.h \
    src/filestorage.h \
    src/formula.h \
-   src/fortrancode.h \
    src/ftvhelp.h \
    src/groupdef.h \
    src/htags.h \

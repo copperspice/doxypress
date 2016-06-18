@@ -26,7 +26,7 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/classdef.h
    ${CMAKE_CURRENT_SOURCE_DIR}/classlist.h
    ${CMAKE_CURRENT_SOURCE_DIR}/cmdmapper.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/code.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/code_cstyle..h
    ${CMAKE_CURRENT_SOURCE_DIR}/commentcnv.h
    ${CMAKE_CURRENT_SOURCE_DIR}/commentscan.h
    ${CMAKE_CURRENT_SOURCE_DIR}/condparser.h
@@ -57,7 +57,6 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/filenamelist.h
    ${CMAKE_CURRENT_SOURCE_DIR}/filestorage.h
    ${CMAKE_CURRENT_SOURCE_DIR}/formula.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/fortrancode.h
    ${CMAKE_CURRENT_SOURCE_DIR}/ftvhelp.h
    ${CMAKE_CURRENT_SOURCE_DIR}/groupdef.h
    ${CMAKE_CURRENT_SOURCE_DIR}/htags.h
@@ -210,20 +209,20 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/xmlgen.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portable.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ce_parse.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/code.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_cstyle..cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_fortran.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_py.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/commentcnv.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/commentscan.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/constexp.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/defargs.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/declinfo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/doctokenizer.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/fortrancode.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/doctokenizer.cpp    
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_cstyle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_fortran.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_py.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_tcl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/pre.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/pycode.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/pre.cpp  
 )
 
 # (todo: enhance) run rcc to generate qrc output

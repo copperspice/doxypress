@@ -19,6 +19,6 @@
 #define DOXY_BUILD_INFO_H_IN
 
 // DoxyPress Version  "1.0.0"
-constexpr const char *versionString = "1.2.2";
+constexpr const char *versionString = "1.2.3-RC1";
 
 #endif

@@ -42,7 +42,7 @@ endif()
 string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
 set(BUILD_MAJOR "1")
 set(BUILD_MINOR "2")
-set(BUILD_MICRO "2")
+set(BUILD_MICRO "3-RC2")
 
 set(BUILD_COMPONENTS "DOXYPRESS")
 
