@@ -179,13 +179,13 @@ void FTVHelp::decContentsDepth()
 }
 
 /*! Add a list item to the contents file.
- *  \param isDir true if the item is a directory, false if it is a text
- *  \param ref  the URL of to the item.
- *  \param file the file containing the definition of the item
- *  \param anchor the anchor within the file
- *  \param name the name of the item
- *  \param addToNavIndex add this entry to the quick navigation index
- *  \param def Definition corresponding to this entry
+ *  \param isDir          true if the item is a directory, false if it is text
+ *  \param ref            URL of to the item
+ *  \param file           file containing the definition of the item
+ *  \param anchor         anchor within the file
+ *  \param name           name of the item
+ *  \param addToNavIndex  add this entry to the quick navigation index
+ *  \param def            definition corresponding to this entry
  */
 void FTVHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                               bool addToNavIndex, QSharedPointer<Definition> def, DirType category)
@@ -369,6 +369,8 @@ static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
 void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index, enum PageType outputType)
 {
    static bool isStyleBB = Config::getBool("bb-style");
+   static bool javaOpt   = Config::getBool("optimize-java");
+   static bool pythonOpt = Config::getBool("optimize-python");
 
    for (auto n : nl) {
       t << "<tr id=\"row_" << generateIndentLabel(n, 0) << "\"";
@@ -401,7 +403,12 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
             // no icon
 
          } else if (n->def && n->def->definitionType() == Definition::TypeNamespace) {
-            t << "<span class=\"icona\"><span class=\"icon\">N</span></span>";
+
+            if (javaOpt || pythonOpt) {
+               t << "<span class=\"icona\"><span class=\"icon\">P</span></span>";
+            } else {
+               t << "<span class=\"icona\"><span class=\"icon\">N</span></span>";
+            }
 
          } else if (n->def && n->def->definitionType() == Definition::TypeClass) {
             t << "<span class=\"icona\"><span class=\"icon\">C</span></span>";
@@ -465,7 +472,12 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
             // no icon
 
          } else if (n->def && n->def->definitionType() == Definition::TypeNamespace) {
-            t << "<span class=\"icona\"><span class=\"icon\">N</span></span>";
+
+            if (javaOpt || pythonOpt) {
+               t << "<span class=\"icona\"><span class=\"icon\">P</span></span>";
+            } else {
+               t << "<span class=\"icona\"><span class=\"icon\">N</span></span>";
+            }
 
          } else if (n->def && n->def->definitionType() == Definition::TypeClass) {
             t << "<span class=\"icona\"><span class=\"icon\">C</span></span>";
@@ -622,11 +634,12 @@ static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t
 
          } else {
 
-            if (mainPageOmit && node->def == Doxy_Globals::mainPage) {
+            if (mainPageOmit && node->def && node->def == Doxy_Globals::mainPage) {
                // do not add this file to the navIndex
 
             } else {
                navIndex.inSort(new NavIndexEntry(node2URL(node), pathToNode(node)));
+
             }
          }
       }
