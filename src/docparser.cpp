@@ -484,8 +484,8 @@ static void checkUndocumentedParams()
                argName = argName.left(argName.length() - 3);
             }
 
-            if (s_memberDef->getLanguage() == SrcLangExt_Python && argName == "self") {
-               // allow undocumented self parameter for Python
+            if (s_memberDef->getLanguage() == SrcLangExt_Python && (argName == "self" || argName == "cls")) {
+               // allow undocumented self / cls parameter for Python
 
             } else if (!argName.isEmpty() && ! s_paramsFound.contains(argName) && a.docs.isEmpty()) {
                found = true;
@@ -508,10 +508,10 @@ static void checkUndocumentedParams()
 
                argName = argName.trimmed();
 
-               if (s_memberDef->getLanguage() == SrcLangExt_Python && argName == "self") {
-                  // allow undocumented self parameter for Python
+               if (s_memberDef->getLanguage() == SrcLangExt_Python && (argName == "self" || argName == "cls")) {
+                  // allow undocumented self / cls parameter for Python
 
-               } else if (!argName.isEmpty() && ! s_paramsFound.contains(argName)) {
+               } else if (! argName.isEmpty() && ! s_paramsFound.contains(argName)) {
 
                   if (! first) {
                      errMsg += "\n";
@@ -563,7 +563,7 @@ static void detectNoDocumentedParams()
                   break;
                }
 
-               if (! a.name.isEmpty() && a.type != "void" && !(isPython && a.name == "self")) {
+               if (! a.name.isEmpty() && a.type != "void" && ! (isPython && (a.name == "self" || a.name == "cls"))) {
                   allDoc = ! a.docs.isEmpty();
                }
             }
@@ -578,7 +578,7 @@ static void detectNoDocumentedParams()
                      break;
                   }
 
-                  if (! a.name.isEmpty() && a.type != "void" && !(isPython && a.name == "self")) {
+                  if (! a.name.isEmpty() && a.type != "void" && ! (isPython && (a.name == "self"|| a.name == "cls"))) {
                      allDoc = ! a.docs.isEmpty();
                   }
                }
@@ -1062,7 +1062,7 @@ static void handleUnclosedStyleCommands()
    }
 }
 
-static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool ignoreAutoLinkFlag = FALSE)
+static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool ignoreAutoLinkFlag = false)
 {
    QString name = linkToText(SrcLangExt_Unknown, g_token->name, true);
 
@@ -1821,7 +1821,7 @@ static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &childre
    bool isFirst = true;
    DocPara *lastPar = 0;
 
-   if (!children.isEmpty() && children.last()->kind() == DocNode::Kind_Para) {
+   if (! children.isEmpty() && children.last()->kind() == DocNode::Kind_Para) {
       // last child item was a paragraph
       lastPar = (DocPara *)children.last();
       isFirst = false;
@@ -2725,7 +2725,6 @@ DocLink::DocLink(DocNode *parent, const QString &target)
    warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve link to '%s' for \\link command", qPrintable(target));
 }
 
-
 QString DocLink::parse(bool isJavaLink, bool isXmlLink)
 {
    DBG(("DocLink::parse() start\n"));
@@ -2735,6 +2734,7 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
    int tok;
 
    while ((tok = doctokenizerYYlex())) {
+
       if (!defaultHandleToken(this, tok, m_children, false)) {
          switch (tok) {
             case TK_COMMAND:
@@ -4261,7 +4261,6 @@ int DocHtmlList::parse()
    int retval = RetVal_OK;
    int num = 1;
 
-
    // get next token
    int tok = doctokenizerYYlex();
 
@@ -4903,15 +4902,16 @@ int DocParamList::parse(const QString &cmdName)
    tok = doctokenizerYYlex();
 
    while (tok == TK_WORD) {
-      /* there is a parameter name */
+      // there is a parameter name
 
       if (m_type == DocParamSect::Param) {
          int typeSeparator = g_token->name.indexOf('#'); // explicit type position
 
          if (typeSeparator != -1) {
             handleParameterType(this, m_paramTypes, g_token->name.left(typeSeparator));
-            g_token->name = g_token->name.mid(typeSeparator + 1);
+            g_token->name     = g_token->name.mid(typeSeparator + 1);
             s_hasParamCommand = true;
+
             checkArgumentName(g_token->name, true);
             ((DocParamSect *)parent())->m_hasTypeSpecifier = true;
 
@@ -4931,13 +4931,16 @@ int DocParamList::parse(const QString &cmdName)
 
    doctokenizerYYsetStatePara();
 
-   if (tok == 0) { /* premature end of comment block */
+   if (tok == 0) {    
+      // premature end of comment block 
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
                      "argument of command %s", qPrintable(cmdName));
       retval = 0;
       goto endparamlist;
    }
-   if (tok != TK_WHITESPACE) { /* premature end of comment block */
+
+   if (tok != TK_WHITESPACE) { 
+      // premature end of comment block 
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token in comment block while parsing the "
                      "argument of command %s", qPrintable(saveCmdName));
       retval = 0;
@@ -4947,8 +4950,10 @@ int DocParamList::parse(const QString &cmdName)
    par = new DocPara(this);
    m_paragraphs.append(par);
    retval = par->parse();
+
    par->markFirst();
    par->markLast();
+
 
 endparamlist:
    DocNode *n = s_nodeStack.pop();
@@ -4995,7 +5000,7 @@ int DocParamList::parseXml(const QString &paramName)
          if (m_paragraphs.isEmpty()) {
             par->markFirst();
          } else {
-            m_paragraphs.last().markLast(false);
+            m_paragraphs.last()->markLast(false);
          }
 
          par->markLast();
@@ -5291,7 +5296,7 @@ void DocPara::handleImage(const QString &cmdName)
    DocImage::Type t;
    QString imgType = g_token->name.toLower();
 
-   if      (imgType == "html") {
+   if (imgType == "html") {
       t = DocImage::Html;
    } else if (imgType == "latex") {
       t = DocImage::Latex;
@@ -5402,7 +5407,6 @@ void DocPara::handleRef(const QString &cmdName)
 endref:
    doctokenizerYYsetStatePara();
 }
-
 
 void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
 {
@@ -6807,6 +6811,7 @@ int DocPara::parse(bool skipParse, int token)
       } else {
          // get the next token
          tok = doctokenizerYYlex();
+
       }
 
       if (tok == 0) {
@@ -6814,15 +6819,6 @@ int DocPara::parse(bool skipParse, int token)
       }
 
    reparsetoken:
-      DBG(("token %s at %d", csPrintable(tokToString(tok)), doctokenizerYYlineno));
-
-      if (tok == TK_WORD || tok == TK_LNKWORD || tok == TK_SYMBOL || tok == TK_URL ||
-            tok == TK_COMMAND || tok == TK_HTMLTAG) {
-
-         DBG((" name=%s", qPrintable(g_token->name)));
-      }
-
-      DBG(("\n"));
 
       switch (tok) {
 
@@ -6866,7 +6862,7 @@ int DocPara::parse(bool skipParse, int token)
          break;
 
          case TK_LISTITEM: {
-            DBG(("found list item at %d parent=%d\n", g_token->indent, parent()->kind()));
+            DBG(("Found list item at %d parent = %d\n", g_token->indent, parent()->kind()));
 
             DocNode *n = parent();
             while (n && n->kind() != DocNode::Kind_AutoList) {
@@ -6923,7 +6919,8 @@ int DocPara::parse(bool skipParse, int token)
                   g_token->text = g_token->simpleSectText;
                   tok = TK_RCSTAG;
 
-               } else { // other section
+               } else { 
+                  // other section
                   tok = TK_COMMAND;
 
                }
@@ -7032,7 +7029,7 @@ int DocPara::parse(bool skipParse, int token)
                goto reparsetoken;
 
             } else if (retval == RetVal_OK) {
-               // the command ended normally, keep scanning for new tokens.
+               // the command ended normally, keep scanning for new tokens
                retval = 0;
 
             } else if (retval > 0 && retval < RetVal_OK) {
@@ -7102,9 +7099,11 @@ int DocPara::parse(bool skipParse, int token)
                n = n->parent();
             }
 
-            if (n) { // already in a simple section
+            if (n) { 
+               // already in a simple section
                // simple section cannot start in this paragraph, need
-               // to unwind the stack and remember the command.
+               // to unwind the stack and remember the command
+
                g_token->simpleSectName = "rcs:" + g_token->name;
                g_token->simpleSectText = g_token->text;
                retval = RetVal_SimpleSec;
@@ -7438,7 +7437,7 @@ void DocRoot::parse()
 
          retval = par->parse(true, tok);
 
-         // new code to test for a <div>
+         // test for a <div>
          if (! par->isEmpty()) {
 
             m_children.append(par);
@@ -7669,7 +7668,6 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    // bool fortranOpt = Config::getBool("optimize-fortran");
    docParserPushContext();
 
-
    if (ctx && ctx != Doxy_Globals::globalScope && (ctx->definitionType() == Definition::TypeClass ||
           ctx->definitionType() == Definition::TypeNamespace)) {
 
@@ -7711,7 +7709,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    }
 
    s_fileName = fileName;
-   s_relPath = (! linkFromIndex && ctx) ? QString(relativePathToRoot(ctx->getOutputFileBase())) : "";
+   s_relPath  = (! linkFromIndex && ctx) ? QString(relativePathToRoot(ctx->getOutputFileBase())) : "";
 
    s_memberDef = md;
 
@@ -7738,12 +7736,12 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    doctokenizerYYlineno = startLine;
    uint inpLen = input.length();
 
-   QString inpStr = processCopyDoc(input, inpLen);
-   if (inpStr.isEmpty() || inpStr.at(inpStr.length() - 1) != '\n') {
-      inpStr += '\n';
+   QString tmpData = processCopyDoc(input, inpLen);
+   if (tmpData.isEmpty() || tmpData.at(tmpData.length() - 1) != '\n') {
+      tmpData += '\n';
    }
 
-   doctokenizerYYinit(inpStr, s_fileName);
+   doctokenizerYYinit(tmpData, s_fileName);
 
    // build abstract syntax tree
    DocRoot *root = new DocRoot(md != 0, singleLine);

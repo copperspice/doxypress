@@ -230,12 +230,12 @@ class ManGenerator : public OutputGenerator
    void endSmall()           {}
 
    void startMemberDescription(const QString &, const QString &) override {
-      m_textStream << "\n.RI \"\\fI";
+      m_textStream << "\n.RI \"";
       firstCol = false;
    }
 
    void endMemberDescription()   {
-      m_textStream << "\\fP\"";
+      m_textStream << "\"";
       firstCol = false;
    }
 

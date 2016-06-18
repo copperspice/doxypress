@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -28,27 +28,26 @@
 #include <membergroup.h>
 
 /*! Main entry point for the documentation parser.
- *  @param fileName  File in which the documentation block is found (or the
- *                   name of the example file in case isExample is true).
- *  @param startLine Line at which the documentation block is found.
- *  @param context   Class or namespace to which this block belongs.
- *  @param md        Member definition to which the documentation belongs.
- *                   Can be 0.
- *  @param input     String representation of the documentation block.
- *  @param indexWords Indicates whether or not words should be put in the
- *                   search index.
- *  @param isExample true if the documentation belongs to an example.
- *  @param exampleName Base name of the example file (0 if isExample is false).
- *  @param singleLine Output should be presented on a single line, so without
- *                   starting a new paragraph at the end.
- *  @param linkFromIndex true if the documentation is generated from an
- *                   index page. In this case context is not used to determine
- *                   the relative path when making a link.
- *  @returns         Root node of the abstract syntax tree. Ownership of the
- *                   pointer is handed over to the caller.
+ *
+ *  @param fileName     File in which the documentation block is found (or the
+ *                      name of the example file in case isExample is true).
+ *  @param startLine    Line at which the documentation block is found.
+ *  @param context      Class or namespace to which this block belongs.
+ *  @param md           Member definition to which the documentation belongs. Can be 0.
+ *  @param input        String representation of the documentation block.
+ *  @param indexWords   Indicates whether or not words should be put in the search index.
+ *  @param isExample    true if the documentation belongs to an example.
+ *  @param exampleName  Base name of the example file (0 if isExample is false).
+ *  @param singleLine   Output should be presented on a single line, so without
+ *                      starting a new paragraph at the end.
+ *  @param linkFromIndex true if the documentation is generated from an index page.
+ *                       In this case context is not used to determine the relative
+ *                       path when making a link.
+ *  @returns             Root node of the abstract syntax tree. Ownership of the
+ *                       pointer is handed over to the caller.
  */
-DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> context, 
-                  QSharedPointer<MemberDef> md, const QString &input, bool indexWords, bool isExample, 
+DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> context,
+                  QSharedPointer<MemberDef> md, const QString &input, bool indexWords, bool isExample,
                   const QString &exampleName = QString(), bool singleLine = false, bool linkFromIndex = false);
 
 /*! Main entry point for parsing simple text fragments. These
@@ -57,7 +56,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
 DocText *validatingParseText(const QString &input);
 
 /*! Searches for section and anchor commands in the input */
-void docFindSections(const QString &input, QSharedPointer<Definition> def, 
+void docFindSections(const QString &input, QSharedPointer<Definition> def,
                   QSharedPointer<MemberGroup> mg, const QString &fileName);
 
 /** Abstract node interface with type information. */
@@ -115,7 +114,7 @@ class DocNode
                Kind_Text           = 47,
                Kind_MscFile        = 48,
                Kind_HtmlBlockQuote = 49,
-            
+
                Kind_ParBlock       = 51,
                Kind_DiaFile        = 52
              };
@@ -274,8 +273,8 @@ class DocLinkedWord : public DocNode
 class DocURL : public DocNode
 {
  public:
-   DocURL(DocNode *parent, const QString &url, bool isEmail) :
-      m_url(url), m_isEmail(isEmail) {
+   DocURL(DocNode *parent, const QString &url, bool isEmail)
+      : m_url(url), m_isEmail(isEmail) {
       m_parent = parent;
    }
 
@@ -304,12 +303,14 @@ class DocURL : public DocNode
 class DocLineBreak : public DocNode
 {
  public:
-   DocLineBreak(DocNode *parent) {
+   explicit DocLineBreak(DocNode *parent) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_LineBreak;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
@@ -321,7 +322,7 @@ class DocLineBreak : public DocNode
 class DocHorRuler : public DocNode
 {
  public:
-   DocHorRuler(DocNode *parent) {
+   explicit DocHorRuler(DocNode *parent) {
       m_parent = parent;
    }
 
@@ -369,34 +370,41 @@ class DocCite : public DocNode
 {
  public:
    DocCite(DocNode *parent, const QString &target, const QString &context);
+
    Kind kind() const            {
       return Kind_Ref;
    }
+
    QString file() const        {
       return m_file;
    }
+
    QString relPath() const     {
       return m_relPath;
    }
+
    QString ref() const         {
       return m_ref;
    }
+
    QString anchor() const      {
       return m_anchor;
    }
+
    QString text() const        {
       return m_text;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
 
  private:
-   QString   m_file;
-   QString   m_relPath;
-   QString   m_ref;
-   QString   m_anchor;
-   QString   m_text;
+   QString  m_file;
+   QString  m_relPath;
+   QString  m_ref;
+   QString  m_anchor;
+   QString  m_text;
 };
 
 
@@ -404,7 +412,7 @@ class DocCite : public DocNode
 class DocStyleChange : public DocNode
 {
   public:
-  
+
    enum Style { Bold          = 0x0001,
                 Italic        = 0x0002,
                 Code          = 0x0004,
@@ -417,8 +425,8 @@ class DocStyleChange : public DocNode
                 Div           = 0x0200,
    };
 
-   DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = 0)    
-      : m_position(position), m_style(s), m_enable(enable) 
+   DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = nullptr)
+      : m_position(position), m_style(s), m_enable(enable)
    {
       m_parent = parent;
 
@@ -427,7 +435,7 @@ class DocStyleChange : public DocNode
       }
    }
 
-   DocStyleChange()         
+   DocStyleChange()
    {
    }
 
@@ -540,19 +548,23 @@ class DocSymbol : public DocNode
       const PerlType  type;
    } PerlSymb;
 
-   DocSymbol(DocNode *parent, SymType s) :
-      m_symbol(s) {
+   DocSymbol(DocNode *parent, SymType s)
+      : m_symbol(s) {
       m_parent = parent;
    }
+
    SymType symbol() const     {
       return m_symbol;
    }
+
    Kind kind() const          {
       return Kind_Symbol;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
+
    static SymType decodeSymbol(const QString &symName);
 
  private:
@@ -563,7 +575,7 @@ class DocSymbol : public DocNode
 class DocWhiteSpace : public DocNode
 {
  public:
-   DocWhiteSpace(DocNode *parent, const QString &chars) 
+   DocWhiteSpace(DocNode *parent, const QString &chars)
       : m_chars(chars) {
       m_parent = parent;
    }
@@ -633,38 +645,38 @@ class DocVerbatim : public DocNode
       return m_isBlock;
    }
 
-   bool hasCaption() const { 
-      return ! m_children.isEmpty(); 
+   bool hasCaption() const {
+      return ! m_children.isEmpty();
    }
 
-   QString width() const { 
-      return m_width; 
+   QString width() const {
+      return m_width;
    }
 
-   QString height() const      { 
-      return m_height; 
+   QString height() const      {
+      return m_height;
    }
 
-   const QList<DocNode *> &children() const { 
-      return m_children; 
+   const QList<DocNode *> &children() const {
+      return m_children;
    }
 
-   QList<DocNode *> &children() { 
-      return m_children; 
+   QList<DocNode *> &children() {
+      return m_children;
    }
 
-   void setText(const QString &t)   { 
-      m_text = t;   
+   void setText(const QString &t)   {
+      m_text = t;
    }
 
-   void setWidth(const QString &w)  { 
-      m_width = w;  
+   void setWidth(const QString &w)  {
+      m_width = w;
    }
 
-   void setHeight(const QString &h) { 
-      m_height = h; 
+   void setHeight(const QString &h) {
+      m_height = h;
    }
-    
+
  private:
    QString  m_context;
    QString  m_text;
@@ -680,7 +692,7 @@ class DocVerbatim : public DocNode
 
    QString m_width;
    QString m_height;
-   QList<DocNode *> m_children;    
+   QList<DocNode *> m_children;
 };
 
 
@@ -691,8 +703,8 @@ class DocInclude : public DocNode
    enum Type { Include, DontInclude, VerbInclude, HtmlInclude, LatexInclude, IncWithLines, Snippet };
 
    DocInclude(DocNode *parent, const QString &file, const QString context, Type t,
-              bool isExample, const QString exampleFile, const QString blockId) 
-      : m_file(file), m_context(context), m_type(t), m_isExample(isExample), m_exampleFile(exampleFile), m_blockId(blockId) { 
+              bool isExample, const QString exampleFile, const QString blockId)
+      : m_file(file), m_context(context), m_type(t), m_isExample(isExample), m_exampleFile(exampleFile), m_blockId(blockId) {
 
       m_parent = parent;
    }
@@ -760,9 +772,10 @@ class DocIncOperator : public DocNode
 {
  public:
    enum Type { Line, SkipLine, Skip, Until };
-   DocIncOperator(DocNode *parent, Type t, const QString &pat, const QString &context, bool isExample, 
-                  const QString &exampleFile) 
-      : m_type(t), m_pattern(pat), m_context(context), m_isFirst(false), m_isLast(false), 
+
+   DocIncOperator(DocNode *parent, Type t, const QString &pat, const QString &context, bool isExample,
+                  const QString &exampleFile)
+      : m_type(t), m_pattern(pat), m_context(context), m_isFirst(false), m_isLast(false),
         m_isExample(isExample), m_exampleFile(exampleFile) {
 
       m_parent = parent;
@@ -822,24 +835,31 @@ class DocFormula : public DocNode
 {
  public:
    DocFormula(DocNode *parent, int id);
+
    Kind kind() const          {
       return Kind_Formula;
    }
+
    QString name() const       {
       return m_name;
    }
+
    QString text() const       {
       return m_text;
    }
+
    QString relPath() const    {
       return m_relPath;
    }
+
    int id() const             {
       return m_id;
    }
+
    void accept(DocVisitor *v) {
       v->visit(this);
    }
+
    bool isInline()            {
       return m_text.length() > 0 ? m_text.at(0) != '\\' : true;
    }
@@ -848,7 +868,7 @@ class DocFormula : public DocNode
    QString  m_name;
    QString  m_text;
    QString  m_relPath;
-   int m_id;
+   int      m_id;
 };
 
 /** Node representing an entry in the index. */
@@ -922,27 +942,33 @@ class DocAutoList : public CompAccept<DocAutoList>, public DocNode
 {
  public:
    DocAutoList(DocNode *parent, int indent, bool isEnumList, int depth);
+
    Kind kind() const          {
       return Kind_AutoList;
    }
+
    bool isEnumList() const    {
       return m_isEnumList;
    }
+
    int  indent() const        {
       return m_indent;
    }
+
    int depth() const          {
       return m_depth;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocAutoList>::accept(this, v);
    }
+
    int parse();
 
  private:
-   int      m_indent;
-   bool     m_isEnumList;
-   int      m_depth;
+   int   m_indent;
+   bool  m_isEnumList;
+   int   m_depth;
 };
 
 /** Node representing an item of a auto list */
@@ -950,15 +976,19 @@ class DocAutoListItem : public CompAccept<DocAutoListItem>, public DocNode
 {
  public:
    DocAutoListItem(DocNode *parent, int indent, int num);
+
    Kind kind() const          {
       return Kind_AutoListItem;
    }
+
    int itemNumber() const     {
       return m_itemNum;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocAutoListItem>::accept(this, v);
    }
+
    int parse();
 
  private:
@@ -970,7 +1000,7 @@ class DocAutoListItem : public CompAccept<DocAutoListItem>, public DocNode
 class DocTitle : public CompAccept<DocTitle>, public DocNode
 {
  public:
-   DocTitle(DocNode *parent) {
+   explicit DocTitle(DocNode *parent) {
       m_parent = parent;
    }
 
@@ -983,7 +1013,7 @@ class DocTitle : public CompAccept<DocTitle>, public DocNode
 
    void accept(DocVisitor *v) {
       CompAccept<DocTitle>::accept(this, v);
-   } 
+   }
 };
 
 /** Node representing an item of a cross-referenced list */
@@ -1038,36 +1068,47 @@ class DocImage : public CompAccept<DocImage>, public DocNode
    enum Type { None, Html, Latex, Rtf, DocBook };
 
    DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t, const QString &url = QString());
+
    Kind kind() const           {
       return Kind_Image;
    }
+
    Type type() const           {
       return m_type;
    }
+
    QString name() const       {
       return m_name;
    }
+
    bool hasCaption() const     {
       return !m_children.isEmpty();
    }
+
    QString width() const      {
       return m_width;
    }
+
    QString height() const     {
       return m_height;
    }
+
    QString relPath() const    {
       return m_relPath;
    }
+
    QString url() const        {
       return m_url;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocImage>::accept(this, v);
    }
+
    void parse();
 
  private:
@@ -1085,35 +1126,45 @@ class DocDotFile : public CompAccept<DocDotFile>, public DocNode
 {
  public:
    DocDotFile(DocNode *parent, const QString &name, const QString &context);
+
    void parse();
 
    Kind kind() const          {
       return Kind_DotFile;
    }
+
    QString name() const       {
       return m_name;
    }
+
    QString file() const       {
       return m_file;
    }
+
    QString relPath() const    {
       return m_relPath;
    }
+
    bool hasCaption() const    {
       return !m_children.isEmpty();
    }
+
    QString width() const      {
       return m_width;
    }
+
    QString height() const     {
       return m_height;
    }
+
    QString context() const    {
       return m_context;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocDotFile>::accept(this, v);
    }
+
  private:
    QString  m_name;
    QString  m_file;
@@ -1133,27 +1184,35 @@ class DocMscFile : public CompAccept<DocMscFile>, public DocNode
    Kind kind() const          {
       return Kind_MscFile;
    }
+
    QString name() const      {
       return m_name;
    }
+
    QString file() const      {
       return m_file;
    }
+
    QString relPath() const   {
       return m_relPath;
    }
+
    bool hasCaption() const    {
       return !m_children.isEmpty();
    }
+
    QString width() const     {
       return m_width;
    }
+
    QString height() const    {
       return m_height;
    }
+
    QString context() const   {
       return m_context;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocMscFile>::accept(this, v);
    }
@@ -1172,34 +1231,45 @@ class DocDiaFile : public CompAccept<DocDiaFile>, public DocNode
 {
  public:
    DocDiaFile(DocNode *parent, const QString &name, const QString &context);
+
    void parse();
+
    Kind kind() const          {
       return Kind_DiaFile;
    }
+
    QString name() const      {
       return m_name;
    }
+
    QString file() const      {
       return m_file;
    }
+
    QString relPath() const   {
       return m_relPath;
    }
+
    bool hasCaption() const    {
       return !m_children.isEmpty();
    }
+
    QString width() const     {
       return m_width;
    }
+
    QString height() const    {
       return m_height;
    }
+
    QString context() const   {
       return m_context;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocDiaFile>::accept(this, v);
    }
+
  private:
    QString  m_name;
    QString  m_file;
@@ -1219,18 +1289,23 @@ class DocLink : public CompAccept<DocLink>, public DocNode
    Kind kind() const          {
       return Kind_Link;
    }
+
    QString file() const       {
       return m_file;
    }
+
    QString relPath() const    {
       return m_relPath;
    }
+
    QString ref() const        {
       return m_ref;
    }
+
    QString anchor() const     {
       return m_anchor;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocLink>::accept(this, v);
    }
@@ -1248,6 +1323,7 @@ class DocRef : public CompAccept<DocRef>, public DocNode
 {
  public:
    DocRef(DocNode *parent, const QString &target, const QString &context);
+
    void parse();
 
    Kind kind() const {
@@ -1261,9 +1337,11 @@ class DocRef : public CompAccept<DocRef>, public DocNode
    QString relPath() const {
       return m_relPath;
    }
+
    QString ref() const {
       return m_ref;
    }
+
    QString anchor() const {
       return m_anchor;
    }
@@ -1309,19 +1387,25 @@ class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
 {
  public:
    DocInternalRef(DocNode *parent, const QString &target);
+
    void parse();
+
    Kind kind() const            {
       return Kind_Ref;
    }
+
    QString file() const         {
       return m_file;
    }
+
    QString relPath() const      {
       return m_relPath;
    }
+
    QString anchor() const       {
       return m_anchor;
    }
+
    void accept(DocVisitor *v)   {
       CompAccept<DocInternalRef>::accept(this, v);
    }
@@ -1336,24 +1420,29 @@ class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
 class DocHRef : public CompAccept<DocHRef>, public DocNode
 {
  public:
-   DocHRef(DocNode *parent, const HtmlAttribList &attribs, const QString &url, const QString &relPath) 
+   DocHRef(DocNode *parent, const HtmlAttribList &attribs, const QString &url, const QString &relPath)
       : m_attribs(attribs), m_url(url), m_relPath(relPath) {
       m_parent = parent;
    }
 
    int parse();
+
    QString url() const        {
       return m_url;
    }
+
    QString relPath() const    {
       return m_relPath;
    }
+
    Kind kind() const           {
       return Kind_HRef;
    }
+
    void accept(DocVisitor *v)  {
       CompAccept<DocHRef>::accept(this, v);
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
@@ -1372,18 +1461,23 @@ class DocHtmlHeader : public CompAccept<DocHtmlHeader>, public DocNode
       m_level(level), m_attribs(attribs) {
       m_parent = parent;
    }
+
    int level() const                     {
       return m_level;
    }
+
    Kind kind() const                     {
       return Kind_HtmlHeader;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlHeader>::accept(this, v);
    }
+
    int parse();
 
  private:
@@ -1399,15 +1493,19 @@ class DocHtmlDescTitle : public CompAccept<DocHtmlDescTitle>, public DocNode
       m_attribs(attribs) {
       m_parent = parent;
    }
+
    Kind kind() const                     {
       return Kind_HtmlDescTitle;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlDescTitle>::accept(this, v);
    }
+
    int parse();
 
  private:
@@ -1422,15 +1520,19 @@ class DocHtmlDescList : public CompAccept<DocHtmlDescList>, public DocNode
       m_attribs(attribs) {
       m_parent = parent;
    }
+
    Kind kind() const                     {
       return Kind_HtmlDescList;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlDescList>::accept(this, v);
    }
+
    int parse();
 
  private:
@@ -1441,7 +1543,7 @@ class DocHtmlDescList : public CompAccept<DocHtmlDescList>, public DocNode
 class DocSection : public CompAccept<DocSection>, public DocNode
 {
  public:
-   DocSection(DocNode *parent, int level, const QString &id) 
+   DocSection(DocNode *parent, int level, const QString &id)
       : m_level(level), m_id(id) {
       m_parent = parent;
    }
@@ -1465,12 +1567,15 @@ class DocSection : public CompAccept<DocSection>, public DocNode
    QString id() const         {
       return m_id;
    }
+
    QString file() const       {
       return m_file;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocSection>::accept(this, v);
    }
+
    int parse();
 
  private:
@@ -1489,21 +1594,27 @@ class DocSecRefItem : public CompAccept<DocSecRefItem>, public DocNode
       m_target(target) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_SecRefItem;
    }
+
    QString target() const     {
       return m_target;
    }
+
    QString file() const       {
       return m_file;
    }
+
    QString anchor() const     {
       return m_anchor;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocSecRefItem>::accept(this, v);
    }
+
    void parse();
 
  private:
@@ -1516,18 +1627,19 @@ class DocSecRefItem : public CompAccept<DocSecRefItem>, public DocNode
 class DocSecRefList : public CompAccept<DocSecRefList>, public DocNode
 {
  public:
-   DocSecRefList(DocNode *parent) {
+   explicit DocSecRefList(DocNode *parent) {
       m_parent = parent;
    }
+
    void parse();
+
    Kind kind() const          {
       return Kind_SecRefList;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocSecRefList>::accept(this, v);
    }
-
- private:
 };
 
 /** Node representing an internal section of documentation */
@@ -1537,33 +1649,35 @@ class DocInternal : public CompAccept<DocInternal>, public DocNode
    DocInternal(DocNode *parent) {
       m_parent = parent;
    }
+
    int parse(int);
+
    Kind kind() const          {
       return Kind_Internal;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocInternal>::accept(this, v);
    }
-
- private:
 };
 
 /** Node representing an block of paragraphs */
 class DocParBlock : public CompAccept<DocParBlock>, public DocNode
 {
  public:
-   DocParBlock(DocNode *parent) {
+      explicit DocParBlock(DocNode *parent) {
       m_parent = parent;
    }
+
    int parse();
+
    Kind kind() const          {
       return Kind_ParBlock;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocParBlock>::accept(this, v);
    }
-
- private:
 };
 
 
@@ -1571,18 +1685,19 @@ class DocParBlock : public CompAccept<DocParBlock>, public DocNode
 class DocSimpleList : public CompAccept<DocSimpleList>, public DocNode
 {
  public:
-   DocSimpleList(DocNode *parent) {
+   explicit DocSimpleList(DocNode *parent) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_SimpleList;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocSimpleList>::accept(this, v);
    }
-   int parse();
 
- private:
+   int parse();
 };
 
 /** Node representing a Html list */
@@ -1590,22 +1705,28 @@ class DocHtmlList : public CompAccept<DocHtmlList>, public DocNode
 {
  public:
    enum Type { Unordered, Ordered };
-   DocHtmlList(DocNode *parent, const HtmlAttribList &attribs, Type t) :
-      m_type(t), m_attribs(attribs) {
+
+   DocHtmlList(DocNode *parent, const HtmlAttribList &attribs, Type t)
+      : m_type(t), m_attribs(attribs) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_HtmlList;
    }
+
    Type type() const          {
       return m_type;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlList>::accept(this, v);
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    int parse();
    int parseXml();
 
@@ -1651,7 +1772,7 @@ class DocSimpleSect : public CompAccept<DocSimpleSect>, public DocNode
 class DocSimpleSectSep : public DocNode
 {
  public:
-   DocSimpleSectSep(DocNode *parent) {
+   explicit DocSimpleSectSep(DocNode *parent) {
       m_parent = parent;
    }
 
@@ -1662,8 +1783,6 @@ class DocSimpleSectSep : public DocNode
    void accept(DocVisitor *v) {
       v->visit(this);
    }
-
- private:
 };
 
 /** Node representing a parameter section */
@@ -1675,23 +1794,29 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
    enum Type {
       Unknown, Param, RetVal, Exception, TemplateParam
    };
+
    enum Direction {
       In = 1, Out = 2, InOut = 3, Unspecified = 0
    };
+
    DocParamSect(DocNode *parent, Type t)
       : m_type(t), m_hasInOutSpecifier(false), m_hasTypeSpecifier(false) {
       m_parent = parent;
    }
+
    int parse(const QString &cmdName, bool xmlContext, Direction d);
    Kind kind() const          {
       return Kind_ParamSect;
    }
+
    Type type() const          {
       return m_type;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocParamSect>::accept(this, v);
    }
+
    bool hasInOutSpecifier() const {
       return m_hasInOutSpecifier;
    }
@@ -1700,16 +1825,16 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
    }
 
  private:
-   Type            m_type;
-   bool            m_hasInOutSpecifier;
-   bool            m_hasTypeSpecifier;
+   Type m_type;
+   bool m_hasInOutSpecifier;
+   bool m_hasTypeSpecifier;
 };
 
 /** Node representing a paragraph in the documentation tree */
 class DocPara : public CompAccept<DocPara>, public DocNode
 {
  public:
-   DocPara(DocNode *parent) :
+   explicit DocPara(DocNode *parent) :
       m_isFirst(false), m_isLast(false) {
       m_parent = parent;
    }
@@ -1727,15 +1852,19 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    void accept(DocVisitor *v)  {
       CompAccept<DocPara>::accept(this, v);
    }
+
    void markFirst(bool v = true) {
       m_isFirst = v;
    }
+
    void markLast(bool v = true)  {
       m_isLast = v;
    }
+
    bool isFirst() const        {
       return m_isFirst;
    }
+
    bool isLast() const         {
       return m_isLast;
    }
@@ -1759,7 +1888,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    void handleSection(const QString &cmdName);
    void handleSortId();
    void handleInheritDoc();
- 
+
    int handleStartCode();
    int handleHtmlHeader(const HtmlAttribList &tagHtmlAttribs, int level);
 
@@ -1776,11 +1905,11 @@ class DocParamList : public DocNode
 {
  public:
    DocParamList(DocNode *parent, DocParamSect::Type t, DocParamSect::Direction d)
-      : m_type(t), m_dir(d), m_isFirst(true), m_isLast(true) {     
+      : m_type(t), m_dir(d), m_isFirst(true), m_isLast(true) {
       m_parent = parent;
    }
 
-   virtual ~DocParamList()        
+   virtual ~DocParamList()
    { }
 
    Kind kind() const {
@@ -1823,7 +1952,7 @@ class DocParamList : public DocNode
       v->visitPre(this);
 
       for (auto n : m_paragraphs)  {
-         n.accept(v);
+         n->accept(v);
       }
 
       v->visitPost(this);
@@ -1833,7 +1962,7 @@ class DocParamList : public DocNode
    int parseXml(const QString &paramName);
 
  private:
-   QList<DocPara>          m_paragraphs;
+   QList<DocPara *>        m_paragraphs;
    QList<DocNode *>        m_params;
    QList<DocNode *>        m_paramTypes;
    DocParamSect::Type      m_type;
@@ -1846,7 +1975,7 @@ class DocParamList : public DocNode
 class DocSimpleListItem : public DocNode
 {
  public:
-   DocSimpleListItem(DocNode *parent) {
+   explicit DocSimpleListItem(DocNode *parent) {
       m_paragraph = new DocPara(this);
       m_parent = parent;
    }
@@ -1874,8 +2003,8 @@ class DocSimpleListItem : public DocNode
 class DocHtmlListItem : public CompAccept<DocHtmlListItem>, public DocNode
 {
  public:
-   DocHtmlListItem(DocNode *parent, const HtmlAttribList &attribs, int num) :
-      m_attribs(attribs), m_itemNum(num) {
+   DocHtmlListItem(DocNode *parent, const HtmlAttribList &attribs, int num)
+      : m_attribs(attribs), m_itemNum(num) {
       m_parent = parent;
    }
 
@@ -1907,18 +2036,21 @@ class DocHtmlListItem : public CompAccept<DocHtmlListItem>, public DocNode
 class DocHtmlDescData : public CompAccept<DocHtmlDescData>, public DocNode
 {
  public:
-   DocHtmlDescData(DocNode *parent) {
+   explicit DocHtmlDescData(DocNode *parent) {
       m_parent = parent;
    }
    Kind kind() const                     {
       return Kind_HtmlDescData;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlDescData>::accept(this, v);
    }
+
    int parse();
 
  private:
@@ -1929,46 +2061,60 @@ class DocHtmlDescData : public CompAccept<DocHtmlDescData>, public DocNode
 class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
 {
    friend class DocHtmlTable;
+
  public:
    enum Alignment { Left, Right, Center };
+
    DocHtmlCell(DocNode *parent, const HtmlAttribList &attribs, bool isHeading) :
       m_isHeading(isHeading),
       m_isFirst(false), m_isLast(false), m_attribs(attribs),
       m_rowIdx(-1), m_colIdx(-1) {
       m_parent = parent;
    }
+
    bool isHeading() const      {
       return m_isHeading;
    }
+
    bool isFirst() const        {
       return m_isFirst;
    }
+
    bool isLast() const         {
       return m_isLast;
    }
+
    Kind kind() const           {
       return Kind_HtmlCell;
    }
+
    void accept(DocVisitor *v)  {
       CompAccept<DocHtmlCell>::accept(this, v);
    }
+
    void markFirst(bool v = true) {
       m_isFirst = v;
    }
+
    void markLast(bool v = true)  {
       m_isLast = v;
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    int parse();
    int parseXml();
+
    int rowIndex() const        {
       return m_rowIdx;
    }
+
    int columnIndex() const     {
       return m_colIdx;
    }
+
    int rowSpan() const;
    int colSpan() const;
    Alignment alignment() const;
@@ -1977,9 +2123,11 @@ class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
    void setRowIndex(int idx)    {
       m_rowIdx = idx;
    }
+
    void setColumnIndex(int idx) {
       m_colIdx = idx;
    }
+
    bool           m_isHeading;
    bool           m_isFirst;
    bool           m_isLast;
@@ -1996,15 +2144,19 @@ class DocHtmlCaption : public CompAccept<DocHtmlCaption>, public DocNode
       m_attribs(attribs) {
       m_parent = parent;
    }
+
    Kind kind() const          {
       return Kind_HtmlCaption;
    }
+
    void accept(DocVisitor *v) {
       CompAccept<DocHtmlCaption>::accept(this, v);
    }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
+
    int parse();
 
  private:
@@ -2049,13 +2201,13 @@ class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
       }
 
       for (auto obj1 : m_children)  {
-            
+
          if (obj1->kind() != Kind_HtmlCell) {
             continue;
          }
 
          DocHtmlCell *obj2 = dynamic_cast<DocHtmlCell *>(obj1);
-   
+
          if (! obj2) {
             return false;
          }
