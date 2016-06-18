@@ -216,7 +216,7 @@
         ],
         "input-recursive": true,
         "input-source": [
-            "input_files"
+            "input_test"
         ],
         "mdfile-mainpage": ""
     },

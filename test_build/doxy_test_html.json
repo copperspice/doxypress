@@ -161,6 +161,7 @@
         "optimize-cplus": true,
         "optimize-fortran": false,
         "optimize-java": false,
+        "optimize-python": false,
         "output-dir": "output_test",
         "output-language": "English",
         "strip-from-inc-path": [
@@ -184,7 +185,7 @@
         ],
         "example-recursive": false,
         "example-source": [
-            "input_files"
+            "input_test"
         ],
         "exclude-files": [
             ""
@@ -216,7 +217,7 @@
         ],
         "input-recursive": true,
         "input-source": [
-            "input_files"
+            "input_test"
         ],
         "mdfile-mainpage": ""
     },
@@ -395,7 +396,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.2"
+        "project-version": "1.2.3"
     },
     "source": {
         "clang-flags": [

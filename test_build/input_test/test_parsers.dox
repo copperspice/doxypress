@@ -13,9 +13,9 @@
 *************************************************************************/
 
 /**
-\page parser-test  Parser Test
+\page syntax-test  Syntax Highlighting
 
-Test other parsers in DoxyPress.
+Test other syntax highlighting for Python and TCL in DoxyPress.
 
 
 <h3>Python</h3>
