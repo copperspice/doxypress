@@ -1,0 +1,31 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
+*************************************************************************/
+
+/*!
+\mainpage Python Test
+
+The pages in the test suite are designed to test parsing Python. If there
+are items which should be added, please email the development team and provide sample
+code.
+
+info@copperspice.com
+
+
+Thank you,
+
+Barbara & Ansel <br>
+Developers of DoxyPress
+
+
+*/
