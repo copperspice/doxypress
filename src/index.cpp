@@ -1803,7 +1803,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
    for (auto cd : *Doxy_Globals::classSDict) { 
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {        
          int index   = getPrefixIndex(cd->className());         
-         startLetter = getUtf8CodeToUpper(cd->className(), index);
+         startLetter = getUtf8CodeToLower(cd->className(), index);
 
          indexLettersUsed.add(startLetter);
          classesByLetter.insertElement(startLetter, cd);  

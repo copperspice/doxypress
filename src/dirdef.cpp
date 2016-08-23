@@ -605,9 +605,14 @@ bool DirDef::depGraphIsTrivial() const
 int FilePairDict::compareMapValues(const QSharedPointer<FilePair> &left, const QSharedPointer<FilePair> &right) const
 {
    int orderHi = left->source()->name().compare(right->source()->name(), Qt::CaseInsensitive );
+
+   if (orderHi != 0) {
+      return orderHi;
+   }
+
    int orderLo = left->destination()->name().compare(right->destination()->name(), Qt::CaseInsensitive );
 
-   return orderHi == 0 ? orderLo : orderHi;
+   return orderLo;
 }
 
 UsedDir::UsedDir(QSharedPointer<DirDef> dir, bool inherited)

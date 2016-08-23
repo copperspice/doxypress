@@ -752,7 +752,7 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
       tArgList = new ArgumentList (*tal);
 
    } else {
-      tArgList = 0;
+      tArgList = nullptr;
 
    }
 
@@ -761,7 +761,7 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
       defArgList = new ArgumentList (*al);
 
    } else {
-      defArgList = 0;
+      defArgList = nullptr;
 
    }
 
@@ -771,7 +771,7 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
       stringToArgumentList(args, declArgList, &extraTypeChars);
 
    } else {
-      declArgList = 0;
+      declArgList = nullptr;
    }
 
    templateMaster = QSharedPointer<MemberDef>();
@@ -2801,6 +2801,10 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       if (ldef.at(0) == '@') {
          ldef = ldef.mid(2);
       }
+
+   } else if (isFunction()) {
+      title += argsString();         
+
    }
 
    // added 01/2016
@@ -4221,7 +4225,7 @@ void MemberDef::setDeclArgumentList(ArgumentList *al)
 
 void MemberDef::setTypeConstraints(ArgumentList *al)
 {
-   if (al == 0) {
+   if (al == nullptr) {
       return;
    }
 

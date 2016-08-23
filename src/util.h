@@ -218,7 +218,8 @@ QString insertTemplateSpecifierInScope(const QString &scope, const QString &temp
 
 QString stripScope(const QString &name);
 
-QString convertToHtml(const QString &s, bool keepEntities = true);
+QString convertToHtml(const QString &s,  bool keepEntities  = true);
+QString convertToLatex(const QString &s, bool insideTabbing = false, bool keepSpaces = false);
 QString convertToXML(const QString &s);
 QString convertToJSString(const QString &s);
 
@@ -255,7 +256,11 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
 void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d);
 
 void filterLatexString(QTextStream &t, const QString &str, bool insideTabbing = false,
-                  bool insidePre = false, bool insideItem = false);
+                  bool insidePre = false, bool insideItem = false, bool keepSpaces = false);
+
+QString latexEscapeLabelName(const QString &data,  bool insideTabbing);
+QString latexEscapeIndexChars(const QString &data, bool insideTabbing); 
+QString latexEscapePDFString(const QString &data);
 
 QString rtfFormatBmkStr(const QString &name);
 

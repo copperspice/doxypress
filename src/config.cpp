@@ -778,11 +778,11 @@ bool Config::verify()
 
    paperType = paperType.toLower().trimmed();
 
-   if (paperType.isEmpty()) {
+   if (paperType.isEmpty() || paperType == "a4wide") {
       paperType = "a4";
 
    } else if (! s_latexPaperType.contains(paperType)) {
-      err("Invalid value of %s for LaTeX Paper Type, using the the default of a4\n", qPrintable(paperType));
+      err("Invalid value of %s for LaTeX Paper Type, using the the default of a4\n", csPrintable(paperType));
 
       paperType = "a4";
    }

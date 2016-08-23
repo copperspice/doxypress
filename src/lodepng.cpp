@@ -2702,16 +2702,14 @@ unsigned LodePNG_InfoRaw_copy(LodePNG_InfoRaw *dest, const LodePNG_InfoRaw *sour
 {
    unsigned error = 0;
    LodePNG_InfoRaw_cleanup(dest);
+
    *dest = *source;
    LodePNG_InfoColor_init(&dest->color);
    error = LodePNG_InfoColor_copy(&dest->color, &source->color);
-   if (error) {
-      return error;
-   }
+  
    return error;
 }
 
-/* ////////////////////////////////////////////////////////////////////////// */
 
 /*
 converts from any color type to 24-bit or 32-bit (later maybe more supported). return value = LodePNG error code

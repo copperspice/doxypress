@@ -197,7 +197,7 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
         
          if (level2.isEmpty()) {
             t << "  <LI><OBJECT type=\"text/sitemap\">";
-            t << "<param name=\"Local\" value=\"" << field2URL(f, true);
+            t << "<param name=\"Local\" value=\"" << field2URL(f, false);
             t << "\">";
             t << "<param name=\"Name\" value=\"" << m_help->recode(level1) << "\">"
               "</OBJECT>\n";
@@ -209,6 +209,7 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
                t << "\">";
                t << "<param name=\"Name\" value=\"" << m_help->recode(level1) << "\">"
                  "</OBJECT>\n";
+
             } else {
                t << "  <LI><OBJECT type=\"text/sitemap\">";
                t << "<param name=\"See Also\" value=\"" << m_help->recode(level1) << "\">";
@@ -217,7 +218,8 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
             }
          }
       }
-      if (!level2Started && !level2.isEmpty()) {
+
+      if (! level2Started && !level2.isEmpty()) {
          // start new list at level 2
          t << "  <UL>" << endl;
          level2Started = true;

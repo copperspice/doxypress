@@ -970,7 +970,8 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       if (bitfield.size() > 0 &&  bitfield.at(0) == ':') {
          bitfield = bitfield.mid(1);
       }
-      t << "        <bitfield>" << bitfield << "</bitfield>" << endl;
+
+      t << "        <bitfield>" << convertToXML(bitfield) << "</bitfield>" << endl;
    }
 
    QSharedPointer<MemberDef> rmd = md->reimplements();

@@ -5693,7 +5693,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->type += text[0];
    }
 
-<FindMembers>"("/{BN}*{ID}{BN}*"*"{BN}*{ID}*")(" { 
+<FindMembers>"("/{BN}*{ID}{BN}*"*"{BN}*{ID}*")"{BN}*"("  { 
       // for catching typedef void (__stdcall *f)() like definitions
       QString text = QString::fromUtf8(yytext);
 

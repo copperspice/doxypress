@@ -738,11 +738,8 @@ static void writeTemplateSpec(OutputList &ol, QSharedPointer<Definition> d, cons
             }
          }
 
-         ol.docify(">");
-         ol.pushGeneratorState();
-         ol.disableAllBut(OutputGenerator::Html);
+         ol.docify(">");         
          ol.lineBreak();
-         ol.popGeneratorState();
       }
 
       ol.docify(type.toLower() + " " + name);

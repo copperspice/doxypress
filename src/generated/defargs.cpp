@@ -3033,15 +3033,15 @@ void defargsYYfree (void *ptr )
 #define YYTABLES_NAME "yytables"
 
 /*! Converts an argument string into an ArgumentList.
- *  \param[in] argsString the list of Arguments.
+ *  \param[in]  argsString the list of Arguments.
  *  \param[out] al a reference to resulting argument list pointer.
- *  \param[out] extraTypeChars point to string to which trailing characters
- *              for complex types are written to
+ *  \param[out] extraTypeChars points to a string,
+                which trailing characters for complex types are written to
  */
 
 void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *extraTypeChars)
 {
-   if (al == 0) {
+   if (al == nullptr) {
       return;
    }
 
@@ -3068,6 +3068,7 @@ void stringToArgumentList(const QString &argsString, ArgumentList *al, QString *
    g_curArgTypeName.resize(0);
    g_curArgDefValue.resize(0);
    g_curArgName.resize(0);
+
    g_argList = al;
 
    defargsYYrestart( defargsYYin );

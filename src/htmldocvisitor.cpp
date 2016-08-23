@@ -43,7 +43,7 @@ static QString convertIndexWordToAnchor(const QString &word)
 
    for (auto c : word) {
     
-      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'A') || (c >= '0' && c <= '9') || 
+      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || 
             c == '-' || c == '.' || c == '_') { 
 
          result += c;
@@ -1445,6 +1445,7 @@ void HtmlDocVisitor::visitPre(DocHtmlRow *tr)
    if (m_hide) {
       return;
    }
+
    m_t << "<tr" << htmlAttribsToString(tr->attribs()) << ">\n";
 }
 
@@ -1453,6 +1454,7 @@ void HtmlDocVisitor::visitPost(DocHtmlRow *)
    if (m_hide) {
       return;
    }
+
    m_t << "</tr>\n";
 }
 
@@ -1461,6 +1463,7 @@ void HtmlDocVisitor::visitPre(DocHtmlCell *c)
    if (m_hide) {
       return;
    }
+
    if (c->isHeading()) {
       m_t << "<th" << htmlAttribsToString(c->attribs()) << ">";
    } else {
@@ -1509,6 +1512,7 @@ void HtmlDocVisitor::visitPost(DocHtmlCaption *)
    if (m_hide) {
       return;
    }
+
    m_t << "</caption>\n";
 }
 

@@ -233,6 +233,7 @@ span.lineno {
    background-color: #E8E8E8;
    white-space: pre;
 }
+
 span.lineno a {
    background-color: #D8D8D8;
 }
@@ -248,6 +249,13 @@ div.classindex ul {
 
 div.classindex span.ai {
    display: inline-block;
+}
+
+.lineno { 
+   user-select: none;   
+   -webkit-user-select: none;
+   -moz-user-select: none;
+   -webkit-touch-callout: none;
 }
 
 div.ah, span.ah {

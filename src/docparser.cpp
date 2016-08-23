@@ -362,11 +362,10 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
    return result;
 }
 
-/*! Collects the parameters found with \@param or \@retval commands
- *  in a global list s_paramsFound. If \a isParam is set to true
- *  and the parameter is not an actual parameter of the current
- *  member g_memberDef, then a warning is raised (unless warnings
- *  are disabled altogether).
+/*! Collects the parameters found with \@param or \@retval commands in a global
+ *  list s_paramsFound. If \a isParam is set to true and the parameter is not 
+ *  an actual parameter of the current member s_memberDef, then a warning is
+ *  raised (unless warnings are disabled altogether).
  */
 static void checkArgumentName(const QString &name, bool isParam)
 {
@@ -374,27 +373,36 @@ static void checkArgumentName(const QString &name, bool isParam)
       return;
    }
 
-   if (s_memberDef == 0) {
+   if (s_memberDef == nullptr) {
       return;
    }
 
-   ArgumentList *al = s_memberDef->isDocsForDefinition() ? s_memberDef->argumentList() : s_memberDef->declArgumentList();
-   SrcLangExt lang = s_memberDef->getLanguage();
+   ArgumentList *al;
 
-   if (al == 0) {
+   if (s_memberDef->isDocsForDefinition())  {
+      al = s_memberDef->argumentList();
+
+   } else {
+      al = s_memberDef->declArgumentList();
+
+   }  
+
+   if (al == nullptr) {
       return;
    }
+
+   SrcLangExt lang  = s_memberDef->getLanguage();
 
    static QRegExp re("\\$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
    int p = 0;
    int i = 0;
-   int l;
+   int len;
 
    while ((i = re.indexIn(name, p)) != -1) {
       // to handle @param x,y
-      l = re.matchedLength();
+      len = re.matchedLength();
 
-      QString aName = name.mid(i, l);
+      QString aName = name.mid(i, len);
 
       if (lang == SrcLangExt_Fortran) {
          aName = aName.toLower();
@@ -402,8 +410,8 @@ static void checkArgumentName(const QString &name, bool isParam)
 
       bool found = false;
 
-      for (auto a : *al) {
-         QString argName = s_memberDef->isDefine() ? a.type : a.name;
+      for (const auto &arg : *al) {
+         QString argName = s_memberDef->isDefine() ? arg.type : arg.name;
 
          if (lang == SrcLangExt_Fortran) {
             argName = argName.toLower();
@@ -411,11 +419,11 @@ static void checkArgumentName(const QString &name, bool isParam)
 
          argName = argName.trimmed();
 
-         if (argName.right(3) == "...") {
+         if (argName.endsWith("...")) {
             argName = argName.left(argName.length() - 3);
          }
 
-         if (aName == argName) {
+         if (aName == argName) { 
             s_paramsFound.insert(aName);
             found = true;
             break;
@@ -441,8 +449,9 @@ static void checkArgumentName(const QString &name, bool isParam)
          if (inheritedMd) {
             // documentation was inherited
 
-            inheritedFrom = QString(" Inherited from member %1 at line %2 in file %3").arg(QString(inheritedMd->name())).
-                                  arg(inheritedMd->docLine()).arg(QString(inheritedMd->docFile()));
+            inheritedFrom = QString(" Inherited from member %1 at line %2 in file %3")
+                  .arg(QString(inheritedMd->name()))
+                  .arg(inheritedMd->docLine()).arg(QString(inheritedMd->docFile()));
 
             docFile = s_memberDef->getDefFileName();
             docLine = s_memberDef->getDefLine();
@@ -450,44 +459,62 @@ static void checkArgumentName(const QString &name, bool isParam)
 
          QString alStr = argListToString(al);
          warn_doc_error(docFile, docLine, "Argument '%s' of command @param was not found in the argument list of %s%s%s%s",
-                        qPrintable(aName), qPrintable(scope), qPrintable(s_memberDef->name()),
-                        qPrintable(alStr), qPrintable(inheritedFrom));
+                        qPrintable(aName), csPrintable(scope), csPrintable(s_memberDef->name()),
+                        qPrintable(alStr), csPrintable(inheritedFrom));
       }
 
-      p = i + l;
+      p = i + len;
    }
 }
 
-/*! Checks if the parameters that have been specified using \@param are
- *  indeed all parameters.
- *  Must be called after checkArgumentName() has been called for each
- *  argument.
+/*! Checks if the parameters that have been specified using \@param are all parameters.
+ *  Must be called after checkArgumentName() has been called for each argument.
  */
 static void checkUndocumentedParams()
 {
-   if (s_memberDef && s_hasParamCommand && Config::getBool("warn-doc-error")) {
-      ArgumentList *al = s_memberDef->isDocsForDefinition() ? s_memberDef->argumentList() : s_memberDef->declArgumentList();
+   static const bool warnDocError = Config::getBool("warn-doc-error");
+
+   if (s_memberDef && s_hasParamCommand && warnDocError) {
+      ArgumentList *al;
+
+      if (s_memberDef->isDocsForDefinition())  {
+         al = s_memberDef->argumentList();
+
+      } else {
+         al = s_memberDef->declArgumentList();
+
+      }
 
       SrcLangExt lang = s_memberDef->getLanguage();
 
-      if (al != 0) {
+      if (al != nullptr) {
          bool found = false;
 
-         for (auto a : *al) {
-            QString argName = s_memberDef->isDefine() ? a.type : a.name;
+         for (const auto &arg : *al) {
+            QString argName;
+
+            if (s_memberDef->isDefine()) { 
+               argName = arg.type;
+
+            } else {
+               argName = arg.name;
+         
+            }
+
             if (lang == SrcLangExt_Fortran) {
                argName = argName.toLower();
             }
 
             argName = argName.trimmed();
-            if (argName.right(3) == "...") {
+
+            if (argName.endsWith("...")) {
                argName = argName.left(argName.length() - 3);
             }
 
             if (s_memberDef->getLanguage() == SrcLangExt_Python && (argName == "self" || argName == "cls")) {
                // allow undocumented self / cls parameter for Python
 
-            } else if (!argName.isEmpty() && ! s_paramsFound.contains(argName) && a.docs.isEmpty()) {
+            } else if (! argName.isEmpty() && arg.docs.isEmpty() && ! s_paramsFound.contains(argName)) {
                found = true;
                break;
             }
@@ -500,7 +527,13 @@ static void checkUndocumentedParams()
                   argListToString(al) + " are not documented:\n";
 
             for (auto a : *al) {
-               QString argName = s_memberDef->isDefine() ? a.type : a.name;
+               QString argName;
+
+               if (s_memberDef->isDefine()) {
+                  argName = a.type;
+               } else {
+                  argName = a.name;
+               }
 
                if (lang == SrcLangExt_Fortran) {
                   argName = argName.toLower();
@@ -2155,7 +2188,9 @@ void DocCopy::parse(QList<DocNode *> &children)
 
    if (def) {
 
-      if (s_copyStack.indexOf(def) == -1) { // definition not parsed earlier
+      if (s_copyStack.indexOf(def) == -1) { 
+         // definition not parsed earlier
+
          bool  hasParamCommand  = s_hasParamCommand;
          bool  hasReturnCommand = s_hasReturnCommand;
 
@@ -4893,7 +4928,7 @@ int DocParamList::parse(const QString &cmdName)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after %s command", qPrintable(cmdName));
+      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after %s command", csPrintable(cmdName));
       retval = 0;
       goto endparamlist;
    }
@@ -4926,6 +4961,8 @@ int DocParamList::parse(const QString &cmdName)
       }
 
       handleLinkedWord(this, m_params);
+
+      // get next word
       tok = doctokenizerYYlex();
    }
 
@@ -4934,7 +4971,7 @@ int DocParamList::parse(const QString &cmdName)
    if (tok == 0) {    
       // premature end of comment block 
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
-                     "argument of command %s", qPrintable(cmdName));
+                     "argument of command %s", csPrintable(cmdName));
       retval = 0;
       goto endparamlist;
    }
@@ -4942,7 +4979,7 @@ int DocParamList::parse(const QString &cmdName)
    if (tok != TK_WHITESPACE) { 
       // premature end of comment block 
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token in comment block while parsing the "
-                     "argument of command %s", qPrintable(saveCmdName));
+                     "argument of command %s", csPrintable(saveCmdName));
       retval = 0;
       goto endparamlist;
    }
@@ -4959,7 +4996,7 @@ endparamlist:
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
 
-   DBG(("DocParamList::parse() end retval=%d\n", retval));
+   DBG(("DocParamList::parse() end retval = %d\n", retval));
 
    return retval;
 }
@@ -5069,7 +5106,7 @@ int DocParamSect::parse(const QString &cmdName, bool xmlContext, Direction d)
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
 
-   DBG(("DocParamSect::parse() end retval=%d\n", retval));
+   DBG(("DocParamSect::parse() end retval = %d\n", retval));
 
    return retval;
 }
@@ -5109,19 +5146,19 @@ int DocPara::handleSimpleSection(DocSimpleSect::Type t, bool xmlContext)
 int DocPara::handleParamSection(const QString &cmdName, DocParamSect::Type t, bool xmlContext = false,
                                 int direction = DocParamSect::Unspecified)
 {
-   DocParamSect *ps = 0;
+   DocParamSect *ps = nullptr;
 
-   if (! m_children.isEmpty() &&                           // previous element
-         m_children.last()->kind() == Kind_ParamSect &&    // was a param sect
+   if (! m_children.isEmpty() && m_children.last()->kind() == Kind_ParamSect &&    
          ((DocParamSect *)m_children.last())->type() == t) {
 
-      // of same type
+      // previous element was a param sect of same type
       // append to previous section
 
       ps = (DocParamSect *)m_children.last();
 
    } else {
       // start new section
+
       ps = new DocParamSect(this, t);
       m_children.append(ps);
    }
@@ -6404,7 +6441,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
             } else {
                retval = handleParamSection(paramName,
-                        tagId == XML_PARAM ? DocParamSect::Param : DocParamSect::TemplateParam,true);
+                        tagId == XML_PARAM ? DocParamSect::Param : DocParamSect::TemplateParam, true);
             }
          } else {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param%s> tag.",
@@ -6968,6 +7005,8 @@ int DocPara::parse(bool skipParse, int token)
 
          case TK_COMMAND: {
 
+
+
             // see if we have to start a simple section
             int cmd = Mappers::cmdMapper->map(g_token->name);
             DocNode *n = parent();
@@ -6980,7 +7019,7 @@ int DocPara::parse(bool skipParse, int token)
 
                if (n) {
                   // already in a simple section
-                  // simple section cannot start in this paragraph, need to unwind the stack and remember the command.
+                  // simple section can not start in this paragraph, need to unwind the stack and remember the command
 
                   g_token->simpleSectName = g_token->name;
                   retval = RetVal_SimpleSec;
@@ -7008,7 +7047,7 @@ int DocPara::parse(bool skipParse, int token)
 
             // check the return value
             if (retval == RetVal_SimpleSec) {
-               // Reparse the token that ended the section at this level,
+               // Reparse the token which ended the section at this level
                // so a new simple section will be started at this level.
                // This is the same as unputting the last read token and continuing.
 
@@ -7659,9 +7698,9 @@ static QString processCopyDoc(const QString &data, uint &len)
 }
 
 // main entry point
-DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md,
-                            const QString &input, bool indexWords, bool isExample, const QString &exampleName,
-                            bool singleLine, bool linkFromIndex)
+DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, 
+                  QSharedPointer<MemberDef> md, const QString &input, bool indexWords, bool isExample, 
+                  const QString &exampleName, bool singleLine, bool linkFromIndex)
 {
    // store parser state so we can re-enter this function if needed
 

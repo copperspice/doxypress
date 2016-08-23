@@ -122,9 +122,11 @@ void MemberGroup::writeDocumentationPage(OutputList &ol, const QString &scopeNam
 void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,    
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {  
-   for (auto md : *memberList) {   
-     
-      if (lt == md->getSectionList(m_parent)->listType()) {
+   for (auto md : *memberList) {        
+      QSharedPointer<MemberList> memberList = md->getSectionList(m_parent);
+
+      if (memberList && lt == memberList->listType()) {
+
          MemberList ml(lt);
          ml.append(md);
          ml.writePlainDeclarations(ol, cd, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(), 
@@ -311,17 +313,17 @@ void MemberGroup::writeTagFile(QTextStream &tagFile)
    memberList->writeTagFile(tagFile);
 }
 
-void MemberGroupInfo::setRefItems(const QList<ListItemInfo> *sli)
+void MemberGroupInfo::setRefItems(const QList<ListItemInfo> *list)
 {
-   if (! sli) {
+   if (! list) {
       return;
    }
 
-   if (m_sli == 0) {
-      m_sli = new QList<ListItemInfo>;      
+   if (m_listInfo == nullptr) {
+      m_listInfo = new QList<ListItemInfo>;      
    }
 
-   for (auto item : *sli ) {
-      m_sli->append(item);
+   for (auto item : *list ) {
+      m_listInfo->append(item);
    }
 }

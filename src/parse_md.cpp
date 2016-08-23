@@ -2598,6 +2598,36 @@ static QString processBlocks(const QString &str, int indent)
    return out;
 }
 
+// returns TRUE if text starts with \@page or \@mainpage command
+static bool isExplicitPage(const QString &text)
+{   
+   if (! text.isEmpty())  {
+
+      int i    = 0;
+      int size = text.length();
+
+      while (i < size && (text[i] == ' ' || text[i] == '\n')) {
+         i++;
+      }      
+
+      if (i < size - 1) {
+         // no remaining chars in text
+
+      } else {  
+         if (text[i] == '\\' || text[i] == '@') {  
+
+            QString tmp = text.mid(i + 1, 8);
+
+            if (tmp.startsWith("page ") || (tmp == "mainpage") ) {
+               return true;
+            }  
+         }         
+      }
+   }
+   
+   return false;
+}
+
 static QString extractPageTitle(QString &docs, QString &id)
 {
    int ln = 0;
@@ -2795,28 +2825,31 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
       id = markdownFileNameToId(fileName);
    }   
 
-   if (! mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage || 
-          QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) ) {
+   if (! isExplicitPage(docs))  {
 
-      // name reference, // file reference with path
-      docs.prepend("@mainpage " + title + "\n");
 
-   } else if (id == "mainpage" || id == "index") {
-      
-      if (title.isEmpty()) {
-         title = titleFn;
+      if (! mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage || 
+                  QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) )  {
+
+          // name reference, file reference with path
+         docs.prepend("@mainpage " + title + "\n");
+
+      } else if (id == "mainpage" || id == "index") {
+
+         if (title.isEmpty()) {
+            title = titleFn;
+         }
+
+         docs.prepend("@mainpage " + title + "\n");
+
+      } else {
+
+         if (title.isEmpty()) {
+            title = titleFn;
+         }
+
+         docs.prepend("@page " + id + " " + title + "\n");
       }
-
-      docs.prepend("@mainpage " + title + "\n");
-
-   } else {     
-
-      if (title.isEmpty()) {
-         title = titleFn;
-      }
-
-      docs.prepend("@page " + id + " " + title + "\n");
-
    }
 
    int lineNr   = 1;

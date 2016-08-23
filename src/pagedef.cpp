@@ -338,6 +338,6 @@ void PageDef::setNestingLevel(int l)
 
 void PageDef::setShowToc(bool b)
 {
-   m_showToc = b;
+   m_showToc |= b;
 }
 

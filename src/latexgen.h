@@ -23,7 +23,46 @@
 
 class QFile;
 
-/** Generator for LaTeX output. */
+class LatexCodeGenerator : public CodeOutputInterface
+{
+   public:
+      LatexCodeGenerator(QTextStream &t, const QString &relPath, const QString &sourceFile);
+      LatexCodeGenerator();
+
+      void setTextStream(QTextStream &t);
+      void setRelativePath(const QString &path);
+      void setSourceFileName(const QString &sourceFileName);
+
+      void codify(const QString &text) override;
+      void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
+                  const QString &name, const QString &tooltip) override;
+
+      void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &,
+                  const SourceLinkInfo &, const SourceLinkInfo &) override {}
+
+      void writeLineNumber(const QString &, const QString &, const QString &, int) override;;
+      void startCodeLine(bool) override;
+      void endCodeLine() override;
+      void startFontClass(const QString &) override;
+      void endFontClass() override;
+      void writeCodeAnchor(const QString &) override {}
+      void setCurrentDoc(QSharedPointer<Definition>, const QString &, bool) override {}
+      void addWord(const QString &, bool) override {}
+   
+   private:
+      void _writeCodeLink(const QString &className, const QString &ref, const QString &file,
+                  const QString &anchor, const QString &name, const QString &tooltip);
+
+      void docify(const QString &str);
+      bool m_streamSet;
+
+      QTextStream  m_t;
+      QString      m_relPath;
+      QString      m_sourceFileName;
+      int          m_col;
+      bool         m_prettyCode;
+};
+
 class LatexGenerator : public OutputGenerator
 {
  public:
@@ -42,31 +81,78 @@ class LatexGenerator : public OutputGenerator
          active = true;
       }
    }
+
    void disable() {
       active = false;
    }
+
    void enableIf(OutputType o)  {
       if (o == Latex) {
          enable();
       }
    }
+
    void disableIf(OutputType o) {
       if (o == Latex) {
          disable();
       }
    }
+
    void disableIfNot(OutputType o) {
       if (o != Latex) {
          disable();
       }
    }
+
    bool isEnabled(OutputType o) {
       return (o == Latex && active);
    }
+
    OutputGenerator *get(OutputType o) {
       return (o == Latex) ? this : 0;
    }
 
+   // CodeOutputInterface
+   void codify(const QString &text) override { 
+      m_codeGen.codify(text); 
+   }
+
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
+                  const QString &name, const QString &tooltip) override {
+      m_codeGen.writeCodeLink(ref, file, anchor, name, tooltip); 
+   }
+
+   void writeLineNumber(const QString &ref,const QString &file,const QString &anchor, int lineNumber) override {
+      m_codeGen.writeLineNumber(ref, file, anchor, lineNumber); 
+   }
+
+   void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl,
+                  const QString &desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo) override  {
+      m_codeGen.writeTooltip(id, docInfo, decl, desc, defInfo, declInfo); 
+   }
+
+   void startCodeLine(bool hasLineNumbers) override  {
+      m_codeGen.startCodeLine(hasLineNumbers); 
+   }
+
+   void endCodeLine() override {
+      m_codeGen.endCodeLine(); 
+   }
+
+   void startFontClass(const QString &s) override {
+      m_codeGen.startFontClass(s); 
+   }
+
+   void endFontClass()  override {
+      m_codeGen.endFontClass(); 
+   }
+
+   void writeCodeAnchor(const QString &anchor) override {
+      m_codeGen.writeCodeAnchor(anchor); 
+   }
+
+
+   //
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md); 
 
    void startFile(const QString &name, const QString &manName, const QString &title) override;
@@ -117,15 +203,8 @@ class LatexGenerator : public OutputGenerator
    void endIndexItem(const QString &ref, const QString &file) override;
 
    void docify(const QString &text) override;
-   void codify(const QString &text) override;
-
-   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override;
-
-   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
-                      const QString &name, const QString &tooltip) override;
-
-   void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &, const SourceLinkInfo &, 
-                     const SourceLinkInfo & ) override {}
+ 
+   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override; 
 
    void startTextLink(const QString &, const QString &) override;
    void endTextLink();
@@ -183,22 +262,23 @@ class LatexGenerator : public OutputGenerator
    void writeAnchor(const QString &fileName, const QString &name) override;
    void startCodeFragment();
    void endCodeFragment();
-   void writeLineNumber(const QString &, const QString &, const QString &, int l) override;
-   void startCodeLine(bool hasLineNumbers);
-   void endCodeLine();
-
+ 
    void startEmphasis() {
       m_textStream << "{\\em ";
    }
+
    void endEmphasis()   {
       m_textStream << "}";
    }
+
    void startBold()     {
       m_textStream << "{\\bfseries ";
    }
+
    void endBold()       {
       m_textStream << "}";
    }
+
    void startDescription();
    void endDescription();
    void startDescItem();
@@ -360,10 +440,6 @@ class LatexGenerator : public OutputGenerator
    void writeLabel(const QString &l, bool isLast) override;
    void endLabels();
 
-   void startFontClass(const QString &) override;
-   void endFontClass(); 
-
-   void writeCodeAnchor(const QString &) override {}
    void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
    void addWord(const QString &word, bool hiPriority) override {}
 
@@ -372,20 +448,17 @@ class LatexGenerator : public OutputGenerator
    LatexGenerator &operator=(const LatexGenerator &);
 
    QString modifyKeywords(const QString &s); 
-   void escapeLabelName(const QString &s);
-   void escapeMakeIndexChars(const QString &s);
+   QString m_relPath;
 
-   int col;
    bool insideTabbing;
    bool firstDescItem;
-   bool disableLinks;
-
-   QString m_relPath;
-   QString m_sourceFileName;
-
+   bool disableLinks;  
+ 
    int m_indent;
    bool templateMemberItem;
    bool m_prettyCode;
+
+   LatexCodeGenerator m_codeGen;
 };
 
 #endif

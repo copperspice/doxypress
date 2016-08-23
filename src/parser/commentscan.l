@@ -244,6 +244,7 @@ static DocCmdMap docCmdMap[] =
   { "result",          0,                       true  },
   { "return",          0,                       true  },
   { "returns",         0,                       true  },
+  { "exception",       0,                       true  },
   { "retval",          0,                       true  },
   { "sa",              0,                       true  },
   { "see",             0,                       true  },
@@ -1141,7 +1142,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
          s_spaceBeforeCmd = QString(text).left(i);
 
-         if (cmdPtr->endsBrief && (inContext != OutputXRef && cmdName == "parblock")) {
+         if (cmdPtr->endsBrief && ! (inContext == OutputXRef && cmdName == "parblock")) {
             briefEndsAtDot = false;
 
             // this command forces the end of brief description

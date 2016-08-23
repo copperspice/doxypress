@@ -2294,15 +2294,21 @@ QString getFileFilter(const QString &name, bool isSourceCode)
    }
 
    if (! found && filterName.isEmpty()) {
-      // then look for filter pattern list
+      // look for filter pattern list
       filterName = getFilterFromList(name, filterList, found);
    }
 
    if (! found) {
-      // then use the generic input filter
+      // use the generic input filter
       return Config::getString("filter-program");
 
    } else {
+      // remove surrounding double quotes 
+
+      if ( filterName.startsWith('\"') && filterName.endsWith('\"') )   {
+         filterName = filterName.mid(1, filterName.length() - 2);
+      }
+
       return filterName;
    }
 }
@@ -2725,8 +2731,8 @@ static void stripIrrelevantString(QString &target, const QString &str)
 }
 
 /*!
-  The following example shows what is stripped by this routine
-  for const. The same is done for volatile.
+  The following example shows what is stripped by this routine for const. 
+  The same is done for volatile.
 
   \code
   const T param     ->   T param          // not relevant
@@ -2739,6 +2745,7 @@ void stripIrrelevantConstVolatile(QString &s)
 {
    stripIrrelevantString(s, "const");
    stripIrrelevantString(s, "volatile");
+   stripIrrelevantString(s, "final");
 }
 
 #ifndef NEWMATCH
@@ -5261,6 +5268,16 @@ QString convertToJSString(const QString &s)
    return convertCharEntities(retval);
 }
 
+QString convertToLatex(const QString &text, bool insideTabbing, bool keepSpaces)
+{
+   QString result;
+
+   QTextStream t(&result);
+   filterLatexString(t, text, insideTabbing, false, false, keepSpaces);
+   
+   return result;
+}
+
 QString convertCharEntities(const QString &str)
 {
    QString retval;
@@ -5369,7 +5386,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
             }
 
             mg->insertMember(md);             // copy this element to a different member group
-            mg->setRefItems(info->m_sli);
+            mg->setRefItems(info->m_listInfo);
             md->setMemberGroup(mg);
          }
       }
@@ -6022,7 +6039,8 @@ void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d)
    recursivelyAddGroupListToTitle(ol, d, true);
 }
 
-void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, bool insidePre, bool insideItem)
+void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, bool insidePre, 
+                  bool insideItem, bool keepSpaces)
 {
    static bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
 
@@ -6031,14 +6049,12 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
    }
 
    const QChar *p  = text.constData();
-
    int cnt;
 
    QChar c;
    QChar pc = '\0';
 
    while (*p != 0) {
-
       c = *p++;
 
       if (insidePre) {
@@ -6059,8 +6075,18 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "\\_";
                break;
 
+            case ' ':             
+               if (keepSpaces) {
+                  t << "~"; 
+               } else {
+                  t << ' ';
+               } 
+
+               break;
+
             default:
                t << c;
+               break;
          }
 
       } else {
@@ -6193,18 +6219,191 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "\\textquotesingle{}";
                break;
 
+            case ' ':  
+               if (keepSpaces) { 
+                  if (insideTabbing) {
+                     t << "\\>"; 
+                  } else {
+                     t << '~';  
+                  }
+
+               } else {
+                  t << ' ';
+
+               }
+
+               break;
+
             default:
                if (! insideTabbing) {
-                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0' && *p != 0) || (c == ':' && pc != ':') || (pc == '.' && isId(c)) ) {
+                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0' && *p != 0) || 
+                       (c == ':' && pc != ':') || (pc == '.' && isId(c)) ) {
                      t << "\\+";
                   }
                }
+
                t << c;
          }
       }
 
       pc = c;
    }
+}
+
+QString latexEscapeLabelName(const QString &text, bool insideTabbing)
+{
+   QString result;
+
+   QTextStream t(&result);
+
+   const QChar *p  = text.constData();
+   
+   QChar c;
+   QString tmp;
+  
+   while (*p != 0) {
+      c = *p++;
+
+      switch (c.unicode()) {
+         
+         case '|': 
+            t << "\\texttt{\"|}";
+            break;
+   
+         case '!': 
+            t << "\"!";
+            break;
+   
+         case '%': 
+            t << "\\%";
+            break;
+   
+         case '{': 
+            t << "\\lcurly{}";
+            break;
+   
+         case '}': 
+            t << "\\rcurly{}"; 
+            break;
+   
+         case '~': 
+            t << "````~"; 
+            break; 
+
+         default: 
+            // collect as many chars as possible before handing it to docify
+            tmp = c;
+   
+            while ((c = *p) != 0 && c != '|' && c != '!' && c != '%' && c != '{' && c != '}' && c != '~') {         
+               tmp += c;
+               p++;
+            }  
+
+            filterLatexString(t, tmp, insideTabbing);
+            break;         
+      }
+
+   }
+
+   return result;
+}
+
+QString latexEscapeIndexChars(const QString &text, bool insideTabbing)
+{
+   QString result;
+
+   QTextStream t(&result);
+
+   const QChar *p  = text.constData();
+   
+   QChar c;
+   QString tmp;
+  
+   while (*p != 0) {
+      c = *p++;
+
+      switch (c.unicode()) {
+  
+         case '!': 
+            t << "\"!"; 
+            break;
+   
+         case '"': 
+            t << "\"\"";
+             break;
+   
+         case '@': 
+            t << "\"@"; 
+            break;
+   
+         case '|': 
+            t << "\\texttt{\"|}";
+            break;
+   
+         case '[': 
+            t << "[";
+            break;
+   
+         case ']': 
+            t << "]"; 
+            break;
+   
+         case '{': 
+            t << "\\lcurly{}";
+            break;
+   
+         case '}': 
+            t << "\\rcurly{}";
+            break;
+    
+         default:    
+           // collect as long string as possible, before handing it to docify
+           tmp = c;
+
+           while ((c = *p) != 0 && c != '"' && c != '@' && c != '[' && c != ']' && c != '!' && c != '{' && c != '}' && c != '|') {        
+             tmp += c;
+             p++;
+           }
+
+           filterLatexString(t, tmp, insideTabbing);
+           break;
+       }
+   }
+
+   return result;
+}
+
+QString latexEscapePDFString(const QString &data)
+{
+   QString result;  
+
+   for (QChar c : data) {
+   
+      switch (c.unicode()) { 
+      
+         case '\\': 
+            result += "\\textbackslash{}";
+            break;
+         
+         case '{':  
+            result += "\\{";
+            break;
+   
+         case '}': 
+            result += "\\}";
+            break;
+   
+         case '_':  
+            result += "\\_";
+            break;
+   
+         default:
+            result += c;
+            break;
+      }
+   }
+
+   return result;
 }
 
 QString rtfFormatBmkStr(const QString &key)

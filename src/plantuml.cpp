@@ -49,10 +49,10 @@ QString writePlantUMLSource(const QString &outDir, const QString &fileName, cons
    QFile file(baseName + ".pu");
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(baseName), file.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(baseName), file.error());
    }
 
-   QString text = "@startuml";
+   QString text = "@startuml\n";
    text += content;
    text += "@enduml\n";
 

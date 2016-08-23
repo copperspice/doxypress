@@ -1,3 +1,19 @@
+/*************************************************************************
+ *
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * All rights reserved.    
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation under the terms of the GNU General Public License version 2
+ * is hereby granted. No representations are made about the suitability of
+ * this software for any purpose. It is provided "as is" without express or
+ * implied warranty. See the GNU General Public License for more details.
+ *
+ * Documents produced by DoxyPress are derivative works derived from the
+ * input used in their production; they are not affected by this license.
+ *
+*************************************************************************/
 
 #line 3 "<stdout>"
 
@@ -167,7 +183,7 @@ typedef unsigned int flex_uint32_t;
  */
 #define YY_BUF_SIZE 32768
 #else
-#define YY_BUF_SIZE 16384
+#define YY_BUF_SIZE 262144
 #endif /* __ia64__ */
 #endif
 
@@ -1427,14 +1443,12 @@ goto find_rule; \
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *parse_py_YYtext;
-#line 1 "parse_py.l"
 /*************************************************************************
  *
  * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
 *************************************************************************/
-#line 9 "parse_py.l"
 
 #include <QFile>
 #include <QFileInfo>
@@ -1814,36 +1828,19 @@ static int yyread(char *buf, int max_size)
 /* start command character */
 /* Main start state */
 
-
 /* Mid-comment states */
 /* %x FuncDoubleComment */
 /* %x ClassDoubleComment */
 
-
-
 /* Function states */
-
-
-
 
 /* Class states */
 
-
-
-
 /* Variable states */
-
-
 
 /* String states */
 
-
-
 /* import */
-
-
-
-#line 1847 "<stdout>"
 
 #define INITIAL 0
 #define Search 1
@@ -2055,11 +2052,6 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 478 "parse_py.l"
-
-
-#line 2062 "<stdout>"
-
 	if ( !(yy_init) )
 		{
 		(yy_init) = 1;
@@ -2177,7 +2169,6 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 482 "parse_py.l"
 {
       // start of a function/method definition with indent
       DBG_CTX((stderr, "Found def at %d\n", yyLineNr));
@@ -2191,7 +2182,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 493 "parse_py.l"
 {
       // start of a function/method definition
       searchFoundDef();
@@ -2200,7 +2190,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 499 "parse_py.l"
 {
       // start of a class definition with indent
       DBG_CTX((stderr,"Found class at %d\n",yyLineNr));
@@ -2214,7 +2203,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 510 "parse_py.l"
 {
       // start of a class definition
      searchFoundClass();
@@ -2222,10 +2210,8 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 5:
-#line 517 "parse_py.l"
 case 6:
 YY_RULE_SETUP
-#line 517 "parse_py.l"
 {
 
       // start of an from import
@@ -2234,10 +2220,8 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 7:
-#line 525 "parse_py.l"
 case 8:
 YY_RULE_SETUP
-#line 525 "parse_py.l"
 {
 
       // start of an import statement
@@ -2247,7 +2231,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 532 "parse_py.l"
 {
       // property
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2266,7 +2249,6 @@ YY_RULE_SETUP
 case 10:
 /* rule 10 can match eol */
 YY_RULE_SETUP
-#line 547 "parse_py.l"
 {
       // variable
       if (g_search_count) {
@@ -2289,7 +2271,6 @@ YY_RULE_SETUP
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 566 "parse_py.l"
 {
       // list of variables, can not place the default value so we will skip it later on in a general rule
       // Also note ")" this is to catch also (a,b). the "("
@@ -2314,7 +2295,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 588 "parse_py.l"
 {
       // start of a single quoted string
       g_stringContext = YY_START;
@@ -2326,7 +2306,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 597 "parse_py.l"
 {
       // start of a double quoted string
       g_stringContext = YY_START;
@@ -2337,14 +2316,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 605 "parse_py.l"
 {
       gstat = true;
    }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 609 "parse_py.l"
 {
       // Unix type script comment
       if (yyLineNr != 1)   {
@@ -2354,7 +2331,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 616 "parse_py.l"
 {
       // normal comment
       g_packageCommentAllowed = false;
@@ -2362,7 +2338,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 621 "parse_py.l"
 {
       // some other identifier
       g_packageCommentAllowed = false;
@@ -2370,7 +2345,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 626 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       g_curIndent  = computeIndent(text);
@@ -2379,7 +2353,6 @@ YY_RULE_SETUP
 case 19:
 /* rule 19 can match eol */
 YY_RULE_SETUP
-#line 631 "parse_py.l"
 {
       // new line
       lineCount();
@@ -2387,7 +2360,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 636 "parse_py.l"
 {
       // start of a comment block
       initTriDoubleQuoteBlock();
@@ -2396,7 +2368,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 642 "parse_py.l"
 {
       // start of a comment block
       initTriSingleQuoteBlock();
@@ -2409,7 +2380,6 @@ case 22:
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 648 "parse_py.l"
 {
       // start of a special comment
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2422,7 +2392,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 658 "parse_py.l"
 {
       // we have to do something with (
       g_search_count += 1;
@@ -2430,7 +2399,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 663 "parse_py.l"
 {
       // we have to do something with )
       g_search_count -= 1;
@@ -2438,24 +2406,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 668 "parse_py.l"
 {
       // any other character...this is the major default
       // that should catch everything else in Body
    }
 	YY_BREAK
 
-
 case 26:
 YY_RULE_SETUP
-#line 675 "parse_py.l"
 {
       // python3 style imports
    }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 679 "parse_py.l"
 {
       // from package import
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2464,7 +2428,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 685 "parse_py.l"
 {
       BEGIN(FromModItem);
    }
@@ -2472,7 +2435,6 @@ YY_RULE_SETUP
 case 29:
 /* rule 29 can match eol */
 YY_RULE_SETUP
-#line 689 "parse_py.l"
 {
       incLineNr();
       BEGIN(Search);
@@ -2480,23 +2442,19 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 694 "parse_py.l"
 {
    }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 697 "parse_py.l"
 {
       unput(*parse_py_YYtext);
       BEGIN(Search);
    }
 	YY_BREAK
 
-
 case 32:
 YY_RULE_SETUP
-#line 704 "parse_py.l"
 {
       // import all
       QString item      = g_packageName;
@@ -2512,7 +2470,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 717 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       QString item = g_packageName+"." + text;
@@ -2529,7 +2486,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 731 "parse_py.l"
 {
       QString text  = QString::fromUtf8(parse_py_YYtext);
       QString item  = g_packageName+"." + text;
@@ -2548,7 +2504,6 @@ YY_RULE_SETUP
 case 35:
 /* rule 35 can match eol */
 YY_RULE_SETUP
-#line 746 "parse_py.l"
 {
       incLineNr();
       BEGIN(Search);
@@ -2556,29 +2511,24 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 751 "parse_py.l"
 {
    }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 754 "parse_py.l"
 {
    }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 757 "parse_py.l"
 {
       unput(*parse_py_YYtext);
       BEGIN(Search);
    }
 	YY_BREAK
 
-
 case 39:
 YY_RULE_SETUP
-#line 764 "parse_py.l"
 {
       QString text  = QString::fromUtf8(parse_py_YYtext);
       current->name = removeRedundantWhiteSpace(substitute(text,".","::"));
@@ -2595,7 +2545,6 @@ YY_RULE_SETUP
 case 40:
 /* rule 40 can match eol */
 YY_RULE_SETUP
-#line 777 "parse_py.l"
 {
       incLineNr();
       BEGIN(Search);
@@ -2603,28 +2552,23 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 782 "parse_py.l"
 {
    }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 785 "parse_py.l"
 {
       unput(*parse_py_YYtext);
       BEGIN(Search);
    }
 	YY_BREAK
 
-
 case 43:
 YY_RULE_SETUP
-#line 792 "parse_py.l"
 {
          QString text = QString::fromUtf8(parse_py_YYtext);
 
          DBG_CTX((stderr,"Found instance method variable %s in %s at %d\n", csPrintable(text.mid(5)), csPrintable(current_root->name), yyLineNr));
-
 
          current->name      = text.mid(5);
          current->section   = Entry::VARIABLE_SEC;
@@ -2643,7 +2587,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 813 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
@@ -2667,7 +2610,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 833 "parse_py.l"
 {
       // start of a comment block
       initTriDoubleQuoteBlock();
@@ -2676,7 +2618,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 839 "parse_py.l"
 {
       // start of a comment block
       initTriSingleQuoteBlock();
@@ -2689,7 +2630,6 @@ case 47:
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 845 "parse_py.l"
 {
       // start of a special comment
       initSpecialBlock();
@@ -2698,14 +2638,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 851 "parse_py.l"
 {
       // #
    }
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 855 "parse_py.l"
 {
       // start of a single quoted string
       g_stringContext = YY_START;
@@ -2715,7 +2653,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 862 "parse_py.l"
 {
       // start of a double quoted string
       g_stringContext = YY_START;
@@ -2726,38 +2663,32 @@ YY_RULE_SETUP
 case 51:
 /* rule 51 can match eol */
 YY_RULE_SETUP
-#line 869 "parse_py.l"
 {
       incLineNr();
    }
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 873 "parse_py.l"
 {
       // identifiers
    }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 877 "parse_py.l"
 {
       // other uninteresting stuff
    }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 881 "parse_py.l"
 {
       // anything else
    }
 	YY_BREAK
 
-
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 887 "parse_py.l"
 {
       DBG_CTX((stderr, "indent %d <= %d\n", computeIndent(text.mid(1)), g_indent));
 
@@ -2784,7 +2715,6 @@ case 56:
 (yy_c_buf_p) = yy_cp -= 2;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 907 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
@@ -2804,7 +2734,6 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case YY_STATE_EOF(FunctionBody):
-#line 925 "parse_py.l"
 {
          endOfDef();
          yyterminate();
@@ -2816,7 +2745,6 @@ case 57:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 930 "parse_py.l"
 {
       // skip empty line
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2825,7 +2753,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 936 "parse_py.l"
 {
       // something at indent >0
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2842,7 +2769,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 950 "parse_py.l"
 {
       // start of a single quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2857,7 +2783,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 962 "parse_py.l"
 {
       // start of a double quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2872,7 +2797,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
-#line 974 "parse_py.l"
 {
       // non-special stuff
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2882,7 +2806,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 62:
 YY_RULE_SETUP
-#line 981 "parse_py.l"
 {
       // normal comment
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2891,7 +2814,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 63:
 YY_RULE_SETUP
-#line 987 "parse_py.l"
 {
       // comment half way
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2901,7 +2823,6 @@ YY_RULE_SETUP
 case 64:
 /* rule 64 can match eol */
 YY_RULE_SETUP
-#line 993 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       incLineNr();
@@ -2910,7 +2831,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 999 "parse_py.l"
 {
       // any character
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2920,7 +2840,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 66:
 YY_RULE_SETUP
-#line 1006 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2931,7 +2850,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 67:
 YY_RULE_SETUP
-#line 1014 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2946,7 +2864,6 @@ case 68:
 (yy_c_buf_p) = yy_cp = yy_bp + 2;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 1022 "parse_py.l"
 {
       // start of a special comment
       initSpecialBlock();
@@ -2954,10 +2871,8 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 69:
 YY_RULE_SETUP
-#line 1031 "parse_py.l"
 {
       //found function name
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -2973,7 +2888,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 70:
 YY_RULE_SETUP
-#line 1044 "parse_py.l"
 {
       // function without arguments
       g_specialBlock = true; // expecting a docstring
@@ -2984,22 +2898,18 @@ YY_RULE_SETUP
 	YY_BREAK
 case 71:
 YY_RULE_SETUP
-#line 1052 "parse_py.l"
 {
       BEGIN( FunctionParams );
    }
 	YY_BREAK
 
-
 case 72:
 YY_RULE_SETUP
-#line 1058 "parse_py.l"
 {
    }
 	YY_BREAK
 case 73:
 YY_RULE_SETUP
-#line 1061 "parse_py.l"
 {
       // Name of parameter
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3012,7 +2922,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 1071 "parse_py.l"
 {
       // default value
 
@@ -3026,7 +2935,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 1082 "parse_py.l"
 {
       // end of parameter list
       current->args = argListToString(&(current->argList));
@@ -3034,7 +2942,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
-#line 1087 "parse_py.l"
 {
       g_specialBlock    = true; // expecting a docstring
       bodyEntry         = current;
@@ -3044,23 +2951,19 @@ YY_RULE_SETUP
 	YY_BREAK
 case 77:
 YY_RULE_SETUP
-#line 1094 "parse_py.l"
 {
       // a comment
    }
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 1098 "parse_py.l"
 {
       // default rule inside arguments
    }
 	YY_BREAK
 
-
 case 79:
 YY_RULE_SETUP
-#line 1105 "parse_py.l"
 {
       // internal opening brace
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3069,10 +2972,8 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 80:
-#line 1113 "parse_py.l"
 case 81:
 YY_RULE_SETUP
-#line 1113 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
@@ -3102,7 +3003,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 1140 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       g_defVal += text[0];
@@ -3111,7 +3011,6 @@ YY_RULE_SETUP
 case 83:
 /* rule 83 can match eol */
 YY_RULE_SETUP
-#line 1145 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       g_defVal += text[0];
@@ -3119,14 +3018,12 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 84:
 /* rule 84 can match eol */
 *yy_cp = (yy_hold_char); /* undo effects of setting up parse_py_YYtext */
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 1154 "parse_py.l"
 {
       // new def at indent 0
       incLineNr();
@@ -3140,7 +3037,6 @@ case 85:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 1161 "parse_py.l"
 {
       // start of a special comment at indent 0
       incLineNr();
@@ -3154,7 +3050,6 @@ case 86:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 1168 "parse_py.l"
 {
       // skip empty line
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3162,7 +3057,6 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case YY_STATE_EOF(ClassBody):
-#line 1174 "parse_py.l"
 {
          endOfDef();
          yyterminate();
@@ -3170,7 +3064,6 @@ case YY_STATE_EOF(ClassBody):
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 1179 "parse_py.l"
 {
       // something at indent >0
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3192,7 +3085,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
-#line 1197 "parse_py.l"
 {
       // start of a single quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3207,7 +3099,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 89:
 YY_RULE_SETUP
-#line 1209 "parse_py.l"
 {
       // start of a double quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3221,7 +3112,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 90:
 YY_RULE_SETUP
-#line 1220 "parse_py.l"
 {
       // non-special stuff
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3232,7 +3122,6 @@ YY_RULE_SETUP
 case 91:
 /* rule 91 can match eol */
 YY_RULE_SETUP
-#line 1227 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->m_program += text[0];
@@ -3241,7 +3130,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 1233 "parse_py.l"
 {
       // normal comment
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3250,7 +3138,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 93:
 YY_RULE_SETUP
-#line 1239 "parse_py.l"
 {
       // any character
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3260,7 +3147,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 94:
 YY_RULE_SETUP
-#line 1246 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3272,7 +3158,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 1255 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3285,7 +3170,6 @@ YY_RULE_SETUP
 
 case 96:
 YY_RULE_SETUP
-#line 1265 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
@@ -3314,14 +3198,12 @@ YY_RULE_SETUP
 
 case 97:
 YY_RULE_SETUP
-#line 1291 "parse_py.l"
 {
       // syntactic sugar for the list
    }
 	YY_BREAK
 case 98:
 YY_RULE_SETUP
-#line 1295 "parse_py.l"
 {
       // begin of the class definition
       g_specialBlock = true; // expecting a docstring
@@ -3332,7 +3214,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 99:
 YY_RULE_SETUP
-#line 1303 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->extends.append(BaseInfo(substitute(text,".","::"), Public, Normal));
@@ -3340,11 +3221,9 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 100:
 /* rule 100 can match eol */
 YY_RULE_SETUP
-#line 1311 "parse_py.l"
 {
       // Blankline - ignore, keep looking for indentation.
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3354,7 +3233,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 1318 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3366,7 +3244,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 1327 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3378,7 +3255,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 103:
 YY_RULE_SETUP
-#line 1336 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->m_program += text;
@@ -3393,7 +3269,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 104:
 YY_RULE_SETUP
-#line 1348 "parse_py.l"
 {
       // Just pushback an empty class, and resume parsing the body
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3404,10 +3279,8 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 105:
 YY_RULE_SETUP
-#line 1359 "parse_py.l"
 {
       // the assignment operator
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3418,14 +3291,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 1367 "parse_py.l"
 {
       // spaces
    }
 	YY_BREAK
 case 107:
 YY_RULE_SETUP
-#line 1371 "parse_py.l"
 {
       // integer value
       QString text  = QString::fromUtf8(parse_py_YYtext);
@@ -3436,7 +3307,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 108:
 YY_RULE_SETUP
-#line 1379 "parse_py.l"
 {
       // floating point value
       QString text  = QString::fromUtf8(parse_py_YYtext);
@@ -3447,7 +3317,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 1386 "parse_py.l"
 {
       // boolean value
       QString text  = QString::fromUtf8(parse_py_YYtext);
@@ -3458,7 +3327,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 110:
 YY_RULE_SETUP
-#line 1394 "parse_py.l"
 {
       // string
       QString text  = QString::fromUtf8(parse_py_YYtext);
@@ -3471,7 +3339,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 111:
 YY_RULE_SETUP
-#line 1404 "parse_py.l"
 {
       // string
       QString text  = QString::fromUtf8(parse_py_YYtext);
@@ -3484,7 +3351,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 112:
 YY_RULE_SETUP
-#line 1414 "parse_py.l"
 {
       // start of a comment block
       QString text  = QString::fromUtf8(parse_py_YYtext);
@@ -3498,7 +3364,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 1425 "parse_py.l"
 {
       // start of a comment block
       QString text  = QString::fromUtf8(parse_py_YYtext);
@@ -3512,7 +3377,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 114:
 YY_RULE_SETUP
-#line 1436 "parse_py.l"
 {
       // tuple, only when direct after =
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3530,7 +3394,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 115:
 YY_RULE_SETUP
-#line 1451 "parse_py.l"
 {
       // list
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3547,7 +3410,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 1465 "parse_py.l"
 {
       // dictionary
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3562,7 +3424,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 117:
 YY_RULE_SETUP
-#line 1477 "parse_py.l"
 {
       // comment
       BEGIN( VariableEnd );
@@ -3570,7 +3431,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 118:
 YY_RULE_SETUP
-#line 1482 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       g_start_init = false;
@@ -3579,7 +3439,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 1488 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       g_start_init = false;
@@ -3589,17 +3448,14 @@ YY_RULE_SETUP
 case 120:
 /* rule 120 can match eol */
 YY_RULE_SETUP
-#line 1494 "parse_py.l"
 {
       unput('\n');
       BEGIN( VariableEnd );
    }
 	YY_BREAK
 
-
 case 121:
 YY_RULE_SETUP
-#line 1501 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->initializer += text[0];
@@ -3611,7 +3467,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 122:
 YY_RULE_SETUP
-#line 1510 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->initializer += text[0];
@@ -3628,7 +3483,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 1524 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3640,7 +3494,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 1533 "parse_py.l"
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3652,7 +3505,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 1542 "parse_py.l"
 {
       g_stringContext = YY_START;
       current->initializer += "'";
@@ -3662,7 +3514,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 1549 "parse_py.l"
 {
       g_stringContext=YY_START;
       current->initializer += "\"";
@@ -3672,7 +3523,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 127:
 YY_RULE_SETUP
-#line 1556 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->initializer += text;
@@ -3680,7 +3530,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
-#line 1560 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->initializer += text[0];
@@ -3689,7 +3538,6 @@ YY_RULE_SETUP
 case 129:
 /* rule 129 can match eol */
 YY_RULE_SETUP
-#line 1565 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->initializer += text[0];
@@ -3697,11 +3545,9 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 130:
 /* rule 130 can match eol */
 YY_RULE_SETUP
-#line 1573 "parse_py.l"
 {
       incLineNr();
       newVariable();
@@ -3710,7 +3556,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 1579 "parse_py.l"
 {
       unput(*parse_py_YYtext);
       newVariable();
@@ -3718,19 +3563,15 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case YY_STATE_EOF(VariableEnd):
-#line 1585 "parse_py.l"
 {
       yyterminate();
       newEntry();
    }
 	YY_BREAK
 
-
 case 132:
-#line 1593 "parse_py.l"
 case 133:
 YY_RULE_SETUP
-#line 1593 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
@@ -3782,7 +3623,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 1642 "parse_py.l"
 {
       // leading whitespace
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3806,7 +3646,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 135:
 YY_RULE_SETUP
-#line 1663 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       docBlock += text;
@@ -3815,7 +3654,6 @@ YY_RULE_SETUP
 case 136:
 /* rule 136 can match eol */
 YY_RULE_SETUP
-#line 1668 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       incLineNr();
@@ -3824,7 +3662,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 1674 "parse_py.l"
 {
       // escaped char
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3833,17 +3670,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 138:
 YY_RULE_SETUP
-#line 1680 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       docBlock += text;
    }
 	YY_BREAK
 
-
 case 139:
 YY_RULE_SETUP
-#line 1687 "parse_py.l"
 {
       // skip leading hashes
    }
@@ -3854,7 +3688,6 @@ case 140:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up parse_py_YYtext again */
 YY_RULE_SETUP
-#line 1691 "parse_py.l"
 {
       // continuation of the comment on the next line
       docBlock  += '\n';
@@ -3865,7 +3698,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 1699 "parse_py.l"
 {
       // any other stuff
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3875,7 +3707,6 @@ YY_RULE_SETUP
 case 142:
 /* rule 142 can match eol */
 YY_RULE_SETUP
-#line 1705 "parse_py.l"
 {
       // new line that ends the comment
       handleCommentBlock(docBlock, docBrief);
@@ -3885,7 +3716,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 143:
 YY_RULE_SETUP
-#line 1712 "parse_py.l"
 {
       // anything we missed
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3893,11 +3723,9 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 144:
 /* rule 144 can match eol */
 YY_RULE_SETUP
-#line 1720 "parse_py.l"
 {
       // line continuation
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3907,7 +3735,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 1727 "parse_py.l"
 {
       // espaced char
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3916,7 +3743,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 146:
 YY_RULE_SETUP
-#line 1733 "parse_py.l"
 {
       // tripple double quotes
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3925,7 +3751,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 1739 "parse_py.l"
 {
       // end of the string
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3935,7 +3760,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 148:
 YY_RULE_SETUP
-#line 1746 "parse_py.l"
 {
       // normal chars
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3944,7 +3768,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 149:
 YY_RULE_SETUP
-#line 1752 "parse_py.l"
 {
       // normal char
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3952,11 +3775,9 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 150:
 /* rule 150 can match eol */
 YY_RULE_SETUP
-#line 1760 "parse_py.l"
 {
       // line continuation
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3966,7 +3787,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 151:
 YY_RULE_SETUP
-#line 1767 "parse_py.l"
 {
       // escaped char
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3975,7 +3795,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-#line 1772 "parse_py.l"
 {
       // tripple single quotes
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3984,7 +3803,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 153:
 YY_RULE_SETUP
-#line 1778 "parse_py.l"
 {
       // end of the string
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -3994,7 +3812,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 154:
 YY_RULE_SETUP
-#line 1785 "parse_py.l"
 {
       // normal chars
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -4003,7 +3820,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 155:
 YY_RULE_SETUP
-#line 1791 "parse_py.l"
 {
       // normal char
       QString text = QString::fromUtf8(parse_py_YYtext);
@@ -4011,12 +3827,9 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 
-
 case 156:
-#line 1800 "parse_py.l"
 case 157:
 YY_RULE_SETUP
-#line 1800 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       *g_copyString += text;
@@ -4029,7 +3842,6 @@ YY_RULE_SETUP
 case 158:
 /* rule 158 can match eol */
 YY_RULE_SETUP
-#line 1809 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       lineCount();
@@ -4039,7 +3851,6 @@ YY_RULE_SETUP
 case 159:
 /* rule 159 can match eol */
 YY_RULE_SETUP
-#line 1815 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       incLineNr();
@@ -4048,7 +3859,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
-#line 1821 "parse_py.l"
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       *g_copyString += text[0];
@@ -4059,23 +3869,19 @@ YY_RULE_SETUP
 case 161:
 /* rule 161 can match eol */
 YY_RULE_SETUP
-#line 1830 "parse_py.l"
 {
       lineCount();
    }
 	YY_BREAK
 case 162:
 YY_RULE_SETUP
-#line 1834 "parse_py.l"
 {
    }
 	YY_BREAK
 case 163:
 YY_RULE_SETUP
-#line 1838 "parse_py.l"
 ECHO;
 	YY_BREAK
-#line 4079 "<stdout>"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(Search):
 			case YY_STATE_EOF(SearchMemVars):
@@ -5069,10 +4875,6 @@ void parse_py_YYfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 1838 "parse_py.l"
-
-
-
 static void parseCompounds(QSharedPointer<Entry> rt)
 {
    for (auto ce : rt->children() ) {
@@ -5275,6 +5077,4 @@ void PythonLanguageParser::resetCodeParserState()
 {
    ::resetPythonCodeParserState();
 }
-
-
 

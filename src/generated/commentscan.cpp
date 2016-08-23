@@ -167,7 +167,7 @@ typedef unsigned int flex_uint32_t;
  */
 #define YY_BUF_SIZE 32768
 #else
-#define YY_BUF_SIZE 262144
+#define YY_BUF_SIZE 16384
 #endif /* __ia64__ */
 #endif
 
@@ -3121,14 +3121,12 @@ goto find_rule; \
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *commentscanYYtext;
-#line 1 "commentscan.l"
 /*************************************************************************
  *
  * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
 *************************************************************************/
-#line 9 "commentscan.l"
 
 #include <QFile>
 #include <QStack>
@@ -3367,6 +3365,7 @@ static DocCmdMap docCmdMap[] =
   { "result",          0,                       true  },
   { "return",          0,                       true  },
   { "returns",         0,                       true  },
+  { "exception",       0,                       true  },
   { "retval",          0,                       true  },
   { "sa",              0,                       true  },
   { "see",             0,                       true  },
@@ -4000,48 +3999,6 @@ static int yyread(char *buf, int max_size)
 /* start command character */
 /* comment parsing states */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#line 4044 "<stdout>"
-
 #define INITIAL 0
 #define Comment 1
 #define PageDocArg1 2
@@ -4271,9 +4228,6 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 974 "commentscan.l"
-
-
   /* What can happen while parsing a comment block:
    *   commands (e.g. @page, or \page)
    *   escaped commands (e.g. @@page or \\page).
@@ -4290,8 +4244,6 @@ YY_DECL
    *   quoted text, such as "foo@bar"
    *   XML commands, <summary></summary><remarks></remarks>
    */
-
-#line 4295 "<stdout>"
 
 	if ( !(yy_init) )
 		{
@@ -4386,7 +4338,6 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 993 "commentscan.l"
 {
       // escaped command
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4395,7 +4346,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 999 "commentscan.l"
 {
       // escaped command
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4404,7 +4354,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 1005 "commentscan.l"
 {
       // mail address
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4413,7 +4362,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 1011 "commentscan.l"
 {
       // quoted text
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4422,7 +4370,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 1017 "commentscan.l"
 {
       // directory (or chain of commands)
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4431,7 +4378,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 1023 "commentscan.l"
 {
       // HTML command ends a brief description
       setOutput(OutputDoc);
@@ -4442,7 +4388,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 1031 "commentscan.l"
 {
       // HTML command that ends a brief description
       if (current->lang == SrcLangExt_CSharp) {
@@ -4455,7 +4400,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 1041 "commentscan.l"
 {
       // start of a .NET XML style brief description
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4465,7 +4409,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 1048 "commentscan.l"
 {
       // start of a .NET XML style detailed description
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4475,7 +4418,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 1055 "commentscan.l"
 {
       // start of a .NET XML style detailed description
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4485,7 +4427,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 1062 "commentscan.l"
 {
       // end of a brief or detailed description
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4494,7 +4435,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 1068 "commentscan.l"
 {
       QString tag = QString::fromUtf8(commentscanYYtext);
 
@@ -4522,7 +4462,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 1093 "commentscan.l"
 {
       insidePre = true;
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4531,7 +4470,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 1099 "commentscan.l"
 {
       insidePre = false;
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4540,7 +4478,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 1105 "commentscan.l"
 {
       // RCS tag which end a brief description
       setOutput(OutputDoc);
@@ -4549,14 +4486,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 1111 "commentscan.l"
 {
       BEGIN(HtmlComment);
    }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 1115 "commentscan.l"
 {
       addOutput("\\endinternal ");
 
@@ -4569,7 +4504,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 1125 "commentscan.l"
 {
       // might be a valid command
       // the {B}* in the front was added for bug620924
@@ -4589,7 +4523,7 @@ YY_RULE_SETUP
 
          s_spaceBeforeCmd = QString(text).left(i);
 
-         if (cmdPtr->endsBrief && (inContext != OutputXRef && cmdName == "parblock")) {
+         if (cmdPtr->endsBrief && ! (inContext == OutputXRef && cmdName == "parblock")) {
             briefEndsAtDot = false;
 
             // this command forces the end of brief description
@@ -4618,7 +4552,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 1171 "commentscan.l"
 {
       // escaped formula command
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4627,7 +4560,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 1177 "commentscan.l"
 {
       // language switch command
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4642,7 +4574,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 1189 "commentscan.l"
 {
       // start of a formula with custom environment
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4662,7 +4593,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 1206 "commentscan.l"
 {
       // start of a inline formula
       formulaText     = "$";
@@ -4672,7 +4602,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 1213 "commentscan.l"
 {
       // start of a block formula
       formulaText      = "\\[";
@@ -4682,7 +4611,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 1220 "commentscan.l"
 {
       // begin of a group
       // langParser->handleGroupStartCommand(s_memberGroupHeader);
@@ -4691,7 +4619,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 1226 "commentscan.l"
 {
       // end of a group
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4708,7 +4635,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 1240 "commentscan.l"
 {
       // escaped character
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4717,7 +4643,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 1246 "commentscan.l"
 {
       // normal word
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4730,7 +4655,6 @@ case 28:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 1252 "commentscan.l"
 {
       // explicit end autolist: e.g "  ."
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4738,10 +4662,8 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case 29:
-#line 1259 "commentscan.l"
 case 30:
 YY_RULE_SETUP
-#line 1259 "commentscan.l"
 {
       // start of autolist
       if (! Doxy_Globals::markdownSupport) {
@@ -4761,7 +4683,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 1276 "commentscan.l"
 {
       // start of autolist
       if (inContext != OutputXRef) {
@@ -4779,7 +4700,6 @@ case 32:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 1287 "commentscan.l"
 {
       // horizontal line (dashed)
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4788,7 +4708,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 1293 "commentscan.l"
 {
       // escaped mdash
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4797,7 +4716,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 1299 "commentscan.l"
 {
       // escaped mdash
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4806,7 +4724,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 1305 "commentscan.l"
 {
       // mdash
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4815,7 +4732,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 1311 "commentscan.l"
 {
       // ndash
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4824,7 +4740,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 1317 "commentscan.l"
 {
       // numbered item
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4833,7 +4748,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 1323 "commentscan.l"
 {
       // . at start or in the middle of a word, or ellipsis
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4842,7 +4756,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 1329 "commentscan.l"
 {
       // . with escaped space
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4853,7 +4766,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 1337 "commentscan.l"
 {
       // . with comma such as "e.g.,"
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4862,7 +4774,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 1343 "commentscan.l"
 {
       // ellipsis with escaped space
       addOutput("... ");
@@ -4873,7 +4784,6 @@ case 42:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 1348 "commentscan.l"
 {
       // internal ellipsis
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4883,7 +4793,6 @@ YY_RULE_SETUP
 case 43:
 /* rule 43 can match eol */
 YY_RULE_SETUP
-#line 1354 "commentscan.l"
 {
       // at least one blank line (or blank line command)
 
@@ -4942,7 +4851,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 1410 "commentscan.l"
 {
       // potential end of a JavaDoc style comment
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4957,7 +4865,6 @@ YY_RULE_SETUP
 case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
-#line 1421 "commentscan.l"
 {
       // newline      
       addOutput('\n');
@@ -4966,7 +4873,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 1427 "commentscan.l"
 {
       // catch-all for anything else
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -4976,7 +4882,6 @@ YY_RULE_SETUP
 /* --------------   Rules for handling HTML comments ----------- */
 case 47:
 YY_RULE_SETUP
-#line 1436 "commentscan.l"
 {
       BEGIN( Comment );
    }
@@ -4984,7 +4889,6 @@ YY_RULE_SETUP
 case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
-#line 1440 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -4995,14 +4899,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 1448 "commentscan.l"
 {
       // ignore unimportant characters
    }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 1452 "commentscan.l"
 {
       // ignore every else
    }
@@ -5010,7 +4912,6 @@ YY_RULE_SETUP
 /* --------------   Rules for handling formulas ---------------- */
 case 51:
 YY_RULE_SETUP
-#line 1459 "commentscan.l"
 {
       // end of inline formula
       formulaText += "$";
@@ -5020,7 +4921,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 1466 "commentscan.l"
 {
       // end of block formula
       formulaText += "\\]";
@@ -5030,7 +4930,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 1473 "commentscan.l"
 {
       // end of custom env formula
       formulaText += "\\end";
@@ -5041,7 +4940,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 1481 "commentscan.l"
 {
       // any non-special character
       QString text = QString::fromUtf8(commentscanYYtext); 
@@ -5051,7 +4949,6 @@ YY_RULE_SETUP
 case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
-#line 1487 "commentscan.l"
 {
       // new line
       QString text = QString::fromUtf8(commentscanYYtext); 
@@ -5063,7 +4960,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 1496 "commentscan.l"
 {
       // any othe character
       QString text = QString::fromUtf8(commentscanYYtext); 
@@ -5074,7 +4970,6 @@ YY_RULE_SETUP
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
-#line 1505 "commentscan.l"
 {
       // handle argument
       QString text = QString::fromUtf8(commentscanYYtext); 
@@ -5085,7 +4980,6 @@ YY_RULE_SETUP
 case 58:
 /* rule 58 can match eol */
 YY_RULE_SETUP
-#line 1512 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5095,7 +4989,6 @@ YY_RULE_SETUP
 case 59:
 /* rule 59 can match eol */
 YY_RULE_SETUP
-#line 1518 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5112,7 +5005,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 1532 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5121,7 +5013,6 @@ YY_RULE_SETUP
 case 61:
 /* rule 61 can match eol */
 YY_RULE_SETUP
-#line 1539 "commentscan.l"
 {
       // handle argument
       QString text  = QString::fromUtf8(commentscanYYtext); 
@@ -5132,7 +5023,6 @@ YY_RULE_SETUP
 case 62:
 /* rule 62 can match eol */
 YY_RULE_SETUP
-#line 1546 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5142,7 +5032,6 @@ YY_RULE_SETUP
 case 63:
 /* rule 63 can match eol */
 YY_RULE_SETUP
-#line 1552 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5157,7 +5046,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 64:
 YY_RULE_SETUP
-#line 1564 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5165,7 +5053,6 @@ YY_RULE_SETUP
 /* ------------ handle argument of package command --------------- */
 case 65:
 YY_RULE_SETUP
-#line 1571 "commentscan.l"
 {
       // handle argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5176,7 +5063,6 @@ YY_RULE_SETUP
 case 66:
 /* rule 66 can match eol */
 YY_RULE_SETUP
-#line 1578 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5186,7 +5072,6 @@ YY_RULE_SETUP
 case 67:
 /* rule 67 can match eol */
 YY_RULE_SETUP
-#line 1584 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5202,7 +5087,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 68:
 YY_RULE_SETUP
-#line 1596 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5211,7 +5095,6 @@ YY_RULE_SETUP
 case 69:
 /* rule 69 can match eol */
 YY_RULE_SETUP
-#line 1603 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       current->name = substitute(removeRedundantWhiteSpace(text),".","::");
@@ -5221,7 +5104,6 @@ YY_RULE_SETUP
 case 70:
 /* rule 70 can match eol */
 YY_RULE_SETUP
-#line 1609 "commentscan.l"
 {
       // first argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5238,7 +5120,6 @@ YY_RULE_SETUP
 case 71:
 /* rule 71 can match eol */
 YY_RULE_SETUP
-#line 1622 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       current->name = substitute(text,".","::");
@@ -5248,7 +5129,6 @@ YY_RULE_SETUP
 case 72:
 /* rule 72 can match eol */
 YY_RULE_SETUP
-#line 1628 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5258,7 +5138,6 @@ YY_RULE_SETUP
 case 73:
 /* rule 73 can match eol */
 YY_RULE_SETUP
-#line 1634 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5276,14 +5155,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-#line 1649 "commentscan.l"
 {    
       // ignore other stuff
    }
 	YY_BREAK
 case 75:
 YY_RULE_SETUP
-#line 1653 "commentscan.l"
 {
       // second argument; include file
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5294,7 +5171,6 @@ YY_RULE_SETUP
 case 76:
 /* rule 76 can match eol */
 YY_RULE_SETUP
-#line 1660 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5304,7 +5180,6 @@ YY_RULE_SETUP
 case 77:
 /* rule 77 can match eol */
 YY_RULE_SETUP
-#line 1666 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -5318,14 +5193,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-#line 1677 "commentscan.l"
 { 
       // ignore other stuff
    }
 	YY_BREAK
 case 79:
 YY_RULE_SETUP
-#line 1682 "commentscan.l"
 {
       // third argument; include file name
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5336,7 +5209,6 @@ YY_RULE_SETUP
 case 80:
 /* rule 80 can match eol */
 YY_RULE_SETUP
-#line 1689 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5346,7 +5218,6 @@ YY_RULE_SETUP
 case 81:
 /* rule 81 can match eol */
 YY_RULE_SETUP
-#line 1695 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -5359,7 +5230,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 82:
 YY_RULE_SETUP
-#line 1705 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5367,7 +5237,6 @@ YY_RULE_SETUP
 /* --------- handle arguments of {def,add,weak} group commands --------- */
 case 83:
 YY_RULE_SETUP
-#line 1712 "commentscan.l"
 {
       // group name
       QString text  = QString::fromUtf8(commentscanYYtext);
@@ -5388,7 +5257,6 @@ YY_RULE_SETUP
 case 84:
 /* rule 84 can match eol */
 YY_RULE_SETUP
-#line 1729 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5398,7 +5266,6 @@ YY_RULE_SETUP
 case 85:
 /* rule 85 can match eol */
 YY_RULE_SETUP
-#line 1735 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5415,7 +5282,6 @@ YY_RULE_SETUP
 case 86:
 /* rule 86 can match eol */
 YY_RULE_SETUP
-#line 1748 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5424,7 +5290,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 87:
 YY_RULE_SETUP
-#line 1754 "commentscan.l"
 {
       // title (stored in type)
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5434,7 +5299,6 @@ YY_RULE_SETUP
 case 88:
 /* rule 88 can match eol */
 YY_RULE_SETUP
-#line 1760 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -5455,7 +5319,6 @@ YY_RULE_SETUP
 /* --------- handle arguments of page/mainpage command ------------------- */
 case 89:
 YY_RULE_SETUP
-#line 1780 "commentscan.l"
 {
       // first argument; page name
       QString text  = QString::fromUtf8(commentscanYYtext);
@@ -5466,7 +5329,6 @@ YY_RULE_SETUP
 case 90:
 /* rule 90 can match eol */
 YY_RULE_SETUP
-#line 1787 "commentscan.l"
 { 
       yyLineNr++;
       addOutput('\n');
@@ -5475,7 +5337,6 @@ YY_RULE_SETUP
 case 91:
 /* rule 91 can match eol */
 YY_RULE_SETUP
-#line 1792 "commentscan.l"
 {
       // missing arguement
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5491,7 +5352,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 92:
 YY_RULE_SETUP
-#line 1805 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5499,7 +5359,6 @@ YY_RULE_SETUP
 case 93:
 /* rule 93 can match eol */
 YY_RULE_SETUP
-#line 1809 "commentscan.l"
 {
       // second argument; page title
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5515,7 +5374,6 @@ YY_RULE_SETUP
 case 94:
 /* rule 94 can match eol */
 YY_RULE_SETUP
-#line 1823 "commentscan.l"
 {
       // no file name specfied
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5530,7 +5388,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 95:
 YY_RULE_SETUP
-#line 1835 "commentscan.l"
 {
       // first argument; name
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5541,7 +5398,6 @@ YY_RULE_SETUP
 case 96:
 /* rule 96 can match eol */
 YY_RULE_SETUP
-#line 1842 "commentscan.l"
 { 
       yyLineNr++;
       addOutput('\n');
@@ -5549,7 +5405,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
-#line 1847 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5557,7 +5412,6 @@ YY_RULE_SETUP
 /* --------- handle arguments of the xrefitem command ------------ */
 case 98:
 YY_RULE_SETUP
-#line 1854 "commentscan.l"
 {
       // first argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5571,7 +5425,6 @@ YY_RULE_SETUP
 case 99:
 /* rule 99 can match eol */
 YY_RULE_SETUP
-#line 1864 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5581,7 +5434,6 @@ YY_RULE_SETUP
 case 100:
 /* rule 100 can match eol */
 YY_RULE_SETUP
-#line 1870 "commentscan.l"
 {
       // missing arguments
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5598,14 +5450,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 101:
 YY_RULE_SETUP
-#line 1884 "commentscan.l"
 {
       // ignore other stuff
    }
 	YY_BREAK
 case 102:
 YY_RULE_SETUP
-#line 1888 "commentscan.l"
 {
       // second argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5616,7 +5466,6 @@ YY_RULE_SETUP
 case 103:
 /* rule 103 can match eol */
 YY_RULE_SETUP
-#line 1895 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5626,7 +5475,6 @@ YY_RULE_SETUP
 case 104:
 /* rule 104 can match eol */
 YY_RULE_SETUP
-#line 1901 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5643,14 +5491,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 105:
 YY_RULE_SETUP
-#line 1915 "commentscan.l"
 {
       // ignore other stuff
    }
 	YY_BREAK
 case 106:
 YY_RULE_SETUP
-#line 1919 "commentscan.l"
 {
       // third argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5664,7 +5510,6 @@ YY_RULE_SETUP
 case 107:
 /* rule 107 can match eol */
 YY_RULE_SETUP
-#line 1929 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5674,7 +5519,6 @@ YY_RULE_SETUP
 case 108:
 /* rule 108 can match eol */
 YY_RULE_SETUP
-#line 1935 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5691,7 +5535,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
-#line 1949 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5699,7 +5542,6 @@ YY_RULE_SETUP
 /* ----- handle arguments of the relates(also)/memberof command ------- */
 case 110:
 YY_RULE_SETUP
-#line 1955 "commentscan.l"
 {
       // argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5711,7 +5553,6 @@ YY_RULE_SETUP
 case 111:
 /* rule 111 can match eol */
 YY_RULE_SETUP
-#line 1963 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5721,7 +5562,6 @@ YY_RULE_SETUP
 case 112:
 /* rule 112 can match eol */
 YY_RULE_SETUP
-#line 1969 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5737,7 +5577,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
-#line 1982 "commentscan.l"
 {
       // ignore other stuff
    }
@@ -5746,7 +5585,6 @@ YY_RULE_SETUP
 case 114:
 /* rule 114 can match eol */
 YY_RULE_SETUP
-#line 1989 "commentscan.l"
 {
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5762,7 +5600,6 @@ YY_RULE_SETUP
 case 115:
 /* rule 115 can match eol */
 YY_RULE_SETUP
-#line 2001 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5771,7 +5608,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 116:
 YY_RULE_SETUP
-#line 2007 "commentscan.l"
 {
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5781,7 +5617,6 @@ YY_RULE_SETUP
 /* ----- handle arguments of the section/subsection/.. commands ------- */
 case 117:
 YY_RULE_SETUP
-#line 2016 "commentscan.l"
 {
       // first argyment
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5796,7 +5631,6 @@ YY_RULE_SETUP
 case 118:
 /* rule 118 can match eol */
 YY_RULE_SETUP
-#line 2027 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5812,7 +5646,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
-#line 2040 "commentscan.l"
 {
       // invalid character for section label
       warn(yyFileName, yyLineNr, "Invalid or missing section label");
@@ -5825,7 +5658,6 @@ case 120:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2046 "commentscan.l"
 {
       // end of section title
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5839,7 +5671,6 @@ case 121:
 (yy_c_buf_p) = yy_cp -= 8;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2054 "commentscan.l"
 {
       // end of section title
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5851,7 +5682,6 @@ YY_RULE_SETUP
 case 122:
 /* rule 122 can match eol */
 YY_RULE_SETUP
-#line 2062 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -5860,7 +5690,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 123:
 YY_RULE_SETUP
-#line 2068 "commentscan.l"
 {
       // any character without special meaning
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5870,7 +5699,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 124:
 YY_RULE_SETUP
-#line 2075 "commentscan.l"
 {
       // unescape escaped command
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5881,7 +5709,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
-#line 2083 "commentscan.l"
 {
       // unescape escaped character
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5892,7 +5719,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-#line 2091 "commentscan.l"
 { 
       // anything else
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5904,7 +5730,6 @@ YY_RULE_SETUP
 /* ----- handle arguments of the subpage command ------- */
 case 127:
 YY_RULE_SETUP
-#line 2101 "commentscan.l"
 {
       // first argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5920,7 +5745,6 @@ YY_RULE_SETUP
 case 128:
 /* rule 128 can match eol */
 YY_RULE_SETUP
-#line 2113 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5937,7 +5761,6 @@ YY_RULE_SETUP
 case 129:
 /* rule 129 can match eol */
 YY_RULE_SETUP
-#line 2126 "commentscan.l"
 {
       // no title, end command
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5947,7 +5770,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 130:
 YY_RULE_SETUP
-#line 2133 "commentscan.l"
 {
       // add title, end of command
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5957,7 +5779,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 131:
 YY_RULE_SETUP
-#line 2140 "commentscan.l"
 {
       // no title, end of command
       unput(commentscanYYtext[0]);     
@@ -5967,7 +5788,6 @@ YY_RULE_SETUP
 /* ----- handle arguments of the anchor command ------- */
 case 132:
 YY_RULE_SETUP
-#line 2149 "commentscan.l"
 {
       // found argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5981,7 +5801,6 @@ YY_RULE_SETUP
 case 133:
 /* rule 133 can match eol */
 YY_RULE_SETUP
-#line 2159 "commentscan.l"
 {
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -5997,7 +5816,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 134:
 YY_RULE_SETUP
-#line 2172 "commentscan.l"
 {
       // invalid character for anchor label
       warn(yyFileName, yyLineNr, "Invalid or missing anchor label");
@@ -6011,7 +5829,6 @@ case 135:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2181 "commentscan.l"
 {
       // possible ends
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6025,7 +5842,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 136:
 YY_RULE_SETUP
-#line 2192 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       addOutput(text);
@@ -6038,7 +5854,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-#line 2202 "commentscan.l"
 { 
       // some word
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6048,7 +5863,6 @@ YY_RULE_SETUP
 case 138:
 /* rule 138 can match eol */
 YY_RULE_SETUP
-#line 2208 "commentscan.l"
 { 
       // new line
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6062,7 +5876,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 139:
 YY_RULE_SETUP
-#line 2219 "commentscan.l"
 {
       // */ (editor syntax fix)
       // start of a C-comment
@@ -6074,7 +5887,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 140:
 YY_RULE_SETUP
-#line 2228 "commentscan.l"
 {
       // end of a C-comment
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6090,7 +5902,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 141:
 YY_RULE_SETUP
-#line 2241 "commentscan.l"
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6098,7 +5909,6 @@ YY_RULE_SETUP
    }
 	YY_BREAK
 case YY_STATE_EOF(FormatBlock):
-#line 2247 "commentscan.l"
 {
       QString endTag = "@end" + blockName;
 
@@ -6115,7 +5925,6 @@ case YY_STATE_EOF(FormatBlock):
 /* ----- handle arguments of if/ifnot commands ------- */
 case 142:
 YY_RULE_SETUP
-#line 2263 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_guardExpr  = text;
@@ -6126,7 +5935,6 @@ YY_RULE_SETUP
 case 143:
 /* rule 143 can match eol */
 YY_RULE_SETUP
-#line 2270 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_guardExpr += text;
@@ -6134,7 +5942,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 144:
 YY_RULE_SETUP
-#line 2275 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_guardExpr += text;
@@ -6143,7 +5950,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 145:
 YY_RULE_SETUP
-#line 2281 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_guardExpr += text;
@@ -6157,7 +5963,6 @@ YY_RULE_SETUP
 case 146:
 /* rule 146 can match eol */
 YY_RULE_SETUP
-#line 2291 "commentscan.l"
 {      
       warn(yyFileName, yyLineNr, "Invalid expression '%s' for guard", csPrintable(s_guardExpr));
       unput(commentscanYYtext[0]);
@@ -6166,7 +5971,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 147:
 YY_RULE_SETUP
-#line 2297 "commentscan.l"
 {
       // parameter of if/ifnot guard
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6176,7 +5980,6 @@ YY_RULE_SETUP
 case 148:
 /* rule 148 can match eol */
 YY_RULE_SETUP
-#line 2303 "commentscan.l"
 {
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6194,7 +5997,6 @@ YY_RULE_SETUP
 case 149:
 /* rule 149 can match eol */
 YY_RULE_SETUP
-#line 2317 "commentscan.l"
 {
       // line continuation
       yyLineNr++;
@@ -6203,7 +6005,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 150:
 YY_RULE_SETUP
-#line 2323 "commentscan.l"
 {
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6213,7 +6014,6 @@ YY_RULE_SETUP
 case 151:
 /* rule 151 can match eol */
 YY_RULE_SETUP
-#line 2329 "commentscan.l"
 {
       s_spaceBeforeIf.resize(0);
       BEGIN(Comment);
@@ -6221,7 +6021,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-#line 2334 "commentscan.l"
 {  
       if (! s_spaceBeforeIf.isEmpty()) {
          // needed for 665313 in combation with bug620924
@@ -6235,7 +6034,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 153:
 YY_RULE_SETUP
-#line 2345 "commentscan.l"
 {
       unput(commentscanYYtext[0]);
       BEGIN(Comment);
@@ -6248,7 +6046,6 @@ case 154:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2352 "commentscan.l"
 {
       guardType = Guard_IfNot;
       BEGIN( GuardParam );
@@ -6260,7 +6057,6 @@ case 155:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2357 "commentscan.l"
 {
       guardType = Guard_If;
       BEGIN( GuardParam );
@@ -6272,7 +6068,6 @@ case 156:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2362 "commentscan.l"
 {
       if (guards.isEmpty()) {
          warn(yyFileName,yyLineNr, "Found @endif without matching start command");
@@ -6295,7 +6090,6 @@ case 157:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2378 "commentscan.l"
 {
       if (guards.isEmpty()) {
          warn(yyFileName, yyLineNr, "Found @else without matching start command");
@@ -6318,7 +6112,6 @@ case 158:
 (yy_c_buf_p) = yy_cp -= 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2394 "commentscan.l"
 {
       if (guards.isEmpty()) {
          warn(yyFileName,yyLineNr, "Found @elseif without matching start command");
@@ -6337,7 +6130,6 @@ YY_RULE_SETUP
 case 159:
 /* rule 159 can match eol */
 YY_RULE_SETUP
-#line 2409 "commentscan.l"
 { 
       // skip line
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6351,14 +6143,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
-#line 2420 "commentscan.l"
 { 
       // skip non-special characters
    }
 	YY_BREAK
 case 161:
 YY_RULE_SETUP
-#line 2424 "commentscan.l"
 { 
       // any other character
    }
@@ -6367,7 +6157,6 @@ YY_RULE_SETUP
 case 162:
 /* rule 162 can match eol */
 YY_RULE_SETUP
-#line 2431 "commentscan.l"
 { 
       // skip line
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6384,7 +6173,6 @@ case 163:
 (yy_c_buf_p) = yy_cp = yy_bp + 3;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2442 "commentscan.l"
 {
       s_condCount++;
    }
@@ -6394,7 +6182,6 @@ case 164:
 (yy_c_buf_p) = yy_cp = yy_bp + 6;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2446 "commentscan.l"
 {
       s_condCount++;
    }
@@ -6404,7 +6191,6 @@ case 165:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2450 "commentscan.l"
 {
       s_condCount--;
    
@@ -6421,7 +6207,6 @@ case 166:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2461 "commentscan.l"
 {
       if (s_sectionLevel > 0 ) {
          unput('\\');
@@ -6434,7 +6219,6 @@ case 167:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2468 "commentscan.l"
 {
       if (s_sectionLevel > 1)  {                 
          unput('\\');
@@ -6447,7 +6231,6 @@ case 168:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2475 "commentscan.l"
 {
       if (s_sectionLevel > 2) {      
          unput('\\');
@@ -6460,7 +6243,6 @@ case 169:
 (yy_c_buf_p) = yy_cp = yy_bp + 1;
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
-#line 2482 "commentscan.l"
 {
       if (s_sectionLevel > 3) {      
          unput('\\');
@@ -6470,7 +6252,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 170:
 YY_RULE_SETUP
-#line 2489 "commentscan.l"
 {
       addOutput("\\endinternal ");
       BEGIN(Comment);
@@ -6478,14 +6259,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 171:
 YY_RULE_SETUP
-#line 2494 "commentscan.l"
 { 
       // skip non-special characters
    }
 	YY_BREAK
 case 172:
 YY_RULE_SETUP
-#line 2498 "commentscan.l"
 { 
       // any other character
    }
@@ -6494,7 +6273,6 @@ YY_RULE_SETUP
 case 173:
 /* rule 173 can match eol */
 YY_RULE_SETUP
-#line 2504 "commentscan.l"
 { 
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6510,7 +6288,6 @@ YY_RULE_SETUP
 case 174:
 /* rule 174 can match eol */
 YY_RULE_SETUP
-#line 2516 "commentscan.l"
 { 
       // line continuation
       yyLineNr++;
@@ -6520,7 +6297,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
-#line 2523 "commentscan.l"
 { 
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6531,7 +6307,6 @@ YY_RULE_SETUP
 /* ----- handle argument of ingroup command ------- */
 case 176:
 YY_RULE_SETUP
-#line 2533 "commentscan.l"
 { 
       // group id
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6543,7 +6318,6 @@ YY_RULE_SETUP
 case 177:
 /* rule 177 can match eol */
 YY_RULE_SETUP
-#line 2541 "commentscan.l"
 { 
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6563,7 +6337,6 @@ YY_RULE_SETUP
 case 178:
 /* rule 178 can match eol */
 YY_RULE_SETUP
-#line 2557 "commentscan.l"
 { 
       // line continuation
       yyLineNr++;
@@ -6572,7 +6345,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 179:
 YY_RULE_SETUP
-#line 2563 "commentscan.l"
 { 
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6583,7 +6355,6 @@ YY_RULE_SETUP
 case 180:
 /* rule 180 can match eol */
 YY_RULE_SETUP
-#line 2572 "commentscan.l"
 { 
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6602,7 +6373,6 @@ YY_RULE_SETUP
 case 181:
 /* rule 181 can match eol */
 YY_RULE_SETUP
-#line 2587 "commentscan.l"
 { 
       // line continuation
       yyLineNr++;
@@ -6611,7 +6381,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-#line 2593 "commentscan.l"
 { 
       // non-special characters
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6620,7 +6389,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 183:
 YY_RULE_SETUP
-#line 2599 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       functionProto += text;
@@ -6629,7 +6397,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 184:
 YY_RULE_SETUP
-#line 2605 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       functionProto += text;
@@ -6638,7 +6405,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-#line 2611 "commentscan.l"
 { 
       // add other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6649,7 +6415,6 @@ YY_RULE_SETUP
 case 186:
 /* rule 186 can match eol */
 YY_RULE_SETUP
-#line 2619 "commentscan.l"
 { 
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6674,7 +6439,6 @@ YY_RULE_SETUP
 case 187:
 /* rule 187 can match eol */
 YY_RULE_SETUP
-#line 2640 "commentscan.l"
 { 
       // line continuation
       yyLineNr++;
@@ -6683,7 +6447,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-#line 2646 "commentscan.l"
 { 
       // add other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6693,7 +6456,6 @@ YY_RULE_SETUP
 /* ----- handle argument of inherit command ------- */
 case 189:
 YY_RULE_SETUP
-#line 2655 "commentscan.l"
 { 
       // found argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6705,7 +6467,6 @@ YY_RULE_SETUP
 case 190:
 /* rule 190 can match eol */
 YY_RULE_SETUP
-#line 2663 "commentscan.l"
 { 
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6722,7 +6483,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
-#line 2677 "commentscan.l"
 { 
       // invalid character for anchor label
       warn(yyFileName, yyLineNr, "Invalid or missing name for \\inherit command");
@@ -6732,7 +6492,6 @@ YY_RULE_SETUP
 /* ----- handle argument of extends and implements commands ------- */
 case 192:
 YY_RULE_SETUP
-#line 2686 "commentscan.l"
 { 
       // found argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6743,7 +6502,6 @@ YY_RULE_SETUP
 case 193:
 /* rule 193 can match eol */
 YY_RULE_SETUP
-#line 2693 "commentscan.l"
 { 
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6759,7 +6517,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-#line 2706 "commentscan.l"
 { 
       // ignore other stuff
    }
@@ -6767,7 +6524,6 @@ YY_RULE_SETUP
 /* ----- handle language specific sections ------- */
 case 195:
 YY_RULE_SETUP
-#line 2712 "commentscan.l"
 {
       /* language switch */
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6781,7 +6537,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 196:
 YY_RULE_SETUP
-#line 2723 "commentscan.l"
 { 
       /* any character not a *, @, backslash or new line */
    }
@@ -6789,7 +6544,6 @@ YY_RULE_SETUP
 case 197:
 /* rule 197 can match eol */
 YY_RULE_SETUP
-#line 2727 "commentscan.l"
 { 
       /* new line in verbatim block */
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6801,7 +6555,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 198:
 YY_RULE_SETUP
-#line 2736 "commentscan.l"
 { 
       /* any other character */
    }
@@ -6809,7 +6562,6 @@ YY_RULE_SETUP
 /* ----- handle arguments of the cite command ------- */
 case 199:
 YY_RULE_SETUP
-#line 2743 "commentscan.l"
 { 
       // found argyment
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6822,7 +6574,6 @@ YY_RULE_SETUP
 case 200:
 /* rule 200 can match eol */
 YY_RULE_SETUP
-#line 2752 "commentscan.l"
 { 
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
@@ -6838,7 +6589,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
-#line 2765 "commentscan.l"
 { 
       // invalid character for cite label
       warn(yyFileName,yyLineNr, "Invalid or missing cite label");
@@ -6847,11 +6597,9 @@ YY_RULE_SETUP
 	YY_BREAK
 /* ----- handle argument of the copydoc command ------- */
 case YY_STATE_EOF(CopyDoc):
-#line 2774 "commentscan.l"
 case 202:
 /* rule 202 can match eol */
 YY_RULE_SETUP
-#line 2775 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       if (text[0] == '\n')   {
@@ -6871,7 +6619,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 203:
 YY_RULE_SETUP
-#line 2792 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_copyDocArg += text;
@@ -6880,7 +6627,6 @@ YY_RULE_SETUP
 	YY_BREAK
 case 204:
 YY_RULE_SETUP
-#line 2798 "commentscan.l"
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_copyDocArg += text;
@@ -6889,10 +6635,8 @@ YY_RULE_SETUP
 	YY_BREAK
 case 205:
 YY_RULE_SETUP
-#line 2804 "commentscan.l"
 ECHO;
 	YY_BREAK
-#line 6896 "<stdout>"
 			case YY_STATE_EOF(INITIAL):
 			case YY_STATE_EOF(Comment):
 			case YY_STATE_EOF(PageDocArg1):
@@ -7905,10 +7649,6 @@ void commentscanYYfree (void * ptr )
 }
 
 #define YYTABLES_NAME "yytables"
-
-#line 2804 "commentscan.l"
-
-
 
 static bool handleBrief(const QString &)
 {

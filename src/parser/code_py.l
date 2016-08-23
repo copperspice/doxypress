@@ -976,10 +976,20 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       endFontClass();
    }
 
+   "self."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER}"(" {
+      codify("self.");
+		findMemberLink(*g_code, text.mid(5));
+   }
+
    "self."{IDENTIFIER}/"("       {
       QString text = QString::fromUtf8(yytext);
       codify("self.");
       findMemberLink(*g_code, text.mid(5));
+   }
+
+   "self."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER} {
+      codify("self.");
+		findMemberLink(*g_code, text.mid(5));
    }
 
    "self."{IDENTIFIER}           {
@@ -988,10 +998,20 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       findMemberLink(*g_code, text.mid(5));
    }
 
+   "cls."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER}"(" {
+		codify("cls.");
+	   findMemberLink(*g_code, text.mid(4));
+   }
+
    "cls."{IDENTIFIER}/"("       {
       QString text = QString::fromUtf8(yytext);
       codify("cls.");
       findMemberLink(*g_code, text.mid(4));
+   }
+
+   "cls."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER} {
+		codify("cls.");
+	   findMemberLink(*g_code, text.mid(4));
    }
 
    "cls."{IDENTIFIER}           {

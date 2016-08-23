@@ -462,8 +462,7 @@ class PerlModDocVisitor : public DocVisitor
    void visitPre(DocParBlock *);
    void visitPost(DocParBlock *);
 
- private:
-  
+ private:  
    void addLink(const QString &ref, const QString &file, const QString &anchor);
 
    void enterText();
@@ -715,9 +714,9 @@ void PerlModDocVisitor::visit(DocStyleChange *s)
          break;
 
    }
+
    openItem("style");
-   m_output.addFieldQuotedString("style", style)
-   .addFieldBoolean("enable", s->enable());
+   m_output.addFieldQuotedString("style", style).addFieldBoolean("enable", s->enable());
    closeItem();
 }
 
@@ -726,44 +725,67 @@ void PerlModDocVisitor::visit(DocVerbatim *s)
    const char *type = 0;
    switch (s->type()) {
       case DocVerbatim::Code:
+
 #if 0
          m_output.add("<programlisting>");
          parseCode(m_ci, s->context(), s->text(), false, 0);
          m_output.add("</programlisting>");
-#endif
          return;
+#endif
+
       case DocVerbatim::Verbatim:
          type = "preformatted";
          break;
+
       case DocVerbatim::HtmlOnly:
          type = "htmlonly";
          break;
+
       case DocVerbatim::RtfOnly:
          type = "rtfonly";
          break;
+
       case DocVerbatim::ManOnly:
          type = "manonly";
          break;
+
       case DocVerbatim::LatexOnly:
          type = "latexonly";
          break;
+
       case DocVerbatim::XmlOnly:
          type = "xmlonly";
          break;
+
       case DocVerbatim::DocbookOnly:
          type = "docbookonly";
          break;
+
       case DocVerbatim::Dot:
          type = "dot";
          break;
+
       case DocVerbatim::Msc:
          type = "msc";
          break;
+
       case DocVerbatim::PlantUML:
          type = "plantuml";
          break;
    }
+
    openItem(type);
+
+   if (s->hasCaption()) {
+      openSubBlock("caption");
+
+      for (auto item : s->children()) {
+         item->accept(this);
+      }
+
+      closeSubBlock();
+   }
+ 
    m_output.addFieldQuotedString("content", s->text());
    closeItem();
 }
@@ -771,6 +793,7 @@ void PerlModDocVisitor::visit(DocVerbatim *s)
 void PerlModDocVisitor::visit(DocAnchor *anc)
 {
    QString anchor = anc->file() + "_1" + anc->anchor();
+
    openItem("anchor");
    m_output.addFieldQuotedString("id", anchor);
    closeItem();
@@ -904,11 +927,7 @@ void PerlModDocVisitor::visitPre(DocPara *)
       m_textblockstart = false;
    } else {
       singleItem("parbreak");
-   }
-   /*
-   openItem("para");
-   openSubBlock("content");
-   */
+   }  
 }
 
 void PerlModDocVisitor::visitPost(DocPara *)
@@ -1038,7 +1057,8 @@ void PerlModDocVisitor::visitPre(DocSection *s)
 {
    QString sect = QString("sect%1").arg(s->level());
 
-   openItem(sect);
+   openItem(sect);   
+   m_output.addFieldQuotedString("title", s->title());
    openSubBlock("content");
 }
 
@@ -1421,6 +1441,7 @@ void PerlModDocVisitor::visitPre(DocParamSect *s)
          err("Unknown parameter section found\n");
          break;
    }
+
    openOther();
    openSubBlock(type);
 }
@@ -1447,7 +1468,29 @@ void PerlModDocVisitor::visitPre(DocParamList *pl)
 
       }
 
-      m_output.openHash().addFieldQuotedString("name", s).closeHash();
+      QString dir        = "";
+      DocParamSect *sect = nullptr;
+      
+      if (pl->parent()->kind() == DocNode::Kind_ParamSect) {
+         sect = (DocParamSect *)pl->parent();
+      }
+
+      if (sect && sect->hasInOutSpecifier()) {
+         if (pl->direction() != DocParamSect::Unspecified) {
+
+            if (pl->direction() == DocParamSect::In) {
+               dir = "in";
+
+            } else if (pl->direction() == DocParamSect::Out) {
+               dir = "out";
+
+            } else if (pl->direction() == DocParamSect::InOut) {
+               dir = "in,out";
+            }
+         }
+      }
+
+      m_output.openHash().addFieldQuotedString("name", s).addFieldQuotedString("dir", dir).closeHash();
    }
 
    m_output.closeList().openList("doc");
@@ -1473,9 +1516,11 @@ void PerlModDocVisitor::visitPre(DocXRefItem *x)
    m_output.add("</xreftitle>");
    m_output.add("<xrefdescription>");
 #endif
+
    if (x->title().isEmpty()) {
       return;
    }
+
    openItem("xrefitem");
    openSubBlock("content");
 }
@@ -1487,10 +1532,12 @@ void PerlModDocVisitor::visitPost(DocXRefItem *x)
    }
    closeSubBlock();
    closeItem();
+
 #if 0
    m_output.add("</xrefdescription>");
    m_output.add("</xrefsect>");
 #endif
+
 }
 
 void PerlModDocVisitor::visitPre(DocInternalRef *ref)

@@ -253,8 +253,8 @@ namespace Doxy_Work{
 
    ClassDef::CompoundType convertToCompoundType(int section, Entry::Traits data);
 
-   void copyExtraFiles(const QString &kind);
-   void copyLogo();
+   void copyExtraFiles(const QString &outputType);
+   void copyLogo(const QString &outputType);
    void copyStyleSheet();
    void copyLatexStyleSheet();
 
@@ -910,7 +910,8 @@ void generateOutput()
    bool generateMan   = Config::getBool("generate-man");
    bool generateRtf   = Config::getBool("generate-rtf");
 
-   const QString htmlOutput = Config::getString("html-output");
+   static const QString htmlOutput  = Config::getString("html-output");
+   static const QString latexOutput = Config::getString("latex-output");
   
    Doxy_Globals::g_outputList = new OutputList(true);
 
@@ -919,11 +920,11 @@ void generateOutput()
       HtmlGenerator::init();
 
       // add HTML indexers that are enabled
-      bool generateHtmlHelp    = Config::getBool("generate-chm");
-      bool generateEclipseHelp = Config::getBool("generate-eclipse");
-      bool generateQhp         = Config::getBool("generate-qthelp");
-      bool generateTreeView    = Config::getBool("generate-treeview");
-      bool generateDocSet      = Config::getBool("generate-docset");
+      bool generateHtmlHelp     = Config::getBool("generate-chm");
+      bool generateEclipseHelp  = Config::getBool("generate-eclipse");
+      bool generateQhp          = Config::getBool("generate-qthelp");
+      bool generateTreeView     = Config::getBool("generate-treeview");
+      bool generateDocSet       = Config::getBool("generate-docset");    
 
       if (generateEclipseHelp) {
          Doxy_Globals::indexList->addIndex(QSharedPointer<EclipseHelp>(new EclipseHelp));
@@ -946,24 +947,12 @@ void generateOutput()
       }
 
       Doxy_Globals::indexList->initialize();
-      HtmlGenerator::writeTabData();
-
-      // copy files
-      copyStyleSheet(); 
-      copyLogo();   
-      copyExtraFiles("html");
-
-      FTVHelp::generateTreeViewImages();
+      HtmlGenerator::writeTabData();      
    }
 
-   if (generateLatex) {
+   if (generateLatex) {    
       Doxy_Globals::g_outputList->add(new LatexGenerator);
-      LatexGenerator::init();
-
-      copyLatexStyleSheet();
-
-      // copy static stuff
-      copyExtraFiles("latex");
+      LatexGenerator::init(); 
    }
 
    if (generateMan) {
@@ -972,8 +961,12 @@ void generateOutput()
    }
 
    if (generateRtf) {
+      static QString rtfOutput = Config::getString("rtf-output");
+
       Doxy_Globals::g_outputList->add(new RTFGenerator);
       RTFGenerator::init();
+
+      copyLogo(rtfOutput);
    }
 
    if (Config::getBool("use-htags")) {
@@ -1173,6 +1166,22 @@ void generateOutput()
       DotManager::instance()->run();
       Doxy_Globals::g_stats.end();
    }
+
+   // copy static files
+   if (generateHtml)     {
+      FTVHelp::generateTreeViewImages();
+
+      copyStyleSheet();
+      copyLogo(htmlOutput);
+      copyExtraFiles("html");     
+   }
+
+   if (generateLatex)  {  
+        copyLatexStyleSheet();
+      copyLogo(latexOutput);
+      copyExtraFiles("latex");
+   }
+
 
    if (generateHtml && Config::getBool("generate-chm") && ! Config::getString("hhc-location").isEmpty()) {
 
@@ -9273,7 +9282,7 @@ void Doxy_Work::copyLatexStyleSheet()
    }
 }
 
-void Doxy_Work::copyLogo()
+void Doxy_Work::copyLogo(const QString &outputType)
 {
    static const QDir configDir = Config::getConfigDir();
    static const QString projectLogo = Config::getString("project-logo");
@@ -9284,8 +9293,8 @@ void Doxy_Work::copyLogo()
       if (! fi.exists()) {
          err("Project logo file '%s' does not exist\n", csPrintable(projectLogo));        
 
-      } else {
-         QString destFileName = Config::getString("html-output") + "/" + fi.fileName();
+      } else {       
+         QString destFileName = outputType + "/" + fi.fileName();
          copyFile(fi.absoluteFilePath(), destFileName);
 
          Doxy_Globals::indexList->addImageFile(fi.fileName());
@@ -9293,14 +9302,14 @@ void Doxy_Work::copyLogo()
    }
 }
 
-void Doxy_Work::copyExtraFiles(const QString &kind)
+void Doxy_Work::copyExtraFiles(const QString &outputType)
 {  
    const QDir configDir = Config::getConfigDir();
 
    QString outputDir;
    QStringList extraFiles;
 
-   if (kind == "html") { 
+   if (outputType == "html") { 
       outputDir  = Config::getString("html-output") + "/";     
       extraFiles = Config::getList("html-extra-files");
 
@@ -9316,7 +9325,7 @@ void Doxy_Work::copyExtraFiles(const QString &kind)
 
          if (! fi.exists()) {
 
-            if (kind == "html") {
+            if (outputType == "html") {
                err("Extra file '%s' specified in 'HTML EXTRA FILES' does not exist\n", csPrintable(fileName));
             } else {
                 err("Extra file '%s' specified in 'LATEX EXTRA FILES' does not exist\n", csPrintable(fileName));

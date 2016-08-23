@@ -34,12 +34,202 @@
 #include <resourcemgr.h>
 #include <util.h>
 
+LatexCodeGenerator::LatexCodeGenerator(QTextStream &t, const QString &relPath, const QString &sourceFileName)
+  : m_relPath(relPath), m_sourceFileName(sourceFileName), m_col(0)
+{
+   m_prettyCode = Config::getBool("latex-source-code");
+   setTextStream(t);
+}
+
+LatexCodeGenerator::LatexCodeGenerator() : m_col(0)
+{
+   m_prettyCode = Config::getBool("latex-source-code");
+}
+
+void LatexCodeGenerator::setTextStream(QTextStream &t)
+{
+   m_streamSet = (t.device() != nullptr);
+   m_t.setDevice(t.device());
+}
+
+void LatexCodeGenerator::setRelativePath(const QString &path)
+{
+   m_relPath = path;
+}
+
+void LatexCodeGenerator::setSourceFileName(const QString &name)
+{
+   m_sourceFileName = name;
+}
+
+void LatexCodeGenerator::codify(const QString &str)
+{
+   if (str.isEmpty()) {
+      return;
+   }
+
+   QString result;
+
+   const QChar *p = str.constData();
+   QChar c;
+
+   static int tabSize   = Config::getInt("tab-size");
+   const int maxLineLen = 108;       
+
+   while ((c = *p) != 0) {
+
+      switch(c.unicode())  {
+         case 0x0c: 
+            // remove ^L
+            p++; 
+            break;
+
+         case '\t':  {
+            
+            int spacesToNextTabStop = tabSize - (m_col % tabSize);
+            m_t << QString(spacesToNextTabStop, QChar(' '));
+            m_col += spacesToNextTabStop;
+
+            p++;
+
+            break;
+         }
+
+         case '\n': 
+            m_t << '\n'; 
+            m_col = 0; 
+            p++;
+
+            break;
+
+         default:
+            // gather characters until we find whitespace or are at the end of a line
+            result += c;
+            p++;
+           
+            if (m_col >= maxLineLen) {
+               // force line break
+            
+               m_t << "\n      ";
+               m_col = 0;
+            
+            } else  {
+               // copy more characters
+            
+               while (m_col < maxLineLen && ((c = *p) != 0) && c != 0x0c && c != '\t' && c != '\n' && c != ' ')  {
+                  result += c;
+                  p++;
+               }
+
+               if (m_col >= maxLineLen) {
+                  // force line break   
+            
+                  m_t << "\n      ";
+                  m_col=0;
+               }
+            }
+            
+            filterLatexString(m_t, result, false, true);           
+            break;      
+    }
+  }
+
+}
+
+void LatexCodeGenerator::writeCodeLink(const QString &ref, const QString &f, const QString &anchor,
+                  const QString &name, const QString &)
+{
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
+
+   int len = name.length();
+
+   if (m_col + len > 80) {
+      m_t << "\n      ";
+      m_col = 0;
+   }
+
+   if (ref.isEmpty() && usePDFLatex && pdfHyperlinks) {
+      m_t << "\\hyperlink{";
+
+      if (! f.isEmpty()) {
+         m_t << stripPath(f);
+      }
+
+      if (! f.isEmpty() && ! anchor.isEmpty()) {
+         m_t << "_"; 
+      }   
+
+      if (! anchor.isEmpty()) {
+         m_t << anchor; 
+      }
+
+      m_t << "}{";
+      codify(name);
+      m_t << "}";
+
+   } else {
+      m_t << name;
+   }
+
+   m_col += len;
+}
+
+void LatexCodeGenerator::writeLineNumber(const QString &ref, const QString &fileName, const QString &anchor, int len)
+{
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
+
+   if (m_prettyCode) {
+      QString lineNumber = QString("%1").arg(len, 5, 10, QChar('0'));
+   
+      if (! fileName.isEmpty() && ! m_sourceFileName.isEmpty()) {
+         QString lineAnchor = "_l" + lineNumber;
+         lineAnchor.prepend(m_sourceFileName);
+
+         if (usePDFLatex && pdfHyperlinks) {
+            m_t << "\\hypertarget{" << stripPath(lineAnchor) << "}{}";
+         }
+
+         writeCodeLink(ref, fileName, anchor, lineNumber, 0);
+
+      } else {
+         codify(lineNumber);
+      }
+
+      m_t << " ";
+
+   } else {
+      m_t << len << " ";
+   }
+}
+
+void LatexCodeGenerator::startCodeLine(bool)
+{
+   m_col = 0;
+}
+
+void LatexCodeGenerator::endCodeLine()
+{
+   codify("\n");
+}
+
+void LatexCodeGenerator::startFontClass(const QString &name)
+{
+   m_t << "\\textcolor{" << name << "}{";
+}
+
+void LatexCodeGenerator::endFontClass()
+{
+   m_t << "}";
+}
+
+// ** 
 LatexGenerator::LatexGenerator() : OutputGenerator()
 {
    m_dir        = Config::getString("latex-output");
    m_prettyCode = Config::getBool("latex-source-code");
-
-   col = 0;
+  
    m_indent = 0;
 
    insideTabbing      = false;
@@ -355,19 +545,17 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n";
 
    // Define page & text layout   
-   QString paperType = Config::getEnum("latex-paper-type");
+   QString paperName = Config::getEnum("latex-paper-type");
   
    t_stream << "% Page & text layout\n"
      "\\usepackage{geometry}\n"
      "\\geometry{%\n"
-     "  " << paperType << "paper,%\n"
+     "  " << paperName << "paper,%\n"
      "  top=2.5cm,%\n"
      "  bottom=2.5cm,%\n"
      "  left=2.5cm,%\n"
      "  right=2.5cm%\n"
-     "}\n";
-
-   // \sloppy is obsolete (see bug 563698)
+     "}\n"; 
 
    // Allow a bit of overflow to go unnoticed by other means
    t_stream << "\\tolerance=750\n"
@@ -466,7 +654,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    }
 
    // Hyperlinks
-   bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       t_stream << "% Hyperlinks (required, but should be loaded last)\n"
@@ -515,13 +703,13 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
       // To avoid duplicate page anchors due to reuse of same numbers for
       // the index (be it as roman numbers)
       t_stream << "\\hypersetup{pageanchor=false,\n"
-               << "             bookmarks=true,\n"
+//             << "             bookmarks=true,\n"            // not used, unclear why
                << "             bookmarksnumbered=true,\n"
                << "             pdfencoding=unicode\n"
                << "            }\n";
    }
 
-   t_stream << "\\pagenumbering{roman}\n"
+   t_stream << "\\pagenumbering{alph}\n"
                "\\begin{titlepage}\n"
                "\\vspace*{7cm}\n"
                "\\begin{center}%\n"
@@ -557,6 +745,7 @@ static void writeDefaultHeaderPart3(QTextStream &t_stream)
    bool compactLatex = Config::getBool("latex-compact");
    if (!compactLatex) {
       t_stream << "\\clearemptydoublepage\n";
+      t_stream << "\\pagenumbering{roman}\n";
    }
 
    // ToC
@@ -566,13 +755,15 @@ static void writeDefaultHeaderPart3(QTextStream &t_stream)
    }
 
    t_stream << "\\pagenumbering{arabic}\n";
-   bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
-   bool usePDFLatex   = Config::getBool("latex-pdf");
+
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    if (pdfHyperlinks && usePDFLatex) {
       // re-enable anchors again
       t_stream << "\\hypersetup{pageanchor=true}\n";
    }
+
    t_stream << "\n"
      "%--- Begin generated contents ---\n";
 }
@@ -639,25 +830,25 @@ void LatexGenerator::writeStyleSheetFile(QFile &f)
 
 void LatexGenerator::startFile(const QString &name, const QString &, const QString &)
 {
-
-#if 0
-   setEncoding(Config::getString("latex-output-encoding"));
-#endif
-
    QString fileName = name;
-   m_relPath = relativePathToRoot(fileName);
-   m_sourceFileName = stripPath(fileName);
 
-   if (fileName.right(4) != ".tex" && fileName.right(4) != ".sty") {
+   m_relPath = relativePathToRoot(fileName);
+  
+   if (! fileName.endsWith(".tex") && ! fileName.endsWith(".sty")) {
       fileName += ".tex";
    }
+
    startPlainFile(fileName);
+
+   m_codeGen.setTextStream(m_textStream);
+   m_codeGen.setRelativePath(m_relPath);
+   m_codeGen.setSourceFileName(stripPath(fileName));
 }
 
 void LatexGenerator::endFile()
 {
    endPlainFile();
-   m_sourceFileName.resize(0);
+   m_codeGen.setSourceFileName("");
 }
 
 //void LatexGenerator::writeIndex()
@@ -668,16 +859,6 @@ void LatexGenerator::endFile()
 void LatexGenerator::startProjectNumber()
 {
    m_textStream << "\\\\[1ex]\\large ";
-}
-
-static QByteArray convertToLaTeX(const QString &s)
-{
-   QByteArray result;
-
-   QTextStream t(&result);
-   filterLatexString(t, s, false, false, false);
-
-   return result;
 }
 
 void LatexGenerator::startIndexSection(IndexSections is)
@@ -929,7 +1110,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
 
 void LatexGenerator::endIndexSection(IndexSections is)
 {
-   //static bool compactLatex = Config::getBool("latex-compact");
+   // static bool compactLatex = Config::getBool("latex-compact");
    static bool sourceBrowser  = Config::getBool("source-code");
    static QString latexHeader = Config::getString("latex-header");
    static QString latexFooter = Config::getString("latex-footer");
@@ -1135,9 +1316,9 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
 QString LatexGenerator::modifyKeywords(const QString &output) 
 {
-   static QString projectName    = convertToLaTeX(Config::getString("project-name"));
-   static QString projectVersion = convertToLaTeX(Config::getString("project-version"));
-   static QString projectBrief   = convertToLaTeX(Config::getString("project-brief"));
+   static QString projectName    = convertToLatex(Config::getString("project-name"));
+   static QString projectVersion = convertToLatex(Config::getString("project-version"));
+   static QString projectBrief   = convertToLatex(Config::getString("project-brief"));
    static QString projectLogo    = Config::getString("project-logo");
 
    QString result = output;
@@ -1321,7 +1502,9 @@ void LatexGenerator::endTextLink()
 
 void LatexGenerator::writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &text)
 {
-   if (! disableLinks && ref.isEmpty() && Config::getBool("latex-hyper-pdf")) {
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
+   if (! disableLinks && ref.isEmpty() && pdfHyperlinks) {
       m_textStream << "\\hyperlink{";
 
       if (! file.isEmpty()) {
@@ -1366,45 +1549,6 @@ void LatexGenerator::endPageRef(const QString &clname, const QString &anchor)
    m_textStream << "}";
 }
 
-void LatexGenerator::writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
-                                   const QString &name, const QString &)
-{
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
-   static bool usePDFLatex   = Config::getBool("latex-pdf");
-
-   int l = name.length();
-
-   if (col + l > 80) {
-      m_textStream << "\n      ";
-      col = 0;
-   }
-
-   if (/*m_prettyCode &&*/ ! disableLinks && ref.isEmpty() && usePDFLatex && pdfHyperlinks) {
-      m_textStream << "\\hyperlink{";
-
-      if (! file.isEmpty()) {
-         m_textStream << stripPath(file);
-      }
-
-      if (! file.isEmpty() && ! anchor.isEmpty()) {
-         m_textStream << "_";
-      }
-
-      if (! anchor.isEmpty()) {
-         m_textStream << anchor;
-      }
-
-      m_textStream << "}{";
-      codify(name);
-      m_textStream << "}";
-
-   } else {
-      m_textStream << name;
-   }
-
-   col += l;
-}
-
 void LatexGenerator::startTitleHead(const QString &fileName)
 {
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
@@ -1427,10 +1571,10 @@ void LatexGenerator::endTitleHead(const QString &fileName, const QString &name)
 
    if (! name.isEmpty()) {
       m_textStream << "\\label{" << stripPath(fileName) << "}\\index{";
-      escapeLabelName(name);
+      m_textStream << latexEscapeLabelName(name,insideTabbing);
 
       m_textStream << "@{";
-      escapeMakeIndexChars(name);
+      m_textStream << latexEscapeIndexChars(name,insideTabbing);
 
       m_textStream << "}}" << endl;
    }
@@ -1440,8 +1584,10 @@ void LatexGenerator::startTitle()
 {
    if (Config::getBool("latex-compact")) {
       m_textStream << "\\subsection{";
+
    } else {
       m_textStream << "\\section{";
+
    }
 }
 
@@ -1493,35 +1639,43 @@ void LatexGenerator::startMemberDoc(const QString &clname, const QString &memnam
       m_textStream << "\\index{";
 
       if (! clname.isEmpty()) {
-         escapeLabelName(clname);
+         m_textStream << latexEscapeLabelName(clname, insideTabbing);
          m_textStream << "@{";
-         escapeMakeIndexChars(clname);
+
+         m_textStream << latexEscapeIndexChars(clname, insideTabbing);
          m_textStream << "}!";
       }
 
-      escapeLabelName(memname);
+      m_textStream << latexEscapeLabelName(memname, insideTabbing);
       m_textStream << "@{";
-      escapeMakeIndexChars(memname);
-      m_textStream << "}}" << endl;
 
+      m_textStream << latexEscapeIndexChars(memname, insideTabbing);;
+      m_textStream << "}}" << endl;
       m_textStream << "\\index{";
-      escapeLabelName(memname);
+
+      m_textStream << latexEscapeLabelName(memname, insideTabbing);
       m_textStream << "@{";
-      escapeMakeIndexChars(memname);
+
+      m_textStream << latexEscapeIndexChars(memname, insideTabbing);
       m_textStream << "}";
 
       if (! clname.isEmpty()) {
          m_textStream << "!";
-         escapeLabelName(clname);
+
+         m_textStream << latexEscapeLabelName(clname, insideTabbing);
          m_textStream << "@{";
-         escapeMakeIndexChars(clname);
+
+         m_textStream << latexEscapeIndexChars(clname, insideTabbing);
          m_textStream << "}";
       }
+
       m_textStream << "}" << endl;
    }
 
    static const char *levelLab[] = { "subsubsection", "paragraph", "subparagraph", "subparagraph" };
-   static bool compactLatex = Config::getBool("latex-compact");
+   static bool compactLatex  = Config::getBool("latex-compact");
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    int level = 0;
 
    if (showInline) {
@@ -1532,21 +1686,21 @@ void LatexGenerator::startMemberDoc(const QString &clname, const QString &memnam
       level++;
    }
 
-   m_textStream << "\\" << levelLab[level];
-
-   //if (Config::getBool("latex-hyper-pdf") && memname)
-   //{
-   //  m_textStream << "[";
-   //  escapeMakeIndexChars(this,t,memname);
-   //  m_textStream << "]";
-   //}
-
+   m_textStream << "\\" << levelLab[level];  
    m_textStream << "[{";
-   escapeMakeIndexChars(title);
+
+   if (pdfHyperlinks)   {
+      m_textStream << "\\texorpdfstring{";
+   }
+
+   m_textStream << latexEscapeIndexChars(title, insideTabbing);
+
+   if (pdfHyperlinks) {
+      m_textStream << "}{" << latexEscapePDFString(title) << "}";
+   }
 
    m_textStream << "}]";
    m_textStream << "{\\setlength{\\rightskip}{0pt plus 5cm}";
-
    disableLinks = true;
 }
 
@@ -1621,23 +1775,26 @@ void LatexGenerator::addIndexItem(const QString &s1, const QString &s2)
 {
    if (! s1.isEmpty()) {
       m_textStream << "\\index{";
-      escapeLabelName(s1);
+
+      m_textStream << latexEscapeLabelName(s1, insideTabbing);
       m_textStream << "@{";
-      escapeMakeIndexChars(s1);
+
+      m_textStream << latexEscapeIndexChars(s1, insideTabbing);
       m_textStream << "}";
 
       if (! s2.isEmpty()) {
          m_textStream << "!";
-         escapeLabelName(s2);
+
+         m_textStream << latexEscapeLabelName(s2, insideTabbing);
          m_textStream << "@{";
-         escapeMakeIndexChars(s2);
+
+         m_textStream << latexEscapeIndexChars(s2, insideTabbing);
          m_textStream << "}";
       }
 
       m_textStream << "}";
    }
 }
-
 
 void LatexGenerator::startSection(const QString &lab, const QString &, SectionInfo::SectionType type)
 {
@@ -1707,72 +1864,6 @@ void LatexGenerator::endSection(const QString &lab, SectionInfo::SectionType)
 void LatexGenerator::docify(const QString &text)
 {
    filterLatexString(m_textStream, text, insideTabbing, false, false);
-}
-
-void LatexGenerator::codify(const QString &text)
-{
-   if (text.isEmpty()) {
-      return;
-   }
-
-   const QChar *p = text.constData();
-   QChar c;
-
-   int spacesToNextTabStop;
-
-   static int tabSize   = Config::getInt("tab-size");
-   const int maxLineLen = 108;
-
-   QString result;   
-
-   while ((c = *p) != 0) {
-      switch (c.unicode()) {
-         case 0x0c:
-            p++;  // remove ^L
-            break;
-
-         case '\t':
-            spacesToNextTabStop = tabSize - (col % tabSize);
-            m_textStream << QString(spacesToNextTabStop, QChar(' '));
-            col += spacesToNextTabStop;
-
-            p++;
-            break;
-
-         case '\n':
-            m_textStream << '\n';
-            col = 0;
-            p++;
-            break;
-
-         default:
-            result += c;
-            ++p;
-
-            if (col >= maxLineLen) { 
-               // force line break
-               m_textStream << "\n      ";
-               col = 0;
-
-            } else { 
-               // copy more characters
-
-               while (col < maxLineLen && (c = *p) != 0 && c != 0x0c && c != '\t' && c != '\n' && c != ' ') {
-                  result += c;
-                  ++p;
-               }
-
-               if (col >= maxLineLen) { 
-                  // force line break
-                  m_textStream << "\n      ";
-                  col = 0;
-               }
-            }
-
-            filterLatexString( m_textStream, result, insideTabbing, true);
-            break;         
-      }
-   }
 }
 
 void LatexGenerator::writeChar(char c)
@@ -2136,116 +2227,6 @@ void LatexGenerator::endConstraintList()
    m_textStream << "\\end{Desc}" << endl;
 }
 
-void LatexGenerator::escapeLabelName(const QString &text)
-{
-   if (text.isEmpty()) {
-      return;
-   }
-
-   const QChar *p = text.constData();
-   QChar c;
-
-   QString result;    
-  
-   while ((c = *p++) != 0) {
-      switch (c.unicode()) {
-         case '|':
-            m_textStream << "\\texttt{\"|}";
-            break;
-
-         case '!':
-            m_textStream << "\"!";
-            break;
-
-         case '%':
-            m_textStream << "\\%";
-            break;
-
-         case '{':
-            m_textStream << "\\lcurly{}";
-            break;
-
-         case '}':
-            m_textStream << "\\rcurly{}";
-            break;
-
-         case '~':
-            // to get it a bit better in index together with other special characters
-            m_textStream << "````~";
-            break; 
-
-         // NOTE: adding a case here, means adding it to while below as well
-
-         default:         
-            // collect as long string as possible, before handing it to docify
-            result += c;
-
-            while ((c = *p) != 0 && c != '|' && c != '!' && c != '%' && c != '{' && c != '}' && c != '~') {
-               result += c;
-               p++;
-            }
-        
-            docify(result);
-            break;
-      }
-   }
-}
-
-void LatexGenerator::escapeMakeIndexChars(const QString &text)
-{
-   if (text.isEmpty()) {
-      return;
-   }
-
-   const QChar *p = text.constData();
-   QChar c;
-
-   QString result;    
-
-   while ((c = *p++) != 0) {
-      switch (c.unicode()) {
-         case '!':
-            m_textStream << "\"!";
-            break;
-         case '"':
-            m_textStream << "\"\"";
-            break;
-         case '@':
-            m_textStream << "\"@";
-            break;
-         case '|':
-            m_textStream << "\\texttt{\"|}";
-            break;
-         case '[':
-            m_textStream << "[";
-            break;
-         case ']':
-            m_textStream << "]";
-            break;
-         case '{':
-            m_textStream << "\\lcurly{}";
-            break;
-         case '}':
-            m_textStream << "\\rcurly{}";
-            break;
-
-         // NOTE: adding a case here, means adding it to while below as well
-         default:
-            
-            // collect as long string as possible, before handing it to docify
-            result += c;
-
-            while ((c = *p) != 0 && c != '"' && c != '@' && c != '[' && c != ']' && c != '!' && c != '{' && c != '}' && c != '|') {
-               result += c;
-               p++;
-            }
-           
-            docify(result);
-            break;
-      }
-   }
-}
-
 void LatexGenerator::startCodeFragment()
 {
    m_textStream << "\n\\begin{DoxyCode}\n";
@@ -2254,60 +2235,6 @@ void LatexGenerator::startCodeFragment()
 void LatexGenerator::endCodeFragment()
 {
    m_textStream << "\\end{DoxyCode}\n";
-}
-
-void LatexGenerator::writeLineNumber(const QString &ref, const QString &fileName, const QString &anchor, int len)
-{
-   static bool usePDFLatex   = Config::getBool("latex-pdf");
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
-
-   if (m_prettyCode) {
-      QString lineNumber = QString("%05d").arg(len);
-
-      if (! fileName.isEmpty() && ! m_sourceFileName.isEmpty()) {
-
-         QString lineAnchor;
-
-         lineAnchor = QString("_l%05d").arg(len);
-         lineAnchor.prepend(stripExtensionGeneral(m_sourceFileName, ".tex"));
-       
-         if (usePDFLatex && pdfHyperlinks) {
-            m_textStream << "\\hypertarget{" << stripPath(lineAnchor) << "}{}";
-         }
-
-         writeCodeLink(ref, fileName, anchor, lineNumber, 0);
-
-      } else {
-         codify(lineNumber);
-      }
-
-      m_textStream << " ";
-
-   } else {
-      m_textStream << len << " ";
-   }
-}
-
-void LatexGenerator::startCodeLine(bool)
-{
-   col = 0;
-}
-
-void LatexGenerator::endCodeLine()
-{
-   codify("\n");
-}
-
-void LatexGenerator::startFontClass(const QString &name)
-{
-   //if (! m_prettyCode) return;
-   m_textStream << "\\textcolor{" << name << "}{";
-}
-
-void LatexGenerator::endFontClass()
-{
-   //if (! m_prettyCode) return;
-   m_textStream << "}";
 }
 
 void LatexGenerator::startInlineHeader()

@@ -145,15 +145,14 @@ class MemberGroup : public EnableSharedFromThis
 
 /** Data collected for a member group */
 struct MemberGroupInfo {
-   MemberGroupInfo() : m_sli(0), docLine(-1)
+   MemberGroupInfo() : docLine(-1), m_listInfo(0)
    {}
 
    ~MemberGroupInfo() {
-      delete m_sli;
-      m_sli = 0;    
+      delete m_listInfo;
    }
 
-   void setRefItems(const QList<ListItemInfo> *sli);
+   void setRefItems(const QList<ListItemInfo> *list);
 
    QString header;
    QString doc;
@@ -161,7 +160,7 @@ struct MemberGroupInfo {
    int docLine;
    QString compoundName;
 
-   QList<ListItemInfo> *m_sli;
+   QList<ListItemInfo> *m_listInfo;
 };
 
 #endif
