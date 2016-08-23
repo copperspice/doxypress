@@ -301,7 +301,7 @@
         "cite-bib-files": [
             ""
         ],
-        "generate-latex": false,
+        "generate-latex": true,
         "latex-batch-mode": false,
         "latex-bib-style": "plain",
         "latex-cmd-name": "latex",

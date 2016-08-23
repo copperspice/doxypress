@@ -15,8 +15,7 @@
 /**
 \page table-test  Table Test (blank rows) 
 
-The following table has blank rows in the source. This caused layout issues and has been resolved and works properly in DoxyPress. The blank rows are not visible
-in the table outoput as shown below.
+The following table has blank rows in the source. This caused layout issues and has been resolved and works properly in DoxyPress. The blank rows are not visible in the table output as shown below.
 
 <br>
  
