@@ -50,13 +50,16 @@ int Formula::getId()
 
 void FormulaList::generateBitmaps(const QString &path)
 {
-   int x1, y1, x2, y2;
+   int x1;
+   int y1;
+   int x2;
+   int y2;
 
    // store the original directory
    QDir d(path);
  
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", qPrintable(path));
+      err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -66,7 +69,7 @@ void FormulaList::generateBitmaps(const QString &path)
    QDir::setCurrent(d.absolutePath());
    QDir thisDir = QDir::current();
 
-   // generate a latex file containing one formula per page.
+   // generate a latex file containing one formula per page
    QString texName = "_formulas.tex";
    QList<int> pagesToGenerate;
      
@@ -140,8 +143,7 @@ void FormulaList::generateBitmaps(const QString &path)
          QString formBase;
          formBase = QString("_form%1").arg(pageNum);
 
-         // run dvips to convert the page with number pageIndex to an
-         // encapsulated postscript.
+         // run dvips to convert the page with number pageIndex to an encapsulated postscript
 
          char dviArgs[4096];   
          sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",pageIndex, qPrintable(formBase));
@@ -151,6 +153,10 @@ void FormulaList::generateBitmaps(const QString &path)
          if (portable_system("dvips", dviArgs) != 0) {
             err("Unable to run dvips, check your installation\n");
             portable_sysTimerStop();
+
+            // reset the directory to the original location
+            QDir::setCurrent(oldDir);
+
             return;
          }
          portable_sysTimerStop();
@@ -219,6 +225,9 @@ void FormulaList::generateBitmaps(const QString &path)
          if (portable_system(gsExe, gsArgs) != 0) {
             err("Unable to run GhostScript %s %s. Verify your installation\n", qPrintable(gsExe), gsArgs);
             portable_sysTimerStop();
+
+            // reset the directory to the original location
+            QDir::setCurrent(oldDir);
 
             return;
          }

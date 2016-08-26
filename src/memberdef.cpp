@@ -1565,8 +1565,13 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          QString varName = ltype.right(ltype.length() - ir).trimmed();
 
          ol.docify("}");
+
          if (varName.isEmpty() && (name().isEmpty() || name().at(0) == '@')) {
             ol.docify(";");
+
+         } else if (! varName.isEmpty() && (varName.at(0) == '*' || varName.at(0) == '&')) {
+            ol.docify(" ");
+            ol.docify(varName);
          }
 
          endAnonScopeNeeded = true;

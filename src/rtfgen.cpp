@@ -2414,6 +2414,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    if (! outf.open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s (rtf preProcessB), error: %d\n", qPrintable(combinedName), outf.error());
 
+      // reset the directory to the original location
       QDir::setCurrent(oldDir);
       return false;
    }
@@ -2427,6 +2428,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
       // failed, remove the temp file
       outf.close();
 
+      // reset the directory to the original location
       QDir::setCurrent(oldDir);
       return false;
    }
@@ -2439,6 +2441,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
 
    testRTFOutput(mainRTFName);
 
+   // reset the directory to the original location
    QDir::setCurrent(oldDir);
 
    return true;

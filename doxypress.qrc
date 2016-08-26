@@ -29,6 +29,7 @@
         <file>resources/html/open.luma</file>
         <file>resources/html/resize.js</file>
         <file>resources/html/search.css</file>
+        <file>resources/html/search_nomenu.css</file>
         <file>resources/html/search.js</file>
         <file>resources/html/search_functions.php</file>
         <file>resources/html/search_l.png</file>

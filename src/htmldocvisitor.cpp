@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -38,19 +38,19 @@ static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
 
 static QString convertIndexWordToAnchor(const QString &word)
-{  
+{
    QString result = "a";
 
    for (auto c : word) {
-    
-      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || 
-            c == '-' || c == '.' || c == '_') { 
+
+      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') ||
+            c == '-' || c == '.' || c == '_') {
 
          result += c;
 
       } else {
-         result += QString(":%1").arg(c.unicode(), 2, 16, QChar('0'));       
-         
+         result += QString(":%1").arg(c.unicode(), 2, 16, QChar('0'));
+
       }
    }
 
@@ -125,8 +125,8 @@ static bool mustBeOutsideParagraph(DocNode *n)
 static QString htmlAttribsToString(const HtmlAttribList &attribs)
 {
    QString result;
-  
-   for (auto att : attribs) { 
+
+   for (auto att : attribs) {
       if (! att.value.isEmpty())  {
          // ignore attribute without values as they are not XHTML compliant
 
@@ -161,7 +161,7 @@ void HtmlDocVisitor::visit(DocLinkedWord *w)
    if (m_hide) {
       return;
    }
-   
+
    startLink(w->ref(), w->file(), w->relPath(), w->anchor(), w->tooltip());
    filter(w->word());
    endLink();
@@ -202,7 +202,7 @@ void HtmlDocVisitor::visit(DocURL *u)
       return;
    }
 
-   if (u->isEmail()) { 
+   if (u->isEmail()) {
       // mail address with no mailto
 
       QString url = "mailto:" + u->url();
@@ -211,7 +211,7 @@ void HtmlDocVisitor::visit(DocURL *u)
       filter(u->url());
       m_t << "</a>";
 
-   } else { 
+   } else {
       // web address defined with no <a>
 
       m_t << "<a href=\"" << u->url() << "\">";
@@ -341,7 +341,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
 
 static void visitPreCaption(QTextStream &t, DocVerbatim *s)
 {
-   if (s->hasCaption()) { 
+   if (s->hasCaption()) {
       t << "<div class=\"caption\">" << endl;
    }
 }
@@ -368,7 +368,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
    QString lang = m_langExt;
 
-   if (! s->language().isEmpty()) { 
+   if (! s->language().isEmpty()) {
       // explicit language setting
       lang = s->language();
    }
@@ -385,10 +385,10 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          {
             auto tmp = Doxy_Globals::parserManager->getParser(lang);
 
-            tmp->parseCode(m_ci, s->context(), s->text(), langExt, 
-                  s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), -1, -1, false, 
+            tmp->parseCode(m_ci, s->context(), s->text(), langExt,
+                  s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), -1, -1, false,
                   QSharedPointer<MemberDef>(), true, m_ctx);
-         }  
+         }
 
          m_t << PREFRAG_END;
          forceStartParagraph(s);
@@ -433,26 +433,26 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());      
+            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());
 
          } else {
 
             file.write(s->text().toUtf8());
             file.close();
-               
+
             m_t << "<div align=\"center\">" << endl;
-   
+
             writeDotFile(fileName, s->relPath(), s->context());
 
             visitPreCaption(m_t, s);
             visitCaption(this, s->children());
             visitPostCaption(m_t, s);
 
-            m_t << "</div>" << endl;            
-   
+            m_t << "</div>" << endl;
+
             if (Config::getBool("dot-cleanup")) {
                file.remove();
-            }            
+            }
          }
 
          forceStartParagraph(s);
@@ -470,18 +470,18 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
          QFile file(baseName + ".msc");
 
-         if (! file.open(QIODevice::WriteOnly)) {       
-            err("Unable to open file for writing %s.msc error: %d\n", csPrintable(baseName), file.error()); 
+         if (! file.open(QIODevice::WriteOnly)) {
+            err("Unable to open file for writing %s.msc error: %d\n", csPrintable(baseName), file.error());
 
          } else {
             QString text = "msc {";
             text += s->text();
             text += "}";
-   
+
             file.write( text.toUtf8() );
             file.close();
-   
-            m_t << "<div align=\"center\">" << endl;   
+
+            m_t << "<div align=\"center\">" << endl;
             writeMscFile(baseName + ".msc", s->relPath(), s->context());
 
             visitPreCaption(m_t, s);
@@ -492,7 +492,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
 
             if (Config::getBool("dot-cleanup")) {
                file.remove();
-            }                      
+            }
          }
 
          forceStartParagraph(s);
@@ -543,7 +543,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          m_t << PREFRAG_START;
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     inc->text(), langExt, inc->isExample(), inc->exampleFile(),                                     
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(),
                      QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), false, m_ctx);
 
          m_t << PREFRAG_END;
@@ -600,7 +600,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
 }
 
 void HtmlDocVisitor::visit(DocIncOperator *op)
-{  
+{
    if (op->isFirst()) {
       if (! m_hide) {
          m_t << PREFRAG_START;
@@ -667,7 +667,7 @@ void HtmlDocVisitor::visit(DocFormula *f)
       }
 
    } else {
-      m_t << "<img class=\"formula" << (bDisplay ? "Dsp" : "Inl"); 
+      m_t << "<img class=\"formula" << (bDisplay ? "Dsp" : "Inl");
       m_t << "\" alt=\"";
       filterQuotedCdataAttr(f->text());
 
@@ -695,7 +695,7 @@ void HtmlDocVisitor::visit(DocIndexEntry *e)
    }
 
    m_t << "<a name=\"" << anchor << "\"></a>";
-   
+
    Doxy_Globals::indexList->addIndexItem(e->scope(), e->member(), anchor, e->entry());
 }
 
@@ -1047,11 +1047,11 @@ void HtmlDocVisitor::visitPre(DocPara *p)
    bool isLast;
 
    t = getParagraphContext(p, isFirst, isLast);
-  
+
    if (isFirst && isLast) {
       needsTag = false;
    }
-  
+
    // write the paragraph tag (if needed)
    if (needsTag) {
       m_t << "<p" << contexts[t] << ">";
@@ -1088,7 +1088,7 @@ void HtmlDocVisitor::visitPost(DocPara *p)
             needsTag = false;
       }
    }
-  
+
    // if the last element of a paragraph is something that should be outside of
    // the paragraph (<ul>,<dl>,<table>) then that will already have ended the
    // paragraph and we don't need to do it here
@@ -1422,6 +1422,10 @@ void HtmlDocVisitor::visitPre(DocHtmlTable *t)
 
    forceEndParagraph(t);
 
+   if (t->hasCaption()) {
+      m_t << "<a class=\"anchor\" id=\"" << t->caption()->anchor() << "\"></a>\n";
+   }
+
    QString attrs = htmlAttribsToString(t->attribs());
 
    if (attrs.isEmpty()) {
@@ -1436,6 +1440,7 @@ void HtmlDocVisitor::visitPost(DocHtmlTable *t)
    if (m_hide) {
       return;
    }
+
    m_t << "</table>\n";
    forceStartParagraph(t);
 }
@@ -1489,21 +1494,7 @@ void HtmlDocVisitor::visitPre(DocHtmlCaption *c)
       return;
    }
 
-   bool hasAlign = false;
-  
-   for (auto att : c->attribs()) {    
-      if (att.name == "align") {
-         hasAlign = true;
-         break;
-      }
-   }
-
    m_t << "<caption" << htmlAttribsToString(c->attribs());
-
-   if (! hasAlign) {
-      m_t << " align=\"bottom\"";
-   }
-
    m_t << ">";
 }
 
@@ -1520,7 +1511,7 @@ void HtmlDocVisitor::visitPre(DocInternal *)
 {
    if (m_hide) {
       return;
-   } 
+   }
 }
 
 void HtmlDocVisitor::visitPost(DocInternal *)
@@ -1561,7 +1552,7 @@ void HtmlDocVisitor::visitPre(DocHtmlHeader *header)
    }
 
    forceEndParagraph(header);
-   m_t << "<h" << header->level() 
+   m_t << "<h" << header->level()
        << htmlAttribsToString(header->attribs()) << ">";
 }
 
@@ -1580,8 +1571,8 @@ void HtmlDocVisitor::visitPre(DocImage *img)
    if (img->type() == DocImage::Html) {
       // CopperSpice: do not force    04/19/2015
       // forceEndParagraph(img);
-     
-      if (m_hide) {         
+
+      if (m_hide) {
          return;
       }
 
@@ -1594,24 +1585,50 @@ void HtmlDocVisitor::visitPre(DocImage *img)
 
       m_t << "<div class=\"image\">" << endl;
 
+      QString sizeAttribs;
+
+      if (! img->width().isEmpty()) {
+         sizeAttribs += " width=\"" + img->width() + "\"";
+      }
+      
+      if (! img->height().isEmpty()) {
+         sizeAttribs += " height=\"" + img->height() + "\"";
+      }
+
       QString url = img->url();
 
       if (url.isEmpty()) {
-         m_t << "<img src=\"" << img->relPath() << img->name() << "\" alt=\""
-             << baseName << "\"" << htmlAttribsToString(img->attribs())
-             << "/>" << endl;
+
+         if (img->name().endsWith(".svg"))  {
+            m_t << "<object type=\"image/svg+xml\" data=\"" << img->relPath() << img->name()
+                  << "\"" << sizeAttribs << htmlAttribsToString(img->attribs()) << ">" << baseName
+                  << "</object>" << endl;
+
+         } else {   
+            m_t << "<img src=\"" << img->relPath() << img->name() << "\" alt=\""
+                << baseName << "\"" << sizeAttribs << htmlAttribsToString(img->attribs())
+                << "/>" << endl;
+         }
 
       } else {
-         m_t << "<img src=\"" << correctURL(url, img->relPath()) << "\" "
-             << htmlAttribsToString(img->attribs())
-             << "/>" << endl;
+
+         if (img->name().endsWith(".svg"))  {
+
+            m_t << "<object type=\"image/svg+xml\" data=\"" << correctURL(url,img->relPath())
+                << "\"" << sizeAttribs << htmlAttribsToString(img->attribs()) << "></object>" << endl;
+
+         } else {
+            m_t << "<img src=\"" << correctURL(url, img->relPath()) << "\" "
+                << sizeAttribs << htmlAttribsToString(img->attribs())
+                << "/>" << endl;
+         }
       }
 
       if (img->hasCaption()) {
          m_t << "<div class=\"caption\">" << endl;
       }
 
-   } else { 
+   } else {
       // other format -> skip
       pushEnabled();
       m_hide = true;
@@ -1752,7 +1769,7 @@ void HtmlDocVisitor::visitPost(DocRef *ref)
 
    if (! ref->file().isEmpty()) {
       endLink();
-   }   
+   }
 }
 
 void HtmlDocVisitor::visitPre(DocSecRefItem *ref)
@@ -1905,10 +1922,10 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
 
    if (sect && sect->hasTypeSpecifier()) {
       m_t << "<td class=\"paramtype\">";
-      
+
       bool first = true;
-      
-      for (auto type : pl->paramTypes()) { 
+
+      for (auto type : pl->paramTypes()) {
          if (!first) {
             m_t << "&#160;|&#160;";
 
@@ -1928,9 +1945,9 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
    }
 
    m_t << "<td class=\"paramname\">";
-  
+
    bool first = true;
- 
+
    for (auto param : pl->parameters()) {
       if (! first) {
          m_t << ",";
@@ -1950,7 +1967,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
 }
 
 void HtmlDocVisitor::visitPost(DocParamList *)
-{   
+{
    if (m_hide) {
       return;
    }
@@ -2087,7 +2104,7 @@ void HtmlDocVisitor::filter(const QString &str)
    if (result.contains("$tr") )  {
       // used in the doxypress test build to show sample translations
 
-      result = result.replace("$trPublicTypedefs",           theTranslator->trPublicTypedefs()); 
+      result = result.replace("$trPublicTypedefs",           theTranslator->trPublicTypedefs());
       result = result.replace("$trProtectedTypedefs",        theTranslator->trProtectedTypedefs() );
       result = result.replace("$trPrivateTypedefs",          theTranslator->trPrivateTypedefs());
       result = result.replace("$trConstructorDocumentation", theTranslator->trConstructorDocumentation());
@@ -2095,7 +2112,7 @@ void HtmlDocVisitor::filter(const QString &str)
       result = result.replace("$trDeprecatedList",           theTranslator->trDeprecatedList());
       result = result.replace("$trLegendDocs",               theTranslator->trLegendDocs("png"));
    }
-   
+
    for (auto c : result) {
 
       switch (c.unicode()) {
@@ -2136,29 +2153,29 @@ void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
             m_t << "&quot;";
             break;
 
-         case '<':  
-            m_t << "&lt;"; 
+         case '<':
+            m_t << "&lt;";
             break;
 
-         case '>':  
-            m_t << "&gt;"; 
+         case '>':
+            m_t << "&gt;";
             break;
-            
+
          default:
             m_t << c;
       }
    }
 }
 
-void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &relPath, 
+void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &relPath,
                   const QString &anchor, const QString &tooltip)
 {
-   if (! ref.isEmpty()) { 
+   if (! ref.isEmpty()) {
       // link to entity imported via tag file
       m_t << "<a class=\"elRef\" ";
       m_t << externalLinkTarget() << externalRef(relPath, ref, false);
 
-   } else { 
+   } else {
       // local link
       m_t << "<a class=\"el\" ";
    }
@@ -2196,7 +2213,7 @@ void HtmlDocVisitor::pushEnabled()
 
 void HtmlDocVisitor::popEnabled()
 {
-   m_hide = m_enabled.pop();   
+   m_hide = m_enabled.pop();
 }
 
 void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, const QString &context)
@@ -2208,7 +2225,7 @@ void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, con
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   if ((i = baseName.indexOf('.')) != -1) { 
+   if ((i = baseName.indexOf('.')) != -1) {
       // strip extension
       baseName = baseName.left(i);
    }
@@ -2225,12 +2242,12 @@ void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPat
    QString baseName = fileName;
    int i;
 
-   if ((i = baseName.lastIndexOf('/')) != -1) { 
+   if ((i = baseName.lastIndexOf('/')) != -1) {
       // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   if ((i = baseName.indexOf('.')) != -1) { 
+   if ((i = baseName.indexOf('.')) != -1) {
       // strip extension
       baseName = baseName.left(i);
    }
@@ -2289,7 +2306,7 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
    if (imgExt == "svg") {
       generatePlantUMLOutput(fileName, outDir, PUML_SVG);
 
-      // m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName 
+      // m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName
       //     << ".svg" << "\" />" << endl;
       // m_t << "<p><b>Yourbrowser is unable to show SVG: try Firefox, Chrome, Safari, or Opera instead</b></p>";
       // m_t << "</iframe>" << endl;
@@ -2304,7 +2321,7 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
 
 /** Returns TRUE if the child nodes in paragraph \a para until \a nodeIndex
     contain a style change node that is still active and that style change is one that
-    must be located outside of a paragraph, i.e. it is a center, div, or pre tag.    
+    must be located outside of a paragraph, i.e. it is a center, div, or pre tag.
  */
 static bool insideStyleChange_OutsidePara(DocPara *para,int nodeIndex)
 {
@@ -2318,7 +2335,7 @@ static bool insideStyleChange_OutsidePara(DocPara *para,int nodeIndex)
          DocStyleChange *sc = dynamic_cast<DocStyleChange*>(n);
 
          if (! sc->enable()) {
-            // remember styles which have been closed already      
+            // remember styles which have been closed already
             styleMask |= sc->style();
          }
 
@@ -2326,7 +2343,7 @@ static bool insideStyleChange_OutsidePara(DocPara *para,int nodeIndex)
                   sc->style() == DocStyleChange::Div || sc->style() == DocStyleChange::Preformatted);
 
          if (sc->enable() && (styleMask&(int)sc->style()) == 0 && paraStyle) {
-            // style change that is still active          
+            // style change that is still active
             styleOutsideParagraph = true;
          }
       }
@@ -2338,7 +2355,7 @@ static bool insideStyleChange_OutsidePara(DocPara *para,int nodeIndex)
 }
 
 /** Used for items found inside a paragraph, which due to XHTML restrictions
- *  have to be outside of the paragraph. This method will force the end of 
+ *  have to be outside of the paragraph. This method will force the end of
  *  the current paragraph and forceStartParagraph() will restart it.
  */
 void HtmlDocVisitor::forceEndParagraph(DocNode *n)
@@ -2351,7 +2368,7 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
       nodeIndex--;
       if (nodeIndex < 0) {
          // first node
-         return;   
+         return;
       }
 
       while (nodeIndex >= 0 && para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
@@ -2360,7 +2377,7 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
 
       if (nodeIndex >= 0) {
          DocNode *n = para->children().at(nodeIndex);
-        
+
          if (mustBeOutsideParagraph(n)) {
             return;
          }
@@ -2373,7 +2390,7 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
       bool isLast;
 
       getParagraphContext(para, isFirst, isLast);
-      
+
       if (isFirst && isLast) {
          return;
       }
@@ -2391,8 +2408,8 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
  *  the paragraph, that was previously ended by forceEndParagraph().
  */
 void HtmlDocVisitor::forceStartParagraph(DocNode *n)
-{  
-   if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) { 
+{
+   if (n->parent() && n->parent()->kind() == DocNode::Kind_Para) {
       // if we are inside a paragraph
 
       DocPara *para = (DocPara *)n->parent();
@@ -2408,7 +2425,7 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
 
       if (nodeIndex == numNodes) {
          // last node
-         return;   
+         return;
       }
 
       while (nodeIndex < numNodes && para->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
@@ -2424,7 +2441,7 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
 
       } else {
          // only whitespace at the end
-         return; 
+         return;
 
       }
 

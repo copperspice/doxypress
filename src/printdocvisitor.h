@@ -686,21 +686,24 @@ class PrintDocVisitor : public DocVisitor
    void visitPost(DocLink *) {
       indent_post();
       printf("</link>\n");
-   }
-
+   }    
+                                   
    void visitPre(DocRef *ref) {
       indent_pre();
       printf("<ref ref=\"%s\" file=\"%s\" "
              "anchor=\"%s\" targetTitle=\"%s\""
-             " hasLinkText=\"%s\" refToAnchor=\"%s\" refToSection=\"%s\">\n",
+             " hasLinkText=\"%s\" refToAnchor=\"%s\" refToSection=\"%s\" refToTable=\"%s\">\n",
              csPrintable(ref->ref()), csPrintable(ref->file()), csPrintable(ref->anchor()),
              csPrintable(ref->targetTitle()), ref->hasLinkText() ? "yes" : "no",
-             ref->refToAnchor() ? "yes" : "no", ref->refToSection() ? "yes" : "no");
+             ref->refToAnchor() ? "yes" : "no", ref->refToSection() ? "yes" : "no",
+             ref->refToTable()?"yes":"no");
    }
+
    void visitPost(DocRef *) {
       indent_post();
       printf("</ref>\n");
    }
+
    void visitPre(DocSecRefItem *ref) {
       indent_pre();
       printf("<secrefitem target=\"%s\">\n", csPrintable(ref->target()));

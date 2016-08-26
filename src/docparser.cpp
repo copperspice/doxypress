@@ -2524,7 +2524,7 @@ void DocInternalRef::parse()
 }
 
 DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
-   : m_refToSection(false), m_refToAnchor(false), m_isSubPage(false)
+   : m_refType(Unknown), m_isSubPage(false)
 {
    m_parent = parent;
    QSharedPointer<Definition> compound;
@@ -2564,11 +2564,20 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
          m_text = sec->label;
       }
 
-      m_ref          = sec->ref;
-      m_file         = stripKnownExtensions(sec->fileName);
-      m_refToAnchor  = sec->type == SectionInfo::Anchor;
-      m_refToSection = sec->type != SectionInfo::Anchor;
-      m_isSubPage    = pd && pd->hasParentPage();
+      m_ref  = sec->ref;
+      m_file = stripKnownExtensions(sec->fileName);
+
+      if (sec->type == SectionInfo::Anchor) {
+         m_refType = Anchor;
+
+      } else if (sec->type == SectionInfo::Table) {
+         m_refType = Table;
+
+      } else {
+         m_refType = Section;
+      }
+     
+      m_isSubPage = pd && pd->hasParentPage();
 
       if (sec->type != SectionInfo::Page || m_isSubPage) {
          m_anchor = sec->label;
@@ -3335,9 +3344,43 @@ endindexentry:
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
 
-   DBG(("DocIndexEntry::parse() end retval=%x\n", retval));
+   DBG(("DocIndexEntry::parse() end retval = %x\n", retval));
 
    return retval;
+}
+
+DocHtmlCaption::DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs)
+{
+   m_hasCaptionId = false;
+
+   for (const auto &item : attribs)  {
+
+      if (item.name == "id") {
+         // interpret id attribute as an anchor 
+      
+         QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(item.value);
+   
+         if (sec) {
+            m_file   = sec->fileName;
+            m_anchor = sec->label;
+            m_hasCaptionId = true;
+   
+            if (s_sectionDict && s_sectionDict->find(item.value) == 0) {
+               s_sectionDict->insert(item.value, sec);
+            }
+   
+         } else {
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid caption id '%s'", csPrintable(item.value));
+   
+         }
+   
+      } else  {
+         // copy attribute      
+         m_attribs.append(item);
+      }
+   }
+
+   m_parent = parent;
 }
 
 int DocHtmlCaption::parse()
@@ -3913,19 +3956,14 @@ void DocHtmlTable::accept(DocVisitor *v)
 {
    v->visitPre(this);
 
-   // for HTML output we put the caption first
-   if (m_caption && v->id() == DocVisitor_Html) {
+   // put the caption first
+   if (m_caption) {
       m_caption->accept(v);
    }
 
    for (auto n : m_children) {
       n->accept(v);
-   }
-
-   // for other output formats we put the caption last
-   if (m_caption && v->id() != DocVisitor_Html) {
-      m_caption->accept(v);
-   }
+   } 
 
    v->visitPost(this);
 }

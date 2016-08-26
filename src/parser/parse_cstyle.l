@@ -8240,6 +8240,16 @@ SkipC11Attribute>"]]"                 {
       BEGIN( s_docBlockContext );
    }
 
+<DocLine>[^\n]*/"\n"{B}*"//"[!/]{B}*{CMD}"}"	{ 
+      // next line is an end group marker, see bug 752712
+      QString text = QString::fromUtf8(yytext);
+
+  		s_docBlock += text;
+		handleCommentBlock(s_docBlock, current->brief.isEmpty());
+
+	   BEGIN( s_docBlockContext );
+   }
+
 <DocLine>[^\n]*/"\n"          { 
       // whole line
       QString text = QString::fromUtf8(yytext);

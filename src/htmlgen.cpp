@@ -775,7 +775,7 @@ void HtmlGenerator::writeTabData()
 
    ResourceMgr &mgr = ResourceMgr::instance();
 
-   //writeColoredImgData(dname,colored_tab_data);
+   // writeColoredImgData(dname,colored_tab_data);
    mgr.copyResourceAs("html/tab_a.lum",      dname, "tab_a.png");
    mgr.copyResourceAs("html/tab_b.lum",      dname, "tab_b.png");
    mgr.copyResourceAs("html/tab_h.lum",      dname, "tab_h.png");
@@ -825,28 +825,31 @@ void HtmlGenerator::writeSearchData(const QString &dir)
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
+      static bool disableIndex = Config::getBool("disable-index");
 
-      QString resData = mgr.getAsString("html/search.css");
+      QString searchCss;
 
-      if (! resData.isEmpty()) {
-
+      if (disableIndex) {
+         searchCss = mgr.getAsString("html/search_nomenu.css");
+      } else {
+         searchCss = mgr.getAsString("html/search.css");
+      }
+   
+      if (! searchCss.isEmpty()) {
+            
          QTextStream t(&f);
-         QString searchCss = replaceColorMarkers(resData);
+        
+         searchCss = replaceColorMarkers(searchCss);
 
          searchCss.replace("$doxypressversion", versionString);
          searchCss.replace("$doxygenversion",   versionString);         // compatibility
 
-         if (Config::getBool("disable-index")) {
-            // move up the search box if there are no tabs
-            searchCss = substitute(searchCss, "margin-top: 8px;", "margin-top: 0px;");
-         }
-
          t << searchCss;
-         Doxy_Globals::indexList->addStyleSheetFile("search/search.css");
+         Doxy_Globals::indexList->addStyleSheetFile("search/search.css");       
       }
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
    }
 }
 

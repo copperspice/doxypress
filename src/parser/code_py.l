@@ -977,6 +977,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    "self."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER}"(" {
+      QString text = QString::fromUtf8(code_py_YYtext);
       codify("self.");
 		findMemberLink(*g_code, text.mid(5));
    }
@@ -988,6 +989,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    "self."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER} {
+      QString text = QString::fromUtf8(code_py_YYtext);
       codify("self.");
 		findMemberLink(*g_code, text.mid(5));
    }
@@ -999,6 +1001,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    "cls."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER}"(" {
+      QString text = QString::fromUtf8(code_py_YYtext);
 		codify("cls.");
 	   findMemberLink(*g_code, text.mid(4));
    }
@@ -1010,6 +1013,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    "cls."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER} {
+      QString text = QString::fromUtf8(code_py_YYtext);
 		codify("cls.");
 	   findMemberLink(*g_code, text.mid(4));
    }

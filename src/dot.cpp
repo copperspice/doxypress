@@ -2548,7 +2548,11 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
    int edgeStyle = (! label.isEmpty() || prot==EdgeInfo::Orange || prot==EdgeInfo::Orange2) ? EdgeInfo::Dashed : EdgeInfo::Solid;
    QString className;
 
-   if (! usedName.isEmpty()) { 
+   if (cd->isAnonymous()) {
+      className = "anonymous:";
+      className += label;
+  
+   } else if (! usedName.isEmpty()) { 
       // name is a typedef
       className = usedName;
 

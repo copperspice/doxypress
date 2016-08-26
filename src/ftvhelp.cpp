@@ -180,6 +180,7 @@ void FTVHelp::decContentsDepth()
 
 /*! Add a list item to the contents file.
  *  \param isDir          true if the item is a directory, false if it is text
+ *  \param name           name of the item
  *  \param ref            URL of to the item
  *  \param file           file containing the definition of the item
  *  \param anchor         anchor within the file

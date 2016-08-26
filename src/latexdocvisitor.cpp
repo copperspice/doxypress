@@ -69,7 +69,7 @@ static QString escapeLabelName(const QString &str)
 }
 
 const int maxLevels = 5;
-static const char *secLabels[maxLevels] = { 
+static const char *secLabels[maxLevels] = {
       "section", "subsection", "subsubsection", "paragraph", "subparagraph" };
 
 static const char *getSectionName(int level)
@@ -89,7 +89,7 @@ static const char *getSectionName(int level)
    return secLabels[qMin(maxLevels - 1, l)];
 }
 
-static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name, 
+static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name,
          const QString &width, const QString &height)
 {
     if (hasCaption) {
@@ -104,7 +104,7 @@ static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &
 
     if (! width.isEmpty() || ! height.isEmpty()) {
       t << "[";
-    } 
+    }
 
     if (! width.isEmpty()) {
       t << "width=" << width;
@@ -136,7 +136,7 @@ static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &
 static void visitPostEnd(QTextStream &t, const bool hasCaption)
 {
    // end mbox or caption
-   t << "}\n"; 
+   t << "}\n";
 
    if (hasCaption) {
       t << "\\end{DoxyImage}\n";
@@ -192,7 +192,7 @@ QString LatexDocVisitor::escapeMakeIndexChars(const QString &str)
             m_t << "\\rcurly{}";
             break;
 
-         default:            
+         default:
             filter(c);
             break;
       }
@@ -202,9 +202,8 @@ QString LatexDocVisitor::escapeMakeIndexChars(const QString &str)
 }
 
 LatexDocVisitor::LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt, bool insideTabbing)
-   : DocVisitor(DocVisitor_Latex), m_t(t), m_ci(ci), m_insidePre(false), m_insideItem(false), 
-     m_hide(false), m_insideTabbing(insideTabbing), m_insideTable(false), m_langExt(langExt), 
-     m_currentColumn(0), m_inRowspan(false), m_inColspan(false), m_firstRow(false)
+   : DocVisitor(DocVisitor_Latex), m_t(t), m_ci(ci), m_insidePre(false), m_insideItem(false),
+     m_hide(false), m_hideCaption(false), m_insideTabbing(insideTabbing), m_langExt(langExt)
 {
 }
 
@@ -271,13 +270,19 @@ void LatexDocVisitor::visit(DocURL *u)
    if (m_hide) {
       return;
    }
-   if (Config::getBool("latex-hyper-pdf")) {
+
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
+   if (pdfHyperlinks) {
       m_t << "\\href{";
+
       if (u->isEmail()) {
          m_t << "mailto:";
       }
+
       m_t << u->url() << "}";
    }
+
    m_t << "{\\tt ";
    filter(u->url());
    m_t << "}";
@@ -377,7 +382,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
    }
 
    QString lang = m_langExt;
-   if (! s->language().isEmpty()) { 
+   if (! s->language().isEmpty()) {
       // explicit language setting
       lang = s->language();
    }
@@ -415,19 +420,19 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
-         QString latexOutput = Config::getString("latex-output") + "/inline_dotgraph_";        
+         QString latexOutput = Config::getString("latex-output") + "/inline_dotgraph_";
          QString fileName = QString("%1%2.dot").arg(latexOutput).arg(dotindex++);
 
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file %s for writing, error: %d\n", csPrintable(fileName), file.error()); 
- 
+            err("Unable to open file %s for writing, error: %d\n", csPrintable(fileName), file.error());
+
          } else {
 
             file.write( s->text().toUtf8() );
             file.close();
-       
+
             startDotFile(fileName, s->width(), s->height(), s->hasCaption());
             visitCaption(this, s->children());
             endDotFile(s->hasCaption());
@@ -435,7 +440,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
             if (Config::getBool("dot-cleanup")) {
                file.remove();
             }
-         } 
+         }
       }
       break;
 
@@ -448,19 +453,19 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file %s.msc for writing, error: %d\n", qPrintable(baseName), file.error()); 
+            err("Unable to open file %s.msc for writing, error: %d\n", qPrintable(baseName), file.error());
 
          } else {
 
             QString text = "msc {";
             text += s->text();
             text += "}";
-   
+
             file.write( text.toUtf8() );
             file.close();
-   
+
             writeMscFile(baseName, s);
-   
+
             if (Config::getBool("dot-cleanup")) {
                file.remove();
             }
@@ -483,8 +488,12 @@ void LatexDocVisitor::visit(DocAnchor *anc)
    if (m_hide) {
       return;
    }
+
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    m_t << "\\label{" << stripPath(anc->file()) << "_" << anc->anchor() << "}%" << endl;
-   if (!anc->file().isEmpty() && Config::getBool("latex-hyper-pdf")) {
+
+   if (! anc->file().isEmpty() && pdfHyperlinks) {
       m_t << "\\hypertarget{" << stripPath(anc->file()) << "_" << anc->anchor()
           << "}{}%" << endl;
    }
@@ -514,7 +523,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Include:
          m_t << "\n\\begin{DoxyCodeInclude}\n";
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(),
                      langExt, inc->isExample(),inc->exampleFile());
 
          m_t << "\\end{DoxyCodeInclude}\n";
@@ -549,7 +558,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
 }
 
 void LatexDocVisitor::visit(DocIncOperator *op)
-{   
+{
    if (op->isFirst()) {
       if (!m_hide) {
          m_t << "\n\\begin{DoxyCodeInclude}\n";
@@ -884,9 +893,13 @@ void LatexDocVisitor::visitPre(DocSection *s)
    if (m_hide) {
       return;
    }
-   if (Config::getBool("latex-hyper-pdf")) {
+
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
+   if (pdfHyperlinks) {
       m_t << "\\hypertarget{" << stripPath(s->file()) << "_" << s->anchor() << "}{}";
    }
+
    m_t << "\\" << getSectionName(s->level()) << "{";
    filter(convertCharEntities(s->title()));
    m_t << "}\\label{" << stripPath(s->file()) << "_" << s->anchor() << "}" << endl;
@@ -998,33 +1011,76 @@ void LatexDocVisitor::visitPost(DocHtmlDescData *)
 {
 }
 
-static const char *getTableName(const DocNode *n)
+static bool tableIsNested(const DocNode *n)
 {
    bool isNested = false;
 
-   while (n && !isNested) {
+   while (n && ! isNested) {
       isNested = n->kind() == DocNode::Kind_HtmlTable || n->kind() == DocNode::Kind_ParamSect;
       n  = n->parent();
    }
 
-   return isNested ? "TabularNC" : "TabularC";
+   return isNested;
+}
+
+static void writeStartTableCommand(QTextStream &t, const DocNode *n, int cols)
+{
+   if (tableIsNested(n))  {
+      t << "\\begin{tabularx}{\\linewidth}{|*{" << cols << "}{>{\\raggedright\\arraybackslash}X|}}";
+
+   } else {
+      t << "\\tabulinesep=1mm\n\\begin{longtabu} spread 0pt [c]{*{" << cols << "}{|X[-1]}|}\n";
+   }
+
+   // return isNested ? "TabularNC" : "TabularC";
+}
+
+static void writeEndTableCommand(QTextStream &t, const DocNode *n)
+{
+   if (tableIsNested(n)) {
+      t << "\\end{tabularx}\n";
+
+   } else {
+      t << "\\end{longtabu}\n";
+   }
+
+   // return isNested ? "TabularNC" : "TabularC";
 }
 
 void LatexDocVisitor::visitPre(DocHtmlTable *t)
 {
-   m_rowSpans.clear();
-   m_insideTable = true;
-
    if (m_hide) {
       return;
    }
 
+   pushTableState();
+
    if (t->hasCaption()) {
-      m_t << "\\begin{table}[h]";
+      DocHtmlCaption *c = t->caption();
+
+      static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
+      if (! c->file().isEmpty() && pdfHyperlinks) {
+         m_t << "\\hypertarget{" << stripPath(c->file()) << "_" << c->anchor() << "}{}";
+      }
+
+      m_t << endl;
    }
 
-   m_t << "\\begin{" << getTableName(t->parent()) << "}{" << t->numColumns() << "}\n";
-   m_numCols = t->numColumns();
+   writeStartTableCommand(m_t, t->parent(), t->numColumns());
+
+   if (t->hasCaption()) {
+      DocHtmlCaption *c = t->caption();
+      m_t << "\\caption{";
+
+      visitCaption(this, c->children());
+
+      m_t << "}";
+      m_t << "\\label{" << stripPath(c->file()) << "_" << c->anchor() << "}";
+      m_t << "\\\\\n";
+   }
+
+   setNumCols(t->numColumns());
    m_t << "\\hline\n";
 
    // check if first row is a heading and then render the row already here
@@ -1034,48 +1090,36 @@ void LatexDocVisitor::visitPre(DocHtmlTable *t)
    DocHtmlRow *firstRow = t->firstRow();
 
    if (firstRow && firstRow->isHeading()) {
-      m_firstRow = true;
+      setFirstRow(true);
       firstRow->accept(this);
-      m_firstRow = false;
+      setFirstRow(false);
    }
 }
 
 void LatexDocVisitor::visitPost(DocHtmlTable *t)
 {
-   m_insideTable = false;
-
    if (m_hide) {
       return;
    }
 
-   if (t->hasCaption()) {
-      m_t << "\\end{table}\n";
-   } else {
-      m_t << "\\end{" << getTableName(t->parent()) << "}\n";
-   }
+   writeEndTableCommand(m_t, t->parent());
+   popTableState();
 }
 
 void LatexDocVisitor::visitPre(DocHtmlCaption *c)
 {
-   if (m_hide) {
-      return;
-   }
-
-   m_t << "\\end{" << getTableName(c->parent()->parent()) << "}\n\\centering\n\\caption{";
+   m_hideCaption = m_hide;
+   m_hide        = true;
 }
 
 void LatexDocVisitor::visitPost(DocHtmlCaption *)
 {
-   if (m_hide) {
-      return;
-   }
-
-   m_t << "}\n";
+   m_hide = m_hideCaption;
 }
 
 void LatexDocVisitor::visitPre(DocHtmlRow *r)
 {
-   m_currentColumn = 0;
+   setCurrentColumn(0);
 
    if (r->isHeading()) {
       m_t << "\\rowcolor{\\tableheadbgcolor}";
@@ -1088,31 +1132,29 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
       return;
    }
 
-   int c = m_currentColumn;
+   int c = currentColumn();
 
-   while (c <= m_numCols) { 
+   while (c <= numCols()) {
       // end of row while inside a row span?
-      uint i;
 
-      for (i = 0; i < m_rowSpans.count(); i++) {
-         ActiveRowSpan &span = m_rowSpans[i];
+      for (int i = 0; i < rowSpans().count(); i++) {
+         const ActiveRowSpan &span = rowSpans()[i];
 
          if (span.rowSpan > 0 && span.column == c && row->rowIndex() > span.cell->rowIndex() ) {
-            // we are at a cell in a row span
-            // but not the row that started the span
+            // at a cell in a row span, but not the row that started the span
 
             m_t << "&";
 
-            if (span.colSpan > 1) { 
+            if (span.colSpan > 1) {
                // row span is also part of a column span
 
                m_t << "\\multicolumn{" << span.colSpan << "}{";
                m_t << "p{(\\linewidth-\\tabcolsep*"
-                   << m_numCols << "-\\arrayrulewidth*"
+                   << numCols() << "-\\arrayrulewidth*"
                    << row->visibleCells() << ")*"
-                   << span.colSpan << "/" << m_numCols << "}|}{}";
+                   << span.colSpan << "/" << numCols() << "}|}{}";
 
-            } else { 
+            } else {
                // solitary row span
                m_t << "\\multicolumn{1}{c|}{}";
             }
@@ -1125,12 +1167,11 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
    m_t << "\\\\";
 
    int col = 1;
-   uint i;
 
-   for (i = 0; i < m_rowSpans.count(); i++) {
-      ActiveRowSpan &span = m_rowSpans[i];
+   for (int i = 0; i < rowSpans().count(); i++) {
+      ActiveRowSpan &span = const_cast<ActiveRowSpan &>(rowSpans()[i]);
 
-      if (span.rowSpan > 0) {
+      if (span.rowSpan > 0) {         
          span.rowSpan--;
       }
 
@@ -1146,20 +1187,24 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
       }
    }
 
-   if (col <= m_numCols) {
-      m_t << "\\cline{" << col << "-" << m_numCols << "}";
+   if (col <= numCols()) {
+      m_t << "\\cline{" << col << "-" << numCols() << "}";
    }
 
    m_t << "\n";
 
    if (row->isHeading() && row->rowIndex() == 1) {
-      if (m_firstRow) {
+
+      if (firstRow()) {
          m_t << "\\endfirsthead" << endl;
+         m_t << "\\hline" << endl;
+         m_t << "\\endfoot" << endl;
          m_t << "\\hline" << endl;
 
       } else {
          m_t << "\\endhead" << endl;
       }
+
    }
 }
 
@@ -1174,32 +1219,32 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
       row = (DocHtmlRow *)c->parent();
    }
 
-   m_currentColumn++;
+   setCurrentColumn(currentColumn() + 1);
 
-   //Skip columns that span from above.
-   uint i;
+   // Skip columns that span from above
 
-   for (i = 0; i < m_rowSpans.count(); i++) {
-      ActiveRowSpan &span = m_rowSpans[i];
+   for (int i = 0; i < rowSpans().count(); i++) {
+      const ActiveRowSpan &span = rowSpans()[i];
 
-      if (span.rowSpan > 0 && span.column == m_currentColumn) {
+      if (span.rowSpan > 0 && span.column == currentColumn()) {
 
          if (row && span.colSpan > 1) {
             m_t << "\\multicolumn{" << span.colSpan << "}{";
 
-            if (m_currentColumn /*c->columnIndex()*/ == 1) { // add extra | for first column
+            if (currentColumn() == 1) {
+               // add extra | for first column
                m_t << "|";
             }
 
             m_t << "p{(\\linewidth-\\tabcolsep*"
-                << m_numCols << "-\\arrayrulewidth*"
+                << numCols() << "-\\arrayrulewidth*"
                 << row->visibleCells() << ")*"
-                << span.colSpan << "/" << m_numCols << "}|}{}";
+                << span.colSpan << "/" << numCols() << "}|}{}";
 
-            m_currentColumn += span.colSpan;
+            setCurrentColumn(currentColumn() + span.colSpan);
 
          } else {
-            m_currentColumn++;
+            setCurrentColumn(currentColumn() + 1);
          }
 
          m_t << "&";
@@ -1209,7 +1254,7 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
    int cs = c->colSpan();
 
    if (cs > 1 && row) {
-      m_inColspan = true;
+      setInColSpan(true);
 
       m_t << "\\multicolumn{" << cs << "}{";
 
@@ -1218,9 +1263,9 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
       }
 
       m_t << "p{(\\linewidth-\\tabcolsep*"
-          << m_numCols << "-\\arrayrulewidth*"
+          << numCols() << "-\\arrayrulewidth*"
           << row->visibleCells() << ")*"
-          << cs << "/" << m_numCols << "}|}{";
+          << cs << "/" << numCols() << "}|}{";
 
       if (c->isHeading()) {
          m_t << "\\cellcolor{\\tableheadbgcolor}";
@@ -1230,9 +1275,9 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
    int rs = c->rowSpan();
 
    if (rs > 0) {
-      m_inRowspan = true;
-      
-      m_rowSpans.append(ActiveRowSpan(c, rs, cs, m_currentColumn));
+      setInRowSpan(true);
+      addRowSpan(ActiveRowSpan(c, rs, cs, currentColumn()));
+
       m_t << "\\multirow{" << rs << "}{\\linewidth}{";
    }
 
@@ -1240,8 +1285,10 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
 
    if (a == DocHtmlCell::Center) {
       m_t << "\\PBS\\centering ";
+
    } else if (a == DocHtmlCell::Right) {
       m_t << "\\PBS\\raggedleft ";
+
    }
 
    if (c->isHeading()) {
@@ -1249,7 +1296,7 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
    }
 
    if (cs > 1) {
-      m_currentColumn += cs - 1;
+      setCurrentColumn(currentColumn() + cs - 1);
    }
 }
 
@@ -1258,18 +1305,22 @@ void LatexDocVisitor::visitPost(DocHtmlCell *c)
    if (m_hide) {
       return;
    }
+
    if (c->isHeading()) {
       m_t << "}";
    }
-   if (m_inRowspan) {
-      m_inRowspan = false;
+
+   if (inRowSpan()) {
+      setInRowSpan(false);
       m_t << "}";
    }
-   if (m_inColspan) {
-      m_inColspan = false;
+
+   if (inColSpan()) {
+       setInColSpan(false);
       m_t << "}";
    }
-   if (!c->isLast()) {
+
+   if (! c->isLast()) {
       m_t << "&";
    }
 }
@@ -1278,7 +1329,7 @@ void LatexDocVisitor::visitPre(DocInternal *)
 {
    if (m_hide) {
       return;
-   }  
+   }
 }
 
 void LatexDocVisitor::visitPost(DocInternal *)
@@ -1294,11 +1345,14 @@ void LatexDocVisitor::visitPre(DocHRef *href)
       return;
    }
 
-   if (Config::getBool("latex-hyper-pdf")) {
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
+   if (pdfHyperlinks) {
       m_t << "\\href{";
       m_t << href->url();
       m_t << "}";
    }
+
    m_t << "{\\tt ";
 }
 
@@ -1332,7 +1386,7 @@ void LatexDocVisitor::visitPre(DocImage *img)
       if (m_hide) {
          return;
       }
-   
+
       QString gfxName = img->name();
 
       if (gfxName.endsWith(".eps") || gfxName.endsWith(".pdf")) {
@@ -1341,7 +1395,7 @@ void LatexDocVisitor::visitPre(DocImage *img)
 
       visitPreStart(m_t, img->hasCaption(), gfxName, img->width(), img->height());
 
-   } else { 
+   } else {
       // other format -> skip
       pushEnabled();
       m_hide = true;
@@ -1357,7 +1411,7 @@ void LatexDocVisitor::visitPost(DocImage *img)
 
       visitPostEnd(m_t, img->hasCaption());
 
-   } else { 
+   } else {
       // other format
       popEnabled();
    }
@@ -1442,12 +1496,15 @@ void LatexDocVisitor::visitPre(DocRef *ref)
 
    if (ref->isSubPage()) {
       startLink(ref->ref(), 0, ref->anchor());
+
    } else {
-      if (!ref->file().isEmpty()) {
-         startLink(ref->ref(), ref->file(), ref->anchor());
+
+      if (! ref->file().isEmpty()) {
+         startLink(ref->ref(), ref->file(), ref->anchor(), ref->refToTable());
       }
    }
-   if (!ref->hasLinkText()) {
+
+   if (! ref->hasLinkText()) {
       filter(ref->targetTitle());
    }
 }
@@ -1619,7 +1676,7 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
       }
    }
 
-   if (sect && sect->hasTypeSpecifier()) {   
+   if (sect && sect->hasTypeSpecifier()) {
       bool first = true;
 
       for (auto type : pl->paramTypes() ) {
@@ -1642,7 +1699,7 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
    }
 
    m_t << "{\\em ";
-    
+
    bool first = true;
 
    for (auto param : pl->parameters() ) {
@@ -1689,7 +1746,7 @@ void LatexDocVisitor::visitPost(DocParamList *pl)
                    parentType == DocParamSect::TemplateParam;
 
    if (useTable) {
-      m_t << "\\\\" << endl 
+      m_t << "\\\\" << endl
           << "\\hline" << endl;
    }
 }
@@ -1699,21 +1756,29 @@ void LatexDocVisitor::visitPre(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
+
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    m_t << "\\begin{DoxyRefDesc}{";
    filter(x->title());
    m_t << "}" << endl;
+
    bool anonymousEnum = x->file() == "@";
    m_t << "\\item[";
-   if (Config::getBool("latex-hyper-pdf") && !anonymousEnum) {
+
+   if (pdfHyperlinks && ! anonymousEnum) {
       m_t << "\\hyperlink{" << stripPath(x->file()) << "_" << x->anchor() << "}{";
    } else {
       m_t << "{\\bf ";
    }
+
    m_insideItem = true;
    filter(x->title());
+
    m_insideItem = false;
    m_t << "}]";
 }
@@ -1734,6 +1799,7 @@ void LatexDocVisitor::visitPre(DocInternalRef *ref)
    if (m_hide) {
       return;
    }
+
    startLink(0, ref->file(), ref->anchor());
 }
 
@@ -1796,12 +1862,19 @@ void LatexDocVisitor::filter(const QString &str)
    filterLatexString(m_t, str, m_insideTabbing, m_insidePre, m_insideItem);
 }
 
-void LatexDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor)
+void LatexDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor, bool refToTable)
 {
-   if (ref.isEmpty() && Config::getBool("latex-hyper-pdf")) { 
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
+   if (ref.isEmpty() && pdfHyperlinks) {
       // internal PDF link
-  
-      m_t << "\\hyperlink{";
+
+      if (refToTable) {
+         m_t << "\\doxytablelink{";
+
+      } else {
+         m_t << "\\hyperlink{";
+      }
 
       if (! file.isEmpty()) {
          m_t << stripPath(file);
@@ -1811,18 +1884,20 @@ void LatexDocVisitor::startLink(const QString &ref, const QString &file, const Q
          m_t << "_";
       }
 
-      if (!anchor.isEmpty()) {
+      if (! anchor.isEmpty()) {
          m_t << anchor;
       }
 
       m_t << "}{";
-     
 
-   } else if (ref.isEmpty()) { 
+   } else if (ref.isEmpty() && refToTable) {
+      m_t << "\\doxytableref{";
+
+   } else if (ref.isEmpty()) {
       // internal non-PDF link
       m_t << "\\doxyref{";
 
-   } else { 
+   } else {
       // external link
       m_t << "{\\bf ";
    }
@@ -1832,12 +1907,14 @@ void LatexDocVisitor::endLink(const QString &ref, const QString &file, const QSt
 {
    m_t << "}";
 
-   if (ref.isEmpty() && ! Config::getBool("latex-hyper-pdf")) {
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
+   if (ref.isEmpty() && ! pdfHyperlinks) {
       m_t << "{";
       filter(theTranslator->trPageAbbreviation());
 
       m_t << "}{" << file;
-      if (!file.isEmpty() && !anchor.isEmpty()) {
+      if (! file.isEmpty() && !anchor.isEmpty()) {
          m_t << "_";
       }
 
@@ -1852,8 +1929,8 @@ void LatexDocVisitor::pushEnabled()
 
 void LatexDocVisitor::popEnabled()
 {
-   bool v = m_enabled.pop(); 
-   m_hide = v;   
+   bool v = m_enabled.pop();
+   m_hide = v;
 }
 
 void LatexDocVisitor::startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
@@ -1874,7 +1951,7 @@ void LatexDocVisitor::startDotFile(const QString &fileName, const QString &width
    QString name = fileName;
 
    writeDotGraphFromFile(name, outDir, baseName, GOF_EPS);
-   visitPreStart(m_t, hasCaption, baseName, width, height);    
+   visitPreStart(m_t, hasCaption, baseName, width, height);
 }
 
 void LatexDocVisitor::endDotFile(bool hasCaption)
@@ -1926,10 +2003,10 @@ void LatexDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
    QString outDir = Config::getString("latex-output");
 
    writeMscGraphFromFile(baseName + ".msc", outDir, shortName, MSC_EPS);
- 
+
    visitPreStart(m_t, s->hasCaption(), shortName, s->width(),s->height());
    visitCaption(this, s->children());
-   visitPostEnd(m_t,  s->hasCaption());  
+   visitPostEnd(m_t,  s->hasCaption());
 }
 
 void LatexDocVisitor::startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
@@ -1948,7 +2025,7 @@ void LatexDocVisitor::startDiaFile(const QString &fileName, const QString &width
    QString outDir = Config::getString("latex-output");
 
    writeDiaGraphFromFile(fileName, outDir, baseName, DIA_EPS);
-   visitPreStart(m_t,hasCaption, baseName, width, height); 
+   visitPreStart(m_t,hasCaption, baseName, width, height);
 }
 
 void LatexDocVisitor::endDiaFile(bool hasCaption)
@@ -1956,7 +2033,7 @@ void LatexDocVisitor::endDiaFile(bool hasCaption)
    if (m_hide) {
       return;
    }
-   
+
    visitPostEnd(m_t, hasCaption);
 }
 
@@ -1974,12 +2051,12 @@ void LatexDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
 
    visitPreStart(m_t, s->hasCaption(), shortName, s->width(), s->height());
    visitCaption(this, s->children());
-   visitPostEnd(m_t, s->hasCaption());  
+   visitPostEnd(m_t, s->hasCaption());
 }
 
 void LatexDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *s)
 {
-   QString shortName = baseName;            
+   QString shortName = baseName;
    int i;
 
    if ((i = shortName.lastIndexOf('/')) != -1) {

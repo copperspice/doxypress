@@ -1354,15 +1354,19 @@ class DocRef : public CompAccept<DocRef>, public DocNode
       return ! m_children.isEmpty();
    }
 
-   bool refToAnchor() const     {
-      return m_refToAnchor;
+   bool refToAnchor() const {
+      return m_refType == Anchor;
    }
 
-   bool refToSection() const    {
-      return m_refToSection;
+   bool refToSection() const {
+      return m_refType == Section;
    }
 
-   bool isSubPage() const       {
+   bool refToTable() const {
+      return m_refType == Table;
+   }
+
+   bool isSubPage() const {
       return m_isSubPage;
    }
 
@@ -1371,9 +1375,9 @@ class DocRef : public CompAccept<DocRef>, public DocNode
    }
 
  private:
-   bool m_refToSection;
-   bool m_refToAnchor;
-   bool m_isSubPage;
+   enum RefType { Unknown, Anchor, Section, Table };
+   RefType m_refType;
+   bool    m_isSubPage;
 
    QString m_file;
    QString m_relPath;
@@ -1411,9 +1415,9 @@ class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
    }
 
  private:
-   QString   m_file;
-   QString   m_relPath;
-   QString   m_anchor;
+   QString m_file;
+   QString m_relPath;
+   QString m_anchor;
 };
 
 /** Node representing a Hypertext reference */
@@ -2136,14 +2140,11 @@ class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
    int            m_colIdx;
 };
 
-/** Node representing a HTML table caption */
+/** Node representing an HTML table caption */
 class DocHtmlCaption : public CompAccept<DocHtmlCaption>, public DocNode
 {
  public:
-   DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs) :
-      m_attribs(attribs) {
-      m_parent = parent;
-   }
+   DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs);
 
    Kind kind() const          {
       return Kind_HtmlCaption;
@@ -2159,8 +2160,23 @@ class DocHtmlCaption : public CompAccept<DocHtmlCaption>, public DocNode
 
    int parse();
 
+   bool hasCaptionId() const {
+      return m_hasCaptionId;
+   }
+
+   QString file() const     {
+      return m_file;
+   }
+
+   QString anchor() const   {
+      return m_anchor;
+   }
+
  private:
    HtmlAttribList m_attribs;
+   bool    m_hasCaptionId;
+   QString m_file;
+   QString m_anchor;
 };
 
 /** Node representing a HTML table row */
@@ -2281,7 +2297,11 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
 
    void accept(DocVisitor *v);
 
-   DocHtmlRow *firstRow() {
+   DocHtmlCaption *caption() const { 
+      return m_caption; 
+   }
+
+   DocHtmlRow *firstRow() const {
       if (m_children.isEmpty()) {
          return nullptr;
       }

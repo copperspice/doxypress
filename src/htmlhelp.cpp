@@ -104,8 +104,8 @@ static QString field2URL(QSharedPointer<IndexField> f, bool checkReversed)
 {
    QString result = f->url + Doxy_Globals::htmlFileExtension;
 
-   if (! f->anchor.isEmpty() && (!checkReversed || f->reversed)) {
-      result += "#" + f->anchor;
+   if (! f->anchor.isEmpty() && (! checkReversed || f->reversed)) {
+      result += "#" + substitute(f->anchor, ":", "%3A");
    }
 
    return result;
