@@ -14,6 +14,8 @@ configure
 config.log
 error.log
 
+/src/parser/read_me_important.txt
+
 /bin/Makefile
 /bin/src
 /bin/*.cpp
