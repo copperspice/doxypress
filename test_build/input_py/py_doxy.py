@@ -9,12 +9,12 @@
 def func():
     pass
 
-## Documentation for a class (brief).
+## Brief documentation for a python class.
 #
 #  More details (doxy-3).
 class PyClass:
    
-    ## The constructor documentation.
+    ## Constructor documentation.
     def __init__(self):
         self._memVar = 0;
    
@@ -27,4 +27,4 @@ class PyClass:
     classVar = 0;
 
     ## @var _memVar
-    #  This is the documentation for a member variable.
+    #  a member variable

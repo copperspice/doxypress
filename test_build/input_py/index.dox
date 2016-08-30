@@ -15,9 +15,8 @@
 /*!
 \mainpage Python Test
 
-The pages in the test suite are designed to test parsing Python. If there
-are items which should be added, please email the development team and provide sample
-code.
+The pages in this test suite are designed to verify the parsing of Python files. If there
+are items which should be added please email the development team and provide sample code.
 
 info@copperspice.com
 
