@@ -1177,11 +1177,10 @@ void generateOutput()
    }
 
    if (generateLatex)  {  
-        copyLatexStyleSheet();
+      copyLatexStyleSheet();
       copyLogo(latexOutput);
       copyExtraFiles("latex");
    }
-
 
    if (generateHtml && Config::getBool("generate-chm") && ! Config::getString("hhc-location").isEmpty()) {
 
@@ -9220,20 +9219,8 @@ void Doxy_Work::copyStyleSheet()
 {
    static const QDir configDir    = Config::getConfigDir();
    static const QString outputDir = Config::getString("html-output") + "/";
-   static const QString cssFile   = ":/resources/html/doxypress.css";
 
-   QFileInfo fi(cssFile);
-
-   if (! fi.exists()) {
-      err("Default stylesheet file '%s' does not exist\n", csPrintable(cssFile));        
-
-   } else {
-      QString destFileName = outputDir + "doxypress.css";
-      copyFile(cssFile, destFileName);
-   }
- 
-   //
-   static const QStringList htmlStyleSheet = Config::getList("html-stylesheets");
+    static const QStringList htmlStyleSheet = Config::getList("html-stylesheets");
 
    for (auto fileName : htmlStyleSheet) {             
       

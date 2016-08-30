@@ -2808,7 +2808,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       }
 
    } else if (isFunction()) {
-      title += argsString();         
+      title += "()";       
 
    }
 

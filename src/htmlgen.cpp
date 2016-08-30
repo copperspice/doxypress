@@ -856,7 +856,6 @@ void HtmlGenerator::writeSearchData(const QString &dir)
 void HtmlGenerator::writeStyleSheetFile(QFile &file)
 {
    QTextStream t(&file);
-
    QString resData = ResourceMgr::instance().getAsString("html/doxypress.css");
 
    if (resData.isEmpty()) {
@@ -866,8 +865,8 @@ void HtmlGenerator::writeStyleSheetFile(QFile &file)
    } else {
       resData.replace("$doxypressversion", versionString);
       resData.replace("$doxygenversion",   versionString);         // compatibility
-      t << replaceColorMarkers(resData);
 
+      t << replaceColorMarkers(resData);
    }
 }
 
@@ -1010,6 +1009,7 @@ void HtmlGenerator::writeStyleInfo(int part)
 {
    if (part == 0) {
       // write default style sheet
+
       startPlainFile("doxypress.css");
       QString resData = ResourceMgr::instance().getAsString("html/doxypress.css");
 
@@ -1020,12 +1020,11 @@ void HtmlGenerator::writeStyleInfo(int part)
       } else {
          resData.replace("$doxypressversion", versionString);
          resData.replace("$doxygenversion",   versionString);            // compatibility
-         m_textStream << replaceColorMarkers(resData);
 
+         m_textStream << replaceColorMarkers(resData);        
       }
 
       endPlainFile();
-
       Doxy_Globals::indexList->addStyleSheetFile("doxypress.css");
 
       // part two
@@ -1653,9 +1652,17 @@ void HtmlGenerator::endMemberDocList()
    DBG_HTML(m_textStream << "<!-- endMemberDocList -->" << endl;)
 }
 
-void HtmlGenerator::startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool)
+void HtmlGenerator::startMemberDoc(const QString &clName, const QString &memName, 
+                  const QString &anchor, const QString &title, bool showInline)
 {
    DBG_HTML(m_textStream << "<!-- startMemberDoc -->" << endl;)
+
+/* looks awful, set up as an tag option
+
+   m_textStream << "\n<h2 class=\"memtitle\">" << title << " "
+                << "<a href=\"#" << anchor << "\" class=\"permalink\"" "title=\"Permalink to this headline\">&#9854;</a>"
+                << "</h2>" << endl;
+*/
 
    m_textStream << "\n<div class=\"memitem\">" << endl;
    m_textStream << "<div class=\"memproto\">" << endl;

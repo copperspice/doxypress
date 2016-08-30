@@ -513,6 +513,29 @@ table.memberdecls {
 
 /* Styles for detailed member documentation */
 
+.memtitle {
+   padding: 8px;
+   border-top: 1px solid ##B4;
+   border-left: 1px solid ##B4;
+   border-right: 1px solid ##B4;
+   border-top-right-radius: 4px;
+   border-top-left-radius: 4px;
+   margin-bottom: -1px;
+   background-image: url('nav_f.png');
+   background-repeat: repeat-x;
+   background-color: ##E6;
+   line-height: 1.25;
+   font-weight: 300;
+   float:left;
+}
+
+.permalink
+{
+   font-size: 65%;
+   display: inline-block;
+   vertical-align: middle;
+}
+
 .memtemplate {
    font-size: 80%;
    color: ##60;
@@ -569,7 +592,7 @@ table.memberdecls {
    text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.9);
    background-image:url('nav_f.png');
    background-repeat:repeat-x;
-   background-color: ##E6;
+   background-color: ##E3;
    /* opera specific markup */
    box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
    border-top-right-radius: 4px;

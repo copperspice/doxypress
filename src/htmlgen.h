@@ -421,7 +421,8 @@ class HtmlGenerator : public OutputGenerator
   
    void lineBreak(const QString &style) override ;
    void writeChar(char c);
-   void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) override;
+   void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor, 
+                  const QString &title, bool showInline) override;
    void endMemberDoc(bool);
 
    void startDoxyAnchor(const QString &fName, const QString &manName, const QString &anchor, 

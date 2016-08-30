@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -48,7 +48,7 @@ class LatexCodeGenerator : public CodeOutputInterface
       void writeCodeAnchor(const QString &) override {}
       void setCurrentDoc(QSharedPointer<Definition>, const QString &, bool) override {}
       void addWord(const QString &, bool) override {}
-   
+
    private:
       void _writeCodeLink(const QString &className, const QString &ref, const QString &file,
                   const QString &anchor, const QString &name, const QString &tooltip);
@@ -73,7 +73,7 @@ class LatexGenerator : public OutputGenerator
    static void writeStyleSheetFile(QFile &f);
    static void writeHeaderFile(QFile &f);
    static void writeFooterFile(QFile &f);
- 
+
    void enable() {
       if (! genStack.isEmpty()) {
          active = genStack.top();
@@ -113,47 +113,47 @@ class LatexGenerator : public OutputGenerator
    }
 
    // CodeOutputInterface
-   void codify(const QString &text) override { 
-      m_codeGen.codify(text); 
+   void codify(const QString &text) override {
+      m_codeGen.codify(text);
    }
 
    void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
                   const QString &name, const QString &tooltip) override {
-      m_codeGen.writeCodeLink(ref, file, anchor, name, tooltip); 
+      m_codeGen.writeCodeLink(ref, file, anchor, name, tooltip);
    }
 
    void writeLineNumber(const QString &ref,const QString &file,const QString &anchor, int lineNumber) override {
-      m_codeGen.writeLineNumber(ref, file, anchor, lineNumber); 
+      m_codeGen.writeLineNumber(ref, file, anchor, lineNumber);
    }
 
    void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl,
                   const QString &desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo) override  {
-      m_codeGen.writeTooltip(id, docInfo, decl, desc, defInfo, declInfo); 
+      m_codeGen.writeTooltip(id, docInfo, decl, desc, defInfo, declInfo);
    }
 
    void startCodeLine(bool hasLineNumbers) override  {
-      m_codeGen.startCodeLine(hasLineNumbers); 
+      m_codeGen.startCodeLine(hasLineNumbers);
    }
 
    void endCodeLine() override {
-      m_codeGen.endCodeLine(); 
+      m_codeGen.endCodeLine();
    }
 
    void startFontClass(const QString &s) override {
-      m_codeGen.startFontClass(s); 
+      m_codeGen.startFontClass(s);
    }
 
    void endFontClass()  override {
-      m_codeGen.endFontClass(); 
+      m_codeGen.endFontClass();
    }
 
    void writeCodeAnchor(const QString &anchor) override {
-      m_codeGen.writeCodeAnchor(anchor); 
+      m_codeGen.writeCodeAnchor(anchor);
    }
 
 
    //
-   void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md); 
+   void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
 
    void startFile(const QString &name, const QString &manName, const QString &title) override;
    void writeSearchInfo() {}
@@ -203,8 +203,8 @@ class LatexGenerator : public OutputGenerator
    void endIndexItem(const QString &ref, const QString &file) override;
 
    void docify(const QString &text) override;
- 
-   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override; 
+
+   void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override;
 
    void startTextLink(const QString &, const QString &) override;
    void endTextLink();
@@ -262,7 +262,7 @@ class LatexGenerator : public OutputGenerator
    void writeAnchor(const QString &fileName, const QString &name) override;
    void startCodeFragment();
    void endCodeFragment();
- 
+
    void startEmphasis() {
       m_textStream << "{\\em ";
    }
@@ -381,12 +381,15 @@ class LatexGenerator : public OutputGenerator
       endDescForItem();
       endSimpleSect();
    }
+
    void startDescTableTitle() {
       m_textStream << "\\item[{\\em " << endl;
    }
+
    void endDescTableTitle() {
       m_textStream << "}]";
    }
+
    void startDescTableData() {}
    void endDescTableData() {}
    void lastIndexPage() {}
@@ -407,10 +410,14 @@ class LatexGenerator : public OutputGenerator
    void endTextBlock(bool) {}
 
    void startMemberDocPrefixItem() {}
-   void endMemberDocPrefixItem() {}
+
+   void endMemberDocPrefixItem() { 
+      m_textStream << "\\\\" << endl; 
+   }
+
    void startMemberDocName(bool) {}
    void endMemberDocName() {}
-   void startParameterType(bool, const QString &) override ; 
+   void startParameterType(bool, const QString &) override;
    void endParameterType();
    void startParameterName(bool);
    void endParameterName(bool, bool, bool);
@@ -447,13 +454,13 @@ class LatexGenerator : public OutputGenerator
    LatexGenerator(const LatexGenerator &);
    LatexGenerator &operator=(const LatexGenerator &);
 
-   QString modifyKeywords(const QString &s); 
+   QString modifyKeywords(const QString &s);
    QString m_relPath;
 
    bool insideTabbing;
    bool firstDescItem;
-   bool disableLinks;  
- 
+   bool disableLinks;
+
    int m_indent;
    bool templateMemberItem;
    bool m_prettyCode;

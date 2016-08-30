@@ -1636,7 +1636,8 @@ void LatexGenerator::endMemberHeader()
    m_textStream << "}" << endl;
 }
 
-void LatexGenerator::startMemberDoc(const QString &clname, const QString &memname, const QString &, const QString &title, bool showInline)
+void LatexGenerator::startMemberDoc(const QString &clname, const QString &memname, const QString &, 
+                  const QString &title, bool showInline)
 {
    if (! memname.isEmpty() && ! memname.startsWith('@')) {
 
@@ -1691,7 +1692,7 @@ void LatexGenerator::startMemberDoc(const QString &clname, const QString &memnam
    }
 
    m_textStream << "\\" << levelLab[level];  
-   m_textStream << "[{";
+   m_textStream << "{";
 
    if (pdfHyperlinks)   {
       m_textStream << "\\texorpdfstring{";
@@ -1703,9 +1704,9 @@ void LatexGenerator::startMemberDoc(const QString &clname, const QString &memnam
       m_textStream << "}{" << latexEscapePDFString(title) << "}";
    }
 
-   m_textStream << "}]";
-   m_textStream << "{\\setlength{\\rightskip}{0pt plus 5cm}";
-   disableLinks = true;
+   m_textStream << "}";
+   m_textStream << "\n{\\ttfamily ";
+   // disableLinks = true;
 }
 
 void LatexGenerator::endMemberDoc(bool)
@@ -1716,10 +1717,6 @@ void LatexGenerator::endMemberDoc(bool)
 
 void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, const QString &anchor, 
                   const QString &, const QString &)
-{
-}
-
-void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 {
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
@@ -1748,7 +1745,11 @@ void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
       m_textStream << "_" << anchor;
    }
 
-   m_textStream << "}" << endl;
+   m_textStream << "} " << endl;
+}
+
+void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
+{
 }
 
 void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
