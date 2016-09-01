@@ -1101,7 +1101,7 @@ char *commentcnvYYtext;
 #include <QChar>
 #include <QStack>
 #include <QRegExp>
-#include <QTextstream>
+#include <QTextStream>
 
 #include <assert.h>
 #include <stdio.h>
