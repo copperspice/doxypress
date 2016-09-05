@@ -210,7 +210,7 @@ int minClassDistance(QSharedPointer<const ClassDef> cd, QSharedPointer<const Cla
 Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef> bcd, 
                   Protection prot = Public, int level = 0);
 
-QString convertNameToFile(const QString &name, bool allowDots = false, bool allowUnderscore = false);
+QString convertNameToFile_X(const QString &name, bool allowDots = false, bool allowUnderscore = false);
 
 void extractNamespaceName(const QString &scopeName, QString &className, QString &namespaceName, bool allowEmptyClass = false);
 

@@ -4829,10 +4829,10 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
  *  given its name, which could be a class name with template
  *  arguments, so special characters need to be escaped.
  */
-QString convertNameToFile(const QString &name, bool allowDots, bool allowUnderscore)
+QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnderscore)
 {
-   static bool shortNames    = Config::getBool("short-names");
-   static bool createSubdirs = Config::getBool("create-subdirs");
+   static const bool shortNames    = Config::getBool("short-names");
+   static const bool createSubdirs = Config::getBool("create-subdirs");
 
    QString result;
 
@@ -5917,7 +5917,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
          pd->setFileName(tagInfo->fileName, true);
 
       } else {
-         pd->setFileName(qPrintable(convertNameToFile(pd->name(), false, true)), false);
+         pd->setFileName(qPrintable(convertNameToFile_X(pd->name(), false, true)), false);
 
       }
 
@@ -6395,6 +6395,14 @@ QString latexEscapePDFString(const QString &data)
    
          case '_':  
             result += "\\_";
+            break;
+
+         case '%':  
+            result += "\\%"; 
+            break;
+
+         case '&':  
+            result += "\\&"; 
             break;
    
          default:
@@ -7359,10 +7367,9 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
       QString dest = Doxy_Globals::tagDestinationDict[ref];
 
       if (! dest.isEmpty()) {
-         result  = dest;
-         int len = result.length();
+         result = dest;
 
-         if (! relPath.isEmpty() && len > 0 && result.at(0) == '.') {
+         if (! relPath.isEmpty() && ! result.isEmpty() && result.at(0) == '.') {
             // relative path -> prepend relPath.
             result.prepend(relPath);
          }
@@ -7371,7 +7378,7 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
             result.prepend("doxypress=\"" + ref + ":");
          }
 
-         if (len > 0 && result.at(len - 1) != '/') {
+         if (! result.isEmpty() && ! result.endsWith('/')) {
             result += '/';
          }
 
@@ -7379,7 +7386,6 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
             result.append("\" ");
          }
       }
-
 
    } else {
       result = relPath;

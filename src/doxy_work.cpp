@@ -737,10 +737,6 @@ void processFiles()
    flushCachedTemplateRelations();
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Creating members for template instances\n");
-   createTemplateInstanceMembers();
-   Doxy_Globals::g_stats.end();
-
    Doxy_Globals::g_stats.begin("Computing class relations\n");
    computeTemplateClassRelations();
    flushUnresolvedRelations();
@@ -760,6 +756,10 @@ void processFiles()
 
    transferRelatedFunctionDocumentation();
    transferFunctionDocumentation();
+   Doxy_Globals::g_stats.end();
+
+   Doxy_Globals::g_stats.begin("Creating members for template instances\n");
+   createTemplateInstanceMembers();
    Doxy_Globals::g_stats.end();
 
    // added 12/2015
@@ -2517,6 +2517,14 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
             if (nd->getLanguage() == SrcLangExt_Unknown) {
                nd->setLanguage(root->lang);
             }
+
+            if (rootNav->tagInfo() == 0)  {
+              // if we found the namespace in a tag file and also in a
+              // project file, then remove the tag file reference
+        
+               nd->setReference("");
+               nd->setFileName(fullName);
+             }
 
             // file definition containing the namespace nd
             QSharedPointer<FileDef> fd = rootNav->fileDef();
@@ -9083,7 +9091,7 @@ void Doxy_Work::buildExampleList(QSharedPointer<EntryNav> rootNav)
                                    root->name, root->brief + root->doc + root->inbodyDocs, root->args);
 
          pd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-         pd->setFileName( csPrintable(convertNameToFile(pd->name() + "-example", false, true)), false);
+         pd->setFileName(csPrintable(convertNameToFile_X(pd->name() + "-example", false, true)), false);
          pd->addSectionsToDefinition(root->anchors);
          pd->setLanguage(root->lang);
 

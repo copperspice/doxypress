@@ -28728,7 +28728,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    g_currentMemberDef  = QSharedPointer<MemberDef>();
 
    if (! g_exampleName.isEmpty()) {
-      g_exampleFile = convertNameToFile(g_exampleName + "-example");
+      g_exampleFile = convertNameToFile_X(g_exampleName + "-example");
    }
 
    g_includeCodeFragment = inlineFragment;

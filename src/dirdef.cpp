@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -31,7 +31,7 @@
 
 static int g_dirCount = 0;
 
-DirDef::DirDef(const QString &path) 
+DirDef::DirDef(const QString &path)
    : Definition(path, 1, 1, path), visited(false)
 {
    bool fullPathNames = Config::getBool("full-path-names");
@@ -62,14 +62,14 @@ DirDef::DirDef(const QString &path)
    }
 
    m_fileList = new FileList;
-   
+
    m_dirCount = g_dirCount++;
    m_level    = -1;
 }
 
 DirDef::~DirDef()
 {
-   delete m_fileList;   
+   delete m_fileList;
 }
 
 bool DirDef::isLinkableInProject() const
@@ -86,7 +86,7 @@ void DirDef::addSubDir(QSharedPointer<DirDef> subdir)
 {
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   m_subdirs.inSort(subdir);
+   m_subdirs.append(subdir);
    subdir->setOuterScope(self);
    subdir->m_parent = self;
 }
@@ -95,16 +95,22 @@ void DirDef::addFile(QSharedPointer<FileDef> fd)
 {
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   m_fileList->inSort(fd);
+   m_fileList->append(fd);
    fd->setDirDef(self);
 }
 
+void DirDef::sort()
+{
+   m_subdirs.sort();
+   m_fileList->sort();
+}
+
 static QString encodeDirName(const QString &anchor)
-{ 
+{
    QString sigStr;
    sigStr = QCryptographicHash::hash(anchor.toUtf8(), QCryptographicHash::Md5).toHex();
 
-   return sigStr;  
+   return sigStr;
 }
 
 QString DirDef::getOutputFileBase() const
@@ -152,15 +158,15 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
       if (!documentation().isEmpty()) {
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
-   } 
+   }
 }
 
 void DirDef::writeBriefDescription(OutputList &ol)
-{  
+{
    QSharedPointer<DirDef> self = sharedFrom(this);
 
    if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
-      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
+      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
@@ -221,7 +227,7 @@ void DirDef::writeSubDirList(OutputList &ol)
       ol.parseText(theTranslator->trDir(true, false));
       ol.endMemberHeader();
       ol.startMemberList();
-      
+
       for (auto dd : m_subdirs) {
 
          if (! dd->hasDocumentation()) {
@@ -263,7 +269,7 @@ void DirDef::writeFileList(OutputList &ol)
       ol.parseText(theTranslator->trFile(true, false));
       ol.endMemberHeader();
       ol.startMemberList();
-    
+
       for (auto fd : *m_fileList) {
 
          if (! fd->hasDocumentation()) {
@@ -345,7 +351,7 @@ void DirDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
 
    QListIterator<LayoutDocEntry *> element(LayoutDocManager::instance().docEntries(LayoutDocManager::Directory));
-   LayoutDocEntry *lde;  
+   LayoutDocEntry *lde;
 
    while (element.hasNext()) {
       lde = element.next();
@@ -363,7 +369,7 @@ void DirDef::writeTagFile(QTextStream &tagFile)
          break;
          case LayoutDocEntry::DirFiles: {
             if (m_fileList->count() > 0) {
-              
+
                for (auto fd : *m_fileList) {
                   tagFile << "    <file>" << convertToXML(fd->name()) << "</file>" << endl;
                }
@@ -410,7 +416,7 @@ void DirDef::writeDocumentation(OutputList &ol)
    SrcLangExt lang = getLanguage();
 
    QListIterator<LayoutDocEntry *> element(LayoutDocManager::instance().docEntries(LayoutDocManager::Directory));
-   LayoutDocEntry *lde;  
+   LayoutDocEntry *lde;
 
    while (element.hasNext()) {
       lde = element.next();
@@ -488,7 +494,7 @@ void DirDef::writeDocumentation(OutputList &ol)
 
 void DirDef::setLevel()
 {
-   if (m_level == -1) { 
+   if (m_level == -1) {
       // level not set before
       QSharedPointer<DirDef> p = parent();
 
@@ -510,16 +516,16 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
    if (this == dir) {
       return;   // do not add self-dependencies
    }
-  
+
    // levels match => add direct dependency
    bool added = false;
    UsedDir *usedDir = m_usedDirs.value(dir->getOutputFileBase());
 
-   if (usedDir) { 
+   if (usedDir) {
       // dir dependency already present
       QSharedPointer<FilePair> usedPair = usedDir->findFilePair(srcFd->getOutputFileBase() + dstFd->getOutputFileBase());
 
-      if (usedPair == nullptr) {         
+      if (usedPair == nullptr) {
          usedDir->addFileDep(srcFd, dstFd);
          added = true;
 
@@ -527,9 +533,9 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
          // dir & file dependency already added
       }
 
-   } else { 
+   } else {
       // new directory dependency
-     
+
       usedDir = new UsedDir(dir, inherited);
       usedDir->addFileDep(srcFd, dstFd);
 
@@ -557,38 +563,38 @@ void DirDef::computeDependencies()
 {
    FileList *fl = m_fileList;
 
-   if (fl) {      
+   if (fl) {
 
-      for (auto fd : *fl) {        
+      for (auto fd : *fl) {
          QList<IncludeInfo> *ifl = fd->includeFileList();
 
-         if (ifl) {           
+         if (ifl) {
             // for each include file
 
-            for (auto &item : *ifl) {                  
+            for (auto &item : *ifl) {
 
-               if (item.fileDef && item.fileDef->isLinkable()) { 
+               if (item.fileDef && item.fileDef->isLinkable()) {
                   // linkable file
                   QSharedPointer<DirDef> usedDir = item.fileDef->getDirDef();
 
                   if (usedDir) {
-                     // add dependency: thisDir->usedDir   
+                     // add dependency: thisDir->usedDir
                      addUsesDependency(usedDir, fd, item.fileDef, false);
                   }
                }
             }
          }
       }
-   }
+   }  
 }
 
 bool DirDef::isParentOf(QSharedPointer<DirDef> dir) const
 {
-   if (dir->parent() == this) { 
+   if (dir->parent() == this) {
       // this is a parent of dir
       return true;
 
-   } else if (dir->parent()) { 
+   } else if (dir->parent()) {
       // repeat for the parent of dir
       return isParentOf(dir->parent());
 
@@ -617,7 +623,7 @@ int FilePairDict::compareMapValues(const QSharedPointer<FilePair> &left, const Q
 
 UsedDir::UsedDir(QSharedPointer<DirDef> dir, bool inherited)
    : m_dir(dir), m_inherited(inherited)
-{ 
+{
 }
 
 UsedDir::~UsedDir()
@@ -634,8 +640,8 @@ QSharedPointer<FilePair> UsedDir::findFilePair(const QString &name)
    QString n = name;
 
    if (n.isEmpty()) {
-      return QSharedPointer<FilePair>(); 
-   } else { 
+      return QSharedPointer<FilePair>();
+   } else {
       return m_filePairs.find(n);
    }
 }
@@ -646,9 +652,9 @@ QSharedPointer<DirDef> DirDef::createNewDir(const QString &path)
 
    QSharedPointer<DirDef> dir = Doxy_Globals::directories.find(path);
 
-   if (dir == nullptr) { 
+   if (dir == nullptr) {
       // new dir
-    
+
       dir = QMakeShared<DirDef>(path);
       Doxy_Globals::directories.insert(path, dir);
    }
@@ -657,13 +663,13 @@ QSharedPointer<DirDef> DirDef::createNewDir(const QString &path)
 }
 
 bool DirDef::matchPath(const QString &path, const QStringList &list)
-{  
+{
    for (auto prefix : list) {
-          
-      if (prefix.startsWith(path, Qt::CaseInsensitive)) {      
+
+      if (prefix.startsWith(path, Qt::CaseInsensitive)) {
          // case insensitive compare
          return true;
-      }      
+      }
    }
 
    return false;
@@ -672,7 +678,7 @@ bool DirDef::matchPath(const QString &path, const QStringList &list)
 /*! strip part of \a path if it matches one of the paths in the list
  */
 QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QString &path)
-{   
+{
    int p = 0;
    int i = 0;
 
@@ -734,7 +740,7 @@ void DirRelation::writeDocumentation(OutputList &ol)
    QString shortTitle = theTranslator->trDirRelation( qPrintable(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName()) );
    QString title = theTranslator->trDirRelation( qPrintable(m_src->displayName() + " -> " + m_dst->dir()->shortName()) );
 
-   startFile(ol, getOutputFileBase(), getOutputFileBase(), 
+   startFile(ol, getOutputFileBase(), getOutputFileBase(),
              title, HLI_None, !generateTreeView, m_src->getOutputFileBase());
 
    if (! generateTreeView) {
@@ -759,7 +765,7 @@ void DirRelation::writeDocumentation(OutputList &ol)
 
    ol.writeString("</th>");
    ol.writeString("</tr>");
-  
+
    for (auto fp : m_dst->filePairs())  {
       ol.writeString("<tr class=\"dirtab\">");
       ol.writeString("<td class=\"dirtab\">");
@@ -798,22 +804,22 @@ static int misMatch(const QString &path, const QString &dirName)
    }
 
    return retval;
-}  
+}
 
 /** In order to create stable, but unique directory names
  *  compute the common part of the path shared by all directories.
  */
 static void computeCommonDirPrefix()
 {
-   if (Doxy_Globals::directories.count() == 0) { 
+   if (Doxy_Globals::directories.count() == 0) {
       return;
    }
 
    // Map<QString, QSharedPointer<DirDef>>
 
-   QString path; 
+   QString path;
    bool isFirstLoop = true;
-  
+
    for (auto dir : Doxy_Globals::directories) {
 
       if (isFirstLoop) {
@@ -822,7 +828,7 @@ static void computeCommonDirPrefix()
          continue;
       }
 
-      int index = misMatch(path, dir->name());  
+      int index = misMatch(path, dir->name());
 
       if (index < path.length()) {
          // trim what did not match
@@ -832,30 +838,30 @@ static void computeCommonDirPrefix()
             break;
          }
       }
-   }     
+   }
 
    if (! path.isEmpty()) {
       // strip off the common prefix from each directory
-     
+
       int prefixLength = path.lastIndexOf('/') + 1;
-   
-      for (auto dir : Doxy_Globals::directories) {   
+
+      for (auto dir : Doxy_Globals::directories) {
          QString diskName = dir->name().mid(prefixLength);
-         dir->setDiskName(diskName);      
-      }   
+         dir->setDiskName(diskName);
+      }
    }
 }
 
 void buildDirectories()
 {
-   // for each input file  
-   for (auto fn : *Doxy_Globals::inputNameList) {       
-      for (auto fd : *fn) {  
-         
+   // for each input file
+   for (auto fn : *Doxy_Globals::inputNameList) {
+      for (auto fd : *fn) {
+
          if (fd->getReference().isEmpty() && fd->isDocumentationFile()) {
             QSharedPointer<DirDef> dir;
 
-            if ((dir = Doxy_Globals::directories.find(fd->getPath())) == 0) { 
+            if ((dir = Doxy_Globals::directories.find(fd->getPath())) == 0) {
                // new directory
                dir = DirDef::mergeDirectoryInTree(fd->getPath());
             }
@@ -869,19 +875,23 @@ void buildDirectories()
          }
       }
    }
-   
-   // compute relations between directories, introduce container dirs 
-   for (auto dir : Doxy_Globals::directories) { 
+
+   // compute relations between directories, introduce container dirs
+   for (auto dir : Doxy_Globals::directories) {
       QString name = dir->name();
       int i = name.lastIndexOf('/', name.length() - 2);
 
       if (i > 0) {
          QSharedPointer<DirDef> parent = Doxy_Globals::directories.find(name.left(i + 1));
-        
-         if (parent) {                       
+
+         if (parent) {
             parent->addSubDir(dir);
          }
       }
+   }
+
+   for (auto dir : Doxy_Globals::directories) {
+      dir->sort();
    }
 
    computeCommonDirPrefix();
@@ -890,24 +900,24 @@ void buildDirectories()
 void computeDirDependencies()
 {
    // compute nesting level for each directory
-   for (auto dir : Doxy_Globals::directories) {  
+   for (auto dir : Doxy_Globals::directories) {
       dir->setLevel();
    }
 
    // compute uses dependencies between directories
-   for (auto dir : Doxy_Globals::directories) {       
+   for (auto dir : Doxy_Globals::directories) {
       dir->computeDependencies();
    }
 }
 
 void generateDirDocs(OutputList &ol)
 {
-   for (auto dir : Doxy_Globals::directories) { 
+   for (auto dir : Doxy_Globals::directories) {
       dir->writeDocumentation(ol);
    }
 
-   if (Config::getBool("directory-graph")) {    
-      for (auto item : Doxy_Globals::dirRelations) { 
+   if (Config::getBool("directory-graph")) {
+      for (auto item : Doxy_Globals::dirRelations) {
          item->writeDocumentation(ol);
       }
    }

@@ -385,6 +385,7 @@ class DotRunner
 
    /** Runs dot for all jobs added. */
    bool run();
+
    CleanupItem cleanup() const {
       return m_cleanupItem;
    }
@@ -392,14 +393,19 @@ class DotRunner
  private:
    QList<QString> m_jobs;
 
-   QString m_imageName;
    QString m_postArgs;
    QString m_postCmd;
+
    QString m_file;
    QString m_path;
+   QString m_dotExe;
+
+   QString m_imageName;
+   QString m_imageFormat;
 
    bool m_checkResult;
    bool m_cleanUp;
+   bool m_multiTargets;
 
    CleanupItem m_cleanupItem;
 };

@@ -103,31 +103,61 @@ static QString escapeSpecialChars(const QString &text)
       return "";
    }
 
-   QString retval;   
+   QString retval; 
+   bool insideQuote = false;  
+
+   QChar prevChar;
 
    for (auto c : text) {
 
       switch (c.unicode()) {
+
+         case '"':  
+            if (prevChar != '\\')  { 
+               insideQuote = !insideQuote; 
+            } 
+
+            retval += c;
+            break;
+
          case '<':
-            retval += "\\<";
+            if (! insideQuote) { 
+               retval += '\\';
+            }
+
+            retval += "<";
             break;
 
          case '>':
-            retval += "\\>";
+            if (! insideQuote) { 
+               retval += '\\';
+            }
+
+            retval += ">";
             break;
 
          case '\\':
-            retval += "\\\\";
+            if (! insideQuote) { 
+               retval += '\\';
+            }
+
+            retval += "\\";
             break;
 
          case '@':
-            retval += "\\@";
+            if (! insideQuote) { 
+               retval += '\\';
+            }
+
+            retval += "@";
             break;
 
          default:
             retval += c;
             break;
       }
+
+      prevChar = c;
    }
 
    return retval;
@@ -682,8 +712,9 @@ static int processEmphasis(QString &out, const QString &data, int offset, int si
    }
 
    // invalid char before * or _, invalid char after * or _, invalid char after ** or __
-   if ( (offset > 0 && ! isOpenEmphChar(charA)) || 
-        (size > 1 && data0 != data1 && ! isIdChar(data1)) || (size > 2 && data0 == data1 && ! isIdChar(data2))) {  
+   if ( (offset > 0 && ! isOpenEmphChar(charA)) ||
+        (size > 1 && data0 != data1 && ! (isIdChar(data1) || data1 == '[')) ||
+        (size > 2 && data0 == data1 && ! (isIdChar(data2) || data2 == '[')) ) {  
 
       return 0;
    }
@@ -1040,7 +1071,10 @@ static int processLink(QString &out, const QString &data, int, int size)
          }
 
          out += ">";
-         out += content.simplified();
+
+         content = content.simplified();
+         processInline(out, content, content.length());
+
          out += "</a>";
 
       } else { 
@@ -1153,27 +1187,22 @@ static int processSpecialCommand(QString &out, const QString &data, int offset, 
    if (size > 1 && data[0] == '\\') {
       QChar c = data[1];
 
-      if (c == '[' || c == ']' || c == '*' ||
-            c == '!' || c == '(' || c == ')' || c == '`' || c == '_') {
-
-         if (c == '-' && size > 3 && data[2] == '-' && data[3] == '-') { 
-            // \---
-            out += data.mid(1, 3);
-            return 4;
-
-         } else if (c == '-' && size > 2 && data[2] == '-') { 
-            // \--
-            out += data.mid(1, 2);
-            return 3;
-
-         } else if (c =='-') {
-            // \- 
-            out += c;
-
-         }
+      if (c == '[' || c == ']' || c == '*' || c == '!' || c == '(' || c == ')' || c == '`' || c == '_') {
 
          out += c;
          return 2;
+
+      } else if (c == '-' && size > 3 && data[2] == '-' && data[3] == '-') { 
+         // \---
+
+         out += data.mid(1, 3);
+         return 4;
+
+      } else if (c == '-' && size > 2 && data[2] == '-') { 
+         // \--
+
+         out += data.mid(1, 2);
+         return 3;  
       }
    }
 
@@ -2819,14 +2848,13 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    QString titleFn = QFileInfo(fileName).baseName();
    QString fn      = QFileInfo(fileName).fileName();
 
-   static QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
+   static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
 
    if (id.isEmpty()) {
       id = markdownFileNameToId(fileName);
    }   
 
    if (! isExplicitPage(docs))  {
-
 
       if (! mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage || 
                   QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) )  {

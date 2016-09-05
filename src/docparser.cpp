@@ -1972,7 +1972,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
       CiteInfo *cite = Doxy_Globals::citeDict->find(id.mid(CiteConsts::anchorPrefix.length()));
 
       if (cite) {
-         m_file   = convertNameToFile(CiteConsts::fileName, false, true);
+         m_file   = convertNameToFile_X(CiteConsts::fileName, false, true);
          m_anchor = id;
 
       } else {
@@ -2285,7 +2285,7 @@ bool DocXRefItem::parse()
                m_anchor = "@";
 
             } else {
-               m_file   = convertNameToFile(refList.listName(), false, true);
+               m_file   = convertNameToFile_X(refList.listName(), false, true);
                m_anchor = item->listAnchor;
             }
 
@@ -2713,7 +2713,7 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
       m_text   = cite->text;
       m_ref    = cite->ref;
       m_anchor = CiteConsts::anchorPrefix + cite->label;
-      m_file   = convertNameToFile(CiteConsts::fileName, false, true);
+      m_file   = convertNameToFile_X(CiteConsts::fileName, false, true);
 
       return;
    }

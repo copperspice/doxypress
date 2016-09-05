@@ -108,6 +108,8 @@ class DirDef : public Definition
       m_diskName = name;
    }
 
+   void sort();
+
  private:
    friend void computeDirDependencies();
 
@@ -138,8 +140,7 @@ class DirDef : public Definition
    int m_dirCount;
    int m_level;
 
-   QSharedPointer<DirDef> m_parent;
-
+   QSharedPointer<DirDef>    m_parent;
    QHash<QString, UsedDir *> m_usedDirs;
 };
 

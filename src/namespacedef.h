@@ -105,6 +105,7 @@ class NamespaceDef : public Definition
    virtual void addInnerCompound(QSharedPointer<Definition> d) override;
 
    void addListReferences();
+   void setFileName(const QString &fn);
 
    bool subGrouping() const {
       return m_subGrouping;

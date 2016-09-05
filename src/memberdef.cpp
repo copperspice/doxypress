@@ -1549,7 +1549,8 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    if (i != -1) {
       // member has an anonymous type
 
-      if (annoClassDef) { // type is an anonymous compound
+      if (annoClassDef) { 
+         // type is an anonymous compound
          int ir = i + l;
 
          ol.startAnonTypeScope(s_indentLevel++);
@@ -1591,7 +1592,8 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          }
       }
 
-   } else if (ltype == "@") { // rename type from enum values
+   } else if (ltype == "@") { 
+      // rename type from enum values
       ltype = "";
 
    } else {
@@ -1627,13 +1629,16 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       ol.insertMemberAlign(m_impl->tArgList != 0);
    }
 
-   // *** write name
+   // write name
    if (! name().isEmpty() && name().at(0) != '@') {
-
       // hide anonymous stuff
+
+      static const bool extractPrivate = Config::getBool("extract-private");
+      static const bool extractStatic  = Config::getBool("extract-static");
+
       if (! (name().isEmpty() || name().at(0) == '@') && (hasDocumentation() || isReference()) &&
-            ! (m_impl->prot == Private && ! Config::getBool("extract-private") && m_impl->mtype != MemberType_Friend) &&
-            ! (isStatic() && m_impl->classDef == 0 && ! Config::getBool("extract-static"))) {
+            ! (m_impl->prot == Private && ! extractPrivate && m_impl->mtype != MemberType_Friend) &&
+            ! (isStatic() && m_impl->classDef == 0 && ! extractStatic)) {
 
          if (m_impl->annMemb) {
 
@@ -1838,7 +1843,11 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // write brief description
-   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc") ) {
+
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+   static const bool briefMemberDesc     = Config::getBool("brief-member-desc");
+
+   if (! briefDescription().isEmpty() && briefMemberDesc) {
 
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : d,
                   self, briefDescription(), true, false, "", true, false);
@@ -1850,14 +1859,16 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          ol.writeDoc(rootNode, getOuterScope() ? getOuterScope() : d, self);
 
          if (detailsVisible) {
-            static bool separateMemberPages = Config::getBool("separate-member-pages");
+            
             ol.pushGeneratorState();
             ol.disableAllBut(OutputGenerator::Html);
             //ol.endEmphasis();
 
             ol.docify(" ");
 
-            if (separateMemberPages || (m_impl->group != 0 && gd == 0) || (m_impl->nspace != 0 && nd == 0) ) {
+            if (inheritedFrom || separateMemberPages || (m_impl->group != 0 && gd == 0) || 
+                  (m_impl->nspace != 0 && nd == 0) ) {
+
                // forward link to the page, group, or namespace
                ol.startTextLink(getOutputFileBase(), anchor());
 

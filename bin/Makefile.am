@@ -213,6 +213,7 @@ noinst_HEADERS = \
    src/classlist.h \
    src/cmdmapper.h \
    src/code_cstyle.h \
+   src/code_cstyle_internal.h \
    src/commentcnv.h \
    src/commentscan.h \
    src/condparser.h \

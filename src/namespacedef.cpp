@@ -36,7 +36,7 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
       fileName = stripExtension(fName);
 
    } else {
-      fileName = "namespace" + QString(name);
+      setFileName(name);
    }
 
    m_usingDeclMap   = new StringMap<QSharedPointer<Definition>>();
@@ -77,6 +77,11 @@ NamespaceDef::~NamespaceDef()
    delete memberGroupSDict;
    delete m_usingDirMap;
    delete namespaceSDict;     
+}
+
+void NamespaceDef::setFileName(const QString &fn)
+{
+  fileName = "namespace" + fn;
 }
 
 void NamespaceDef::distributeMemberGroupDocumentation()
