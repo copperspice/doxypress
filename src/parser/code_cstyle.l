@@ -2075,16 +2075,19 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body,MemberCall,MemberCall2>"}"    { 
       QString text = QString::fromUtf8(yytext);
+
       g_theVarContext.popScope();
       g_type.resize(0); 
       g_name.resize(0);
       
-      int scope = g_scopeStack.pop();
-
-      DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
-
-      if (scope == SCOPEBLOCK || scope == CLASSBLOCK)  {
-         popScope();
+      if (! g_scopeStack.isEmpty()) {
+         int scope = g_scopeStack.pop();
+   
+         DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
+   
+         if (scope == SCOPEBLOCK || scope == CLASSBLOCK)  {
+            popScope();
+         }
       }
       
       g_code->codify(text);
@@ -2117,16 +2120,14 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       if (g_insideBody) {
          g_theVarContext.popScope();
       
-         int scope = 0;
-   
-         if (! g_scopeStack.isEmpty() ) {              
-            scope = g_scopeStack.pop();
-         }
-
-         DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
+         if (! g_scopeStack.isEmpty()) {
+            int scope = g_scopeStack.pop();
+         
+            DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
       
-         if (scope == SCOPEBLOCK || scope == CLASSBLOCK) {
-            popScope();
+            if (scope == SCOPEBLOCK || scope == CLASSBLOCK) {
+               popScope();
+            }
          }
 
          g_insideBody=false;

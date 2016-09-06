@@ -11,6 +11,7 @@ gcclibs=libgcc_s_*-1  libstdc++-6  libwinpthread-1
 
 # list of CopperSpice libraries
 cslibs=Core Xml
+csver=1.3
 
 # location of includes
 AM_CXXFLAGS+=-I../src
@@ -75,7 +76,7 @@ deploy : all
 
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
-	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%1.so*,$(cslibs)) $(deploydir)
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%$(csver).so*,$(cslibs)) $(deploydir)
 endif
 
 if OSTYPE_DARWIN
@@ -89,7 +90,7 @@ deploy : all
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)%.dll,$(gcclibs))  $(deploydir)
-	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%1-0.dll,$(cslibs))  $(deploydir)
+	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%$(csver)-0.dll,$(cslibs))  $(deploydir)
 
 	rsync -W -a --modify-window=2  $(clang_dll)        $(deploydir)
 	rsync -W -a --modify-window=2  $(clang_hdr)/3.7.1  $(deploydir)/include/
@@ -99,7 +100,7 @@ endif
 VPATH = ../
 
 # linking
-doxypress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%1,$(cslibs)) $(clang_link)
+doxypress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%$(csver),$(cslibs)) $(clang_link)
 
 if OSTYPE_WIN
    doxypress_LDFLAGS+= -lole32

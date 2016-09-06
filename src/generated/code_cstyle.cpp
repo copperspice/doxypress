@@ -13137,16 +13137,19 @@ case 29:
 YY_RULE_SETUP
 { 
       QString text = QString::fromUtf8(code_cstyle_YYtext);
+
       g_theVarContext.popScope();
       g_type.resize(0); 
       g_name.resize(0);
       
-      int scope = g_scopeStack.pop();
-
-      DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
-
-      if (scope == SCOPEBLOCK || scope == CLASSBLOCK)  {
-         popScope();
+      if (! g_scopeStack.isEmpty()) {
+         int scope = g_scopeStack.pop();
+   
+         DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
+   
+         if (scope == SCOPEBLOCK || scope == CLASSBLOCK)  {
+            popScope();
+         }
       }
       
       g_code->codify(text);
@@ -13181,16 +13184,14 @@ YY_RULE_SETUP
       if (g_insideBody) {
          g_theVarContext.popScope();
       
-         int scope = 0;
-   
-         if (! g_scopeStack.isEmpty() ) {              
-            scope = g_scopeStack.pop();
-         }
-
-         DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
+         if (! g_scopeStack.isEmpty()) {
+            int scope = g_scopeStack.pop();
+         
+            DBG_CTX((stderr, "** scope stack pop SCOPEBLOCK = %d\n", scope == SCOPEBLOCK));
       
-         if (scope == SCOPEBLOCK || scope == CLASSBLOCK) {
-            popScope();
+            if (scope == SCOPEBLOCK || scope == CLASSBLOCK) {
+               popScope();
+            }
          }
 
          g_insideBody=false;
