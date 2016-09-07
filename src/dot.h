@@ -408,6 +408,8 @@ class DotRunner
    bool m_multiTargets;
 
    CleanupItem m_cleanupItem;
+
+   static std::mutex m_output_mutex;
 };
 
 /** class to insert a set of map files into an output file */

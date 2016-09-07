@@ -116,7 +116,10 @@ int portable_system(const QString &command, const QString &args, bool commandHas
 
       SHELLEXECUTEINFOW sInfo = {
          sizeof(SHELLEXECUTEINFOW),   
-         SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,     // wait till the process is  done, do not display msg box if there is an error                                                       
+
+         // wait till the process is  done, do not display msg box if there is an error                                                       
+         SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,     
+
          NULL,                       /* window handle */
          NULL,                       /* action to perform: open */
          (LPCWSTR)command.utf16(),   /* file to execute */

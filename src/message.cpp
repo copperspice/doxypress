@@ -176,7 +176,7 @@ static void format_warn(const QString &file, int line, const QString &text)
    msgText = substitute(msgText, "$line",    lineSubst);
    msgText = substitute(msgText, "$version", versionSubst) + "\n";
    
-   // print resulting message
+   // message sent to warnFile 
    fwrite(msgText.toUtf8().constData(), 1, msgText.length(), warnFile);
 }
 
@@ -184,7 +184,7 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
                   const QString &fmt, va_list args)
 {
    if (! Config::getBool(tag)) {
-      // is this warning type disabled
+      // this warning type disabled
       return;   
    }
 
@@ -204,37 +204,61 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
    format_warn(file, line, text);
 }
 
-
 // **
 void err(const QString &fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
 
-   QString temp = "Error: ";   
-   vfprintf(warnFile, (temp + fmt).toUtf8().constData(), args);
+   const QString temp = "Error: " + fmt; 
+
+   // message sent to warnFile 
+   vfprintf(warnFile, temp.toUtf8().constData(), args);
 
    va_end(args);
 }
 
-void msg(const QString &fmt, ...)
-{
-   if (! Config::getBool("quiet")) {    
-      va_list args;
-      va_start(args, fmt);
-
-      vfprintf(stdout, fmt.toUtf8().constData(), args);
-      va_end(args);
-   }
-}
-
-void warn(const QString &file, int line, const QString &fmt, ...)
+void errAll(const QString &fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
 
-   static const QString warning_str = "Warning: ";
-   warn_internal("warnings", file, line, warning_str, fmt, args);
+   const QString temp = "Error: " + fmt;  
+
+   // message sent to warnFile 
+   vfprintf(warnFile, temp.toUtf8().constData(), args);
+
+   if (warnFile != stderr) {   
+      // message displayed on screen
+      vfprintf(stderr, temp.toUtf8().constData(), args);
+   }
+
+   va_end(args);
+}
+
+void errNoPrefix(const QString &fmt, ...)
+{
+   va_list args;
+   va_start(args, fmt);
+   
+   // message sent to warnFile 
+   vfprintf(warnFile, fmt.toUtf8().constData(), args);
+
+   va_end(args);
+}
+
+void errNoPrefixAll(const QString &fmt, ...)
+{
+   va_list args;
+   va_start(args, fmt);   
+
+   // message sent to warnFile 
+   vfprintf(warnFile, fmt.toUtf8().constData(), args);
+
+   if (warnFile != stderr) {   
+      // message displayed on screen
+      vfprintf(stderr, fmt.toUtf8().constData(), args);
+   }
 
    va_end(args);
 }
@@ -244,8 +268,10 @@ void warnMsg(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   static const QString temp = "Warning: ";      
-   vfprintf(warnFile, (temp + fmt).toUtf8().constData(), args);
+   const QString temp = "Warning: " + fmt;  
+
+   // message sent to warnFile 
+   vfprintf(warnFile, temp.toUtf8().constData(), args);
 
    va_end(args);
 }
@@ -255,13 +281,56 @@ void warnAll(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   const QString temp = "\nWarning: " + fmt + "\n";   
+   const QString temp = "Warning: " + fmt;  
+ 
+   // message sent to warnFile 
    vfprintf(warnFile, temp.toUtf8().constData(), args);
 
-   // ensure the message is sent to the warning log file
    if (warnFile != stderr) {   
+      // message displayed on screen
       vfprintf(stderr, temp.toUtf8().constData(), args);
    }
+
+   va_end(args);
+}
+
+
+// **
+void msg(const QString &fmt, ...)
+{   
+   if (! Config::getBool("quiet")) {    
+      va_list args;
+      va_start(args, fmt);
+
+      // message displayed on screen
+      vfprintf(stdout, fmt.toUtf8().constData(), args);
+
+      va_end(args);
+   }
+}
+
+void warn(const QString &file, int line, const QString &fmt, ...)
+{
+   va_list args;
+   va_start(args, fmt);
+
+   static const QString temp = "Warning: ";
+
+   // message sent to warnFile 
+   warn_internal("warnings", file, line, temp, fmt, args);
+
+   va_end(args);
+}
+
+void warn_doc_error(const QString &file, int line, const QString &fmt, ...)
+{   
+   va_list args;
+   va_start(args, fmt);
+
+   static const QString temp = "Warning: ";
+
+   // message sent to warnFile 
+   warn_internal("warn-doc-error", file, line, temp, fmt, args);
 
    va_end(args);
 }
@@ -272,25 +341,10 @@ void warn_simple(const QString &file, int line, const QString &text)
       return;  
    }
 
-   static const QString warning_str = "Warning: ";
-   format_warn(file, line, warning_str + text);
-}
+   const QString temp = "Warning: " + text;
 
-void va_warn(const QString &file, int line, const QString &fmt, va_list args)
-{
-   static const QString warning_str = "Warning: ";
-   warn_internal("warnings", file, line, warning_str, fmt, args);
-}
-
-void warn_doc_error(const QString &file, int line, const QString &fmt, ...)
-{   
-   va_list args;
-   va_start(args, fmt);
-
-   static QString warning_str = "Warning: ";
-   warn_internal("warn-doc-error", file, line, warning_str, fmt, args);
-
-   va_end(args);
+   // message sent to warnFile 
+   format_warn(file, line, temp);
 }
 
 void warn_undoc(const QString &file, int line, const QString &fmt, ...)
@@ -298,23 +352,37 @@ void warn_undoc(const QString &file, int line, const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   static const QString warning_str = "Warning: ";
-   warn_internal("warn-undoc", file, line, warning_str, fmt, args);
+   static const QString temp = "Warning: ";
+
+   // message sent to warnFile 
+   warn_internal("warn-undoc", file, line, temp, fmt, args);
 
    va_end(args);
 }
 
+// **
 void warn_uncond(const QString &fmt, ...)
 {   
    va_list args;
    va_start(args, fmt);
 
-   static const QString warning_str = "Warning: ";
-   vfprintf(warnFile, (warning_str + fmt).toUtf8().constData(), args);
+   const QString temp = "Warning: " + fmt;
+
+   // message sent to warnFile 
+   vfprintf(warnFile, temp.toUtf8().constData(), args);
 
    va_end(args);
 }
 
+void va_warn(const QString &file, int line, const QString &fmt, va_list args)
+{
+   static const QString temp = "Warning: ";
+
+   // message sent to warnFile 
+   warn_internal("warnings", file, line, temp, fmt, args);
+}
+
+// **
 void printlex(int dbg, bool enter, const QString &lexName, const QString &fileName)
 {
    QString enter_txt    = "entering";

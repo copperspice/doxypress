@@ -1562,7 +1562,7 @@ static const char constScope[]   = { 'c', 'o', 'n', 's', 't', ':' };
 static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
 // note: this function is not reentrant due to the use of a static buffer
-QString removeRedundantWhiteSpace(const QString &str)
+QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
 {
    if (str.isEmpty()) {
       return str;
@@ -1725,7 +1725,10 @@ QString removeRedundantWhiteSpace(const QString &str)
 
          // fix spacing "int(*var"
          if (c == '(' && ( (i > 1 && isId(str.at(i-1))) || (i > 2 && str.at(i-1) == ' ' && isId(str.at(i-2)) ) ) )   {
-            retval += ' ';
+
+            if (makePretty) {
+               retval += ' ';
+            }
          }
 
          if (c == '*' || c == '&' || c == '@' || c == '$') {
@@ -4100,9 +4103,9 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
    QString fullName = substitute(tName, "#", "::");
 
    if (fullName.indexOf("anonymous_namespace{") == -1) {
-      fullName = removeRedundantWhiteSpace(substitute(fullName, ".", "::"));
+      fullName = removeRedundantWhiteSpace(substitute(fullName, ".", "::"), false);
    } else {
-      fullName = removeRedundantWhiteSpace(fullName);
+      fullName = removeRedundantWhiteSpace(fullName, false);      
    }
 
    int bracePos = findParameterList(fullName);
@@ -4115,7 +4118,7 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
 
    } else   {
       endNamePos = fullName.length();
-      scopePos = fullName.lastIndexOf("::", fullName.length() - 1);
+      scopePos   = fullName.lastIndexOf("::", fullName.length() - 1);
    }
 
    bool explicitScope = fullName.left(2) == "::" && (scopePos > 2 || tName.left(2) == "::" || scName.isEmpty());
@@ -4184,8 +4187,7 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
             ! md->isStrongEnumValue() && (! scopeStr.isEmpty() || nameStr.indexOf("::") > 0)) {
 
          // we found a member, but it is a global one while we were explicitly
-         // looking for a scoped variable. See bug 616387 for an example why this check is needed.
-         // note we do need to support autolinking to "::symbol" hence the > 0
+         // looking for a scoped variable, support autolinking to "::symbol" hence the > 0
 
          *resContext = QSharedPointer<Definition>();
          *resMember  = QSharedPointer<MemberDef>();

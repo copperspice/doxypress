@@ -3183,7 +3183,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <ObjCMName>{ID}/{BN}*"]"          { 
-      // broom - rule 126 old
       QString text = QString::fromUtf8(yytext);
 
       if (g_braceCount == 0 && g_ObjC_currentCtx->methodName.isEmpty()) {
@@ -3272,7 +3271,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <Body>"]"            {                           
-      // broom - case 140
       QString text = QString::fromUtf8(yytext);
 
       popCallContext();
@@ -3494,7 +3492,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <CallEnd,OldStyleArgs>("const"|"volatile"|"sealed"|"override")*({BN}+("const"|"volatile"|"sealed"|"override"))*{BN}*"{" {
-      // broom case 160
       QString text = QString::fromUtf8(yytext);
 
       if (g_insideBody) {
@@ -3794,7 +3791,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <RemoveSpecialCComment>"*/"{B}*\n({B}*\n)*({B}*(("//@"[{}])|("/*@"[{}]"*/")){B}*\n)? {
-      // broom 186
       QString text = QString::fromUtf8(yytext);
 
       g_yyLineNr += text.count('\n');

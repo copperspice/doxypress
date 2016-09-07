@@ -44,6 +44,8 @@ int DotInclDepGraph::m_curNodeNumber = 0;
 int DotClassGraph::m_curNodeNumber   = 0;
 int DotCallGraph::m_curNodeNumber    = 0;
 
+std::mutex DotRunner::m_output_mutex;
+
 #define MAP_CMD "cmapx"
 
 //#define FONTNAME "Helvetica"
@@ -365,12 +367,24 @@ static QString replaceRef(const QString &buf, const QString relPath, bool urlOnl
 static bool convertMapFile(QTextStream &t, const QString &mapName, const QString &relPath, bool urlOnly = false,
                            const QString &context = QString())
 {
+   static int logCount = 0;
    QFile f(mapName);
 
    if (! f.open(QIODevice::ReadOnly)) {                 
-      err("Unable to open map file %s\n" 
-          "If Graphviz/dot was installed after a previous DoxyPress issue, please delete the output directory and "
-          "regenerate the documentation.\n", qPrintable(mapName));
+
+      if (logCount < 5) {      
+         logCount++;  
+
+         errNoPrefixAll("\n");
+         errAll("Unable to open dot map file %s\n" 
+                  "If dot was installed after a previous issue, delete the output directory and run DoxyPress again\n", 
+                   csPrintable(mapName));
+               
+      } else if (logCount == 5) {   
+         logCount++;
+         errNoPrefixAll("\n** Suppressing all further messages regarding dot map file\n\n");      
+   
+      }
 
       return false;
    }
@@ -776,12 +790,12 @@ static bool checkDeliverables(const QString &file1, const QString &file2 = QStri
 DotRunner::DotRunner(const QString &file, const QString &path, bool checkResult, const QString &imageName)
    : m_file(file), m_path(path), m_imageName(imageName), m_checkResult(checkResult) 
 {
-   static const QString dotExe      = Config::getEnum("dot-path");
+   static const QString dotPath     = Config::getString("dot-path");
    static const QString imageFormat = Config::getEnum("dot-image-format");
    static const bool dotCleanUp     = Config::getBool("dot-cleanup");
    static const bool multiTargets   = Config::getBool("dot-multiple-targets");
 
-   m_dotExe       = dotExe;
+   m_dotExe       = dotPath;
    m_imageFormat  = imageFormat; 
    m_cleanUp      = dotCleanUp; 
    m_multiTargets = multiTargets;  
@@ -801,6 +815,8 @@ void DotRunner::addPostProcessing(const  QString &cmd, const  QString &args)
 
 bool DotRunner::run()
 {       
+   static int logCount = 0;
+
    int exitCode = 0;
    QString dotArgs;
 
@@ -827,6 +843,8 @@ bool DotRunner::run()
    }
 
    if (! m_postCmd.isEmpty() && portable_system(m_postCmd, m_postArgs) != 0) {
+      std::lock_guard<std::mutex> lock(m_output_mutex);
+
       err("Unable to run '%s' as a post-processing step for dot output\n", csPrintable(m_postCmd));
       return false;
    }
@@ -843,7 +861,27 @@ bool DotRunner::run()
    return true;
 
 error:
-   err("Unable to run Dot, exit code = %d, command = '%s', arguments = '%s'\n", exitCode, csPrintable(m_dotExe), qPrintable(dotArgs));
+   std::lock_guard<std::mutex> lock(m_output_mutex);
+
+   if (logCount < 5) {      
+
+      logCount++;
+         
+      if (exitCode == -1) {
+         errAll("Unable to run '%s', most likely the Dot program was not found\n", csPrintable(m_dotExe));
+   
+      } else  {    
+         errNoPrefixAll("\n");
+         errAll("Unable to run '%s', exit code = %d\nArguments = '%s'\n", csPrintable(m_dotExe), 
+                     exitCode, csPrintable(dotArgs));   
+      }
+
+   } else if (logCount == 5) {
+
+      logCount++;
+      errNoPrefixAll("\n** Suppressing all further messages regarding dot program execution\n\n");      
+
+   }
 
    return false;
 }
@@ -1308,7 +1346,8 @@ bool DotManager::run()
          msg("Generating dot graphs in single threaded mode...\n");
 
       } else {
-         msg("Generating dot graphs using %d parallel threads...\n", qMin(numDotRuns + numDotMaps, (uint)m_workers.count()));
+         msg("Generating dot graphs using %d parallel threads...\n", 
+                  qMin(numDotRuns + numDotMaps, (uint)m_workers.count()));
       }
    }
 
@@ -1334,7 +1373,8 @@ bool DotManager::run()
    DotRunner *dr;
    int prev = 1;
      
-   if (m_workers.count() == 0) { // no threads to work with
+   if (m_workers.count() == 0) { 
+      // no threads to work with
 
       for (auto dr : m_dotRuns) {
          msg("Running dot for graph %d/%d\n", prev, numDotRuns);
@@ -1342,7 +1382,8 @@ bool DotManager::run()
          prev++;
       }
 
-   } else { // use multiple threads to run instances of dot in parallel
+   } else { 
+      // use multiple threads to run instances of dot in parallel
       for (auto dr : m_dotRuns) {
          m_queue->enqueue(dr);
       }
@@ -1387,9 +1428,8 @@ bool DotManager::run()
    i = 1;
 
    // since patching the svg files may involve patching the header of the SVG
-   // (for zoomable SVGs), and patching the .html files requires reading that
-   // header after the SVG is patched, we first process the .svg files and
-   // then the other files.
+   // (for zoomable SVGs), and patching the .html files requires reading that header
+   // after the SVG is patched, first process the .svg files and then the other files
    
    for (auto mapItem : m_dotMaps) {
       if (mapItem->file().right(4) == ".svg") {
@@ -4374,18 +4414,19 @@ void DotGroupCollaboration::addMemberList(QSharedPointer<MemberList> ml)
 DotGroupCollaboration::Edge *DotGroupCollaboration::addEdge(DotNode *x_pNStart, DotNode *x_pNEnd, EdgeType x_eType,
                   const QString &x_label, const QString &x_url)
 {
-   Edge *newEdge = 0;   
+   Edge *newEdge = nullptr; 
 
    // search a existing link 
-   for (auto item : m_edges) {
-      if (item->pNStart == x_pNStart && newEdge->pNEnd == x_pNEnd && item->eType == x_eType) {
-         // edge already found
+   for (auto item : m_edges) {      
+
+      if (item->pNStart == x_pNStart && item->pNEnd == x_pNEnd && item->eType == x_eType) {
+         // edge already found         
          newEdge = item;
          break;
       }
    }
 
-   if (newEdge == 0) { 
+   if (newEdge == nullptr) { 
       // new link
       newEdge = new Edge(x_pNStart, x_pNEnd, x_eType);
       m_edges.append(newEdge);

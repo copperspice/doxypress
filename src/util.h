@@ -187,7 +187,7 @@ bool resolveRef(const QString &scName, const QString &tsname, bool inSeeBlock, Q
 
 bool resolveLink(const QString &scName, const QString &linkRef, bool inSeeBlock, QSharedPointer<Definition> *resContext, QString &resAnchor);
 
-QString removeRedundantWhiteSpace(const QString &s);
+QString removeRedundantWhiteSpace(const QString &s, bool makePretty = true);
 QString removeAnonymousScopes(const QString &s);
 QString replaceAnonymousScopes(const QString &s, const QString &replacement = QString() );
 

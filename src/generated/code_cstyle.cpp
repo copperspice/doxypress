@@ -14505,7 +14505,6 @@ case 134:
 /* rule 134 can match eol */
 YY_RULE_SETUP
 { 
-      // broom - rule 126 old
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
       if (g_braceCount == 0 && g_ObjC_currentCtx->methodName.isEmpty()) {
@@ -14627,7 +14626,6 @@ YY_RULE_SETUP
 case 148:
 YY_RULE_SETUP
 {                           
-      // broom - case 140
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
       popCallContext();
@@ -14904,7 +14902,6 @@ case 168:
 /* rule 168 can match eol */
 YY_RULE_SETUP
 {
-      // broom case 160
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
       if (g_insideBody) {
@@ -15269,7 +15266,6 @@ case 194:
 /* rule 194 can match eol */
 YY_RULE_SETUP
 {
-      // broom 186
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
       g_yyLineNr += text.count('\n');

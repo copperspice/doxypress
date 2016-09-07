@@ -231,7 +231,9 @@ bool Config::preVerify()
 
    // ** temporary
    if (Config::getBool("clang-parsing")) {
-      warnAll("Clang parsing is currently under development, some aspects may not be enabled");
+
+      errNoPrefixAll("\n");
+      warnAll("Clang parsing is currently under development, some aspects may not be enabled\n");
    }
 
    return isOk;

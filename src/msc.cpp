@@ -30,12 +30,25 @@ static const int maxCmdLine = 40960;
 
 static bool convertMapFile(QTextStream &t, const QString &mapName, const QString &relPath, const QString &context)
 {
+   static int logCount = 0;
    QFile f(mapName);
 
    if (! f.open(QIODevice::ReadOnly)) { 
-      err("Unable to open map file %s\n" 
-         "If Graphviz/dot was installed after a previous problem, delete the output directory " 
-          " and run DoxyPress again.\n", qPrintable(mapName) );
+
+      if (logCount < 5) {      
+         logCount++;  
+
+         errNoPrefixAll("\n");
+         errAll("Unable to open dot map file %s\n" 
+                  "If dot was installed after a previous issue, delete the output directory and run DoxyPress again\n", 
+                   csPrintable(mapName));
+               
+      } else if (logCount == 5) {   
+         logCount++;
+         errNoPrefixAll("\n** Suppressing all further messages regarding dot map file\n\n");      
+   
+      }    
+
       return false;
    }
 

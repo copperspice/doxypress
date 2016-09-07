@@ -1099,7 +1099,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 {
    QString name = linkToText(SrcLangExt_Unknown, g_token->name, true);
 
-   static bool autolinkSupport = Config::getBool("auto-link");
+   static const bool autolinkSupport = Config::getBool("auto-link");
 
    if (! autolinkSupport && ! ignoreAutoLinkFlag) {
       // no autolinking so add as normal word
@@ -1138,7 +1138,6 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    }
 
    if (partA) {
-
       if (member && member->isLinkable()) {
 
          if (member->isObjCMethod()) {
