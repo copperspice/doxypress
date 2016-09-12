@@ -1,10 +1,11 @@
-DoxyPress is a modern C++ application for generating documentation from annotated sources.
+DoxyPress is a modern C++ application for generating documentation from annotated sources
+and API documentation.
 
-The lex parser for handling C++ is being phased out and libClang 
-will be used for all parsing and comment documentation. This will enable DoxyPress
-to parse future versions of C++ as they become available.
+The lex parser for handling C++ is being phased out and libClang will be used for all
+parsing and comment documentation. This will enable DoxyPress to parse future versions
+of C++ as they become available.
 
-DoxyPress and DoxyPressApp were from Doxygen and DoxyWizard.
+DoxyPress and DoxyPressApp were initially derived from Doxygen and DoxyWizard.
 
 Major enhancements include:
 
@@ -20,6 +21,8 @@ Major enhancements include:
  * Updated to leverage variadic templates and shared pointers
 
 Full documentation: http://www.copperspice.com/docs/doxypress/index.html
+
+For documentation on building DoxyPress: http://www.copperspice.com/docs/doxypress/building.html
 
 
 Website: copperspice.com
