@@ -90,7 +90,7 @@ deploy : all
 	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
 
 	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)%.dll,$(gcclibs))  $(deploydir)
-	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%$(csver)-0.dll,$(cslibs))  $(deploydir)
+	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%$(csver).dll,$(cslibs))  $(deploydir)
 
 	rsync -W -a --modify-window=2  $(clang_dll)        $(deploydir)
 	rsync -W -a --modify-window=2  $(clang_hdr)/3.7.1  $(deploydir)/include/
