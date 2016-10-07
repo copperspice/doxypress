@@ -1094,9 +1094,11 @@ void generateOutput()
       if (generateHtml) {
          removeDoxFont(htmlOutput);
       }
+
       if (generateRtf) {
          removeDoxFont(Config::getString("rtf-output"));
       }
+
       if (generateLatex) {
          removeDoxFont(Config::getString("latex-output"));
       }
@@ -1104,9 +1106,11 @@ void generateOutput()
 
    if (Config::getBool("generate-xml")) {
       Doxy_Globals::g_stats.begin("Generating XML output\n");
+
       Doxy_Globals::generatingXmlOutput = true;
       generateXML();
       Doxy_Globals::generatingXmlOutput = false;
+
       Doxy_Globals::g_stats.end();
    }
 
@@ -1153,7 +1157,8 @@ void generateOutput()
    }
 
    if (generateRtf) {
-      Doxy_Globals::g_stats.begin("Combining RTF output\n");
+      Doxy_Globals::g_stats.begin("Post process RTF output\n");
+
       if (! RTFGenerator::preProcessFileInplace(Config::getString("rtf-output"), "refman.rtf")) {
          err("Error occurred during post processing of RTF files\n");
       }
@@ -1163,6 +1168,7 @@ void generateOutput()
 
    if (Config::getBool("have-dot")) {
       Doxy_Globals::g_stats.begin("Running dot\n");
+
       DotManager::instance()->run();
       Doxy_Globals::g_stats.end();
    }
@@ -1176,10 +1182,14 @@ void generateOutput()
       copyExtraFiles("html");     
    }
 
-   if (generateLatex)  {  
+   if (generateLatex)  {    
+      Doxy_Globals::g_stats.begin("Post process Latex output\n");
+   
       copyLatexStyleSheet();
       copyLogo(latexOutput);
       copyExtraFiles("latex");
+
+      Doxy_Globals::g_stats.end();
    }
 
    if (generateHtml && Config::getBool("generate-chm") && ! Config::getString("hhc-location").isEmpty()) {

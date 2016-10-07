@@ -344,19 +344,20 @@ static void writeLatexMakefile()
 static void writeMakeBat()
 {
 
-#if defined(_MSC_VER)
+#if defined(Q_OS_WIN)
+ 
    QString dir = Config::getString("latex-output");
    QString fileName = dir + "/make.bat";
 
    QString latex_command = Config::getString("latex-cmd-name");
-   QString mkidx_command = Config::getString("make_index_cmd_name");
+   QString mkidx_command = Config::getString("make-index-cmd-name");
 
    QFile file(fileName);
 
    bool generateBib = ! Doxy_Globals::citeDict->isEmpty();
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", qPrintable(fileName));
+      err("Unable to open file %s for writing\n", csPrintable(fileName));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -446,8 +447,8 @@ void LatexGenerator::init()
    QString dir = Config::getString("latex-output");
    QDir d(dir);
 
-   if (! d.exists() && !d.mkdir(dir)) {
-      err("Unable to create output directory %s\n", qPrintable(dir));
+   if (! d.exists() && ! d.mkdir(dir)) {
+      err("Unable to create output directory %s\n", csPrintable(dir));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -1396,14 +1397,6 @@ void LatexGenerator::endIndexItem(const QString &ref, const QString &fn)
    }
 }
 
-//void LatexGenerator::writeIndexFileItem(const char *,const char *text)
-//{
-//  m_textStream << "\\item\\contentsline{section}{";
-//  docify(text);
-//  m_textStream << "}{\\pageref{" << text << "}}" << endl;
-//}
-
-
 void LatexGenerator::startHtmlLink(const QString &url)
 {
    if (Config::getBool("latex-hyper-pdf")) {
@@ -1446,7 +1439,7 @@ void LatexGenerator::writeStartAnnoItem(const QString &, const QString &, const 
 
 void LatexGenerator::writeEndAnnoItem(const QString &name)
 {
-   m_textStream << "}{\\pageref{" << name << "}}{}" << endl;
+   m_textStream << "}{\\pageref{" << stripPath(name) << "}}{}" << endl;
 }
 
 void LatexGenerator::startIndexKey()
@@ -1469,7 +1462,7 @@ void LatexGenerator::startIndexValue(bool hasBrief)
 
 void LatexGenerator::endIndexValue(const QString &name, bool)
 {
-   m_textStream << "}{\\pageref{" << name << "}}{}" << endl;
+   m_textStream << "}{\\pageref{" << stripPath(name) << "}}{}" << endl;
 }
 
 //void LatexGenerator::writeClassLink(const char *,const char *, const char *,const char *name)
@@ -2262,7 +2255,7 @@ void LatexGenerator::lineBreak(const QString &style)
       m_textStream << "\\\\\n";
 
    } else {
-      m_textStream << "\\\\*\n";
+      m_textStream << "\\newline\n";
 
    }
 }

@@ -6248,6 +6248,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       BEGIN(CopyRound);
    }
 
+<FuncQual>{BN}*"&"   {
+      current->args += " &";
+      current->argList.refSpecifier = RefType::LValueRef;
+   }
+
+<FuncQual>{BN}*"&&"  {
+      current->args += " &&";
+      current->argList.refSpecifier = RefType::RValueRef;
+   }
+   
 <FuncQual,TrailingReturn>{BN}*"="{BN}*"0"{BN}*     { 
       // pure virtual member function
       lineCount() ;
@@ -7645,6 +7655,10 @@ SkipC11Attribute>"]]"                 {
    }
 
 <BasesProt>"internal"{BN}+              { 
+      if (! insideCli) {
+         REJECT;
+      }
+
       lineCount(); 
       baseProt = Package;    
    }

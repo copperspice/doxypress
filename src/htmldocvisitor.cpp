@@ -440,7 +440,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
             file.write(s->text().toUtf8());
             file.close();
 
-            m_t << "<div align=\"center\">" << endl;
+            m_t << "<div class=\"dotgraph\">" << endl;
 
             writeDotFile(fileName, s->relPath(), s->context());
 
@@ -481,7 +481,8 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
             file.write( text.toUtf8() );
             file.close();
 
-            m_t << "<div align=\"center\">" << endl;
+            m_t << "<div class=\"mscgraph\">" << endl;
+
             writeMscFile(baseName + ".msc", s->relPath(), s->context());
 
             visitPreCaption(m_t, s);
@@ -505,7 +506,8 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          static QString htmlOutput = Config::getString("html-output");
          QString baseName = writePlantUMLSource(htmlOutput, s->exampleFile(), s->text());
 
-         m_t << "<div align=\"center\">" << endl;
+         m_t << "<div class=\"plantumlgraph\">" << endl;
+
          writePlantUMLFile(baseName, s->relPath(), s->context());
 
          visitPreCaption(m_t, s);

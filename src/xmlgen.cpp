@@ -611,47 +611,60 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       case MemberType_Define:
          memType = "define";
          break;
+
       case MemberType_Function:
          memType = "function";
          isFunc = true;
          break;
+
       case MemberType_Variable:
          memType = "variable";
          break;
+
       case MemberType_Typedef:
          memType = "typedef";
          break;
+
       case MemberType_Enumeration:
          memType = "enum";
          break;
+
       case MemberType_EnumValue:
          assert(0);
          break;
+
       case MemberType_Signal:
          memType = "signal";
          isFunc = true;
          break;
+
       case MemberType_Slot:
          memType = "slot";
          isFunc = true;
          break;
+
       case MemberType_Friend:
          memType = "friend";
          isFunc = true;
          break;
+
       case MemberType_DCOP:
          memType = "dcop";
          isFunc = true;
          break;
+
       case MemberType_Property:
          memType = "property";
          break;
+
       case MemberType_Event:
          memType = "event";
          break;
+
       case MemberType_Interface:
          memType = "interface";
          break;
+
       case MemberType_Service:
          memType = "service";
          break;
@@ -709,15 +722,22 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    if (isFunc) {
       ArgumentList *al = md->argumentList();
+
+      // **
       t << " const=\"";
+
       if (al != 0 && al->constSpecifier) {
          t << "yes";
+
       } else {
          t << "no";
+
       }
       t << "\"";
 
+      // **
       t << " explicit=\"";
+
       if (md->isExplicit()) {
          t << "yes";
       } else {
@@ -725,14 +745,17 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       }
       t << "\"";
 
+      // **
       t << " inline=\"";
+
       if (md->isInline()) {
          t << "yes";
       } else {
          t << "no";
       }
       t << "\"";
-
+     
+      // **
       if (md->isFinal()) {
          t << " final=\"yes\"";
       }

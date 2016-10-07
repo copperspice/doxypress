@@ -2726,13 +2726,13 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_name += text; 
    }
 
-<Body>{SCOPENAME}/{BN}*[;,)\]]      { 
-      // "int var;" or "var, var2" or "debug(f) macro" 
+<Body>{SCOPENAME}/{BN}*[:;,)\]]      { 
+      // "int var;" or "var, var2" or "debug(f) macro" , or int var : 5;
       QString text = QString::fromUtf8(yytext);
       addType();
 
-      // changed this to generateFunctionLink, see bug 624514
-      //generateClassOrGlobalLink(*g_code,yytext,false,true);
+      // changed to generateFunctionLink
+      // generateClassOrGlobalLink(*g_code,yytext,false,true);
 
       generateFunctionLink(*g_code, text);
       g_name += text; 
@@ -3415,12 +3415,18 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (text[0] == ')') {
          // no a pointer cast    
-         g_theVarContext.addVariable(g_parmType,g_parmName);
 
+         if (g_parmType.isEmpty()) {
+            g_parmType = g_parmName;
+            g_parmName.resize(0);
+         }
+        
       } else {
-         g_parmType.resize(0);
+         g_parmType = g_parmName;
          g_parmName.resize(0);
       }
+
+      g_theVarContext.addVariable(g_parmType, g_parmName);
 
       popCallContext();
       g_inForEachExpression = false;

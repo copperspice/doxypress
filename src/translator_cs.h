@@ -38,11 +38,17 @@ class Translator_Cs : public Translator
     *  "\\usepackage[T1]{fontenc}\n"
     *  </pre>
     *
-    * The English LaTeX does not use such commands.  Because of this
-    * the empty string is returned in this implementation.
+    * English LaTeX does not use these commands, return an empty string
     */
    virtual QString latexLanguageSupportCommand() {
-      return QCoreApplication::translate("latexSupport", "remove-value");
+
+      QString retval = QCoreApplication::translate("latexSupport", "remove-value");
+
+      if (retval == "remove-value") {
+         retval = "";
+      }
+
+      return retval;
    }
    
    /*! used in the compound documentation before a list of related functions. */

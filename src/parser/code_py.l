@@ -1119,6 +1119,11 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       codify(text);
    }
 
+   "\n"                            {
+      QString text = QString::fromUtf8(yytext);
+	   codifyLines(text);
+   }
+
    ":"                             {
       QString text = QString::fromUtf8(yytext);
       codify(text);
@@ -1480,7 +1485,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       yy_pop_state();
    }
 
-<*>{POUNDCOMMENT}              {
+<*>{POUNDCOMMENT}.*            {
       if (YY_START == SingleQuoteString || YY_START == DoubleQuoteString || YY_START == TripleString) {
          REJECT;
       }

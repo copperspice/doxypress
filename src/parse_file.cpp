@@ -35,13 +35,13 @@ void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &, co
       }
 
       QString lineStr = input.mid(i, j - i);
-      codeOutIntf.startCodeLine(showLineNumbers);
+      codeOutIntf.startCodeLine(fd && showLineNumbers);
 
-      if (showLineNumbers) {
+      if (fd  && showLineNumbers) {
          codeOutIntf.writeLineNumber(0, 0, 0, lineNr);
       }
 
-      if (!lineStr.isEmpty()) {
+      if (! lineStr.isEmpty()) {
          codeOutIntf.codify(lineStr);
       }
 

@@ -2128,6 +2128,13 @@ QString argListToString(ArgumentList *al, bool useCanonicalType, bool showDefVal
       result += " volatile";
    }
 
+   if (al->refSpecifier == RefType::LValueRef) {
+      result += " &";
+
+   } else if (al->refSpecifier == RefType::RValueRef)  {
+      result += " &&";
+   }
+
    if (! al->trailingReturnType.isEmpty()) {
       result += " -> " + al->trailingReturnType;
    }
@@ -2306,7 +2313,7 @@ QString getFileFilter(const QString &name, bool isSourceCode)
       return Config::getString("filter-program");
 
    } else {
-      // remove surrounding double quotes 
+      // remove surrounding double quotes
 
       if ( filterName.startsWith('\"') && filterName.endsWith('\"') )   {
          filterName = filterName.mid(1, filterName.length() - 2);
@@ -2734,7 +2741,7 @@ static void stripIrrelevantString(QString &target, const QString &str)
 }
 
 /*!
-  The following example shows what is stripped by this routine for const. 
+  The following example shows what is stripped by this routine for const.
   The same is done for volatile.
 
   \code
@@ -3353,19 +3360,24 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 
    if (srcAl->count() != dstAl->count()) {
       DOX_NOMATCH
-      return false;       // different number of arguments -> no match
+      return false;
    }
 
    if (checkCV) {
       if (srcAl->constSpecifier != dstAl->constSpecifier) {
          DOX_NOMATCH
-         return false;    // one member is const, the other not -> no match
+         return false;
       }
 
       if (srcAl->volatileSpecifier != dstAl->volatileSpecifier) {
          DOX_NOMATCH
-         return false;    // one member is volatile, the other not -> no match
+         return false;
       }
+   }
+
+   if (srcAl->refSpecifier != dstAl->refSpecifier) {
+      DOX_NOMATCH
+      return false;
    }
 
    // so far the argument list could match, so we need to compare the types of all arguments
@@ -4105,7 +4117,7 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
    if (fullName.indexOf("anonymous_namespace{") == -1) {
       fullName = removeRedundantWhiteSpace(substitute(fullName, ".", "::"), false);
    } else {
-      fullName = removeRedundantWhiteSpace(fullName, false);      
+      fullName = removeRedundantWhiteSpace(fullName, false);
    }
 
    int bracePos = findParameterList(fullName);
@@ -5276,7 +5288,7 @@ QString convertToLatex(const QString &text, bool insideTabbing, bool keepSpaces)
 
    QTextStream t(&result);
    filterLatexString(t, text, insideTabbing, false, false, keepSpaces);
-   
+
    return result;
 }
 
@@ -6041,7 +6053,7 @@ void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d)
    recursivelyAddGroupListToTitle(ol, d, true);
 }
 
-void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, bool insidePre, 
+void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, bool insidePre,
                   bool insideItem, bool keepSpaces)
 {
    static bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
@@ -6077,12 +6089,12 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "\\_";
                break;
 
-            case ' ':             
+            case ' ':
                if (keepSpaces) {
-                  t << "~"; 
+                  t << "~";
                } else {
                   t << ' ';
-               } 
+               }
 
                break;
 
@@ -6221,12 +6233,12 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "\\textquotesingle{}";
                break;
 
-            case ' ':  
-               if (keepSpaces) { 
+            case ' ':
+               if (keepSpaces) {
                   if (insideTabbing) {
-                     t << "\\>"; 
+                     t << "\\>";
                   } else {
-                     t << '~';  
+                     t << '~';
                   }
 
                } else {
@@ -6238,7 +6250,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
             default:
                if (! insideTabbing) {
-                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0' && *p != 0) || 
+                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0' && *p != 0) ||
                        (c == ':' && pc != ':') || (pc == '.' && isId(c)) ) {
                      t << "\\+";
                   }
@@ -6259,50 +6271,54 @@ QString latexEscapeLabelName(const QString &text, bool insideTabbing)
    QTextStream t(&result);
 
    const QChar *p  = text.constData();
-   
+
    QChar c;
    QString tmp;
-  
+
    while (*p != 0) {
       c = *p++;
 
       switch (c.unicode()) {
-         
-         case '|': 
+
+         case '|':
             t << "\\texttt{\"|}";
             break;
-   
-         case '!': 
+
+         case '!':
             t << "\"!";
             break;
-   
-         case '%': 
+
+         case '@':
+            t << "\"@";
+            break;
+
+         case '%':
             t << "\\%";
             break;
-   
-         case '{': 
+
+         case '{':
             t << "\\lcurly{}";
             break;
-   
-         case '}': 
-            t << "\\rcurly{}"; 
-            break;
-   
-         case '~': 
-            t << "````~"; 
-            break; 
 
-         default: 
+         case '}':
+            t << "\\rcurly{}";
+            break;
+
+         case '~':
+            t << "````~";
+            break;
+
+         default:
             // collect as many chars as possible before handing it to docify
             tmp = c;
-   
-            while ((c = *p) != 0 && c != '|' && c != '!' && c != '%' && c != '{' && c != '}' && c != '~') {         
+
+            while ((c = *p) != 0 && c != '@' && c!='[' && c!=']'&& c != '|' && c != '!' && c != '{' && c != '}') {
                tmp += c;
                p++;
-            }  
+            }
 
             filterLatexString(t, tmp, insideTabbing);
-            break;         
+            break;
       }
 
    }
@@ -6317,52 +6333,52 @@ QString latexEscapeIndexChars(const QString &text, bool insideTabbing)
    QTextStream t(&result);
 
    const QChar *p  = text.constData();
-   
+
    QChar c;
    QString tmp;
-  
+
    while (*p != 0) {
       c = *p++;
 
       switch (c.unicode()) {
-  
-         case '!': 
-            t << "\"!"; 
+
+         case '!':
+            t << "\"!";
             break;
-   
-         case '"': 
+
+         case '"':
             t << "\"\"";
              break;
-   
-         case '@': 
-            t << "\"@"; 
+
+         case '@':
+            t << "\"@";
             break;
-   
-         case '|': 
+
+         case '|':
             t << "\\texttt{\"|}";
             break;
-   
-         case '[': 
+
+         case '[':
             t << "[";
             break;
-   
-         case ']': 
-            t << "]"; 
+
+         case ']':
+            t << "]";
             break;
-   
-         case '{': 
+
+         case '{':
             t << "\\lcurly{}";
             break;
-   
-         case '}': 
+
+         case '}':
             t << "\\rcurly{}";
             break;
-    
-         default:    
+
+         default:
            // collect as long string as possible, before handing it to docify
            tmp = c;
 
-           while ((c = *p) != 0 && c != '"' && c != '@' && c != '[' && c != ']' && c != '!' && c != '{' && c != '}' && c != '|') {        
+           while ((c = *p) != 0 && c != '"' && c != '@' && c != '[' && c != ']' && c != '!' && c != '{' && c != '}' && c != '|') {
              tmp += c;
              p++;
            }
@@ -6377,36 +6393,36 @@ QString latexEscapeIndexChars(const QString &text, bool insideTabbing)
 
 QString latexEscapePDFString(const QString &data)
 {
-   QString result;  
+   QString result;
 
    for (QChar c : data) {
-   
-      switch (c.unicode()) { 
-      
-         case '\\': 
+
+      switch (c.unicode()) {
+
+         case '\\':
             result += "\\textbackslash{}";
             break;
-         
-         case '{':  
+
+         case '{':
             result += "\\{";
             break;
-   
-         case '}': 
+
+         case '}':
             result += "\\}";
             break;
-   
-         case '_':  
+
+         case '_':
             result += "\\_";
             break;
 
-         case '%':  
-            result += "\\%"; 
+         case '%':
+            result += "\\%";
             break;
 
-         case '&':  
-            result += "\\&"; 
+         case '&':
+            result += "\\&";
             break;
-   
+
          default:
             result += c;
             break;
