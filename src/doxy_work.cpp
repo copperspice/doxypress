@@ -1,7 +1,7 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
@@ -196,7 +196,7 @@ namespace Doxy_Work{
    void addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav);
 
    void addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> ifd, QSharedPointer<Entry> root);
-   void addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNav> rootNav, QSharedPointer<ClassDef> cd, 
+   void addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<EntryNav> rootNav, QSharedPointer<ClassDef> cd,
                   QString const &rname);
 
    void addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<ClassDef> cd, const QString &rname, bool isFriend);
@@ -206,7 +206,7 @@ namespace Doxy_Work{
 
    void addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<MemberDef> md, const QString &funcDecl,
                   ArgumentList *al, bool overload, NamespaceSDict *nl = 0);
-  
+
    void addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<EntryNav> rootNav);
    void addListReferences();
    void addRelatedPage(QSharedPointer<EntryNav> rootNav);
@@ -267,11 +267,11 @@ namespace Doxy_Work{
    void dumpGlossary();
 
    QString extractClassName(QSharedPointer<EntryNav> rootNav);
-   
+
    void filterMemberDocumentation(QSharedPointer<EntryNav> rootNav);
 
-   void findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd, 
-                                QSharedPointer<ClassDef> instanceCd, FindBaseClassRelation_Mode mode, bool isArtificial, 
+   void findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
+                                QSharedPointer<ClassDef> instanceCd, FindBaseClassRelation_Mode mode, bool isArtificial,
                                 ArgumentList *actualArgs = 0, QHash<QString, int> *templateNames = 0);
 
    QSharedPointer<ClassDef> findClassDefinition(QSharedPointer<FileDef> fd, QSharedPointer<NamespaceDef> nd, const QString &scopeName);
@@ -320,8 +320,8 @@ namespace Doxy_Work{
 
    QSharedPointer<NamespaceDef> findUsedNamespace(NamespaceSDict *unl, const QString &name);
 
-   void findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd, 
-            QSharedPointer<ClassDef> instanceCd, bool isArtificial, ArgumentList *actualArgs = 0, 
+   void findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
+            QSharedPointer<ClassDef> instanceCd, bool isArtificial, ArgumentList *actualArgs = 0,
             QHash<QString, int> *templateNames = 0);
 
    void findUsedTemplateInstances();
@@ -343,7 +343,7 @@ namespace Doxy_Work{
    void generateNamespaceDocs();
    void generatePageDocs();
    void generateXRefPages();
-  
+
    QString getQchFileName();
    QHash<QString, int> *getTemplateArgumentsInName(ArgumentList *templateArguments, const QString &name);
 
@@ -358,35 +358,35 @@ namespace Doxy_Work{
    void organizeSubGroupsFiltered(QSharedPointer<EntryNav> rootNav, bool additional);
    void organizeSubGroups(QSharedPointer<EntryNav> rootNav);
 
-   void parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
+   void parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav,
                   QSharedPointer<FileDef> fd, QString fileName, enum ParserMode mode, QStringList &filesInSameTu);
 
    void parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav);
 
    void processFiles();
-   void processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef>tagParentCd, 
+   void processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef>tagParentCd,
                   const QString &prefix, int count);
 
 struct ReadDirArgs {
    bool recursive = false;
-   bool errorIfNotExist = true; 
+   bool errorIfNotExist = true;
 
-   QStringList includePatternList; 
-   QStringList excludePatternList; 
+   QStringList includePatternList;
+   QStringList excludePatternList;
 
    QSet<QString> excludeSet;
-   
+
    bool isFnList = false;
    SortedList<QSharedPointer<FileNameList>> fnList;
 
    bool isFnDict = false;
-   FileNameDict fnDict;     
+   FileNameDict fnDict;
 
    bool isResultList = false;
    QStringList resultList;
 
    bool isPrepExclude = false;
-   QSet<QString> prepExcludeSet; 
+   QSet<QString> prepExcludeSet;
 
    bool isKillDict = false;
    QSet<QString> killDict;
@@ -396,15 +396,15 @@ struct ReadDirArgs {
 };
 
    void readFileOrDirectory(const QString &fileName, ReadDirArgs &data);
-   void readDir(const QFileInfo &fileInfo, ReadDirArgs &data);  
-           
+   void readDir(const QFileInfo &fileInfo, ReadDirArgs &data);
+
    void resolveClassNestingRelations();
    void resolveHiddenNamespace();
    QString resolveSymlink(QString path);
    void resolveUserReferences();
 
    void readTagFile(QSharedPointer<Entry> root, const QString &tl);
-   
+
    bool scopeIsTemplate(QSharedPointer<Definition> d);
    void substituteTemplatesInArgList(const QList<ArgumentList> &srcTempArgLists, const QList<ArgumentList> &dstTempArgLists,
                ArgumentList *src, ArgumentList *dst, ArgumentList *funcTempArgs = 0);
@@ -425,14 +425,14 @@ using namespace Doxy_Work;
 
 void processFiles()
 {
-   printf("Parse input files\n");   
+   printf("Parse input files\n");
 
    // make sure the output directory exists
    QString outputDirectory = Config::getString("output-dir");
-  
+
    // initialize global lists and dictionaries
    Doxy_Globals::symbolStorage = new Store;
-   
+
    int cacheSize = Config::getInt("lookup-cache-size");
 
    if (cacheSize < 0) {
@@ -526,12 +526,12 @@ void processFiles()
 
       }
    }
-  
+
    // handle layout file
    LayoutDocManager::instance().init();
- 
+
    QString layoutFileName = Config::getString("layout-file");
- 
+
    QFile layoutFile(layoutFileName);
 
    if (layoutFile.open(QIODevice::ReadOnly)) {
@@ -546,7 +546,7 @@ void processFiles()
       warn_uncond("Unable to open layout file '%s' for reading\n", csPrintable(layoutFileName));
 
    }
-   
+
    // prevent search in the output directories
    QStringList exclPatterns = Config::getList("exclude-patterns");
 
@@ -592,7 +592,7 @@ void processFiles()
    QSharedPointer<Entry> root = QMakeShared<Entry>();
    QSharedPointer<EntryNav> rootNav = QMakeShared<EntryNav>(QSharedPointer<EntryNav>(), root);
    rootNav->setEntry(root);
-  
+
    msg("Parsing tag files\n");
 
    const QStringList tagFileList = Config::getList("tag-files");
@@ -630,7 +630,7 @@ void processFiles()
    organizeSubGroups(rootNav);
    Doxy_Globals::g_stats.end();
 
-   Doxy_Globals::g_stats.begin("Building directory list\n");   
+   Doxy_Globals::g_stats.begin("Building directory list\n");
    buildDirectories();
    findDirDocumentation(rootNav);
    Doxy_Globals::g_stats.end();
@@ -644,8 +644,8 @@ void processFiles()
    buildFileList(rootNav);
    Doxy_Globals::g_stats.end();
 
-   // generateFileTree()   
-  
+   // generateFileTree()
+
    Doxy_Globals::g_stats.begin("Building class list\n");
    buildClassList(rootNav);
    Doxy_Globals::g_stats.end();
@@ -700,13 +700,13 @@ void processFiles()
    Doxy_Globals::g_stats.begin("Searching for documented variables\n");
    buildVarList(rootNav);
    Doxy_Globals::g_stats.end();
-  
+
    // UNO IDL
    Doxy_Globals::g_stats.begin("Building interface member list\n");
-   buildInterfaceAndServiceList(rootNav);                  
+   buildInterfaceAndServiceList(rootNav);
 
    // using class info only
-   Doxy_Globals::g_stats.begin("Building member list\n");   
+   Doxy_Globals::g_stats.begin("Building member list\n");
    buildFunctionList(rootNav);
    Doxy_Globals::g_stats.end();
 
@@ -850,7 +850,7 @@ void processFiles()
    addListReferences();
    generateXRefPages();
    Doxy_Globals::g_stats.end();
- 
+
    if (Config::getBool("directory-graph")) {
       Doxy_Globals::g_stats.begin("Computing dependencies between directories\n");
       computeDirDependencies();
@@ -891,16 +891,16 @@ void processFiles()
 
 void generateOutput()
 {
-   // Initialize output generators  
-   printf("\n**  Generate Documentation Output\n");   
-  
+   // Initialize output generators
+   printf("\n**  Generate Documentation Output\n");
+
    if (Doxy_Globals::dumpGlossary) {
       dumpGlossary();
       exit(0);
    }
 
-   // move to the output directory 
-   QString outputDir = Config::getString("output-dir");   
+   // move to the output directory
+   QString outputDir = Config::getString("output-dir");
    QDir::setCurrent(outputDir);
 
    initSearchIndexer();
@@ -912,7 +912,7 @@ void generateOutput()
 
    static const QString htmlOutput  = Config::getString("html-output");
    static const QString latexOutput = Config::getString("latex-output");
-  
+
    Doxy_Globals::g_outputList = new OutputList(true);
 
    if (generateHtml) {
@@ -924,7 +924,7 @@ void generateOutput()
       bool generateEclipseHelp  = Config::getBool("generate-eclipse");
       bool generateQhp          = Config::getBool("generate-qthelp");
       bool generateTreeView     = Config::getBool("generate-treeview");
-      bool generateDocSet       = Config::getBool("generate-docset");    
+      bool generateDocSet       = Config::getBool("generate-docset");
 
       if (generateEclipseHelp) {
          Doxy_Globals::indexList->addIndex(QSharedPointer<EclipseHelp>(new EclipseHelp));
@@ -947,12 +947,12 @@ void generateOutput()
       }
 
       Doxy_Globals::indexList->initialize();
-      HtmlGenerator::writeTabData();      
+      HtmlGenerator::writeTabData();
    }
 
-   if (generateLatex) {    
+   if (generateLatex) {
       Doxy_Globals::g_outputList->add(new LatexGenerator);
-      LatexGenerator::init(); 
+      LatexGenerator::init();
    }
 
    if (generateMan) {
@@ -970,7 +970,7 @@ void generateOutput()
    }
 
    if (Config::getBool("use-htags")) {
-      Htags::useHtags = true;      
+      Htags::useHtags = true;
 
       if (! Htags::execute(htmlOutput)) {
          err("'USE HTAGS' is set, however htags(1) failed\n");
@@ -979,7 +979,7 @@ void generateOutput()
          err("htags(1) ended normally but failed to load the file map\n");
       }
    }
- 
+
    // ** generate documentation
    if (generateHtml) {
       writeDoxFont(htmlOutput);
@@ -994,9 +994,9 @@ void generateOutput()
    }
 
    Doxy_Globals::g_stats.begin("Generating style sheet\n");
-  
+
    // write first part
-   Doxy_Globals::g_outputList->writeStyleInfo(0); 
+   Doxy_Globals::g_outputList->writeStyleInfo(0);
    Doxy_Globals::g_stats.end();
 
    static bool searchEngine      = Config::getBool("html-search");
@@ -1013,13 +1013,13 @@ void generateOutput()
       QDir searchDir(searchDirName);
 
       if (! searchDir.exists() && ! QDir::current().mkpath(searchDirName)) {
-         err("Unable to create search directory '%s'\n", csPrintable(searchDirName));   
+         err("Unable to create search directory '%s'\n", csPrintable(searchDirName));
          stopDoxyPress();
       }
 
       HtmlGenerator::writeSearchData(searchDirName);
 
-      if (! serverBasedSearch) { 
+      if (! serverBasedSearch) {
          // client side search index
          writeJavascriptSearchIndex();
       }
@@ -1073,9 +1073,9 @@ void generateOutput()
       Doxy_Globals::g_stats.end();
    }
 
-   if (Config::getBool("sort-group-names")) {      
-      // groupSDict -- always sorted  
-      // sort the sub groups 
+   if (Config::getBool("sort-group-names")) {
+      // groupSDict -- always sorted
+      // sort the sub groups
    }
 
    if (Doxy_Globals::g_outputList->count() > 0) {
@@ -1119,7 +1119,7 @@ void generateOutput()
       generateDocbook();
       Doxy_Globals::g_stats.end();
    }
- 
+
    if (Config::getBool("generate-perl")) {
       Doxy_Globals::g_stats.begin("Generating Perl module output\n");
       generatePerlMod();
@@ -1129,13 +1129,13 @@ void generateOutput()
    if (generateHtml && searchEngine && serverBasedSearch) {
       Doxy_Globals::g_stats.begin("Generating search index\n");
 
-      if (Doxy_Globals::searchIndex->kind() == SearchIndexIntf::Internal) { 
+      if (Doxy_Globals::searchIndex->kind() == SearchIndexIntf::Internal) {
          // write own search index
 
          HtmlGenerator::writeSearchPage();
          Doxy_Globals::searchIndex->write(htmlOutput + "/search/search.idx");
 
-      } else { 
+      } else {
          // write data for external search index
          HtmlGenerator::writeExternalSearchPage();
 
@@ -1145,7 +1145,7 @@ void generateOutput()
             searchDataFile = "searchdata.xml";
          }
 
-         if (! QDir::isAbsolutePath(searchDataFile)) {                       
+         if (! QDir::isAbsolutePath(searchDataFile)) {
             QString outputDirectory = Config::getString("output-dir");
             searchDataFile.prepend(outputDirectory + "/");
          }
@@ -1179,12 +1179,12 @@ void generateOutput()
 
       copyStyleSheet();
       copyLogo(htmlOutput);
-      copyExtraFiles("html");     
+      copyExtraFiles("html");
    }
 
-   if (generateLatex)  {    
+   if (generateLatex)  {
       Doxy_Globals::g_stats.begin("Post process Latex output\n");
-   
+
       copyLatexStyleSheet();
       copyLogo(latexOutput);
       copyExtraFiles("latex");
@@ -1199,7 +1199,7 @@ void generateOutput()
       QDir::setCurrent(htmlOutput);
 
       portable_sysTimerStart();
-    
+
       // this was false, now it is testing the extcmd flag
       bool isDebug = Debug::isFlagSet(Debug::ExtCmd);
 
@@ -1244,7 +1244,7 @@ void generateOutput()
 
    }
 
-   // all done, cleaning up and exit  
+   // all done, cleaning up and exit
    shutDownDoxyPress();
    Doxy_Globals::programExit = true;
 }
@@ -1267,10 +1267,10 @@ ArgumentList getTemplateArgumentsFromName(const QString &name, const QList<Argum
    while (true) {
       index = name.indexOf("::", p);
 
-      if (index == -1) { 
+      if (index == -1) {
          break;
       }
-       
+
       QSharedPointer<NamespaceDef> nd (Doxy_Globals::namespaceSDict->find(name.left(index)));
 
       if (nd == nullptr) {
@@ -1291,9 +1291,9 @@ ArgumentList getTemplateArgumentsFromName(const QString &name, const QList<Argum
    }
 
    if (item != tArgLists->end()) {
-      retval = *item;                     
+      retval = *item;
    }
- 
+
    return retval;
 }
 
@@ -1366,7 +1366,7 @@ void Doxy_Work::addSTLMember(QSharedPointer<EntryNav> rootNav, const QString &ty
    memEntry->brief      = "STL member";
    memEntry->hidden     = false;
    memEntry->artificial = true;
-  
+
    QSharedPointer<EntryNav> memEntryNav = QMakeShared<EntryNav>(rootNav, memEntry);
 
    memEntryNav->setEntry(memEntry);
@@ -1403,14 +1403,14 @@ void Doxy_Work::addSTLClasses(QSharedPointer<EntryNav> rootNav)
    namespaceEntry->brief      = "STL namespace";
    namespaceEntry->hidden     = false;
    namespaceEntry->artificial = true;
-  
+
    QSharedPointer<EntryNav> namespaceEntryNav = QMakeShared<EntryNav>(rootNav, namespaceEntry);
    namespaceEntryNav->setEntry(namespaceEntry);
    rootNav->addChild(namespaceEntryNav);
 
    STLInfo *info = g_stlinfo;
 
-   while (info->className) {      
+   while (info->className) {
       QString fullName = info->className;
       fullName.prepend("std::");
 
@@ -1512,7 +1512,7 @@ void Doxy_Work::addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<Entr
       scope = stripAnonymousNamespaceScope(scope);
       scope += "::" + pd->name();
 
-      QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope, 
+      QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope,
                   QSharedPointer<FileDef>(), rootNav->tagInfo());
 
       if (def) {
@@ -1564,7 +1564,7 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
             (root->groupDocType != Entry::GROUPDOC_NORMAL && additional)) {
 
          QSharedPointer<GroupDef> gd = Doxy_Globals::groupSDict->find(root->name);
-     
+
          if (gd) {
             if (! gd->hasGroupTitle() ) {
                gd->setGroupTitle(root->type);
@@ -1646,7 +1646,7 @@ void Doxy_Work::findGroupScope(QSharedPointer<EntryNav> rootNav)
          scope = stripAnonymousNamespaceScope(scope);
          scope += "::" + gd->name();
 
-         QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope, 
+         QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, scope,
                   QSharedPointer<FileDef>(), rootNav->tagInfo());
 
          if (def) {
@@ -1670,7 +1670,7 @@ void Doxy_Work::organizeSubGroupsFiltered(QSharedPointer<EntryNav> rootNav, bool
 
          QSharedPointer<GroupDef> gd;
 
-         if ((gd = Doxy_Globals::groupSDict->find(root->name))) {           
+         if ((gd = Doxy_Globals::groupSDict->find(root->name))) {
             addGroupToGroups(root, gd);
          }
       }
@@ -1704,9 +1704,9 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
 
       bool ambig;
       QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, root->name, ambig);
-      
+
       if (fd && ! ambig) {
-         {           
+         {
             // using false in setDocumentation is small hack to make sure a file
             // is documented even if a \file command is used without further documentation
 
@@ -1738,7 +1738,7 @@ void Doxy_Work::buildFileList(QSharedPointer<EntryNav> rootNav)
             text += showFileDefMatches(Doxy_Globals::inputNameDict, root->name);
             text += "Use a more specific name or include a larger part of the path";
 
-         } else { 
+         } else {
             // name is not an input file
             text += "is not an input file";
          }
@@ -1757,7 +1757,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
    QString temp1 = root->doc.trimmed();
    QString temp2 = root->brief.trimmed();
 
-   if ( (! temp1.isEmpty() || ! temp2.isEmpty() || Config::getBool("extract-all")) && root->protection != Private)  {    
+   if ( (! temp1.isEmpty() || ! temp2.isEmpty() || Config::getBool("extract-all")) && root->protection != Private)  {
       bool local = Config::getBool("force-local-includes");
 
       QString includeFile = root->includeFile;
@@ -1775,7 +1775,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
       QSharedPointer<FileDef> fd;
 
       // see if we need to include a verbatim copy of the header file
-  
+
       if (! includeFile.isEmpty() && (fd = findFileDef(Doxy_Globals::inputNameDict, includeFile, ambig)) == 0) {
          // explicit request
 
@@ -1783,21 +1783,21 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
          text = QString("the name `%1' supplied as the argument of the \\class, \\struct, \\union, or \\include command ").
                         arg( QString(includeFile) );
 
-         if (ambig) { 
+         if (ambig) {
             // name is ambiguous
 
             text += "matches the following input files:\n";
             text += showFileDefMatches(Doxy_Globals::inputNameDict, root->includeFile);
             text += "Use a more specific name by including a larger part of the path\n";
 
-         } else { 
+         } else {
             // name is not an input file
             text += "is not an input file\n";
          }
 
          warn(root->fileName, root->startLine, csPrintable(text) );
 
-      } else if (includeFile.isEmpty() && ifd && determineSection(ifd->name()) == Entry::HEADER_SEC) {        
+      } else if (includeFile.isEmpty() && ifd && determineSection(ifd->name()) == Entry::HEADER_SEC) {
          fd = ifd;
       }
 
@@ -1806,7 +1806,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
          QString iName = ! root->includeName.isEmpty() ? root->includeName : includeFile;
 
-         if (! iName.isEmpty()) { 
+         if (! iName.isEmpty()) {
             // user specified include file
 
             if (iName.at(0) == '<') {
@@ -1832,11 +1832,11 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
             iName = fd->name();
          }
 
-         if (fd->generateSourceFile()) { 
+         if (fd->generateSourceFile()) {
             // generate code for header
             cd->setIncludeFile(fd, csPrintable(iName), local, ! root->includeName.isEmpty());
 
-         } else { 
+         } else {
             // put #include in the class documentation without link
             cd->setIncludeFile(QSharedPointer<FileDef>(), csPrintable(iName), local, true);
 
@@ -1849,9 +1849,9 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
  *  full qualified name \a name. Creates an artificial scope if the scope is
  *  not found and set the parent/child scope relation if the scope is found.
  */
-QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QString name, int level, 
+QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QString name, int level,
                   SrcLangExt lang, TagInfo *tagInfo)
-{  
+{
    int i = 0;
    int p = 0;
    int l;
@@ -1864,7 +1864,7 @@ QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QString 
 
       if (idx == -1) {
          return prevScope;
-      }   
+      }
 
       QString nsName = name.mid(idx, l);
 
@@ -1975,7 +1975,7 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
                // for a nested class A::I in used namespace N, we get
                // N::A::I while looking for A, so we should compare
                // resultScope->name() against scope.left(i2+l2)
-              
+
                if (rightScopeMatch(resultScope->name(), scope.left(i2 + l2))) {
                   break;
                }
@@ -2049,7 +2049,7 @@ ClassDef::CompoundType Doxy_Work::convertToCompoundType(int section, Entry::Trai
       sec = ClassDef::Singleton;
    }
 
-   switch (section) {    
+   switch (section) {
       case Entry::UNIONDOC_SEC:
          sec = ClassDef::Union;
          break;
@@ -2130,11 +2130,11 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
          cd->setBodyDef(fd);
       }
 
-      if (root->tArgLists != nullptr && 
-                  (cd->templateArguments() == 0 || (cd->isForwardDeclared() && 
+      if (root->tArgLists != nullptr &&
+                  (cd->templateArguments() == 0 || (cd->isForwardDeclared() &&
                   (! root->m_traits.hasTrait(Entry::Virtue::ForwardDecl)) ))) {
 
-         // happens if a template class is declared before the actual definition or 
+         // happens if a template class is declared before the actual definition or
          // if a forward declaration has different template parameter names
 
          ArgumentList tArgList = getTemplateArgumentsFromName(cd->name(), root->tArgLists);
@@ -2143,7 +2143,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
 
       cd->setCompoundType(convertToCompoundType(root->section, root->m_traits));
 
-   } else { 
+   } else {
       // new class
       ClassDef::CompoundType sec = convertToCompoundType(root->section, root->m_traits);
 
@@ -2172,7 +2172,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
 
       if ((root->lang == SrcLangExt_CSharp || root->lang == SrcLangExt_Java) && (i = fullName.indexOf('<')) != -1) {
          // a Java/C# generic class looks like a C++ specialization, split the name and template arguments here
-        
+
          stringToArgumentList(fullName.mid(i), &tArgList);
          fullName = fullName.left(i);
 
@@ -2199,9 +2199,9 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       cd->setClassTraits(root->m_traits);
 
       cd->setTypeConstraints(&root->typeConstr);
-      cd->setTemplateArguments(&tArgList);   
+      cd->setTemplateArguments(&tArgList);
 
-      cd->setProtection(root->protection); 
+      cd->setProtection(root->protection);
       cd->setIsStatic(root->stat);
 
       // file definition containing the class cd
@@ -2247,7 +2247,7 @@ void Doxy_Work::buildClassList(QSharedPointer<EntryNav> rootNav)
    if (((rootNav->section() & Entry::COMPOUND_MASK) || rootNav->section() == Entry::OBJCIMPL_SEC) && ! rootNav->name().isEmpty()) {
       addClassToContext(rootNav);
    }
- 
+
    RECURSE_ENTRYTREE(buildClassList, rootNav);
 }
 
@@ -2279,7 +2279,7 @@ void Doxy_Work::resolveClassNestingRelations()
             QString name = stripAnonymousNamespaceScope(cd->name());
 
             // add class to the correct structural context
-            QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, 
+            QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope,
                   name, cd->getFileDef(), nullptr);
 
             if (def) {
@@ -2318,7 +2318,7 @@ void Doxy_Work::resolveClassNestingRelations()
    }
 }
 
-QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, 
+QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ,
                   const QString &fieldName)
 {
    QString fullName = removeAnonymousScopes(templ->name());
@@ -2328,7 +2328,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
    }
 
    fullName += "." + fieldName;
-   QSharedPointer<ClassDef> cd = QMakeShared<ClassDef>(templ->getDefFileName(), templ->getDefLine(), templ->getDefColumn(), 
+   QSharedPointer<ClassDef> cd = QMakeShared<ClassDef>(templ->getDefFileName(), templ->getDefLine(), templ->getDefColumn(),
                   fullName, templ->compoundType());
 
    cd->setDocumentation(templ->documentation(), templ->docFile(), templ->docLine()); // copy docs to definition
@@ -2358,7 +2358,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
          item->addClass(cd);
       }
    }
-   
+
    Doxy_Globals::classSDict->insert(fullName, QSharedPointer<ClassDef> (cd) );
 
    QSharedPointer<MemberList> ml = templ->getMemberList(MemberListType_pubAttribs);
@@ -2366,7 +2366,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
    if (ml) {
 
       for (auto md : *ml) {
-        
+
          QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(md->getDefFileName(), md->getDefLine(),
                    md->getDefColumn(), md->typeString(), md->name(), md->argsString(), md->excpString(),
                    md->protection(), md->virtualness(), md->isStatic(), Member, md->memberType(), nullptr, nullptr);
@@ -2399,7 +2399,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
  *  recursively. Later on we need to patch the member types so we keep
  *  track of the hierarchy of classes we create.
  */
-void Doxy_Work::processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, 
+void Doxy_Work::processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd,
                   QSharedPointer<ClassDef>  tagParentCd, const QString &prefix, int count)
 {
    if (cd->getClassSDict()) {
@@ -2479,7 +2479,7 @@ void Doxy_Work::findTagLessClasses()
    for (auto cd : *Doxy_Globals::classSDict) {
       QSharedPointer<Definition> scope = cd->getOuterScope();
 
-      if (scope && scope->definitionType() != Definition::TypeClass) { 
+      if (scope && scope->definitionType() != Definition::TypeClass) {
          // that is not nested
          findTagLessClasses(cd);
       }
@@ -2495,21 +2495,21 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
       QSharedPointer<Entry> root = rootNav->entry();
-  
+
       QString fullName = root->name;
       if (root->section == Entry::PACKAGEDOC_SEC) {
          fullName = substitute(fullName, ".", "::");
       }
 
       fullName = stripAnonymousNamespaceScope(fullName);
-         
+
       // change the namespace to be match the ns alias
       auto iter = Doxy_Globals::nsRenameAlias.find(fullName);
-            
+
       if (iter != Doxy_Globals::nsRenameAlias.end()) {
-         fullName = iter.value();         
-      }  
-      
+         fullName = iter.value();
+      }
+
       if (! fullName.isEmpty()) {
          QSharedPointer<NamespaceDef> nd;
 
@@ -2519,7 +2519,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
             nd->setDocumentation(root->doc, root->docFile, root->docLine);
 
             // change name to match docs
-            nd->setName(fullName); 
+            nd->setName(fullName);
 
             nd->addSectionsToDefinition(root->anchors);
 
@@ -2531,7 +2531,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
             if (rootNav->tagInfo() == 0)  {
               // if we found the namespace in a tag file and also in a
               // project file, then remove the tag file reference
-        
+
                nd->setReference("");
                nd->setFileName(fullName);
              }
@@ -2547,7 +2547,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<EntryNav> rootNav)
             addNamespaceToGroups(root, nd);
             nd->setRefItems(root->sli);
 
-         } else { 
+         } else {
             // new namespace
 
             QString tagName;
@@ -2698,7 +2698,7 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<EntryNav> rootNav)
                QSharedPointer<Definition> s = pnd->getOuterScope();
 
                if (s && s->definitionType() == Definition::TypeNamespace) {
-                  pnd = s.dynamicCast<NamespaceDef>();  
+                  pnd = s.dynamicCast<NamespaceDef>();
 
                } else {
                   pnd = QSharedPointer<NamespaceDef>();
@@ -2708,7 +2708,7 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<EntryNav> rootNav)
          }
 
          if (usingNd == 0 && fd) {
-            // still nothing, also try used namespace in the global scope         
+            // still nothing, also try used namespace in the global scope
             usingNd = findUsedNamespace(fd->getUsedNamespaces(), name);
          }
 
@@ -2794,9 +2794,9 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::USINGDECL_SEC && !(rootNav->parent()->section()&Entry::COMPOUND_MASK) ) {
       // not a class/struct member
-      
+
       rootNav->loadEntry(Doxy_Globals::g_storage);
-      QSharedPointer<Entry> root = rootNav->entry();     
+      QSharedPointer<Entry> root = rootNav->entry();
 
       if (! root->name.isEmpty()) {
          QSharedPointer<ClassDef> usingCd;
@@ -2828,7 +2828,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
             usingCd = Doxy_Globals::hiddenClasses->find(name);
          }
 
-         if (usingCd == 0) { 
+         if (usingCd == 0) {
             // definition not in the input => add an artificial class
             Debug::print(Debug::Classes, 0, "  New using class `%s' (sec=0x%08x)! #tArgLists=%d\n",
                          csPrintable(name), root->section, root->tArgLists ? root->tArgLists->count() : -1);
@@ -2842,11 +2842,11 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
 
          } else {
             Debug::print(Debug::Classes, 0, "  Found used class %s in scope=%s\n",
-                         csPrintable(usingCd->name()), nd ? csPrintable(nd->name()) : 
+                         csPrintable(usingCd->name()), nd ? csPrintable(nd->name()) :
                          fd ? csPrintable(fd->name()) : "<unknown>");
          }
 
-         if (nd) {           
+         if (nd) {
             nd->addUsingDeclaration(usingCd);
 
          } else if (fd) {
@@ -2862,14 +2862,14 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<EntryNav> rootNav)
 void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::USINGDECL_SEC && (rootNav->parent()->section()&Entry::COMPOUND_MASK) )  {
-     
+
       QString fullName = removeRedundantWhiteSpace(rootNav->parent()->name());
       fullName = stripAnonymousNamespaceScope(fullName);
       fullName = stripTemplateSpecifiersFromScope(fullName);
 
       QSharedPointer<ClassDef> cd = getClass(fullName);
 
-      if (cd) {         
+      if (cd) {
          int i = rootNav->name().indexOf("::");
 
          if (i != -1) {
@@ -2877,7 +2877,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<EntryNav> rootNav)
             QString memName = rootNav->name().right(rootNav->name().length() - i - 2);
             QSharedPointer<ClassDef> bcd = getResolvedClass(cd, QSharedPointer<FileDef>(), scope); // todo: file in fileScope parameter
 
-            if (bcd) {              
+            if (bcd) {
                MemberNameInfoSDict *mndict = bcd->memberNameInfoSDict();
 
                if (mndict) {
@@ -2966,14 +2966,14 @@ void Doxy_Work::findIncludedUsingDirectives()
    for (auto fn : *Doxy_Globals::inputNameList) {
 
       for (auto fd : *fn) {
-         if (! fd->visited) {            
+         if (! fd->visited) {
             fd->addIncludedUsingDirectives();
          }
       }
    }
 }
 
-QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<ClassDef> cd, MemberType mtype, 
+QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<ClassDef> cd, MemberType mtype,
                            const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb, Protection prot, Relationship related)
 {
    QSharedPointer<Entry> root = rootNav->entry();
@@ -2988,7 +2988,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
       scopeSeparator = ".";
    }
 
-   Debug::print(Debug::Variables, 0, "  class variable:\n" 
+   Debug::print(Debug::Variables, 0, "  class variable:\n"
                 "    `%s' `%s'::`%s' `%s' prot=`%d ann=%d init=`%s'\n",
                 csPrintable(root->type), csPrintable(qualScope), csPrintable(name), csPrintable(root->args),
                 root->protection, fromAnnScope, csPrintable(root->initializer));
@@ -3000,8 +3000,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
       bool isAlias = root->m_traits.hasTrait(Entry::Virtue::Alias);
 
       if (related || mtype == MemberType_Friend || Config::getBool("hide-scope-names")) {
-       
-         if (isAlias) { 
+
+         if (isAlias) {
             // turn 'typedef B A' into 'using A = B'
             def = "using " + name + " = " + root->type.mid(7);
 
@@ -3011,7 +3011,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
          }
 
       } else {
-         if (isAlias) { 
+         if (isAlias) {
             // turn 'typedef B C::A' into 'using C::A = B'
             def = "using " + qualScope + scopeSeparator + name + " = " + root->type.mid(7);
 
@@ -3050,16 +3050,16 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
                md->setProtection(root->protection);
                cd->reclassifyMember(md, MemberType_Property);
 
-            } else if (root->mtype == Property) { 
+            } else if (root->mtype == Property) {
                // copperspice has multiple property elements, update memberDef
 
-               if (! root->m_read.isEmpty()) { 
+               if (! root->m_read.isEmpty()) {
                   md->setPropertyRead(root->m_read);
-               }   
-              
+               }
+
                if (! root->m_write.isEmpty()) {
                   md->setPropertyWrite(root->m_write);
-               } 
+               }
 
                if (! root->m_reset.isEmpty()) {
                   md->setPropertyReset(root->m_reset);
@@ -3083,8 +3083,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
    }
 
    // new member variable, typedef, enum value, or property
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, 
-            root->type, name, root->args, root->exception, prot, Normal, root->stat, 
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
+            root->type, name, root->args, root->exception, prot, Normal, root->stat,
             related, mtype, root->tArgLists ? &(root->tArgLists->last()) : 0, nullptr);
 
    md->setTagInfo(rootNav->tagInfo());
@@ -3129,12 +3129,12 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
    if (mn) {
       mn->append(md);
 
-   } else { 
+   } else {
       // new variable name, add the member to the class
       mn = QMakeShared<MemberName>(name);
       mn->append(md);
 
-      Doxy_Globals::memberNameSDict->insert(name, mn); 
+      Doxy_Globals::memberNameSDict->insert(name, mn);
    }
 
    cd->insertMember(md);
@@ -3148,14 +3148,14 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<EntryNav>
    return md;
 }
 
-QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> rootNav, MemberType mtype, const QString &scope, 
+QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> rootNav, MemberType mtype, const QString &scope,
                      const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb)
 {
    QSharedPointer<Entry> root = rootNav->entry();
 
    Debug::print(Debug::Variables, 0, "  global variable:\n"
                 "    type=`%s' scope=`%s' name=`%s' args=`%s' prot=`%d  mtype=%d  lang=%d\n",
-                csPrintable(root->type), csPrintable(scope), csPrintable(name), csPrintable(root->args), 
+                csPrintable(root->type), csPrintable(scope), csPrintable(name), csPrintable(root->args),
                 root->protection, mtype, root->lang );
 
    QSharedPointer<FileDef> fd = rootNav->fileDef();
@@ -3218,11 +3218,11 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
 
          bool isAlias = root->m_traits.hasTrait(Entry::Virtue::Alias);
 
-         if (isAlias) { 
+         if (isAlias) {
             // turn 'typedef B NS::A' into 'using NS::A = B'
             def = "using " + nd->name() + sep + name + " = " + root->type;
 
-         } else { 
+         } else {
             // normal member
             def = root->type + " " + nd->name() + sep + name + root->args;
          }
@@ -3233,19 +3233,19 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
 
    } else {
 
-      if (! root->type.isEmpty() && ! root->name.isEmpty()) { 
-         if (name.at(0) == '@') { 
+      if (! root->type.isEmpty() && ! root->name.isEmpty()) {
+         if (name.at(0) == '@') {
             // dummy variable representing anonymous union
             def = root->type;
 
          } else {
             bool isAlias = root->m_traits.hasTrait(Entry::Virtue::Alias);
 
-            if (isAlias) { 
+            if (isAlias) {
                // turn 'typedef B A' into 'using A = B'
                def = "using " + root->name + " = " + root->type.mid(7);
 
-            } else { 
+            } else {
                // normal member
                def = root->type + " " + name + root->args;
             }
@@ -3273,7 +3273,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
             // in C# an enum value and enum can have the same name
             // function style #define's can be "overloaded" by typedefs or variables
             // both variable names in the same file variable already in the scope
-         
+
             bool isPHPArray = md->getLanguage() == SrcLangExt_PHP &&
                               md->argsString() != root->args && root->args.indexOf('[') != -1;
 
@@ -3282,7 +3282,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
             if (md->getFileDef() && ! isPHPArray && ! staticsInDifferentFiles) {
                // not a php array
                // not a php array variable
-            
+
                Debug::print(Debug::Variables, 0, "    variable already found: scope=%s\n", csPrintable(md->getOuterScope()->name()));
 
                addMemberDocs(rootNav, md, def, 0, false);
@@ -3304,7 +3304,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, root->type, name,
                                               root->args, nullptr, Public, Normal, root->stat, Member, mtype,
                                               root->tArgLists ? &(root->tArgLists->last()) : nullptr, nullptr);
-  
+
    md->setTagInfo(rootNav->tagInfo());
    md->setMemberTraits(root->m_traits);
    md->setDocumentation(root->doc, root->docFile, root->docLine);
@@ -3322,7 +3322,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<EntryNav> 
    md->enableCallGraph(root->callGraph);
    md->enableCallerGraph(root->callerGraph);
    md->setExplicitExternal(root->explicitExternal);
-   
+
    if (! root->explicitExternal) {
       md->setBodySegment(root->bodyLine, root->endBodyLine);
       md->setBodyDef(fd);
@@ -3374,9 +3374,9 @@ int Doxy_Work::findFunctionPtr(const QString &type, int lang, int *pLength)
    int bb = type.indexOf('<');
    int be = type.lastIndexOf('>');
 
-   if (! type.isEmpty() && (i = re.indexIn(type, 0)) != -1 && type.indexOf("operator") == -1 && 
+   if (! type.isEmpty() && (i = re.indexIn(type, 0)) != -1 && type.indexOf("operator") == -1 &&
                   (type.indexOf(")(") == -1 || type.indexOf("typedef ") != -1) && ! (bb < i && i < be) ) {
-      
+
       len = re.matchedLength();
 
       if (pLength) {
@@ -3587,14 +3587,14 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
          // function pointer
          int ai = root->type.indexOf('[', i);
 
-         if (ai > i) { 
+         if (ai > i) {
             // function pointer array
             root->args.prepend(root->type.right(root->type.length() - ai));
             root->type = root->type.left(ai);
 
          } else if (root->type.indexOf(')', i) != -1) { // function ptr, not variable like "int (*bla)[10]"
             root->type = root->type.left(root->type.length() - 1);
-            root->args.prepend(") ");            
+            root->args.prepend(") ");
          }
 
       } else if (root->type.indexOf("typedef ") != -1 && root->type.right(2) == "()") { // typedef void (func)(int)
@@ -3672,7 +3672,7 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
       mtype = MemberType_Variable;
    }
 
-   if (! root->relates.isEmpty()) { 
+   if (! root->relates.isEmpty()) {
       // related variable
 
       isRelated = true;
@@ -3702,7 +3702,7 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
 
       static bool inlineSimpleStructs = Config::getBool("inline-simple-struct");
 
-      if (si != -1 && ! inlineSimpleStructs) { 
+      if (si != -1 && ! inlineSimpleStructs) {
          // anonymous scope or type
 
          QString pScope;
@@ -3722,10 +3722,10 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
             if (! pScope.isEmpty() && (pcd = getClass(pScope))) {
                // pcd is the class to add the member to
 
-               md = addVariableToClass(rootNav, pcd, mtype, name, true, QSharedPointer<MemberDef>(), 
+               md = addVariableToClass(rootNav, pcd, mtype, name, true, QSharedPointer<MemberDef>(),
                   root->protection, isMemberOf ? Foreign : isRelated ? Related : Member);
-              
-            } else { 
+
+            } else {
                // anonymous scope inside namespace or file => put variable in the global scope
 
                if (mtype == MemberType_Variable) {
@@ -3737,7 +3737,7 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
       }
 
       // cd is the class to add the member to
-      addVariableToClass(rootNav, cd,  mtype, name, false, md,   
+      addVariableToClass(rootNav, cd,  mtype, name, false, md,
                          root->protection, isMemberOf ? Foreign : isRelated ? Related : Member);
 
    } else if (!name.isEmpty()) {
@@ -3775,25 +3775,25 @@ void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
    bool isVar    = false;
 
    if (! rootNav->name().isEmpty() ) {
-     
+
       if (rootNav->type().isEmpty() || ! Doxy_Globals::g_compoundKeywordDict.contains(rootNav->type())) {
-                    
-         if (rootNav->section() == Entry::VARIABLE_SEC) { 
-            isVar = true;  
-    
-         } else if (rootNav->section() == Entry::FUNCTION_SEC) {        
-            isFuncPtr = findFunctionPtr(rootNav->type(), rootNav->lang()); 
-   
+
+         if (rootNav->section() == Entry::VARIABLE_SEC) {
+            isVar = true;
+
+         } else if (rootNav->section() == Entry::FUNCTION_SEC) {
+            isFuncPtr = findFunctionPtr(rootNav->type(), rootNav->lang());
+
             if (isFuncPtr != -1) {
-               // might be a function pointer variable 
+               // might be a function pointer variable
                isVar = true;
 
             } else if (isVarWithConstructor(rootNav)) {
-               // class variable initialized by constructor 
-               isVar = true;  
+               // class variable initialized by constructor
+               isVar = true;
 
             }
-         }      
+         }
       }
    }
 
@@ -3801,7 +3801,7 @@ void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
       // documented variable
       addVariable(rootNav, isFuncPtr);
    }
-   
+
    for (auto e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
          buildVarList(e);
@@ -3810,31 +3810,31 @@ void Doxy_Work::buildVarList(QSharedPointer<EntryNav> rootNav)
 }
 
 void Doxy_Work::resolveHiddenNamespace()
-{ 
+{
    std::set<QString> visibleSet;
    std::map<QString, QSharedPointer<NamespaceDef>> hiddenMap;
 
    // are there any classes or members in this namespace
-   for (auto nd : *Doxy_Globals::namespaceSDict) { 
-      ClassSDict *cd  = nd->getClassSDict();          
+   for (auto nd : *Doxy_Globals::namespaceSDict) {
+      ClassSDict *cd  = nd->getClassSDict();
 
       const QList<QSharedPointer<MemberList>> &list = nd->getMemberLists();
-      bool hasMembers = false;      
+      bool hasMembers = false;
 
-      for (auto item : list)  { 
-         if (item != nullptr && ! item->isEmpty())  {            
+      for (auto item : list)  {
+         if (item != nullptr && ! item->isEmpty())  {
             hasMembers = true;
             break;
          }
       }
 
-      if ( (cd == nullptr || cd->isEmpty()) && ! hasMembers ) {              
-         hiddenMap.insert( std::make_pair(nd->name(), nd) );         
-       
-      } else  {         
+      if ( (cd == nullptr || cd->isEmpty()) && ! hasMembers ) {
+         hiddenMap.insert( std::make_pair(nd->name(), nd) );
+
+      } else  {
          visibleSet.insert(nd->name());
 
-      }    
+      }
    }
 
    // verify if the hidden ns should be visible
@@ -3843,9 +3843,9 @@ void Doxy_Work::resolveHiddenNamespace()
       auto begin = visibleSet.lower_bound(item.first + "::");
       auto end   = visibleSet.lower_bound(item.first + ":;");      // colon -- semicolon is correct
 
-      if (begin == end) {         
-         item.second->setHidden(true);            
-      }      
+      if (begin == end) {
+         item.second->setHidden(true);
+      }
    }
 }
 
@@ -3998,7 +3998,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
 
    bool isAlias = root->m_traits.hasTrait(Entry::Virtue::Alias);
 
-   if (cd->getLanguage() == SrcLangExt_Cpp && ! root->type.isEmpty() && ! isAlias && i != -1) { 
+   if (cd->getLanguage() == SrcLangExt_Cpp && ! root->type.isEmpty() && ! isAlias && i != -1) {
       // only C has pointers, function variable
 
       root->args += root->type.right(root->type.length() - i - l);
@@ -4044,7 +4044,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
    // adding class member
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
                root->type, name, root->args, root->exception, root->protection, root->virt,
-               (root->stat && root->relatesType != MemberOf), 
+               (root->stat && root->relatesType != MemberOf),
                (root->relates.isEmpty() ? Member : root->relatesType == MemberOf ? Foreign : Related),
                mtype, root->tArgLists ? &root->tArgLists->last() : 0, &root->argList);
 
@@ -4084,17 +4084,17 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
       if (! root->type.isEmpty()) {
          def = root->type + " " + name;
 
-      } else {         
-         def = name;         
+      } else {
+         def = name;
 
       }
 
    } else {
       if (! root->type.isEmpty()) {
         def = root->type + " " + qualScope + scopeSeparator + name;
-        
-      } else {         
-         def = qualScope + scopeSeparator + name;       
+
+      } else {
+         def = qualScope + scopeSeparator + name;
 
       }
    }
@@ -4106,7 +4106,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<EntryNav> rootNav, QSharedPointe
    md->setDefinition(def);
    md->enableCallGraph(root->callGraph);
    md->enableCallerGraph(root->callerGraph);
- 
+
    // add member to the global list of all members
    QSharedPointer<MemberName> mn;
    mn = Doxy_Globals::memberNameSDict->find(name);
@@ -4204,7 +4204,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                // and args not )[.. -> function pointer
                // type contains ..)(.. and not "operator"
                // language other than C
-             
+
                addMethodToClass(rootNav, cd, rname, isFriend);
                done = true;
             }
@@ -4213,7 +4213,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
          if (done) {
             // all done
 
-         } else if (! ((rootNav->parent()->section() & Entry::COMPOUND_MASK) || 
+         } else if (! ((rootNav->parent()->section() & Entry::COMPOUND_MASK) ||
                     rootNav->parent()->section() == Entry::OBJCIMPL_SEC) &&
                     ! isMember && (root->relates.isEmpty() || root->relatesType == Duplicate) &&
                     root->type.left(7) != "extern " && root->type.left(8) != "typedef ") {
@@ -4227,7 +4227,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
             QSharedPointer<MemberName> mn;
             mn = Doxy_Globals::functionNameSDict->find(rname);
 
-            bool found = false;            
+            bool found = false;
             QSharedPointer<MemberDef> md;
 
             if (mn) {
@@ -4285,7 +4285,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                   bool staticsInDifferentFiles = root->stat && item->isStatic() && root->fileName != item->getDefFileName();
 
-                  bool tmp = matchArguments2(item->getOuterScope(), mfd, mdAl, 
+                  bool tmp = matchArguments2(item->getOuterScope(), mfd, mdAl,
                            rnd ? rnd : Doxy_Globals::globalScope, rfd, &root->argList, false);
 
                   if (tmp && sameNumTemplateArgs && matchingReturnTypes && ! staticsInDifferentFiles) {
@@ -4423,10 +4423,10 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                if (! root->type.isEmpty()) {
                   def = root->type + " " + scope + name;
-                 
+
                } else {
                   def = scope + name;
-                 
+
                }
 
                Debug::print(Debug::Functions, 0, "  Global Function:\n"
@@ -4444,7 +4444,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
                   // add member to namespace
                   md->setNamespace(nd);
-                  nd->insertMember(md);            
+                  nd->insertMember(md);
                }
 
                if (fd) {
@@ -4461,7 +4461,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                   mn->append(md);
 
                } else {
-                  mn = QMakeShared<MemberName>(name);   
+                  mn = QMakeShared<MemberName>(name);
                   mn->append(md);
 
                   Doxy_Globals::functionNameSDict->insert(name, mn);
@@ -4471,8 +4471,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                if (root->relatesType == Simple)  {
                   // if this is a relatesalso command, allow find Member to pick it up
-               
-                  rootNav->changeSection(Entry::EMPTY_SEC); 
+
+                  rootNav->changeSection(Entry::EMPTY_SEC);
                   // Otherwise we have finished with this entry
                }
 
@@ -4550,15 +4550,15 @@ void Doxy_Work::findFriends()
                      fmd->setInbodyDocumentation(mmd->inbodyDocumentation(), mmd->inbodyFile(), mmd->inbodyLine());
 
                   }
-                  
+
                   if (mmd->getStartBodyLine() == -1 && fmd->getStartBodyLine() != -1) {
                      mmd->setBodySegment(fmd->getStartBodyLine(), fmd->getEndBodyLine());
                      mmd->setBodyDef(fmd->getBodyDef());
-                   
+
                   } else if (mmd->getStartBodyLine() != -1 && fmd->getStartBodyLine() == -1) {
                      fmd->setBodySegment(mmd->getStartBodyLine(), mmd->getEndBodyLine());
                      fmd->setBodyDef(mmd->getBodyDef());
-                     
+
                   }
 
                   mmd->setDocsForDefinition(fmd->isDocsForDefinition());
@@ -4689,7 +4689,7 @@ void Doxy_Work::transferRelatedFunctionDocumentation()
 
                   // related function
                   if (rmd->relatedAlso()) {
-                     md->setRelatedAlso(rmd->relatedAlso()); 
+                     md->setRelatedAlso(rmd->relatedAlso());
 
                   } else if (rmd->isForeign()) {
                      md->makeForeign();
@@ -4816,7 +4816,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                while (! found && extractClassNameFromType(type, pos, usedClassName, templSpec, rootNav->lang()) != -1) {
 
                   // find the type (if any) that matches usedClassName
-                  QSharedPointer<ClassDef> typeCd = getResolvedClass(masterCd, 
+                  QSharedPointer<ClassDef> typeCd = getResolvedClass(masterCd,
                         masterCd->getFileDef(), usedClassName, 0, 0, false, true);
 
                   if (typeCd) {
@@ -4825,7 +4825,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
                   int sp = usedClassName.indexOf('<');
                   if (sp == -1) {
-                     sp = 0; 
+                     sp = 0;
                   }
 
                   int si = usedClassName.lastIndexOf("::", sp);
@@ -4899,12 +4899,12 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                   }
                }
 
-               if (! found && ! type.isEmpty()) { 
+               if (! found && ! type.isEmpty()) {
                   // used class is not documented in any scope
                   QSharedPointer<ClassDef> usedCd = Doxy_Globals::hiddenClasses->find(type);
 
                   if (usedCd == 0 && ! Config::getBool("hide-undoc-relations")) {
-                     if (type.right(2) == "(*" || type.right(2) == "(^") { 
+                     if (type.right(2) == "(*" || type.right(2) == "(^") {
                         // type is a function pointer
                         type += md->argsString();
                      }
@@ -4935,8 +4935,8 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
    }
 }
 
-void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd, 
-             QSharedPointer<ClassDef>instanceCd, FindBaseClassRelation_Mode mode, bool isArtificial, ArgumentList *actualArgs, 
+void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
+             QSharedPointer<ClassDef>instanceCd, FindBaseClassRelation_Mode mode, bool isArtificial, ArgumentList *actualArgs,
              QHash<QString, int> *templateNames)
 {
    QSharedPointer<Entry> root = rootNav->entry();
@@ -4956,7 +4956,7 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
       BaseInfo tbi(bi.name, bi.prot, bi.virt);
 
-      if (actualArgs) { 
+      if (actualArgs) {
          // substitute the formal template arguments of the base class
          tbi.name = substituteTemplateArgumentsInString(bi.name, formalArgs, actualArgs);
       }
@@ -4967,7 +4967,7 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
          if (! findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, DocumentedOnly, isArtificial)) {
             // decided to show inheritance relations even if not documented,
             // make them artificial, so they do not appear in the index
-           
+
             bool b = Config::getBool("hide-undoc-relations") ? true : isArtificial;
 
             // no documented base class -> try to find an undocumented one
@@ -4987,7 +4987,7 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
    }
 }
 
-bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QSharedPointer<Definition> context, QSharedPointer<ClassDef> templateClass, 
+bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QSharedPointer<Definition> context, QSharedPointer<ClassDef> templateClass,
                const QString &templSpec, QHash<QString, int> *templateNames, bool isArtificial)
 {
    Debug::print(Debug::Classes, 0, "    derived from template %s with parameters %s\n",
@@ -5021,7 +5021,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
          bool unloadNeeded = false;
          QSharedPointer<Entry> templateRoot = templateRootNav->entry();
 
-         if (templateRoot == 0) { 
+         if (templateRoot == 0) {
             // not yet loaded
             templateRootNav->loadEntry(Doxy_Globals::g_storage);
             templateRoot = templateRootNav->entry();
@@ -5043,7 +5043,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
                                  isArtificial, templArgs, templateNames);
          delete templArgs;
 
-         if (unloadNeeded) { 
+         if (unloadNeeded) {
             // still cleanup to do
             templateRootNav->releaseEntry();
          }
@@ -5052,7 +5052,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
          Debug::print(Debug::Classes, 0, "        no template root entry found\n");
          // TODO: what happened if we get here?
       }
-     
+
    } else {
       Debug::print(Debug::Classes, 0, "      instance already exists\n");
    }
@@ -5093,7 +5093,7 @@ int Doxy_Work::findEndOfTemplate(const QString &s, int startPos)
 
    int brCount    = 1;
    int roundCount = 0;
-   
+
    bool insideString = false;
    bool insideChar   = false;
 
@@ -5172,7 +5172,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
    QString biName = bi->name;
    bool isExplicitGlobalScope = false;
 
-   if (biName.left(2) == "::") { 
+   if (biName.left(2) == "::") {
       // explicit global scope
       biName = biName.right(biName.length() - 2);
       isExplicitGlobalScope = true;
@@ -5194,24 +5194,24 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
       int scopeOffset = isExplicitGlobalScope ? 0 : scopeName.length();
 
       do {
-         // try all parent scope prefixes, starting with the largest scope         
+         // try all parent scope prefixes, starting with the largest scope
          QString baseClassName = biName;
 
          if (scopeOffset > 0) {
             baseClassName.prepend(scopeName.left(scopeOffset) + "::");
          }
 
-         QSharedPointer<MemberDef> baseClassTypeDef;     
+         QSharedPointer<MemberDef> baseClassTypeDef;
          QString templSpec;
 
-         QSharedPointer<Definition> scope; 
+         QSharedPointer<Definition> scope;
 
-         if (isExplicitGlobalScope) { 
+         if (isExplicitGlobalScope) {
             scope = Doxy_Globals::globalScope;
          } else {
             scope = context;
-         }   
-        
+         }
+
          QSharedPointer<ClassDef> baseClass = getResolvedClass(scope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
                                                                &templSpec, mode == Undocumented, true);
 
@@ -5228,8 +5228,8 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                (bi->prot == Private) ? "private" : ((bi->prot == Protected) ? "protected" : "public"),
                (bi->virt == Normal) ? "normal" : "virtual", csPrintable(templSpec) );
 
-            int i  = baseClassName.indexOf('<');   
-         
+            int i  = baseClassName.indexOf('<');
+
             if (i == -1) {
                i = baseClassName.length() - 1;
             }
@@ -5260,15 +5260,15 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                   templSpec = removeRedundantWhiteSpace(baseClassName.mid(i, e - i));
                   baseClassName = baseClassName.left(i) + baseClassName.right(baseClassName.length() - e);
 
-                  QSharedPointer<Definition> scope; 
+                  QSharedPointer<Definition> scope;
 
-                  if (isExplicitGlobalScope) { 
+                  if (isExplicitGlobalScope) {
                      scope = Doxy_Globals::globalScope;
                   } else {
                      scope = context;
-                  }   
+                  }
 
-                  baseClass = getResolvedClass(scope, cd->getFileDef(), baseClassName, &baseClassTypeDef, 
+                  baseClass = getResolvedClass(scope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
                                                0, mode == Undocumented, true);
                }
 
@@ -5296,15 +5296,15 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                // replace any namespace aliases
                replaceNamespaceAliases(baseClassName, si);
 
-               QSharedPointer<Definition> scope; 
+               QSharedPointer<Definition> scope;
 
-               if (isExplicitGlobalScope) { 
+               if (isExplicitGlobalScope) {
                   scope = Doxy_Globals::globalScope;
                } else {
                   scope = context;
-               }   
+               }
 
-               baseClass = getResolvedClass(scope, cd->getFileDef(), baseClassName, &baseClassTypeDef, 
+               baseClass = getResolvedClass(scope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
                                             &tmpTemplSpec, mode == Undocumented, true);
 
                found = (baseClass != 0 && baseClass != cd);
@@ -5347,9 +5347,9 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
             // warning: the following line doesn't work for Mixin classes (see bug 560623)
             // templSpec = getCanonicalTemplateSpec(cd, cd->getFileDef(), templSpec);
 
-            if (found) { 
+            if (found) {
 
-               Debug::print(Debug::Classes, 0, "    Documented base class `%s' templSpec=%s\n", 
+               Debug::print(Debug::Classes, 0, "    Documented base class `%s' templSpec=%s\n",
                            csPrintable(biName), templSpec.isEmpty() ? "" : csPrintable(templSpec) );
 
                // add base class to this class
@@ -5440,7 +5440,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPoint
                      baseClass->setLanguage(root->lang);
                      int si = baseClassName.lastIndexOf("::");
 
-                     if (si != -1) { 
+                     if (si != -1) {
                         // class is nested
                         QSharedPointer<Definition> sd = findScopeFromQualifiedName(Doxy_Globals::globalScope,
                                  baseClassName.left(si), QSharedPointer<FileDef>(), rootNav->tagInfo());
@@ -5644,8 +5644,8 @@ void Doxy_Work::computeClassRelations()
 
       if ((cd == 0 || (!cd->hasDocumentation() && !cd->isReference())) && numMembers > 0 && bName.right(2) != "::") {
 
-         if (! root->name.isEmpty() && root->name.indexOf('@') == -1 && 
-               (determineSection(root->fileName) == Entry::HEADER_SEC || extractLocalClass) && 
+         if (! root->name.isEmpty() && root->name.indexOf('@') == -1 &&
+               (determineSection(root->fileName) == Entry::HEADER_SEC || extractLocalClass) &&
                 protectionLevelVisible(root->protection) && ! hideUndocClasses )
 
             warn_undoc(root->fileName, root->startLine, "Compound %s was not documented", csPrintable(root->name));
@@ -5799,9 +5799,9 @@ void Doxy_Work::addListReferences()
       if (pd->getGroupDef()) {
          name = pd->getGroupDef()->getOutputFileBase();
       }
-      
+
       QList<ListItemInfo> *xrefItems = pd->xrefListItems();
-      addRefItem(xrefItems, name, theTranslator->trPage(true, true), name, pd->title(), "", QSharedPointer<Definition>());      
+      addRefItem(xrefItems, name, theTranslator->trPage(true, true), name, pd->title(), "", QSharedPointer<Definition>());
    }
 
    for (auto dd : Doxy_Globals::directories) {
@@ -5819,8 +5819,8 @@ void Doxy_Work::generateXRefPages()
    }
 }
 
-// Copy the documentation in entry `root' to member definition `md' and 
-// set the function declaration of the member to `funcDecl'.  
+// Copy the documentation in entry `root' to member definition `md' and
+// set the function declaration of the member to `funcDecl'.
 // If 'overload' is set the standard overload text is added.
 
 void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<MemberDef> md, const QString &funcDecl, ArgumentList *al,
@@ -5871,7 +5871,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
       }
    }
 
-   if (overload) { 
+   if (overload) {
       // the \overload keyword was used
 
       QString doc = theTranslator->trOverloadText();
@@ -5884,7 +5884,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
       md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
       md->setDocsForDefinition(!root->proto);
 
-   } else {     
+   } else {
       md->setDocumentation(root->doc, root->docFile, root->docLine);
       md->setDocsForDefinition(! root->proto);
 
@@ -5895,14 +5895,14 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
       }
    }
 
-   if (md->initializer().isEmpty() && !root->initializer.isEmpty()) {      
+   if (md->initializer().isEmpty() && !root->initializer.isEmpty()) {
       md->setInitializer(root->initializer);
    }
 
    md->setMaxInitLines(root->initLines);
 
    if (rfd) {
-      if ((md->getStartBodyLine() == -1 && root->bodyLine != -1)) {         
+      if ((md->getStartBodyLine() == -1 && root->bodyLine != -1)) {
          md->setBodySegment(root->bodyLine, root->endBodyLine);
          md->setBodyDef(rfd);
       }
@@ -5946,13 +5946,13 @@ QSharedPointer<ClassDef> Doxy_Work::findClassDefinition(QSharedPointer<FileDef> 
 // Adds the documentation contained in `root' to a global function
 // with name `name' and argument list `args' (for overloading) and
 // function declaration `decl' to the corresponding member definition.
-bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString &namespaceName, const QString &type, 
+bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString &namespaceName, const QString &type,
                   const QString &name, const QString &tempArg, const QString &, const QString &decl)
 {
    QSharedPointer<Entry> root = rootNav->entry();
 
    Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() namespace= %s   type= %s   name= %s   tempArg= %s   decl= %s\n",
-                csPrintable(namespaceName), csPrintable(type), csPrintable(name), 
+                csPrintable(namespaceName), csPrintable(type), csPrintable(name),
                 csPrintable(tempArg), csPrintable(decl) );
 
    QString n = name;
@@ -5963,15 +5963,15 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
 
    if (n.indexOf("::") != -1) {
       // skip undefined class members
-      return false;   
+      return false;
    }
 
    // look in function dictionary
-   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(n + tempArg); 
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(n + tempArg);
 
    if (mn == nullptr) {
       // try without template arguments
-      mn = Doxy_Globals::functionNameSDict->find(n); 
+      mn = Doxy_Globals::functionNameSDict->find(n);
    }
 
    if (mn) {
@@ -5994,7 +5994,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
          // using declaration
          bool viaUsingDirective = nl && nd && nl->find(nd->qualifiedName()) != 0;
 
-         if ((namespaceName.isEmpty() && nd == 0) || (nd && nd->name() == namespaceName) || viaUsingDirective) { 
+         if ((namespaceName.isEmpty() && nd == 0) || (nd && nd->name() == namespaceName) || viaUsingDirective) {
             // not in a namespace, or in the same namespace, memeber in "using' namespace
 
             Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() attempting to add member %s to scope %s\n",
@@ -6040,7 +6040,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
                }
             }
 
-            if (matching) { 
+            if (matching) {
                // add docs to the member
                Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() match found\n");
                addMemberDocs(rootNav, md, decl, &root->argList, false);
@@ -6049,11 +6049,11 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
          }
       }
 
-      if (! found && root->relatesType != Duplicate && root->section == Entry::FUNCTION_SEC) { 
+      if (! found && root->relatesType != Duplicate && root->section == Entry::FUNCTION_SEC) {
          // no match
-         QString fullFuncDecl = decl;         
+         QString fullFuncDecl = decl;
          fullFuncDecl += argListToString(&root->argList, true);
-         
+
          QString warnMsg = QString("No matching file member found for \n") + substitute(fullFuncDecl, "%", "%%");
 
          if (mn->count() > 0) {
@@ -6068,7 +6068,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
 
          warn(root->fileName, root->startLine, warnMsg);
       }
-   } else { 
+   } else {
       // have docs for an undefined member
 
       if (root->type != "friend class" && root->type != "friend struct" &&
@@ -6109,7 +6109,7 @@ bool Doxy_Work::scopeIsTemplate(QSharedPointer<Definition> d)
    bool result = false;
 
    if (d && d->definitionType() == Definition::TypeClass) {
-      QSharedPointer<ClassDef> temp = d.dynamicCast<ClassDef>();   
+      QSharedPointer<ClassDef> temp = d.dynamicCast<ClassDef>();
       result = ( temp->templateArguments() || scopeIsTemplate(d->getOuterScope()) );
    }
 
@@ -6151,9 +6151,9 @@ QString Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &srcTem
             fali = funcTempArgList->begin();
             fa = &*fali;
          }
-         
-         auto tempDest = dest->begin();   
-         
+
+         auto tempDest = dest->begin();
+
          for (auto &tsa : source) {
 
             if (found) {
@@ -6232,13 +6232,13 @@ QString Doxy_Work::substituteTemplatesInString(const QList<ArgumentList> &srcTem
 
 void Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &srcTempArgLists, const QList<ArgumentList> &dstTempArgLists,
             ArgumentList *src, ArgumentList *dst, ArgumentList *funcTempArgs)
-{  
+{
    Argument da;
 
    if (! dst->isEmpty())  {
       da = dst->first();
    }
-   
+
    auto destIter = dst->begin();
 
    for (auto &sa : *src) {
@@ -6363,8 +6363,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                     substitute(funcDecl, "~ ", "~"),
                     ":: ", "::"),
                  " ::", "::").trimmed();
-   
-   if (isFriend && funcDecl.startsWith("class ")) {     
+
+   if (isFriend && funcDecl.startsWith("class ")) {
       funcDecl = funcDecl.right(funcDecl.length() - 6);
       funcName = funcDecl;
 
@@ -6377,7 +6377,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
       parseFuncDecl(funcDecl, root->lang == SrcLangExt_ObjC, scopeName, funcType, funcName,
                     funcArgs, funcTempList, exceptions);
    }
-   
+
    // the class name can also be a namespace name, we decide this later.
    // if a related class name is specified and the class name could
    // not be derived from the function declaration, then use the related field
@@ -6436,8 +6436,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
    scopeName = stripTemplateSpecifiersFromScope(removeRedundantWhiteSpace(scopeName), false, &funcSpec);
 
    // funcSpec contains the last template specifiers of the given scope.
-   // If this method does not have any template arguments or they are empty 
-   // while funcSpec is not empty we assume this is a specialization of a method. 
+   // If this method does not have any template arguments or they are empty
+   // while funcSpec is not empty we assume this is a specialization of a method.
    // If not, we clear the funcSpec and treat this as a normal method of a template class.
 
    if (! (root->tArgLists && root->tArgLists->count() > 0 && root->tArgLists->first().count() == 0) ) {
@@ -6449,9 +6449,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
    if (namespaceName.indexOf('@') != -1) {
       // skip stuff in anonymous namespace
-      return;   
+      return;
    }
-   
+
    // merge class and namespace scopes again
    scopeName.resize(0);
 
@@ -6459,7 +6459,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
       if (className.isEmpty()) {
          scopeName = namespaceName;
 
-      } else if (! root->relates.isEmpty() || ! getClass(className)) { 
+      } else if (! root->relates.isEmpty() || ! getClass(className)) {
          // relates command with explicit scopem, class name only exists in a namespace
          scopeName = namespaceName + "::" + className;
 
@@ -6486,7 +6486,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
    // rebuild the function declaration (needed to get the scope right)
    if (! scopeName.isEmpty() && !isRelated && ! isFriend && ! Config::getBool("hide-scope-names")) {
       if (! funcType.isEmpty()) {
-         if (isFunc) { 
+         if (isFunc) {
             // a function -> we use argList for the arguments
             funcDecl = funcType + " " + tempScopeName + "::" + funcName + funcTempList;
          } else {
@@ -6494,24 +6494,24 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
          }
 
       } else {
-         if (isFunc) { 
+         if (isFunc) {
             // a function => we use argList for the arguments
             funcDecl = tempScopeName + "::" + funcName + funcTempList;
-         } else { 
+         } else {
             // variable => add `argument' list
             funcDecl = tempScopeName + "::" + funcName + funcArgs;
          }
       }
 
-   } else {      
+   } else {
       // build declaration without scope
 
       if (!funcType.isEmpty()) { // but with a type
-         if (isFunc) { 
+         if (isFunc) {
             // function => omit argument list
             funcDecl = funcType + " " + funcName + funcTempList;
 
-         } else { 
+         } else {
             // variable => add `argument' list
             funcDecl = funcType + " " + funcName + funcArgs;
          }
@@ -6535,8 +6535,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                 "  funcTempList= %s   funcDecl= %s   related= %s   exceptions= %s\n"
                 "  isRelated= %d   isMemberOf= %d   isFriend= %d   isFunc= %d\n",
                 csPrintable(namespaceName), csPrintable(className),
-                csPrintable(funcType), csPrintable(funcSpec), csPrintable(funcName), csPrintable(funcArgs), 
-                csPrintable(funcTempList), csPrintable(funcDecl), csPrintable(root->relates), 
+                csPrintable(funcType), csPrintable(funcSpec), csPrintable(funcName), csPrintable(funcArgs),
+                csPrintable(funcTempList), csPrintable(funcDecl), csPrintable(root->relates),
                 csPrintable(exceptions), isRelated, isMemberOf, isFriend, isFunc );
 
    QSharedPointer<MemberName> mn;
@@ -6545,30 +6545,30 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
       // function name is valid
       Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [1] funcName= %s\n", csPrintable(funcName));
 
-      if (funcName.startsWith("operator ")) { 
+      if (funcName.startsWith("operator ")) {
          // strip class scope from cast operator
          funcName = substitute(funcName, className + "::", "");
       }
 
-      if (! funcTempList.isEmpty()) { 
+      if (! funcTempList.isEmpty()) {
          // try with member specialization
          mn = Doxy_Globals::memberNameSDict->find(funcName + funcTempList);
       }
 
-      if (mn == nullptr) { 
+      if (mn == nullptr) {
          // try without specialization
          mn = Doxy_Globals::memberNameSDict->find(funcName);
       }
 
-      if (! isRelated && mn) { 
+      if (! isRelated && mn) {
          // function name already found
          Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [2] member name exists "
                   "(%d members with this name)\n", mn->count());
 
-         if (! className.isEmpty()) { 
+         if (! className.isEmpty()) {
             // class name is valid
 
-            if (funcSpec.isEmpty()) { 
+            if (funcSpec.isEmpty()) {
                // not a member specialization
                int count = 0;
 
@@ -6584,7 +6584,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                   QSharedPointer<ClassDef> cd = md->getClassDef();
                   Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() member definition: \n"
                                "   scope needed= %s   scope= %s   args= %s   fileName= %s\n",
-                               csPrintable(scopeName), cd ? csPrintable(cd->name()) : "none", 
+                               csPrintable(scopeName), cd ? csPrintable(cd->name()) : "none",
                                csPrintable(md->argsString()), csPrintable(root->fileName)  );
 
                   QSharedPointer<FileDef> fd = rootNav->fileDef();
@@ -6601,10 +6601,10 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      tcd = cd;
                   }
 
-                  if (cd && tcd == cd) { 
+                  if (cd && tcd == cd) {
                      // member's classes match
 
-                     Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [4] class definition: %s\n", 
+                     Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [4] class definition: %s\n",
                         csPrintable(cd->name()));
 
                      // get the template parameter lists found at the member declaration
@@ -6625,7 +6625,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      ArgumentList *argList = 0;
 
                      // substitute the occurrences of class template names in the
-                     // argument list before matching                     
+                     // argument list before matching
 
                      ArgumentList *mdAl = md->argumentList();
 
@@ -6643,31 +6643,31 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                         substDone = true;
 
-                     } else { 
+                     } else {
                         // no template arguments, compare argument lists directly
                         argList = mdAl;
 
                      }
 
-                     Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [5] matching %s with %s   className= %s "
-                           "namespaceName= %s\n", csPrintable(argListToString(argList, true)), 
-                           csPrintable(argListToString(&root->argList, true)), 
+                     Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [5] matching %s with %s   className = %s "
+                           "namespaceName= %s\n", csPrintable(argListToString(argList, true)),
+                           csPrintable(argListToString(&root->argList, true)),
                            csPrintable(className), csPrintable(namespaceName) );
-                    
+
                      bool matching = md->isVariable() || md->isTypedef();
 
                      if (! matching && (mdAl == 0 && root->argList.count() == 0)) {
                         matching = true;
                      }
 
-                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(), 
+                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(),
                            argList, cd, fd, &root->argList, true)) {
                         matching = true;
                      }
 
                      if (md->getLanguage() == SrcLangExt_ObjC && md->isVariable() && (root->section & Entry::FUNCTION_SEC)) {
                         // do not match methods and attributes with the same name
-                        matching = false; 
+                        matching = false;
                      }
 
                      // for template member check the return type
@@ -6676,11 +6676,11 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         QString memType = md->typeString();
 
                         // see bug700696
-                        memType  = stripPrefix(memType, "static "); 
+                        memType  = stripPrefix(memType, "static ");
 
                         // see bug700693 & bug732594
-                        funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", ""); 
-                        memType  = substitute(stripTemplateSpecifiersFromScope(memType, true), className+"::",""); 
+                        funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", "");
+                        memType  = substitute(stripTemplateSpecifiersFromScope(memType, true), className+"::","");
 
                         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [6] comparing return types %s with %s"
                                      "#args %d with %d\n", csPrintable(md->typeString()), csPrintable(funcType),
@@ -6696,28 +6696,34 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         // value from source code
                         QString memType = md->typeString();
 
-                        if (memType == "virtual") { 
+                        memType  = stripPrefix(memType, "friend ");
+                        memType  = stripPrefix(memType, "static ");
+                        memType  = stripPrefix(memType, "virtual ");
+
+                        if (memType == "class") {
                            memType = "";
                         }
 
-                        memType  = stripPrefix(memType, "static "); 
-                        memType  = stripPrefix(memType, "virtual "); 
-                       
+                        if (memType == "virtual") {
+                           memType = "";
+                        }
+
+
                         // remove myClass<T>, or myClass, etc
-                        if (memType.startsWith(className)) {   
+                        if (memType.startsWith(className)) {
                            memType = stripTemplateSpecifiersFromScope(memType, true);
-                           memType = substitute(memType, className + "::", ""); 
-                        } 
+                           memType = substitute(memType, className + "::", "");
+                        }
 
                         // remove myClass<T>, or myClass, etc
-                        if (funcType.startsWith(className)) {   
+                        if (funcType.startsWith(className)) {
                            funcType = stripTemplateSpecifiersFromScope(funcType, true);
-                           funcType = substitute(funcType, className + "::", ""); 
-                        } 
+                           funcType = substitute(funcType, className + "::", "");
+                        }
 
-                        if (memType != funcType) {  
+                        if (memType != funcType) {
                            warn(root->fileName, root->startLine, "Return types do not agree for member: %s\n"
-                                "   return type: %s   return type: %s\n",     
+                                "   return type: %s   return type: %s\n",
                                 csPrintable(funcName), csPrintable(memType), csPrintable(funcType) );
                         }
                      }
@@ -6735,29 +6741,29 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         // Method with template return type does not match method without return type
                         // even if the parameters are the same. See also bug709052
 
-                        Debug::print(Debug::FindMembers, 0, 
+                        Debug::print(Debug::FindMembers, 0,
                               "\nDebug: findMember() [7] comparing return types: template with non-template\n");
 
                         matching = false;
-                     }                     
+                     }
 
-                     if (substDone) { 
+                     if (substDone) {
                         // found a new argument list
 
-                        if (matching) { 
+                        if (matching) {
                            // replace member's argument list
                            md->setDefinitionTemplateParameterLists(root->tArgLists);
                            md->setArgumentList(argList); // new owner of the list => no delete
 
-                        } else { 
+                        } else {
                            // no match
 
                            if (! funcTempList.isEmpty() && isSpecialization(declTemplArgs, *defTemplArgs)) {
-                              // check if we are dealing with a partial template specialization. 
+                              // check if we are dealing with a partial template specialization.
                               // In this case we add it to the class even though the member arguments do not match.
 
                               // TODO: copy other aspects?
-                              root->protection = md->protection(); 
+                              root->protection = md->protection();
                               addMethodToClass(rootNav, cd, md->name(), isFriend);
 
                               return;
@@ -6798,7 +6804,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      for (auto md : *mn) {
                         QSharedPointer<ClassDef> ccd  = md->getClassDef();
                         QSharedPointer<MemberDef> cmd = md;
-                        
+
                         if (ccd != 0 && rightScopeMatch(ccd->name(), className)) {
                            ArgumentList *templAl = md->templateArguments();
 
@@ -6813,7 +6819,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                               umd = emd = cmd;
 
                               Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [8] className= %s   scope= %s\n"
-                                 "  args= %s [Exact Match]\n", csPrintable(className), csPrintable(ccd->name()), 
+                                 "  args= %s [Exact Match]\n", csPrintable(className), csPrintable(ccd->name()),
                                  csPrintable(md->argsString()) );
 
                            } else {
@@ -6835,7 +6841,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                   if (! strictSigMatching) {
 
                      if (candidates == 1 && ucd && umd) {
-                        // did not find a full signature match on arguments, there is only one  member 
+                        // did not find a full signature match on arguments, there is only one  member
                         // with this name in this same scope, use the mtype for the .h file
 
                         addMemberDocs(rootNav, umd, funcDecl, 0, overloaded, 0);
@@ -6918,7 +6924,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                   warn_simple(root->fileName, root->startLine, warnMsg);
                }
 
-            } else if (cd) { 
+            } else if (cd) {
                // member specialization
                QSharedPointer<MemberDef> declMd;
                QSharedPointer<MemberDef> md;
@@ -7016,7 +7022,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                // new overloaded member function
                ArgumentList tArgList = getTemplateArgumentsFromName(cd->name() + "::" + funcName, root->tArgLists);
 
-               QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, 
+               QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn,
                      funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat, Related,
                      mtype, &tArgList, &root->argList);
 
@@ -7052,7 +7058,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                md->setRefItems(root->sli);
             }
 
-         } else { 
+         } else {
             // unrelated function with the same name as a member
 
             if (! findGlobalMember(rootNav, namespaceName, funcType, funcName, funcTempList, funcArgs, funcDecl)) {
@@ -7138,7 +7144,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                }
             }
 
-            if (newMember) { 
+            if (newMember) {
                // need to create a new member
                MemberType mtype;
 
@@ -7174,8 +7180,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn, funcType,
                                 funcName, funcArgs, exceptions, root->protection, root->virt,
-                                root->stat && !isMemberOf, isMemberOf ? Foreign : Related, mtype, 
-                                (root->tArgLists ? &root->tArgLists->last() : nullptr), 
+                                root->stat && !isMemberOf, isMemberOf ? Foreign : Related, mtype,
+                                (root->tArgLists ? &root->tArgLists->last() : nullptr),
                                 funcArgs.isEmpty() ? nullptr : &root->argList);
 
                if (isDefine && mdDefine) {
@@ -7184,7 +7190,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                // Problem :
                // MemberDef::writeDocumentation() in memberdef.cpp writes the template argument list for the class,
-               // as if this member is a member of the class. 
+               // as if this member is a member of the class.
                // Fortunately, MemberDef::writeDocumentation() has a special mechanism that allows us to totally
                // override the set of template argument lists that are printed.  We use that and set it to the
                // template argument lists of the related function.
@@ -7203,7 +7209,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      auto iter = rmn->begin();
                      QSharedPointer<MemberDef> rmd;
 
-                     while ((rmd = *iter) && ! found) { 
+                     while ((rmd = *iter) && ! found) {
                         // see if we got another member with matching arguments
                         ArgumentList *rmdAl = rmd->argumentList();
 
@@ -7215,27 +7221,27 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                         if (! found) {
                            ++iter;
-                           
+
                            if (iter == rmn->end()) {
                               break;
-                           }            
+                           }
                         }
                      }
-   
-                     if (rmd) { 
+
+                     if (rmd) {
                         // member found -> copy line number info
                         md->setBodySegment(rmd->getStartBodyLine(), rmd->getEndBodyLine());
-                        md->setBodyDef(rmd->getBodyDef());                        
+                        md->setBodyDef(rmd->getBodyDef());
                      }
                   }
                }
 
                if (! found) {
                   // line number could not be found or is available in this entry
-              
+
                   md->setBodySegment(root->bodyLine, root->endBodyLine);
                   md->setBodyDef(fd);
-               }           
+               }
 
                md->setMemberClass(cd);
                md->setMemberTraits(root->m_traits);
@@ -7266,8 +7272,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                if (!isDefine) {
                   addMemberToGroups(root, md);
                }
-              
-               if (newMemberName) {                 
+
+               if (newMemberName) {
                   Doxy_Globals::memberNameSDict->insert(funcName, mn);
                }
             }
@@ -7280,7 +7286,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      fullFuncDecl += argListToString(&root->argList, true);
                   }
 
-                  warn(root->fileName, root->startLine, 
+                  warn(root->fileName, root->startLine,
                        "Can not determine file/namespace for related also function\n%s", csPrintable(fullFuncDecl));
                }
             }
@@ -7297,9 +7303,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
          if (Config::getBool("extract-local-methods") && (cd = getClass(scopeName))) {
             Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [11]  method %s"
-                         "   scopeName= %s   className= %s\n", csPrintable(root->name), 
+                         "   scopeName= %s   className= %s\n", csPrintable(root->name),
                          csPrintable(scopeName), csPrintable(className));
-            
+
             QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn,
                funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat, Member,
                MemberType_Function, nullptr, &root->argList);
@@ -7343,7 +7349,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
             // local objective C method found for class without interface
          }
 
-      } else { 
+      } else {
          // unrelated not overloaded member found
 
          bool globMem = findGlobalMember(rootNav, namespaceName, funcType, funcName, funcTempList, funcArgs, funcDecl);
@@ -7370,13 +7376,13 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
 {
    QSharedPointer<Entry> root = rootNav->entry();
    int i = -1;
-   int l;  
+   int l;
 
    Debug::print(Debug::FindMembers, 0, "\nDebug: filterMemberDocumentation(): root->type= %s  root->inside= %s   root->name= %s\n"
-                "   root->args= %s   section= %x   root->mGrpId= %d\n", 
-                csPrintable(root->type), csPrintable(root->inside), csPrintable(root->name), csPrintable(root->args), 
+                "   root->args= %s   section= %x   root->mGrpId= %d\n",
+                csPrintable(root->type), csPrintable(root->inside), csPrintable(root->name), csPrintable(root->args),
                 root->section, root->mGrpId);
-   
+
    bool isFunc = true;
 
    if (root->relatesType == Duplicate && ! root->relates.isEmpty()) {
@@ -7410,7 +7416,7 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
          findMember(rootNav, root->type + " " + root->name + root->args + root->exception, false, isFunc);
       }
 
-   } else if (root->section == Entry::OVERLOADDOC_SEC) {     
+   } else if (root->section == Entry::OVERLOADDOC_SEC) {
       findMember(rootNav, root->name, true, isFunc);
 
    } else if ((root->section == Entry::FUNCTION_SEC  || (root->section == Entry::VARIABLE_SEC && ! root->type.isEmpty() &&
@@ -7432,7 +7438,7 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
    } else if (root->section == Entry::DEFINE_SEC && ! root->relates.isEmpty()) {
       findMember(rootNav, root->name + root->args, false, ! root->args.isEmpty());
 
-   } else if (root->section == Entry::VARIABLEDOC_SEC) {  
+   } else if (root->section == Entry::VARIABLEDOC_SEC) {
       findMember(rootNav, root->name, false, false);
 
 
@@ -7440,7 +7446,7 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
       findMember(rootNav, root->type + " " + root->name, false, false);
 
    } else {
-      // skip section      
+      // skip section
 
    }
 }
@@ -7456,16 +7462,16 @@ void Doxy_Work::findMemberDocumentation(QSharedPointer<EntryNav> rootNav)
       filterMemberDocumentation(rootNav);
       rootNav->releaseEntry();
    }
- 
+
    for (auto e : rootNav->children() ) {
       if (e->section() != Entry::ENUM_SEC) {
          findMemberDocumentation(e);
-      }      
+      }
    }
 }
 
 void Doxy_Work::findObjCMethodDefinitions(QSharedPointer<EntryNav> rootNav)
-{  
+{
    for (auto objCImplNav : rootNav->children() ) {
       if (objCImplNav->section() == Entry::OBJCIMPL_SEC) {
 
@@ -7473,11 +7479,11 @@ void Doxy_Work::findObjCMethodDefinitions(QSharedPointer<EntryNav> rootNav)
 
             if (objCMethodNav->section() == Entry::FUNCTION_SEC) {
 
-               auto temp = objCMethodNav; 
+               auto temp = objCMethodNav;
                temp->loadEntry(Doxy_Globals::g_storage);
 
                QSharedPointer<Entry> objCMethod = temp->entry();
-              
+
                findMember(temp, objCMethod->type + " " + objCImplNav->name() + "::" +
                           objCMethod->name + " " + objCMethod->args, false, true);
 
@@ -7513,7 +7519,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
       QString name;
       QString scope;
 
-      if ((i = root->name.lastIndexOf("::")) != -1) { 
+      if ((i = root->name.lastIndexOf("::")) != -1) {
          // scope is specified
 
          scope = root->name.left(i);                             // extract scope
@@ -7525,10 +7531,10 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
             nd = getResolvedNamespace(scope);
          }
 
-      } else { 
+      } else {
          // no scope, check the scope in which the docs where found
 
-         if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && !rootNav->parent()->name().isEmpty()) { 
+         if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && !rootNav->parent()->name().isEmpty()) {
             // found enum docs inside a compound
             scope = rootNav->parent()->name();
 
@@ -7560,20 +7566,20 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          }
       }
 
-      if (cd && ! name.isEmpty()) { 
-         // found a enum inside a compound        
+      if (cd && ! name.isEmpty()) {
+         // found a enum inside a compound
 
          fd   = QSharedPointer<FileDef>();
          mnsd = Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') { 
+      } else if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
          // found enum inside namespace
 
          mnsd = Doxy_Globals::functionNameSDict;
          isGlobal = true;
 
-      } else { 
+      } else {
          // found a global enum
 
          fd = rootNav->fileDef();
@@ -7585,32 +7591,32 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          // new enum type
 
          md = QMakeShared<MemberDef>(root->fileName, root->startLine, root->startColumn,
-                        nullptr, name, nullptr, nullptr, root->protection, Normal, false, 
+                        nullptr, name, nullptr, nullptr, root->protection, Normal, false,
                         isMemberOf ? Foreign : isRelated ? Related : Member,
-                        MemberType_Enumeration, nullptr, nullptr); 
+                        MemberType_Enumeration, nullptr, nullptr);
 
          md->setTagInfo(rootNav->tagInfo());
          md->setLanguage(root->lang);
          md->setId(root->id);
 
-         if (isGlobal) {      
+         if (isGlobal) {
             md->setFileDef(fd);
          } else {
-            md->setMemberClass(cd);            
+            md->setMemberClass(cd);
          }
 
          md->setBodySegment(root->bodyLine, root->endBodyLine);
          md->setBodyDef(rootNav->fileDef());
          md->setMemberTraits(root->m_traits);
          md->setEnumBaseType(root->args);
-         
+
          md->addSectionsToDefinition(root->anchors);
          md->setMemberGroupId(root->mGrpId);
          md->enableCallGraph(root->callGraph);
          md->enableCallerGraph(root->callerGraph);
-                 
+
          md->setRefItems(root->sli);
-         
+
          bool defSet = false;
 
          QString baseType = root->args;
@@ -7624,7 +7630,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
                md->setDefinition(name + baseType);
             } else {
                md->setDefinition(nd->name() + "::" + name + baseType);
-            }          
+            }
 
             defSet = true;
             md->setNamespace(nd);
@@ -7633,7 +7639,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
 
          // even if we have already added the enum to a namespace, we still
          // also want to add it to other appropriate places such as file or class
-         
+
          if (isGlobal) {
 
             if (! defSet) {
@@ -7665,7 +7671,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
          md->setDocsForDefinition(!root->proto);
          md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
          md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
-       
+
          QSharedPointer<MemberName> mn;
 
          if ((mn = (*mnsd)[name])) {
@@ -7677,7 +7683,7 @@ void Doxy_Work::findEnums(QSharedPointer<EntryNav> rootNav)
             mn = QMakeShared<MemberName>(name);
 
             mn->append(md);
-            mnsd->insert(name, mn);           
+            mnsd->insert(name, mn);
          }
 
          addMemberToGroups(root, md);
@@ -7695,7 +7701,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 {
    if (rootNav->section() == Entry::ENUM_SEC) {
       // non anonymous enumeration
-   
+
       rootNav->loadEntry(Doxy_Globals::g_storage);
       QSharedPointer<Entry> root = rootNav->entry();
 
@@ -7707,13 +7713,13 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
       bool isGlobal;
       bool isRelated = false;
-      
+
       int i;
 
       QString name;
       QString scope;
 
-      if ((i = root->name.lastIndexOf("::")) != -1) { 
+      if ((i = root->name.lastIndexOf("::")) != -1) {
          // scope is specified
 
          scope = root->name.left(i); // extract scope
@@ -7723,7 +7729,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
             nd = getResolvedNamespace(scope);
          }
 
-      } else { 
+      } else {
          // no scope, check the scope in which the docs where found
 
          if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && ! rootNav->parent()->name().isEmpty()) {
@@ -7754,39 +7760,39 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
          }
       }
 
-      if (cd && ! name.isEmpty()) { 
-         // found an enum inside a compound        
+      if (cd && ! name.isEmpty()) {
+         // found an enum inside a compound
 
          fd   = QSharedPointer<FileDef>();
          mnsd = Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') { 
-         // found enum inside namespace       
-  
+      } else if (nd && !nd->name().isEmpty() && nd->name().at(0) != '@') {
+         // found enum inside namespace
+
          mnsd = Doxy_Globals::functionNameSDict;
          isGlobal = true;
 
-      } else { 
+      } else {
          // found a global enum
 
-         fd = rootNav->fileDef();         
+         fd = rootNav->fileDef();
          mnsd = Doxy_Globals::functionNameSDict;
          isGlobal = true;
       }
 
-      if (! name.isEmpty()) {         
-         QSharedPointer<MemberName> mn = mnsd->find(name); 
+      if (! name.isEmpty()) {
+         QSharedPointer<MemberName> mn = mnsd->find(name);
 
          // for all members with this name
-         if (mn) {          
+         if (mn) {
 
             for (auto md : *mn) {
                // for each enum in this list
 
                if (md->isEnumerate()) {
-                  
-                  for (auto e : rootNav->children() ) {                     
+
+                  for (auto e : rootNav->children() ) {
                      SrcLangExt sle;
 
                      bool isStrong = root->m_traits.hasTrait(Entry::Virtue::Strong);
@@ -7805,7 +7811,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                         if (! scope.isEmpty() && rootNav->tagInfo()) {
                            qualifiedName = substitute(scope,"::",".") + "." + qualifiedName;
                         }
-                        
+
                         // TODO: add function to get canonical representation
 
                         if (substitute(md->qualifiedName(), "::", ".") == qualifiedName) {
@@ -7819,8 +7825,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                               fileName = rootNav->tagInfo()->tagName;
                            }
 
-                           QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, root->startLine, 
-                              root->startColumn, root->type, root->name, root->args, nullptr, Public, Normal, 
+                           QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, root->startLine,
+                              root->startColumn, root->type, root->name, root->args, nullptr, Public, Normal,
                               root->stat, Member, MemberType_EnumValue, nullptr, nullptr);
 
                            if (md->getClassDef()) {
@@ -7865,8 +7871,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
                         e->releaseEntry();
 
-                     } else {                       
-                        // c++ 
+                     } else {
+                        // c++
 
                         QSharedPointer<MemberName> fmn;
                         MemberNameSDict *enumDict;
@@ -7877,23 +7883,23 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                            enumDict = mnsd;
                         }
 
-                        QString valueName = e->name();                          
+                        QString valueName = e->name();
 
-                        if (! valueName.isEmpty()) { 
+                        if (! valueName.isEmpty()) {
                            fmn = enumDict->find(valueName);
                         }
 
                         if (fmn) {
                            // get a list of members with the same name as the enum field
-                                                        
-                           for (auto fmd : *fmn) {   
-                              if (fmd->isEnumValue() && fmd->getOuterScope() == md->getOuterScope()) { 
+
+                           for (auto fmd : *fmn) {
+                              if (fmd->isEnumValue() && fmd->getOuterScope() == md->getOuterScope()) {
                                  // in same scope
-                                
+
                                  if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
                                     QSharedPointer<NamespaceDef> fnd = fmd->getNamespaceDef();
 
-                                    if (fnd == nd) { 
+                                    if (fnd == nd) {
                                        // enum value is inside a namespace
                                        md->insertEnumField(fmd);
                                        fmd->setEnumScope(md);
@@ -7902,7 +7908,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                                  } else if (isGlobal) {
                                     QSharedPointer<FileDef> ffd = fmd->getFileDef();
 
-                                    if (ffd == fd) { 
+                                    if (ffd == fd) {
                                        // enum value has file scope
                                        md->insertEnumField(fmd);
                                        fmd->setEnumScope(md);
@@ -7910,7 +7916,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
 
                                  } else if (isRelated && cd)  {
                                     // reparent enum value to match the enum's scope
-                              
+
                                     md->insertEnumField(fmd);          // add field def to list
                                     fmd->setEnumScope(md);             // cross ref with enum name
                                     fmd->setEnumClassScope(cd);        // cross ref with enum name
@@ -7921,9 +7927,9 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<EntryNav> rootNav)
                                  } else {
                                     QSharedPointer<ClassDef> fcd = fmd->getClassDef();
 
-                                    if (fcd == cd) { 
+                                    if (fcd == cd) {
                                        // enum value is inside a class
-                               
+
                                        md->insertEnumField(fmd);  // add field def to list
                                        fmd->setEnumScope(md);     // cross ref with enum name
                                     }
@@ -7960,13 +7966,13 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
       if ((i = root->name.lastIndexOf("::")) != -1) { // scope is specified as part of the name
          name  = root->name.right(root->name.length() - i - 2); // extract name
          scope = root->name.left(i); // extract scope
-        
-      } else { 
+
+      } else {
          // just the name
          name = root->name;
       }
 
-      if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && !rootNav->parent()->name().isEmpty()) { 
+      if (( rootNav->parent()->section() & Entry::SCOPE_MASK ) && !rootNav->parent()->name().isEmpty()) {
          // found enum docs inside a compound
          if (! scope.isEmpty()) {
             scope.prepend("::");
@@ -7980,12 +7986,12 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
       if (! name.isEmpty()) {
          bool found = false;
 
-         if (cd) {            
+         if (cd) {
             QString className = cd->name();
             QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(name);
 
-            if (mn) {             
-               for (auto md : *mn) {   
+            if (mn) {
+               for (auto md : *mn) {
                   if (found) {
                      break;
                   }
@@ -7994,13 +8000,13 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
 
                   if (cd && cd->name() == className && md->isEnumerate()) {
                      // documentation outside a compound overrides the documentation inside it
-                     
+
                      md->setDocumentation(root->doc, root->docFile, root->docLine);
                      md->setDocsForDefinition(! root->proto);
-                     
-                     // brief descriptions inside a compound override the documentation outside it                     
+
+                     // brief descriptions inside a compound override the documentation outside it
                      md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-                     
+
                      if (md->inbodyDocumentation().isEmpty() || ! rootNav->parent()->name().isEmpty()) {
                         md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                      }
@@ -8014,7 +8020,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
 
                      QSharedPointer<GroupDef> gd = md->getGroupDef();
 
-                     if (gd == 0 && ! root->groups->isEmpty()) { 
+                     if (gd == 0 && ! root->groups->isEmpty()) {
                         // member not grouped but out-of-line documentation is
                         addMemberToGroups(root, md);
                      }
@@ -8023,20 +8029,20 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<EntryNav> rootNav)
                   }
                }
             } else {
-               
+
             }
 
-         } else { 
-            // enum outside class, most likley in a namaspace            
+         } else {
+            // enum outside class, most likley in a namaspace
 
             QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(name);
 
-            if (mn) {              
+            if (mn) {
                for (auto md : *mn) {
 
-                  if (found) {    
-                     break; 
-                  }    
+                  if (found) {
+                     break;
+                  }
 
                   // ensure our MemberDef is the correct namespce
                   QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
@@ -8120,17 +8126,17 @@ void Doxy_Work::findDocumentedEnumValues()
 void Doxy_Work::addMembersToIndex()
 {
    // for each member name
-   for (auto mn : *Doxy_Globals::memberNameSDict) { 
-      
+   for (auto mn : *Doxy_Globals::memberNameSDict) {
+
       // for each member definition
       for (auto md : *mn) {
          addClassMemberNameToIndex(md);
       }
    }
 
-   // for each member name 
+   // for each member name
    for (auto mn : *Doxy_Globals::functionNameSDict) {
-     
+
       // for each member definition
       for (auto md : *mn) {
          if (md->getNamespaceDef()) {
@@ -8148,37 +8154,37 @@ void Doxy_Work::addMembersToIndex()
 
 void Doxy_Work::computeMemberRelations()
 {
-   for (auto mn : *Doxy_Globals::memberNameSDict) { 
+   for (auto mn : *Doxy_Globals::memberNameSDict) {
       // for each member name
-       
-     for (auto md : *mn) { 
+
+     for (auto md : *mn) {
          // for each member with a specific name
 
-         for (auto bmd : *mn) { 
+         for (auto bmd : *mn) {
             // for each other member with the same name
             QSharedPointer<ClassDef> mcd  = md->getClassDef();
 
             if (mcd && mcd->baseClasses()) {
                QSharedPointer<ClassDef> bmcd = bmd->getClassDef();
-             
+
                if (md != bmd && bmcd && mcd && bmcd != mcd &&
                      (bmd->virtualness() != Normal || bmcd->compoundType() == ClassDef::Interface ||
                       bmcd->compoundType() == ClassDef::Protocol) &&
                       md->isFunction() && mcd->isLinkable() && bmcd->isLinkable() && mcd->isBaseClass(bmcd, true)) {
-                 
+
                   ArgumentList *bmdAl = bmd->argumentList();
                   ArgumentList *mdAl =  md->argumentList();
-                 
+
                   if (matchArguments2(bmd->getOuterScope(), bmd->getFileDef(), bmdAl,
                                      md->getOuterScope(), md->getFileDef(), mdAl,true)) {
 
                      QSharedPointer<MemberDef> rmd;
-                     if ((rmd = md->reimplements()) == 0 || 
+                     if ((rmd = md->reimplements()) == 0 ||
                           minClassDistance(mcd, bmcd) < minClassDistance(mcd, rmd->getClassDef())) {
 
                         md->setReimplements(bmd);
                      }
-                    
+
                      bmd->insertReimplementedBy(md);
                   }
                }
@@ -8189,12 +8195,12 @@ void Doxy_Work::computeMemberRelations()
 }
 
 void Doxy_Work::createTemplateInstanceMembers()
-{   
+{
    // for each class
-   for (auto cd : *Doxy_Globals::classSDict) {       
+   for (auto cd : *Doxy_Globals::classSDict) {
       QHash<QString, QSharedPointer<ClassDef>> *templInstances = cd->getTemplateInstances();
 
-      if (templInstances) {             
+      if (templInstances) {
          // for each instance of the template
 
          for (auto iter = templInstances->begin(); iter != templInstances->end(); ++iter) {
@@ -8205,17 +8211,17 @@ void Doxy_Work::createTemplateInstanceMembers()
 }
 
 void Doxy_Work::mergeCategories()
-{   
-   // merge members of categories into the class they extends   
-   for (auto cd : *Doxy_Globals::classSDict) { 
+{
+   // merge members of categories into the class they extends
+   for (auto cd : *Doxy_Globals::classSDict) {
       int i = cd->name().indexOf('(');
 
-      if (i != -1) { 
+      if (i != -1) {
          // it is an Objective-C category
          QString baseName = cd->name().left(i);
          QSharedPointer<ClassDef> baseClass = Doxy_Globals::classSDict->find(baseName);
 
-         if (baseClass) {          
+         if (baseClass) {
             baseClass->mergeCategory(cd);
          }
       }
@@ -8225,10 +8231,10 @@ void Doxy_Work::mergeCategories()
 // builds the list of all members for each class
 void Doxy_Work::buildCompleteMemberLists()
 {
-   // merge the member list of base classes into the inherited classes   
-   for (auto cd : *Doxy_Globals::classSDict) { 
+   // merge the member list of base classes into the inherited classes
+   for (auto cd : *Doxy_Globals::classSDict) {
 
-      if (cd->subClasses() == 0 && cd->baseClasses()) {         
+      if (cd->subClasses() == 0 && cd->baseClasses()) {
          cd->mergeMembers();
       }
    }
@@ -8239,10 +8245,10 @@ void Doxy_Work::generateSourceCode()
    if (Doxy_Globals::inputNameList->count() > 0) {
       static bool clangParsing = Config::getBool("clang-parsing");
 
-      if (clangParsing) {     
-         QSet<QString> processedFiles;         
+      if (clangParsing) {
+         QSet<QString> processedFiles;
          QSet<QString> filesToProcess;
-                    
+
          for (auto fn : *Doxy_Globals::inputNameList) {
             for (auto fd : *fn) {
                filesToProcess.insert(fd->getFilePath());
@@ -8250,8 +8256,8 @@ void Doxy_Work::generateSourceCode()
          }
 
          // process source files (and their include dependencies)
-         for (auto fn : *Doxy_Globals::inputNameList) {   
-           
+         for (auto fn : *Doxy_Globals::inputNameList) {
+
             for (auto fd : *fn) {
                if (fd->isSource() && ! fd->isReference()) {
                   QStringList includeFiles;
@@ -8259,14 +8265,14 @@ void Doxy_Work::generateSourceCode()
                   fd->getAllIncludeFilesRecursively(includeFiles);
                   fd->startParsing();
 
-                  if (fd->generateSourceFile()) { 
+                  if (fd->generateSourceFile()) {
                      // source needs to be shown in the output
 
                      msg("Generating code for file %s\n", csPrintable(fd->docName()));
                      fd->writeSource(*Doxy_Globals::g_outputList, false, includeFiles);
 
                   } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded) {
-                     // parse the source even if not shown                 
+                     // parse the source even if not shown
 
                      msg("Parsing code for file %s\n", csPrintable(fd->docName()));
                      fd->parseSource(false, includeFiles);
@@ -8282,14 +8288,14 @@ void Doxy_Work::generateSourceCode()
 
                         if (ifd && ! ifd->isReference()) {
 
-                           if (ifd->generateSourceFile()) { 
+                           if (ifd->generateSourceFile()) {
                               // source needs to be shown in the output
 
                               msg("Generating code for file %s\n", csPrintable(ifd->docName()));
                               ifd->writeSource(*Doxy_Globals::g_outputList, true, moreFiles);
 
                            } else if (Doxy_Globals::parseSourcesNeeded)  {
-                              // need to parse the sources even if we do not show it                           
+                              // need to parse the sources even if we do not show it
 
                               msg("Parsing code for file %s\n", csPrintable(ifd->docName()));
                               ifd->parseSource(true, moreFiles);
@@ -8297,7 +8303,7 @@ void Doxy_Work::generateSourceCode()
 
                            processedFiles.insert(incFile);
                         }
-                     }                     
+                     }
                   }
 
                   fd->finishParsing();
@@ -8307,15 +8313,15 @@ void Doxy_Work::generateSourceCode()
          }
 
          // process remaining files
-         for (auto fn : *Doxy_Globals::inputNameList) {         
+         for (auto fn : *Doxy_Globals::inputNameList) {
 
             for (auto fd : *fn) {
-               if (! processedFiles.contains(fd->getFilePath())) { 
-                 
+               if (! processedFiles.contains(fd->getFilePath())) {
+
                   QStringList includeFiles;
                   fd->startParsing();
 
-                  if (fd->generateSourceFile()) { 
+                  if (fd->generateSourceFile()) {
                      // source needs to be shown in the output
 
                      msg("Generating code for file %s\n", csPrintable(fd->docName()));
@@ -8323,7 +8329,7 @@ void Doxy_Work::generateSourceCode()
 
                   } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded)  {
                      // needed to parse the source even if we do not show it
-                  
+
                      msg("Parsing code for file %s\n", csPrintable(fd->docName()));
                      fd->parseSource(false, includeFiles);
                   }
@@ -8334,7 +8340,7 @@ void Doxy_Work::generateSourceCode()
          }
 
       } else {
-         // use lex and not clang      
+         // use lex and not clang
 
          for (auto fn : *Doxy_Globals::inputNameList) {
 
@@ -8350,7 +8356,7 @@ void Doxy_Work::generateSourceCode()
 
                } else if (! fd->isReference() && Doxy_Globals::parseSourcesNeeded) {
                   // parse the sources even if we do not show it
-            
+
                   msg("Parsing code for file %s\n",  csPrintable(fd->docName()));
                   fd->parseSource(false, includeFiles);
                }
@@ -8369,7 +8375,7 @@ void Doxy_Work::generateFileDocs()
    }
 
    if (Doxy_Globals::inputNameList->count() > 0) {
-     
+
       for (auto fn : *Doxy_Globals::inputNameList) {
 
          for (auto fd : *fn) {
@@ -8417,8 +8423,8 @@ void Doxy_Work::addSourceReferences()
       }
    }
 
-   for (auto mn : *Doxy_Globals::functionNameSDict) {   
-    
+   for (auto mn : *Doxy_Globals::functionNameSDict) {
+
       for (auto md : *mn) {
          QSharedPointer<FileDef> fd = md->getBodyDef();
 
@@ -8435,14 +8441,14 @@ void Doxy_Work::addSourceReferences()
 void Doxy_Work::generateClassList(ClassSDict &classSDict)
 {
    for (auto cd : classSDict) {
-            
+
       if (cd && (cd->getOuterScope() == 0 || // <-- should not happen, but can if we read an old tag file
                  cd->getOuterScope() == Doxy_Globals::globalScope) && ! cd->isHidden() && ! cd->isEmbeddedInOuterScope()) {
 
          // skip external references, anonymous compounds and template instances
 
          if ( cd->isLinkableInProject() && cd->templateMaster() == 0) {
-            msg("Generating docs for compound %s\n", csPrintable(cd->name()));    
+            msg("Generating docs for compound %s\n", csPrintable(cd->name()));
 
             cd->writeDocumentation(*Doxy_Globals::g_outputList);
             cd->writeMemberList(*Doxy_Globals::g_outputList);
@@ -8471,11 +8477,11 @@ void Doxy_Work::inheritDocumentation()
             QSharedPointer<MemberDef> bmd = md->reimplements();
 
             while (bmd && bmd->documentation().isEmpty() && bmd->briefDescription().isEmpty() ) {
-               // search up the inheritance tree for a documentation member             
+               // search up the inheritance tree for a documentation member
                bmd = bmd->reimplements();
             }
 
-            if (bmd) { 
+            if (bmd) {
                // copy the documentation from the reimplemented member
 
                md->setInheritsDocsFrom(bmd);
@@ -8492,8 +8498,8 @@ void Doxy_Work::inheritDocumentation()
 
 void Doxy_Work::combineUsingRelations()
 {
-   // for each file 
-   for (auto &fn : *Doxy_Globals::inputNameList) {  
+   // for each file
+   for (auto &fn : *Doxy_Globals::inputNameList) {
       for (auto &fd : *fn) {
          fd->visited = false;
       }
@@ -8505,7 +8511,7 @@ void Doxy_Work::combineUsingRelations()
       }
    }
 
-   // for each namespace  
+   // for each namespace
    for (auto nd : *Doxy_Globals::namespaceSDict) {
       nd->visited = false;
    }
@@ -8656,22 +8662,22 @@ void Doxy_Work::flushUnresolvedRelations()
    // class A { class I {} };
    // class B : public A {};
    // class C : public B::I {};
-   
+
    Doxy_Globals::lookupCache->clear();
- 
+
    for (auto fn : *Doxy_Globals::functionNameSDict) {
       // for each global function name
-    
+
       for (auto fmd : *fn) {
          // for each function with that name
          fmd->invalidateCachedArgumentTypes();
       }
    }
-  
-   for (auto fn : *Doxy_Globals::memberNameSDict) { 
+
+   for (auto fn : *Doxy_Globals::memberNameSDict) {
       // for each class method name
-     
-      for (auto fmd : *fn) { 
+
+      for (auto fmd : *fn) {
          // for each function with that name
          fmd->invalidateCachedArgumentTypes();
       }
@@ -8686,24 +8692,24 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
       rootNav->loadEntry(Doxy_Globals::g_storage);
       QSharedPointer<Entry> root = rootNav->entry();
 
-      if (rootNav->tagInfo() && ! root->name.isEmpty()) { 
+      if (rootNav->tagInfo() && ! root->name.isEmpty()) {
 
          // define read from a tag file
-         QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(rootNav->tagInfo()->tagName, 
+         QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(rootNav->tagInfo()->tagName,
                   1, 1, "#define", root->name, root->args, nullptr,
                   Public, Normal, false, Member, MemberType_Define, nullptr, nullptr);
 
          md->setTagInfo(rootNav->tagInfo());
-         md->setLanguage(root->lang);         
+         md->setLanguage(root->lang);
          md->setFileDef(rootNav->parent()->fileDef());
-       
+
          QSharedPointer<MemberName> mn;
 
          if ((mn = Doxy_Globals::functionNameSDict->find(root->name))) {
             mn->append(md);
 
          } else {
-            mn = QMakeShared<MemberName>(root->name); 
+            mn = QMakeShared<MemberName>(root->name);
 
             mn->append(md);
             Doxy_Globals::functionNameSDict->insert(root->name, mn);
@@ -8712,16 +8718,16 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
 
       QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(root->name);
 
-      if (mn) {    
+      if (mn) {
          int count = 0;
-   
+
          for (auto md : *mn) {
             if (md->memberType() == MemberType_Define) {
                count++;
             }
          }
 
-         if (count == 1) {          
+         if (count == 1) {
             for (auto md : *mn) {
                if (md->memberType() == MemberType_Define) {
                   md->setDocumentation(root->doc, root->docFile, root->docLine);
@@ -8749,7 +8755,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
          } else if (count > 1 && (! root->doc.isEmpty() || !root->brief.isEmpty() || root->bodyLine != -1))
             // multiple defines don't know where to add docs
             // but maybe they are in different files together with their documentation
-                            
+
             for (auto md : *mn) {
 
                if (md->memberType() == MemberType_Define) {
@@ -8757,11 +8763,11 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
 
                   if (fd && fd->getFilePath() == root->fileName) {
                      // doc and define in the same file assume they belong together.
-                                       
+
                      md->setDocumentation(root->doc, root->docFile, root->docLine);
-                     md->setDocsForDefinition(!root->proto);                                          
+                     md->setDocsForDefinition(!root->proto);
                      md->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-                     
+
                      if (md->inbodyDocumentation().isEmpty()) {
                         md->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine);
                      }
@@ -8780,12 +8786,12 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<EntryNav> rootNav)
                   }
                }
             }
-           
+
       } else if (!root->doc.isEmpty() || !root->brief.isEmpty()) { // define not found
          static bool preEnabled = Config::getBool("enable-preprocessing");
 
          if (preEnabled) {
-            warn(root->fileName, root->startLine, "documentation for unknown define %s found.\n",  
+            warn(root->fileName, root->startLine, "documentation for unknown define %s found.\n",
                   csPrintable(root->name) );
 
          } else {
@@ -8808,7 +8814,7 @@ void Doxy_Work::findDirDocumentation(QSharedPointer<EntryNav> rootNav)
 
       QString normalizedName = root->name;
       normalizedName = substitute(normalizedName, "\\", "/");
-     
+
       if (root->docFile == normalizedName) { // current dir?
          int lastSlashPos = normalizedName.lastIndexOf('/');
 
@@ -8824,13 +8830,13 @@ void Doxy_Work::findDirDocumentation(QSharedPointer<EntryNav> rootNav)
       QSharedPointer<DirDef> matchingDir;
 
       for (auto dir : Doxy_Globals::directories) {
-  
+
          if (dir->name().right(normalizedName.length()) == normalizedName) {
             if (matchingDir) {
 
                warn(root->fileName, root->startLine, "\\dir command matches multiple directories.\n"
                     "  Applying the command for directory %s\n"
-                    "  Ignoring the command for directory %s\n", csPrintable(matchingDir->name()), 
+                    "  Ignoring the command for directory %s\n", csPrintable(matchingDir->name()),
                     csPrintable(dir->name()) );
 
             } else {
@@ -8840,7 +8846,7 @@ void Doxy_Work::findDirDocumentation(QSharedPointer<EntryNav> rootNav)
          }
       }
 
-      if (matchingDir) {         
+      if (matchingDir) {
          matchingDir->setBriefDescription(root->brief, root->briefFile, root->briefLine);
          matchingDir->setDocumentation(root->doc, root->docFile, root->docLine);
          matchingDir->setRefItems(root->sli);
@@ -8882,17 +8888,17 @@ void Doxy_Work::buildPageList(QSharedPointer<EntryNav> rootNav)
       if (title.isEmpty()) {
          title = theTranslator->trMainPage();
       }
-      
+
       QString name = "index";
       addRefItem(root->sli, name, "page", name, title, 0, QSharedPointer<Definition>());
 
-      rootNav->releaseEntry();  
-   } 
- 
+      rootNav->releaseEntry();
+   }
+
    // recursive call
-   for (auto item : rootNav->children() ) { 
-      buildPageList(item);   
-   }  
+   for (auto item : rootNav->children() ) {
+      buildPageList(item);
+   }
 }
 
 // search for \mainpage defined in this project
@@ -8910,7 +8916,7 @@ void Doxy_Work::findMainPage(QSharedPointer<EntryNav> rootNav)
          QString indexName = "index";
          Doxy_Globals::mainPage = QMakeShared<PageDef>(root->docFile, root->docLine,
                                          indexName, root->brief + root->doc + root->inbodyDocs, title);
-         
+
          Doxy_Globals::mainPage->setBriefDescription(root->brief, root->briefFile, root->briefLine);
          Doxy_Globals::mainPage->setFileName(indexName, true);
          Doxy_Globals::mainPage->setShowToc(root->stat);
@@ -8922,17 +8928,17 @@ void Doxy_Work::findMainPage(QSharedPointer<EntryNav> rootNav)
          if (si) {
             if (si->lineNr != -1) {
                warn(root->fileName, root->startLine, "multiple use of section label '%s' for main page, "
-                  "(first occurrence: %s, line %d)", csPrintable(Doxy_Globals::mainPage->name()), 
+                  "(first occurrence: %s, line %d)", csPrintable(Doxy_Globals::mainPage->name()),
                    csPrintable(si->fileName), si->lineNr);
 
             } else {
-               warn(root->fileName, root->startLine, "multiple use of section label '%s' for main page, (first occurrence: %s)", 
+               warn(root->fileName, root->startLine, "multiple use of section label '%s' for main page, (first occurrence: %s)",
                     csPrintable(Doxy_Globals::mainPage->name()), csPrintable(si->fileName));
             }
 
          } else {
             // a page name is a label as well, but should not be double either
-            si = QMakeShared<SectionInfo>(indexName, root->startLine, Doxy_Globals::mainPage->name(), 
+            si = QMakeShared<SectionInfo>(indexName, root->startLine, Doxy_Globals::mainPage->name(),
                               Doxy_Globals::mainPage->title(), SectionInfo::Page, 0);
 
             Doxy_Globals::sectionDict->insert(indexName, si);
@@ -8943,7 +8949,7 @@ void Doxy_Work::findMainPage(QSharedPointer<EntryNav> rootNav)
          QSharedPointer<Entry> root = rootNav->entry();
 
          warn(root->fileName, root->startLine, "found more than one \\mainpage comment block "
-            "(first occurrence: %s, line %d), Skip current block", 
+            "(first occurrence: %s, line %d), Skip current block",
             csPrintable(Doxy_Globals::mainPage->docFile()), Doxy_Globals::mainPage->docLine());
       }
 
@@ -8969,7 +8975,7 @@ void Doxy_Work::findMainPageTagFiles(QSharedPointer<EntryNav> rootNav)
 
 void Doxy_Work::computePageRelations(QSharedPointer<EntryNav> rootNav)
 {
-   if ((rootNav->section() == Entry::PAGEDOC_SEC || rootNav->section() == Entry::MAINPAGEDOC_SEC) 
+   if ((rootNav->section() == Entry::PAGEDOC_SEC || rootNav->section() == Entry::MAINPAGEDOC_SEC)
                && !rootNav->name().isEmpty() ) {
 
       rootNav->loadEntry(Doxy_Globals::g_storage);
@@ -8977,13 +8983,13 @@ void Doxy_Work::computePageRelations(QSharedPointer<EntryNav> rootNav)
 
       QSharedPointer<PageDef> pd = root->section == Entry::PAGEDOC_SEC ? Doxy_Globals::pageSDict->find(root->name) : Doxy_Globals::mainPage;
 
-      if (pd) {       
+      if (pd) {
 
          for (auto bi : root->extends) {
             QSharedPointer<PageDef> subPd = Doxy_Globals::pageSDict->find(bi.name);
 
             if (subPd) {
-               pd->addInnerCompound(subPd);              
+               pd->addInnerCompound(subPd);
             }
          }
       }
@@ -8995,15 +9001,15 @@ void Doxy_Work::computePageRelations(QSharedPointer<EntryNav> rootNav)
 }
 
 void Doxy_Work::checkPageRelations()
-{  
+{
    for (auto pd : *Doxy_Globals::pageSDict) {
       QSharedPointer<Definition> ppd = pd->getOuterScope();
 
       while (ppd) {
          if (ppd == pd) {
             err("Page defined at line %d of file %s with label %s is a subpage "
-                "of itself Remove this cyclic dependency.\n", pd->docLine(), 
-                csPrintable(pd->docFile()), csPrintable(pd->name())); 
+                "of itself Remove this cyclic dependency.\n", pd->docLine(),
+                csPrintable(pd->docFile()), csPrintable(pd->name()));
 
             stopDoxyPress();
          }
@@ -9022,9 +9028,9 @@ void Doxy_Work::resolveUserReferences()
       // different files, so the resulting section's all have the wrong file
       // name (not from the todo/test/bug/deprecated list, but from the file in
       // which they are defined). We correct this here by looking at the generated section labels
-    
+
       for (auto &rl : *Doxy_Globals::xrefLists) {
-         QString label = "_" + rl.listName(); 
+         QString label = "_" + rl.listName();
 
          // "_todo", "_test", ...
 
@@ -9035,7 +9041,7 @@ void Doxy_Work::resolveUserReferences()
             break;
          }
       }
-      
+
       if (! si->generated) {
          // if this section is in a page and the page is in a group, then we
          // have to adjust the link file name to point to the group.
@@ -9059,19 +9065,19 @@ void Doxy_Work::resolveUserReferences()
 
             } else {
                //  si->fileName=si->definition->getOutputFileBase();
-               
+
             }
          }
-      }     
+      }
    }
 }
 
 // generate all separate documentation pages
 void Doxy_Work::generatePageDocs()
-{   
+{
    if (Doxy_Globals::documentedPages == 0) {
       return;
-   }  
+   }
 
    for (auto pd : *Doxy_Globals::pageSDict) {
 
@@ -9120,19 +9126,19 @@ void printNavTree(QSharedPointer<EntryNav> rootNav, int indent)
    indentStr.fill(' ', indent);
 
    msg("%s%s (section = 0x%x)\n", indentStr.isEmpty() ? "" : csPrintable(indentStr),
-       rootNav->name().isEmpty() ? "<empty>" : csPrintable(rootNav->name()), 
+       rootNav->name().isEmpty() ? "<empty>" : csPrintable(rootNav->name()),
        rootNav->section() );
-  
+
    for (auto e : rootNav->children()) {
       printNavTree(e, indent + 2);
-   }   
+   }
 }
 
 // generate the example documentation
 void Doxy_Work::generateExampleDocs()
 {
    Doxy_Globals::g_outputList->disable(OutputGenerator::Man);
-  
+
    for (auto pd : *Doxy_Globals::exampleSDict) {
       msg("Generating docs for example %s\n", csPrintable(pd->name()) );
       resetCCodeParserState();
@@ -9157,7 +9163,7 @@ void Doxy_Work::generateExampleDocs()
 
 // generate module pages
 void Doxy_Work::generateGroupDocs()
-{ 
+{
    for (auto gd : *Doxy_Globals::groupSDict) {
       if (! gd->isReference()) {
          msg("Generating docs for group %s\n", csPrintable(gd->name()) );
@@ -9174,7 +9180,7 @@ void Doxy_Work::generateGroupDocs()
 //    PackageSDict::Iterator pdi(Doxy_Globals::packageDict);
 //    QSharedPointer<PackageDef pd;
 //
-//    for (pdi.toFirst();(pd=pdi.current());++pdi) //    
+//    for (pdi.toFirst();(pd=pdi.current());++pdi) //
 //       pd->writeDocumentation(*g_outputList);
 //    }
 //  }
@@ -9192,14 +9198,14 @@ void Doxy_Work::generateNamespaceDocs()
          nd->writeDocumentation(*Doxy_Globals::g_outputList);
       }
 
-      // for each class in the namespace   
+      // for each class in the namespace
       for (auto cd : *nd->getClassSDict()) {
 
          if ( ( cd->isLinkableInProject() && cd->templateMaster() == 0) && ! cd->isHidden() && !cd->isEmbeddedInOuterScope() ) {
               // skip external references, anonymous compounds and
-              // template instances and nested classes             
-         
-            msg("Generating docs for namespace compounds %s\n", csPrintable(cd->name()));  
+              // template instances and nested classes
+
+            msg("Generating docs for namespace compounds %s\n", csPrintable(cd->name()));
 
             cd->writeDocumentation(*Doxy_Globals::g_outputList);
             cd->writeMemberList(*Doxy_Globals::g_outputList);
@@ -9240,8 +9246,8 @@ void Doxy_Work::copyStyleSheet()
 
     static const QStringList htmlStyleSheet = Config::getList("html-stylesheets");
 
-   for (auto fileName : htmlStyleSheet) {             
-      
+   for (auto fileName : htmlStyleSheet) {
+
       if (! fileName.isEmpty()) {
          QFileInfo fi(configDir, fileName);
 
@@ -9250,8 +9256,8 @@ void Doxy_Work::copyStyleSheet()
 
          } else if (fi.fileName() == "doxypress.css" || fi.fileName() == "tabs.css" || fi.fileName() == "navtree.css") {
             err("Style sheet %s specified by 'HTML STYLESHEETS' is using the built in stylesheet name. Please use a "
-               "different file name\n", csPrintable(fileName));      
-            
+               "different file name\n", csPrintable(fileName));
+
          } else {
             QString destFileName = outputDir + fi.fileName();
             copyFile(fi.absoluteFilePath(), destFileName);
@@ -9261,11 +9267,11 @@ void Doxy_Work::copyStyleSheet()
 }
 
 void Doxy_Work::copyLatexStyleSheet()
-{  
+{
    static const QDir configDir              = Config::getConfigDir();
    static const QString outputDir           = Config::getString("latex-output") + "/";
    static const QStringList latexStyleSheet = Config::getList("latex-stylesheets");
-  
+
    for (auto fileName : latexStyleSheet) {
 
       if (! fileName.isEmpty()) {
@@ -9274,13 +9280,13 @@ void Doxy_Work::copyLatexStyleSheet()
          if (! fi.exists()) {
             err("Stylesheet '%s' specified in 'LATEX STYLESHEETS' does not exist\n", csPrintable(fileName));
 
-         } else {           
+         } else {
             QString destFileName = outputDir + fi.fileName();
 
             if (! checkExtension(fi.fileName(), Doxy_Globals::latexStyleExtension)) {
                destFileName += Doxy_Globals::latexStyleExtension;
             }
-           
+
             copyFile(fi.absoluteFilePath(), destFileName);
          }
       }
@@ -9296,9 +9302,9 @@ void Doxy_Work::copyLogo(const QString &outputType)
       QFileInfo fi(configDir, projectLogo);
 
       if (! fi.exists()) {
-         err("Project logo file '%s' does not exist\n", csPrintable(projectLogo));        
+         err("Project logo file '%s' does not exist\n", csPrintable(projectLogo));
 
-      } else {       
+      } else {
          QString destFileName = outputType + "/" + fi.fileName();
          copyFile(fi.absoluteFilePath(), destFileName);
 
@@ -9308,22 +9314,22 @@ void Doxy_Work::copyLogo(const QString &outputType)
 }
 
 void Doxy_Work::copyExtraFiles(const QString &outputType)
-{  
+{
    const QDir configDir = Config::getConfigDir();
 
    QString outputDir;
    QStringList extraFiles;
 
-   if (outputType == "html") { 
-      outputDir  = Config::getString("html-output") + "/";     
+   if (outputType == "html") {
+      outputDir  = Config::getString("html-output") + "/";
       extraFiles = Config::getList("html-extra-files");
 
    } else {
-      outputDir  = Config::getString("latex-output") + "/";     
-      extraFiles = Config::getList("latex-extra-files");   
+      outputDir  = Config::getString("latex-output") + "/";
+      extraFiles = Config::getList("latex-extra-files");
    }
-   
-   for (auto fileName : extraFiles) {    
+
+   for (auto fileName : extraFiles) {
 
       if (! fileName.isEmpty()) {
          QFileInfo fi(configDir, fileName);
@@ -9337,7 +9343,7 @@ void Doxy_Work::copyExtraFiles(const QString &outputType)
             }
 
          } else {
-            QString destFileName = outputDir + fi.fileName();          
+            QString destFileName = outputDir + fi.fileName();
             copyFile(fi.absoluteFilePath(), destFileName);
 
             Doxy_Globals::indexList->addImageFile(fi.fileName());
@@ -9354,7 +9360,7 @@ static ParserInterface *getParserForFile(const QString &fn)
    int sep = fileName.lastIndexOf('/');
    int ei  = fileName.lastIndexOf('.');
 
-   if (ei != -1 && (sep == -1 || ei > sep)) { 
+   if (ei != -1 && (sep == -1 || ei > sep)) {
       // matches dir/file.ext but not dir.1/file
       extension = fileName.right(fileName.length() - ei);
 
@@ -9365,11 +9371,11 @@ static ParserInterface *getParserForFile(const QString &fn)
    return Doxy_Globals::parserManager->getParser(extension);
 }
 
-void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav, 
+void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav,
                   QSharedPointer<FileDef> fd, QString fileName, enum ParserMode mode, QStringList &includedFiles)
-{   
+{
    static bool clangParsing = Config::getBool("clang-parsing");
-          
+
    QString extension;
    int ei = fileName.lastIndexOf('.');
 
@@ -9378,41 +9384,41 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    } else {
       extension = ".no_extension";
    }
- 
+
    QFileInfo fi(fileName);
    QString fileContents;
 
    // broom - not completed if clangParsing, do not preprocess
 
-   if (Config::getBool("enable-preprocessing") && parser->needsPreprocessing(extension)) {      
+   if (Config::getBool("enable-preprocessing") && parser->needsPreprocessing(extension)) {
       msg("Processing %s\n", csPrintable(fileName));
 
-      fileContents = readInputFile(fileName); 
+      fileContents = readInputFile(fileName);
       fileContents = preprocessFile(fileName, fileContents);
 
-   } else { 
+   } else {
       // no preprocessing
       msg("Reading %s\n", csPrintable(fileName));
       fileContents = readInputFile(fileName);
- 
+
    }
 
    if (! fileContents.endsWith("\n")) {
       // add extra newline to help parser
-      fileContents += '\n'; 
+      fileContents += '\n';
    }
-   
+
    // convert multi-line C++ comments to C style comments
    QString convBuf = convertCppComments(fileContents, fileName);
-   auto srcLang    = fd->getLanguage(); 
+   auto srcLang    = fd->getLanguage();
 
-   if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {   
+   if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
       fd->getAllIncludeFilesRecursively(includedFiles);
-      
-      // use clang for parsing  
+
+      // use clang for parsing
       parser->parseInput(fileName, convBuf, root, mode, includedFiles, true);
 
-   } else { 
+   } else {
       // use lex parser
       parser->parseInput(fileName, convBuf, root, mode, includedFiles, false);
 
@@ -9425,32 +9431,32 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
 // parse the list of input files
 void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> rootNav)
 {
-   // user specified 
-   static bool clangParsing = Config::getBool("clang-parsing"); 
- 
-   if (clangParsing) {   
-      QSet<QString> processedFiles;      
+   // user specified
+   static bool clangParsing = Config::getBool("clang-parsing");
+
+   if (clangParsing) {
+      QSet<QString> processedFiles;
       QSet<QString> filesToProcess;
-      
-      for (auto fName : Doxy_Globals::g_inputFiles) { 
+
+      for (auto fName : Doxy_Globals::g_inputFiles) {
          filesToProcess.insert(fName);
       }
 
-      // process source files and their include dependencies     
-      for (auto fName : Doxy_Globals::g_inputFiles) { 
+      // process source files and their include dependencies
+      for (auto fName : Doxy_Globals::g_inputFiles) {
          bool ambig;
 
          QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, fName, ambig);
          assert(fd != 0);
 
-         if (fd->isSource() && ! fd->isReference()) {             
+         if (fd->isSource() && ! fd->isReference()) {
             QStringList includedFiles;
 
             auto srcLang = fd->getLanguage();
 
-            ParserInterface *parser = getParserForFile(fName);           
+            ParserInterface *parser = getParserForFile(fName);
             parseFile(parser, root, rootNav, fd, fName, ParserMode::SOURCE_FILE, includedFiles);
-           
+
             // process any include files in the the current source file
             for (auto file : includedFiles) {
 
@@ -9463,14 +9469,14 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
 
                   if (ifd && ! ifd->isReference()) {
                      QStringList moreFiles;
-                     
+
                      parseFile(parser, root, rootNav, ifd, file, ParserMode::INCLUDE_FILE, moreFiles);
                      processedFiles.insert(file);
                   }
-               }               
-            }           
+               }
+            }
 
-            if (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC) {   
+            if (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC) {
                ClangParser::instance()->finish();
             }
 
@@ -9479,22 +9485,22 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
       }
 
       // process remaining files, treat as source files even if they are header files
-      for (auto fName : Doxy_Globals::g_inputFiles) { 
+      for (auto fName : Doxy_Globals::g_inputFiles) {
 
-         if (! processedFiles.contains(fName)) { 
+         if (! processedFiles.contains(fName)) {
             QStringList includedFiles;
-            
+
             bool ambig;
-            
+
             QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, fName, ambig);
             assert(fd != 0);
 
             auto srcLang = fd->getLanguage();
 
-            ParserInterface *parser = getParserForFile(fName);         
+            ParserInterface *parser = getParserForFile(fName);
             parseFile(parser, root, rootNav, fd, fName, ParserMode::SOURCE_FILE, includedFiles);
 
-            if (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC) {   
+            if (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC) {
                ClangParser::instance()->finish();
             }
 
@@ -9504,16 +9510,16 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root, QSharedPointer<EntryNav> 
 
    } else  {
       // use lex and not clang
-        
-      for (auto fName : Doxy_Globals::g_inputFiles) { 
+
+      for (auto fName : Doxy_Globals::g_inputFiles) {
          QStringList includedFiles;
 
-         bool ambig;         
+         bool ambig;
 
          QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, fName, ambig);
          assert(fd != nullptr);
 
-         ParserInterface *parser = getParserForFile(fName);        
+         ParserInterface *parser = getParserForFile(fName);
          parseFile(parser, root, rootNav, fd, fName, ParserMode::SOURCE_FILE, includedFiles);
       }
    }
@@ -9576,7 +9582,7 @@ QString  Doxy_Work::resolveSymlink(QString  path)
 
             if (known.contains(result)) {
                // recursive symlink
-               return QString();  
+               return QString();
             }
 
             known.insert(result);
@@ -9584,7 +9590,7 @@ QString  Doxy_Work::resolveSymlink(QString  path)
             if (isRelative) {
                sepPos = oldPos;
 
-            } else { 
+            } else {
                // link to absolute path
                sepPos    = 0;
                oldPrefix = "/";
@@ -9610,7 +9616,7 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const QString &tagLine)
 
    int eqPos = tagLine.indexOf('=');
 
-   if (eqPos != -1) { 
+   if (eqPos != -1) {
       // tag command contains a destination
       fileName = tagLine.left(eqPos).trimmed();
       destName = tagLine.right(tagLine.length() - eqPos - 1).trimmed();
@@ -9640,7 +9646,7 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const QString &tagLine)
 }
 
 QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName)
-{   
+{
    QString formatDirName = Config::getString(formatDirOption);
 
    if (formatDirName.isEmpty()) {
@@ -9652,8 +9658,8 @@ QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QStri
 
    QDir formatDir(formatDirName);
 
-   if (! formatDir.exists() && ! formatDir.mkdir(formatDirName)) {  
-      err("Unable to create output directory %s", csPrintable(formatDirName));  
+   if (! formatDir.exists() && ! formatDir.mkdir(formatDirName)) {
+      err("Unable to create output directory %s", csPrintable(formatDirName));
       stopDoxyPress();
    }
 
@@ -9710,49 +9716,49 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 
             if (excludeSymlink && cfi.isSymLink())  {
                continue;
-            }  
+            }
 
             if (cfi.isFile()) {
 
-               bool testA = (data.includePatternList.isEmpty() || patternMatch(cfi, data.includePatternList));                
+               bool testA = (data.includePatternList.isEmpty() || patternMatch(cfi, data.includePatternList));
                bool testB = (! patternMatch(cfi, data.excludePatternList));
-               
+
                if (testA && testB && ! data.killDict.contains(filePath) ) {
-                           
+
                   totalSize += cfi.size() + filePath.length() + 4;
                   QString name = cfi.fileName();
-      
+
                   if (data.isFnDict) {
                      QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path() + "/", name);
                      QSharedPointer<FileNameList> fn;
-      
+
                      if (! name.isEmpty() && (fn = data.fnDict[name])) {
                         fn->append(fd);
-      
+
                      } else {
                         fn = QMakeShared<FileNameList>(filePath, name);
                         fn->append(fd);
-      
+
                         if (data.isFnList) {
                            data.fnList.inSort(fn);
                         }
-      
+
                         data.fnDict.insert(name, fn);
                      }
-                  }                  
-      
-                  if (data.isResultList) {                
-                     data.resultList.append(filePath);                                
                   }
-      
-                  if (data.isPrepExclude) {      
+
+                  if (data.isResultList) {
+                     data.resultList.append(filePath);
+                  }
+
+                  if (data.isPrepExclude) {
                      data.prepExcludeSet.insert(filePath);
                   }
-      
-                  if (data.isKillDict) {         
-                     data.killDict.insert(filePath);                  
-                  }     
-               }            
+
+                  if (data.isKillDict) {
+                     data.killDict.insert(filePath);
+                  }
+               }
 
             } else if (cfi.isDir() && data.recursive) {
 
@@ -9762,38 +9768,38 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 
                if (patternMatch(cfi, data.excludePatternList) ) {
                   continue;
-               }   
+               }
 
                QFile tmp(filePath);
-               readDir(tmp, data);               
+               readDir(tmp, data);
             }
          }
       }
-   }   
+   }
 }
 
 // read a file or all files in a directory and append their contents to the
 // input string. The names of the files are appended to the `fiList' list.
 
 void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
-{   
+{
    if (fn.isEmpty()) {
       return;
-   } 
+   }
 
    // strip trailing slashes
    QString fileName = fn;
-  
+
    if (fileName.endsWith('/') || fileName.endsWith('\\')) {
       fileName = fileName.left(fileName.length() - 1);
    }
 
-   QFileInfo fi(fileName);                  
- 
+   QFileInfo fi(fileName);
+
    QString name     = fi.fileName();
    QString dirPath  = fi.absolutePath();
-   QString filePath = fi.absoluteFilePath(); 
-   
+   QString filePath = fi.absoluteFilePath();
+
    if (! data.excludeSet.contains(filePath)) {
 
       if (! fi.exists() || ! fi.isReadable()) {
@@ -9803,10 +9809,10 @@ void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
 
       } else if (! Config::getBool("exclude-symlinks") || ! fi.isSymLink()) {
 
-         if (fi.isFile()) {          
-            
+         if (fi.isFile()) {
+
             if (! data.killDict.contains(filePath)) {
-                            
+
                if (data.isFnDict) {
                   QSharedPointer<FileDef> fd = QMakeShared<FileDef>(dirPath + "/", name);
                   QSharedPointer<FileNameList> fn;
@@ -9826,27 +9832,27 @@ void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
                      data.fnDict.insert(name, fn);
                   }
                }
-                        
-               if (data.isResultList) {                
-                  data.resultList.append(filePath);                                
+
+               if (data.isResultList) {
+                  data.resultList.append(filePath);
                }
 
-               if (data.isPrepExclude) {      
+               if (data.isPrepExclude) {
                   data.prepExcludeSet.insert(filePath);
                }
 
-               if (data.isKillDict) {         
-                  data.killDict.insert(filePath);                  
-               }                        
+               if (data.isKillDict) {
+                  data.killDict.insert(filePath);
+               }
             }
 
-         } else if (fi.isDir()) { 
+         } else if (fi.isDir()) {
             // readable dir
             readDir(fi, data);
          }
       }
    }
-  
+
    return;
 }
 
@@ -9854,7 +9860,7 @@ void readFormulaRepository()
 {
    QFile f(Config::getString("html-output") + "/formula.repository");
 
-   if (f.open(QIODevice::ReadOnly)) { 
+   if (f.open(QIODevice::ReadOnly)) {
       // open repository
 
       msg("Reading formula repository\n");
@@ -9918,7 +9924,7 @@ void Doxy_Work::dumpGlossary()
          // list of phrases
 
          QSharedPointer<Definition> def = sharedFrom(item);
-         dumpPhrase(t, def);         
+         dumpPhrase(t, def);
       }
    }
 }
@@ -9926,13 +9932,13 @@ void Doxy_Work::dumpGlossary()
 // read the argument of option `c' from the comment argument list and
 // update the option index `optind'.
 int Doxy_Work::computeIdealCacheParam(uint v)
-{   
+{
    int r = 0;
 
    while (v != 0) {
       v >>= 1, r++;
    }
-  
+
    // convert to a valid cache size value
    return qMax(0, qMin(r - 16, 9));
 }
@@ -9981,15 +9987,15 @@ void Doxy_Work::writeTagFile()
 
    // for each file
    for (auto fn : *Doxy_Globals::inputNameList) {
-      for (auto fd : *fn) {       
+      for (auto fd : *fn) {
          if (fd->isLinkableInProject()) {
             fd->writeTagFile(tagFile);
-         }  
+         }
       }
    }
 
    // for each class
-   for (auto cd : *Doxy_Globals::classSDict) { 
+   for (auto cd : *Doxy_Globals::classSDict) {
       if (cd->isLinkableInProject()) {
          cd->writeTagFile(tagFile);
       }
@@ -10058,7 +10064,7 @@ QString Doxy_Work::getQchFileName()
    }
 
    if (! projectVersion.isEmpty()) {
-      projectVersion = "-" + projectVersion; 
+      projectVersion = "-" + projectVersion;
    }
 
    QString retval = "../qch/" + projectName + projectVersion + ".qch";
@@ -10067,11 +10073,11 @@ QString Doxy_Work::getQchFileName()
 }
 
 void searchInputFiles()
-{     
+{
    // gather names for all files in the include and example path
    QSet<QString> excludeSet;
 
-   // source   
+   // source
    Doxy_Globals::g_stats.begin("Searching for include files\n");
 
    const QStringList inputPatterns   = Config::getList("input-patterns");
@@ -10080,16 +10086,16 @@ void searchInputFiles()
    const QStringList excludePatterns = Config::getList("exclude-patterns");
 
    const QStringList includePath     = Config::getList("include-path");
-   QStringList includePatterns       = Config::getList("include-patterns");  
-       
+   QStringList includePatterns       = Config::getList("include-patterns");
+
    if (includePatterns.isEmpty()) {
       includePatterns = inputPatterns;
    }
 
-   for (auto fName : includePath) {    
+   for (auto fName : includePath) {
       ReadDirArgs data;
 
-      data.recursive          = inputRecursive;         
+      data.recursive          = inputRecursive;
       data.isFnDict           = true;
       data.fnDict             = *Doxy_Globals::includeNameDict;
       data.includePatternList = includePatterns;
@@ -10108,14 +10114,14 @@ void searchInputFiles()
    const QStringList examplePatterns = Config::getList("example-patterns");
    const bool exampleRecursive       = Config::getBool("example-recursive");
 
-   for (auto s : examplePath) {     
+   for (auto s : examplePath) {
       ReadDirArgs data;
 
       data.recursive          = exampleRecursive;
       data.isFnDict           = true;
       data.fnDict             = *Doxy_Globals::exampleNameDict;
       data.includePatternList = examplePatterns;
- 
+
       readFileOrDirectory(s, data);
 
       *Doxy_Globals::exampleNameDict = data.fnDict;
@@ -10187,7 +10193,7 @@ void searchInputFiles()
       data.recursive   = inputRecursive;
       data.isFnDict    = true;
       data.fnDict      = *Doxy_Globals::diaFileNameDict;
-    
+
       readFileOrDirectory(s, data);
       *Doxy_Globals::diaFileNameDict = data.fnDict;
    }
@@ -10195,9 +10201,9 @@ void searchInputFiles()
 
 
    Doxy_Globals::g_stats.begin("Searching for files to exclude\n");
-   const QStringList excludeFiles  = Config::getList("exclude-files");   
+   const QStringList excludeFiles  = Config::getList("exclude-files");
 
-   for (auto s : excludeFiles) {   
+   for (auto s : excludeFiles) {
       ReadDirArgs data;
 
       data.recursive          = inputRecursive;
@@ -10205,10 +10211,10 @@ void searchInputFiles()
       data.includePatternList = inputPatterns;
       data.isPrepExclude      = true;
       data.prepExcludeSet     = excludeSet;
-            
-      readFileOrDirectory(s, data);  
 
-      excludeSet = data.prepExcludeSet;  
+      readFileOrDirectory(s, data);
+
+      excludeSet = data.prepExcludeSet;
    }
    Doxy_Globals::g_stats.end();
 
@@ -10229,30 +10235,30 @@ void searchInputFiles()
             path = path.left(len - 1);
          }
 
-         ReadDirArgs data;       
+         ReadDirArgs data;
 
-         data.recursive          = inputRecursive;         
+         data.recursive          = inputRecursive;
          data.isFnList           = true;
          data.fnList             = *Doxy_Globals::inputNameList;
          data.isFnDict           = true;
-         data.fnDict             = *Doxy_Globals::inputNameDict;   
+         data.fnDict             = *Doxy_Globals::inputNameDict;
          data.includePatternList = inputPatterns;
          data.excludePatternList = excludePatterns;
          data.excludeSet         = excludeSet;
          data.isResultList       = true;
-         data.resultList         = Doxy_Globals::g_inputFiles;       
+         data.resultList         = Doxy_Globals::g_inputFiles;
          data.isKillDict         = true;
          data.killDict           = killDict;
          data.isPathSet          = true;
          data.pathSet            = Doxy_Globals::inputPaths;
 
-         readFileOrDirectory(path, data);              
+         readFileOrDirectory(path, data);
 
          *Doxy_Globals::inputNameList  = data.fnList;
-         *Doxy_Globals::inputNameDict  = data.fnDict; 
-         Doxy_Globals::g_inputFiles    = data.resultList;          
+         *Doxy_Globals::inputNameDict  = data.fnDict;
+         Doxy_Globals::g_inputFiles    = data.resultList;
          killDict                      = data.killDict;
-         Doxy_Globals::inputPaths      = data.pathSet;   
+         Doxy_Globals::inputPaths      = data.pathSet;
       }
    }
 
