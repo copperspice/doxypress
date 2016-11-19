@@ -3291,6 +3291,8 @@ case 106:
 YY_RULE_SETUP
 {
       // spaces
+      QString text = QString::fromUtf8(parse_py_YYtext);
+      current->initializer += text;
    }
 	YY_BREAK
 case 107:
@@ -3298,9 +3300,12 @@ YY_RULE_SETUP
 {
       // integer value
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      current->type = "int";
-      current->initializer += text;
-      BEGIN(VariableEnd);
+
+      if (current->type.isEmpty()) {
+         current->type = "int";
+      }
+
+      current->initializer += text;      
    }
 	YY_BREAK
 case 108:
@@ -3308,19 +3313,25 @@ YY_RULE_SETUP
 {
       // floating point value
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      current->type = "float";
+
+      if (current->type.isEmpty()) {
+         current->type = "float";
+      }
+
       current->initializer += text;
-      BEGIN(VariableEnd);
-            }
+   }
 	YY_BREAK
 case 109:
 YY_RULE_SETUP
 {
       // boolean value
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      current->type = "bool";
-      current->initializer += text;
-      BEGIN(VariableEnd);
+
+      if (current->type.isEmpty()) {
+         current->type = "bool";
+      }
+
+      current->initializer += text;      
    }
 	YY_BREAK
 case 110:
@@ -3328,10 +3339,14 @@ YY_RULE_SETUP
 {
       // string
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      current->type = "string";
+
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_copyString = &current->initializer;
-      g_stringContext=VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN( SingleQuoteString );
    }
 	YY_BREAK
@@ -3340,10 +3355,14 @@ YY_RULE_SETUP
 {
       // string
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      current->type = "string";
+
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_copyString    = &current->initializer;
-      g_stringContext = VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN( DoubleQuoteString );
    }
 	YY_BREAK
@@ -3352,11 +3371,15 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      current->type = "string";
+
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_doubleQuote   = true;
       g_copyString    = &current->initializer;
-      g_stringContext = VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN(TripleString);
    }
 	YY_BREAK
@@ -3365,11 +3388,15 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      current->type = "string";
+      
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_doubleQuote   = false;
       g_copyString    = &current->initializer;
-      g_stringContext = VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN(TripleString);
    }
 	YY_BREAK
@@ -3431,6 +3458,19 @@ case 118:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
+
+      // do something based on the type of the IDENTIFIER
+      if (current->type.isEmpty()) {
+       
+         for (auto child : current_root->children() )  {
+
+            if (child->name == text) {
+               current->type = child->type;
+               break;
+            }
+         }
+      }
+
       g_start_init = false;
       current->initializer += text;
    }

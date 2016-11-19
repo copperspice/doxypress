@@ -1305,7 +1305,7 @@ static void tcl_font_end()
    }
 }
 
-//! Codify 'str' with special font class 's'.
+// Codify 'str' with special font class 's'.
 static void tcl_codify(const QString &s, const QString &str)
 {
    if (! tcl.code || str.isEmpty() ) {

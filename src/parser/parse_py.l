@@ -1366,70 +1366,98 @@ STARTDOCSYMS      "##"
 
    {B}                {
       // spaces
+      QString text = QString::fromUtf8(yytext);
+      current->initializer += text;
    }
 
    {INTNUMBER}          {
       // integer value
       QString text  = QString::fromUtf8(yytext);
-      current->type = "int";
-      current->initializer += text;
-      BEGIN(VariableEnd);
+
+      if (current->type.isEmpty()) {
+         current->type = "int";
+      }
+
+      current->initializer += text;      
    }
 
    {FLOATNUMBER}      {
       // floating point value
       QString text  = QString::fromUtf8(yytext);
-      current->type = "float";
+
+      if (current->type.isEmpty()) {
+         current->type = "float";
+      }
+
       current->initializer += text;
-      BEGIN(VariableEnd);
-            }
+   }
+
    {BOOL}             {
       // boolean value
       QString text  = QString::fromUtf8(yytext);
-      current->type = "bool";
-      current->initializer += text;
-      BEGIN(VariableEnd);
+
+      if (current->type.isEmpty()) {
+         current->type = "bool";
+      }
+
+      current->initializer += text;      
    }
 
    {STRINGPREFIX}?"'" {
       // string
       QString text  = QString::fromUtf8(yytext);
-      current->type = "string";
+
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_copyString = &current->initializer;
-      g_stringContext=VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN( SingleQuoteString );
    }
 
    {STRINGPREFIX}?"\"" {
       // string
       QString text  = QString::fromUtf8(yytext);
-      current->type = "string";
+
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_copyString    = &current->initializer;
-      g_stringContext = VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN( DoubleQuoteString );
    }
 
    {TRIDOUBLEQUOTE}   {
       // start of a comment block
       QString text  = QString::fromUtf8(yytext);
-      current->type = "string";
+
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_doubleQuote   = true;
       g_copyString    = &current->initializer;
-      g_stringContext = VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN(TripleString);
    }
 
    {TRISINGLEQUOTE}   {
       // start of a comment block
       QString text  = QString::fromUtf8(yytext);
-      current->type = "string";
+      
+      if (current->type.isEmpty()) {
+         current->type = "string";
+      }
+
       current->initializer += text;
       g_doubleQuote   = false;
       g_copyString    = &current->initializer;
-      g_stringContext = VariableEnd;
+      g_stringContext = VariableDec;
       BEGIN(TripleString);
    }
 
@@ -1481,6 +1509,19 @@ STARTDOCSYMS      "##"
 
    {IDENTIFIER}         {
       QString text = QString::fromUtf8(yytext);
+
+      // do something based on the type of the IDENTIFIER
+      if (current->type.isEmpty()) {
+       
+         for (auto child : current_root->children() )  {
+
+            if (child->name == text) {
+               current->type = child->type;
+               break;
+            }
+         }
+      }
+
       g_start_init = false;
       current->initializer += text;
    }

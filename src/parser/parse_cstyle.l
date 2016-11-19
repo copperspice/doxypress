@@ -7076,7 +7076,7 @@ SkipC11Attribute>"]]"                 {
 
       lineCount();
 
-      if (--sharpCount <= 0) {
+      if (roundCount == 0 && --sharpCount <= 0) {
          current->name = removeRedundantWhiteSpace(current->name);
 
          bool isProtocol  = current->m_traits.hasTrait(Entry::Virtue::Protocol);
@@ -8238,13 +8238,18 @@ SkipC11Attribute>"]]"                 {
  /*  Documentation block related rules */
 
  /*  ---- Single line comments ------ */
-<DocLine>[^\n]*"\n"[ \t]*"//"[/!]       { 
+<DocLine>[^\n]*"\n"[ \t]*"//"[/!][<]?       { 
       // continuation of multiline C++-style comment          
       QString text = QString::fromUtf8(yytext);
       
       s_docBlock += text;
-      s_docBlock.resize(s_docBlock.length() - 3);
-      
+
+      int markerLen = 3;
+      if (text.endsWith('<') ) {
+         markerLen = 4;      
+      }
+
+      s_docBlock.resize(s_docBlock.length() - markerLen);      
       lineCount();
 }
 
