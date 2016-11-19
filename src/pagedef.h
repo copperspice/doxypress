@@ -36,7 +36,7 @@ class PageDef : public Definition
    ~PageDef();
 
    // setters
-   void setFileName(const QString &name, bool dontEscape);
+   void setFileName(const QString &name);
    void setShowToc(bool b);
 
    // getters

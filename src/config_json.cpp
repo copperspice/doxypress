@@ -327,7 +327,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("template-relations",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("directory-graph",           struc_CfgBool   { true,           DEFAULT } );
 
-   m_cfgEnum.insert("dot-image-format",          struc_CfgEnum   { "png",          DEFAULT } );
+   m_cfgEnum.insert("dot-image-format",          struc_CfgEnum   { "png",          DEFAULT } );  
    m_cfgBool.insert("interactive-svg",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("dot-path",                struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("dot-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );

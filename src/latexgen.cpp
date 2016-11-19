@@ -188,7 +188,7 @@ void LatexCodeGenerator::writeLineNumber(const QString &ref, const QString &file
          lineAnchor.prepend(m_sourceFileName);
 
          if (usePDFLatex && pdfHyperlinks) {
-            m_t << "\\hypertarget{" << stripPath(lineAnchor) << "}{}";
+            m_t << "\\Hypertarget{" << stripPath(lineAnchor) << "}";
          }
 
          writeCodeLink(ref, fileName, anchor, lineNumber, 0);
@@ -634,25 +634,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\makeindex\n"
      "\n";
 
-   // User-specified packages
-   const QStringList extraPackages = Config::getList("latex-extra-packages");
-  
-   if (! extraPackages.isEmpty()) {     
-      t_stream << "% Packages requested by user\n";     
-   
-      for (auto pkgName : extraPackages) {         
- 
-         if (pkgName.startsWith('[') || pkgName.startsWith('{')) {
-            t_stream << "\\usepackage" << pkgName << "\n";
-
-         } else {
-            t_stream << "\\usepackage{" << pkgName << "}\n";
-         }
-
-      }
-   
-      t_stream << "\n";      
-   }
+   writeExtraLatexPackages(t_stream);
 
    // Hyperlinks
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
@@ -1714,8 +1696,10 @@ void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, cons
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
 
+   m_textStream << "\\mbox{";
+
    if (usePDFLatex && pdfHyperlinks) {
-      m_textStream << "\\hypertarget{";
+      m_textStream << "\\Hypertarget{";
 
       if (! fName.isEmpty()) {
          m_textStream << stripPath(fName);
@@ -1725,7 +1709,7 @@ void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, cons
          m_textStream << "_" << anchor;
       }
 
-      m_textStream << "}{}";
+      m_textStream << "}";
    }
 
    m_textStream << "\\label{";
@@ -1738,7 +1722,7 @@ void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, cons
       m_textStream << "_" << anchor;
    }
 
-   m_textStream << "} " << endl;
+   m_textStream << "}} " << endl;
 }
 
 void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
@@ -1755,10 +1739,10 @@ void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
    if (usePDFLatex && pdfHyperlinks) {
 
       if (! fName.isEmpty()) {
-         m_textStream  << "\\hypertarget{" << stripPath(fName) << "_" << stripPath(name) << "}{}" << endl;
+         m_textStream  << "\\Hypertarget{" << stripPath(fName) << "_" << stripPath(name) << "}" << endl;
       
       } else {
-         m_textStream  << "\\hypertarget{" << stripPath(name) << "}{}" << endl;
+         m_textStream  << "\\Hypertarget{" << stripPath(name) << "}" << endl;
       }
    }
 }
@@ -2274,20 +2258,26 @@ void LatexGenerator::endMemberDocSimple()
 
 void LatexGenerator::startInlineMemberType()
 {
+   // to prevent \+ from causing unwanted breaks
+   insideTabbing = true; 
 }
 
 void LatexGenerator::endInlineMemberType()
 {
    m_textStream << "&" << endl;
+   insideTabbing = false;
 }
 
 void LatexGenerator::startInlineMemberName()
 {
+   // to prevent \+ from causing unwanted breaks
+   insideTabbing = true; 
 }
 
 void LatexGenerator::endInlineMemberName()
 {
    m_textStream << "&" << endl;
+   insideTabbing = false;
 }
 
 void LatexGenerator::startInlineMemberDoc()

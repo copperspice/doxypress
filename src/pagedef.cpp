@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -30,9 +30,11 @@
 PageDef::PageDef(const QString &f, int l, const QString &name, const QString &d, const QString &t)
    : Definition(f, l, 1, name), m_title(t)
 {
+   static const bool shortNames = Config::getBool("short-names");
+
    setDocumentation(d, f, l);
 
-   m_subPageDict  = new PageSDict();   
+   m_subPageDict  = new PageSDict();
    m_nestingLevel = 0;
    m_showToc      = false;
    m_fileName     = convertNameToFile_X(name, false, true);
@@ -53,7 +55,7 @@ QSharedPointer<GroupDef> PageDef::getGroupDef() const
 {
    SortedList<QSharedPointer<GroupDef>> *groups = partOfGroups();
 
-   if (groups) {       
+   if (groups) {
        return groups->first();
 
    } else {
@@ -73,16 +75,9 @@ QString PageDef::getOutputFileBase() const
    }
 }
 
-void PageDef::setFileName(const QString &name, bool dontEscape)
+void PageDef::setFileName(const QString &name)
 {
-   static bool shortNames = Config::getBool("short-names");
-
-   if (shortNames && ! dontEscape) {
-      m_fileName = convertNameToFile(name);
-
-   } else {
-      m_fileName = name;
-   }
+   m_fileName = name;
 }
 
 void PageDef::addInnerCompound(QSharedPointer<Definition> d)
@@ -92,8 +87,8 @@ void PageDef::addInnerCompound(QSharedPointer<Definition> d)
    if (d->definitionType() == Definition::TypePage) {
 
       QSharedPointer<PageDef> pd = d.dynamicCast<PageDef>();
-      assert(pd);    
-           
+      assert(pd);
+
       m_subPageDict->insert(pd->name(), pd);
 
       d->setOuterScope(self);
@@ -122,18 +117,18 @@ QString PageDef::pathFragment_Internal() const
 void PageDef::writeTagFile(QTextStream &tagFile)
 {
    bool found = (name() == "citelist");
-   
-   if (! found ) {      
-      for (auto item : *Doxy_Globals::xrefLists) {         
-   
+
+   if (! found ) {
+      for (auto item : *Doxy_Globals::xrefLists) {
+
          if (item.listName() == name()) {
             found = true;
             break;
-         }      
+         }
       }
    }
 
-   if (! found) { 
+   if (! found) {
       // not one of the generated related pages
 
       tagFile << "  <compound kind=\"page\">" << endl;
@@ -152,7 +147,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    QSharedPointer<PageDef> self = sharedFrom(this);
 
    static bool generateTreeView = Config::getBool("generate-treeview");
-   
+
    QString pageName;
    QString manPageName;
 
@@ -165,7 +160,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    if (m_nestingLevel > 0) {
       //&& // a sub page
       //(Doxy_Globals::mainPage==0 || getOuterScope()!=Doxy_Globals::mainPage) // and not a subpage of the mainpage
-     
+
       // do not generate sub page output for RTF and LaTeX, as these are
       // part of their parent page
       ol.disableAll();
@@ -203,7 +198,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.endTitleHead(manPageName, manPageName);
 
    if (si) {
-      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, 0, true, false);
+      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);
       ol.endSection(si->label, si->type);
    }
    ol.popGeneratorState();
@@ -220,8 +215,8 @@ void PageDef::writeDocumentation(OutputList &ol)
    if (! title().isEmpty() && !name().isEmpty() && si != 0) {
 
       startTitle(ol, getOutputFileBase(), self);
-      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, 0, true, false);
-      
+      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);
+
       endTitle(ol, getOutputFileBase(), name());
    }
 
@@ -245,11 +240,10 @@ void PageDef::writeDocumentation(OutputList &ol)
    }
 
    ol.popGeneratorState();
-   //1.}
 
    Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, filterTitle(title()));
 }
- 
+
 void PageDef::writePageDocumentation(OutputList &ol)
 {
    QSharedPointer<PageDef> self = sharedFrom(this);
@@ -260,9 +254,17 @@ void PageDef::writePageDocumentation(OutputList &ol)
    }
 
    ol.startTextBlock();
+   QString docStr = documentation() + inbodyDocumentation();
 
-   ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), 
-                  documentation() + inbodyDocumentation(), true, false );
+   if (! docStr.isEmpty()) {
+      ol.pushGeneratorState();
+      ol.disableAllBut(OutputGenerator::Man);
+      ol.writeString(" - ");
+      ol.popGeneratorState();
+   }
+
+   ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(),
+                  docStr, true, false);
 
    ol.endTextBlock();
 
@@ -274,7 +276,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
       ol.pushGeneratorState();
       ol.disableAll();
       ol.enable(OutputGenerator::Latex);
-      ol.enable(OutputGenerator::RTF);  
+      ol.enable(OutputGenerator::RTF);
 
       for (auto subPage : *m_subPageDict) {
          SectionInfo::SectionType sectionType = SectionInfo::Paragraph;

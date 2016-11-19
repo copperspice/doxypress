@@ -248,6 +248,7 @@ class Definition : public DefinitionIntf
    SrcLangExt getLanguage() const;
 
    SortedList<QSharedPointer<GroupDef>> *partOfGroups() const;
+   bool isLinkableViaGroup() const;
 
    QList<ListItemInfo> *xrefListItems() const;
 

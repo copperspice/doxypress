@@ -1,4 +1,4 @@
-/*************************************************************************
+ /*************************************************************************
  *
  * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
@@ -1353,11 +1353,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
    while ((tok = doctokenizerYYlex())) {
 
       if (tok == TK_WORD && g_token->name == "width=" || g_token->name == "height=") {
-         // special case: no title, but we do have a size indicator
-         doctokenizerYYsetStateTitleAttrValue();
-
-         // strip =
-         g_token->name = g_token->name.left(g_token->name.length()-1);
+         // special case: no title, but we do have a size indicator       
          break;
        }
 
@@ -1385,20 +1381,30 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
      tok = doctokenizerYYlex();
    }
 
-   while (tok == TK_WORD)  {
+   while (tok == TK_WHITESPACE || tok == TK_WORD)  {
       // there are values following the title
 
-      if (g_token->name == "width")  {
-         width = g_token->chars;
+      if (tok == TK_WORD) {
 
-      } else if (g_token->name == "height")  {
-         height = g_token->chars;
+         if (g_token->name == "width=" || g_token->name == "height=") {
+            doctokenizerYYsetStateTitleAttrValue();
+            g_token->name = g_token->name.left(g_token->name.length() - 1);
+         }
+   
+         if (g_token->name == "width")  {
+            width = g_token->chars;
+   
+         } else if (g_token->name == "height")  {
+            height = g_token->chars;
+   
+         } else {
+            warn_doc_error(s_fileName,doctokenizerYYlineno,"Unknown option %s after \\%s command, expected 'width' or 'height'",
+                     csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)));
 
-      } else {
-         warn_doc_error(s_fileName,doctokenizerYYlineno,"Unknown option %s after \\%s command, expected 'width' or 'height'",
-                  csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)));
+            break;
+         }
       }
-
+   
       tok = doctokenizerYYlex();
    }
 
@@ -2284,7 +2290,7 @@ bool DocXRefItem::parse()
                m_anchor = "@";
 
             } else {
-               m_file   = convertNameToFile_X(refList.listName(), false, true);
+               m_file   = refList.fileName();
                m_anchor = item->listAnchor;
             }
 
@@ -6307,14 +6313,17 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       case HTML_CODE:
-         if (/*getLanguageFromFileName(s_fileName)==SrcLangExt_CSharp ||*/ s_xmlComment)
+         if (/*getLanguageFromFileName(s_fileName)==SrcLangExt_CSharp ||*/ s_xmlComment)  {
             // for C# source or inside a <summary> or <remark> section we
             // treat <code> as an XML tag (so similar to @code)
-         {
+         
             doctokenizerYYsetStateXmlCode();
             retval = handleStartCode();
-         } else { // normal HTML markup
+
+         } else { 
+            // normal HTML markup
             handleStyleEnter(this, m_children, DocStyleChange::Code, &g_token->attribs);
+
          }
          break;
 

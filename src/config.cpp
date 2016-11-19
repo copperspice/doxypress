@@ -503,7 +503,7 @@ bool Config::verify()
    iterList.value().value = includePath;
 
 
-   // ** dot
+   // ** dot  (full value, such as png:cairo:gd)
    iterEnum = m_cfgEnum.find("dot-image-format");
    QString dotImageFormat = iterEnum.value().value;
 
@@ -517,13 +517,18 @@ bool Config::verify()
 
       dotImageFormat = "png";
    }
+   
+   iterEnum.value().value = dotImageFormat;
 
-   // broom - may want to split this into two config entries (12/2015)
-   if (dotImageFormat.contains(":"))  {
-      dotImageFormat = dotImageFormat.replace( QRegExp(":.*"), "");
+   // save the stripped extension (png, jpeg)
+   QString dotImage = dotImageFormat;
+
+   if (dotImage.contains(":"))  {
+      dotImage = dotImage.replace( QRegExp(":.*"), "");
    }
 
-   iterEnum.value().value = dotImageFormat;
+   m_cfgEnum.insert("dot-image-extension", struc_CfgEnum{ dotImage, DEFAULT } );
+ 
 
    //
    iterString = m_cfgString.find("mscgen-path");

@@ -84,14 +84,10 @@ void FormulaList::generateBitmaps(const QString &path)
       }
 
       t << "\\documentclass{article}" << endl;
-      t << "\\usepackage{epsfig}" << endl; // for those who want to include images
+      t << "\\usepackage{epsfig}" << endl;       // include images
 
-      QStringList s = Config::getList("latex-extra-packages");
-
-      for (auto item : s) {
-         t << "\\usepackage{" << item << "}\n";        
-      }
-
+      writeExtraLatexPackages(t);
+       
       t << "\\pagestyle{empty}" << endl;
       t << "\\begin{document}" << endl;
 

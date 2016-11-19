@@ -2256,12 +2256,12 @@ void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPat
 
    baseName.prepend("msc_");
 
-   QString outDir = Config::getString("html-output");
-   QString imgExt = Config::getEnum("dot-image-format");
+   static const QString outDir   = Config::getString("html-output");
+   static const QString imageExt = Config::getEnum("dot-image-extension");
 
    MscOutputFormat mscFormat = MSC_BITMAP;
 
-   if ("svg" == imgExt) {
+   if (imageExt == "svg") {
       mscFormat = MSC_SVG;
    }
 
@@ -2274,11 +2274,13 @@ void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPat
    QString baseName = fileName;
    int i;
 
-   if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
+   if ((i = baseName.lastIndexOf('/')) != -1) { 
+      // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   if ((i = baseName.indexOf('.')) != -1) { // strip extension
+   if ((i = baseName.indexOf('.')) != -1) { 
+      // strip extension
       baseName = baseName.left(i);
    }
 
@@ -2302,10 +2304,10 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
       baseName = baseName.left(i);
    }
 
-   static QString outDir = Config::getString("html-output");
-   static QString imgExt = Config::getEnum("dot-image-format");
+   static const QString outDir   = Config::getString("html-output");
+   static const QString imageExt = Config::getEnum("dot-image-extension");
 
-   if (imgExt == "svg") {
+   if (imageExt == "svg") {
       generatePlantUMLOutput(fileName, outDir, PUML_SVG);
 
       // m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName

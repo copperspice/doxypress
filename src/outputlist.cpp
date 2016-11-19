@@ -98,8 +98,9 @@ void OutputList::popGeneratorState()
    }
 }
 
-bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
-               const QString &docStr, bool indexWords, bool isExample, const QString &exampleName, bool singleLine, bool linkFromIndex)
+bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, 
+                  QSharedPointer<MemberDef> md, const QString &docStr, bool indexWords, bool isExample, 
+                  const QString &exampleName, bool singleLine, bool linkFromIndex)
 {
    if (docStr.isEmpty()) {
       return true;

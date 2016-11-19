@@ -896,8 +896,6 @@ void FTVHelp::generateTreeViewImages()
    rm.copyResourceAs("html/doc.luma",          htmlOutput, "doc.png");
    rm.copyResourceAs("html/folderopen.luma",   htmlOutput, "folderopen.png");
    rm.copyResourceAs("html/folderclosed.luma", htmlOutput, "folderclosed.png");
-   rm.copyResourceAs("html/arrowdown.luma",    htmlOutput, "arrowdown.png");
-   rm.copyResourceAs("html/arrowright.luma",   htmlOutput, "arrowright.png");
    rm.copyResourceAs("html/splitbar.lum",      htmlOutput, "splitbar.png");
 }
 

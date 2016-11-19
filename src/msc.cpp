@@ -21,6 +21,7 @@
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
+#include <index.h>
 #include <message.h>
 #include <msc.h>
 #include <portable.h>
@@ -119,26 +120,26 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    // move to output dir so dot can find the font file
    QString oldDir = QDir::currentPath(); 
    QDir::setCurrent(outDir);
-   
+    
    QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
-
    QString mscArgs;
-   QString extension;
 
+   QString imageName = outFile;
+ 
    switch (format) {
       case MSC_BITMAP:
-         mscArgs += "-T png";
-         extension = ".png";
+         mscArgs   += "-T png";
+         imageName += ".png";
          break;
 
       case MSC_EPS:
-         mscArgs += "-T eps";
-         extension = ".eps";
+         mscArgs   += "-T eps";
+         imageName += ".eps";
          break;
 
       case MSC_SVG:
-         mscArgs += "-T svg";
-         extension = ".svg";
+         mscArgs   += "-T svg";
+         imageName += ".svg";
          break;
 
       default:
@@ -149,9 +150,8 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    mscArgs += " -i \"";
    mscArgs += inFile;
 
-   mscArgs += "\" -o \"";
-   mscArgs += outFile;
-   mscArgs += extension + "\"";
+   mscArgs += "\" -o \"";  
+   mscArgs += imageName + "\"";
 
    int exitCode;
    
@@ -177,6 +177,8 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
       portable_sysTimerStop();
    }
+
+   Doxy_Globals::indexList->addImageFile(imageName);
 
    QDir::setCurrent(oldDir);
 }

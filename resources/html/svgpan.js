@@ -88,32 +88,38 @@ function show()
  */
 function init(evt) 
 {
-  svgDoc = evt.target.ownerDocument;
-  if (top.window && top.window.registerShow) // register show function in html doc for dynamic sections
-  {
-    top.window.registerShow(sectionId,show);
-  }
-  show();
+   svgDoc = evt.target.ownerDocument;
+      
+   try {
+      if (top.window && top.window.registerShow)  {
+       // register show function in html doc for dynamic sections  
+       top.window.registerShow(sectionId,show);
+      }
 
-  setAttributes(root, {
+   } catch(e) {
+      // this can happen with Chrome when viewing pages
+
+   }
+      
+   show();
+   
+   setAttributes(root, {
      "onmousedown" : "handleMouseDown(evt)",
      "onmousemove" : "handleMouseMove(evt)",
      "onmouseup"   : "handleMouseUp(evt)"
-  });
-
-  if (window.addEventListener)
-  {
-    if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 || 
-        navigator.userAgent.toLowerCase().indexOf("opera") >= 0 || 
-        navigator.appVersion.indexOf("MSIE") != -1)
-    {
-      window.addEventListener('mousewheel', handleMouseWheel, false); // Chrome/Safari/IE9
-    }
-    else
-    {
-      window.addEventListener('DOMMouseScroll', handleMouseWheel, false); // Others
-    }
-  }
+   });
+   
+   if (window.addEventListener) {
+      if (navigator.userAgent.toLowerCase().indexOf('webkit') >= 0 || 
+         navigator.userAgent.toLowerCase().indexOf("opera") >= 0 || 
+         navigator.appVersion.indexOf("MSIE") != -1) {
+         
+         window.addEventListener('mousewheel', handleMouseWheel, false);       // Chrome/Safari/IE9
+      
+      } else {
+         window.addEventListener('DOMMouseScroll', handleMouseWheel, false);   // Others
+      }
+   }
 }
 
 window.onresize=function()

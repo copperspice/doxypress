@@ -60,6 +60,7 @@ class RefList
    RefItem *getNextRefItem();
 
    QString listName() const;
+   QString fileName() const;
    QString pageTitle() const;
    QString sectionTitle() const;
 
@@ -77,6 +78,7 @@ class RefList
    int m_id;
 
    QString m_listName;
+   QString m_fileName;
    QString m_pageTitle;
    QString m_secTitle;  
 

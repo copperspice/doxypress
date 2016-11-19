@@ -96,7 +96,7 @@ static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &
     t << "{" << name << "}";
 
     if (hasCaption) {
-      t << "\n\\caption{";
+      t << "\n\\doxyfigcaption{";
     }
 }
 
@@ -461,8 +461,8 @@ void LatexDocVisitor::visit(DocAnchor *anc)
    m_t << "\\label{" << stripPath(anc->file()) << "_" << anc->anchor() << "}%" << endl;
 
    if (! anc->file().isEmpty() && pdfHyperlinks) {
-      m_t << "\\hypertarget{" << stripPath(anc->file()) << "_" << anc->anchor()
-          << "}{}%" << endl;
+      m_t << "\\Hypertarget{" << stripPath(anc->file()) << "_" << anc->anchor()
+          << "}%" << endl;
    }
 }
 
@@ -482,7 +482,8 @@ void LatexDocVisitor::visit(DocInclude *inc)
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd,
+                     -1, -1, false, QSharedPointer<MemberDef>(), true);
 
          m_t << "\\end{DoxyCodeInclude}" << endl;
       }
@@ -490,8 +491,9 @@ void LatexDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Include:
          m_t << "\n\\begin{DoxyCodeInclude}\n";
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(),
-                     langExt, inc->isExample(),inc->exampleFile());
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                     inc->text(), langExt, inc->isExample(),inc->exampleFile(), QSharedPointer<FileDef>(),
+                     -1, -1, true, QSharedPointer<MemberDef>(), false);
 
          m_t << "\\end{DoxyCodeInclude}\n";
          break;

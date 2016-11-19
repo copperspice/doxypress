@@ -1,8 +1,6 @@
 <RCC>
     <qresource prefix="/">       
-        <file>resources/layout_default.xml</file> 
-        <file>resources/html/arrowdown.luma</file>
-        <file>resources/html/arrowright.luma</file>
+        <file>resources/layout_default.xml</file>
         <file>resources/html/bc_s.luma</file>
         <file>resources/html/bdwn.luma</file>
         <file>resources/html/bib2xhtml.pl</file>

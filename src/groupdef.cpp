@@ -655,36 +655,50 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
 void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+
    QSharedPointer<GroupDef> self = sharedFrom(this);
+ 
+   if ((! briefDescription().isEmpty() && repeatBrief)
+         || ! documentation().isEmpty() || ! inbodyDocumentation().isEmpty()) {
 
-   if ((! briefDescription().isEmpty() && Config::getBool("repeat-brief"))
-         || !documentation().isEmpty() || !inbodyDocumentation().isEmpty()) {
+      ol.pushGeneratorState();
 
-      if (pageDict->count() != countMembers()) { // not only pages -> classical layout
+      if (pageDict->count() != countMembers()) { 
+         // not only pages -> classical layout
+        
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Html);
          ol.writeRuler();
          ol.popGeneratorState();
+
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
          ol.writeAnchor(0, "details");
          ol.popGeneratorState();
-         ol.startGroupHeader();
-         ol.parseText(title);
-         ol.endGroupHeader();
+
+      } else {
+         ol.disableAllBut(OutputGenerator::Man);    // always print title for man page
       }
 
+      ol.startGroupHeader();
+      ol.parseText(title);
+      ol.endGroupHeader();
+      ol.popGeneratorState();
+
       // repeat brief description
-      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
+      if (! briefDescription().isEmpty() && repeatBrief) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
       // write separator between brief and details
-      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief") && ! documentation().isEmpty()) {
+      if (! briefDescription().isEmpty() && repeatBrief && ! documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
+
          // ol.newParagraph(); // FIXME:PARA
+
          ol.enableAll();
          ol.disableAllBut(OutputGenerator::Man);
          ol.enable(OutputGenerator::Latex);
@@ -693,34 +707,42 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
       }
 
       // write detailed documentation
-      if (!documentation().isEmpty()) {
+      if (! documentation().isEmpty()) {
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
 
       // write inbody documentation
-      if (!inbodyDocumentation().isEmpty()) {
-         ol.generateDoc(inbodyFile(), inbodyLine(), self, QSharedPointer<MemberDef>(), inbodyDocumentation() + "\n", true, false);
+      if (! inbodyDocumentation().isEmpty()) {
+         ol.generateDoc(inbodyFile(), inbodyLine(), self, QSharedPointer<MemberDef>(), 
+                  inbodyDocumentation() + "\n", true, false);
       }
    }
 }
 
 void GroupDef::writeBriefDescription(OutputList &ol)
 {
+   static const bool repeatBrief = Config::getBool("repeat-brief");
    QSharedPointer<GroupDef> self = sharedFrom(this);
-
-   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+  
+   if (hasBriefDescription()) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
                                              briefDescription(), true, false, "", true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
+
+         ol.pushGeneratorState();
+         ol.disableAllBut(OutputGenerator::Man);
+         ol.writeString(" - ");
+         ol.popGeneratorState();
+
          ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::RTF);
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (Config::getBool("repeat-brief") || ! documentation().isEmpty() ) {
+         if (repeatBrief || ! documentation().isEmpty() ) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(0, "details");
             ol.parseText(theTranslator->trMore());
@@ -733,6 +755,8 @@ void GroupDef::writeBriefDescription(OutputList &ol)
 
       delete rootNode;
    }
+
+   ol.writeSynopsis();
 }
 
 void GroupDef::writeGroupGraph(OutputList &ol)
@@ -782,7 +806,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
          if (! item->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(item->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), item, QSharedPointer<MemberDef>(), 
-                           item->briefDescription(), false, false, 0, true, false);
+                           item->briefDescription(), false, false, "", true, false);
 
             ol.endMemberDescription();
          }
@@ -839,7 +863,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
             if (! gd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
                ol.startMemberDescription(gd->getOutputFileBase());
                ol.generateDoc(briefFile(), briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription(), 
-                              false, false, 0, true, false);
+                              false, false, "", true, false);
 
                ol.endMemberDescription();
             }
@@ -873,10 +897,10 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
          ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
          ol.endMemberItem();
 
-         if (!dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+         if (! dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(dd->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(), 
-                           false, false, 0, true, false);
+                           false, false, "", true, false);
 
             ol.endMemberDescription();
          }
@@ -904,7 +928,9 @@ void GroupDef::writePageDocumentation(OutputList &ol)
       if (! pd->isReference()) {
          QSharedPointer<SectionInfo> si;
 
-         if (! pd->title().isEmpty() && ! pd->name().isEmpty() && (si = Doxy_Globals::sectionDict->find(pd->name())) != 0) {
+         if (! pd->title().isEmpty() && ! pd->name().isEmpty() && 
+                  (si = Doxy_Globals::sectionDict->find(pd->name())) != 0) {
+
             ol.startSection(si->label, si->title, SectionInfo::Subsection);
             ol.docify(si->title);
             ol.endSection(si->label, SectionInfo::Subsection);
@@ -912,7 +938,7 @@ void GroupDef::writePageDocumentation(OutputList &ol)
 
          ol.startTextBlock();
          ol.generateDoc(pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(), 
-                        pd->documentation() + pd->inbodyDocumentation(), true, false, 0, true, false);
+                  pd->documentation() + pd->inbodyDocumentation(), true, false, "", true, false);
 
          ol.endTextBlock();
       }
@@ -1040,12 +1066,14 @@ void GroupDef::writeDocumentation(OutputList &ol)
 
    ol.startHeaderSection();
    writeSummaryLinks(ol);
+
    ol.startTitleHead(getOutputFileBase());
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);
    ol.parseText(m_title);
    ol.popGeneratorState();
    addGroupListToTitle(ol, self);
+
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);
    ol.endTitleHead(getOutputFileBase(), m_title);
@@ -1053,7 +1081,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Man);
    ol.endTitleHead(getOutputFileBase(), name());
-   ol.parseText(m_title);
+   
    ol.popGeneratorState();
    ol.endHeaderSection();
    ol.startContents();

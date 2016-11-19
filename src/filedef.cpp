@@ -128,8 +128,8 @@ void FileDef::findSectionsInDocumentation()
 
 bool FileDef::hasDetailedDescription() const
 {
-   static bool repeatBrief   = Config::getBool("repeat-brief");
-   static bool sourceBrowser = Config::getBool("source-code");
+   static const bool repeatBrief   = Config::getBool("repeat-brief");
+   static const bool sourceBrowser = Config::getBool("source-code");
 
    // avail empty section
 
@@ -291,7 +291,8 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
          }
 
          ol.endParagraph();
-         //Restore settings, bug_738548
+
+         // restore settings, bug_738548
          ol.popGeneratorState();
       }
 
@@ -301,27 +302,35 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
 void FileDef::writeBriefDescription(OutputList &ol)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+   QSharedPointer<FileDef> self  = sharedFrom(this);
 
-   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+   if (hasBriefDescription()) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false, "", true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
-         ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
-         ol.pushGeneratorState();
 
+         ol.pushGeneratorState();
+         ol.disableAllBut(OutputGenerator::Man);
+         ol.writeString(" - ");
+         ol.popGeneratorState();
+
+         ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
+
+         ol.pushGeneratorState();
          ol.disable(OutputGenerator::RTF);
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (Config::getBool("repeat-brief") || ! documentation().isEmpty()) {
+         if (repeatBrief || ! documentation().isEmpty()) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(0, "details");
             ol.parseText(theTranslator->trMore());
             ol.endTextLink();
          }
+
          ol.popGeneratorState();
          ol.endParagraph();
       }
@@ -1615,7 +1624,8 @@ void FileDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const 
 bool FileDef::isLinkableInProject() const
 {
    static bool showFiles = Config::getBool("show-file-page");
-   return hasDocumentation() && ! isReference() && showFiles;
+
+   return hasDocumentation() && ! isReference() && (showFiles || isLinkableViaGroup());
 }
 
 static void getAllIncludeFilesRecursively(QSet<QString> &filesVisited, QSharedPointer<const FileDef> fd, QStringList &incFiles)

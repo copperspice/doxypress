@@ -33,6 +33,7 @@ RefList::RefList(const QString &listName, const QString &pageTitle, const QStrin
    m_id = 0;
 
    m_listName  = listName;
+   m_fileName  = convertNameToFile_X(listName, false, true);
    m_pageTitle = pageTitle;
    m_secTitle  = secTitle;
 }
@@ -104,6 +105,11 @@ RefItem *RefList::getNextRefItem()
 QString RefList::listName() const
 {
    return m_listName;
+}
+
+QString RefList::fileName() const
+{
+   return m_fileName;
 }
 
 QString RefList::pageTitle() const
@@ -187,5 +193,5 @@ void RefList::generatePage()
 
    doc += "</dl>\n";
 
-   addRelatedPage(m_listName, m_pageTitle, doc, 0, m_listName, 1, 0, QSharedPointer<GroupDef>(), 0);
+   addRelatedPage(m_listName, m_pageTitle, doc, 0, m_fileName, 1, 0, QSharedPointer<GroupDef>(), 0);
 }

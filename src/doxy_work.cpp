@@ -3592,14 +3592,13 @@ void Doxy_Work::addVariable(QSharedPointer<EntryNav> rootNav, int isFuncPtr)
             root->args.prepend(root->type.right(root->type.length() - ai));
             root->type = root->type.left(ai);
 
-         } else if (root->type.indexOf(')', i) != -1) { // function ptr, not variable like "int (*bla)[10]"
+         } else if (root->type.indexOf(')', i) != -1) { 
+            // function ptr, not variable like "int (*bla)[10]"
+
             root->type = root->type.left(root->type.length() - 1);
             root->args.prepend(") ");
          }
 
-      } else if (root->type.indexOf("typedef ") != -1 && root->type.right(2) == "()") { // typedef void (func)(int)
-         root->type = root->type.left(root->type.length() - 1);
-         root->args.prepend(") ");
       }
    }
 
@@ -8918,7 +8917,7 @@ void Doxy_Work::findMainPage(QSharedPointer<EntryNav> rootNav)
                                          indexName, root->brief + root->doc + root->inbodyDocs, title);
 
          Doxy_Globals::mainPage->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-         Doxy_Globals::mainPage->setFileName(indexName, true);
+         Doxy_Globals::mainPage->setFileName(indexName);
          Doxy_Globals::mainPage->setShowToc(root->stat);
 
          addPageToContext(Doxy_Globals::mainPage, rootNav);
@@ -9107,7 +9106,7 @@ void Doxy_Work::buildExampleList(QSharedPointer<EntryNav> rootNav)
                                    root->name, root->brief + root->doc + root->inbodyDocs, root->args);
 
          pd->setBriefDescription(root->brief, root->briefFile, root->briefLine);
-         pd->setFileName(csPrintable(convertNameToFile_X(pd->name() + "-example", false, true)), false);
+         pd->setFileName(csPrintable(convertNameToFile_X(pd->name() + "-example", false, true)));
          pd->addSectionsToDefinition(root->anchors);
          pd->setLanguage(root->lang);
 

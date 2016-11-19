@@ -141,10 +141,16 @@ class RTFDocVisitor : public DocVisitor
 
    void pushEnabled();
    void popEnabled();
-   void writeDotFile(const QString &fileName);
-   void writeMscFile(const QString &fileName);
-   void writeDiaFile(const QString &fileName);
-   void writePlantUMLFile(const QString &fileName);
+
+   void includePicturePreRTF(const QString name, const bool isTypeRTF, const bool hasCaption);
+   void includePicturePostRTF(const bool isTypeRTF, const bool hasCaption);
+
+   void writeDotFile(const QString &fileName, const bool hasCaption);
+   void writeDotFile(DocDotFile *);
+   void writeMscFile(const QString &fileName, const bool hasCaption);
+   void writeMscFile(DocMscFile *);
+   void writeDiaFile(DocDiaFile *);
+   void writePlantUMLFile(const QString &fileName, const bool hasCaption);
 
    QTextStream &m_t;
    CodeOutputInterface &m_ci;

@@ -15,9 +15,6 @@
  *
 *************************************************************************/
 
-/* http://www.cubic.org/source/archive/fileform/txt/man/ 
-*/
-
 #include <QDir>
 #include <QTextStream>
 
@@ -33,6 +30,8 @@
 #include <mandocvisitor.h>
 #include <message.h>
 #include <util.h>
+
+//   http://www.cubic.org/source/archive/fileform/txt/man/ 
 
 static QString getSubdir()
 {
@@ -189,7 +188,7 @@ void ManGenerator::endTitleHead(const QString &, const QString &name)
    m_textStream << ".ad l" << endl;
    m_textStream << ".nh" << endl;
    m_textStream << ".SH NAME" << endl;
-   m_textStream << name << " \\- ";
+   m_textStream << name;
 
    firstCol  = false;
    paragraph = true;

@@ -1,4 +1,6 @@
 var navTreeSubIndices = new Array();
+var arrowDown  = '&#9660;';
+var arrowRight = '&#9658;';
 
 function getData(varName)
 {
@@ -92,20 +94,23 @@ function createIndent(o,domNode,node,level)
 {
   var level=-1;
   var n = node;
+
   while (n.parentNode) { level++; n=n.parentNode; }
+
   if (node.childrenData) {
-    var imgNode = document.createElement("img");
+    var imgNode = document.createElement("span");
+    imgNode.className = 'arrow';
     imgNode.style.paddingLeft=(16*level).toString()+'px';
-    imgNode.width  = 16;
-    imgNode.height = 22;
-    imgNode.border = 0;
+    imgNode.innerHTML=arrowRight;
+
     node.plus_img = imgNode;
     node.expandToggle = document.createElement("a");
     node.expandToggle.href = "javascript:void(0)";
+
     node.expandToggle.onclick = function() {
       if (node.expanded) {
-        $(node.getChildrenUL()).slideUp("fast");
-        node.plus_img.src = node.relpath+"arrowright.png";
+        $(node.getChildrenUL()).slideUp("fast");  
+        node.plus_img.innerHTML=arrowRight;      
         node.expanded = false;
       } else {
         expandNode(o, node, false, false);
@@ -113,13 +118,12 @@ function createIndent(o,domNode,node,level)
     }
     node.expandToggle.appendChild(imgNode);
     domNode.appendChild(node.expandToggle);
-    imgNode.src = node.relpath+"arrowright.png";
+    
   } else {
-    var span = document.createElement("span");
-    span.style.display = 'inline-block';
+    var span = document.createElement("span");   
+    span.className     = 'arrow';
     span.style.width   = 16*(level+1)+'px';
-    span.style.height  = '22px';
-    span.innerHTML = '&#160;';
+    span.innerHTML     = '&#160;';
     domNode.appendChild(span);
   } 
 }
@@ -259,6 +263,7 @@ function expandNode(o, node, imm, showRoot)
         node.childrenData = getData(varName);
         expandNode(o, node, imm, showRoot);
       }, showRoot);
+
     } else {
       if (!node.childrenVisited) {
         getNode(o, node);
@@ -268,11 +273,8 @@ function expandNode(o, node, imm, showRoot)
       } else {
         $(node.getChildrenUL()).slideDown("fast");
       }
-      if (node.isLast) {
-        node.plus_img.src = node.relpath+"arrowdown.png";
-      } else {
-        node.plus_img.src = node.relpath+"arrowdown.png";
-      }
+
+      node.plus_img.innerHTML = arrowDown;
       node.expanded = true;
     }
   }
@@ -336,13 +338,16 @@ function showNode(o, node, index, hash)
         node.childrenData = getData(varName);
         showNode(o,node,index,hash);
       },true);
+
     } else {
       if (!node.childrenVisited) {
         getNode(o, node);
       }
+
       $(node.getChildrenUL()).css({'display':'block'});
-      node.plus_img.src = node.relpath+"arrowdown.png";
+      node.plus_img.innerHTML = arrowDown;
       node.expanded = true;
+
       var n = node.children[o.breadcrumbs[index]];
       if (index+1<o.breadcrumbs.length) {
         showNode(o,n,index+1,hash);
@@ -478,10 +483,10 @@ function initNavTree(toroot,relpath)
   o.node.relpath = relpath;
   o.node.expanded = false;
   o.node.isLast = true;
-  o.node.plus_img = document.createElement("img");
-  o.node.plus_img.src = relpath+"arrowright.png";
-  o.node.plus_img.width = 16;
-  o.node.plus_img.height = 22;
+
+  o.node.plus_img = document.createElement("span");
+  o.node.plus_img.className = 'arrow';
+  o.node.plus_img.innerHTML = arrowRight;
 
   if (localStorageSupported()) {
     var navSync = $('#nav-sync');

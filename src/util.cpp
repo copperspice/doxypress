@@ -305,6 +305,27 @@ void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn)
    od.popGeneratorState();
 }
 
+void writeExtraLatexPackages(QTextStream &t_stream)
+{
+   // user specified packages
+   const QStringList &extraPackages = Config::getList("latex-extra-packages");
+
+   if (! extraPackages.isEmpty()) {
+      t_stream << "% Packages requested by user\n";
+
+      for (auto pkgName : extraPackages) {  
+
+         if (pkgName.startsWith('[') || pkgName.startsWith('{')) {
+            t_stream << "\\usepackage" << pkgName << "\n";
+         } else {
+            t_stream << "\\usepackage{" << pkgName << "}\n";
+         }         
+      }
+
+      t_stream << "\n";
+   }
+}
+
 static QString stripFromPath(const QString &path, const QStringList &list)
 {
    // look at all the strings in the list and strip the longest match
@@ -4863,7 +4884,7 @@ QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnder
 
       auto value = usedNames.find(name);
 
-      if (value != usedNames.end()) {
+      if (value == usedNames.end()) {
          usedNames.insert(name, count);
          num = count++;
 
@@ -4879,7 +4900,7 @@ QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnder
       int resultLen = result.length();
 
       if (resultLen >= 128) {
-         // prevent names that cannot be created
+         // prevent names that can not be created
          // third algorithm based on MD5 hash
 
          QString sigStr;
@@ -5531,7 +5552,7 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
    p++;
    QString result = name.left(p);
 
-   static QRegExp re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
+   static QRegExp re("[a-z:_A-Z\\x80-\\xFF][a-z:_A-Z0-9\\x80-\\xFF]*");
    int l, i;
 
    // for each identifier in the template part (e.g. B<T> -> T)
@@ -5898,8 +5919,8 @@ int getScopeFragment(const QString &str, int p, int *l)
 }
 
 QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc, QList<SectionInfo> *,
-                  const QString &fileName, int startLine, const QList<ListItemInfo> *sli, QSharedPointer<GroupDef> gd,
-                  TagInfo *tagInfo, SrcLangExt lang)
+                  const QString &fileName, int startLine, const QList<ListItemInfo> *sli, 
+                  QSharedPointer<GroupDef> gd, TagInfo *tagInfo, SrcLangExt lang)
 {
    static int id = 1;
 
@@ -5928,11 +5949,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
 
       if (tagInfo) {
          pd->setReference(tagInfo->tagName);
-         pd->setFileName(tagInfo->fileName, true);
-
-      } else {
-         pd->setFileName(qPrintable(convertNameToFile_X(pd->name(), false, true)), false);
-
+         pd->setFileName(tagInfo->fileName);  
       }
 
       pd->setInputOrderId(id);
@@ -8047,7 +8064,7 @@ bool mainPageHasTitle()
 
    return true;
 }
-
+ 
 QString stripPrefix(QString input, const QByteArray &prefix)
 {
    QString retval = input;

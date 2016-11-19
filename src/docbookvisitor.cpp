@@ -1516,7 +1516,7 @@ void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &wid
                   bool hasCaption)
 {
    static const QString docbookOutDir = Config::getString("docbook-output");
-   static const QString imgExt        = Config::getEnum("dot-image-format");
+   static const QString imageExt      = Config::getEnum("dot-image-extension");
 
    QString baseName = fileName;
    int i;
@@ -1533,7 +1533,7 @@ void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &wid
  
    writeDotGraphFromFile(fileName, docbookOutDir, baseName, GOF_BITMAP);
    m_t << "<para>" << endl;
-   visitPreStart(m_t, hasCaption, baseName + "." + imgExt, width, height);  
+   visitPreStart(m_t, hasCaption, baseName + "." + imageExt, width, height);  
 }
 
 void DocbookDocVisitor::endDotFile(bool hasCaption)

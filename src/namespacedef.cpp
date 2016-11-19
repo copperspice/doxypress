@@ -380,8 +380,14 @@ void NamespaceDef::writeBriefDescription(OutputList &ol)
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false, "", true, false);
 
-      if (rootNode && !rootNode->isEmpty()) {
+      if (rootNode && ! rootNode->isEmpty()) {
          ol.startParagraph();
+
+         ol.pushGeneratorState();
+         ol.disableAllBut(OutputGenerator::Man);
+         ol.writeString(" - ");
+         ol.popGeneratorState();
+
          ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::RTF);
@@ -986,7 +992,9 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
          if (! nd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
 
             ol.startMemberDescription(nd->getOutputFileBase());
-            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), nd->briefDescription(), false, false, 0, true);
+            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), 
+                  nd->briefDescription(), false, false, "", true);
+
             ol.endMemberDescription();
          }
 

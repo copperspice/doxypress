@@ -81,13 +81,14 @@ class DotNode
    int findParent( DotNode *n );
 
    void write(QTextStream &t, GraphType gt, GraphOutputFormat f,
-              bool topDown, bool toChildren, bool backArrows, bool reNumber);
+              bool topDown, bool toChildren, bool backArrows);
 
    int  m_subgraphId;
    void clearWriteFlag();
    void writeXML(QTextStream &t, bool isClassGraph);
    void writeDocbook(QTextStream &t, bool isClassGraph);
    void writeDEF(QTextStream &t);
+   void renumberNodes(int &number);
 
    QString label() const {
       return m_label;
@@ -111,10 +112,10 @@ class DotNode
 
  private:
    void colorConnectedNodes(int curColor);
-   void writeBox(QTextStream &t, GraphType gt, GraphOutputFormat f, bool hasNonReachableChildren, bool reNumber = false);
+   void writeBox(QTextStream &t, GraphType gt, GraphOutputFormat f, bool hasNonReachableChildren);
 
    void writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat f, DotNode *cn,
-                   EdgeInfo *ei, bool topDown, bool pointBack = true, bool reNumber = false);
+                   EdgeInfo *ei, bool topDown, bool pointBack = true);
 
    void setDistance(int distance);
    const DotNode  *findDocNode() const; // only works for acyclic graphs!
@@ -158,15 +159,6 @@ class DotNode
                         bool backArrows, const QString &title, QString &graphStr);
 };
 
-inline int DotNode::findParent( DotNode *n )
-{
-   if (! m_parents) {
-      return -1;
-   }
-
-   return m_parents->indexOf(n);
-}
-
 /** Represents a graphical class hierarchy */
 class DotGfxHierarchyTable
 {
@@ -182,7 +174,7 @@ class DotGfxHierarchyTable
    QList<DotNode *>          *m_rootNodes;
    QHash<QString, DotNode *> *m_usedNodes;
 
-   static int    m_curNodeNumber;
+   int m_curNodeNumber;
    SortedList<DotNode *>  *m_rootSubgraphs;
 };
 
@@ -204,6 +196,7 @@ class DotClassGraph
    void writeDocbook(QTextStream &t);
    void writeDEF(QTextStream &t);
    QString diskName() const;
+   static void resetNumbering();
 
  private:
    void buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool base, int distance);
@@ -237,7 +230,7 @@ class DotInclDepGraph
    QString diskName() const;
    void writeXML(QTextStream &t);
    void writeDocbook(QTextStream &t);
-
+   static void resetNumbering();
 
  private:
    void buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int distance);
@@ -268,10 +261,11 @@ class DotCallGraph
    bool isTooBig() const;
    void determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes);
    void determineTruncatedNodes(QList<DotNode *> &queue);
+   static void resetNumbering();
 
  private:
-   DotNode        *m_startNode;
-   static int      m_curNodeNumber;
+   DotNode     *m_startNode;
+   static int   m_curNodeNumber;
 
    QHash<QString, DotNode *> *m_usedNodes;
 
@@ -336,12 +330,14 @@ class DotGroupCollaboration
 
    DotGroupCollaboration(QSharedPointer<GroupDef> gd);
    ~DotGroupCollaboration();
+
    QString writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const QString &path, const QString &fileName, const QString &relPath,
                          bool writeImageMap = true, int graphId = -1) const;
 
    void buildGraph(QSharedPointer<GroupDef> gd);
    bool isTrivial() const;
+   static void resetNumbering();
 
  private :
    void addCollaborationMember(QSharedPointer<Definition> def, const QString &url, EdgeType eType);
@@ -352,7 +348,7 @@ class DotGroupCollaboration
    Edge *addEdge(DotNode *_pNStart, DotNode *_pNEnd, EdgeType _eType, const QString &_label, const QString &_url );
 
    DotNode        *m_rootNode;
-   int             m_curNodeId;
+   static int      m_curNodeNumber;
 
    QHash<QString, DotNode *> *m_usedNodes;
 
@@ -395,13 +391,11 @@ class DotRunner
 
    QString m_postArgs;
    QString m_postCmd;
-
    QString m_file;
    QString m_path;
    QString m_dotExe;
 
    QString m_imageName;
-   QString m_imageFormat;
 
    bool m_checkResult;
    bool m_cleanUp;
@@ -510,5 +504,7 @@ void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
                   const QString &baseName, const QString &context, int graphId = -1);
 
 void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd);
+
+void resetDotNodeNumbering();
 
 #endif

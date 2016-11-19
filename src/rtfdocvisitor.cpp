@@ -290,8 +290,16 @@ void RTFDocVisitor::visit(DocStyleChange *s)
 
       case DocStyleChange::Div:  /* HTML only */
          break;
+
       case DocStyleChange::Span: /* HTML only */
          break;
+   }
+}
+
+static void visitCaption(RTFDocVisitor *parent, QList<DocNode *> children)
+{
+   for (auto n : children) {
+      n->accept(parent);
    }
 }
 
@@ -305,7 +313,8 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
    QString lang = m_langExt;
 
-   if (! s->language().isEmpty()) { // explicit language setting
+   if (! s->language().isEmpty()) { 
+      // explicit language setting
       lang = s->language();
    }
 
@@ -316,8 +325,10 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          m_t << "{" << endl;
          m_t << "\\par" << endl;
          m_t << rtf_Style_Reset << getStyle("CodeExample");
+
          Doxy_Globals::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(), langExt,
                      s->isExample(), s->exampleFile());
+
          //m_t << "\\par" << endl;
          m_t << "}" << endl;
          break;
@@ -351,16 +362,15 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
          QFile file(fileName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), file.error());            
+            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());            
          }
 
          file.write( s->text().toUtf8() );
          file.close();
 
-         m_t << "\\par{\\qc "; // center picture
-         writeDotFile(fileName);
-
-         m_t << "} ";
+         writeDotFile(fileName, s->hasCaption());
+         visitCaption(this, s->children());
+         includePicturePostRTF(true, s->hasCaption());
 
          if (Config::getBool("dot-cleanup")) {
             file.remove();
@@ -385,10 +395,9 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          file.write( text.toUtf8() );
          file.close();
 
-         m_t << "\\par{\\qc "; // center picture
-         writeMscFile(baseName);
-
-         m_t << "} ";
+         writeMscFile(baseName, s->hasCaption());
+         visitCaption(this, s->children());
+         includePicturePostRTF(true, s->hasCaption());
 
          if (Config::getBool("dot-cleanup")) {
             file.remove();
@@ -400,9 +409,9 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          static QString rtfOutput = Config::getString("rtf-output");
          QString baseName = writePlantUMLSource(rtfOutput, s->exampleFile(), s->text());
 
-         m_t << "\\par{\\qc "; // center picture
-         writePlantUMLFile(baseName);
-         m_t << "} ";
+         writePlantUMLFile(baseName, s->hasCaption());
+         visitCaption(this, s->children());
+         includePicturePostRTF(true, s->hasCaption());
       }
       break;
    }
@@ -455,7 +464,8 @@ void RTFDocVisitor::visit(DocInclude *inc)
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd,
+                     -1, -1, false, QSharedPointer<MemberDef>(), true);
 
          m_t << "\\par";
          m_t << "}" << endl;
@@ -468,7 +478,9 @@ void RTFDocVisitor::visit(DocInclude *inc)
          m_t << rtf_Style_Reset << getStyle("CodeExample");
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     inc->text(), langExt, inc->isExample(),inc->exampleFile());
+                     inc->text(), langExt, inc->isExample(),inc->exampleFile(), QSharedPointer<FileDef>(),
+                     -1, -1, true, QSharedPointer<MemberDef>(), false);
+
          m_t << "\\par";
          m_t << "}" << endl;
          break;
@@ -1240,73 +1252,102 @@ void RTFDocVisitor::visitPost(DocHtmlHeader *)
 void RTFDocVisitor::visitPre(DocImage *img)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocImage)}\n");
-   if (img->type() == DocImage::Rtf) {
+
+   includePicturePreRTF(img->name(), img->type() == DocImage::Rtf, img->hasCaption());
+}
+
+void RTFDocVisitor::includePicturePreRTF(const QString name, const bool isTypeRTF, const bool hasCaption)
+{
+   if (isTypeRTF) {
       m_t << "\\par" << endl;
       m_t << "{" << endl;
       m_t << rtf_Style_Reset << endl;
-      m_t << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-      m_t << img->name();
-      m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
-      m_t << "}" << endl;
+      
+      if (hasCaption || m_lastIsPara) {
+         m_t << "\\par" << endl;
+      }
+
+      m_t << "\\pard \\qc { \\field\\flddirty {\\*\\fldinst  INCLUDEPICTURE \"";
+      m_t << name;
+      m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt Image}}" << endl;
+      m_t << "\\par" << endl;
+
+      if (hasCaption) {
+         m_t << "\\pard \\qc \\b";
+         m_t << "{Image \\field\\flddirty{\\*\\fldinst { SEQ Image \\\\*Arabic }}{\\fldrslt {\\noproof 1}} ";
+      }
+
       m_lastIsPara = true;
-   } else { // other format -> skip
+
+   } else { 
+      // other format -> skip
+   
+      pushEnabled();
+      m_hide = true;
    }
-   // hide caption since it is not supported at the moment
-   pushEnabled();
-   m_hide = true;
 }
 
-void RTFDocVisitor::visitPost(DocImage *)
+void RTFDocVisitor::visitPost(DocImage *img)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocImage)}\n");
-   popEnabled();
+   includePicturePostRTF(img->type()==DocImage::Rtf, img->hasCaption());
+}
+
+void RTFDocVisitor::includePicturePostRTF(const bool isTypeRTF, const bool hasCaption)
+{
+   if (isTypeRTF) {
+      if (m_hide) {
+         return;
+      }
+
+      if (hasCaption) {
+         m_t << "}" <<endl;
+         m_t << "\\par}" <<endl;
+
+      } else {
+         m_t << "}" <<endl;
+      }
+
+   } else {
+      popEnabled();
+
+   }
 }
 
 void RTFDocVisitor::visitPre(DocDotFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocDotFile)}\n");
-   writeDotFile(df->file());
-
-   // hide caption since it is not supported at the moment
-   pushEnabled();
-   m_hide = true;
+   writeDotFile(df);
 }
 
-void RTFDocVisitor::visitPost(DocDotFile *)
+void RTFDocVisitor::visitPost(DocDotFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocDotFile)}\n");
-   popEnabled();
+   includePicturePostRTF(true, df->hasCaption());
 }
+
 void RTFDocVisitor::visitPre(DocMscFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocMscFile)}\n");
-   writeMscFile(df->file());
-
-   // hide caption since it is not supported at the moment
-   pushEnabled();
-   m_hide = true;
+   writeMscFile(df);  
 }
 
-void RTFDocVisitor::visitPost(DocMscFile *)
+void RTFDocVisitor::visitPost(DocMscFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocMscFile)}\n");
-   popEnabled();
+   includePicturePostRTF(true, df->hasCaption());  
 }
 
 void RTFDocVisitor::visitPre(DocDiaFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocDiaFile)}\n");
-   writeDiaFile(df->file());
-
-   // hide caption since it is not supported at the moment
-   pushEnabled();
-   m_hide = true;
+   writeDiaFile(df); 
 }
 
-void RTFDocVisitor::visitPost(DocDiaFile *)
+void RTFDocVisitor::visitPost(DocDiaFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocDiaFile)}\n");
-   popEnabled();
+   includePicturePostRTF(true, df->hasCaption());
 }
 
 void RTFDocVisitor::visitPre(DocLink *lnk)
@@ -1314,6 +1355,7 @@ void RTFDocVisitor::visitPre(DocLink *lnk)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocLink)}\n");
    startLink(lnk->ref(), lnk->file(), lnk->anchor());
 }
@@ -1894,12 +1936,16 @@ void RTFDocVisitor::popEnabled()
    m_hide = v;  
 }
 
-void RTFDocVisitor::writeDotFile(const QString &fileName)
+void RTFDocVisitor::writeDotFile(DocDotFile *df)
+{
+   writeDotFile(df->file(), df->hasCaption());
+}
+
+void RTFDocVisitor::writeDotFile(const QString &fileName, const bool hasCaption)
 {
    QString baseName = fileName;
 
    int i;
-
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
@@ -1907,89 +1953,55 @@ void RTFDocVisitor::writeDotFile(const QString &fileName)
    QString outDir = Config::getString("rtf-output");
    writeDotGraphFromFile(fileName, outDir, baseName, GOF_BITMAP);
 
-   if (!m_lastIsPara) {
-      m_t << "\\par" << endl;
-   }
-
-   m_t << "{" << endl;
-   m_t << rtf_Style_Reset;
-   m_t << "\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_t << baseName << "." << Config::getEnum("dot-image-format");
-   m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
-   m_t << "}" << endl;
-   m_lastIsPara = true;
+   static const QString imageExt = Config::getEnum("dot-image-extension");
+   includePicturePreRTF(baseName + "." + imageExt, true, hasCaption);  
 }
 
-void RTFDocVisitor::writeMscFile(const QString &fileName)
+void RTFDocVisitor::writeMscFile(DocMscFile *df)
+{
+   writeMscFile(df->file(), df->hasCaption());
+}
+
+void RTFDocVisitor::writeMscFile(const QString &fileName, const bool hasCaption)
 {
    QString baseName = fileName;
-   int i;
 
+   int i;
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
    QString outDir = Config::getString("rtf-output");
-   writeMscGraphFromFile(fileName, outDir, baseName, MSC_BITMAP);
+   writeMscGraphFromFile(fileName, outDir, baseName, MSC_BITMAP);   
 
-   if (! m_lastIsPara) {
-      m_t << "\\par" << endl;
-   }
-
-   m_t << "{" << endl;
-   m_t << rtf_Style_Reset;
-   m_t << "\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_t << baseName << ".png";
-   m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
-   m_t << "}" << endl;
-   m_lastIsPara = true;
+   includePicturePreRTF(baseName + ".png", true, hasCaption);
 }
 
-void RTFDocVisitor::writeDiaFile(const QString &fileName)
+void RTFDocVisitor::writeDiaFile(DocDiaFile *df)
 {
-   QString baseName = fileName;
-   int i;
+   QString baseName = df->file();
 
+   int i;
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
    QString outDir = Config::getString("rtf-output");
-   writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
-
-   if (!m_lastIsPara) {
-      m_t << "\\par" << endl;
-   }
-   m_t << "{" << endl;
-   m_t << rtf_Style_Reset;
-   m_t << "\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_t << baseName << ".png";
-   m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
-   m_t << "}" << endl;
-   m_lastIsPara = true;
+   writeDiaGraphFromFile(df->file(), outDir, baseName, DIA_BITMAP); 
+   includePicturePreRTF(baseName + ".png", true, df->hasCaption());
 }
 
-void RTFDocVisitor::writePlantUMLFile(const QString &fileName)
+void RTFDocVisitor::writePlantUMLFile(const QString &fileName, const bool hasCaption)
 {
    QString baseName = fileName;
-   int i;
 
+   int i;
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);   
    }
 
    QString outDir = Config::getString("rtf-output");
    generatePlantUMLOutput(fileName, outDir, PUML_BITMAP);
-
-   if (!m_lastIsPara) {
-      m_t << "\\par" << endl;
-   }
-   m_t << "{" << endl;
-   m_t << rtf_Style_Reset;
-   m_t << "\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_t << baseName << ".png";
-   m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
-   m_t << "}" << endl;
-   m_lastIsPara = true;
+   includePicturePreRTF(baseName + ".png", true, hasCaption); 
 }
 

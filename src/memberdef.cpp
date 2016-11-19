@@ -1131,7 +1131,8 @@ void MemberDef::computeLinkableInProject() const
       m_isLinkableCached = 1; // not a valid or a dummy name
       return;
    }
-   if (! hasDocumentation() && ! isReference()) {
+
+   if (! hasDocumentation() || isReference()) {
       m_isLinkableCached = 1; // no documentation
       return;
    }
@@ -3195,7 +3196,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       ol.startParagraph();
 
       ol.generateDoc(briefFile(), briefLine(), scopedContainer, self,
-                  brief, false, false, 0, true, false);
+                  brief, false, false, "", true, false);
 
       ol.endParagraph();
    }
@@ -3484,13 +3485,13 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    /* write brief description */
    if (!brief.isEmpty()) {
       ol.generateDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : container, self,
-                     brief, false, false, 0, true, false);
+                     brief, false, false, "", true, false);
    }
 
    /* write detailed description */
    if (!detailed.isEmpty()) {
       ol.generateDoc(docFile(), docLine(), getOuterScope() ? getOuterScope() : container, self,
-                     detailed + "\n", false, false, 0, false, false);
+                     detailed + "\n", false, false, "", false, false);
 
    }
 

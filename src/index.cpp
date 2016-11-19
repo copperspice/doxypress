@@ -308,6 +308,7 @@ void startFile(OutputList &ol, const QString &name, const QString &manName, cons
    }    
 
    ol.writeSearchInfo();
+   resetDotNodeNumbering();
 }
 
 void endFile(OutputList &ol, bool skipNavIndex, bool skipEndContents, const QString &navPath)
@@ -1110,7 +1111,7 @@ static void writeSingleFileIndex(OutputList &ol, QSharedPointer<FileDef> fd)
 
       if (hasBrief) {         
          ol.generateDoc(fd->briefFile(), fd->briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription(true),
-               false, false, 0, true, true);         
+               false, false, "", true, true);         
       }
 
       ol.endIndexValue(fd->getOutputFileBase(), hasBrief);      
@@ -1292,7 +1293,7 @@ static void writeSingleFileSourceIndex(OutputList &ol, QSharedPointer<FileDef> f
 
       if (hasBrief) {         
          ol.generateDoc(fd->briefFile(), fd->briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription(true),
-               false, false, 0, true, true);         
+               false, false, "", true, true);         
       }
 
       ol.endIndexValue(fd->getOutputFileBase(), hasBrief);      
@@ -1571,7 +1572,7 @@ static void writeNamespaceIndex(OutputList &ol)
 
          if (hasBrief) {            
             ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), nd->briefDescription(true),
-               false, false, 0, true, true);            
+               false, false, "", true, true);            
          }
 
          ol.endIndexValue(nd->getOutputFileBase(), hasBrief);
@@ -1658,7 +1659,7 @@ static void writeAnnotatedClassList(OutputList &ol)
 
          if (hasBrief) {
             ol.generateDoc(cd->briefFile(), cd->briefLine(), cd, QSharedPointer<MemberDef>(), cd->briefDescription(true),
-               false, false, 0, true, true);
+               false, false, "", true, true);
          }
 
          ol.endIndexValue(cd->getOutputFileBase(), hasBrief);    
@@ -3324,14 +3325,13 @@ void writeGraphInfo(OutputList &ol)
    ol.startContents();
 
    //
-   static QString dotFormat = Config::getEnum("dot-image-format");
-
-   QString legendDocs = theTranslator->trLegendDocs(dotFormat);
+   static const QString imageExt = Config::getEnum("dot-image-extension");
+   QString legendDocs = theTranslator->trLegendDocs(imageExt);
 
    int s = legendDocs.indexOf("<center>");
    int e = legendDocs.indexOf("</center>");
 
-   if (dotFormat == "svg" && s != -1 && e != -1) {
+   if (imageExt == "svg" && s != -1 && e != -1) {
       legendDocs = legendDocs.left(s + 8) + "[!-- SVG 0 --]\n" + legendDocs.mid(e);    
    }
 
@@ -3739,7 +3739,7 @@ static void writeIndex(OutputList &ol)
          ol.startTitleHead(0);
 
          ol.generateDoc(Doxy_Globals::mainPage->docFile(), Doxy_Globals::mainPage->docLine(), Doxy_Globals::mainPage, 
-                        QSharedPointer<MemberDef>(), Doxy_Globals::mainPage->title(), true, false, 0, true, false);
+                        QSharedPointer<MemberDef>(), Doxy_Globals::mainPage->title(), true, false, "", true, false);
 
          headerWritten = true;
       }

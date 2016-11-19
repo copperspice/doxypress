@@ -473,5 +473,15 @@
 \definecolor{vhdllogic}{rgb}{1.0,0.0,0.0}
 \definecolor{vhdlchar}{rgb}{0.0,0.0,0.0}
 
-% Color used for table heading
+% Used for table heading
 \newcommand{\tableheadbgcolor}{lightgray}%
+
+% Version of hypertarget with correct landing location
+\newcommand{\Hypertarget}[1]{\Hy@raisedlink{\hypertarget{#1}{}}}
+
+% Define caption which is also suitable in a table
+\makeatletter
+\def\doxyfigcaption{%
+\refstepcounter{figure}%
+\@dblarg{\@caption{figure}}}
+\makeatother

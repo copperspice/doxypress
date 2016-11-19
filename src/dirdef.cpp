@@ -120,9 +120,11 @@ QString DirDef::getOutputFileBase() const
 
 void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   if ((! briefDescription().isEmpty() && Config::getBool("repeat-brief")) || ! documentation().isEmpty()) {
+   if ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty()) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       ol.writeRuler();
@@ -136,12 +138,12 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
       ol.endGroupHeader();
 
       // repeat brief description
-      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
+      if (! briefDescription().isEmpty() && repeatBrief) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
       // separator between brief and details
-      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief") && ! documentation().isEmpty()) {
+      if (! briefDescription().isEmpty() && repeatBrief && ! documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
@@ -155,7 +157,7 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
       }
 
       // write documentation
-      if (!documentation().isEmpty()) {
+      if (! documentation().isEmpty()) {
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
    }
@@ -163,21 +165,29 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
 void DirDef::writeBriefDescription(OutputList &ol)
 {
-   QSharedPointer<DirDef> self = sharedFrom(this);
+   static const bool repeatBrief = Config::getBool("repeat-brief");
 
-   if (! briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+   QSharedPointer<DirDef> self = sharedFrom(this);
+   
+   if (hasBriefDescription())  {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false);
 
-      if (rootNode && !rootNode->isEmpty()) {
+      if (rootNode && ! rootNode->isEmpty()) {
          ol.startParagraph();
+
+         ol.pushGeneratorState();
+         ol.disableAllBut(OutputGenerator::Man);
+         ol.writeString(" - ");
+         ol.popGeneratorState();
+
          ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::RTF);
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (Config::getBool("repeat-brief") || !documentation().isEmpty()) {
+         if (repeatBrief || ! documentation().isEmpty()) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(0, "details");
             ol.parseText(theTranslator->trMore());
@@ -221,8 +231,16 @@ void DirDef::writeDirectoryGraph(OutputList &ol)
 
 void DirDef::writeSubDirList(OutputList &ol)
 {
+   int numSubdirs = 0;
+
+   for (auto dd : m_subdirs) {
+      if (dd->hasDocumentation() || dd->getFiles()->count() > 0) {
+         numSubdirs++;
+      }
+   }
+
    // write subdir list
-   if (m_subdirs.count() > 0) {
+   if (numSubdirs > 0) {
       ol.startMemberHeader("subdirs");
       ol.parseText(theTranslator->trDir(true, false));
       ol.endMemberHeader();
@@ -230,31 +248,26 @@ void DirDef::writeSubDirList(OutputList &ol)
 
       for (auto dd : m_subdirs) {
 
-         if (! dd->hasDocumentation()) {
-            continue;
+         if (dd->hasDocumentation() || dd->getFiles()->count()== 0) {         
+   
+            ol.startMemberDeclaration();
+            ol.startMemberItem(dd->getOutputFileBase(), 0);
+            ol.parseText(theTranslator->trDir(false, true) + " ");
+            ol.insertMemberAlign();
+            ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
+            ol.endMemberItem();
+
+            if (! dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+               ol.startMemberDescription(dd->getOutputFileBase());
+   
+               ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
+                              false, false, "", true, true);
+   
+               ol.endMemberDescription();
+            }
+
+            ol.endMemberDeclaration(0, 0);
          }
-
-         ol.startMemberDeclaration();
-         ol.startMemberItem(dd->getOutputFileBase(), 0);
-         ol.parseText(theTranslator->trDir(false, true) + " ");
-         ol.insertMemberAlign();
-         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
-         ol.endMemberItem();
-
-         if (!dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
-            ol.startMemberDescription(dd->getOutputFileBase());
-
-            ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
-                           false, // indexWords
-                           false, // isExample
-                           0,     // exampleName
-                           true,  // single line
-                           true   // link from index
-                          );
-
-            ol.endMemberDescription();
-         }
-         ol.endMemberDeclaration(0, 0);
       }
 
       ol.endMemberList();
@@ -263,8 +276,16 @@ void DirDef::writeSubDirList(OutputList &ol)
 
 void DirDef::writeFileList(OutputList &ol)
 {
+   int numFiles = 0;
+
+   for (auto fd : *m_fileList) {
+      if (fd->hasDocumentation()) {
+         numFiles++;
+       }
+   }
+
    // write file list
-   if (m_fileList->count() > 0) {
+   if (numFiles > 0) {
       ol.startMemberHeader("files");
       ol.parseText(theTranslator->trFile(true, false));
       ol.endMemberHeader();
@@ -272,52 +293,46 @@ void DirDef::writeFileList(OutputList &ol)
 
       for (auto fd : *m_fileList) {
 
-         if (! fd->hasDocumentation()) {
-            continue;
+         if (fd->hasDocumentation()) {
+            ol.startMemberDeclaration();
+            ol.startMemberItem(fd->getOutputFileBase(), 0);
+            ol.docify(theTranslator->trFile(false, true) + " ");
+            ol.insertMemberAlign();
+   
+            if (fd->isLinkable()) {
+               ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fd->name());
+            } else {
+               ol.startBold();
+               ol.docify(fd->name());
+               ol.endBold();
+            }
+   
+            if (fd->generateSourceFile()) {
+               ol.pushGeneratorState();
+               ol.disableAllBut(OutputGenerator::Html);
+               ol.docify(" ");
+               ol.startTextLink(fd->includeName(), 0);
+               ol.docify("[");
+               ol.parseText(theTranslator->trCode());
+               ol.docify("]");
+               ol.endTextLink();
+               ol.popGeneratorState();
+            }
+
+            ol.endMemberItem();
+   
+            if (! fd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+               ol.startMemberDescription(fd->getOutputFileBase());
+   
+               ol.generateDoc(briefFile(), briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription(),
+                              false, false, "", true, true);
+   
+               ol.endMemberDescription();
+            }
+            ol.endMemberDeclaration(0, 0);
          }
-
-         ol.startMemberDeclaration();
-         ol.startMemberItem(fd->getOutputFileBase(), 0);
-         ol.docify(theTranslator->trFile(false, true) + " ");
-         ol.insertMemberAlign();
-
-         if (fd->isLinkable()) {
-            ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fd->name());
-         } else {
-            ol.startBold();
-            ol.docify(fd->name());
-            ol.endBold();
-         }
-
-         if (fd->generateSourceFile()) {
-            ol.pushGeneratorState();
-            ol.disableAllBut(OutputGenerator::Html);
-            ol.docify(" ");
-            ol.startTextLink(fd->includeName(), 0);
-            ol.docify("[");
-            ol.parseText(theTranslator->trCode());
-            ol.docify("]");
-            ol.endTextLink();
-            ol.popGeneratorState();
-         }
-
-         ol.endMemberItem();
-
-         if (! fd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
-            ol.startMemberDescription(fd->getOutputFileBase());
-
-            ol.generateDoc(briefFile(), briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription(),
-                           false, // indexWords
-                           false, // isExample
-                           0,     // exampleName
-                           true,  // single line
-                           true   // link from index
-                          );
-
-            ol.endMemberDescription();
-         }
-         ol.endMemberDeclaration(0, 0);
       }
+
       ol.endMemberList();
    }
 }
@@ -339,7 +354,7 @@ QString DirDef::shortTitle() const
 
 bool DirDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config::getBool("repeat-brief");
+   static const bool repeatBrief = Config::getBool("repeat-brief");
    return (! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty();
 }
 

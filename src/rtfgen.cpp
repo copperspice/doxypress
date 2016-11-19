@@ -2237,14 +2237,16 @@ void RTFGenerator::endDotGraph(const DotClassGraph &g)
 {
    newParagraph();
 
-   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, true, false);
-   QString imageFormat = Config::getEnum("dot-image-format");
+   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), 
+                  m_fileName, relPath, true, false); 
+
+   static const QString imageExt = Config::getEnum("dot-image-extension");
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << imageFormat;
+   m_textStream << fn << "." << imageExt;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
    newParagraph();
@@ -2262,13 +2264,13 @@ void RTFGenerator::endInclDepGraph(const DotInclDepGraph &g)
    newParagraph();
 
    QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
-   QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt = Config::getEnum("dot-image-extension");
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << imageFormat;
+   m_textStream << fn << "." << imageExt;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
 
@@ -2293,13 +2295,13 @@ void RTFGenerator::endCallGraph(const DotCallGraph &g)
    newParagraph();
 
    QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
-   QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt = Config::getEnum("dot-image-extension");
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << imageFormat;
+   m_textStream << fn << "." << imageExt;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
    DBG_RTF(m_textStream << "{\\comment (endCallGraph)}"    << endl)
@@ -2315,13 +2317,13 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
    newParagraph();
 
    QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
-   QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt = Config::getEnum("dot-image-extension");
 
    // display the file
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset << endl;
    m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE \"";
-   m_textStream << fn << "." << imageFormat;
+   m_textStream << fn << "." << imageExt;
    m_textStream << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
    m_textStream << "}" << endl;
 

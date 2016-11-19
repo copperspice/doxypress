@@ -395,6 +395,8 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
    //     (templateArguments(), definitionTemplateParameterLists())
    // - call graph
 
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+
    // enum values are written as part of the enum
    if (md->memberType() == MemberType_EnumValue) {
       return;
@@ -404,12 +406,9 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
       return;
    }
 
-   static bool repeatBrief = Config::getBool("repeat-brief");
-
-   //if (md->name().at(0)=='@') return; // anonymous member
-
+   // if (md->name().at(0)=='@') return; // anonymous member
    // group members are only visible in their group
-   //if (def->definitionType()!=Definition::TypeGroup && md->getGroupDef()) return;
+   // if (def->definitionType()!=Definition::TypeGroup && md->getGroupDef()) return;
 
    QString memType;
 
@@ -849,7 +848,7 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
       return;
    }
 
-   static bool repeatBrief = Config::getBool("repeat-brief");
+   static const bool repeatBrief = Config::getBool("repeat-brief");
 
    int count     = 0;
    int doc_count = 0;
@@ -1186,9 +1185,10 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    if (cd->templateMaster() != 0) {
       return;   // skip generated template instances.
    }
-
+  
    static const QString docbookOutDir = Config::getString("docbook-output");
    static const bool    haveDot       = Config::getBool("have-dot"); 
+   static const bool repeatBrief      = Config::getBool("repeat-brief");
  
    msg("Generating Docbook output for class %s\n", csPrintable(cd->name()));
 
@@ -1225,7 +1225,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
          nm = ii->fileDef->docName();
       }
 
-      if (!nm.isEmpty()) {
+      if (! nm.isEmpty()) {
          t << "<para>" << endl;
          t << "    <programlisting>#include ";
 
@@ -1283,7 +1283,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       }
    }
 
-   if (Config::getBool("repeat-brief")) {
+   if (repeatBrief) {
 
       if (! cd->briefDescription().isEmpty()) {
          t << "    <simplesect>" << endl;
@@ -1333,13 +1333,15 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
    if (nd->isReference() || nd->isHidden()) {
       return;   // skip external references
    }
+   
+   QString outputDirectory       = Config::getString("docbook-output");
+   static const bool repeatBrief = Config::getBool("repeat-brief");
 
    QString fileDocbook = nd->getOutputFileBase() + ".xml";
    //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
-   QString outputDirectory = Config::getString("docbook-output");
-   QString fileName = outputDirectory + "/" + nd->getOutputFileBase() + ".xml";
+  QString fileName = outputDirectory + "/" + nd->getOutputFileBase() + ".xml";
 
    QFile f(fileName);
 
@@ -1370,12 +1372,14 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
       }
    }
 
-   if (Config::getBool("repeat-brief")) {
+   if (repeatBrief) {
 
       if (! nd->briefDescription().isEmpty()) {
          t << "    <simplesect>" << endl;
 
-         writeDocbookDocBlock(t, nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), nd->briefDescription());
+         writeDocbookDocBlock(t, nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), 
+                  nd->briefDescription());
+
          t << "    </simplesect>" << endl;
       }
    }
@@ -1386,8 +1390,10 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
 
       writeDocbookDocBlock(t, nd->docFile(), nd->docLine(), nd, QSharedPointer<MemberDef>(), nd->documentation());
 
-      t << "                <para>Definition at line " << nd->getDefLine() << " of file " << stripPath(nd->getDefFileName()) << "</para>" << endl;
-      t << "                <para>The Documentation for this struct was generated from the following file: </para>" << endl;
+      t << "                <para>Definition at line " << nd->getDefLine() << " of file "; 
+      t << stripPath(nd->getDefFileName()) << "</para>" << endl;
+      t << "                <para>The Documentation for this struct was generated from the following file: </para>";
+      t << endl;
 
       t << "                <para><itemizedlist><listitem><para>" << stripPath(nd->getDefFileName())
         << "</para></listitem></itemizedlist></para>" << endl;

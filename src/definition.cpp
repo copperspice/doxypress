@@ -1861,6 +1861,21 @@ SortedList<QSharedPointer<GroupDef>> *Definition::partOfGroups() const
    return m_private->partOfGroups;
 }
 
+bool Definition::isLinkableViaGroup() const
+{
+   SortedList<QSharedPointer<GroupDef>> *gl = partOfGroups();
+   
+   if (gl) {
+      for (auto gd : *gl) {   
+         if (gd->isLinkable()) {
+            return true;
+         }
+      }
+   }
+
+  return false;
+}
+
 QSharedPointer<Definition> Definition::findInnerCompound(const QString &)
 {
    return QSharedPointer<Definition>();
@@ -1919,6 +1934,7 @@ void Definition::setPhraseName(const QString &phrase)
 bool Definition::hasBriefDescription() const
 {
    static bool briefMemberDesc = Config::getBool("brief-member-desc");
+
    return ! briefDescription().isEmpty() && briefMemberDesc;
 }
 

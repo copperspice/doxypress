@@ -325,6 +325,8 @@ QString externalRef(const QString &relPath, const QString &ref, bool href);
 
 void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn);
 
+void writeExtraLatexPackages(QTextStream &t);
+
 /** Data associated with a HSV colored image. */
 struct ColoredImgDataItem {
    QString  path;

@@ -550,7 +550,9 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
          if (! st.isEmpty()) {
             ol.startMemberSubtitle();
-            ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), subtitle, false, false, 0, false, false);
+            ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), subtitle, 
+                  false, false, "", false, false);
+
             ol.endMemberSubtitle();
          }
       }

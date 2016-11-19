@@ -96,6 +96,19 @@ static bool isIdChar(const QChar &text)
    return retval;
 }
 
+static bool extraChar(const QChar &text)
+{
+   bool retval = false;
+
+   if (text == '-' || text == '+' || text == '!' || text == '?' || text == '$' || 
+       text == '@' || text == '&' || text == '*' || text == '%') {
+
+      retval = true;
+   }
+
+   return retval;
+}
+
 // escape characters that have a special meaning later on
 static QString escapeSpecialChars(const QString &text)
 {
@@ -713,8 +726,8 @@ static int processEmphasis(QString &out, const QString &data, int offset, int si
 
    // invalid char before * or _, invalid char after * or _, invalid char after ** or __
    if ( (offset > 0 && ! isOpenEmphChar(charA)) ||
-        (size > 1 && data0 != data1 && ! (isIdChar(data1) || data1 == '[')) ||
-        (size > 2 && data0 == data1 && ! (isIdChar(data2) || data2 == '[')) ) {
+        (size > 1 && data0 != data1 && ! (isIdChar(data1) || extraChar(data1) || data1 == '[')) ||
+        (size > 2 && data0 == data1 && ! (isIdChar(data2) || extraChar(data2) || data2 == '[')) ) {
 
       return 0;
    }

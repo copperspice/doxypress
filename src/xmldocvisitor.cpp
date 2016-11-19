@@ -336,7 +336,8 @@ void XmlDocVisitor::visit(DocInclude *inc)
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
          Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd); 
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd,
+                     -1, -1, false, QSharedPointer<MemberDef>(), true);
 
          m_t << "</programlisting>";
       }
@@ -345,8 +346,9 @@ void XmlDocVisitor::visit(DocInclude *inc)
       case DocInclude::Include:
          m_t << "<programlisting>";
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(),
-                     langExt, inc->isExample(), inc->exampleFile());
+         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
+                     -1, -1, true, QSharedPointer<MemberDef>(), false);
 
          m_t << "</programlisting>";
          break;
