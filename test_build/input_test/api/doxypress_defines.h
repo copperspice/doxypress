@@ -101,10 +101,6 @@ int qMacVersion();
 
 #define Q_DECLARE_METATYPE(TYPE)
 
-class QPixMap {
-   public:
-      enum ShareMode { ImplicitlyShared, ExplicitlyShared };
-};
 
 class QObject {
    public:

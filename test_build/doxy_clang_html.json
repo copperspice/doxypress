@@ -1,6 +1,5 @@
 {
     "bb": {
-        "bb-style": false
     },
     "configuration": {
         "allow-sub-grouping": true,
@@ -45,7 +44,7 @@
         "inline-inherited-member": false,
         "inline-simple-struct": false,
         "internal-docs": true,
-        "javadoc-auto-brief": false,
+        "javadoc-auto-brief": true,
         "language-mapping": [
             ""
         ],
@@ -159,6 +158,7 @@
         "optimize-cplus": true,
         "optimize-fortran": false,
         "optimize-java": false,
+        "optimize-python": false,
         "output-dir": "output_clang",
         "output-language": "English",
         "strip-from-inc-path": [
@@ -209,9 +209,10 @@
         "input-patterns": [
             "*.cpp",
             "*.h",
-            "*.dox"
+            "*.dox",
+            "*.dll"
         ],
-        "input-recursive": false,
+        "input-recursive": true,
         "input-source": [
             "input_clang"
         ],
@@ -223,7 +224,7 @@
         "warn-format": "$file:$line: $text",
         "warn-logfile": "clang_warn.log",
         "warn-undoc": true,
-        "warn-undoc-param": false,
+        "warn-undoc-param": true,
         "warnings": true
     },
     "output-chm": {

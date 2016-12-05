@@ -14,6 +14,6 @@
 
 testTypeDef::myTypeDef testTypeDef::someMethod()
 {
-   /// empty method is ok, does this cause a return type mismatch? No issue found.
+   /// empty method is ok, does this cause a return type mismatch?
 }
  

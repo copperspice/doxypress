@@ -19,11 +19,11 @@
 Lemongrass is a test class to ensure two classes in one file can be documented. The following text to addHoliday() 
 and monthName() test auto linking methods. 
 
-These two auto link: monthName(int value),  monthName(int)
+These two will auto link: monthName(int value),  monthName(int)
 
 This does not link, which is correct: monthName
 
-Does the link from the QSSsl namespace work correct?   QSsl::someFunction()
+The following link from a namespace should work: QSsl::someFunction()
 
 */
 
@@ -34,4 +34,24 @@ Does the link from the QSSsl namespace work correct?   QSsl::someFunction()
 Documentation for a public variable.
 
 */
+
+
+/*!
+\fn int Lemongrass::addData(QString textA, float valueB)
+
+The parameter documentation are listed in the reverse order. The R in the return keyword is shown with a
+capital R.  This autolink should work: addHoliday()
+
+@param valueB Documentation for the second received parameter
+@param textA  Documentation for the first received parameter
+@return Documentation for the return
+
+
+*/
+
+
+
+
+
+
 

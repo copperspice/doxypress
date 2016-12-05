@@ -149,7 +149,7 @@ This method is documentation for resetTitle which is used in a property.
 
 
 /*!
-\fn Ginger::getFavorite ()
+\fn Spices Ginger::getFavorite ()
 
 The getFavorite documentation is used with with retrieving a value in a property.
 
@@ -165,7 +165,7 @@ The settFavorite documentation is used with with setting a value in a property.
 */
 
 /*!
-\fn Ginger::isScriptTitle ()
+\fn bool Ginger::isScriptTitle ()
 
 The isScriptTitle documentation is connected to a property.
 

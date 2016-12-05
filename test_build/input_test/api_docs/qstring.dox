@@ -1144,7 +1144,6 @@ causes a deep copy to occur.
 
 <b>See also </b>constData() and operator[]().
 
-
 */
 
 
@@ -3420,22 +3419,6 @@ Example:
 \endcode
 
 <b>See also </b>number() and toShort().
-
-
-*/
-
-
-/*!
-\fn QVector<uint> QString::toUcs4 () const
-
-Returns a UCS-4/UTF-32 representation of the string as a QVector&lt;uint&gt;.
-
-UCS-4 is a Unicode codec and is lossless. All characters from this string can be encoded in UCS-4. The vector is not null terminated.
-
-This function was introduced in Qt 4.2.
-
-<b>See also </b>fromUtf8(), toAscii(), toLatin1(), toLocal8Bit(), QTextCodec, fromUcs4(), and toWCharArray().
-
 
 */
 

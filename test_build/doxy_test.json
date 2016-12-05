@@ -1,6 +1,5 @@
 {
     "bb": {
-        "bb-style": false
     },
     "configuration": {
         "allow-sub-grouping": true,
@@ -161,6 +160,7 @@
         "optimize-cplus": true,
         "optimize-fortran": false,
         "optimize-java": false,
+        "optimize-python": false,
         "output-dir": "output_test",
         "output-language": "English",
         "strip-from-inc-path": [
@@ -395,7 +395,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.2"
+        "project-version": "1.2.4"
     },
     "source": {
         "clang-flags": [

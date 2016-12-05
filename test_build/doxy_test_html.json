@@ -1,6 +1,5 @@
 {
     "bb": {
-        "bb-style": false
     },
     "configuration": {
         "allow-sub-grouping": true,
@@ -9,7 +8,7 @@
         "auto-link": true,
         "brief-member-desc": true,
         "built-in-stl-support": false,
-        "case-sensitive-fname": false,
+        "case-sensitive-fname": true,
         "cpp-cli-support": false,
         "create-subdirs": false,
         "duplicate-docs": true,
@@ -36,8 +35,8 @@
         "hide-in-body-docs": false,
         "hide-navtree-members": false,
         "hide-scope-names": false,
-        "hide-undoc-classes": true,
-        "hide-undoc-members": true,
+        "hide-undoc-classes": false,
+        "hide-undoc-members": false,
         "idl-support": true,
         "inherit-docs": true,
         "inline-grouped-classes": false,
@@ -62,11 +61,11 @@
         "repeat-brief": true,
         "separate-member-pages": false,
         "short-names": false,
-        "show-file-page": false,
+        "show-file-page": true,
         "show-grouped-members-inc": false,
         "show-include-files": true,
         "show-namespace-page": true,
-        "show-used-files": false,
+        "show-used-files": true,
         "sip-support": false,
         "sort-brief-docs": true,
         "sort-by-scope-name": false,
@@ -213,7 +212,11 @@
             "*.cpp",
             "*.h",
             "*.dox",
-            "*.dll"
+            "*.dll",
+            "*.cs",
+            "*.py",
+            "*.f90",
+            "*.tcl"
         ],
         "input-recursive": true,
         "input-source": [
@@ -226,7 +229,7 @@
         "warn-doc-error": true,
         "warn-format": "$file:$line: $text",
         "warn-logfile": "doxy_error.log",
-        "warn-undoc": false,
+        "warn-undoc": true,
         "warn-undoc-param": true,
         "warnings": true
     },
@@ -407,7 +410,7 @@
         "ref-by-relation": false,
         "ref-link-source": true,
         "ref-relation": false,
-        "source-code": false,
+        "source-code": true,
         "source-tooltips": true,
         "strip-code-comments": true,
         "suffix-exclude-navtree": [

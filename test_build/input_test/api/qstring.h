@@ -1,15 +1,15 @@
 /*************************************************************************
-*                                                                         
-* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim                                                       
-* All rights reserved.                                                    
-*                                                                         
-*                                                                         
-* GNU Free Documentation License                                          
-* This file may be used under the terms of the GNU Free Documentation     
-* License version 1.3 as published by the Free Software Foundation        
-* and appearing in the file included in the packaging of this file.       
-*                                                                         
-*                                                                         
+*
+* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+*
+* GNU Free Documentation License
+* This file may be used under the terms of the GNU Free Documentation
+* License version 1.3 as published by the Free Software Foundation
+* and appearing in the file included in the packaging of this file.
+*
+*
 *************************************************************************/
 
 #ifndef QSTRING_H
@@ -29,58 +29,28 @@ class QTextCodec;
 class QLatin1String;
 class QStringRef;
 
-template <typename T> class QVector;
-
 typedef QTypedArrayData<ushort> QStringData;
 
 #define QT_UNICODE_LITERAL_II(str) u"" str
 typedef char16_t qunicodechar;
 
-
-#ifndef QT_NO_UNICODE_LITERAL
-#  define QT_UNICODE_LITERAL(str) QT_UNICODE_LITERAL_II(str)
-
-#  define QStringLiteral(str) \
-    ([]() -> QStringDataPtr { \
-        enum { Size = sizeof(QT_UNICODE_LITERAL(str))/2 - 1 }; \
-        static const QStaticStringData<Size> qstring_literal = \
-        { { Q_REFCOUNT_INITIALIZE_STATIC, Size, 0, 0, sizeof(QStringData) }, QT_UNICODE_LITERAL(str) }; \
-        QStringDataPtr holder = { qstring_literal.data_ptr() }; \
-        return holder; \
-    }()) 
-#endif
-
 #define Q_STATIC_STRING_DATA_HEADER_INITIALIZER_WITH_OFFSET(size, offset) \
-    { Q_REFCOUNT_INITIALIZE_STATIC, size, 0, 0, offset } 
+    { Q_REFCOUNT_INITIALIZE_STATIC, size, 0, 0, offset }
 
 #define Q_STATIC_STRING_DATA_HEADER_INITIALIZER(size) \
-    Q_STATIC_STRING_DATA_HEADER_INITIALIZER_WITH_OFFSET(size, sizeof(QStringData)) 
+    Q_STATIC_STRING_DATA_HEADER_INITIALIZER_WITH_OFFSET(size, sizeof(QStringData))
 
-struct QStringDataPtr {
-   QStringData *ptr;
-};
-
-template <int N>
-struct QStaticStringData {
-   QArrayData str;
-   qunicodechar data[N + 1];
-
-   QStringData *data_ptr() const {
-      Q_ASSERT(str.ref.isStatic());
-      return const_cast<QStringData *>(static_cast<const QStringData *>(&str));
-   }
-};
 
 class Q_CORE_EXPORT QString
 {
  public:
    typedef QStringData Data;
-  
+
    QString(QChar c);
    QString(int size, QChar c);
 
    explicit QString(const QChar *unicode, int size = -1);
-  
+
    inline QString();
    inline QString(const QLatin1String &latin1);
    inline QString(const QString &);
@@ -141,7 +111,7 @@ class Q_CORE_EXPORT QString
    const QChar operator[](uint i) const;
    QCharRef operator[](uint i);
 
-   inline QString & operator=(QString && other) {         
+   inline QString & operator=(QString && other) {
       qSwap(d, other.d);
       return *this;
    }
@@ -379,7 +349,6 @@ class Q_CORE_EXPORT QString
    QByteArray toLatin1() const Q_REQUIRED_RESULT;
    QByteArray toUtf8() const Q_REQUIRED_RESULT;
    QByteArray toLocal8Bit() const Q_REQUIRED_RESULT;
-   QVector<uint> toUcs4() const Q_REQUIRED_RESULT;
 
    // note - this are all inline so we can benefit from strlen() compile time optimizations
    static inline QString fromAscii(const char *str, int size = -1) {
@@ -581,7 +550,7 @@ class Q_CORE_EXPORT QString
    }
 
    typedef QChar *iterator;
-   typedef const QChar *const_iterator;  
+   typedef const QChar *const_iterator;
    typedef iterator Iterator;
    typedef const_iterator ConstIterator;
 
@@ -620,7 +589,7 @@ class Q_CORE_EXPORT QString
 #ifndef QT_NO_STL_WCHAR
    static inline QString fromStdWString(const QStdWString &s);
    inline QStdWString toStdWString() const;
-#endif 
+#endif
 
    inline bool isNull() const {
       return d == Data::sharedNull();
@@ -664,7 +633,7 @@ class Q_CORE_EXPORT QString
    struct Null { };
    static const Null null;
 
-   inline QString(const Null &) 
+   inline QString(const Null &)
       : d(Data::sharedNull()) {}
 
    inline QString &operator=(const Null &) {
@@ -1665,7 +1634,6 @@ class Q_CORE_EXPORT QStringRef
    QByteArray toLatin1() const Q_REQUIRED_RESULT;
    QByteArray toUtf8() const Q_REQUIRED_RESULT;
    QByteArray toLocal8Bit() const Q_REQUIRED_RESULT;
-   QVector<uint> toUcs4() const Q_REQUIRED_RESULT;
 
    inline void clear() {
       m_string = 0;
