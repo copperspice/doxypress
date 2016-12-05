@@ -648,9 +648,9 @@ void FileDef::writeDocumentation(OutputList &ol)
       ol.enableAll();
    }
 
-   if (Doxy_Globals::searchIndex) {
-      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
-      Doxy_Globals::searchIndex->addWord(localName(), true);
+   if (Doxy_Globals::searchIndexBase != nullptr) {
+      Doxy_Globals::searchIndexBase->setCurrentDoc(self, anchor(), false);
+      Doxy_Globals::searchIndexBase->addWord(localName(), true);
    } 
 
    SrcLangExt lang = getLanguage();    
@@ -923,7 +923,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    } else  {
       // use lex
    
-      ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
+      ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
 
@@ -975,7 +975,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
    } else {
       // use lex parser    
    
-      ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(getDefFileExtension());
+      ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), srcLang, false, 0, self);
    }
@@ -1291,7 +1291,8 @@ void FileDef::addListReferences()
 {   
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   QList<ListItemInfo> *xrefItems = xrefListItems();
+   const QList<ListItemInfo> &xrefItems = getRefItems();
+
    addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(), 
               "", QSharedPointer<Definition>());
       
@@ -1431,7 +1432,7 @@ static void addDirsAsGroups(QSharedPointer<DirEntryTree> root, QSharedPointer<Gr
          gd->makePartOfGroup(parent);
 
       } else {
-         Doxy_Globals::groupSDict->insert(root->path(), gd);
+         Doxy_Globals::groupSDict.insert(root->path(), gd);
       }
    }
   

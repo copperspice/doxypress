@@ -25,9 +25,6 @@
 class PageSDict;
 class OutputList;
 
-template <typename T>
-class StringMap;
-
 /** @brief A model of a page symbol. */
 class PageDef : public Definition
 {

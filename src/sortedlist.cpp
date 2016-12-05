@@ -17,6 +17,7 @@
 
 #include <sortedlist.h>
 
+#include <classdef.h>
 #include <config.h>
 #include <dirdef.h>
 #include <dot.h>

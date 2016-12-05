@@ -26,21 +26,22 @@
 #include <arguments.h>
 #include <definition.h>
 #include <entry.h>
+#include <filedef.h>
 #include <filenamelist.h>
 #include <groupdef.h>
 #include <memberlist.h>
 #include <membergroup.h>
 #include <membername.h>
 #include <outputlist.h>
+#include <stringmap.h>
 #include <sortedlist_fwd.h>
+#include <types.h>
 
 class ConstraintClassDef;
 class ClassDict;
 class FileDef;
 class StringDict;
 class UsesClassDef;
-
-struct IncludeInfo;
 
 /** A class representing a compound symbol
  *
@@ -50,17 +51,6 @@ struct IncludeInfo;
 class ClassDef : public Definition
 {
  public:
-   /** The various compound types */
-   enum CompoundType { Class,     //=Entry::CLASS_SEC,
-                       Struct,    //=Entry::STRUCT_SEC,
-                       Union,     //=Entry::UNION_SEC,
-                       Interface, //=Entry::INTERFACE_SEC,
-                       Protocol,  //=Entry::PROTOCOL_SEC,
-                       Category,  //=Entry::CATEGORY_SEC,
-                       Exception, //=Entry::EXCEPTION_SEC
-                       Service,   //=Entry::CLASS_SEC
-                       Singleton, //=Entry::CLASS_SEC
-                     };
 
    /** Creates a new compound definition
     *  \param fileName  full path and file name in which this compound was
@@ -82,7 +72,7 @@ class ClassDef : public Definition
     *                    I didn't add this to CompoundType to avoid having
     *                    to adapt all translators.
     */
-   ClassDef(const QString &fileName, int startLine, int startColumn, const QString &name, CompoundType ct,
+   ClassDef(const QString &fileName, int startLine, int startColumn, const QString &name, enum CompoundType ct,
             const QString &ref = QString(), const QString &fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
   
    /** Destroys a compound definition. */
@@ -123,7 +113,7 @@ class ClassDef : public Definition
    QString displayName(bool = true) const override;
 
    /** Returns the type of compound this is, i.e. class/struct/union/.. */
-   CompoundType compoundType() const;
+   enum CompoundType compoundType() const;
 
    /** Returns the type of compound as a string */
    QString compoundTypeString() const;
@@ -162,11 +152,9 @@ class ClassDef : public Definition
    /** show this class in the declaration section of its parent? */
    bool visibleInParentsDeclList() const;
 
-   /** Returns the template arguments of this class
-    *  Will return 0 if not applicable.
-    */
-   const ArgumentList *templateArguments() const;
-   ArgumentList *templateArguments();
+   // Returns the template arguments of this class      
+   const ArgumentList &getTemplateArgumentList() const;
+   ArgumentList &getTemplateArgumentList();
 
    /** Returns the namespace this compound is in, or 0 if it has a global
     *  scope.
@@ -202,7 +190,7 @@ class ClassDef : public Definition
    /** Returns a sorted dictionary with all template instances found for
     *  this template class. Returns 0 if not a template or no instances.
     */
-   QHash<QString, QSharedPointer<ClassDef>> *getTemplateInstances() const;
+   const QHash<QString, QSharedPointer<ClassDef>> &getTemplateInstances() const;
 
    /** Returns the template master of which this class is an instance.
     *  Returns 0 if not applicable.
@@ -212,11 +200,11 @@ class ClassDef : public Definition
    /** Returns true if this class is a template */
    bool isTemplate() const;
 
-   IncludeInfo *includeInfo() const;
+   const IncludeInfo &includeInfo() const;
 
-   QHash<QString, UsesClassDef> *usedImplementationClasses() const;
-   QHash<QString, UsesClassDef> *usedByImplementationClasses() const;
-   QHash<QString, UsesClassDef> *usedInterfaceClasses() const;
+   const QHash<QString, UsesClassDef> &usedImplementationClasses() const;
+   const QHash<QString, UsesClassDef> &usedByImplementationClasses() const;
+   const QHash<QString, UsesClassDef> &usedInterfaceClasses() const;
 
    QHash<QString, QSharedPointer<ConstraintClassDef>> templateTypeConstraints() const;
 
@@ -237,7 +225,7 @@ class ClassDef : public Definition
     */
    void getTemplateParameterLists(QList<ArgumentList> &lists) const;
 
-   QString qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams = 0, int *actualParamIndex = 0) const;
+   QString qualifiedNameWithTemplateParameters(const QList<ArgumentList> &actualParams = QList<ArgumentList>(), int *actualParamIndex = 0) const;
 
    /** Returns true if there is at least one pure virtual member in this
     *  class.
@@ -282,7 +270,7 @@ class ClassDef : public Definition
    /** Returns the member groups defined for this class */
    MemberGroupSDict *getMemberGroupSDict() const;
 
-   QHash<QString, int> *getTemplateBaseClassNames() const;
+   const QHash<QString, int> &getTemplateBaseClassNames() const;
 
    QSharedPointer<ClassDef> getVariableInstance(const QString &templSpec);
 
@@ -308,7 +296,7 @@ class ClassDef : public Definition
    QString generatedFromFiles() const;
    const FileList &usedFiles() const;
 
-   const ArgumentList *typeConstraints() const;
+   const ArgumentList &typeConstraints() const;
    const ExampleSDict *exampleList() const;
    bool hasExamples() const;
    QString getMemberListFileName() const;
@@ -337,15 +325,15 @@ class ClassDef : public Definition
    void addUsedClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
    void addUsedByClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
    void setIsStatic(bool b);
-   void setCompoundType(CompoundType t);
+   void setCompoundType(enum CompoundType t);
    void setClassName(const QString &name);
 
    void setClassTraits(Entry::Traits traits);
 
-   void setTemplateArguments(ArgumentList *al);
-   void setTemplateBaseClassNames(QHash<QString, int> *templateNames);
+   void setTemplateArguments(const ArgumentList &al);
+   void setTemplateBaseClassNames(const QHash<QString, int> &templateNames);
    void setTemplateMaster(QSharedPointer<ClassDef> tm);
-   void setTypeConstraints(ArgumentList *al);
+   void setTypeConstraints(const ArgumentList &al);
    void addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const QString &templSpec);
    void makeTemplateArgument(bool b = true);
    void setCategoryOf(QSharedPointer<ClassDef> cd);
@@ -453,7 +441,7 @@ class ClassDef : public Definition
    /*! Include information about the header file should be included
     *  in the documentation. 0 by default, set by setIncludeFile().
     */
-   IncludeInfo *m_incInfo;
+   IncludeInfo m_incInfo;
 
    /*! List of base class (or super-classes) from which this class derives
     *  directly.
@@ -484,11 +472,11 @@ class ClassDef : public Definition
    /*! Files that were used for generating the class documentation. */
    FileList m_files;
 
-   /*! Examples that use this class */
-   ExampleSDict *m_exampleSDict;
+   /*! Examples that uses this class */
+   ExampleSDict m_exampleSDict;
 
    /*! Holds the kind of "class" this is. */
-   ClassDef::CompoundType m_compType;
+   enum CompoundType m_compType;
 
    /*! The protection level in which this class was found.
     *  Typically Public, but for nested classes this can also be Protected
@@ -501,16 +489,16 @@ class ClassDef : public Definition
    ClassSDict *m_innerClasses;
 
    /* classes for the collaboration diagram */
-   QHash<QString, UsesClassDef> *m_usesImplClassDict;
-   QHash<QString, UsesClassDef> *m_usedByImplClassDict;
-   QHash<QString, UsesClassDef> *m_usesIntfClassDict;
+   QHash<QString, UsesClassDef> m_usesImplClassDict;
+   QHash<QString, UsesClassDef> m_usedByImplClassDict;
+   QHash<QString, UsesClassDef> m_usesIntfClassDict;
 
    QHash<QString, QSharedPointer<ConstraintClassDef>> m_constraintClassDict;
 
    /*! Template instances that exists of this class, the key in the
     *  dictionary is the template argument list.
     */
-   QHash<QString, QSharedPointer<ClassDef>> *m_templateInstances;
+   QHash<QString, QSharedPointer<ClassDef>> m_templateInstances;
 
    /*! Template instances that exists of this class, as defined by variables.
     *  We do NOT want to document these individually. The key in the
@@ -518,7 +506,7 @@ class ClassDef : public Definition
     */
    QHash<QString, QSharedPointer<ClassDef>> *m_variableInstances;
 
-   QHash<QString, int> *m_templBaseClassNames;
+   QHash<QString, int> m_templBaseClassNames;
 
    /*! The class this class is an instance of. */
    QSharedPointer<ClassDef> m_templateMaster;

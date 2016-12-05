@@ -1146,7 +1146,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
 
 void clearVisitFlags()
 {   
-   for (auto cd : *Doxy_Globals::classSDict) {
+   for (auto cd : Doxy_Globals::classSDict) {
       cd->visited = false;
    }
 }
@@ -1519,7 +1519,7 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
 
    }            
 
-   Doxy_Globals::indexList->addImageFile(fileName);
+   Doxy_Globals::indexList.addImageFile(fileName);
 
    if (generateMap) {
       t << "</map>" << endl;

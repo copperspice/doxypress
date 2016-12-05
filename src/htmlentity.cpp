@@ -330,11 +330,9 @@ static const int g_numHtmlEntities = (int)(sizeof(g_htmlEntities) / sizeof(*g_ht
 HtmlEntityMapper *HtmlEntityMapper::s_instance = 0;
 
 HtmlEntityMapper::HtmlEntityMapper()
-{
-   m_name2sym = new QHash<QString, int>;
-   
+{ 
    for (int i = 0; i < g_numHtmlEntities; i++) {
-      m_name2sym->insert(g_htmlEntities[i].item, g_htmlEntities[i].symb);
+      m_name2sym.insert(g_htmlEntities[i].item, g_htmlEntities[i].symb);
    }
 
    validate();
@@ -342,7 +340,6 @@ HtmlEntityMapper::HtmlEntityMapper()
 
 HtmlEntityMapper::~HtmlEntityMapper()
 {
-   delete m_name2sym;
 }
 
 /** Returns the one and only instance of the HTML entity mapper */
@@ -476,9 +473,9 @@ const DocSymbol::PerlSymb *HtmlEntityMapper::perl(DocSymbol::SymType symb) const
  */
 DocSymbol::SymType HtmlEntityMapper::name2sym(const QString &symName) const
 {
-   auto item = m_name2sym->find(symName);
+   auto item = m_name2sym.find(symName);
   
-   if (item == m_name2sym->end()) {
+   if (item == m_name2sym.end()) {
       return DocSymbol::Sym_Unknown;
 
    } else {   

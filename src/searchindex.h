@@ -28,11 +28,7 @@ class Definition;
 class MemberDef;
 class SearchDocEntry;
 
-/*! Initialize the search indexer */
 void initSearchIndexer();
-
-/*! Cleanup the search indexer */
-void finializeSearchIndexer();
 
 //------- server side search index ----------------------
 
@@ -81,14 +77,14 @@ class IndexWord
    QHash<long, QSharedPointer<URLInfo>> m_urls;
 };
 
-class SearchIndexIntf
+class SearchIndex_Base
 {
  public:
    enum Kind { Internal, External };
 
-   SearchIndexIntf(Kind k) : m_kind(k) {}
+   SearchIndex_Base(Kind k) : m_kind(k) {}
 
-   virtual ~SearchIndexIntf() {}
+   virtual ~SearchIndex_Base() {}
 
    virtual void setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile) = 0;
    virtual void addWord(const QString &word, bool hiPriority) = 0;
@@ -102,7 +98,7 @@ class SearchIndexIntf
    Kind m_kind;
 };
 
-class SearchIndex : public SearchIndexIntf
+class SearchIndex : public SearchIndex_Base
 {
  public:
    SearchIndex();
@@ -123,13 +119,12 @@ class SearchIndex : public SearchIndexIntf
    int m_urlIndex;
 };
 
-
-class SearchIndexExternal : public SearchIndexIntf
+class SearchIndex_External : public SearchIndex_Base
 {
   
  public:
-   SearchIndexExternal();
-   ~SearchIndexExternal();
+   SearchIndex_External();
+   ~SearchIndex_External();
    void setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile) override;
    void addWord(const QString &word, bool hiPriority) override;
    void write(const QString &file) override;

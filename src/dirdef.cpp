@@ -61,15 +61,12 @@ DirDef::DirDef(const QString &path)
       m_dispName = m_dispName.left(m_dispName.length() - 1);
    }
 
-   m_fileList = new FileList;
-
    m_dirCount = g_dirCount++;
    m_level    = -1;
 }
 
 DirDef::~DirDef()
 {
-   delete m_fileList;
 }
 
 bool DirDef::isLinkableInProject() const
@@ -95,14 +92,14 @@ void DirDef::addFile(QSharedPointer<FileDef> fd)
 {
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   m_fileList->append(fd);
+   m_fileList.append(fd);
    fd->setDirDef(self);
 }
 
 void DirDef::sort()
 {
    m_subdirs.sort();
-   m_fileList->sort();
+   m_fileList.sort();
 }
 
 static QString encodeDirName(const QString &anchor)
@@ -234,7 +231,7 @@ void DirDef::writeSubDirList(OutputList &ol)
    int numSubdirs = 0;
 
    for (auto dd : m_subdirs) {
-      if (dd->hasDocumentation() || dd->getFiles()->count() > 0) {
+      if (dd->hasDocumentation() || dd->getFiles().count() > 0) {
          numSubdirs++;
       }
    }
@@ -248,7 +245,7 @@ void DirDef::writeSubDirList(OutputList &ol)
 
       for (auto dd : m_subdirs) {
 
-         if (dd->hasDocumentation() || dd->getFiles()->count()== 0) {         
+         if (dd->hasDocumentation() || dd->getFiles().count()== 0) {         
    
             ol.startMemberDeclaration();
             ol.startMemberItem(dd->getOutputFileBase(), 0);
@@ -278,7 +275,7 @@ void DirDef::writeFileList(OutputList &ol)
 {
    int numFiles = 0;
 
-   for (auto fd : *m_fileList) {
+   for (auto fd : m_fileList) {
       if (fd->hasDocumentation()) {
          numFiles++;
        }
@@ -291,7 +288,7 @@ void DirDef::writeFileList(OutputList &ol)
       ol.endMemberHeader();
       ol.startMemberList();
 
-      for (auto fd : *m_fileList) {
+      for (auto fd : m_fileList) {
 
          if (fd->hasDocumentation()) {
             ol.startMemberDeclaration();
@@ -383,9 +380,9 @@ void DirDef::writeTagFile(QTextStream &tagFile)
          }
          break;
          case LayoutDocEntry::DirFiles: {
-            if (m_fileList->count() > 0) {
+            if (m_fileList.count() > 0) {
 
-               for (auto fd : *m_fileList) {
+               for (auto fd : m_fileList) {
                   tagFile << "    <file>" << convertToXML(fd->name()) << "</file>" << endl;
                }
             }
@@ -532,9 +529,9 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
       return;   // do not add self-dependencies
    }
 
-   // levels match => add direct dependency
+   // levels match, add direct dependency
    bool added = false;
-   UsedDir *usedDir = m_usedDirs.value(dir->getOutputFileBase());
+   QSharedPointer<UsedDir> usedDir = m_usedDirs.value(dir->getOutputFileBase());
 
    if (usedDir) {
       // dir dependency already present
@@ -551,7 +548,7 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
    } else {
       // new directory dependency
 
-      usedDir = new UsedDir(dir, inherited);
+      usedDir = QMakeShared<UsedDir>(dir, inherited);
       usedDir->addFileDep(srcFd, dstFd);
 
       m_usedDirs.insert(dir->getOutputFileBase(), usedDir);
@@ -576,31 +573,27 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
  */
 void DirDef::computeDependencies()
 {
-   FileList *fl = m_fileList;
+   for (auto fd : m_fileList) {
+      QList<IncludeInfo> *ifl = fd->includeFileList();
 
-   if (fl) {
+      if (ifl) {
+         // for each include file
 
-      for (auto fd : *fl) {
-         QList<IncludeInfo> *ifl = fd->includeFileList();
+         for (auto &item : *ifl) {
 
-         if (ifl) {
-            // for each include file
+            if (item.fileDef && item.fileDef->isLinkable()) {
+               // linkable file
+               QSharedPointer<DirDef> usedDir = item.fileDef->getDirDef();
 
-            for (auto &item : *ifl) {
-
-               if (item.fileDef && item.fileDef->isLinkable()) {
-                  // linkable file
-                  QSharedPointer<DirDef> usedDir = item.fileDef->getDirDef();
-
-                  if (usedDir) {
-                     // add dependency: thisDir->usedDir
-                     addUsesDependency(usedDir, fd, item.fileDef, false);
-                  }
+               if (usedDir) {
+                  // add dependency: thisDir->usedDir
+                  addUsesDependency(usedDir, fd, item.fileDef, false);
                }
             }
          }
       }
-   }  
+   }
+    
 }
 
 bool DirDef::isParentOf(QSharedPointer<DirDef> dir) const
@@ -870,7 +863,7 @@ static void computeCommonDirPrefix()
 void buildDirectories()
 {
    // for each input file
-   for (auto fn : *Doxy_Globals::inputNameList) {
+   for (auto &fn : Doxy_Globals::inputNameList) {
       for (auto fd : *fn) {
 
          if (fd->getReference().isEmpty() && fd->isDocumentationFile()) {

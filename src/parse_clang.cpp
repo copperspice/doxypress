@@ -400,9 +400,8 @@ static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
    }
 
    // set search page target
-   if (Doxy_Globals::searchIndex) {
+   if (Doxy_Globals::searchIndexBase != nullptr) {
       QString lineAnchor = QString("l%1").arg(line, 5, 10, QChar('0'));
-
       ol.setCurrentDoc(fd, lineAnchor, true);
    }
 }
@@ -990,7 +989,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> f
    QSharedPointer<FileDef> ifd;
 
    if (! incName.isEmpty()) {
-      QSharedPointer<FileNameList> fn = Doxy_Globals::inputNameDict->find(incName);
+      QSharedPointer<FileNameList> fn = Doxy_Globals::inputNameDict.find(incName);
 
       if (fn) {
          bool found = false;
@@ -1019,7 +1018,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> f
 
 void ClangParser::linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text)
 {
-   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(text);
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(text);
 
    if (mn) {
       for (auto md : *mn) {
@@ -1261,7 +1260,7 @@ void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> 
 
                      linkIdentifier(ol, fd, line, column, text, i);
 
-                     if (Doxy_Globals::searchIndex) {
+                     if (Doxy_Globals::searchIndexBase != nullptr) {
                         ol.addWord(text, false);
                      }
 

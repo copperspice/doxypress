@@ -26,36 +26,34 @@
 
 OutputGenerator::OutputGenerator()
 {
-   m_filePtr = nullptr;
-   active    = true;   
+   active = true;   
 }
 
 OutputGenerator::~OutputGenerator()
-{
-   delete m_filePtr;   
+{ 
 }
 
 void OutputGenerator::startPlainFile(const QString &name)
 {
    m_fileName = m_dir + "/" + name;
-   m_filePtr  = new QFile(m_fileName);
+   m_file.setFileName(m_fileName);
 
-   if (! m_filePtr->open(QIODevice::WriteOnly)) {   
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(m_fileName), m_filePtr->error());
+   if (! m_file.open(QIODevice::WriteOnly)) {   
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(m_fileName), m_file.error());
       Doxy_Work::stopDoxyPress();
    }
 
-   m_textStream.setDevice(m_filePtr);
+   m_textStream.setDevice(&m_file);
 }
 
 void OutputGenerator::endPlainFile()
 {
    m_textStream.setDevice(0);
 
-   delete m_filePtr;
-
-   m_filePtr  = nullptr;
    m_fileName = "";
+
+   m_file.close();
+   m_file.setFileName(m_fileName);
 }
 
 void OutputGenerator::pushGeneratorState()

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -47,32 +47,32 @@ class Definition_Private
 
    void init(const QString &df, const QString &n);
 
-   SectionDict *sectionDict;                          // dictionary of all sections
-   QList<QSharedPointer <SectionInfo>> sectionList;   // list of sections, definiton order
+   SectionDict m_sectionDict;                           // dictionary of all sections
+   QList<QSharedPointer <SectionInfo>> m_sectionList;   // list of sections, definiton order
 
-   MemberSDict *sourceRefByDict;
-   MemberSDict *sourceRefsDict;
+   MemberSDict m_sourceRefByDict;
+   MemberSDict m_sourceRefsDict;
 
-   QList<ListItemInfo> *xrefListItems;
+   QList<ListItemInfo> m_xrefListItems;
    SortedList<QSharedPointer<GroupDef>> *partOfGroups;
 
-   DocInfo   *details;    // not exported
-   DocInfo   *inbodyDocs; // not exported
-   BriefInfo *brief;      // not exported
-   BodyInfo  *body;       // not exported
+   DocInfo    m_details;       // not exported
+   DocInfo    m_inbodyDocs;    // not exported
+   BriefInfo  m_brief;         // not exported
+   BodyInfo  *body;            // not exported
 
    QString briefSignatures;
    QString docSignatures;
 
-   QString localName;      // local (unqualified) name of the definition
-   
+   QString localName;         // local (unqualified) name of the definition
+
    QString qualifiedName;
-   QString ref;            // reference to external documentation
+   QString ref;               // reference to external documentation
 
    bool hidden;
    bool isArtificial;
 
-   QSharedPointer<Definition> outerScope;  
+   QSharedPointer<Definition> outerScope;
 
    // where the item was found
    QString defFileName;
@@ -80,26 +80,18 @@ class Definition_Private
 
    SrcLangExt lang;
 
-   QString id; // clang unique id
+   QString id;                // clang unique id
 };
 
 Definition_Private::Definition_Private()
-   : sectionDict(0), sourceRefByDict(0), sourceRefsDict(0), xrefListItems(0), partOfGroups(0),
-     details(0), inbodyDocs(0), brief(0), body(0), hidden(false), isArtificial(false), lang(SrcLangExt_Unknown)
+   : partOfGroups(0), body(0), hidden(false), isArtificial(false), lang(SrcLangExt_Unknown)
 {
 }
 
 Definition_Private::~Definition_Private()
 {
-   delete sectionDict;
-   delete sourceRefByDict;
-   delete sourceRefsDict;
    delete partOfGroups;
-   delete xrefListItems;
-   delete brief;
-   delete details;
    delete body;
-   delete inbodyDocs;
 }
 
 void Definition_Private::init(const QString &df, const QString &n)
@@ -113,23 +105,17 @@ void Definition_Private::init(const QString &df, const QString &n)
 
    QString name = n;
 
-   if (name != "<globalScope>") {     
+   if (name != "<globalScope>") {
       localName = stripScope(n);
 
    } else {
       localName = n;
    }
- 
-   brief           = 0;
-   details         = 0;
-   body            = 0;
-   inbodyDocs      = 0;
-   sourceRefByDict = 0;
-   sourceRefsDict  = 0;
-   sectionDict     = 0,
+   
+   partOfGroups    = 0; 
+   body            = 0;  
    outerScope      = Doxy_Globals::globalScope;
-   partOfGroups    = 0;
-   xrefListItems   = 0;
+   
    hidden          = false;
    isArtificial    = false;
    lang            = SrcLangExt_Unknown;
@@ -141,12 +127,12 @@ static bool matchExcludedSymbols(const QString &name)
 
    if (exclSyms.count() == 0) {
       // nothing specified
-      return false;   
+      return false;
    }
 
    QString symName = name;
 
-   for (auto pattern : exclSyms) {          
+   for (auto pattern : exclSyms) {
 
       bool forceStart = false;
       bool forceEnd   = false;
@@ -160,47 +146,47 @@ static bool matchExcludedSymbols(const QString &name)
          pattern = pattern.left(pattern.length() - 1), forceEnd = true;
       }
 
-      if (pattern.indexOf('*') != -1) { 
+      if (pattern.indexOf('*') != -1) {
          // wildcard mode
          QRegExp re(pattern.replace("*", ".*"), Qt::CaseSensitive);
 
          int i  = re.indexIn(symName, 0);
-         int pl = re.matchedLength();   
+         int pl = re.matchedLength();
 
-         if (i != -1) { 
+         if (i != -1) {
             // wildcard match
             int sl = symName.length();
 
             // check if it is a whole word match
             if ((i == 0 || pattern.at(0) == '*' || (! isId(symName.at(i - 1).unicode())  && ! forceStart)) &&
-                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {      
+                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {
                return true;
             }
          }
 
-      } else if (! pattern.isEmpty()) { 
+      } else if (! pattern.isEmpty()) {
          // match words
          int i = symName.indexOf(pattern);
 
-         if (i != -1) { 
+         if (i != -1) {
             // we have a match!
             int pl = pattern.length();
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0  || (! isId(symName.at(i - 1).unicode())  && ! forceStart)) && (i + pl == sl || 
-                     (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {               
+            if ((i == 0  || (! isId(symName.at(i - 1).unicode())  && ! forceStart)) && (i + pl == sl ||
+                     (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {
                return true;
             }
          }
-      }      
+      }
    }
-   
+
    return false;
 }
 
 void Definition::addToMap(const QString &name)
-{    
+{
    QString phrase = name;
    int index = computeQualifiedIndex(phrase);
 
@@ -208,14 +194,14 @@ void Definition::addToMap(const QString &name)
       phrase = phrase.mid(index + 2);
    }
 
-   if (! phrase.isEmpty()) { 
-      // must use a raw pointer since this method is called from a constructor                     
-      Doxy_Globals::glossary().insertMulti(phrase, this);         
+   if (! phrase.isEmpty()) {
+      // must use a raw pointer since this method is called from a constructor
+      Doxy_Globals::glossary().insertMulti(phrase, this);
       this->setPhraseName(phrase);
    }
 }
 
-Definition::Definition(const QString &df, int dl, int dc, const QString &name, const QString &briefDoc, 
+Definition::Definition(const QString &df, int dl, int dc, const QString &name, const QString &briefDoc,
                   const QString &fullDoc, bool isPhrase)
 {
    m_name      = name;
@@ -243,7 +229,7 @@ Definition::Definition(const QString &df, int dl, int dc, const QString &name, c
    }
 }
 
-Definition::Definition(const Definition &d) 
+Definition::Definition(const Definition &d)
    : DefinitionIntf()
 {
    m_name    = d.m_name;
@@ -252,65 +238,28 @@ Definition::Definition(const Definition &d)
    m_private  = new Definition_Private;
    *m_private = *d.m_private;
 
-   m_private->sectionDict     = 0;
-   m_private->sourceRefByDict = 0;
-   m_private->sourceRefsDict  = 0;
    m_private->partOfGroups    = 0;
-   m_private->xrefListItems   = 0;
-   m_private->brief           = 0;
-   m_private->details         = 0;
    m_private->body            = 0;
-   m_private->inbodyDocs      = 0;
+  
+   m_private->m_sectionDict      = d.m_private->m_sectionDict;
+   m_private->m_sectionList      = d.m_private->m_sectionList;
+   m_private->m_sourceRefByDict  = d.m_private->m_sourceRefByDict;
+   m_private->m_sourceRefsDict   = d.m_private->m_sourceRefsDict;
 
-   if (d.m_private->sectionDict) {
-      m_private->sectionDict = new SectionDict();
-    
-      for (auto si : *d.m_private->sectionDict) {  
-         m_private->sectionDict->insert(si->label, si);
-      }
-   }
-
-   m_private->sectionList = d.m_private->sectionList;
-
-   if (d.m_private->sourceRefByDict) {
-      m_private->sourceRefByDict = new MemberSDict;
-      
-      for (auto iter = d.m_private->sourceRefByDict->begin();  iter != d.m_private->sourceRefByDict->end(); ++iter) {   
-         m_private->sourceRefByDict->insert(iter.key(), iter.value());
-      }
-   }
-
-   if (d.m_private->sourceRefsDict) {
-      m_private->sourceRefsDict = new MemberSDict;
-    
-      for (auto iter= d.m_private->sourceRefsDict->begin(); iter != d.m_private->sourceRefsDict->end(); ++iter) {   
-         m_private->sourceRefsDict->insert(iter.key(), iter.value());
-      }
-   }
-   if (d.m_private->partOfGroups) {     
-      for (auto gd : *d.m_private->partOfGroups) {   
+   if (d.m_private->partOfGroups) {
+      for (auto gd : *d.m_private->partOfGroups) {
          makePartOfGroup(gd);
       }
    }
-
-   if (d.m_private->xrefListItems) {
-      setRefItems(d.m_private->xrefListItems);
-   }
-
-   if (d.m_private->brief) {
-      m_private->brief = new BriefInfo(*d.m_private->brief);
-   }
-
-   if (d.m_private->details) {
-      m_private->details = new DocInfo(*d.m_private->details);
-   }
-
+   
+   setRefItems(d.m_private->m_xrefListItems);
+   
+   m_private->m_details    = d.m_private->m_details;
+   m_private->m_inbodyDocs = d.m_private->m_inbodyDocs;
+   m_private->m_brief      = d.m_private->m_brief;
+   
    if (d.m_private->body) {
       m_private->body = new BodyInfo(*d.m_private->body);
-   }
-
-   if (d.m_private->inbodyDocs) {
-      m_private->inbodyDocs = new DocInfo(*d.m_private->inbodyDocs);
    }
 
    m_isPhrase = d.m_isPhrase;
@@ -320,7 +269,7 @@ Definition::Definition(const Definition &d)
 }
 
 Definition::~Definition()
-{  
+{
    if (m_private) {
       delete m_private;
       m_private = 0;
@@ -328,16 +277,16 @@ Definition::~Definition()
 
    if (! Doxy_Globals::programExit)  {
       auto iter = Doxy_Globals::glossary().find(m_phraseName);
-   
-      while (iter != Doxy_Globals::glossary().end() && iter.key() == m_phraseName)  {      
-   
+
+      while (iter != Doxy_Globals::glossary().end() && iter.key() == m_phraseName)  {
+
          if (iter.value() == this) {
             iter = Doxy_Globals::glossary().erase(iter);
-   
+
          }  else {
             ++iter;
-   
-         }      
+
+         }
       }
    }
 }
@@ -358,8 +307,8 @@ void Definition::setId(const QString &id)
    if (id.isEmpty()) {
       return;
    }
-  
-   m_private->id = id; 
+
+   m_private->id = id;
    Doxy_Globals::clangUsrMap.insert(id, self);
 }
 
@@ -368,44 +317,33 @@ QString Definition::id() const
    return m_private->id;
 }
 
-void Definition::addSectionsToDefinition(QList<SectionInfo> *anchorList)
+void Definition::addSectionsToDefinition(const QList<SectionInfo> &anchorList)
 {
    QSharedPointer<Definition> self = sharedFrom(this);
+ 
+   for (auto &si : anchorList) {
+      QSharedPointer<SectionInfo> gsi (Doxy_Globals::sectionDict.find(si.label));
 
-   if (! anchorList) {
-      return;
-   }
-
-   for (auto &si : *anchorList) {       
-      QSharedPointer<SectionInfo> gsi (Doxy_Globals::sectionDict->find(si.label));
-      
       if (! gsi) {
          gsi = QMakeShared<SectionInfo>(si);
-         Doxy_Globals::sectionDict->insert(si.label, gsi);
+         Doxy_Globals::sectionDict.insert(si.label, gsi);
       }
 
-      if (m_private->sectionDict == 0) {
-         m_private->sectionDict = new SectionDict();
-      }
-
-      if (m_private->sectionDict->find(gsi->label) == 0) {
-         m_private->sectionDict->insert(gsi->label, gsi);
+      if (m_private->m_sectionDict.find(gsi->label) == 0) {
+         m_private->m_sectionDict.insert(gsi->label, gsi);
          gsi->definition = self;
 
-         m_private->sectionList.append(gsi);
+         m_private->m_sectionList.append(gsi);
       }
    }
 }
 
 bool Definition::hasSections() const
-{ 
-   if (m_private->sectionDict == 0) {
-      return false;
-   }
-  
-   for (auto si : *m_private->sectionDict) {   
+{
+   for (auto &si : m_private->m_sectionDict) {
       if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection ||
             si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
+
          return true;
       }
    }
@@ -414,28 +352,28 @@ bool Definition::hasSections() const
 }
 
 void Definition::addSectionsToIndex(bool addToNavIndex)
-{ 
+{
    int level = 1;
 
-   auto nextItem = m_private->sectionList.begin();
+   auto nextItem = m_private->m_sectionList.begin();
 
-   // by definition order  
-   for (auto si : m_private->sectionList) {   
+   // by definition order
+   for (auto si : m_private->m_sectionList) {
 
       if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection ||
             si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
-    
+
          int nextLevel = si->type;
          int i;
 
          if (nextLevel > level) {
             for (i = level; i < nextLevel; i++) {
-               Doxy_Globals::indexList->incContentsDepth();
+               Doxy_Globals::indexList.incContentsDepth();
             }
 
          } else if (nextLevel < level) {
             for (i = nextLevel; i < level; i++) {
-               Doxy_Globals::indexList->decContentsDepth();
+               Doxy_Globals::indexList.decContentsDepth();
             }
          }
 
@@ -449,28 +387,28 @@ void Definition::addSectionsToIndex(bool addToNavIndex)
          ++nextItem;
          bool isDir = false;
 
-         if (nextItem != m_private->sectionList.end())  {
+         if (nextItem != m_private->m_sectionList.end())  {
             isDir = (*nextItem)->type > nextLevel;
          }
-      
-         Doxy_Globals::indexList->addContentsItem(isDir, title, getReference(), getOutputFileBase(), si->label, addToNavIndex);
+
+         Doxy_Globals::indexList.addContentsItem(isDir, title, getReference(), getOutputFileBase(), si->label, addToNavIndex);
          level = nextLevel;
       }
    }
 
    while (level > 1) {
-      Doxy_Globals::indexList->decContentsDepth();
+      Doxy_Globals::indexList.decContentsDepth();
       level--;
    }
 }
 
 void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
-{   
-    // by definition order  
-   for (auto si : m_private->sectionList) {   
+{
+    // by definition order
+   for (auto si : m_private->m_sectionList) {
 
       if (! si->generated && si->ref.isEmpty()) {
-        
+
          if (definitionType() == TypeMember) {
             tagFile << "  ";
          }
@@ -484,20 +422,19 @@ void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
          tagFile << ">" << si->label << "</docanchor>" << endl;
       }
    }
-   
 }
 
 bool Definition::_docsAlreadyAdded(const QString &doc, QString &sigList)
-{  
+{
    // to avoid mismatches due to differences in indenting, we first remove
    // double whitespaces...
 
    QString docStr = doc.simplified();
 
    QString sigStr;
-   sigStr = QCryptographicHash::hash(docStr.toUtf8(), QCryptographicHash::Md5).toHex();  
+   sigStr = QCryptographicHash::hash(docStr.toUtf8(), QCryptographicHash::Md5).toHex();
 
-   if (sigList.indexOf(sigStr) == -1) { 
+   if (sigList.indexOf(sigStr) == -1) {
       // new docs, add signature to prevent re-adding it
       sigList += ":" + sigStr;
       return false;
@@ -508,8 +445,8 @@ bool Definition::_docsAlreadyAdded(const QString &doc, QString &sigList)
    }
 }
 
-void Definition::setDocumentation(const QString &tDoc, const QString &docFile, int docLine, 
-                                   bool stripWhiteSpace, bool atTop)
+void Definition::setDocumentation(const QString &tDoc, const QString &docFile, int docLine,
+                  bool stripWhiteSpace, bool atTop)
 {
    QString doc = tDoc;
 
@@ -522,33 +459,29 @@ void Definition::setDocumentation(const QString &tDoc, const QString &docFile, i
    }
 
    if (! _docsAlreadyAdded(doc, m_private->docSignatures)) {
-     
-      if (m_private->details == nullptr) {
-         m_private->details = new DocInfo;
-      }
 
-      if (m_private->details->doc.isEmpty()) { 
+      if (m_private->m_details.doc.isEmpty()) {
          // fresh detailed description
-         m_private->details->doc = doc;
-       
-      } else if (atTop) { 
+         m_private->m_details.doc = doc;
+
+      } else if (atTop) {
          // another detailed description, append it to the start
-         m_private->details->doc = doc + "\n\n" + m_private->details->doc;
-
-      } else { 
-         // another detailed description, append it to the end
-         m_private->details->doc += "\n\n" + doc;
-
-      }
-
-      if (docLine != -1) { 
-         // store location if valid
-         m_private->details->file = docFile;
-         m_private->details->line = docLine;
+         m_private->m_details.doc = doc + "\n\n" + m_private->m_details.doc;
 
       } else {
-         m_private->details->file = docFile;
-         m_private->details->line = 1;
+         // another detailed description, append it to the end
+         m_private->m_details.doc += "\n\n" + doc;
+
+      }
+
+      if (docLine != -1) {
+         // store location if valid
+         m_private->m_details.file = docFile;
+         m_private->m_details.line = docLine;
+
+      } else {
+         m_private->m_details.file = docFile;
+         m_private->m_details.line = 1;
       }
    }
 }
@@ -559,12 +492,12 @@ void Definition::setBriefDescription(const QString &b, const QString &briefFile,
    static bool needsDot = (outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean");
 
    QString brief = b.trimmed();
-  
+
    if (brief.isEmpty()) {
       return;
    }
-   
-   if (needsDot) { 
+
+   if (needsDot) {
       // add punctuation if needed
 
       int len = brief.length();
@@ -590,43 +523,36 @@ void Definition::setBriefDescription(const QString &b, const QString &briefFile,
 
    if (! _docsAlreadyAdded(brief, m_private->briefSignatures)) {
 
-      if (m_private->brief && ! m_private->brief->doc.isEmpty()) {         
+      if (! m_private->m_brief.doc.isEmpty()) {
          setDocumentation(brief, briefFile, briefLine, false, true);
 
       } else {
-         
-         if (m_private->brief == 0) {
-            m_private->brief = new BriefInfo;
-         }
-
-         m_private->brief->doc = brief;
+       
+         m_private->m_brief.doc = brief;
 
          if (briefLine != -1) {
-            m_private->brief->file = briefFile;
-            m_private->brief->line = briefLine;
+            m_private->m_brief.file = briefFile;
+            m_private->m_brief.line = briefLine;
+
          } else {
-            m_private->brief->file = briefFile;
-            m_private->brief->line = 1;
+            m_private->m_brief.file = briefFile;
+            m_private->m_brief.line = 1;
          }
-      }  
+      }
    }
 }
 
 void Definition::_setInbodyDocumentation(const QString &doc, const QString &inbodyFile, int inbodyLine)
 {
-   if (m_private->inbodyDocs == nullptr) {
-      m_private->inbodyDocs = new DocInfo;
-   }
-
-   if (m_private->inbodyDocs->doc.isEmpty()) { 
+   if (m_private->m_inbodyDocs.doc.isEmpty()) {
       // fresh inbody docs
-      m_private->inbodyDocs->doc  = doc;
-      m_private->inbodyDocs->file = inbodyFile;
-      m_private->inbodyDocs->line = inbodyLine;
+      m_private->m_inbodyDocs.doc  = doc;
+      m_private->m_inbodyDocs.file = inbodyFile;
+      m_private->m_inbodyDocs.line = inbodyLine;
 
-   } else { 
+   } else {
       // another inbody documentation fragment, append this to the end
-      m_private->inbodyDocs->doc += "\n\n" + doc;
+      m_private->m_inbodyDocs.doc += "\n\n" + doc;
    }
 }
 
@@ -653,7 +579,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
 {
    static bool filterSourceFiles = Config::getBool("filter-source-files");
    static int tabSize = Config::getInt("tab-size");
-   
+
    if (fileName.isEmpty()) {
       return false;   // not a valid file name
    }
@@ -667,18 +593,18 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
 
    SrcLangExt lang = getLanguageFromFileName(fileName);
 
-   if (! usePipe) { 
+   if (! usePipe) {
       // no filter given or wanted
       f = fopen(fileName.toUtf8(), "r");
 
-   } else { 
+   } else {
       // use filter
-      QString cmd = filter + " \"" + fileName + "\"";    
+      QString cmd = filter + " \"" + fileName + "\"";
       f = popen(cmd.toUtf8(), "r");
    }
 
    // for TCL, Python, and Fortran no bracket search is possible
-   bool found = (lang == SrcLangExt_Tcl) || (lang == SrcLangExt_Python) || (lang == SrcLangExt_Fortran);  
+   bool found = (lang == SrcLangExt_Tcl) || (lang == SrcLangExt_Python) || (lang == SrcLangExt_Fortran);
 
    if (f) {
       int c      = 0;
@@ -712,7 +638,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
                } else if (c == '\t') {
                   col += tabSize - (col % tabSize);
 
-               } else if (pc == '/' && c == '/') { 
+               } else if (pc == '/' && c == '/') {
                   // skip single line comment
 
                   while ((c = fgetc(f)) != '\n' && c != EOF) {
@@ -723,7 +649,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
                      lineNr++, col = 0;
                   }
 
-               } else if (pc == '/' && c == '*') { 
+               } else if (pc == '/' && c == '*') {
                   // skip C style comment
 
                   while (((c = fgetc(f)) != '/' || pc != '*') && c != EOF) {
@@ -747,14 +673,14 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
                   found = true;
                }
 
-            } else if (c == '{') { 
+            } else if (c == '{') {
                // } so vi matching brackets has no problem
                found = true;
             }
          }
-         
+
          if (found) {
-            // For code with more than one line, fill the line with spaces until we are 
+            // For code with more than one line, fill the line with spaces until we are
             // at the right column so that the opening brace lines up with the closing brace
 
             if (endLine != startLine) {
@@ -764,7 +690,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
                tempResult += spaces;
             }
 
-            // copy until end of line            
+            // copy until end of line
             if (c) {
                tempResult += c;
             }
@@ -782,13 +708,13 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
             const int maxLineLength = 4096;
             char lineStr[maxLineLength];
 
-            do {               
+            do {
                int size_read;
 
                do {
                   // read up to maxLineLength-1 bytes, the last byte being zero
                   char *p = fgets(lineStr, maxLineLength, f);
-                 
+
                   if (p) {
                      size_read = qstrlen(p);
 
@@ -830,7 +756,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
    if (! result.isEmpty() && ! result.endsWith('\n')) {
       result += "\n";
    }
-   
+
    return found;
 }
 
@@ -873,7 +799,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
    static bool rtfSourceCode   = Config::getBool("rtf-source-code");
 
    ol.pushGeneratorState();
-  
+
    QString fn = getSourceFileBase();
 
    if (! fn.isEmpty()) {
@@ -882,7 +808,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
       int lineMarkerPos = refText.indexOf("@0");
       int fileMarkerPos = refText.indexOf("@1");
 
-      if (lineMarkerPos != -1 && fileMarkerPos != -1) { 
+      if (lineMarkerPos != -1 && fileMarkerPos != -1) {
          // should always pass this.
          QString lineStr;
          lineStr = QString("%1").arg(m_private->body->startLine);
@@ -997,7 +923,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             ol.parseText(refText.mid(fileMarkerPos + 2, lineMarkerPos - fileMarkerPos - 2));
 
             ol.pushGeneratorState();
-           
+
             ol.disable(OutputGenerator::Man);
 
             if (! latexSourceCode) {
@@ -1043,7 +969,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
 }
 
 void Definition::setBodySegment(int bls, int ble)
-{   
+{
    if (m_private->body == 0) {
       m_private->body = new BodyInfo;
    }
@@ -1073,7 +999,7 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
 
    static bool inlineSources = Config::getBool("inline-source");
    ol.pushGeneratorState();
-   
+
    if (inlineSources && hasSources()) {
       QString codeFragment;
 
@@ -1081,9 +1007,9 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
 
       if (readCodeFragment(m_private->body->fileDef->getFilePath(), actualStart, actualEnd, codeFragment) ) {
 
-         ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(m_private->defFileExt);
+         ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(m_private->defFileExt);
          pIntf->resetCodeParserState();
-        
+
          QSharedPointer<MemberDef> thisMd;
 
          if (definitionType() == TypeMember) {
@@ -1094,7 +1020,7 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
          pIntf->parseCode(ol,               // codeOutIntf
                           scopeName,        // scope
                           codeFragment,     // input
-                          m_private->lang,     // lang
+                          m_private->lang,  // lang
                           false,            // isExample
                           nullptr,          // exampleName
                           m_private->body->fileDef,  // fileDef
@@ -1115,41 +1041,41 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
  *  definition is used.
  */
 void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
-                                     const QString &text, MemberSDict *members, bool)
+                  const QString &text, const MemberSDict &members)
 {
    static const bool sourceBrowser   = Config::getBool("source-code");
    static const bool refLinkSource   = Config::getBool("ref-link-source");
    static const bool latexSourceCode = Config::getBool("latex-source-code");
-   static const bool rtfSourceCode   = Config::getBool("rtf-source-code");  
-  
+   static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
+
    ol.pushGeneratorState();
 
-   if (members) {      
+   if (! members.isEmpty()) {
 
       ol.startParagraph();
       ol.parseText(text);
       ol.docify(" ");
 
-      QString ldefLine = theTranslator->trWriteList(members->count());
+      QString ldefLine = theTranslator->trWriteList(members.count());
 
       QRegExp marker("@[0-9]+");
       int index = 0, newIndex, matchLen;
 
-      auto iter = members->begin();
+      auto iter = members.begin();
 
       // now replace all markers in inheritLine with links to the classes
       while ((newIndex = marker.indexIn(ldefLine, index)) != -1) {
 
          matchLen = marker.matchedLength();
-      
-         ol.parseText(ldefLine.mid(index, newIndex - index));        
+
+         ol.parseText(ldefLine.mid(index, newIndex - index));
 
          QSharedPointer<MemberDef> md = iter.value();
 
          if (md) {
             QString scope = md->getScopeString();
             QString name  = md->name();
-           
+
             if (! scope.isEmpty() && scope != scopeName) {
                name.prepend(scope + getLanguageSpecificSeparator(m_private->lang));
             }
@@ -1157,8 +1083,8 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
             if (!md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isPrototype() || md->isSignal() )) {
                name += "()";
             }
-        
-            if (sourceBrowser && !(md->isLinkable() && !refLinkSource) && md->getStartBodyLine() != -1 && md->getBodyDef()) {              
+
+            if (sourceBrowser && !(md->isLinkable() && !refLinkSource) && md->getStartBodyLine() != -1 && md->getBodyDef()) {
                // for HTML write a real link
 
                ol.pushGeneratorState();
@@ -1178,7 +1104,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                const int maxLineNrStr = 10;
                char anchorStr[maxLineNrStr];
                qsnprintf(anchorStr, maxLineNrStr, "l%05d", md->getStartBodyLine());
-             
+
                ol.writeObjectLink(0, md->getBodyDef()->getSourceFileBase(), anchorStr, name);
                ol.popGeneratorState();
 
@@ -1201,7 +1127,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                // for HTML write a real link
                ol.pushGeneratorState();
 
-               //ol.disableAllBut(OutputGenerator::Html);              
+               //ol.disableAllBut(OutputGenerator::Html);
                ol.disable(OutputGenerator::Man);
 
                if (! latexSourceCode) {
@@ -1248,37 +1174,34 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 {
    if (Config::getBool("ref-by-relation")) {
-      _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_private->sourceRefByDict, false);
+      _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_private->m_sourceRefByDict);
    }
 }
 
 void Definition::writeSourceRefs(OutputList &ol, const QString &scopeName)
 {
    if (Config::getBool("ref-relation")) {
-      _writeSourceRefList(ol, scopeName, theTranslator->trReferences(), m_private->sourceRefsDict, true);
+      _writeSourceRefList(ol, scopeName, theTranslator->trReferences(), m_private->m_sourceRefsDict);
    }
 }
 
 bool Definition::hasDocumentation() const
 {
    static bool extractAll = Config::getBool("extract-all");
-   // static bool sourceBrowser = Config::getBool("source-code");
+   // static bool sourceBrowser = Config::getBool("source-code");   
 
-   bool hasDocs = (m_private->details    && ! m_private->details->doc.isEmpty())    || 
-                  (m_private->brief      && ! m_private->brief->doc.isEmpty())      ||
-                  (m_private->inbodyDocs && ! m_private->inbodyDocs->doc.isEmpty()) || extractAll; 
+   bool hasDocs = (! m_private->m_details.doc.isEmpty()    || ! m_private->m_brief.doc.isEmpty() ||
+                   ! m_private->m_inbodyDocs.doc.isEmpty() || extractAll );
 
-      //  ||   // extract everything
-      //       (sourceBrowser && m_private->body && m_private->body->startLine!=-1 && m_private->body->fileDef)
-    
+      //  (sourceBrowser && m_private->body && m_private->body->startLine!=-1 && m_private->body->fileDef)
+
    return hasDocs;
 }
 
 bool Definition::hasUserDocumentation() const
 {
-   bool hasDocs = (m_private->details    && ! m_private->details->doc.isEmpty()) ||
-                  (m_private->brief      && ! m_private->brief->doc.isEmpty())   ||
-                  (m_private->inbodyDocs && ! m_private->inbodyDocs->doc.isEmpty());
+   bool hasDocs = (! m_private->m_details.doc.isEmpty() || ! m_private->m_brief.doc.isEmpty() ||
+                   ! m_private->m_inbodyDocs.doc.isEmpty() );
 
    return hasDocs;
 }
@@ -1289,16 +1212,12 @@ void Definition::addSourceReferencedBy(QSharedPointer<MemberDef> md)
       QString name  = md->name();
       QString scope = md->getScopeString();
 
-      if (!scope.isEmpty()) {
+      if (! scope.isEmpty()) {
          name.prepend(scope + "::");
       }
 
-      if (m_private->sourceRefByDict == 0) {
-         m_private->sourceRefByDict = new MemberSDict;
-      }
-
-      if (m_private->sourceRefByDict->find(name) == 0) {
-         m_private->sourceRefByDict->insert(name, md);
+      if (m_private->m_sourceRefByDict.find(name) == nullptr) {
+         m_private->m_sourceRefByDict.insert(name, md);
       }
    }
 }
@@ -1312,31 +1231,27 @@ void Definition::addSourceReferences(QSharedPointer<MemberDef> md)
       QString name  = md->name();
       QString scope = md->getScopeString();
 
-      if (!scope.isEmpty()) {
+      if (! scope.isEmpty()) {
          name.prepend(scope + "::");
       }
 
-      if (m_private->sourceRefsDict == 0) {
-         m_private->sourceRefsDict = new MemberSDict;
-      }
-
-      if (m_private->sourceRefsDict->find(name) == 0) {
-         m_private->sourceRefsDict->insert(name, md);
+      if (m_private->m_sourceRefsDict.find(name) == nullptr) {
+         m_private->m_sourceRefsDict.insert(name, md);
       }
    }
 }
 
 QString Definition::qualifiedName() const
 {
-   if (! m_private->qualifiedName.isEmpty()) {     
+   if (! m_private->qualifiedName.isEmpty()) {
       return m_private->qualifiedName;
    }
-   
+
    if (! m_private->outerScope) {
-      if (m_private->localName == "<globalScope>") {       
+      if (m_private->localName == "<globalScope>") {
          return "";
 
-      } else {         
+      } else {
          return m_private->localName;
       }
    }
@@ -1347,12 +1262,12 @@ QString Definition::qualifiedName() const
    } else {
       m_private->qualifiedName = m_private->outerScope->qualifiedName() + getLanguageSpecificSeparator(getLanguage()) + m_private->localName;
    }
-   
+
    return m_private->qualifiedName;
 }
 
 void Definition::setOuterScope(QSharedPointer<Definition> d)
-{  
+{
    QSharedPointer<Definition> p = m_private->outerScope;
    bool found = false;
 
@@ -1384,54 +1299,41 @@ void Definition::makePartOfGroup(QSharedPointer<GroupDef> gd)
    m_private->partOfGroups->append(gd);
 }
 
-void Definition::setRefItems(const QList<ListItemInfo> *sli)
+const QList<ListItemInfo> &Definition::getRefItems() const
 {
-   if (sli) {
-      // deep copy the list
-      if (m_private->xrefListItems == 0) {
-         m_private->xrefListItems = new QList<ListItemInfo>;        
-      }
-   
-      for (auto item : *sli) {
-         m_private->xrefListItems->append(item);
-      }
-   }
+   return m_private->m_xrefListItems;
 }
 
-void Definition::mergeRefItems(QSharedPointer<Definition> d)
+QList<ListItemInfo> &Definition::getRefItems()
 {
-   QList<ListItemInfo> *xrefList = d->xrefListItems();
+   return m_private->m_xrefListItems;
+}
 
-   if (xrefList != 0) {
-      // deep copy the list
-      if (m_private->xrefListItems == 0) {
-         m_private->xrefListItems = new QList<ListItemInfo>;         
+void Definition::setRefItems(const QList<ListItemInfo> &list)
+{
+   m_private->m_xrefListItems = list;   
+}
+
+void Definition::mergeRefItems(QSharedPointer<Definition> def)
+{
+   QList<ListItemInfo> &xrefList = def->getRefItems();
+
+   for (auto &item : xrefList) {
+      if (_getXRefListId(item.type) == -1) {
+         m_private->m_xrefListItems.append(item);
       }
-    
-      for (auto item : *xrefList) {  
-         if (_getXRefListId(item.type) == -1) {
-            m_private->xrefListItems->append(item);
-         }
-      }
-   }
+   }   
 }
 
 int Definition::_getXRefListId(const QString &listName) const
 {
-   if (m_private->xrefListItems) {     
-      for (auto &item : *m_private->xrefListItems) {  
-         if (item.type == listName) {
-            return item.itemId;
-         }
+   for (auto &item : m_private->m_xrefListItems) {
+      if (item.type == listName) {
+         return item.itemId;
       }
    }
-
+   
    return -1;
-}
-
-QList<ListItemInfo> *Definition::xrefListItems() const
-{
-   return m_private->xrefListItems;
 }
 
 QString Definition::convertNameToFile(const QString &name, bool allowDots) const
@@ -1499,7 +1401,7 @@ QString Definition::navigationPathAsString() const
       auto pd = dynamic_cast<const PageDef *>(this);
 
       if (definitionType() == Definition::TypeGroup && ! gd->groupTitle().isEmpty() ) {
-    
+
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
                    convertToHtml(gd->groupTitle()) + "</a>";
 
@@ -1509,8 +1411,8 @@ QString Definition::navigationPathAsString() const
                    convertToHtml(pd->title()) + "</a>";
 
       } else if (definitionType() == Definition::TypeClass) {
-         // class         
-    
+         // class
+
          if (tName.right(2) == "-p") {
             tName = tName.left(tName.length() - 2);
          }
@@ -1563,8 +1465,8 @@ void Definition::writeNavigationPath(OutputList &ol) const
 
 // TODO: move to htmlgen
 void Definition::writeToc(OutputList &ol)
-{  
-   if (m_private->sectionList.isEmpty()) {
+{
+   if (m_private->m_sectionList.isEmpty()) {
       return;
    }
 
@@ -1575,18 +1477,18 @@ void Definition::writeToc(OutputList &ol)
    ol.writeString(theTranslator->trRTFTableOfContents());
    ol.writeString("</h3>\n");
    ol.writeString("<ul>");
-  
-   int level = 1;   
+
+   int level = 1;
    QString cs;
 
-   bool inLi[5] = { false, false, false, false };   
+   bool inLi[5] = { false, false, false, false };
 
-   // by definition order  
-   for (auto si : m_private->sectionList) {   
+   // by definition order
+   for (auto si : m_private->m_sectionList) {
 
       if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection    ||
             si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
-        
+
          int nextLevel = si->type;
 
          if (nextLevel > level) {
@@ -1610,10 +1512,10 @@ void Definition::writeToc(OutputList &ol)
          if (inLi[nextLevel]) {
             ol.writeString("</li>\n");
          }
-     
+
          QString titleDoc = convertToHtml(si->title);
          ol.writeString("<li class=\"level" + cs + "\"><a href=\"#" + si->label + "\">" + (si->title.isEmpty() ? si->label : titleDoc) + "</a>");
-   
+
          inLi[nextLevel] = true;
          level = nextLevel;
       }
@@ -1646,21 +1548,23 @@ QString Definition::phraseName() const
 
 QString Definition::documentation() const
 {
-   if (m_private->details) {
-      return m_private->details->doc;
-   }
-
-   return "";
+   return m_private->m_details.doc;
 }
 
 int Definition::docLine() const
 {
-   return m_private->details ? m_private->details->line : 1;
+   return m_private->m_details.line;
 }
 
 QString Definition::docFile() const
 {
-   return m_private->details ? m_private->details->file : "<" + m_name + ">";
+   QString retval = m_private->m_details.file;
+
+   if (retval.isEmpty() ) {
+      retval = "<" + m_name + ">";
+   }
+
+   return retval;
 }
 
 // strips w from s if s starts with w
@@ -1696,18 +1600,18 @@ QString abbreviate(const QString &s, const QString &name)
 
    // strip any predefined prefix
    const QStringList briefDescAbbrev = Config::getList("abbreviate-brief");
-  
-   for (auto s : briefDescAbbrev) {     
-      s.replace(QRegExp("\\$name"), scopelessName);     
-      
+
+   for (auto s : briefDescAbbrev) {
+      s.replace(QRegExp("\\$name"), scopelessName);
+
       // replace $name with entity name
       s += " ";
 
-      stripWord(result, s);      
+      stripWord(result, s);
    }
 
    // capitalize first word
-   if (! result.isEmpty()) {  
+   if (! result.isEmpty()) {
       result[0] = result[0].toUpper();
    }
 
@@ -1716,17 +1620,17 @@ QString abbreviate(const QString &s, const QString &name)
 
 QString Definition::briefDescription(bool abbr) const
 {
-   QString retval = ""; 
+   QString retval = "";
 
-   if (m_private->brief)  {
+   if (! m_private->m_brief.doc.isEmpty())  {
 
       if (abbr) {
-         retval = abbreviate(m_private->brief->doc, displayName());
+         retval = abbreviate(m_private->m_brief.doc, displayName());
 
       } else {
-         retval = m_private->brief->doc; 
+         retval = m_private->m_brief.doc;
 
-      } 
+      }
    }
 
    return retval;
@@ -1735,70 +1639,77 @@ QString Definition::briefDescription(bool abbr) const
 QString Definition::briefDescriptionAsTooltip() const
 {
    QSharedPointer<const Definition> self = sharedFrom(this);
+   
+   if (m_private->m_brief.tooltip.isEmpty() && ! m_private->m_brief.doc.isEmpty()) {
+      static bool reentering = false;
 
-   if (m_private->brief) {
+      if (! reentering) {
+         QSharedPointer<const MemberDef> md;
 
-      if (m_private->brief->tooltip.isEmpty() && ! m_private->brief->doc.isEmpty()) {
-         static bool reentering = false;
-
-         if (! reentering) {
-            QSharedPointer<const MemberDef> md;
-
-            if (definitionType() == TypeMember) {
-               md = self.dynamicCast< const MemberDef>();
-            } else {
-               md = QSharedPointer<MemberDef>();
-            }
-
-            QSharedPointer<const Definition> scope;
-
-            if (definitionType() == TypeMember) {
-               scope = getOuterScope();
-
-            } else {
-               scope = self;
-
-            }
-
-            // prevent requests for tooltips while parsing a tooltip
-            reentering = true; 
-
-            m_private->brief->tooltip = parseCommentAsText(scope, md, m_private->brief->doc, 
-                  m_private->brief->file, m_private->brief->line);
-
-            reentering = false;
+         if (definitionType() == TypeMember) {
+            md = self.dynamicCast< const MemberDef>();
+         } else {
+            md = QSharedPointer<MemberDef>();
          }
-      }
 
-      return m_private->brief->tooltip;
+         QSharedPointer<const Definition> scope;
+
+         if (definitionType() == TypeMember) {
+            scope = getOuterScope();
+
+         } else {
+            scope = self;
+
+         }
+
+         // prevent requests for tooltips while parsing a tooltip
+         reentering = true;
+
+         m_private->m_brief.tooltip = parseCommentAsText(scope, md, m_private->m_brief.doc,
+               m_private->m_brief.file, m_private->m_brief.line);
+
+         reentering = false;
+      }
    }
 
-   return "";
+   return m_private->m_brief.tooltip;
 }
 
 int Definition::briefLine() const
 {
-   return m_private->brief ? m_private->brief->line : 1;
+   return m_private->m_brief.line;
 }
 
 QString Definition::briefFile() const
-{
-   return m_private->brief ? m_private->brief->file : "<" + m_name + ">";
+{  
+   QString retval = m_private->m_brief.file;
+
+   if (retval.isEmpty() ) {
+      retval = "<" + m_name + ">";
+   }
+
+   return retval;
 }
 
 QString Definition::inbodyDocumentation() const
 {
-   return m_private->inbodyDocs ? m_private->inbodyDocs->doc : "";
+   return m_private->m_inbodyDocs.doc;
 }
 
 int Definition::inbodyLine() const
 {
-   return m_private->inbodyDocs ? m_private->inbodyDocs->line : 1;
+   return m_private->m_inbodyDocs.line;
 }
 
 QString Definition::inbodyFile() const
 {
-   return m_private->inbodyDocs ? m_private->inbodyDocs->file : "<" + m_name + ">";
+   QString retval = m_private->m_inbodyDocs.file;
+
+   if (retval.isEmpty() ) {
+      retval = "<" + m_name + ">";
+   }
+
+   return retval;
 }
 
 QString Definition::getDefFileName() const
@@ -1864,9 +1775,9 @@ SortedList<QSharedPointer<GroupDef>> *Definition::partOfGroups() const
 bool Definition::isLinkableViaGroup() const
 {
    SortedList<QSharedPointer<GroupDef>> *gl = partOfGroups();
-   
+
    if (gl) {
-      for (auto gd : *gl) {   
+      for (auto gd : *gl) {
          if (gd->isLinkable()) {
             return true;
          }
@@ -1886,14 +1797,14 @@ QSharedPointer<Definition> Definition::getOuterScope() const
    return m_private->outerScope;
 }
 
-MemberSDict *Definition::getReferencesMembers() const
+const MemberSDict &Definition::getReferencesMembers() const
 {
-   return m_private->sourceRefsDict;
+   return m_private->m_sourceRefsDict;
 }
 
-MemberSDict *Definition::getReferencedByMembers() const
+const MemberSDict &Definition::getReferencedByMembers() const
 {
-   return m_private->sourceRefByDict;
+   return m_private->m_sourceRefByDict;
 }
 
 void Definition::setReference(const QString &r)
@@ -1907,7 +1818,7 @@ SrcLangExt Definition::getLanguage() const
 }
 
 void Definition::setHidden(bool b)
-{  
+{
    m_private->hidden = m_private->hidden || b;
 }
 

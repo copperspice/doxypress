@@ -52,7 +52,7 @@ void IndexWord::addUrlIndex(int idx, bool hiPriority)
    }
 }
 
-SearchIndex::SearchIndex() : SearchIndexIntf(Internal), m_urlIndex(-1)
+SearchIndex::SearchIndex() : SearchIndex_Base(Internal), m_urlIndex(-1)
 {    
 }
 
@@ -344,11 +344,11 @@ struct SearchDocEntry {
    QString normalText;
 };
 
-SearchIndexExternal::SearchIndexExternal() : SearchIndexIntf(External)
+SearchIndex_External::SearchIndex_External() : SearchIndex_Base(External)
 {
 }
 
-SearchIndexExternal::~SearchIndexExternal()
+SearchIndex_External::~SearchIndex_External()
 {
 }
 
@@ -407,7 +407,7 @@ static QString definitionToName(QSharedPointer<Definition> ctx)
    return "unknown";
 }
 
-void SearchIndexExternal::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile)
+void SearchIndex_External::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile)
 {
    QString extId = stripPath(Config::getString("external-search-id"));
 
@@ -440,7 +440,7 @@ void SearchIndexExternal::setCurrentDoc(QSharedPointer<Definition> ctx, const QS
    }
 }
 
-void SearchIndexExternal::addWord(const QString &word, bool hiPriority)
+void SearchIndex_External::addWord(const QString &word, bool hiPriority)
 {
    if (word.isEmpty() || ! isId(word[0].unicode()) || m_current == 0) {
       return;
@@ -455,7 +455,7 @@ void SearchIndexExternal::addWord(const QString &word, bool hiPriority)
    *pText += word; 
 }
 
-void SearchIndexExternal::write(const QString &fileName)
+void SearchIndex_External::write(const QString &fileName)
 {
    QFile f(fileName);
 
@@ -681,7 +681,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index classes
-   for (auto cd : *Doxy_Globals::classSDict) {
+   for (auto cd : Doxy_Globals::classSDict) {
 
       uint letter = getUtf8CodeToLower(cd->localName(), 0);
 
@@ -695,7 +695,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index namespaces  
-   for (auto nd : *Doxy_Globals::namespaceSDict) {
+   for (auto &nd : Doxy_Globals::namespaceSDict) {
       uint letter = getUtf8CodeToLower(nd->name(), 0);
 
       if (nd->isLinkable() && isId(letter)) {
@@ -708,7 +708,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index files 
-   for (auto fn : *Doxy_Globals::inputNameList) {
+   for (auto &fn : Doxy_Globals::inputNameList) {
      
       for (auto fd : *fn) { 
          uint letter = getUtf8CodeToLower(fd->name(), 0);
@@ -724,7 +724,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index class members, for each member name
-   for (auto mn : *Doxy_Globals::memberNameSDict) {
+   for (auto mn : Doxy_Globals::memberNameSDict) {
      
       // for each member definition
       for (auto md : *mn) {  
@@ -734,7 +734,7 @@ void writeJavascriptSearchIndex()
 
 
    // index file/namespace members, for each member name          
-   for (auto mn : *Doxy_Globals::functionNameSDict) {
+   for (auto mn : Doxy_Globals::functionNameSDict) {
 
       // for each member definition         
       for (auto md : *mn) { 
@@ -743,7 +743,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index groups
-   for (auto gd : *Doxy_Globals::groupSDict) {
+   for (auto gd : Doxy_Globals::groupSDict) {
 
       if (gd->isLinkable()) {
          QString title = gd->groupTitle();
@@ -766,7 +766,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index pages 
-   for (auto pd : *Doxy_Globals::pageSDict) {
+   for (auto &pd : Doxy_Globals::pageSDict) {
 
       if (pd->isLinkable()) {
          QString title = pd->title();
@@ -1207,7 +1207,7 @@ void writeJavascriptSearchIndex()
       }
    }
 
-   Doxy_Globals::indexList->addStyleSheetFile("search/search.js");
+   Doxy_Globals::indexList.addStyleSheetFile("search/search.js");
 }
 
 void initSearchIndexer()
@@ -1217,21 +1217,17 @@ void initSearchIndexer()
    static bool externalSearch    = Config::getBool("search-external");
 
    if (searchEngine && serverBasedSearch) {
-      if (externalSearch) { // external tools produce search index and engine
-         Doxy_Globals::searchIndex = new SearchIndexExternal;
+      if (externalSearch) { 
+         // external tools produce search index and engine
+         Doxy_Globals::searchIndexBase = QMakeShared<SearchIndex_External>();
 
       } else {
          // DoxyPress produces search index and engine
-         Doxy_Globals::searchIndex = new SearchIndex;
+         Doxy_Globals::searchIndexBase = QMakeShared<SearchIndex>();
       }
 
    } else { 
       // no search engine or pure javascript based search function
-      Doxy_Globals::searchIndex = 0;
+      Doxy_Globals::searchIndexBase = QSharedPointer<SearchIndex_Base>();
    }
-}
-
-void finializeSearchIndexer()
-{
-   delete Doxy_Globals::searchIndex;
 }

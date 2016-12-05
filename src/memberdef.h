@@ -24,10 +24,10 @@
 #include <QTextStream>
 
 #include <sys/types.h>
-#include <types.h>
 
 #include <definition.h>
 #include <entry.h>
+#include <types.h>
 
 class ClassDef;
 class NamespaceDef;
@@ -49,7 +49,7 @@ class MemberDef : public Definition
  public:
    MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &name, 
              const QString &args, const QString &excp, Protection prot, Specifier virt, bool stat,
-             Relationship related, MemberType t, const ArgumentList *tal, const ArgumentList *al);
+             Relationship related, MemberType t, const ArgumentList &tal, const ArgumentList &al);
 
    ~MemberDef();
 
@@ -236,10 +236,19 @@ class MemberDef : public Definition
    bool isPrototype() const;
 
    // argument related members
-   ArgumentList *argumentList() const;
-   ArgumentList *declArgumentList() const;
-   ArgumentList *templateArguments() const;
-   QList<ArgumentList> *definitionTemplateParameterLists() const;
+   void setArgumentList(const ArgumentList &al);
+   void setDeclArgumentList(const ArgumentList &al);
+   void setTypeConstraints(const ArgumentList &al);
+   void setTemplateParameterLists(const QList<ArgumentList> &lists);
+
+   const ArgumentList &getArgumentList() const;
+         ArgumentList &getArgumentList();
+   const ArgumentList &getDeclArgumentList() const;
+   const ArgumentList &getTemplateArgumentList() const;
+         ArgumentList &getTemplateArgumentList();
+   const ArgumentList &getTypeConstraints() const;
+
+   const QList<ArgumentList> &getTemplateParameterLists() const;
 
    // member group related members
    int getMemberGroupId() const;
@@ -275,9 +284,7 @@ class MemberDef : public Definition
    QString displayName(bool = true) const override;
    QString getDeclType() const;
    void getLabels(QStringList &sl, QSharedPointer<Definition> container) const;
-
-   const ArgumentList *typeConstraints() const;
-
+ 
    //
    QString documentation() const;
    QString briefDescription(bool abbr = false) const;
@@ -321,7 +328,7 @@ class MemberDef : public Definition
    void setHasDocumentedParams(bool b);
    void setHasDocumentedReturnType(bool b);
    void setInheritsDocsFrom(QSharedPointer<MemberDef> md);
-   void setTagInfo(TagInfo *i);
+   void setTagInfo(const TagInfo &tag);
    void setArgsString(const QString &as);
 
    // relation to other members
@@ -343,11 +350,7 @@ class MemberDef : public Definition
    // prototype related members
    void setPrototype(bool p);
 
-   // argument related members
-   void setArgumentList(ArgumentList *al);
-   void setDeclArgumentList(ArgumentList *al);
-   void setDefinitionTemplateParameterLists(QList<ArgumentList> *lists);
-   void setTypeConstraints(ArgumentList *al);
+   //    
    void setType(const QString &t);
    void setAccessorType(QSharedPointer<ClassDef> cd, const QString &t);
 
@@ -411,7 +414,7 @@ class MemberDef : public Definition
    void writeTagFile(QTextStream &);
    void warnIfUndocumented();
 
-   QSharedPointer<MemberDef> createTemplateInstanceMember(ArgumentList *formalArgs, ArgumentList *actualArgs);
+   QSharedPointer<MemberDef> createTemplateInstanceMember(const ArgumentList &formalArgs, const ArgumentList &actualArgs);
 
    void findSectionsInDocumentation();
 

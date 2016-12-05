@@ -105,7 +105,7 @@ void FormulaList::generateBitmaps(const QString &path)
             pagesToGenerate.append(page);
          }
 
-         Doxy_Globals::indexList->addImageFile(resultName);
+         Doxy_Globals::indexList.addImageFile(resultName);
          page++;
       }
 

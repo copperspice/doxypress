@@ -22,7 +22,7 @@
 #include <message.h>
 #include <util.h>
 
-EclipseHelp::EclipseHelp() : m_depth(0), m_endtag(false), m_openTags(0), m_tocfile(0)
+EclipseHelp::EclipseHelp() : m_depth(0), m_endtag(false), m_openTags(0)
 {
 }
 
@@ -32,8 +32,7 @@ EclipseHelp::~EclipseHelp()
 
 void EclipseHelp::indent()
 {
-   int i;
-   for (i = 0; i < m_depth; i++) {
+   for (int i = 0; i < m_depth; i++) {
       m_tocstream << "  ";
    }
 }
@@ -63,25 +62,26 @@ void EclipseHelp::openedTag()
  */
 void EclipseHelp::initialize()
 {
-   // -- read path prefix from the configuration
+   // open the contents file
+   static const QString name  = Config::getString("html-output") + "/toc.xml";
+   QString title = Config::getString("project-name");
+
+   // read path prefix from the configuration
    // m_pathprefix = Config::getString("eclipse-pathprefix");
    // if (m_pathprefix.isEmpty()) m_pathprefix = "html/";
 
-   // -- open the contents file
-   QString name = Config::getString("html-output") + "/toc.xml";
-   m_tocfile = new QFile(name);
+   // open the contents file
+   m_tocfile.setFileName(name);
 
-   if (! m_tocfile->open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", qPrintable(name));
+   if (! m_tocfile.open(QIODevice::WriteOnly)) {
+      err("Unable to open file %s for writing\n", csPrintable(name));
       Doxy_Work::stopDoxyPress();
    }
 
-   // -- initialize its text stream
-   m_tocstream.setDevice(m_tocfile);
+   // initialize text stream
+   m_tocstream.setDevice(&m_tocfile);
    
-   // -- write the opening tag
-   QString title = Config::getString("project-name");
-
+   // write the opening tag 
    if (title.isEmpty()) {
       title = "DoxyPress generated documentation";
    }
@@ -100,19 +100,21 @@ void EclipseHelp::initialize()
  */
 void EclipseHelp::finalize()
 {
-   closedTag(); // -- close previous tag
+   static const QString name = Config::getString("html-output") + "/plugin.xml";
 
-   // -- write ending tag
+   // close previous tag
+   closedTag(); 
+
+   // write ending tag
    --m_depth;
    m_tocstream << "</toc>" << endl;
 
-   // -- close the content file
+   // close the content file
    m_tocstream.setDevice(0);
-   m_tocfile->close();
-   delete m_tocfile;
-   m_tocfile = 0;
 
-   QString name = Config::getString("html-output") + "/plugin.xml";
+   m_tocfile.close();  
+   m_tocfile.setFileName("");
+ 
    QFile pluginFile(name);
 
    if (pluginFile.open(QIODevice::WriteOnly)) {

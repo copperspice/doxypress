@@ -151,13 +151,14 @@ QString fileToString(const QString &name, bool filter = false, bool isSourceCode
 QString langToString(SrcLangExt lang);
 
 void linkifyText(const TextGeneratorIntf &ol, QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
-                 QSharedPointer<Definition> self, const QString &text, bool autoBreak = false, bool external = true,
-                 bool keepSpaces = false,  int indentLevel = 0);
+                  QSharedPointer<Definition> self, const QString &text, bool autoBreak = false, bool external = true,   
+                  bool keepSpaces = false, int indentLevel = 0);
 
-bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, ArgumentList *srcAl,
-                  QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, ArgumentList *dstAl, bool checkCV );
+bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, 
+                  const ArgumentList &srcArgList, QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, 
+                  const ArgumentList &dstArgList, bool checkCV);
 
-void mergeArguments(ArgumentList *, ArgumentList *, bool forceNameOverwrite = false);
+void mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool forceNameOverwrite = false);
 
 
 QSharedPointer<ClassDef> getClass(const QString &key);
@@ -169,14 +170,14 @@ QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSha
 QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &key);
 QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
 
-QString showFileDefMatches(const FileNameDict *fnDict, const QString &xName);
+QString showFileDefMatches(const FileNameDict &fnDict, const QString &xName);
 
 int determineSection(const QString &name);
 
-QString argListToString(ArgumentList *al, bool useCanonicalType = false, bool showDefVals = true);
-QString tempArgListToString(const ArgumentList *al, SrcLangExt lang);
+QString argListToString(const ArgumentList &al, bool useCanonicalType = false, bool showDefVals = true);
+QString tempArgListToString(const ArgumentList &al, SrcLangExt lang);
 
-void writeExample(OutputList &ol, ExampleSDict *el);
+void writeExample(OutputList &ol, const ExampleSDict &el);
 
 bool rightScopeMatch(const QString &scope, const QString &name);
 bool leftScopeMatch(const QString &scope, const QString &name);
@@ -227,13 +228,11 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
 
 int extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt = SrcLangExt_Unknown);
 
-QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointer<Definition> context, const ArgumentList *formalArgs);
+QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointer<Definition> context, const ArgumentList &formalArgList);
 
-QString substituteTemplateArgumentsInString(const QString &name, ArgumentList *formalArgs, ArgumentList *actualArgs);
+QString substituteTemplateArgumentsInString(const QString &name, const ArgumentList &formalArgs, const ArgumentList &actualArgs);
 
-QList<ArgumentList> *copyArgumentLists(const QList<ArgumentList> *srcLists);
-
-QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnly = true, QString *lastScopeStripped = 0);
+QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnly = true, QString *lastScopeStripped = nullptr);
 
 QString resolveTypeDef(QSharedPointer<Definition> d, const QString &name, QSharedPointer<Definition> *typedefContext = nullptr);
 
@@ -243,13 +242,13 @@ int getScopeFragment(const QString &s, int p, int *l);
 
 QString filterCRLF(const QString &buffer);
 
-void addRefItem(const QList<ListItemInfo> *sli, const QString &key, const QString &prefix, 
+void addRefItem(const QList<ListItemInfo> &list, const QString &key, const QString &prefix, 
                   const QString &name, const QString &title, const QString &args, QSharedPointer<Definition> scope);
 
-QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc, QList<SectionInfo> *anchors,
-                  const QString &fileName, int startLine, const QList<ListItemInfo> *sli, 
+QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
+                  const QString &fileName, int startLine, const QList<ListItemInfo> &list, 
                   QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
-                  TagInfo *tagInfo = 0, SrcLangExt lang = SrcLangExt_Unknown );
+                  const TagInfo &tagInfo = TagInfo(), SrcLangExt lang = SrcLangExt_Unknown);
 
 QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore = false);
 
@@ -307,7 +306,7 @@ int countAliasArguments(const QString &argList);
 QString resolveAliasCmd(const QString &aliasCmd);
 QString expandAlias(const QString &aliasName, const QString &aliasValue);
 
-void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, ArgumentList *al);
+void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList);
 
 QString convertCharEntities(const QString &s);
 

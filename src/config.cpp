@@ -35,7 +35,7 @@ bool Config::getBool(const QString &name)
       retval = hashIter.value().value;
 
    } else {
-      fprintf(stderr, "Warning: %s was not retrieved from the project bool table\n", qPrintable(name) );
+      fprintf(stderr, "Warning: %s was not retrieved from the project bool table\n", csPrintable(name) );
 
    }
 

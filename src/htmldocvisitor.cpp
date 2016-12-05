@@ -383,7 +383,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          m_t << PREFRAG_START;
 
          {
-            auto tmp = Doxy_Globals::parserManager->getParser(lang);
+            auto tmp = Doxy_Globals::parserManager.getParser(lang);
 
             tmp->parseCode(m_ci, s->context(), s->text(), langExt,
                   s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), -1, -1, false,
@@ -544,7 +544,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),
                      QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), false, m_ctx);
 
@@ -559,7 +559,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),
                      fd, -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
 
@@ -590,7 +590,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_t << PREFRAG_START;
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      extractBlock(inc->text(), inc->blockId()), langExt, inc->isExample(), inc->exampleFile(),
                      QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), true, m_ctx);
 
@@ -618,7 +618,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       popEnabled();
 
       if (! m_hide) {
-         Doxy_Globals::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
+         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
             langExt, op->isExample(), op->exampleFile(),
             QSharedPointer<FileDef>(), -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
       }
@@ -698,7 +698,7 @@ void HtmlDocVisitor::visit(DocIndexEntry *e)
 
    m_t << "<a name=\"" << anchor << "\"></a>";
 
-   Doxy_Globals::indexList->addIndexItem(e->scope(), e->member(), anchor, e->entry());
+   Doxy_Globals::indexList.addIndexItem(e->scope(), e->member(), anchor, e->entry());
 }
 
 void HtmlDocVisitor::visit(DocSimpleSectSep *)

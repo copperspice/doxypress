@@ -770,7 +770,7 @@ void HtmlGenerator::init()
 /// Additional initialization after indices have been created
 void HtmlGenerator::writeTabData()
 {
-   Doxy_Globals::indexList->addStyleSheetFile("tabs.css");
+   Doxy_Globals::indexList.addStyleSheetFile("tabs.css");
    QString dname = Config::getString("html-output");
 
    ResourceMgr &mgr = ResourceMgr::instance();
@@ -799,24 +799,24 @@ void HtmlGenerator::writeSearchData(const QString &dir)
    ResourceMgr &mgr = ResourceMgr::instance();
 
    mgr.copyResourceAs("html/search_l.png", dir, "search_l.png");
-   Doxy_Globals::indexList->addImageFile("search/search_l.png");
+   Doxy_Globals::indexList.addImageFile("search/search_l.png");
 
    mgr.copyResourceAs("html/search_m.png", dir, "search_m.png");
-   Doxy_Globals::indexList->addImageFile("search/search_m.png");
+   Doxy_Globals::indexList.addImageFile("search/search_m.png");
 
    mgr.copyResourceAs("html/search_r.png", dir, "search_r.png");
-   Doxy_Globals::indexList->addImageFile("search/search_r.png");
+   Doxy_Globals::indexList.addImageFile("search/search_r.png");
 
    if (serverBasedSearch) {
       mgr.copyResourceAs("html/mag.png", dir, "mag.png");
-      Doxy_Globals::indexList->addImageFile("search/mag.png");
+      Doxy_Globals::indexList.addImageFile("search/mag.png");
 
    } else {
       mgr.copyResourceAs("html/close.png", dir, "close.png");
-      Doxy_Globals::indexList->addImageFile("search/close.png");
+      Doxy_Globals::indexList.addImageFile("search/close.png");
 
       mgr.copyResourceAs("html/mag_sel.png", dir, "mag_sel.png");
-      Doxy_Globals::indexList->addImageFile("search/mag_sel.png");
+      Doxy_Globals::indexList.addImageFile("search/mag_sel.png");
    }
 
    QString outputName = Config::getString("html-output") + "/search";
@@ -845,7 +845,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
          searchCss.replace("$doxygenversion",   versionString);         // compatibility
 
          t << searchCss;
-         Doxy_Globals::indexList->addStyleSheetFile("search/search.css");       
+         Doxy_Globals::indexList.addStyleSheetFile("search/search.css");       
       }
 
    } else {
@@ -902,7 +902,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath);
 
    //
-   Doxy_Globals::indexList->addIndexFile(fileName);
+   Doxy_Globals::indexList.addIndexFile(fileName);
 
    m_lastFile = fileName;
    m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
@@ -1025,10 +1025,10 @@ void HtmlGenerator::writeStyleInfo(int part)
       }
 
       endPlainFile();
-      Doxy_Globals::indexList->addStyleSheetFile("doxypress.css");
+      Doxy_Globals::indexList.addStyleSheetFile("doxypress.css");
 
       // part two
-      static const QDir configDir = Config::getConfigDir();
+      static const QDir configDir           = Config::getConfigDir();
       static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
       for (auto fileName : extraCssFile) {
@@ -1037,7 +1037,7 @@ void HtmlGenerator::writeStyleInfo(int part)
             QFileInfo fi(configDir, fileName);
 
             if (fi.exists()) {
-               Doxy_Globals::indexList->addStyleSheetFile(fi.fileName());
+               Doxy_Globals::indexList.addStyleSheetFile(fi.fileName());
             } else {
                err("Unable to find stylesheet '%s'\n", csPrintable(fi.absoluteFilePath()));
             }
@@ -2123,7 +2123,7 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
          return documentedFileMembers[FMHL_All] > 0;
 
       case LayoutNavEntry::Examples:
-         return Doxy_Globals::exampleSDict->count() > 0;
+         return Doxy_Globals::exampleSDict.count() > 0;
    }
    return false;
 }
@@ -2854,15 +2854,15 @@ void HtmlGenerator::endMemberDeclaration(const QString &anchor, const QString &i
 
 void HtmlGenerator::setCurrentDoc(QSharedPointer<Definition> context, const QString &anchor, bool isSourceFile)
 {
-   if (Doxy_Globals::searchIndex) {
-      Doxy_Globals::searchIndex->setCurrentDoc(context, anchor, isSourceFile);
+   if (Doxy_Globals::searchIndexBase != nullptr) {
+      Doxy_Globals::searchIndexBase->setCurrentDoc(context, anchor, isSourceFile);
    }
 }
 
 void HtmlGenerator::addWord(const QString &word, bool hiPriority)
 {
-   if (Doxy_Globals::searchIndex) {
-      Doxy_Globals::searchIndex->addWord(word, hiPriority);
+   if (Doxy_Globals::searchIndexBase != nullptr) {
+      Doxy_Globals::searchIndexBase->addWord(word, hiPriority);
    }
 }
 

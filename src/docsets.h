@@ -20,6 +20,7 @@
 
 #include <QFile>
 #include <QTextStream>
+#include <QSet>
 
 #include <index.h>
 #include <stringmap.h>

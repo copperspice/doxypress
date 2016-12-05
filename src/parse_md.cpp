@@ -1014,10 +1014,9 @@ static int processLink(QString &out, const QString &data, int, int size)
       bool ambig;
       QSharedPointer<FileDef> fd;
 
-      if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(Doxy_Globals::imageNameDict, link, ambig)))
+      if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(&Doxy_Globals::imageNameDict, link, ambig))) {
          // assume DoxyPress symbol link or local image link
-
-      {
+      
          out += "@image html ";
          out += link.mid(fd ? 0 : 5);
 
@@ -2130,7 +2129,7 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
          out += header;
          out += "\n";
 
-         QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(id);
+         QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(id);
 
          if (si) {
             if (si->lineNr != -1) {
@@ -2146,10 +2145,10 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
             si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header, type, level));
 
             if (g_current) {
-               g_current->anchors->append(*si);
+               g_current->m_anchors.append(*si);
             }
 
-            Doxy_Globals::sectionDict->insert(id, si);
+            Doxy_Globals::sectionDict.insert(id, si);
          }
 
       } else {
@@ -2547,7 +2546,7 @@ static QString processBlocks(const QString &str, int indent)
                   out += header;
                   out += "\n\n";
 
-                  QSharedPointer<SectionInfo> si (Doxy_Globals::sectionDict->find(id));
+                  QSharedPointer<SectionInfo> si (Doxy_Globals::sectionDict.find(id));
 
                   if (si) {
                      if (si->lineNr != -1) {
@@ -2564,10 +2563,10 @@ static QString processBlocks(const QString &str, int indent)
                                           level == 1 ? SectionInfo::Section : SectionInfo::Subsection, level));
 
                      if (g_current) {
-                        g_current->anchors->append(*si);
+                        g_current->m_anchors.append(*si);
                      }
 
-                     Doxy_Globals::sectionDict->insert(id, si);
+                     Doxy_Globals::sectionDict.insert(id, si);
                   }
 
                } else {
@@ -2942,7 +2941,7 @@ void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QStri
                                    int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                                    bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
-   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser("*.cpp");
+   ParserInterface *pIntf = Doxy_Globals::parserManager.getParser("*.cpp");
 
    if (pIntf != this) {
       pIntf->parseCode(codeOutIntf, scopeName, input, lang, isExampleBlock, exampleName,
@@ -2953,7 +2952,7 @@ void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QStri
 
 void MarkdownFileParser::resetCodeParserState()
 {
-   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser("*.cpp");
+   ParserInterface *pIntf = Doxy_Globals::parserManager.getParser("*.cpp");
 
    if (pIntf != this) {
       pIntf->resetCodeParserState();
@@ -2962,7 +2961,7 @@ void MarkdownFileParser::resetCodeParserState()
 
 void MarkdownFileParser::parsePrototype(const QString &text)
 {
-   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser("*.cpp");
+   ParserInterface *pIntf = Doxy_Globals::parserManager.getParser("*.cpp");
 
    if (pIntf != this) {
       pIntf->parsePrototype(text);

@@ -460,7 +460,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          // Module Documentation       
          bool found = false;
         
-         for (auto gd : *Doxy_Globals::groupSDict)  {
+         for (auto gd : Doxy_Globals::groupSDict)  {
 
             if (found) { 
                break;
@@ -496,7 +496,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          // Namespace Documentation       
          bool found = false;
        
-         for (auto nd : *Doxy_Globals::namespaceSDict)  {
+         for (auto &nd : Doxy_Globals::namespaceSDict)  {
 
             if (found) { 
                break;
@@ -514,7 +514,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          // Compound Documentation          
          bool found = false;
        
-         for (auto cd : *Doxy_Globals::classSDict)  {
+         for (auto cd : Doxy_Globals::classSDict)  {
 
             if (found) { 
                break;
@@ -533,7 +533,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
          // File Documentation
          bool isFirst = true;
        
-         for (auto fn : *Doxy_Globals::inputNameList)  {
+         for (auto &fn : Doxy_Globals::inputNameList)  {
            
             for (auto fd : *fn)  {
                if (fd->isLinkableInProject()) {
@@ -746,7 +746,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
       case isModuleDocumentation: {         
          m_textStream  << "{\\tc \\v " << theTranslator->trModuleDocumentation() << "}" << endl;
       
-         for (auto gd :*Doxy_Globals::groupSDict) {
+         for (auto gd : Doxy_Globals::groupSDict) {
             if (! gd->isReference()) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
                m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
@@ -776,9 +776,9 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
       case isNamespaceDocumentation: {       
          bool found = false;
 
-         auto iter = Doxy_Globals::namespaceSDict->begin();
+         auto iter = Doxy_Globals::namespaceSDict.begin();
         
-         for (auto nd :*Doxy_Globals::namespaceSDict) {
+         for (auto &nd :Doxy_Globals::namespaceSDict) {
             if (found) {
                break;
             }
@@ -794,7 +794,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             ++iter;
          }
 
-         while (iter !=  Doxy_Globals::namespaceSDict->end()) {
+         while (iter !=  Doxy_Globals::namespaceSDict.end()) {
 
             if ((*iter)->isLinkableInProject()) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
@@ -820,7 +820,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          bool firstTime = true;
 
-         for (auto cd :*Doxy_Globals::classSDict) {
+         for (auto cd : Doxy_Globals::classSDict) {
            
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope() ) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
@@ -846,7 +846,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          m_textStream  << "{\\tc \\v " << theTranslator->trFileDocumentation() << "}" << endl;
        
-         for (auto fn :*Doxy_Globals::inputNameList) {  
+         for (auto &fn :Doxy_Globals::inputNameList) {  
             for (auto fd :*fn) {  
 
                if (fd->isLinkableInProject()) {
@@ -887,9 +887,9 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
       case isExampleDocumentation: {        
          m_textStream  << "{\\tc \\v " << theTranslator->trExampleDocumentation() << "}" << endl;
       
-         auto iter1 = Doxy_Globals::exampleSDict->begin();
+         auto iter1 = Doxy_Globals::exampleSDict.begin();
 
-         if (iter1 != Doxy_Globals::exampleSDict->end()) {
+         if (iter1 != Doxy_Globals::exampleSDict.end()) {
             m_textStream  << "\\par " << rtf_Style_Reset << endl;
 
             m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
@@ -898,7 +898,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
        
             ++iter1;  
    
-            for (auto iter2 = iter1; iter2 != Doxy_Globals::exampleSDict->end(); ++iter2) {  
+            for (auto iter2 = iter1; iter2 != Doxy_Globals::exampleSDict.end(); ++iter2) {  
    
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
                beginRTFSection();

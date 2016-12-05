@@ -18,7 +18,7 @@
 #ifndef TRANSLATOR_H
 #define TRANSLATOR_H
 
-#include <classdef.h>
+#include <types.h>
 
 /** Abstract base class for translatable text fragments. */
 class Translator
@@ -112,7 +112,7 @@ class Translator
    virtual QString trNamespacesListDescription(bool extractAll) = 0;
    virtual QString trFriends() = 0; 
    virtual QString trRelatedFunctionDocumentation() = 0;
-   virtual QString trCompoundReference(const QString &clName, ClassDef::CompoundType compType, bool isTemplate) = 0;
+   virtual QString trCompoundReference(const QString &clName, enum CompoundType compType, bool isTemplate) = 0;
 
    virtual QString trFileReference(const QString &fileName) = 0;
    virtual QString trNamespaceReference(const QString &namespaceName) = 0;
@@ -145,7 +145,7 @@ class Translator
    virtual QString trNamespaceDocumentation() = 0;
    virtual QString trNamespaces() = 0;
   
-   virtual QString trGeneratedFromFiles(ClassDef::CompoundType compType, bool single) = 0;  
+   virtual QString trGeneratedFromFiles(enum CompoundType compType, bool single) = 0;  
    virtual QString trReturnValues() = 0;
    virtual QString trMainPage() = 0;
    virtual QString trPageAbbreviation() = 0;   
@@ -319,8 +319,8 @@ class Translator
    virtual QString trModulesList() = 0;
    virtual QString trModulesListDescription(bool extractAll) = 0;
 
-   virtual QString trCompoundReferenceFortran(const QString &clName, ClassDef::CompoundType 
-                  compType, bool isTemplate) = 0;
+   virtual QString trCompoundReferenceFortran(const QString &clName, 
+                  enum CompoundType compType, bool isTemplate) = 0;
 
    virtual QString trModuleReference(const QString &namespaceName) = 0;
 
@@ -330,7 +330,7 @@ class Translator
    virtual QString trModulesIndex() = 0;
    virtual QString trModule(bool first_capital, bool singular) = 0;
 
-   virtual QString trGeneratedFromFilesFortran(ClassDef::CompoundType compType, bool single) = 0;
+   virtual QString trGeneratedFromFilesFortran(enum CompoundType compType, bool single) = 0;
    virtual QString trType(bool first_capital, bool singular) = 0;
    virtual QString trSubprogram(bool first_capital, bool singular) = 0;
    virtual QString trTypeConstraints() = 0;

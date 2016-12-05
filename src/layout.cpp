@@ -70,7 +70,7 @@ static bool elemIsVisible(const QXmlAttributes &attrib, bool defVal = true)
 
 LayoutNavEntry *LayoutNavEntry::find(LayoutNavEntry::Kind kind, const QString &file) const
 {
-   LayoutNavEntry *result = 0;
+   LayoutNavEntry *result = nullptr;
 
    for ( auto entry : m_children) {
       // depth first search, needed to find the entry furthest from the
@@ -129,130 +129,132 @@ QString LayoutNavEntry::url() const
 
 class LayoutParser : public QXmlDefaultHandler
 {
- private:
-   class StartElementHandler
-   {
-    typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib);
+   private:
+      class StartElement
+      {
+      
+       typedef void (LayoutParser::*Handler)(const QXmlAttributes &attrib);
+      
+       public:
+         StartElement(LayoutParser *parent, Handler h)
+            : m_parent(parent), m_handler(h) {}
+      
+         virtual ~StartElement() {}
+      
+         virtual void operator()(const QXmlAttributes &attrib) {
+            (m_parent->*m_handler)(attrib);
+         }
+      
+       protected:
+         StartElement() : m_parent(0), m_handler(0) {}
+      
+       private:
+         LayoutParser *m_parent;
+         Handler m_handler;
+      };
 
-    public:
-      StartElementHandler(LayoutParser *parent, Handler h)
-         : m_parent(parent), m_handler(h) {}
+      class StartElementKind : public StartElement
+      {
+   
+       typedef void (LayoutParser::*Handler)(LayoutDocEntry::Kind kind, const QXmlAttributes &attrib);
+   
+       public:
+         StartElementKind(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h)
+            : m_parent(parent), m_kind(k), m_handler(h) {}
+   
+         void operator()(const QXmlAttributes &attrib) override {
+            (m_parent->*m_handler)(m_kind, attrib);
+         }
+   
+       private:
+         LayoutParser         *m_parent;
+         LayoutDocEntry::Kind  m_kind;
+         Handler               m_handler;
+      };
 
-      virtual ~StartElementHandler() {}
+      class StartElementSection : public StartElement
+      {
+        typedef void (LayoutParser::*Handler)(LayoutDocEntry::Kind kind, const QXmlAttributes &attrib, const QString &title);
+      
+        public:
+         StartElementSection(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h, const QString &title)
+            : m_parent(parent), m_kind(k), m_handler(h), m_title(title) {}
+      
+         void operator()(const QXmlAttributes &attrib) {
+            (m_parent->*m_handler)(m_kind, attrib, m_title);
+         }
+      
+       private:
+         LayoutParser        *m_parent;
+         LayoutDocEntry::Kind m_kind;
+         Handler              m_handler;
+         QString              m_title;
+      };
 
-      virtual void operator()(const QXmlAttributes &attrib) {
-         (m_parent->*m_handler)(attrib);
-      }
+      class StartElementMember : public StartElement
+      {
+        using Handler = void (LayoutParser::*)(const QXmlAttributes &attrib, MemberListType type,
+                     const QString &title, const QString &subtitle);
+      
+        public:
+          StartElementMember(LayoutParser *parent, Handler h, MemberListType type,
+                     const QString &tl, const QString &ss = QString() )
+            : m_parent(parent), m_handler(h), m_type(type), m_title(tl), m_subscript(ss) {}
+      
+          void operator()(const QXmlAttributes &attrib) {
+             (m_parent->*m_handler)(attrib, m_type, m_title, m_subscript);
+         }
+      
+        private:
+         LayoutParser  *m_parent;
+         Handler        m_handler;
+         MemberListType m_type;
+         QString        m_title;
+         QString        m_subscript;
+      };
 
-    protected:
-      StartElementHandler() : m_parent(0), m_handler(0) {}
+      class StartElementNavEntry : public StartElement
+      {
+      
+        typedef void (LayoutParser::*Handler)(LayoutNavEntry::Kind kind, const QXmlAttributes &attrib, const QString &title);
+      
+        public:
+           StartElementNavEntry(LayoutParser *parent, LayoutNavEntry::Kind kind, Handler h, const QString &tl )
+              : m_parent(parent), m_kind(kind), m_handler(h), m_title(tl) {}
+      
+           void operator()(const QXmlAttributes &attrib) {
+              (m_parent->*m_handler)(m_kind, attrib, m_title);
+           }
+      
+        private:
+          LayoutParser          *m_parent;
+          LayoutNavEntry::Kind   m_kind;
+          Handler m_handler;
+          QString m_title;
+      };
 
-    private:
-      LayoutParser *m_parent;
-      Handler m_handler;
-   };
+      class EndElement
+      {
+      
+        typedef void (LayoutParser::*Handler)();
+      
+        public:
+         EndElement(LayoutParser *parent, Handler h) : m_parent(parent), m_handler(h) {}
 
-   class StartElementHandlerKind : public StartElementHandler
-   {
-
-    typedef void (LayoutParser::*Handler)(LayoutDocEntry::Kind kind, const QXmlAttributes &attrib);
-
-    public:
-      StartElementHandlerKind(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h)
-         : m_parent(parent), m_kind(k), m_handler(h) {}
-
-      void operator()(const QXmlAttributes &attrib) override {
-         (m_parent->*m_handler)(m_kind, attrib);
-      }
-
-    private:
-      LayoutParser         *m_parent;
-      LayoutDocEntry::Kind  m_kind;
-      Handler               m_handler;
-   };
-
-   class StartElementHandlerSection : public StartElementHandler
-   {
-     typedef void (LayoutParser::*Handler)(LayoutDocEntry::Kind kind, const QXmlAttributes &attrib, const QString &title);
-
-     public:
-      StartElementHandlerSection(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h, const QString &title)
-         : m_parent(parent), m_kind(k), m_handler(h), m_title(title) {}
-
-      void operator()(const QXmlAttributes &attrib) {
-         (m_parent->*m_handler)(m_kind, attrib, m_title);
-      }
-
-    private:
-      LayoutParser        *m_parent;
-      LayoutDocEntry::Kind m_kind;
-      Handler              m_handler;
-      QString              m_title;
-   };
-
-   class StartElementHandlerMember : public StartElementHandler
-   {
-     using Handler = void (LayoutParser::*)(const QXmlAttributes &attrib, MemberListType type,
-                  const QString &title, const QString &subtitle);
-
-     public:
-       StartElementHandlerMember(LayoutParser *parent, Handler h, MemberListType type,
-                  const QString &tl, const QString &ss = QString() )
-         : m_parent(parent), m_handler(h), m_type(type), m_title(tl), m_subscript(ss) {}
-
-       void operator()(const QXmlAttributes &attrib) {
-          (m_parent->*m_handler)(attrib, m_type, m_title, m_subscript);
-      }
-
-     private:
-      LayoutParser *m_parent;
-      Handler m_handler;
-      MemberListType m_type;
-      QString m_title;
-      QString m_subscript;
-   };
-
-   class StartElementHandlerNavEntry : public StartElementHandler
-   {
-
-     typedef void (LayoutParser::*Handler)(LayoutNavEntry::Kind kind, const QXmlAttributes &attrib, const QString &title);
-
-     public:
-        StartElementHandlerNavEntry(LayoutParser *parent, LayoutNavEntry::Kind kind, Handler h, const QString &tl )
-           : m_parent(parent), m_kind(kind), m_handler(h), m_title(tl) {}
-
-        void operator()(const QXmlAttributes &attrib) {
-           (m_parent->*m_handler)(m_kind, attrib, m_title);
-        }
-
-     private:
-       LayoutParser *m_parent;
-       LayoutNavEntry::Kind m_kind;
-       Handler m_handler;
-       QString m_title;
-   };
-
-   class EndElementHandler
-   {
-
-     typedef void (LayoutParser::*Handler)();
-
-     public:
-      EndElementHandler(LayoutParser *parent, Handler h) : m_parent(parent), m_handler(h) {}
-      void operator()() {
-         (m_parent->*m_handler)();
-      }
-
-     private:
-      LayoutParser *m_parent;
-      Handler m_handler;
-   };
+         void operator()() {
+            (m_parent->*m_handler)();
+         }
+      
+        private:
+         LayoutParser *m_parent;
+         Handler       m_handler;
+      };
 
 
  public:
    static LayoutParser &instance() {
-      static LayoutParser *theInstance = new LayoutParser;
-      return *theInstance;
+      static LayoutParser theInstance;
+      return theInstance;
    }
 
    void init() {
@@ -262,514 +264,837 @@ class LayoutParser : public QXmlDefaultHandler
       // bool fortranOpt = Config::getBool("optimize-fortran");
       // bool javaOpt    = Config::getBool("optimize-java");
 
-      // start & end handlers
-      m_sHandler.insert("doxypress-layout",          new StartElementHandler(this, &LayoutParser::startLayout));
-      m_eHandler.insert("doxypress-layout",          new EndElementHandler(this, &LayoutParser::endLayout));
+      // start & end
+      m_sHandler.insert("doxypress-layout",          QMakeShared<StartElement>(this, &LayoutParser::startLayout));
+      m_eHandler.insert("doxypress-layout",          QMakeShared<EndElement>(this,   &LayoutParser::endLayout));
 
-      // class layout handlers
-      m_sHandler.insert("navindex",                  new StartElementHandler(this, &LayoutParser::startNavIndex));
-      m_sHandler.insert("navindex/tab",              new StartElementHandler(this, &LayoutParser::startNavEntry));
-      m_eHandler.insert("navindex/tab",              new EndElementHandler(this, &LayoutParser::endNavEntry));
-      m_eHandler.insert("navindex",                  new EndElementHandler(this, &LayoutParser::endNavIndex));
+      // class layout
+      m_sHandler.insert("navindex",                  QMakeShared<StartElement>(this, &LayoutParser::startNavIndex));
+      m_sHandler.insert("navindex/tab",              QMakeShared<StartElement>(this, &LayoutParser::startNavEntry));
+      m_eHandler.insert("navindex/tab",              QMakeShared<EndElement>(this,   &LayoutParser::endNavEntry));
+      m_eHandler.insert("navindex",                  QMakeShared<EndElement>(this,   &LayoutParser::endNavIndex));
 
-      // class layout handlers
-      m_sHandler.insert("class",                     new StartElementHandler(this, &LayoutParser::startClass));
+      // class layout
+      m_sHandler.insert("class",                     
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startClass));
 
-      m_sHandler.insert("class/briefdescription",    new StartElementHandlerKind(
-               this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/briefdescription",    
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/detaileddescription", new StartElementHandlerSection(
-               this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
+      m_sHandler.insert("class/detaileddescription", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
                theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("class/authorsection",       new StartElementHandlerKind(
-               this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/authorsection",       
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/includes",            new StartElementHandlerKind(
-               this, LayoutDocEntry::ClassIncludes, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/includes",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::ClassIncludes, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/inheritancegraph",    new StartElementHandlerKind(
-               this, LayoutDocEntry::ClassInheritanceGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/inheritancegraph",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::ClassInheritanceGraph, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/collaborationgraph",  new StartElementHandlerKind(
-               this, LayoutDocEntry::ClassCollaborationGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/collaborationgraph",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::ClassCollaborationGraph, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/allmemberslink",      new StartElementHandlerKind(
-               this, LayoutDocEntry::ClassAllMembersLink, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/allmemberslink",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::ClassAllMembersLink, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/usedfiles",           new StartElementHandlerKind(
-               this, LayoutDocEntry::ClassUsedFiles, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/usedfiles",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::ClassUsedFiles, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("class/memberdecl",                   new StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("class/memberdecl",
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("class/memberdecl/nestedclasses",     new StartElementHandlerSection(this, LayoutDocEntry::ClassNestedClasses,
-               &LayoutParser::startSectionEntry,
+      m_sHandler.insert("class/memberdecl/nestedclasses",  
+               QMakeShared<StartElementSection>   
+               (this, LayoutDocEntry::ClassNestedClasses, &LayoutParser::startSectionEntry,
                buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes())) );
 
-      m_sHandler.insert("class/memberdecl/services",          new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/services",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_services, theTranslator->trServices()));
 
-      m_sHandler.insert("class/memberdecl/interfaces",        new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/interfaces",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_interfaces, theTranslator->trInterfaces()));
 
-
-      m_sHandler.insert("class/memberdecl/publictypedefs",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publictypedefs",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubTypedefs, theTranslator->trPublicTypedefs()));
 
-      m_sHandler.insert("class/memberdecl/protectedtypedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedtypedefs", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proTypedefs, theTranslator->trProtectedTypedefs()));
 
-      m_sHandler.insert("class/memberdecl/privatetypedefs",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatetypedefs",   
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priTypedefs, theTranslator->trPrivateTypedefs()));
 
-
-      m_sHandler.insert("class/memberdecl/publictypes",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publictypes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubTypes, theTranslator->trPublicTypes()));
 
-      m_sHandler.insert("class/memberdecl/publicslots",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicslots",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubSlots, theTranslator->trPublicSlots()));
 
-      m_sHandler.insert("class/memberdecl/publicsignals",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicsignals",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubSignals, theTranslator->trPublicSignals()));
 
-      m_sHandler.insert("class/memberdecl/publicmethods",     new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicmethods",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubMethods,
                buildMultiTitle(theTranslator->trPublicMembers(), SrcLangExt_ObjC, theTranslator->trInstanceMethods())));
 
-      m_sHandler.insert("class/memberdecl/publicstaticmethods",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicstaticmethods",  
+               QMakeShared<StartElementMember>
+              (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubStaticMethods,
                buildMultiTitle( theTranslator->trStaticPublicMembers(), SrcLangExt_ObjC, theTranslator->trClassMethods())));
 
-      m_sHandler.insert("class/memberdecl/publicattributes",       new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubAttribs, theTranslator->trPublicAttribs()));
 
-      m_sHandler.insert("class/memberdecl/publicstaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/publicstaticattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pubStaticAttribs, theTranslator->trStaticPublicAttribs()));
 
-      m_sHandler.insert("class/memberdecl/protectedtypes",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedtypes",  
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proTypes, theTranslator->trProtectedTypes()));
 
-      m_sHandler.insert("class/memberdecl/protectedslots",    new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedslots", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proSlots, theTranslator->trProtectedSlots()));
 
-     m_sHandler.insert("class/memberdecl/protectedsignals",   new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+     m_sHandler.insert("class/memberdecl/protectedsignals",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proSignals, theTranslator->trProtectedSignals()));
 
-      m_sHandler.insert("class/memberdecl/protectedmethods",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedmethods",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proMethods, theTranslator->trProtectedMembers()));
 
-      m_sHandler.insert("class/memberdecl/protectedstaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedstaticmethods",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proStaticMethods, theTranslator->trStaticProtectedMembers()));
 
-      m_sHandler.insert("class/memberdecl/protectedattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proAttribs, theTranslator->trProtectedAttribs()));
 
-      m_sHandler.insert("class/memberdecl/protectedstaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/protectedstaticattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proStaticAttribs, theTranslator->trStaticProtectedAttribs()));
 
-      m_sHandler.insert("class/memberdecl/packagetypes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagetypes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pacTypes, theTranslator->trPackageTypes()));
 
-      m_sHandler.insert("class/memberdecl/packagemethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagemethods",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pacMethods, theTranslator->trPackageMembers()));
 
-      m_sHandler.insert("class/memberdecl/packagestaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagestaticmethods",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pacStaticMethods, theTranslator->trStaticPackageMembers()));
 
-      m_sHandler.insert("class/memberdecl/packageattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packageattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pacAttribs, theTranslator->trPackageAttribs()));
 
-      m_sHandler.insert("class/memberdecl/packagestaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/packagestaticattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_pacStaticAttribs, theTranslator->trStaticPackageAttribs()));
 
-      m_sHandler.insert("class/memberdecl/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/properties",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_properties, theTranslator->trProperties()));
 
-      m_sHandler.insert("class/memberdecl/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/events",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_events, theTranslator->trEvents()));
 
-      m_sHandler.insert("class/memberdecl/privatetypes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatetypes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priTypes, theTranslator->trPrivateTypes()));
 
-      m_sHandler.insert("class/memberdecl/privateslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privateslots",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priSlots, theTranslator->trPrivateSlots()));
 
-      m_sHandler.insert("class/memberdecl/privatesignals",  new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatesignals",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priSignals, theTranslator->trPrivateSignals()));
 
-      m_sHandler.insert("class/memberdecl/privatemethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatemethods",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priMethods, theTranslator->trPrivateMembers()));
 
-      m_sHandler.insert("class/memberdecl/privatestaticmethods", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatestaticmethods",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priStaticMethods, theTranslator->trStaticPrivateMembers()));
 
-      m_sHandler.insert("class/memberdecl/privateattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privateattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priAttribs, theTranslator->trPrivateAttribs()));
 
-      m_sHandler.insert("class/memberdecl/privatestaticattributes", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/privatestaticattributes",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priStaticAttribs, theTranslator->trStaticPrivateAttribs()));
 
-      m_sHandler.insert("class/memberdecl/friends", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/friends",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_friends, theTranslator->trFriends()));
 
-      m_sHandler.insert("class/memberdecl/related", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("class/memberdecl/related",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_related, theTranslator->trRelatedFunctions(), theTranslator->trRelatedSubscript()));
 
-      m_sHandler.insert("class/memberdecl/membergroups",  new StartElementHandlerKind(
-               this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("class/memberdecl/membergroups",  
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
 
-      m_eHandler.insert("class/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
+      m_eHandler.insert("class/memberdecl", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDecl));
 
-      m_sHandler.insert("class/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_sHandler.insert("class/memberdef",  
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDef));
 
-      m_sHandler.insert("class/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::ClassInlineClasses,
+      m_sHandler.insert("class/memberdef/inlineclasses", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::ClassInlineClasses,
                &LayoutParser::startSectionEntry,
                buildMultiTitle(theTranslator->trClassDocumentation(), SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("class/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/typedefs", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_typedefMembers, theTranslator->trMemberTypedefDocumentation()));
 
-      m_sHandler.insert("class/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/enums", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_enumMembers, theTranslator->trMemberEnumerationDocumentation()));
 
-      m_sHandler.insert("class/memberdef/services", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/services", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_serviceMembers, theTranslator->trInterfaces()));
 
-      m_sHandler.insert("class/memberdef/interfaces", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/interfaces",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_interfaceMembers, theTranslator->trInterfaces()));
 
-      m_sHandler.insert("class/memberdef/constructors", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/constructors",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_constructors, theTranslator->trConstructorDocumentation()));
 
-      m_sHandler.insert("class/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/functions",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_functionMembers, buildMultiTitle(theTranslator->trMemberFunctionDocumentation(),
                SrcLangExt_ObjC, theTranslator->trMethodDocumentation(),
                SrcLangExt_Fortran, theTranslator->trMemberFunctionDocumentationFortran() )));
 
-      m_sHandler.insert("class/memberdef/related", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/related",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_relatedMembers, theTranslator->trRelatedFunctionDocumentation()));
 
-      m_sHandler.insert("class/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/variables",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_variableMembers, theTranslator->trMemberDataDocumentation()));
 
-      m_sHandler.insert("class/memberdef/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/properties",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_propertyMembers, theTranslator->trPropertyDocumentation()));
 
-      m_sHandler.insert("class/memberdef/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("class/memberdef/events",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_eventMembers, theTranslator->trEventDocumentation()));
 
-      m_eHandler.insert("class/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
+      m_eHandler.insert("class/memberdef",
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDef));
 
-      m_eHandler.insert("class", new EndElementHandler(this, &LayoutParser::endClass));
+      m_eHandler.insert("class",
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endClass));
 
+      // namespace layout
+      m_sHandler.insert("namespace",
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startNamespace));
 
-      // namespace layout handlers
-      m_sHandler.insert("namespace", new StartElementHandler(this, &LayoutParser::startNamespace));
-      m_sHandler.insert("namespace/briefdescription", new StartElementHandlerKind(this,
-               LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("namespace/briefdescription", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("namespace/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc,
+      m_sHandler.insert("namespace/detaileddescription",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::DetailedDesc,
                &LayoutParser::startSectionEntry, theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("namespace/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection,
-               &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("namespace/authorsection", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("namespace/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("namespace/memberdecl", 
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("namespace/memberdecl/nestednamespaces", new StartElementHandlerSection(this,
-               LayoutDocEntry::NamespaceNestedNamespaces,
+      m_sHandler.insert("namespace/memberdecl/nestednamespaces", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::NamespaceNestedNamespaces,
                &LayoutParser::startSectionEntry, buildMultiTitle( theTranslator->trNamespaces(),
                SrcLangExt_Java, theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(),
                SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("namespace/memberdecl/constantgroups", new StartElementHandlerSection(this,
-               LayoutDocEntry::NamespaceNestedConstantGroups, &LayoutParser::startSectionEntry, theTranslator->trConstantGroups()));
+      m_sHandler.insert("namespace/memberdecl/constantgroups",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::NamespaceNestedConstantGroups, 
+               &LayoutParser::startSectionEntry, theTranslator->trConstantGroups()));
 
-      m_sHandler.insert("namespace/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceClasses,
-               &LayoutParser::startSectionEntry, buildMultiTitle(theTranslator->trCompounds(),
+      m_sHandler.insert("namespace/memberdecl/classes", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::NamespaceClasses, &LayoutParser::startSectionEntry,
+               buildMultiTitle(theTranslator->trCompounds(),
                SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("namespace/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups,
-               &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("namespace/memberdecl/membergroups", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("namespace/memberdecl/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/typedefs", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decTypedefMembers, theTranslator->trTypedefs()));
 
-      m_sHandler.insert("namespace/memberdecl/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/enums", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decEnumMembers, theTranslator->trEnumerations()));
 
-      m_sHandler.insert("namespace/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/functions", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decFuncMembers, buildMultiTitle( theTranslator->trFunctions(),
                SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
-      m_sHandler.insert("namespace/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("namespace/memberdecl/variables", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decVarMembers, theTranslator->trVariables()));
 
-      m_eHandler.insert("namespace/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("namespace/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_eHandler.insert("namespace/memberdecl", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDecl));
 
-      m_sHandler.insert("namespace/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::NamespaceInlineClasses,
+      m_sHandler.insert("namespace/memberdef",  
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDef));
+
+      m_sHandler.insert("namespace/memberdef/inlineclasses", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::NamespaceInlineClasses,
                &LayoutParser::startSectionEntry, buildMultiTitle(theTranslator->trClassDocumentation(),
                SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("namespace/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/typedefs", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docTypedefMembers, theTranslator->trTypedefDocumentation()));
 
-      m_sHandler.insert("namespace/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/enums", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docEnumMembers, theTranslator->trEnumerationTypeDocumentation()));
 
-      m_sHandler.insert("namespace/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/functions", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docFuncMembers, buildMultiTitle( theTranslator->trFunctionDocumentation(),
                SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
 
-      m_sHandler.insert("namespace/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("namespace/memberdef/variables", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
 
-      m_eHandler.insert("namespace/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
-      m_eHandler.insert("namespace", new EndElementHandler(this, &LayoutParser::endNamespace));
+      m_eHandler.insert("namespace/memberdef", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDef));
 
-      // file layout handlers
-      m_sHandler.insert("file", new StartElementHandler(this, &LayoutParser::startFile));
-      m_sHandler.insert("file/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+      m_eHandler.insert("namespace", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endNamespace));
 
-      m_sHandler.insert("file/detaileddescription", new StartElementHandlerSection(this,
-               LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,theTranslator->trDetailedDescription()));
+      // file layout
+      m_sHandler.insert("file", 
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startFile));
 
-      m_sHandler.insert("file/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/includes", new StartElementHandlerKind(this, LayoutDocEntry::FileIncludes, &LayoutParser::startSimpleEntry));
-      m_sHandler.insert("file/includegraph", new StartElementHandlerKind(this, LayoutDocEntry::FileIncludeGraph, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/briefdescription", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("file/includedbygraph", new StartElementHandlerKind(this, LayoutDocEntry::FileIncludedByGraph,
+      m_sHandler.insert("file/detaileddescription", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::DetailedDesc, 
+               &LayoutParser::startSectionEntry,theTranslator->trDetailedDescription()));
+
+      m_sHandler.insert("file/authorsection", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
+
+      m_sHandler.insert("file/includes", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::FileIncludes, &LayoutParser::startSimpleEntry));
+
+      m_sHandler.insert("file/includegraph", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::FileIncludeGraph, &LayoutParser::startSimpleEntry));
+
+      m_sHandler.insert("file/includedbygraph", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::FileIncludedByGraph,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("file/sourcelink", new StartElementHandlerKind(this, LayoutDocEntry::FileSourceLink, &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/sourcelink", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::FileSourceLink, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("file/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups,
-               &LayoutParser::startSimpleEntry));
+      m_sHandler.insert("file/memberdecl/membergroups",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::MemberGroups, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("file/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("file/memberdecl",
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("file/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::FileClasses,
-               &LayoutParser::startSectionEntry,
+      m_sHandler.insert("file/memberdecl/classes", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::FileClasses, &LayoutParser::startSectionEntry,
                buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("file/memberdecl/namespaces", new StartElementHandlerSection(this, LayoutDocEntry::FileNamespaces,
-               &LayoutParser::startSectionEntry, buildMultiTitle( theTranslator->trNamespaces(), SrcLangExt_Java,
+      m_sHandler.insert("file/memberdecl/namespaces", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::FileNamespaces, &LayoutParser::startSectionEntry, 
+                buildMultiTitle( theTranslator->trNamespaces(), SrcLangExt_Java,
                theTranslator->trPackages(), SrcLangExt_IDL, theTranslator->trModules(),
                SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("file/memberdecl/constantgroups", new StartElementHandlerSection(this, LayoutDocEntry::FileConstantGroups,
+      m_sHandler.insert("file/memberdecl/constantgroups",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::FileConstantGroups,
                &LayoutParser::startSectionEntry, theTranslator->trConstantGroups()));
 
-      m_sHandler.insert("file/memberdecl/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/defines", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decDefineMembers, theTranslator->trDefines()));
 
-      m_sHandler.insert("file/memberdecl/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/typedefs", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decTypedefMembers, theTranslator->trTypedefs()));
 
-      m_sHandler.insert("file/memberdecl/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/enums", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decEnumMembers, theTranslator->trEnumerations()));
 
-      m_sHandler.insert("file/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/functions", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decFuncMembers,
                buildMultiTitle( theTranslator->trFunctions(), SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
-      m_sHandler.insert("file/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("file/memberdecl/variables", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decVarMembers, theTranslator->trVariables()));
 
-      m_eHandler.insert("file/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("file/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
+      m_eHandler.insert("file/memberdecl", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDecl));
 
-      m_sHandler.insert("file/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::FileInlineClasses,
+      m_sHandler.insert("file/memberdef",  
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDef));
+
+      m_sHandler.insert("file/memberdef/inlineclasses",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::FileInlineClasses,
                &LayoutParser::startSectionEntry,
                buildMultiTitle( theTranslator->trClassDocumentation(), SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("file/memberdef/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/defines",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docDefineMembers, theTranslator->trDefineDocumentation()));
-
-      m_sHandler.insert("file/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+               
+      m_sHandler.insert("file/memberdef/typedefs",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docTypedefMembers, theTranslator->trTypedefDocumentation()));
 
-      m_sHandler.insert("file/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/enums",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docEnumMembers, theTranslator->trEnumerationTypeDocumentation()));
 
-      m_sHandler.insert("file/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/functions",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docFuncMembers, buildMultiTitle(theTranslator->trFunctionDocumentation(),
                SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
 
-      m_sHandler.insert("file/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("file/memberdef/variables", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
 
-      m_eHandler.insert("file/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
-      m_eHandler.insert("file", new EndElementHandler(this, &LayoutParser::endFile));
+      m_eHandler.insert("file/memberdef", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDef));
 
-      // group layout handlers
-      m_sHandler.insert("group", new StartElementHandler(this, &LayoutParser::startGroup));
-      m_sHandler.insert("group/briefdescription", new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc,
+      m_eHandler.insert("file", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endFile));
+
+      // group layout
+      m_sHandler.insert("group", 
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startGroup));
+
+      m_sHandler.insert("group/briefdescription", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::BriefDesc,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/detaileddescription", new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc,
+      m_sHandler.insert("group/detaileddescription",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::DetailedDesc,
                &LayoutParser::startSectionEntry, theTranslator->trDetailedDescription()));
 
-      m_sHandler.insert("group/authorsection", new StartElementHandlerKind(this, LayoutDocEntry::AuthorSection,
+      m_sHandler.insert("group/authorsection", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::AuthorSection,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/groupgraph", new StartElementHandlerKind(this, LayoutDocEntry::GroupGraph,
+      m_sHandler.insert("group/groupgraph",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::GroupGraph,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/memberdecl/membergroups", new StartElementHandlerKind(this, LayoutDocEntry::MemberGroups,
+      m_sHandler.insert("group/memberdecl/membergroups", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::MemberGroups,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("group/memberdecl", 
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDecl));
 
-      m_sHandler.insert("group/memberdecl/classes", new StartElementHandlerSection(this, LayoutDocEntry::GroupClasses,
+      m_sHandler.insert("group/memberdecl/classes", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::GroupClasses,
                &LayoutParser::startSectionEntry,
                buildMultiTitle( theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes() )));
 
-      m_sHandler.insert("group/memberdecl/namespaces", new StartElementHandlerSection(this, LayoutDocEntry::GroupNamespaces,
+      m_sHandler.insert("group/memberdecl/namespaces", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::GroupNamespaces,
                &LayoutParser::startSectionEntry, buildMultiTitle( theTranslator->trNamespaces(),
                SrcLangExt_Java, theTranslator->trPackages(), SrcLangExt_Fortran, theTranslator->trModules() )));
 
-      m_sHandler.insert("group/memberdecl/dirs", new StartElementHandlerSection(this, LayoutDocEntry::GroupDirs,
+      m_sHandler.insert("group/memberdecl/dirs",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::GroupDirs,
                &LayoutParser::startSectionEntry, theTranslator->trDirectories() ));
 
-      m_sHandler.insert("group/memberdecl/nestedgroups", new StartElementHandlerSection(this, LayoutDocEntry::GroupNestedGroups,
+      m_sHandler.insert("group/memberdecl/nestedgroups", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::GroupNestedGroups,
                &LayoutParser::startSectionEntry, theTranslator->trModules() ));
 
-      m_sHandler.insert("group/memberdecl/files", new StartElementHandlerSection(this, LayoutDocEntry::GroupFiles,
+      m_sHandler.insert("group/memberdecl/files", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::GroupFiles,
                &LayoutParser::startSectionEntry, theTranslator->trFile(true, false) ));
 
-      m_sHandler.insert("group/memberdecl/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/defines", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decDefineMembers, theTranslator->trDefines()));
 
-      m_sHandler.insert("group/memberdecl/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/typedefs", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decTypedefMembers, theTranslator->trTypedefs()));
 
-      m_sHandler.insert("group/memberdecl/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/enums", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decEnumMembers, theTranslator->trEnumerations()));
 
-      m_sHandler.insert("group/memberdecl/enumvalues", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/enumvalues",
+               QMakeShared<StartElementMember>                  
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decEnumValMembers, theTranslator->trEnumerationValues()));
 
-      m_sHandler.insert("group/memberdecl/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/functions", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decFuncMembers,
                buildMultiTitle(theTranslator->trFunctions(), SrcLangExt_Fortran, theTranslator->trSubprograms() )));
 
-      m_sHandler.insert("group/memberdecl/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/variables", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decVarMembers, theTranslator->trVariables()));
 
-
-      m_sHandler.insert("group/memberdecl/publicsignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/publicsignals",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPubSignalMembers, theTranslator->trPublicSignals()));
 
-     m_sHandler.insert("group/memberdecl/protectedsignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/protectedsignals",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decProSignalMembers, theTranslator->trProtectedSignals()));
 
-     m_sHandler.insert("group/memberdecl/privatesignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/privatesignals",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPriSignalMembers, theTranslator->trPrivateSignals()));
 
-      m_sHandler.insert("group/memberdecl/publicslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/publicslots",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPubSlotMembers, theTranslator->trPublicSlots()));
 
-      m_sHandler.insert("group/memberdecl/protectedslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/protectedslots",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decProSlotMembers, theTranslator->trProtectedSlots()));
 
-      m_sHandler.insert("group/memberdecl/privateslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/privateslots",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPriSlotMembers, theTranslator->trPrivateSlots()));
 
-
-      m_sHandler.insert("group/memberdecl/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/events", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decEventMembers, theTranslator->trEvents()));
 
-      m_sHandler.insert("group/memberdecl/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/properties", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decPropMembers, theTranslator->trProperties()));
 
-      m_sHandler.insert("group/memberdecl/friends", new StartElementHandlerMember(this, &LayoutParser::startMemberDeclEntry,
+      m_sHandler.insert("group/memberdecl/friends", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_decFriendMembers, theTranslator->trFriends()));
 
-      m_eHandler.insert("group/memberdecl", new EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_sHandler.insert("group/memberdef",  new StartElementHandler(this, &LayoutParser::startMemberDef));
-      m_sHandler.insert("group/memberdef/pagedocs", new StartElementHandlerKind(this, LayoutDocEntry::GroupPageDocs,
+      m_eHandler.insert("group/memberdecl", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDecl));
+
+      m_sHandler.insert("group/memberdef",  
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDef));
+
+      m_sHandler.insert("group/memberdef/pagedocs", 
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::GroupPageDocs,
                &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("group/memberdef/inlineclasses", new StartElementHandlerSection(this, LayoutDocEntry::GroupInlineClasses,
-               &LayoutParser::startSectionEntry, buildMultiTitle(theTranslator->trClassDocumentation(), SrcLangExt_Fortran,
-               theTranslator->trTypeDocumentation() )));
+      m_sHandler.insert("group/memberdef/inlineclasses", 
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::GroupInlineClasses,
+               &LayoutParser::startSectionEntry, buildMultiTitle(theTranslator->trClassDocumentation(), 
+               SrcLangExt_Fortran, theTranslator->trTypeDocumentation() )));
 
-      m_sHandler.insert("group/memberdef/defines", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/defines", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docDefineMembers, theTranslator->trDefineDocumentation()));
 
-      m_sHandler.insert("group/memberdef/typedefs", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/typedefs",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docTypedefMembers, theTranslator->trTypedefDocumentation()));
 
-      m_sHandler.insert("group/memberdef/enums", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/enums", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docEnumMembers, theTranslator->trEnumerationTypeDocumentation()));
 
-      m_sHandler.insert("group/memberdef/enumvalues", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/enumvalues", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docEnumValMembers, theTranslator->trEnumerationValueDocumentation()));
 
-      m_sHandler.insert("group/memberdef/functions", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/functions", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docFuncMembers, buildMultiTitle( theTranslator->trFunctionDocumentation(),
                SrcLangExt_Fortran, theTranslator->trSubprogramDocumentation() )));
 
-      m_sHandler.insert("group/memberdef/variables", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
+      m_sHandler.insert("group/memberdef/variables", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
+               MemberListType_docVarMembers, theTranslator->trVariableDocumentation()));
 
+      m_sHandler.insert("group/memberdef/publicsignals",  
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
+               MemberListType_docPubSignalMembers, theTranslator->trPublicSignals()));
 
-      m_sHandler.insert("group/memberdef/publicsignals",   new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docPubSignalMembers, theTranslator->trPublicSignals()));
+      m_sHandler.insert("group/memberdef/protectedsignals", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
+               MemberListType_docProSignalMembers, theTranslator->trProtectedSignals()));
 
-      m_sHandler.insert("group/memberdef/protectedsignals", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docProSignalMembers, theTranslator->trProtectedSignals()));
+      m_sHandler.insert("group/memberdef/privatesignals",  
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
+               MemberListType_docPriSignalMembers, theTranslator->trPrivateSignals()));
 
-      m_sHandler.insert("group/memberdef/privatesignals",   new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docPriSignalMembers, theTranslator->trPrivateSignals()));
+      m_sHandler.insert("group/memberdef/publicslots",    
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
+               MemberListType_docPubSlotMembers, theTranslator->trPublicSlots()));
 
-      m_sHandler.insert("group/memberdef/publicslots",    new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docPubSlotMembers, theTranslator->trPublicSlots()));
+      m_sHandler.insert("group/memberdef/protectedslots", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
+               MemberListType_docProSlotMembers, theTranslator->trProtectedSlots()));
 
-      m_sHandler.insert("group/memberdef/protectedslots", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docProSlotMembers, theTranslator->trProtectedSlots()));
+      m_sHandler.insert("group/memberdef/privateslots",   
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
+               MemberListType_docPriSlotMembers, theTranslator->trPrivateSlots()));
 
-      m_sHandler.insert("group/memberdef/privateslots",   new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
-                              MemberListType_docPriSlotMembers, theTranslator->trPrivateSlots()));
-
-
-      m_sHandler.insert("group/memberdef/events", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/events", 
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docEventMembers, theTranslator->trEvents()));
 
-      m_sHandler.insert("group/memberdef/properties", new StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/properties",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docPropMembers, theTranslator->trProperties()));
 
-      m_sHandler.insert("group/memberdef/friends", new  StartElementHandlerMember(this, &LayoutParser::startMemberDefEntry,
+      m_sHandler.insert("group/memberdef/friends",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDefEntry,
                MemberListType_docFriendMembers, theTranslator->trFriends()));
 
-      m_eHandler.insert("group/memberdef", new EndElementHandler(this, &LayoutParser::endMemberDef));
+      m_eHandler.insert("group/memberdef", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDef));
 
-      m_eHandler.insert("group", new EndElementHandler(this, &LayoutParser::endGroup));
+      m_eHandler.insert("group", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endGroup));
 
-      // directory layout handlers
-      m_sHandler.insert("directory", new StartElementHandler(this, &LayoutParser::startDirectory));
+      // directory layout
+      m_sHandler.insert("directory", 
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startDirectory));
+
       m_sHandler.insert("directory/briefdescription",
-               new StartElementHandlerKind(this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("directory/detaileddescription",
-               new StartElementHandlerSection(this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
                theTranslator->trDetailedDescription()));
 
       m_sHandler.insert("directory/directorygraph",
-               new StartElementHandlerKind(this, LayoutDocEntry::DirGraph, &LayoutParser::startSimpleEntry));
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::DirGraph, &LayoutParser::startSimpleEntry));
 
-      m_sHandler.insert("directory/memberdecl", new StartElementHandler(this, &LayoutParser::startMemberDecl));
+      m_sHandler.insert("directory/memberdecl", 
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startMemberDecl));
 
       m_sHandler.insert("directory/memberdecl/dirs",
-               new StartElementHandlerKind(this, LayoutDocEntry::DirSubDirs, &LayoutParser::startSimpleEntry));
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::DirSubDirs, &LayoutParser::startSimpleEntry));
 
       m_sHandler.insert("directory/memberdecl/files",
-               new StartElementHandlerKind(this, LayoutDocEntry::DirFiles, &LayoutParser::startSimpleEntry));
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::DirFiles, &LayoutParser::startSimpleEntry));
 
-      m_eHandler.insert("directory/memberdecl",new EndElementHandler(this, &LayoutParser::endMemberDecl));
-      m_eHandler.insert("directory", new EndElementHandler(this, &LayoutParser::endDirectory));
+      m_eHandler.insert("directory/memberdecl",
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endMemberDecl));
+
+      m_eHandler.insert("directory", 
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endDirectory));
    }
 
    void startSimpleEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib) {
@@ -784,7 +1109,6 @@ class LayoutParser : public QXmlDefaultHandler
    void startSectionEntry(LayoutDocEntry::Kind k, const QXmlAttributes &attrib, const QString &title) {
       bool isVisible    = elemIsVisible(attrib);
       QString userTitle = attrib.value("title");
-
 
       if (userTitle.isEmpty()) {
          userTitle = title;
@@ -834,8 +1158,9 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void startNavIndex(const QXmlAttributes &) {
-      m_scope = "navindex/";
+      m_scope   = "navindex/";
       m_rootNav = LayoutDocManager::instance().rootNavEntry();
+
       if (m_rootNav) {
          m_rootNav->clear();
       }
@@ -846,9 +1171,10 @@ class LayoutParser : public QXmlDefaultHandler
 
       if (m_rootNav && ! m_rootNav->find(LayoutNavEntry::MainPage)) {
 
-         // no MainPage node... add one as the first item of the root node...
-         new LayoutNavEntry(m_rootNav, LayoutNavEntry::MainPage, true, "index", theTranslator->trMainPage(), "", true);
-      }
+         // no MainPage node, add one as the first item of the root node
+         LayoutNavEntry *tmpLayout = new LayoutNavEntry(m_rootNav, LayoutNavEntry::MainPage, true, "index", theTranslator->trMainPage(), "");
+         m_rootNav->prependChild(tmpLayout);         
+      }      
    }
 
    struct NavEntryMap {
@@ -1265,12 +1591,14 @@ class LayoutParser : public QXmlDefaultHandler
       }
 
       // create new item and make it the new root
-      m_rootNav = new LayoutNavEntry(m_rootNav, tKind, isVisible, baseFile, title, intro);
+      LayoutNavEntry *tmpLayout = new LayoutNavEntry(m_rootNav, tKind, isVisible, baseFile, title, intro);
+      m_rootNav->addChild(tmpLayout);
+      m_rootNav = tmpLayout;
    }
 
    void endNavEntry() {
       // set the root back to the parent
-      if (m_rootNav && !m_invalidEntry) {
+      if (m_rootNav && ! m_invalidEntry) {
          m_rootNav = m_rootNav->parent();
       }
 
@@ -1334,19 +1662,22 @@ class LayoutParser : public QXmlDefaultHandler
 
    void startMemberDef(const QXmlAttributes &) {
       m_scope += "memberdef/";
+
       if (m_part != -1) {
          LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part,
-                                               new LayoutDocEntrySimple(LayoutDocEntry::MemberDefStart));
+                  new LayoutDocEntrySimple(LayoutDocEntry::MemberDefStart));
       }
    }
 
    void endMemberDef() {
       int i = m_scope.lastIndexOf("memberdef/");
+
       if (i != -1) {
          m_scope = m_scope.left(i);
+
          if (m_part != -1) {
             LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part,
-                                                  new LayoutDocEntrySimple(LayoutDocEntry::MemberDefEnd));
+                  new LayoutDocEntrySimple(LayoutDocEntry::MemberDefEnd));
          }
       }
    }
@@ -1355,7 +1686,7 @@ class LayoutParser : public QXmlDefaultHandler
       m_scope += "memberdecl/";
       if (m_part != -1) {
          LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part,
-                                               new LayoutDocEntrySimple(LayoutDocEntry::MemberDeclStart));
+                  new LayoutDocEntrySimple(LayoutDocEntry::MemberDeclStart));
       }
    }
 
@@ -1367,7 +1698,7 @@ class LayoutParser : public QXmlDefaultHandler
 
          if (m_part != -1) {
             LayoutDocManager::instance().addEntry((LayoutDocManager::LayoutPart)m_part,
-                                                  new LayoutDocEntrySimple(LayoutDocEntry::MemberDeclEnd));
+                  new LayoutDocEntrySimple(LayoutDocEntry::MemberDeclEnd));
          }
       }
    }
@@ -1376,21 +1707,21 @@ class LayoutParser : public QXmlDefaultHandler
    bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib ) {
 
       QString temp = m_scope + name;
-      StartElementHandler *handler = m_sHandler[temp];
+      QSharedPointer<StartElement> handler = m_sHandler[temp];
 
       if (handler) {
          (*handler)(attrib);
 
       } else {
          err("Unable to process layout file, XML tag '%s' was found in scope: '%s', \n",
-                     qPrintable(name), qPrintable(m_scope));
+                     csPrintable(name), qPrintable(m_scope));
       }
 
       return true;
    }
 
    bool endElement( const QString &, const QString &, const QString &name ) {
-      EndElementHandler *handler;
+      QSharedPointer<EndElement> handler;
 
       if (! m_scope.isEmpty() && m_scope.right(name.length() + 1 ) == name + "/") {
         // element ends current scope
@@ -1405,7 +1736,7 @@ class LayoutParser : public QXmlDefaultHandler
         (*handler)();
       }
 
-      return TRUE;
+      return true;
    }
 
    bool startDocument() {
@@ -1415,14 +1746,14 @@ class LayoutParser : public QXmlDefaultHandler
  private:
    LayoutParser() :  m_invalidEntry(false) { }
 
-   QHash<QString, StartElementHandler *> m_sHandler;
-   QHash<QString, EndElementHandler *>   m_eHandler;
+   QHash<QString, QSharedPointer<StartElement>> m_sHandler;
+   QHash<QString, QSharedPointer<EndElement>>   m_eHandler;
    QString m_scope;
 
-   int m_part;
+   int             m_part;
    LayoutNavEntry *m_rootNav;
-   bool m_invalidEntry;
-   static int m_userGroupCount;
+   bool            m_invalidEntry;
+   static int      m_userGroupCount;
 };
 
 int LayoutParser::m_userGroupCount = 0;
@@ -1467,27 +1798,16 @@ static QString getLayout_Default()
    QFile f(fileName);
 
    if (! f.open(QFile::ReadOnly | QFile::Text)) {
-      err("Unable to open file %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file %s, error: %d\n", csPrintable(fileName), f.error());
       return "";
    }
 
    return f.readAll();
 }
 
-class LayoutDocManager::Private
-{
- public:
-   QList<LayoutDocEntry *> m_docEntries[LayoutDocManager::NUM_PARTS];
-   LayoutNavEntry *rootNav;
-};
-
 LayoutDocManager::LayoutDocManager()
 {
-   d = new Private;
-
-   int i;
-
-   d->rootNav = new LayoutNavEntry;
+   m_docRootNav = new LayoutNavEntry;
    LayoutParser::instance().init();
 }
 
@@ -1510,8 +1830,7 @@ void LayoutDocManager::init()
 
 LayoutDocManager::~LayoutDocManager()
 {
-   delete d->rootNav;
-   delete d;
+   delete m_docRootNav;
 }
 
 LayoutDocManager &LayoutDocManager::instance()
@@ -1521,23 +1840,68 @@ LayoutDocManager &LayoutDocManager::instance()
 }
 
 const QList<LayoutDocEntry *> &LayoutDocManager::docEntries(LayoutDocManager::LayoutPart part) const
-{
-   return d->m_docEntries[(int)part];
+{   
+   switch (part)  {
+      case LayoutPart::Class:
+         return m_docClass; 
+
+      case LayoutPart::Namespace:
+         return m_docNamespace; 
+
+      case LayoutPart::File:
+         return m_docFile; 
+
+      case LayoutPart::Group:
+         return m_docGroup; 
+
+      case LayoutPart::Directory:
+         return m_docDirectory; 
+   }
 }
 
 LayoutNavEntry *LayoutDocManager::rootNavEntry() const
 {
-   return d->rootNav;
+   return m_docRootNav;
 }
 
-void LayoutDocManager::addEntry(LayoutDocManager::LayoutPart p, LayoutDocEntry *e)
+void LayoutDocManager::addEntry(LayoutDocManager::LayoutPart part, LayoutDocEntry *e)
 {
-   d->m_docEntries[(int)p].append(e);
+   switch (part)  {
+      case LayoutPart::Class:
+         m_docClass.append(e); 
+
+      case LayoutPart::Namespace:
+         return m_docNamespace.append(e);
+
+      case LayoutPart::File:
+         return m_docFile.append(e); 
+
+      case LayoutPart::Group:
+         return m_docGroup.append(e); 
+
+      case LayoutPart::Directory:
+         return m_docDirectory.append(e); 
+   }
 }
 
-void LayoutDocManager::clear(LayoutDocManager::LayoutPart p)
+void LayoutDocManager::clear(LayoutDocManager::LayoutPart part)
 {
-   d->m_docEntries[(int)p].clear();
+   switch (part)  {
+      case LayoutPart::Class:
+         m_docClass.clear(); 
+
+      case LayoutPart::Namespace:
+         m_docNamespace.clear(); 
+
+      case LayoutPart::File:
+         m_docFile.clear(); 
+
+      case LayoutPart::Group:
+         m_docGroup.clear(); 
+
+      case LayoutPart::Directory:
+         m_docDirectory.clear(); 
+   }
 }
 
 void LayoutDocManager::parse(QTextStream &t, const QString &fileName)
@@ -1575,11 +1939,11 @@ void writeDefaultLayoutFile(const QString &fileName)
    printf("DoxyPress layout file generated: %s", csPrintable( f.fileName() ));
 }
 
-// Convert input to a title.
-// The format of input can be a simple title "A title" or in case there are different
+// Convert input to a title
+// format of input can be a simple title "A title" or in case there are different
 // titles for some programming languages they can take the following form:
-// "A title|16=Another title|8=Yet Another title"
-// where the number is a value of SrcLangExt in decimal notation (i.e. 16=Java, 8=IDL).
+//    "A title|16=Another title|8=Yet Another title"
+//    where the number is a value of SrcLangExt in decimal notation (i.e. 16=Java, 8=IDL).
 
 QString extractLanguageSpecificTitle(const QString &input, SrcLangExt lang)
 {

@@ -85,15 +85,15 @@ void marshalArgumentList(StorageIntf *s, const ArgumentList &argList)
    ArgumentList::marshal(s, argList);
 }
 
-void marshalArgumentLists(StorageIntf *s, QList<ArgumentList> *argLists)
+void marshalArgumentLists(StorageIntf *s, const QList<ArgumentList> &argLists)
 {
-   if (argLists == nullptr) {
+   if (argLists.isEmpty()) {
       marshalUInt(s, NULL_LIST);
 
    } else {
-      marshalUInt(s, argLists->count());
+      marshalUInt(s, argLists.count());
 
-      for (auto &al : *argLists) {
+      for (auto &al : argLists) {
          marshalArgumentList(s, al);
       }
    }
@@ -115,30 +115,30 @@ void marshalBaseInfoList(StorageIntf *s, QList<BaseInfo> *baseList)
    }
 }
 
-void marshalGroupingList(StorageIntf *s, QList<Grouping> *groups)
+void marshalGroupingList(StorageIntf *s, const QList<Grouping> &groups)
 {
-   if (groups == nullptr) {
+   if (groups.isEmpty()) {
       marshalUInt(s, NULL_LIST);
 
    } else {
-      marshalUInt(s, groups->count());
+      marshalUInt(s, groups.count());
 
-      for (auto &g : *groups) {
+      for (auto &g : groups) {
          marshalQString(s, g.groupname);
          marshalInt(s, g.pri);
       }
    }
 }
 
-void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors)
+void marshalSectionInfoList(StorageIntf *s, const QList<SectionInfo> &anchors)
 {
-   if (anchors == nullptr) {
+   if (anchors.isEmpty()) {
       marshalUInt(s, NULL_LIST);
 
    } else {
-      marshalUInt(s, anchors->count());
+      marshalUInt(s, anchors.count());
 
-      for (auto &si : *anchors) {
+      for (auto &si : anchors) {
          marshalQString(s, si.label);
          marshalQString(s, si.title);
          marshalQString(s, si.ref);
@@ -150,15 +150,15 @@ void marshalSectionInfoList(StorageIntf *s, QList<SectionInfo> *anchors)
    }
 }
 
-void marshalItemInfoList(StorageIntf *s, QList<ListItemInfo> *sli)
+void marshalItemInfoList(StorageIntf *s, const QList<ListItemInfo> &list)
 {
-   if (sli == nullptr) {
+   if (list.isEmpty()) {
       marshalUInt(s, NULL_LIST);
 
    } else {
-      marshalUInt(s, sli->count());
+      marshalUInt(s, list.count());
 
-      for (auto &item : *sli) {
+      for (auto &item : list) {
          marshalQString(s, item.type);
          marshalInt(s, item.itemId);
       }
@@ -207,7 +207,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalQString(s, e->bitfields);
 
    marshalArgumentList(s,  e->argList);
-   marshalArgumentLists(s, e->tArgLists);
+   marshalArgumentLists(s, e->m_templateArgLists);
 
    marshalQString(s, e->m_program);
    marshalQString(s, e->initializer);
@@ -240,11 +240,12 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
 
    marshalBaseInfoList(s,    &e->extends);
 
-   marshalGroupingList(s,    e->groups);
-   marshalSectionInfoList(s, e->anchors);
+   marshalGroupingList(s,    e->m_groups);
+   marshalSectionInfoList(s, e->m_anchors);
+
    marshalQString(s,         e->fileName);
    marshalInt(s,             e->startLine);
-   marshalItemInfoList(s,    e->sli);
+   marshalItemInfoList(s,    e->m_specialLists);
    marshalInt(s,             e->lang);
    marshalBool(s,            e->hidden);
    marshalBool(s,            e->artificial);
@@ -324,24 +325,24 @@ QString unmarshalQString(StorageIntf *s)
    return QString::fromUtf8(result);
 }
 
-ArgumentList *unmarshalArgumentList(StorageIntf *s)
+ArgumentList unmarshalArgumentList(StorageIntf *s)
 {
    return ArgumentList::unmarshal(s);
 }
 
-QList<ArgumentList> *unmarshalArgumentLists(StorageIntf *s)
+QList<ArgumentList> unmarshalArgumentLists(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return 0;
+      return QList<ArgumentList>();
    }
 
-   QList<ArgumentList> *result = new QList<ArgumentList>;
+   QList<ArgumentList> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
-      result->append(*unmarshalArgumentList(s));
+      result.append(unmarshalArgumentList(s));
    }
 
    return result;
@@ -370,36 +371,36 @@ QList<BaseInfo> unmarshalBaseInfoList(StorageIntf *s)
    return result;
 }
 
-QList<Grouping> *unmarshalGroupingList(StorageIntf *s)
+QList<Grouping> unmarshalGroupingList(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return nullptr;
+      return QList<Grouping>();
    }
 
-   QList<Grouping> *result = new QList<Grouping>;
+   QList<Grouping> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
       QString name = unmarshalQString(s);
       Grouping::GroupPri_t prio = (Grouping::GroupPri_t)unmarshalInt(s);
 
-      result->append(Grouping(name, prio));
+      result.append(Grouping(name, prio));
    }
 
    return result;
 }
 
-QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s)
+QList<SectionInfo> unmarshalSectionInfoList(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return nullptr;
+      return QList<SectionInfo>();
    }
 
-   QList<SectionInfo> *result = new QList<SectionInfo>;
+   QList<SectionInfo> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
@@ -408,26 +409,26 @@ QList<SectionInfo> *unmarshalSectionInfoList(StorageIntf *s)
       QString ref   = unmarshalQString(s);
 
       SectionInfo::SectionType type = (SectionInfo::SectionType)unmarshalInt(s);
-
       QString fileName = unmarshalQString(s);
 
       int lineNr = unmarshalInt(s);
       int level  = unmarshalInt(s);
-      result->append(SectionInfo(fileName, lineNr, label, title, type, level, ref));
+
+      result.append(SectionInfo(fileName, lineNr, label, title, type, level, ref));
    }
 
    return result;
 }
 
-QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s)
+QList<ListItemInfo> unmarshalItemInfoList(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return nullptr;
+      return QList<ListItemInfo>();
    }
 
-   QList<ListItemInfo> *result = new QList<ListItemInfo>;
+   QList<ListItemInfo> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
@@ -435,7 +436,7 @@ QList<ListItemInfo> *unmarshalItemInfoList(StorageIntf *s)
       list.type   = unmarshalQString(s);
       list.itemId = unmarshalInt(s);
 
-      result->append(list);
+      result.append(list);
    }
 
    return result;
@@ -491,8 +492,8 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->args             = unmarshalQString(s);
    e->bitfields        = unmarshalQString(s);
 
-   e->argList          = *unmarshalArgumentList(s);
-   e->tArgLists        = unmarshalArgumentLists(s);
+   e->argList            = unmarshalArgumentList(s);
+   e->m_templateArgLists = unmarshalArgumentLists(s);
 
    e->m_program        = unmarshalQString(s);
    e->initializer      = unmarshalQString(s);
@@ -518,22 +519,18 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
 
    e->inside           = unmarshalQString(s);
    e->exception        = unmarshalQString(s);
-   e->typeConstr       = *unmarshalArgumentList(s);
+   e->typeConstr       = unmarshalArgumentList(s);
    e->bodyLine         = unmarshalInt(s);
    e->endBodyLine      = unmarshalInt(s);
    e->mGrpId           = unmarshalInt(s);
 
    e->extends          = unmarshalBaseInfoList(s);
-
-   delete e->groups;
-   e->groups           = unmarshalGroupingList(s);
-
-   delete e->anchors;
-   e->anchors          = unmarshalSectionInfoList(s);
+   e->m_groups         = unmarshalGroupingList(s);   
+   e->m_anchors        = unmarshalSectionInfoList(s);
 
    e->fileName         = unmarshalQString(s);
    e->startLine        = unmarshalInt(s);
-   e->sli              = unmarshalItemInfoList(s);
+   e->m_specialLists   = unmarshalItemInfoList(s);
    e->lang             = static_cast<SrcLangExt>(unmarshalInt(s));
    e->hidden           = unmarshalBool(s);
    e->artificial       = unmarshalBool(s);

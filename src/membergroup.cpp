@@ -47,7 +47,6 @@ MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QStrin
    
    m_docFile       = docFile;
    m_docLine       = docLine;
-   m_xrefListItems = 0;   
 }
 
 MemberGroup::~MemberGroup()
@@ -280,9 +279,9 @@ void MemberGroup::addListReferences(QSharedPointer<Definition> def)
 {
    memberList->addListReferences(def);
 
-   if (m_xrefListItems && def) {
+   if (! m_xrefListItems.isEmpty() && def) {
       QString name = def->getOutputFileBase() + "#" + anchor();      
-      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, 0, def);      
+      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, "", def);      
    }
 }
 
@@ -294,18 +293,9 @@ void MemberGroup::findSectionsInDocumentation()
    memberList->findSectionsInDocumentation();
 }
 
-void MemberGroup::setRefItems(const QList<ListItemInfo> *sli)
+void MemberGroup::setRefItems(const QList<ListItemInfo> &list)
 {
-   if (sli) {
-      // deep copy the list
-      if (m_xrefListItems == 0) {
-         m_xrefListItems = new QList<ListItemInfo>;        
-      }    
-
-      for (auto item : *sli ) {
-         m_xrefListItems->append(item);
-      }
-   }
+   m_xrefListItems = list;   
 }
 
 void MemberGroup::writeTagFile(QTextStream &tagFile)
@@ -313,17 +303,11 @@ void MemberGroup::writeTagFile(QTextStream &tagFile)
    memberList->writeTagFile(tagFile);
 }
 
-void MemberGroupInfo::setRefItems(const QList<ListItemInfo> *list)
+void MemberGroupInfo::setRefItems(const QList<ListItemInfo> &list)
 {
-   if (! list) {
+   if (list.isEmpty()) {
       return;
    }
 
-   if (m_listInfo == nullptr) {
-      m_listInfo = new QList<ListItemInfo>;      
-   }
-
-   for (auto item : *list ) {
-      m_listInfo->append(item);
-   }
+   m_listInfo = list;
 }

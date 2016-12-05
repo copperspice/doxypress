@@ -249,7 +249,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
       case DocVerbatim::Code: 
          m_t << "<literallayout><computeroutput>";
-         Doxy_Globals::parserManager->getParser(m_langExt)->parseCode(m_ci, s->context(), s->text(), 
+         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, s->context(), s->text(), 
                   langExt, s->isExample(), s->exampleFile());
 
          m_t << "</computeroutput></literallayout>";
@@ -375,7 +375,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                   inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
 
          m_t << "</computeroutput></literallayout>";
@@ -384,7 +384,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Include:
          m_t << "<literallayout><computeroutput>";
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                   inc->text(),langExt, inc->isExample(), inc->exampleFile());
 
          m_t << "</computeroutput></literallayout>";
@@ -404,7 +404,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Snippet:
          m_t << "<literallayout><computeroutput>";
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                   extractBlock(inc->text(), inc->blockId()), langExt, inc->isExample(), inc->exampleFile() );
 
          m_t << "</computeroutput></literallayout>";
@@ -427,7 +427,7 @@ void DocbookDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxy_Globals::parserManager->getParser(m_langExt)
+         Doxy_Globals::parserManager.getParser(m_langExt)
          ->parseCode(m_ci, op->context(),
                      op->text(), langExt, op->isExample(),
                      op->exampleFile());
@@ -1009,7 +1009,7 @@ void DocbookDocVisitor::visitPost(DocImage *img)
       QString m_file;
 
       bool ambig;
-      QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::imageNameDict, baseName, ambig);
+      QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::imageNameDict, baseName, ambig);
 
       if (fd) {
          m_file = fd->getFilePath();

@@ -282,8 +282,8 @@ void CiteDict::generatePage() const
    }
    
    // 7. add it as a page
-   addRelatedPage(CiteConsts::fileName, theTranslator->trCiteReferences(), doc, 0, CiteConsts::fileName, 1, 0, 
-                  QSharedPointer<GroupDef>(), 0);
+   addRelatedPage(CiteConsts::fileName, theTranslator->trCiteReferences(), doc, CiteConsts::fileName, 1, 
+                  QList<ListItemInfo>(), QSharedPointer<GroupDef>());
 
    // 8. for latex we just copy the bib files to the output and let
    //    latex do this work.

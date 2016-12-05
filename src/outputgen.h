@@ -467,7 +467,7 @@ class OutputGenerator : public BaseOutputDocInterface
  protected:
    QTextStream m_textStream;
 
-   QFile   *m_filePtr;
+   QFile    m_file;
    QString  m_fileName;
    QString  m_dir;
    bool     active;

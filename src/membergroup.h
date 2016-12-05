@@ -101,7 +101,7 @@ class MemberGroup : public EnableSharedFromThis
    int countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const;
    void setInGroup(bool b);
    void addListReferences(QSharedPointer<Definition> d);
-   void setRefItems(const QList<ListItemInfo> *sli);
+   void setRefItems(const QList<ListItemInfo> &list);
 
    QSharedPointer<MemberList> members() const {
       return memberList;
@@ -140,19 +140,18 @@ class MemberGroup : public EnableSharedFromThis
    int  m_numDecMembers;
    int  m_numDocMembers; 
 
-   QList<ListItemInfo> *m_xrefListItems;
+   QList<ListItemInfo> m_xrefListItems;
 };
 
 /** Data collected for a member group */
 struct MemberGroupInfo {
-   MemberGroupInfo() : docLine(-1), m_listInfo(0)
+   MemberGroupInfo() : docLine(-1)
    {}
 
    ~MemberGroupInfo() {
-      delete m_listInfo;
    }
 
-   void setRefItems(const QList<ListItemInfo> *list);
+   void setRefItems(const QList<ListItemInfo> &list);
 
    QString header;
    QString doc;
@@ -160,7 +159,7 @@ struct MemberGroupInfo {
    int docLine;
    QString compoundName;
 
-   QList<ListItemInfo> *m_listInfo;
+   QList<ListItemInfo> m_listInfo;
 };
 
 #endif

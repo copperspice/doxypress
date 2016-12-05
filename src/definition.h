@@ -42,6 +42,8 @@ struct DocInfo {
    QString doc;
    int line;
    QString file;
+
+   DocInfo() : line(1) {};
 };
 
 /** Data associated with a brief description. */
@@ -50,6 +52,8 @@ struct BriefInfo {
    QString tooltip;
    int line;
    QString file;
+
+   BriefInfo() : line(1) {};
 };
 
 /** Data associated with description found in the body. */
@@ -250,13 +254,11 @@ class Definition : public DefinitionIntf
    SortedList<QSharedPointer<GroupDef>> *partOfGroups() const;
    bool isLinkableViaGroup() const;
 
-   QList<ListItemInfo> *xrefListItems() const;
-
    virtual QSharedPointer<Definition> findInnerCompound(const QString &name);
    virtual QSharedPointer<Definition> getOuterScope() const;
 
-   MemberSDict *getReferencesMembers() const;
-   MemberSDict *getReferencedByMembers() const;
+   const MemberSDict &getReferencesMembers() const;
+   const MemberSDict &getReferencedByMembers() const;
 
    bool hasSections() const;
    bool hasSources() const;
@@ -298,10 +300,9 @@ class Definition : public DefinitionIntf
    /*! Sets the tag file id via which this definition was imported. */
    void setReference(const QString &r);
 
-   /*! Add the list of anchors that mark the sections that are found in the
-    * documentation.
+   /*! Add the list of anchors that mark the sections that are found in the documentation.
     */
-   void addSectionsToDefinition(QList<SectionInfo> *anchorList);
+   void addSectionsToDefinition(const QList<SectionInfo> &anchorList);
 
    // source references
    void setBodySegment(int bls, int ble);
@@ -309,8 +310,10 @@ class Definition : public DefinitionIntf
    void addSourceReferencedBy(QSharedPointer<MemberDef>d);
    void addSourceReferences(QSharedPointer<MemberDef>d);
 
-   void setRefItems(const QList<ListItemInfo> *sli);
+   void setRefItems(const QList<ListItemInfo> &list);
    void mergeRefItems(QSharedPointer<Definition> d);
+   const QList<ListItemInfo> &getRefItems() const;
+   QList<ListItemInfo> &getRefItems();
 
    virtual void addInnerCompound(QSharedPointer<Definition> d)
    {};   
@@ -370,7 +373,8 @@ class Definition : public DefinitionIntf
    void setPhraseName(const QString &phrase);
 
    int  _getXRefListId(const QString &listName) const;
-   void _writeSourceRefList(OutputList &ol, const QString &scopeName,const QString &text, MemberSDict *members, bool);
+   void _writeSourceRefList(OutputList &ol, const QString &scopeName,const QString &text, 
+                  const MemberSDict &members);
 
    void _setInbodyDocumentation(const QString &d, const QString &docFile, int docLine);
    bool _docsAlreadyAdded(const QString &doc, QString &sigList);

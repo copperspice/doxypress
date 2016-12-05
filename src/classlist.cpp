@@ -19,7 +19,7 @@
 
 #include <arguments.h>
 #include <config.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <groupdef.h>
 #include <language.h>
 #include <outputlist.h>
@@ -42,7 +42,7 @@ int ClassSDict::compareMapValues(const QSharedPointer<ClassDef> &item1, const QS
    return compItems(item1, item2);
 }
 
-bool ClassSDict::declVisible(const ClassDef::CompoundType *filter) const
+bool ClassSDict::declVisible(const enum CompoundType *filter) const
 {
    static bool hideUndocClasses    = Config::getBool("hide-undoc-classes");
    static bool extractLocalClasses = Config::getBool("extract-local-classes");
@@ -66,7 +66,7 @@ bool ClassSDict::declVisible(const ClassDef::CompoundType *filter) const
    return false;
 }
 
-void ClassSDict::writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter, const QString &header, bool localNames)
+void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filter, const QString &header, bool localNames)
 {
    static bool extractPrivate = Config::getBool("extract-private");
 
@@ -132,7 +132,7 @@ void GenericsSDict::insert(const QString &key, QSharedPointer<ClassDef> cd)
    }
 
    ArgumentList argList;
-   stringToArgumentList(key.mid(i), &argList);
+   argList = stringToArgumentList(key.mid(i));
 
    int c = argList.count();
 
@@ -172,7 +172,7 @@ QSharedPointer<ClassDef> GenericsSDict::find(const QString &key)
 
       if (collection) {
          ArgumentList argList;
-         stringToArgumentList(key.mid(i), &argList);
+         argList = stringToArgumentList(key.mid(i));
 
          int c = argList.count();
          return collection->value(c);

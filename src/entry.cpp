@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -28,151 +28,111 @@
 #include <section.h>
 #include <util.h>
 
-int Entry::num = 0;
+int Entry::m_EntryCount = 0;
 
 Entry::Entry()
 {
-   num++;
+   m_EntryCount++;
 
    m_parent.clear();
-   section  = Entry::EMPTY_SEC;
-       
-   groups    = new QList<Grouping>; 
-   anchors   = new QList<SectionInfo>;    // Doxy_globals::sectionDict takes ownership of the items
-       
-   tArgLists  = 0;
-   mGrpId     = -1;
-   tagInfo    = 0;
-   sli        = 0;
 
-   relatesType = Simple;
-   hidden      = false;
-
+   section      = Entry::EMPTY_SEC;
+   mGrpId       = -1;
+   relatesType  = Simple;
+   hidden       = false;
    groupDocType = GROUPDOC_NORMAL;
 
-   reset();  
+   reset();
 }
 
 Entry::Entry(const Entry &e)
-{  
-   num++;
+{
+   m_EntryCount++;
 
-   section     = e.section;
-   type        = e.type;
-   name        = e.name;
-   tagInfo     = e.tagInfo;
-   protection  = e.protection;
-   mtype       = e.mtype;
-   m_traits    = e.m_traits;
-   initLines   = e.initLines;
-   stat        = e.stat;
+   section          = e.section;
+   type             = e.type;
+   name             = e.name;
+   m_tagInfoEntry   = e.m_tagInfoEntry;
+   protection       = e.protection;
+   mtype            = e.mtype;
+   m_traits         = e.m_traits;
+   initLines        = e.initLines;
+   stat             = e.stat;
    explicitExternal = e.explicitExternal;
-   proto       = e.proto;
-   subGrouping = e.subGrouping;
-   callGraph   = e.callGraph;
-   callerGraph = e.callerGraph;
-   virt        = e.virt;
-   args        = e.args;
-   bitfields   = e.bitfields;
+   proto            = e.proto;
+   subGrouping      = e.subGrouping;
+   callGraph        = e.callGraph;
+   callerGraph      = e.callerGraph;
+   virt             = e.virt;
+   args             = e.args;
+   bitfields        = e.bitfields;
+   argList          = e.argList;
 
-   argList     = e.argList; 
-   tArgLists   = 0;     
-   
-   m_program    = e.m_program;
-   initializer = e.initializer;
-   includeFile = e.includeFile;
-   includeName = e.includeName;
-   doc         = e.doc;
-   docLine     = e.docLine;
-   docFile     = e.docFile;
-   brief       = e.brief;
-   briefLine   = e.briefLine;
-   briefFile   = e.briefFile;
-   inbodyDocs  = e.inbodyDocs;
-   inbodyLine  = e.inbodyLine;
-   inbodyFile  = e.inbodyFile;
-   relates     = e.relates;
-   relatesType = e.relatesType;
+   m_program        = e.m_program;
+   initializer      = e.initializer;
+   includeFile      = e.includeFile;
+   includeName      = e.includeName;
+   doc              = e.doc;
+   docLine          = e.docLine;
+   docFile          = e.docFile;
+   brief            = e.brief;
+   briefLine        = e.briefLine;
+   briefFile        = e.briefFile;
+   inbodyDocs       = e.inbodyDocs;
+   inbodyLine       = e.inbodyLine;
+   inbodyFile       = e.inbodyFile;
+   relates          = e.relates;
+   relatesType      = e.relatesType;
 
-   m_read       = e.m_read;
-   m_write      = e.m_write;
-   m_reset      = e.m_reset;
-   m_notify     = e.m_notify;
-   m_revision   = e.m_revision;
-   m_designable = e.m_designable;
-   m_scriptable = e.m_scriptable;
-   m_stored     = e.m_stored;
-   m_user       = e.m_user;   
+   m_read           = e.m_read;
+   m_write          = e.m_write;
+   m_reset          = e.m_reset;
+   m_notify         = e.m_notify;
+   m_revision       = e.m_revision;
+   m_designable     = e.m_designable;
+   m_scriptable     = e.m_scriptable;
+   m_stored         = e.m_stored;
+   m_user           = e.m_user;
 
-   inside      = e.inside;
-   exception   = e.exception;   
-   bodyLine    = e.bodyLine;
-   endBodyLine = e.endBodyLine;
-   mGrpId      = e.mGrpId;
-  
-   groups      = new QList<Grouping>;  
-   anchors     = new QList<SectionInfo>;
+   inside           = e.inside;
+   exception        = e.exception;
+   bodyLine         = e.bodyLine;
+   endBodyLine      = e.endBodyLine;
+   mGrpId           = e.mGrpId;
 
-   fileName    = e.fileName;
-   startLine   = e.startLine;
-   startColumn = e.startColumn;
+   fileName         = e.fileName;
+   startLine        = e.startLine;
+   startColumn      = e.startColumn;
 
-   if (e.sli) {
-      sli = new QList<ListItemInfo>;          
+   m_specialLists   = e.m_specialLists;
 
-      for (auto item : *e.sli) { 
-         sli->append(item);
-      }
+   lang             = e.lang;
+   hidden           = e.hidden;
+   artificial       = e.artificial;
+   groupDocType     = e.groupDocType;
+   id               = e.id;
+   m_parent         = e.m_parent;
 
-   } else {
-      sli = 0;
-   }
-
-   lang         = e.lang;
-   hidden       = e.hidden;
-   artificial   = e.artificial;
-   groupDocType = e.groupDocType;
-   id           = e.id;
-   m_parent     = e.m_parent;
-    
-   // copy of the child entry list  
-   for (auto item : e.m_sublist) { 
+   // copy of the child entry list
+   for (auto item : e.m_sublist) {
       m_sublist.append(QMakeShared<Entry>(*item));
    }
 
    // copy base class list
-   for (auto item : e.extends) { 
+   for (auto item : e.extends) {
       extends.append(item);
    }
 
-   // copy group list
-   for (auto item : *e.groups) { 
-      groups->append(item);
-   }
+   m_groups    = e.m_groups;
+   m_anchors   = e.m_anchors;
+   typeConstr  = e.typeConstr;
 
-   for (auto item : *e.anchors) { 
-      anchors->append(item);
-   }
-
-   // copy type contraint list  
-   typeConstr  = e.typeConstr;       
-   
-   // copy template argument lists
-   if (e.tArgLists) {
-      tArgLists = copyArgumentLists(e.tArgLists);
-   }
+   m_templateArgLists = e.m_templateArgLists;
 }
 
 Entry::~Entry()
 {
-   // our children   
-   delete groups;
-   delete anchors;  
-   delete tArgLists;
-   delete tagInfo;   
-   delete sli;
-
-   num--;
+   m_EntryCount--;
 }
 
 void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> self)
@@ -181,7 +141,7 @@ void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> self)
       throw std::runtime_error("Internal Issue: passed parameter was not equal to the current object (Entry::addSubEntry)");
    }
 
-   child->m_parent = self; 
+   child->m_parent = self;
    m_sublist.append(child);
 }
 
@@ -189,7 +149,7 @@ void Entry::reset()
 {
    static bool dotCallGraph = Config::getBool("dot-call");
    static bool dotCalledBy  = Config::getBool("dot-called-by");
-   
+
    name.resize(0);
    type.resize(0);
    args.resize(0);
@@ -229,7 +189,7 @@ void Entry::reset()
    stat    = false;
    proto   = false;
    explicitExternal = false;
-  
+
    m_traits.clear();
 
    lang         = SrcLangExt_Unknown;
@@ -238,31 +198,20 @@ void Entry::reset()
    subGrouping  = true;
    protection   = Public;
    groupDocType = GROUPDOC_NORMAL;
+
    id.resize(0);
 
    m_sublist.clear();
 
    extends.clear();
-   groups->clear();
-   anchors->clear();
+   m_groups.clear();
+   m_anchors.clear();
    argList.clear();
+   m_tagInfoEntry.clear(); 
 
-   if (tagInfo)    {
-      delete tagInfo;
-      tagInfo = 0;
-   }
-
-   if (tArgLists)  {
-      delete tArgLists;
-      tArgLists = 0;
-   }
-
-   if (sli) {
-      delete sli;
-      sli = 0;
-   }
-   
-   typeConstr = ArgumentList();     
+   m_templateArgLists.clear();
+   m_specialLists.clear();
+   typeConstr.clear();
 }
 
 int Entry::getSize()
@@ -270,41 +219,38 @@ int Entry::getSize()
    return sizeof(Entry);
 }
 
-void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage, QSharedPointer<FileDef> fd, QSharedPointer<Entry> self)
-{  
+void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage, QSharedPointer<FileDef> fd,
+                  QSharedPointer<Entry> self)
+{
    assert(self == this);
-
-   QSharedPointer<EntryNav> childNav = QMakeShared<EntryNav>(nav, self); 
+   QSharedPointer<EntryNav> childNav = QMakeShared<EntryNav>(nav, self);
 
    nav->addChild(childNav);
 
    childNav->setFileDef(fd);
    childNav->saveEntry(self, storage);
-    
+
    for (auto childNode : m_sublist) {
       childNode->createSubtreeIndex(childNav, storage, fd, childNode);
    }
-   
-   m_sublist.clear();   
+
+   m_sublist.clear();
 }
 
-void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, QSharedPointer<FileDef> fd, 
-                                  QSharedPointer<Entry> self)
+void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage, QSharedPointer<FileDef> fd,
+                  QSharedPointer<Entry> self)
 {
    createSubtreeIndex(rootNav, storage, fd, self);
 }
 
 void Entry::addSpecialListItem(const QString &listName, int itemId)
 {
-   if (sli == 0) {
-      sli = new QList<ListItemInfo>;      
-   }
+   ListItemInfo item;
 
-   ListItemInfo *ili = new ListItemInfo;
-   ili->type   = listName;
-   ili->itemId = itemId;
+   item.type   = listName;
+   item.itemId = itemId;
 
-   sli->append(*ili);
+   m_specialLists.append(item);
 }
 
 void Entry::removeSubEntry(QSharedPointer<Entry> e)
@@ -315,51 +261,41 @@ void Entry::removeSubEntry(QSharedPointer<Entry> e)
 
    if (i != -1) {
       m_sublist.removeAt(i);
-   }  
-}
-
-EntryNav::EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e)
-   : m_parent(parent), m_section(e->section), m_type(e->type), m_name(e->name), 
-     m_fileDef(0), m_lang(e->lang), m_offset(-1), m_noLoad(false)
-{
-   if (e->tagInfo) {
-      m_tagInfo = new TagInfo;
-
-      m_tagInfo->tagName  = e->tagInfo->tagName;
-      m_tagInfo->fileName = e->tagInfo->fileName;
-      m_tagInfo->anchor   = e->tagInfo->anchor;
-   
-   } else {
-      m_tagInfo = 0;
-
    }
 }
 
+EntryNav::EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e)
+   : m_parent(parent), m_section(e->section), m_type(e->type), m_name(e->name),
+     m_fileDef(0), m_lang(e->lang), m_offset(-1), m_noLoad(false)
+{
+   
+   m_tagInfoNav = e->m_tagInfoEntry;  
+}
+
 EntryNav::~EntryNav()
-{    
-   delete m_tagInfo;
+{
 }
 
 void EntryNav::addChild( QSharedPointer<EntryNav> e)
-{  
+{
    m_subList.append(e);
 }
 
-bool EntryNav::loadEntry(FileStorage *storage)
+bool EntryNav::loadEntry(FileStorage &storage)
 {
    if (m_noLoad) {
       return true;
    }
 
-   if (m_offset == -1) {      
+   if (m_offset == -1) {
       return false;
    }
-   
-   if (! storage->seek(m_offset)) {      
+
+   if (! storage.seek(m_offset)) {
       return false;
    }
-  
-   m_info = unmarshalEntry(storage);
+
+   m_info = unmarshalEntry(&storage);
 
    m_info->name    = m_name;
    m_info->type    = m_type;
@@ -368,23 +304,23 @@ bool EntryNav::loadEntry(FileStorage *storage)
    return true;
 }
 
-bool EntryNav::saveEntry(QSharedPointer<Entry> e, FileStorage *storage)
+bool EntryNav::saveEntry(QSharedPointer<Entry> e, FileStorage &storage)
 {
-   m_offset = storage->pos();   
-   marshalEntry(storage, e);
+   m_offset = storage.pos();
+   marshalEntry(&storage, e);
 
    return true;
 }
 
 void EntryNav::releaseEntry()
 {
-   if (! m_noLoad) {      
+   if (! m_noLoad) {
       m_info =  QSharedPointer<Entry>();
    }
 }
 
 void EntryNav::setEntry(QSharedPointer<Entry> e)
 {
-   m_info   = e;  
+   m_info   = e;
    m_noLoad = true;
 }

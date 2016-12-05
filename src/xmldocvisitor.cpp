@@ -265,7 +265,7 @@ void XmlDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
       case DocVerbatim::Code: 
          m_t << "<programlisting>";
-         Doxy_Globals::parserManager->getParser(lang)->parseCode(m_ci, s->context(), s->text(),
+         Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                    langExt, s->isExample(), s->exampleFile());
 
          m_t << "</programlisting>";
@@ -335,7 +335,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd,
                      -1, -1, false, QSharedPointer<MemberDef>(), true);
 
@@ -346,7 +346,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
       case DocInclude::Include:
          m_t << "<programlisting>";
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
                      -1, -1, true, QSharedPointer<MemberDef>(), false);
 
@@ -376,7 +376,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Snippet:
          m_t << "<programlisting>";
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
                      langExt, inc->isExample(), inc->exampleFile() );
          m_t << "</programlisting>";
          break;
@@ -399,7 +399,7 @@ void XmlDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxy_Globals::parserManager->getParser(m_langExt)->parseCode(m_ci, op->context(),
+         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(),
                      op->text(), langExt, op->isExample(), op->exampleFile());
       }
       pushEnabled();

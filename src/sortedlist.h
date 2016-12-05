@@ -33,7 +33,7 @@ class GroupDef;
 class MemberDef;
 class NavIndexEntry;
  
-// defualt value for flag is false
+// default value for flag is false
 
 template <class T, bool flag>
 class SortedList : public QList<T>

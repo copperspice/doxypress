@@ -178,7 +178,7 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
       portable_sysTimerStop();
    }
 
-   Doxy_Globals::indexList->addImageFile(imageName);
+   Doxy_Globals::indexList.addImageFile(imageName);
 
    QDir::setCurrent(oldDir);
 }

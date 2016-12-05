@@ -60,6 +60,18 @@ enum SrcLangExt {
    SrcLangExt_Docs     = 0x40000,
 };
 
+/** The various compound types */
+enum class CompoundType { Class,     // Entry::CLASS_SEC,
+                          Struct,    // Entry::STRUCT_SEC,
+                          Union,     // Entry::UNION_SEC,
+                          Interface, // Entry::INTERFACE_SEC,
+                          Protocol,  // Entry::PROTOCOL_SEC,
+                          Category,  // Entry::CATEGORY_SEC,
+                          Exception, // Entry::EXCEPTION_SEC
+                          Service,   // Entry::CLASS_SEC
+                          Singleton, // Entry::CLASS_SEC
+                  };
+
 /** Grouping info */
 struct Grouping {
 

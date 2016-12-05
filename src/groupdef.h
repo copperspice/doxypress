@@ -24,19 +24,16 @@
 
 #include <definition.h>
 #include <filenamelist.h>
+#include <stringmap.h>
 
 class ClassDef;
-class ClassSDict;
 class DirDef;
 class Entry;
 class FileDef;
 class FTVHelp;
 class MemberDef;
 class MemberList;
-class MemberGroupSDict;
-class MemberNameInfoSDict;
 class NamespaceDef;
-class NamespaceSDict;
 class OutputList;
 class PageSDict;
 class PageDef;
@@ -131,8 +128,8 @@ class GroupDef : public Definition
       return classSDict;
    }
 
-   NamespaceSDict *getNamespaces() const {
-      return namespaceSDict;
+   const NamespaceSDict &getNamespaces() const {
+      return m_namespaceSDict;
    }
 
    PageSDict *getPages() const {
@@ -147,7 +144,7 @@ class GroupDef : public Definition
       return dirList;
    }
 
-   FileList *getFiles() const {
+   const FileList &getFiles() const {
       return fileList;
    }
 
@@ -200,13 +197,13 @@ class GroupDef : public Definition
    bool titleSet;                       // true if title is not the same as the name
    QString fileName;                    // base name of the generated file
    
-   ClassSDict *classSDict;              // list of classes in the group
-   NamespaceSDict *namespaceSDict;      // list of namespaces in the group 
-   PageSDict *pageDict;                 // list of pages in the group
-   PageSDict *exampleDict;              // list of examples in the group
+   ClassSDict     *classSDict;          // list of classes in the group
+   NamespaceSDict  m_namespaceSDict;    // list of namespaces in the group 
+   PageSDict      *pageDict;            // list of pages in the group
+   PageSDict      *exampleDict;         // list of examples in the group
 
    SortedList<QSharedPointer<DirDef>> *dirList;       // list of directories in the group
-   FileList *fileList;                                // list of files in the group
+   FileList fileList;                                 // list of files in the group
 
    SortedList<QSharedPointer<GroupDef>> *groupList;   // list of sub groups
   

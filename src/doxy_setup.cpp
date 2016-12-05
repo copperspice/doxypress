@@ -94,18 +94,17 @@ void initDoxyPress()
 
    initPreprocessor();
 
-   Doxy_Globals::parserManager = new ParserManager;
-   Doxy_Globals::parserManager->registerDefaultParser(new FileParser);
+   Doxy_Globals::parserManager.registerDefaultParser(new FileParser);
 
-   Doxy_Globals::parserManager->registerParser("c",            new CPPLanguageParser);
-   Doxy_Globals::parserManager->registerParser("python",       new PythonLanguageParser);
-   Doxy_Globals::parserManager->registerParser("fortran",      new FortranLanguageParser);
-   Doxy_Globals::parserManager->registerParser("fortranfree",  new FortranLanguageParserFree);
-   Doxy_Globals::parserManager->registerParser("fortranfixed", new FortranLanguageParserFixed);
+   Doxy_Globals::parserManager.registerParser("c",            new CPPLanguageParser);
+   Doxy_Globals::parserManager.registerParser("python",       new PythonLanguageParser);
+   Doxy_Globals::parserManager.registerParser("fortran",      new FortranLanguageParser);
+   Doxy_Globals::parserManager.registerParser("fortranfree",  new FortranLanguageParserFree);
+   Doxy_Globals::parserManager.registerParser("fortranfixed", new FortranLanguageParserFixed);
 
-   Doxy_Globals::parserManager->registerParser("tcl",          new TclLanguageParser);
-   Doxy_Globals::parserManager->registerParser("md",           new MarkdownFileParser);
-   Doxy_Globals::parserManager->registerParser("make",         new MakeFileParser);
+   Doxy_Globals::parserManager.registerParser("tcl",          new TclLanguageParser);
+   Doxy_Globals::parserManager.registerParser("md",           new MarkdownFileParser);
+   Doxy_Globals::parserManager.registerParser("make",         new MakeFileParser);
 
    // register additional parsers here
    initDefaultLangMapping();
@@ -116,38 +115,13 @@ void initDoxyPress()
    initClassMemberIndices();
    initNamespaceMemberIndices();
    initFileMemberIndices();
-
-   Doxy_Globals::inputNameList     = new SortedList<QSharedPointer<FileNameList>>;
-
-   Doxy_Globals::memberNameSDict   = new MemberNameSDict();
-   Doxy_Globals::functionNameSDict = new MemberNameSDict();
-   Doxy_Globals::groupSDict        = new GroupSDict();
-
+   
    Doxy_Globals::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
-
-   Doxy_Globals::namespaceSDict    = new NamespaceSDict();
-   Doxy_Globals::classSDict        = new ClassSDict(Config::getCase("sort-class-case-sensitive"));
-
-   Doxy_Globals::hiddenClasses     = new ClassSDict();
-   Doxy_Globals::pageSDict         = new PageSDict();          // all doc pages
-   Doxy_Globals::exampleSDict      = new PageSDict();          // all examples
-
-   Doxy_Globals::inputNameDict     = new FileNameDict();
-   Doxy_Globals::includeNameDict   = new FileNameDict();
-   Doxy_Globals::exampleNameDict   = new FileNameDict();
-   Doxy_Globals::imageNameDict     = new FileNameDict();
-   Doxy_Globals::dotFileNameDict   = new FileNameDict();
-   Doxy_Globals::mscFileNameDict   = new FileNameDict();
-   Doxy_Globals::diaFileNameDict   = new FileNameDict();
-   Doxy_Globals::citeDict          = new CiteDict();
-   Doxy_Globals::genericsDict      = QMakeShared<GenericsSDict>();
-   Doxy_Globals::indexList         = new IndexList;
-   Doxy_Globals::formulaList       = new FormulaList;
-   Doxy_Globals::formulaDict       = new FormulaDict();
-   Doxy_Globals::formulaNameDict   = new FormulaDict();
-   Doxy_Globals::sectionDict       = new SectionDict();
-
-   // Initialize global constants
+   
+   // Broom - review this
+   Doxy_Globals::classSDict        = ClassSDict(Config::getCase("sort-class-case-sensitive"));  
+  
+   // initialize global constants
    Doxy_Globals::g_compoundKeywordDict.insert("template class");
    Doxy_Globals::g_compoundKeywordDict.insert("template struct");
    Doxy_Globals::g_compoundKeywordDict.insert("class");
@@ -158,50 +132,17 @@ void initDoxyPress()
 }
 
 void shutDownDoxyPress()
-{
-   finializeSearchIndexer();
-
-   //
-   Doxy_Globals::symbolStorage->close();
+{  
+   Doxy_Globals::symbolStorage.close();
 
    QDir thisDir;
    if (! Doxy_Globals::tempA_FName.isEmpty()) {
       thisDir.remove(Doxy_Globals::tempA_FName);
    }
 
-   delete Doxy_Globals::sectionDict;
-   delete Doxy_Globals::formulaNameDict;
-   delete Doxy_Globals::formulaDict;
-   delete Doxy_Globals::formulaList;
-   delete Doxy_Globals::indexList;
-   delete Doxy_Globals::inputNameDict;
-   delete Doxy_Globals::includeNameDict;
-   delete Doxy_Globals::exampleNameDict;
-   delete Doxy_Globals::imageNameDict;
-   delete Doxy_Globals::dotFileNameDict;
-   delete Doxy_Globals::mscFileNameDict;
-   delete Doxy_Globals::diaFileNameDict;
-   delete Doxy_Globals::pageSDict;
-   delete Doxy_Globals::exampleSDict;
-   delete Doxy_Globals::xrefLists;
-   delete Doxy_Globals::parserManager;
-
    removePreProcessor();
-
-   delete Doxy_Globals::g_outputList;
-
    Mappers::freeMappers();
    codeFreeScanner();
-
-   delete Doxy_Globals::inputNameList;
-   delete Doxy_Globals::memberNameSDict;
-   delete Doxy_Globals::functionNameSDict;
-   delete Doxy_Globals::groupSDict;
-   delete Doxy_Globals::classSDict;
-   delete Doxy_Globals::hiddenClasses;
-   delete Doxy_Globals::namespaceSDict;
-
-   delete Doxy_Globals::symbolStorage;
 }
 
 // **
@@ -605,7 +546,7 @@ bool updateLanguageMapping(const QString &ext, const QString &language, bool use
       // user parsers will be registered later
       s_langMapping.insert(extension, i->second.parserName);
 
-   } else if (! Doxy_Globals::parserManager->registerExtension(extension, i->second.parserName)) {
+   } else if (! Doxy_Globals::parserManager.registerExtension(extension, i->second.parserName)) {
       msg("Unable to assign extension %-4s (%-7s), currently unsupported\n",
                   csPrintable(extension), csPrintable(i->second.parserName));
    }
@@ -620,7 +561,7 @@ void initUserLangMapping()
       QString extension  = item.key();
       QString parserName = item.value();
 
-      if (! Doxy_Globals::parserManager->registerExtension(extension, parserName)) {
+      if (! Doxy_Globals::parserManager.registerExtension(extension, parserName)) {
 
          msg("Unable to assign extension %-4s (%-7s), currently unsupported\n",
              csPrintable(extension), csPrintable(parserName));
@@ -674,6 +615,9 @@ void initDefaultLangMapping()
    updateLanguageMapping(".f",        "fortran");
    updateLanguageMapping(".for",      "fortran");
    updateLanguageMapping(".f90",      "fortran");
+   updateLanguageMapping(".f95",      "fortran");
+   updateLanguageMapping(".f03",      "fortran");
+   updateLanguageMapping(".f08",      "fortran");
    updateLanguageMapping(".tcl",      "tcl");
    updateLanguageMapping(".md",       "md");
    updateLanguageMapping(".markdown", "md");
@@ -699,7 +643,7 @@ SrcLangExt getLanguageFromFileName(const QString &fileName)
       }
    }
 
-   return SrcLangExt_Cpp; // not listed => assume C language
+   return SrcLangExt_Cpp;    // not listed, assume C language
 }
 
 void Doxy_Setup::usage()

@@ -30,7 +30,7 @@
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
 #include <dot.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
@@ -419,52 +419,51 @@ class XMLCodeGenerator : public CodeOutputInterface
    bool m_insideSpecialHL;
 };
 
-static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope, 
+static void writeTemplateArgumentList(const ArgumentList &al, QTextStream &t, QSharedPointer<Definition> scope, 
                   QSharedPointer<FileDef> fileScope, int indent)
 {
    QString indentStr;
    indentStr.fill(' ', indent);
+  
+   t << indentStr << "<templateparamlist>" << endl;
+  
+   for (auto &arg : al) {
+      t << indentStr << "  <param>" << endl;
 
-   if (al) {
-      t << indentStr << "<templateparamlist>" << endl;
-     
-      for (auto a : *al) {
-         t << indentStr << "  <param>" << endl;
-
-         if (! a.type.isEmpty()) {
-            t << indentStr <<  "    <type>";
-            linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), a.type);
-            t << "</type>" << endl;
-         }
-
-         if (! a.name.isEmpty()) {
-            t << indentStr <<  "    <declname>" << a.name << "</declname>" << endl;
-            t << indentStr <<  "    <defname>" << a.name << "</defname>" << endl;
-         }
-
-         if (! a.defval.isEmpty()) {
-            t << indentStr << "    <defval>";
-            linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), a.defval);
-            t << "</defval>" << endl;
-         }
-
-         if (! a.typeConstraint.isEmpty()) {
-           t << indentStr << "    <typeconstraint>";
-           linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), a.typeConstraint);
-           t << "</typeconstraint>" << endl;
-         }
-
-         t << indentStr << "  </param>" << endl;
+      if (! arg.type.isEmpty()) {
+         t << indentStr <<  "    <type>";
+         linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), arg.type);
+         t << "</type>" << endl;
       }
-      t << indentStr << "</templateparamlist>" << endl;
+
+      if (! arg.name.isEmpty()) {
+         t << indentStr <<  "    <declname>" << arg.name << "</declname>" << endl;
+         t << indentStr <<  "    <defname>"  << arg.name << "</defname>" << endl;
+      }
+
+      if (! arg.defval.isEmpty()) {
+         t << indentStr << "    <defval>";
+         linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), arg.defval);
+         t << "</defval>" << endl;
+      }
+
+      if (! arg.typeConstraint.isEmpty()) {
+        t << indentStr << "    <typeconstraint>";
+        linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), arg.typeConstraint);
+        t << "</typeconstraint>" << endl;
+      }
+
+      t << indentStr << "  </param>" << endl;
    }
+   t << indentStr << "</templateparamlist>" << endl;
+   
 }
 
 static void writeMemberTemplateLists(QSharedPointer<MemberDef> md, QTextStream &t)
 {
-   ArgumentList *templMd = md->templateArguments();
+   const ArgumentList &templMd = md->getTemplateArgumentList();
 
-   if (templMd) { 
+   if (! templMd.isEmpty()) {   
       // function template prefix
       writeTemplateArgumentList(templMd, t, md->getClassDef(), md->getFileDef(), 8);
    }
@@ -472,7 +471,7 @@ static void writeMemberTemplateLists(QSharedPointer<MemberDef> md, QTextStream &
 
 static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
 {
-   writeTemplateArgumentList(cd->templateArguments(), t, cd, QSharedPointer<FileDef>(), 4);
+   writeTemplateArgumentList(cd->getTemplateArgumentList(), t, cd, QSharedPointer<FileDef>(), 4);
 }
 
 static void writeXMLDocBlock(QTextStream &t, const QString &fileName, int lineNr,
@@ -504,7 +503,7 @@ static void writeXMLDocBlock(QTextStream &t, const QString &fileName, int lineNr
 
 void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 {
-   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(fd->getDefFileExtension());
+   ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(fd->getDefFileExtension());
    SrcLangExt langExt = getLanguageFromFileName(fd->getDefFileExtension());
    pIntf->resetCodeParserState();
 
@@ -721,12 +720,12 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    t << "\"";
 
    if (isFunc) {
-      ArgumentList *al = md->argumentList();
+      const ArgumentList &al = md->getArgumentList();
 
       // **
       t << " const=\"";
 
-      if (al != 0 && al->constSpecifier) {
+      if (al.constSpecifier) {
          t << "yes";
 
       } else {
@@ -776,15 +775,16 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << " required=\"yes\"";
       }
 
-      if (al && al->volatileSpecifier) {
+      if (al.volatileSpecifier) {
          t << " volatile=\"yes\"";
       }
 
-      if (al && al->refSpecifier == RefType::LValueRef) {
-         t << " ref=\"lvalue\"";
+      if (al.refSpecifier == RefType::LValueRef) {
+         t << " refSpecifier=\"lvalue\"";
 
-      } else if (al && al->refSpecifier == RefType::RValueRef) {
-         t << " ref=\"rvalue\"";
+      } else if (al.refSpecifier == RefType::RValueRef) {
+         t << " refSpecifier=\"rvalue\"";
+
       }
 
       t << " virt=\"";
@@ -964,7 +964,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          writeMemberTemplateLists(md, t);
       }
 
-      QString typeStr = md->typeString();    //replaceAnonymousScopes(md->typeString());
+      QString typeStr = md->typeString();    // replaceAnonymousScopes(md->typeString());
       stripQualifiers(typeStr);
 
       t << "        <type>";
@@ -1015,59 +1015,66 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    }
 
    if (isFunc) { 
-      //function
-      ArgumentList *declAl = md->declArgumentList();
-      ArgumentList *defAl  = md->argumentList();
+      // function
+      const ArgumentList &declAl = md->getDeclArgumentList();
+      const ArgumentList &defAl  = md->getArgumentList();
 
-      if (declAl && declAl->count() > 0) {
+      if (! declAl.isEmpty()) {
         
-         auto defAli = defAl->begin();
+         auto iter = defAl.begin();
 
-         for (auto a : *declAl) {
+         for (auto &arg : declAl) {
                    
             t << "        <param>" << endl;
-            if (!a.attrib.isEmpty()) {
+            if (! arg.attrib.isEmpty()) {
                t << "          <attributes>";
-               writeXMLString(t, a.attrib);
+               writeXMLString(t, arg.attrib);
                t << "</attributes>" << endl;
             }
-            if (!a.type.isEmpty()) {
+
+            if (! arg.type.isEmpty()) {
                t << "          <type>";
-               linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, a.type);
+               linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.type);
                t << "</type>" << endl;
             }
-            if (!a.name.isEmpty()) {
+
+            if (! arg.name.isEmpty()) {
                t << "          <declname>";
-               writeXMLString(t, a.name);
+               writeXMLString(t, arg.name);
                t << "</declname>" << endl;
             }
-            if (defAli != defAl->end() && ! defAli->name.isEmpty() && defAli->name != a.name) {
+
+            if (iter != defAl.end() && ! iter->name.isEmpty() && iter->name != arg.name) {
                t << "          <defname>";
-               writeXMLString(t, defAli->name);
+               writeXMLString(t, iter->name);
                t << "</defname>" << endl;
             }
-            if (!a.array.isEmpty()) {
+
+            if (! arg.array.isEmpty()) {
                t << "          <array>";
-               writeXMLString(t, a.array);
+               writeXMLString(t, arg.array);
                t << "</array>" << endl;
             }
-            if (!a.defval.isEmpty()) {
+
+            if (! arg.defval.isEmpty()) {
                t << "          <defval>";
-               linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, a.defval);
+               linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.defval);
                t << "</defval>" << endl;
             }
-            if (defAli != defAl->end() && defAli->hasDocumentation()) {
+
+            if (iter != defAl.end() && iter->hasDocumentation()) {
                t << "          <briefdescription>";
 
                writeXMLDocBlock(t, md->getDefFileName(), md->getDefLine(),
-                                md->getOuterScope(), md, defAli->docs);
+                                md->getOuterScope(), md, iter->docs);
 
                t << "</briefdescription>" << endl;
             }
+
             t << "        </param>" << endl;
 
-            if (defAli != defAl->end()) {
-               ++defAli;
+            if (iter != defAl.end()) {
+               ++iter;
             }
          }
       }
@@ -1075,15 +1082,16 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    } else if (md->memberType() == MemberType_Define && ! md->argsString().isEmpty() ) { 
       // define
 
-      if (md->argumentList()->count() == 0) // special case for "foo()" to
-         // disguish it from "foo".
-      {
+      const ArgumentList &argList = md->getArgumentList();
+
+      if (argList.isEmpty())  {
+         // special case for "foo()" to disguish it from "foo".      
          t << "        <param></param>" << endl;
 
       } else {
 
-         for (auto a : *md->argumentList()) {
-            t << "        <param><defname>" << a.type << "</defname></param>" << endl;
+         for (auto &arg : argList) {
+            t << "        <param><defname>" << arg.type << "</defname></param>" << endl;
          }
       }
    }
@@ -1177,21 +1185,17 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       }
       t << "/>" << endl;
    }
-
-   //printf("md->getReferencesMembers()=%p\n",md->getReferencesMembers());
-   MemberSDict *mdict = md->getReferencesMembers();
-
-   if (mdict) {     
-      for (auto item : *mdict) {
-         writeMemberReference(t, def, item, "references");
-      }
+   
+   const MemberSDict &mdict_1 = md->getReferencesMembers();
+   
+   for (auto &item : mdict_1) {
+      writeMemberReference(t, def, item, "references");
    }
 
-   mdict = md->getReferencedByMembers();
-   if (mdict) {      
-      for (auto item : *mdict) {
-         writeMemberReference(t, def, item, "referencedby");
-      }
+   const MemberSDict &mdict_2 = md->getReferencedByMembers();
+  
+   for (auto &item : mdict_2) {
+      writeMemberReference(t, def, item, "referencedby");
    }
 
    t << "      </memberdef>" << endl;
@@ -1334,26 +1338,23 @@ static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
    }
 }
 
-static void writeInnerNamespaces(const NamespaceSDict *nl, QTextStream &t)
-{
-   if (nl) {  
-      for (auto nd : *nl) {
-         if (!nd->isHidden() && nd->name().indexOf('@') == -1) { // skip anonymouse scopes
-            t << "    <innernamespace refid=\"" << nd->getOutputFileBase()
-              << "\">" << convertToXML(nd->name()) << "</innernamespace>" << endl;
-         }
+static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
+{   
+   for (auto &nd : nl) {
+      if (! nd->isHidden() && nd->name().indexOf('@') == -1) {
+         // skip anonymouse scopes
+         t << "    <innernamespace refid=\"" << nd->getOutputFileBase()
+           << "\">" << convertToXML(nd->name()) << "</innernamespace>" << endl;
       }
    }
 }
 
-static void writeInnerFiles(const FileList *fl, QTextStream &t)
-{
-   if (fl) {     
-      for (auto fd : *fl) {
-         t << "    <innerfile refid=\"" << fd->getOutputFileBase()
-           << "\">" << convertToXML(fd->name()) << "</innerfile>" << endl;
-      }
-   }
+static void writeInnerFiles(const FileList &fl, QTextStream &t)
+{  
+   for (auto fd : fl) {
+      t << "    <innerfile refid=\"" << fd->getOutputFileBase()
+        << "\">" << convertToXML(fd->name()) << "</innerfile>" << endl;
+   }   
 }
 
 static void writeInnerPages(const PageSDict *pl, QTextStream &t)
@@ -1572,28 +1573,27 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       }
    }
 
-   IncludeInfo *ii = cd->includeInfo();
+   const IncludeInfo &item = cd->includeInfo();
 
-   if (ii) {
-      QString nm = ii->includeName;
+   QString nm = item.includeName;
 
-      if (nm.isEmpty() && ii->fileDef) {
-         nm = ii->fileDef->docName();
-      }
-
-      if (!nm.isEmpty()) {
-         t << "    <includes";
-
-         if (ii->fileDef && !ii->fileDef->isReference()) { 
-            // TODO: support external references
-            t << " refid=\"" << ii->fileDef->getOutputFileBase() << "\"";
-         }
-
-         t << " local=\"" << (ii->local ? "yes" : "no") << "\">";
-         t << nm;
-         t << "</includes>" << endl;
-      }
+   if (nm.isEmpty() && item.fileDef) {
+      nm = item.fileDef->docName();
    }
+
+   if (! nm.isEmpty()) {
+      t << "    <includes";
+
+      if (item.fileDef && ! item.fileDef->isReference()) { 
+         // TODO: support external references
+         t << " refid=\"" << item.fileDef->getOutputFileBase() << "\"";
+      }
+
+      t << " local=\"" << (item.local ? "yes" : "no") << "\">";
+      t << nm;
+      t << "</includes>" << endl;
+   }
+
 
    writeInnerClasses(cd->getClassSDict(), t);
    writeTemplateList(cd, t);
@@ -1823,7 +1823,8 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    if (fd->getClassSDict()) {
       writeInnerClasses(fd->getClassSDict(), t);
    }
-   if (fd->getNamespaceSDict()) {
+
+   if (! fd->getNamespaceSDict().isEmpty() ) {
       writeInnerNamespaces(fd->getNamespaceSDict(), t);
    }
 
@@ -2035,7 +2036,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
         << "</title>" << endl;
 
    } else {
-      QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(pd->name());
+      QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(pd->name());
 
       if (si) {
          t << "    <title>" << convertToXML(convertCharEntities(filterTitle(si->title)))
@@ -2134,28 +2135,28 @@ void generateXML()
    t << "xsi:noNamespaceSchemaLocation=\"index.xsd\" ";
    t << "version=\"" << versionString << "\">" << endl;
        
-   for (auto cd : *Doxy_Globals::classSDict) {
+   for (auto cd : Doxy_Globals::classSDict) {
        generateXMLForClass(cd, t);
    }
    
-   for (auto nd : *Doxy_Globals::namespaceSDict) {
+   for (auto &nd : Doxy_Globals::namespaceSDict) {
       msg("Generating XML output for namespace %s\n", qPrintable(nd->name()));
       generateXMLForNamespace(nd, t);
    }
  
-   for (auto fn : *Doxy_Globals::inputNameList) {     
+   for (auto &fn : Doxy_Globals::inputNameList) {     
       for (auto fd : *fn) {
          msg("Generating XML output for file %s\n", qPrintable(fd->name()));
          generateXMLForFile(fd, t);
       }
    }
  
-   for (auto gd : *Doxy_Globals::groupSDict) {
+   for (auto gd : Doxy_Globals::groupSDict) {
       msg("Generating XML output for group %s\n", qPrintable(gd->name()));
       generateXMLForGroup(gd, t);
    } 
 
-   for (auto pd : *Doxy_Globals::pageSDict) {
+   for (auto &pd : Doxy_Globals::pageSDict) {
       msg("Generating XML output for page %s\n", qPrintable(pd->name()));
       generateXMLForPage(pd, t, false);
    }
@@ -2165,7 +2166,7 @@ void generateXML()
       generateXMLForDir(dir, t);
    }
     
-   for (auto pd : *Doxy_Globals::exampleSDict) {
+   for (auto &pd : Doxy_Globals::exampleSDict) {
       msg("Generating XML output for example %s\n", qPrintable(pd->name()));
       generateXMLForPage(pd, t, true);
    }

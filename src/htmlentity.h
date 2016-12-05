@@ -49,7 +49,7 @@ class HtmlEntityMapper
    ~HtmlEntityMapper();
 
    static HtmlEntityMapper *s_instance;
-   QHash<QString, int> *m_name2sym;
+   QHash<QString, int>      m_name2sym;
 };
 
 #endif

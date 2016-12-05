@@ -24,7 +24,7 @@
 #include <dot.h>
 
 #include <config.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <docparser.h>
 #include <doxy_globals.h>
 #include <groupdef.h>
@@ -2389,7 +2389,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
          removeDotGraph(absBaseName + ".dot");
       }
 
-      Doxy_Globals::indexList->addImageFile(imageName);
+      Doxy_Globals::indexList.addImageFile(imageName);
 
       // write image and map in a table row
       QString mapLabel = escapeCharsInString(n->m_label, false);
@@ -2512,10 +2512,10 @@ DotGfxHierarchyTable::DotGfxHierarchyTable()
    m_rootSubgraphs = new SortedList<DotNode *>;
 
    // build a graph with each class as a node and the inheritance relations as edges
-   initClassHierarchy(Doxy_Globals::classSDict);
-   initClassHierarchy(Doxy_Globals::hiddenClasses);
-   addClassList(Doxy_Globals::classSDict);
-   addClassList(Doxy_Globals::hiddenClasses);
+   initClassHierarchy(&Doxy_Globals::classSDict);
+   initClassHierarchy(&Doxy_Globals::hiddenClasses);
+   addClassList(&Doxy_Globals::classSDict);
+   addClassList(&Doxy_Globals::hiddenClasses);
 
    // m_usedNodes now contains all nodes in the graph
 
@@ -2827,51 +2827,40 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
    }
 
    if (m_graphType == DotNode::Collaboration) {
-      // Add usage relations
+      // add usage relations
+      const QHash<QString, UsesClassDef> &dict = base ? cd->usedImplementationClasses() : cd->usedByImplementationClasses();
+    
+      for (auto &ucd : dict) {
+         QString label;
 
-      QHash<QString, UsesClassDef> *dict;
+         bool first    = true;
+         int count     = 0;
+         int maxLabels = 10;
 
-      if (base) {
-         dict = cd->usedImplementationClasses();
-      } else {
-         dict = cd->usedByImplementationClasses();
-      }
+         for (auto &s : ucd.m_accessors ) {
 
-      if (dict) {
-
-         for (auto &ucd : *dict) {
-            QString label;
-
-            bool first    = true;
-            int count     = 0;
-            int maxLabels = 10;
-
-            for (auto &s : ucd.m_accessors ) {
-
-               if (count >= maxLabels) {
-                  break;
-               }
-
-               if (first) {
-                  label = s;
-                  first = false;
-
-               } else {
-                  label += "\n" + s;
-               }
-
-               ++count;
+            if (count >= maxLabels) {
+               break;
             }
 
-            if (count == maxLabels) {
-               label += "\n...";
+            if (first) {
+               label = s;
+               first = false;
+
+            } else {
+               label += "\n" + s;
             }
 
-            addClass(ucd.m_classDef, n, EdgeInfo::Purple, label, 0, ucd.m_templSpecifiers, base, distance);
+            ++count;
          }
-      }
-   }
 
+         if (count == maxLabels) {
+            label += "\n...";
+         }
+
+         addClass(ucd.m_classDef, n, EdgeInfo::Purple, label, "", ucd.m_templSpecifiers, base, distance);
+      }      
+   }
 
    if (templateRelations && base) {
       QHash<QString, QSharedPointer<ConstraintClassDef>> dict = cd->templateTypeConstraints();
@@ -2918,9 +2907,9 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
          QSharedPointer<ClassDef> templMaster = cd->templateMaster();
 
          if (templMaster) {
-            auto iter = templMaster->getTemplateInstances()->begin();
+            auto iter = templMaster->getTemplateInstances().begin();
 
-            for (auto templInstance : *templMaster->getTemplateInstances()) {
+            for (auto templInstance : templMaster->getTemplateInstances()) {
 
                if (templInstance == cd) {
                   addClass(templMaster, n, EdgeInfo::Orange, iter.key(), 0, 0, true, distance);
@@ -2932,17 +2921,15 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
 
       } else {
          // template relations for super classes
-         QHash<QString, QSharedPointer<ClassDef>> *templInstances = cd->getTemplateInstances();
+         const QHash<QString, QSharedPointer<ClassDef>> &templInstances = cd->getTemplateInstances();
 
-         if (templInstances) {
-            auto iter = templInstances->begin();
+         auto iter = templInstances.begin();
 
-            for (auto templInstance : *templInstances) {
-               addClass(templInstance, n, EdgeInfo::Orange, iter.key(), 0, 0, false, distance);
+         for (auto templInstance : templInstances) {
+            addClass(templInstance, n, EdgeInfo::Orange, iter.key(), 0, 0, false, distance);
 
-               ++iter;
-            }
-         }
+            ++iter;
+         }         
       }
    }
 }
@@ -3202,7 +3189,7 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
       }
    }
 
-   Doxy_Globals::indexList->addImageFile(baseName + "." + imageExt);
+   Doxy_Globals::indexList.addImageFile(baseName + "." + imageExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -3545,7 +3532,7 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
          DotManager::instance()->addRun(dotRun);
       }
    }
-   Doxy_Globals::indexList->addImageFile(baseName + "." + imageExt);
+   Doxy_Globals::indexList.addImageFile(baseName + "." + imageExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -3638,42 +3625,39 @@ void DotInclDepGraph::writeDocbook(QTextStream &t)
 
 void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int distance)
 {
-   MemberSDict *refs = m_inverse ? md->getReferencedByMembers() : md->getReferencesMembers();
+   const MemberSDict &refs = m_inverse ? md->getReferencedByMembers() : md->getReferencesMembers();
 
-   if (refs) {
+   for (auto &rmd : refs) {
+      if (rmd->showInCallGraph()) {
+         QString uniqueId;
 
-      for (auto rmd : *refs) {
-         if (rmd->showInCallGraph()) {
-            QString uniqueId;
+         uniqueId = rmd->getReference() + "$" + rmd->getOutputFileBase() + "#" + rmd->anchor();
+         DotNode *bn  = m_usedNodes->value(uniqueId);
 
-            uniqueId = rmd->getReference() + "$" + rmd->getOutputFileBase() + "#" + rmd->anchor();
-            DotNode *bn  = m_usedNodes->value(uniqueId);
+         if (bn) {
+            // file is already a node in the graph
+            n->addChild(bn, 0, 0, 0);
+            bn->addParent(n);
+            bn->setDistance(distance);
 
-            if (bn) {
-               // file is already a node in the graph
-               n->addChild(bn, 0, 0, 0);
-               bn->addParent(n);
-               bn->setDistance(distance);
+         } else {
+            QString name;
 
+            if (Config::getBool("hide-scope-names")) {
+               name  = rmd->getOuterScope() == m_scope ? rmd->name() : rmd->qualifiedName();
             } else {
-               QString name;
-
-               if (Config::getBool("hide-scope-names")) {
-                  name  = rmd->getOuterScope() == m_scope ? rmd->name() : rmd->qualifiedName();
-               } else {
-                  name = rmd->qualifiedName();
-               }
-
-               QString tooltip = rmd->briefDescriptionAsTooltip();
-
-               bn = new DotNode(m_curNodeNumber++, linkToText(rmd->getLanguage(), name, false), tooltip, uniqueId, false);
-               n->addChild(bn, 0, 0, 0);
-               bn->addParent(n);
-               bn->setDistance(distance);
-               m_usedNodes->insert(uniqueId, bn);
-
-               buildGraph(bn, rmd, distance + 1);
+               name = rmd->qualifiedName();
             }
+
+            QString tooltip = rmd->briefDescriptionAsTooltip();
+
+            bn = new DotNode(m_curNodeNumber++, linkToText(rmd->getLanguage(), name, false), tooltip, uniqueId, false);
+            n->addChild(bn, 0, 0, 0);
+            bn->addParent(n);
+            bn->setDistance(distance);
+            m_usedNodes->insert(uniqueId, bn);
+
+            buildGraph(bn, rmd, distance + 1);
          }
       }
    }
@@ -3834,7 +3818,7 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
       }
    }
 
-   Doxy_Globals::indexList->addImageFile(baseName + "." + imageExt);
+   Doxy_Globals::indexList.addImageFile(baseName + "." + imageExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -4030,7 +4014,7 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
          DotManager::instance()->addRun(dotRun);
       }
    }
-   Doxy_Globals::indexList->addImageFile(baseName + "." + imageExt);
+   Doxy_Globals::indexList.addImageFile(baseName + "." + imageExt);
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
@@ -4179,7 +4163,7 @@ void generateGraphLegend(const QString &path)
    } else {
       removeDotGraph(absDotName);
    }
-   Doxy_Globals::indexList->addImageFile(imgName);
+   Doxy_Globals::indexList.addImageFile(imgName);
 
    if (imageExt == "svg") {
       DotManager::instance()->addSVGObject(absBaseName + Doxy_Globals::htmlFileExtension,
@@ -4229,7 +4213,7 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
       checkDotResult(absImgName);
    }
 
-   Doxy_Globals::indexList->addImageFile(imageName);
+   Doxy_Globals::indexList.addImageFile(imageName);
 }
 
 
@@ -4384,18 +4368,18 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    }
 
    // Add namespaces
-   if ( gd->getNamespaces() && gd->getNamespaces()->count() ) {
+   if (! gd->getNamespaces().isEmpty()) {
 
-      for (auto def : *gd->getNamespaces()) {
+      for (auto &def : gd->getNamespaces()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tnamespace);
       }
    }
 
    // Add files
-   if ( gd->getFiles() && gd->getFiles()->count() ) {
+   if (gd->getFiles().count() ) {
 
-      for (auto def : *gd->getFiles()) {
+      for (auto def : gd->getFiles()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile );
       }
@@ -4824,15 +4808,15 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
    }
 
    // add nodes for other used directories
-   for (auto udir : dd->usedDirs()) {
-      // for each used dir (=directly used or a parent of a directly used dir)
+   for (auto &udir : dd->usedDirs()) {
+      // for each used dir (directly used or a parent of a directly used dir)
 
       QSharedPointer<DirDef> usedDir = udir->dir().constCast<DirDef>();
-      QSharedPointer<DirDef> dir = dd;
+      QSharedPointer<DirDef> dir     = dd;
 
       while (dir) {
 
-         if (dir != usedDir && dir->parent() == usedDir->parent() && !usedDir->isParentOf(dd)) {
+         if (dir != usedDir && dir->parent() == usedDir->parent() && ! usedDir->isParentOf(dd)) {
             // include if both have the same parent (or no parent)
 
             t << "  " << usedDir->getOutputFileBase() << " [shape=box label=\""
@@ -4860,7 +4844,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
    for (auto dir : dirsInGraph) {
 
       // foreach dir in the graph
-      for (auto udir : dir->usedDirs()) {
+      for (auto &udir : dir->usedDirs()) {
 
          // foreach used dir
          QSharedPointer<DirDef> usedDir = udir->dir().constCast<DirDef>();
@@ -4891,7 +4875,6 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
 
    t << "}\n";
 }
-
 
 void resetDotNodeNumbering()
 {

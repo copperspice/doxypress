@@ -190,8 +190,8 @@ class FileDef : public Definition
       return &m_memberGroupSDict;
    }
 
-   NamespaceSDict *getNamespaceSDict() {
-      return &m_namespaceSDict;
+   const NamespaceSDict &getNamespaceSDict() {
+      return m_namespaceSDict;
    }
 
    ClassSDict *getClassSDict()  {

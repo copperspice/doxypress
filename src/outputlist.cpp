@@ -23,7 +23,7 @@
 #include <message.h>
 #include <outputgen.h>
 
-OutputList::OutputList(bool)
+OutputList::OutputList()
 {
 }
 
@@ -31,7 +31,7 @@ OutputList::~OutputList()
 {
 }
 
-void OutputList::add(OutputGenerator *og)
+void OutputList::add(QSharedPointer<OutputGenerator> og)
 {
    if (og) {
       m_outputs.append(og);
@@ -93,7 +93,7 @@ void OutputList::pushGeneratorState()
 
 void OutputList::popGeneratorState()
 {
-  for (auto item : m_outputs ) {
+   for (auto item : m_outputs ) {
       item->popGeneratorState();
    }
 }
@@ -118,7 +118,7 @@ bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPoin
       return true;   // no output formats enabled
    }
 
-   DocRoot *root = 0;
+   DocRoot *root = nullptr;
    root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample, 
                   exampleName, singleLine, linkFromIndex);
 

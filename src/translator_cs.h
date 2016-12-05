@@ -592,11 +592,11 @@ class Translator_Cs : public Translator
    }  
 
    /*! used as the title of the HTML page of a class/struct/union */
-   virtual QString trCompoundReference(const QString &clName, ClassDef::CompoundType compType, bool isTemplate) {                                                                                
+   virtual QString trCompoundReference(const QString &clName, enum CompoundType compType, bool isTemplate) {                                                                                
       QString result;
       
       switch (compType) {
-         case ClassDef::Class:            
+         case CompoundType::Class:            
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Class Template Reference").arg(clName);
             } else {
@@ -604,7 +604,7 @@ class Translator_Cs : public Translator
             }                
             break;
 
-         case ClassDef::Struct:
+         case CompoundType::Struct:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Struct Template Reference").arg(clName);
             } else {
@@ -612,7 +612,7 @@ class Translator_Cs : public Translator
             }       
             break;
 
-         case ClassDef::Union:
+         case CompoundType::Union:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Union Template Reference").arg(clName);
             } else {
@@ -620,7 +620,7 @@ class Translator_Cs : public Translator
             }         
             break;
 
-         case ClassDef::Interface:
+         case CompoundType::Interface:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Interface Template Reference").arg(clName);
             } else {
@@ -628,7 +628,7 @@ class Translator_Cs : public Translator
             }         
             break;
 
-         case ClassDef::Protocol:
+         case CompoundType::Protocol:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Protocol Template Reference").arg(clName);
             } else {
@@ -636,7 +636,7 @@ class Translator_Cs : public Translator
             }         
             break;
 
-         case ClassDef::Category:
+         case CompoundType::Category:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Category Template Reference").arg(clName);
             } else {
@@ -644,7 +644,7 @@ class Translator_Cs : public Translator
             }         
             break;
 
-         case ClassDef::Exception:
+         case CompoundType::Exception:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Exception Template Reference").arg(clName);
             } else {
@@ -810,12 +810,12 @@ class Translator_Cs : public Translator
    /*! This is put at the bottom of a class documentation page and is
     *  followed by a list of files that were used to generate the page.
     */
-   virtual QString trGeneratedFromFiles(ClassDef::CompoundType compType, bool single) {
+   virtual QString trGeneratedFromFiles(enum CompoundType compType, bool single) {
       QString result;
       
       switch (compType) {
 
-         case ClassDef::Class:
+         case CompoundType::Class:
             if (single) {
               result = QCoreApplication::translate("doxy-text", "The documentation for this class "
                      " was generated from the following file:");
@@ -825,7 +825,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Struct:
+         case CompoundType::Struct:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this struct "
                      " was generated from the following file:");
@@ -835,7 +835,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Union:
+         case CompoundType::Union:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this union "
                      " was generated from the following file:");
@@ -845,7 +845,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Interface:
+         case CompoundType::Interface:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this interface "
                      " was generated from the following file:");
@@ -855,7 +855,7 @@ class Translator_Cs : public Translator
             }           
             break;
 
-         case ClassDef::Protocol:
+         case CompoundType::Protocol:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this protocol "
                      " was generated from the following file:");
@@ -865,7 +865,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Category:
+         case CompoundType::Category:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this category "
                      " was generated from the following file:");
@@ -875,7 +875,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Exception:
+         case CompoundType::Exception:
 
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this exception"
@@ -1729,11 +1729,11 @@ class Translator_Cs : public Translator
    }
 
    /*! used as the title of the HTML page of a module/type (Fortran) */
-   virtual QString trCompoundReferenceFortran(const QString &clName, ClassDef::CompoundType compType,bool isTemplate) {
+   virtual QString trCompoundReferenceFortran(const QString &clName, enum CompoundType compType,bool isTemplate) {
       QString result;            
 
       switch (compType) {
-         case ClassDef::Class:
+         case CompoundType::Class:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Module Template Reference").arg(clName);
             } else {
@@ -1741,7 +1741,7 @@ class Translator_Cs : public Translator
             }         
             break;
 
-         case ClassDef::Struct:
+         case CompoundType::Struct:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Type Template Reference").arg(clName);
             } else {
@@ -1749,7 +1749,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Union:
+         case CompoundType::Union:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Union Template Reference").arg(clName);
             } else {
@@ -1757,7 +1757,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Interface:
+         case CompoundType::Interface:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Interface Template Reference").arg(clName);
             } else {
@@ -1765,7 +1765,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Protocol:
+         case CompoundType::Protocol:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Protocol Template Reference").arg(clName);
             } else {
@@ -1773,7 +1773,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Category:
+         case CompoundType::Category:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Category Template Reference").arg(clName);
             } else {
@@ -1781,7 +1781,7 @@ class Translator_Cs : public Translator
             }
             break;
 
-         case ClassDef::Exception:
+         case CompoundType::Exception:
             if (isTemplate) {
                result = QCoreApplication::translate("doxy-text", "%1 Exception Template Reference").arg(clName);
             } else {
@@ -1854,11 +1854,11 @@ class Translator_Cs : public Translator
    /*! This is put at the bottom of a module documentation page and is
     *  followed by a list of files that were used to generate the page.
     */
-   virtual QString trGeneratedFromFilesFortran(ClassDef::CompoundType compType, bool single) {   
+   virtual QString trGeneratedFromFilesFortran(enum CompoundType compType, bool single) {   
       QString result;
 
       switch (compType) {
-         case ClassDef::Class:
+         case CompoundType::Class:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this module was generated from "
                      "the following file:");
@@ -1867,7 +1867,7 @@ class Translator_Cs : public Translator
                      "the following files:");
             }
             break;
-         case ClassDef::Struct:
+         case CompoundType::Struct:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this type was generated from "
                      "the following file:");
@@ -1876,7 +1876,7 @@ class Translator_Cs : public Translator
                      "the following files:");
             } 
             break;
-         case ClassDef::Union:
+         case CompoundType::Union:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this union was generated from "
                      "the following file:");
@@ -1885,7 +1885,7 @@ class Translator_Cs : public Translator
                      "the following files:");
             } 
             break;
-         case ClassDef::Interface:
+         case CompoundType::Interface:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this interface was generated from "
                      "the following file:");
@@ -1894,7 +1894,7 @@ class Translator_Cs : public Translator
                      "the following files:");
             } 
             break;
-         case ClassDef::Protocol:
+         case CompoundType::Protocol:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this protocol was generated from "
                      "the following file:");
@@ -1903,7 +1903,7 @@ class Translator_Cs : public Translator
                      "the following files:");
             }
             break;
-         case ClassDef::Category:
+         case CompoundType::Category:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this category was generated from "
                      "the following file:");
@@ -1912,7 +1912,7 @@ class Translator_Cs : public Translator
                      "the following files:");
             } 
             break;
-         case ClassDef::Exception:
+         case CompoundType::Exception:
             if (single) {
                result = QCoreApplication::translate("doxy-text", "The documentation for this exception was generated from "
                      "the following file:");

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -32,8 +32,8 @@ class FileStorage : public StorageIntf
  public:
    FileStorage() : m_readOnly(false) {}
 
-   FileStorage( const QString &name) :
-      m_readOnly(false)    {
+   FileStorage(const QString &name) : m_readOnly(false)
+   {
       m_file.setFileName(name);
    }
 
@@ -44,6 +44,13 @@ class FileStorage : public StorageIntf
    int write(const char *buf, uint size) {
       assert(m_readOnly == false);
       return m_file.write(buf, size);
+   }
+
+   void clear() {
+      m_readOnly = false;
+
+      m_file.close();
+      m_file.setFileName("");
    }
 
    bool open( QIODevice::OpenModeFlag value)  {
@@ -69,7 +76,7 @@ class FileStorage : public StorageIntf
    }
 
  private:
-   bool m_readOnly;
+   bool  m_readOnly;
    QFile m_file;
 };
 

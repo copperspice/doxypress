@@ -60,19 +60,19 @@ class EclipseHelp : public IndexIntf
    virtual void addStyleSheetFile(const QString &name) override;
 
  private:
-   int m_depth;
+   int  m_depth;
    bool m_endtag;
-   int m_openTags;
+   int  m_openTags;
 
-   QFile *m_tocfile;
+   QFile       m_tocfile;
    QTextStream m_tocstream;
-   QString m_pathprefix;
+   QString     m_pathprefix;
 
-   /* -- avoid copying */
+   // avoid copying
    EclipseHelp(const EclipseHelp &);
    EclipseHelp &operator = (const EclipseHelp &);
 
-   /* -- formatting helpers */
+   // formatting
    void indent();
    void closedTag();
    void openedTag();

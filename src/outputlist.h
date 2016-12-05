@@ -38,10 +38,12 @@ class DocRoot;
 class OutputList : public OutputDocInterface
 {
  public:
-   OutputList(bool);
+   OutputList();
+   OutputList(const OutputList &dummy) = delete;
+
    virtual ~OutputList();
 
-   void add(OutputGenerator *);
+   void add(QSharedPointer<OutputGenerator> og);
 
    uint count() const {
       return m_outputs.count();
@@ -367,7 +369,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::startCodeLine, hasLineNumbers);
    }
  
-  void endCodeLine() {
+   void endCodeLine() {
       forall(&OutputGenerator::endCodeLine);
    }
 
@@ -787,13 +789,12 @@ class OutputList : public OutputDocInterface
 
       for (auto item : m_outputs ) {                              
          if (item->isEnabled()) {
-            (item->*func)(vs...);                 
+            ((*item).*func)(vs...);           // BROOM - resolve when we update CS      
          }
       }      
    }
 
-   OutputList(const OutputList &ol);
-   QList<OutputGenerator *> m_outputs;
+   QList<QSharedPointer<OutputGenerator>> m_outputs;
 };
 
 #endif

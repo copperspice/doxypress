@@ -219,7 +219,7 @@ void ManDocVisitor::visit(DocVerbatim *s)
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
-         Doxy_Globals::parserManager->getParser(lang)
+         Doxy_Globals::parserManager.getParser(lang)
          ->parseCode(m_ci, s->context(), s->text(),
                      langExt,
                      s->isExample(), s->exampleFile());
@@ -283,7 +283,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>( cfi.path(), cfi.fileName());
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
                   langExt, inc->isExample(), inc->exampleFile(), fd,
                   -1, -1, false, QSharedPointer<MemberDef>(), true);
 
@@ -305,7 +305,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
 
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(),inc->text(),
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),inc->text(),
                   langExt, inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
                   -1, -1, true, QSharedPointer<MemberDef>(), false);
 
@@ -350,7 +350,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
-         Doxy_Globals::parserManager->getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
                      langExt, inc->isExample(), inc->exampleFile() );
 
          if (!m_firstCol) {
@@ -384,7 +384,7 @@ void ManDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxy_Globals::parserManager->getParser(m_langExt)
+         Doxy_Globals::parserManager.getParser(m_langExt)
          ->parseCode(m_ci, op->context(), op->text(), langExt,
                      op->isExample(), op->exampleFile());
       }

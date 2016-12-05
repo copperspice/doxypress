@@ -46,8 +46,7 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
    m_allMembersDict = 0;  
    memberGroupSDict = new MemberGroupSDict();  
    m_usingDirMap    = new NamespaceSDict();
-   namespaceSDict   = new NamespaceSDict();
-  
+    
    setReference(lref);
    
    visited = false; 
@@ -75,8 +74,7 @@ NamespaceDef::~NamespaceDef()
    delete classSDict;
    delete m_allMembersDict;
    delete memberGroupSDict;
-   delete m_usingDirMap;
-   delete namespaceSDict;     
+   delete m_usingDirMap;    
 }
 
 void NamespaceDef::setFileName(const QString &fn)
@@ -163,8 +161,8 @@ void NamespaceDef::insertClass(QSharedPointer<ClassDef> cd)
 
 void NamespaceDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 {
-   if (namespaceSDict->find(nd->name()) == nullptr) {     
-      namespaceSDict->insert(nd->name(), nd);
+   if (m_namespaceSDict.find(nd->name()) == nullptr) {     
+      m_namespaceSDict.insert(nd->name(), nd);
    }
 }
 
@@ -278,13 +276,13 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::NamespaceNestedNamespaces:
          {
-            if (namespaceSDict) {              
-               for (auto nd : *namespaceSDict) {
-                  if (nd->isLinkableInProject()) {
-                     tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
-                  }
+                        
+            for (auto &nd : m_namespaceSDict) {
+               if (nd->isLinkableInProject()) {
+                  tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
                }
             }
+            
          }
          break;
 
@@ -458,8 +456,8 @@ void NamespaceDef::writeInlineClasses(OutputList &ol)
 void NamespaceDef::writeNamespaceDeclarations(OutputList &ol, const QString &title,
       bool const isConstantGroup)
 {
-   if (namespaceSDict) {
-      namespaceSDict->writeDeclaration(ol, title, isConstantGroup, true);
+   if (! m_namespaceSDict.isEmpty()) {
+      m_namespaceSDict.writeDeclaration(ol, title, isConstantGroup, true);
    }
 }
 
@@ -502,7 +500,8 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
 
       if ((lde->kind() == LayoutDocEntry::NamespaceClasses && classSDict && classSDict->declVisible()) ||
-            (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && namespaceSDict && namespaceSDict->declVisible())) {
+            (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && ! m_namespaceSDict.isEmpty() &&
+             m_namespaceSDict.declVisible())) {
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          QString label = lde->kind() == LayoutDocEntry::NamespaceClasses ? "nested-classes" : "namespaces";
@@ -566,12 +565,12 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    ol.startContents();
 
-   if (Doxy_Globals::searchIndex) {
-      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
-      Doxy_Globals::searchIndex->addWord(localName(), true);
+   if (Doxy_Globals::searchIndexBase != nullptr) {
+      Doxy_Globals::searchIndexBase->setCurrentDoc(self, anchor(), false);
+      Doxy_Globals::searchIndexBase->addWord(localName(), true);
    }
 
-   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
+   Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>());
 
    // 
    SrcLangExt lang = getLanguage();
@@ -814,7 +813,7 @@ void NamespaceDef::addListReferences()
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
    // bool fortranOpt = Config::getBool("optimize-fortran");
    
-   QList<ListItemInfo> *xrefItems = xrefListItems();
+   const QList<ListItemInfo> &xrefItems = getRefItems();
 
    QString prefix; 
    if (getLanguage() == SrcLangExt_Fortran) {

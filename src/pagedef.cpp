@@ -119,7 +119,7 @@ void PageDef::writeTagFile(QTextStream &tagFile)
    bool found = (name() == "citelist");
 
    if (! found ) {
-      for (auto item : *Doxy_Globals::xrefLists) {
+      for (auto item : Doxy_Globals::xrefLists) {
 
          if (item.listName() == name()) {
             found = true;
@@ -187,7 +187,7 @@ void PageDef::writeDocumentation(OutputList &ol)
       ol.endQuickIndices();
    }
 
-   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(name());
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(name());
 
    // save old generator state and write title only to Man generator
    ol.pushGeneratorState();
@@ -241,7 +241,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    ol.popGeneratorState();
 
-   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>(), 0, filterTitle(title()));
+   Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>(), 0, filterTitle(title()));
 }
 
 void PageDef::writePageDocumentation(OutputList &ol)

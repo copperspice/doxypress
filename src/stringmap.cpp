@@ -21,6 +21,8 @@
 #include <example.h>
 #include <groupdef.h>
 #include <htmlhelp.h>
+#include <membergroup.h>
+#include <membername.h>
 #include <pagedef.h>
 #include <searchindex.h>
 
@@ -43,6 +45,10 @@ int IndexFieldSDict::compareMapValues(const QSharedPointer<IndexField> &item1,
                   const QSharedPointer<IndexField> &item2) const
 {
    return item1->name.compare(item2->name, Qt::CaseInsensitive);
+}
+
+int MemberGroupSDict::compareMapValues(const QSharedPointer<MemberGroup> &item1, const QSharedPointer<MemberGroup> &item2) const {
+   return item1->groupId() - item2->groupId();
 }
 
 int MemberNameInfoSDict::compareMapValues(const QSharedPointer<MemberNameInfo> &item1, 

@@ -31,7 +31,7 @@ class ClassSDict;
 class OutputList;
 class UsedDir;
 
-/** A model of a directory symbol. */
+// model of a directory symbol
 class DirDef : public Definition
 {
  public:
@@ -61,7 +61,7 @@ class DirDef : public Definition
 
    void addSubDir(QSharedPointer<DirDef> subdir);
 
-   FileList *getFiles() const        {
+   const FileList &getFiles() const        {
       return m_fileList;
    }
 
@@ -87,7 +87,7 @@ class DirDef : public Definition
       return m_dirCount;
    }
 
-   const QHash<QString, UsedDir *> &usedDirs() const {
+   const QHash<QString, QSharedPointer<UsedDir>> &usedDirs() const {
       return m_usedDirs;
    }
 
@@ -135,13 +135,13 @@ class DirDef : public Definition
    QString m_diskName;
 
    // list of files in the group
-   FileList *m_fileList;                 
+   FileList m_fileList;                 
 
    int m_dirCount;
    int m_level;
 
-   QSharedPointer<DirDef>    m_parent;
-   QHash<QString, UsedDir *> m_usedDirs;
+   QSharedPointer<DirDef> m_parent;
+   QHash<QString, QSharedPointer<UsedDir>> m_usedDirs;
 };
 
 /** Class representing a pair of FileDef objects */
@@ -196,7 +196,7 @@ class UsedDir
 class DirRelation
 {
  public:
-   DirRelation(const QString &name, QSharedPointer<DirDef> src, UsedDir *dst)
+   DirRelation(const QString &name, QSharedPointer<DirDef> src, QSharedPointer<UsedDir> dst)
       : m_name(name), m_src(src), m_dst(dst)
    {}
 
@@ -204,19 +204,20 @@ class DirRelation
       return m_src;
    }
 
-   UsedDir *destination() const {
+   QSharedPointer<UsedDir> destination() const {
       return m_dst;
    }
 
    void writeDocumentation(OutputList &ol);
+
    QString getOutputFileBase() const {
       return m_name;
    }
 
  private:
-   QString m_name;
-   QSharedPointer<DirDef> m_src;
-   UsedDir *m_dst;
+   QString                 m_name;
+   QSharedPointer<DirDef>  m_src;
+   QSharedPointer<UsedDir> m_dst;
 };
 
 void buildDirectories();

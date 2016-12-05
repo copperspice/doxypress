@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -28,7 +28,7 @@ DocSets::DocSets()
    m_tf = 0;
 
    m_dc = 0;
-   m_id = 0;   
+   m_id = 0;
 }
 
 DocSets::~DocSets()
@@ -46,7 +46,7 @@ void DocSets::initialize()
    QString publisherId    = Config::getString("docset-publisher-id");
    QString publisherName  = Config::getString("docset-publisher-name");
    QString projectVersion = Config::getString("project-version");
-  
+
    // write Makefile
    {
       QString mfName = Config::getString("html-output") + "/Makefile";
@@ -164,7 +164,7 @@ void DocSets::initialize()
 
    QString tokens = Config::getString("html-output") + "/Tokens.xml";
    m_tf = new QFile(tokens);
-  
+
    if (! m_tf->open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", csPrintable(tokens), m_tf->error());
       Doxy_Work::stopDoxyPress();
@@ -231,32 +231,32 @@ void DocSets::decContentsDepth()
 
 void DocSets::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                               bool unused, QSharedPointer<Definition>, DirType category)
-{    
+{
    if (! ref.isEmpty()) {
 
       if (! m_firstNode.at(m_dc - 1)) {
          m_nts << indent() << " </Node>" << endl;
       }
-     
+
       m_firstNode[m_dc - 1] = false;
 
       m_nts << indent() << " <Node>" << endl;
       m_nts << indent() << "  <Name>" << convertToXML(name) << "</Name>" << endl;
 
-      if (! file.isEmpty() && file[0] == '^') { 
+      if (! file.isEmpty() && file[0] == '^') {
          // URL marker
          m_nts << indent() << "  <URL>" << convertToXML(file.mid(1) )
                << "</URL>" << endl;
 
-      } else { 
+      } else {
          // relative file
          m_nts << indent() << "  <Path>";
 
-         if (! file.isEmpty() && file[0] == '!') { 
+         if (! file.isEmpty() && file[0] == '!') {
             // user specified file
             m_nts << convertToXML(file.mid(1));
 
-         } else if (! file.isEmpty()) { 
+         } else if (! file.isEmpty()) {
             // generated file
             m_nts << file << Doxy_Globals::htmlFileExtension;
          }
@@ -324,11 +324,11 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
       break;
       case SrcLangExt_IDL:
          lang = "idl";
-         break;        
+         break;
 
       case SrcLangExt_CSharp:
          lang = "csharp";
-         break;    
+         break;
 
       case SrcLangExt_PHP:
          lang = "php";
@@ -336,23 +336,23 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
       case SrcLangExt_D:
          lang = "d";
-         break;         
+         break;
 
       case SrcLangExt_Java:
          lang = "java";
-         break;       
+         break;
 
       case SrcLangExt_JS:
          lang = "javascript";
-         break; 
+         break;
 
       case SrcLangExt_Python:
          lang = "python";
-         break;     
+         break;
 
       case SrcLangExt_Fortran:
          lang = "fortran";
-         break;    
+         break;
 
       case SrcLangExt_XML:
          lang = "xml";
@@ -360,19 +360,19 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
       case SrcLangExt_Tcl:
          lang = "tcl";
-         break;        
- 
+         break;
+
      case SrcLangExt_Markdown:
          lang = "markdown";
-         break; 
+         break;
 
      case SrcLangExt_Make:
          lang = "make";
-         break;  
+         break;
 
       case SrcLangExt_Unknown:
          lang = "unknown";
-         break;    
+         break;
    }
 
    if (md) {
@@ -391,20 +391,24 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          case MemberType_Define:
             type = "macro";
             break;
+
          case MemberType_Function:
-            if (cd && (cd->compoundType() == ClassDef::Interface ||
-                       cd->compoundType() == ClassDef::Class)) {
+            if (cd && (cd->compoundType() == CompoundType::Interface ||
+                       cd->compoundType() == CompoundType::Class)) {
+
                if (md->isStatic()) {
-                  type = "clm";   // class member
+                  type = "clm";      // class member
                } else {
-                  type = "instm";   // instance member
+                  type = "instm";    // instance member
                }
-            } else if (cd && cd->compoundType() == ClassDef::Protocol) {
+
+            } else if (cd && cd->compoundType() == CompoundType::Protocol) {
                if (md->isStatic()) {
                   type = "intfcm";   // interface class member
                } else {
-                  type = "intfm";   // interface member
+                  type = "intfm";    // interface member
                }
+
             } else {
                type = "func";
             }
@@ -435,8 +439,9 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          case MemberType_DCOP:
             type = "dcop";
             break;
+
          case MemberType_Property:
-            if (cd && cd->compoundType() == ClassDef::Protocol) {
+            if (cd && cd->compoundType() == CompoundType::Protocol) {
                type = "intfp";   // interface property
             } else {
                type = "instp";   // instance property
@@ -499,16 +504,16 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          if (cd->isTemplate()) {
             type = "tmplt";
 
-         } else if (cd->compoundType() == ClassDef::Protocol) {
+         } else if (cd->compoundType() == CompoundType::Protocol) {
             type = "intf";
             if (scope.right(2) == "-p") {
                scope = scope.left(scope.length() - 2);
             }
 
-         } else if (cd->compoundType() == ClassDef::Interface) {
+         } else if (cd->compoundType() == CompoundType::Interface) {
             type = "cl";
 
-         } else if (cd->compoundType() == ClassDef::Category) {
+         } else if (cd->compoundType() == CompoundType::Category) {
             type = "cat";
 
          } else {
@@ -516,10 +521,8 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
          }
 
-         IncludeInfo *ii = cd->includeInfo();
-         if (ii) {
-            decl = ii->includeName;           
-         }
+         const IncludeInfo &item = cd->includeInfo();
+         decl = item.includeName;
 
       } else if (nd) {
          scope = nd->name();
@@ -534,7 +537,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 }
 
 void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QString &type, const QString &lang,
-                         const QString &scope, const QString &anchor, const QString &decl) 
+                         const QString &scope, const QString &anchor, const QString &decl)
 {
    t << "  <Token>" << endl;
    t << "    <TokenIdentifier>" << endl;

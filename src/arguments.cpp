@@ -33,16 +33,16 @@ bool ArgumentList::hasDocumentation() const
    return false;
 }
 
-ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
+ArgumentList ArgumentList::unmarshal(StorageIntf *s)
 {
    uint i;
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return 0;
+      return ArgumentList();
    }
 
-   ArgumentList *result = new ArgumentList;
+   ArgumentList result;
    assert(count < 1000000);
 
    for (i = 0; i < count; i++) {
@@ -57,15 +57,15 @@ ArgumentList *ArgumentList::unmarshal(StorageIntf *s)
       a.docs    = unmarshalQString(s);
       a.typeConstraint = unmarshalQString(s);
 
-      result->append(a);
+      result.append(a);
    }
 
-   result->constSpecifier     = unmarshalBool(s);
-   result->volatileSpecifier  = unmarshalBool(s);
-   result->pureSpecifier      = unmarshalBool(s);
-   result->refSpecifier       = static_cast<RefType>(unmarshalInt(s));
-   result->trailingReturnType = unmarshalQString(s);
-   result->isDeleted          = unmarshalBool(s);
+   result.constSpecifier     = unmarshalBool(s);
+   result.volatileSpecifier  = unmarshalBool(s);
+   result.pureSpecifier      = unmarshalBool(s);
+   result.refSpecifier       = static_cast<RefType>(unmarshalInt(s));
+   result.trailingReturnType = unmarshalQString(s);
+   result.isDeleted          = unmarshalBool(s);
 
    return result;
 }

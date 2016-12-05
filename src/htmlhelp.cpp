@@ -42,20 +42,18 @@ class HtmlHelpIndex
    void writeFields(QTextStream &t);
 
  private:
-   IndexFieldSDict *dict;
+   IndexFieldSDict m_indexFieldDict;
    HtmlHelp *m_help;
 };
 
 /*! Constructs a new HtmlHelp index */
 HtmlHelpIndex::HtmlHelpIndex(HtmlHelp *help) : m_help(help)
 {
-   dict = new IndexFieldSDict;   
 }
 
 /*! Destroys the HtmlHelp index */
 HtmlHelpIndex::~HtmlHelpIndex()
 {
-   delete dict;
 }
 
 /*! Stores an item in the index if it is not already present.
@@ -85,7 +83,7 @@ void HtmlHelpIndex::addItem(const QString &level1, const QString &level2, const 
       return;
    }
 
-   if (dict->find(key) == 0) { 
+   if (m_indexFieldDict.find(key) == 0) { 
       // new key
    
       QSharedPointer<IndexField> f (new IndexField);
@@ -96,7 +94,7 @@ void HtmlHelpIndex::addItem(const QString &level1, const QString &level2, const 
       f->link     = hasLink;
       f->reversed = reversed;
 
-      dict->insert(key, f);
+      m_indexFieldDict.insert(key, f);
    }
 }
 
@@ -142,9 +140,9 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
    QString lastLevel1;
    bool level2Started = false;
 
-   auto nextItem = dict->begin();
+   auto nextItem = m_indexFieldDict.begin();
 
-   for (auto f : *dict) {
+   for (auto f : m_indexFieldDict) {
       QString level1;
       QString level2;
 
@@ -179,7 +177,7 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
          //   a2, b2
          //   a2, b3
 
-         if ( nextItem != dict->end() ) {
+         if ( nextItem != m_indexFieldDict.end() ) {
 
             QString nextLevel1;
             QSharedPointer<IndexField> fnext = *nextItem;

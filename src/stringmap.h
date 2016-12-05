@@ -25,8 +25,9 @@
 #include <algorithm>
 #include <stdexcept>
 
-#include <classdef.h>
 #include <config.h>
+#include <definition.h>
+#include <types.h>
 
 class ClassDef;
 class DirDef;
@@ -34,7 +35,6 @@ class Example;
 class FileNameList;
 class FilePair;
 class GroupDef;
-class IndexField;
 class MemberDef;
 class MemberGroup;
 class MemberName;
@@ -46,40 +46,41 @@ class SearchDefinitionList;
 class SectionInfo;
 class UseEntry;
 
-/** Ordered dictionary of elements of type T Internally uses a QMap<T>.
- */
-template<class T>
+struct IndexField;
+
+// Ordered dictionary of elements of type T Internally uses a QMap<T>
+class StringCompare { 
+   public:
+      explicit StringCompare(Qt::CaseSensitivity sortCase) : m_sortCase_enum(sortCase) { }
+      
+      bool operator()(const QString &a, const QString &b) const {
+         return a.compare(b, m_sortCase_enum) < 0;        
+      }    
+   
+   private:
+      Qt::CaseSensitivity m_sortCase_enum;  
+};
+
+template<class T, class SC = StringCompare>
 class StringMap
 {
 
- private:  
-   class Compare { 
-      public:
-         Compare(Qt::CaseSensitivity isCase) : m_isCase(isCase) { }
-
-         bool operator()(const QString &a, const QString &b) const {
-            return a.compare(b, m_isCase) < 0;        
-         }    
-
-      private:
-         Qt::CaseSensitivity m_isCase;  
-   };
-
-   QMap<QString, T, Compare> m_dict;
+ private: 
+   QMap<QString, T, SC> m_dict;
    
  public:
-   /*! Create an ordered dictionary.   
-    *  \param caseSensitive indicated whether the keys should be sorted
-    *         in a case sensitive way.
-    */
+   // create an ordered dictionary   
+   // indicate whether the keys should be sorted in a case sensitive way
+    
+   using iterator = typename QMap<QString, T, SC>::iterator;
+   using const_iterator = typename QMap<QString, T, SC>::const_iterator;
 
-   using iterator = typename QMap<QString, T, Compare>::iterator;
-   using const_iterator = typename QMap<QString, T, Compare>::const_iterator;
-
-   StringMap(Qt::CaseSensitivity isCase = Qt::CaseSensitive) : m_dict(isCase) {     
+   StringMap(SC compare) : m_dict(compare) {   
    }
-   
-   /*! Destroys the dictionary */
+
+   StringMap(Qt::CaseSensitivity sortCase_enum = Qt::CaseSensitive) : m_dict(StringCompare(sortCase_enum)) {     
+   }
+    
    virtual ~StringMap() {            
    }
      
@@ -90,15 +91,11 @@ class StringMap
    const_iterator begin() const {     
       return m_dict.begin();      
    }  
-
-   /*! Clears the dictionary 
-    */
+  
    void clear() {
       m_dict.clear();
    }
 
-   /*! Returns the number of items stored in the dictionary
-    */
    int count() const {
       return m_dict.count();
    }
@@ -120,7 +117,7 @@ class StringMap
       return m_dict.end();  
    }  
   
-   T find(const char *key) {
+   T find(const char *key) const {
       auto item = m_dict.find(key);
 
       if (item == m_dict.end()) {   
@@ -130,7 +127,7 @@ class StringMap
       return item.value();
    }
 
-   T find(const QByteArray &key) {
+   T find(const QByteArray &key) const {
       auto item = m_dict.find(key);
 
       if (item == m_dict.end()) {   
@@ -140,7 +137,7 @@ class StringMap
       return item.value();
    }
 
-   T find(const QString &key) {
+   T find(const QString &key) const {
        auto item = m_dict.find(key);
 
       if (item == m_dict.end()) {   
@@ -447,11 +444,11 @@ class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
 
    ~ClassSDict() {}
 
-   void writeDeclaration(OutputList &ol, const ClassDef::CompoundType *filter = 0,
+   void writeDeclaration(OutputList &ol, const enum CompoundType *filter = 0,
                          const QString &header = 0, bool localNames = false);
 
    void writeDocumentation(OutputList &ol, QSharedPointer<Definition> container = QSharedPointer<Definition>());
-   bool declVisible(const ClassDef::CompoundType *filter = 0) const;
+   bool declVisible(const enum CompoundType *filter = 0) const;
 
  private:
    int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
@@ -477,14 +474,23 @@ class ExampleSDict : public StringMap<QSharedPointer<Example>>
       int compareMapValues(const QSharedPointer<Example> &item1, const QSharedPointer<Example> &item2) const override;      
 };
 
-/** map of FileNameList objects. */
-class FileNameDict : public StringMap<QSharedPointer<FileNameList>>
+/** map of FileNameList objects */
+class FileNameStringCompare { 
+   public: 
+      bool operator()(const QString &a, const QString &b) const {
+         static const Qt::CaseSensitivity sortCase_enum = Config::getCase("case-sensitive-fname");
+
+         return a.compare(b, sortCase_enum) < 0;        
+      }  
+};
+
+class FileNameDict : public StringMap<QSharedPointer<FileNameList>, FileNameStringCompare>
 {   
    public:
-      FileNameDict() : StringMap<QSharedPointer<FileNameList>>(Config::getCase("case-sensitive-fname"))
+      FileNameDict() : StringMap<QSharedPointer<FileNameList>, FileNameStringCompare>(FileNameStringCompare())
       { }
    
-      ~FileNameDict() {}
+      ~FileNameDict() {}       
 };
 
 /** A sorted dictionary of FilePair objects. */
@@ -613,9 +619,8 @@ class MemberGroupSDict : public LongMap<QSharedPointer<MemberGroup>>
    ~MemberGroupSDict() {}
 
  private:
-   int compareMapValues(const QSharedPointer<MemberGroup> &item1, const QSharedPointer<MemberGroup> &item2) const override {
-      return item1->groupId() - item2->groupId();
-   }
+   int compareMapValues(const QSharedPointer<MemberGroup> &item1, const QSharedPointer<MemberGroup> &item2) const override;
+   
 };
 
 using SectionDict = StringMap<QSharedPointer<SectionInfo>>;

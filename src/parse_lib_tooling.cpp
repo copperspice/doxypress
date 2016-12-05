@@ -948,11 +948,9 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             QString currentUSR = getUSR_Decl(node);
             s_entryMap.insert(currentUSR, current);
 
-            if (parentEntry->tArgLists == nullptr) {
-               parentEntry->tArgLists = new QList<ArgumentList>;
-
+            if (parentEntry->m_templateArgLists.isEmpty()) {
                ArgumentList temp;
-               parentEntry->tArgLists->append(temp);
+               parentEntry->m_templateArgLists.append(temp);
             }
 
             parentEntry->m_traits.setTrait(Entry::Virtue::Template);
@@ -973,14 +971,14 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                defValue = toQString(node->getDefaultArgument());
             }
 
-            ArgumentList *argList = &parentEntry->tArgLists->last();
+            ArgumentList &argList = parentEntry->m_templateArgLists.last();
 
             Argument tmp;
             tmp.type   = type;
             tmp.name   = name;
             tmp.defval = defValue;
 
-            argList->append(tmp);
+            argList.append(tmp);
          }
 
          return true;

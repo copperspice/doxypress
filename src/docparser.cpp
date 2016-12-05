@@ -245,7 +245,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
 
    QSharedPointer<FileDef> fd;
 
-   if ((fd = findFileDef(Doxy_Globals::imageNameDict, fileName, ambig))) {
+   if ((fd = findFileDef(&Doxy_Globals::imageNameDict, fileName, ambig))) {
       QString inputFile = fd->getFilePath();
       QFile inImage(inputFile);
 
@@ -303,7 +303,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
                // copy the image
 
                if (type == DocImage::Html) {
-                  Doxy_Globals::indexList->addImageFile(result);
+                  Doxy_Globals::indexList.addImageFile(result);
                }
 
             } else {
@@ -355,7 +355,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
 
       if (result.left(5) != "http:" && result.left(6) != "https:") {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Image file %s was not found in 'IMAGE PATH': "
-                        "assuming external image", qPrintable(fileName) );
+                        "assuming it is an external image", csPrintable(fileName) );
       }
    }
 
@@ -377,13 +377,13 @@ static void checkArgumentName(const QString &name, bool isParam)
       return;
    }
 
-   ArgumentList *al;
+   const ArgumentList *al;      // ok as a ptr
 
    if (s_memberDef->isDocsForDefinition())  {
-      al = s_memberDef->argumentList();
+      al = &s_memberDef->getArgumentList();
 
    } else {
-      al = s_memberDef->declArgumentList();
+      al = &s_memberDef->getDeclArgumentList();
 
    }  
 
@@ -457,10 +457,10 @@ static void checkArgumentName(const QString &name, bool isParam)
             docLine = s_memberDef->getDefLine();
          }
 
-         QString alStr = argListToString(al);
+         QString alStr = argListToString(*al);
          warn_doc_error(docFile, docLine, "Argument '%s' of command @param was not found in the argument list of %s%s%s%s",
-                        qPrintable(aName), csPrintable(scope), csPrintable(s_memberDef->name()),
-                        qPrintable(alStr), csPrintable(inheritedFrom));
+                        csPrintable(aName), csPrintable(scope), csPrintable(s_memberDef->name()),
+                        csPrintable(alStr), csPrintable(inheritedFrom));
       }
 
       p = i + len;
@@ -475,13 +475,13 @@ static void checkUndocumentedParams()
    static const bool warnDocError = Config::getBool("warn-doc-error");
 
    if (s_memberDef && s_hasParamCommand && warnDocError) {
-      ArgumentList *al;
+      const ArgumentList *al;         // ok as a ptr
 
       if (s_memberDef->isDocsForDefinition())  {
-         al = s_memberDef->argumentList();
+         al = &s_memberDef->getArgumentList();
 
       } else {
-         al = s_memberDef->declArgumentList();
+         al = &s_memberDef->getDeclArgumentList();
 
       }
 
@@ -524,7 +524,7 @@ static void checkUndocumentedParams()
             bool first = true;
 
             QString errMsg = "The following parameters of " + s_memberDef->qualifiedName() +
-                  argListToString(al) + " are not documented:\n";
+                  argListToString(*al) + " are not documented:\n";
 
             for (auto a : *al) {
                QString argName;
@@ -574,45 +574,45 @@ static void checkUndocumentedParams()
 static void detectNoDocumentedParams()
 {
    if (s_memberDef && Config::getBool("warn-undoc-param")) {
-      ArgumentList *al     = s_memberDef->argumentList();
-      ArgumentList *declAl = s_memberDef->declArgumentList();
+      const ArgumentList &argList = s_memberDef->getArgumentList();
+      const ArgumentList &declAl  = s_memberDef->getDeclArgumentList();
 
-      QString returnType   = s_memberDef->typeString();
-      bool isPython = s_memberDef->getLanguage() == SrcLangExt_Python;
+      QString returnType = s_memberDef->typeString();
+      bool isPython      = s_memberDef->getLanguage() == SrcLangExt_Python;
 
       if (! s_memberDef->hasDocumentedParams() && s_hasParamCommand) {
          s_memberDef->setHasDocumentedParams(true);
 
-      } else if (!s_memberDef->hasDocumentedParams()) {
+      } else if (! s_memberDef->hasDocumentedParams()) {
          bool allDoc = true; // no paramater => all parameters are documented
 
-         if ( al != 0 && al->count() > 0) {
+         if (! argList.isEmpty() ) {
             // member has parameters but the member has a parameter list
             // with at least one parameter (that is not void)
 
             // see if all parameters have documentation
-            for (auto a : *al) {
+            for (auto &arg : argList) {
                if (! allDoc) {
                   break;
                }
 
-               if (! a.name.isEmpty() && a.type != "void" && ! (isPython && (a.name == "self" || a.name == "cls"))) {
-                  allDoc = ! a.docs.isEmpty();
+               if (! arg.name.isEmpty() && arg.type != "void" && ! (isPython && (arg.name == "self" || arg.name == "cls"))) {
+                  allDoc = ! arg.docs.isEmpty();
                }
             }
 
-            if (! allDoc && declAl != 0) {
+            if (! allDoc && ! declAl.isEmpty()) {
                // try declaration arguments as well
                allDoc = true;
 
-               for (auto a : *declAl) {
+               for (auto &arg : declAl) {
 
                   if (! allDoc) {
                      break;
                   }
 
-                  if (! a.name.isEmpty() && a.type != "void" && ! (isPython && (a.name == "self"|| a.name == "cls"))) {
-                     allDoc = ! a.docs.isEmpty();
+                  if (! arg.name.isEmpty() && arg.type != "void" && ! (isPython && (arg.name == "self"|| arg.name == "cls"))) {
+                     allDoc = ! arg.docs.isEmpty();
                   }
                }
             }
@@ -793,7 +793,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
       }
 
       // try class, namespace, group, page, file reference
-      cd = Doxy_Globals::classSDict->find(fullName);
+      cd = Doxy_Globals::classSDict.find(fullName);
 
       if (cd) {
          doc     = cd->documentation();
@@ -803,7 +803,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
          return retval;
       }
 
-      nd = Doxy_Globals::namespaceSDict->find(fullName);
+      nd = Doxy_Globals::namespaceSDict.find(fullName);
 
       if (nd) {
          doc    = nd->documentation();
@@ -813,7 +813,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
          return retval;
       }
 
-      gd = Doxy_Globals::groupSDict->find(cmdArg);
+      gd = Doxy_Globals::groupSDict.find(cmdArg);
 
       if (gd) {
          doc    = gd->documentation();
@@ -823,7 +823,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
          return retval;
       }
 
-      pd = Doxy_Globals::pageSDict->find(cmdArg);
+      pd = Doxy_Globals::pageSDict.find(cmdArg);
 
       if (pd) {
          doc    = pd->documentation();
@@ -834,7 +834,7 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
       }
 
       bool ambig;
-      fd = findFileDef(Doxy_Globals::inputNameDict, cmdArg, ambig);
+      fd = findFileDef(&Doxy_Globals::inputNameDict, cmdArg, ambig);
 
       if (fd && ! ambig) {
          doc    = fd->documentation();
@@ -1115,7 +1115,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    bool ambig;
    int len = g_token->name.length();
 
-   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, s_fileName, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, s_fileName, ambig);
 
    bool partA = false;
 
@@ -1318,7 +1318,7 @@ static void handleAnchorName(DocNode *parent)
    QString title = g_token->name;
    title = title.mid(1, title.length()-2);
 
-   QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(id);
+   QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict.find(id);
 
    if (sec) {
       sec->title = title;
@@ -1926,7 +1926,7 @@ static void readTextFileByName(const QString &file, QString &text)
    bool ambig;
    QSharedPointer<FileDef> fd;
 
-   if ((fd = findFileDef(Doxy_Globals::exampleNameDict, file, ambig))) {
+   if ((fd = findFileDef(&Doxy_Globals::exampleNameDict, file, ambig))) {
       text = fileToString(fd->getFilePath(), filterSourceFiles);
 
    } else if (ambig) {
@@ -1945,8 +1945,8 @@ DocWord::DocWord(DocNode *parent, const QString &word)
 {
    m_parent = parent;
 
-   if (Doxy_Globals::searchIndex && ! s_searchUrl.isEmpty()) {
-      Doxy_Globals::searchIndex->addWord(word, false);
+   if (Doxy_Globals::searchIndexBase != nullptr && ! s_searchUrl.isEmpty()) {
+      Doxy_Globals::searchIndexBase->addWord(word, false);
    }
 }
 
@@ -1956,8 +1956,8 @@ DocLinkedWord::DocLinkedWord(DocNode *parent, const QString &word, const QString
 {
    m_parent = parent;
 
-   if (Doxy_Globals::searchIndex && !s_searchUrl.isEmpty()) {
-      Doxy_Globals::searchIndex->addWord(word, false);
+   if (Doxy_Globals::searchIndexBase != nullptr && !s_searchUrl.isEmpty()) {
+      Doxy_Globals::searchIndexBase->addWord(word, false);
    }
 }
 
@@ -1974,7 +1974,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
       m_anchor = id;
 
    } else if (id.left(CiteConsts::anchorPrefix.length()) == CiteConsts::anchorPrefix) {
-      CiteInfo *cite = Doxy_Globals::citeDict->find(id.mid(CiteConsts::anchorPrefix.length()));
+      CiteInfo *cite = Doxy_Globals::citeDict.find(id.mid(CiteConsts::anchorPrefix.length()));
 
       if (cite) {
          m_file   = convertNameToFile_X(CiteConsts::fileName, false, true);
@@ -1989,7 +1989,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
 
    } else {
       // found \anchor label
-      QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(id);
+      QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict.find(id);
 
       if (sec) {
          m_file   = sec->fileName;
@@ -2176,10 +2176,11 @@ void DocIncOperator::parse()
                DBG(("DocIncOperator::parse() Until: %s\n", qPrintable(m_text)));
                break;
             }
+
             o++; // skip new line
          }
 
-         s_includeFileOffset = qMin(l, o + 1); // set pointer to start of new line
+         s_includeFileOffset = qMin(l, o + 1);    // set pointer to start of new line
          break;
    }
 }
@@ -2271,14 +2272,19 @@ DocXRefItem::DocXRefItem(DocNode *parent, int id, const QString &key)
 
 bool DocXRefItem::parse()
 {
-   if (Doxy_Globals::xrefLists->contains(m_key)) {
+   if (Doxy_Globals::xrefLists.contains(m_key)) {
 
-      auto &refList = (*Doxy_Globals::xrefLists)[m_key];
+      static const bool todoList  = Config::getBool("generate-todo-list");
+      static const bool testList  = Config::getBool("generate-test-list");
+      static const bool bugList   = Config::getBool("generate-bug-list");
+      static const bool depreList = Config::getBool("generate-deprecate-list");
 
-      if ( (m_key != "todo"       || Config::getBool("generate-todo-list")) &&
-           (m_key != "test"       || Config::getBool("generate-test-list")) &&
-           (m_key != "bug"        || Config::getBool("generate-bug-list"))  &&
-           (m_key != "deprecated" || Config::getBool("generate-deprecate-list")) ) {
+      auto &refList = Doxy_Globals::xrefLists[m_key];
+
+      if ( (m_key != "todo"       || todoList) &&
+           (m_key != "test"       || testList) &&
+           (m_key != "bug"        || bugList)  &&
+           (m_key != "deprecated" || depreList) ) {
 
          // either not a built-in list or the list is enabled
          RefItem *item = refList.getRefItem(m_id);
@@ -2318,9 +2324,9 @@ DocFormula::DocFormula(DocNode *parent, int id)
    QString formCmd;
    formCmd = QString("\\form#%1").arg(id);
 
-   auto formula = Doxy_Globals::formulaNameDict->find(formCmd);
+   auto formula = Doxy_Globals::formulaNameDict.find(formCmd);
 
-   if (formula != Doxy_Globals::formulaNameDict->end()) {
+   if (formula != Doxy_Globals::formulaNameDict.end()) {
       m_id   = formula->getId();
       m_name = QString("form_%1").arg(m_id);
 
@@ -2393,7 +2399,7 @@ void DocSecRefItem::parse()
    QSharedPointer<SectionInfo> sec;
 
    if (! m_target.isEmpty()) {
-      sec = Doxy_Globals::sectionDict->find(m_target);
+      sec = Doxy_Globals::sectionDict.find(m_target);
 
       if (sec) {
          m_file   = sec->fileName;
@@ -2541,11 +2547,11 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
 
    m_relPath = s_relPath;
 
-   QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(target);
+   QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict.find(target);
 
    if (sec == nullptr && lang == SrcLangExt_Markdown) {
       // lookup as markdown file
-      sec = Doxy_Globals::sectionDict->find(markdownFileNameToId(target));
+      sec = Doxy_Globals::sectionDict.find(markdownFileNameToId(target));
    }
 
    if (sec) {
@@ -2560,7 +2566,7 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
       QSharedPointer<PageDef> pd;
 
       if (sec->type == SectionInfo::Page) {
-         pd = Doxy_Globals::pageSDict->find(target);
+         pd = Doxy_Globals::pageSDict.find(target);
       }
 
       m_text = sec->title;
@@ -2710,7 +2716,7 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
    assert(! target.isEmpty());
 
    m_relPath = s_relPath;
-   CiteInfo *cite = Doxy_Globals::citeDict->find(target);
+   CiteInfo *cite = Doxy_Globals::citeDict.find(target);
 
    if (numBibFiles > 0 && cite && !cite->text.isEmpty()) {
       // ref to citation
@@ -2873,11 +2879,11 @@ void DocDotFile::parse()
    defaultHandleTitleAndSize(CMD_DOTFILE, this, m_children, m_width, m_height);
 
    bool ambig;
-   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::dotFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::dotFileNameDict, m_name, ambig);
 
    if (fd == 0 && m_name.right(4) != ".dot") { 	
       // try with .dot extension as well
-      fd = findFileDef(Doxy_Globals::dotFileNameDict, m_name + ".dot", ambig);
+      fd = findFileDef(&Doxy_Globals::dotFileNameDict, m_name + ".dot", ambig);
    }
 
    if (fd) {
@@ -2904,11 +2910,11 @@ void DocMscFile::parse()
    defaultHandleTitleAndSize(CMD_MSCFILE, this, m_children, m_width, m_height);
 
    bool ambig;
-   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::mscFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::mscFileNameDict, m_name, ambig);
 
-   if (fd == 0 && m_name.right(4) != ".msc") {
+   if (fd == nullptr && m_name.right(4) != ".msc") {
       // try with .msc extension as well
-      fd = findFileDef(Doxy_Globals::mscFileNameDict, m_name + ".msc", ambig);
+      fd = findFileDef(&Doxy_Globals::mscFileNameDict, m_name + ".msc", ambig);
    }
 
    if (fd) {
@@ -2936,11 +2942,11 @@ void DocDiaFile::parse()
    defaultHandleTitleAndSize(CMD_DIAFILE, this, m_children, m_width, m_height);
 
    bool ambig;
-   QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::diaFileNameDict, m_name, ambig);
+   QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name, ambig);
 
    if (fd == 0 && m_name.right(4) != ".dia") {
       // try with .dia extension as well
-      fd = findFileDef(Doxy_Globals::diaFileNameDict, m_name + ".dia", ambig);
+      fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name + ".dia", ambig);
    }
 
    if (fd) {
@@ -3363,7 +3369,7 @@ DocHtmlCaption::DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs)
       if (item.name == "id") {
          // interpret id attribute as an anchor 
       
-         QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(item.value);
+         QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict.find(item.value);
    
          if (sec) {
             m_file   = sec->fileName;
@@ -7235,7 +7241,7 @@ int DocSection::parse()
    QSharedPointer<SectionInfo> sec;
 
    if (! m_id.isEmpty()) {
-      sec = Doxy_Globals::sectionDict->find(m_id);
+      sec = Doxy_Globals::sectionDict.find(m_id);
 
       if (sec) {
          m_file   = sec->fileName;
@@ -7305,7 +7311,7 @@ int DocSection::parse()
       // then parse any number of nested sections
 
       while (retval == RetVal_Subsection) { // more sections follow
-         //SectionInfo *sec=Doxy_Globals::sectionDict[g_token->sectionId];
+         // SectionInfo *sec = Doxy_Globals::sectionDict[g_token->sectionId];
 
          DocSection *s = new DocSection(this, qMin(2 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
          m_children.append(s);
@@ -7316,7 +7322,7 @@ int DocSection::parse()
       // then parse any number of nested sections
 
       while (retval == RetVal_Subsubsection) { // more sections follow
-         //SectionInfo *sec=Doxy_Globals::sectionDict[g_token->sectionId];
+         // SectionInfo *sec = Doxy_Globals::sectionDict[g_token->sectionId];
 
          DocSection *s = new DocSection(this, qMin(3 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
          m_children.append(s);
@@ -7326,7 +7332,7 @@ int DocSection::parse()
       // then parse any number of nested sections
 
       while (retval == RetVal_Paragraph) { // more sections follow
-         //SectionInfo *sec=Doxy_Globals::sectionDict[g_token->sectionId];
+         // SectionInfo *sec = Doxy_Globals::sectionDict[g_token->sectionId];
 
          DocSection *s = new DocSection(this, qMin(4 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
          m_children.append(s);
@@ -7568,7 +7574,7 @@ void DocRoot::parse()
 
    // then parse any number of level1 sections
    while (retval == RetVal_Section) {
-      QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict->find(g_token->sectionId);
+      QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict.find(g_token->sectionId);
 
       if (sec) {
          DocSection *s = new DocSection(this, qMin(1 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
@@ -7778,14 +7784,14 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
 
    s_scope = ctx;
 
-   if (indexWords && Doxy_Globals::searchIndex) {
+   if (indexWords && Doxy_Globals::searchIndexBase != nullptr) {
       if (md) {
          s_searchUrl = md->getOutputFileBase();
-         Doxy_Globals::searchIndex->setCurrentDoc(md, md->anchor(), false);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(md, md->anchor(), false);
 
       } else if (ctx) {
          s_searchUrl = ctx->getOutputFileBase();
-         Doxy_Globals::searchIndex->setCurrentDoc(ctx, ctx->anchor(), false);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(ctx, ctx->anchor(), false);
 
       }
 

@@ -24,7 +24,7 @@
 
 #include <config.h>
 #include <dot.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <docparser.h>
 #include <doxy_globals.h>
 #include <diagram.h>
@@ -56,32 +56,26 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
 
    }
 
-   m_exampleSDict = 0;
    m_parents      = 0;
    m_inheritedBy  = 0;
-   m_incInfo      = 0;
    m_prot         = Public;
      
    m_allMemberNameInfoSDict = 0;
-
-   m_usesImplClassDict   = 0;
-   m_usedByImplClassDict = 0;
-   m_usesIntfClassDict   = 0;
+  
    m_memberGroupSDict    = 0;
    m_innerClasses        = 0;
 
-   m_subGrouping = Config::getBool("allow-sub-grouping");
-   m_templateInstances   = 0;
+   m_subGrouping  = Config::getBool("allow-sub-grouping");   
+   m_isSimple     = Config::getBool("inline-simple-struct");   
+
    m_variableInstances   = 0;   
-   m_templBaseClassNames = 0;
 
    m_isAbstract    = false;
    m_isStatic      = false;
    m_isTemplArg    = false;
    m_membersMerged = false;  
    m_usedOnly      = false;
-
-   m_isSimple = Config::getBool("inline-simple-struct");   
+   
    m_taggedInnerClasses = 0; 
    m_classTraits = Entry::Traits{};  
 
@@ -103,16 +97,11 @@ ClassDef::~ClassDef()
    delete m_parents;
    delete m_inheritedBy;
    delete m_allMemberNameInfoSDict;
-   delete m_exampleSDict;
-   delete m_usesImplClassDict;
-   delete m_usedByImplClassDict;
-   delete m_usesIntfClassDict;
-   delete m_incInfo;
+
    delete m_memberGroupSDict;
    delete m_innerClasses;
-   delete m_templateInstances;
+
    delete m_variableInstances;
-   delete m_templBaseClassNames;
    delete m_taggedInnerClasses;
 }
 
@@ -140,7 +129,7 @@ QString ClassDef::displayName(bool includeScope) const
       retval = substitute(retval, "::", sep);
    }
 
-   if (m_compType == ClassDef::Protocol && retval.right(2) == "-p") {
+   if (m_compType == CompoundType::Protocol && retval.right(2) == "-p") {
       retval = "<" + retval.left(retval.length() - 2) + ">";
    }
    
@@ -583,12 +572,10 @@ void ClassDef::insertUsedFile(QSharedPointer<FileDef> fd)
    if (! m_files.contains(fd)) {
       m_files.append(fd);
    }
-
-   if (m_templateInstances) {     
-      for (auto &item : *m_templateInstances) {
-         item->insertUsedFile(fd);
-      }
-   }
+  
+   for (auto &item : m_templateInstances) {
+      item->insertUsedFile(fd);
+   } 
 }
 
 static void writeInheritanceSpecifier(OutputList &ol, BaseClassDef *bcd)
@@ -630,20 +617,16 @@ static void writeInheritanceSpecifier(OutputList &ol, BaseClassDef *bcd)
 
 void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const QString &includeName, bool local, bool force)
 {   
-   if (! m_incInfo) {
-      m_incInfo = new IncludeInfo;
-   }
+   if ((! includeName.isEmpty() && m_incInfo.includeName.isEmpty()) || (fd != nullptr && m_incInfo.fileDef == nullptr) ) {
 
-   if ((! includeName.isEmpty() && m_incInfo->includeName.isEmpty()) || (fd != nullptr && m_incInfo->fileDef == 0) ) {
-
-      m_incInfo->fileDef     = fd;
-      m_incInfo->includeName = includeName;
-      m_incInfo->local       = local;
+      m_incInfo.fileDef     = fd;
+      m_incInfo.includeName = includeName;
+      m_incInfo.local       = local;
    }
 
    if (force && ! includeName.isEmpty()) {
-      m_incInfo->includeName = includeName;
-      m_incInfo->local       = local;
+      m_incInfo.includeName = includeName;
+      m_incInfo.local       = local;
    }
 }
 
@@ -689,11 +672,13 @@ static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList
       name += clName;
       bool isSpecialization = d->localName().indexOf('<') != -1;
 
-      if (cd->templateArguments()) {
-         result.append(* (cd->templateArguments()) );
+      const ArgumentList &tmpList = cd->getTemplateArgumentList();
+
+      if (! tmpList.isEmpty()) {
+         result.append(tmpList);
 
          if (! isSpecialization) {
-            name += tempArgListToString(cd->templateArguments(), lang);
+            name += tempArgListToString(tmpList, lang);
          }
       }
 
@@ -810,10 +795,10 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    }
 
    // write type constraints
-   writeTypeConstraints(ol, self, &m_typeConstraints);
+   writeTypeConstraints(ol, self, m_typeConstraints);
 
    // write examples
-   if (hasExamples() && m_exampleSDict) {
+   if (hasExamples()) {
       ol.startSimpleSect(BaseOutputDocInterface::Examples, 0, 0, theTranslator->trExamples() + ": ");
       ol.startDescForItem();
       //ol.startParagraph();
@@ -880,20 +865,21 @@ QString ClassDef::generatedFromFiles() const
 
    if (lang == SrcLangExt_Fortran) {
       result = theTranslator->trGeneratedFromFilesFortran(getLanguage() == SrcLangExt_ObjC && 
-                  m_compType == Interface ? Class : m_compType, m_files.count() == 1);
+                  m_compType == CompoundType::Interface ? CompoundType::Class : m_compType, m_files.count() == 1);
 
    } else if (isJavaEnum()) {
       result = theTranslator->trEnumGeneratedFromFiles(m_files.count() == 1);
 
-   } else if (m_compType == Service) {
+   } else if (m_compType == CompoundType::Service) {
       result = theTranslator->trServiceGeneratedFromFiles(m_files.count() == 1);
 
-   } else if (m_compType == Singleton) {
+   } else if (m_compType == CompoundType::Singleton) {
       result = theTranslator->trSingletonGeneratedFromFiles(m_files.count() == 1);
 
    } else {
       result = theTranslator->trGeneratedFromFiles(
-                  getLanguage() == SrcLangExt_ObjC && m_compType == Interface ? Class : m_compType, m_files.count() == 1);
+                  getLanguage() == SrcLangExt_ObjC && 
+                  m_compType == CompoundType::Interface ? CompoundType::Class : m_compType, m_files.count() == 1);
    }
 
    return result;
@@ -1150,49 +1136,60 @@ QString ClassDef::includeStatement() const
 
 void ClassDef::writeIncludeFiles(OutputList &ol)
 {
-   if (m_incInfo) {
+   QString nm;
 
-      QString nm = m_incInfo->includeName.isEmpty() ? (m_incInfo->fileDef 
-            ? m_incInfo->fileDef->docName() : "" ) : m_incInfo->includeName;
+   if (m_incInfo.includeName.isEmpty()) {
 
-      if (! nm.isEmpty()) {
-         ol.startParagraph();
-         ol.startTypewriter();
-         ol.docify(includeStatement());
-
-         SrcLangExt lang = getLanguage();
-         bool isIDLorJava = lang == SrcLangExt_IDL || lang == SrcLangExt_Java;
-
-         if (m_incInfo->local || isIDLorJava) {
-            ol.docify("\"");
-         } else {
-            ol.docify("<");
-         }
-
-         ol.pushGeneratorState();
-         ol.disable(OutputGenerator::Html);
-         ol.docify(nm);
-         ol.disableAllBut(OutputGenerator::Html);
-         ol.enable(OutputGenerator::Html);
-
-         if (m_incInfo->fileDef) {
-            ol.writeObjectLink(0, m_incInfo->fileDef->includeName(), 0, nm);
-         } else {
-            ol.docify(nm);
-         }
-         ol.popGeneratorState();
-         if (m_incInfo->local || isIDLorJava) {
-            ol.docify("\"");
-         } else {
-            ol.docify(">");
-         }
-         if (isIDLorJava) {
-            ol.docify(";");
-         }
-         ol.endTypewriter();
-         ol.endParagraph();
+      if (m_incInfo.fileDef) {
+         nm = m_incInfo.fileDef->docName();
       }
+
+   } else { 
+      nm = m_incInfo.includeName;
+
    }
+
+   if (! nm.isEmpty()) {
+      ol.startParagraph();
+      ol.startTypewriter();
+      ol.docify(includeStatement());
+
+      SrcLangExt lang  = getLanguage();
+      bool isIDLorJava = lang == SrcLangExt_IDL || lang == SrcLangExt_Java;
+
+      if (m_incInfo.local || isIDLorJava) {
+         ol.docify("\"");
+      } else {
+         ol.docify("<");
+      }
+
+      ol.pushGeneratorState();
+      ol.disable(OutputGenerator::Html);
+      ol.docify(nm);
+      ol.disableAllBut(OutputGenerator::Html);
+      ol.enable(OutputGenerator::Html);
+
+      if (m_incInfo.fileDef) {
+         ol.writeObjectLink(0, m_incInfo.fileDef->includeName(), 0, nm);
+      } else {
+         ol.docify(nm);
+      }
+      ol.popGeneratorState();
+
+      if (m_incInfo.local || isIDLorJava) {
+         ol.docify("\"");
+      } else {
+         ol.docify(">");
+      }
+
+      if (isIDLorJava) {
+         ol.docify(";");
+      }
+
+      ol.endTypewriter();
+      ol.endParagraph();
+   }
+
 }
 
 #if 0
@@ -1728,11 +1725,11 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTit
 
    QString pageType = " " + compoundTypeString();
   
-   Doxy_Globals::indexList->addIndexItem(self, QSharedPointer<MemberDef>());
+   Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>());
 
-   if (Doxy_Globals::searchIndex) {
-      Doxy_Globals::searchIndex->setCurrentDoc(self, anchor(), false);
-      Doxy_Globals::searchIndex->addWord(localName(), true);
+   if (Doxy_Globals::searchIndexBase != nullptr) {
+      Doxy_Globals::searchIndexBase->setCurrentDoc(self, anchor(), false);
+      Doxy_Globals::searchIndexBase->addWord(localName(), true);
    }
 
    bool exampleFlag = hasExamples();
@@ -1863,10 +1860,10 @@ QString ClassDef::title() const
    } else if (isJavaEnum()) {
       pageTitle = theTranslator->trEnumReference(qPrintable(displayName()));
 
-   } else if (m_compType == Service) {
+   } else if (m_compType == CompoundType::Service) {
       pageTitle = theTranslator->trServiceReference(qPrintable(displayName()));
 
-   } else if (m_compType == Singleton) {
+   } else if (m_compType == CompoundType::Singleton) {
       pageTitle = theTranslator->trSingletonReference(qPrintable(displayName()));
 
    } else {
@@ -1874,10 +1871,10 @@ QString ClassDef::title() const
          pageTitle = displayName();
 
       } else {         
-         ClassDef::CompoundType compType;
+         enum CompoundType compType;
     
-         if (m_compType == Interface && getLanguage() == SrcLangExt_ObjC)  { 
-            compType = ClassDef::Class;
+         if (m_compType == CompoundType::Interface && getLanguage() == SrcLangExt_ObjC)  { 
+            compType = CompoundType::Class;
 
          } else  { 
             compType = m_compType;
@@ -2222,33 +2219,23 @@ void ClassDef::writeMemberList(OutputList &ol)
 // add a reference to an example
 bool ClassDef::addExample(const QString &anchor, const QString &nameStr, const QString &file)
 {
-   if (m_exampleSDict == 0) {
-      m_exampleSDict = new ExampleSDict;      
-   }
-
-   if (! m_exampleSDict->find(nameStr)) {
-      QSharedPointer<Example> e (new Example);
+   if (! m_exampleSDict.find(nameStr)) {
+      QSharedPointer<Example> e = QMakeShared<Example>();
 
       e->anchor = anchor;
       e->name   = nameStr;
       e->file   = file;
-
-      m_exampleSDict->insert(nameStr, e);
+      m_exampleSDict.insert(nameStr, e);
 
       return true;
    }
+
    return false;
 }
 
-// returns true if this class is used in an example
 bool ClassDef::hasExamples() const
-{
-   bool result = false;
-
-   if (m_exampleSDict) {
-      result = m_exampleSDict->count() > 0;
-   }
-   return result;
+{  
+   return (! m_exampleSDict.isEmpty() );
 }
 
 void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &type)
@@ -2264,11 +2251,11 @@ void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &t
    QSharedPointer<ClassDef> cd = getResolvedClass(self, getFileDef(), typeConstraint);
 
    if (cd == nullptr && ! hideUndocRelation) {
-      cd = QMakeShared<ClassDef>(getDefFileName(), getDefLine(), getDefColumn(), typeConstraint, ClassDef::Class);
+      cd = QMakeShared<ClassDef>(getDefFileName(), getDefLine(), getDefColumn(), typeConstraint, CompoundType::Class);
       cd->setUsedOnly(true);
       cd->setLanguage(getLanguage());
 
-      Doxy_Globals::hiddenClasses->insert(typeConstraint, cd);
+      Doxy_Globals::hiddenClasses.insert(typeConstraint, cd);
    }
   
    if (cd != nullptr) {        
@@ -2309,30 +2296,14 @@ void ClassDef::addTypeConstraints()
 }
 
 // C# Type Constraints: D<T> where T : C, I
-void ClassDef::setTypeConstraints(ArgumentList *al)
+void ClassDef::setTypeConstraints(const ArgumentList &al)
 {
-   if (al == 0) {
-      return;
-   }
-  
-   m_typeConstraints = ArgumentList();
-  
-   for (auto a : *al) {
-      m_typeConstraints.append(a);
-   }
+   m_typeConstraints = al;  
 }
 
-void ClassDef::setTemplateArguments(ArgumentList *al)
-{
-   if (al == 0) {
-      return;
-   }
- 
-   m_tempArgs = ArgumentList();
-
-   for (auto a : *al) {
-      m_tempArgs.append(a);
-   }
+void ClassDef::setTemplateArguments(const ArgumentList &al)
+{   
+   m_tempArgs = al; 
 }
 
 /*! Returns \c true if this class or a class inheriting from this class
@@ -2362,21 +2333,19 @@ bool ClassDef::hasNonReferenceSuperClass()
 
          if (! found) {
             // look for template instances that might have non-reference super classes
-            QHash<QString, QSharedPointer<ClassDef>> *cil = bcd->getTemplateInstances();
+            const QHash<QString, QSharedPointer<ClassDef>> &cil = bcd->getTemplateInstances();
+                     
+            for (auto tidi : cil) {
+               // for each template instance, recurse into the template instance branch                                
 
-            if (cil) {              
+               found = tidi->hasNonReferenceSuperClass();
 
-               for (auto tidi : *cil) {
-                  // for each template instance, recurse into the template instance branch                                
-
-                  found = tidi->hasNonReferenceSuperClass();
-
-                  if (found) {
-                     break;
-                  }
-
+               if (found) {
+                  break;
                }
+
             }
+         
          }
       }
    }
@@ -2630,11 +2599,11 @@ void ClassDef::mergeMembers()
                            if (srcCd == dstCd || dstCd->isBaseClass(srcCd, true)) {
                               // member is in the same or a base class
                            
-                              ArgumentList *srcAl = srcMd->argumentList();
-                              ArgumentList *dstAl = dstMd->argumentList();
+                              const ArgumentList &srcAl = srcMd->getArgumentList();
+                              const ArgumentList &dstAl = dstMd->getArgumentList();
 
                               found = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcAl,
-                                         dstMd->getOuterScope(), dstMd->getFileDef(), dstAl, true );
+                                         dstMd->getOuterScope(), dstMd->getFileDef(), dstAl, true);
                              
                               hidden = hidden  || !found;
 
@@ -2657,7 +2626,7 @@ void ClassDef::mergeMembers()
                            
                            if ((srcMi.virt != Normal && dstMi.virt != Normal) ||
                                     bClass->name() + sep + srcMi.scopePath == dstMi.scopePath ||
-                                    dstMd->getClassDef()->compoundType() == Interface) {
+                                    dstMd->getClassDef()->compoundType() == CompoundType::Interface) {
                               found = true;
 
                            } else  {
@@ -2884,14 +2853,14 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
                   QSharedPointer<MemberName> mn;
                   QString name = newMd->name();
 
-                  if ((mn = Doxy_Globals::memberNameSDict->find(name))) {
+                  if ((mn = Doxy_Globals::memberNameSDict.find(name))) {
                      mn->append(newMd);
 
                   } else {
                      mn = QMakeShared<MemberName>(newMd->name());
                      mn->append(newMd);
 
-                     Doxy_Globals::memberNameSDict->insert(name, mn);
+                     Doxy_Globals::memberNameSDict.insert(name, mn);
                   }
 
                   newMd->setCategory(category);
@@ -2915,23 +2884,19 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 
 void ClassDef::addUsedClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot)
 {
-   static bool extractPrivate = Config::getBool("extract-private");
-   static bool umlLook = Config::getBool("uml-look");
+   static const bool extractPrivate = Config::getBool("extract-private");
+   static const bool umlLook        = Config::getBool("uml-look");
 
    if (prot == Private && ! extractPrivate) {
       return;
    }
-   
-   if (m_usesImplClassDict == 0) {
-      m_usesImplClassDict = new QHash<QString, UsesClassDef>();      
-   }
+ 
+   auto ucd = m_usesImplClassDict.find(cd->name());
 
-   auto ucd = m_usesImplClassDict->find(cd->name());
-
-   if (ucd == m_usesImplClassDict->end()) {      
-      m_usesImplClassDict->insert(cd->name(), UsesClassDef(cd));
+   if (ucd == m_usesImplClassDict.end()) {      
+      m_usesImplClassDict.insert(cd->name(), UsesClassDef(cd));
       
-      ucd = m_usesImplClassDict->find(cd->name());
+      ucd = m_usesImplClassDict.find(cd->name());
    }
 
    QString acc = accessName;
@@ -2968,17 +2933,12 @@ void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const QString &access
       return;
    }
    
-   if (m_usedByImplClassDict == 0) {
-      m_usedByImplClassDict = new QHash<QString, UsesClassDef>();      
-   }
+   auto ucd = m_usedByImplClassDict.find(cd->name());
 
-
-   auto ucd = m_usedByImplClassDict->find(cd->name());
-
-   if (ucd == m_usedByImplClassDict->end()) {      
-      m_usedByImplClassDict->insert(cd->name(), UsesClassDef(cd));
+   if (ucd == m_usedByImplClassDict.end()) {      
+      m_usedByImplClassDict.insert(cd->name(), UsesClassDef(cd));
       
-      ucd = m_usedByImplClassDict->find(cd->name());
+      ucd = m_usedByImplClassDict.find(cd->name());
    }
 
    QString acc = accessName;
@@ -3007,19 +2967,19 @@ QString ClassDef::compoundTypeString() const
    if (getLanguage() == SrcLangExt_Fortran) {
 
       switch (m_compType) {
-         case Class:
+         case CompoundType::Class:
             return "module";
-         case Struct:
+         case CompoundType::Struct:
             return "type";
-         case Union:
+         case CompoundType::Union:
             return "union";
-         case Interface:
+         case CompoundType::Interface:
             return "interface";
-         case Protocol:
+         case CompoundType::Protocol:
             return "protocol";
-         case Category:
+         case CompoundType::Category:
             return "category";
-         case Exception:
+         case CompoundType::Exception:
             return "exception";
          default:
             return "unknown";
@@ -3028,23 +2988,23 @@ QString ClassDef::compoundTypeString() const
    } else {
 
       switch (m_compType) {
-         case Class:
+         case CompoundType::Class:
             return isJavaEnum() ? "enum" : "class";
-         case Struct:
+         case CompoundType::Struct:
             return "struct";
-         case Union:
+         case CompoundType::Union:
             return "union";
-         case Interface:
+         case CompoundType::Interface:
             return getLanguage() == SrcLangExt_ObjC ? "class" : "interface";
-         case Protocol:
+         case CompoundType::Protocol:
             return "protocol";
-         case Category:
+         case CompoundType::Category:
             return "category";
-         case Exception:
+         case CompoundType::Exception:
             return "exception";
-         case Service:
+         case CompoundType::Service:
             return "service";
-         case Singleton:
+         case CompoundType::Singleton:
             return "singleton";
          default:
             return "unknown";
@@ -3193,27 +3153,23 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileNam
    QSharedPointer<ClassDef> self = sharedFrom(this);
    freshInstance = false;
 
-   if (m_templateInstances == 0) {
-      m_templateInstances = new QHash<QString, QSharedPointer<ClassDef>>();
-   }
+   auto templateClass = m_templateInstances.find(templSpec);
 
-   auto templateClass = m_templateInstances->find(templSpec);
-
-   if (templateClass == m_templateInstances->end()) {
+   if (templateClass == m_templateInstances.end()) {
       Debug::print(Debug::Classes, 0, "      New template instance class `%s'`%s'\n", csPrintable(name()), csPrintable(templSpec));
 
       QString tcname = removeRedundantWhiteSpace(localName() + templSpec);
 
-      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, ClassDef::Class); 
+      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, CompoundType::Class); 
 
       temp->setTemplateMaster(self);
       temp->setOuterScope(getOuterScope());
       temp->setHidden(isHidden());
 
-      m_templateInstances->insert(templSpec, temp);
+      m_templateInstances.insert(templSpec, temp);
       freshInstance = true;
 
-      templateClass = m_templateInstances->find(templSpec);
+      templateClass = m_templateInstances.find(templSpec);
    }
 
    return *templateClass;
@@ -3233,7 +3189,7 @@ QSharedPointer<ClassDef> ClassDef::getVariableInstance(const QString &templSpec)
       Debug::print(Debug::Classes, 0, "      New template variable instance class `%s'`%s'\n", qPrintable(name()), qPrintable(templSpec));
       QString tcname = removeRedundantWhiteSpace(name() + templSpec);
 
-      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>("<code>", 1, 1, tcname, ClassDef::Class, nullptr, "", false);
+      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>("<code>", 1, 1, tcname, CompoundType::Class, nullptr, "", false);
 
       temp->addMembersToTemplateInstance(self, templSpec);
       temp->setTemplateMaster(self);
@@ -3245,25 +3201,18 @@ QSharedPointer<ClassDef> ClassDef::getVariableInstance(const QString &templSpec)
    return *templateClass;
 }
 
-void ClassDef::setTemplateBaseClassNames(QHash<QString, int> *templateNames)
+void ClassDef::setTemplateBaseClassNames(const QHash<QString, int> &templateNames)
 {
-   if (templateNames == 0) {
-      return;
-   }
+   // copy one hash into the other hash
+   for (auto qdi = templateNames.begin(); qdi != templateNames.end(); ++qdi) {
 
-   if (m_templBaseClassNames == 0) {
-      m_templBaseClassNames = new QHash<QString, int>();
-   }
-
-   // make a deep copy of the dictionary
-   for (auto qdi = templateNames->begin(); qdi != templateNames->end(); ++qdi) {
-      if (! m_templBaseClassNames->contains(qdi.key())) {
-         m_templBaseClassNames->insert(qdi.key(), qdi.value());
+      if (! m_templBaseClassNames.contains(qdi.key())) {
+         m_templBaseClassNames.insert(qdi.key(), qdi.value());
       }
    }
 }
 
-QHash<QString, int> *ClassDef::getTemplateBaseClassNames() const
+const QHash<QString, int> &ClassDef::getTemplateBaseClassNames() const
 {
    return m_templBaseClassNames;
 }
@@ -3272,19 +3221,18 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (cd->memberNameInfoSDict() == 0) {
+   if (cd->memberNameInfoSDict() == nullptr) {
       return;
    }
   
    for (auto mni : *cd->memberNameInfoSDict()) {
 
       for (auto &mi : *mni) {
-         ArgumentList *actualArguments = new ArgumentList;
-         stringToArgumentList(templSpec, actualArguments);
+         ArgumentList actualArguments;
+         actualArguments = stringToArgumentList(templSpec);
 
          QSharedPointer<MemberDef> md = mi.memberDef;
-         QSharedPointer<MemberDef> imd(md->createTemplateInstanceMember(cd->templateArguments(), actualArguments));
-         delete actualArguments;
+         QSharedPointer<MemberDef> imd(md->createTemplateInstanceMember(cd->getTemplateArgumentList(), actualArguments));
          
          imd->setMemberClass(self);
          imd->setTemplateMaster(md);
@@ -3296,11 +3244,11 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
 
          insertMember(imd);
         
-         QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(imd->name());
+         QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict.find(imd->name());
 
          if (! mn) {
             mn = QMakeShared<MemberName>(imd->name());
-            Doxy_Globals::memberNameSDict->insert(imd->name(), mn);
+            Doxy_Globals::memberNameSDict.insert(imd->name(), mn);
          }
 
          mn->append(imd);
@@ -3328,21 +3276,23 @@ bool ClassDef::isReference() const
 
 void ClassDef::getTemplateParameterLists(QList<ArgumentList> &lists) const
 {
-   QSharedPointer<Definition> d = getOuterScope();
+   QSharedPointer<Definition> def = getOuterScope();
 
-   if (d) {
-      if (d->definitionType() == Definition::TypeClass) {
-         QSharedPointer<ClassDef> cd = d.dynamicCast<ClassDef>();
+   if (def) {
+      if (def->definitionType() == Definition::TypeClass) {
+         QSharedPointer<ClassDef> cd = def.dynamicCast<ClassDef>();
          cd->getTemplateParameterLists(lists);
       }
    }
 
-   if ( templateArguments() != 0) {
-      lists.append(*templateArguments());
+   const ArgumentList &tmp = getTemplateArgumentList();
+
+   if (! tmp.isEmpty()) {
+      lists.append(tmp);
    }
 }
 
-QString ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *actualParams, int *actualParamIndex) const
+QString ClassDef::qualifiedNameWithTemplateParameters(const QList<ArgumentList> &actualParams, int *actualParamIndex) const
 {
    //static bool optimizeOutputJava = Config::getBool("optimize-java");
    static bool hideScopeNames = Config::getBool("hide-scope-names");
@@ -3363,7 +3313,7 @@ QString ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *actua
    SrcLangExt lang = getLanguage();
    QString scopeSeparator = getLanguageSpecificSeparator(lang);
 
-   if (!scName.isEmpty()) {
+   if (! scName.isEmpty()) {
       scName += scopeSeparator;
    }
 
@@ -3372,21 +3322,23 @@ QString ClassDef::qualifiedNameWithTemplateParameters(QList<ArgumentList> *actua
    QString clName = className();
 
    scName += clName;
-   ArgumentList al;
 
-   if (templateArguments()) {
-      if (actualParams && *actualParamIndex < (int)actualParams->count()) {
-         al = actualParams->at(*actualParamIndex);
+   ArgumentList al;
+   const ArgumentList &tmpList = getTemplateArgumentList();
+
+   if (! tmpList.isEmpty()) {
+      if (! actualParams.isEmpty() && *actualParamIndex < actualParams.count()) {
+         al = actualParams.at(*actualParamIndex);
 
          if (! isSpecialization) {
-            scName += tempArgListToString(&al, lang);
+            scName += tempArgListToString(al, lang);
          }
 
          (*actualParamIndex)++;
 
       } else {
          if (! isSpecialization) {
-            scName += tempArgListToString(templateArguments(), lang);
+            scName += tempArgListToString(tmpList, lang);
          }
       }
    }
@@ -3417,7 +3369,7 @@ void ClassDef::addListReferences()
       return;
    }
 
-   QList<ListItemInfo> *xrefItems = xrefListItems();
+   const QList<ListItemInfo> &xrefItems = getRefItems();
 
    addRefItem(xrefItems, qualifiedName(), 
                  lang == SrcLangExt_Fortran ? theTranslator->trType(true, true) : theTranslator->trClass(true, true),
@@ -3822,7 +3774,7 @@ ClassSDict *ClassDef::getClassSDict()
    return m_innerClasses;
 }
 
-ClassDef::CompoundType ClassDef::compoundType() const
+enum CompoundType ClassDef::compoundType() const
 {
    return m_compType;
 }
@@ -3847,23 +3799,14 @@ Protection ClassDef::protection() const
    return m_prot;
 }
 
-const ArgumentList *ClassDef::templateArguments() const
+const ArgumentList &ClassDef::getTemplateArgumentList() const
 {
-   if (m_tempArgs.isEmpty())  {
-      return 0;
-   } else { 
-      return &m_tempArgs;
-   }
+   return m_tempArgs;   
 }
 
-ArgumentList *ClassDef::templateArguments()
+ArgumentList &ClassDef::getTemplateArgumentList()
 {
-   if (m_tempArgs.isEmpty())  {
-      return 0;
-
-   } else { 
-      return &m_tempArgs;
-   }
+   return m_tempArgs;   
 }
 
 QSharedPointer<NamespaceDef> ClassDef::getNamespaceDef() const
@@ -3876,7 +3819,7 @@ QSharedPointer<FileDef> ClassDef::getFileDef() const
    return m_fileDef;
 }
 
-QHash<QString, QSharedPointer<ClassDef>> *ClassDef::getTemplateInstances() const
+const QHash<QString, QSharedPointer<ClassDef>> &ClassDef::getTemplateInstances() const
 {
    return m_templateInstances;
 }
@@ -3891,22 +3834,22 @@ bool ClassDef::isTemplate() const
    return ! m_tempArgs.isEmpty();
 }
 
-IncludeInfo *ClassDef::includeInfo() const
+const IncludeInfo &ClassDef::includeInfo() const
 {
    return m_incInfo;
 }
 
-QHash<QString, UsesClassDef> *ClassDef::usedImplementationClasses() const
+const QHash<QString, UsesClassDef> &ClassDef::usedImplementationClasses() const
 {
    return m_usesImplClassDict;
 }
 
-QHash<QString, UsesClassDef> *ClassDef::usedByImplementationClasses() const
+const QHash<QString, UsesClassDef> &ClassDef::usedByImplementationClasses() const
 {
    return m_usedByImplClassDict;
 }
 
-QHash<QString, UsesClassDef> *ClassDef::usedInterfaceClasses() const
+const QHash<QString, UsesClassDef> &ClassDef::usedInterfaceClasses() const
 {
    return m_usesIntfClassDict;
 }
@@ -4159,14 +4102,9 @@ const FileList &ClassDef::usedFiles() const
    return m_files;
 }
 
-const ArgumentList *ClassDef::typeConstraints() const
+const ArgumentList &ClassDef::typeConstraints() const
 {
-   return &m_typeConstraints;
-}
-
-const ExampleSDict *ClassDef::exampleList() const
-{
-   return m_exampleSDict;
+   return m_typeConstraints;
 }
 
 bool ClassDef::subGrouping() const

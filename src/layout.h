@@ -153,16 +153,9 @@ struct LayoutNavEntry {
    };
 
    LayoutNavEntry(LayoutNavEntry *parent, Kind k, bool vs, const QString &bf,
-                  const QString &tl, const QString &intro, bool prepend = false)
+                  const QString &tl, const QString &intro)
       : m_parent(parent), m_kind(k), m_visible(vs), m_baseFile(bf), m_title(tl), m_intro(intro) {
      
-      if (parent) {
-         if (prepend) {
-            parent->prependChild(this);
-         } else {
-            parent->addChild(this);
-         }
-      }
    }
 
    LayoutNavEntry *parent() const   {
@@ -210,6 +203,7 @@ struct LayoutNavEntry {
 
  private:
    LayoutNavEntry() : m_parent(0) {}
+
    LayoutNavEntry *m_parent;
    Kind m_kind;
    bool m_visible;
@@ -226,37 +220,42 @@ struct LayoutNavEntry {
 /** @brief Singleton providing access to the (user configurable) layout of the documentation */
 class LayoutDocManager
 {
-   class Private;
+   public:
+   
+      enum LayoutPart {
+         Class, Namespace, File, Group, Directory
+      };
+      
+      // returns a reference to this singleton.
+      static LayoutDocManager &instance();
+      
+      // returns the list of LayoutDocEntry's in representation order for a
+      // given page identified by @a part. 
+      const QList<LayoutDocEntry *> &docEntries(LayoutPart part) const;
+      
+      // returns the (invisible) root of the navigation tree.
+      LayoutNavEntry *rootNavEntry() const;
+      
+      // parses a user provided layout
+      void parse(QTextStream &t, const QString &fileName);
+      void init();
+      
+   private:
+      LayoutDocManager();
+      ~LayoutDocManager();
 
- public:
+      void addEntry(LayoutPart p, LayoutDocEntry *e);
+      void clear(LayoutPart p);
+                 
+      QList<LayoutDocEntry *> m_docClass;
+      QList<LayoutDocEntry *> m_docNamespace;
+      QList<LayoutDocEntry *> m_docFile;
+      QList<LayoutDocEntry *> m_docGroup;
+      QList<LayoutDocEntry *> m_docDirectory;
 
-   enum LayoutPart {
-      Class, Namespace, File, Group, Directory
-   };
+      LayoutNavEntry *m_docRootNav;
 
-   /** Returns a reference to this singleton. */
-   static LayoutDocManager &instance();
-
-   /** Returns the list of LayoutDocEntry's in representation order for a given page identified by @a part. */
-   const QList<LayoutDocEntry *> &docEntries(LayoutPart part) const;
-
-   /** returns the (invisible) root of the navigation tree. */
-   LayoutNavEntry *rootNavEntry() const;
-
-   /** Parses a user provided layout */
-   void parse(QTextStream &t, const QString &fileName);
-   void init();
-
- private:
-   void addEntry(LayoutPart p, LayoutDocEntry *e);
-   void clear(LayoutPart p);
-   LayoutDocManager();
-   ~LayoutDocManager();
-
-   static const int NUM_PARTS = 5;
-
-   Private *d;
-   friend class LayoutParser;
+      friend class LayoutParser;
 };
 
 void writeDefaultLayoutFile(const QString &fileName);

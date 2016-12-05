@@ -163,7 +163,7 @@ static void format_warn(const QString &file, int line, const QString &text)
       // get version from file name
 
       bool ambig;
-      QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, file, ambig);
+      QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, file, ambig);
 
       if (fd) {
          versionSubst = fd->getVersion();

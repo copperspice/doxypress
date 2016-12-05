@@ -29,7 +29,7 @@ class StorageIntf;
 struct Argument {
    Argument() {}
 
-   /*! Copy an argument (does a deep copy of all strings) */
+   // copy constructor
    Argument(const Argument &a) {
       attrib  = a.attrib;
       type    = a.type;
@@ -40,7 +40,7 @@ struct Argument {
       typeConstraint = a.typeConstraint;
    }
 
-   /*! Assignment of an argument (does a deep copy of all strings) */
+   // Assignment operator
    Argument &operator=(const Argument &a) {
       if (this != &a) {
          attrib = a.attrib;
@@ -54,21 +54,19 @@ struct Argument {
       return *this;
    }
 
-   /*! return true if this argument is documentation and the argument has a
-    *  non empty name.
-    */
+   // return true if this argument is documentation and the argument has a  non empty name 
    bool hasDocumentation() const {
       return ! name.isEmpty() && ! docs.isEmpty();
    }
 
-   QString attrib;          /*!< Argument's attribute (IDL only) */
-   QString type;            /*!< Argument's type */
-   QString canType;         /*!< Cached value of canonical type (after type resolution). Empty initially. */
-   QString name;            /*!< Argument's name (may be empty) */
-   QString array;           /*!< Argument's array specifier (may be empty) */
-   QString defval;          /*!< Argument's default value (may be empty) */
-   QString docs;            /*!< Argument's documentation (may be empty) */
-   QString typeConstraint;  /*!< Used for Java generics: <T extends C> */
+   QString attrib;             /*!< Argument's attribute (IDL only) */
+   QString type;               /*!< Argument's type */
+   mutable QString canType;    /*!< Cached value of canonical type (after type resolution). Empty initially. */
+   QString name;               /*!< Argument's name (may be empty) */
+   QString array;              /*!< Argument's array specifier (may be empty) */
+   QString defval;             /*!< Argument's default value (may be empty) */
+   QString docs;               /*!< Argument's documentation (may be empty) */
+   QString typeConstraint;     /*!< Used for Java generics: <T extends C> */
 };
 
 /*! \brief This class represents an function or template argument list.
@@ -82,7 +80,7 @@ class ArgumentList : public QList<Argument>
  public:
    /*! Creates an empty argument list */
    ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false),
-                    isDeleted(false), refSpecifier(RefType::NoRef)
+                    refSpecifier(RefType::NoRef), isDeleted(false)
    {
    }
 
@@ -106,10 +104,10 @@ class ArgumentList : public QList<Argument>
    /*! C++11 style Trailing return type */
    QString trailingReturnType;
 
-   /*! method with =delete */
+   /*! parsing a method with = delete */
    bool isDeleted;
 
-   static ArgumentList *unmarshal(StorageIntf *s);
+   static ArgumentList unmarshal(StorageIntf *s);
    static void marshal(StorageIntf *s, const ArgumentList &argList);
 };
 

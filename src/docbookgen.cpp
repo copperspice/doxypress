@@ -26,7 +26,7 @@
 
 #include <arguments.h>
 #include <config.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <docbookvisitor.h>
 #include <docparser.h>
 #include <dot.h>
@@ -286,45 +286,44 @@ class DocbookCodeGenerator : public CodeOutputInterface
    bool m_insideSpecialHL;
 };
 
-static void writeTemplateArgumentList(ArgumentList *al, QTextStream &t, QSharedPointer<Definition> scope,
+static void writeTemplateArgumentList(const ArgumentList &argList, QTextStream &t, QSharedPointer<Definition> scope,
                   QSharedPointer<FileDef> fileScope, int indent)
 {
    QString indentStr;
    indentStr.fill(' ', indent);
 
-   if (al) {
-      t << indentStr << "<templateparamlist>" << endl;
+   t << indentStr << "<templateparamlist>" << endl;
 
-      for (auto &item : *al) {
-         t << indentStr << "  <param>" << endl;
+   for (auto &item : argList) {
+      t << indentStr << "  <param>" << endl;
 
-         if (! item.type.isEmpty()) {
-            t << indentStr <<  "    <type>";
-            linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, QSharedPointer<Definition>(), item.type);
-            t << "</type>" << endl;
-         }
-
-         if (! item.name.isEmpty()) {
-            t << indentStr <<  "    <declname>" << item.name << "</declname>" << endl;
-            t << indentStr <<  "    <defname>" << item.name << "</defname>" << endl;
-         }
-
-         if (! item.defval.isEmpty()) {
-            t << indentStr << "    <defval>";
-            linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, QSharedPointer<Definition>(), item.defval);
-            t << "</defval>" << endl;
-         }
-
-         t << indentStr << "  </param>" << endl;
+      if (! item.type.isEmpty()) {
+         t << indentStr <<  "    <type>";
+         linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, QSharedPointer<Definition>(), item.type);
+         t << "</type>" << endl;
       }
 
-      t << indentStr << "</templateparamlist>" << endl;
+      if (! item.name.isEmpty()) {
+         t << indentStr <<  "    <declname>" << item.name << "</declname>" << endl;
+         t << indentStr <<  "    <defname>" << item.name << "</defname>" << endl;
+      }
+
+      if (! item.defval.isEmpty()) {
+         t << indentStr << "    <defval>";
+         linkifyText(TextGeneratorDocbookImpl(t), scope, fileScope, QSharedPointer<Definition>(), item.defval);
+         t << "</defval>" << endl;
+      }
+
+      t << indentStr << "  </param>" << endl;
    }
+
+   t << indentStr << "</templateparamlist>" << endl;
+ 
 }
 
 static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
 {
-   writeTemplateArgumentList(cd->templateArguments(), t, cd, QSharedPointer<FileDef>(), 4);
+   writeTemplateArgumentList(cd->getTemplateArgumentList(), t, cd, QSharedPointer<FileDef>(), 4);
 }
 
 static void writeDocbookDocBlock(QTextStream &t, const QString &fileName, int lineNr, QSharedPointer<Definition> scope,
@@ -355,7 +354,7 @@ static void writeDocbookDocBlock(QTextStream &t, const QString &fileName, int li
 
 void writeDocbookCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 {
-   ParserInterface *pIntf = Doxy_Globals::parserManager->getParser(fd->getDefFileExtension());
+   ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(fd->getDefFileExtension());
    SrcLangExt langExt = getLanguageFromFileName(fd->getDefFileExtension());
    pIntf->resetCodeParserState();
 
@@ -608,29 +607,26 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          t << "_1" << md->anchor() << "\">" << convertToXML(md->name()) << "</link>";
          t << " (" << endl;
 
-         ArgumentList *declAl = md->declArgumentList();
+         const ArgumentList &declAl = md->getDeclArgumentList();        
+         int cnt = 0;
 
-         if (declAl && declAl->count() > 0) {
-            int cnt = 0;
-
-            for (auto &a : *declAl) {
-               if (cnt != 0) {
-                  t << ", ";
-               }
-
-               if (! a.type.isEmpty()) {
-                  linkifyText(TextGeneratorDocbookImpl(t), def, md->getBodyDef(), md, a.type);
-               }
-
-               t << " ";
-
-               if (! a.name.isEmpty()) {
-                  writeDocbookString(t, a.name);
-               }
-
-               cnt++;
+         for (auto &arg : declAl) {
+            if (cnt != 0) {
+               t << ", ";
             }
-         }
+
+            if (! arg.type.isEmpty()) {
+               linkifyText(TextGeneratorDocbookImpl(t), def, md->getBodyDef(), md, arg.type);
+            }
+
+            t << " ";
+
+            if (! arg.name.isEmpty()) {
+               writeDocbookString(t, arg.name);
+            }
+
+            cnt++;
+         }    
 
          t << ")";
 
@@ -1020,62 +1016,60 @@ static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
    }
 }
 
-static void writeInnerNamespaces(const NamespaceSDict *nl, QTextStream &t)
+static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
 {
-   if (nl) {
-      QString title = theTranslator->trNamespaces();
-
-      if (! nl->isEmpty()) {
-         t << "        <simplesect>" << endl;
-         t << "            <title> " << title << " </title>" << endl;
-      }
-
-      for (auto nd : *nl) {
-         if (! nd->isHidden() && nd->name().indexOf('@') == -1) { // skip anonymouse scopes
-            t << "            <para>" << endl;
-            t << "                <itemizedlist>" << endl;
-            t << "                    <listitem>" << endl;
-
-            t << "                        <para>" << "struct <link linkend=\"" << nd->getOutputFileBase()
-              << "\">" << convertToXML(nd->name()) << "</link>";
-
-            t << "</para>" << endl;
-            t << "                    </listitem>" << endl;
-            t << "                </itemizedlist>" << endl;
-            t << "            </para>" << endl;
-         }
-      }
-
-      if (! nl->isEmpty()) {
-         t << "        </simplesect>" << endl;
-      }
+   if (nl.isEmpty()) {
+      return;
    }
-}
 
-static void writeInnerFiles(const FileList *fl, QTextStream &t)
-{
-   if (fl) {
-      QString title = theTranslator->trFile(true, true);
+   static const QString title = theTranslator->trNamespaces();
+  
+   t << "        <simplesect>" << endl;
+   t << "            <title> " << title << " </title>" << endl;
+   
+   for (auto &nd : nl) {
+      if (! nd->isHidden() && nd->name().indexOf('@') == -1) { 
+         // skip anonymouse scopes
 
-      if (! fl->isEmpty()) {
-         t << "        <simplesect>" << endl;
-         t << "            <title> " << title << " </title>" << endl;
-      }
-
-      for (auto fd : *fl) {
          t << "            <para>" << endl;
          t << "                <itemizedlist>" << endl;
          t << "                    <listitem>" << endl;
-         t << "                        <para>" << "file <link linkend=\"" << fd->getOutputFileBase() << "\">" << convertToXML(fd->name()) << "</link>";
+
+         t << "                        <para>" << "struct <link linkend=\"" << nd->getOutputFileBase()
+           << "\">" << convertToXML(nd->name()) << "</link>";
+
          t << "</para>" << endl;
          t << "                    </listitem>" << endl;
          t << "                </itemizedlist>" << endl;
          t << "            </para>" << endl;
       }
+   }
+   
+   t << "        </simplesect>" << endl;
+}
 
-      if (! fl->isEmpty()) {
-         t << "        </simplesect>" << endl;
-      }
+static void writeInnerFiles(const FileList &fl, QTextStream &t)
+{  
+   QString title = theTranslator->trFile(true, true);
+   
+   if (! fl.isEmpty()) {
+      t << "        <simplesect>" << endl;
+      t << "            <title> " << title << " </title>" << endl;
+   }
+   
+   for (auto fd : fl) {
+      t << "            <para>" << endl;
+      t << "                <itemizedlist>" << endl;
+      t << "                    <listitem>" << endl;
+      t << "                        <para>" << "file <link linkend=\"" << fd->getOutputFileBase() << "\">" << convertToXML(fd->name()) << "</link>";
+      t << "</para>" << endl;
+      t << "                    </listitem>" << endl;
+      t << "                </itemizedlist>" << endl;
+      t << "            </para>" << endl;
+   }
+   
+   if (! fl.isEmpty()) {
+      t << "        </simplesect>" << endl;
    }
 }
 
@@ -1216,45 +1210,45 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    t << " " << cd->compoundTypeString() << " Reference";
    t << "</title>" << endl;
 
-   IncludeInfo *ii = cd->includeInfo();
+   const IncludeInfo &item = cd->includeInfo();
 
-   if (ii) {
-      QString nm = ii->includeName;
+   QString nm = item.includeName;
 
-      if (nm.isEmpty() && ii->fileDef) {
-         nm = ii->fileDef->docName();
-      }
-
-      if (! nm.isEmpty()) {
-         t << "<para>" << endl;
-         t << "    <programlisting>#include ";
-
-         if (ii->fileDef && !ii->fileDef->isReference()) {
-            // TODO: support external references
-            t << "<link linkend=\"" << ii->fileDef->getOutputFileBase() << "\">";
-         }
-
-         if (ii->local) {
-            t << "&quot;";
-         } else {
-            t << "&lt;";
-         }
-
-         t << convertToXML(nm);
-
-         if (ii->local) {
-            t << "&quot;";
-         } else {
-            t << "&gt;";
-         }
-
-         if (ii->fileDef && !ii->fileDef->isReference()) {
-            t << "</link>";
-         }
-         t << "</programlisting>" << endl;
-         t << "</para>" << endl;
-      }
+   if (nm.isEmpty() && item.fileDef) {
+      nm = item.fileDef->docName();
    }
+
+   if (! nm.isEmpty()) {
+      t << "<para>" << endl;
+      t << "    <programlisting>#include ";
+
+      if (item.fileDef && !item.fileDef->isReference()) {
+         // TODO: support external references
+         t << "<link linkend=\"" << item.fileDef->getOutputFileBase() << "\">";
+      }
+
+      if (item.local) {
+         t << "&quot;";
+      } else {
+         t << "&lt;";
+      }
+
+      t << convertToXML(nm);
+
+      if (item.local) {
+         t << "&quot;";
+      } else {
+         t << "&gt;";
+      }
+
+      if (item.fileDef && ! item.fileDef->isReference()) {
+         t << "</link>";
+      }
+
+      t << "</programlisting>" << endl;
+      t << "</para>" << endl;
+   }
+  
 
    if (haveDot && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
       t << "<para>Inheritance diagram for " << convertToXML(cd->name()) << "</para>" << endl;
@@ -1489,7 +1483,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       writeInnerClasses(fd->getClassSDict(), t);
    }
 
-   if (fd->getNamespaceSDict()) {
+   if (! fd->getNamespaceSDict().isEmpty()) {
       writeInnerNamespaces(fd->getNamespaceSDict(), t);
    }
 
@@ -1723,7 +1717,7 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
       writeDocbookHeader_ID(t, pid);
    }
 
-   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(pd->name());
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(pd->name());
 
    if (si) {
       t << "    <title>" << convertToXML(si->title) << "</title>" << endl;
@@ -1756,7 +1750,12 @@ void generateDocbook()
    // + related pages
    // - examples
 
-   QString outputDirectory = Config::getString("docbook-output");
+   static QString outputDirectory   = Config::getString("docbook-output");
+   static QString dbk_projectName   = Config::getString("project-name");
+
+   static const bool showFiles      = Config::getBool("show-file-page");
+   static const bool directoryGraph = Config::getBool("directory-graph");
+   static const bool haveDot        = Config::getBool("have-dot");
 
    if (outputDirectory.isEmpty()) {
       outputDirectory = QDir::currentPath();
@@ -1796,7 +1795,6 @@ void generateDocbook()
    createSubDirs(docbookDir);
 
    QString fileName = outputDirectory + "/index.xml";
-   QString dbk_projectName = Config::getString("project-name");
 
    QFile f(fileName);
    f.setFileName(fileName);
@@ -1817,20 +1815,20 @@ void generateDocbook()
    t << "    </info>" << endl;
 
    // NAMESPACE DOCUMENTATION
-   //Namespace Documentation index header
+   // Namespace Documentation index header
 
-   if (! Doxy_Globals::namespaceSDict->isEmpty()) {
+   if (! Doxy_Globals::namespaceSDict.isEmpty()) {
       t << "    <chapter>" << endl;
       t << "        <title>Namespace Documentation</title>" << endl;
    }
 
-   for (auto nd : *Doxy_Globals::namespaceSDict)  {
+   for (auto &nd : Doxy_Globals::namespaceSDict)  {
       msg("Generating Docbook output for namespace %s\n", qPrintable(nd->name()));
       generateDocbookForNamespace(nd, t);
    }
 
-   //Namespace Documentation index footer
-   if (! Doxy_Globals::namespaceSDict->isEmpty()) {
+   // Namespace Documentation index footer
+   if (! Doxy_Globals::namespaceSDict.isEmpty()) {
       t << "    </chapter>" << endl;
    }
 
@@ -1841,26 +1839,26 @@ void generateDocbook()
    }
 
    // page documentation
-   for (auto pd : *Doxy_Globals::pageSDict) {
-      msg("Generating Docbook output for page %s\n", qPrintable(pd->name()));
+   for (auto &pd : Doxy_Globals::pageSDict) {
+      msg("Generating Docbook output for page %s\n", csPrintable(pd->name()));
       generateDocbookForPage(pd, t, false);
    }
 
    // ** module group documentation
 
    // Module group Documentation index header
-   if (! Doxy_Globals::groupSDict->isEmpty()) {
+   if (! Doxy_Globals::groupSDict.isEmpty()) {
       t << "    <chapter>" << endl;
       t << "        <title>" << theTranslator->trModuleDocumentation() << "</title>" << endl;
    }
 
-   for (auto gd : *Doxy_Globals::groupSDict) {
+   for (auto gd : Doxy_Globals::groupSDict) {
       msg("Generating Docbook output for group %s\n", qPrintable(gd->name()));
       generateDocbookForGroup(gd, t);
    }
 
    // Module group Documentation index footer
-   if (! Doxy_Globals::groupSDict->isEmpty()) {
+   if (! Doxy_Globals::groupSDict.isEmpty()) {
       t << "    </chapter>" << endl;
    }
 
@@ -1868,32 +1866,31 @@ void generateDocbook()
 
    {
       // Class Documentation index header
-      if (! Doxy_Globals::classSDict->isEmpty()) {
+      if (! Doxy_Globals::classSDict.isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>" << theTranslator->trClassDocumentation() << "</title>" << endl;
       }
 
-      for (auto cd : *Doxy_Globals::classSDict) {
+      for (auto cd : Doxy_Globals::classSDict) {
          generateDocbookForClass(cd, t);
       }
 
       // Class Documentation index footer
-      if (! Doxy_Globals::classSDict->isEmpty()) {
+      if (! Doxy_Globals::classSDict.isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }
 
-   // file documentation
-   static bool showFiles = Config::getBool("show-file-page");
+   // file documentation 
    if (showFiles) {
 
-      //File Documentation index header
-      if (! Doxy_Globals::inputNameList->isEmpty()) {
+      // File Documentation index header
+      if (! Doxy_Globals::inputNameList.isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>" << theTranslator->trFileDocumentation() << "</title>" << endl;
       }
 
-      for (auto fn : *Doxy_Globals::inputNameList) {
+      for (auto &fn : Doxy_Globals::inputNameList) {
          for (auto fd : *fn) {
             msg("Generating Docbook output for file %s\n", qPrintable(fd->name()));
             generateDocbookForFile(fd, t);
@@ -1901,13 +1898,13 @@ void generateDocbook()
       }
 
       // File Documentation index footer
-      if (! Doxy_Globals::inputNameList->isEmpty()) {
+      if (! Doxy_Globals::inputNameList.isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }
 
    // DIRECTORY DOCUMENTATION
-   if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
+   if (directoryGraph && haveDot) {
 
       // Directory Documentation index header
       if (! Doxy_Globals::directories.isEmpty()) {
@@ -1930,18 +1927,18 @@ void generateDocbook()
 
    {
       //Example Page Documentation index header
-      if (! Doxy_Globals::exampleSDict->isEmpty()) {
+      if (! Doxy_Globals::exampleSDict.isEmpty()) {
          t << "    <chapter>" << endl;
          t << "        <title>" << theTranslator->trExampleDocumentation() << "</title>" << endl;
       }
 
-      for (auto pd : *Doxy_Globals::exampleSDict) {
-         msg("Generating Docbook output for example %s\n", qPrintable(pd->name()));
+      for (auto &pd : Doxy_Globals::exampleSDict) {
+         msg("Generating Docbook output for example %s\n", csPrintable(pd->name()));
          generateDocbookForPage(pd, t, true);
       }
 
       // Example Page Documentation index footer
-      if (! Doxy_Globals::exampleSDict->isEmpty()) {
+      if (! Doxy_Globals::exampleSDict.isEmpty()) {
          t << "    </chapter>" << endl;
       }
    }

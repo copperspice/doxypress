@@ -48,11 +48,25 @@ struct BaseInfo {
    Specifier  virt;      //  virtualness
 };
 
-// This struct is used to capture the tag file information for an Entry.
+// used to capture the tag file information for an entry
 struct TagInfo {
    QString tagName;
    QString fileName;
    QString anchor;
+
+   bool isEmpty() const {
+      if (tagName.isEmpty() &&  fileName.isEmpty() && anchor.isEmpty()) {
+         return true;
+      } else {
+         return false;
+      }
+   }
+
+   bool clear() {
+      tagName  = "";
+      fileName = "";
+      anchor   = "";
+   }
 };
 
 /** Represents some information, about an entity found in the source.
@@ -258,7 +272,7 @@ class Entry
    int getSize();
 
    void addSpecialListItem(const QString &listName, int index);
-   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage *storage, QSharedPointer<FileDef> fd,
+   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage, QSharedPointer<FileDef> fd,
                               QSharedPointer<Entry> self);
 
    // while parsing a file these function can be used to navigate/build the tree
@@ -288,63 +302,63 @@ class Entry
    void reset();
 
  public:
-   TagInfo      *tagInfo;       // tag file info
-   ArgumentList  argList;       // member arguments as a list
-   ArgumentList  typeConstr;    // where clause (C#) for type constraints
+   TagInfo       m_tagInfoEntry;   // tag file info
+   ArgumentList  argList;          // member arguments as a list
+   ArgumentList  typeConstr;       // where clause (C#) for type constraints
 
-   RelatesType  relatesType;    // how relates is handled
-   Specifier    virt;           // virtualness of the entry
-   Protection   protection;     // class protection
-   MethodTypes  mtype;          // signal, slot, (dcop) method, or property
+   RelatesType  relatesType;       // how relates is handled
+   Specifier    virt;              // virtualness of the entry
+   Protection   protection;        // class protection
+   MethodTypes  mtype;             // signal, slot, (dcop) method, or property
    GroupDocType groupDocType;
-   SrcLangExt   lang;           // programming language in which this entry was found
+   SrcLangExt   lang;              // programming language in which this entry was found
 
    Traits m_traits;
 
-   static int num;              // counts the total number of entries
+   static int m_EntryCount;        // counts the total number of entries
 
-   int  section;                // entry type (see Sections);
-   int  initLines;              // define/variable initializer lines to show
-   int  docLine;                // line number at which the documentation was found
-   int  briefLine;              // line number at which the brief desc. was found
-   int  inbodyLine;             // line number at which the body doc was found
-   int  bodyLine;               // line number of the definition in the source
-   int  endBodyLine;            // line number where the definition ends
-   int  mGrpId;                 // member group id
-   int  startLine;              // start line of entry in the source
-   int  startColumn;            // start column of entry in the source
+   int  section;                   // entry type (see Sections);
+   int  initLines;                 // define/variable initializer lines to show
+   int  docLine;                   // line number at which the documentation was found
+   int  briefLine;                 // line number at which the brief desc. was found
+   int  inbodyLine;                // line number at which the body doc was found
+   int  bodyLine;                  // line number of the definition in the source
+   int  endBodyLine;               // line number where the definition ends
+   int  mGrpId;                    // member group id
+   int  startLine;                 // start line of entry in the source
+   int  startColumn;               // start column of entry in the source
 
-   bool stat;                   // static ?
-   bool explicitExternal;       // explicitly defined as external ?
-   bool proto;                  // prototype ?
-   bool subGrouping;            // automatically group class members ?
-   bool callGraph;              // do we need to draw the call graph ?
-   bool callerGraph;            // do we need to draw the caller graph ?
+   bool stat;                      // static ?
+   bool explicitExternal;          // explicitly defined as external ?
+   bool proto;                     // prototype ?
+   bool subGrouping;               // automatically group class members ?
+   bool callGraph;                 // do we need to draw the call graph ?
+   bool callerGraph;               // do we need to draw the caller graph ?
 
-   QList<ArgumentList>   *tArgLists;    // template argument declarations
-   QList<BaseInfo>        extends;      // list of base classes
-   QList<Grouping>       *groups;       // list of groups this entry belongs to
-   QList<SectionInfo>    *anchors;      // list of anchors defined in this entry
-   QList<ListItemInfo>   *sli;          // special lists (test/todo/bug/deprecated/..)
+   QList<ArgumentList>    m_templateArgLists;    // template argument declarations
+   QList<BaseInfo>        extends;               // list of base classes
+   QList<Grouping>        m_groups;              // list of groups this entry belongs to
+   QList<SectionInfo>     m_anchors;             // list of anchors defined in this entry
+   QList<ListItemInfo>    m_specialLists;        // special lists (test/todo/bug/deprecated/..)
 
-   QString   type;              // member type
-   QString   name;              // member name
-   QString   args;              // member argument string
-   QString   bitfields;         // member's bit fields
-   QString   m_program;         // the program text
-   QString   initializer;       // initial value (for variables)
-   QString   includeFile;       // include file (2 arg of \\class, must be unique)
-   QString   includeName;       // include name (3 arg of \\class)
-   QString   doc;               // documentation block (partly parsed)
-   QString   docFile;           // file in which the documentation was found
-   QString   brief;             // brief description (doc block)
-   QString   briefFile;         // file in which the brief desc. was found
-   QString   inbodyDocs;        // documentation inside the body of a function
-   QString   inbodyFile;        // file in which the body doc was found
-   QString   relates;           // related class (doc block)
+   QString   type;                 // member type
+   QString   name;                 // member name
+   QString   args;                 // member argument string
+   QString   bitfields;            // member's bit fields
+   QString   m_program;            // the program text
+   QString   initializer;          // initial value (for variables)
+   QString   includeFile;          // include file (2 arg of \\class, must be unique)
+   QString   includeName;          // include name (3 arg of \\class)
+   QString   doc;                  // documentation block (partly parsed)
+   QString   docFile;              // file in which the documentation was found
+   QString   brief;                // brief description (doc block)
+   QString   briefFile;            // file in which the brief desc. was found
+   QString   inbodyDocs;           // documentation inside the body of a function
+   QString   inbodyFile;           // file in which the body doc was found
+   QString   relates;              // related class (doc block)
 
-   QString   m_read;            // property read
-   QString   m_write;           // property write
+   QString   m_read;               // property read
+   QString   m_write;              // property write
 
    // copperspice - additional properties
    QString   m_reset;
@@ -355,13 +369,13 @@ class Entry
    QString   m_stored;
    QString   m_user;
 
-   QString   inside;            // name of the class in which documents are found
-   QString   exception;         // throw specification
-   QString	 fileName;          // file this entry was extracted from
-   QString   id;                // libclang id
+   QString   inside;               // name of the class in which documents are found
+   QString   exception;            // throw specification
+   QString	 fileName;             // file this entry was extracted from
+   QString   id;                   // libclang id
 
-   bool      hidden;            // does this represent an entity that is hidden from the output
-   bool      artificial;        // Artificially introduced item
+   bool      hidden;               // does this represent an entity that is hidden from the output
+   bool      artificial;           // Artificially introduced item
 
    // return the command name used to define GROUPDOC_SEC
    QString groupDocCmd() const {
@@ -402,7 +416,7 @@ class Entry
    }
 
  private:
-   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage *storage,
+   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage,
                   QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
    QWeakPointer<Entry> m_parent;               // parent node in the tree
@@ -422,8 +436,8 @@ class EntryNav
    ~EntryNav();
 
    void addChild(QSharedPointer<EntryNav> e);
-   bool loadEntry(FileStorage *storage);
-   bool saveEntry(QSharedPointer<Entry> e, FileStorage *storage);
+   bool loadEntry(FileStorage &storage);
+   bool saveEntry(QSharedPointer<Entry> e, FileStorage &storage);
    void setEntry(QSharedPointer<Entry> e);
    void releaseEntry();
 
@@ -455,8 +469,8 @@ class EntryNav
       return m_name;
    }
 
-   TagInfo *tagInfo() const {
-      return m_tagInfo;
+   const TagInfo &tagInfo() const {
+      return m_tagInfoNav;
    }
 
    const QList<QSharedPointer<EntryNav>> &children() const {
@@ -479,7 +493,7 @@ class EntryNav
    QString	    m_type;        //!< member type
    QString      m_name;        //!< member name
 
-   TagInfo     *m_tagInfo;     //!< tag file info
+   TagInfo      m_tagInfoNav;  //!< tag file info
    SrcLangExt   m_lang;        //!< programming language in which this entry was found
 
    QSharedPointer<FileDef> m_fileDef;

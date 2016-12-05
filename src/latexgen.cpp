@@ -244,7 +244,7 @@ LatexGenerator::~LatexGenerator()
 
 static void writeLatexMakefile()
 {
-   bool generateBib = ! Doxy_Globals::citeDict->isEmpty();
+   bool generateBib = ! Doxy_Globals::citeDict.isEmpty();
 
    QString dir = Config::getString("latex-output");
    QString fileName = dir + "/Makefile";
@@ -354,7 +354,7 @@ static void writeMakeBat()
 
    QFile file(fileName);
 
-   bool generateBib = ! Doxy_Globals::citeDict->isEmpty();
+   bool generateBib = ! Doxy_Globals::citeDict.isEmpty();
 
    if (! file.open(QIODevice::WriteOnly)) {
       err("Unable to open file %s for writing\n", csPrintable(fileName));
@@ -766,7 +766,7 @@ static void writeDefaultFooter(QTextStream &t)
      "\n";
 
    // Bibliography
-   Doxy_Globals::citeDict->writeLatexBibliography(t);
+   Doxy_Globals::citeDict.writeLatexBibliography(t);
 
    // Index
    t << "% Index\n";
@@ -955,7 +955,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {
          bool found = false;        
 
-         for (auto gd : *Doxy_Globals::groupSDict) {
+         for (auto gd : Doxy_Globals::groupSDict) {
             if (found) {
                break;
             }
@@ -1000,7 +1000,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {        
          bool found = false;
 
-         for (auto nd : *Doxy_Globals::namespaceSDict) {
+         for (auto &nd : Doxy_Globals::namespaceSDict) {
             if (found) {
                break;
             }
@@ -1022,7 +1022,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {        
          bool found = false;
        
-         for (auto cd : *Doxy_Globals::classSDict) {
+         for (auto cd : Doxy_Globals::classSDict) {
             if (found) {
                break;
             }
@@ -1044,7 +1044,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       {
          bool isFirst = true;
       
-         for (auto fn : *Doxy_Globals::inputNameList) {           
+         for (auto &fn : Doxy_Globals::inputNameList) {           
 
             for (auto fd : *fn) { 
 
@@ -1152,7 +1152,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       {        
          bool found = false;
 
-         for (auto gd : *Doxy_Globals::groupSDict) {           
+         for (auto gd : Doxy_Globals::groupSDict) {           
 
             if (! gd->isReference()) {
                if (! found) {
@@ -1192,7 +1192,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       {
          bool found = false;
 
-         for (auto nd : *Doxy_Globals::namespaceSDict) {
+         for (auto &nd : Doxy_Globals::namespaceSDict) {
         
             if (nd->isLinkableInProject()) {
 
@@ -1213,7 +1213,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       {
          bool found = false;
 
-         for (auto cd : *Doxy_Globals::classSDict) {
+         for (auto cd : Doxy_Globals::classSDict) {
          
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope()) {
 
@@ -1233,7 +1233,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       case isFileDocumentation: {
          bool isFirst = true;
         
-         for (auto fn : *Doxy_Globals::inputNameList) {
+         for (auto &fn : Doxy_Globals::inputNameList) {
 
             for (auto fd : *fn) {
          
@@ -1266,7 +1266,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
          bool isFirst = true;          
 
-         for (auto pd : *Doxy_Globals::exampleSDict) {
+         for (auto &pd : Doxy_Globals::exampleSDict) {
 
             if (isFirst) {
                m_textStream << "\\input{" << pd->getOutputFileBase() << "}\n";

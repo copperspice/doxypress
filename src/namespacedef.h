@@ -25,6 +25,7 @@
 
 #include <definition.h>
 #include <filenamelist.h>
+#include <stringmap.h>
 
 class ClassDef;
 class ClassSDict;
@@ -34,9 +35,6 @@ class MemberGroupSDict;
 class NamespaceList;
 class NamespaceSDict;
 class OutputList;
-
-template<typename T>
-class StringMap;
 
 /** model of a namespace symbol */
 class NamespaceDef : public Definition
@@ -130,8 +128,8 @@ class NamespaceDef : public Definition
    }
 
    /*! Returns the namespaces contained in this namespace */
-   NamespaceSDict *getNamespaceSDict() const {
-      return namespaceSDict;
+   const NamespaceSDict &getNamespaceSDict() const {
+      return m_namespaceSDict;
    }
 
    QString title() const;
@@ -169,7 +167,7 @@ class NamespaceDef : public Definition
    StringMap<QSharedPointer<Definition>>  *m_innerCompounds;
 
    NamespaceSDict    *m_usingDirMap;
-   NamespaceSDict    *namespaceSDict;
+   NamespaceSDict     m_namespaceSDict;
    MemberSDict       *m_allMembersDict;
    MemberGroupSDict  *memberGroupSDict;
    ClassSDict        *classSDict;

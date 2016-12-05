@@ -35,7 +35,7 @@
 #include <tagreader.h>
 
 #include <arguments.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <message.h>
@@ -1201,12 +1201,12 @@ void TagFileParser::dump()
 void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoList &list)
 {
    for (auto ta : list) {
-      if (Doxy_Globals::sectionDict->find(ta.label) == 0) {
+      if (Doxy_Globals::sectionDict.find(ta.label) == 0) {
 
          QSharedPointer<SectionInfo> si (new SectionInfo(ta.fileName, -1, ta.label, ta.title, SectionInfo::Anchor, 0, m_tagName));
-         Doxy_Globals::sectionDict->insert(ta.label, si);
+         Doxy_Globals::sectionDict.insert(ta.label, si);
 
-         e->anchors->append(*si);
+         e->m_anchors.append(*si);
 
       } else {
          warn("Duplicate anchor %s found\n", qPrintable(ta.label));
@@ -1224,9 +1224,8 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       me->name  = tmi.name;
       me->args  = tmi.arglist;
 
-      if (! me->args.isEmpty()) {
-         me->argList = ArgumentList();
-         stringToArgumentList(me->args, &(me->argList));
+      if (! me->args.isEmpty()) {        
+         me->argList = stringToArgumentList(me->args);
       }
 
       if (tmi.enumValues.count() > 0) {
@@ -1239,12 +1238,13 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
             ev->name       = evi.name;
             ev->id         = evi.clangid;
             ev->section    = Entry::VARIABLE_SEC;
-            TagInfo *ti    = new TagInfo;
-            ti->tagName    = m_tagName;
-            ti->anchor     = evi.anchor;
-            ti->fileName   = evi.file;
-            ev->tagInfo    = ti;
 
+            TagInfo ti;
+            ti.tagName     = m_tagName;
+            ti.anchor      = evi.anchor;
+            ti.fileName    = evi.file;
+
+            ev->m_tagInfoEntry = ti;
             me->addSubEntry(ev, me);
          }
       }
@@ -1256,16 +1256,17 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       me->id         = tmi.clangId;
 
       if (ce->section == Entry::GROUPDOC_SEC) {
-         me->groups->append(Grouping(ce->name, Grouping::GROUPING_INGROUP));
+         me->m_groups.append(Grouping(ce->name, Grouping::GROUPING_INGROUP));
       }
 
       addDocAnchors(me, tmi.docAnchors);
-      TagInfo *ti    = new TagInfo;
 
-      ti->tagName    = m_tagName;
-      ti->anchor     = tmi.anchor;
-      ti->fileName   = tmi.anchorFile;
-      me->tagInfo    = ti;
+      TagInfo ti;
+      ti.tagName    = m_tagName;
+      ti.anchor     = tmi.anchor;
+      ti.fileName   = tmi.anchorFile;
+
+      me->m_tagInfoEntry = ti;
 
       if (tmi.kind == "define") {
          me->type = "#define";
@@ -1408,13 +1409,14 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       }
 
       addDocAnchors(ce, tci.docAnchors);
-      TagInfo *ti  = new TagInfo;
 
-      ti->tagName  = m_tagName;
-      ti->fileName = tci.filename;
-      ce->id       = tci.clangId;
-      ce->tagInfo  = ti;
-      ce->lang     = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
+      TagInfo ti;
+      ti.tagName   = m_tagName;
+      ti.fileName  = tci.filename;
+
+      ce->id             = tci.clangId;
+      ce->m_tagInfoEntry = ti;
+      ce->lang           = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
 
       // transfer base class list
       if (tci.bases) {
@@ -1425,20 +1427,15 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       }
 
       if (tci.templateArguments) {
-         if (ce->tArgLists == 0) {
-            ce->tArgLists = new QList<ArgumentList>;
-         }
-
          ArgumentList al;
-         ce->tArgLists->append(al);
+         ce->m_templateArgLists.append(al);
 
          for (auto argName : *tci.templateArguments) {
-            Argument a;
+            Argument arg;
 
-            a.type = "class";
-            a.name = argName;
-
-            al.append(a);
+            arg.type = "class";
+            arg.name = argName;
+            al.append(arg);
          }
       }
 
@@ -1449,22 +1446,24 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    // build file list
    for (auto tfi : m_tagFileFiles) {
       QSharedPointer<Entry> fe = QMakeShared<Entry>();
+
       fe->section = determineSection(tfi.name);
       fe->name    = tfi.name;
 
       addDocAnchors(fe, tfi.docAnchors);
 
-      TagInfo *ti  = new TagInfo;
-      ti->tagName  = m_tagName;
-      ti->fileName = tfi.filename;
-      fe->tagInfo  = ti;
+      TagInfo ti;
+      ti.tagName  = m_tagName;
+      ti.fileName = tfi.filename;
+
+      fe->m_tagInfoEntry = ti;
 
       QString fullName = m_tagName + ":" + tfi.path + stripPath_tag(tfi.name);
       fe->fileName = fullName;
 
       QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
 
-      QSharedPointer<FileNameList> mn (Doxy_Globals::inputNameDict->find(tfi.name));
+      QSharedPointer<FileNameList> mn (Doxy_Globals::inputNameDict.find(tfi.name));
 
       if (mn) {
          mn->append(fd);
@@ -1473,8 +1472,8 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
          mn = QMakeShared<FileNameList>(fullName, tfi.name);
          mn->append(fd);
 
-         Doxy_Globals::inputNameList->inSort(mn);
-         Doxy_Globals::inputNameDict->insert(tfi.name, mn);
+         Doxy_Globals::inputNameList.inSort(mn);
+         Doxy_Globals::inputNameDict.insert(tfi.name, mn);
       }
 
       buildMemberList(fe, tfi.members);
@@ -1484,15 +1483,17 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    // build namespace list
    for (auto tni : m_tagFileNamespaces) {
       QSharedPointer<Entry> ne = QMakeShared<Entry>();
+
       ne->section  = Entry::NAMESPACE_SEC;
       ne->name     = tni.name;
       addDocAnchors(ne, tni.docAnchors);
 
-      TagInfo *ti  = new TagInfo;
-      ti->tagName  = m_tagName;
-      ti->fileName = tni.filename;
-      ne->id       = tni.clangId;
-      ne->tagInfo  = ti;
+      TagInfo ti;
+      ti.tagName   = m_tagName;
+      ti.fileName  = tni.filename;
+
+      ne->id              = tni.clangId;
+      ne->m_tagInfoEntry  = ti;
 
       buildMemberList(ne, tni.members);
       root->addSubEntry(ne, root);
@@ -1501,14 +1502,16 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    // build package list
    for (auto tpgi : m_tagFilePackages) {
       QSharedPointer<Entry> pe = QMakeShared<Entry>();
+
       pe->section  = Entry::PACKAGE_SEC;
       pe->name     = tpgi.name;
       addDocAnchors(pe, tpgi.docAnchors);
 
-      TagInfo *ti  = new TagInfo;
-      ti->tagName  = m_tagName;
-      ti->fileName = tpgi.filename;
-      pe->tagInfo  = ti;
+      TagInfo ti;
+      ti.tagName  = m_tagName;
+      ti.fileName = tpgi.filename;
+
+      pe->m_tagInfoEntry  = ti;
 
       buildMemberList(pe, tpgi.members);
       root->addSubEntry(pe, root);
@@ -1517,16 +1520,18 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    // build group list
    for (auto tgi : m_tagFileGroups) {
       QSharedPointer<Entry> ge = QMakeShared<Entry>();
+
       ge->section  = Entry::GROUPDOC_SEC;
       ge->name     = tgi.name;
       ge->type     = tgi.title;
 
       addDocAnchors(ge, tgi.docAnchors);
 
-      TagInfo *ti  = new TagInfo;
-      ti->tagName  = m_tagName;
-      ti->fileName = tgi.filename;
-      ge->tagInfo  = ti;
+      TagInfo ti;
+      ti.tagName  = m_tagName;
+      ti.fileName = tgi.filename;
+
+      ge->m_tagInfoEntry  = ti;
 
       buildMemberList(ge, tgi.members);
       root->addSubEntry(ge, root);
@@ -1549,11 +1554,11 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 
       addDocAnchors(pe, tpi.docAnchors);
 
-      TagInfo *ti  = new TagInfo;
-      ti->tagName  = m_tagName;
-      ti->fileName = tpi.filename;
-      pe->tagInfo  = ti;
+      TagInfo ti;
+      ti.tagName  = m_tagName;
+      ti.fileName = tpi.filename;
 
+      pe->m_tagInfoEntry = ti;
       root->addSubEntry(pe, root);
    }
 }
@@ -1561,7 +1566,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 void TagFileParser::addIncludes()
 {
    for (auto tfi : m_tagFileFiles) {
-      QSharedPointer<FileNameList> fn (Doxy_Globals::inputNameDict->find(tfi.name));
+      QSharedPointer<FileNameList> fn (Doxy_Globals::inputNameDict.find(tfi.name));
 
       if (fn) {
 
@@ -1570,7 +1575,7 @@ void TagFileParser::addIncludes()
 
                for (auto item : tfi.includes) {
 
-                  QSharedPointer<FileNameList> ifn (Doxy_Globals::inputNameDict->find(item.name));
+                  QSharedPointer<FileNameList> ifn (Doxy_Globals::inputNameDict.find(item.name));
                   assert(ifn != 0);
 
                   if (ifn) {
