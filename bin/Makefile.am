@@ -195,7 +195,7 @@ doxypress_SOURCES = \
    src/generated/commentcnv.cpp  \
    src/generated/commentscan.cpp  \
    src/generated/constexp.cpp \
-   src/generated/defargs.cpp \
+   src/generated/default_args.cpp \
    src/generated/declinfo.cpp  \
    src/generated/doctokenizer.cpp \
    src/generated/parse_cstyle.cpp \
@@ -222,7 +222,7 @@ noinst_HEADERS = \
    src/constexp.h \
    src/cppvalue.h \
    src/declinfo.h \
-   src/defargs.h \
+   src/default_args.h \
    src/definition.h \
    src/dia.h \
    src/diagram.h \

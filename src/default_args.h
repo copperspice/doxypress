@@ -20,8 +20,11 @@
 
 #include <QByteArray>
 
-class ArgumentList;
+#include <arguments.h>
 
-extern void stringToArgumentList(const QString &argsString, ArgumentList *argList, QString *extraTypeChars = 0);
+
+ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &argList = ArgumentList());
+
+ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &argList, QString &extraTypeChars);
 
 #endif

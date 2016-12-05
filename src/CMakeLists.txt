@@ -34,7 +34,7 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/constexp.h
    ${CMAKE_CURRENT_SOURCE_DIR}/cppvalue.h
    ${CMAKE_CURRENT_SOURCE_DIR}/declinfo.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/defargs.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/default_args.h
    ${CMAKE_CURRENT_SOURCE_DIR}/definition.h
    ${CMAKE_CURRENT_SOURCE_DIR}/dia.h
    ${CMAKE_CURRENT_SOURCE_DIR}/diagram.h
@@ -217,12 +217,12 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/constexp.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/defargs.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/declinfo.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/doctokenizer.cpp    
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/doctokenizer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_cstyle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_fortran.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_py.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_tcl.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/pre.cpp  
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/pre.cpp
 )
 
 # (todo: enhance) run rcc to generate qrc output
@@ -278,5 +278,5 @@ target_link_libraries(doxypress
 install(TARGETS doxypress DESTINATION .)
 install(FILES ${CS_LIBS} DESTINATION .)
 
-# (todo: enhance) need to copy the CS libraries and MingW files 
+# (todo: enhance) need to copy the CS libraries and MingW files
 
