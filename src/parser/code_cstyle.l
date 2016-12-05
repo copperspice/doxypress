@@ -196,7 +196,7 @@ static void pushCallContext()
 
 QSharedPointer<ClassDef> VariableContext::dummyContext()
 {
-   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-code", ClassDef::Class);
+   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-code", CompoundType::Class);
    return dummyContext;
 }
 
@@ -243,14 +243,12 @@ void VariableContext::addVariable(const QString &type, const QString &name)
       QSharedPointer<ClassDef> newDef;
       QString templateArgs(ltype.right(ltype.length() - i));
 
-
       if ( ( (varType = g_codeClassSDict->find(typeName)) || 
              (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, typeName, 0, 0, true, true)) ) &&
-           varType->templateArguments()) {
+              ! varType->getTemplateArgumentList().isEmpty() ) {
 
-         // look for class definitions inside the code block
-         // otherwise look for global class definitions      
-         // and it must be a template
+         // look for class definitions inside the code block, otherwise look for global      
+         //  class definitionsand it must be a template
       
          newDef = varType->getVariableInstance(templateArgs);
       }
@@ -262,7 +260,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
          scope->insert(lname, newDef);
       
       } else {
-         // Does not seem to be a template, try just the base name
+         // does not seem to be a template, try just the base name
          addVariable(typeName, name);
 
       }
@@ -337,7 +335,7 @@ static void popScope()
 
 static void setCurrentDoc(const QString &anchor)
 {
-   if (Doxy_Globals::searchIndex) {
+   if (Doxy_Globals::searchIndexBase != nullptr) {
       if (g_searchCtx) {
          g_code->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), false);
       } else {
@@ -348,7 +346,7 @@ static void setCurrentDoc(const QString &anchor)
 
 static void addToSearchIndex(const QString &text)
 {
-   if (Doxy_Globals::searchIndex) {
+   if (Doxy_Globals::searchIndexBase != nullptr) {
       g_code->addWord(text, false);
    }
 }
@@ -565,7 +563,7 @@ static void addParmType()
 static void addUsingDirective(const QString &name)
 {
    if (g_sourceFileDef && ! name.isEmpty()) {
-      QSharedPointer<NamespaceDef> nd = Doxy_Globals::namespaceSDict->find(name);
+      QSharedPointer<NamespaceDef> nd = Doxy_Globals::namespaceSDict.find(name);
 
       if (nd) {
          g_sourceFileDef->addUsingDirective(nd);
@@ -576,15 +574,15 @@ static void addUsingDirective(const QString &name)
 static void setParameterList(QSharedPointer<MemberDef> md)
 {
    g_classScope = md->getClassDef() ? md->getClassDef()->name() : "";
-   ArgumentList *al = md->argumentList();
+   const ArgumentList &argList = md->getArgumentList();
 
-   if (al == nullptr) {
+   if (argList.isEmpty()) {
       return;
    }
 
-   for (auto &a : *al) {
-      g_parmName = a.name;
-      g_parmType = a.type;
+   for (auto &arg : argList) {
+      g_parmName = arg.name;
+      g_parmType = arg.type;
 
       int i = g_parmType.indexOf('*');
       if (i != -1) {
@@ -704,7 +702,7 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QString &name)
    }
 
    // look for a global member
-   if ((mn = Doxy_Globals::functionNameSDict->find(name))) {
+   if ((mn = Doxy_Globals::functionNameSDict.find(name))) {
      
       if (mn->count() == 1) { // global defined only once
          QSharedPointer<MemberDef> md( mn->first());
@@ -1156,7 +1154,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, 
 
       if (vcd && vcd->isLinkable()) {
  
-         QSharedPointer<MemberName> vmn = Doxy_Globals::memberNameSDict->find(varName);
+         QSharedPointer<MemberName> vmn = Doxy_Globals::memberNameSDict.find(varName);
 
          if (vmn == 0) {
             int vi;
@@ -1166,7 +1164,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, 
                QSharedPointer<ClassDef> jcd = getClass(vn.left(vi));
 
                vn = vn.right(vn.length() - vi - 2);
-               vmn = Doxy_Globals::memberNameSDict->find(vn);
+               vmn = Doxy_Globals::memberNameSDict.find(vn);
                
                if (vmn) {
                 
@@ -1510,7 +1508,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                         if (bcd) { // get direct base class (there should be only one)                          
 
                            for (auto bclass : *bcd) {
-                              if (bclass->classDef->compoundType() != ClassDef::Protocol) {
+                              if (bclass->classDef->compoundType() != CompoundType::Protocol) {
                                  ctx->objectType = bclass->classDef;
 
                                  if (ctx->objectType) {
@@ -1578,7 +1576,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      if (QString(ictx->method->typeString()) == "id") {
                         // see if the method name is unique, if so we link to it
 
-                        QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict->find(ctx->methodName);
+                        QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict.find(ctx->methodName);
 
                         if (mn && mn->count() == 1) { 
                            // member name unique
@@ -1970,7 +1968,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       bool ambig;
       bool found = false;
      
-      QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, text, ambig);
+      QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, text, ambig);
 
       if (fd && fd->isLinkable()) {
 
@@ -1979,7 +1977,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             QString name = QDir::cleanPath(text);
          
             if (! name.isEmpty() && g_sourceFileDef) {
-               QSharedPointer<FileNameList> fn = Doxy_Globals::inputNameDict->find(name);    
+               QSharedPointer<FileNameList> fn = Doxy_Globals::inputNameDict.find(name);    
    
                if (fn) {                          
                   // for each include name                        
@@ -2335,7 +2333,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       
             DBG_CTX((stderr, "Adding new class %s\n", csPrintable(g_curClassName)));
 
-            QSharedPointer<ClassDef> ncd = QMakeShared<ClassDef>("<code>", 1, 1, g_curClassName, ClassDef::Class, 
+            QSharedPointer<ClassDef> ncd = QMakeShared<ClassDef>("<code>", 1, 1, g_curClassName, CompoundType::Class, 
                   nullptr, "", false); 
 
             g_codeClassSDict->insert(g_curClassName, ncd);

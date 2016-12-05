@@ -22,7 +22,7 @@
 #include <commentscan.h>
 #include <config.h>
 #include <doxy_globals.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <entry.h>
 #include <language.h>
 #include <message.h>
@@ -1081,7 +1081,7 @@ STARTDOCSYMS      "##"
 
    ")"                {
       // end of parameter list
-      current->args = argListToString(&(current->argList));
+      current->args = argListToString(current->argList);
    }
 
    ":"{B}             {
@@ -1121,7 +1121,7 @@ STARTDOCSYMS      "##"
          }
 
           if (text[0] == ')') {
-             current->args = argListToString(&(current->argList));
+             current->args = argListToString(current->argList);
           }
 
           BEGIN(FunctionParams);

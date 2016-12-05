@@ -21,7 +21,7 @@
 #include <config.h>
 #include <commentscan.h>
 #include <code_cstyle.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <language.h>
@@ -241,23 +241,23 @@ static void initEntry()
 //static void setCurrentGroup( QCString *newgroup, Grouping::GroupPri_t pri )
 //{
 //   /* remove auto group name from current entry and discard it */
-//   Grouping *g = current->groups->first();
+//   Grouping *g = current->m_groups.first();
 //   int i = 0;
 //   while (g)
 //   {
 //     if (g->pri <= Grouping::GROUPING_AUTO_DEF)
 //     {
-//       current->groups->remove(i);
+//       current->m_groups.remove(i);
 //       i--;
 //     }
-//     g=current->groups->next();
+//     g=current->m_groups.next();
 //     i++;
 //   }
 //
 //   /* use new group name instead? */
 //   if ( newgroup )
 //   {
-//      current->groups->append(new Grouping(*newgroup, pri));
+//      current->m_groups.append(new Grouping(*newgroup, pri));
 //   }
 //}
 
@@ -356,7 +356,7 @@ static QString stripQuotes(const QString &str)
 
 static void startCommentBlock(bool);
 static void handleCommentBlock(const QString &doc, bool brief);
-static void handleParametersCommentBlocks(ArgumentList *al);
+static void handleParametersCommentBlocks(ArgumentList &al);
 
 static bool nameIsOperator(QString &name)
 {
@@ -389,11 +389,10 @@ static bool nameIsOperator(QString &name)
   return false;
 }
 
-static void setContext()
+static void setContext(const QString &fileName)
 {
-  QString fileName = yyFileName;
-
   language     = getLanguageFromFileName(fileName);
+
   insideIDL    = language == SrcLangExt_IDL;
   insideJava   = language == SrcLangExt_Java;
   insideCSharp = language == SrcLangExt_CSharp;
@@ -411,15 +410,10 @@ static void setContext()
 static void prependScope()
 {
    if (current_root->section & Entry::SCOPE_MASK) {
-      current->name.prepend(current_root->name + "::");
+      current->name.prepend(current_root->name + "::"); 
 
-      if (current_root->tArgLists) {
-
-         if (current->tArgLists == nullptr) {
-            current->tArgLists = new QList<ArgumentList>;
-         }
-
-         *current->tArgLists = *current_root->tArgLists;
+      if (! current_root->m_templateArgLists.isEmpty()) {
+         current->m_templateArgLists = current_root->m_templateArgLists;
       }
    }
 }
@@ -580,13 +574,9 @@ static void addKnRArgInfo(const QString &type, const QString &name, const QStrin
    }
 }
 
-void fixArgumentListForJavaScript(ArgumentList *al)
+void fixArgumentListForJavaScript(ArgumentList &argList)
 {
-   if (al == 0) {
-      return;
-   }
-
-   for (auto a : *al) {
+   for (auto &a : argList) {
       if (! a.type.isEmpty() && a.name.isEmpty()) {
          // a->type is actually the (typeless) parameter name, so move it
          a.name = a.type;
@@ -1349,7 +1339,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->argList.last().type = "id";
       }
 
-      current->args = argListToString(&current->argList);
+      current->args = argListToString(current->argList);
 
       unput(';');
       BEGIN( Function );
@@ -1363,7 +1353,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->argList.last().type = "id";
       }
       
-      current->args = argListToString(&current->argList);
+      current->args = argListToString(current->argList);
       unput('{');
       BEGIN( Function );
    }
@@ -1764,8 +1754,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{BN}*((("disp")?"interface")|"valuetype"){BN}+    { 
       // M$/Corba/UNO IDL/Java interface
-
-      // start clean up here (perth)
 
       QString text = QString::fromUtf8(yytext);
       lineCount();
@@ -2274,16 +2262,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // generic is a C++ / CLI extension
       lineCount();
 
-      if (current->tArgLists == nullptr) {
-         current->tArgLists = new QList<ArgumentList>;
-      }
-      
       ArgumentList temp;
-      current->tArgLists->append(temp);
-      
-      ArgumentList *al = &current->tArgLists->last();
-      
-      currentArgumentList = al;
+      current->m_templateArgLists.append(temp);
+     
+      currentArgumentList = &current->m_templateArgLists.last();  
+
       templateStr = "<";
       
       fullArgString = templateStr;
@@ -3316,7 +3299,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          
       } else if (insideJS && text == "var") { 
          // javascript variable
-         current->type="var";
+         current->type ="var";
       
       } else if (insideJS && text == "function") {
          // javascript function
@@ -3325,7 +3308,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       } else if (insideCSharp && text == "this") {
          // C# indexer
          addType( current ) ;
-         current->name="this";
+         current->name = "this";
          BEGIN(CSIndexer);
       
       } else if (insideCpp && text == "static_assert") {                  
@@ -3339,74 +3322,75 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          
       } else {
       
-      if (YY_START == FindMembers) {
-         addType(current);
-      }
-      
-      bool javaLike = insideJava || insideCSharp || insideD || insidePHP || insideJS;
-      
-      if (javaLike && text == "public") {
-         current->protection = Public;
-      
-      } else if (javaLike && text == "protected") {
-         current->protection = Protected;
-      
-      } else if (javaLike && text == "internal") {
-         current->protection = Package;
-      
-      } else if (javaLike && text == "private") {
-         current->protection = Private;
-      
-      } else if (javaLike && text == "static") {
-         
-         if (YY_START == FindMembers)  {
-            current->name  = text;
-         } else {
-            current->name += text;
-      }
-      
-      current->stat = true; 
-      
-      } else {
          if (YY_START == FindMembers) {
-            current->name  = text;
-         }  else  {
-            current->name += text;
+            addType(current);
          }
       
-      if (current->name.left(7) == "static ") {
-         current->stat = true;
-         current->name = current->name.mid(7);
-         
-         } else if (current->name.left(7) == "inline ")  {
-         
-         if (current->type.isEmpty()) {
-            current->type = "inline";
-         } else {
-            current->type += "inline ";
-         }
-         
-         current->name = current->name.mid(7);
-         
-         } else if (current->name.left(6)=="const ") {
-         
-         if (current->type.isEmpty()) {
-         current->type = "const";
-         
-         } else {
-         current->type += "const ";
-         
-         }
-         
-         current->name=current->name.mid(6);
-         }      
-      }
+         bool javaLike = ( insideJava || insideCSharp || insideD || insidePHP || insideJS );
       
-      if (nameIsOperator(text)) {
-         BEGIN(Operator);
-      } else {
-         externC = false;
-         BEGIN(FindMembers);
+         if (javaLike && text == "public") {
+            current->protection = Public;
+         
+         } else if (javaLike && text == "protected") {
+            current->protection = Protected;
+         
+         } else if (javaLike && text == "internal") {
+            current->protection = Package;
+         
+         } else if (javaLike && text == "private") {
+            current->protection = Private;
+         
+         } else if (javaLike && text == "static") {
+            
+            if (YY_START == FindMembers)  {
+               current->name  = text;
+            } else {
+               current->name += text;
+            }
+      
+            current->stat = true; 
+      
+         } else {
+
+            if (YY_START == FindMembers) {
+               current->name  = text;
+            }  else  {
+               current->name += text;
+            }
+      
+            if (current->name.left(7) == "static ") {
+               current->stat = true;
+               current->name = current->name.mid(7);
+               
+            } else if (current->name.left(7) == "inline ")  {
+               
+               if (current->type.isEmpty()) {
+                  current->type = "inline";
+               } else {
+                  current->type += "inline ";
+               }
+         
+               current->name = current->name.mid(7);
+         
+            } else if (current->name.left(6)=="const ") {
+         
+               if (current->type.isEmpty()) {
+                  current->type = "const";
+         
+               } else {
+                  current->type += "const ";         
+               }
+         
+               current->name=current->name.mid(6);
+            }      
+         }
+      
+         if (nameIsOperator(text)) {
+            BEGIN(Operator);
+
+         } else {
+            externC = false;
+            BEGIN(FindMembers);
          }
       }
    }
@@ -3873,7 +3857,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->bodyLine      = yyLineNr;
       current->initializer   = text;
       lastInitializerContext = YY_START;
-      initBracketCount=0;
+      initBracketCount       = 0;
       BEGIN(ReadInitializer);
    }
 
@@ -4532,20 +4516,20 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->bodyLine = yyLineNr;
       }
       
-      if ( insidePHP && current->type.left(3) == "var" ) {
+      if (insidePHP && current->type.left(3) == "var") {
          current->type = current->type.mid(3);
       }
       
-      if (isTypedef && current->type.left(8)!="typedef ") {
+      if (isTypedef && current->type.left(8) != "typedef ") {
         current->type.prepend("typedef ");
       }
       
       bool needNewCurrent = false;
       
       if (! current->name.isEmpty() && current->section != Entry::ENUM_SEC) {
-         current->type=current->type.simplified();
-         current->args=removeRedundantWhiteSpace(current->args);
-         current->name=current->name.trimmed();
+         current->type = current->type.simplified();
+         current->args = removeRedundantWhiteSpace(current->args);
+         current->name = current->name.trimmed();
       
          if (current->section == Entry::CLASS_SEC)  {
             // remove spec for "struct Bla bla;"       
@@ -4556,11 +4540,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->fileName    = yyFileName;
          current->startLine   = yyBegLineNr;
          current->startColumn = yyBegColNr;
+
          current_root->addSubEntry( current, current_root);
          needNewCurrent = true;
       }
       
-      if ( text[0] == ',') {
+      if (text[0] == ',') {
          bool stat = current->stat;
       
          if (needNewCurrent) {
@@ -4568,16 +4553,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             initEntry();
           }
       
-         current->stat = stat; // the static attribute holds for all variables
+         current->stat = stat;         // the static attribute holds for all variables
          current->name.resize(0);
          current->args.resize(0);
          current->brief.resize(0);
          current->doc.resize(0);
          current->initializer.resize(0);
          current->bitfields.resize(0);
-         int i=oldType.length();
+
+         int i = oldType.length();
          
-         while (i>0 && (oldType[i-1]=='*' || oldType[i-1]=='&' || oldType[i-1]==' ')) i--; {
+         while (i > 0 && (oldType[i-1]=='*' || oldType[i-1]=='&' || oldType[i-1]==' ')) i--; {
             current->type = oldType.left(i);
          }
          
@@ -4588,8 +4574,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          if (needNewCurrent) {
             current = QMakeShared<Entry>();
          
-         } else if (current->groups) {
-            current->groups->clear();
+         } else {
+            current->m_groups.clear();
          
          }
          
@@ -5416,17 +5402,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             varEntry->mGrpId      = current->mGrpId;
             varEntry->initializer = current->initializer;
             
-            // deep copy group list
-            for (auto g : *current->groups) {
-               varEntry->groups->append(g);
+            // copy group list
+            for (auto &g : current->m_groups) {
+               varEntry->m_groups.append(g);
             }
       
-            if (current->sli) { 
-               // copy special list items
-
-               for (auto lii : *current->sli) {
-                  varEntry->addSpecialListItem(lii.type, lii.itemId);
-               }
+            // copy special list items
+            for (auto &lii : current->m_specialLists) {
+               varEntry->addSpecialListItem(lii.type, lii.itemId);               
             }
       
             current_root->addSubEntry(varEntry, current_root);
@@ -5805,13 +5788,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       *copyArgString += text[0];
       fullArgString  += text[0];
-      stringToArgumentList(fullArgString, &current->argList);
+
+      current->argList = stringToArgumentList(fullArgString, current->argList);
       
       if (insideJS) {
-         fixArgumentListForJavaScript(&current->argList);
+         fixArgumentListForJavaScript(current->argList);
       }
       
-      handleParametersCommentBlocks(&current->argList);
+      handleParametersCommentBlocks(current->argList);
       
       // save the current documentation block
       docBackup   = current->doc;
@@ -5833,8 +5817,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             unput(yytext[i]);
          }
       
-         stringToArgumentList(fullArgString, &current->argList); 
-         handleParametersCommentBlocks(&current->argList);
+         current->argList = stringToArgumentList(fullArgString, current->argList); 
+         handleParametersCommentBlocks(current->argList);
          BEGIN(currentArgumentContext);
 
       } else {
@@ -5899,8 +5883,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          *copyArgString += text[0];
          fullArgString  += text[0];
 
-         stringToArgumentList(fullArgString, &current->argList);
-         handleParametersCommentBlocks(&current->argList);
+         current->argList = stringToArgumentList(fullArgString, current->argList);
+         handleParametersCommentBlocks(current->argList);
          BEGIN( currentArgumentContext );
          
          } else {
@@ -6013,7 +5997,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CopyArgComment>{CMD}("brief"|"short"){B}+ {
       QString text = QString::fromUtf8(yytext); 
-      warn(yyFileName,yyLineNr, "Ignoring %c brief command inside argument documentation", csPrintable(text[0]) );
+      warn(yyFileName, yyLineNr, "Ignoring %c brief command inside argument documentation", csPrintable(text[0]) );
       fullArgString += ' ';
    }
 
@@ -6029,8 +6013,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext); 
       *copyArgString += text[0];
       fullArgString  += text[0];
-      //printf("end template list %s\n",copyArgString->data());
-      stringToArgumentList(fullArgString,currentArgumentList);
+
+      *currentArgumentList = stringToArgumentList(fullArgString, *currentArgumentList);
+
       BEGIN( currentArgumentContext );
    }
 
@@ -6459,7 +6444,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <OldStyleArgs>"{"          {
-      current->args = argListToString(&current->argList);
+      current->args = argListToString(current->argList);
       unput('{');
       BEGIN(FuncQual);
    }
@@ -6740,28 +6725,30 @@ SkipC11Attribute>"]]"                 {
       ++curlyCount ;
    }
 
-<SkipCurly>"}"/{BN}*("/*!"|"/**"|"//!"|"///")"<!--" | /* see bug710917 */
+<SkipCurly>"}"/{BN}*("/*!"|"/**"|"//!"|"///")"<!--" | 
 <SkipCurly>"}"             {
+      // */ (editor syntax fix)
+
       if (curlyCount)  {
          --curlyCount;
 
       } else {
 
-         if (current->sli && previous) {
+         if (! current->m_specialLists.isEmpty() && previous) {
             // copy special list items
          
-            for (auto lii : *current->sli) {
+            for (auto &lii : current->m_specialLists) {
                previous->addSpecialListItem(lii.type, lii.itemId);
             }
-
-            delete current->sli;
-            current->sli = 0;
+            
+            current->m_specialLists.clear();
          }
 
          if (previous) {
             previous->endBodyLine = yyLineNr;
          }
-         BEGIN( lastCurlyContext ) ;
+
+         BEGIN( lastCurlyContext );
          }
    }
 
@@ -7003,7 +6990,7 @@ SkipC11Attribute>"]]"                 {
          current = QMakeShared<Entry>();
 
       } else {
-         current->section = Entry::EMPTY_SEC ;
+         current->section = Entry::EMPTY_SEC;
          current->type.resize(0) ;
          current->name.resize(0) ;
          current->args.resize(0) ;
@@ -7046,15 +7033,9 @@ SkipC11Attribute>"]]"                 {
       }
    }
 
-<CSGeneric>"<"             {
-      if (current->tArgLists == 0) {
-         current->tArgLists = new QList<ArgumentList>;
-      }
-            
-      current->tArgLists->append(ArgumentList());
-      ArgumentList *al = &current->tArgLists->last();
-      
-      currentArgumentList = al;
+<CSGeneric>"<"             {           
+      current->m_templateArgLists.append(ArgumentList());
+      currentArgumentList = &current->m_templateArgLists.last();  
       
       templateStr   =  "<";
       current->name += "<";
@@ -7117,7 +7098,7 @@ SkipC11Attribute>"]]"                 {
       bool isService_Root   = current_root->m_traits.hasTrait(Entry::Virtue::Service);
       bool isSingleton_Root = current_root->m_traits.hasTrait(Entry::Virtue::Singleton);
 
-      if (current->tArgLists && current->tArgLists->count() > 0) {
+      if (! current->m_templateArgLists.isEmpty()) {
           // found a forward template declaration, this has a purpose of its own
           current->name = text;
           current->name = current->name.left(current->name.length()-1).trimmed();
@@ -7400,13 +7381,13 @@ SkipC11Attribute>"]]"                 {
 <CSConstraintType>"{"         { 
       // end of type constraint reached
       // parse documentation of the constraints
-      handleParametersCommentBlocks(&current->typeConstr);
+      handleParametersCommentBlocks(current->typeConstr);
       unput('{');
       BEGIN( lastCSConstraint );
    }
 
 <CSConstraintType,CSConstraintName>";"  {
-      handleParametersCommentBlocks(&current->typeConstr);
+      handleParametersCommentBlocks(current->typeConstr);
       unput(';');
       BEGIN( lastCSConstraint );
    }
@@ -8117,16 +8098,18 @@ SkipC11Attribute>"]]"                 {
          externC = false;
 
       } else if (insideCSharp && ! current->name.isEmpty() && ! current->type.isEmpty())  {
+
          if (containsWord(current->type,"event")) {
             // event      
             current->mtype = mtype = MethodTypes::Event;
+
          } else {
             // property      
             current->mtype = mtype = MethodTypes::Property;
          }
 
          current->bodyLine = yyLineNr;
-         curlyCount=0;
+         curlyCount = 0;
 
          BEGIN( CSAccessorDecl );
 
@@ -8137,10 +8120,10 @@ SkipC11Attribute>"]]"                 {
          BEGIN(UNOIDLAttributeBlock);
 
       } else {
-
          if ((insideJava || insideCSharp || insideD) && current->name.isEmpty()) {
             // static Java initializer
             needsSemi = false;
+
             if (current->stat) {
                current->name="[static initializer]";
                current->type.resize(0);
@@ -8151,28 +8134,45 @@ SkipC11Attribute>"]]"                 {
             unput(*yytext);
             BEGIN( Function );
 
-      } else {        
-         // C++11 style initializer list
-         current->bodyLine      = yyLineNr;
-         current->initializer   = text;
-         lastInitializerContext = YY_START;
-         initBracketCount=1;
-         BEGIN(ReadInitializer);
+         } else {        
+            // C++11 style initializer list
+            current->bodyLine      = yyLineNr;
+            current->initializer   = text;
+            lastInitializerContext = YY_START;
+            initBracketCount=1;
+            BEGIN(ReadInitializer);
          }
       }
    }
 
-<CSAccessorDecl>"{"        { 
+<CSAccessorDecl>"{"          { 
       curlyCount++; 
    }
 
-<CSAccessorDecl>"}"        {
-      if (curlyCount) {
+<CSAccessorDecl>"}"{BN}*"="   {
+
+      if (curlyCount != 0) {
+        REJECT;
+
+      } else {
+
+         mtype = MethodTypes::Method;
+         virt  = Normal;
+
+         // default value
+         unput('=');
+
+         BEGIN(FindMembers);
+      }  
+   }
+
+<CSAccessorDecl>"}"          {      
+      if (curlyCount != 0) {
          curlyCount--;
 
       } else {
          mtype = MethodTypes::Method;
-         virt = Normal;
+         virt  = Normal;
          unput(';');
          BEGIN(FindMembers);
       }
@@ -8852,9 +8852,9 @@ static void handleCommentBlock(const QString &doc, bool brief)
    }
 }
 
-static void handleParametersCommentBlocks(ArgumentList *al)
+static void handleParametersCommentBlocks(ArgumentList &argList)
 {
-   for (auto &a : *al) {
+   for (auto &a : argList) {
 
       if (! a.docs.isEmpty()) {
          int position = 0;
@@ -8930,10 +8930,10 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          initEntry();       
 
-         // deep copy group list from parent (see bug 727732)
-         if (groupNested && rt->groups && ce->section != Entry::ENUM_SEC && ! isEnum) {
-            for (auto g : *rt->groups) {
-               ce->groups->append(g);
+         // copy group list from parent
+         if (groupNested && ce->section != Entry::ENUM_SEC && ! isEnum) {
+            for (auto &g : rt->m_groups) {
+               ce->m_groups.append(g);
             }
          }
 
@@ -9028,8 +9028,8 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 {
    s_inputFile.setFileName(fileName);
 
-   if (s_inputFile.open(QIODevice::ReadOnly)) { 
-      setContext();       
+   if (s_inputFile.open(QIODevice::ReadOnly)) {
+      setContext(fileName); 
       initParser();
 
       s_inputString   = fileBuf;
@@ -9040,8 +9040,8 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       global_root     = rt;          
 
       yyLineNr        = 1;
-      yyFileName      = fileName;         
-      rt->lang        = language;            
+      yyFileName      = fileName;                   
+      rt->lang        = language;  
       
       groupEnterFile(yyFileName, yyLineNr);
 

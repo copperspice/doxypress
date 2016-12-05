@@ -742,7 +742,7 @@ char *tclscannerYYtext;
 #include <commentscan.h>
 #include <config.h>
 #include <doxy_globals.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <entry.h>
 #include <language.h>
 #include <message.h>
@@ -3933,13 +3933,13 @@ static void tcl_codify_link(const QString &name)
    if (init == 0) {
       init = 1;
 
-      for (auto mn : *Doxy_Globals::memberNameSDict) { 
+      for (auto mn : Doxy_Globals::memberNameSDict) { 
          for (auto md : *mn) {
             fn.insert(md->qualifiedName(), md);
          }
       }
 
-      for (auto mn : *Doxy_Globals::functionNameSDict) {
+      for (auto mn : Doxy_Globals::functionNameSDict) {
          for (auto md : *mn) {
             fn.insert(md->qualifiedName(), md);
          }

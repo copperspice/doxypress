@@ -120,7 +120,7 @@ class PyVariableContext
 
 QSharedPointer<ClassDef> PyVariableContext::dummyContext()
 {
-   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-python", ClassDef::Class);
+   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-python", CompoundType::Class);
    return dummyContext;
 }
 
@@ -278,19 +278,19 @@ static int countLines()
 
 static void setCurrentDoc(const QString &anchor)
 {
-   if (Doxy_Globals::searchIndex) {
+   if (Doxy_Globals::searchIndexBase != nullptr) {
       if (g_searchCtx) {
-         Doxy_Globals::searchIndex->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), false);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), false);
       } else {
-         Doxy_Globals::searchIndex->setCurrentDoc(g_sourceFileDef, anchor, true);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(g_sourceFileDef, anchor, true);
       }
    }
 }
 
 static void addToSearchIndex(const QString &text)
 {
-   if (Doxy_Globals::searchIndex) {
-      Doxy_Globals::searchIndex->addWord(text, false);
+   if (Doxy_Globals::searchIndexBase != nullptr) {
+      Doxy_Globals::searchIndexBase->addWord(text, false);
    }
 }
 
@@ -1060,7 +1060,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
       // Push a class scope
       QSharedPointer<ClassDef> classDefToAdd = QMakeShared<ClassDef> ("<code>", 1, 1, g_curClassName,
-                  ClassDef::Class, "", "", false);
+                  CompoundType::Class, "", "", false);
 
       g_codeClassSDict.insert(g_curClassName, classDefToAdd);
 

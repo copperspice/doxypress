@@ -20,7 +20,7 @@
 #include <cite.h>
 #include <condparser.h>
 #include <config.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <formula.h>
@@ -509,31 +509,28 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       return;
    }
 
-   auto refList = Doxy_Globals::xrefLists->find(listName);
+   auto refList = Doxy_Globals::xrefLists.find(listName);
 
-   if (refList == Doxy_Globals::xrefLists->end()) {
+   if (refList == Doxy_Globals::xrefLists.end()) {
       // new list
-      Doxy_Globals::xrefLists->insert(listName, RefList(listName, listTitle, itemTitle));
-      refList = Doxy_Globals::xrefLists->find(listName);
+      Doxy_Globals::xrefLists.insert(listName, RefList(listName, listTitle, itemTitle));
+      refList = Doxy_Globals::xrefLists.find(listName);
    }
 
-   ListItemInfo *lii = 0;
+   ListItemInfo *listItem;
 
-   if (docEntry->sli) {
+   for (auto &item : docEntry->m_specialLists) {
+      listItem = &item;
 
-      for (auto &item : *docEntry->sli) {
-         lii = &item;
-
-         if (lii->type == listName) {
-            break;
-         }
+      if (listItem->type == listName) {
+         break;
       }
    }
-
-   if (lii && append) {
+   
+   if (listItem && append) {
       // already found item of same type just before this one
 
-      RefItem *item = refList->getRefItem(lii->itemId);
+      RefItem *item = refList->getRefItem(listItem->itemId);
       assert(item != 0);
 
       item->text += " <p>";
@@ -574,7 +571,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
          docEntry->doc += cmdString;
       }
 
-      QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(anchorLabel);
+      QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(anchorLabel);
 
       if (si) {
          if (si->lineNr != -1) {
@@ -588,8 +585,8 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
 
       } else {
          si = QMakeShared<SectionInfo>(listName, yyLineNr, anchorLabel, s_sectionTitle, SectionInfo::Anchor, s_sectionLevel);
-         Doxy_Globals::sectionDict->insert(anchorLabel, si);
-         docEntry->anchors->append(*si);
+         Doxy_Globals::sectionDict.insert(anchorLabel, si);
+         docEntry->m_anchors.append(*si);
       }
    }
 
@@ -603,18 +600,18 @@ static QString addFormula()
    QString formLabel;
    QString fText = formulaText.simplified();
 
-   auto f = Doxy_Globals::formulaDict->find(fText);
+   auto f = Doxy_Globals::formulaDict.find(fText);
 
-   if (f == Doxy_Globals::formulaDict->end()) {
+   if (f == Doxy_Globals::formulaDict.end()) {
       Formula temp = Formula(fText);
 
-      Doxy_Globals::formulaList->append(temp);
-      Doxy_Globals::formulaDict->insert(fText, temp);
+      Doxy_Globals::formulaList.append(temp);
+      Doxy_Globals::formulaDict.insert(fText, temp);
 
       formLabel = QString("\\form#%1").arg(temp.getId());
 
-      Doxy_Globals::formulaNameDict->insert(formLabel, temp);
-      f = Doxy_Globals::formulaDict->find(fText);
+      Doxy_Globals::formulaNameDict.insert(formLabel, temp);
+      f = Doxy_Globals::formulaDict.find(fText);
 
    } else {
       formLabel = QString("\\form#%1").arg(f->getId());
@@ -642,7 +639,7 @@ static SectionInfo::SectionType sectionLevelToType(int level)
 
 static void addSection()
 {
-   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(s_sectionLabel);
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(s_sectionLabel);
 
    if (si) {
       if (si->lineNr != -1) {
@@ -662,10 +659,10 @@ static void addSection()
                   sectionLevelToType(s_sectionLevel), s_sectionLevel);
 
       // add section to this entry
-      current->anchors->append(*si);
+      current->m_anchors.append(*si);
 
       // add section to the global dictionary
-      Doxy_Globals::sectionDict->insert(s_sectionLabel, si);
+      Doxy_Globals::sectionDict.insert(s_sectionLabel, si);
 
       // for a section the si->fileName is the physical file name. this will be replaced with the section name
       // in doctokenizer processSection()
@@ -675,7 +672,7 @@ static void addSection()
 static void addCite()
 {
    QString text = QString::fromUtf8(yytext);
-   Doxy_Globals::citeDict->insert(text);
+   Doxy_Globals::citeDict.insert(text);
 }
 
 // strip trailing whitespace (excluding newlines) from string s
@@ -797,7 +794,7 @@ static inline void setOutput(OutputContext ctx)
 
 static void addAnchor(const QString &anchorName)
 {
-   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict->find(anchorName);
+   QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(anchorName);
 
    if (si) {
       // anchor name already exists         
@@ -808,8 +805,8 @@ static void addAnchor(const QString &anchorName)
       si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorName, QString(""), SectionInfo::Anchor, 0);
       si->dupAnchor_fName = yyFileName; 
 
-      Doxy_Globals::sectionDict->insert(anchorName, si);          
-      current->anchors->append(*si);
+      Doxy_Globals::sectionDict.insert(anchorName, si);          
+      current->m_anchors.append(*si);
    }
 }
 
@@ -2535,7 +2532,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // group id
       QString text = QString::fromUtf8(yytext);
 
-      current->groups->append(Grouping(text, Grouping::GROUPING_INGROUP) ); 
+      current->m_groups.append(Grouping(text, Grouping::GROUPING_INGROUP) ); 
       inGroupParamFound = true;
    }
 
@@ -3712,7 +3709,7 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
 
       // see bug577005: we should not remove the last group for e
       if (! foundInline) {
-         e->groups->removeLast();
+         e->m_groups.removeLast();
       }
      
       if (! foundInline) {
@@ -3727,7 +3724,7 @@ void initGroupInfo(QSharedPointer<Entry> e)
    e->relates = s_memberGroupRelates;
 
    if (! s_autoGroupStack.isEmpty()) {
-      e->groups->append(*s_autoGroupStack.top());
+      e->m_groups.append(*s_autoGroupStack.top());
    }
 }
 
@@ -3745,10 +3742,10 @@ static void groupAddDocs(QSharedPointer<Entry> e)
       QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(s_memberGroupId);
 
       if (info) {
-         info->doc = s_memberGroupDocs;
+         info->doc     = s_memberGroupDocs;
          info->docFile = e->docFile;
          info->docLine = e->docLine;
-         info->setRefItems(e->sli);
+         info->setRefItems(e->m_specialLists);
       }
 
       e->doc.resize(0);

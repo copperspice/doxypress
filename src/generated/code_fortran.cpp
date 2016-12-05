@@ -27499,7 +27499,7 @@ char *code_fortran_YYtext;
 #include <stdio.h>
 
 #include <config.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <doxy_globals.h>
 #include <entry.h>
 #include <filedef.h>
@@ -27692,21 +27692,21 @@ static void startFontClass(const QString &s)
 
 static void setCurrentDoc(const QString &anchor)
 {
-   if (Doxy_Globals::searchIndex) {
+   if (Doxy_Globals::searchIndexBase != nullptr) {
 
       if (g_searchCtx) {
-         Doxy_Globals::searchIndex->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), false);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), false);
 
       } else {
-         Doxy_Globals::searchIndex->setCurrentDoc(g_sourceFileDef, anchor, true);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(g_sourceFileDef, anchor, true);
       }
    }
 }
 
 static void addToSearchIndex(const QString &text)
 {
-   if (Doxy_Globals::searchIndex) {
-      Doxy_Globals::searchIndex->addWord(text, false);
+   if (Doxy_Globals::searchIndexBase != nullptr) {
+      Doxy_Globals::searchIndexBase->addWord(text, false);
    }
 }
 
@@ -27863,7 +27863,7 @@ static bool getFortranNamespaceDefs(const QString &moduleName, QSharedPointer<Na
    }
 
    // search for module
-   if ((cd = Doxy_Globals::namespaceSDict->find(moduleName))) {
+   if ((cd = Doxy_Globals::namespaceSDict.find(moduleName))) {
       return true;
    }
 
@@ -27886,19 +27886,19 @@ static bool getFortranTypeDefs(const QString &tname, const QString &moduleName,
    }
 
    // search for type
-   if ((cd = Doxy_Globals::classSDict->find(tname))) {
+   if ((cd = Doxy_Globals::classSDict.find(tname))) {
       return true;
 
-   } else if (! moduleName.isEmpty() && (cd = Doxy_Globals::classSDict->find(moduleName + "::" + tname))) {
+   } else if (! moduleName.isEmpty() && (cd = Doxy_Globals::classSDict.find(moduleName + "::" + tname))) {
       return true;
 
    } else  {
 
       for (auto use : *usedict)  {
-         cd = Doxy_Globals::classSDict->find(use->module + "::" + tname);
+         cd = Doxy_Globals::classSDict.find(use->module + "::" + tname);
 
          if (cd) {
-            return TRUE;
+            return true;
          }
       }
    }
@@ -27929,16 +27929,17 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
    }
 
    // search for function
-   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(memberName);
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(memberName);
 
    if (! mn) {
-      mn = Doxy_Globals::memberNameSDict->find(memberName);
+      mn = Doxy_Globals::memberNameSDict.find(memberName);
    }
 
    if (mn) {
       // name is known
 
-      for (auto md : *mn) {
+      for (auto item : *mn) {
+         md = item;
 
          // all found functions with given name
          QSharedPointer<FileDef>  fd = md->getFileDef();
@@ -27948,22 +27949,22 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
          if ((gd && gd->isLinkable()) || (fd && fd->isLinkable())) {
             QSharedPointer<NamespaceDef> nspace = md->getNamespaceDef();
 
-            if (nspace == 0) {
+            if (nspace == nullptr) {
                // found function in global scope
 
                if (cd == nullptr) {
-                // skip if bound to type
-                return true;
+                  // skip if bound to type
+                  return true;
                }
 
             } else if (moduleName == nspace->name()) {
                // found in local scope
-                return true;
+               return true;
 
             } else  {
                // else search in used modules
 
-               QString moduleName= nspace->name();
+               QString moduleName = nspace->name();
                UseEntry *ue = usedict->find(moduleName);
 
                if (ue)  {
@@ -28009,14 +28010,13 @@ static bool getLink(UseSDict *usedict, const QString &memberText,
    QString memberName = removeRedundantWhiteSpace(memberText);
 
    if (getFortranDefs(memberName, currentModule, md, usedict) && md->isLinkable())  {
-
       QSharedPointer<Definition> d;
 
       if (md->getOuterScope() == Doxy_Globals::globalScope) {
          d = md->getBodyDef();
 
       } else {
-         d->getOuterScope();
+         d = md->getOuterScope();
 
       }
 
@@ -28053,7 +28053,7 @@ static void generateLink(CodeOutputInterface &ol, const QString &lname)
    // check if lowercase lname is a linkable type or interface
    if ( (getFortranTypeDefs(tmp, currentModule, cd, useMembers)) && cd->isLinkable() ) {
 
-      if ( (cd->compoundType() == ClassDef::Class) && (getGenericProcedureLink(cd, tmp, ol)) ) {
+      if ( (cd->compoundType() == CompoundType::Class) && (getGenericProcedureLink(cd, tmp, ol)) ) {
          // no code
 
       } else  {
@@ -28065,6 +28065,7 @@ static void generateLink(CodeOutputInterface &ol, const QString &lname)
    // check for module
    } else if ( (getFortranNamespaceDefs(tmp, nd)) && nd->isLinkable() ) {
       // write module link
+
       writeMultiLineCodeLink(ol, nd, tmp);
       addToSearchIndex(tmp);
 
@@ -28074,7 +28075,6 @@ static void generateLink(CodeOutputInterface &ol, const QString &lname)
 
    } else {
       // nothing found, just write out the word
-
       codifyLines(tmp);
       addToSearchIndex(tmp);
    }

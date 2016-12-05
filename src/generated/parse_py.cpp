@@ -1463,7 +1463,7 @@ char *parse_py_YYtext;
 #include <commentscan.h>
 #include <config.h>
 #include <doxy_globals.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <entry.h>
 #include <language.h>
 #include <message.h>
@@ -2935,7 +2935,7 @@ case 75:
 YY_RULE_SETUP
 {
       // end of parameter list
-      current->args = argListToString(&(current->argList));
+      current->args = argListToString(current->argList);
    }
 	YY_BREAK
 case 76:
@@ -2983,7 +2983,7 @@ YY_RULE_SETUP
          }
 
           if (text[0] == ')') {
-             current->args = argListToString(&(current->argList));
+             current->args = argListToString(current->argList);
           }
 
           BEGIN(FunctionParams);

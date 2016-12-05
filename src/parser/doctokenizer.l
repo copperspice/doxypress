@@ -182,7 +182,7 @@ static void processSection()
 
    QSharedPointer<SectionInfo> si;
 
-   if ((si = Doxy_Globals::sectionDict->find(s_secLabel))) {
+   if ((si = Doxy_Globals::sectionDict.find(s_secLabel))) {
       si->fileName = file;
       si->type     = s_secType;
    }

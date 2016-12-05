@@ -29,7 +29,7 @@
 #include <config.h>
 #include <condparser.h>
 #include <doxy_globals.h>
-#include <defargs.h>
+#include <default_args.h>
 #include <entry.h>
 #include <message.h>
 #include <membername.h>
@@ -376,11 +376,11 @@ static void setFileName(const QString &name)
    QFileInfo fi(name);
 
    g_yyFileName = fi.absoluteFilePath();
-   g_yyFileDef  = findFileDef(Doxy_Globals::inputNameDict, g_yyFileName, ambig);
+   g_yyFileDef  = findFileDef(&Doxy_Globals::inputNameDict, g_yyFileName, ambig);
 
    if (g_yyFileDef == 0) {
       // if this is not an input file check if it is an include file
-      g_yyFileDef = findFileDef(Doxy_Globals::includeNameDict, g_yyFileName, ambig);
+      g_yyFileDef = findFileDef(&Doxy_Globals::includeNameDict, g_yyFileName, ambig);
    }
 
    if (g_yyFileDef && g_yyFileDef->isReference()) {
@@ -1464,13 +1464,13 @@ void addDefine()
    }
 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(g_yyFileName, g_yyLineNr - g_yyMLines, g_yyColNr,
-               "#define", g_defName, g_defArgsStr, nullptr, Public, Normal, false, Member,
-               MemberType_Define, nullptr, nullptr);
+               "#define", g_defName, g_defArgsStr, "", Public, Normal, false, Member,
+               MemberType_Define, ArgumentList(), ArgumentList());
 
    if (! g_defArgsStr.isEmpty()) {
-      ArgumentList *argList = new ArgumentList;
+      ArgumentList argList;
 
-      stringToArgumentList(g_defArgsStr, argList);
+      argList = stringToArgumentList(g_defArgsStr);
       md->setArgumentList(argList);
    }
 
@@ -1498,11 +1498,11 @@ void addDefine()
    md->setFileDef(g_inputFileDef);
    md->setDefinition("#define " + g_defName);
 
-   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict->find(g_defName);
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(g_defName);
 
    if (! mn) {
       mn = QMakeShared<MemberName>(g_defName);
-      Doxy_Globals::functionNameSDict->insert(g_defName, mn);
+      Doxy_Globals::functionNameSDict.insert(g_defName, mn);
    }
 
    mn->append(md);
@@ -1618,7 +1618,7 @@ static void readIncludeFile(const QString &inc)
             bool ambig;
 
             // change to absolute name for bug 641336
-            QSharedPointer<FileDef> incFd = findFileDef(Doxy_Globals::inputNameDict, absIncFileName, ambig);
+            QSharedPointer<FileDef> incFd = findFileDef(&Doxy_Globals::inputNameDict, absIncFileName, ambig);
 
             QSharedPointer<FileDef> temp;
             if (ambig) {
@@ -1666,7 +1666,7 @@ static void readIncludeFile(const QString &inc)
             bool ambig;
 
             // change to absolute name for bug 641336
-            QSharedPointer<FileDef> fd = findFileDef(Doxy_Globals::inputNameDict, absIncFileName, ambig);
+            QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, absIncFileName, ambig);
 
             // add include dependency to the file in which the #include was found
             oldFileDef->addIncludeDependency(ambig ? QSharedPointer<FileDef>() : fd, incFileName, localInclude, g_isImported, false);
