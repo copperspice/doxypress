@@ -27,64 +27,32 @@ struct CiteConsts {
    static const QString anchorPrefix;
 };
 
-/// Citation-related data.
-struct CiteInfo {
-   CiteInfo(const  QString & t_label, const QString &t_text = QString(), const  QString &t_fullText = QString(), 
-                  const QString &t_ref = QString() )
-      : label(t_label), text(t_text), fullText(t_fullText), ref(t_ref) {
-   }
-
-   CiteInfo(const CiteInfo &o) {
-      label    = o.label;
-      text     = o.text;
-      fullText = o.fullText;
-      ref      = o.ref;
-   }
-
-   QString label;
-   QString text;
-   QString fullText;
-   QString ref;
-};
-
-/**
- * @brief Cite database access class.
- * @details This class provides access do the database of bibliographic
- * references through the bibtex backend.
- */
+// This class provides access do the database of bibliographic references through the bibtex backend.
 class CiteDict
 {
- public:
-   /** Create the database, with an expected maximum of \a size entries */
+ public:   
    CiteDict();
-
-   //    /** Resolve references to citations */
-   //    void resolve();
 
    /** Insert a citation identified by \a label into the database */
    void insert(const QString &label);
 
-   /** Return the citation info for a given \a label */
-   CiteInfo *find(const QString &label) const;
+   /** Return the citation info for a given label */
+   QString find(const QString &label) const;
 
    /** Generate the citations page */
    void generatePage() const;
 
-   /** clears the database */
+   /** clears the hash */
    void clear();
 
-   /** return true if there are no citations.
-    *  Only valid after calling resolve()
-    */
+   /** return true if there are no citations   */
    bool isEmpty() const;
 
-   /** writes the latex code for the standard bibliography
-    *  section to text stream \a t
-    */
+   /* writes the latex code for the bibliography section to text stream */
    void writeLatexBibliography(QTextStream &t);
 
  private:  
-   QHash<QString, CiteInfo> m_entries;
+   mutable QMap<QString, QString> m_entries;
    QString m_baseFileName;
 };
 

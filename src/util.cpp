@@ -3285,25 +3285,6 @@ static bool matchArgument_Internal(QSharedPointer<Definition> srcScope, QSharedP
    stripIrrelevantConstVolatile(srcType);
    stripIrrelevantConstVolatile(dstType);
 
-
-/* BROOM CHECK - removed to see what happens
-
-   if (srcName == dstType.right(srcName.length())) {
-      // case "unsigned int" <-> "unsigned int i"
-
-      srcArg.type    += srcName;
-      srcArg.name     = "";
-      srcArg.canType  = "";              // invalidate cached type value
-
-   } else if (dstName == srcType.right(dstName.length())) {
-      // case "unsigned int i" <-> "unsigned int"
-
-      dstArg.type    += dstName;
-      dstArg.name     = "";
-      dstArg.canType  = "";              // invalidate cached type value
-   }
-*/
-
    if (srcArg.canType.isEmpty()) {
       srcArg.canType = extractCanonicalArgType(srcScope, srcFileScope, srcArg);
    }
@@ -3375,9 +3356,6 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
    }
 
    // so far the argument list could match, need to compare the types of all arguments
-// const ArgumentList &srcArgList_temp = srcArgList;         // BROOM, test code to undo 
-// const ArgumentList &dstArgList_temp = dstArgList;
-
    auto dst_iter = dstArgList.begin();
 
    for (auto &srcArg : srcArgList) {
@@ -3390,21 +3368,11 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
       bool retval = matchArgument_Internal(srcScope, srcFileScope, srcArg, dstScope, dstFileScope, *dst_iter);
              
       if (! retval) {
-         // save the changed data 
-//       Doxy_Globals::matchArgs.maybeUpdated = true;
-//       Doxy_Globals::matchArgs.srcList = srcArgList_temp;
-//       Doxy_Globals::matchArgs.dstList = dstArgList_temp;
-
          return false;
       }
 
       ++dst_iter;
    }
-  
-   // save the changed data 
-// Doxy_Globals::matchArgs.maybeUpdated = true;
-// Doxy_Globals::matchArgs.srcList = srcArgList_temp;
-// Doxy_Globals::matchArgs.dstList = dstArgList_temp;
 
    return true;       // all arguments match
 }
@@ -3418,7 +3386,7 @@ void mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool for
       return; 
    }
 
-   auto dst_iter = dstArgList.begin();                  //  BROOM CHECK
+   auto dst_iter = dstArgList.begin();
 
    for (auto &srcArg : srcArgList) {
 

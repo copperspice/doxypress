@@ -774,7 +774,7 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
 
                   if (addToIndex) {                      
                      Doxy_Globals::indexList.addContentsItem(false, convertToHtml(fd->name(), true), 
-                        "", fd->getSourceFileBase(), "", true, fd);                     
+                        "", fd->getSourceFileBase(), "", true, fd, category);                     
                   }
                   
                }

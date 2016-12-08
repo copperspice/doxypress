@@ -4,23 +4,22 @@
 #
 # Convert from bibtex to XHTML.
 #
-# (C) Copyright 1995, 1996 David Hull.
-# (David Hull / hull@cs.uiuc.edu / http://www.uiuc.edu/ph/www/dlhull)
+# Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
 #
 # (C) Copyright 2002-2010 Diomidis Spinellis
 # http://www.spinellis.gr
 #
+# (C) Copyright 1995, 1996 David Hull.
+# (David Hull / hull@cs.uiuc.edu / http://www.uiuc.edu/ph/www/dlhull)
+#
 # This program is free software.  You can redistribute it and/or modify
 # it under the terms of the GNU General Public License.  See the
 # files README and COPYING for details.
-#
-# This source code contains UTF-8 characters.  You might want to use
-# an appropriate editor, if you want to view/modify the LaTeX to Unicode
-# substitution commands.
-#
 
 use Getopt::Std;
 use open IO => ':crlf';
+# pass in the current directory
+$cwd = shift @ARGV;
 $label_styles{'numbered'} = 	$LABEL_NUMBERED = 	2;
 $list_start[$LABEL_NUMBERED] = 'dl class="citelist"';
 $list_end[$LABEL_NUMBERED] = "/dl";
@@ -128,9 +127,10 @@ foreach (@ARGV) {
   }
 }
 exit(1) unless defined($htmlfile);
+@bibfiles = map { $cwd . $_ } @bibfiles;
 $bibdatacmd="\\bibdata{".join(',',@bibfiles)."}";
 $label_style = $LABEL_NUMBERED;
-$bstfile = "doxypress";
+$bstfile = $cwd . "doxypress";
 umask(077);
 open(HTMLFILE,">$htmlfile$$");
 if (open(OHTMLFILE, "$htmlfile")) {
