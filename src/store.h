@@ -72,7 +72,7 @@ class Store : public StorageIntf
     *  First alloc() has to be called.
     *  \note The information can only be read after end() has been called.
     */
-   int write(const char *buf, uint size);
+   int write(const char *buf, uint size) override;
 
    /*! Ends the sequence of writes.
     *  \note After this call, first alloc() has to be called
@@ -92,7 +92,7 @@ class Store : public StorageIntf
    /*! Reads \a size bytes from the store into the array pointed to be \a buf.
     *  \note Before reading seek() has to be called to set the right start of the store.
     */
-   int read(char *buf, uint size);
+   int read(char *buf, uint size) override;
 
    void printStats();
 

@@ -41,8 +41,8 @@ class FileParser : public ParserInterface
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override;
 
-   void resetCodeParserState() {}
-   void parsePrototype(const QString &) {}
+   void resetCodeParserState() override {}
+   void parsePrototype(const QString &) override {}
 };
 
 

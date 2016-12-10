@@ -180,7 +180,7 @@ class LayoutParser : public QXmlDefaultHandler
          StartElementSection(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h, const QString &title)
             : m_parent(parent), m_kind(k), m_handler(h), m_title(title) {}
       
-         void operator()(const QXmlAttributes &attrib) {
+         void operator()(const QXmlAttributes &attrib) override {
             (m_parent->*m_handler)(m_kind, attrib, m_title);
          }
       
@@ -201,7 +201,7 @@ class LayoutParser : public QXmlDefaultHandler
                      const QString &tl, const QString &ss = QString() )
             : m_parent(parent), m_handler(h), m_type(type), m_title(tl), m_subscript(ss) {}
       
-          void operator()(const QXmlAttributes &attrib) {
+          void operator()(const QXmlAttributes &attrib) override {
              (m_parent->*m_handler)(attrib, m_type, m_title, m_subscript);
          }
       
@@ -222,7 +222,7 @@ class LayoutParser : public QXmlDefaultHandler
            StartElementNavEntry(LayoutParser *parent, LayoutNavEntry::Kind kind, Handler h, const QString &tl )
               : m_parent(parent), m_kind(kind), m_handler(h), m_title(tl) {}
       
-           void operator()(const QXmlAttributes &attrib) {
+           void operator()(const QXmlAttributes &attrib) override {
               (m_parent->*m_handler)(m_kind, attrib, m_title);
            }
       
@@ -1704,7 +1704,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    // reimplemented from QXmlDefaultHandler
-   bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib ) {
+   bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib ) override {
 
       QString temp = m_scope + name;
       QSharedPointer<StartElement> handler = m_sHandler[temp];
@@ -1720,7 +1720,7 @@ class LayoutParser : public QXmlDefaultHandler
       return true;
    }
 
-   bool endElement( const QString &, const QString &, const QString &name ) {
+   bool endElement( const QString &, const QString &, const QString &name ) override {
       QSharedPointer<EndElement> handler;
 
       if (! m_scope.isEmpty() && m_scope.right(name.length() + 1 ) == name + "/") {
@@ -1739,7 +1739,7 @@ class LayoutParser : public QXmlDefaultHandler
       return true;
    }
 
-   bool startDocument() {
+   bool startDocument() override {
       return true;
    }
 

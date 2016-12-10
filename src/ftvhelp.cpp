@@ -183,8 +183,7 @@ void FTVHelp::decContentsDepth()
  *  \param name           name of the item
  *  \param ref            URL of to the item
  *  \param file           file containing the definition of the item
- *  \param anchor         anchor within the file
- *  \param name           name of the item
+ *  \param anchor         anchor within the file 
  *  \param addToNavIndex  add this entry to the quick navigation index
  *  \param def            definition corresponding to this entry
  */

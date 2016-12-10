@@ -47,7 +47,7 @@ class MarkdownFileParser : public ParserInterface
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,
                   QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
 
-   void resetCodeParserState();
+   void resetCodeParserState() override;
    void parsePrototype(const QString &text) override;
 };
 

@@ -39,17 +39,18 @@ class DirDef : public Definition
    virtual ~DirDef();
 
    // accessors
-   DefType definitionType() const {
+   DefType definitionType() const override {
       return TypeDir;
    }
 
-   QString getOutputFileBase() const;
-   QString anchor() const {
+   QString getOutputFileBase() const override;
+
+   QString anchor() const override {
       return "";
    }
 
-   bool isLinkableInProject() const;
-   bool isLinkable() const;
+   bool isLinkableInProject() const override;
+   bool isLinkable() const override;
 
    QString displayName(bool = true) const override {
       return m_dispName;

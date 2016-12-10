@@ -207,7 +207,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
                      const QString &, const SourceLinkInfo &, const SourceLinkInfo &) override {
    }
 
-   void startCodeLine(bool) {
+   void startCodeLine(bool) override {
 
       if (m_lineNumber != -1) {
          if (!m_refId.isEmpty()) {
@@ -222,7 +222,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
       m_col = 0;
    }
 
-   void endCodeLine() {
+   void endCodeLine() override {
       m_t << endl;
       m_lineNumber = -1;
       m_refId.resize(0);
@@ -235,7 +235,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
       m_insideSpecialHL = true;
    }
 
-   void endFontClass() {
+   void endFontClass() override {
       m_t << "</emphasis>"; // non DocBook
       m_insideSpecialHL = false;
    }
@@ -244,7 +244,6 @@ class DocbookCodeGenerator : public CodeOutputInterface
    }
 
    void writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) override {
-
       // we remember the information provided here to use it
       // at the <codeline> start tag.
 

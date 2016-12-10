@@ -63,7 +63,7 @@ class MemberDef : public Definition
   
    // link id
    QString getOutputFileBase() const override;
-   QString getReference() const;
+   QString getReference() const override;
    QString anchor() const override;
 
    QString declaration() const;
@@ -101,7 +101,7 @@ class MemberDef : public Definition
    QString getGroupFileName() const;
    int getGroupStartLine() const;
    bool getGroupHasDocs() const;
-   QString qualifiedName() const;
+   QString qualifiedName() const override;
    QString objCMethodName(bool localLink, bool showStatic) const;
 
    // direct kind info
@@ -204,8 +204,8 @@ class MemberDef : public Definition
    bool isRelatedOrFriend() const;
 
    // output info
-   bool isLinkableInProject() const;
-   bool isLinkable() const;
+   bool isLinkableInProject() const override;
+   bool isLinkable() const override;
 
    bool hasDocumentation() const override;
    bool isDeleted() const;
@@ -286,10 +286,10 @@ class MemberDef : public Definition
    void getLabels(QStringList &sl, QSharedPointer<Definition> container) const;
  
    //
-   QString documentation() const;
-   QString briefDescription(bool abbr = false) const;
+   QString documentation() const override;
+   QString briefDescription(bool abbr = false) const override;
    QString fieldType() const;
-   bool isReference() const;
+   bool isReference() const override;
 
    // set functions
    void setMemberType(MemberType t);
@@ -393,9 +393,9 @@ class MemberDef : public Definition
             bool stripWhiteSpace = true, bool atTop = false) override;
 
    void setBriefDescription(const QString &b, const QString &briefFile, int briefLine)  override;
-   void setInbodyDocumentation(const QString &d, const QString &inbodyFile, int inbodyLine);
+   void setInbodyDocumentation(const QString &d, const QString &inbodyFile, int inbodyLine) override;
 
-   void setHidden(bool b);
+   void setHidden(bool b) override;
    
    // output generation
    void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,

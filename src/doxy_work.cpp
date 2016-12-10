@@ -9932,7 +9932,7 @@ void Doxy_Work::stopDoxyPress(int unused)
 
 void Doxy_Work::writeTagFile()
 {
-   const QString generateTagFile = Config::getString("generate-tagfile");
+   static const QString generateTagFile = Config::getString("generate-tagfile");
 
    if (generateTagFile.isEmpty()) {
       return;

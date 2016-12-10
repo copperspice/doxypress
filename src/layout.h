@@ -72,7 +72,7 @@ struct LayoutDocEntrySimple : LayoutDocEntry {
  public:
    LayoutDocEntrySimple(Kind k) : m_kind(k) {}
 
-   Kind kind() const {
+   Kind kind() const override {
       return m_kind;
    }
 
@@ -97,7 +97,7 @@ struct LayoutDocEntryMemberDecl: public LayoutDocEntry {
       : type(tp), m_title(tl), m_subscript(ss) 
    {}
 
-   Kind kind() const {
+   Kind kind() const  override {
       return MemberDecl;
    }
 
@@ -116,7 +116,7 @@ struct LayoutDocEntryMemberDef: public LayoutDocEntry {
       : type(tp), m_title(tl) 
    {}
 
-   Kind kind() const {
+   Kind kind() const  override {
       return MemberDef;
    }
 

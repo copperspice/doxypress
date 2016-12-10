@@ -45,11 +45,11 @@ class GroupDef : public Definition
    GroupDef(const QString &fileName, int line, const QString &name, const QString &title, QString refFileName = QString());
    ~GroupDef();
 
-   DefType definitionType() const {
+   DefType definitionType() const override {
       return TypeGroup;
    }
 
-   QString getOutputFileBase() const;
+   QString getOutputFileBase() const override;
 
    QString anchor() const  override {
       return "";
@@ -83,11 +83,11 @@ class GroupDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const override;
    void writeTagFile(QTextStream &);
    int  countMembers() const;
-   bool isLinkableInProject() const;
-   bool isLinkable() const;
+   bool isLinkableInProject() const override;
+   bool isLinkable() const override;
    bool isASubGroup() const;
    void computeAnchors();
 
@@ -189,7 +189,7 @@ class GroupDef : public Definition
    void startMemberDocumentation(OutputList &ol);
    void endMemberDocumentation(OutputList &ol);
    void writeAuthorSection(OutputList &ol);
-   void writeSummaryLinks(OutputList &ol);
+   void writeSummaryLinks(OutputList &ol) override;
 
    void updateLanguage(QSharedPointer<const Definition> d);
 

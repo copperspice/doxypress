@@ -208,11 +208,11 @@ class DocWord : public DocNode
       return m_word;
    }
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_Word;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -232,7 +232,7 @@ class DocLinkedWord : public DocNode
       return m_word;
    }
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_LinkedWord;
    }
 
@@ -248,7 +248,7 @@ class DocLinkedWord : public DocNode
       return m_ref;
    }
 
-   QString anchor() const     {
+   QString anchor() const {
       return m_anchor;
    }
 
@@ -256,7 +256,7 @@ class DocLinkedWord : public DocNode
       return m_tooltip;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v)  override  {
       v->visit(this);
    }
 
@@ -282,11 +282,11 @@ class DocURL : public DocNode
       return m_url;
    }
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_URL;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v)  override {
       v->visit(this);
    }
 
@@ -307,11 +307,11 @@ class DocLineBreak : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const  override {
       return Kind_LineBreak;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v)  override {
       v->visit(this);
    }
 
@@ -326,11 +326,11 @@ class DocHorRuler : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const  override {
       return Kind_HorRuler;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v)  override {
       v->visit(this);
    }
 
@@ -344,7 +344,7 @@ class DocAnchor : public DocNode
    DocAnchor(DocNode *parent, const QString &id, bool newAnchor);
    void parse();
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_Anchor;
    }
 
@@ -356,7 +356,7 @@ class DocAnchor : public DocNode
       return m_file;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -371,7 +371,7 @@ class DocCite : public DocNode
  public:
    DocCite(DocNode *parent, const QString &target, const QString &context);
 
-   Kind kind() const            {
+   Kind kind() const override  {
       return Kind_Ref;
    }
 
@@ -387,7 +387,7 @@ class DocCite : public DocNode
       return m_ref;
    }
 
-   QString anchor() const      {
+   QString anchor() const {
       return m_anchor;
    }
 
@@ -395,7 +395,7 @@ class DocCite : public DocNode
       return m_text;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -439,7 +439,7 @@ class DocStyleChange : public DocNode
    {
    }
 
-   Kind kind() const {
+   Kind kind() const  override {
       return Kind_StyleChange;
    }
 
@@ -457,7 +457,7 @@ class DocStyleChange : public DocNode
       return m_position;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -557,11 +557,11 @@ class DocSymbol : public DocNode
       return m_symbol;
    }
 
-   Kind kind() const          {
+   Kind kind() const  override {
       return Kind_Symbol;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -580,7 +580,7 @@ class DocWhiteSpace : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const  override {
       return Kind_WhiteSpace;
    }
 
@@ -588,7 +588,7 @@ class DocWhiteSpace : public DocNode
       return m_chars;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -605,7 +605,7 @@ class DocVerbatim : public DocNode
    DocVerbatim(DocNode *parent, const QString &context,const QString &text, Type t, bool isExample,
                const QString &exampleFile, bool isBlock = false, const QString &lang = QString());
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_Verbatim;
    }
 
@@ -621,7 +621,7 @@ class DocVerbatim : public DocNode
       return m_context;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -709,7 +709,7 @@ class DocInclude : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const            {
+   Kind kind() const  override {
       return Kind_Include;
    }
 
@@ -751,7 +751,7 @@ class DocInclude : public DocNode
       return m_exampleFile;
    }
 
-   void accept(DocVisitor *v)   {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -781,7 +781,7 @@ class DocIncOperator : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const           {
+   Kind kind() const  override  {
       return Kind_IncOperator;
    }
    Type type() const           {
@@ -796,7 +796,7 @@ class DocIncOperator : public DocNode
    QString context() const     {
       return m_context;
    }
-   void accept(DocVisitor *v)  {
+   void accept(DocVisitor *v) override  {
       v->visit(this);
    }
    bool isFirst() const        {
@@ -836,7 +836,7 @@ class DocFormula : public DocNode
  public:
    DocFormula(DocNode *parent, int id);
 
-   Kind kind() const          {
+   Kind kind() const  override {
       return Kind_Formula;
    }
 
@@ -856,7 +856,7 @@ class DocFormula : public DocNode
       return m_id;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -880,7 +880,7 @@ class DocIndexEntry : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_IndexEntry;
    }
 
@@ -897,7 +897,7 @@ class DocIndexEntry : public DocNode
    QString entry() const        {
       return m_entry;
    }
-   void accept(DocVisitor *v)   {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 
@@ -917,7 +917,7 @@ class DocCopy : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_Copy;
    }
 
@@ -925,7 +925,7 @@ class DocCopy : public DocNode
       return m_link;
    }
 
-   void accept(DocVisitor * /*v*/) {
+   void accept(DocVisitor * /*v*/)  override  {
       /*CompAccept<DocCopy>::accept(this,v);*/
    }
 
@@ -943,7 +943,7 @@ class DocAutoList : public CompAccept<DocAutoList>, public DocNode
  public:
    DocAutoList(DocNode *parent, int indent, bool isEnumList, int depth);
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_AutoList;
    }
 
@@ -959,7 +959,7 @@ class DocAutoList : public CompAccept<DocAutoList>, public DocNode
       return m_depth;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override  {
       CompAccept<DocAutoList>::accept(this, v);
    }
 
@@ -977,7 +977,7 @@ class DocAutoListItem : public CompAccept<DocAutoListItem>, public DocNode
  public:
    DocAutoListItem(DocNode *parent, int indent, int num);
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_AutoListItem;
    }
 
@@ -985,7 +985,7 @@ class DocAutoListItem : public CompAccept<DocAutoListItem>, public DocNode
       return m_itemNum;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocAutoListItem>::accept(this, v);
    }
 
@@ -1007,11 +1007,11 @@ class DocTitle : public CompAccept<DocTitle>, public DocNode
    void parse();
    void parseFromString(const QString &title);
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_Title;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocTitle>::accept(this, v);
    }
 };
@@ -1022,7 +1022,7 @@ class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
  public:
    DocXRefItem(DocNode *parent, int id, const QString &key);
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_XRefItem;
    }
 
@@ -1046,7 +1046,7 @@ class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
       return m_key;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocXRefItem>::accept(this, v);
    }
 
@@ -1069,7 +1069,7 @@ class DocImage : public CompAccept<DocImage>, public DocNode
 
    DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t, const QString &url = QString());
 
-   Kind kind() const           {
+   Kind kind() const  override {
       return Kind_Image;
    }
 
@@ -1105,7 +1105,7 @@ class DocImage : public CompAccept<DocImage>, public DocNode
       return m_attribs;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocImage>::accept(this, v);
    }
 
@@ -1129,7 +1129,7 @@ class DocDotFile : public CompAccept<DocDotFile>, public DocNode
 
    void parse();
 
-   Kind kind() const          {
+   Kind kind() const  override {
       return Kind_DotFile;
    }
 
@@ -1161,7 +1161,7 @@ class DocDotFile : public CompAccept<DocDotFile>, public DocNode
       return m_context;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocDotFile>::accept(this, v);
    }
 
@@ -1181,7 +1181,7 @@ class DocMscFile : public CompAccept<DocMscFile>, public DocNode
    DocMscFile(DocNode *parent, const QString &name, const QString &context);
    void parse();
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_MscFile;
    }
 
@@ -1213,7 +1213,7 @@ class DocMscFile : public CompAccept<DocMscFile>, public DocNode
       return m_context;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocMscFile>::accept(this, v);
    }
 
@@ -1234,7 +1234,7 @@ class DocDiaFile : public CompAccept<DocDiaFile>, public DocNode
 
    void parse();
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_DiaFile;
    }
 
@@ -1266,7 +1266,7 @@ class DocDiaFile : public CompAccept<DocDiaFile>, public DocNode
       return m_context;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocDiaFile>::accept(this, v);
    }
 
@@ -1286,7 +1286,7 @@ class DocLink : public CompAccept<DocLink>, public DocNode
    DocLink(DocNode *parent, const QString &target);
    QString parse(bool, bool isXmlLink = false);
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_Link;
    }
 
@@ -1306,7 +1306,7 @@ class DocLink : public CompAccept<DocLink>, public DocNode
       return m_anchor;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocLink>::accept(this, v);
    }
 
@@ -1326,7 +1326,7 @@ class DocRef : public CompAccept<DocRef>, public DocNode
 
    void parse();
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_Ref;
    }
 
@@ -1370,7 +1370,7 @@ class DocRef : public CompAccept<DocRef>, public DocNode
       return m_isSubPage;
    }
 
-   void accept(DocVisitor *v)   {
+   void accept(DocVisitor *v) override {
       CompAccept<DocRef>::accept(this, v);
    }
 
@@ -1394,7 +1394,7 @@ class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
 
    void parse();
 
-   Kind kind() const            {
+   Kind kind() const override {
       return Kind_Ref;
    }
 
@@ -1410,7 +1410,7 @@ class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
       return m_anchor;
    }
 
-   void accept(DocVisitor *v)   {
+   void accept(DocVisitor *v) override {
       CompAccept<DocInternalRef>::accept(this, v);
    }
 
@@ -1439,11 +1439,11 @@ class DocHRef : public CompAccept<DocHRef>, public DocNode
       return m_relPath;
    }
 
-   Kind kind() const           {
+   Kind kind() const override {
       return Kind_HRef;
    }
 
-   void accept(DocVisitor *v)  {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHRef>::accept(this, v);
    }
 
@@ -1470,7 +1470,7 @@ class DocHtmlHeader : public CompAccept<DocHtmlHeader>, public DocNode
       return m_level;
    }
 
-   Kind kind() const                     {
+   Kind kind() const override {
       return Kind_HtmlHeader;
    }
 
@@ -1478,7 +1478,7 @@ class DocHtmlHeader : public CompAccept<DocHtmlHeader>, public DocNode
       return m_attribs;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlHeader>::accept(this, v);
    }
 
@@ -1498,7 +1498,7 @@ class DocHtmlDescTitle : public CompAccept<DocHtmlDescTitle>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const                     {
+   Kind kind() const  override {
       return Kind_HtmlDescTitle;
    }
 
@@ -1506,7 +1506,7 @@ class DocHtmlDescTitle : public CompAccept<DocHtmlDescTitle>, public DocNode
       return m_attribs;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlDescTitle>::accept(this, v);
    }
 
@@ -1525,7 +1525,7 @@ class DocHtmlDescList : public CompAccept<DocHtmlDescList>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const                     {
+   Kind kind() const override {
       return Kind_HtmlDescList;
    }
 
@@ -1533,7 +1533,7 @@ class DocHtmlDescList : public CompAccept<DocHtmlDescList>, public DocNode
       return m_attribs;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override  {
       CompAccept<DocHtmlDescList>::accept(this, v);
    }
 
@@ -1552,7 +1552,7 @@ class DocSection : public CompAccept<DocSection>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_Section;
    }
 
@@ -1576,7 +1576,7 @@ class DocSection : public CompAccept<DocSection>, public DocNode
       return m_file;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocSection>::accept(this, v);
    }
 
@@ -1599,7 +1599,7 @@ class DocSecRefItem : public CompAccept<DocSecRefItem>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_SecRefItem;
    }
 
@@ -1615,7 +1615,7 @@ class DocSecRefItem : public CompAccept<DocSecRefItem>, public DocNode
       return m_anchor;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocSecRefItem>::accept(this, v);
    }
 
@@ -1637,11 +1637,11 @@ class DocSecRefList : public CompAccept<DocSecRefList>, public DocNode
 
    void parse();
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_SecRefList;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocSecRefList>::accept(this, v);
    }
 };
@@ -1656,11 +1656,11 @@ class DocInternal : public CompAccept<DocInternal>, public DocNode
 
    int parse(int);
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_Internal;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocInternal>::accept(this, v);
    }
 };
@@ -1675,11 +1675,11 @@ class DocParBlock : public CompAccept<DocParBlock>, public DocNode
 
    int parse();
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_ParBlock;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocParBlock>::accept(this, v);
    }
 };
@@ -1693,11 +1693,11 @@ class DocSimpleList : public CompAccept<DocSimpleList>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_SimpleList;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocSimpleList>::accept(this, v);
    }
 
@@ -1715,7 +1715,7 @@ class DocHtmlList : public CompAccept<DocHtmlList>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_HtmlList;
    }
 
@@ -1723,7 +1723,7 @@ class DocHtmlList : public CompAccept<DocHtmlList>, public DocNode
       return m_type;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlList>::accept(this, v);
    }
 
@@ -1751,7 +1751,7 @@ class DocSimpleSect : public CompAccept<DocSimpleSect>, public DocNode
    DocSimpleSect(DocNode *parent, Type t);
    virtual ~DocSimpleSect();
 
-   Kind kind() const       {
+   Kind kind() const override {
       return Kind_SimpleSect;
    }
 
@@ -1760,7 +1760,7 @@ class DocSimpleSect : public CompAccept<DocSimpleSect>, public DocNode
    }
 
    QString typeString() const;
-   void accept(DocVisitor *v);
+   void accept(DocVisitor *v)override ;
    int parse(bool userTitle, bool needsSeparator);
    int parseRcs();
    int parseXml();
@@ -1780,11 +1780,11 @@ class DocSimpleSectSep : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_SimpleSectSep;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visit(this);
    }
 };
@@ -1809,7 +1809,7 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
    }
 
    int parse(const QString &cmdName, bool xmlContext, Direction d);
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_ParamSect;
    }
 
@@ -1817,7 +1817,7 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
       return m_type;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocParamSect>::accept(this, v);
    }
 
@@ -1845,7 +1845,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
 
    int parse(bool skipParse = false, int token = 0);
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_Para;
    }
 
@@ -1853,7 +1853,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
       return m_children.isEmpty();
    }
 
-   void accept(DocVisitor *v)  {
+   void accept(DocVisitor *v) override {
       CompAccept<DocPara>::accept(this, v);
    }
 
@@ -1916,7 +1916,7 @@ class DocParamList : public DocNode
    virtual ~DocParamList()
    { }
 
-   Kind kind() const {
+   Kind kind() const override  {
       return Kind_ParamList;
    }
 
@@ -1952,7 +1952,7 @@ class DocParamList : public DocNode
       return m_isLast;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visitPre(this);
 
       for (auto n : m_paragraphs)  {
@@ -1989,11 +1989,11 @@ class DocSimpleListItem : public DocNode
       delete m_paragraph;
    }
 
-   Kind kind() const            {
+   Kind kind() const override {
       return Kind_SimpleListItem;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       v->visitPre(this);
       m_paragraph->accept(v);
       v->visitPost(this);
@@ -2012,7 +2012,7 @@ class DocHtmlListItem : public CompAccept<DocHtmlListItem>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const                     {
+   Kind kind() const override {
       return Kind_HtmlListItem;
    }
 
@@ -2024,7 +2024,7 @@ class DocHtmlListItem : public CompAccept<DocHtmlListItem>, public DocNode
       return m_attribs;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlListItem>::accept(this, v);
    }
 
@@ -2043,7 +2043,7 @@ class DocHtmlDescData : public CompAccept<DocHtmlDescData>, public DocNode
    explicit DocHtmlDescData(DocNode *parent) {
       m_parent = parent;
    }
-   Kind kind() const                     {
+   Kind kind() const override {
       return Kind_HtmlDescData;
    }
 
@@ -2051,7 +2051,7 @@ class DocHtmlDescData : public CompAccept<DocHtmlDescData>, public DocNode
       return m_attribs;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlDescData>::accept(this, v);
    }
 
@@ -2088,11 +2088,11 @@ class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
       return m_isLast;
    }
 
-   Kind kind() const           {
+   Kind kind() const override {
       return Kind_HtmlCell;
    }
 
-   void accept(DocVisitor *v)  {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlCell>::accept(this, v);
    }
 
@@ -2146,11 +2146,11 @@ class DocHtmlCaption : public CompAccept<DocHtmlCaption>, public DocNode
  public:
    DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs);
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_HtmlCaption;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlCaption>::accept(this, v);
    }
 
@@ -2190,7 +2190,7 @@ class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const          {
+   Kind kind() const override {
       return Kind_HtmlRow;
    }
 
@@ -2198,7 +2198,7 @@ class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
       return m_children.count();
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlRow>::accept(this, v);
    }
 
@@ -2272,7 +2272,7 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
       delete m_caption;
    }
 
-   Kind kind() const       {
+   Kind kind() const override {
       return Kind_HtmlTable;
    }
 
@@ -2295,7 +2295,7 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
       return m_numCols;
    }
 
-   void accept(DocVisitor *v);
+   void accept(DocVisitor *v) override;
 
    DocHtmlCaption *caption() const { 
       return m_caption; 
@@ -2328,15 +2328,16 @@ class DocHtmlBlockQuote : public CompAccept<DocHtmlBlockQuote>, public DocNode
  public:
    DocHtmlBlockQuote(DocNode *parent, const HtmlAttribList &attribs)
       : m_attribs(attribs) {
+
       m_parent = parent;
    }
 
-   Kind kind() const       {
+   Kind kind() const override {
       return Kind_HtmlBlockQuote;
    }
 
    int parse();
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocHtmlBlockQuote>::accept(this, v);
    }
 
@@ -2354,11 +2355,11 @@ class DocText : public CompAccept<DocText>, public DocNode
  public:
    DocText() {}
 
-   Kind kind() const       {
+   Kind kind() const  override {
       return Kind_Text;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocText>::accept(this, v);
    }
 
@@ -2375,11 +2376,11 @@ class DocRoot : public CompAccept<DocRoot>, public DocNode
  public:
    DocRoot(bool indent, bool sl) : m_indent(indent), m_singleLine(sl) {}
 
-   Kind kind() const       {
+   Kind kind() const override {
       return Kind_Root;
    }
 
-   void accept(DocVisitor *v) {
+   void accept(DocVisitor *v) override {
       CompAccept<DocRoot>::accept(this, v);
    }
 

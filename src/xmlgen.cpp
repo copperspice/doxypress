@@ -317,7 +317,7 @@ class XMLCodeGenerator : public CodeOutputInterface
       XML_DB(("(writeToolTip)\n"));
    }
 
-   void startCodeLine(bool) {
+   void startCodeLine(bool) override {
       XML_DB(("(startCodeLine)\n"));
 
       m_t << "<codeline";
@@ -341,7 +341,7 @@ class XMLCodeGenerator : public CodeOutputInterface
       m_col = 0;
    }
 
-   void endCodeLine() {
+   void endCodeLine() override {
       XML_DB(("(endCodeLine)\n"));
       if (!m_insideSpecialHL && !m_normalHLNeedStartTag) {
          m_t << "</highlight>";
@@ -364,7 +364,7 @@ class XMLCodeGenerator : public CodeOutputInterface
       m_insideSpecialHL = true;
    }
 
-   void endFontClass() {
+   void endFontClass() override {
       XML_DB(("(endFontClass)\n"));
       m_t << "</highlight>"; // non DocBook
       m_insideSpecialHL = false;

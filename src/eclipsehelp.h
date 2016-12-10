@@ -45,19 +45,19 @@ class EclipseHelp : public IndexIntf
    EclipseHelp();
    virtual ~EclipseHelp();
 
-   virtual void initialize();
-   virtual void finalize();
-   virtual void incContentsDepth();
-   virtual void decContentsDepth();
-   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
+   void initialize() override;
+   void finalize() override;
+   void incContentsDepth() override;
+   void decContentsDepth() override;
+   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
                   const QString &anchor, bool unused, QSharedPointer<Definition> def, DirType category) override;
   
-   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
                   const QString &title) override;
 
-   virtual void addIndexFile(const QString &name) override;
-   virtual void addImageFile(const QString &name) override;
-   virtual void addStyleSheetFile(const QString &name) override;
+   void addIndexFile(const QString &name) override;
+   void addImageFile(const QString &name) override;
+   void addStyleSheetFile(const QString &name) override;
 
  private:
    int  m_depth;

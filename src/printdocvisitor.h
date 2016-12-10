@@ -28,17 +28,17 @@ class PrintDocVisitor : public DocVisitor
    PrintDocVisitor() : DocVisitor(DocVisitor_Other), m_indent(0),
       m_needsEnter(false), m_insidePre(false) {}
 
-   void visit(DocWord *w) {
+   void visit(DocWord *w)  override {
       indent_leaf();
       printf("%s", csPrintable(w->word()));
    }
 
-   void visit(DocLinkedWord *w) {
+   void visit(DocLinkedWord *w) override {
       indent_leaf();
       printf("%s", csPrintable(w->word()));
    }
 
-   void visit(DocWhiteSpace *w) {
+   void visit(DocWhiteSpace *w) override {
       indent_leaf();
 
       if (m_insidePre) {
@@ -48,32 +48,34 @@ class PrintDocVisitor : public DocVisitor
       }
    }
 
-   void visit(DocSymbol *s) {
+   void visit(DocSymbol *s) override {
       indent_leaf();
       QString res = HtmlEntityMapper::instance()->utf8(s->symbol(), true);
 
       if (! res.isEmpty()) {
          printf("%s", csPrintable(res));
       } else {
-         printf("Print: Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+         printf("Print: Unsupported HTML entity found: %s\n", csPrintable(
+                  HtmlEntityMapper::instance()->html(s->symbol(), true)) );
       }
    }
-   void visit(DocURL *u) {
+
+   void visit(DocURL *u) override {
       indent_leaf();
       printf("%s", csPrintable(u->url()));
    }
 
-   void visit(DocLineBreak *) {
+   void visit(DocLineBreak *) override {
       indent_leaf();
       printf("<br/>");
    }
 
-   void visit(DocHorRuler *) {
+   void visit(DocHorRuler *) override {
       indent_leaf();
       printf("<hr/>");
    }
 
-   void visit(DocStyleChange *s) {
+   void visit(DocStyleChange *s) override {
       indent_leaf();
 
       switch (s->style()) {
@@ -158,7 +160,7 @@ class PrintDocVisitor : public DocVisitor
       }
    }
 
-   void visit(DocVerbatim *s) {
+   void visit(DocVerbatim *s) override {
       indent_leaf();
 
       switch (s->type()) {
@@ -256,12 +258,12 @@ class PrintDocVisitor : public DocVisitor
       }
    }
 
-   void visit(DocAnchor *a) {
+   void visit(DocAnchor *a) override {
       indent_leaf();
       printf("<anchor name=\"%s\"/>", csPrintable(a->anchor()));
    }
 
-   void visit(DocInclude *inc) {
+   void visit(DocInclude *inc) override {
       indent_leaf();
       printf("<include file=\"%s\" type=\"", csPrintable(inc->file()));
 
@@ -291,7 +293,7 @@ class PrintDocVisitor : public DocVisitor
       printf("\"/>");
    }
 
-   void visit(DocIncOperator *op) {
+   void visit(DocIncOperator *op) override {
       indent_leaf();
       printf("<incoperator pattern=\"%s\" type=\"", csPrintable(op->pattern()));
 
@@ -312,29 +314,28 @@ class PrintDocVisitor : public DocVisitor
       printf("\"/>");
    }
 
-   void visit(DocFormula *f) {
+   void visit(DocFormula *f) override {
       indent_leaf();
       printf("<formula name = %s text = %s/>", csPrintable(f->name()), csPrintable(f->text()));
    }
 
-   void visit(DocIndexEntry *i) {
+   void visit(DocIndexEntry *i) override {
       indent_leaf();
       printf("<indexentry>%s</indexentry\n", csPrintable(i->entry()));
    }
 
-   void visit(DocSimpleSectSep *) {
+   void visit(DocSimpleSectSep *) override {
       indent_leaf();
       printf("<simplesectsep/>");
    }
 
-   void visit(DocCite *cite) {
+   void visit(DocCite *cite) override {
       indent_leaf();
       printf("<cite ref=\"%s\" file=\"%s\" anchor=\"%s\" text=\"%s\"/>\n",
              csPrintable(cite->ref()), csPrintable(cite->file()), csPrintable(cite->anchor()), csPrintable(cite->text()) );
    }
 
-
-   void visitPre(DocAutoList *l) {
+   void visitPre(DocAutoList *l) override {
       indent_pre();
       if (l->isEnumList()) {
          printf("<ol>\n");
@@ -342,7 +343,8 @@ class PrintDocVisitor : public DocVisitor
          printf("<ul>\n");
       }
    }
-   void visitPost(DocAutoList *l) {
+
+   void visitPost(DocAutoList *l) override {
       indent_post();
       if (l->isEnumList()) {
          printf("</ol>\n");
@@ -350,36 +352,39 @@ class PrintDocVisitor : public DocVisitor
          printf("</ul>\n");
       }
    }
-   void visitPre(DocAutoListItem *) {
+
+   void visitPre(DocAutoListItem *) override {
       indent_pre();
       printf("<li>\n");
    }
-   void visitPost(DocAutoListItem *) {
+
+   void visitPost(DocAutoListItem *) override {
       indent_post();
       printf("</li>\n");
    }
 
-   void visitPre(DocPara *node) {
+   void visitPre(DocPara *node) override {
       // print the address of the paragraph
       indent_pre();
       printf("<para> %08x \n", node);
    }
 
-   void visitPost(DocPara *) {
+   void visitPost(DocPara *) override {
       indent_post();
       printf("</para>\n");
    }
 
-   void visitPre(DocRoot *) {
+   void visitPre(DocRoot *) override {
       indent_pre();
       printf("<root>\n");
    }
 
-   void visitPost(DocRoot *) {
+   void visitPost(DocRoot *) override {
       indent_post();
       printf("</root>\n");
    }
-   void visitPre(DocSimpleSect *s) {
+
+   void visitPre(DocSimpleSect *s) override {
       indent_pre();
       printf("<simplesect type=");
 
@@ -459,52 +464,52 @@ class PrintDocVisitor : public DocVisitor
       printf(">\n");
    }
 
-   void visitPost(DocSimpleSect *) {
+   void visitPost(DocSimpleSect *) override {
       indent_post();
       printf("</simplesect>\n");
    }
 
-   void visitPre(DocTitle *) {
+   void visitPre(DocTitle *) override {
       indent_pre();
       printf("<title>\n");
    }
 
-   void visitPost(DocTitle *) {
+   void visitPost(DocTitle *) override {
       indent_post();
       printf("</title>\n");
    }
 
-   void visitPre(DocSimpleList *) {
+   void visitPre(DocSimpleList *) override {
       indent_pre();
       printf("<ul>\n");
    }
 
-   void visitPost(DocSimpleList *) {
+   void visitPost(DocSimpleList *) override {
       indent_post();
       printf("</ul>\n");
    }
 
-   void visitPre(DocSimpleListItem *) {
+   void visitPre(DocSimpleListItem *) override {
       indent_pre();
       printf("<li>\n");
    }
 
-   void visitPost(DocSimpleListItem *) {
+   void visitPost(DocSimpleListItem *) override {
       indent_post();
       printf("</li>\n");
    }
 
-   void visitPre(DocSection *s) {
+   void visitPre(DocSection *s) override {
       indent_pre();
       printf("<sect%d>\n", s->level());
    }
 
-   void visitPost(DocSection *s) {
+   void visitPost(DocSection *s) override {
       indent_post();
       printf("</sect%d>\n", s->level());
    }
 
-   void visitPre(DocHtmlList *s) {
+   void visitPre(DocHtmlList *s) override {
       indent_pre();
       if (s->type() == DocHtmlList::Ordered) {
          printf("<ol>\n");
@@ -513,7 +518,7 @@ class PrintDocVisitor : public DocVisitor
       }
    }
 
-   void visitPost(DocHtmlList *s) {
+   void visitPost(DocHtmlList *s) override {
       indent_post();
       if (s->type() == DocHtmlList::Ordered) {
          printf("</ol>\n");
@@ -521,11 +526,13 @@ class PrintDocVisitor : public DocVisitor
          printf("</ul>\n");
       }
    }
-   void visitPre(DocHtmlListItem *) {
+
+   void visitPre(DocHtmlListItem *) override {
       indent_pre();
       printf("<li>\n");
    }
-   void visitPost(DocHtmlListItem *) {
+
+   void visitPost(DocHtmlListItem *) override {
       indent_post();
       printf("</li>\n");
    }
@@ -543,89 +550,108 @@ class PrintDocVisitor : public DocVisitor
    //  printf("</pre>\n");
    //}
 
-   void visitPre(DocHtmlDescList *) {
+   void visitPre(DocHtmlDescList *) override {
       indent_pre();
       printf("<dl>\n");
    }
-   void visitPost(DocHtmlDescList *) {
+
+   void visitPost(DocHtmlDescList *) override {
       indent_post();
       printf("</dl>\n");
    }
-   void visitPre(DocHtmlDescTitle *) {
+
+   void visitPre(DocHtmlDescTitle *) override {
       indent_pre();
       printf("<dt>\n");
    }
-   void visitPost(DocHtmlDescTitle *) {
+
+   void visitPost(DocHtmlDescTitle *) override {
       indent_post();
       printf("</dt>\n");
    }
-   void visitPre(DocHtmlDescData *) {
+
+   void visitPre(DocHtmlDescData *) override {
       indent_pre();
       printf("<dd>\n");
    }
-   void visitPost(DocHtmlDescData *) {
+
+   void visitPost(DocHtmlDescData *) override {
       indent_post();
       printf("</dd>\n");
    }
-   void visitPre(DocHtmlTable *t) {
+
+   void visitPre(DocHtmlTable *t) override {
       indent_pre();
 
       printf("<table rows=\"%d\" cols=\"%d\">\n", t->numRows(), t->numColumns());
    }
 
-   void visitPost(DocHtmlTable *) {
+   void visitPost(DocHtmlTable *) override {
       indent_post();
       printf("</table>\n");
    }
-   void visitPre(DocHtmlRow *) {
+
+   void visitPre(DocHtmlRow *) override {
       indent_pre();
       printf("<tr>\n");
    }
-   void visitPost(DocHtmlRow *) {
+
+   void visitPost(DocHtmlRow *) override {
       indent_post();
       printf("</tr>\n");
    }
-   void visitPre(DocHtmlCell *c) {
+
+   void visitPre(DocHtmlCell *c) override {
       indent_pre();
       printf("<t%c>\n", c->isHeading() ? 'h' : 'd');
    }
-   void visitPost(DocHtmlCell *c) {
+
+   void visitPost(DocHtmlCell *c) override {
       indent_post();
       printf("</t%c>\n", c->isHeading() ? 'h' : 'd');
    }
-   void visitPre(DocHtmlCaption *) {
+
+   void visitPre(DocHtmlCaption *) override {
       indent_pre();
       printf("<caption>\n");
    }
-   void visitPost(DocHtmlCaption *) {
+
+   void visitPost(DocHtmlCaption *) override {
       indent_post();
       printf("</caption>\n");
    }
-   void visitPre(DocInternal *) {
+
+   void visitPre(DocInternal *) override {
       indent_pre();
       printf("<internal>\n");
    }
-   void visitPost(DocInternal *) {
+
+   void visitPost(DocInternal *) override {
       indent_post();
       printf("</internal>\n");
    }
-   void visitPre(DocHRef *href) {
+
+   void visitPre(DocHRef *href) override {
       indent_pre();
       printf("<a url=\"%s\">\n", csPrintable(href->url()));
    }
-   void visitPost(DocHRef *) {
+
+   void visitPost(DocHRef *) override {
       indent_post();
       printf("</a>\n");
    }
-   void visitPre(DocHtmlHeader *header) {
+
+   void visitPre(DocHtmlHeader *header) override {
       indent_pre();
       printf("<h%d>\n", header->level());
    }
-   void visitPost(DocHtmlHeader *header) {
+
+   void visitPost(DocHtmlHeader *header) override {
       indent_post();
       printf("</h%d>\n", header->level());
    }
-   void visitPre(DocImage *img) {
+
+   void visitPre(DocImage *img) override {
       indent_pre();
       printf("<image src=\"%s\" type=\"", csPrintable(img->name()));
 
@@ -647,48 +673,53 @@ class PrintDocVisitor : public DocVisitor
       printf("\" width=%s height=%s>\n", csPrintable(img->width()), csPrintable(img->height()));
    }
 
-   void visitPost(DocImage *) {
+   void visitPost(DocImage *) override {
       indent_post();
       printf("</image>\n");
    }
 
-   void visitPre(DocDotFile *df) {
+   void visitPre(DocDotFile *df) override {
       indent_pre();
       printf("<dotfile src=\"%s\">\n", csPrintable(df->name()));
    }
-   void visitPost(DocDotFile *) {
+
+   void visitPost(DocDotFile *) override {
       indent_post();
       printf("</dotfile>\n");
    }
-   void visitPre(DocMscFile *df) {
+
+   void visitPre(DocMscFile *df) override {
       indent_pre();
       printf("<mscfile src=\"%s\">\n", csPrintable(df->name()));
    }
-   void visitPost(DocMscFile *) {
+
+   void visitPost(DocMscFile *) override {
       indent_post();
       printf("</mscfile>\n");
    }
-   void visitPre(DocDiaFile *df) {
+
+   void visitPre(DocDiaFile *df) override {
       indent_pre();
       printf("<diafile src=\"%s\">\n", csPrintable(df->name()));
    }
-   void visitPost(DocDiaFile *) {
+
+   void visitPost(DocDiaFile *) override {
       indent_post();
       printf("</diafile>\n");
    }
 
-   void visitPre(DocLink *lnk) {
+   void visitPre(DocLink *lnk) override {
       indent_pre();
       printf("<link ref=\"%s\" file=\"%s\" anchor=\"%s\">\n",
              csPrintable(lnk->ref()), csPrintable(lnk->file()), csPrintable(lnk->anchor()));
    }
 
-   void visitPost(DocLink *) {
+   void visitPost(DocLink *) override {
       indent_post();
       printf("</link>\n");
    }    
                                    
-   void visitPre(DocRef *ref) {
+   void visitPre(DocRef *ref) override {
       indent_pre();
       printf("<ref ref=\"%s\" file=\"%s\" "
              "anchor=\"%s\" targetTitle=\"%s\""
@@ -699,32 +730,32 @@ class PrintDocVisitor : public DocVisitor
              ref->refToTable()?"yes":"no");
    }
 
-   void visitPost(DocRef *) {
+   void visitPost(DocRef *) override {
       indent_post();
       printf("</ref>\n");
    }
 
-   void visitPre(DocSecRefItem *ref) {
+   void visitPre(DocSecRefItem *ref) override {
       indent_pre();
       printf("<secrefitem target=\"%s\">\n", csPrintable(ref->target()));
    }
 
-   void visitPost(DocSecRefItem *) {
+   void visitPost(DocSecRefItem *) override {
       indent_post();
       printf("</secrefitem>\n");
    }
 
-   void visitPre(DocSecRefList *) {
+   void visitPre(DocSecRefList *) override {
       indent_pre();
       printf("<secreflist>\n");
    }
 
-   void visitPost(DocSecRefList *) {
+   void visitPost(DocSecRefList *) override {
       indent_post();
       printf("</secreflist>\n");
    }
 
-   void visitPre(DocParamList *pl) {
+   void visitPre(DocParamList *pl) override {
       indent_pre();
 
       DocNode *param;
@@ -746,12 +777,12 @@ class PrintDocVisitor : public DocVisitor
       printf("\n");
    }
 
-   void visitPost(DocParamList *) {
+   void visitPost(DocParamList *) override {
       indent_post();
       printf("</parameters>\n");
    }
 
-   void visitPre(DocParamSect *ps) {
+   void visitPre(DocParamSect *ps) override {
       indent_pre();
       printf("<paramsect type=");
 
@@ -775,65 +806,67 @@ class PrintDocVisitor : public DocVisitor
       printf(">\n");
    }
 
-   void visitPost(DocParamSect *) {
+   void visitPost(DocParamSect *) override {
       indent_post();
       printf("</paramsect>\n");
    }
 
-   void visitPre(DocXRefItem *x) {
+   void visitPre(DocXRefItem *x) override {
       indent_pre();
       printf("<xrefitem file=\"%s\" anchor=\"%s\" title=\"%s\"/>\n",
              csPrintable(x->file()), csPrintable(x->anchor()), csPrintable(x->title()));
    }
 
-   void visitPost(DocXRefItem *) {
+   void visitPost(DocXRefItem *) override {
       indent_post();
       printf("<xrefitem/>\n");
    }
 
-   void visitPre(DocInternalRef *r) {
+   void visitPre(DocInternalRef *r) override {
       indent_pre();
       printf("<internalref file=%s anchor=%s>\n", csPrintable(r->file()), csPrintable(r->anchor()));
    }
 
-   void visitPost(DocInternalRef *) {
+   void visitPost(DocInternalRef *) override {
       indent_post();
       printf("</internalref>\n");
    }
-   void visitPre(DocCopy *c) {
+   void visitPre(DocCopy *c) override {
       indent_pre();
       printf("<copy link=\"%s\">\n", csPrintable(c->link()));
    }
-   void visitPost(DocCopy *) {
+
+   void visitPost(DocCopy *) override {
       indent_post();
       printf("</copy>\n");
    }
-   void visitPre(DocText *) {
+
+   void visitPre(DocText *) override {
       indent_pre();
       printf("<text>\n");
    }
 
-   void visitPost(DocText *) {
+   void visitPost(DocText *) override {
       indent_post();
       printf("</text>\n");
    }
 
-   void visitPre(DocHtmlBlockQuote *) {
+   void visitPre(DocHtmlBlockQuote *) override {
       indent_pre();
       printf("<blockquote>\n");
    }
 
-   void visitPost(DocHtmlBlockQuote *) {
+   void visitPost(DocHtmlBlockQuote *) override {
       indent_post();
       printf("</blockquote>\n");
    }
 
-   void visitPre(DocParBlock *) {
+   void visitPre(DocParBlock *) override {
       indent_pre();
       printf("<parblock>\n");
    }
 
-   void visitPost(DocParBlock *) {
+   void visitPost(DocParBlock *) override {
       indent_post();
       printf("</parblock>\n");
    }

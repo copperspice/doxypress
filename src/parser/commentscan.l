@@ -2739,7 +2739,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ----- handle arguments of the cite command ------- */
 
 <CiteLabel>{CITEID}        { 
-      // found argyment
+      // found argument
       QString text = QString::fromUtf8(yytext);
 
       addCite();

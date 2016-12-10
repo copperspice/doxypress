@@ -73,7 +73,7 @@ class FileDef : public Definition
    FileDef(const QString &p, const QString &n, const QString &ref = QString(), const QString &dn = QString());
    ~FileDef();
 
-   DefType definitionType() const {
+   DefType definitionType() const override {
       return TypeFile;
    }
 
@@ -135,9 +135,9 @@ class FileDef : public Definition
       return m_fileVersion;
    }
 
-   bool isLinkableInProject() const;
+   bool isLinkableInProject() const override;
 
-   bool isLinkable() const {
+   bool isLinkable() const override {
       return isLinkableInProject() || isReference();
    }
 
@@ -210,8 +210,8 @@ class FileDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
-   void writeSummaryLinks(OutputList &ol);
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const override;
+   void writeSummaryLinks(OutputList &ol) override;
    void writeTagFile(QTextStream &t);
 
    void startParsing();

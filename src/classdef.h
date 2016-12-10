@@ -84,7 +84,7 @@ class ClassDef : public Definition
    }
 
    /** Returns the unique base name (without extension) of the class's file on disk */
-   QString getOutputFileBase() const;
+   QString getOutputFileBase() const override;
    QString getInstanceOutputFileBase() const;
    QString getFileBase() const;
 
@@ -95,7 +95,7 @@ class ClassDef : public Definition
    QString getReference() const override;
 
    /** Returns true if this class is imported via a tag file */
-   bool isReference() const;
+   bool isReference() const override;
 
    /** Returns true if this is a local class definition, see EXTRACT_LOCAL_CLASSES */
    bool isLocal() const;
@@ -104,7 +104,7 @@ class ClassDef : public Definition
    ClassSDict *getClassSDict();
 
    /** returns true if this class has documentation */
-   bool hasDocumentation() const;
+   bool hasDocumentation() const override;
 
    /** returns true if this class has a non-empty detailed description */
    bool hasDetailedDescription() const;
@@ -139,12 +139,12 @@ class ClassDef : public Definition
 
    /** returns true iff a link is possible to this item within this project.
     */
-   bool isLinkableInProject() const;
+   bool isLinkableInProject() const override;
 
    /** return true iff a link to this class is possible (either within
     *  this project, or as a cross-reference to another project).
     */
-   bool isLinkable() const;
+   bool isLinkable() const override;
 
    /** the class is visible in a class diagram, or class hierarchy */
    bool isVisibleInHierarchy();
@@ -214,7 +214,7 @@ class ClassDef : public Definition
     *  available, or 0 otherwise.
     *  @param name The name of the nested compound
     */
-   virtual QSharedPointer<Definition> findInnerCompound(const QString &name) override;
+   QSharedPointer<Definition> findInnerCompound(const QString &name) override;
 
    /** Returns the template parameter lists that form the template
     *  declaration of this class.
@@ -276,7 +276,7 @@ class ClassDef : public Definition
 
    bool isUsedOnly() const;
 
-   QString anchor() const;
+   QString anchor() const override;
    bool isEmbeddedInOuterScope() const;
 
    bool isSimple() const;
@@ -341,7 +341,7 @@ class ClassDef : public Definition
 
    void addTaggedInnerClass(QSharedPointer<ClassDef> cd);
    void setTagLessReference(QSharedPointer<ClassDef> cd);
-   void setName(const QString &name);
+   void setName(const QString &name) override;
 
    // actions
    void findSectionsInDocumentation();
@@ -359,8 +359,8 @@ class ClassDef : public Definition
    void writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup, 
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
-   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> md) const;
-   void writeSummaryLinks(OutputList &ol);
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> md) const override;
+   void writeSummaryLinks(OutputList &ol) override;
    void reclassifyMember(QSharedPointer<MemberDef> md, MemberType t);
    void writeInlineDocumentation(OutputList &ol);
    void writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames);

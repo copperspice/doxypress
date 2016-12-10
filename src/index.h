@@ -101,29 +101,29 @@ class IndexList : public IndexIntf
    }
 
    // IndexIntf implementation
-   void initialize() {
+   void initialize() override  {
       call_forEach(&IndexIntf::initialize);
    }
 
-   void finalize() {
+   void finalize() override  {
       call_forEach(&IndexIntf::finalize);
    }
 
-   void incContentsDepth() {
+   void incContentsDepth() override  {
       if (m_enabled) {
          call_forEach(&IndexIntf::incContentsDepth);
       }
    }
 
-   void decContentsDepth() {
+   void decContentsDepth() override {
       if (m_enabled) {
          call_forEach(&IndexIntf::decContentsDepth);
       }
    }
 
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-                        bool addToNavIndex = false, QSharedPointer<Definition> def = QSharedPointer<Definition>(), 
-                        DirType category = DirType::None) override {
+                  bool addToNavIndex = false, QSharedPointer<Definition> def = QSharedPointer<Definition>(), 
+                  DirType category = DirType::None) override {
 
       if (m_enabled)  {
          for (auto item : m_intfs) {
@@ -132,8 +132,8 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor = QString(), 
-                     const QString &title = QString() ) {   
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
+                  const QString &sectionAnchor = QString(), const QString &title = QString()) override {   
       if (m_enabled) {
          for (auto item : m_intfs) {
             item->addIndexItem(context, md, sectionAnchor, title);    

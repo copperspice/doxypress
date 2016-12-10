@@ -6574,7 +6574,7 @@ YY_RULE_SETUP
 case 199:
 YY_RULE_SETUP
 { 
-      // found argyment
+      // found argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
       addCite();

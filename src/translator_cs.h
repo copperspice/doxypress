@@ -40,7 +40,7 @@ class Translator_Cs : public Translator
     *
     * English LaTeX does not use these commands, return an empty string
     */
-   virtual QString latexLanguageSupportCommand() {
+   QString latexLanguageSupportCommand() override {
 
       QString retval = QCoreApplication::translate("latexSupport", "remove-value");
 
@@ -52,37 +52,37 @@ class Translator_Cs : public Translator
    }
    
    /*! used in the compound documentation before a list of related functions. */
-   virtual QString trRelatedFunctions() {
+   QString trRelatedFunctions() override {
       return QCoreApplication::translate("doxy-text", "Related Functions");
    }
 
    /*! subscript for the related functions. */
-   virtual QString trRelatedSubscript() {
+   QString trRelatedSubscript() override {
       return QCoreApplication::translate("doxy-text", "These are not member functions");
    }
 
    /*! header that is put before the detailed description of files, classes and namespaces. */
-   virtual QString trDetailedDescription() {
+   QString trDetailedDescription() override {
       return QCoreApplication::translate("doxy-text", "Detailed Description");
    }
 
    /*! header that is put before the list of typedefs. */
-   virtual QString trMemberTypedefDocumentation() {
+   QString trMemberTypedefDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Member Typedef Documentation");
    }
 
    /*! header that is put before the list of enumerations. */
-   virtual QString trMemberEnumerationDocumentation() {
+   QString trMemberEnumerationDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Member Enumeration Documentation");
    }
 
    /*! header that is put before the list of member functions. */
-   virtual QString trMemberFunctionDocumentation() {
+   QString trMemberFunctionDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Member Function Documentation");
    }
 
    /*! header that is put before the list of member attributes. */
-   virtual QString trMemberDataDocumentation() {
+   QString trMemberDataDocumentation() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Field Documentation");
       } else {
@@ -91,34 +91,34 @@ class Translator_Cs : public Translator
    }
 
    /*! this is the text of a link put after brief descriptions. */
-   virtual QString trMore() {
+   QString trMore() override {
       return QCoreApplication::translate("doxy-text", "More...");;
    }
 
    /*! put in the class documentation */
-   virtual QString trListOfAllMembers() {
+   QString trListOfAllMembers() override {
       return QCoreApplication::translate("doxy-text", "List of all members");
    }
 
    /*! used as the title of the "list of all members" page of a class */
-   virtual QString trMemberList() {
+   QString trMemberList() override {
       return QCoreApplication::translate("doxy-text", "Member List");
    }
 
    /*! this is the first part of a sentence that is followed by a class name */
-   virtual QString trThisIsTheListOfAllMembers() {
+   QString trThisIsTheListOfAllMembers() override {
       return QCoreApplication::translate("doxy-text", "This is the complete list of members for ");
    }
 
    /*! this is the remainder of the sentence after the class name */
-   virtual QString trIncludingInheritedMembers() {
+   QString trIncludingInheritedMembers() override {
       return QCoreApplication::translate("doxy-text", ", including all inherited members.");
    }
 
    /*! this is put at the author sections at the bottom of man pages.
     *  parameter s is name of the project name.
     */
-   virtual QString trGeneratedAutomatically(const QString &s) {        
+   QString trGeneratedAutomatically(const QString &s) override {        
       if (! s.isEmpty() ) {      
          return QCoreApplication::translate("doxy-text", "Generated automatically by DoxyPress for %1 from the source code.").arg(s);
 
@@ -129,34 +129,34 @@ class Translator_Cs : public Translator
    }
 
    /*! put after an enum name in the list of all members */
-   virtual QString trEnumName() {
+   QString trEnumName() override {
       return QCoreApplication::translate("doxy-text", "enum name");;
    }
 
    /*! put after an enum value in the list of all members */
-   virtual QString trEnumValue() {
+   QString trEnumValue() override {
       return QCoreApplication::translate("doxy-text", "enum value");
    }
 
    /*! put after an undocumented member in the list of all members */
-   virtual QString trDefinedIn() {
+   QString trDefinedIn() override {
       return QCoreApplication::translate("doxy-text", "defined in");
    }
 
    /*! This is put above each page as a link to the list of all groups of
     *  compounds or files (see the \\group command).
     */
-   virtual QString trModules() {
+   QString trModules() override {
       return QCoreApplication::translate("doxy-text", "Modules");;
    }
 
    /*! This is put above each page as a link to the class hierarchy */
-   virtual QString trClassHierarchy() {
+   QString trClassHierarchy() override {
       return QCoreApplication::translate("doxy-text", "Class Hierarchy");
    }
 
    /*! This is put above each page as a link to the list of annotated classes */
-   virtual QString trCompoundList() {
+   QString trCompoundList() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Structures");
       } else {
@@ -165,12 +165,12 @@ class Translator_Cs : public Translator
    }
 
    /*! This is put above each page as a link to the list of documented files */
-   virtual QString trFileList() {
+   QString trFileList() override {
       return QCoreApplication::translate("doxy-text", "File List");
    }
 
    /*! This is put above each page as a link to all members of compounds. */
-   virtual QString trCompoundMembers() {
+   QString trCompoundMembers() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Fields");
       } else {
@@ -179,7 +179,7 @@ class Translator_Cs : public Translator
    }
 
    /*! This is put above each page as a link to all members of files. */
-   virtual QString trFileMembers() {
+   QString trFileMembers() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Globals");
       } else {
@@ -188,33 +188,33 @@ class Translator_Cs : public Translator
    }
 
    /*! This is put above each page as a link to all related pages. */
-   virtual QString trRelatedPages() {
+   QString trRelatedPages() override {
       return QCoreApplication::translate("doxy-text", "Related Pages");
    }
 
    /*! This is put above each page as a link to file source. */
-   virtual QString trFileSource() {
+   QString trFileSource() override {
       return QCoreApplication::translate("doxy-text", "File Source");
    }
 
    /*! This is put above each page as a link to all examples. */
-   virtual QString trExamples() {
+   QString trExamples() override {
       return QCoreApplication::translate("doxy-text", "Examples");
    }
 
    /*! This is put above each page as a link to the search engine. */
-   virtual QString trSearch() {
+   QString trSearch() override {
       return QCoreApplication::translate("doxy-text", "Search");
    }
 
    /*! This is an introduction to the class hierarchy. */
-   virtual QString trClassHierarchyDescription() {
+   QString trClassHierarchyDescription() override {
       return QCoreApplication::translate("doxy-text", "This inheritance list is sorted roughly, "
                 "but not completely, alphabetically:");
    }
 
    /*! This is an introduction to the list with all files. */
-   virtual QString trFileListDescription(bool extractAll) {   
+   QString trFileListDescription(bool extractAll) override {  
       if (extractAll) {
          return QCoreApplication::translate("doxy-text", "Here is a list of all files with brief "
                   "descriptions:");
@@ -225,7 +225,7 @@ class Translator_Cs : public Translator
    }
 
    /*! This is an introduction to the annotated compound list. */
-   virtual QString trCompoundListDescription() {
+   QString trCompoundListDescription() override {
 
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", 
@@ -238,7 +238,7 @@ class Translator_Cs : public Translator
    }
 
    /*! This is an introduction to the page with all class members. */
-   virtual QString trCompoundMembersDescription(bool extractAll) { 
+   QString trCompoundMembersDescription(bool extractAll) override {
       QString result;
 
       if (extractAll) {
@@ -267,7 +267,7 @@ class Translator_Cs : public Translator
    }
 
    /*! This is an introduction to the page with all file members. */
-   virtual QString trFileMembersDescription(bool extractAll) {      
+   QString trFileMembersDescription(bool extractAll) override {      
       QString result;
 
       if (extractAll) { 
@@ -298,50 +298,50 @@ class Translator_Cs : public Translator
    }
 
    /*! This is an introduction to the page with the list of all file source */
-   virtual QString trFileSourceDescription() {
+   QString trFileSourceDescription() override {
       return QCoreApplication::translate("doxy-text", "Here is a list of all source code files with brief descriptions:");
    }
 
    /*! This is an introduction to the page with the list of all examples */
-   virtual QString trExamplesDescription() {
+   QString trExamplesDescription() override {
       return QCoreApplication::translate("doxy-text", "Here is a list of all examples:");
    }
 
    /*! This is an introduction to the page with the list of related pages */
-   virtual QString trRelatedPagesDescription() {
+   QString trRelatedPagesDescription() override {
       return QCoreApplication::translate("doxy-text", "Here is a list of all related documentation pages:");
    }
 
    /*! This is an introduction to the page with the list of class/file groups */
-   virtual QString trModulesDescription() {
+   QString trModulesDescription() override {
       return QCoreApplication::translate("doxy-text", "Here is a list of all modules:");
    }
 
    // index titles (the project name is prepended for these)            
 
    /*! This is used in HTML as the title of index.html. */
-   virtual QString trDocumentation() {
+   QString trDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Documentation");
    }
 
    /*! This is used in LaTeX as the title of the chapter with the
     * index of all groups.
     */
-   virtual QString trModuleIndex() {
+   QString trModuleIndex() override {
       return QCoreApplication::translate("doxy-text", "Module Index");
    }
 
    /*! This is used in LaTeX as the title of the chapter with the
     * class hierarchy.
     */
-   virtual QString trHierarchicalIndex() {
+   QString trHierarchicalIndex() override {
       return QCoreApplication::translate("doxy-text", "Hierarchical Index");
    }
 
    /*! This is used in LaTeX as the title of the chapter with the
     * annotated compound index.
     */
-   virtual QString trCompoundIndex() {
+   QString trCompoundIndex() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Structure Index");
       } else {
@@ -351,21 +351,21 @@ class Translator_Cs : public Translator
 
    /*! This is used in LaTeX as the title of the chapter with the list of all files.
     */
-   virtual QString trFileIndex() {
+   QString trFileIndex() override {
       return QCoreApplication::translate("doxy-text", "File Index");
    }
 
    /*! This is used in LaTeX as the title of the chapter containing
     *  the documentation of all groups.
     */
-   virtual QString trModuleDocumentation() {
+   QString trModuleDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Module Documentation");
    }
 
    /*! This is used in LaTeX as the title of the chapter containing
     *  the documentation of all classes, structs and unions.
     */
-   virtual QString trClassDocumentation() {
+   QString trClassDocumentation() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Structure Documentation");
       } else {
@@ -376,121 +376,121 @@ class Translator_Cs : public Translator
    /*! This is used in LaTeX as the title of the chapter containing
     *  the documentation of all files.
     */
-   virtual QString trFileDocumentation() {
+   QString trFileDocumentation() override {
       return QCoreApplication::translate("doxy-text", "File Documentation");
    }
 
    /*! This is used in LaTeX as the title of the chapter containing
     *  the documentation of all examples.
     */
-   virtual QString trExampleDocumentation() {
+   QString trExampleDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Example Documentation");
    }
 
    /*! This is used in LaTeX as the title of the chapter containing
     *  the documentation of all related pages.
     */
-   virtual QString trPageDocumentation() {
+   QString trPageDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Page Documentation");
    }
 
    /*! This is used in LaTeX as the title of the document */
-   virtual QString trReferenceManual() {
+   QString trReferenceManual() override {
       return QCoreApplication::translate("doxy-text", "Reference Manual");
    }
 
    /*! This is used in the documentation of a file as a header before the
     *  list of defines
     */
-   virtual QString trDefines() {
+   QString trDefines() override {
       return QCoreApplication::translate("doxy-text", "Macros");
    }
 
-   virtual QString trPublicTypedefs() {
+   QString trPublicTypedefs() override {
       return QCoreApplication::translate("doxy-text", "Public Typedefs");
    }
 
-   virtual QString trProtectedTypedefs() {
+   QString trProtectedTypedefs() override {
       return QCoreApplication::translate("doxy-text", "Protected Typedefs");
    }
 
-   virtual QString trPrivateTypedefs() {
+   QString trPrivateTypedefs() override {
       return QCoreApplication::translate("doxy-text", "Private Typedefs");
    }
 
    /*! This is used in the documentation of a file as a header before the list of typedefs
     */
-   virtual QString trTypedefs() {
+   QString trTypedefs() override {
       return QCoreApplication::translate("doxy-text", "Typedefs");
    }
 
    /*! This is used in the documentation of a file as a header before the
     *  list of enumerations
     */
-   virtual QString trEnumerations() {
+   QString trEnumerations() override {
       return QCoreApplication::translate("doxy-text", "Enums");
    }
 
    /*! This is used in the documentation of a file as a header before the
     *  list of (global) functions
     */
-   virtual QString trFunctions() {
+   QString trFunctions() override {
       return QCoreApplication::translate("doxy-text", "Functions");
    }
 
    /*! This is used in the documentation of a file as a header before the
     *  list of (global) variables
     */
-   virtual QString trVariables() {
+   QString trVariables() override {
       return QCoreApplication::translate("doxy-text", "Variables");
    }
 
    /*! This is used in the documentation of a file as a header before the
     *  list of (global) variables
     */
-   virtual QString trEnumerationValues() {
+   QString trEnumerationValues() override {
       return QCoreApplication::translate("doxy-text", "Enum Values");
    }
 
    /*! This is used in the documentation of a file before the list of
     *  documentation blocks for defines
     */
-   virtual QString trDefineDocumentation() {
+   QString trDefineDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Macro Definition Documentation");
    }
 
    /*! This is used in the documentation of a file/namespace before the list
     *  of documentation blocks for typedefs
     */
-   virtual QString trTypedefDocumentation() {
+   QString trTypedefDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Typedef Documentation");
    }
 
    /*! This is used in the documentation of a file/namespace before the list
     *  of documentation blocks for enumeration types
     */
-   virtual QString trEnumerationTypeDocumentation() {
+   QString trEnumerationTypeDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Enumeration Type Documentation");
    }
 
    /*! This is used in the documentation of a file/namespace before the list
     *  of documentation blocks for functions
     */
-   virtual QString trFunctionDocumentation() {
+   QString trFunctionDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Function Documentation");
    }
 
    /*! This is used in the documentation of a file/namespace before the list
     *  of documentation blocks for variables
     */
-   virtual QString trVariableDocumentation() {
+   QString trVariableDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Variable Documentation");
    }
 
    /*! This is used in the documentation of a file/namespace/group before
     *  the list of links to documented compounds
     */
-   virtual QString trCompounds() {
+   QString trCompounds() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Structures");
       } else {
@@ -501,7 +501,7 @@ class Translator_Cs : public Translator
    /*! This is used in the standard footer of each page and indicates when
     *  the page was generated
     */
-   virtual QString trGeneratedAt(const QString &date, const QString &projName) {  
+   QString trGeneratedAt(const QString &date, const QString &projName) override {  
 
       if (projName.isEmpty()) {
          return QCoreApplication::translate("doxy-text", "Generated on %1 &nbsp; by").arg(date);         
@@ -511,62 +511,62 @@ class Translator_Cs : public Translator
    }
 
    /*! this text is put before a class diagram */
-   virtual QString trClassDiagram(const QString &clName) {
+   QString trClassDiagram(const QString &clName) override {
       return QCoreApplication::translate("doxy-text", "Inheritance diagram for %1:").arg(clName);
    }
 
    /*! this text is generated when the \\internal command is used. */
-   virtual QString trForInternalUseOnly() {
+   QString trForInternalUseOnly() override {
       return QCoreApplication::translate("doxy-text", "For internal use only.");
    }
 
    /*! this text is generated when the \\warning command is used. */
-   virtual QString trWarning() {
+   QString trWarning() override {
       return QCoreApplication::translate("doxy-text", "Warning");
    }
 
    /*! this text is generated when the \\version command is used. */
-   virtual QString trVersion() {
+   QString trVersion() override {
       return QCoreApplication::translate("doxy-text", "Version");
    }
 
    /*! this text is generated when the \\date command is used. */
-   virtual QString trDate() {
+   QString trDate() override {
       return QCoreApplication::translate("doxy-text", "Date");
    }
 
    /*! this text is generated when the \\return command is used. */
-   virtual QString trReturns() {
+   QString trReturns() override {
       return QCoreApplication::translate("doxy-text", "Returns");
    }
 
    /*! this text is generated when the \\sa command is used. */
-   virtual QString trSeeAlso() {
+   QString trSeeAlso() override {
       return QCoreApplication::translate("doxy-text", "See also");
    }
 
    /*! this text is generated when the \\param command is used. */
-   virtual QString trParameters() {
+   QString trParameters() override {
       return QCoreApplication::translate("doxy-text", "Parameters");
    }
 
    /*! this text is generated when the \\exception command is used. */
-   virtual QString trExceptions() {
+   QString trExceptions() override {
       return QCoreApplication::translate("doxy-text", "Exceptions");
    }
 
    /*! this text is used in the title page of a LaTeX document. */
-   virtual QString trGeneratedBy() {
+   QString trGeneratedBy() override {
       return QCoreApplication::translate("doxy-text", "Generated by");
    }
 
    /*! used as the title of page containing all the index of all namespaces. */
-   virtual QString trNamespaceList() {
+   QString trNamespaceList() override {
       return QCoreApplication::translate("doxy-text", "Namespace List");
    }
 
    /*! used as an introduction to the namespace list */   
-   virtual QString trNamespacesListDescription(bool extractAll) {      
+   QString trNamespacesListDescription(bool extractAll) override {      
 
       if (extractAll) {
          return QCoreApplication::translate("doxy-text", "Here is a list of all namespaces with "
@@ -580,19 +580,19 @@ class Translator_Cs : public Translator
    /*! used in the class documentation as a header before the list of all
     *  friends of a class
     */
-   virtual QString trFriends() {
+   QString trFriends() override {
       return QCoreApplication::translate("doxy-text", "Friends");
    }
 
    /*! used in the class documentation as a header before the list of all
     * related classes
     */
-   virtual QString trRelatedFunctionDocumentation() {
+   QString trRelatedFunctionDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Friends And Related Function Documentation");
    }  
 
    /*! used as the title of the HTML page of a class/struct/union */
-   virtual QString trCompoundReference(const QString &clName, enum CompoundType compType, bool isTemplate) {                                                                                
+   QString trCompoundReference(const QString &clName, enum CompoundType compType, bool isTemplate) override {                                                                                
       QString result;
       
       switch (compType) {
@@ -665,58 +665,67 @@ class Translator_Cs : public Translator
    }
 
    /*! used as the title of the HTML page of a file */
-   virtual QString trFileReference(const QString &fileName) {
+   QString trFileReference(const QString &fileName)  override {
       return QCoreApplication::translate("doxy-text", "%1 File Reference").arg(fileName);
    }
 
    /*! used as the title of the HTML page of a namespace */
-   virtual QString trNamespaceReference(const QString &name) {   
+   QString trNamespaceReference(const QString &name)  override {   
       return QCoreApplication::translate("doxy-text", "%1 Namespace Reference").arg(name);
    }
 
-   virtual QString trPublicMembers() {
+   QString trPublicMembers() override {
       return QCoreApplication::translate("doxy-text", "Public Member Functions");
    }
   
-   virtual QString trPublicSignals() {
+   QString trPublicSignals() override {
       return QCoreApplication::translate("doxy-text", "Public Signals");
    }
-   virtual QString trProtectedSignals() {
+
+   QString trProtectedSignals() override {
       return QCoreApplication::translate("doxy-text", "Protected Signals");
    }
-   virtual QString trPrivateSignals() {
+
+   QString trPrivateSignals() override {
       return QCoreApplication::translate("doxy-text", "Private Signals");
    }
 
-   virtual QString trStaticPublicMembers() {
+   QString trStaticPublicMembers() override {
       return QCoreApplication::translate("doxy-text", "Static Public Member Functions");
    }
-   virtual QString trProtectedMembers() {
+
+   QString trProtectedMembers() override {
       return QCoreApplication::translate("doxy-text", "Protected Member Functions");
    }
-   virtual QString trPublicSlots() {
+
+   QString trPublicSlots() override {
       return QCoreApplication::translate("doxy-text", "Public Slots");
    }
-   virtual QString trProtectedSlots() {
+
+   QString trProtectedSlots() override {
       return QCoreApplication::translate("doxy-text", "Protected Slots");
    }
-   virtual QString trStaticProtectedMembers() {
+
+   QString trStaticProtectedMembers() override {
       return QCoreApplication::translate("doxy-text", "Static Protected Member Functions");
    }
-   virtual QString trPrivateMembers() {
+
+   QString trPrivateMembers() override {
       return QCoreApplication::translate("doxy-text", "Private Member Functions");
    }
-   virtual QString trPrivateSlots() {
+
+   QString trPrivateSlots() override {
       return QCoreApplication::translate("doxy-text", "Private Slots");
    }
-   virtual QString trStaticPrivateMembers() {
+
+   QString trStaticPrivateMembers() override {
       return QCoreApplication::translate("doxy-text", "Static Private Member Functions");
    }
 
    /*! this function is used to produce a comma-separated list of items.
     *  use generateMarker(i) to indicate where item i should be put.
     */
-   virtual QString trWriteList(int numEntries) {                                  
+   QString trWriteList(int numEntries) override {   
       QString result;
 
       // the inherits list contains `numEntries' classes
@@ -745,38 +754,38 @@ class Translator_Cs : public Translator
    /*! used in class documentation to produce a list of base classes,
     *  if class diagrams are disabled.
     */
-   virtual QString trInheritsList(int numEntries) {      
+   QString trInheritsList(int numEntries) override {      
       return QCoreApplication::translate("doxy-text", "Inherits %1.").arg( trWriteList(numEntries));
    }
 
    /*! used in class documentation to produce a list of super classes,
     *  if class diagrams are disabled.
     */
-   virtual QString trInheritedByList(int numEntries) {
+   QString trInheritedByList(int numEntries) override {
       return QCoreApplication::translate("doxy-text", "Inherited by %1.").arg( trWriteList(numEntries));
    }
 
    /*! used in member documentation blocks to produce a list of
     *  members that are hidden by this one.
     */
-   virtual QString trReimplementedFromList(int numEntries) {
+   QString trReimplementedFromList(int numEntries) override {
       return QCoreApplication::translate("doxy-text", "Reimplemented from %1.").arg( trWriteList(numEntries));
    }
 
    /*! used in member documentation blocks to produce a list of
     *  all member that overwrite the implementation of this member.
     */
-   virtual QString trReimplementedInList(int numEntries) {
+   QString trReimplementedInList(int numEntries)  override {
       return QCoreApplication::translate("doxy-text", "Reimplemented in %1.").arg( trWriteList(numEntries));
    }
 
    /*! This is put above each page as a link to all members of namespaces. */
-   virtual QString trNamespaceMembers() {
+   QString trNamespaceMembers() override {
       return QCoreApplication::translate("doxy-text", "Namespace Members");
    }
 
    /*! This is an introduction to the page with all namespace members */
-   virtual QString trNamespaceMemberDescription(bool extractAll) {         
+   QString trNamespaceMemberDescription(bool extractAll) override {         
       if (extractAll) {
          return QCoreApplication::translate("doxy-text", "Here is a list of all namespace members with links "
                   "to the namespace documentation for each member:"); 
@@ -789,28 +798,28 @@ class Translator_Cs : public Translator
    /*! This is used in LaTeX as the title of the chapter with the
     *  index of all namespaces.
     */
-   virtual QString trNamespaceIndex() {
+   QString trNamespaceIndex() override {
       return QCoreApplication::translate("doxy-text", "Namespace Index");
    }
 
    /*! This is used in LaTeX as the title of the chapter containing
     *  the documentation of all namespaces.
     */
-   virtual QString trNamespaceDocumentation() {
+   QString trNamespaceDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Namespace Documentation");
    }
 
    /*! This is used in the documentation before the list of all
     *  namespaces in a file.
     */
-   virtual QString trNamespaces() {
+   QString trNamespaces() override {
       return QCoreApplication::translate("doxy-text", "Namespaces");
    }
 
    /*! This is put at the bottom of a class documentation page and is
     *  followed by a list of files that were used to generate the page.
     */
-   virtual QString trGeneratedFromFiles(enum CompoundType compType, bool single) {
+   QString trGeneratedFromFiles(enum CompoundType compType, bool single) override {
       QString result;
       
       switch (compType) {
@@ -903,107 +912,108 @@ class Translator_Cs : public Translator
    }
 
    /*! This is used as the heading text for the retval command. */
-   virtual QString trReturnValues() {
+   QString trReturnValues() override {
       return QCoreApplication::translate("doxy-text", "Return Values");
    }
 
    /*! This is in the (quick) index as a link to the main page (index.html)
     */
-   virtual QString trMainPage() {
+   QString trMainPage() override {
       return QCoreApplication::translate("doxy-text", "Main Page");
    }
 
    /*! This is used in references to page that are put in the LaTeX
     *  documentation. It should be an abbreviation of the word page.
     */
-   virtual QString trPageAbbreviation() {
+   QString trPageAbbreviation() override {
       return QCoreApplication::translate("doxy-text", "p,");
    }
  
-   virtual QString trDefinedAtLineInSourceFile() {        
+   QString trDefinedAtLineInSourceFile() override { 
       return QCoreApplication::translate("doxy-text", "Definition at line @0 of file @1.");          
    }
 
-   virtual QString trDefinedInSourceFile() {               
+   QString trDefinedInSourceFile() override {  
       return QCoreApplication::translate("doxy-text", "Definition in file @0.");
    }
 
-   virtual QString trDeprecated() {
+   QString trDeprecated() override {
       return QCoreApplication::translate("doxy-text", "Deprecated");
    }
 
    /*! this text is put before a collaboration diagram */
-   virtual QString trCollaborationDiagram(const QString &clName) {
+   QString trCollaborationDiagram(const QString &clName) override {
       return QCoreApplication::translate("doxy-text", "Collaboration diagram for %1:").arg(clName);
    }
 
    /*! this text is put before an include dependency graph */
-   virtual QString trInclDepGraph(const QString &fName) {
+   QString trInclDepGraph(const QString &fName)  override {
       return QCoreApplication::translate("doxy-text", "Include dependency graph for %1:").arg(fName);
    }  
 
    /*! header that is put before the list of constructor/destructors. */
-   virtual QString trConstructorDocumentation() {
+   QString trConstructorDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Constructor & Destructor Documentation");
    }
 
    /*! Used in the file documentation to point to the corresponding sources. */
-   virtual QString trGotoSourceCode() {
+   QString trGotoSourceCode() override {
       return QCoreApplication::translate("doxy-text", "Go to the source code of this file.");
    }
 
    /*! Used in the file sources to point to the corresponding documentation. */
-   virtual QString trGotoDocumentation() {
+   QString trGotoDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Go to the documentation of this file.");
    }
 
    /*! Text for the \\pre command */
-   virtual QString trPrecondition() {
+   QString trPrecondition() override {
       return QCoreApplication::translate("doxy-text", "Precondition");
    }
 
    /*! Text for the \\post command */
-   virtual QString trPostcondition() {
+   QString trPostcondition() override {
       return QCoreApplication::translate("doxy-text", "Postcondition");
    }
    /*! Text for the \\invariant command */
-   virtual QString trInvariant() {
+   QString trInvariant() override {
       return QCoreApplication::translate("doxy-text", "Invariant");
    }
 
    /*! Text shown before a multi-line variable/enum initialization */
-   virtual QString trInitialValue() {
+   QString trInitialValue() override {
       return QCoreApplication::translate("doxy-text", "Initial value:");
    }
    /*! Text used the source code in the file index */
-   virtual QString trCode() {
+   QString trCode() override {
       return QCoreApplication::translate("doxy-text", "code");
    }
 
-   virtual QString trGraphicalHierarchy() {
+   QString trGraphicalHierarchy() override {
       return QCoreApplication::translate("doxy-text", "Graphical Class Hierarchy");
    }
 
-   virtual QString trGotoGraphicalHierarchy() {
+   QString trGotoGraphicalHierarchy() override {
       return QCoreApplication::translate("doxy-text", "Go to the graphical class hierarchy");
    }
 
-   virtual QString trGotoTextualHierarchy() {
+   QString trGotoTextualHierarchy() override {
       return QCoreApplication::translate("doxy-text", "Go to the textual class hierarchy");
    }
 
-   virtual QString trPageIndex() {
+   QString trPageIndex() override {
       return QCoreApplication::translate("doxy-text", "Page Index");
    }
 
-   virtual QString trNote() {
+   QString trNote() override {
       return QCoreApplication::translate("doxy-text", "Note");
    }
-   virtual QString trPublicTypes() {
+
+   QString trPublicTypes() override {
       return QCoreApplication::translate("doxy-text", "Public Types");
    }
 
-   virtual QString trPublicAttribs() {
+   QString trPublicAttribs() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Fields");
       } else {
@@ -1011,74 +1021,74 @@ class Translator_Cs : public Translator
       }
    }
 
-   virtual QString trStaticPublicAttribs() {
+   QString trStaticPublicAttribs() override {
       return QCoreApplication::translate("doxy-text", "Static Public Attributes");
    }
 
-   virtual QString trProtectedTypes() {
+   QString trProtectedTypes() override {
       return QCoreApplication::translate("doxy-text", "Protected Types");
    }
 
-   virtual QString trProtectedAttribs() {
+   QString trProtectedAttribs() override {
       return QCoreApplication::translate("doxy-text", "Protected Attributes");
    }
 
-   virtual QString trStaticProtectedAttribs() {
+   QString trStaticProtectedAttribs() override {
       return QCoreApplication::translate("doxy-text", "Static Protected Attributes");
    }
 
-   virtual QString trPrivateTypes() {
+   QString trPrivateTypes() override {
       return QCoreApplication::translate("doxy-text", "Private Types");
    }
 
-   virtual QString trPrivateAttribs() {
+   QString trPrivateAttribs() override {
       return QCoreApplication::translate("doxy-text", "Private Attributes");
    }
 
-   virtual QString trStaticPrivateAttribs() {
+   QString trStaticPrivateAttribs() override {
       return QCoreApplication::translate("doxy-text", "Static Private Attributes");
    }
 
    /*! Used as a marker that is put before a \\todo item */
-   virtual QString trTodo() {
+   QString trTodo() override {
       return QCoreApplication::translate("doxy-text", "Todo");
    }
 
    /*! Used as the header of the todo list */
-   virtual QString trTodoList() {
+   QString trTodoList() override {
       return QCoreApplication::translate("doxy-text", "Todo List");
    }
 
-   virtual QString trReferencedBy() {
+   QString trReferencedBy() override {
       return QCoreApplication::translate("doxy-text", "Referenced by");
    }
 
-   virtual QString trRemarks() {
+   QString trRemarks() override {
       return QCoreApplication::translate("doxy-text", "Remarks");
    }
 
-   virtual QString trAttention() {
+   QString trAttention() override {
       return QCoreApplication::translate("doxy-text", "Attention");
    }
 
-   virtual QString trInclByDepGraph() {
+   QString trInclByDepGraph() override {
       return QCoreApplication::translate("doxy-text", "This graph shows which files "
                   "directly or indirectly include this file");
    }
 
-   virtual QString trSince() {
+   QString trSince() override {
       return QCoreApplication::translate("doxy-text", "Since");
    }
 
    /*! title of the graph legend page */
-   virtual QString trLegendTitle() {
+   QString trLegendTitle() override {
       return QCoreApplication::translate("doxy-text", "Graph Legend");
    }
 
    /*! page explaining how the dot graph's should be interpreted
     *  The %A in the text below are to prevent link to classes called "A".
     */
-   virtual QString trLegendDocs(const QString &dotFormat) {     
+   QString trLegendDocs(const QString &dotFormat) override {     
       
       return QCoreApplication::translate("doxy-text", 
          "This page explains how to interpret the graphs which are generated by DoxyPress.\n\n"
@@ -1143,32 +1153,32 @@ class Translator_Cs : public Translator
    }
 
    /*! text for the link to the legend page */
-   virtual QString trLegend() {
+   QString trLegend() override {
       return QCoreApplication::translate("doxy-text", "legend");
    }
 
    /*! Used as a marker that is put before a test item */
-   virtual QString trTest() {
+   QString trTest() override {
       return QCoreApplication::translate("doxy-text", "Test");
    }
 
    /*! Used as the header of the test list */
-   virtual QString trTestList() {
+   QString trTestList() override {
       return QCoreApplication::translate("doxy-text", "Test List");
    }
 
    /*! Used as a section header for IDL properties */
-   virtual QString trProperties() {
+   QString trProperties() override {
       return QCoreApplication::translate("doxy-text", "Properties");
    }
 
    /*! Used as a section header for IDL property documentation */
-   virtual QString trPropertyDocumentation() {
+   QString trPropertyDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Property Documentation");
    }
   
    /*! Used for Java classes in the summary section of Java packages */
-   virtual QString trClasses() {
+   QString trClasses() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Structures");
       } else {
@@ -1177,38 +1187,38 @@ class Translator_Cs : public Translator
    }
 
    /*! Used as the title of a Java package */
-   virtual QString trPackage(const QString &name) {      
+   QString trPackage(const QString &name) override { 
       return QCoreApplication::translate("doxy-text", "Package %1").arg(name);
    }
 
    /*! Title of the package index page */
-   virtual QString trPackageList() {
+   QString trPackageList() override {
       return QCoreApplication::translate("doxy-text", "Package List");
    }
 
    /*! The description of the package index page */
-   virtual QString trPackagesListDescription() {
+   QString trPackagesListDescription() override {
       return QCoreApplication::translate("doxy-text", "Here are the packages with " 
                   "brief descriptions (if available):");
    }
 
    /*! The link name in the Quick links header for each page */
-   virtual QString trPackages() {
+   QString trPackages() override {
       return QCoreApplication::translate("doxy-text", "Packages");
    }
 
    /*! Text shown before a multi-line define */
-   virtual QString trDefineValue() {
+   QString trDefineValue() override {
       return QCoreApplication::translate("doxy-text", "Value:");
    }
 
    /*! Used as a marker that is put before a \\bug item */
-   virtual QString trBug() {
+   QString trBug() override {
       return QCoreApplication::translate("doxy-text", "Bug");
    }
 
    /*! Used as the header of the bug list */
-   virtual QString trBugList() {
+   QString trBugList() override {
       return QCoreApplication::translate("doxy-text", "Bug List");
    }
   
@@ -1237,26 +1247,26 @@ class Translator_Cs : public Translator
     * </pre>
     *
     */
-   virtual QString trRTFansicp() {        
+   QString trRTFansicp() override { 
       return QCoreApplication::translate("doxy-rtf", "1252", "trRTFansicp");
    }
 
    /*! Used as ansicpg for RTF fcharset
     *  \see trRTFansicp() for a table of possible values.
     */
-   virtual QString trRTFCharSet() {
+   QString trRTFCharSet() override {
       return QCoreApplication::translate("doxy-rtf", "0", "trRTFCharSet");
    }
 
    /*! Used as header RTF general index */
-   virtual QString trRTFGeneralIndex() {
+   QString trRTFGeneralIndex() override {
       return QCoreApplication::translate("doxy-text", "Index");
    }
 
    /*! This is used for translation of the word that will possibly
     *  be followed by a single name or by a list of names of the category.
     */
-   virtual QString trClass(bool first_capital, bool singular) {        
+   QString trClass(bool first_capital, bool singular) override {        
       if (first_capital) {      
 
          if (singular) {
@@ -1279,7 +1289,7 @@ class Translator_Cs : public Translator
     *  be followed by a single name or by a list of names
     *  of the category.
     */
-   virtual QString trFile(bool first_capital, bool singular) {            
+   QString trFile(bool first_capital, bool singular) override {            
       if (first_capital) {      
 
          if (singular) {
@@ -1302,7 +1312,7 @@ class Translator_Cs : public Translator
     *  be followed by a single name or by a list of names
     *  of the category.
     */
-   virtual QString trNamespace(bool first_capital, bool singular) {
+   QString trNamespace(bool first_capital, bool singular) override {
       if (first_capital) {      
 
          if (singular) {
@@ -1324,7 +1334,7 @@ class Translator_Cs : public Translator
    /*! This is used for translation of the word that will possibly
     *  be followed by a single name or by a list of names of the category.
     */
-   virtual QString trGroup(bool first_capital, bool singular) {
+   QString trGroup(bool first_capital, bool singular) override {
       if (first_capital) {      
 
          if (singular) {
@@ -1346,7 +1356,7 @@ class Translator_Cs : public Translator
    /*! This is used for translation of the word that will possibly
     *  be followed by a single name or by a list of names of the category.
     */
-   virtual QString trPage(bool first_capital, bool singular) {
+   QString trPage(bool first_capital, bool singular) override {
       if (first_capital) {      
 
          if (singular) {
@@ -1370,7 +1380,7 @@ class Translator_Cs : public Translator
     *  be followed by a single name or by a list of names
     *  of the category.
     */
-   virtual QString trMember(bool first_capital, bool singular) {
+   QString trMember(bool first_capital, bool singular) override {
       if (first_capital) {      
 
          if (singular) {
@@ -1393,7 +1403,7 @@ class Translator_Cs : public Translator
     *  be followed by a single name or by a list of names
     *  of the category.
     */
-   virtual QString trGlobal(bool first_capital, bool singular) {
+   QString trGlobal(bool first_capital, bool singular) override {
       if (first_capital) {      
 
          if (singular) {
@@ -1414,7 +1424,7 @@ class Translator_Cs : public Translator
 
    /*! This text is generated when the \\author command is used and
     *  for the author section in man pages. */
-   virtual QString trAuthor(bool first_capital, bool singular) {
+   QString trAuthor(bool first_capital, bool singular) override {
       if (first_capital) {      
 
          if (singular) {
@@ -1435,21 +1445,21 @@ class Translator_Cs : public Translator
 
    /*! This text is put before the list of members referenced by a member
     */
-   virtual QString trReferences() {
+   QString trReferences() override {
       return QCoreApplication::translate("doxy-text", "References");
    }
 
    /*! used in member documentation blocks to produce a list of
     *  members that are implemented by this one.
     */
-   virtual QString trImplementedFromList(int numEntries) { 
+   QString trImplementedFromList(int numEntries) override {  
      return QCoreApplication::translate("doxy-text", "Implements %1.").arg(trWriteList(numEntries));     
    }
 
    /*! used in member documentation blocks to produce a list of
     *  all members that implement this abstract member.
     */
-   virtual QString trImplementedInList(int numEntries) {
+   QString trImplementedInList(int numEntries) override {
       return QCoreApplication::translate("doxy-text", "Implemented %1.").arg( 
                   trWriteList(numEntries));
    }
@@ -1457,79 +1467,79 @@ class Translator_Cs : public Translator
    /*! used in RTF documentation as a heading for the Table
     *  of Contents.
     */
-   virtual QString trRTFTableOfContents() {
+   QString trRTFTableOfContents() override {
       return QCoreApplication::translate("doxy-text", "Table of Contents");
    }
   
    /*! Used as the header of the list of item that have been
     *  flagged deprecated
     */
-   virtual QString trDeprecatedList() {
+   QString trDeprecatedList() override {
       return QCoreApplication::translate("doxy-text", "Deprecated List");
    }
 
    /*! Used as a header for declaration section of the events found in
     * a C# program
     */
-   virtual QString trEvents() {
+   QString trEvents() override {
       return QCoreApplication::translate("doxy-text", "Events");
    }
 
    /*! Header used for the documentation section of a class' events. */
-   virtual QString trEventDocumentation() {
+   QString trEventDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Event Documentation");
    }
 
    /*! Used as a heading for a list of Java class types with package scope.
     */
-   virtual QString trPackageTypes() {
+   QString trPackageTypes() override   {
       return QCoreApplication::translate("doxy-text", "Package Types");
    }
 
    /*! Used as a heading for a list of Java class functions with package
     * scope.
     */
-   virtual QString trPackageMembers() {
+   QString trPackageMembers() override   {
       return QCoreApplication::translate("doxy-text", "Package Functions");
    }
 
    /*! Used as a heading for a list of static Java class functions with
     *  package scope.
     */
-   virtual QString trStaticPackageMembers() {
+   QString trStaticPackageMembers() override  {
       return QCoreApplication::translate("doxy-text", "Static Package Functions");
    }
 
    /*! Used as a heading for a list of Java class variables with package
     * scope.
     */
-   virtual QString trPackageAttribs() {
+   QString trPackageAttribs() override {
       return QCoreApplication::translate("doxy-text", "Package Attributes");
    }
 
    /*! Used as a heading for a list of static Java class variables with
     * package scope.
     */
-   virtual QString trStaticPackageAttribs() {
+   QString trStaticPackageAttribs() override {
       return QCoreApplication::translate("doxy-text", "Static Package Attributes");
    }   
 
    /*! Used in the quick index of a class/file/namespace member list page
     *  to link to the unfiltered list of all members.
     */
-   virtual QString trAll() {
+   QString trAll() override {
       return QCoreApplication::translate("doxy-text", "All");
    }
 
    /*! Put in front of the call graph for a function. */
-   virtual QString trCallGraph() {
+   QString trCallGraph() override {
       return QCoreApplication::translate("doxy-text", "Here is the call graph for this function:");
    }
 
     /*! This string is used as the title for the page listing the search
     *  results.
     */
-   virtual QString trSearchResultsTitle() {
+   QString trSearchResultsTitle() override {
       return QCoreApplication::translate("doxy-text", "Search Results");
    }
 
@@ -1541,7 +1551,7 @@ class Translator_Cs : public Translator
     *  value 2 represents 2 or more matches. HTML markup is allowed inside
     *  the returned string.
     */
-   virtual QString trSearchResults(int numDocuments) {            
+   QString trSearchResults(int numDocuments) override  {            
       if (numDocuments == 0) {
          return QCoreApplication::translate("doxy-text",  "Sorry, no documents matching your query.");
 
@@ -1556,41 +1566,41 @@ class Translator_Cs : public Translator
    /*! This string is put before the list of matched words, for each search
     *  result. What follows is the list of words that matched the query.
     */
-   virtual QString trSearchMatches() {
+   QString trSearchMatches() override  {
       return QCoreApplication::translate("doxy-text", "Matches:");
    }
 
    /*! This is used in HTML as the title of page with source code for file filename
     */
-   virtual QString trSourceFile(const QString &filename) {
+   QString trSourceFile(const QString &filename) override  {
       return QCoreApplication::translate("doxy-text", "%1 Source File").arg(filename);
    }
  
    /*! This is used as the name of the chapter containing the directory
     *  hierarchy.
     */
-   virtual QString trDirIndex() {
+   QString trDirIndex() override  {
       return QCoreApplication::translate("doxy-text", "Directory Hierarchy");
    }
 
    /*! This is used as the name of the chapter containing the documentation
     *  of the directories.
     */
-   virtual QString trDirDocumentation() {
+   QString trDirDocumentation() override   {
       return QCoreApplication::translate("doxy-text", "Directory Documentation");
    }
 
    /*! This is used as the title of the directory index and also in the
     *  Quick links of an HTML page, to link to the directory hierarchy.
     */
-   virtual QString trDirectories() {
+   QString trDirectories() override  {
       return QCoreApplication::translate("doxy-text", "Directories");
    }
 
    /*! This returns a sentences that introduces the directory hierarchy.
     *  and the fact that it is sorted alphabetically per level
     */
-   virtual QString trDirDescription() {
+   QString trDirDescription() override {
       return QCoreApplication::translate("doxy-text", "This directory hierarchy is sorted roughly, "
              "but not completely, alphabetically:");
    }
@@ -1598,14 +1608,14 @@ class Translator_Cs : public Translator
    /*! This returns the title of a directory page. The name of the
     *  directory is passed via \a dirName.
     */
-   virtual QString trDirReference(const QString &dirName) {    
+   QString trDirReference(const QString &dirName) override {    
       return QCoreApplication::translate("doxy-text", "%1 Directory Reference").arg(dirName);
    }
 
    /*! This returns the word directory with or without starting capital
     *  (\a first_capital) and in sigular or plural form (\a singular).
     */
-   virtual QString trDir(bool first_capital, bool singular) {
+   QString trDir(bool first_capital, bool singular) override  {
       if (first_capital) {      
 
          if (singular) {
@@ -1627,46 +1637,46 @@ class Translator_Cs : public Translator
    /*! This text is added to the documentation when the \\overload command
     *  is used for a overloaded function.
     */
-   virtual QString trOverloadText() {
+   QString trOverloadText() override {
       return QCoreApplication::translate("doxy-text",  "This is an overloaded member function, "
              "provided for convenience. It differs from the above "
              "function only in what argument(s) it accepts.");
    }
   
    /*! This is used to introduce a caller (or called-by) graph */
-   virtual QString trCallerGraph() {
+   QString trCallerGraph() override  {
       return QCoreApplication::translate("doxy-text", "Here is the caller graph for this function:");
    }
 
    /*! This is used in the documentation of a file/namespace before the list
     *  of documentation blocks for enumeration values
     */
-   virtual QString trEnumerationValueDocumentation() {
+   QString trEnumerationValueDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Enumerator Documentation");
    }
 
    /*! header that is put before the list of member subprograms (Fortran). */
-   virtual QString trMemberFunctionDocumentationFortran() {
+   QString trMemberFunctionDocumentationFortran() override { 
       return QCoreApplication::translate("doxy-text", "Member Function/Subroutine Documentation");
    }
 
    /*! This is put above each page as a link to the list of annotated data types (Fortran). */
-   virtual QString trCompoundListFortran() {
+   QString trCompoundListFortran() override  {
       return QCoreApplication::translate("doxy-text", "Data Types List");
    }
 
    /*! This is put above each page as a link to all members of compounds (Fortran). */
-   virtual QString trCompoundMembersFortran() {
+   QString trCompoundMembersFortran() override  {
       return QCoreApplication::translate("doxy-text", "Data Fields");
    }
 
    /*! This is an introduction to the annotated compound list (Fortran). */
-   virtual QString trCompoundListDescriptionFortran() {
+   QString trCompoundListDescriptionFortran() override  {
       return QCoreApplication::translate("doxy-text", "Here are the data types with brief descriptions:");
    }
 
    /*! This is an introduction to the page with all data types (Fortran). */
-   virtual QString trCompoundMembersDescriptionFortran(bool extractAll) {
+   QString trCompoundMembersDescriptionFortran(bool extractAll) override  {
       QString result;
 
       if (extractAll) {
@@ -1682,45 +1692,45 @@ class Translator_Cs : public Translator
    /*! This is used in LaTeX as the title of the chapter with the
     * annotated compound index (Fortran).
     */
-   virtual QString trCompoundIndexFortran() {
+   QString trCompoundIndexFortran() override  {
       return QCoreApplication::translate("doxy-text", "Data Type Index");
    }
 
    /*! This is used in LaTeX as the title of the chapter containing
     *  the documentation of all data types (Fortran).
     */
-   virtual QString trTypeDocumentation() {
+   QString trTypeDocumentation() override  {
       return QCoreApplication::translate("doxy-text", "Data Type Documentation");
    }
 
    /*! This is used in the documentation of a file as a header before the
     *  list of (global) subprograms (Fortran).
     */
-   virtual QString trSubprograms() {
+   QString trSubprograms() override {
       return QCoreApplication::translate("doxy-text", "Functions/Subroutines");
    }
 
    /*! This is used in the documentation of a file/namespace before the list
     *  of documentation blocks for subprograms (Fortran)
     */
-   virtual QString trSubprogramDocumentation() {
+   QString trSubprogramDocumentation() override   {
       return QCoreApplication::translate("doxy-text", "Function/Subroutine Documentation");
    }
 
    /*! This is used in the documentation of a file/namespace/group before
     *  the list of links to documented compounds (Fortran)
     */
-   virtual QString trDataTypes() {
+   QString trDataTypes() override {
       return QCoreApplication::translate("doxy-text", "Data Types");
    }
 
    /*! used as the title of page containing all the index of all modules (Fortran). */
-   virtual QString trModulesList() {
+   QString trModulesList() override  {
       return QCoreApplication::translate("doxy-text", "Modules List");
    }
 
    /*! used as an introduction to the modules list (Fortran) */
-   virtual QString trModulesListDescription(bool extractAll) {      
+   QString trModulesListDescription(bool extractAll) override  {      
       if (extractAll) {
          return QCoreApplication::translate("doxy-text", "Here is a list of all modules with brief descriptions:");
       } else {
@@ -1729,7 +1739,7 @@ class Translator_Cs : public Translator
    }
 
    /*! used as the title of the HTML page of a module/type (Fortran) */
-   virtual QString trCompoundReferenceFortran(const QString &clName, enum CompoundType compType,bool isTemplate) {
+   QString trCompoundReferenceFortran(const QString &clName, enum CompoundType compType,bool isTemplate) override  {
       QString result;            
 
       switch (compType) {
@@ -1801,17 +1811,17 @@ class Translator_Cs : public Translator
       return result;
    }
    /*! used as the title of the HTML page of a module (Fortran) */
-   virtual QString trModuleReference(const QString &namespaceName) {      
+   QString trModuleReference(const QString &namespaceName) override  {      
       return QCoreApplication::translate("doxy-text", "%1 Module Reference").arg(namespaceName);
    }
 
    /*! This is put above each page as a link to all members of modules. (Fortran) */
-   virtual QString trModuleMembers() {
+   QString trModuleMembers() override  {
       return QCoreApplication::translate("doxy-text", "Module Members");
    }
 
    /*! This is an introduction to the page with all modules members (Fortran) */
-   virtual QString trModulesMemberDescription(bool extractAll) {       
+   QString trModulesMemberDescription(bool extractAll) override  {       
       if (extractAll) {
          return QCoreApplication::translate("doxy-text", "Here is a list of all module members with links " 
                   "to the module documentation for each member:");
@@ -1824,14 +1834,14 @@ class Translator_Cs : public Translator
    /*! This is used in LaTeX as the title of the chapter with the
     *  index of all modules (Fortran).
     */
-   virtual QString trModulesIndex() {
+   QString trModulesIndex() override  {
       return QCoreApplication::translate("doxy-text", "Modules Index");
    }
 
    /*! This is used for translation of the word that will possibly
     *  be followed by a single name or by a list of names of the category.
     */
-   virtual QString trModule(bool first_capital, bool singular) {        
+   QString trModule(bool first_capital, bool singular) override  {        
 
       if (first_capital) {      
 
@@ -1854,7 +1864,7 @@ class Translator_Cs : public Translator
    /*! This is put at the bottom of a module documentation page and is
     *  followed by a list of files that were used to generate the page.
     */
-   virtual QString trGeneratedFromFilesFortran(enum CompoundType compType, bool single) {   
+   QString trGeneratedFromFilesFortran(enum CompoundType compType, bool single) override  {   
       QString result;
 
       switch (compType) {
@@ -1938,7 +1948,7 @@ class Translator_Cs : public Translator
     *  be followed by a single name or by a list of names
     *  of the category.
     */
-   virtual QString trType(bool first_capital, bool singular) {  
+   QString trType(bool first_capital, bool singular) override {  
        if (first_capital) {      
 
          if (singular) {
@@ -1961,7 +1971,7 @@ class Translator_Cs : public Translator
     *  be followed by a single name or by a list of names
     *  of the category.
     */
-   virtual QString trSubprogram(bool first_capital, bool singular) {
+   QString trSubprogram(bool first_capital, bool singular) override {
        if (first_capital) {      
 
          if (singular) {
@@ -1981,32 +1991,32 @@ class Translator_Cs : public Translator
    }
 
    /*! C# Type Constraint list */
-   virtual QString trTypeConstraints() {
+   QString trTypeConstraints() override  {
       return QCoreApplication::translate("doxy-text", "Type Constraints");
    }
    
    /*! directory relation for \a name */
-   virtual QString trDirRelation(const QString &name) {
+   QString trDirRelation(const QString &name) override  {
       return QCoreApplication::translate("doxy-text", "%1 Relation").arg(name);
    }
 
    /*! Loading message shown when loading search results */
-   virtual QString trLoading() {
+   QString trLoading() override  {
       return QCoreApplication::translate("doxy-text", "Loading...");
    }
 
    /*! Label used for search results in the global namespace */
-   virtual QString trGlobalNamespace() {
+   QString trGlobalNamespace() override {
       return QCoreApplication::translate("doxy-text", "Global Namespace");
    }
 
    /*! Message shown while searching */
-   virtual QString trSearching() {
+   QString trSearching() override  {
       return QCoreApplication::translate("doxy-text", "Searching...");
    }
 
    /*! Text shown when no search results are found */
-   virtual QString trNoMatches() {
+   QString trNoMatches() override  {
       return QCoreApplication::translate("doxy-text", "No Matches");
    } 
 
@@ -2014,7 +2024,7 @@ class Translator_Cs : public Translator
     *  table is shown. The heading for the first column mentions the
     *  source file that has a relation to another file.
     */
-   virtual QString trFileIn(const QString &name) {      
+   QString trFileIn(const QString &name) override {      
       return QCoreApplication::translate("doxy-text", "File in %1").arg(name);
    }
 
@@ -2022,42 +2032,42 @@ class Translator_Cs : public Translator
     *  table is shown. The heading for the second column mentions the
     *  destination file that is included.
     */
-   virtual QString trIncludesFileIn(const QString &name) {     
+   QString trIncludesFileIn(const QString &name) override  {     
       return QCoreApplication::translate("doxy-text", "Includes file in %1").arg(name);
    }
    
    /*! Header for the page with bibliographic citations */
-   virtual QString trCiteReferences() {
+   QString trCiteReferences() override  {
       return QCoreApplication::translate("doxy-text", "Bibliography");
    }
 
    /*! Text for copyright paragraph */
-   virtual QString trCopyright() {
+   QString trCopyright() override {
       return QCoreApplication::translate("doxy-text", "Copyright");
    }
 
    /*! Header for the graph showing the directory dependencies */
-   virtual QString trDirDepGraph(const QString &name) {
+   QString trDirDepGraph(const QString &name) override  {
       return QCoreApplication::translate("doxy-text", "Directory dependency graph for %1:").arg(name);
    }
   
    /*! Detail level selector shown for hierarchical indices */
-   virtual QString trDetailLevel() {
+   QString trDetailLevel() override {
       return QCoreApplication::translate("doxy-text", "detail level");
    }
 
    /*! Section header for list of template parameters */
-   virtual QString trTemplateParameters() {
+   QString trTemplateParameters() override  {
       return QCoreApplication::translate("doxy-text", "Template Parameters");
    }
 
    /*! Used in dot graph when UML_LOOK is enabled and there are many fields */
-   virtual QString trAndMore(const QString &number) {  
+   QString trAndMore(const QString &number) override  {  
       return QCoreApplication::translate("doxy-text", "and %1 more...").arg(number);
    }
 
    /*! Used file list for a Java enum */
-   virtual QString trEnumGeneratedFromFiles(bool single) {
+   QString trEnumGeneratedFromFiles(bool single) override  {
       if (single) {
          return QCoreApplication::translate("doxy-text", "The documentation for this enum was generated "
                   "from the following file:"); 
@@ -2068,19 +2078,19 @@ class Translator_Cs : public Translator
    }
 
    /*! Header of a Java enum page (Java enums are represented as classes). */
-   virtual QString trEnumReference(const QString &name) {      
+   QString trEnumReference(const QString &name) override  {      
       return QCoreApplication::translate("doxy-text", "%1 Enum Reference").arg(name);
    }
 
    /*! Used for a section containing inherited members */
-   virtual QString trInheritedFrom(const QString &members, const QString &what) {    
+   QString trInheritedFrom(const QString &members, const QString &what) override  {    
       return QCoreApplication::translate("doxy-text", "%1 inherited from %2").arg(members).arg(what);
    }
 
    /*! Header of the sections with inherited members specific for the
     *  base class(es)
     */
-   virtual QString trAdditionalInheritedMembers() {
+   QString trAdditionalInheritedMembers() override  {
       return QCoreApplication::translate("doxy-text", "Additional Inherited Members");
    }
   
@@ -2088,7 +2098,7 @@ class Translator_Cs : public Translator
     *  navigation tree in the HTML output when GENERATE_TREEVIEW is
     *  enabled. This tooltip explains the meaning of the button.
     */
-   virtual QString trPanelSyncTooltip(bool enable) {        
+   QString trPanelSyncTooltip(bool enable) override  {        
       if (enable) {
          return QCoreApplication::translate("doxy-text", "click to enable panel synchronization");
       } else {
@@ -2100,7 +2110,7 @@ class Translator_Cs : public Translator
     *  a category. Note that the @1 marker is required and is replaced
     *  by a link.
     */
-   virtual QString trProvidedByCategory() {         
+   QString trProvidedByCategory() override  {         
       return QCoreApplication::translate("doxy-text", "Provided by category @1.");
    }
 
@@ -2108,69 +2118,69 @@ class Translator_Cs : public Translator
     *  Note that the @1 marker is required and is replaced by a link to
     *  the class method.
     */
-   virtual QString trExtendsClass() {     
+   QString trExtendsClass() override  {     
       return QCoreApplication::translate("doxy-text", "Extends class @1");
    }
 
    /*! Used as the header of a list of class methods in Objective-C.
     *  These are similar to static public member functions in C++.
     */
-   virtual QString trClassMethods() {
+   QString trClassMethods() override  {
       return QCoreApplication::translate("doxy-text", "Class Methods");
    }
 
    /*! Used as the header of a list of instance methods in Objective-C.
     *  These are similar to public member functions in C++.
     */
-   virtual QString trInstanceMethods() {
+   QString trInstanceMethods() override  {
       return QCoreApplication::translate("doxy-text", "Instance Methods");
    }
 
    /*! Used as the header of the member functions of an Objective-C class.
     */
-   virtual QString trMethodDocumentation() {
+   QString trMethodDocumentation() override  {
       return QCoreApplication::translate("doxy-text", "Method Documentation");
    }
 
    /*! Used as the title of the design overview picture created for the
     *  VHDL output.
     */
-   virtual QString trDesignOverview() {
+   QString trDesignOverview() override {
       return QCoreApplication::translate("doxy-text", "Design Overview");
    }
    
    /** old style UNO IDL services: implemented interfaces */
-   virtual QString trInterfaces() {
+   QString trInterfaces() override {
       return QCoreApplication::translate("doxy-text", "Exported Interfaces");
    }
 
    /** old style UNO IDL services: inherited services */
-   virtual QString trServices() {
+   QString trServices() override {
       return QCoreApplication::translate("doxy-text", "Included Services");
    }
 
    /** UNO IDL constant groups */
-   virtual QString trConstantGroups() {
+   QString trConstantGroups() override {
       return QCoreApplication::translate("doxy-text", "Constant Groups");
    }
 
    /** UNO IDL constant groups */
-   virtual QString trConstantGroupReference(const QString &namespaceName) {
+   QString trConstantGroupReference(const QString &namespaceName)  override  {
       return QCoreApplication::translate("doxy-text", "%1 Constant Group Reference").arg(namespaceName);
    }
 
    /** UNO IDL service page title */
-   virtual QString trServiceReference(const QString &sName) {
+   QString trServiceReference(const QString &sName) override {
       return QCoreApplication::translate("doxy-text", "%1 Service Reference").arg(sName);
    }
 
    /** UNO IDL singleton page title */
-   virtual QString trSingletonReference(const QString &sName) {
+   QString trSingletonReference(const QString &sName) override {
       return QCoreApplication::translate("doxy-text", "%1 Singleton Reference").arg(sName);
    }
 
    /** UNO IDL service page */
-   virtual QString trServiceGeneratedFromFiles(bool single) {
+   QString trServiceGeneratedFromFiles(bool single) override {
       if (single) {
          return QCoreApplication::translate("doxy-text", "The documentation for this service "
                           "was generated from the following file:");
@@ -2182,7 +2192,7 @@ class Translator_Cs : public Translator
    }
 
    /** UNO IDL singleton page */
-   virtual QString trSingletonGeneratedFromFiles(bool single) {           
+   QString trSingletonGeneratedFromFiles(bool single) override  {          
       if (single) {
          return QCoreApplication::translate("doxy-text", "The documentation for this singleton "
                           "was generated from the following file:");

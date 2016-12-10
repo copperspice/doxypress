@@ -62,7 +62,6 @@ int portable_system(const QString &command, const QString &args, bool commandHas
 
    fullCmd += " " + args;
 
-
 #ifdef HAVE_FORK
   
    int pid;
@@ -103,7 +102,6 @@ int portable_system(const QString &command, const QString &args, bool commandHas
          }
       }
    }
-
 
 #else 
    // Windows

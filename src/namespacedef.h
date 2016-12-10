@@ -45,7 +45,7 @@ class NamespaceDef : public Definition
 
    ~NamespaceDef();
 
-   DefType definitionType() const {
+   DefType definitionType() const override {
       return TypeNamespace;
    }
 
@@ -59,7 +59,7 @@ class NamespaceDef : public Definition
 
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
-   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const;
+   void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const override;
    void writeTagFile(QTextStream &);
 
    void insertClass(QSharedPointer<ClassDef> cd);
@@ -92,15 +92,15 @@ class NamespaceDef : public Definition
       return LIBRARY == m_type;
    }
 
-   bool isLinkableInProject() const;
-   bool isLinkable() const;
+   bool isLinkableInProject() const override;
+   bool isLinkable() const override;
    bool hasDetailedDescription() const;
    void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
  
-   virtual QSharedPointer<Definition> findInnerCompound(const QString &name) override;
-   virtual void addInnerCompound(QSharedPointer<Definition> d) override;
+   QSharedPointer<Definition> findInnerCompound(const QString &name) override;
+   void addInnerCompound(QSharedPointer<Definition> d) override;
 
    void addListReferences();
    void setFileName(const QString &fn);
@@ -154,7 +154,7 @@ class NamespaceDef : public Definition
    void writeAuthorSection(OutputList &ol);
    void startMemberDocumentation(OutputList &ol);
    void endMemberDocumentation(OutputList &ol);
-   void writeSummaryLinks(OutputList &ol);
+   void writeSummaryLinks(OutputList &ol) override;
    void addNamespaceAttributes(OutputList &ol);
 
    bool m_subGrouping;

@@ -454,7 +454,7 @@ class DotWorkerThread : public QThread
 {
  public:
    DotWorkerThread(DotRunnerQueue *queue);
-   void run();
+   void run() override;
    void cleanup();
 
  private:

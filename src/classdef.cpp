@@ -157,7 +157,7 @@ void ClassDef::insertBaseClass(QSharedPointer<ClassDef> cd, const QString &n, Pr
 // inserts a derived/sub class in the inherited-by list
 void ClassDef::insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const QString &t)
 {
-   static bool extractPrivate = Config::getBool("extract-private");
+   static const bool extractPrivate = Config::getBool("extract-private");
 
    if (! extractPrivate && cd->protection() == Private) {
       return;
@@ -1330,11 +1330,11 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
 }
 
 void ClassDef::writeTagFile(QTextStream &tagFile)
-{
+{ 
    if (! isLinkableInProject()) {
       return;
    }
-
+   
    tagFile << "  <compound kind=\"" << compoundTypeString();
    tagFile << "\"";
 
@@ -1346,7 +1346,7 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
 
-   if (!anchor().isEmpty()) {
+   if (! anchor().isEmpty()) {
       tagFile << "    <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
    }
 
@@ -1364,23 +1364,21 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
       for (auto ibcd : *m_parents) {
          QSharedPointer<ClassDef> cd = ibcd->classDef;
 
-         if (cd && cd->isLinkable()) {
+         if (cd && cd->isLinkable()) {           
+            tagFile << "    <base";
 
-            if (! Config::getString("generate_tagfile").isEmpty()) {
-               tagFile << "    <base";
+            if (ibcd->prot == Protected) {
+               tagFile << " protection=\"protected\"";
 
-               if (ibcd->prot == Protected) {
-                  tagFile << " protection=\"protected\"";
-
-               } else if (ibcd->prot == Private) {
-                  tagFile << " protection=\"private\"";
-               }
-
-               if (ibcd->virt == Virtual) {
-                  tagFile << " virtualness=\"virtual\"";
-               }
-               tagFile << ">" << convertToXML(cd->name()) << "</base>" << endl;
+            } else if (ibcd->prot == Private) {
+               tagFile << " protection=\"private\"";
             }
+
+            if (ibcd->virt == Virtual) {
+               tagFile << " virtualness=\"virtual\"";
+            }
+
+            tagFile << ">" << convertToXML(cd->name()) << "</base>" << endl;         
          }
       }
    }

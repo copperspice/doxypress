@@ -28,10 +28,10 @@ class Qhp : public IndexIntf
    Qhp();
    ~Qhp();
  
-   void initialize();
-   void finalize();
-   void incContentsDepth();
-   void decContentsDepth();
+   void initialize() override;
+   void finalize() override;
+   void incContentsDepth() override;
+   void decContentsDepth() override;
 
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                   bool unused, QSharedPointer<Definition> def, DirType category) override;

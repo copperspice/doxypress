@@ -1974,9 +1974,9 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
       m_anchor = id;
 
    } else if (id.left(CiteConsts::anchorPrefix.length()) == CiteConsts::anchorPrefix) {
-      CiteInfo *cite = Doxy_Globals::citeDict.find(id.mid(CiteConsts::anchorPrefix.length()));
+      QString citeValue = Doxy_Globals::citeDict.find(id.mid(CiteConsts::anchorPrefix.length()));
 
-      if (cite) {
+      if (citeValue.isEmpty()) {
          m_file   = convertNameToFile_X(CiteConsts::fileName, false, true);
          m_anchor = id;
 
@@ -2716,14 +2716,13 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
    assert(! target.isEmpty());
 
    m_relPath = s_relPath;
-   CiteInfo *cite = Doxy_Globals::citeDict.find(target);
+   QString citeValue = Doxy_Globals::citeDict.find(target);
 
-   if (numBibFiles > 0 && cite && !cite->text.isEmpty()) {
-      // ref to citation
+   if (! citeValue.isEmpty() && numBibFiles > 0) {
+      // refer to the citation
 
-      m_text   = cite->text;
-      m_ref    = cite->ref;
-      m_anchor = CiteConsts::anchorPrefix + cite->label;
+      m_text   = citeValue;
+      m_anchor = CiteConsts::anchorPrefix + target;
       m_file   = convertNameToFile_X(CiteConsts::fileName, false, true);
 
       return;
@@ -2734,7 +2733,7 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
    if (numBibFiles == 0) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "No bib files for the \\cite command were specified in 'CITE BIB FILES'");
 
-   } else if (cite == 0) {
+   } else if (citeValue.isEmpty()) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to '%s' for \\cite command",
                   csPrintable(target));
 
@@ -2777,7 +2776,7 @@ DocLink::DocLink(DocNode *parent, const QString &target)
    }
 
    // bogus link target
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "unable to resolve link to '%s' for \\link command", qPrintable(target));
+   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve link to '%s' for \\link command", csPrintable(target));
 }
 
 QString DocLink::parse(bool isJavaLink, bool isXmlLink)

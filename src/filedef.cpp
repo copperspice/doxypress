@@ -36,23 +36,23 @@
 class DevNullCodeDocInterface : public CodeOutputInterface
 {
  public:
-   virtual void codify(const QString &) override {}
+   void codify(const QString &) override {}
 
-   virtual void writeCodeLink(const QString &, const QString &, const QString &, 
-                              const QString &, const QString &) override  {}
+   void writeCodeLink(const QString &, const QString &, const QString &, 
+                  const QString &, const QString &) override  {}
 
-   virtual void writeTooltip(const QString &, const DocLinkInfo &, const QString &,
-                             const QString &, const SourceLinkInfo &, const SourceLinkInfo & ) override {}
+   void writeTooltip(const QString &, const DocLinkInfo &, const QString &,
+                  const QString &, const SourceLinkInfo &, const SourceLinkInfo & ) override {}
 
-   virtual void writeLineNumber(const QString &, const QString &, const QString &, int)  override {}
-   virtual void startCodeLine(bool) {}
-   virtual void endCodeLine() {}
-   virtual void startFontClass(const QString &) override {}
-   virtual void endFontClass() {}
-   virtual void writeCodeAnchor(const QString &) override {}
-   virtual void linkableSymbol(int, QString &, QSharedPointer<Definition>(), QSharedPointer<Definition>()) {}
-   virtual void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
-   virtual void addWord(const QString &, bool) override {}
+   void writeLineNumber(const QString &, const QString &, const QString &, int)  override {}
+   void startCodeLine(bool) override {}
+   void endCodeLine() override {}
+   void startFontClass(const QString &) override {}
+   void endFontClass() override {}
+   void writeCodeAnchor(const QString &) override {}
+   void linkableSymbol(int, QString &, QSharedPointer<Definition>(), QSharedPointer<Definition>()) {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
+   void addWord(const QString &, bool) override {}
 };
 
 /*! create a new file definition, where \a p is the file path,
@@ -269,7 +269,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
       }
       
       if (sourceCode) {
-         //if Latex enabled and LATEX_SOURCE_CODE is not -> skip, bug_738548
+         //if Latex enabled and LATEX_SOURCE_CODE is not, then skip
 
          ol.pushGeneratorState();
          if (ol.isEnabled(OutputGenerator::Latex) && ! latexSourceCode) {
@@ -284,8 +284,10 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
          QString refText = theTranslator->trDefinedInSourceFile();
          int fileMarkerPos = refText.indexOf("@0");
 
-         if (fileMarkerPos != -1) { // should always pass this.
-            ol.parseText(refText.left(fileMarkerPos)); //text left from marker 1
+         if (fileMarkerPos != -1) { 
+            // should always pass this
+
+            ol.parseText(refText.left(fileMarkerPos));                          //text left from marker 1
             ol.writeObjectLink(0, getSourceFileBase(), 0, name());
             ol.parseText(refText.right( refText.length() - fileMarkerPos - 2)); // text right from marker 2
          }

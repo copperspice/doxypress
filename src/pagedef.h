@@ -37,15 +37,15 @@ class PageDef : public Definition
    void setShowToc(bool b);
 
    // getters
-   DefType definitionType() const {
+   DefType definitionType() const override {
       return TypePage;
    }
 
-   bool isLinkableInProject() const {
+   bool isLinkableInProject() const override {
       return /*hasDocumentation() &&*/ !isReference();
    }
 
-   bool isLinkable() const {
+   bool isLinkable() const override {
       return isLinkableInProject() || isReference();
    }
 

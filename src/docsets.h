@@ -39,15 +39,15 @@ class DocSets  : public IndexIntf
    DocSets();
    ~DocSets();
 
-   void initialize();
-   void finalize();
-   void incContentsDepth();
-   void decContentsDepth();
+   void initialize() override;
+   void finalize() override;
+   void incContentsDepth() override;
+   void decContentsDepth() override;
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
                         bool unused, QSharedPointer<Definition> def, DirType category) override;
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
-                     const QString &title);
+                     const QString &title) override;
 
    void addIndexFile(const QString &name) override {}
    void addImageFile(const QString &name) override {}

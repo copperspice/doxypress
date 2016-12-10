@@ -603,7 +603,7 @@ class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
 
  private:
    int compareMapValues(const QSharedPointer<SearchDefinitionList> &md1, 
-                  const QSharedPointer<SearchDefinitionList> &md2) const; 
+                  const QSharedPointer<SearchDefinitionList> &md2) const override; 
 
    uint m_letter;
 };

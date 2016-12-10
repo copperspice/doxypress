@@ -37,11 +37,11 @@ class FileStorage : public StorageIntf
       m_file.setFileName(name);
    }
 
-   int read(char *buf, uint size) {
+   int read(char *buf, uint size) override {
       return m_file.read(buf, size);
    }
 
-   int write(const char *buf, uint size) {
+   int write(const char *buf, uint size) override {
       assert(m_readOnly == false);
       return m_file.write(buf, size);
    }

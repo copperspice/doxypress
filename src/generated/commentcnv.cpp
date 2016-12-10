@@ -1817,7 +1817,7 @@ YY_RULE_SETUP
       // */ (editor syntax fix)
 
       if (g_mlBrief)      {
-         REJECT; // bail out if we do not need to convert
+         REJECT;             // bail out if we do not need to convert
 
       } else {
       int i = 3;
@@ -3839,23 +3839,22 @@ static bool recognizeFixedForm(const QString &contents)
 }
 
 /*! This function does three things:
- *  -# It converts multi-line C++ style comment blocks (that are aligned)
- *     to C style comment blocks (if MULTILINE_CPP_IS_BRIEF is set to NO).
- *  -# It replaces aliases with their definition (see ALIASES)
- *  -# It handles conditional sections (cond...endcond blocks)
+ *  1 Convert multi-line C++ style comment blocks (which are aligned) to C style 
+ *    comment blocks (if MULTILINE_CPP_IS_BRIEF is set to NO)
+ *  2 Replaces aliases with their definition (see ALIASES)
+ *  3 Handles conditional sections (cond...endcond blocks)
  */
 
 // main entry point
 QString convertCppComments(const QString &inBuf, const QString &fileName)
 {
+   g_mlBrief  = Config::getBool("multiline-cpp-brief");
+
    g_inBuf    = inBuf;
    g_outBuf   = "";
 
    g_inBufPos = 0;
    g_col      = 0;
-
-   g_mlBrief = Config::getBool("multiline-cpp-brief");
-
    g_skip     = false;
    g_fileName = fileName;
    g_lang     = getLanguageFromFileName(fileName);

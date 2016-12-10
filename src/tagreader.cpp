@@ -316,7 +316,7 @@ class TagFileParser : public QXmlDefaultHandler
       m_locator = 0;
    }
 
-   void setDocumentLocator ( QXmlLocator *locator ) {
+   void setDocumentLocator ( QXmlLocator *locator ) override {
       m_locator = locator;
    }
 
@@ -896,7 +896,7 @@ class TagFileParser : public QXmlDefaultHandler
    void endIgnoreElement() {
    }
 
-   bool startDocument() {
+   bool startDocument() override {
       m_state = Invalid;
 
       m_curClass = 0;
@@ -958,7 +958,7 @@ class TagFileParser : public QXmlDefaultHandler
       return true;
    }
 
-   bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib) {
+   bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib) override {
 
       auto iter = m_startElementHandlers.find(name);
 
@@ -975,7 +975,7 @@ class TagFileParser : public QXmlDefaultHandler
       return true;
    }
 
-   bool endElement( const QString &, const QString &, const QString &name ) {
+   bool endElement( const QString &, const QString &, const QString &name ) override {
 
       auto iter = m_endElementHandlers.find(name);
 
@@ -992,7 +992,7 @@ class TagFileParser : public QXmlDefaultHandler
       return true;
    }
 
-   bool characters (const QString &ch) {
+   bool characters (const QString &ch) override {
       m_curString += ch;
       return true;
    }
