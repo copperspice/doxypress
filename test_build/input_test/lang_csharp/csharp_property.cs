@@ -1,7 +1,7 @@
 /// <summary>
 /// Test properties in C#
 /// </summary>
-public class CSharp_Property
+public class csharp_property
 {
 	/// <summary>
 	/// First test: static property, default 55

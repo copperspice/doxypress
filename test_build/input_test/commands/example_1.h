@@ -7,8 +7,10 @@
 *
 *************************************************************************/
 
-testTypeDef::myTypeDef testTypeDef::someMethod()
+class example_1
 {
-   /// empty method is ok, does this cause a return type mismatch?
-}
-
+   public:
+      QString plantName;
+      bool flowers;
+      int size;      
+};

@@ -1,12 +1,12 @@
-#ifndef INCLUDED_APM
-#define INCLUDED_APM
+#ifndef INCLUDE_USER_DUPLICATE
+#define INCLUDE_USER_DUPLICATE
 
 #include <exception>
 
 /**
- * @class apm
+ * @class user_duplicate
  *
- * @brief Something simple
+ * @brief Some simple brief notation for user_b file
  *
  */
 class user_duplicate

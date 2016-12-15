@@ -68,11 +68,11 @@ void func_c1() {};
 
 
 /** @ingroup group1 group2 group3 group4
- *  Namespace myNS is in groups A, B, C, D
+ *  Namespace groupNS is in groups A, B, C, D
  *
  */
 
-namespace myNS{
+namespace groupNS{
    void func_all() {};
 }
 

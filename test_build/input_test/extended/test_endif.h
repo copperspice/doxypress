@@ -12,22 +12,21 @@
 *
 *************************************************************************/
 
-/**
-\page syntax-test  Syntax Highlighting
+#ifndef TEST_ENDIF_H
+#define TEST_ENDIF_H
 
-Test other syntax highlighting for Python and TCL in DoxyPress.
+/// test for warning requarding the comment after the endif
+class test_Endif
+{
 
-
-<h3>Python</h3>
-
-\include py_doxy.py
-
-
-<h3>TCL</h3>
-
-\include tcl_sample.tcl
+   /* comment one */
 
 
+#if test
+#endif      /// internal comment two
+            /// more things to document
+            
 
-*/
+};
 
+#endif      // comment after the end of the header file (does this cause a problem? Unable to repeat)

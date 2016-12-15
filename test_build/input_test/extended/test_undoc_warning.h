@@ -1,7 +1,8 @@
-#ifndef INCLUDED_APM
-#define INCLUDED_APM
+#ifndef INCLUDE_USER_UNDOC_PARAM
+#define INCLUDE_USER_UNDOC_PARAM
 
-class user_apm
+/** @brief User requested test for undocumented parameter warning */
+class user_undoc_param
 {
 public:
 
@@ -10,7 +11,7 @@ public:
      * The whatjamacallit is specified somehow.
      *
     * @param[in] pObject the object
-     * @param[in] name the name
+    * @param[in] name the name
     * @param[in] date the start date to query
     * @return TRUE if something, FALSE otherwise
     */

@@ -15,7 +15,7 @@
 #ifndef USER_INCLUDE_1_H
 #define USER_INCLUDE_1_H
 
-/// This documentation is for someTestClass
+/// Documentation for test_inculde
 template <class T>
 class test_Include
 {        

@@ -5,10 +5,10 @@
 # Startup code:\
 exec tclsh "$0" "$@"
 #\endverbatim
-## Documented namespace \c ns .
+## Documented namespace \c tcl_ns .
 # The code is inserted here:
 #\code
-namespace eval ns {
+namespace eval tcl_ns {
   ## Documented proc \c ns_proc .
   # param[in] arg some argument
   proc ns_proc {arg} {}
@@ -61,11 +61,11 @@ namespace eval ns {
 }
 #\endcode
 
-itcl::body ::ns::itcl_class::itcl_method_x {argx} {
+itcl::body ::tcl_ns::itcl_class::itcl_method_x {argx} {
   puts "$argx OK"
 }
 
-oo::define ns::oo_class {
+oo::define tcl_ns::oo_class {
   ## \public Outside defined variable \c oo_var_out .
   # Inside oo_class
   variable oo_var_out

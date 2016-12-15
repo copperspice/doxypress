@@ -1,7 +1,7 @@
 #ifndef INCLUDED_MYCLASS
 #define INCLUDED_MYCLASS
 
-class test_GroupMethod
+class test_Group3
 {
    public:
        /** comment A */

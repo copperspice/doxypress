@@ -182,7 +182,7 @@
         "example-patterns": [
             "*"
         ],
-        "example-recursive": false,
+        "example-recursive": true,
         "example-source": [
             "input_test"
         ],
@@ -303,7 +303,7 @@
     },
     "output-latex": {
         "cite-bib-files": [
-            ""
+            "input_test/commands/test_cite.bib"
         ],
         "generate-latex": false,
         "latex-batch-mode": false,

@@ -15,7 +15,7 @@
 #ifndef USER_TESTS_H
 #define USER_TESTS_H
 
-/// docs for testTabs
+/// docs for test_Tabs
 class test_Tabs
 {
 public:
@@ -33,7 +33,7 @@ public:
    void hasABrief(double foo);
 };
 
-/// docs for testFriend
+/// docs for test_Friend
 class test_Friend
 {
    public:
@@ -41,7 +41,7 @@ class test_Friend
       friend class myFriend;
 };
 
-/// docs for testTypeDef
+/// docs for test_TypeDef
 class test_TypeDef
 {
    public:
@@ -64,7 +64,7 @@ class test_dotApple : public test_dotFruit
       void chew();
 };
 
-
+/// test return type matching
 class test_ReturnType
 {
    public:
@@ -73,5 +73,4 @@ class test_ReturnType
 
 };
 
-
-#endif      // comment after the end of the header file (does this cause a problem? No isssue found.)
+#endif

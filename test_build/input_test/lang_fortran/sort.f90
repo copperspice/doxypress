@@ -2,7 +2,7 @@
 !! The fortran_sort_routines module provides several routines to sort arrays
 !<
 !
-!> @defgroup Fortran_Library
+!> @defgroup Fortran library
 !! The fortran_sort_routines module provides several routines to sort arrays
 !!
 module fortran_sort_routines
