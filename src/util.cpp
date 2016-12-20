@@ -365,7 +365,7 @@ int determineSection(const QString &fname)
 }
 
 QString resolveTypeDef(QSharedPointer<Definition> context, const QString &qualifiedName,
-                          QSharedPointer<Definition> *typedefContext)
+                  QSharedPointer<Definition> *typedefContext)
 {
    QString result;
 
@@ -625,7 +625,8 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QS
             }
          }
 
-         result = getResolvedClassRec(md->getOuterScope(), fileScope, stripTemplateSpecifiersFromScope(type.left(i), false), 0, 0, pResolvedType);
+         result = getResolvedClassRec(md->getOuterScope(), fileScope, 
+                     stripTemplateSpecifiersFromScope(type.left(i), false), 0, 0, pResolvedType);
       }
 
    }
@@ -736,7 +737,8 @@ static QSharedPointer<Definition> endOfPathIsUsedClass(StringMap<QSharedPointer<
  *  searched. If found the scope definition is returned, otherwise 0
  *  is returned.
  */
-static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, QSharedPointer<FileDef> fileScope, const QString &path)
+static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, QSharedPointer<FileDef> fileScope, 
+                  const QString &path)
 {
    int is;
    int ps;
@@ -830,8 +832,8 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
    return false;
 }
 
-static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item,
-                                 const QString &explicitScopePart = "")
+static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope, 
+                  QSharedPointer<Definition> item, const QString &explicitScopePart = "")
 {
    static QSet<QString> visitedDict;
 
@@ -934,7 +936,6 @@ class AccessStack
    }
 
  private:
-
    /** Element in the stack */
    struct AccessElem {
       QSharedPointer<Definition>  scopeDef;
