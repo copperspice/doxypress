@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -417,8 +417,8 @@ void readConfiguration(struct CommandLine cmdArgs)
 
    // step 1
    if (! Config::parseConfig(cmdArgs.configName) ) {
-      printf("\n\nUnable to parse the project file, please veify the syntax. \n"
-             "For additional assistence submit a report to the developers.\nEmail: info@copperspice.com\n\n");
+      printf("\n\nUnable to parse the project file, please verify the syntax. \n"
+             "For additional assistance submit a report to the developers.\nEmail: info@copperspice.com\n\n");
       exit(1);
    }
 

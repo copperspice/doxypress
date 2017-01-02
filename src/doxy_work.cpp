@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -6613,12 +6613,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                      bool matching = md->isVariable() || md->isTypedef();
 
-                     if (! matching && root->argList.isEmpty()) {
-                        matching = true;
-                     }
-
-                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(),
-                                       argList, cd, fd, root->argList, true)) {
+                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(), argList, cd, fd, 
+                           root->argList, true)) {
                         matching = true;
                      }
 

@@ -1,6 +1,6 @@
  /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -1138,6 +1138,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    }
 
    if (partA) {
+
       if (member && member->isLinkable()) {
 
          if (member->isObjCMethod()) {
@@ -1166,7 +1167,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 
          } else {
             children.append(new DocLinkedWord(parent, name, compound->getReference(), compound->getOutputFileBase(),
-                                           anchor, compound->briefDescriptionAsTooltip() ) );
+                  anchor, compound->briefDescriptionAsTooltip() ) );
          }
 
       } else if (compound->definitionType() == Definition::TypeFile && compound.dynamicCast<FileDef>()->generateSourceFile() ) {
@@ -1199,6 +1200,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       if (g_token->name.left(1) == "#" || g_token->name.left(2) == "::") {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Explicit link request to '%s' could not be resolved",
                   csPrintable(name));
+
          children.append(new DocWord(parent, g_token->name));
 
       } else {
@@ -1640,7 +1642,8 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   tok = doctokenizerYYlex();
                   children.append(new DocVerbatim(parent, s_context, g_token->verb, DocVerbatim::DocbookOnly, s_isExample, s_exampleName));
                   if (tok == 0) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Docbookonly section ended without an end marker", doctokenizerYYlineno);
+                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Docbookonly section ended without an end marker",
+                           doctokenizerYYlineno);
                   }
                   doctokenizerYYsetStatePara();
                }
@@ -6657,7 +6660,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       case HTML_UNKNOWN:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported xml/html tag <%s> found", qPrintable(tagName));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported xml/html tag <%s> found", csPrintable(tagName));
          m_children.append(new DocWord(this, "<" + tagName + tagHtmlAttribs.toString() + ">"));
          break;
 
@@ -6864,12 +6867,14 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
       case XML_TYPEPARAMREF:
          // These tags are defined in .Net but are currently unsupported
          break;
+
       case HTML_UNKNOWN:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported xml/html tag </%s> found", qPrintable(tagName));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported xml/html tag </%s> found", csPrintable(tagName));
          m_children.append(new DocWord(this, "</" + tagName + ">"));
          break;
+
       default:
-         // we should not get here!
+         // we should not get here
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end tag %s\n", qPrintable(tagName));
          assert(0);
          break;

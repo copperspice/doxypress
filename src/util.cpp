@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.
  *
@@ -2085,16 +2085,7 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
 
 QString argListToString(const ArgumentList &argList, bool useCanonicalType, bool showDefVals)
 {
-   QString result;
-
-   //  this test is now invalid
-   //
-   //  if (argList.isEmpty()) {
-   //     return result;
-   //  }
-
-   result += "(";
-
+   QString result = "(";
    auto nextItem = argList.begin();
 
    for (auto &arg : argList)  {
@@ -2160,7 +2151,7 @@ QString argListToString(const ArgumentList &argList, bool useCanonicalType, bool
 
 QString tempArgListToString(const ArgumentList &argList, SrcLangExt lang)
 {
-   QString  result;
+   QString result;
 
    if (argList.isEmpty()) {
       return result;
@@ -3306,16 +3297,9 @@ static bool matchArgument_Internal(QSharedPointer<Definition> srcScope, QSharedP
 bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope, const ArgumentList &srcArgList,
                      QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope, const ArgumentList &dstArgList, bool checkCV)
 {  
-   if (srcArgList.isEmpty() && dstArgList.isEmpty()) {
-      return true;
-
-   } else if (srcArgList.isEmpty() || dstArgList.isEmpty()) {
-      return false;
-
-   }
   
 /*
-   * only valid for C, elected to disable since this should not be done without the consent of the use
+   * only valid for C, elected to disable since this should not be done without the consent of the user
    * if this is really required add a user tag and reconsider the best way to actually implement
 
    // handle special case with void argument
@@ -3337,6 +3321,10 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
       return true;
    }
 */
+
+   if (srcArgList.isEmpty() != dstArgList.isEmpty()) {
+      return false;
+   }
 
    if (srcArgList.count() != dstArgList.count()) {
       return false;
@@ -3382,7 +3370,7 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 // the types of the arguments in the list should match
 void mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool forceNameOverwrite)
 {
-   if (srcArgList.isEmpty() || dstArgList.isEmpty() || srcArgList.count() != dstArgList.count()) {
+   if ( (srcArgList.isEmpty() != dstArgList.isEmpty()) || (srcArgList.count() != dstArgList.count()) ) {
       // invalid argument lists, do not merge
       return; 
    }
@@ -3993,34 +3981,33 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
  * The parameter `docScope` is a string representing the name of the scope in
  * which the `scope` string was found.
  *
- * The function returns true if the scope is known and documented or
- * false if it is not.
- * If true is returned exactly one of the parameter `cd`, `nd`
- * will be non-zero:
+ * The function returns true if the scope is known and documented , false if it is not.
+ * If true is returned exactly one of the parameter `cd`, `nd` will be non-zero:
  *   - if `cd` is non zero, the scope was a class pointed to by cd.
  *   - if `nd` is non zero, the scope was a namespace pointed to by nd.
  */
 static bool getScopeDefs(const QString &docScope, const QString &scope,
                   QSharedPointer<ClassDef> &cd, QSharedPointer<NamespaceDef> &nd)
 {
-   cd = QSharedPointer<ClassDef>();
-   nd = QSharedPointer<NamespaceDef>();
-
-   QString scopeName = scope;
-
-   if (scopeName.isEmpty()) {
+   if (scope.isEmpty()) {
       return false;
    }
 
-   bool explicitGlobalScope = false;
+   cd = QSharedPointer<ClassDef>();
+   nd = QSharedPointer<NamespaceDef>();
+
+   QString docScopeName = docScope;
+   QString scopeName    = scope; 
+
+   int scopeOffset = 0;
 
    if (scopeName.startsWith("::")) {
       scopeName = scopeName.right(scopeName.length() - 2);
-      explicitGlobalScope = true;
+
+   } else {     
+      scopeOffset = docScopeName.length();
    }
 
-   QString docScopeName = docScope;
-   int scopeOffset = explicitGlobalScope ? 0 : docScopeName.length();
 
    do {
       // for each possible docScope (from largest to and including empty)
@@ -4081,13 +4068,14 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
    int endNamePos;
    int scopePos;
 
-   if (bracePos != -1) {
+   if (bracePos == -1) {
+      endNamePos = fullName.length();
+      scopePos   = fullName.lastIndexOf("::", fullName.length() - 1);
+
+   } else {
       endNamePos = bracePos;
       scopePos   = fullName.lastIndexOf("::", bracePos);
 
-   } else   {
-      endNamePos = fullName.length();
-      scopePos   = fullName.lastIndexOf("::", fullName.length() - 1);
    }
 
    bool explicitScope = fullName.left(2) == "::" && (scopePos > 2 || tName.left(2) == "::" || scName.isEmpty());
@@ -4121,12 +4109,16 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
 
          return true;
 
-      } else if (scName == fullName || (! inSeeBlock && scopePos == -1)) {
+      } else if (scName == fullName) {
          // nothing to link, output plain text
+
+         // removed (! inSeeBlock && scopePos == -1) so all links are as strict
+         // as a "seeAlso". partially solves template issues 01/02/2017 
+
          return false;
       }
 
-      // continue search...
+      // continue searching
    }
 
    // extract userscope + name
@@ -4206,8 +4198,8 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
       }
    }
 
-   // strip template specifier, try again
-   // so do we need clang to match the correct template
+   // strip template specifier and try again
+   // will need to use clang to check if this is a template
    int posBegin = nameStr.indexOf('<');
    bool tryBaseTemplate = false;
 
@@ -4220,9 +4212,9 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
             // do nothing
 
          } else {
-            nameStr = nameStr.left(posBegin) + nameStr.right(nameStr.length() - posEnd - 1);
-            return resolveRef(scName, nameStr, inSeeBlock, resContext, resMember, true, QSharedPointer<FileDef>(), checkScope);
-
+            nameStr = nameStr.left(posBegin) + nameStr.right(nameStr.length() - posEnd - 1);           
+            return resolveRef(scName, nameStr, inSeeBlock, resContext, resMember, true, 
+                  QSharedPointer<FileDef>(), checkScope);
          }
       }
    }

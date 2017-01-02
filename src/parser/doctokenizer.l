@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
 *************************************************************************/
@@ -520,11 +520,14 @@ CVSPEC    {BLANK}*("const"|"volatile")
 LNKWORD2  (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
 LNKWORD3  ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
 CHARWORDQ [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
-ESCWORD   ("%"{ID}(("::"|"."){ID})*)|("%'")
+
+ESCWORD   ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
 WORD1     {ESCWORD}|{CHARWORDQ}+|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
 WORD2     "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
+
 WORD1NQ   {ESCWORD}|{CHARWORDQ}+|"{"|"}"
 WORD2NQ   "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
+
 CAPTION   [cC][aA][pP][tT][iI][oO][nN]
 HTMLTAG   "<"(("/")?){ID}({WS}+{ATTRIB})*{WS}*(("/")?)">"
 
@@ -910,7 +913,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 
   /********* patterns for normal words ******************/
 
-<St_Para,St_Text>{WORD1} |
+<St_Para,St_Text>{WORD1}       |
 <St_Para,St_Text>{WORD2} {
       /* function call */
       QString text = QString::fromUtf8(yytext);
@@ -1272,6 +1275,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_TitleQ>{WORD1NQ}   |
 <St_TitleQ>{WORD2NQ}      {
       /* word */
+
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
    }
@@ -1284,18 +1288,18 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_TitleQ>"\""          {
       /* closing quote => end of title */
       BEGIN(St_TitleA);
-         return 0;
+      return 0;
    }
 
 <St_TitleQ>\n         {
       /* new line => end of title */
       unput(yytext[0]);
-         return 0;
+      return 0;
    }
 
 <St_TitleA>{BLANK}*{ID}{BLANK}*"="{BLANK}* {
       // title attribute
-         g_token->name = QString::fromUtf8(yytext);
+      g_token->name = QString::fromUtf8(yytext);
 
       int i = g_token->name.indexOf('=');
       g_token->name = g_token->name.left(i).trimmed();
@@ -1427,7 +1431,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_Ref2>"&"{ID}";"    {
       /* symbol */
       g_token->name = QString::fromUtf8(yytext);
-         return TK_SYMBOL;
+      return TK_SYMBOL;
    }
 
 <St_Ref2>{SPCMD1}      |
@@ -1442,13 +1446,13 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_Ref2>{WORD1NQ}     |
 <St_Ref2>{WORD2NQ}     {
       /* word */
-      g_token->name = QString::fromUtf8(yytext);
+      g_token->name = QString::fromUtf8(yytext);   
       return TK_WORD;
    }
 
 <St_Ref2>[ \t]+        {
       g_token->chars = QString::fromUtf8(yytext);
-         return TK_WHITESPACE;
+      return TK_WHITESPACE;
    }
 
 <St_Ref2>"\""|\n       {
