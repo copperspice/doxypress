@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * All rights reserved.    
  *
@@ -19,6 +19,6 @@
 #define DOXY_BUILD_INFO_H_IN
 
 // DoxyPress Version  "1.0.0"
-constexpr const char *versionString = "1.2.4";
+constexpr const char *versionString = "1.2.5";
 
 #endif
