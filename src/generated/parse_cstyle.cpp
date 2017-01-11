@@ -12650,12 +12650,12 @@ static bool checkForKnRstyleC()
       return false;   
    }
 
-   if (current->argList.isEmpty()) {
+   if (current->argList.listEmpty()) {
       // must have arguments
       return false;   
    }
 
-   for (auto a : current->argList) {
+   for (const auto &a : current->argList) {
       // K&R style arguments do not have a type 
       // DoxyPress expects a type so it will think the argument has no name
 
@@ -13966,7 +13966,7 @@ case 60:
 YY_RULE_SETUP
 { 
       // end of method declaration
-      if (! current->argList.isEmpty() && current->argList.last().type.isEmpty()) {
+      if (! current->argList.listEmpty() && current->argList.last().type.isEmpty()) {
          current->argList.last().type = "id";
       }
 
@@ -13983,7 +13983,7 @@ YY_RULE_SETUP
       // start of a method body
       lineCount();
              
-      if (! current->argList.isEmpty() && current->argList.last().type.isEmpty()) {
+      if (! current->argList.listEmpty() && current->argList.last().type.isEmpty()) {
          current->argList.last().type = "id";
       }
       

@@ -463,7 +463,7 @@ static void writeMemberTemplateLists(QSharedPointer<MemberDef> md, QTextStream &
 {
    const ArgumentList &templMd = md->getTemplateArgumentList();
 
-   if (! templMd.isEmpty()) {   
+   if (! templMd.listEmpty()) {   
       // function template prefix
       writeTemplateArgumentList(templMd, t, md->getClassDef(), md->getFileDef(), 8);
    }
@@ -1018,73 +1018,70 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       // function
       const ArgumentList &declAl = md->getDeclArgumentList();
       const ArgumentList &defAl  = md->getArgumentList();
+          
+      auto iter = defAl.begin();
 
-      if (! declAl.isEmpty()) {
-        
-         auto iter = defAl.begin();
+      for (const auto &arg : declAl) {
+                
+         t << "        <param>" << endl;
+         if (! arg.attrib.isEmpty()) {
+            t << "          <attributes>";
+            writeXMLString(t, arg.attrib);
+            t << "</attributes>" << endl;
+         }
 
-         for (auto &arg : declAl) {
-                   
-            t << "        <param>" << endl;
-            if (! arg.attrib.isEmpty()) {
-               t << "          <attributes>";
-               writeXMLString(t, arg.attrib);
-               t << "</attributes>" << endl;
-            }
+         if (! arg.type.isEmpty()) {
+            t << "          <type>";
+            linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.type);
+            t << "</type>" << endl;
+         }
 
-            if (! arg.type.isEmpty()) {
-               t << "          <type>";
-               linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.type);
-               t << "</type>" << endl;
-            }
+         if (! arg.name.isEmpty()) {
+            t << "          <declname>";
+            writeXMLString(t, arg.name);
+            t << "</declname>" << endl;
+         }
 
-            if (! arg.name.isEmpty()) {
-               t << "          <declname>";
-               writeXMLString(t, arg.name);
-               t << "</declname>" << endl;
-            }
+         if (iter != defAl.end() && ! iter->name.isEmpty() && iter->name != arg.name) {
+            t << "          <defname>";
+            writeXMLString(t, iter->name);
+            t << "</defname>" << endl;
+         }
 
-            if (iter != defAl.end() && ! iter->name.isEmpty() && iter->name != arg.name) {
-               t << "          <defname>";
-               writeXMLString(t, iter->name);
-               t << "</defname>" << endl;
-            }
+         if (! arg.array.isEmpty()) {
+            t << "          <array>";
+            writeXMLString(t, arg.array);
+            t << "</array>" << endl;
+         }
 
-            if (! arg.array.isEmpty()) {
-               t << "          <array>";
-               writeXMLString(t, arg.array);
-               t << "</array>" << endl;
-            }
+         if (! arg.defval.isEmpty()) {
+            t << "          <defval>";
+            linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.defval);
+            t << "</defval>" << endl;
+         }
 
-            if (! arg.defval.isEmpty()) {
-               t << "          <defval>";
-               linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.defval);
-               t << "</defval>" << endl;
-            }
+         if (iter != defAl.end() && iter->hasDocumentation()) {
+            t << "          <briefdescription>";
 
-            if (iter != defAl.end() && iter->hasDocumentation()) {
-               t << "          <briefdescription>";
+            writeXMLDocBlock(t, md->getDefFileName(), md->getDefLine(),
+                             md->getOuterScope(), md, iter->docs);
 
-               writeXMLDocBlock(t, md->getDefFileName(), md->getDefLine(),
-                                md->getOuterScope(), md, iter->docs);
+            t << "</briefdescription>" << endl;
+         }
 
-               t << "</briefdescription>" << endl;
-            }
+         t << "        </param>" << endl;
 
-            t << "        </param>" << endl;
-
-            if (iter != defAl.end()) {
-               ++iter;
-            }
+         if (iter != defAl.end()) {
+            ++iter;
          }
       }
-
+      
    } else if (md->memberType() == MemberType_Define && ! md->argsString().isEmpty() ) { 
       // define
 
       const ArgumentList &argList = md->getArgumentList();
 
-      if (argList.isEmpty())  {
+      if (argList.listEmpty())  {
          // special case for "foo()" to disguish it from "foo".      
          t << "        <param></param>" << endl;
 

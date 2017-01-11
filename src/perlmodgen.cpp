@@ -1592,7 +1592,7 @@ void PerlModDocVisitor::visitPost(DocParBlock *)
 
 static void addTemplateArgumentList(const ArgumentList &argList, PerlModOutput &output)
 {   
-   if (argList.isEmpty()) {
+   if (argList.listEmpty()) {
       return;
    }
 
@@ -1823,48 +1823,46 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       m_output.openList("parameters");
       const ArgumentList &declAl = md->getDeclArgumentList();
       const ArgumentList &defAl  = md->getArgumentList();
+        
+      auto iter = defAl.begin();   
 
-      if (! declAl.isEmpty()) {      
-         auto iter = defAl.begin();   
+      for (const auto &arg : declAl) {         
+         m_output.openHash();
 
-         for (auto &arg : declAl) {         
-            m_output.openHash();
-
-            if (! arg.name.isEmpty()) {
-               m_output.addFieldQuotedString("declaration_name", arg.name);
-            }
-
-            if (iter != defAl.end()) {
-               const Argument &defArg = *iter;
-
-               if (! defArg.name.isEmpty() && defArg.name != arg.name) {
-                  m_output.addFieldQuotedString("definition_name", defArg.name);
-               }
-
-               // increment must come at the end of this if
-               ++iter;
-            }
-
-            if (! arg.type.isEmpty()) {
-               m_output.addFieldQuotedString("type", arg.type);
-            }
-
-            if (! arg.array.isEmpty()) {
-               m_output.addFieldQuotedString("array", arg.array);
-            }
-
-            if (! arg.defval.isEmpty()) {
-               m_output.addFieldQuotedString("default_value", arg.defval);
-            }
-
-            if (! arg.attrib.isEmpty()) {
-               m_output.addFieldQuotedString("attributes", arg.attrib);
-            }
-
-            m_output.closeHash();             
+         if (! arg.name.isEmpty()) {
+            m_output.addFieldQuotedString("declaration_name", arg.name);
          }
-      }
 
+         if (iter != defAl.end()) {
+            const Argument &defArg = *iter;
+
+            if (! defArg.name.isEmpty() && defArg.name != arg.name) {
+               m_output.addFieldQuotedString("definition_name", defArg.name);
+            }
+
+            // increment must come at the end of this if
+            ++iter;
+         }
+
+         if (! arg.type.isEmpty()) {
+            m_output.addFieldQuotedString("type", arg.type);
+         }
+
+         if (! arg.array.isEmpty()) {
+            m_output.addFieldQuotedString("array", arg.array);
+         }
+
+         if (! arg.defval.isEmpty()) {
+            m_output.addFieldQuotedString("default_value", arg.defval);
+         }
+
+         if (! arg.attrib.isEmpty()) {
+            m_output.addFieldQuotedString("attributes", arg.attrib);
+         }
+
+         m_output.closeHash();             
+      }
+     
       m_output.closeList();
 
    } else if (md->memberType() == MemberType_Define && md->argsString() != 0) { 

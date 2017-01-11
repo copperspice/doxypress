@@ -107,8 +107,15 @@ class ArgumentList : public QList<Argument>
    /*! parsing a method with = delete */
    bool isDeleted;
 
+   // methods
    static ArgumentList unmarshal(StorageIntf *s);
    static void marshal(StorageIntf *s, const ArgumentList &argList);
+
+   bool isEmpty() const = delete;
+
+   bool listEmpty() const {
+      return QList<Argument>::isEmpty();
+   }
 };
 
 using ArgumentListIterator = QListIterator<Argument>;

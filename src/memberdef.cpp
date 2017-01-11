@@ -210,7 +210,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       if (il != -1 && ir != -1 && ir > il) {
          cName = cName.mid(il, ir - il + 1);
 
-      } else if (scopeDef->definitionType() == Definition::TypeClass && ! tmpList.isEmpty()) {
+      } else if (scopeDef->definitionType() == Definition::TypeClass && ! tmpList.listEmpty()) {
          cName = tempArgListToString(tmpList, scopeDef->getLanguage());
 
       } else {
@@ -1316,7 +1316,7 @@ bool MemberDef::isBriefSectionVisible() const
 
    // Hide friend (class|struct|union) declarations if HIDE_FRIEND_COMPOUNDS is true
    bool visibleIfFriendCompound = ! (hideFriendCompounds && isFriend() && (m_impl->type == "friend class" ||
-                                     m_impl->type == "friend struct" || m_impl->type == "friend union" ) );
+                  m_impl->type == "friend struct" || m_impl->type == "friend union" ) );
 
    // only include members that are non-private unless EXTRACT_PRIVATE is
    // set to YES or the member is part of a group
@@ -1327,7 +1327,7 @@ bool MemberDef::isBriefSectionVisible() const
 
    // hide default constructors or destructors (no args) without documentation
    bool visibleIfNotDefaultCDTor = !( cOrDTor &&
-               (m_impl->m_defArgList.isEmpty() || m_impl->m_defArgList.first().type == "void" ) && ! hasDocs);
+               (m_impl->m_defArgList.listEmpty() || m_impl->m_defArgList.first().type == "void" ) && ! hasDocs);
 
    bool visible = visibleIfStatic && visibleIfDocumented && visibleIfEnabled && visibleIfPrivate &&
                   visibleIfNotDefaultCDTor && visibleIfFriendCompound && ! m_impl->annScope && ! isHidden();
@@ -1425,7 +1425,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    if (isAnonymous)  {
       x = 1;
 
-   } else if (! m_impl->m_templateArgList.isEmpty()) {
+   } else if (! m_impl->m_templateArgList.listEmpty()) {
       x = 3;
 
    }
@@ -1466,7 +1466,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // *** write template lists
-   if (! m_impl->m_templateArgList.isEmpty() && getLanguage() == SrcLangExt_Cpp) {
+   if (! m_impl->m_templateArgList.listEmpty() && getLanguage() == SrcLangExt_Cpp) {
       if (! isAnonymous) {
          ol.startMemberTemplateParams();
       }
@@ -1577,7 +1577,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       ol.popGeneratorState();
 
    } else {
-      ol.insertMemberAlign(! m_impl->m_templateArgList.isEmpty());
+      ol.insertMemberAlign(! m_impl->m_templateArgList.listEmpty());
    }
 
    static const bool extractPrivate      = Config::getBool("extract-private");
@@ -1868,7 +1868,7 @@ bool MemberDef::isDetailedSectionLinkable() const
    bool temp_b = (hasMultiLineInitializer() && ! hideUndocMembers);
 
    // has one or more documented arguments
-   bool temp_c = (! m_impl->m_defArgList.isEmpty() && m_impl->m_defArgList.hasDocumentation() );
+   bool temp_c = (! m_impl->m_defArgList.listEmpty() && m_impl->m_defArgList.hasDocumentation() );
 
    bool isAttribute = m_impl->m_memberTraits.hasTrait(Entry::Virtue::Attribute);
    bool isProperty  = m_impl->m_memberTraits.hasTrait(Entry::Virtue::Property);
@@ -2467,13 +2467,13 @@ void MemberDef::_writeTypeConstraints(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   if (! m_impl->m_typeConstraints.isEmpty()) {
+   if (! m_impl->m_typeConstraints.listEmpty()) {
       writeTypeConstraints(ol, self, m_impl->m_typeConstraints);
    }
 }
 
 void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> container, const QString &cfname,
-                                 const QString &ciname, const QString &cname)
+                  const QString &ciname, const QString &cname)
 {
    if (isEnumerate()) {
       bool first = true;
@@ -2907,7 +2907,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
                }
             }
 
-            if (! m_impl->m_templateArgList.isEmpty() && lang == SrcLangExt_Cpp) {
+            if (! m_impl->m_templateArgList.listEmpty() && lang == SrcLangExt_Cpp) {
                // function template prefix
 
                ol.startMemberDocPrefixItem();
@@ -3565,24 +3565,15 @@ bool MemberDef::isDocumentedFriendClass() const
 
 bool MemberDef::isDeleted() const
 {
-   return (! m_impl->m_defArgList.isEmpty() && m_impl->m_defArgList.isDeleted);
+   return (m_impl->m_defArgList.isDeleted);
 }
 
 bool MemberDef::hasDocumentation() const
 {
    return Definition::hasDocumentation() ||
-          (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||            // has enum values
-          (! m_impl->m_defArgList.isEmpty() && m_impl->m_defArgList.hasDocumentation());  // has doc arguments
+          (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||    // has enum values
+          m_impl->m_defArgList.hasDocumentation();                                 // has doc arguments
 }
-
-#if 0
-bool MemberDef::hasUserDocumentation() const
-{
-   bool hasDocs = Definition::hasUserDocumentation();
-   return hasDocs;
-}
-#endif
-
 
 void MemberDef::setMemberGroup(QSharedPointer<MemberGroup> grp)
 {
@@ -3609,30 +3600,6 @@ QString MemberDef::getScopeString() const
    return result;
 }
 
-#if 0
-static QString escapeAnchor(const QString &anchor)
-{
-   QString result;
-
-   int l = anchor.length(), i;
-
-   for (i = 0; i < l; i++) {
-      char c = anchor.at(i);
-      if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z')) {
-         result += c;
-
-      } else {
-         static char hexStr[] = "0123456789ABCDEF";
-         char escChar[] = { '_', 0, 0, 0 };
-         escChar[1] = hexStr[c >> 4];
-         escChar[2] = hexStr[c & 0xf];
-         result += escChar;
-      }
-   }
-   return result;
-}
-#endif
-
 void MemberDef::setAnchor()
 {
    QString memAnchor = name();
@@ -3643,13 +3610,12 @@ void MemberDef::setAnchor()
 
    memAnchor.prepend(definition());
 
-   // method name is now included twice, which is odd
-   // currently done for backward compatibility
+   // method name is now included twice, currently done for backward compatibility
 
    // include number of template arguments as well, to distinguish between two template
    // specializations that only differ in the template parameters
 
-   if (! m_impl->m_templateArgList.isEmpty())   {
+   if (! m_impl->m_templateArgList.listEmpty())   {
       QString tmp = QString("%1:").arg(m_impl->m_templateArgList.count());
       memAnchor.prepend(tmp);
    }
@@ -3662,7 +3628,7 @@ void MemberDef::setAnchor()
 }
 
 void MemberDef::setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri, const QString &fileName,
-                            int startLine, bool hasDocs, QSharedPointer<MemberDef> member)
+                  int startLine, bool hasDocs, QSharedPointer<MemberDef> member)
 {
    m_impl->group = gd;
    m_impl->grouppri = pri;
@@ -3704,23 +3670,22 @@ void MemberDef::setNamespace(QSharedPointer<NamespaceDef> nd)
    setOuterScope(nd);
 }
 
-QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const ArgumentList &formalArgs, const ArgumentList &actualArgs)
+QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const ArgumentList &formalArgs, 
+                  const ArgumentList &actualArgs)
 {
-   ArgumentList actualArgList;
+   ArgumentList actualArgList; 
+   actualArgList = m_impl->m_defArgList;
 
-   if (! m_impl->m_defArgList.isEmpty()) {
-      actualArgList = m_impl->m_defArgList;
-
-      // replace formal arguments with actuals
-
-      for (auto &arg : actualArgList) {
-         arg.type = substituteTemplateArgumentsInString(arg.type, formalArgs, actualArgs);
-      }
-
-      actualArgList.trailingReturnType = substituteTemplateArgumentsInString(actualArgList.trailingReturnType, formalArgs, actualArgs);
+   // replace formal arguments with actuals
+   for (auto &arg : actualArgList) {
+      arg.type = substituteTemplateArgumentsInString(arg.type, formalArgs, actualArgs);
    }
 
+   actualArgList.trailingReturnType = substituteTemplateArgumentsInString(actualArgList.trailingReturnType,
+               formalArgs, actualArgs);
+
    QString methodName = name();
+
    if (methodName.startsWith("operator ")) {
       // conversion operator
       methodName = substituteTemplateArgumentsInString(methodName, formalArgs, actualArgs);
@@ -3729,7 +3694,8 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
    QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(getDefFileName(), getDefLine(), getDefColumn(),
          substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs), methodName,
          substituteTemplateArgumentsInString(m_impl->args, formalArgs, actualArgs),
-         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->related, m_impl->mtype, ArgumentList(), ArgumentList());
+         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->related, m_impl->mtype, 
+         ArgumentList(), ArgumentList());
 
    imd->setArgumentList(actualArgList);
    imd->setDefinition(substituteTemplateArgumentsInString(m_impl->def, formalArgs, actualArgs));
@@ -5314,26 +5280,22 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
          if (! mdef->documentation().isEmpty()) {
             mdec->setDocumentation(mdef->documentation(), mdef->docFile(), mdef->docLine());
             mdec->setDocsForDefinition(mdef->isDocsForDefinition());
+            
+            ArgumentList mdefAlComb = stringToArgumentList(mdef->argsString());
 
-            if (! mdefAl.isEmpty()) {
-               ArgumentList mdefAlComb;
-               mdefAlComb = stringToArgumentList(mdef->argsString());
-
-               transferArgumentDocumentation(mdefAl, mdefAlComb);
-               mdec->setArgumentList(mdefAlComb);
-            }
+            transferArgumentDocumentation(mdefAl, mdefAlComb);
+            mdec->setArgumentList(mdefAlComb);
+            
 
          } else if (! mdec->documentation().isEmpty()) {
             mdef->setDocumentation(mdec->documentation(), mdec->docFile(), mdec->docLine());
             mdef->setDocsForDefinition(mdec->isDocsForDefinition());
+            
+            ArgumentList mdecAlComb = stringToArgumentList(mdec->argsString());
 
-            if (! mdecAl.isEmpty()) {
-               ArgumentList mdecAlComb;
-               mdecAlComb = stringToArgumentList(mdec->argsString());
-
-               transferArgumentDocumentation(mdecAl, mdecAlComb);
-               mdef->setDeclArgumentList(mdecAlComb);
-            }
+            transferArgumentDocumentation(mdecAl, mdecAlComb);
+            mdef->setDeclArgumentList(mdecAlComb);
+            
          }
 
          if (! mdef->inbodyDocumentation().isEmpty()) {
@@ -5341,6 +5303,7 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
 
          } else if (! mdec->inbodyDocumentation().isEmpty()) {
             mdef->setInbodyDocumentation(mdec->inbodyDocumentation(), mdec->inbodyFile(), mdec->inbodyLine());
+
          }
 
          if (mdec->getStartBodyLine() != -1 && mdef->getStartBodyLine() == -1) {

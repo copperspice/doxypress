@@ -674,7 +674,7 @@ static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList
 
       const ArgumentList &tmpList = cd->getTemplateArgumentList();
 
-      if (! tmpList.isEmpty()) {
+      if (! tmpList.listEmpty()) {
          result.append(tmpList);
 
          if (! isSpecialization) {
@@ -1853,7 +1853,8 @@ QString ClassDef::title() const
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
-      pageTitle = theTranslator->trCompoundReferenceFortran( qPrintable(displayName()), m_compType, ! m_tempArgs.isEmpty() );         
+      pageTitle = theTranslator->trCompoundReferenceFortran( qPrintable(displayName()), m_compType, 
+                  ! m_tempArgs.listEmpty() );         
 
    } else if (isJavaEnum()) {
       pageTitle = theTranslator->trEnumReference(qPrintable(displayName()));
@@ -1879,7 +1880,8 @@ QString ClassDef::title() const
 
          } 
 
-         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()), compType, ! m_tempArgs.isEmpty() );
+         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()), compType, 
+                  ! m_tempArgs.listEmpty() );
       }
    }
 
@@ -3285,7 +3287,7 @@ void ClassDef::getTemplateParameterLists(QList<ArgumentList> &lists) const
 
    const ArgumentList &tmp = getTemplateArgumentList();
 
-   if (! tmp.isEmpty()) {
+   if (! tmp.listEmpty()) {
       lists.append(tmp);
    }
 }
@@ -3324,7 +3326,7 @@ QString ClassDef::qualifiedNameWithTemplateParameters(const QList<ArgumentList> 
    ArgumentList al;
    const ArgumentList &tmpList = getTemplateArgumentList();
 
-   if (! tmpList.isEmpty()) {
+   if (! tmpList.listEmpty()) {
       if (! actualParams.isEmpty() && *actualParamIndex < actualParams.count()) {
          al = actualParams.at(*actualParamIndex);
 
@@ -3829,7 +3831,7 @@ QSharedPointer<ClassDef> ClassDef::templateMaster() const
 
 bool ClassDef::isTemplate() const
 {
-   return ! m_tempArgs.isEmpty();
+   return ! m_tempArgs.listEmpty();
 }
 
 const IncludeInfo &ClassDef::includeInfo() const

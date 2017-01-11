@@ -274,8 +274,6 @@ namespace Doxy_Work{
                                 QSharedPointer<ClassDef> instanceCd, FindBaseClassRelation_Mode mode, bool isArtificial,
                                 const ArgumentList &actualArgs = ArgumentList(), QHash<QString, int> templateNames = QHash<QString, int>());
 
-   QSharedPointer<ClassDef> findClassDefinition(QSharedPointer<FileDef> fd, QSharedPointer<NamespaceDef> nd, const QString &scopeName);
-
    void findClassEntries(QSharedPointer<EntryNav> rootNav);
    bool findClassRelation(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> cd, BaseInfo *bi,
                           QHash<QString, int> templateNames, FindBaseClassRelation_Mode mode, bool isArtificial);
@@ -295,7 +293,7 @@ namespace Doxy_Work{
    int findFunctionPtr(const QString &type, int lang, int *pLength = 0);
 
    bool findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString &namespaceName, const QString &type, const QString &name,
-                                const QString &tempArg, const QString &, const QString &decl);
+                  const QString &tempArg, const QString &, const QString &decl);
 
    void findGroupScope(QSharedPointer<EntryNav> rootNav);
    void findInheritedTemplateInstances();
@@ -316,7 +314,7 @@ namespace Doxy_Work{
    void findTagLessClasses(QSharedPointer<ClassDef> cd);
 
    bool findTemplateInstanceRelation(QSharedPointer<Entry> root, QSharedPointer<Definition> context, QSharedPointer<ClassDef> templateClass,
-                                     const QString &templSpec, QHash<QString, int> templateNames, bool isArtificial);
+                  const QString &templSpec, QHash<QString, int> templateNames, bool isArtificial);
 
    QSharedPointer<NamespaceDef> findUsedNamespace(NamespaceSDict *unl, const QString &name);
 
@@ -1267,7 +1265,7 @@ ArgumentList getTemplateArgumentsFromName(const QString &name, const QList<Argum
          QSharedPointer<ClassDef> cd = getClass(name.left(index));
 
          if (cd) {
-            if (! cd->getTemplateArgumentList().isEmpty()) {
+            if (! cd->getTemplateArgumentList().listEmpty()) {
                ++item;
 
                if (item == tArgLists.end()) {
@@ -2117,7 +2115,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<EntryNav> rootNav)
       }
 
       if (! root->m_templateArgLists.isEmpty() &&
-                  (cd->getTemplateArgumentList().isEmpty() || (cd->isForwardDeclared() &&
+                  (cd->getTemplateArgumentList().listEmpty() || (cd->isForwardDeclared() &&
                   (! root->m_traits.hasTrait(Entry::Virtue::ForwardDecl)) ))) {
 
          // happens if a template class is declared before the actual definition or
@@ -3447,14 +3445,12 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<EntryNav> rootNav)
       }
 
       if (typeIsClass) {
-         // now we still have to check if the arguments are
-         // types or values. Since we do not have complete type info
-         // we need to rely on heuristics
+         // need to check if the arguments are types or values.
+         // Since we do not have complete type info, need on heuristics
 
          const ArgumentList &argList = root->argList;
 
-         if (argList.isEmpty()) {
-            // empty arg list -> function prototype
+         if (argList.listEmpty()) {           
             result = false;
             break;
          }
@@ -4286,12 +4282,12 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                   const ArgumentList &mdArgList = item->getArgumentList();
                   ArgumentList &mdTempArgList   = item->getTemplateArgumentList();
 
-                  // in case of template functions, we need to check if the
-                  // functions have the same number of template parameters
+                  // for template functions, check if they have the same number of template parameters
                   bool sameNumTemplateArgs = true;
                   bool matchingReturnTypes = true;
 
-                  if (! mdTempArgList.isEmpty() && ! root->m_templateArgLists.isEmpty()) {
+                  if (! mdTempArgList.listEmpty() && ! root->m_templateArgLists.isEmpty()) {
+
                      if (mdTempArgList.count() != root->m_templateArgLists.last().count()) {
                         sameNumTemplateArgs = false;
                      }
@@ -4301,9 +4297,10 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                      }
                   }
 
-                  bool staticsInDifferentFiles = root->stat && item->isStatic() && root->fileName != item->getDefFileName();
+                  bool staticsInDifferentFiles = root->stat && item->isStatic() && 
+                           root->fileName != item->getDefFileName();
 
-                  bool tmp = matchArguments2(item->getOuterScope(), mfd, mdTempArgList,
+                  bool tmp = matchArguments2(item->getOuterScope(), mfd, mdArgList,
                            rnd ? rnd : Doxy_Globals::globalScope, rfd, root->argList, false);
 
                   if (tmp && sameNumTemplateArgs && matchingReturnTypes && ! staticsInDifferentFiles) {
@@ -4321,7 +4318,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                      // otherwise, allow a duplicate global member with the same argument list
                      if (! found && gd && gd == item->getGroupDef() && nsName == rnsName) {
-                        // member is already in the group, so we don't want to add it again.
+                        // member is already in the group, so we do not want to add it again
+
                         found = true;
                      }
 
@@ -4734,31 +4732,29 @@ QHash<QString, int> Doxy_Work::getTemplateArgumentsInName(const ArgumentList &te
    QHash<QString, int> templateNames;
    static QRegExp re("[a-z_A-Z][a-z_A-Z0-9:]*");
 
-   if (! templateArgumentList.isEmpty()) {
-      int count = 0;
+   int count = 0;
 
-      for (auto &item : templateArgumentList) {
+   for (auto &item : templateArgumentList) {
 
-         int i;
-         int len;
-         int p = 0;
+      int i;
+      int len;
+      int p = 0;
 
-         while ((i = re.indexIn(name, p)) != -1) {
-            len = re.matchedLength();
+      while ((i = re.indexIn(name, p)) != -1) {
+         len = re.matchedLength();
 
-            QString n = name.mid(i, len);
+         QString n = name.mid(i, len);
 
-            if (n == item.name) {
-               if (! templateNames.contains(n)) {
-                  templateNames.insert(n, count);
-               }
+         if (n == item.name) {
+            if (! templateNames.contains(n)) {
+               templateNames.insert(n, count);
             }
-
-            p = i + len;
          }
 
-         count++;
+         p = i + len;
       }
+
+      count++;
    }
 
    return templateNames;
@@ -4798,8 +4794,9 @@ QSharedPointer<ClassDef> Doxy_Work::findClassWithinClassContext(QSharedPointer<D
    return result;
 }
 
-void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
-               QSharedPointer<ClassDef> instanceCd, bool isArtificial, const ArgumentList &actualArgs, QHash<QString, int> templateNames)
+void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context,
+                  QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef> instanceCd, bool isArtificial, 
+                  const ArgumentList &actualArgs, QHash<QString, int> templateNames)
 {
    masterCd->visited = true;
    const ArgumentList &formalArgs = masterCd->getTemplateArgumentList();
@@ -4828,7 +4825,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
                bool found = false;
 
                // the type can contain template variables, replace them if present
-               if (! actualArgs.isEmpty()) {
+               if (! actualArgs.listEmpty()) {
                   type = substituteTemplateArgumentsInString(type, formalArgs, actualArgs);
                }
 
@@ -4947,9 +4944,10 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
    }
 }
 
-void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
-             QSharedPointer<ClassDef>instanceCd, FindBaseClassRelation_Mode mode, bool isArtificial, const ArgumentList &actualArgs,
-             QHash<QString, int> templateNames)
+void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QSharedPointer<Definition> context,
+         QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef>instanceCd, 
+         FindBaseClassRelation_Mode mode, bool isArtificial, const ArgumentList &actualArgs,
+         QHash<QString, int> templateNames)
 {
    QSharedPointer<Entry> root = rootNav->entry();
 
@@ -4966,7 +4964,7 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
       BaseInfo tbi(bi.name, bi.prot, bi.virt);
 
-      if (! actualArgs.isEmpty()) {
+      if (! actualArgs.listEmpty()) {
          // substitute the formal template arguments of the base class
          tbi.name = substituteTemplateArgumentsInString(bi.name, formalArgs, actualArgs);
       }
@@ -4982,7 +4980,6 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<EntryNav> rootNav, QShare
 
             // no documented base class -> try to find an undocumented one
             findClassRelation(rootNav, context, instanceCd, &tbi, templateNames, Undocumented, b);
-
          }
 
       } else if (mode == TemplateInstances) {
@@ -5694,7 +5691,7 @@ void Doxy_Work::computeTemplateClassRelations()
                BaseInfo tbi(bi.name, bi.prot, bi.virt);
                const ArgumentList &tl = cd->getTemplateArgumentList();
 
-               if (! tl.isEmpty()) {
+               if (! tl.listEmpty()) {
                   const QHash<QString, int> &baseClassNames = item.value()->getTemplateBaseClassNames();
                   QHash<QString, int> templateNames         = getTemplateArgumentsInName(tl, bi.name);
 
@@ -5856,7 +5853,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
 
    ArgumentList &mdArgList = md->getArgumentList();
 
-   if (! argList.isEmpty()) {
+   if (! argList.listEmpty()) {
       mergeArguments(mdArgList, argList, ! root->doc.isEmpty());
 
    } else if (matchArguments2(md->getOuterScope(), md->getFileDef(), mdArgList, rscope, rfd, root->argList, true)) {
@@ -5928,14 +5925,6 @@ void Doxy_Work::addMemberDocs(QSharedPointer<EntryNav> rootNav, QSharedPointer<M
    }
 }
 
-// find a class definition given the scope name and (optionally) a
-// template list specifier
-QSharedPointer<ClassDef> Doxy_Work::findClassDefinition(QSharedPointer<FileDef> fd, QSharedPointer<NamespaceDef> nd, const QString &scopeName)
-{
-   QSharedPointer<ClassDef> tcd = getResolvedClass(nd, fd, scopeName, 0, 0, true, true);
-   return tcd;
-}
-
 // Adds the documentation contained in `root' to a global function
 // with name `name' and argument list `args' (for overloading) and
 // function declaration `decl' to the corresponding member definition.
@@ -5946,52 +5935,46 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
 
    Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() namespace= %s   type= %s   name= %s   tempArg= %s   decl= %s\n",
                 csPrintable(namespaceName), csPrintable(type), csPrintable(name),
-                csPrintable(tempArg), csPrintable(decl) );
+                csPrintable(tempArg), csPrintable(decl) );   
 
-   QString n = name;
-
-   if (n.isEmpty()) {
+   if (name.isEmpty()) {
       return false;
    }
 
-   if (n.indexOf("::") != -1) {
+   if (name.indexOf("::") != -1) {
       // skip undefined class members
       return false;
    }
 
    // look in function dictionary
-   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(n + tempArg);
+   QSharedPointer<MemberName> memberList = Doxy_Globals::functionNameSDict.find(name + tempArg);
 
-   if (mn == nullptr) {
+   if (memberList == nullptr) {
       // try without template arguments
-      mn = Doxy_Globals::functionNameSDict.find(n);
+      memberList = Doxy_Globals::functionNameSDict.find(name);
    }
 
-   if (mn) {
+   if (memberList) {
       // function name defined
 
       Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() found symbol scope\n");
       bool found = false;
 
-      for (auto md : *mn) {
-         if (found) {
-            break;
-         }
-
+      for (const auto &md : *memberList) {
+        
          QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
-         QSharedPointer<FileDef> fd = rootNav->fileDef();
+         QSharedPointer<FileDef> fd      = rootNav->fileDef();
 
-         NamespaceSDict *nl = fd ? fd->getUsedNamespaces() : 0;
+         NamespaceSDict *nl = fd ? fd->getUsedNamespaces() : nullptr;
 
-         // search in the list of namespaces that are imported via a
-         // using declaration
-         bool viaUsingDirective = nl && nd && nl->find(nd->qualifiedName()) != 0;
+         // search in the list of namespaces that are imported via a using declaration
+         bool viaUsingDirective = nl && nd && nl->find(nd->qualifiedName()) != nullptr;
 
-         if ((namespaceName.isEmpty() && nd == 0) || (nd && nd->name() == namespaceName) || viaUsingDirective) {
+         if ((namespaceName.isEmpty() && nd == nullptr) || (nd && nd->name() == namespaceName) || viaUsingDirective) {
             // not in a namespace, or in the same namespace, memeber in "using' namespace
 
             Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() attempting to add member %s to scope %s\n",
-                         csPrintable(md->name()), csPrintable(namespaceName));
+                  csPrintable(md->name()), csPrintable(namespaceName));
 
             QSharedPointer<NamespaceDef> rnd;
 
@@ -6001,13 +5984,21 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
 
             const ArgumentList &mdAl = md->getArgumentList();
 
-            bool matching = (mdAl.isEmpty() && root->argList.count() == 0) || md->isVariable() || md->isTypedef() ||
-                     matchArguments2(md->getOuterScope(), md->getFileDef(), mdAl,
-                     rnd ? rnd : Doxy_Globals::globalScope, fd, root->argList, false);
+            bool matching = md->isVariable() || md->isTypedef();
 
-            // for template members we need to check if the number of
-            // template arguments is the same, otherwise we are dealing with different functions
+            if (! matching) {
+               if (rnd == nullptr) {
+                  rnd = Doxy_Globals::globalScope;
+               }
+               
+               matching = matchArguments2(md->getOuterScope(), md->getFileDef(), mdAl, rnd, fd, root->argList, false);              
+            }
+
+            // for template members we need to check if the number of template arguments is the same
+            // otherwise we are dealing with different functions
+
             if (matching && ! root->m_templateArgLists.isEmpty()) {
+
                const ArgumentList &mdTempl = md->getTemplateArgumentList();
 
                if (root->m_templateArgLists.last().count() != mdTempl.count()) {
@@ -6015,18 +6006,18 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
                }
             }
 
-            // for static members we also check if the comment block was found in
-            // the same file. This is needed because static members with the same
-            // name can be in different files. Thus it would be wrong to just
-            // put the comment block at the first syntactically matching member.
-            if (matching && md->isStatic() && md->getDefFileName() != root->fileName && mn->count() > 1) {
+            // for static members we also check if the comment block was found in the same file. 
+            // This is needed because static members with the same name can be in different files.
+            // It would be incoorect to put the comment block at the first syntactically matching member.
+
+            if (matching && md->isStatic() && md->getDefFileName() != root->fileName && memberList->count() > 1) {
                matching = false;
             }
 
             // for template member, check the return type
             const ArgumentList &tmpList = md->getTemplateArgumentList();
 
-            if (! tmpList.isEmpty() && ! root->m_templateArgLists.isEmpty()) {
+            if (! root->m_templateArgLists.isEmpty()) {
 
                if (tmpList.count() != root->m_templateArgLists.last().count() || md->typeString() != type) {
                   matching = false;
@@ -6036,26 +6027,28 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<EntryNav> rootNav, const QString
             if (matching) {
                // add docs to the member
                Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() match found\n");
+
                addMemberDocs(rootNav, md, decl, root->argList, false);
                found = true;
+               break;
             }
          }
       }
 
       if (! found && root->relatesType != Duplicate && root->section == Entry::FUNCTION_SEC) {
          // no match
-         QString fullFuncDecl = decl;
-         fullFuncDecl += argListToString(root->argList, true);
+         QString signature = decl;
+         signature += argListToString(root->argList, true);
 
-         QString warnMsg = QString("No matching file member found for \n") + substitute(fullFuncDecl, "%", "%%");
+         QString warnMsg = QString("No matching member or function found for \n") + substitute(signature, "%", "%%");
 
-         if (mn->count() > 0) {
+         if (memberList->count() > 0) {
             warnMsg += "\nPossible candidates:\n";
 
-            for (auto md : *mn) {
-               warnMsg += " '";
+            for (const auto &md : *memberList) {
+               warnMsg += "  '";
                warnMsg += substitute(md->declaration(), "%", "%%");
-               warnMsg += "' at line " + QString().setNum(md->getDefLine()) + " of file" + md->getDefFileName() + "\n";
+               warnMsg += "' at line " + QString().setNum(md->getDefLine()) + " in file " + md->getDefFileName() + "\n";
             }
          }
 
@@ -6103,7 +6096,7 @@ bool Doxy_Work::scopeIsTemplate(QSharedPointer<Definition> d)
 
    if (d && d->definitionType() == Definition::TypeClass) {
       QSharedPointer<ClassDef> temp = d.dynamicCast<ClassDef>();
-      result = (! temp->getTemplateArgumentList().isEmpty() || scopeIsTemplate(d->getOuterScope()) );
+      result = (! temp->getTemplateArgumentList().listEmpty() || scopeIsTemplate(d->getOuterScope()) );
    }
 
    return result;
@@ -6233,7 +6226,7 @@ ArgumentList Doxy_Work::substituteTemplatesInArgList(const QList<ArgumentList> &
 }
 
 /*! This function tries to find a member (in a documented class/file/namespace)
- * that corresponds to the function/variable declaration given in \a funcDecl.
+ * that corresponds to the function/variable declaration given in funcDecl.
  *
  * The boolean \a overloaded is used to specify whether or not a standard
  * overload documentation line should be generated.
@@ -6360,8 +6353,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
           (rootNav->parent()->section() == Entry::OBJCIMPL_SEC) ) &&
            ! rootNav->parent()->name().isEmpty()) {
 
-      // see if we can combine scopeName
-      // with the scope in which it was found
+      // see if we can combine scopeName with the scope in which it was found
 
       QString joinedName = rootNav->parent()->name() + "::" + scopeName;
 
@@ -6414,7 +6406,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
    }
 
    // merge class and namespace scopes again
-   scopeName.resize(0);
+   scopeName = "";
 
    if (! namespaceName.isEmpty()) {
       if (className.isEmpty()) {
@@ -6459,7 +6451,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
             // a function => we use argList for the arguments
             funcDecl = tempScopeName + "::" + funcName + funcTempList;
          } else {
-            // variable => add `argument' list
+            // variable => add 'argument' list
             funcDecl = tempScopeName + "::" + funcName + funcArgs;
          }
       }
@@ -6507,8 +6499,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
    if (! funcName.isEmpty()) {
       // function name is valid
-      Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [1] funcName= %s\n", csPrintable(funcName));
-
+    
       if (funcName.startsWith("operator ")) {
          // strip class scope from cast operator
          funcName = substitute(funcName, className + "::", "");
@@ -6537,7 +6528,17 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                int count = 0;
 
                int noMatchCount = 0;
-               bool memFound = false;
+               bool memFound    = false;
+
+               QSharedPointer<FileDef>      fd = rootNav->fileDef(); 
+               QSharedPointer<NamespaceDef> nd;
+
+               if (! namespaceName.isEmpty()) {
+                  nd = getResolvedNamespace(namespaceName);
+               }
+
+               // find a class def given the scope name and (optionally) a template list specifier
+               QSharedPointer<ClassDef> tcd_hold = getResolvedClass(nd, fd, scopeName, nullptr, nullptr, true, true);
 
                for (auto md : *mn) {
 
@@ -6546,38 +6547,28 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                   }
 
                   QSharedPointer<ClassDef> cd = md->getClassDef();
-                  Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() member definition: \n"
-                               "   scope needed= %s   scope= %s   args= %s   fileName= %s\n",
-                               csPrintable(scopeName), cd ? csPrintable(cd->name()) : "none",
-                               csPrintable(md->argsString()), csPrintable(root->fileName)  );
 
-                  QSharedPointer<FileDef> fd = rootNav->fileDef();
-                  QSharedPointer<NamespaceDef> nd;
-
-                  if (! namespaceName.isEmpty()) {
-                     nd = getResolvedNamespace(namespaceName);
-                  }
-
-                  QSharedPointer<ClassDef> tcd = findClassDefinition(fd, nd, scopeName);
-
+                  // reset tcd
+                  QSharedPointer<ClassDef> tcd = tcd_hold;
+                                       
                   if (tcd == nullptr && cd && stripAnonymousNamespaceScope(cd->name()) == scopeName) {
-                     // do not be fooled by anonymous scopes
+                     // could be an anonymous scope
                      tcd = cd;
                   }
 
                   if (cd && tcd == cd) {
-                     // member's classes match
+                     // found the class this funcDecl belongs to
 
                      Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [4] class definition: %s\n",
                         csPrintable(cd->name()));
 
-                     // get the template parameter lists found at the member declaration
+                     // get the template parameter lists found in the member declaration
                      QList<ArgumentList> declTemplArgs;
 
                      cd->getTemplateParameterLists(declTemplArgs);
                      const ArgumentList &templAl = md->getTemplateArgumentList();
 
-                     if (! templAl.isEmpty()) {
+                     if (! templAl.listEmpty()) {
                         declTemplArgs.append(templAl);
                      }
 
@@ -6591,11 +6582,11 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      // substitute the occurrences of class template names in the argument list before matching
                      const ArgumentList &mdAl = md->getArgumentList();
 
-                     if (declTemplArgs.count() > 0 && declTemplArgs.count() == defTemplArgs.count() && ! mdAl.isEmpty()) {
+                     if (declTemplArgs.count() > 0 && declTemplArgs.count() == defTemplArgs.count() && ! mdAl.listEmpty()) {
 
                         // the function definition has template arguments and the class definition
-                        // also has template arguments, so we must substitute the template names of
-                        // the class by that of the function definition before matching.
+                        // also has template arguments. must substitute the template names of
+                        // the class with those of the function definition before matching.
 
                         argList   = substituteTemplatesInArgList(declTemplArgs, defTemplArgs, mdAl);
                         substDone = true;
@@ -6624,7 +6615,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      }
 
                      // for template member check the return type
-                     if (! md->getTemplateArgumentList().isEmpty() && ! root->m_templateArgLists.isEmpty()) {
+                     if (! md->getTemplateArgumentList().listEmpty() && ! root->m_templateArgLists.isEmpty()) {
                         // return type from the source
                         QString memType = md->typeString();
 
@@ -6636,7 +6627,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                                      "#args %d with %d\n", csPrintable(md->typeString()), csPrintable(funcType),
                                      md->getTemplateArgumentList().count(), root->m_templateArgLists.last().count());
 
-                        if (md->getTemplateArgumentList().count() != root->m_templateArgLists.last().count() || memType != funcType) {
+                        if (md->getTemplateArgumentList().count() != root->m_templateArgLists.last().count() || 
+                                 memType != funcType) {
                            matching = false;
                         }
 
@@ -6679,7 +6671,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
 
                      bool rootIsUserDoc       = (root->section & Entry::MEMBERDOC_SEC) != 0;
                      bool classIsTemplate     = scopeIsTemplate(md->getClassDef());
-                     bool mdIsTemplate        = ! md->getTemplateArgumentList().isEmpty();
+                     bool mdIsTemplate        = ! md->getTemplateArgumentList().listEmpty();
                      bool classOrMdIsTemplate = mdIsTemplate || classIsTemplate;
                      bool rootIsTemplate      = ! root->m_templateArgLists.isEmpty();
 
@@ -6728,8 +6720,9 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      }
 
                   } else if (cd && cd != tcd) {
-                     // found a class with the same name as cd, but in a different namespace
+                     // searching for funcDecl, found a different class which has a method of the same name                 
                      noMatchCount++;
+
                   }
 
                }
@@ -6756,7 +6749,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         if (ccd != nullptr && rightScopeMatch(ccd->name(), className)) {
                            const ArgumentList &templAl = md->getTemplateArgumentList();
 
-                           if (! root->m_templateArgLists.isEmpty() && ! templAl.isEmpty() &&
+                           if (! root->m_templateArgLists.isEmpty() && ! templAl.listEmpty() &&
                                     root->m_templateArgLists.last().count() <= templAl.count()) {
 
                               addMethodToClass(rootNav, ccd, md->name(), isFriend);
@@ -6791,7 +6784,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                   if (! strictSigMatching) {
 
                      if (candidates == 1 && ucd && umd) {
-                        // did not find a full signature match on arguments, there is only one  member
+                        // did not find a full signature match on arguments, there is only one member
                         // with this name in this same scope, use the mtype for the .h file
 
                         ArgumentList tmp;
@@ -6808,13 +6801,23 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                      }
                   }
 
-                  QString warnMsg = "no ";
+                  QString warnMsg;
 
-                  if (noMatchCount > 1) {
-                     warnMsg += "uniquely ";
+                  if (noMatchCount < 1) {
+                     warnMsg = "documentation found for a class member which was not found \n";
+
+                  } else {
+
+                     if (root->m_templateArgLists.isEmpty()) {
+                        warnMsg = "documentation found for a class member which was not found \n";
+                     } else {
+                        warnMsg = "no class member or template specialization found for \n";
+                     }
+
+                     // might be might be docs with no matching method, function, class
+                     // might be a template specialization of a method with no specialization of the class 
+
                   }
-
-                  warnMsg += "matching class member found for \n";
 
                   for (auto &al : root->m_templateArgLists) {
                      warnMsg += "  template ";
@@ -6840,7 +6843,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         if (cd != 0 && rightScopeMatch(cd->name(), className)) {
                            const ArgumentList &templAl = md->getTemplateArgumentList();
 
-                           if (! templAl.isEmpty()) {
+                           if (! templAl.listEmpty()) {
                               warnMsg += "  'template ";
                               warnMsg += tempArgListToString(templAl, root->lang);
                               warnMsg += '\n';

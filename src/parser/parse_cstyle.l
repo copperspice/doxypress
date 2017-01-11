@@ -426,12 +426,12 @@ static bool checkForKnRstyleC()
       return false;   
    }
 
-   if (current->argList.isEmpty()) {
+   if (current->argList.listEmpty()) {
       // must have arguments
       return false;   
    }
 
-   for (auto a : current->argList) {
+   for (const auto &a : current->argList) {
       // K&R style arguments do not have a type 
       // DoxyPress expects a type so it will think the argument has no name
 
@@ -1335,7 +1335,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ObjCMethod,ObjCParams>";"       { 
       // end of method declaration
-      if (! current->argList.isEmpty() && current->argList.last().type.isEmpty()) {
+      if (! current->argList.listEmpty() && current->argList.last().type.isEmpty()) {
          current->argList.last().type = "id";
       }
 
@@ -1349,7 +1349,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // start of a method body
       lineCount();
              
-      if (! current->argList.isEmpty() && current->argList.last().type.isEmpty()) {
+      if (! current->argList.listEmpty() && current->argList.last().type.isEmpty()) {
          current->argList.last().type = "id";
       }
       

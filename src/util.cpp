@@ -1370,22 +1370,18 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       if (! Doxy_Globals::glossary().contains(name + "-p")) {
          return QSharedPointer<ClassDef>();
       }
-
    }
 
    bool hasUsingStatements = (fileScope && ((fileScope->getUsedNamespaces() &&
                   fileScope->getUsedNamespaces()->count() > 0) ||
                   (fileScope->getUsedClasses() && fileScope->getUsedClasses()->count() > 0)) );
 
-   // Since it is often the case that the same name is searched in the same
-   // scope over an over again (especially for the linked source code generation)
-   // we use a cache to collect previous results. This is possible since the
-   // result of a lookup is deterministic. As the key we use the concatenated
-   // scope, the name to search for and the explicit scope prefix. The speedup
-   // achieved by this simple cache can be enormous.
+   // it is often the case that the same name is searched in the same scope
+   // use a cache to collect previous results. 
+   // the key is the concatenated scope, the name to search for and the explicit scope prefix. 
 
-   int scopeNameLen = scope->name().length() + 1;
-   int nameLen = name.length() + 1;
+   int scopeNameLen    = scope->name().length() + 1;
+   int nameLen         = name.length() + 1;
    int explicitPartLen = explicitScopePart.length();
 
    int fileScopeLen;
@@ -1479,35 +1475,34 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
    return bestMatch;
 }
 
-/* Find the fully qualified class name referred to by the input class
- * or typedef name against the input scope.
- * Loops through scope and each of its parent scopes looking for a
- * match against the input name.
+/* Find the fully qualified class name referred to by the input class or typedef name against the input scope.
+ * Loops through scope and each of its parent scopes looking for a match against the input name.
  */
-QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &key,
-                     QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, bool mayBeUnlinkable, bool mayBeHidden, QString *pResolvedType)
+QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, 
+                  const QString &key, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, bool mayBeUnlinkable, 
+                  bool mayBeHidden, QString *pResolvedType)
 {
    s_resolvedTypedefs.clear();
 
-   if (scope == 0 || (scope->definitionType() != Definition::TypeClass && scope->definitionType() != Definition::TypeNamespace ) ||
+   if (scope == nullptr || (scope->definitionType() != Definition::TypeClass && scope->definitionType() != Definition::TypeNamespace ) ||
             (scope->getLanguage() == SrcLangExt_Java && key.contains("::")) ) {
       scope = Doxy_Globals::globalScope;
    }
 
-   QSharedPointer<ClassDef>result;
+   QSharedPointer<ClassDef> result = getResolvedClassRec(scope, fileScope, key, pTypeDef, pTemplSpec, pResolvedType);
 
-   result = getResolvedClassRec(scope, fileScope, key, pTypeDef, pTemplSpec, pResolvedType);
-
-   if (result == 0)  {
-      // for nested classes imported via tag files, the scope may not
-      // present, so we check the class name directly as well. See also bug701314
+   if (result == nullptr)  {
+      // for nested classes imported via tag files, the scope may not be
+      // present, check the class name directly as well. 
       result = getClass(key);
    }
 
    if (! mayBeUnlinkable && result && ! result->isLinkable()) {
+
       if (! mayBeHidden || ! result->isHidden()) {
          result = QSharedPointer<ClassDef>();  // do not link to artificial/hidden classes unless explicitly allowed
       }
+
    }
 
    return result;
@@ -2151,13 +2146,7 @@ QString argListToString(const ArgumentList &argList, bool useCanonicalType, bool
 
 QString tempArgListToString(const ArgumentList &argList, SrcLangExt lang)
 {
-   QString result;
-
-   if (argList.isEmpty()) {
-      return result;
-   }
-
-   result = "<";
+   QString result = "<";
 
    auto nextItem = argList.begin();
 
@@ -3322,10 +3311,6 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
    }
 */
 
-   if (srcArgList.isEmpty() != dstArgList.isEmpty()) {
-      return false;
-   }
-
    if (srcArgList.count() != dstArgList.count()) {
       return false;
    }
@@ -3370,7 +3355,7 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 // the types of the arguments in the list should match
 void mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool forceNameOverwrite)
 {
-   if ( (srcArgList.isEmpty() != dstArgList.isEmpty()) || (srcArgList.count() != dstArgList.count()) ) {
+   if (srcArgList.count() != dstArgList.count()) {
       // invalid argument lists, do not merge
       return; 
    }
@@ -4948,7 +4933,7 @@ QString insertTemplateSpecifierInScope(const QString &scope, const QString &temp
       QSharedPointer<ClassDef> cd = QSharedPointer<ClassDef>();
 
       while ( (si = scope.indexOf("::", pi)) != -1 && ! getClass(scope.left(si) + templ) &&
-                  ((cd = getClass(scope.left(si))) == 0 || cd->getTemplateArgumentList().isEmpty()) ) {
+                  ((cd = getClass(scope.left(si))) == 0 || cd->getTemplateArgumentList().listEmpty()) ) {
 
          pi = si + 2;
       }
@@ -5459,18 +5444,15 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
       result     += name.mid(p, i - p);
       QString n   = name.mid(i, l);
       bool found  = false;
-
-      if (! formalArgList.isEmpty()) {
-         // check that n is not a formal template argument
-
-         for (auto &arg : formalArgList) {  
-         
-            if (arg.name == n) {
-               found = true;
-               break;
-            }
+    
+      // check that n is not a formal template argument
+      for (auto &arg : formalArgList) {  
+      
+         if (arg.name == n) {
+            found = true;
+            break;
          }
-      }
+      }    
 
       if (! found) {
          // try to resolve the type
@@ -5501,9 +5483,10 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
  *  is returned as a string. The argument \a name is used to
  *  prevent recursive substitution.
  */
-QString substituteTemplateArgumentsInString(const QString &name, const ArgumentList &formalArgList, const ArgumentList &actualArgList)
+QString substituteTemplateArgumentsInString(const QString &name, const ArgumentList &formalArgList, 
+                  const ArgumentList &actualArgList)
 {
-   if (formalArgList.isEmpty()) {
+   if (formalArgList.listEmpty()) {
       return name;
    }
 
@@ -7064,7 +7047,7 @@ QString expandAlias(const QString &aliasName, const QString &aliasValue)
 
 void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList)
 {
-   if (argList.isEmpty()) {
+   if (argList.listEmpty()) {
       return;
    }
 

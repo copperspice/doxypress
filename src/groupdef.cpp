@@ -239,21 +239,22 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
             return false;   // already added before
          }
 
-         bool sameScope = srcMd->getOuterScope() == md->getOuterScope() || // same class or namespace
-                          // both inside a file => definition and declaration do not have to be in the same file
-                          (srcMd->getOuterScope()->definitionType() == Definition::TypeFile &&
-                           md->getOuterScope()->definitionType() == Definition::TypeFile);
+         // same class or namespace
+         // both inside a file => definition and declaration do not have to be in the same file
+
+         bool sameScope = srcMd->getOuterScope() == md->getOuterScope() || 
+                  (srcMd->getOuterScope()->definitionType() == Definition::TypeFile &&
+                  md->getOuterScope()->definitionType() == Definition::TypeFile);
 
          const ArgumentList &srcMdAl  = srcMd->getArgumentList();
          const ArgumentList &mdAl     = md->getArgumentList();
          const ArgumentList &tSrcMdAl = srcMd->getTemplateArgumentList();
          const ArgumentList &tMdAl    = md->getTemplateArgumentList();
 
-         if (srcMd->isFunction() && md->isFunction() && ( (tSrcMdAl.isEmpty() && tMdAl.isEmpty()) ||
-                  (! tSrcMdAl.isEmpty() && ! tMdAl.isEmpty() && tSrcMdAl.count() == tMdAl.count() ))) {
+         if ( (srcMd->isFunction() && md->isFunction()) && (tSrcMdAl.count() == tMdAl.count()) ) {
 
             bool ok = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcMdAl, md->getOuterScope(), 
-                                      md->getFileDef(), mdAl, true);
+                     md->getFileDef(), mdAl, true);
 
             if (ok && sameScope) {
                if (srcMd->getGroupAlias() == 0) {

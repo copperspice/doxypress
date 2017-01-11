@@ -586,12 +586,12 @@ static void detectNoDocumentedParams()
       } else if (! s_memberDef->hasDocumentedParams()) {
          bool allDoc = true; // no paramater => all parameters are documented
 
-         if (! argList.isEmpty() ) {
+         if (! argList.listEmpty() ) {
             // member has parameters but the member has a parameter list
             // with at least one parameter (that is not void)
 
             // see if all parameters have documentation
-            for (auto &arg : argList) {
+            for (const auto &arg : argList) {
                if (! allDoc) {
                   break;
                }
@@ -601,11 +601,11 @@ static void detectNoDocumentedParams()
                }
             }
 
-            if (! allDoc && ! declAl.isEmpty()) {
+            if (! allDoc && ! declAl.listEmpty()) {
                // try declaration arguments as well
                allDoc = true;
 
-               for (auto &arg : declAl) {
+               for (const auto &arg : declAl) {
 
                   if (! allDoc) {
                      break;

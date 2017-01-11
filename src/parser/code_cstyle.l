@@ -245,11 +245,9 @@ void VariableContext::addVariable(const QString &type, const QString &name)
 
       if ( ( (varType = g_codeClassSDict->find(typeName)) || 
              (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, typeName, 0, 0, true, true)) ) &&
-              ! varType->getTemplateArgumentList().isEmpty() ) {
+              ! varType->getTemplateArgumentList().listEmpty() ) {
 
-         // look for class definitions inside the code block, otherwise look for global      
-         //  class definitionsand it must be a template
-      
+         // look for class definitions inside the code block, otherwise look for global class definitions      
          newDef = varType->getVariableInstance(templateArgs);
       }
       
@@ -576,11 +574,7 @@ static void setParameterList(QSharedPointer<MemberDef> md)
    g_classScope = md->getClassDef() ? md->getClassDef()->name() : "";
    const ArgumentList &argList = md->getArgumentList();
 
-   if (argList.isEmpty()) {
-      return;
-   }
-
-   for (auto &arg : argList) {
+   for (const auto &arg : argList) {
       g_parmName = arg.name;
       g_parmType = arg.type;
 
@@ -601,9 +595,7 @@ static void setParameterList(QSharedPointer<MemberDef> md)
    }
 }
 
-static QSharedPointer<ClassDef> stripClassName(const QString &s, 
-                  QSharedPointer<Definition> d = g_currentDefinition)
-
+static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<Definition> d = g_currentDefinition)
 {
    int pos = 0;
    QString type = s;

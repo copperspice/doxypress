@@ -2978,7 +2978,7 @@ YY_RULE_SETUP
       if (g_braceCount == 0)   {
          // end of default argument
 
-         if (current->argList.isEmpty()) {
+         if (current->argList.listEmpty()) {
             current->argList.last().defval = g_defVal.trimmed();
          }
 
