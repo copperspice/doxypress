@@ -1450,7 +1450,6 @@ void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname,
    m_sectionCount++;
 }
 
-
 void HtmlGenerator::startMemberList()
 {
    DBG_HTML(m_textStream << "<!-- startMemberList -->" << endl)

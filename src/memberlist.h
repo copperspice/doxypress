@@ -88,10 +88,12 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
       assert(m_numDecMembers != -1);
       return m_friendCnt;
    }
+
    int numDecMembers() const  {
       assert(m_numDecMembers != -1);
       return m_numDecMembers;
    }
+
    int numDocMembers() const  {
       assert(m_numDocMembers != -1);
       return m_numDocMembers;
@@ -112,8 +114,8 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
                   QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), 
                   MemberListType lt = MemberListType_pubMethods);
 
-   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, const QString &title, 
-                  bool showEnumValues = false, bool showInline = false);
+   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
+                  const QString &title, bool showEnumValues = false, bool showInline = false);
 
    void writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definition> container);   
    void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container);
@@ -134,10 +136,12 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
    void findSectionsInDocumentation();
  
    QList<MemberGroup> *getMemberGroupList() const {
-      return memberGroupList;
+      return m_memberGroupList;
    }
 
  private:
+   int countEnumValues(QSharedPointer<MemberDef> md, bool setAnonEnumType) const;
+
    int m_varCnt;
    int m_funcCnt;
    int m_enumCnt;
@@ -149,7 +153,7 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
    int m_numDecMembers;  // number of members in the brief part of the memberlist
    int m_numDocMembers;  // number of members in the detailed part of the memberlist
 
-   QList<MemberGroup> *memberGroupList;
+   QList<MemberGroup> *m_memberGroupList;
 
    bool m_inGroup;       // is this list part of a group definition
    bool m_inFile;        // is this list part of a file definition

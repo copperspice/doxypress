@@ -836,7 +836,7 @@ class OutputList : public OutputDocInterface
 
       for (auto item : m_outputs ) {                              
          if (item->isEnabled()) {
-            ((*item).*func)(vs...);           // BROOM - resolve when we update CS      
+            ((*item).*func)(vs...);           // BROOM - resolve when we update CS with operator->    
          }
       }      
    }

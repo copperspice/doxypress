@@ -3336,10 +3336,8 @@ QString ClassDef::qualifiedNameWithTemplateParameters(const QList<ArgumentList> 
 
          (*actualParamIndex)++;
 
-      } else {
-         if (! isSpecialization) {
-            scName += tempArgListToString(tmpList, lang);
-         }
+      } else if (! isSpecialization) {
+         scName += tempArgListToString(tmpList, lang);         
       }
    }
 
