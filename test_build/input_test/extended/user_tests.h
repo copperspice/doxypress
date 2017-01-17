@@ -1,14 +1,9 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2016 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
 * All rights reserved.
 *
-*
 * GNU Free Documentation License
-* This file may be used under the terms of the GNU Free Documentation
-* License version 1.3 as published by the Free Software Foundation
-* and appearing in the file included in the packaging of this file.
-*
 *
 *************************************************************************/
 
@@ -62,15 +57,6 @@ class test_dotApple : public test_dotFruit
 {
    public:
       void chew();
-};
-
-/// test return type matching
-class test_ReturnType
-{
-   public:
-      void returnIsVoid();
-      bool returnIsBool();
-
 };
 
 #endif

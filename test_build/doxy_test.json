@@ -182,9 +182,9 @@
         "example-patterns": [
             "*"
         ],
-        "example-recursive": false,
+        "example-recursive": true,
         "example-source": [
-            "dox"
+            "input_test"
         ],
         "exclude-files": [
             ""
@@ -212,7 +212,11 @@
             "*.cpp",
             "*.h",
             "*.dox",
-            "*.dll"
+            "*.dll",
+            "*.cs",
+            "*.py",
+            "*.f90",
+            "*.tcl"
         ],
         "input-recursive": true,
         "input-source": [
@@ -225,7 +229,7 @@
         "warn-doc-error": true,
         "warn-format": "$file:$line: $text",
         "warn-logfile": "doxy_error.log",
-        "warn-undoc": false,
+        "warn-undoc": true,
         "warn-undoc-param": false,
         "warnings": true
     },
@@ -395,7 +399,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.4"
+        "project-version": "1.2.5"
     },
     "source": {
         "clang-flags": [
@@ -406,7 +410,7 @@
         "ref-by-relation": false,
         "ref-link-source": true,
         "ref-relation": false,
-        "source-code": false,
+        "source-code": true,
         "source-tooltips": true,
         "strip-code-comments": true,
         "suffix-exclude-navtree": [

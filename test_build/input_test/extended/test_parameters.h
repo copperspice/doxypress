@@ -1,3 +1,12 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+* GNU Free Documentation License
+*
+*************************************************************************/
+
 #ifndef test_Parameters_h
 #define test_Parameters_h
 
