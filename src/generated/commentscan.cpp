@@ -3271,7 +3271,7 @@ static DocCmdMap docCmdMap[] =
   { "overload",        &handleOverload,         false },
   { "enum",            &handleEnum,             false },
   { "defgroup",        &handleDefGroup,         false },
-  { "group",           &handleDefGroup,         false },  
+  { "group",           &handleDefGroup,         false },
   { "addtogroup",      &handleAddToGroup,       false },
   { "weakgroup",       &handleWeakGroup,        false },
   { "namespace",       &handleNamespace,        false },
@@ -3389,7 +3389,7 @@ static DocCmdMap docCmdMap[] =
   { "until",           0,                       true  },
   { "verbinclude",     0,                       false },
   { "version",         0,                       true  },
-  { "warning",         0,                       true  },  
+  { "warning",         0,                       true  },
   { 0, 0, false }
 };
 
@@ -3451,7 +3451,7 @@ class DocCmdMapper
 };
 
 DocCmdMapper *DocCmdMapper::s_instance = 0;
-    
+
 #define YY_NEVER_INTERACTIVE 1
 
 enum XRefKind {
@@ -3525,7 +3525,7 @@ static QStack<GuardedSection *> guards;      // tracks nested conditional sectio
 static QSharedPointer<Entry>  current;       // working entry
 
 static bool             s_needNewEntry;
-static int              s_docBlockContext; 
+static int              s_docBlockContext;
 
 static QString          s_sectionLabel;
 static QString          s_sectionTitle;
@@ -3559,8 +3559,8 @@ static QString          s_memberGroupDocs;
 static QString          s_memberGroupRelates;
 static QString          s_compoundName;
 
-static bool             s_internalDocs;   
-static bool             s_processInternalDocs = false;  
+static bool             s_internalDocs;
+static bool             s_processInternalDocs = false;
 
 static void initParser()
 {
@@ -3569,7 +3569,7 @@ static void initParser()
    s_memberGroupHeader.resize(0);
 
    s_insideParBlock = false;
-   s_internalDocs   = Config::getBool("internal-docs"); 
+   s_internalDocs   = Config::getBool("internal-docs");
 }
 
 static bool getDocSectionName(int s)
@@ -3661,7 +3661,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
          break;
       }
    }
-   
+
    if (listItem && append) {
       // already found item of same type just before this one
 
@@ -3790,7 +3790,7 @@ static void addSection()
       // create a new section element
       s_sectionTitle += QString::fromUtf8(commentscanYYtext).trimmed();
 
-      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, s_sectionLabel, s_sectionTitle, 
+      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, s_sectionLabel, s_sectionTitle,
                   sectionLevelToType(s_sectionLevel), s_sectionLevel);
 
       // add section to this entry
@@ -3932,15 +3932,15 @@ static void addAnchor(const QString &anchorName)
    QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(anchorName);
 
    if (si) {
-      // anchor name already exists         
-      si->dupAnchor_cnt++;                 
+      // anchor name already exists
+      si->dupAnchor_cnt++;
 
    } else {
       // title is empty, level is zero
       si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorName, QString(""), SectionInfo::Anchor, 0);
-      si->dupAnchor_fName = yyFileName; 
+      si->dupAnchor_fName = yyFileName;
 
-      Doxy_Globals::sectionDict.insert(anchorName, si);          
+      Doxy_Globals::sectionDict.insert(anchorName, si);
       current->m_anchors.append(*si);
    }
 }
@@ -4542,12 +4542,12 @@ YY_RULE_SETUP
          }
 
          if (cmdPtr->func && cmdPtr->func(cmdName)) {
-            // implicit split of the comment block into two entries 
+            // implicit split of the comment block into two entries
             // restart the next block at the start of this command
 
             s_parseMore = true;
 
-            inputPosition = prevPosition + (yy_bp - s_bufferPosition);     
+            inputPosition = prevPosition + (yy_bp - s_bufferPosition);
             yyterminate();
 
          } else if (cmdPtr->func == nullptr) {
@@ -4573,11 +4573,12 @@ case 20:
 YY_RULE_SETUP
 {
       // language switch command
-      QString text = QString::fromUtf8(commentscanYYtext);
+      static const QString outputLanguage = Config::getEnum("output-language");
 
+      QString text   = QString::fromUtf8(commentscanYYtext);
       QString langId = text.trimmed().mid(2);
 
-      if (! langId.isEmpty() && Config::getEnum("output-language").compare(langId, Qt::CaseInsensitive) != 0) {
+      if (! langId.isEmpty() && outputLanguage.compare(langId, Qt::CaseInsensitive) != 0) {
          // enable language specific section
          BEGIN(SkipLang);
       }
@@ -4640,7 +4641,7 @@ YY_RULE_SETUP
       s_parseMore    = true;
       s_needNewEntry = true;
 
-      inputPosition = prevPosition + (yy_bp - s_bufferPosition) + text.length();           
+      inputPosition = prevPosition + (yy_bp - s_bufferPosition) + text.length();
       yyterminate();
    }
 	YY_BREAK
@@ -4817,27 +4818,27 @@ YY_RULE_SETUP
          }
 
          for (int i = 0; i < text.length();  ) {
-            if (text[i] == '\n') { 
-               addOutput('\n'); 
-               i++; 
+            if (text[i] == '\n') {
+               addOutput('\n');
+               i++;
 
-            } else if (text.mid(i) == "\\_linebr")  { 
+            } else if (text.mid(i) == "\\_linebr")  {
                addOutput('\n');
                i += 8;
 
             } else  {
                i++;
             }
-         } 
+         }
 
       } else if (inContext != OutputBrief) {
-      
+
          for (int i = 0; i< text.length(); ) {
             if (text[i] == '\n') {
                addOutput('\n');
                i++;
 
-            } else if (text.mid(i) == "\\_linebr")  { 
+            } else if (text.mid(i) == "\\_linebr")  {
                 addOutput('\n');
                 i += 8;
 
@@ -4877,7 +4878,7 @@ case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
 {
-      // newline      
+      // newline
       addOutput('\n');
       yyLineNr++;
    }
@@ -4905,7 +4906,7 @@ YY_RULE_SETUP
 
       if (text[0] == '\n') {
          yyLineNr++;
-      }   
+      }
    }
 	YY_BREAK
 case 49:
@@ -4953,7 +4954,7 @@ case 54:
 YY_RULE_SETUP
 {
       // any non-special character
-      QString text = QString::fromUtf8(commentscanYYtext); 
+      QString text = QString::fromUtf8(commentscanYYtext);
       formulaText += text;
    }
 	YY_BREAK
@@ -4962,7 +4963,7 @@ case 55:
 YY_RULE_SETUP
 {
       // new line
-      QString text = QString::fromUtf8(commentscanYYtext); 
+      QString text = QString::fromUtf8(commentscanYYtext);
 
       formulaNewLines++;
       formulaText += text[0];
@@ -4973,8 +4974,8 @@ case 56:
 YY_RULE_SETUP
 {
       // any othe character
-      QString text = QString::fromUtf8(commentscanYYtext); 
-      formulaText += text[0]; 
+      QString text = QString::fromUtf8(commentscanYYtext);
+      formulaText += text[0];
    }
 	YY_BREAK
 /* ------------ handle argument of enum command --------------- */
@@ -4983,7 +4984,7 @@ case 57:
 YY_RULE_SETUP
 {
       // handle argument
-      QString text = QString::fromUtf8(commentscanYYtext); 
+      QString text = QString::fromUtf8(commentscanYYtext);
       current->name = text;
       BEGIN( Comment );
    }
@@ -5026,7 +5027,7 @@ case 61:
 YY_RULE_SETUP
 {
       // handle argument
-      QString text  = QString::fromUtf8(commentscanYYtext); 
+      QString text  = QString::fromUtf8(commentscanYYtext);
       current->name = substitute(text,".", "::");
       BEGIN( Comment );
    }
@@ -5121,7 +5122,7 @@ YY_RULE_SETUP
 
       current->name = substitute(text,".","::");
       if (current->section==Entry::PROTOCOLDOC_SEC) {
-         current->name+="-p"; 
+         current->name+="-p";
       }
 
       // prepend outer scope name
@@ -5153,7 +5154,7 @@ YY_RULE_SETUP
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      warn(yyFileName, yyLineNr, "Missing argument after \\%s", 
+      warn(yyFileName, yyLineNr, "Missing argument after \\%s",
                   YY_START == ClassDocArg1 ? "class" : "category" );
 
       addOutput('\n');
@@ -5166,7 +5167,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 74:
 YY_RULE_SETUP
-{    
+{
       // ignore other stuff
    }
 	YY_BREAK
@@ -5204,7 +5205,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 78:
 YY_RULE_SETUP
-{ 
+{
       // ignore other stuff
    }
 	YY_BREAK
@@ -5232,7 +5233,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      if (text[0] =='\n') { 
+      if (text[0] =='\n') {
          yyLineNr++;
       }
 
@@ -5340,7 +5341,7 @@ YY_RULE_SETUP
 case 90:
 /* rule 90 can match eol */
 YY_RULE_SETUP
-{ 
+{
       yyLineNr++;
       addOutput('\n');
    }
@@ -5409,7 +5410,7 @@ YY_RULE_SETUP
 case 96:
 /* rule 96 can match eol */
 YY_RULE_SETUP
-{ 
+{
       yyLineNr++;
       addOutput('\n');
    }
@@ -5557,7 +5558,7 @@ YY_RULE_SETUP
       // argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      current->relates = text;                                          
+      current->relates = text;
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5714,7 +5715,7 @@ YY_RULE_SETUP
       // unescape escaped command
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      s_sectionTitle += text.mid(1);               
+      s_sectionTitle += text.mid(1);
       addOutput(text);
    }
 	YY_BREAK
@@ -5730,10 +5731,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
-{ 
+{
       // anything else
       QString text = QString::fromUtf8(commentscanYYtext);
-      
+
       s_sectionTitle += text;
       addOutput(text[0]);
    }
@@ -5745,7 +5746,7 @@ YY_RULE_SETUP
       // first argument
       QString text = QString::fromUtf8(commentscanYYtext);
       addOutput(text);
-      
+
       // we add subpage labels as a kind of "inheritance" relation to prevent
       // needing to add another list to the Entry class.
 
@@ -5792,7 +5793,7 @@ case 131:
 YY_RULE_SETUP
 {
       // no title, end of command
-      unput(commentscanYYtext[0]);     
+      unput(commentscanYYtext[0]);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5865,7 +5866,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 137:
 YY_RULE_SETUP
-{ 
+{
       // some word
       QString text = QString::fromUtf8(commentscanYYtext);
       addOutput(text);
@@ -5874,7 +5875,7 @@ YY_RULE_SETUP
 case 138:
 /* rule 138 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // new line
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -5974,7 +5975,7 @@ YY_RULE_SETUP
 case 146:
 /* rule 146 can match eol */
 YY_RULE_SETUP
-{      
+{
       warn(yyFileName, yyLineNr, "Invalid expression '%s' for guard", csPrintable(s_guardExpr));
       unput(commentscanYYtext[0]);
       BEGIN(GuardParam);
@@ -6032,10 +6033,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 152:
 YY_RULE_SETUP
-{  
+{
       if (! s_spaceBeforeIf.isEmpty()) {
          // needed for 665313 in combation with bug620924
-   
+
          addOutput(s_spaceBeforeIf);
       }
 
@@ -6141,7 +6142,7 @@ YY_RULE_SETUP
 case 159:
 /* rule 159 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // skip line
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -6154,13 +6155,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
-{ 
+{
       // skip non-special characters
    }
 	YY_BREAK
 case 161:
 YY_RULE_SETUP
-{ 
+{
       // any other character
    }
 	YY_BREAK
@@ -6168,11 +6169,11 @@ YY_RULE_SETUP
 case 162:
 /* rule 162 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // skip line
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      if (text[0] == '\n')  { 
+      if (text[0] == '\n')  {
          yyLineNr++;
       }
 
@@ -6204,10 +6205,10 @@ YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
 {
       s_condCount--;
-   
+
       if (s_condCount < 0 )   {
          // handle conditional section around \internal, see bug607743
-      
+
          unput('\\');
          BEGIN(Comment);
       }
@@ -6231,7 +6232,7 @@ case 167:
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
 {
-      if (s_sectionLevel > 1)  {                 
+      if (s_sectionLevel > 1)  {
          unput('\\');
          BEGIN(Comment);
       }
@@ -6243,7 +6244,7 @@ case 168:
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
 {
-      if (s_sectionLevel > 2) {      
+      if (s_sectionLevel > 2) {
          unput('\\');
          BEGIN(Comment);
       }
@@ -6255,7 +6256,7 @@ case 169:
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
 {
-      if (s_sectionLevel > 3) {      
+      if (s_sectionLevel > 3) {
          unput('\\');
          BEGIN(Comment);
       }
@@ -6270,13 +6271,13 @@ YY_RULE_SETUP
 	YY_BREAK
 case 171:
 YY_RULE_SETUP
-{ 
+{
       // skip non-special characters
    }
 	YY_BREAK
 case 172:
 YY_RULE_SETUP
-{ 
+{
       // any other character
    }
 	YY_BREAK
@@ -6284,7 +6285,7 @@ YY_RULE_SETUP
 case 173:
 /* rule 173 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -6299,7 +6300,7 @@ YY_RULE_SETUP
 case 174:
 /* rule 174 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // line continuation
       yyLineNr++;
       addOutput('\n');
@@ -6308,7 +6309,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 175:
 YY_RULE_SETUP
-{ 
+{
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
       s_memberGroupHeader += text[0];
@@ -6318,18 +6319,18 @@ YY_RULE_SETUP
 /* ----- handle argument of ingroup command ------- */
 case 176:
 YY_RULE_SETUP
-{ 
+{
       // group id
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      current->m_groups.append(Grouping(text, Grouping::GROUPING_INGROUP) ); 
+      current->m_groups.append(Grouping(text, Grouping::GROUPING_INGROUP) );
       inGroupParamFound = true;
    }
 	YY_BREAK
 case 177:
 /* rule 177 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -6338,7 +6339,7 @@ YY_RULE_SETUP
       }
 
       if (text[0] == '\n')   {
-         yyLineNr++; 
+         yyLineNr++;
       }
 
       addOutput('\n');
@@ -6348,7 +6349,7 @@ YY_RULE_SETUP
 case 178:
 /* rule 178 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // line continuation
       yyLineNr++;
       addOutput('\n');
@@ -6356,7 +6357,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 179:
 YY_RULE_SETUP
-{ 
+{
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
       addOutput(text[0]);
@@ -6366,16 +6367,16 @@ YY_RULE_SETUP
 case 180:
 /* rule 180 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
       if (braceCount == 0) {
          if (text[0] == '\n')   {
-            yyLineNr++; 
+            yyLineNr++;
          }
-         
-         addOutput('\n');        
+
+         addOutput('\n');
          langParser->parsePrototype(functionProto);
          BEGIN( Comment );
       }
@@ -6384,7 +6385,7 @@ YY_RULE_SETUP
 case 181:
 /* rule 181 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // line continuation
       yyLineNr++;
       functionProto += ' ';
@@ -6392,7 +6393,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 182:
 YY_RULE_SETUP
-{ 
+{
       // non-special characters
       QString text = QString::fromUtf8(commentscanYYtext);
       functionProto += text;
@@ -6416,7 +6417,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 185:
 YY_RULE_SETUP
-{ 
+{
       // add other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
       functionProto += text[0];
@@ -6426,20 +6427,20 @@ YY_RULE_SETUP
 case 186:
 /* rule 186 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // end of argument
       QString text = QString::fromUtf8(commentscanYYtext);
       if (text[0] == '\n')  {
          yyLineNr++;
-      }   
+      }
 
-      if (functionProto.trimmed().isEmpty()) { 
+      if (functionProto.trimmed().isEmpty()) {
          // plain overload command
          addOutput(theTranslator->trOverloadText());
          addOutput('\n');
 
       }  else   {
-         // overload declaration      
+         // overload declaration
          makeStructuralIndicator(Entry::OVERLOADDOC_SEC);
          langParser->parsePrototype(functionProto);
       }
@@ -6450,7 +6451,7 @@ YY_RULE_SETUP
 case 187:
 /* rule 187 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // line continuation
       yyLineNr++;
       functionProto += ' ';
@@ -6458,7 +6459,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 188:
 YY_RULE_SETUP
-{ 
+{
       // add other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
       functionProto += text[0];
@@ -6467,7 +6468,7 @@ YY_RULE_SETUP
 /* ----- handle argument of inherit command ------- */
 case 189:
 YY_RULE_SETUP
-{ 
+{
       // found argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -6478,7 +6479,7 @@ YY_RULE_SETUP
 case 190:
 /* rule 190 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -6494,7 +6495,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 191:
 YY_RULE_SETUP
-{ 
+{
       // invalid character for anchor label
       warn(yyFileName, yyLineNr, "Invalid or missing name for \\inherit command");
       BEGIN(Comment);
@@ -6503,7 +6504,7 @@ YY_RULE_SETUP
 /* ----- handle argument of extends and implements commands ------- */
 case 192:
 YY_RULE_SETUP
-{ 
+{
       // found argument
       QString text = QString::fromUtf8(commentscanYYtext);
       current->extends.append(BaseInfo(removeRedundantWhiteSpace(text),Public,Normal));
@@ -6513,7 +6514,7 @@ YY_RULE_SETUP
 case 193:
 /* rule 193 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
       warn(yyFileName,yyLineNr, "\\extends or \\implements command has no argument");
@@ -6528,7 +6529,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 194:
 YY_RULE_SETUP
-{ 
+{
       // ignore other stuff
    }
 	YY_BREAK
@@ -6548,14 +6549,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 196:
 YY_RULE_SETUP
-{ 
+{
       /* any character not a *, @, backslash or new line */
    }
 	YY_BREAK
 case 197:
 /* rule 197 can match eol */
 YY_RULE_SETUP
-{ 
+{
       /* new line in verbatim block */
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -6566,14 +6567,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 198:
 YY_RULE_SETUP
-{ 
+{
       /* any other character */
    }
 	YY_BREAK
 /* ----- handle arguments of the cite command ------- */
 case 199:
 YY_RULE_SETUP
-{ 
+{
       // found argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
@@ -6585,7 +6586,7 @@ YY_RULE_SETUP
 case 200:
 /* rule 200 can match eol */
 YY_RULE_SETUP
-{ 
+{
       // missing argument
       QString text = QString::fromUtf8(commentscanYYtext);
       warn(yyFileName, yyLineNr, "\\cite command has no label" );
@@ -6600,7 +6601,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 201:
 YY_RULE_SETUP
-{ 
+{
       // invalid character for cite label
       warn(yyFileName,yyLineNr, "Invalid or missing cite label");
       BEGIN(Comment);
@@ -6614,9 +6615,9 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       if (text[0] == '\n')   {
-         yyLineNr++; 
+         yyLineNr++;
       }
-      
+
       addOutput('\n');
 
       setOutput(OutputDoc);
@@ -7806,11 +7807,11 @@ static bool handlePage(const QString &)
 static bool handleMainpage(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
-   
+
    if (! stop) {
       current->name = "mainpage";
    }
-   
+
    BEGIN( PageDocArg2 );
    return stop;
 }
@@ -7855,7 +7856,7 @@ static bool handleDetails(const QString &)
 {
    if (inContext != OutputBrief) {
       // treat @details outside brief description as a new paragraph
-      addOutput("\n\n"); 
+      addOutput("\n\n");
    }
 
    setOutput(OutputDoc);
@@ -7866,13 +7867,13 @@ static bool handleName(const QString &)
 {
    bool stop = makeStructuralIndicator(Entry::MEMBERGRP_SEC);
 
-   if (! stop) {  
+   if (! stop) {
       s_memberGroupHeader.resize(0);
       BEGIN( NameParam );
 
       if (s_memberGroupId != DOX_NOGROUP) {
          // end of previous member group
-    
+
          closeGroup(current,yyFileName,yyLineNr,true);
        }
   }
@@ -7924,12 +7925,12 @@ static bool handleParBlock(const QString &)
    if (s_insideParBlock)   {
       warn(yyFileName,yyLineNr, "Found \\parblock command while already in a parblock");
    }
-   
+
    if (! s_spaceBeforeCmd.isEmpty()) {
       addOutput(s_spaceBeforeCmd);
       s_spaceBeforeCmd.resize(0);
    }
-   
+
    addOutput("@parblock ");
    s_insideParBlock = true;
 
@@ -8001,7 +8002,7 @@ static bool handleSection(const QString &s)
 
 static bool handleSubpage(const QString &s)
 {
-   if (current->section != Entry::EMPTY_SEC && current->section != Entry::PAGEDOC_SEC && 
+   if (current->section != Entry::EMPTY_SEC && current->section != Entry::PAGEDOC_SEC &&
          current->section != Entry::MAINPAGEDOC_SEC) {
 
       warn(yyFileName,yyLineNr, "Found \\subpage command in a comment block that is not marked as a page");
@@ -8081,7 +8082,7 @@ static bool handleElseIf(const QString &)
       guardType = enabledSectionFound ? Guard_Skip : Guard_If;
       BEGIN(GuardParam);
    }
-   
+
    return false;
 }
 
@@ -8100,11 +8101,11 @@ static bool handleEndIf(const QString &)
 {
    if (guards.isEmpty())   {
       warn(yyFileName,yyLineNr, "Found \\endif without matching start command");
-   
+
    } else {
       delete guards.pop();
    }
-   
+
    enabledSectionFound = false;
    if (! s_spaceBeforeCmd.isEmpty()) {
       addOutput(s_spaceBeforeCmd);
@@ -8136,31 +8137,31 @@ static bool handleShowInitializer(const QString &)
 
 static bool handleHideInitializer(const QString &)
 {
-   current->initLines = 0;       
+   current->initLines = 0;
    return false;
 }
 
 static bool handleCallgraph(const QString &)
 {
-   current->callGraph = true; 
+   current->callGraph = true;
    return false;
 }
 
 static bool handleHideCallgraph(const QString &)
 {
-   current->callGraph = false; 
+   current->callGraph = false;
    return false;
 }
 
 static bool handleCallergraph(const QString &)
 {
-   current->callerGraph = true; 
+   current->callerGraph = true;
    return false;
 }
 
 static bool handleHideCallergraph(const QString &)
 {
-   current->callerGraph = false; 
+   current->callerGraph = false;
    return false;
 }
 
@@ -8180,7 +8181,7 @@ static bool handleInternal(const QString &)
       }
 
       s_condCount = 0;
-      BEGIN( SkipInternal );  
+      BEGIN( SkipInternal );
   }
 
   return false;
@@ -8346,7 +8347,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    s_parseMore    = false;
    inBody         = isInbody;
 
-   outputXRef.resize(0); 
+   outputXRef.resize(0);
 
    if (isBrief || isAutoBrief) {
       setOutput(OutputBrief);
@@ -8356,7 +8357,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    briefEndsAtDot = isAutoBrief;
-  
+
    s_condCount    = 0;
    s_sectionLevel = 0;
 
@@ -8377,8 +8378,8 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    Debug::print(Debug::CommentScan, 0, "-----------\nCommentScanner: %s:%d\n"
                 "input=[\n%s]\n", csPrintable(fileName), lineNr, csPrintable(comment) );
-              
-   commentscanYYrestart(commentscanYYin);   
+
+   commentscanYYrestart(commentscanYYin);
    BEGIN( Comment );
 
    commentscanYYlex();
@@ -8425,7 +8426,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    groupAddDocs(curEntry);
    r_newEntryNeeded = s_needNewEntry;
-    
+
    if (s_parseMore && r_position == inputPosition) {
       // did not proceed during this call, do not continue or there will be an infinate loop
       s_parseMore = false;
@@ -8501,7 +8502,7 @@ static int findExistingGroup(int &groupId, const QSharedPointer<MemberGroupInfo>
 
       auto mi = *di;
 
-      if (s_compoundName == mi->compoundName && ! mi->header.isEmpty() && 
+      if (s_compoundName == mi->compoundName && ! mi->header.isEmpty() &&
                mi->header.compare(info->header, Qt::CaseInsensitive) == 0) {
 
          // same file or scope, not a nameless group, same header name
@@ -8518,7 +8519,7 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
 {
    if (e->section == Entry::GROUPDOC_SEC) {
       // auto group
-      s_autoGroupStack.push( QMakeShared<Grouping>(e->name, e->groupingPri()) ); 
+      s_autoGroupStack.push( QMakeShared<Grouping>(e->name, e->groupingPri()) );
 
    } else {
       // start of a member group
@@ -8571,7 +8572,7 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
       if (! foundInline) {
          e->m_groups.removeLast();
       }
-     
+
       if (! foundInline) {
          initGroupInfo(e);
       }

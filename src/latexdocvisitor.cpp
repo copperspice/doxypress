@@ -1264,7 +1264,7 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
    }
 
    if (c->isHeading()) {
-      m_t << "{\\bf ";
+      m_t << "{\\textbf ";
    }
 
    if (cs > 1) {

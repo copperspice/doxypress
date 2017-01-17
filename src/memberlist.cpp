@@ -794,6 +794,7 @@ QString MemberList::listTypeAsString(MemberListType type)
          return "pac-static-attribs";
       case MemberListType_priStaticAttribs:
          return "pri-static-attribs";
+
       case MemberListType_pubTypes:
          return "pub-types";
       case MemberListType_proTypes:
@@ -806,6 +807,8 @@ QString MemberList::listTypeAsString(MemberListType type)
       case MemberListType_pubTypedefs:
          return "typedefs";
       case MemberListType_proTypedefs:
+         return "typedefs";
+      case MemberListType_pacTypedefs:
          return "typedefs";
       case MemberListType_priTypedefs:
          return "typedefs";

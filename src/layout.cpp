@@ -331,6 +331,7 @@ class LayoutParser : public QXmlDefaultHandler
                (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_interfaces, theTranslator->trInterfaces()));
 
+      //
       m_sHandler.insert("class/memberdecl/publictypedefs",
                QMakeShared<StartElementMember>
                (this, &LayoutParser::startMemberDeclEntry,
@@ -341,11 +342,16 @@ class LayoutParser : public QXmlDefaultHandler
                (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proTypedefs, theTranslator->trProtectedTypedefs()));
 
+      m_sHandler.insert("class/memberdecl/packagetypedefs",
+               QMakeShared<StartElementMember>
+               (this, &LayoutParser::startMemberDeclEntry,
+               MemberListType_pacTypedefs, theTranslator->trPackageTypedefs()));
+
       m_sHandler.insert("class/memberdecl/privatetypedefs",   
                QMakeShared<StartElementMember>
                (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_priTypedefs, theTranslator->trPrivateTypedefs()));
-
+      
       m_sHandler.insert("class/memberdecl/publictypes",
                QMakeShared<StartElementMember>
                (this, &LayoutParser::startMemberDeclEntry,

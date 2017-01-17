@@ -333,9 +333,9 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                         addMemberToList(MemberListType_proTypedefs, md, true);
                         break;
 
-//                     case Package:
-//                        addMemberToList(MemberListType_pacTypes, md, true);
-//                        break;
+                     case Package:
+                        addMemberToList(MemberListType_pacTypedefs, md, true);
+                        break;
 
                      case Public:
                         addMemberToList(MemberListType_pubTypedefs, md, true);
@@ -361,7 +361,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
 
                      case Public:
                         addMemberToList(MemberListType_pubTypes, md, true);
-                        isSimple = md->typeString().indexOf(")(") == -1;
+                        isSimple = false;
                         break;
 
                      case Private:

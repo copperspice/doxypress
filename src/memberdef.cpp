@@ -1308,8 +1308,8 @@ bool MemberDef::isBriefSectionVisible() const
    bool visibleIfDocumented = (! hideUndocMembers || hasDocs || isDocumentedFriendClass() );
 
    // hide members with no detailed description and brief description disabled
-   bool fnTest1 = (hideUndocMembers && documentation().isEmpty());
-   bool fnTest2 = (! briefMemberDesc && ! repeatBrief);
+   bool fnTest1 = (hideUndocMembers    && documentation().isEmpty());
+   bool fnTest2 = (! briefMemberDesc   && ! repeatBrief);
    bool fnTest3 = ! (alwaysDetailedSec && ! briefDescription().isEmpty());
 
    bool visibleIfEnabled = ! (fnTest1 && fnTest2 && fnTest3);
@@ -1318,7 +1318,7 @@ bool MemberDef::isBriefSectionVisible() const
    bool visibleIfFriendCompound = ! (hideFriendCompounds && isFriend() && (m_impl->type == "friend class" ||
                   m_impl->type == "friend struct" || m_impl->type == "friend union" ) );
 
-   // only include members that are non-private unless EXTRACT_PRIVATE is
+   // only include members that are non-private unless extract_private is
    // set to YES or the member is part of a group
    bool visibleIfPrivate = (protectionLevelVisible(protection()) || m_impl->mtype == MemberType_Friend);
 
@@ -2693,9 +2693,6 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
    static const bool hideScopeNames  = Config::getBool("hide-scope-names");
    static const bool repeatBrief     = Config::getBool("repeat-brief");
    static const bool briefMemberDesc = Config::getBool("brief-member-desc");
-   static const bool extractAll      = Config::getBool("extract-all");
-   static const bool warnUndoc       = Config::getBool("warn-undoc");
-   static const bool warnUndocParam  = Config::getBool("warn-undoc-param");
 
    // if this member is in a group find the real scope name
    bool hasParameterList = false;
@@ -3258,21 +3255,9 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    // enable LaTeX again
    // if Config::getBool("extract-all") && ! hasDocs) ol.enable(OutputGenerator::Latex);
-
    ol.popGeneratorState();
 
-   if (! extractAll && warnUndoc && warnUndocParam && ! Doxy_Globals::suppressDocWarnings) {
-
-      if (! hasDocumentedParams()) {
-         warn_doc_error(getDefFileName(),getDefLine(), "parameters of member %s are not (all) documented",
-                        qPrintable(qualifiedName()));
-      }
-
-      if (! hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
-         warn_doc_error(getDefFileName(),getDefLine(), "return type of member %s was not documented",
-                        qPrintable(qualifiedName()));
-      }
-   }
+   warnIfUndocumentedParams();
 }
 
 // strip scope and field name from the type
@@ -3305,54 +3290,6 @@ static QString simplifyTypeForTable(const QString &s)
 
    return ts;
 }
-
-#if 0
-/** Returns the type definition corresponding to a member's return type.
- *  @param[in]  scope The scope in which to search for the class definition.
- *  @param[in]  type  The string representing the member's return type.
- *  @param[in]  lang  The programming language in which the class is defined.
- *  @param[out] start The string position where the class definition name was found.
- *  @param[out] length The length of the class definition's name.
- */
-static QSharedPointer<Definition> getClassFromType(QSharedPointer<Definition> scope, const QString &type, SrcLangExt lang, int &start, int &length)
-{
-   int pos = 0;
-   int i;
-
-   QString name;
-   QString templSpec;
-
-   while ((i = extractClassNameFromType(type, pos, name, templSpec, lang)) != -1) {
-      QSharedPointer<ClassDef> cd;
-      QSharedPointer<MemberDef> md;
-
-      int l = name.length() + templSpec.length();
-
-      if (!templSpec.isEmpty()) {
-         cd = getResolvedClass(scope, 0, name + templSpec, &md);
-      }
-
-      cd = getResolvedClass(scope, 0, name);
-
-      if (cd) {
-         start = i;
-         length = l;
-         printf("getClassFromType: type=%s name=%s start=%d length=%d\n", qPrintable(type), qPrintable(name), start, length);
-         return cd;
-
-      } else if (md) {
-         start = i;
-         length = l;
-         printf("getClassFromType: type=%s name=%s start=%d length=%d\n", qPrintable(type), qPrintable(name), start, length);
-         return md;
-      }
-
-      pos = i + l;
-   }
-
-   return 0;
-}
-#endif
 
 QString MemberDef::fieldType() const
 {
@@ -3497,6 +3434,8 @@ void MemberDef::warnIfUndocumented()
       return;
    }
 
+   static const bool extractAll = Config::getBool("extract-all");
+
    QSharedPointer<ClassDef>     cd = getClassDef();
    QSharedPointer<NamespaceDef> nd = getNamespaceDef();
    QSharedPointer<FileDef>      fd = getFileDef();
@@ -3530,23 +3469,44 @@ void MemberDef::warnIfUndocumented()
 
    }
 
-   static bool extractAll = Config::getBool("extract-all");
+   if ((! hasUserDocumentation() && ! extractAll) && ! isFriendClass() && name().indexOf('@') == -1 &&
+                  def != nullptr && def->name().indexOf('@') == -1 && 
+                  protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 
-   if ((! hasUserDocumentation() && ! extractAll) && !isFriendClass() && name().indexOf('@') == -1 &&
-         def && def->name().indexOf('@') == -1 &&
-         protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
-
-      warn_undoc(getDefFileName(),getDefLine(), "Member %s%s (%s) of %s %s is not documented.",
+      warn_undoc(getDefFileName(),getDefLine(), "Member %s%s (%s) of %s %s is undocumented.",
                  csPrintable(name()), csPrintable(argsString()), csPrintable(memberTypeName()),
                  csPrintable(type), csPrintable(def->name()));
+
+   } else if (! isDetailedSectionLinkable()) {
+      warnIfUndocumentedParams();
+  }
+}
+
+void MemberDef::warnIfUndocumentedParams()
+{
+   static const bool extractAll     = Config::getBool("extract-all");
+   static const bool warnUndoc      = Config::getBool("warn-undoc");
+   static const bool warnUndocParam = Config::getBool("warn-undoc-param");
+
+   if (! extractAll && warnUndoc &&  warnUndocParam && ! Doxy_Globals::suppressDocWarnings) {
+
+      if (!hasDocumentedParams()) {
+         warn_doc_error(getDefFileName(), getDefLine(), "Parameters for member %s are not fully documented",
+                     csPrintable(qualifiedName()));
+      }
+   
+      if (!hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
+         warn_doc_error(getDefFileName(), getDefLine(), "Return type of member %s is not documented",
+                     csPrintable(qualifiedName()));
+      }
    }
 }
 
 bool MemberDef::isFriendClass() const
 {
-   return (isFriend() &&
-           (m_impl->type == "friend class" || m_impl->type == "friend struct" ||
-            m_impl->type == "friend union"));
+   return (isFriend() && 
+                  (m_impl->type == "friend class" || m_impl->type == "friend struct" || 
+                   m_impl->type == "friend union"));
 }
 
 bool MemberDef::isDocumentedFriendClass() const

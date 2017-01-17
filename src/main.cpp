@@ -71,7 +71,7 @@ void loadTranslationFile()
          
 QString getLanguage()
 {
-   static QString outputLanguage = Config::getEnum("output-language").toLower();   
+   static const QString outputLanguage = Config::getEnum("output-language").toLower();   
    QString retval;
 
    if (outputLanguage == "english") {

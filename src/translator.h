@@ -48,7 +48,13 @@ class Translator
 
    virtual QString trPublicTypedefs() = 0;   
    virtual QString trProtectedTypedefs() = 0;
+   virtual QString trPackageTypedefs() = 0;
    virtual QString trPrivateTypedefs() = 0;  
+
+   virtual QString trPublicTypes() = 0;
+   virtual QString trProtectedTypes() = 0;
+   virtual QString trPackageTypes() = 0;
+   virtual QString trPrivateTypes() = 0;
 
    // quick reference sections
    virtual QString trModules() = 0;
@@ -168,14 +174,11 @@ class Translator
    virtual QString trGotoTextualHierarchy() = 0;
    virtual QString trPageIndex() = 0;
 
-   virtual QString trNote() = 0;
-   virtual QString trPublicTypes() = 0;
+   virtual QString trNote() = 0;  
    virtual QString trPublicAttribs() = 0;
-   virtual QString trStaticPublicAttribs() = 0;
-   virtual QString trProtectedTypes() = 0;
+   virtual QString trStaticPublicAttribs() = 0; 
    virtual QString trProtectedAttribs() = 0;
    virtual QString trStaticProtectedAttribs() = 0;
-   virtual QString trPrivateTypes() = 0;
    virtual QString trPrivateAttribs() = 0;
    virtual QString trStaticPrivateAttribs() = 0;
 
@@ -284,7 +287,7 @@ class Translator
    virtual QString trDeprecatedList() = 0;
    virtual QString trEvents() = 0;
    virtual QString trEventDocumentation() = 0; 
-   virtual QString trPackageTypes() = 0;
+
    virtual QString trPackageMembers() = 0;
    virtual QString trStaticPackageMembers() = 0;
    virtual QString trPackageAttribs() = 0;

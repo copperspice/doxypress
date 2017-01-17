@@ -74,18 +74,18 @@ void LatexCodeGenerator::codify(const QString &str)
    QChar c;
 
    static int tabSize   = Config::getInt("tab-size");
-   const int maxLineLen = 108;       
+   const int maxLineLen = 108;
 
    while ((c = *p) != 0) {
 
       switch(c.unicode())  {
-         case 0x0c: 
+         case 0x0c:
             // remove ^L
-            p++; 
+            p++;
             break;
 
          case '\t':  {
-            
+
             int spacesToNextTabStop = tabSize - (m_col % tabSize);
             m_t << QString(spacesToNextTabStop, QChar(' '));
             m_col += spacesToNextTabStop;
@@ -95,9 +95,9 @@ void LatexCodeGenerator::codify(const QString &str)
             break;
          }
 
-         case '\n': 
-            m_t << '\n'; 
-            m_col = 0; 
+         case '\n':
+            m_t << '\n';
+            m_col = 0;
             p++;
 
             break;
@@ -106,31 +106,31 @@ void LatexCodeGenerator::codify(const QString &str)
             // gather characters until we find whitespace or are at the end of a line
             result += c;
             p++;
-           
+
             if (m_col >= maxLineLen) {
                // force line break
-            
+
                m_t << "\n      ";
                m_col = 0;
-            
+
             } else  {
                // copy more characters
-            
+
                while (m_col < maxLineLen && ((c = *p) != 0) && c != 0x0c && c != '\t' && c != '\n' && c != ' ')  {
                   result += c;
                   p++;
                }
 
                if (m_col >= maxLineLen) {
-                  // force line break   
-            
+                  // force line break
+
                   m_t << "\n      ";
                   m_col=0;
                }
             }
-            
-            filterLatexString(m_t, result, false, true);           
-            break;      
+
+            filterLatexString(m_t, result, false, true);
+            break;
     }
   }
 
@@ -157,11 +157,11 @@ void LatexCodeGenerator::writeCodeLink(const QString &ref, const QString &f, con
       }
 
       if (! f.isEmpty() && ! anchor.isEmpty()) {
-         m_t << "_"; 
-      }   
+         m_t << "_";
+      }
 
       if (! anchor.isEmpty()) {
-         m_t << anchor; 
+         m_t << anchor;
       }
 
       m_t << "}{";
@@ -182,7 +182,7 @@ void LatexCodeGenerator::writeLineNumber(const QString &ref, const QString &file
 
    if (m_prettyCode) {
       QString lineNumber = QString("%1").arg(len, 5, 10, QChar('0'));
-   
+
       if (! fileName.isEmpty() && ! m_sourceFileName.isEmpty()) {
          QString lineAnchor = "_l" + lineNumber;
          lineAnchor.prepend(m_sourceFileName);
@@ -224,12 +224,12 @@ void LatexCodeGenerator::endFontClass()
    m_t << "}";
 }
 
-// ** 
+// **
 LatexGenerator::LatexGenerator() : OutputGenerator()
 {
    m_dir        = Config::getString("latex-output");
    m_prettyCode = Config::getBool("latex-source-code");
-  
+
    m_indent = 0;
 
    insideTabbing      = false;
@@ -263,7 +263,7 @@ static void writeLatexMakefile()
    // end insertion by KONNO Akihisa <konno@researchers.jp> 2002-03-05
    QTextStream t(&file);
 
-   if (! Config::getBool("latex-pdf")) { 
+   if (! Config::getBool("latex-pdf")) {
       // use plain old latex
 
       t << "all: refman.dvi" << endl
@@ -345,7 +345,7 @@ static void writeMakeBat()
 {
 
 #if defined(Q_OS_WIN)
- 
+
    QString dir = Config::getString("latex-output");
    QString fileName = dir + "/make.bat";
 
@@ -366,7 +366,7 @@ static void writeMakeBat()
    t << "cd /D %~dp0\n\n";
    t << "del /s /f *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out *.brf *.blg *.bbl refman.pdf\n\n";
 
-   if (! Config::getBool("latex-pdf")) { 
+   if (! Config::getBool("latex-pdf")) {
       // use plain old latex
 
       t << latex_command << " refman.tex\n";
@@ -385,7 +385,7 @@ static void writeMakeBat()
       t << "set content=X\n";
       t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
 
-      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )" 
+      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )"
                   " do set content=\"%%~T\"\n";
 
       t << "if !content! == X goto :skip\n";
@@ -402,7 +402,7 @@ static void writeMakeBat()
       t << "gswin32c -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite "
         "-sOutputFile=refman.pdf -c save pop -f refman.ps\n";
 
-   } else { 
+   } else {
       // use pdflatex
 
       t << "pdflatex refman\n";
@@ -422,7 +422,7 @@ static void writeMakeBat()
       t << "set content=X\n";
       t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
 
-      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )" 
+      t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )"
                " do set content=\"%%~T\"\n";
 
       t << "if !content! == X goto :skip\n";
@@ -460,19 +460,25 @@ void LatexGenerator::init()
 
 static void writeDefaultHeaderPart1(QTextStream &t_stream)
 {
-   static const QStringList extraLatexStyle = Config::getList("latex-stylesheets");
-
-   // part 1
+   static const QString projectName         = Config::getString("project-name");
+   static const QString outputLanguage      = Config::getEnum("output-language").toLower();
+   static const QStringList latexStyleSheet = Config::getList("latex-stylesheets");
+   static const bool latexBatchMode         = Config::getBool("latex-batch-mode");
+   static const bool latexCompact           = Config::getBool("latex-compact");
+   static const bool timeStamp              = Config::getBool("latex-timestamp");
+   static const bool pdfHyperlinks          = Config::getBool("latex-hyper-pdf");
+   static const bool usePDFLatex            = Config::getBool("latex-pdf");
+   static const QString paperName           = Config::getEnum("latex-paper-type");
 
    // Handle batch mode
-   if (Config::getBool("latex-batch-mode")) {
+   if (latexBatchMode) {
       t_stream << "\\batchmode\n";
    }
 
    // Set document class depending on configuration
    QByteArray documentClass;
 
-   if (Config::getBool("latex-compact")) {
+   if (latexCompact) {
       documentClass = "article";
    } else {
       documentClass = "book";
@@ -487,8 +493,8 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
       "\\usepackage{calc}\n"
       "\\usepackage{doxypress}\n"
       "\\usepackage[export]{adjustbox} % also loads graphicx\n";
-    
-   for (auto fileName : extraLatexStyle) {   
+
+   for (auto fileName : latexStyleSheet) {
 
       if (! fileName.isEmpty()) {
          QFileInfo fi(fileName);
@@ -496,7 +502,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
          if (fi.exists()) {
             if (checkExtension(fi.fileName(), Doxy_Globals::latexStyleExtension)) {
                // strip the extension, it will be added by the usepackage in the tex conversion process
-               t_stream << "\\usepackage{" << stripExtensionGeneral(fi.fileName(), 
+               t_stream << "\\usepackage{" << stripExtensionGeneral(fi.fileName(),
                      Doxy_Globals::latexStyleExtension) << "}\n";
 
             } else {
@@ -545,9 +551,8 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\newcommand{\\+}{\\discretionary{\\mbox{\\scriptsize$\\hookleftarrow$}}{}{}}\n"
      "\n";
 
-   // Define page & text layout   
-   QString paperName = Config::getEnum("latex-paper-type");
-  
+   // Define page & text layout
+
    t_stream << "% Page & text layout\n"
      "\\usepackage{geometry}\n"
      "\\geometry{%\n"
@@ -556,7 +561,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "  bottom=2.5cm,%\n"
      "  left=2.5cm,%\n"
      "  right=2.5cm%\n"
-     "}\n"; 
+     "}\n";
 
    // Allow a bit of overflow to go unnoticed by other means
    t_stream << "\\tolerance=750\n"
@@ -583,13 +588,11 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
 
    // Headers & footers
    QString genString;
+   QString generatedBy;
    QTextStream tg(&genString);
 
-   QString generatedBy;
-   static bool timeStamp = Config::getBool("latex-timestamp");
-
    if (timeStamp) {
-      generatedBy = theTranslator->trGeneratedAt(dateToString(true), Config::getString("project-name"));
+      generatedBy = theTranslator->trGeneratedAt(dateToString(true), projectName);
 
    } else {
       generatedBy = theTranslator->trGeneratedBy();
@@ -614,7 +617,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\fancyfoot[RO]{\\fancyplain{}{}}\n"
      "\\renewcommand{\\footrulewidth}{0.4pt}\n";
 
-   if (!Config::getBool("latex-compact")) {
+   if (! latexCompact) {
       t_stream << "\\renewcommand{\\chaptermark}[1]{%\n"
         "  \\markboth{#1}{}%\n"
         "}\n";
@@ -637,8 +640,6 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    writeExtraLatexPackages(t_stream);
 
    // Hyperlinks
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
-
    if (pdfHyperlinks) {
       t_stream << "% Hyperlinks (required, but should be loaded last)\n"
         "\\usepackage{ifpdf}\n"
@@ -660,7 +661,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    t_stream << "% Custom commands\n"
      "\\newcommand{\\clearemptydoublepage}{%\n"
      "  \\newpage{\\pagestyle{empty}\\cleardoublepage}%\n"
-     "}\n"    
+     "}\n"
      "\n";
 
    // caption style definition
@@ -673,19 +674,17 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n"
      "\\begin{document}\n";
 
-   // not sure why only the one language is set
-   static QString outputLanguage = Config::getEnum("output-language").toLower();   
-
-   if (outputLanguage == "greek") {
-      t_stream << "\\selectlanguage{greek}\n";
+  
+   // set to the indicated language
+   if (! outputLanguage.isEmpty() && outputLanguage != "english") {
+      t_stream << "\\selectlanguage{" << outputLanguage << "}\n";
    }
 
    t_stream << "\n";
 
    // Front matter
    t_stream << "% Titlepage & ToC\n";
-
-   bool usePDFLatex = Config::getBool("latex-pdf");
+   
    if (pdfHyperlinks && usePDFLatex) {
       // To avoid duplicate page anchors due to reuse of same numbers for
       // the index (be it as roman numbers)
@@ -820,7 +819,7 @@ void LatexGenerator::startFile(const QString &name, const QString &, const QStri
    QString fileName = name;
 
    m_relPath = relativePathToRoot(fileName);
-  
+
    if (! fileName.endsWith(".tex") && ! fileName.endsWith(".sty")) {
       fileName += ".tex";
    }
@@ -854,7 +853,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
    const QString latexHeader = Config::getString("latex-header");
 
    switch (is) {
-      case isTitlePageStart:       
+      case isTitlePageStart:
          if (latexHeader.isEmpty()) {
             writeDefaultHeaderPart1(m_textStream);
 
@@ -862,7 +861,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
             QString header = fileToString(latexHeader);
             m_textStream << modifyKeywords(header);
          }
-      
+
          break;
 
       case isTitlePageAuthor:
@@ -880,7 +879,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
 
          m_textStream << "{"; //Introduction}\n"
          break;
-      
+
       case isModuleIndex:
          if (compactLatex) {
             m_textStream << "\\section";
@@ -953,7 +952,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
 
       case isModuleDocumentation:
       {
-         bool found = false;        
+         bool found = false;
 
          for (auto gd : Doxy_Globals::groupSDict) {
             if (found) {
@@ -974,8 +973,8 @@ void LatexGenerator::startIndexSection(IndexSections is)
       }
       break;
 
-      case isDirDocumentation: 
-      {         
+      case isDirDocumentation:
+      {
          bool found = false;
 
          for (auto dd : Doxy_Globals::directories) {
@@ -996,8 +995,8 @@ void LatexGenerator::startIndexSection(IndexSections is)
       }
       break;
 
-      case isNamespaceDocumentation: 
-      {        
+      case isNamespaceDocumentation:
+      {
          bool found = false;
 
          for (auto &nd : Doxy_Globals::namespaceSDict) {
@@ -1018,10 +1017,10 @@ void LatexGenerator::startIndexSection(IndexSections is)
       }
       break;
 
-      case isClassDocumentation: 
-      {        
+      case isClassDocumentation:
+      {
          bool found = false;
-       
+
          for (auto cd : Doxy_Globals::classSDict) {
             if (found) {
                break;
@@ -1040,13 +1039,13 @@ void LatexGenerator::startIndexSection(IndexSections is)
       }
       break;
 
-      case isFileDocumentation: 
+      case isFileDocumentation:
       {
          bool isFirst = true;
-      
-         for (auto &fn : Doxy_Globals::inputNameList) {           
 
-            for (auto fd : *fn) { 
+         for (auto &fn : Doxy_Globals::inputNameList) {
+
+            for (auto fd : *fn) {
 
                if (fd->isLinkableInProject()) {
                   if (isFirst) {
@@ -1066,7 +1065,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
       }
       break;
 
-      case isExampleDocumentation: 
+      case isExampleDocumentation:
 
          if (compactLatex) {
             m_textStream << "\\section";
@@ -1077,14 +1076,14 @@ void LatexGenerator::startIndexSection(IndexSections is)
          m_textStream << "{"; //Example Documentation}\n";
          break;
 
-      case isPageDocumentation: 
+      case isPageDocumentation:
          if (compactLatex) {
             m_textStream << "\\section";
          } else {
             m_textStream << "\\chapter";
          }
 
-         m_textStream << "{"; //Page Documentation}\n";      
+         m_textStream << "{"; //Page Documentation}\n";
          break;
 
       case isPageDocumentation2:
@@ -1112,7 +1111,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
          }
          break;
 
-      case isMainPage: 
+      case isMainPage:
       {
          // QString indexName = Config::getBool("generate-treeview")?"main":"index";
 
@@ -1148,18 +1147,18 @@ void LatexGenerator::endIndexSection(IndexSections is)
          m_textStream << "}\n\\input{pages}\n";
          break;
 
-      case isModuleDocumentation: 
-      {        
+      case isModuleDocumentation:
+      {
          bool found = false;
 
-         for (auto gd : Doxy_Globals::groupSDict) {           
+         for (auto gd : Doxy_Globals::groupSDict) {
 
             if (! gd->isReference()) {
                if (! found) {
                   m_textStream << "}\n\\input{" << gd->getOutputFileBase() << "}\n";
                   found = true;
-                       
-               }  else {                   
+
+               }  else {
                   m_textStream << "\\include";
                   m_textStream << "{" << gd->getOutputFileBase() << "}\n";
                }
@@ -1168,18 +1167,18 @@ void LatexGenerator::endIndexSection(IndexSections is)
       }
       break;
 
-      case isDirDocumentation: 
-      {         
+      case isDirDocumentation:
+      {
          bool found = false;
-         
+
          for (auto dd : Doxy_Globals::directories) {
- 
+
             if (dd->isLinkableInProject())  {
                if (! found) {
                   m_textStream << "}\n\\input{" << dd->getOutputFileBase() << "}\n";
                   found = true;
-              
-               }  else  {              
+
+               }  else  {
                   m_textStream << "\\input";
                   m_textStream << "{" << dd->getOutputFileBase() << "}\n";
                }
@@ -1188,40 +1187,40 @@ void LatexGenerator::endIndexSection(IndexSections is)
       }
       break;
 
-      case isNamespaceDocumentation: 
+      case isNamespaceDocumentation:
       {
          bool found = false;
 
          for (auto &nd : Doxy_Globals::namespaceSDict) {
-        
+
             if (nd->isLinkableInProject()) {
 
-               if (! found) { 
+               if (! found) {
                   m_textStream << "}\n\\input{" << nd->getOutputFileBase() << "}\n";
                   found = true;
 
-               } else {    
+               } else {
                   m_textStream << "\\input";
                   m_textStream << "{" << nd->getOutputFileBase() << "}\n";
                }
-            }            
+            }
          }
       }
       break;
 
-      case isClassDocumentation: 
+      case isClassDocumentation:
       {
          bool found = false;
 
          for (auto cd : Doxy_Globals::classSDict) {
-         
+
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope()) {
 
                if (! found) {
                   m_textStream << "}\n\\input{" << cd->getOutputFileBase() << "}\n";
                   found = true;
 
-               } else {                     
+               } else {
                   m_textStream << "\\input";
                   m_textStream << "{" << cd->getOutputFileBase() << "}\n";
                }
@@ -1232,26 +1231,26 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
       case isFileDocumentation: {
          bool isFirst = true;
-        
+
          for (auto &fn : Doxy_Globals::inputNameList) {
 
             for (auto fd : *fn) {
-         
+
                if (fd->isLinkableInProject()) {
                   if (isFirst) {
                      m_textStream << "}\n\\input{" << fd->getOutputFileBase() << "}\n";
 
-                     if (sourceBrowser && m_prettyCode && fd->generateSourceFile()) {                        
+                     if (sourceBrowser && m_prettyCode && fd->generateSourceFile()) {
                         m_textStream << "\\input{" << fd->getSourceFileBase() << "}\n";
                      }
 
                      isFirst = false;
 
-                  } else {                
+                  } else {
                      m_textStream << "\\input" ;
                      m_textStream << "{" << fd->getOutputFileBase() << "}\n";
 
-                     if (sourceBrowser && m_prettyCode && fd->generateSourceFile()) {                       
+                     if (sourceBrowser && m_prettyCode && fd->generateSourceFile()) {
                         m_textStream << "\\input{" << fd->getSourceFileBase() << "}\n";
                      }
                   }
@@ -1264,7 +1263,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       case isExampleDocumentation: {
          m_textStream << "}\n";
 
-         bool isFirst = true;          
+         bool isFirst = true;
 
          for (auto &pd : Doxy_Globals::exampleSDict) {
 
@@ -1293,7 +1292,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
             writeDefaultFooter(m_textStream);
 
          } else {
-            QString footer = fileToString(latexFooter);            
+            QString footer = fileToString(latexFooter);
             m_textStream << modifyKeywords(footer);
 
          }
@@ -1301,7 +1300,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
    }
 }
 
-QString LatexGenerator::modifyKeywords(const QString &output) 
+QString LatexGenerator::modifyKeywords(const QString &output)
 {
    static QString projectName    = convertToLatex(Config::getString("project-name"));
    static QString projectVersion = convertToLatex(Config::getString("project-version"));
@@ -1309,7 +1308,7 @@ QString LatexGenerator::modifyKeywords(const QString &output)
    static QString projectLogo    = Config::getString("project-logo");
 
    QString result = output;
-  
+
    result = result.replace("$datetimeHHMM",   dateTimeHHMM());
    result = result.replace("$datetime",       dateToString(true));
    result = result.replace("$date",           dateToString(false));
@@ -1318,7 +1317,7 @@ QString LatexGenerator::modifyKeywords(const QString &output)
    result = result.replace("$doxypressversion", versionString);
    result = result.replace("$doxygenversion",   versionString);         // compatibility
 
-   result = result.replace("$projectname",    projectName);  
+   result = result.replace("$projectname",    projectName);
    result = result.replace("$projectversion", projectVersion);
    result = result.replace("$projectbrief",   projectBrief);
    result = result.replace("$projectlogo",    stripPath(projectLogo));
@@ -1327,7 +1326,7 @@ QString LatexGenerator::modifyKeywords(const QString &output)
 }
 
 void LatexGenerator::writePageLink(const QString &name, bool)
-{  
+{
    m_textStream << "\\input" ;
    m_textStream << "{" << name << "}\n";
 }
@@ -1397,7 +1396,7 @@ void LatexGenerator::endHtmlLink()
 
 //void LatexGenerator::writeMailLink(const char *url)
 //{
-//  if (Config::getBool("latex-hyper-pdf")) {  
+//  if (Config::getBool("latex-hyper-pdf")) {
 //    m_textStream << "\\href{mailto:";
 //    m_textStream << url;
 //    m_textStream << "}";
@@ -1470,7 +1469,7 @@ void LatexGenerator::startTextLink(const QString &file, const QString &anchor)
       m_textStream << "}{";
 
    } else {
-      m_textStream << "{\\bf ";
+      m_textStream << "{\\textbf ";
    }
 }
 
@@ -1611,7 +1610,7 @@ void LatexGenerator::endMemberHeader()
    m_textStream << "}" << endl;
 }
 
-void LatexGenerator::startMemberDoc(const QString &clname, const QString &memname, const QString &, 
+void LatexGenerator::startMemberDoc(const QString &clname, const QString &memname, const QString &,
                   const QString &title, bool showInline)
 {
    if (! memname.isEmpty() && ! memname.startsWith('@')) {
@@ -1666,7 +1665,7 @@ void LatexGenerator::startMemberDoc(const QString &clname, const QString &memnam
       level++;
    }
 
-   m_textStream << "\\" << levelLab[level];  
+   m_textStream << "\\" << levelLab[level];
    m_textStream << "{";
 
    if (pdfHyperlinks)   {
@@ -1690,7 +1689,7 @@ void LatexGenerator::endMemberDoc(bool)
    m_textStream << "}";
 }
 
-void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, const QString &anchor, 
+void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, const QString &anchor,
                   const QString &, const QString &)
 {
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
@@ -1730,7 +1729,7 @@ void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 }
 
 void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
-{   
+{
    m_textStream << "\\label{" << stripPath(name) << "}" << endl;
 
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
@@ -1740,7 +1739,7 @@ void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
 
       if (! fName.isEmpty()) {
          m_textStream  << "\\Hypertarget{" << stripPath(fName) << "_" << stripPath(name) << "}" << endl;
-      
+
       } else {
          m_textStream  << "\\Hypertarget{" << stripPath(name) << "}" << endl;
       }
@@ -1941,7 +1940,7 @@ void LatexGenerator::endMemberDescription()
 }
 
 void LatexGenerator::writeNonBreakableSpace(int)
-{   
+{
    if (insideTabbing) {
       m_textStream << "\\>";
    } else {
@@ -1957,7 +1956,7 @@ void LatexGenerator::startMemberList()
 }
 
 void LatexGenerator::endMemberList()
-{   
+{
    if (! insideTabbing) {
       m_textStream << "\\end{DoxyCompactItemize}"   << endl;
    }
@@ -1969,7 +1968,7 @@ void LatexGenerator::startMemberGroupHeader(bool hasHeader)
       m_textStream << "\\begin{Indent}";
    }
 
-   m_textStream << "{\\bf ";   
+   m_textStream << "{\\bf ";
 }
 
 void LatexGenerator::endMemberGroupHeader()
@@ -2259,7 +2258,7 @@ void LatexGenerator::endMemberDocSimple()
 void LatexGenerator::startInlineMemberType()
 {
    // to prevent \+ from causing unwanted breaks
-   insideTabbing = true; 
+   insideTabbing = true;
 }
 
 void LatexGenerator::endInlineMemberType()
@@ -2271,7 +2270,7 @@ void LatexGenerator::endInlineMemberType()
 void LatexGenerator::startInlineMemberName()
 {
    // to prevent \+ from causing unwanted breaks
-   insideTabbing = true; 
+   insideTabbing = true;
 }
 
 void LatexGenerator::endInlineMemberName()

@@ -376,7 +376,7 @@ void HtmlHelp::initialize()
 
 static QString getLanguageString()
 {
-   static QString outputLanguage = Config::getEnum("output-language").toLower();   
+   static const QString outputLanguage = Config::getEnum("output-language").toLower();   
         
    QString retval = s_languageDict[outputLanguage];
 

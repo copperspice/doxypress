@@ -64,11 +64,11 @@ int PageSDict::compareMapValues(const QSharedPointer<PageDef> &i1, const QShared
 
 void SearchIndexMap ::insertDef(QSharedPointer<Definition> d)
 {
-   QSharedPointer<SearchDefinitionList> lx = this->find(d->name());
+   QSharedPointer<SearchDefinitionList> lx = this->find(d->localName());
    
    if (lx == nullptr) {
       lx = QSharedPointer<SearchDefinitionList>(new SearchDefinitionList(m_letter));
-      StringMap<QSharedPointer<SearchDefinitionList>>::insert(d->name(), lx);
+      StringMap<QSharedPointer<SearchDefinitionList>>::insert(d->localName(), lx);
    }
    
    lx->append(d);

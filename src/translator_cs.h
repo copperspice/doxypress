@@ -406,6 +406,7 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Macros");
    }
 
+   //
    QString trPublicTypedefs() override {
       return QCoreApplication::translate("doxy-text", "Public Typedefs");
    }
@@ -413,9 +414,30 @@ class Translator_Cs : public Translator
    QString trProtectedTypedefs() override {
       return QCoreApplication::translate("doxy-text", "Protected Typedefs");
    }
+  
+   QString trPackageTypedefs() override   {
+      return QCoreApplication::translate("doxy-text", "Package Typedefs");
+   }
 
    QString trPrivateTypedefs() override {
       return QCoreApplication::translate("doxy-text", "Private Typedefs");
+   }
+
+   //
+   QString trPublicTypes() override {
+      return QCoreApplication::translate("doxy-text", "Public Types");
+   }
+
+   QString trProtectedTypes() override {
+      return QCoreApplication::translate("doxy-text", "Protected Types");
+   }
+
+   QString trPackageTypes() override   {
+      return QCoreApplication::translate("doxy-text", "Package Types");
+   }
+
+   QString trPrivateTypes() override {
+      return QCoreApplication::translate("doxy-text", "Private Types");
    }
 
    /*! This is used in the documentation of a file as a header before the list of typedefs
@@ -1009,10 +1031,6 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Note");
    }
 
-   QString trPublicTypes() override {
-      return QCoreApplication::translate("doxy-text", "Public Types");
-   }
-
    QString trPublicAttribs() override {
       if (Config::getBool("optimize-c")) {
          return QCoreApplication::translate("doxy-text", "Data Fields");
@@ -1025,20 +1043,12 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Static Public Attributes");
    }
 
-   QString trProtectedTypes() override {
-      return QCoreApplication::translate("doxy-text", "Protected Types");
-   }
-
    QString trProtectedAttribs() override {
       return QCoreApplication::translate("doxy-text", "Protected Attributes");
    }
 
    QString trStaticProtectedAttribs() override {
       return QCoreApplication::translate("doxy-text", "Static Protected Attributes");
-   }
-
-   QString trPrivateTypes() override {
-      return QCoreApplication::translate("doxy-text", "Private Types");
    }
 
    QString trPrivateAttribs() override {
@@ -1488,12 +1498,6 @@ class Translator_Cs : public Translator
    /*! Header used for the documentation section of a class' events. */
    QString trEventDocumentation() override {
       return QCoreApplication::translate("doxy-text", "Event Documentation");
-   }
-
-   /*! Used as a heading for a list of Java class types with package scope.
-    */
-   QString trPackageTypes() override   {
-      return QCoreApplication::translate("doxy-text", "Package Types");
    }
 
    /*! Used as a heading for a list of Java class functions with package

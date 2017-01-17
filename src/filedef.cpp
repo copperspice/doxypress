@@ -62,6 +62,8 @@ class DevNullCodeDocInterface : public CodeOutputInterface
 FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const QString &dn)
    : Definition(p + nm, 1, 1, nm)
 {
+   static const bool fullPathNames = Config::getBool("full-path-names");
+
    m_path     = p;
    m_filePath = m_path + nm;
    m_fileName = nm;
@@ -78,7 +80,7 @@ FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const
    m_docname   = nm;
    m_dir       = QSharedPointer<DirDef>();
 
-   if (Config::getBool("full-path-names")) {
+   if (fullPathNames) {
       m_docname.prepend(stripFromPath(m_path));
    }
 

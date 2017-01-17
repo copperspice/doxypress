@@ -295,7 +295,7 @@ void portable_unsetenv(const QString &variable)
    char **ep;  
    ep  = environ;
 
-   while (*ep != NULL) {
+   while (*ep != nullptr) {
       if (! qstrncmp(*ep, tmp.constData(), len) && (*ep)[len] == '=') {
          // found it, remove this pointer by moving later ones back. 
          char **dp = ep;

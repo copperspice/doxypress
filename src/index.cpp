@@ -143,8 +143,8 @@ class MemberIndexList : public QList<QSharedPointer<MemberDef>>
       return result;
    }
 
-   void insertDef(QSharedPointer<MemberDef> d) {
-      append(d);
+   void insertDef(QSharedPointer<MemberDef> data) {
+      append(data);
    }
 
    uint letter() const {

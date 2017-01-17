@@ -413,6 +413,7 @@ class MemberDef : public Definition
 
    void writeTagFile(QTextStream &);
    void warnIfUndocumented();
+   void warnIfUndocumentedParams();
 
    QSharedPointer<MemberDef> createTemplateInstanceMember(const ArgumentList &formalArgs, const ArgumentList &actualArgs);
 

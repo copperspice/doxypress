@@ -29,8 +29,10 @@ error.log
 /deploy
 /install
 
+test_build/do-gdb
 test_build/*.log
 test_build/*.txt
+test_build/hold
 
 test_build/output_test
 test_build/output_clang
@@ -39,3 +41,5 @@ test_build/output_py
 test_doxy/output_clang
 test_doxy/output_test
 test_doxy/output_py
+
+
