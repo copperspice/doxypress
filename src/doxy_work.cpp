@@ -6771,7 +6771,8 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                               umd = cmd;
 
                               Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [9] className= %s scope= %s args= %s"
-                                 " [No Match]\n", csPrintable(className), csPrintable(ccd->name()), csPrintable(md->argsString()) );
+                                 " [No Match]\n", csPrintable(className), 
+                                 csPrintable(ccd->name()), csPrintable(md->argsString()) );
                            }
 
                            candidates++;
@@ -6804,14 +6805,14 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                   QString warnMsg;
 
                   if (noMatchCount < 1) {
-                     warnMsg = "documentation found for a class member which was not found \n";
+                     warnMsg = "documentation found, for a class member which was not found: \n";
 
                   } else {
 
                      if (root->m_templateArgLists.isEmpty()) {
-                        warnMsg = "documentation found for a class member which was not found \n";
+                        warnMsg = "documentation found, for a class member which was not found: \n";
                      } else {
-                        warnMsg = "no class member or template specialization found for \n";
+                        warnMsg = "no class member or template specialization found for: \n";
                      }
 
                      // might be might be docs with no matching method, function, class

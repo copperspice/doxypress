@@ -326,7 +326,7 @@ static void addType(QSharedPointer<Entry> ce)
    }
 
    ce->type += ce->name;
-   ce->name.resize(0);
+   ce->name.clear();
    tl = ce->type.length();
 
    if (tl > 0 && ! ce->args.isEmpty() && ce->type.at(tl - 1) != '.') {
@@ -335,7 +335,7 @@ static void addType(QSharedPointer<Entry> ce)
 
    ce->type += ce->args;
 
-   ce->args.resize(0) ;
+   ce->args.clear();
    ce->argList.clear();
 }
 
@@ -1138,7 +1138,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <CliPropertyIndex>"]"         {
-      QString text = QString::fromUtf8(yytext);     
+      QString text = QString::fromUtf8(yytext);
       current->args += text;
       BEGIN( CliPropertyType );
    }
@@ -2585,7 +2585,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <EndTemplate>">"        {
       current->name += '>';
-      if (roundCount==0 && --sharpCount <= 0) {
+      if (roundCount == 0 && --sharpCount <= 0) {
          BEGIN(FindMembers);
       }
    }
@@ -3100,55 +3100,53 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       BEGIN(CsSignalSlotMethod);
    }
 
+<FindMembers>"CS_SLOT_1"       {
+      current->mtype = MethodTypes::Slot;
+      current->type.resize(0);
+      BEGIN(CsSlot);
+   }
+
+<CsSlot>"("                  {
+      BEGIN(CsSlotProtection);
+   }
+
+<CsSlotProtection>{ID}       {
+      QString text = QString::fromUtf8(yytext);
+      Protection visibility = getProtection(text);
+      current->protection = visibility;
+   }
+
+<CsSlotProtection>","           {
+      BEGIN(CsSignalSlotMethod);
+   }
+
+<CsSignalSlotMethod>[<,>]    {
+      QString text = QString::fromUtf8(yytext);
+      current->name += text;
+   }
+
+<CsSignalSlotMethod>{B}*"inline"{BN}+      {
+      current->m_traits.setTrait(Entry::Virtue::Inline);
+      lineCount();
+   }
+
+<CsSignalSlotMethod>[&*]+ {
+      QString text   = QString::fromUtf8(yytext);
+      current->name += text;
+
+      addType(current);
+   }
+
 <CsSignalSlotMethod>{SCOPENAME}    {
       QString text = QString::fromUtf8(yytext);
-      yyBegColNr  = yyColNr;
-      yyBegLineNr = yyLineNr;
+      yyBegColNr   = yyColNr;
+      yyBegLineNr  = yyLineNr;
       lineCount();
 
-      if (text == "decltype") {
-         // C++11 decltype(x)
-         current->type += text;
-         BEGIN(DeclType);
+      addType(current);
+      current->name += text;
 
-      } else {
-         addType(current);
-         current->name += text;
-
-         if (current->name.startsWith("static ")){
-            current->stat = true;
-            current->name = current->name.mid(7);
-
-         } else if (current->name.startsWith("inline ") ) {
-
-            if (current->type.isEmpty()) {
-               current->type ="inline";
-            } else {
-               current->type +="inline ";
-            }
-
-            current->name = current->name.mid(7);
-
-         } else if (current->name.startsWith("const ") ) {
-
-            if (current->type.isEmpty()) {
-               current->type = "const";
-
-            } else {
-               current->type += "const ";
-            }
-
-            current->name = current->name.mid(6);
-         }
-
-         if (nameIsOperator(text)) {
-            // BEGIN(Operator);    broom (on hold, may need to add)
-
-         } else {
-            BEGIN(CsSignalSlotMethod);
-         }
-      }
-
+      BEGIN(CsSignalSlotMethod);
    }
 
 <CsSignalSlotMethod>"("           {
@@ -3234,22 +3232,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       }
    }
 
-<FindMembers>"CS_SLOT_1"       {
-      current->mtype = MethodTypes::Slot;
-      current->type.resize(0);
-      BEGIN(CsSlotProtection);
-   }
-
-<CsSlotProtection>{ID}       {
-      QString text = QString::fromUtf8(yytext);
-      Protection visibility = getProtection(text);
-      current->protection = visibility;
-   }
-
-<CsSlotProtection>","           {
-      BEGIN(CsSignalSlotMethod);
-   }
-
    /* end CopperSpice specific parsing */
 
 <FindMembers>"friend"{BN}+("class"|"union"|"struct"){BN}+ {
@@ -3280,7 +3262,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          } else  {
             // insideJava or insideD
             BEGIN(JavaImport);
-
          }
 
       } else if (insidePHP && text == "use") {
@@ -3376,7 +3357,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
                current->name = current->name.mid(7);
 
-            } else if (current->name.left(6)=="const ") {
+            } else if (current->name.left(6) == "const ") {
 
                if (current->type.isEmpty()) {
                   current->type = "const";
@@ -3385,7 +3366,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                   current->type += "const ";
                }
 
-               current->name=current->name.mid(6);
+               current->name = current->name.mid(6);
             }
          }
 
