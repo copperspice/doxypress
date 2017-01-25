@@ -1,0 +1,32 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+* GNU Free Documentation License
+*
+*************************************************************************/
+
+
+/*!
+\fn inline const QMap<QString, bool> &test_Slot::serviceOwner ( const QString & name ) const
+
+Documentation for serviceOwner method. Ensure the template brackets < > are displayed in both lists.
+
+*/
+
+
+/*!
+\fn void test_Slot::setOffset (qreal dx)
+
+Documentation for setOffset.
+
+*/
+
+
+/*!
+\fn QString test_Slot::color ( )
+
+Returns the color blue as a string.
+
+*/
