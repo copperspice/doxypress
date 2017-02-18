@@ -8,3 +8,9 @@ deploy:
 
 dist-test-project:
 	$(MAKE) $(AM_MAKE_FLAGS) -C bin dist-test-project
+
+EXTRA_DIST= \
+	CMakeLists.txt \
+	cmake/modules/FindCopperSpice.cmake \
+	cmake/modules/FindLibClang.cmake \
+	src/CMakeLists.txt

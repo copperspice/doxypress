@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2014-2016 Barbara Geller & Ansel Sermersheim
+# Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
 # All rights reserved.    
 #
 # Permission to use, copy, modify, and distribute this software and its
@@ -11,10 +11,8 @@
 # Documents produced by DoxyPress are derivative works derived from the
 # input used in their production; they are not affected by this license.
 
-cmake_minimum_required(VERSION 3.2.2 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.4.3 FATAL_ERROR)
 project(doxypress)
-
-set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
@@ -22,27 +20,55 @@ include(CheckIncludeFile)
 include(CheckIncludeFiles)
 include(CheckTypeSize)
 
-# list of CopperSpice libraries    (todo: enhance)
-set(CS_LIBS Core Xml)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
+# FIXME - find packages not working
+find_package(CopperSpice REQUIRED)
+# find_package(LibClang REQUIRED)
+# find_package(LibTooling REQUIRED)
+
+include(CopperSpiceMacros)
+
+# FIXME - hard coded, I believe these should be  CopperSpice::Core
+set(CopperSpiceCore "z:/cs5_x_lib/bin/libCsCore1.4.dll")
+set(CopperSpiceXml  "z:/cs5_x_lib/bin/libCsXml1.4.dll")
+
+# list of CopperSpice libraries
+set(CS_LIBS ${CopperSpiceCore}  ${CopperSpiceXml})
+
+# path to lib clang
+set(CLANG_PATH "../clang_lib")
+
+# lib clang dll
+set(CLANG_LIBS ${CLANG_PATH}/bin/libclang.dll)
+
+# lib clang hdr
+set(CLANG_INC ${CLANG_PATH}/include/3.7.1)
 
 # file locations for installing
-if(UNIX)
+if(DARWIN)
    include(GNUInstallDirs)
-else()
-   set(CMAKE_INSTALL_BINDIR ${CMAKE_INSTALL_PREFIX})   
-   set(CMAKE_INSTALL_INCLUDEDIR  ${CMAKE_INSTALL_PREFIX}/include)
-  
-   # path to gcc retrieved from configure (windows)    (todo: enhance)
-   # gccpath=$(dir $(shell which $(word 1,$(CC))))
 
-   # list of gcc libraries (windows)    (todo: enhance)
-   # gcclibs=libgcc_s_*-1  libstdc++-6  libwinpthread-1
+elseif(WIN32)
+   set(CMAKE_INSTALL_BINDIR ${CMAKE_INSTALL_PREFIX})   
+   set(CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/include)
+  
+   # path to gcc  FIXME
+   # gccpath=$(dir $(shell which $(word 1,$(CC))))
+   set(GCC_PATH "z:/w_retain/gcc_libs")
+
+   # list of gcc libraries  sjlj or seh
+   file(GLOB wild ${GCC_PATH}/libgcc_s_*-1.dll)
+   set(GCC_LIBS ${wild} ${GCC_PATH}/libstdc++-6.dll  ${GCC_PATH}/libwinpthread-1.dll )
+
+else()
+   include(GNUInstallDirs)
+
 endif()
 
-string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
 set(BUILD_MAJOR "1")
 set(BUILD_MINOR "2")
-set(BUILD_MICRO "4")
+set(BUILD_MICRO "6")
 
 set(BUILD_COMPONENTS "DOXYPRESS")
 
@@ -107,17 +133,17 @@ else()
     set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -Wl,--no-undefined")
 endif()
 
+string(TIMESTAMP BUILD_DATE "%m/%d/%Y")
 add_definitions(-DBUILD_DATE="${BUILD_DATE}")
 configure_file(
     ${CMAKE_SOURCE_DIR}/src/doxy_build_info.h.in    
-    ${CMAKE_SOURCE_DIR}/src/doxy_build_info.h
+    src/doxy_build_info.h
 )
-
-# (todo: enhance)
-# find_package(LibClang REQUIRED)
-# find_package(LibTooling REQUIRED)
 
 # file locations for building
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+
+# for install, not sure why this is required  FIXME?
+set(CMAKE_INSTALL_LOCAL_ONLY ON)
 
 add_subdirectory(src)

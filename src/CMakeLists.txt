@@ -1,11 +1,22 @@
+#
+# Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
+# All rights reserved.    
+#
+# Permission to use, copy, modify, and distribute this software and its
+# documentation under the terms of the GNU General Public License version 2
+# is hereby granted. No representations are made about the suitability of
+# this software for any purpose. It is provided "as is" without express or
+# implied warranty. See the GNU General Public License for more details.
+#
+# Documents produced by DoxyPress are derivative works derived from the
+# input used in their production; they are not affected by this license.
 
-if (WIN32)
-   # (todo: enhance) hard coded for testing
-   set(CS_INCLUDE_DIR "z:/cs5_x_lib/include" "z:/cs5_x_lib/include/QtCore" "z:/cs5_x_lib/include/QtXml")
+# (todo: enhance) hard coded for testing
+set(CS_INCLUDE_DIR "z:/cs5_x_lib/include" "z:/cs5_x_lib/include/QtCore" "z:/cs5_x_lib/include/QtXml")
 
-   set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
-   set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
-endif()
+set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
+set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
+
 
 include_directories( ${CMAKE_SOURCE_DIR}/src
                      ${CS_INCLUDE_DIR}
@@ -26,7 +37,7 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/classdef.h
    ${CMAKE_CURRENT_SOURCE_DIR}/classlist.h
    ${CMAKE_CURRENT_SOURCE_DIR}/cmdmapper.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/code_cstyle..h
+   ${CMAKE_CURRENT_SOURCE_DIR}/code_cstyle.h
    ${CMAKE_CURRENT_SOURCE_DIR}/commentcnv.h
    ${CMAKE_CURRENT_SOURCE_DIR}/commentscan.h
    ${CMAKE_CURRENT_SOURCE_DIR}/condparser.h
@@ -209,13 +220,13 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/xmlgen.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/portable.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/ce_parse.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_cstyle..cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_cstyle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_fortran.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_py.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/commentcnv.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/commentscan.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/constexp.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/generated/defargs.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/default_args.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/declinfo.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/doctokenizer.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_cstyle.cpp
@@ -223,26 +234,22 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_py.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/parse_tcl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/pre.cpp
+    qrc_doxypress.cpp
 )
 
-# (todo: enhance) run rcc to generate qrc output
-set(DOXYPRESS_SOURCES  ${DOXYPRESS_SOURCES}
-                       ${CMAKE_CURRENT_SOURCE_DIR}/../doxypress.qrc
-)
+# run rcc to generate qrc output
+COPPERSPICE_RESOURCES(${CMAKE_CURRENT_SOURCE_DIR}/../doxypress.qrc)
 
-add_executable(doxypress
-       ${DOXYPRESS_SOURCES}
-       ${doxypress_RESOURCES_RCC}
-)
+add_executable(doxypress ${DOXYPRESS_SOURCES})
 
 # (todo: enhance)
-# target_link_libraries(doxypress CopperSpice::CsCore CopperSpice::CsXml ${CLANG_LIB_DIR} )
+# target_link_libraries(doxypress CopperSpice::CsCore CopperSpice::CsXml ${CLANG_LIB_DIR})
 
-target_link_libraries(doxypress
+target_link_libraries(doxypress  
 
-   # (todo: enhance)
-   "z:/cs5_x_lib/lib/libCsCore1.dll.a"
-   "z:/cs5_x_lib/lib/libCsXml1.dll.a"
+# FIXME - hard coded
+   "z:/cs5_x_lib/lib/libCsCore1.4.dll.a"
+   "z:/cs5_x_lib/lib/libCsXml1.4.dll.a"
 
    -L${CLANG_LIB_DIR}
    -Wl,--start-group
@@ -275,8 +282,12 @@ target_link_libraries(doxypress
    -llibclang
 )
 
-install(TARGETS doxypress DESTINATION .)
-install(FILES ${CS_LIBS} DESTINATION .)
+install(TARGETS   doxypress      DESTINATION .)
+install(FILES     ${CS_LIBS}     DESTINATION .)
+install(FILES     ${CLANG_LIBS}  DESTINATION .)
+install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
 
-# (todo: enhance) need to copy the CS libraries and MingW files
-
+if(WIN32)
+   # copy MingW files, windows only
+   install(FILES ${GCC_LIBS}  DESTINATION .)
+endif()
