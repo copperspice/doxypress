@@ -244,6 +244,7 @@ bool Config::verify()
    const static QStringList s_dotImageFormat = getDotImageFormat();
    const static QStringList s_mathJaxFormat  = getMathJaxFormat();
    const static QStringList s_latexPaperType = getLatexPaperType();
+   const static QStringList s_rtfPaperType   = getRtfPaperType();
 
    bool isOk = true;
 
@@ -846,6 +847,23 @@ bool Config::verify()
       }
    }
 
+   // ** rtf 
+   iterEnum = m_cfgEnum.find("rtf-paper-type");  
+
+   paperType = paperType.toLower().trimmed();
+
+   if (paperType.isEmpty()) {
+      paperType = "a4";
+
+   } else if (! s_rtfPaperType.contains(paperType)) {
+      err("Invalid value of %s for RTF Paper Type, using the the default of a4\n", csPrintable(paperType));
+
+      paperType = "a4";
+   }
+
+   iterEnum.value().value = paperType;
+
+
    // **********
 
    // **
@@ -968,6 +986,18 @@ QStringList Config::getMathJaxFormat()
 }
 
 QStringList Config::getLatexPaperType()
+{
+   QStringList list;
+
+   list.append("a4");
+   list.append("letter");
+   list.append("legal");
+   list.append("executive");
+
+   return list;
+}
+
+QStringList Config::getRtfPaperType()
 {
    QStringList list;
 

@@ -96,6 +96,7 @@ class Config
       static QStringList getDotImageFormat();
       static QStringList getMathJaxFormat();
       static QStringList getLatexPaperType();
+      static QStringList getRtfPaperType();
 
       static void cleanUpPaths(QStringList &str);
 

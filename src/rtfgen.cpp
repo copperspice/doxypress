@@ -249,6 +249,27 @@ void RTFGenerator::beginRTFDocument()
    m_textStream << "{\\stylesheet\n";
    m_textStream << "{\\widctlpar\\adjustright \\fs20\\cgrid \\snext0 Normal;}\n";
 
+   // set the paper dimensions according to the rtf paper type
+   static const QString paperName = Config::getEnum("rtf-paper-type");
+
+   m_textStream << "{";
+
+   if (paperName == "a4") {
+      // width & height values are inches * 1440
+      m_textStream << "\\paperw11900\\paperh16840"; 
+
+   } else if (paperName == "letter") {
+      m_textStream << "\\paperw12240\\paperh15840";
+
+   } else if (paperName == "legal") {
+      m_textStream << "\\paperw12240\\paperh20160";
+
+   } else if (paperName == "executive") {
+      m_textStream << "\\paperw10440\\paperh15120";
+   }
+
+   m_textStream << "\\margl1800\\margr1800\\margt1440\\margb1440\\gutter0\\ltrsect}\n";
+
    // sort styles ascending by \s-number via an intermediate QArray
    QVector<const StyleData *> array(128);
    array.fill(0);

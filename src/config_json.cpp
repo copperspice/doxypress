@@ -474,6 +474,7 @@ void Config::load_Defaults()
    m_cfgString.insert("rtf-stylesheet",          struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("rtf-extension",           struc_CfgString { QString(),      DEFAULT } );
    m_cfgBool.insert("rtf-source-code",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgEnum.insert("rtf-paper-type",            struc_CfgEnum   { "a4",           DEFAULT } );
 
    // tab 3 - xml
    m_cfgString.insert("xml-output",              struc_CfgString { "xml",          DEFAULT } );
@@ -533,7 +534,9 @@ bool Config::read_ProjectFile(const QString &fName)
          QString key        = iter2.key();
          QJsonValue tempObj = iter2.value();
 
-         if (key == "output-language" || key == "dot-image-format" || key == "mathjax-format" || key == "latex-paper-type")  {
+         if (key == "output-language" || key == "dot-image-format" || key == "mathjax-format" || key == "latex-paper-type" ||
+                  key == "rtf-paper-type")  {
+
             auto hashIter = m_cfgEnum.find(key);
 
             if (hashIter != m_cfgEnum.end()) {
