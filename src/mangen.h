@@ -86,13 +86,15 @@ class ManGenerator : public OutputGenerator
    void startProjectNumber() override {}
    void endProjectNumber() override {}
    void writeStyleInfo(int) override {}
+
    void startTitleHead(const QString &) override {}
    void endTitleHead(const QString &, const QString &) override;
-
    void startTitle() override;
    void endTitle() override;
+
    void newParagraph();
-   void startParagraph() override;
+
+   void startParagraph(const QString &className) override;
    void endParagraph() override;
    void writeString(const QString &text) override;
    void startIndexListItem() override {}

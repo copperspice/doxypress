@@ -110,6 +110,8 @@ static bool handleCopyDetails(const QString &);
 static bool handleParBlock(const QString &);
 static bool handleEndParBlock(const QString &);
 static void handleGuard(const QString &expr);
+static bool handleParam(const QString &);
+static bool handleRetval(const QString &);
 
 static void checkFormula();
 
@@ -235,7 +237,7 @@ static DocCmdMap docCmdMap[] =
   { "line",            0,                       true  },
   { "note",            0,                       true  },
   { "par",             0,                       true  },
-  { "param",           0,                       true  },
+  { "param",           &handleParam,            true  },
   { "tparam",          0,                       true  },
   { "post",            0,                       true  },
   { "pre",             0,                       true  },
@@ -245,7 +247,7 @@ static DocCmdMap docCmdMap[] =
   { "return",          0,                       true  },
   { "returns",         0,                       true  },
   { "exception",       0,                       true  },
-  { "retval",          0,                       true  },
+  { "retval",          &handleRetval,           true  },
   { "sa",              0,                       true  },
   { "see",             0,                       true  },
   { "since",           0,                       true  },
@@ -939,6 +941,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 %x XRefItemParam2
 %x XRefItemParam3
 %x FileDocArg1
+%x ParamArg1
 %x EnumDocArg1
 %x NameSpaceDocArg1
 %x PackageDocArg1
@@ -1816,6 +1819,36 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
+  /* --------- handle arguments of the param command ------------ */
+<ParamArg1>{ID}/{B}*","   {
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '_' && Doxy_Globals::markdownSupport) {
+         addOutput('\\');
+      }
+
+      addOutput(text);
+   }
+
+<ParamArg1>","   {
+      addOutput(" , ");
+   }
+
+<ParamArg1>{ID}  {
+      QString text = QString::fromUtf8(yytext);
+
+      if (text[0] == '_' && Doxy_Globals::markdownSupport) {
+         addOutput('\\');
+      }
+
+      addOutput(text);
+      BEGIN( Comment );
+   }
+
+<ParamArg1>.    { 
+      unput(yytext[0]);
+      BEGIN( Comment );
+   }
 
   /* --------- handle arguments of the file/dir/example command ------------ */
 
@@ -2966,6 +2999,25 @@ static bool handleFile(const QString &)
 
    BEGIN( FileDocArg1 );
    return stop;
+}
+
+static bool handleParam(const QString &)
+{
+  // process param and retval arguments to escape leading underscores
+  // in case of markdown processing
+
+  addOutput("@param ");
+  BEGIN( ParamArg1 );
+
+  return false;
+}
+
+static bool handleRetval(const QString &)
+{
+  addOutput("@retval ");
+  BEGIN( ParamArg1 );
+
+  return false;
 }
 
 static bool handleDir(const QString &)

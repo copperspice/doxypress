@@ -25,6 +25,10 @@ caption {
    font-weight: bold;
 }
 
+p.reference, p.definition {
+   font: 400 14px/22px Roboto,sans-serif;
+}
+
 h1.groupheader {
    font-size: 150%;
 }

@@ -2026,7 +2026,7 @@ void RTFGenerator::newParagraph()
    m_omitParagraph = false;
 }
 
-void RTFGenerator::startParagraph()
+void RTFGenerator::startParagraph(const QString &className)
 {
    DBG_RTF(m_textStream << "{\\comment startParagraph}" << endl)
    newParagraph();

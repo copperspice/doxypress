@@ -1055,14 +1055,19 @@ void HtmlGenerator::endDoxyAnchor(const QString &, const QString &)
 {
 }
 
-//void HtmlGenerator::newParagraph()
-//{
-//  m_textStream << endl << "<p>" << endl;
-//}
+// void HtmlGenerator::newParagraph()
+// {
+//    m_textStream << endl << "<p>" << endl;
+// }
 
-void HtmlGenerator::startParagraph()
+void HtmlGenerator::startParagraph(const QString &className)
 {
-   m_textStream << endl << "<p>";
+   if (className.isEmpty()) {
+      m_textStream << endl << "<p>";
+
+   } else {
+      m_textStream << endl << "<p class=\"" << className << "\">";
+   }
 }
 
 void HtmlGenerator::endParagraph()

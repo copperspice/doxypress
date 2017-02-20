@@ -209,7 +209,7 @@ void ManGenerator::newParagraph()
    paragraph = true;
 }
 
-void ManGenerator::startParagraph()
+void ManGenerator::startParagraph(const QString &className)
 {
    if (! paragraph) {
       if (!firstCol) {

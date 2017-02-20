@@ -282,7 +282,8 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
             ol.disable(OutputGenerator::RTF);
          }
 
-         ol.startParagraph();
+         ol.startParagraph("definition");
+
          QString refText = theTranslator->trDefinedInSourceFile();
          int fileMarkerPos = refText.indexOf("@0");
 
@@ -292,11 +293,13 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
             ol.parseText(refText.left(fileMarkerPos));                          //text left from marker 1
             ol.writeObjectLink(0, getSourceFileBase(), 0, name());
             ol.parseText(refText.right( refText.length() - fileMarkerPos - 2)); // text right from marker 2
-         }
 
-         ol.endParagraph();
+         } else {
+            err("Invalid translation markers in trDefinedInSourceFile\n");
 
-         // restore settings, bug_738548
+         }         
+
+         ol.endParagraph();        
          ol.popGeneratorState();
       }
 

@@ -1347,7 +1347,7 @@ void LatexGenerator::newParagraph()
    m_textStream << endl << endl;
 }
 
-void LatexGenerator::startParagraph()
+void LatexGenerator::startParagraph(const QString &className)
 {
    m_textStream << endl << endl;
 }

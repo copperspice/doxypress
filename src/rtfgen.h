@@ -85,6 +85,7 @@ class RTFGenerator : public OutputGenerator
    void startProjectNumber() override;
    void endProjectNumber() override;
    void writeStyleInfo(int part) override;
+
    void startTitleHead(const QString &) override;
    void startTitle() override;
    void endTitleHead(const QString &, const QString &name) override;
@@ -92,7 +93,7 @@ class RTFGenerator : public OutputGenerator
 
    void newParagraph();
 
-   void startParagraph() override;
+   void startParagraph(const QString &className) override;
    void endParagraph() override;
    void writeString(const QString &text) override;
    void startIndexListItem() override;
