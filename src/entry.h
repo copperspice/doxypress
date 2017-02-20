@@ -27,13 +27,13 @@
 #include <types.h>
 
 #include <arguments.h>
+#include <section.h>
 
 class EntryNav;
 class FileDef;
 class FileStorage;
 class StorageIntf;
 
-struct SectionInfo;
 struct ListItemInfo;
 
 // this class stores information about an inheritance relation
