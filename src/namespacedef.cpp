@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -28,10 +28,14 @@
 #include <outputlist.h>
 #include <util.h>
 
-NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &name, 
-      const QString &lref, QString fName, const QString &type, bool isPublished) 
-   : Definition(df, dl, dc, name), m_isPublished(isPublished), m_subGrouping(Config::getBool("allow-sub-grouping"))
+NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &name,
+                  const QString &lref, QString fName, const QString &type, bool isPublished)
+   : Definition(df, dl, dc, name), m_isPublished(isPublished)
 {
+   static const bool allowSubGrouping = Config::getBool("allow-sub-grouping");
+
+   m_subGrouping = allowSubGrouping;
+
    if (! fName.isEmpty()) {
       fileName = stripExtension(fName);
 
@@ -39,17 +43,9 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
       setFileName(name);
    }
 
-   m_usingDeclMap   = new StringMap<QSharedPointer<Definition>>();
-   m_innerCompounds = new StringMap<QSharedPointer<Definition>>();
-      
-   classSDict       = new ClassSDict();
-   m_allMembersDict = 0;  
-   memberGroupSDict = new MemberGroupSDict();  
-   m_usingDirMap    = new NamespaceSDict();
-    
    setReference(lref);
-   
-   visited = false; 
+
+   visited = false;
 
    if (type == "module") {
       m_type = MODULE;
@@ -63,18 +59,11 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
    } else   {
       m_type = NAMESPACE;
 
-   }  
+   }
 }
 
 NamespaceDef::~NamespaceDef()
 {
-   delete m_usingDeclMap;   
-   delete m_innerCompounds;     
-
-   delete classSDict;
-   delete m_allMembersDict;
-   delete memberGroupSDict;
-   delete m_usingDirMap;    
 }
 
 void NamespaceDef::setFileName(const QString &fn)
@@ -84,24 +73,24 @@ void NamespaceDef::setFileName(const QString &fn)
 
 void NamespaceDef::distributeMemberGroupDocumentation()
 {
-   for (auto mg : *memberGroupSDict) {
+   for (auto mg : m_memberGroupSDict) {
       mg->distributeMemberGroupDocumentation();
    }
 }
 
-StringMap<QSharedPointer<Definition>> &NamespaceDef::getUsedClasses() 
+const StringMap<QSharedPointer<Definition>> &NamespaceDef::getUsedClasses() const
 {
-   return *m_usingDeclMap;
+   return m_usingDeclMap;
 }
 
 void NamespaceDef::findSectionsInDocumentation()
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
    docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
-   
-   for (auto mg : *memberGroupSDict) {
+
+   for (auto mg : m_memberGroupSDict) {
       mg->findSectionsInDocumentation();
-   }  
+   }
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
@@ -112,12 +101,14 @@ void NamespaceDef::findSectionsInDocumentation()
 
 void NamespaceDef::insertUsedFile(QSharedPointer<FileDef> fd)
 {
-   if (fd == 0) {
+   static const bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   if (fd == nullptr) {
       return;
    }
 
    if (! files.contains(fd)) {
-      if (Config::getBool("sort-member-docs")) {
+      if (sortMemberDocs) {
          files.inSort(fd);
 
       } else {
@@ -128,19 +119,19 @@ void NamespaceDef::insertUsedFile(QSharedPointer<FileDef> fd)
 
 void NamespaceDef::addInnerCompound(QSharedPointer<Definition> d)
 {
-   m_innerCompounds->insert(d->localName(), d);
-  
+   m_innerCompounds.insert(d->localName(), d);
+
    if (d->definitionType() == Definition::TypeNamespace) {
 
       QSharedPointer<NamespaceDef> nd = d.dynamicCast<NamespaceDef>();
-      assert(nd);    
+      assert(nd);
 
       insertNamespace(nd);
 
    } else if (d->definitionType() == Definition::TypeClass) {
 
       QSharedPointer<ClassDef> cd = d.dynamicCast<ClassDef>();
-      assert(cd);    
+      assert(cd);
 
       insertClass(cd);
    }
@@ -148,40 +139,37 @@ void NamespaceDef::addInnerCompound(QSharedPointer<Definition> d)
 
 void NamespaceDef::insertClass(QSharedPointer<ClassDef> cd)
 {
-   if (classSDict->find(cd->name()) == nullptr) {      
+   // added 12/2015
+   if (cd->isHidden()) {
+      return;
+   }
 
-      // added 12/2015
-      if (cd->isHidden()) {
-         return;
-      }
-
-      classSDict->insert(cd->name(), cd);
+   if (m_classSDict.find(cd->name()) == nullptr) {
+      m_classSDict.insert(cd->name(), cd);
    }
 }
 
 void NamespaceDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 {
-   if (m_namespaceSDict.find(nd->name()) == nullptr) {     
+   if (m_namespaceSDict.find(nd->name()) == nullptr) {
       m_namespaceSDict.insert(nd->name(), nd);
    }
 }
 
 void NamespaceDef::addMembersToMemberGroup()
-{  
+{
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml, &memberGroupSDict, self);
+         ::addMembersToMemberGroup(ml, m_memberGroupSDict, self);
       }
    }
 
    // add members inside sections to their groups
-   if (memberGroupSDict) {     
-      for (auto mg : *memberGroupSDict) {
-         if (mg->allMembersInSameSection() && m_subGrouping) {            
-            mg->addToDeclarationSection();
-         }
+   for (auto mg : m_memberGroupSDict) {
+      if (mg->allMembersInSameSection() && m_subGrouping) {
+         mg->addToDeclarationSection();
       }
    }
 }
@@ -195,19 +183,14 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
    QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (! allMemberList) {
-      allMemberList = QSharedPointer<MemberList> (new MemberList(MemberListType_allMembersList));
+      allMemberList = QMakeShared<MemberList>(MemberListType_allMembersList);
       m_memberLists.append(allMemberList);
    }
 
    allMemberList->append(md);
 
-   //
-   if (! m_allMembersDict) {
-      m_allMembersDict = new MemberSDict;
-   }
-  
-   m_allMembersDict->insert(md->localName(), md);
- 
+   m_allMembersDict.insert(md->localName(), md);
+
    switch (md->memberType()) {
 
       case MemberType_Variable:
@@ -255,9 +238,9 @@ void NamespaceDef::computeAnchors()
 
 bool NamespaceDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config::getBool("repeat-brief");
+   static const bool repeatBrief = Config::getBool("repeat-brief");
 
-   return ((!briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty());
+   return ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty());
 }
 
 void NamespaceDef::writeTagFile(QTextStream &tagFile)
@@ -270,35 +253,33 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
    if (! idStr.isEmpty()) {
       tagFile << "    <clangid>" << convertToXML(idStr) << "</clangid>" << endl;
    }
-   
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
       switch (lde->kind()) {
 
          case LayoutDocEntry::NamespaceNestedNamespaces:
          {
-                        
+
             for (auto &nd : m_namespaceSDict) {
                if (nd->isLinkableInProject()) {
                   tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
                }
             }
-            
+
          }
          break;
 
          case LayoutDocEntry::NamespaceClasses:
          {
-            if (classSDict) {              
-               for (auto cd : *classSDict) {
-                  if (cd->isLinkableInProject()) {
-                     tagFile << "    <class kind=\"" << cd->compoundTypeString()
-                             << "\">" << convertToXML(cd->name()) << "</class>" << endl;
-                  }
+            for (auto cd : m_classSDict) {
+               if (cd->isLinkableInProject()) {
+                  tagFile << "    <class kind=\"" << cd->compoundTypeString()
+                          << "\">" << convertToXML(cd->name()) << "</class>" << endl;
                }
             }
          }
 
-         case LayoutDocEntry::MemberDecl: 
+         case LayoutDocEntry::MemberDecl:
          {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
             QSharedPointer<MemberList> ml = getMemberList(lmd->type);
@@ -309,12 +290,10 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
          }
          break;
 
-         case LayoutDocEntry::MemberGroups: 
+         case LayoutDocEntry::MemberGroups:
          {
-            if (memberGroupSDict) {              
-               for (auto mg : *memberGroupSDict) {
-                  mg->writeTagFile(tagFile);
-               }
+            for (auto mg : m_memberGroupSDict) {
+               mg->writeTagFile(tagFile);
             }
          }
          break;
@@ -330,7 +309,9 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
 
 void NamespaceDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
-  QSharedPointer<NamespaceDef> self = sharedFrom(this);
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
+
+   static const bool repeatBrief = Config::getBool("repeat-brief");
 
    if (hasDetailedDescription()) {
       ol.pushGeneratorState();
@@ -346,11 +327,11 @@ void NamespaceDef::writeDetailedDescription(OutputList &ol, const QString &title
       ol.endGroupHeader();
 
       ol.startTextBlock();
-      if (! briefDescription().isEmpty() && Config::getBool("repeat-brief")) {
+      if (! briefDescription().isEmpty() && repeatBrief) {
          ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
       }
 
-      if (!briefDescription().isEmpty() && Config::getBool("repeat-brief") && !documentation().isEmpty()) {
+      if (! briefDescription().isEmpty() && repeatBrief && ! documentation().isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::RTF);
@@ -362,7 +343,7 @@ void NamespaceDef::writeDetailedDescription(OutputList &ol, const QString &title
          ol.popGeneratorState();
       }
 
-      if (!documentation().isEmpty()) {
+      if (! documentation().isEmpty()) {
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
 
@@ -424,7 +405,9 @@ void NamespaceDef::endMemberDeclarations(OutputList &ol)
 
 void NamespaceDef::startMemberDocumentation(OutputList &ol)
 {
-   if (Config::getBool("separate-member-pages")) {
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.disable(OutputGenerator::Html);
       Doxy_Globals::suppressDocWarnings = true;
    }
@@ -432,7 +415,9 @@ void NamespaceDef::startMemberDocumentation(OutputList &ol)
 
 void NamespaceDef::endMemberDocumentation(OutputList &ol)
 {
-   if (Config::getBool("separate-member-pages")) {
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.enable(OutputGenerator::Html);
       Doxy_Globals::suppressDocWarnings = false;
    }
@@ -440,16 +425,16 @@ void NamespaceDef::endMemberDocumentation(OutputList &ol)
 
 void NamespaceDef::writeClassDeclarations(OutputList &ol, const QString &title)
 {
-   if (classSDict) {
-      classSDict->writeDeclaration(ol, 0, title, true);
+   if (m_classSDict.count() > 0) {
+      m_classSDict.writeDeclaration(ol, 0, title, true);
    }
-}   
+}
 
 void NamespaceDef::writeInlineClasses(OutputList &ol)
 {
-   if (classSDict) {
+   if (m_classSDict.count() > 0) {
       QSharedPointer<NamespaceDef> self = sharedFrom(this);
-      classSDict->writeDocumentation(ol, self);
+      m_classSDict.writeDocumentation(ol, self);
    }
 }
 
@@ -466,12 +451,9 @@ void NamespaceDef::writeMemberGroups(OutputList &ol)
    /* write user defined member groups */
   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
-   if (memberGroupSDict) {
-     
-      for (auto mg : *memberGroupSDict) {
-         if ((! mg->allMembersInSameSection() || ! m_subGrouping) && mg->header() != "[NOHEADER]") {
-            mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>());
-         }
+  for (auto mg : m_memberGroupSDict) {
+      if ((! mg->allMembersInSameSection() || ! m_subGrouping) && mg->header() != "[NOHEADER]") {
+         mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>());
       }
    }
 }
@@ -479,12 +461,14 @@ void NamespaceDef::writeMemberGroups(OutputList &ol)
 void NamespaceDef::writeAuthorSection(OutputList &ol)
 {
    // write Author section (Man only)
+   static const QString projectName = Config::getString("project-name");
+
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Man);
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name")));
+   ol.parseText(theTranslator->trGeneratedAutomatically(projectName));
    ol.popGeneratorState();
 }
 
@@ -492,14 +476,14 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
 {
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-   
+
    bool first = true;
 
    SrcLangExt lang = getLanguage();
 
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
 
-      if ((lde->kind() == LayoutDocEntry::NamespaceClasses && classSDict && classSDict->declVisible()) ||
+      if ((lde->kind() == LayoutDocEntry::NamespaceClasses && m_classSDict.count() > 0 && m_classSDict.declVisible()) ||
             (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && ! m_namespaceSDict.isEmpty() &&
              m_namespaceSDict.declVisible())) {
 
@@ -542,7 +526,8 @@ void NamespaceDef::addNamespaceAttributes(OutputList &ol)
 void NamespaceDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
-   static bool generateTreeView = Config::getBool("generate-treeview");
+   static const bool generateTreeView    = Config::getBool("generate-treeview");
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
 
    // static bool outputJava = Config::getBool("optimize-java");
    // static bool fortranOpt = Config::_getBool("optimize-fortran");
@@ -572,9 +557,9 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>());
 
-   // 
+   //
    SrcLangExt lang = getLanguage();
-  
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
 
       switch (lde->kind()) {
@@ -681,7 +666,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
 
    endFileWithNavPath(self, ol);
 
-   if (Config::getBool("separate-member-pages")) {
+   if (separateMemberPages) {
       QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
       if (allMemberList) {
@@ -718,10 +703,10 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDe
    QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (allMemberList) {
-      
+
       for (auto md : *allMemberList) {
 
-         if (md->getNamespaceDef() == this && md->isLinkable() && !md->isEnumValue()) {
+         if (md->getNamespaceDef() == this && md->isLinkable() && ! md->isEnumValue()) {
             ol.writeString("          <tr><td class=\"navtab\">");
 
             if (md->isLinkableInProject()) {
@@ -757,25 +742,25 @@ int NamespaceDef::countMembers()
       allMemberList->countDocMembers();
    }
 
-   return (allMemberList ? allMemberList->numDocMembers() : 0) + classSDict->count();
+   return (allMemberList ? allMemberList->numDocMembers() : 0) + m_classSDict.count();
 }
 
 void NamespaceDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)
-{   
-   if (m_usingDirMap->find(nd->qualifiedName()) == 0) {
-      m_usingDirMap->insert(nd->qualifiedName(), nd);
-   }   
+{
+   if (m_usingDirMap.find(nd->qualifiedName()) == 0) {
+      m_usingDirMap.insert(nd->qualifiedName(), nd);
+   }
 }
 
 const NamespaceSDict &NamespaceDef::getUsedNamespaces() const
 {
-   return *m_usingDirMap;
+   return m_usingDirMap;
 }
 
 void NamespaceDef::addUsingDeclaration(QSharedPointer<Definition> d)
 {
-   if (m_usingDeclMap->find(d->qualifiedName()) == 0) {
-      m_usingDeclMap->insert(d->qualifiedName(), d);
+   if (m_usingDeclMap.find(d->qualifiedName()) == 0) {
+      m_usingDeclMap.insert(d->qualifiedName(), d);
    }
 }
 
@@ -795,13 +780,13 @@ QSharedPointer<Definition> NamespaceDef::findInnerCompound(const QString &n)
       return QSharedPointer<Definition>();
    }
 
-   QSharedPointer<Definition> d = m_innerCompounds->find(n);
+   QSharedPointer<Definition> d = m_innerCompounds.find(n);
 
-   if (d == nullptr) {      
-      d = m_usingDirMap->find(n);
-      
+   if (d == nullptr) {
+      d = m_usingDirMap.find(n);
+
       if (d == nullptr) {
-         d = m_usingDeclMap->find(n);
+         d = m_usingDeclMap.find(n);
       }
    }
 
@@ -812,19 +797,19 @@ void NamespaceDef::addListReferences()
 {
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
    // bool fortranOpt = Config::getBool("optimize-fortran");
-   
-   const QList<ListItemInfo> &xrefItems = getRefItems();
 
-   QString prefix; 
+   const QVector<ListItemInfo> &xrefItems = getRefItems();
+
+   QString prefix;
    if (getLanguage() == SrcLangExt_Fortran) {
-      prefix = theTranslator->trModule(true, true); 
+      prefix = theTranslator->trModule(true, true);
    } else {
       prefix = theTranslator->trNamespace(true, true);
    }
 
    addRefItem(xrefItems, qualifiedName(), prefix, getOutputFileBase(), displayName(), "", self);
-     
-   for (auto mg : *memberGroupSDict) {
+
+   for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);
    }
 
@@ -848,7 +833,7 @@ QString NamespaceDef::displayName(bool includeScope) const
 
    // added 01/2016
    retval = renameNS_Aliases(retval);
-  
+
    return retval;
 }
 
@@ -874,19 +859,19 @@ void NamespaceDef::combineUsingRelations()
    }
 
    visited = true;
- 
-   for (auto nd : *m_usingDirMap) {
+
+   for (auto nd : m_usingDirMap) {
       nd->combineUsingRelations();
    }
-  
-   for (auto nd : *m_usingDirMap) {
+
+   for (auto nd : m_usingDirMap) {
       // add used namespaces of namespace nd to this namespace
-      
+
       for (auto und : nd->getUsedNamespaces() ) {
          addUsingDirective(und);
       }
-  
-      // add used classes of namespace nd to this namespace     
+
+      // add used classes of namespace nd to this namespace
       for (auto ucd : nd->getUsedClasses() ) {
          addUsingDeclaration(ucd);
       }
@@ -911,13 +896,15 @@ bool NamespaceSDict::declVisible() const
 
 void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool const isConstantGroup, bool localName)
 {
+   static const bool briefMemberDesc = Config::getBool("brief-member-desc");
+
    if (count() == 0) {
       // no namespaces in the list
-      return;  
+      return;
    }
-  
+
    bool found = false;
-  
+
    for (auto nd : *this) {
 
       if (found) {
@@ -933,7 +920,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
                break;
             }
 
-         } else if (! isConstantGroup) { 
+         } else if (! isConstantGroup) {
             // ensure we only get extra section in IDL
 
             if (nd->isConstantGroup()) {
@@ -959,7 +946,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
    ol.parseText(title);
    ol.endMemberHeader();
    ol.startMemberList();
-    
+
    for (auto nd : *this) {
 
       if (nd->isLinkable() && nd->hasDocumentation()) {
@@ -988,10 +975,10 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
          ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name);
          ol.endMemberItem();
 
-         if (! nd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+         if (! nd->briefDescription().isEmpty() && briefMemberDesc) {
 
             ol.startMemberDescription(nd->getOutputFileBase());
-            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), 
+            ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(),
                   nd->briefDescription(), false, false, "", true);
 
             ol.endMemberDescription();
@@ -1004,7 +991,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
 }
 
 QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
-{   
+{
    for (auto item : m_memberLists) {
       if (item->listType() == lt) {
          return item;
@@ -1014,17 +1001,17 @@ QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
    // not found, create a new member list
    QSharedPointer<MemberList> ml = QMakeShared<MemberList>(lt);
    m_memberLists.append(ml);
- 
+
    return ml;
 }
 
 void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
-{  
+{
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml     = createMemberList(lt);
 
-   static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
-   static bool sortMemberDocs = Config::getBool("sort-member-docs");
+   static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
+   static const bool sortMemberDocs = Config::getBool("sort-member-docs");
 
    bool isSorted = false;
 
@@ -1082,22 +1069,22 @@ void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, c
 
 bool NamespaceDef::isLinkableInProject() const
 {
+  static const bool extractAnonNameSpace = Config::getBool("extract-anon-namespaces");
+
    int i = name().lastIndexOf("::");
 
    if (i == -1) {
       i = 0;
    } else {
       i += 2;
-   }
+   } 
 
-   static bool extractAnonNs = Config::getBool("extract-anon-namespaces");
-
-   if (extractAnonNs && name().mid(i, 20) == "anonymous_namespace{") {                                          
+   if (extractAnonNameSpace && name().mid(i, 20) == "anonymous_namespace{") {
       return true;
    }
 
-   return ! name().isEmpty() && name().at(i) != '@' && (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) && 
-          ! isReference() && ! isHidden() && ! isArtificial();      
+   return ! name().isEmpty() && name().at(i) != '@' && (hasDocumentation() || getLanguage() == SrcLangExt_CSharp) &&
+          ! isReference() && ! isHidden() && ! isArtificial();
 }
 
 bool NamespaceDef::isLinkable() const
@@ -1109,8 +1096,8 @@ QSharedPointer<MemberDef> NamespaceDef::getMemberByName(const QString &n) const
 {
    QSharedPointer<MemberDef> md;
 
-   if (m_allMembersDict && ! n.isEmpty()) {
-      md = QSharedPointer<MemberDef> (m_allMembersDict->find(n));
+   if (! n.isEmpty()) {
+      md = m_allMembersDict.find(n);
    }
 
    return md;

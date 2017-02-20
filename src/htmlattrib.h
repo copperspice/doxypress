@@ -78,12 +78,5 @@ class HtmlAttribList : public QList<HtmlAttrib>
    }
 };
 
-/*! @brief Html attribute list iterator */
-class HtmlAttribListIterator : public QListIterator<HtmlAttrib>
-{
- public:
-   HtmlAttribListIterator(const HtmlAttribList &l) : QListIterator<HtmlAttrib>(l) {}
-};
-
 #endif
 

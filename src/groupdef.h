@@ -120,12 +120,12 @@ class GroupDef : public Definition
    }
 
    /* user defined member groups */
-   MemberGroupSDict *getMemberGroupSDict() const {
-      return memberGroupSDict;
+   const MemberGroupSDict &getMemberGroupSDict() const {
+      return m_memberGroupSDict;
    }
 
-   ClassSDict *getClasses() const {
-      return classSDict;
+   const ClassSDict &getClasses() const {
+      return m_classSDict;
    }
 
    const NamespaceSDict &getNamespaces() const {
@@ -197,7 +197,7 @@ class GroupDef : public Definition
    bool titleSet;                       // true if title is not the same as the name
    QString fileName;                    // base name of the generated file
    
-   ClassSDict     *classSDict;          // list of classes in the group
+   ClassSDict      m_classSDict;        // list of classes in the group
    NamespaceSDict  m_namespaceSDict;    // list of namespaces in the group 
    PageSDict      *pageDict;            // list of pages in the group
    PageSDict      *exampleDict;         // list of examples in the group
@@ -213,7 +213,7 @@ class GroupDef : public Definition
    QSharedPointer<Definition> groupScope;
 
    QList<QSharedPointer<MemberList>>  m_memberLists;
-   MemberGroupSDict  *memberGroupSDict;
+   MemberGroupSDict m_memberGroupSDict;
 
    bool m_subGrouping;
    QString m_hint;

@@ -65,7 +65,7 @@ static QString       g_realScope;
 static QStack<int>   g_scopeStack;
 static QString       g_forceTagReference;
 
-static int           g_anchorCount;
+static int           g_anchorCount = 0;
 
 static bool          g_lineNumbers;
 static bool          g_includeCodeFragment;
@@ -103,12 +103,12 @@ static bool          g_insideProtocolList;
 static bool          g_lexInit = false;
 static bool          g_collectXRefs;
 
-static ClassSDict                 *g_codeClassSDict = nullptr;
+static ClassSDict                  g_codeClassSDict;
 static QSharedPointer<FileDef>     g_sourceFileDef;
 static QSharedPointer<Definition>  g_currentDefinition;
 static QSharedPointer<MemberDef>   g_currentMemberDef;
 
-static QStack<int *>               g_classScopeLengthStack;
+static QStack<int>                 g_classScopeLengthStack;
 static QSharedPointer<Definition>  g_searchCtx;
 
 static VariableContext             g_theVarContext;
@@ -226,7 +226,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
  
    int i = 0;
 
-   if ((varType = g_codeClassSDict->find(ltype)) || 
+   if ((varType = g_codeClassSDict.find(ltype)) || 
        (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, ltype))) {
 
       // look for class definitions inside the code block     
@@ -243,7 +243,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
       QSharedPointer<ClassDef> newDef;
       QString templateArgs(ltype.right(ltype.length() - i));
 
-      if ( ( (varType = g_codeClassSDict->find(typeName)) || 
+      if ( ( (varType = g_codeClassSDict.find(typeName)) || 
              (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, typeName, 0, 0, true, true)) ) &&
               ! varType->getTemplateArgumentList().listEmpty() ) {
 
@@ -308,7 +308,7 @@ QSharedPointer<ClassDef> VariableContext::findVariable(const QString &name)
 /*! add class/namespace name s to the scope */
 static void pushScope(const QString &s)
 {
-   g_classScopeLengthStack.push(new int(g_classScope.length()));
+   g_classScopeLengthStack.push(g_classScope.length());
 
    if (g_classScope.isEmpty() || leftScopeMatch(s, g_classScope)) {
       g_classScope = s;
@@ -324,10 +324,8 @@ static void popScope()
 {
    if (! g_classScopeLengthStack.isEmpty()) {
 
-      int *pLength = g_classScopeLengthStack.pop();
-
-      g_classScope.truncate(*pLength);
-      delete pLength; 
+      int pLength = g_classScopeLengthStack.pop();
+      g_classScope.truncate(pLength);      
    }   
 }
 
@@ -362,11 +360,12 @@ static void setClassScope(const QString &name)
       n = n.left(ts) + n.right(n.length() - te - 1);
    }
 
-   while (!g_classScopeLengthStack.isEmpty()) {
+   while (! g_classScopeLengthStack.isEmpty()) {
       popScope();
    }
 
    g_classScope.resize(0);
+
    int i;
    while ((i = n.indexOf("::")) != -1) {
       pushScope(n.left(i));
@@ -1276,7 +1275,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
       }
    }
 
-   if (! fullScope.isEmpty() && (ccd = g_codeClassSDict->find(fullScope))) {
+   if (! fullScope.isEmpty() && (ccd = g_codeClassSDict.find(fullScope))) {
      
       if (ccd->baseClasses()) {       
          for (auto item : *ccd->baseClasses()) {
@@ -1287,7 +1286,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
       }
    }
 
-   if (! locScope.isEmpty() && fullScope != locScope && (ccd = g_codeClassSDict->find(locScope))) {
+   if (! locScope.isEmpty() && fullScope != locScope && (ccd = g_codeClassSDict.find(locScope))) {
       
       if (ccd->baseClasses()) {
 
@@ -2328,13 +2327,12 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             QSharedPointer<ClassDef> ncd = QMakeShared<ClassDef>("<code>", 1, 1, g_curClassName, CompoundType::Class, 
                   nullptr, "", false); 
 
-            g_codeClassSDict->insert(g_curClassName, ncd);
+            g_codeClassSDict.insert(g_curClassName, ncd);
 
-            // insert base classes
-                                      
+            // insert base classes                                      
             for (auto s : g_curClassBases) { 
                QSharedPointer<ClassDef> bcd;
-               bcd = g_codeClassSDict->find(s);
+               bcd = g_codeClassSDict.find(s);
 
                if (! bcd) {
                   bcd = getResolvedClass(g_currentDefinition, g_sourceFileDef, csPrintable(s));
@@ -4180,15 +4178,12 @@ static void restoreObjCContext()
 
 void resetCCodeParserState()
 {
-  g_forceTagReference.resize(0);
+  g_forceTagReference.clear();
   g_theVarContext.clear();
-  g_classScopeLengthStack.clear();
-
-  delete g_codeClassSDict;
-
-  g_codeClassSDict = new ClassSDict;  
-  g_codeClassSDict->clear();
+  g_classScopeLengthStack.clear(); 
+  g_codeClassSDict.clear();
   g_curClassBases.clear();
+
   g_anchorCount = 0;
 }
 
@@ -4206,12 +4201,8 @@ void parseCCode(CodeOutputInterface &od, const QString &className, const QString
 
    printlex(yy_flex_debug, true, __FILE__, fd ? csPrintable(fd->fileName()) : "");
 
-   TooltipManager::instance()->clearTooltips();
-
-   if (g_codeClassSDict == nullptr) {
-      resetCCodeParserState();
-   }
-
+   TooltipManager::instance()->clearTooltips();   
+    
    g_code               = &od;
    g_inputString        = s;
    g_inputPosition      = 0;

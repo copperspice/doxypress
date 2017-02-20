@@ -73,8 +73,7 @@ class NamespaceDef : public Definition
    void addUsingDeclaration(QSharedPointer<Definition> def);
 
    const NamespaceSDict &getUsedNamespaces() const;
-
-   StringMap<QSharedPointer<Definition>> &getUsedClasses();
+   const StringMap<QSharedPointer<Definition>> &getUsedClasses() const;
 
    void combineUsingRelations();
    QString displayName(bool = true) const override;
@@ -118,13 +117,13 @@ class NamespaceDef : public Definition
    QSharedPointer<MemberDef> getMemberByName(const QString &) const;
 
    /*! Returns the user defined member groups */
-   MemberGroupSDict *getMemberGroupSDict() const {
-      return memberGroupSDict;
+   const MemberGroupSDict &getMemberGroupSDict() const {
+      return m_memberGroupSDict;
    }
 
    /*! Returns the classes contained in this namespace */
-   ClassSDict *getClassSDict() const {
-      return classSDict;
+   const ClassSDict &getClassSDict() const {
+      return m_classSDict;
    }
 
    /*! Returns the namespaces contained in this namespace */
@@ -163,14 +162,14 @@ class NamespaceDef : public Definition
    QString  fileName;
    FileList files;
   
-   StringMap<QSharedPointer<Definition>>  *m_usingDeclMap;
-   StringMap<QSharedPointer<Definition>>  *m_innerCompounds;
+   StringMap<QSharedPointer<Definition>>  m_usingDeclMap;
+   StringMap<QSharedPointer<Definition>>  m_innerCompounds;
 
-   NamespaceSDict    *m_usingDirMap;
-   NamespaceSDict     m_namespaceSDict;
-   MemberSDict       *m_allMembersDict;
-   MemberGroupSDict  *memberGroupSDict;
-   ClassSDict        *classSDict;
+   NamespaceSDict    m_usingDirMap;
+   NamespaceSDict    m_namespaceSDict;
+   MemberSDict       m_allMembersDict;
+   MemberGroupSDict  m_memberGroupSDict;
+   ClassSDict        m_classSDict;
   
    QList<QSharedPointer<MemberList>> m_memberLists;
  

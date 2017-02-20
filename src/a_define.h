@@ -19,7 +19,6 @@
 #define A_DEFINE_H
 
 #include <QHash>
-#include <QList>
 
 class FileDef;
 
@@ -28,9 +27,12 @@ class A_Define
 {
  public:
    A_Define();
-   A_Define(const A_Define &d);
 
-   ~A_Define();
+   A_Define(const A_Define &d) = delete;
+   A_Define(A_Define &&d)      = delete;
+
+   A_Define &operator=(const A_Define &d) = delete;
+   A_Define &operator=(A_Define &&d)      = delete;
 
    bool hasDocumentation();
 
@@ -56,6 +58,6 @@ class A_Define
 };
 
 /** An unsorted dictionary of A_Define objects. */
-using DefineDict = QHash<QString, A_Define *>;      // only used in pre.cpp (lex code)
+using DefineDict = QHash<QString, QSharedPointer<A_Define>>;      // only used in pre.cpp (lex code)
 
 #endif

@@ -58,10 +58,7 @@ class TagAnchorInfo
 class TagAnchorInfoList : public QList<TagAnchorInfo>
 {
  public:
-   TagAnchorInfoList() : QList<TagAnchorInfo>()
-   {
-   }
-
+   TagAnchorInfoList() : QList<TagAnchorInfo>() {}
    virtual ~TagAnchorInfoList() {}
 };
 
@@ -120,10 +117,12 @@ class TagClassInfo
    QString name;
    QString filename;
    QString clangId;
-   TagAnchorInfoList docAnchors;
-   QList<BaseInfo> *bases;
-   QList<TagMemberInfo> members;
-   QList<QString> *templateArguments;
+
+   TagAnchorInfoList      docAnchors;
+   QVector<BaseInfo>     *bases;
+   QList<TagMemberInfo>   members;
+   QList<QString>        *templateArguments;
+
    QStringList classList;
    Kind kind;
    bool isObjC;
@@ -133,9 +132,7 @@ class TagClassInfo
 class TagNamespaceInfo
 {
  public:
-   TagNamespaceInfo()
-   {
-   }
+   TagNamespaceInfo() { }
 
    QString name;
    QString filename;
@@ -734,7 +731,7 @@ class TagFileParser : public QXmlDefaultHandler
          }
 
          if (m_curClass->bases == 0) {
-            m_curClass->bases = new QList<BaseInfo>;
+            m_curClass->bases = new QVector<BaseInfo>;
          }
 
          m_curClass->bases->append(BaseInfo(m_curString, prot, virt));
@@ -784,7 +781,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_curClass->templateArguments->append(m_curString);
 
       } else {
-         warn("Unexpected tag `templarg' found\n");
+         warn("Unexpected tag templarg found\n");
       }
    }
 

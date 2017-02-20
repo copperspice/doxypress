@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -39,10 +39,6 @@ Formula::Formula(const QString &text)
    form = text;
 }
 
-Formula::~Formula()
-{
-}
-
 int Formula::getId()
 {
    return number;
@@ -57,7 +53,7 @@ void FormulaList::generateBitmaps(const QString &path)
 
    // store the original directory
    QDir d(path);
- 
+
    if (! d.exists()) {
       err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
@@ -72,7 +68,7 @@ void FormulaList::generateBitmaps(const QString &path)
    // generate a latex file containing one formula per page
    QString texName = "_formulas.tex";
    QList<int> pagesToGenerate;
-     
+
    QFile f(texName);
    bool formulaError = false;
 
@@ -87,12 +83,12 @@ void FormulaList::generateBitmaps(const QString &path)
       t << "\\usepackage{epsfig}" << endl;       // include images
 
       writeExtraLatexPackages(t);
-       
+
       t << "\\pagestyle{empty}" << endl;
       t << "\\begin{document}" << endl;
 
       int page = 0;
-     
+
       for (auto &formula : *this) {
          QString resultName = QString("form_%1.png").arg(formula.getId());
 
@@ -114,9 +110,7 @@ void FormulaList::generateBitmaps(const QString &path)
    }
 
    if (pagesToGenerate.count() > 0) {
-      // there are new formulas   
-      //system("latex _formulas.tex </dev/null >/dev/null");
-
+      // new formulas
       QString latexCmd = Config::getString("latex-cmd-name");
 
       if (latexCmd.isEmpty()) {
@@ -126,22 +120,22 @@ void FormulaList::generateBitmaps(const QString &path)
 
       if (portable_system(latexCmd, "_formulas.tex") != 0) {
          err("Unable to run LaTeX, verify your installation, _formulas.tex, and _formulas.log\n");
-         formulaError = true;         
+         formulaError = true;
       }
 
       portable_sysTimerStop();
-             
+
       int pageIndex = 1;
-    
-      for (auto pageNum : pagesToGenerate) {         
+
+      for (auto pageNum : pagesToGenerate) {
          msg("Generating image form_%d.png for formula\n", pageNum);
-         
+
          QString formBase;
          formBase = QString("_form%1").arg(pageNum);
 
          // run dvips to convert the page with number pageIndex to an encapsulated postscript
 
-         char dviArgs[4096];   
+         char dviArgs[4096];
          sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",pageIndex, qPrintable(formBase));
 
          portable_sysTimerStart();
@@ -159,7 +153,7 @@ void FormulaList::generateBitmaps(const QString &path)
 
          // now we read the generated postscript file to extract the bounding box
          QFileInfo fi(formBase + ".eps");
- 
+
          if (fi.exists()) {
             QString eps = fileToString(formBase + ".eps");
             int i = eps.indexOf("%%BoundingBox:");
@@ -207,7 +201,7 @@ void FormulaList::generateBitmaps(const QString &path)
          int gy = (((int)((y2 - y1) * scaleFactor)) + 3) & ~1;
 
          // run ghostscript to convert the postscript to a pixmap
-         // The pixmap is a truecolor image, where only black and white are used         
+         // The pixmap is a truecolor image, where only black and white are used
 
          char gsArgs[4096];
          sprintf(gsArgs, "-q -g%dx%d -r%dx%dx -sDEVICE=ppmraw "
@@ -216,7 +210,7 @@ void FormulaList::generateBitmaps(const QString &path)
 
          portable_sysTimerStart();
 
-         QString gsExe = Config::getString("ghostscript");   
+         QString gsExe = Config::getString("ghostscript");
 
          if (portable_system(gsExe, gsArgs) != 0) {
             err("Unable to run GhostScript %s %s. Verify your installation\n", qPrintable(gsExe), gsArgs);
@@ -232,7 +226,7 @@ void FormulaList::generateBitmaps(const QString &path)
          f.setFileName(formBase + ".pnm");
 
          uint imageX = 0, imageY = 0;
-         
+
          // read the generated image again, to obtain the pixel data.
          if (f.open(QIODevice::ReadOnly)) {
             QTextStream t(&f);
@@ -248,13 +242,13 @@ void FormulaList::generateBitmaps(const QString &path)
             } else {
                // assume the size is after the first line that does not start with
                // # excluding the first line of the file.
-             
-               while (! t.atEnd()) {            
+
+               while (! t.atEnd()) {
                   s = t.readLine();
-                  
+
                   if (s.isEmpty()) {
                      break;
-                  }   
+                  }
 
                   if (s.at(0) != '#') {
                      break;
@@ -265,8 +259,12 @@ void FormulaList::generateBitmaps(const QString &path)
             }
 
             if (imageX > 0 && imageY > 0) {
-               //printf("Converting image...\n");
-               char *data = new char[imageX * imageY * 3]; // rgb 8:8:8 format
+               // converting image
+
+               // rgb 8:8:8 format
+               std::vector<char> tmp(imageX * imageY * 3);
+
+               char *data = &tmp[0];
                uint i, x, y, ix, iy;
                f.read(data, imageX * imageY * 3);
 
@@ -293,7 +291,7 @@ void FormulaList::generateBitmaps(const QString &path)
                }
 
                // down-sample the image to 1/16th of the area using 16 gray scale colors.
-             
+
                for (y = 0; y < dstImage.getHeight(); y++) {
                   for (x = 0; x < dstImage.getWidth(); x++) {
                      int xp = x << 2;
@@ -323,24 +321,22 @@ void FormulaList::generateBitmaps(const QString &path)
                }
 
                // save the result as a bitmap
-               QString fileName = QString("form_%1.png").arg(pageNum);                          
-              
+               QString fileName = QString("form_%1.png").arg(pageNum);
+
                QFile f(fileName);
 
                if (f.open(QIODevice::WriteOnly)) {
-               
+
                   // parameter 1 is used as a temporary hack to select the right color palette
                   QByteArray buffer = dstImage.convert(1);
- 
+
                   f.write(buffer);
                   f.close();
-   
+
                } else {
                   err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
 
-               }            
-
-               delete[] data;
+               }
             }
 
             f.close();
@@ -378,7 +374,7 @@ void FormulaList::generateBitmaps(const QString &path)
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
-      for (auto &formula : *this) {      
+      for (auto &formula : *this) {
          t << "\\form#" << formula.getId() << ":" << formula.getFormulaText() << endl;
       }
       f.close();

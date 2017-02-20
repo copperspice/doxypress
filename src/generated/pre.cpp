@@ -2644,10 +2644,10 @@ struct FileState {
    FileState(int size) : lineNr(1), fileBuf(size),
       oldFileBuf(""), oldFileBufPos(0), bufState(0) {}
 
-   int        lineNr;
-   QString    fileBuf;
-   QString    oldFileBuf;
-   int        oldFileBufPos;
+   int       lineNr;
+   QString   fileBuf;
+   QString   oldFileBuf;
+   int       oldFileBufPos;
    QString   fileName;
    YY_BUFFER_STATE bufState;
 };
@@ -2673,10 +2673,10 @@ class DefineManager
        *  an existing define with the same name (redefinition)
        *  @param def The Define object to add.
        */
-      void addDefine(A_Define *def) {
-         A_Define *d = m_defines.value(def->m_name);
+      void addDefine(QSharedPointer<A_Define> def) {
+         QSharedPointer<A_Define> d = m_defines.value(def->m_name);
 
-         if (d != 0) {
+         if (d != nullptr) {
             // redefine
             m_defines.remove(d->m_name);
          }
@@ -2700,6 +2700,7 @@ class DefineManager
 
  public:
    friend class DefinesPerFile;
+
    /** Returns a reference to the singleton */
    static DefineManager &instance() {
       if (theInstance == nullptr) {
@@ -2724,11 +2725,11 @@ class DefineManager
          return;
       }
 
-      DefinesPerFile *dpf = m_fileMap.value(fileName);
+      QSharedPointer<DefinesPerFile> dpf = m_fileMap.value(fileName);
       if (dpf == nullptr) {
          // new file
 
-         dpf = new DefinesPerFile;
+         dpf = QMakeShared<DefinesPerFile>();
          m_fileMap.insert(fileName, dpf);
       }
    }
@@ -2749,12 +2750,12 @@ class DefineManager
          return;
       }
 
-      DefinesPerFile *dpf = m_fileMap.value(fileName);
+      QSharedPointer<DefinesPerFile> dpf = m_fileMap.value(fileName);
 
-      if (dpf == 0) {
+      if (dpf == nullptr) {
          // new file
 
-         dpf = new DefinesPerFile;
+         dpf = QMakeShared<DefinesPerFile>();
          m_fileMap.insert(fileName, dpf);
 
       } else {
@@ -2769,24 +2770,28 @@ class DefineManager
     *  @param fileName The file in which the define was found
     *  @param def The Define object to add.
     */
-   void addDefine(const QString &fileName, A_Define *def) {
+   void addDefine(const QString &fileName, QSharedPointer<A_Define> def) {
       if (fileName.isEmpty()) {
          return;
       }
 
-      A_Define *d = m_contextDefines.value(def->m_name);
+      QSharedPointer<A_Define> d = m_contextDefines.value(def->m_name);
 
-      if (d != 0) {
+      if (d != nullptr) {
          // redefine
          m_contextDefines.remove(d->m_name);
       }
+
       m_contextDefines.insert(def->m_name, def);
 
-      DefinesPerFile *dpf = m_fileMap.value(fileName);
-      if (dpf == 0) {
-         dpf = new DefinesPerFile;
+      //
+      QSharedPointer<DefinesPerFile> dpf = m_fileMap.value(fileName);
+
+      if (dpf == nullptr) {
+         dpf = QMakeShared<DefinesPerFile>();
          m_fileMap.insert(fileName, dpf);
       }
+
       dpf->addDefine(def);
    }
 
@@ -2799,9 +2804,10 @@ class DefineManager
          return;
       }
 
-      DefinesPerFile *dpf = m_fileMap.value(fromFileName);
-      if (dpf == 0) {
-         dpf = new DefinesPerFile;
+      QSharedPointer<DefinesPerFile> dpf = m_fileMap.value(fromFileName);
+
+      if (dpf == nullptr) {
+         dpf = QMakeShared<DefinesPerFile>();
          m_fileMap.insert(fromFileName, dpf);
       }
       dpf->addInclude(toFileName);
@@ -2809,11 +2815,11 @@ class DefineManager
 
    /** Returns a Define object given its name or 0 if the Define does not exist.
    */
-   A_Define *isDefined(const QString &name) const {
-      A_Define *d = m_contextDefines.value(name);
+   QSharedPointer<A_Define> isDefined(const QString &name) const {
+      QSharedPointer<A_Define> d = m_contextDefines.value(name);
 
       if (d && d->undef) {
-         d = 0;
+         d = QSharedPointer<A_Define>();
       }
 
       return d;
@@ -2833,7 +2839,7 @@ class DefineManager
          return;
       }
 
-      DefinesPerFile *dpf = m_fileMap.value(fileName);
+      QSharedPointer<DefinesPerFile> dpf = m_fileMap.value(fileName);
 
       if (dpf) {
          QSet<QString> includeStack;
@@ -2841,23 +2847,22 @@ class DefineManager
       }
    }
 
-   /** Helper function to return the DefinesPerFile object for a given file name. */
-   DefinesPerFile *find(const QString &fileName) const {
+   /** returns the DefinesPerFile object for a given file name. */
+   QSharedPointer<DefinesPerFile> find(const QString &fileName) const {
       if (fileName.isEmpty()) {
-         return 0;
+         return QSharedPointer<DefinesPerFile>();
       }
+
       return m_fileMap.value(fileName);
    }
 
-   /** Creates a new DefineManager object */
    DefineManager() {
    }
-
-   /** Destroys the object */
+  
    virtual ~DefineManager() {
    }
 
-   QHash<QString, DefinesPerFile *> m_fileMap;
+   QHash<QString, QSharedPointer<DefinesPerFile>> m_fileMap;
    DefineDict m_contextDefines;
 };
 
@@ -2877,7 +2882,7 @@ void DefineManager::DefinesPerFile::collectDefines(DefineDict &dict, QSet<QStrin
       for (auto di : m_includedFiles) {
          QString incFile = di;
 
-         DefinesPerFile *dpf = DefineManager::instance().find(incFile);
+         QSharedPointer<DefinesPerFile> dpf = DefineManager::instance().find(incFile);
 
          if (dpf && ! includeStack.contains(incFile)) {
             includeStack.insert(incFile);
@@ -2887,10 +2892,10 @@ void DefineManager::DefinesPerFile::collectDefines(DefineDict &dict, QSet<QStrin
    }
 
    {
-      for (auto def : m_defines)  {
-         A_Define *d = dict.value(def->m_name);
+      for (const auto &def : m_defines)  {
+         QSharedPointer<A_Define> d = dict.value(def->m_name);
 
-         if (d != 0) {
+         if (d != nullptr) {
             // redefine
             dict.remove(d->m_name);
          }
@@ -2900,62 +2905,61 @@ void DefineManager::DefinesPerFile::collectDefines(DefineDict &dict, QSet<QStrin
    }
 }
 
-static int                      g_yyLineNr   = 1;
-static int                      g_yyMLines   = 1;
-static int                      g_yyColNr    = 1;
+static QStringList              g_pathList;
 static QString                  g_yyFileName;
 static QSharedPointer<FileDef>  g_yyFileDef;
 static QSharedPointer<FileDef>  g_inputFileDef;
-static int                      g_ifcount   = 0;
-static int                      g_defArgs   = -1;
 
-static QStringList              g_pathList;
-static QStack<FileState *>      g_includeStack;
-static QHash<QString, int *>   *g_argDict;
+static QSharedPointer<QHash<QString, int>> g_argDict;
+static QStack<QSharedPointer<FileState>>   g_includeStack;
+static QStack<QSharedPointer<CondCtx>>     g_condStack;
+static QSharedPointer<DefineDict>          g_expandedDict;
 
-static QString            g_defName;
-static QString            g_defText;
-static QString            g_defLitText;
-static QString            g_defArgsStr;
-static QString            g_defExtraSpacing;
-static bool               g_defVarArgs;
-static int                g_lastCContext;
-static int                g_lastCPPContext;
-static QStack<int>        g_levelGuard;
-static QString            g_inputBuf;
-static int                g_inputBufPos;
-static QString            g_outputBuf;
-static int                g_roundCount;
-static bool               g_quoteArg;
+static int          g_yyLineNr   = 1;
+static int          g_yyMLines   = 1;
+static int          g_yyColNr    = 1;
+static int          g_ifcount    = 0;
+static int          g_defArgs    = -1;
 
-static QSharedPointer<DefineDict>   g_expandedDict;
+static QString      g_defName;
+static QString      g_defText;
+static QString      g_defLitText;
+static QString      g_defArgsStr;
+static QString      g_defExtraSpacing;
+static bool         g_defVarArgs;
+static int          g_lastCContext;
+static int          g_lastCPPContext;
+static QStack<int>  g_levelGuard;
+static QString      g_inputBuf;
+static int          g_inputBufPos;
+static QString      g_outputBuf;
+static int          g_roundCount;
+static bool         g_quoteArg;
 
-static int                g_findDefArgContext;
-static bool               g_expectGuard;
-static QString            g_guardName;
-static QString            g_lastGuardName;
-static QString            g_incName;
-static QString            g_guardExpr;
-static int                g_curlyCount;
-static bool               g_nospaces;          // add extra spaces during macro expansion
+static int          g_findDefArgContext;
+static bool         g_expectGuard;
+static QString      g_guardName;
+static QString      g_lastGuardName;
+static QString      g_incName;
+static QString      g_guardExpr;
+static int          g_curlyCount;
+static bool         g_nospaces;          // add extra spaces during macro expansion
 
-static bool               g_macroExpansion;    // from the configuration
-static bool               g_expandOnlyPredef;  // from the configuration
-static int                g_commentCount;
-static bool               g_insideComment;
-static bool               g_isImported;
-static QString            g_blockName;
-static int                g_condCtx;
-static bool               g_skip;
+static bool         g_macroExpansion;    // from the configuration
+static bool         g_expandOnlyPredef;  // from the configuration
+static int          g_commentCount;
+static bool         g_insideComment;
+static bool         g_isImported;
+static QString      g_blockName;
+static int          g_condCtx;
+static bool         g_skip;
 
-static bool               g_insideCS; // C# has simpler preprocessor
-static bool               g_isSource;
+static bool         g_insideCS;          // C# has simpler preprocessor
+static bool         g_isSource;
 
-static bool               g_lexInit   = false;
-static int                g_fenceSize = 0;
-static bool               g_ccomment;
-
-static QStack<QSharedPointer<CondCtx>>  g_condStack;
+static bool         g_lexInit   = false;
+static int          g_fenceSize = 0;
+static bool         g_ccomment;
 
 static void setFileName(const QString &name)
 {
@@ -2965,7 +2969,7 @@ static void setFileName(const QString &name)
    g_yyFileName = fi.absoluteFilePath();
    g_yyFileDef  = findFileDef(&Doxy_Globals::inputNameDict, g_yyFileName, ambig);
 
-   if (g_yyFileDef == 0) {
+   if (g_yyFileDef == nullptr) {
       // if this is not an input file check if it is an include file
       g_yyFileDef = findFileDef(&Doxy_Globals::includeNameDict, g_yyFileName, ambig);
    }
@@ -3013,10 +3017,10 @@ static void setCaseDone(bool value)
 
 static QSet<QString> g_allIncludes;
 
-static FileState *checkAndOpenFile(const QString &fileName, bool &alreadyIncluded)
+static QSharedPointer<FileState> checkAndOpenFile(const QString &fileName, bool &alreadyIncluded)
 {
    alreadyIncluded = false;
-   FileState *fs = 0;
+   QSharedPointer<FileState> fs;
 
    QFileInfo fi(fileName);
 
@@ -3024,24 +3028,25 @@ static FileState *checkAndOpenFile(const QString &fileName, bool &alreadyInclude
       static const QStringList exclPatterns = Config::getList("exclude-patterns");
 
       if (patternMatch(fi, exclPatterns)) {
-         return 0;
+         return QSharedPointer<FileState>();
       }
 
       QString absName = fi.absoluteFilePath();
 
       // global guard
-      if (g_curlyCount == 0) { // not #include inside { ... }
+      if (g_curlyCount == 0) { 
+         // not #include inside { ... }
 
          if (g_allIncludes.contains(absName)) {
             alreadyIncluded = true;
-            return 0;
+            return QSharedPointer<FileState>();
          }
 
          g_allIncludes.insert(absName);
       }
 
       // check include stack for absName
-      QStack<FileState *> tmpStack;
+      QStack<QSharedPointer<FileState>> tmpStack;
 
       while (! g_includeStack.isEmpty()) {
          fs = g_includeStack.pop();
@@ -3060,30 +3065,29 @@ static FileState *checkAndOpenFile(const QString &fileName, bool &alreadyInclude
       }
 
       if (alreadyIncluded) {
-         return 0;
+         return QSharedPointer<FileState>();
       }
 
-      fs = new FileState(fi.size() + 4096);
+      fs = QMakeShared<FileState>(fi.size() + 4096);
       alreadyIncluded = false;
 
       if (! readInputFile(absName, fs->fileBuf)) {
-         // error
-
-         delete fs;
-         fs = 0;
+         // error        
+         fs = QSharedPointer<FileState>();
 
       } else {
          fs->oldFileBuf    = g_inputBuf;
          fs->oldFileBufPos = g_inputBufPos;
       }
    }
+
    return fs;
 }
 
-static FileState *findFile(const QString &fileName, bool localInclude, bool &alreadyIncluded)
+static QSharedPointer<FileState> findFile(const QString &fileName, bool localInclude, bool &alreadyIncluded)
 {
    if (QDir::isAbsolutePath(fileName)) {
-      FileState *fs = checkAndOpenFile(fileName, alreadyIncluded);
+      QSharedPointer<FileState> fs = checkAndOpenFile(fileName, alreadyIncluded);
 
       if (fs) {
          setFileName(fileName);
@@ -3091,16 +3095,16 @@ static FileState *findFile(const QString &fileName, bool localInclude, bool &alr
          return fs;
 
       } else if (alreadyIncluded) {
-         return nullptr;
+         return QSharedPointer<FileState>();
       }
    }
 
-   if (localInclude && !g_yyFileName.isEmpty()) {
+   if (localInclude && ! g_yyFileName.isEmpty()) {
       QFileInfo fi(g_yyFileName);
 
       if (fi.exists()) {
          QString absName = fi.absolutePath() + "/" + fileName;
-         FileState *fs = checkAndOpenFile(absName, alreadyIncluded);
+         QSharedPointer<FileState> fs = checkAndOpenFile(absName, alreadyIncluded);
 
          if (fs) {
             setFileName(absName);
@@ -3108,33 +3112,31 @@ static FileState *findFile(const QString &fileName, bool localInclude, bool &alr
             return fs;
 
          } else if (alreadyIncluded) {
-            return nullptr;
+            return QSharedPointer<FileState>();
          }
       }
    }
 
    if (g_pathList.isEmpty()) {
-      return nullptr;
+      return QSharedPointer<FileState>();
    }
 
    for (auto &s : g_pathList) {
       QString absName = s + "/" + fileName;
 
-      FileState *fs = checkAndOpenFile(absName, alreadyIncluded);
+      QSharedPointer<FileState> fs = checkAndOpenFile(absName, alreadyIncluded);
 
       if (fs) {
          setFileName(absName);
          g_yyLineNr = 1;
-
          return fs;
 
       } else if (alreadyIncluded) {
-         return nullptr;
+         return QSharedPointer<FileState>();
       }
-
    }
 
-   return nullptr;
+   return QSharedPointer<FileState>();
 }
 
 static QString extractTrailingComment(const QString &s)
@@ -3151,7 +3153,9 @@ static QString extractTrailingComment(const QString &s)
       switch (c.unicode()) {
          case '/': {
             i--;
-            if (i >= 0 && s[i] == '*') { // end of a comment block
+
+            if (i >= 0 && s[i] == '*') { 
+               // end of a comment block
                i--;
 
                while (i > 0 && !(s[i - 1] == '/' && s[i] == '*')) {
@@ -3185,6 +3189,7 @@ static QString extractTrailingComment(const QString &s)
          default:
             return "";
       }
+
       i--;
    }
 
@@ -3199,13 +3204,12 @@ static void expandExpression(QString &expr, QString *rest, int pos);
 static QString stringize(const QString &s)
 {
    QString result;
+   QChar c;
+   QChar pc;
 
    uint i = 0;
    bool inString = false;
    bool inChar   = false;
-
-   QChar c;
-   QChar pc;
 
    while (i < s.length()) {
 
@@ -3314,6 +3318,7 @@ static void returnCharToStream(char c)
 static inline void addTillEndOfString(const QString &expr, QString *rest, uint &pos, char term, QString &arg)
 {
    int cc;
+
    while ((cc = getNextChar(expr, rest, pos)) != EOF && cc != 0) {
       if (cc == '\\') {
          arg += (char)cc, cc = getNextChar(expr, rest, pos);
@@ -3331,11 +3336,12 @@ static inline void addTillEndOfString(const QString &expr, QString *rest, uint &
  * The replacement string will be returned in \a result and the
  * length of the (unexpanded) argument list is stored in \a len.
  */
-static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, int &len, const A_Define *def, QString &result)
+static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, int &len, QSharedPointer<const A_Define> def, QString &result)
 {
    uint j = pos;
    len    = 0;
-   result.resize(0);
+
+   result.clear();
    int cc;
 
    while ((cc = getCurrentChar(expr, rest, j)) != EOF && isspace(cc)) {
@@ -3348,13 +3354,15 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
       return false;
    }
 
-   getNextChar(expr, rest, j); // eat the `(' character
+   // consume the `(' character
+   getNextChar(expr, rest, j); 
 
-   QHash<QString, QString *> argTable;  // list of arguments
+   // list of arguments
+   QHash<QString, QString> argTable;  
 
    QString arg;
    int argCount = 0;
-   bool done = false;
+   bool done    = false;
 
    // PHASE 1: read the macro arguments
    if (def->nargs == 0) {
@@ -3372,7 +3380,8 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
 
          char c = (char)cc;
 
-         if (c == '(') { // argument is a function => search for matching )
+         if (c == '(') { 
+            // argument is a function => search for matching )
             int level = 1;
             arg += c;
 
@@ -3381,7 +3390,8 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
             while ((cc = getNextChar(expr, rest, j)) != EOF && cc != 0) {
                char c = (char)cc;
 
-               if (c == '\'' || c == '\"') { // skip ('s and )'s inside strings
+               if (c == '\'' || c == '\"') { 
+                  // skip ('s and )'s inside strings
                   arg += c;
                   addTillEndOfString(expr, rest, j, c, arg);
                }
@@ -3412,19 +3422,22 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
             } else {
 
                QString argKey;
-               argKey = QString("@%1").arg(argCount++); // key name
+               argKey = QString("@%1").arg(argCount++);    // key name
                arg    = arg.trimmed();
 
                // add argument to the lookup table
-               argTable.insert(argKey, new QString(arg));
-               arg.resize(0);
+               argTable.insert(argKey, arg);
+               arg.clear();
 
-               if (c == ')') { // end of the argument list
+               if (c == ')') { 
+                  // end of the argument list
                   done = true;
                }
             }
 
-         } else if (c == '\"') { // append literal strings
+         } else if (c == '\"') { 
+            // append literal strings
+
             arg += c;
             bool found = false;
 
@@ -3442,7 +3455,8 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                arg += c;
             }
 
-         } else if (c == '\'') { // append literal characters
+         } else if (c == '\'') { 
+            // append literal characters
             arg += c;
             bool found = false;
 
@@ -3496,28 +3510,27 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                resExpr += "@-";
 
             } else {
-               // argument marker => read the argument number
-
-               QString key    = "@";
-               QString *subst = 0;
-
+               // argument marker, read the argument number
+               QString key = "@";
+             
                bool hash = false;
-               int l = k - 1;
+               int len2  = k - 1;
 
                // search for ## backward
-               if (l >= 0 && d.at(l) == '"') {
-                  l--;
+               if (len2 >= 0 && d.at(len2) == '\"') {
+                  len2--;
                }
 
-               while (l >= 0 && d.at(l) == ' ') {
-                  l--;
+               while (len2 >= 0 && d.at(len2) == ' ') {
+                  len2--;
                }
 
-               if (l > 0 && d.at(l) == '#' && d.at(l - 1) == '#') {
+               if (len2 > 0 && d.at(len2) == '#' && d.at(len2 - 1) == '#') {
                   hash = true;
                }
 
                k++;
+
                // scan the number
                while (k < d.length() && d.at(k) >= '0' && d.at(k) <= '9') {
                   key += d.at(k++);
@@ -3525,37 +3538,42 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
 
                if (! hash) {
                   // search for ## forward
-                  l = k;
-                  if (l < d.length() && d.at(l) == '"') {
-                     l++;
-                  }
-                  while (l < d.length() && d.at(l) == ' ') {
-                     l++;
+                  len2 = k;
+
+                  if (len2 < d.length() && d.at(len2) == '\"') {
+                     len2++;
                   }
 
-                  if (l < d.length() - 1 && d.at(l) == '#' && d.at(l + 1) == '#') {
+                  while (len2 < d.length() && d.at(len2) == ' ') {
+                     len2++;
+                  }
+
+                  if (len2 < d.length() - 1 && d.at(len2) == '#' && d.at(len2 + 1) == '#') {
                      hash = true;
                   }
                }
 
-               if (key.length() > 1 && (subst = argTable[key])) {
-                  QString substArg = *subst;
+               if (key.length() > 1 && argTable.contains(key)) {
+                  QString substArg = argTable.value(key);
 
-                  // only if no ## operator is before or after the argument marker we do macro expansion
+                  // only if no ## operator is before or after the argument marker, then do macro expansion
                   if (! hash) {
                      expandExpression(substArg, 0, 0);
                   }
 
                   if (inString) {
                      // if the marker is inside a string (because a # was put
-                     // before the macro name) we must escape " and \ characters
+                     // before the macro name), escape " and \ characters
                      resExpr += stringize(substArg);
 
                   } else {
                      if (hash && substArg.isEmpty()) {
-                        resExpr += "@E"; // empty argument will be remove later on
+                        // empty argument will be remove later on
+                        resExpr += "@E";
+
                      } else if (g_nospaces) {
                         resExpr += substArg;
+
                      } else {
                         resExpr += " " + substArg + " ";
                      }
@@ -3563,9 +3581,10 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                }
             }
 
-         } else { // no marker, just copy
+         } else { 
+            // no marker, just copy
 
-            if (!inString && d.at(k) == '\"') {
+            if (! inString && d.at(k) == '\"') {
                inString = true; // entering a literal string
 
             } else if (inString && d.at(k) == '\"' && (d.at(k - 1) != '\\' || d.at(k - 2) == '\\')) {
@@ -3575,7 +3594,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
          }
       }
 
-      len = j - pos;
+      len    = j - pos;
       result = resExpr;
 
       return true;
@@ -3686,7 +3705,7 @@ static void expandExpression(QString &expr, QString *rest, int pos)
          if (! g_expandedDict->contains(macroName)) {
 
             // expand macro
-            A_Define *def = DefineManager::instance().isDefined(macroName);
+            QSharedPointer<A_Define> def = DefineManager::instance().isDefined(macroName);
 
             if (definedTest) {
                // macro name was found after defined
@@ -4015,9 +4034,9 @@ QString expandMacro(const QString &name)
    return n;
 }
 
-A_Define *newDefine()
+QSharedPointer<A_Define> newDefine()
 {
-   A_Define *def = new A_Define;
+   QSharedPointer<A_Define> def = QMakeShared<A_Define>();
 
    def->m_name       = g_defName;
    def->m_definition = g_defText.trimmed();
@@ -4185,22 +4204,17 @@ static void readIncludeFile(const QString &inc)
       DefineManager::instance().addFileToContext(absIncFileName);
 
       // findFile will overwrite g_yyFileDef if found
-      FileState *fs;
+      QSharedPointer<FileState> fs;
       bool alreadyIncluded = false;
 
-      if ((fs = findFile(incFileName, localInclude, alreadyIncluded))) { // see if the include file can be found
-
-         if (Debug::isFlagSet(Debug::Preprocessor)) {
-            for (i = 0; i < g_includeStack.count(); i++) {
-               Debug::print(Debug::Preprocessor, 0, "  ");
-            }
-         }
-
+      if ((fs = findFile(incFileName, localInclude, alreadyIncluded))) { 
+         // see if the include file can be found
+        
          if (oldFileDef) {
             // add include dependency to the file in which the #include was found
             bool ambig;
 
-            // change to absolute name for bug 641336
+            // change to absolute name
             QSharedPointer<FileDef> incFd = findFileDef(&Doxy_Globals::inputNameDict, absIncFileName, ambig);
 
             QSharedPointer<FileDef> temp;
@@ -4237,10 +4251,11 @@ static void readIncludeFile(const QString &inc)
          QString lineStr = QString("# 1 \"%1\" 1\n").arg(QString(g_yyFileName));
          outputArray(lineStr, lineStr.length());
 
-         DBG_CTX((stderr, "Switching to include file %s\n", qPrintable(incFileName)));
+         DBG_CTX((stderr, "Switching to include file %s\n", csPrintable(incFileName)));
          g_expectGuard = true;
          g_inputBuf    = fs->fileBuf;
          g_inputBufPos = 0;
+
          preYY_switch_to_buffer(preYY_create_buffer(0, YY_BUF_SIZE));
 
       } else {
@@ -4272,7 +4287,7 @@ static void readIncludeFile(const QString &inc)
          }
 
          if (g_curlyCount > 0 && !alreadyIncluded) { // failed to find #include inside { ... }
-            warn(g_yyFileName, g_yyLineNr, "include file %s not found, perhaps you forgot to add its directory to INCLUDE_PATH?", csPrintable(incFileName));
+            warn(g_yyFileName, g_yyLineNr, "include file %s was not found, check the value of INCLUDE_PATH", csPrintable(incFileName));
          }
       }
    }
@@ -4797,7 +4812,7 @@ YY_RULE_SETUP
       QString name = QString::fromUtf8(preYYtext);
       name = name.left(name.indexOf('(')).trimmed();
 
-      A_Define *def = 0;
+      QSharedPointer<A_Define> def;
 
       if (skipFuncMacros && name != "Q_PROPERTY" && ! ( (g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
                   (def = DefineManager::instance().isDefined(name)) && (! g_expandOnlyPredef || def->isPredefined)) ) {
@@ -4835,6 +4850,7 @@ YY_RULE_SETUP
       if (g_includeStack.isEmpty())  {
          g_curlyCount++;
       }
+
       outputChar(text[0]);
    }
 	YY_BREAK
@@ -4944,7 +4960,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(preYYtext);
 
       g_expectGuard = false;
-      A_Define *def = 0;
+      QSharedPointer<A_Define> def;
 
       if ((g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
                   (def = DefineManager::instance().isDefined(text)) &&
@@ -4978,7 +4994,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(preYYtext);
 
-      A_Define *def = 0;
+      QSharedPointer<A_Define> def;
 
       if ((g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
                   (def = DefineManager::instance().isDefined(text)) &&
@@ -5343,7 +5359,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(preYYtext);
 
-      A_Define *def;
+      QSharedPointer<A_Define> def;
 
       if ((def = DefineManager::instance().isDefined(text)) && ! def->nonRecursive) {
          def->undef = true;
@@ -5720,9 +5736,8 @@ case 107:
 YY_RULE_SETUP
 {
       // define with argument
-
-      delete g_argDict;
-      g_argDict = g_argDict = new QHash<QString, int *>;
+     
+      g_argDict = QMakeShared<QHash<QString, int>>();
 
       g_defArgs = 0;
       g_defArgsStr.resize(0);
@@ -5743,9 +5758,9 @@ YY_DO_BEFORE_ACTION; /* set up preYYtext again */
 YY_RULE_SETUP
 {
       // special case: define with 1 -> can be "guard"
+      
+      g_argDict = QSharedPointer<QHash<QString, int>>();
 
-      delete g_argDict;
-      g_argDict = 0;
       g_defArgs = -1;
       g_defArgsStr.resize(0);
 
@@ -5783,8 +5798,8 @@ YY_RULE_SETUP
       // empty define
       QString text = QString::fromUtf8(preYYtext);
 
-      delete g_argDict;
-      g_argDict = 0;
+      g_argDict = QSharedPointer<QHash<QString, int>>();
+
       g_defArgs = -1;
       g_defName = text;
 
@@ -5822,12 +5837,13 @@ case 110:
 YY_RULE_SETUP
 {
       // define with content
-     QString text = QString::fromUtf8(preYYtext);
+      QString text = QString::fromUtf8(preYYtext);
 
-      delete g_argDict;
-      g_argDict = 0;
+      g_argDict = QSharedPointer<QHash<QString, int>>();
+
       g_defArgs = -1;
       g_defArgsStr.resize(0);
+
       g_defText.resize(0);
       g_defLitText.resize(0);
       g_defName    = text;
@@ -5882,9 +5898,10 @@ YY_RULE_SETUP
 {
       // Variadic macro
       g_defVarArgs = true;
-      g_defArgsStr+=  QString::fromUtf8(preYYtext);
-      g_argDict->insert("__VA_ARGS__", new int(g_defArgs));
-      g_defArgs++;
+      g_defArgsStr +=  QString::fromUtf8(preYYtext);
+
+      g_argDict->insert("__VA_ARGS__", g_defArgs);
+      g_defArgs++;     
    }
 	YY_BREAK
 case 116:
@@ -5901,7 +5918,8 @@ YY_RULE_SETUP
       }
 
       text = text.trimmed();
-      g_argDict->insert(text, new int(g_defArgs));
+
+      g_argDict->insert(text, g_defArgs);
       g_defArgs++;
    }
 	YY_BREAK
@@ -6461,12 +6479,14 @@ YY_RULE_SETUP
       }
 
       if (g_defArgs > 0) {
-         int *n;
+         auto iter = g_argDict->find(text);
 
-         if ((n = (*g_argDict)[text])) {
+         if (iter != g_argDict->end()) {
+            int n = iter.value();
+
             g_defText += '@';
 
-            QString numStr = QString("%1").arg(*n);
+            QString numStr = QString("%1").arg(n);
             g_defText += numStr;
 
          } else {
@@ -6523,7 +6543,7 @@ YY_RULE_SETUP
 
       outputChar('\n');
 
-      A_Define *def = 0;
+      QSharedPointer<A_Define> def;
 
       if (g_includeStack.isEmpty() || g_curlyCount > 0) {
          addDefine();
@@ -6531,18 +6551,18 @@ YY_RULE_SETUP
 
       def = DefineManager::instance().isDefined(g_defName);
 
-      if (def == 0)  {
+      if (def == nullptr)  {
          // new define
 
-         A_Define *nd = newDefine();
+         QSharedPointer<A_Define> nd = newDefine();
          DefineManager::instance().addDefine(g_yyFileName, nd);
 
-      } else if (def /*&& macroIsAccessible(def)*/) {
+      } else if (def) {
          // name already exists
 
          if (def->undef) {
             // undefined name
-           def->undef        = false;
+            def->undef        = false;
             def->m_name       = g_defName;
             def->m_definition = g_defText.trimmed();
             def->nargs        = g_defArgs;
@@ -6552,8 +6572,8 @@ YY_RULE_SETUP
          }
       }
 
-      delete g_argDict;
-      g_argDict = 0;
+      g_argDict = QSharedPointer<QHash<QString, int>>();
+
       g_yyLineNr++;
       g_yyColNr = 1;
       g_lastGuardName.resize(0);
@@ -6730,27 +6750,24 @@ case YY_STATE_EOF(SkipCond):
          yyterminate();
 
       } else {
-         FileState *fs = g_includeStack.pop();
+         QSharedPointer<FileState> fs = g_includeStack.pop();
 
          YY_BUFFER_STATE oldBuf = YY_CURRENT_BUFFER;
          preYY_switch_to_buffer(fs->bufState );
          preYY_delete_buffer(oldBuf );
-         g_yyLineNr    = fs->lineNr;
 
+         g_yyLineNr    = fs->lineNr;
          g_inputBuf    = fs->oldFileBuf;
          g_inputBufPos = fs->oldFileBufPos;
          setFileName(fs->fileName);
 
-         DBG_CTX((stderr, "######## FileName %s\n", qPrintable(g_yyFileName)));
+         DBG_CTX((stderr, "######## FileName %s\n", csPrintable(g_yyFileName)));
 
          // deal with file changes due to
          // #include's within { .. } blocks
 
          QString lineStr = QString("# %1 \"%2\" 2").arg(g_yyLineNr).arg(QString(g_yyFileName));
-         outputArray(lineStr, lineStr.length());
-
-         delete fs;
-         fs = 0;
+         outputArray(lineStr, lineStr.length());       
       }
    }
 	YY_BREAK
@@ -7821,6 +7838,7 @@ static int getCurrentChar(const QString &expr, QString *rest, uint pos)
 
    } else {
       int cc = yyinput();
+
       returnCharToStream(cc);
       return cc;
    }
@@ -7919,7 +7937,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
 
             // regexp matching an id
             QRegExp reId("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
-            QHash<QString, int *> argDict;
+            QHash<QString, int> argDict;
 
             int index = posOpen + 1;
             int pos;
@@ -7927,12 +7945,11 @@ QString preprocessFile(const QString &fileName, const QString &input)
             int count = 0;
 
             // gather the formal arguments in a dictionary
-
             while (index < posClose && (pos = reId.indexIn(ds, index))) {
                len = reId.matchedLength();
 
                if (len > 0) {
-                  argDict.insert(ds.mid(pos, len), new int(count++));
+                  argDict.insert(ds.mid(pos, len), count++);
                   index = pos + len;
 
                } else {
@@ -7946,7 +7963,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
 
             index = 0;
 
-            // substitute all occurrences of formal arguments by their corresponding markers
+            // substitute all occurrences of formal arguments with their corresponding markers
             while ((pos = reId.indexIn(tmp, index)) != -1) {
                len = reId.matchedLength();
 
@@ -7954,12 +7971,12 @@ QString preprocessFile(const QString &fileName, const QString &input)
                   definition += tmp.mid(index, pos - index);
                }
 
-               int *argIndex;
-               if ((argIndex = argDict[tmp.mid(pos, len)]) != 0) {
+               auto iter = argDict.find(tmp.mid(pos, len));
 
-                  QString marker;
-                  marker = QString(" @%1 ").arg(*argIndex);
+               if (iter != argDict.end()) {
+                  int argIndex = iter.value();
 
+                  QString marker = QString(" @%1 ").arg(argIndex);
                   definition += marker;
 
                } else {
@@ -7977,7 +7994,8 @@ QString preprocessFile(const QString &fileName, const QString &input)
             QString dname = ds.left(posOpen);
 
             if (! dname.isEmpty()) {
-               A_Define *def     = new A_Define;
+               QSharedPointer<A_Define> def = QMakeShared<A_Define>();
+
                def->m_name       = dname;
                def->m_definition = definition;
                def->nargs        = count;
@@ -7985,6 +8003,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
                def->nonRecursive = nonRecursive;
                def->fileDef      = g_yyFileDef;
                def->m_fileName   = fileName;
+
                DefineManager::instance().addDefine(g_yyFileName, def);
             }
 
@@ -7993,8 +8012,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
                     ! ds.isEmpty() && ds.length() > posEquals)  {
 
             // predefined non-function macro definition
-
-            A_Define *def = new A_Define;
+            QSharedPointer<A_Define> def = QMakeShared<A_Define>();
 
             if (posEquals == -1) {
                // simple define without argument
@@ -8014,10 +8032,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
                def->nonRecursive = nonRecursive;
                def->fileDef      = g_yyFileDef;
                def->m_fileName   = fileName;
-               DefineManager::instance().addDefine(g_yyFileName, def);
-
-            } else {
-               delete def;
+               DefineManager::instance().addDefine(g_yyFileName, def);           
             }
          }
       }
@@ -8054,42 +8069,6 @@ QString preprocessFile(const QString &fileName, const QString &input)
 
    // make sure we do not extend a \cond with missing \endcond over multiple files
    forceEndCondSection();
-
-   if (Debug::isFlagSet(Debug::Preprocessor)) {
-      const QChar *orgPos = g_outputBuf.constData() + orgOffset;
-      const QChar *newPos = g_outputBuf.constData() + g_outputBuf.length();
-
-      Debug::print(Debug::Preprocessor, 0, "Preprocessor output (size: %d bytes):\n",
-                  newPos - orgPos);
-      int line = 1;
-
-      Debug::print(Debug::Preprocessor, 0, "---------\n00001 ");
-
-      while (orgPos < newPos) {
-         putchar(orgPos->toLatin1());
-
-         if (*orgPos == '\n') {
-            Debug::print(Debug::Preprocessor, 0, "%05d ", ++line);
-         }
-         orgPos++;
-      }
-
-      Debug::print(Debug::Preprocessor, 0, "\n---------\n");
-
-      if (DefineManager::instance().defineContext().count() > 0) {
-         Debug::print(Debug::Preprocessor, 0, "Macros accessible in this file:\n");
-         Debug::print(Debug::Preprocessor, 0, "---------\n");
-
-         for (auto def : DefineManager::instance().defineContext()) {
-            Debug::print(Debug::Preprocessor, 0, "%s ", qPrintable(def->m_name));
-         }
-
-         Debug::print(Debug::Preprocessor, 0, "\n---------\n");
-
-      } else {
-         Debug::print(Debug::Preprocessor, 0, "No macros accessible in this file.\n");
-      }
-   }
 
    DefineManager::instance().endContext();
    printlex(preYY_flex_debug, false, __FILE__, csPrintable(fileName));

@@ -113,7 +113,7 @@ Entry::Entry(const Entry &e)
    id               = e.id;
    m_parent         = e.m_parent;
 
-   // copy of the child entry list
+   // deep copy of the child entry list
    for (auto item : e.m_sublist) {
       m_sublist.append(QMakeShared<Entry>(*item));
    }
@@ -123,11 +123,11 @@ Entry::Entry(const Entry &e)
       extends.append(item);
    }
 
+   m_templateArgLists = e.m_templateArgLists;
    m_groups    = e.m_groups;
    m_anchors   = e.m_anchors;
-   typeConstr  = e.typeConstr;
 
-   m_templateArgLists = e.m_templateArgLists;
+   typeConstr  = e.typeConstr;   
 }
 
 Entry::~Entry()
@@ -202,16 +202,15 @@ void Entry::reset()
    id.resize(0);
 
    m_sublist.clear();
+   argList.clear();
+   m_tagInfoEntry.clear();     
+   typeConstr.clear();
 
+   m_templateArgLists.clear();
    extends.clear();
    m_groups.clear();
    m_anchors.clear();
-   argList.clear();
-   m_tagInfoEntry.clear(); 
-
-   m_templateArgLists.clear();
    m_specialLists.clear();
-   typeConstr.clear();
 }
 
 int Entry::getSize()

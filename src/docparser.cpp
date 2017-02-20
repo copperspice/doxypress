@@ -3795,7 +3795,7 @@ getrow:
 
          } else {
             m_caption = new DocHtmlCaption(this, g_token->attribs);
-            retval = m_caption->parse();
+            retval    = m_caption->parse();
 
             if (retval == RetVal_OK) {
                // caption was parsed ok

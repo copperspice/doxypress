@@ -47,19 +47,23 @@ class Definition_Private
 
    void init(const QString &df, const QString &n);
 
-   SectionDict m_sectionDict;                           // dictionary of all sections
-   QList<QSharedPointer <SectionInfo>> m_sectionList;   // list of sections, definiton order
+   SectionDict m_sectionDict;                              // dictionary of all sections
+   QVector<QSharedPointer <SectionInfo>> m_sectionList;   // list of sections, definiton order
 
    MemberSDict m_sourceRefByDict;
    MemberSDict m_sourceRefsDict;
 
-   QList<ListItemInfo> m_xrefListItems;
+   QVector<ListItemInfo> m_xrefListItems;
    SortedList<QSharedPointer<GroupDef>> *partOfGroups;
 
    DocInfo    m_details;       // not exported
    DocInfo    m_inbodyDocs;    // not exported
    BriefInfo  m_brief;         // not exported
-   BodyInfo  *body;            // not exported
+
+   // data associated with description found in the body.
+   int m_body_startLine;                      // line number of the start of the definition
+   int m_body_endLine;                        // line number of the end of the definition
+   QSharedPointer<FileDef> m_body_fileDef;    // file definition containing the function body
 
    QString briefSignatures;
    QString docSignatures;
@@ -84,14 +88,13 @@ class Definition_Private
 };
 
 Definition_Private::Definition_Private()
-   : partOfGroups(0), body(0), hidden(false), isArtificial(false), lang(SrcLangExt_Unknown)
+   : partOfGroups(0), m_body_startLine(-1), m_body_endLine(-1), hidden(false), isArtificial(false), lang(SrcLangExt_Unknown)
 {
 }
 
 Definition_Private::~Definition_Private()
 {
    delete partOfGroups;
-   delete body;
 }
 
 void Definition_Private::init(const QString &df, const QString &n)
@@ -112,8 +115,7 @@ void Definition_Private::init(const QString &df, const QString &n)
       localName = n;
    }
    
-   partOfGroups    = 0; 
-   body            = 0;  
+   partOfGroups    = nullptr;   
    outerScope      = Doxy_Globals::globalScope;
    
    hidden          = false;
@@ -238,8 +240,7 @@ Definition::Definition(const Definition &d)
    m_private  = new Definition_Private;
    *m_private = *d.m_private;
 
-   m_private->partOfGroups    = 0;
-   m_private->body            = 0;
+   m_private->partOfGroups = nullptr;
   
    m_private->m_sectionDict      = d.m_private->m_sectionDict;
    m_private->m_sectionList      = d.m_private->m_sectionList;
@@ -254,13 +255,13 @@ Definition::Definition(const Definition &d)
    
    setRefItems(d.m_private->m_xrefListItems);
    
-   m_private->m_details    = d.m_private->m_details;
-   m_private->m_inbodyDocs = d.m_private->m_inbodyDocs;
-   m_private->m_brief      = d.m_private->m_brief;
-   
-   if (d.m_private->body) {
-      m_private->body = new BodyInfo(*d.m_private->body);
-   }
+   m_private->m_details        = d.m_private->m_details;
+   m_private->m_inbodyDocs     = d.m_private->m_inbodyDocs;
+   m_private->m_brief          = d.m_private->m_brief;   
+
+   m_private->m_body_startLine = d.m_private->m_body_startLine;
+   m_private->m_body_endLine   = d.m_private->m_body_endLine;
+   m_private->m_body_fileDef   = d.m_private->m_body_fileDef;  
 
    m_isPhrase = d.m_isPhrase;
    if (m_isPhrase) {
@@ -317,7 +318,7 @@ QString Definition::id() const
    return m_private->id;
 }
 
-void Definition::addSectionsToDefinition(const QList<SectionInfo> &anchorList)
+void Definition::addSectionsToDefinition(const QVector<SectionInfo> &anchorList)
 {
    QSharedPointer<Definition> self = sharedFrom(this);
  
@@ -765,10 +766,10 @@ QString Definition::getSourceFileBase() const
    assert(definitionType() != Definition::TypeFile); // file overloads this method
 
    QString fn;
-   static bool sourceBrowser = Config::getBool("source-code");
+   static const bool sourceBrowser = Config::getBool("source-code");
 
-   if (sourceBrowser && m_private->body && m_private->body->startLine != -1 && m_private->body->fileDef) {
-      fn = m_private->body->fileDef->getSourceFileBase();
+   if (sourceBrowser && m_private->m_body_startLine != -1 && m_private->m_body_fileDef) {
+      fn = m_private->m_body_fileDef->getSourceFileBase();
    }
 
    return fn;
@@ -781,11 +782,11 @@ QString Definition::getSourceAnchor() const
    char anchorStr[maxAnchorStrLen];
    anchorStr[0] = '\0';
 
-   if (m_private->body && m_private->body->startLine != -1) {
+   if (m_private->m_body_startLine != -1) {
       if (Htags::useHtags) {
-         qsnprintf(anchorStr, maxAnchorStrLen, "L%d", m_private->body->startLine);
+         qsnprintf(anchorStr, maxAnchorStrLen, "L%d",   m_private->m_body_startLine);
       } else {
-         qsnprintf(anchorStr, maxAnchorStrLen, "l%05d", m_private->body->startLine);
+         qsnprintf(anchorStr, maxAnchorStrLen, "l%05d", m_private->m_body_startLine);
       }
    }
 
@@ -809,9 +810,8 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
       int fileMarkerPos = refText.indexOf("@1");
 
       if (lineMarkerPos != -1 && fileMarkerPos != -1) {
-         // should always pass this.
-         QString lineStr;
-         lineStr = QString("%1").arg(m_private->body->startLine);
+         // should always pass this
+         QString lineStr = QString("%1").arg(m_private->m_body_startLine);
 
          QString anchorStr = getSourceAnchor();
          ol.startParagraph("definition");
@@ -865,7 +865,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write file link (HTML, LaTeX optionally, RTF optionally)
-            ol.writeObjectLink(0, fn, 0, m_private->body->fileDef->name());
+            ol.writeObjectLink(0, fn, 0, m_private->m_body_fileDef->name());
             ol.enableAll();
 
             ol.disable(OutputGenerator::Html);
@@ -878,7 +878,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write normal text (Man/RTF, Latex optionally)
-            ol.docify(m_private->body->fileDef->name());
+            ol.docify(m_private->m_body_fileDef->name());
             ol.popGeneratorState();
 
             // write text right from file marker
@@ -901,7 +901,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write file link (HTML only)
-            ol.writeObjectLink(0, fn, 0, m_private->body->fileDef->name());
+            ol.writeObjectLink(0, fn, 0, m_private->m_body_fileDef->name());
 
             ol.enableAll();
 
@@ -916,7 +916,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write normal text (RTF/Latex/Man only)
-            ol.docify(m_private->body->fileDef->name());
+            ol.docify(m_private->m_body_fileDef->name());
             ol.popGeneratorState();
 
             // write text between markers
@@ -970,42 +970,37 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
 
 void Definition::setBodySegment(int bls, int ble)
 {
-   if (m_private->body == 0) {
-      m_private->body = new BodyInfo;
-   }
-
-   m_private->body->startLine = bls;
-   m_private->body->endLine = ble;
+   m_private->m_body_startLine = bls;
+   m_private->m_body_endLine   = ble;
 }
 
 void Definition::setBodyDef(QSharedPointer<FileDef> fd)
 {
-   if (m_private->body == 0) {
-      m_private->body = new BodyInfo;
-   }
-   m_private->body->fileDef = fd;
+   m_private->m_body_fileDef = fd;
 }
 
 bool Definition::hasSources() const
 {
-   return m_private->body && m_private->body->startLine != -1 &&
-          m_private->body->endLine >= m_private->body->startLine && m_private->body->fileDef;
+   return m_private->m_body_startLine != -1 && 
+          m_private->m_body_endLine >= m_private->m_body_startLine &&
+          m_private->m_body_fileDef;
 }
 
 /*! Write code of this definition into the documentation */
 void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
 {
    QSharedPointer<Definition> self = sharedFrom(this);
+   static const bool inlineSources = Config::getBool("inline-source");
 
-   static bool inlineSources = Config::getBool("inline-source");
    ol.pushGeneratorState();
 
    if (inlineSources && hasSources()) {
       QString codeFragment;
 
-      int actualStart = m_private->body->startLine, actualEnd = m_private->body->endLine;
+      int actualStart = m_private->m_body_startLine;
+      int actualEnd   = m_private->m_body_endLine;
 
-      if (readCodeFragment(m_private->body->fileDef->getFilePath(), actualStart, actualEnd, codeFragment) ) {
+      if (readCodeFragment(m_private->m_body_fileDef->getFilePath(), actualStart, actualEnd, codeFragment) ) {
 
          ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(m_private->defFileExt);
          pIntf->resetCodeParserState();
@@ -1017,19 +1012,8 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
          }
 
          ol.startCodeFragment();
-         pIntf->parseCode(ol,               // codeOutIntf
-                          scopeName,        // scope
-                          codeFragment,     // input
-                          m_private->lang,  // lang
-                          false,            // isExample
-                          nullptr,          // exampleName
-                          m_private->body->fileDef,  // fileDef
-                          actualStart,      // startLine
-                          actualEnd,        // endLine
-                          true,             // inlineFragment
-                          thisMd,           // memberDef
-                          true              // show line numbers
-                         );
+         pIntf->parseCode(ol, scopeName, codeFragment, m_private->lang, false, nullptr, 
+                  m_private->m_body_fileDef, actualStart, actualEnd, true, thisMd, true);
 
          ol.endCodeFragment();
       }
@@ -1191,9 +1175,7 @@ bool Definition::hasDocumentation() const
    // static bool sourceBrowser = Config::getBool("source-code");   
 
    bool hasDocs = (! m_private->m_details.doc.isEmpty()    || ! m_private->m_brief.doc.isEmpty() ||
-                   ! m_private->m_inbodyDocs.doc.isEmpty() || extractAll );
-
-      //  (sourceBrowser && m_private->body && m_private->body->startLine!=-1 && m_private->body->fileDef)
+                   ! m_private->m_inbodyDocs.doc.isEmpty() || extractAll);      
 
    return hasDocs;
 }
@@ -1292,31 +1274,31 @@ QString Definition::localName() const
 
 void Definition::makePartOfGroup(QSharedPointer<GroupDef> gd)
 {
-   if (m_private->partOfGroups == 0) {
+   if (m_private->partOfGroups == nullptr) {
       m_private->partOfGroups = new SortedList<QSharedPointer<GroupDef>>;
    }
 
    m_private->partOfGroups->append(gd);
 }
 
-const QList<ListItemInfo> &Definition::getRefItems() const
+const QVector<ListItemInfo> &Definition::getRefItems() const
 {
    return m_private->m_xrefListItems;
 }
 
-QList<ListItemInfo> &Definition::getRefItems()
+QVector<ListItemInfo> &Definition::getRefItems()
 {
    return m_private->m_xrefListItems;
 }
 
-void Definition::setRefItems(const QList<ListItemInfo> &list)
+void Definition::setRefItems(const QVector<ListItemInfo> &list)
 {
    m_private->m_xrefListItems = list;   
 }
 
 void Definition::mergeRefItems(QSharedPointer<Definition> def)
 {
-   QList<ListItemInfo> &xrefList = def->getRefItems();
+   QVector<ListItemInfo> &xrefList = def->getRefItems();
 
    for (auto &item : xrefList) {
       if (_getXRefListId(item.type) == -1) {
@@ -1754,17 +1736,17 @@ bool Definition::isReference() const
 
 int Definition::getStartBodyLine() const
 {
-   return m_private->body ? m_private->body->startLine : -1;
+   return m_private->m_body_startLine;
 }
 
 int Definition::getEndBodyLine() const
 {
-   return m_private->body ? m_private->body->endLine : -1;
+   return m_private->m_body_endLine;
 }
 
 QSharedPointer<FileDef> Definition::getBodyDef() const
 {
-   return m_private->body ? m_private->body->fileDef : QSharedPointer<FileDef>();
+   return m_private->m_body_fileDef;
 }
 
 SortedList<QSharedPointer<GroupDef>> *Definition::partOfGroups() const
@@ -1844,7 +1826,7 @@ void Definition::setPhraseName(const QString &phrase)
 
 bool Definition::hasBriefDescription() const
 {
-   static bool briefMemberDesc = Config::getBool("brief-member-desc");
+   static const bool briefMemberDesc = Config::getBool("brief-member-desc");
 
    return ! briefDescription().isEmpty() && briefMemberDesc;
 }

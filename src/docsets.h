@@ -44,10 +44,10 @@ class DocSets  : public IndexIntf
    void incContentsDepth() override;
    void decContentsDepth() override;
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-                        bool unused, QSharedPointer<Definition> def, DirType category) override;
+                  bool unused, QSharedPointer<Definition> def, DirType category) override;
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
-                     const QString &title) override;
+                  const QString &title) override;
 
    void addIndexFile(const QString &name) override {}
    void addImageFile(const QString &name) override {}
@@ -72,8 +72,8 @@ class DocSets  : public IndexIntf
 
    QString indent();
 
-   QFile *m_nf;
-   QFile *m_tf;
+   QFile m_nf;
+   QFile m_tf;
 
    QTextStream m_nts;
    QTextStream m_tts;

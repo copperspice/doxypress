@@ -22,7 +22,7 @@
 
 #include <QString>
 #include <QFile>
-#include <QList>
+#include <QVector>
 
 #include <types.h>
 
@@ -288,7 +288,7 @@ class Entry
    /*! Returns the list of children for this Entry
     *  @see addSubEntry() and removeSubEntry()
     */
-   const QList<QSharedPointer<Entry>> children() const {
+   const QVector<QSharedPointer<Entry>> &children() const {
       return m_sublist;
    }
 
@@ -335,12 +335,6 @@ class Entry
    bool callGraph;                 // do we need to draw the call graph ?
    bool callerGraph;               // do we need to draw the caller graph ?
 
-   QList<ArgumentList>    m_templateArgLists;    // template argument declarations
-   QList<BaseInfo>        extends;               // list of base classes
-   QList<Grouping>        m_groups;              // list of groups this entry belongs to
-   QList<SectionInfo>     m_anchors;             // list of anchors defined in this entry
-   QList<ListItemInfo>    m_specialLists;        // special lists (test/todo/bug/deprecated/..)
-
    QString   type;                 // member type
    QString   name;                 // member name
    QString   args;                 // member argument string
@@ -376,6 +370,12 @@ class Entry
 
    bool      hidden;               // does this represent an entity that is hidden from the output
    bool      artificial;           // Artificially introduced item
+
+   QVector<ArgumentList>  m_templateArgLists;    // template argument declarations
+   QVector<BaseInfo>      extends;               // list of base classes
+   QVector<Grouping>      m_groups;              // list of groups this entry belongs to
+   QVector<SectionInfo>   m_anchors;             // list of anchors defined in this entry
+   QVector<ListItemInfo>  m_specialLists;        // special lists (test/todo/bug/deprecated/..)
 
    // return the command name used to define GROUPDOC_SEC
    QString groupDocCmd() const {
@@ -419,8 +419,8 @@ class Entry
    void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage,
                   QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
-   QWeakPointer<Entry> m_parent;               // parent node in the tree
-   QList<QSharedPointer<Entry>>  m_sublist;    // entries that are children
+   QWeakPointer<Entry> m_parent;                // parent node in the tree
+   QVector<QSharedPointer<Entry>> m_sublist;    // entries that are children
 
    Entry &operator=(const Entry &);
 };
@@ -473,7 +473,7 @@ class EntryNav
       return m_tagInfoNav;
    }
 
-   const QList<QSharedPointer<EntryNav>> &children() const {
+   const QVector<QSharedPointer<EntryNav>> &children() const {
       return m_subList;
    }
 
@@ -486,15 +486,15 @@ class EntryNav
    }
 
  private:
-   QWeakPointer<EntryNav> m_parent;              //!< parent node in the tree
-   QList<QSharedPointer<EntryNav>>  m_subList;   //!< entries that are children
+   QWeakPointer<EntryNav> m_parent;                // parent node in the tree
+   QVector<QSharedPointer<EntryNav>>  m_subList;   // entries that are children
 
-   int          m_section;     //!< entry type (see Sections);
-   QString	    m_type;        //!< member type
-   QString      m_name;        //!< member name
+   int          m_section;     // entry type (see Sections);
+   QString	    m_type;        // member type
+   QString      m_name;        // member name
 
-   TagInfo      m_tagInfoNav;  //!< tag file info
-   SrcLangExt   m_lang;        //!< programming language in which this entry was found
+   TagInfo      m_tagInfoNav;  // tag file info
+   SrcLangExt   m_lang;        // programming language in which this entry was found
 
    QSharedPointer<FileDef> m_fileDef;
    QSharedPointer<Entry>   m_info;

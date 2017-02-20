@@ -8881,9 +8881,12 @@ static void handleParametersCommentBlocks(ArgumentList &argList)
 
 static void parseCompounds(QSharedPointer<Entry> rt)
 {
-  static const bool groupNested = Config::getBool("group-nested-compounds");
+   static const bool groupNested = Config::getBool("group-nested-compounds");
 
-   for (auto ce : rt->children() ) {
+   // safter to make a temp copy
+   const QVector<QSharedPointer<Entry>> tmpChildren = rt->children();
+
+   for (auto ce : tmpChildren) {
 
       if (! ce->m_program.isEmpty()) {
 

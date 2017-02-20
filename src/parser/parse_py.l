@@ -66,8 +66,6 @@ static QString         *g_copyString;
 static int              g_indent    = 0;
 static int              g_curIndent = 0;
 
-static QHash<QString, QString *>  g_packageNameCache;
-
 static char             g_atomStart;
 static char             g_atomEnd;
 static int              g_atomCount;
@@ -169,26 +167,29 @@ static inline int computeIndent(const QString &str)
 
 static QString findPackageScopeFromPath(const QString &path)
 {
-   QString *pScope = g_packageNameCache.value(path);
+   static QHash<QString, QString> g_packageNameCache;
 
-   if (pScope) {
-      return *pScope;
+   QString pScope = g_packageNameCache.value(path);
+
+   if (! pScope.isEmpty()) {
+      return pScope;
    }
 
-   QFileInfo pf(path + "/__init__.py"); // found package initialization file
+   // found package initialization file
+   QFileInfo pf(path + "/__init__.py"); 
 
    if (pf.exists()) {
-      int i = path.lastIndexOf('/');
+      int pos = path.lastIndexOf('/');
 
-      if (i != -1) {
-         QString scope = findPackageScopeFromPath(path.left(i));
+      if (pos != -1) {
+         QString scope = findPackageScopeFromPath(path.left(pos));
 
          if (! scope.isEmpty()) {
             scope += "::";
          }
 
-         scope += path.mid(i + 1);
-         g_packageNameCache.insert(path, new QString(scope));
+         scope += path.mid(pos + 1);
+         g_packageNameCache.insert(path, scope);
          return scope;
       }
    }
@@ -1880,9 +1881,14 @@ STARTDOCSYMS      "##"
 
 static void parseCompounds(QSharedPointer<Entry> rt)
 {
-   for (auto ce : rt->children() ) {
+   // safter to make a temp copy
+   const QVector<QSharedPointer<Entry>> tmpChildren = rt->children();
+
+   for (auto ce : tmpChildren) {
+
       if (! ce->m_program.isEmpty()) {
          // init scanner state
+
          s_inputString   = ce->m_program;
          s_inputPosition = 0;
 

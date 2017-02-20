@@ -61102,25 +61102,6 @@ static void subrHandleCommentBlockResult(const QString &doc, bool brief)
    current = tmp_entry;
 }
 
-#if 0
-static int level = 0;
-
-static void debugCompounds(Entry *rt)
-{
-   // print Entry structure (for debugging)
-
-   level++;
-   printf("%d) debugCompounds(%s) line %d\n",level, rt->name.data(), rt->bodyLine);
-   EntryListIterator eli(*rt->children());
-
-   Entry *ce;
-   for (;(ce=eli.current());++eli) {
-      debugCompounds(ce);
-   }
-   level--;
-}
-#endif
-
 static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> &rt, FortranFormat format)
 {
    initParser();

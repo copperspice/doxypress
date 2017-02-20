@@ -20,9 +20,9 @@
 
 A_Define::A_Define()
 {  
-   lineNr   = 1;
-   columnNr = 1;
-   nargs    = -1;
+   lineNr       = 1;
+   columnNr     = 1;
+   nargs        = -1;
 
    undef        = false;
    varArgs      = false;
@@ -30,26 +30,11 @@ A_Define::A_Define()
    nonRecursive = false;
 }
 
-A_Define::A_Define(const A_Define &d)
-   : m_name(d.m_name), m_definition(d.m_definition), m_fileName(d.m_fileName)
-{   
-   lineNr   = d.lineNr;
-   columnNr = d.columnNr;
-   nargs    = d.nargs;
-   undef    = d.undef;
-   varArgs  = d.varArgs;
-
-   isPredefined = d.isPredefined;
-   nonRecursive = d.nonRecursive;   
-}
-
-A_Define::~A_Define()
-{
-}
-
 bool A_Define::hasDocumentation()
 {
-   if (! m_definition.isEmpty() && (! doc.isEmpty() || Config::getBool("extract-all") )) { 
+   static const bool extractAll = Config::getBool("extract-all");
+
+   if (! m_definition.isEmpty() && (! doc.isEmpty() || extractAll )) { 
       return true;
    }
 

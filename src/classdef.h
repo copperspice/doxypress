@@ -101,7 +101,7 @@ class ClassDef : public Definition
    bool isLocal() const;
 
    /** returns the classes nested into this class */
-   ClassSDict *getClassSDict();
+   const ClassSDict &getClassSDict();
 
    /** returns true if this class has documentation */
    bool hasDocumentation() const override;
@@ -130,7 +130,7 @@ class ClassDef : public Definition
    /** Returns a dictionary of all members. This includes any inherited
     *  members. Members are sorted alphabetically.
     */
-   MemberNameInfoSDict *memberNameInfoSDict() const;
+   const MemberNameInfoSDict &memberNameInfoSDict() const;
 
    /** Return the protection level (Public,Protected,Private) in which
     *  this compound was found.
@@ -223,9 +223,10 @@ class ClassDef : public Definition
     *  will return a list with one ArgumentList containing one argument
     *  with type="class" and name="T".
     */
-   void getTemplateParameterLists(QList<ArgumentList> &lists) const;
+   void getTemplateParameterLists(QVector<ArgumentList> &lists) const;
 
-   QString qualifiedNameWithTemplateParameters(const QList<ArgumentList> &actualParams = QList<ArgumentList>(), int *actualParamIndex = 0) const;
+   QString qualifiedNameWithTemplateParameters(const QVector<ArgumentList> &actualParams = QVector<ArgumentList>(), 
+                  int *actualParamIndex = 0) const;
 
    /** Returns true if there is at least one pure virtual member in this
     *  class.
@@ -268,7 +269,7 @@ class ClassDef : public Definition
    const QList<QSharedPointer<MemberList>> &getMemberLists() const;
 
    /** Returns the member groups defined for this class */
-   MemberGroupSDict *getMemberGroupSDict() const;
+   const MemberGroupSDict &getMemberGroupSDict() const;
 
    const QHash<QString, int> &getTemplateBaseClassNames() const;
 
@@ -289,8 +290,7 @@ class ClassDef : public Definition
    bool isJavaEnum() const;
 
    bool isGeneric() const;
-   bool isAnonymous() const;
-   const ClassSDict *innerClasses() const;
+   bool isAnonymous() const;   
    QString title() const;
 
    QString generatedFromFiles() const;
@@ -390,17 +390,17 @@ class ClassDef : public Definition
 
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
                   const QString &subTitle = 0, bool showInline = false,
-                  QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1, bool invert = false,
-                  bool showAlways = false, QSet<QSharedPointer<ClassDef>> *visitedClasses = 0);
+                  QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1, 
+                  bool invert = false, bool showAlways = false, QSet<QSharedPointer<ClassDef>> *visitedClasses = 0);
 
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline = false);
    void writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt);
-   void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup, QSharedPointer<ClassDef> inheritedFrom, 
-                  const QString &inheritId);
+   void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup, 
+                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    void writeBriefDescription(OutputList &ol, bool exampleFlag);
    void writeDetailedDescription(OutputList &ol, const QString &pageType, bool exampleFlag,
-                  const QString &title, const QString &anchor = QString());
+                  const QString &title, const QString &anchor = QString()); 
 
    void writeIncludeFiles(OutputList &ol);
    //void writeAllMembersLink(OutputList &ol);
@@ -422,10 +422,10 @@ class ClassDef : public Definition
    void addClassAttributes(OutputList &ol);
 
    int countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
-                               int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
+                  int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
-   int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways,
-                                QSet<QSharedPointer<ClassDef>> *visitedClasses);
+   int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, 
+                  bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
    void getTitleForMemberListType(MemberListType type, QString &title, QString &subtitle);
    QString includeStatement() const;
@@ -438,57 +438,51 @@ class ClassDef : public Definition
     */
    QString m_fileName;
 
-   /*! Include information about the header file should be included
-    *  in the documentation. 0 by default, set by setIncludeFile().
-    */
+   // Include information about the header file should be included
+   // in the documentation. 0 by default, set by setIncludeFile().    
    IncludeInfo m_incInfo;
 
-   /*! List of base class (or super-classes) from which this class derives
-    *  directly.
-    */
+   // List of base class (or super-classes) from which this class derives directly    
    SortedList<BaseClassDef *> *m_parents;
 
-   /*! List of sub-classes that directly derive from this class
-    */
+   // List of sub-classes that directly derive from this class    
    SortedList<BaseClassDef *> *m_inheritedBy;
 
-   /*! Namespace this class is part of
-    *  (this is the inner most namespace in case of nested namespaces)
-    */
+   SortedList<QSharedPointer<ClassDef>> *m_taggedInnerClasses;
+
+   // Namespace this class is part of (this is the inner most namespace in case of nested namespaces)    
    QSharedPointer<NamespaceDef> m_nspace;
 
-   /*! File this class is defined in */
+   // File this class is defined in 
    QSharedPointer<FileDef> m_fileDef;
 
-   /*! List of all members (including inherited members) */
-   MemberNameInfoSDict *m_allMemberNameInfoSDict;
+   // List of all members (including inherited members)
+   MemberNameInfoSDict m_allMemberNameInfoSDict;
 
-   /*! Template arguments of this class */
+   // Template arguments of this class 
    ArgumentList m_tempArgs;
 
-   /*! Type constraints for template parameters */
+   // Type constraints for template parameters
    ArgumentList m_typeConstraints;
 
-   /*! Files that were used for generating the class documentation. */
+   // Files that were used for generating the class documentation.
    FileList m_files;
 
    /*! Examples that uses this class */
    ExampleSDict m_exampleSDict;
 
-   /*! Holds the kind of "class" this is. */
+   // Holds the kind of "class" this is.
    enum CompoundType m_compType;
 
    /*! The protection level in which this class was found.
-    *  Typically Public, but for nested classes this can also be Protected
-    *  or Private.
+    *  Typically Public, but for nested classes this can also be Protected or Private.
     */
    Protection m_prot;
 
-   /*! The inner classes contained in this class. Will be 0 if there are  no inner classes.
-    */
-   ClassSDict *m_innerClasses;
+   // The inner classes contained in this class. Will be empty if there are  no inner classes. 
+   ClassSDict m_innerClasses;
 
-   /* classes for the collaboration diagram */
+   // classes for the collaboration diagram
    QHash<QString, UsesClassDef> m_usesImplClassDict;
    QHash<QString, UsesClassDef> m_usedByImplClassDict;
    QHash<QString, UsesClassDef> m_usesIntfClassDict;
@@ -504,7 +498,7 @@ class ClassDef : public Definition
     *  We do NOT want to document these individually. The key in the
     *  dictionary is the template argument list.
     */
-   QHash<QString, QSharedPointer<ClassDef>> *m_variableInstances;
+   QHash<QString, QSharedPointer<ClassDef>> m_variableInstances;
 
    QHash<QString, int> m_templBaseClassNames;
 
@@ -522,7 +516,7 @@ class ClassDef : public Definition
    QList<QSharedPointer<MemberList>> m_memberLists;
 
    /* user defined member groups */
-   MemberGroupSDict *m_memberGroupSDict;
+   MemberGroupSDict m_memberGroupSDict;
 
    /*! Is this an abstact class? */
    bool m_isAbstract;
@@ -552,8 +546,7 @@ class ClassDef : public Definition
 
    /** Does this class overloaded the -> operator? */
    QSharedPointer<MemberDef> m_arrowOperator;
-
-   SortedList<QSharedPointer<ClassDef>> *m_taggedInnerClasses;
+   
    QSharedPointer<ClassDef> m_tagLessRef;
 
    /** Does this class represent a Java style enum? */

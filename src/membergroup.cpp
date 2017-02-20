@@ -293,7 +293,7 @@ void MemberGroup::findSectionsInDocumentation()
    memberList->findSectionsInDocumentation();
 }
 
-void MemberGroup::setRefItems(const QList<ListItemInfo> &list)
+void MemberGroup::setRefItems(const QVector<ListItemInfo> &list)
 {
    m_xrefListItems = list;   
 }
@@ -303,7 +303,7 @@ void MemberGroup::writeTagFile(QTextStream &tagFile)
    memberList->writeTagFile(tagFile);
 }
 
-void MemberGroupInfo::setRefItems(const QList<ListItemInfo> &list)
+void MemberGroupInfo::setRefItems(const QVector<ListItemInfo> &list)
 {
    if (list.isEmpty()) {
       return;

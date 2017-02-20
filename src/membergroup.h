@@ -18,8 +18,8 @@
 #ifndef MEMBERGROUP_H
 #define MEMBERGROUP_H
 
-#include <QList>
 #include <QTextStream>
+#include <QVector>
 
 #include <types.h>
 
@@ -101,7 +101,7 @@ class MemberGroup : public EnableSharedFromThis
    int countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const;
    void setInGroup(bool b);
    void addListReferences(QSharedPointer<Definition> d);
-   void setRefItems(const QList<ListItemInfo> &list);
+   void setRefItems(const QVector<ListItemInfo> &list);
 
    QSharedPointer<MemberList> members() const {
       return memberList;
@@ -140,7 +140,7 @@ class MemberGroup : public EnableSharedFromThis
    int  m_numDecMembers;
    int  m_numDocMembers; 
 
-   QList<ListItemInfo> m_xrefListItems;
+   QVector<ListItemInfo> m_xrefListItems;
 };
 
 /** Data collected for a member group */
@@ -151,7 +151,7 @@ struct MemberGroupInfo {
    ~MemberGroupInfo() {
    }
 
-   void setRefItems(const QList<ListItemInfo> &list);
+   void setRefItems(const QVector<ListItemInfo> &list);
 
    QString header;
    QString doc;
@@ -159,7 +159,7 @@ struct MemberGroupInfo {
    int docLine;
    QString compoundName;
 
-   QList<ListItemInfo> m_listInfo;
+   QVector<ListItemInfo> m_listInfo;
 };
 
 #endif

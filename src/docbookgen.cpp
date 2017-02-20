@@ -976,43 +976,41 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
    }
 }
 
-static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
+static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
 {
-   if (cl) {
-      QString title = theTranslator->trClasses();
+   QString title = theTranslator->trClasses();
 
-      if (! cl->isEmpty()) {
-            t << "        <section>" << endl;
-            t << "            <title> " << title << " </title>" << endl;
-      }
+   if (! cl.isEmpty()) {
+         t << "        <section>" << endl;
+         t << "            <title> " << title << " </title>" << endl;
+   }
 
-      for (auto cd : *cl) {
-         if (! cd->isHidden() && cd->name().indexOf('@') == -1) {
-            t << "            <para>" << endl;
-            t << "                <itemizedlist>" << endl;
-            t << "                    <listitem>" << endl;
+   for (auto cd : cl) {
+      if (! cd->isHidden() && cd->name().indexOf('@') == -1) {
+         t << "            <para>" << endl;
+         t << "                <itemizedlist>" << endl;
+         t << "                    <listitem>" << endl;
 
-            t << "                        <para>" << "struct <link linkend=\""
-              << classOutputFileBase(cd) << "\">" << convertToXML(cd->name()) << "</link>";
+         t << "                        <para>" << "struct <link linkend=\""
+           << classOutputFileBase(cd) << "\">" << convertToXML(cd->name()) << "</link>";
 
-            t << "</para>" << endl;
+         t << "</para>" << endl;
 
-            if (! cd->briefDescription().isEmpty()) {
-               t << "<para><emphasis>";
-               writeDocbookString(t, cd->briefDescription());
-               t << "</emphasis></para>" << endl;
-            }
-
-            t << "                    </listitem>" << endl;
-            t << "                </itemizedlist>" << endl;
-            t << "            </para>" << endl;
+         if (! cd->briefDescription().isEmpty()) {
+            t << "<para><emphasis>";
+            writeDocbookString(t, cd->briefDescription());
+            t << "</emphasis></para>" << endl;
          }
-      }
 
-      if (! cl->isEmpty()) {
-         t << "        </section>" << endl;
+         t << "                    </listitem>" << endl;
+         t << "                </itemizedlist>" << endl;
+         t << "            </para>" << endl;
       }
    }
+
+   if (! cl.isEmpty()) {
+      t << "        </section>" << endl;
+   }  
 }
 
 static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
@@ -1263,15 +1261,14 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
 
    writeInnerClasses(cd->getClassSDict(), t);
    writeTemplateList(cd, t);
-
-   if (cd->getMemberGroupSDict()) {
-      for (auto mg : *cd->getMemberGroupSDict()) {
-         generateDocbookSection(cd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
-      }
+   
+   for (auto mg : cd->getMemberGroupSDict()) {
+      generateDocbookSection(cd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
    }
+   
 
    for (auto ml : cd->getMemberLists()) {
-      if ((ml->listType()&MemberListType_detailedLists) == 0) {
+      if ((ml->listType() & MemberListType_detailedLists) == 0) {
          generateDocbookSection(cd, t, ml, g_docbookSectionMapper.value(ml->listType()));
       }
    }
@@ -1352,11 +1349,9 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
    t << "</title>" << endl;
    writeInnerClasses(nd->getClassSDict(), t);
    writeInnerNamespaces(nd->getNamespaceSDict(), t);
-
-   if (nd->getMemberGroupSDict()) {
-      for (auto mg : *nd->getMemberGroupSDict() ) {
-         generateDocbookSection(nd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
-      }
+ 
+   for (auto mg : nd->getMemberGroupSDict() ) {
+      generateDocbookSection(nd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());      
    }
 
    for (auto ml : nd->getMemberLists()) {
@@ -1478,18 +1473,16 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       }
    }
 
-   if (fd->getClassSDict()) {
+   if (fd->getClassSDict().count() > 0) {
       writeInnerClasses(fd->getClassSDict(), t);
    }
 
    if (! fd->getNamespaceSDict().isEmpty()) {
       writeInnerNamespaces(fd->getNamespaceSDict(), t);
    }
-
-   if (fd->getMemberGroupSDict()) {
-      for (auto mg : *fd->getMemberGroupSDict()) {
-         generateDocbookSection(fd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
-      }
+   
+   for (auto mg : fd->getMemberGroupSDict()) {
+      generateDocbookSection(fd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
    }
 
    for (auto ml : fd->getMemberLists()) {
@@ -1584,11 +1577,9 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    writeInnerNamespaces(gd->getNamespaces(), t);
    writeInnerPages(gd->getPages(), t);
    writeInnerGroups(gd->getSubGroups(), t);
-
-   if (gd->getMemberGroupSDict()) {
-      for (auto mg : *gd->getMemberGroupSDict()) {
-         generateDocbookSection(gd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
-      }
+  
+   for (auto mg : gd->getMemberGroupSDict()) {
+      generateDocbookSection(gd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());      
    }
 
    for (auto ml : gd->getMemberLists()) {

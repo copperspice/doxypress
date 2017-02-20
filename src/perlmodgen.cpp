@@ -1956,34 +1956,31 @@ void PerlModGenerator::generatePerlModSection(QSharedPointer<Definition> d, QSha
 void PerlModGenerator::addListOfAllMembers(QSharedPointer<ClassDef> cd)
 {
    m_output.openList("all_members");
-
-   if (cd->memberNameInfoSDict()) {
-      
-      for (auto mni : *cd->memberNameInfoSDict()) {
        
-         for (auto mi : *mni) {
-            QSharedPointer<MemberDef> md = mi.memberDef;
+   for (auto mni : cd->memberNameInfoSDict()) {
+    
+      for (auto mi : *mni) {
+         QSharedPointer<MemberDef> md = mi.memberDef;
 
-            QSharedPointer<ClassDef>   cd  = md->getClassDef();
-            QSharedPointer<Definition> def = md->getGroupDef();
+         QSharedPointer<ClassDef>   cd  = md->getClassDef();
+         QSharedPointer<Definition> def = md->getGroupDef();
 
-            if (def == 0) {
-               def = cd;
-            }
-
-            m_output.openHash().addFieldQuotedString("name", md->name())
-               .addFieldQuotedString("virtualness", getVirtualnessName(md->virtualness()))
-               .addFieldQuotedString("protection",  getProtectionName(mi.prot));
-
-            if (! mi.ambiguityResolutionScope.isEmpty()) {
-               m_output.addFieldQuotedString("ambiguity_scope", mi.ambiguityResolutionScope);
-            }
-
-            m_output.addFieldQuotedString("scope", cd->name()).closeHash();
+         if (def == 0) {
+            def = cd;
          }
+
+         m_output.openHash().addFieldQuotedString("name", md->name())
+            .addFieldQuotedString("virtualness", getVirtualnessName(md->virtualness()))
+            .addFieldQuotedString("protection",  getProtectionName(mi.prot));
+
+         if (! mi.ambiguityResolutionScope.isEmpty()) {
+            m_output.addFieldQuotedString("ambiguity_scope", mi.ambiguityResolutionScope);
+         }
+
+         m_output.addFieldQuotedString("scope", cd->name()).closeHash();
       }
    }
-
+   
    m_output.closeList();
 }
 
@@ -2045,12 +2042,12 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
       m_output.closeList();
    }
 
-   ClassSDict *cl = cd->getClassSDict();
+   const ClassSDict &cl = cd->getClassSDict();
 
-   if (cl) {
+   if (cl.count() > 0) {
       m_output.openList("inner");
      
-      for (auto cd : *cl) {
+      for (auto cd : cl) {
          m_output.openHash().addFieldQuotedString("name", cd->name()).closeHash();
       }
 
@@ -2072,11 +2069,9 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 
    addTemplateList(cd, m_output);
    addListOfAllMembers(cd);
-
-   if (cd->getMemberGroupSDict()) {    
-      for (auto mg : *cd->getMemberGroupSDict()) {
-         generatePerlModSection(cd, mg->members(), "user_defined", mg->header());
-      }
+  
+   for (auto mg : cd->getMemberGroupSDict()) {
+      generatePerlModSection(cd, mg->members(), "user_defined", mg->header());      
    }
 
    generatePerlModSection(cd, cd->getMemberList(MemberListType_pubTypes),         "public_typedefs");
@@ -2156,11 +2151,12 @@ void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> 
 
    m_output.openHash().addFieldQuotedString("name", nd->name());
 
-   ClassSDict *cl = nd->getClassSDict();
-   if (cl) {
+   const ClassSDict &cl = nd->getClassSDict();
+
+   if (cl.count() > 0) {
       m_output.openList("classes");
     
-      for (auto cd : *cl) {
+      for (auto cd : cl) {
          m_output.openHash().addFieldQuotedString("name", cd->name()).closeHash();
       }
 
@@ -2168,6 +2164,7 @@ void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> 
    }
 
    const NamespaceSDict &nl = nd->getNamespaceSDict();
+
    if (! nl.isEmpty()) {
       m_output.openList("namespaces");
      
@@ -2178,11 +2175,10 @@ void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> 
       m_output.closeList();
    }
 
-   if (nd->getMemberGroupSDict()) {     
-      for (auto mg : *nd->getMemberGroupSDict()) {
-         generatePerlModSection(nd, mg->members(), "user-defined", mg->header());
-      }
+   for (auto mg : nd->getMemberGroupSDict()) {
+      generatePerlModSection(nd, mg->members(), "user-defined", mg->header());
    }
+   
 
    generatePerlModSection(nd, nd->getMemberList(MemberListType_decDefineMembers),  "defines");
    generatePerlModSection(nd, nd->getMemberList(MemberListType_decProtoMembers),   "prototypes");
@@ -2299,12 +2295,11 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
 
    m_output.closeList();
    
-
-   ClassSDict *cl = gd->getClasses();
-   if (cl) {
+   const ClassSDict &cl = gd->getClasses();
+   if (cl.count() > 0) {
       m_output.openList("classes");
      
-      for (auto cd : *cl) {
+      for (auto cd : cl) {
          m_output.openHash().addFieldQuotedString("name", cd->name()).closeHash();
       }
 
@@ -2343,10 +2338,8 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
       m_output.closeList();
    }
 
-   if (gd->getMemberGroupSDict()) {
-      for (auto mg : *gd->getMemberGroupSDict()){
-         generatePerlModSection(gd, mg->members(), "user-defined", mg->header());
-      }
+   for (auto mg : gd->getMemberGroupSDict()){
+      generatePerlModSection(gd, mg->members(), "user-defined", mg->header());      
    }
 
    generatePerlModSection(gd, gd->getMemberList(MemberListType_decDefineMembers),  "defines");

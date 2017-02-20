@@ -1,5 +1,19 @@
-
-#line 3 "<stdout>"
+/*************************************************************************
+ *
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * All rights reserved.
+ *
+ * Permission to use, copy, modify, and distribute this software and its
+ * documentation under the terms of the GNU General Public License version 2
+ * is hereby granted. No representations are made about the suitability of
+ * this software for any purpose. It is provided "as is" without express or
+ * implied warranty. See the GNU General Public License for more details.
+ *
+ * Documents produced by DoxyPress are derivative works derived from the
+ * input used in their production; they are not affected by this license.
+ *
+*************************************************************************/
 
 #define  YY_INT_ALIGNED short int
 
@@ -167,7 +181,7 @@ typedef unsigned int flex_uint32_t;
  */
 #define YY_BUF_SIZE 32768
 #else
-#define YY_BUF_SIZE 16384
+#define YY_BUF_SIZE 262144
 #endif /* __ia64__ */
 #endif
 
@@ -3457,7 +3471,7 @@ class DocCmdMapper
 
   private:
     static DocCmdMapper *instance() {
-      if (s_instance == 0) {
+      if (s_instance == nullptr) {
          s_instance = new DocCmdMapper;
       }
       return s_instance;
@@ -3560,7 +3574,7 @@ static GuardType        guardType;           // kind of guard for conditional se
 static bool             enabledSectionFound;
 static QString          functionProto;       // function prototype
 
-static QStack<GuardedSection *> guards;      // tracks nested conditional sections (if,ifnot,..)
+static QStack<GuardedSection> s_guards;      // tracks nested conditional sections (if,ifnot,..)
 static QSharedPointer<Entry>  current;       // working entry
 
 static bool             s_needNewEntry;
@@ -6183,13 +6197,12 @@ case 160:
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
 {
-      if (guards.isEmpty()) {
+      if (s_guards.isEmpty()) {
          warn(yyFileName,yyLineNr, "Found @endif without matching start command");
 
        } else {
-         GuardedSection *s  = guards.pop();
-         bool parentVisible = s->parentVisible();
-         delete s;
+         GuardedSection s   = s_guards.pop();
+         bool parentVisible = s.parentVisible();        
 
          if (parentVisible) {
             enabledSectionFound = true;
@@ -6205,16 +6218,16 @@ case 161:
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
 {
-      if (guards.isEmpty()) {
+      if (s_guards.isEmpty()) {
          warn(yyFileName, yyLineNr, "Found @else without matching start command");
 
       } else {
 
-         if (! enabledSectionFound && guards.top()->parentVisible()) {
-            delete guards.pop();
-            guards.push(new GuardedSection(true,true));
-            enabledSectionFound = true;
+         if (! enabledSectionFound && s_guards.top().parentVisible()) {
+            s_guards.pop();
+            s_guards.push(GuardedSection(true,true));
 
+            enabledSectionFound = true;
             BEGIN( GuardParamEnd );
          }
       }
@@ -6227,14 +6240,14 @@ case 162:
 YY_DO_BEFORE_ACTION; /* set up commentscanYYtext again */
 YY_RULE_SETUP
 {
-      if (guards.isEmpty()) {
+      if (s_guards.isEmpty()) {
          warn(yyFileName,yyLineNr, "Found @elseif without matching start command");
 
        } else {
 
-         if (! enabledSectionFound && guards.top()->parentVisible()) {
+         if (! enabledSectionFound && s_guards.top().parentVisible()) {
             guardType = Guard_If;
-            delete guards.pop();
+            s_guards.pop();
 
             BEGIN( GuardParam );
          }
@@ -8198,8 +8211,9 @@ static bool handleIfNot(const QString &)
 
 static bool handleElseIf(const QString &)
 {
-   if (guards.isEmpty()) {
+   if (s_guards.isEmpty()) {
       warn(yyFileName,yyLineNr, "Found \\else without matching start command");
+
    } else {
       guardType = enabledSectionFound ? Guard_Skip : Guard_If;
       BEGIN(GuardParam);
@@ -8210,8 +8224,9 @@ static bool handleElseIf(const QString &)
 
 static bool handleElse(const QString &)
 {
-   if (guards.isEmpty()) {
+   if (s_guards.isEmpty()) {
       warn(yyFileName,yyLineNr, "Found \\else without matching start command");
+
    } else {
       BEGIN( SkipGuardedSection );
    }
@@ -8221,11 +8236,11 @@ static bool handleElse(const QString &)
 
 static bool handleEndIf(const QString &)
 {
-   if (guards.isEmpty())   {
+   if (s_guards.isEmpty())   {
       warn(yyFileName,yyLineNr, "Found \\endif without matching start command");
 
    } else {
-      delete guards.pop();
+      s_guards.pop();
    }
 
    enabledSectionFound = false;
@@ -8446,7 +8461,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 {
    initParser();
 
-   guards.clear();
+   s_guards.clear();
    langParser = parser;
    current    = curEntry;
 
@@ -8512,7 +8527,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       addOutput(theTranslator->trOverloadText());
    }
 
-   if (! guards.isEmpty()) {
+   if (! s_guards.isEmpty()) {
       warn(yyFileName, yyLineNr, "Documentation block ended in the middle of a conditional section");
    }
 
@@ -8742,21 +8757,21 @@ static void handleGuard(const QString &expr)
    bool sectionEnabled = prs.parse(yyFileName, yyLineNr, expr.trimmed());
    bool parentEnabled  = true;
 
-   if (! guards.isEmpty()) {
-      parentEnabled = guards.top()->isEnabled();
+   if (! s_guards.isEmpty()) {
+      parentEnabled = s_guards.top().isEnabled();
    }
 
    if (parentEnabled) {
-      if ( (sectionEnabled && guardType == Guard_If) || (!sectionEnabled && guardType == Guard_IfNot)) {
+      if ( (sectionEnabled && guardType == Guard_If) || (! sectionEnabled && guardType == Guard_IfNot)) {
          // section is visible
-         guards.push(new GuardedSection(true, true));
+         s_guards.push(GuardedSection(true, true));
          enabledSectionFound = true;
          BEGIN( GuardParamEnd );
 
       } else {
          // section is invisible
          if (guardType != Guard_Skip) {
-            guards.push(new GuardedSection(false, true));
+            s_guards.push(GuardedSection(false, true));
          }
 
          BEGIN( SkipGuardedSection );
@@ -8764,7 +8779,7 @@ static void handleGuard(const QString &expr)
 
    } else {
       // invisible because of parent
-      guards.push(new GuardedSection(false, false));
+      s_guards.push(GuardedSection(false, false));
       BEGIN( SkipGuardedSection );
    }
 }

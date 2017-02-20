@@ -224,7 +224,7 @@ QString convertToLatex(const QString &s, bool insideTabbing = false, bool keepSp
 QString convertToXML(const QString &s);
 QString convertToJSString(const QString &s);
 
-void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context);
+void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict &memberGroupSDict, QSharedPointer<Definition> context);
 
 int extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt = SrcLangExt_Unknown);
 
@@ -242,11 +242,11 @@ int getScopeFragment(const QString &s, int p, int *l);
 
 QString filterCRLF(const QString &buffer);
 
-void addRefItem(const QList<ListItemInfo> &list, const QString &key, const QString &prefix, 
+void addRefItem(const QVector<ListItemInfo> &list, const QString &key, const QString &prefix, 
                   const QString &name, const QString &title, const QString &args, QSharedPointer<Definition> scope);
 
 QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
-                  const QString &fileName, int startLine, const QList<ListItemInfo> &list, 
+                  const QString &fileName, int startLine, const QVector<ListItemInfo> &list, 
                   QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
                   const TagInfo &tagInfo = TagInfo(), SrcLangExt lang = SrcLangExt_Unknown);
 

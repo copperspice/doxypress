@@ -618,7 +618,7 @@ class MemberDefImpl
    ArgumentList  m_typeConstraints;  // type constraints for template parameters
 
    // lists of template argument lists for template functions in nested template classes
-   QList<ArgumentList> m_defaultTemplateArgLists;
+   QVector<ArgumentList> m_defaultTemplateArgLists;
 
    QSharedPointer<MemberDef> templateMaster;
 
@@ -2887,7 +2887,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
             // (since no definition was found)
 
             if (cd && lang == SrcLangExt_Cpp && ! isTemplateSpecialization()) {
-               QList<ArgumentList> tempParamLists;
+               QVector<ArgumentList> tempParamLists;
                cd->getTemplateParameterLists(tempParamLists);
 
                for (auto &tal : tempParamLists) {
@@ -3642,7 +3642,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
    }
 
    actualArgList.trailingReturnType = substituteTemplateArgumentsInString(actualArgList.trailingReturnType,
-               formalArgs, actualArgs);
+                  formalArgs, actualArgs);
 
    QString methodName = name();
 
@@ -3742,7 +3742,7 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
       }
    }
 
-   const QList<ListItemInfo> &xrefItems = getRefItems();
+   const QVector<ListItemInfo> &xrefItems = getRefItems();
 
    if (! xrefItems.isEmpty()) {
       // argsString is needed for overloaded functions (see bug 609624)
@@ -4119,7 +4119,7 @@ void MemberDef::setTypeConstraints(const ArgumentList &al)
    m_impl->m_typeConstraints = al;
 }
 
-void MemberDef::setTemplateParameterLists(const QList<ArgumentList> &lists)
+void MemberDef::setTemplateParameterLists(const QVector<ArgumentList> &lists)
 {
    m_impl->m_defaultTemplateArgLists = lists;
 }
@@ -4805,7 +4805,7 @@ ArgumentList &MemberDef::getTemplateArgumentList()
    return m_impl->m_templateArgList;
 }
 
-const QList<ArgumentList> &MemberDef::getTemplateParameterLists() const
+const QVector<ArgumentList> &MemberDef::getTemplateParameterLists() const
 {
    return m_impl->m_defaultTemplateArgLists;
 }

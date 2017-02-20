@@ -1782,9 +1782,9 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
          writeBoxMemberList(t, '-', m_classDef->getMemberList(MemberListType_priSlots), m_classDef);
       }
 
-      if (m_classDef->getLanguage() != SrcLangExt_Fortran && m_classDef->getMemberGroupSDict()) {
+      if (m_classDef->getLanguage() != SrcLangExt_Fortran) {
 
-         for (auto mg : *m_classDef->getMemberGroupSDict() ) {
+         for (auto mg : m_classDef->getMemberGroupSDict() ) {
             if (mg->members()) {
                writeBoxMemberList(t, '*', mg->members(), m_classDef, false, &arrowNames);
             }
@@ -4354,52 +4354,43 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    addMemberList( gd->getMemberList(MemberListType_allMembersList) );
    QString htmlEntenstion = Doxy_Globals::htmlFileExtension;
 
-   // Add classes
-   if ( gd->getClasses() && gd->getClasses()->count() ) {
+   // Add classes   
+   for (auto def : gd->getClasses()) {
+      tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
 
-      for (auto def : *gd->getClasses()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
-
-         if (!def->anchor().isEmpty()) {
-            tmp_url += "#" + def->anchor();
-         }
-         addCollaborationMember(def, tmp_url, DotGroupCollaboration::tclass);
+      if (!def->anchor().isEmpty()) {
+         tmp_url += "#" + def->anchor();
       }
+      addCollaborationMember(def, tmp_url, DotGroupCollaboration::tclass);
    }
-
+  
    // Add namespaces
-   if (! gd->getNamespaces().isEmpty()) {
-
-      for (auto &def : gd->getNamespaces()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
-         addCollaborationMember(def, tmp_url, DotGroupCollaboration::tnamespace);
-      }
+   for (auto &def : gd->getNamespaces()) {
+      tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
+      addCollaborationMember(def, tmp_url, DotGroupCollaboration::tnamespace);
    }
 
-   // Add files
-   if (gd->getFiles().count() ) {
-
-      for (auto def : gd->getFiles()) {
-         tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
-         addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile );
-      }
+   // Add files  
+   for (auto def : gd->getFiles()) {
+      tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
+      addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile);
    }
-
+  
    // Add pages
-   if ( gd->getPages() && gd->getPages()->count() ) {
+   if (gd->getPages()) {
 
       for (auto def : *gd->getPages()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
-         addCollaborationMember(def, tmp_url, DotGroupCollaboration::tpages );
+         addCollaborationMember(def, tmp_url, DotGroupCollaboration::tpages);
       }
    }
 
    // Add directories
-   if ( gd->getDirs() && gd->getDirs()->count() ) {
+   if (gd->getDirs()) {
 
       for (auto def : *gd->getDirs()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
-         addCollaborationMember(def, tmp_url, DotGroupCollaboration::tdir );
+         addCollaborationMember(def, tmp_url, DotGroupCollaboration::tdir);
       }
    }
 }

@@ -489,7 +489,7 @@ void FileDef::writeNamespaceDeclarations(OutputList &ol, const QString &title, b
 void FileDef::writeClassDeclarations(OutputList &ol, const QString &title)
 {
    // write list of classes  
-   m_classSDict.writeDeclaration(ol, 0, title, false);   
+   m_classSDict.writeDeclaration(ol, nullptr, title, false);   
 }
 
 void FileDef::writeInlineClasses(OutputList &ol)
@@ -1000,11 +1000,10 @@ void FileDef::finishParsing()
 void FileDef::addMembersToMemberGroup()
 { 
    QSharedPointer<FileDef> self = sharedFrom(this);
-   MemberGroupSDict *temp = &m_memberGroupSDict;
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml, &temp, self);    
+         ::addMembersToMemberGroup(ml, m_memberGroupSDict, self);    
       }
    }
 
@@ -1298,7 +1297,7 @@ void FileDef::addListReferences()
 {   
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   const QList<ListItemInfo> &xrefItems = getRefItems();
+   const QVector<ListItemInfo> &xrefItems = getRefItems();
 
    addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(), 
               "", QSharedPointer<Definition>());
@@ -1571,8 +1570,8 @@ void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
    QSharedPointer<FileDef> self  = sharedFrom(this);
    QSharedPointer<MemberList> ml = createMemberList(lt);  
 
-   static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
-   static bool sortMemberDocs = Config::getBool("sort-member-docs");
+   static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
+   static const bool sortMemberDocs = Config::getBool("sort-member-docs");
 
    bool isSorted = false;
 

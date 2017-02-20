@@ -19,13 +19,10 @@
 
 #include <util.h>
 
-MemberName::MemberName(const QString &n) : QList<QSharedPointer<MemberDef>>()
+MemberName::MemberName(const QString &n) 
+   : QList<QSharedPointer<MemberDef>>()
 {
    name = n;
-}
-
-MemberName::~MemberName()
-{
 }
 
 int MemberName::compareValues(QSharedPointer<const MemberDef> m1, QSharedPointer<const MemberDef> m2) const
@@ -47,7 +44,8 @@ int MemberName::compareValues(QSharedPointer<const MemberDef> m1, QSharedPointer
    }
 }
 
-MemberNameInfo::MemberNameInfo(const QString &n) : QList<MemberInfo>()
+MemberNameInfo::MemberNameInfo(const QString &n) 
+   : QList<MemberInfo>()
 {
    name = n;
 }

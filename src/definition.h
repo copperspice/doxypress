@@ -18,10 +18,10 @@
 #ifndef DEFINITION_H
 #define DEFINITION_H
 
-#include <QList>
 #include <QHash>
 #include <QSharedPointer>
 #include <QTextStream>
+#include <QVector>
 
 #include <doxy_shared.h>
 #include <sortedlist.h>
@@ -56,20 +56,11 @@ struct BriefInfo {
    BriefInfo() : line(1) {};
 };
 
-/** Data associated with description found in the body. */
-struct BodyInfo {
-   int      startLine;   //!< line number of the start of the definition
-   int      endLine;     //!< line number of the end of the definition
-
-   QSharedPointer<FileDef> fileDef;     //!< file definition containing the function body
-};
-
 /** Abstract interface for a Definition or DefinitionList */
 class DefinitionIntf : public EnableSharedFromThis 
 {
  public:
    DefinitionIntf() { }
-
    virtual ~DefinitionIntf() { }
 
    /*! Types of derived classes */
@@ -302,7 +293,7 @@ class Definition : public DefinitionIntf
 
    /*! Add the list of anchors that mark the sections that are found in the documentation.
     */
-   void addSectionsToDefinition(const QList<SectionInfo> &anchorList);
+   void addSectionsToDefinition(const QVector<SectionInfo> &anchorList);
 
    // source references
    void setBodySegment(int bls, int ble);
@@ -310,14 +301,12 @@ class Definition : public DefinitionIntf
    void addSourceReferencedBy(QSharedPointer<MemberDef>d);
    void addSourceReferences(QSharedPointer<MemberDef>d);
 
-   void setRefItems(const QList<ListItemInfo> &list);
+   void setRefItems(const QVector<ListItemInfo> &list);
    void mergeRefItems(QSharedPointer<Definition> d);
-   const QList<ListItemInfo> &getRefItems() const;
-   QList<ListItemInfo> &getRefItems();
+   const QVector<ListItemInfo> &getRefItems() const;
+   QVector<ListItemInfo> &getRefItems();
 
-   virtual void addInnerCompound(QSharedPointer<Definition> d)
-   {};   
-
+   virtual void addInnerCompound(QSharedPointer<Definition> d) {};
    virtual void setOuterScope(QSharedPointer<Definition> d);
    virtual void setHidden(bool b);
 

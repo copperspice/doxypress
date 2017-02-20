@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -38,14 +38,14 @@
 ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const QString &x_name, CompoundType ct,
                    const QString &lref, const QString &fName, bool isSymbol, bool isJavaEnum)
    : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(x_name), "", "", isSymbol)
-{  
+{
    visited = false;
    setReference(lref);
-   
+
    m_compType   = ct;
    m_isJavaEnum = isJavaEnum;
 
-   QString tname = name();   
+   QString tname = name();
    const QString ctStr = compoundTypeString();
 
    if (! fName.isEmpty()) {
@@ -56,28 +56,22 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
 
    }
 
-   m_parents      = 0;
-   m_inheritedBy  = 0;
-   m_prot         = Public;
-     
-   m_allMemberNameInfoSDict = 0;
-  
-   m_memberGroupSDict    = 0;
-   m_innerClasses        = 0;
+   m_parents            = 0;
+   m_inheritedBy        = 0;;
+   m_taggedInnerClasses = 0;
 
-   m_subGrouping  = Config::getBool("allow-sub-grouping");   
-   m_isSimple     = Config::getBool("inline-simple-struct");   
+   m_prot          = Public;
 
-   m_variableInstances   = 0;   
+   m_subGrouping   = Config::getBool("allow-sub-grouping");
+   m_isSimple      = Config::getBool("inline-simple-struct");
 
    m_isAbstract    = false;
    m_isStatic      = false;
    m_isTemplArg    = false;
-   m_membersMerged = false;  
+   m_membersMerged = false;
    m_usedOnly      = false;
-   
-   m_taggedInnerClasses = 0; 
-   m_classTraits = Entry::Traits{};  
+
+   m_classTraits = Entry::Traits{};
 
    // can not use getLanguage at this point, setLanguage() has not been called
    SrcLangExt lang = getLanguageFromFileName(defFileName);
@@ -96,12 +90,6 @@ ClassDef::~ClassDef()
 {
    delete m_parents;
    delete m_inheritedBy;
-   delete m_allMemberNameInfoSDict;
-
-   delete m_memberGroupSDict;
-   delete m_innerClasses;
-
-   delete m_variableInstances;
    delete m_taggedInnerClasses;
 }
 
@@ -132,7 +120,7 @@ QString ClassDef::displayName(bool includeScope) const
    if (m_compType == CompoundType::Protocol && retval.right(2) == "-p") {
       retval = "<" + retval.left(retval.length() - 2) + ">";
    }
-   
+
    // added 01/2016
    retval = renameNS_Aliases(retval);
 
@@ -145,7 +133,7 @@ QString ClassDef::displayName(bool includeScope) const
 
 // inserts a base/super class in the inheritance list
 void ClassDef::insertBaseClass(QSharedPointer<ClassDef> cd, const QString &n, Protection p, Specifier s, const QString &t)
-{   
+{
    if (m_parents == 0) {
       m_parents = new SortedList<BaseClassDef *>;
    }
@@ -164,7 +152,7 @@ void ClassDef::insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifi
    }
 
    if (m_inheritedBy == 0) {
-      m_inheritedBy = new SortedList<BaseClassDef *>;     
+      m_inheritedBy = new SortedList<BaseClassDef *>;
    }
 
    SortedList<BaseClassDef *> *temp = m_inheritedBy;
@@ -179,28 +167,25 @@ void ClassDef::addMembersToMemberGroup()
 
    for (auto item : m_memberLists ) {
       if ( (item->listType() & MemberListType_detailedLists) == 0) {
-         ::addMembersToMemberGroup(item, &m_memberGroupSDict, self);
+         ::addMembersToMemberGroup(item, m_memberGroupSDict, self);
       }
    }
 
    // add members inside sections to their groups
-   if (m_memberGroupSDict) {
-  
-      for (auto item : *m_memberGroupSDict ) {
-         if (item->allMembersInSameSection() && m_subGrouping) {   
-            item->addToDeclarationSection();
-         }
+   for (auto item : m_memberGroupSDict ) {
+      if (item->allMembersInSameSection() && m_subGrouping) {
+         item->addToDeclarationSection();
       }
    }
 }
 
 // adds new member definition to the class
 void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection prot, bool addToAllList)
-{   
+{
    if (md->isHidden()) {
       return;
    }
-    
+
    bool isSimple = false;
 
    if (md->isRelated() && protectionLevelVisible(prot)) {
@@ -231,17 +216,17 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             addMemberToList(MemberListType_events, md, true);
             break;
 
-         case MemberType_Signal:       // Qt and CS specific                        
+         case MemberType_Signal:       // Qt and CS specific
             switch (prot) {
                case Public:
                   addMemberToList(MemberListType_pubSignals, md, true);
                   break;
 
                case Protected:
-               case Package:           // signals in packages are not possible       
+               case Package:           // signals in packages are not possible
                   addMemberToList(MemberListType_proSignals, md, true);
                   break;
-              
+
                case Private:
                   addMemberToList(MemberListType_priSignals, md, true);
                   break;
@@ -258,14 +243,15 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                case Package:           // slots in packages are not possible
                   addMemberToList(MemberListType_proSlots, md, true);
                   break;
-             
+
                case Private:
                   addMemberToList(MemberListType_priSlots, md, true);
                   break;
             }
             break;
 
-         default: // any of the other members
+         default:
+            // any of the other members
 
             if (md->isStatic()) {
                if (md->isVariable()) {
@@ -284,7 +270,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                         break;
                   }
 
-               } else { 
+               } else {
                   // function
 
                   switch (prot) {
@@ -303,7 +289,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                   }
                }
 
-            } else { 
+            } else {
                // not static
 
                if (md->isVariable()) {
@@ -370,7 +356,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                   }
 
 
-               } else { 
+               } else {
                   // member function
 
                   switch (prot) {
@@ -391,15 +377,14 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             }
             break;
       }
-   } 
+   }
 
    if (! isSimple) {
       // not a simple field -> not a simple struct
       m_isSimple = false;
    }
-   
-   // insert member in the detailed documentation section      
 
+   // insert member in the detailed documentation section
    if ((md->isRelated() && protectionLevelVisible(prot)) || md->isFriend()) {
       addMemberToList(MemberListType_relatedMembers, md, false);
 
@@ -421,12 +406,11 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             addMemberToList(MemberListType_eventMembers, md, false);
             break;
 
-
          case MemberType_DCOP:
             addMemberToList(MemberListType_functionMembers, md, false);
             break;
 
-         case MemberType_Signal:      
+         case MemberType_Signal:
             if (protectionLevelVisible(prot)) {
                addMemberToList(MemberListType_functionMembers, md, false);
             }
@@ -438,7 +422,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             }
             break;
 
-         default: 
+         default:
             // any of the other members
 
             if (protectionLevelVisible(prot)) {
@@ -477,10 +461,10 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             break;
       }
    }
-      
-   // insert member in the appropriate member group 
+
+   // insert member in the appropriate member group
    // do this ONLY AFTER inserting the member in the regular groups, addMemberToGroup(md,groupId);
-   
+
    if (md->virtualness() == Pure) {
       m_isAbstract = true;
    }
@@ -488,25 +472,23 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
    if (md->name() == "operator->") {
       m_arrowOperator = md;
    }
-   
-   if (addToAllList && ! (Config::getBool("hide-friend-compounds") && md->isFriend() &&  (md->typeString() == "friend class" || 
+
+   static const bool hideFriendCompound = Config::getBool("hide-friend-compounds");
+
+   if (addToAllList && ! (hideFriendCompound && md->isFriend() && (md->typeString() == "friend class" ||
             md->typeString() == "friend struct" || md->typeString() == "friend union"))) {
-      
+
       MemberInfo mi = MemberInfo(md, prot, md->virtualness(), false);
       QSharedPointer<MemberNameInfo> mni;
 
-      if (m_allMemberNameInfoSDict == 0) {
-         m_allMemberNameInfoSDict = new MemberNameInfoSDict();        
-      }
-
-      if ((mni = m_allMemberNameInfoSDict->find(md->name()))) {
+      if ((mni = m_allMemberNameInfoSDict.find(md->name()))) {
          mni->append(mi);
 
       } else {
          mni = QMakeShared<MemberNameInfo>(md->name());
          mni->append(mi);
 
-         m_allMemberNameInfoSDict->insert(mni->memberName(), mni);
+         m_allMemberNameInfoSDict.insert(mni->memberName(), mni);
       }
    }
 }
@@ -518,43 +500,35 @@ void ClassDef::insertMember(QSharedPointer<MemberDef> md)
 
 // compute the anchors for all members
 void ClassDef::computeAnchors()
-{   
+{
    for (auto ml : m_memberLists ) {
       if ((ml->listType()&MemberListType_detailedLists) == 0) {
          setAnchors(ml);
       }
    }
 
-   if (m_memberGroupSDict) {
-      for (auto mg : *m_memberGroupSDict ) {
-         mg->setAnchors();
-      }
+   for (auto mg : m_memberGroupSDict) {
+      mg->setAnchors();
    }
 }
 
 void ClassDef::distributeMemberGroupDocumentation()
 {
-   if (m_memberGroupSDict) {
-      for (auto mg : *m_memberGroupSDict ) {
-         mg->distributeMemberGroupDocumentation();
-      }
+   for (auto mg : m_memberGroupSDict) {
+      mg->distributeMemberGroupDocumentation();
    }
 }
 
 void ClassDef::findSectionsInDocumentation()
 {
-
    QSharedPointer<ClassDef> self = sharedFrom(this);
    docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
 
-   if (m_memberGroupSDict) {    
-      for (auto item : *m_memberGroupSDict) {
-         item->findSectionsInDocumentation();
-      }
+   for (auto item : m_memberGroupSDict) {
+      item->findSectionsInDocumentation();
    }
- 
-   for (auto item : m_memberLists) {
 
+   for (auto item : m_memberLists) {
       if ((item->listType() & MemberListType_detailedLists) == 0) {
          item->findSectionsInDocumentation();
       }
@@ -572,10 +546,10 @@ void ClassDef::insertUsedFile(QSharedPointer<FileDef> fd)
    if (! m_files.contains(fd)) {
       m_files.append(fd);
    }
-  
+
    for (auto &item : m_templateInstances) {
       item->insertUsedFile(fd);
-   } 
+   }
 }
 
 static void writeInheritanceSpecifier(OutputList &ol, BaseClassDef *bcd)
@@ -616,7 +590,7 @@ static void writeInheritanceSpecifier(OutputList &ol, BaseClassDef *bcd)
 }
 
 void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const QString &includeName, bool local, bool force)
-{   
+{
    if ((! includeName.isEmpty() && m_incInfo.includeName.isEmpty()) || (fd != nullptr && m_incInfo.fileDef == nullptr) ) {
 
       m_incInfo.fileDef     = fd;
@@ -648,7 +622,7 @@ void ClassDef::setIncludeFile(QSharedPointer<FileDef> fd, const QString &include
 //  return 0;
 //}
 
-static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList> &result,
+static void searchTemplateSpecs(QSharedPointer<Definition> d, QVector<ArgumentList> &result,
                   QString &name, SrcLangExt lang)
 {
    if (d->definitionType() == Definition::TypeClass) {
@@ -689,21 +663,21 @@ static void searchTemplateSpecs(QSharedPointer<Definition> d, QList<ArgumentList
 
 static void writeTemplateSpec(OutputList &ol, QSharedPointer<Definition> d, const QString &type, SrcLangExt lang)
 {
-   QList<ArgumentList> specs;
+   QVector<ArgumentList> specs;
    QString name;
 
    searchTemplateSpecs(d, specs, name, lang);
 
-   if (specs.count() > 0) { 
+   if (specs.count() > 0) {
       // class has template scope specifiers
-      ol.startSubsubsection();    
+      ol.startSubsubsection();
 
       for (auto al : specs ) {
          ol.docify("template<");
-    
+
          auto nextItem = al.begin();
 
-         for (auto a : al) { 
+         for (auto a : al) {
             ++nextItem;
 
             ol.docify(a.type);
@@ -718,12 +692,12 @@ static void writeTemplateSpec(OutputList &ol, QSharedPointer<Definition> d, cons
                ol.docify(a.defval);
             }
 
-            if (nextItem != al.end()) {                               
+            if (nextItem != al.end()) {
                ol.docify(", ");
             }
          }
 
-         ol.docify(">");         
+         ol.docify(">");
          ol.lineBreak();
       }
 
@@ -745,7 +719,7 @@ void ClassDef::writeBriefDescription(OutputList &ol, bool exampleFlag)
       ol.writeString(" - ");
       ol.popGeneratorState();
 
-      ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
+      ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                   briefDescription(), true, false, "", true, false);
 
       ol.pushGeneratorState();
@@ -864,7 +838,7 @@ QString ClassDef::generatedFromFiles() const
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
-      result = theTranslator->trGeneratedFromFilesFortran(getLanguage() == SrcLangExt_ObjC && 
+      result = theTranslator->trGeneratedFromFilesFortran(getLanguage() == SrcLangExt_ObjC &&
                   m_compType == CompoundType::Interface ? CompoundType::Class : m_compType, m_files.count() == 1);
 
    } else if (isJavaEnum()) {
@@ -878,7 +852,7 @@ QString ClassDef::generatedFromFiles() const
 
    } else {
       result = theTranslator->trGeneratedFromFiles(
-                  getLanguage() == SrcLangExt_ObjC && 
+                  getLanguage() == SrcLangExt_ObjC &&
                   m_compType == CompoundType::Interface ? CompoundType::Class : m_compType, m_files.count() == 1);
    }
 
@@ -894,7 +868,7 @@ void ClassDef::showUsedFiles(OutputList &ol)
    ol.parseText(generatedFromFiles());
 
    bool first = true;
-   
+
    for (auto fd : m_files) {
       if (first) {
          first = false;
@@ -959,7 +933,7 @@ int ClassDef::countInheritanceNodes()
       }
    }
 
-   if (m_parents) {     
+   if (m_parents) {
       for (auto ibcd : *m_parents) {
          QSharedPointer<ClassDef> icd = ibcd->classDef;
 
@@ -983,7 +957,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
    if (Config::getBool("have-dot") && (Config::getBool("class-diagrams") || Config::getBool("class-graph"))) {
 
-      // write class diagram using dot   
+      // write class diagram using dot
       DotClassGraph inheritanceGraph(self, DotNode::Inheritance);
 
       if (!inheritanceGraph.isTrivial() && !inheritanceGraph.isTooBig()) {
@@ -998,7 +972,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
    } else if (Config::getBool("class-diagrams") && count > 0) {
       // write class diagram using build-in generator
-  
+
       ClassDiagram diagram(self); // create a diagram of this class
       ol.startClassDiagram();
 
@@ -1011,18 +985,18 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
    }
 
    if (renderDiagram)  {
-      // if we already show the inheritance relations graphically, then hide the text version   
+      // if we already show the inheritance relations graphically, then hide the text version
       ol.disableAllBut(OutputGenerator::Man);
    }
 
    if (m_parents && m_parents->count() > 0) {
       ol.startParagraph();
-     
+
       QString inheritLine = theTranslator->trInheritsList(m_parents->count());
       QRegExp marker("@[0-9]+");
       int index = 0, newIndex, matchLen;
 
-      // now replace all markers in inheritLine with links to the classes      
+      // now replace all markers in inheritLine with links to the classes
       while ((newIndex = marker.indexIn(inheritLine, index)) != -1) {
 
          matchLen = marker.matchedLength();
@@ -1144,7 +1118,7 @@ void ClassDef::writeIncludeFiles(OutputList &ol)
          nm = m_incInfo.fileDef->docName();
       }
 
-   } else { 
+   } else {
       nm = m_incInfo.includeName;
 
    }
@@ -1196,7 +1170,7 @@ void ClassDef::writeIncludeFiles(OutputList &ol)
 void ClassDef::writeAllMembersLink(OutputList &ol)
 {
    // write link to list of all members (HTML only)
-   if (m_allMemberNameInfoSDict && ! Config::getBool("optimize-c") ) {
+   if (m_allMemberNameInfoSDict.count() > 0 && ! Config::getBool("optimize-c") ) {
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
@@ -1215,16 +1189,15 @@ void ClassDef::writeMemberGroups(OutputList &ol, bool showInline)
    // write user defined member groups
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (m_memberGroupSDict) {          
-      for (auto mg : *m_memberGroupSDict)  {
-         if (! mg->allMembersInSameSection() || !m_subGrouping) { // group is in its own section
-            mg->writeDeclarations(ol, self, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(), 
-                     QSharedPointer<GroupDef>(), showInline);
+   for (auto mg : m_memberGroupSDict)  {
+      if (! mg->allMembersInSameSection() || ! m_subGrouping) {
+         // group is in its own section
+         mg->writeDeclarations(ol, self, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
+                  QSharedPointer<GroupDef>(), showInline);
 
-         } else { 
-            // add this group to the corresponding member section
-            
-         }
+      } else {
+         // add this group to the corresponding member section
+
       }
    }
 }
@@ -1232,30 +1205,34 @@ void ClassDef::writeMemberGroups(OutputList &ol, bool showInline)
 void ClassDef::writeNestedClasses(OutputList &ol, const QString &title)
 {
    // nested classes
-   if (m_innerClasses) {
-      m_innerClasses->writeDeclaration(ol, 0, title, true);
+   if (m_innerClasses.count() > 0) {
+      m_innerClasses.writeDeclaration(ol, nullptr, title, true);
    }
 }
 
 void ClassDef::writeInlineClasses(OutputList &ol)
 {
-   if (m_innerClasses) {
+   if (m_innerClasses.count() > 0) {
       QSharedPointer<ClassDef> self = sharedFrom(this);
-      m_innerClasses->writeDocumentation(ol, self);
+      m_innerClasses.writeDocumentation(ol, self);
    }
 }
 
 void ClassDef::startMemberDocumentation(OutputList &ol)
 {
-   if (Config::getBool("separate-member-pages")) {
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.disable(OutputGenerator::Html);
       Doxy_Globals::suppressDocWarnings = true;
    }
 }
 
 void ClassDef::endMemberDocumentation(OutputList &ol)
-{ 
-   if (Config::getBool("separate-member-pages")) {
+{
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.enable(OutputGenerator::Html);
       Doxy_Globals::suppressDocWarnings = false;
    }
@@ -1268,46 +1245,51 @@ void ClassDef::startMemberDeclarations(OutputList &ol)
 
 void ClassDef::endMemberDeclarations(OutputList &ol)
 {
-   static bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
+   static const bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
-   if (!inlineInheritedMembers && countAdditionalInheritedMembers() > 0) {
+   if (! inlineInheritedMembers && countAdditionalInheritedMembers() > 0) {
       ol.startMemberHeader("inherited");
       ol.parseText(theTranslator->trAdditionalInheritedMembers());
       ol.endMemberHeader();
       writeAdditionalInheritedMembers(ol);
    }
+
    ol.endMemberSections();
 }
 
 void ClassDef::writeAuthorSection(OutputList &ol)
 {
+   static const QString projectName = Config::getString("project-name");
+
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Man);
    ol.writeString("\n");
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name")));
+   ol.parseText(theTranslator->trGeneratedAutomatically(projectName));
    ol.popGeneratorState();
 }
 
 
 void ClassDef::writeSummaryLinks(OutputList &ol)
 {
+   static const bool optimizeC = Config::getBool("optimize-c");
+
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-   
+
    bool first = true;
-   SrcLangExt lang = getLanguage();  
-   
+   SrcLangExt lang = getLanguage();
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class)) {
 
-      if (lde->kind() == LayoutDocEntry::ClassNestedClasses && m_innerClasses  && m_innerClasses->declVisible()) {
+      if (lde->kind() == LayoutDocEntry::ClassNestedClasses && m_innerClasses.count() > 0 && m_innerClasses.declVisible()) {
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
          ol.writeSummaryLink("", "nested-classes", ls->title(lang), first);
          first = false;
 
-      } else if (lde->kind() == LayoutDocEntry::ClassAllMembersLink && m_allMemberNameInfoSDict &&  ! Config::getBool("optimize-c") ) {
+      } else if (lde->kind() == LayoutDocEntry::ClassAllMembersLink && m_allMemberNameInfoSDict.count() > 0 && ! optimizeC) {
          ol.writeSummaryLink(getMemberListFileName(), "all-members-list", theTranslator->trListOfAllMembers(), first);
          first = false;
 
@@ -1321,7 +1303,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
          }
       }
    }
-  
+
    if (! first) {
       ol.writeString("  </div>\n");
    }
@@ -1330,11 +1312,11 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
 }
 
 void ClassDef::writeTagFile(QTextStream &tagFile)
-{ 
+{
    if (! isLinkableInProject()) {
       return;
    }
-   
+
    tagFile << "  <compound kind=\"" << compoundTypeString();
    tagFile << "\"";
 
@@ -1356,15 +1338,15 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
    }
 
    for (auto a : m_tempArgs) {
-      tagFile << "    <templarg>" << convertToXML(a.name) << "</templarg>" << endl;      
+      tagFile << "    <templarg>" << convertToXML(a.name) << "</templarg>" << endl;
    }
 
    if (m_parents) {
-     
+
       for (auto ibcd : *m_parents) {
          QSharedPointer<ClassDef> cd = ibcd->classDef;
 
-         if (cd && cd->isLinkable()) {           
+         if (cd && cd->isLinkable()) {
             tagFile << "    <base";
 
             if (ibcd->prot == Protected) {
@@ -1378,49 +1360,48 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
                tagFile << " virtualness=\"virtual\"";
             }
 
-            tagFile << ">" << convertToXML(cd->name()) << "</base>" << endl;         
+            tagFile << ">" << convertToXML(cd->name()) << "</base>" << endl;
          }
       }
    }
-  
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class)) {
       switch (lde->kind()) {
 
-         case LayoutDocEntry::ClassNestedClasses: {
-            if (m_innerClasses) {
-              
-               for (auto innerCd : *m_innerClasses) {
+         case LayoutDocEntry::ClassNestedClasses:
+            {
+               for (auto innerCd : m_innerClasses) {
 
-                  if (innerCd->isLinkableInProject() && 
+                  if (innerCd->isLinkableInProject() &&
                           innerCd->templateMaster() == 0 && protectionLevelVisible(innerCd->protection()) &&
                         ! innerCd->isEmbeddedInOuterScope() ) {
 
-                     tagFile << "    <class kind=\"" << innerCd->compoundTypeString() << "\">" 
+                     tagFile << "    <class kind=\"" << innerCd->compoundTypeString() << "\">"
                              << convertToXML(innerCd->name()) << "</class>" << endl;
                   }
                }
             }
-         }
-         break;
+            break;
 
-         case LayoutDocEntry::MemberDecl: {
-            LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-            QSharedPointer<MemberList> ml = getMemberList(lmd->type);
+         case LayoutDocEntry::MemberDecl:
+            {
+               LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
+               QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
-            if (ml) {
-               ml->writeTagFile(tagFile);
+               if (ml) {
+                  ml->writeTagFile(tagFile);
+               }
             }
-         }
-         break;
+            break;
 
-         case LayoutDocEntry::MemberGroups: {
-            if (m_memberGroupSDict) {
-               for (auto mg : *m_memberGroupSDict) {
+         case LayoutDocEntry::MemberGroups:
+            {
+               for (auto mg : m_memberGroupSDict) {
                   mg->writeTagFile(tagFile);
                }
             }
-         }
-         break;
+
+            break;
 
          default:
             break;
@@ -1436,7 +1417,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    bool isSimple = m_isSimple;
 
    ol.addIndexItem(name(), 0);
- 
+
    // part 1: anchor and title
    QString s = compoundTypeString() + " " + name();
 
@@ -1620,7 +1601,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
 
    if (visibleInParentsDeclList()) {
 
-      if (! found) { 
+      if (! found) {
          // first class
          ol.startMemberHeader("nested-classes");
 
@@ -1704,9 +1685,9 @@ void ClassDef::addClassAttributes(OutputList &ol)
 
       auto nextItem = sl.begin();
 
-      for (auto s : sl) {         
-         ++nextItem;                   
-         ol.writeLabel(s, nextItem != sl.end());         
+      for (auto s : sl) {
+         ++nextItem;
+         ol.writeLabel(s, nextItem != sl.end());
       }
 
       ol.endLabels();
@@ -1722,7 +1703,7 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTit
    ol.startContents();
 
    QString pageType = " " + compoundTypeString();
-  
+
    Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>());
 
    if (Doxy_Globals::searchIndexBase != nullptr) {
@@ -1731,11 +1712,11 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTit
    }
 
    bool exampleFlag = hasExamples();
- 
-   // start flexible part 
+
+   // start flexible part
    SrcLangExt lang = getLanguage();
 
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) { 
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) {
 
       switch (lde->kind()) {
 
@@ -1853,8 +1834,8 @@ QString ClassDef::title() const
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
-      pageTitle = theTranslator->trCompoundReferenceFortran( qPrintable(displayName()), m_compType, 
-                  ! m_tempArgs.listEmpty() );         
+      pageTitle = theTranslator->trCompoundReferenceFortran( qPrintable(displayName()), m_compType,
+                  ! m_tempArgs.listEmpty() );
 
    } else if (isJavaEnum()) {
       pageTitle = theTranslator->trEnumReference(qPrintable(displayName()));
@@ -1869,18 +1850,18 @@ QString ClassDef::title() const
       if (Config::getBool("hide-compound-ref")) {
          pageTitle = displayName();
 
-      } else {         
+      } else {
          enum CompoundType compType;
-    
-         if (m_compType == CompoundType::Interface && getLanguage() == SrcLangExt_ObjC)  { 
+
+         if (m_compType == CompoundType::Interface && getLanguage() == SrcLangExt_ObjC)  {
             compType = CompoundType::Class;
 
-         } else  { 
+         } else  {
             compType = m_compType;
 
-         } 
+         }
 
-         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()), compType, 
+         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()), compType,
                   ! m_tempArgs.listEmpty() );
       }
    }
@@ -1922,13 +1903,13 @@ void ClassDef::writeDocumentation(OutputList &ol)
 }
 
 void ClassDef::writeMemberPages(OutputList &ol)
-{  
+{
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   // Member definitions on separate pages  
+   // Member definitions on separate pages
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-   
+
    for (auto ml : m_memberLists) {
       ml->countDocMembers();
 
@@ -1947,33 +1928,33 @@ void ClassDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> c
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
 
-   if (m_allMemberNameInfoSDict) {
-    
-      for (auto mni : *m_allMemberNameInfoSDict) {
+   for (auto mni : m_allMemberNameInfoSDict) {
 
-         for (auto &mi : *mni) {
-            QSharedPointer<MemberDef> md = mi.memberDef;
+      for (auto &mi : *mni) {
+         QSharedPointer<MemberDef> md = mi.memberDef;
 
-            if (md->getClassDef() == this && md->isLinkable() && ! md->isEnumValue()) {
-               ol.writeString("          <tr><td class=\"navtab\">");
+         if (md->getClassDef() == this && md->isLinkable() && ! md->isEnumValue()) {
+            ol.writeString("          <tr><td class=\"navtab\">");
 
-               if (md->isLinkableInProject()) {
-                  if (md == currentMd) { // selected item => highlight
-                     ol.writeString("<a class=\"qindexHL\" ");
-                  } else {
-                     ol.writeString("<a class=\"qindex\" ");
-                  }
-                  ol.writeString("href=\"");
-                  if (createSubDirs) {
-                     ol.writeString("../../");
-                  }
-                  ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + md->anchor());
-                  ol.writeString("\">");
-                  ol.writeString(convertToHtml(md->name()));
-                  ol.writeString("</a>");
+            if (md->isLinkableInProject()) {
+               if (md == currentMd) {
+                  // selected item => highlight
+                  ol.writeString("<a class=\"qindexHL\" ");
+               } else {
+                  ol.writeString("<a class=\"qindex\" ");
                }
-               ol.writeString("</td></tr>\n");
+
+               ol.writeString("href=\"");
+               if (createSubDirs) {
+                  ol.writeString("../../");
+               }
+               ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + md->anchor());
+               ol.writeString("\">");
+               ol.writeString(convertToHtml(md->name()));
+               ol.writeString("</a>");
             }
+
+            ol.writeString("</td></tr>\n");
          }
       }
    }
@@ -1984,21 +1965,18 @@ void ClassDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> c
 
 void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
 {
-   // write inner classes after the parent, so the tag files contain
-   // the definition in proper order!
-   if (m_innerClasses) {
-    
-      for (auto innerCd : *m_innerClasses) {
-         if (innerCd->isLinkableInProject() && innerCd->templateMaster() == 0 &&
-               protectionLevelVisible(innerCd->protection()) && !innerCd->isEmbeddedInOuterScope() ) {
+   // write inner classes after the parent so the tag files contain the definition in proper order
 
-            msg("Generating docs for nested compound %s\n", qPrintable(innerCd->name()));
-            innerCd->writeDocumentation(ol);
-            innerCd->writeMemberList(ol);
-         }
+   for (auto innerCd : m_innerClasses) {
+      if (innerCd->isLinkableInProject() && innerCd->templateMaster() == 0 &&
+            protectionLevelVisible(innerCd->protection()) && !innerCd->isEmbeddedInOuterScope() ) {
 
-         innerCd->writeDocumentationForInnerClasses(ol);
+         msg("Generating docs for nested compound %s\n", qPrintable(innerCd->name()));
+         innerCd->writeDocumentation(ol);
+         innerCd->writeMemberList(ol);
       }
+
+      innerCd->writeDocumentationForInnerClasses(ol);
    }
 }
 
@@ -2007,10 +1985,10 @@ void ClassDef::writeMemberList(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   static bool cOpt = Config::getBool("optimize-c");
+   static bool optimizeC = Config::getBool("optimize-c");
    static bool generateTreeView = Config::getBool("generate-treeview");
 
-   if (m_allMemberNameInfoSDict == 0 || cOpt) {
+   if (m_allMemberNameInfoSDict.count() == 0 || optimizeC) {
       return;
    }
 
@@ -2040,12 +2018,12 @@ void ClassDef::writeMemberList(OutputList &ol)
    ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), displayName());
    ol.parseText(theTranslator->trIncludingInheritedMembers());
    ol.endParagraph();
- 
+
    ol.writeString("<table class=\"directory\">\n");
 
    int idx = 0;
-  
-   for (auto mni : *m_allMemberNameInfoSDict) {
+
+   for (auto mni : m_allMemberNameInfoSDict) {
 
       for (auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
@@ -2053,12 +2031,12 @@ void ClassDef::writeMemberList(OutputList &ol)
 
          Protection prot = mi.prot;
          Specifier virt = md->virtualness();
-        
+
          if (cd && ! md->name().isEmpty() && md->name()[0] != '@') {
             bool memberWritten = false;
 
             if (cd->isLinkable() && md->isLinkable()) {
-               // create a link to the documentation            
+               // create a link to the documentation
                QString name = mi.ambiguityResolutionScope + md->name();
 
                ol.writeString("  <tr");
@@ -2083,7 +2061,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                   }
                }
                if (md->isObjCMethod()) {
-                  ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), md->name()); 
+                  ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), md->name());
 
                } else {
                   ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), name);
@@ -2112,7 +2090,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                        (protectionLevelVisible(md->protection()) || md->isFriend()))  {
 
                // no documentation, generate link to the class instead
-           
+
                ol.writeString("  <tr bgcolor=\"#f0f0f0\"");
                if ((idx & 1) == 0) {
                   ol.writeString(" class=\"even\"");
@@ -2181,34 +2159,34 @@ void ClassDef::writeMemberList(OutputList &ol)
                ol.writeString("</td>");
                ol.writeString("<td class=\"entry\">");
             }
-            
-            QStringList sl;
-            md->getLabels(sl, self);   
 
-            // not needed           
-            sl.removeOne("inherited");                                
+            QStringList sl;
+            md->getLabels(sl, self);
+
+            // not needed
+            sl.removeOne("inherited");
 
             if (memberWritten) {
 
-               if (sl.count() > 0) {       
-                  ol.writeString("<span class=\"mlabels\">");   
-                 
-                  for (auto s : sl)  {                  
-                     ol.writeString("<span class=\"mlabel\">");                               
-                     ol.docify(s);                                  
-                     ol.writeString("</span>");                 
+               if (sl.count() > 0) {
+                  ol.writeString("<span class=\"mlabels\">");
+
+                  for (auto s : sl)  {
+                     ol.writeString("<span class=\"mlabel\">");
+                     ol.docify(s);
+                     ol.writeString("</span>");
                   }
-   
+
                   ol.writeString("</span>");
                }
-            
+
                ol.writeString("</td>");
                ol.writeString("</tr>\n");
             }
          }
       }
    }
-  
+
    ol.writeString("</table>");
 
    endFile(ol);
@@ -2234,7 +2212,7 @@ bool ClassDef::addExample(const QString &anchor, const QString &nameStr, const Q
 }
 
 bool ClassDef::hasExamples() const
-{  
+{
    return (! m_exampleSDict.isEmpty() );
 }
 
@@ -2243,7 +2221,7 @@ void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &t
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    static bool hideUndocRelation = Config::getBool("hide-undoc-relations");
-   
+
    if (typeConstraint.isEmpty() || type.isEmpty()) {
       return;
    }
@@ -2257,37 +2235,37 @@ void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &t
 
       Doxy_Globals::hiddenClasses.insert(typeConstraint, cd);
    }
-  
-   if (cd != nullptr) {        
+
+   if (cd != nullptr) {
       QSharedPointer<ConstraintClassDef> ccd = m_constraintClassDict.value(typeConstraint);
-   
+
       if (ccd == nullptr) {
          ccd = QMakeShared<ConstraintClassDef>(cd);
          m_constraintClassDict.insert(typeConstraint, ccd);
       }
-      
-      ccd->addAccessor(type); 
+
+      ccd->addAccessor(type);
    }
 }
 
 // Java Type Constrains: A<T extends C & I>
 void ClassDef::addTypeConstraints()
-{   
+{
    for (auto a : m_tempArgs) {
-   
+
       if (! a.typeConstraint.isEmpty()) {
          QString typeConstraint;
          int index = 0;
          int p = 0;
 
-         while ((index = a.typeConstraint.indexOf('&', p)) != -1) { 
-            // typeConstraint="A &I" for C<T extends A & I> 
-         
+         while ((index = a.typeConstraint.indexOf('&', p)) != -1) {
+            // typeConstraint="A &I" for C<T extends A & I>
+
             typeConstraint = a.typeConstraint.mid(p, index - p).trimmed();
             addTypeConstraint(typeConstraint, a.type);
             p = index + 1;
          }
-   
+
          typeConstraint = a.typeConstraint.right(a.typeConstraint.length() - p).trimmed();
          addTypeConstraint(typeConstraint, a.type);
       }
@@ -2298,12 +2276,12 @@ void ClassDef::addTypeConstraints()
 // C# Type Constraints: D<T> where T : C, I
 void ClassDef::setTypeConstraints(const ArgumentList &al)
 {
-   m_typeConstraints = al;  
+   m_typeConstraints = al;
 }
 
 void ClassDef::setTemplateArguments(const ArgumentList &al)
-{   
-   m_tempArgs = al; 
+{
+   m_tempArgs = al;
 }
 
 /*! Returns \c true if this class or a class inheriting from this class
@@ -2315,10 +2293,10 @@ bool ClassDef::hasNonReferenceSuperClass()
 
    if (found) {
       // this class is not a reference
-      return true; 
+      return true;
    }
 
-   if (m_inheritedBy) {     
+   if (m_inheritedBy) {
 
       for (auto bcli : *m_inheritedBy) {
          if (found) {
@@ -2334,9 +2312,9 @@ bool ClassDef::hasNonReferenceSuperClass()
          if (! found) {
             // look for template instances that might have non-reference super classes
             const QHash<QString, QSharedPointer<ClassDef>> &cil = bcd->getTemplateInstances();
-                     
+
             for (auto tidi : cil) {
-               // for each template instance, recurse into the template instance branch                                
+               // for each template instance, recurse into the template instance branch
 
                found = tidi->hasNonReferenceSuperClass();
 
@@ -2345,7 +2323,7 @@ bool ClassDef::hasNonReferenceSuperClass()
                }
 
             }
-         
+
          }
       }
    }
@@ -2356,9 +2334,9 @@ bool ClassDef::hasNonReferenceSuperClass()
 /*! called from MemberDef::writeDeclaration() to (recusively) write the
  *  definition of an anonymous struct, union or class.
  */
-void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup, 
+void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup,
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
-{   
+{
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    ol.docify(compoundTypeString());
@@ -2381,14 +2359,13 @@ void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bo
    ol.endMemberItem();
 
    // write user defined member groups
-   if (m_memberGroupSDict) {     
-      for (auto mg : *m_memberGroupSDict){
-         mg->setInGroup(inGroup);
-         mg->writePlainDeclarations(ol, self, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
-                                    QSharedPointer<GroupDef>(), inheritedFrom, inheritId);
-      }
+   for (auto mg : m_memberGroupSDict){
+      mg->setInGroup(inGroup);
+      mg->writePlainDeclarations(ol, self, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
+                                 QSharedPointer<GroupDef>(), inheritedFrom, inheritId);
    }
-   
+
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class)) {
       if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
@@ -2409,8 +2386,8 @@ bool ClassDef::isLinkableInProject() const
 
    } else {
       return ! name().isEmpty() && ! isArtificial() && !isHidden() && ! isAnonymous() && protectionLevelVisible(m_prot) &&
-             (! m_isLocal || extractLocal)  && (hasDocumentation() || ! hideUndoc) && 
-             (! m_isStatic || extractStatic) && ! isReference(); 
+             (! m_isLocal || extractLocal)  && (hasDocumentation() || ! hideUndoc) &&
+             (! m_isStatic || extractStatic) && ! isReference();
    }
 }
 
@@ -2430,7 +2407,7 @@ bool ClassDef::isVisibleInHierarchy()
    static bool hideUndocClasses = Config::getBool("hide-undoc-classes");
    static bool extractStatic    = Config::getBool("extract-static");
 
-   bool retval =  (allExternals || hasNonReferenceSuperClass()); 
+   bool retval =  (allExternals || hasNonReferenceSuperClass());
 
    if (retval && ! isAnonymous() && protectionLevelVisible(m_prot)) {
 
@@ -2446,7 +2423,7 @@ bool ClassDef::isVisibleInHierarchy()
       } else {
          retval = false;
 
-      }   
+      }
 
    } else {
       retval = false;
@@ -2468,7 +2445,7 @@ bool ClassDef::hasDocumentation() const
 bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, int level)
 {
    bool found = false;
-  
+
    if (level > 256) {
       err("Possible recursive class relation while inside %s and looking for base class %s\n", qPrintable(name()), qPrintable(bcd->name()));
       return false;
@@ -2476,7 +2453,7 @@ bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, i
 
    if (baseClasses()) {
       // Beware: trying to optimise the iterator away using ->first() & ->next()
-      // causes bug 625531   
+      // causes bug 625531
 
       for (auto bcli : *baseClasses() ) {
          QSharedPointer<ClassDef> ccd = bcli->classDef;
@@ -2484,7 +2461,7 @@ bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, i
          if (! followInstances && ccd->templateMaster()) {
             ccd = ccd->templateMaster();
          }
-         
+
          if (ccd == bcd) {
             found = true;
          } else {
@@ -2504,7 +2481,7 @@ bool ClassDef::isSubClass(QSharedPointer<ClassDef> cd, int level)
       return false;
    }
 
-   if (subClasses()) { 
+   if (subClasses()) {
 
       for (auto bcli : *subClasses()) {
 
@@ -2521,6 +2498,7 @@ bool ClassDef::isSubClass(QSharedPointer<ClassDef> cd, int level)
          }
       }
    }
+
    return found;
 }
 
@@ -2543,216 +2521,208 @@ void ClassDef::mergeMembers()
    }
 
    // static bool optimizeOutputForJava = Config::getBool("optimize-java");
-   
+
    SrcLangExt lang = getLanguage();
    QString sep = getLanguageSpecificSeparator(lang, true);
    int sepLen  = sep.length();
 
    m_membersMerged = true;
-  
+
    bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
    if (baseClasses()) {
-      
+
       for (auto bcd : *baseClasses() ) {
          QSharedPointer<ClassDef> bClass = bcd->classDef;
 
          // merge the members in the base class of this inheritance branch first
          bClass->mergeMembers();
 
-         MemberNameInfoSDict *srcMnd  = bClass->memberNameInfoSDict();
-         MemberNameInfoSDict *dstMnd  = m_allMemberNameInfoSDict;
+         const MemberNameInfoSDict &srcMnd = bClass->memberNameInfoSDict();
+         MemberNameInfoSDict &dstMnd       = m_allMemberNameInfoSDict;
 
-         if (srcMnd) {
+         for (auto srcMni : srcMnd) {
 
-            for (auto srcMni : *srcMnd) {
-             
-               QSharedPointer<MemberNameInfo> dstMni;
+            QSharedPointer<MemberNameInfo> dstMni;
 
-               if (dstMnd != 0 && (dstMni = dstMnd->find(srcMni->memberName()))) {
-                  // a member with that name is already in the class
-                  // the member may hide or reimplement the one in the sub class
-                  // or there may be another path to the base class that is already
-                  // visited via another branch in the class hierarchy
-                                
-                  for (auto &srcMi : *srcMni) {
-                     QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
+            if (dstMni = dstMnd.find(srcMni->memberName())) {
+               // a member with that name is already in the class
+               // the member may hide or reimplement the one in the sub class
+               // or there may be another path to the base class that is already
+               // visited via another branch in the class hierarchy
 
-                     bool found   = false;
-                     bool ambigue = false;
-                     bool hidden  = false;
-                    
-                     QSharedPointer<ClassDef> srcCd = srcMd->getClassDef();
-                   
-                     for (auto &dstMi : *dstMni) {
+               for (auto &srcMi : *srcMni) {
+                  QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
 
-                        if (found) {
-                           break;
+                  bool found   = false;
+                  bool ambigue = false;
+                  bool hidden  = false;
+
+                  QSharedPointer<ClassDef> srcCd = srcMd->getClassDef();
+
+                  for (auto &dstMi : *dstMni) {
+
+                     if (found) {
+                        break;
+                     }
+
+                     QSharedPointer<MemberDef> dstMd = dstMi.memberDef;
+
+                     if (srcMd != dstMd) {
+                        // different members
+                        QSharedPointer<ClassDef> dstCd = dstMd->getClassDef();
+
+                        if (srcCd == dstCd || dstCd->isBaseClass(srcCd, true)) {
+                           // member is in the same or a base class
+
+                           const ArgumentList &srcAl = srcMd->getArgumentList();
+                           const ArgumentList &dstAl = dstMd->getArgumentList();
+
+                           found = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcAl,
+                                      dstMd->getOuterScope(), dstMd->getFileDef(), dstAl, true);
+
+                           hidden = hidden  || !found;
+
+                        } else  {
+                           // member is in a non base class => multiple inheritance
+                           // using the same base class
+
+                           QString scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
+
+                           if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
+                              dstMi.ambiguityResolutionScope.prepend(scope);
+                           }
+
+                           ambigue = true;
                         }
 
-                        QSharedPointer<MemberDef> dstMd = dstMi.memberDef;
+                     } else {
+                        // same members do not add if base class is virtual or if scope paths are
+                        // are equal or if base class is an interface (and thus implicitly virtual)
 
-                        if (srcMd != dstMd) { 
-                           // different members
-                           QSharedPointer<ClassDef> dstCd = dstMd->getClassDef();
-                         
-                           if (srcCd == dstCd || dstCd->isBaseClass(srcCd, true)) {
-                              // member is in the same or a base class
-                           
-                              const ArgumentList &srcAl = srcMd->getArgumentList();
-                              const ArgumentList &dstAl = dstMd->getArgumentList();
+                        if ((srcMi.virt != Normal && dstMi.virt != Normal) ||
+                                 bClass->name() + sep + srcMi.scopePath == dstMi.scopePath ||
+                                 dstMd->getClassDef()->compoundType() == CompoundType::Interface) {
+                           found = true;
 
-                              found = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcAl,
-                                         dstMd->getOuterScope(), dstMd->getFileDef(), dstAl, true);
-                             
-                              hidden = hidden  || !found;
+                        } else  {
+                           // member can be reached via multiple paths in the inheritance tree
 
-                           } else  {
-                              // member is in a non base class => multiple inheritance
-                              // using the same base class
-                           
-                              QString scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
+                           QString scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
 
-                              if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
-                                 dstMi.ambiguityResolutionScope.prepend(scope);
-                              }
-
-                              ambigue = true;
+                           if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
+                              dstMi.ambiguityResolutionScope.prepend(scope);
                            }
 
-                        } else { 
-                           // same members do not add if base class is virtual or if scope paths are 
-                           // are equal or if base class is an interface (and thus implicitly virtual)
-                           
-                           if ((srcMi.virt != Normal && dstMi.virt != Normal) ||
-                                    bClass->name() + sep + srcMi.scopePath == dstMi.scopePath ||
-                                    dstMd->getClassDef()->compoundType() == CompoundType::Interface) {
-                              found = true;
-
-                           } else  {
-                              // member can be reached via multiple paths in the inheritance tree                                                     
-
-                              QString scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
-
-                              if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
-                                 dstMi.ambiguityResolutionScope.prepend(scope);
-                              }
-
-                              ambigue = true;
-                           }
+                           ambigue = true;
                         }
                      }
-                    
-                     // TODO: fix the case where a member is hidden by inheritance
-                     //       of a member with the same name but with another prototype,
-                     //       while there is more than one path to the member in the
-                     //       base class due to multiple inheritance. In this case
-                     //       it seems that the member is not reachable by prefixing a
-                     //       scope name either (according to my compiler). Currently,
-                     //       this case is shown anyway.
+                  }
 
-                     if (! found && srcMd->protection() != Private && ! srcMd->isFriend()) {
-                        Protection prot = srcMd->protection();
+                  // TODO: fix the case where a member is hidden by inheritance
+                  //       of a member with the same name but with another prototype,
+                  //       while there is more than one path to the member in the
+                  //       base class due to multiple inheritance. In this case
+                  //       it seems that the member is not reachable by prefixing a
+                  //       scope name either (according to my compiler). Currently,
+                  //       this case is shown anyway.
 
-                        if (bcd->prot == Protected && prot == Public) {
-                           prot = bcd->prot;
-                        } else if (bcd->prot == Private) {
-                           prot = bcd->prot;
+                  if (! found && srcMd->protection() != Private && ! srcMd->isFriend()) {
+                     Protection prot = srcMd->protection();
+
+                     if (bcd->prot == Protected && prot == Public) {
+                        prot = bcd->prot;
+                     } else if (bcd->prot == Private) {
+                        prot = bcd->prot;
+                     }
+
+                     if (inlineInheritedMembers) {
+                        if (! isStandardFunc(srcMd)) {
+                           internalInsertMember(srcMd, prot, false);
+                        }
+                     }
+
+                     Specifier virt = srcMi.virt;
+                     if (srcMi.virt == Normal && bcd->virt != Normal) {
+                        virt = bcd->virt;
+                     }
+
+                     MemberInfo newMi = MemberInfo(srcMd, prot, virt, true);
+                     newMi.scopePath = bClass->name() + sep + srcMi.scopePath;
+
+                     if (ambigue) {
+
+                        QString scope = bClass->name() + sep;
+                        if (scope != srcMi.ambiguityResolutionScope.left(scope.length())) {
+                           newMi.ambiguityResolutionScope = scope + srcMi.ambiguityResolutionScope;
+                        }
+                     }
+
+                     if (hidden) {
+                        if (srcMi.ambigClass == 0) {
+                           newMi.ambigClass = bClass;
+                           newMi.ambiguityResolutionScope = bClass->name() + sep;
+
+                        } else {
+                           newMi.ambigClass = srcMi.ambigClass;
+                           newMi.ambiguityResolutionScope = srcMi.ambigClass->name() + sep;
+                        }
+                     }
+
+                     dstMni->append(newMi);
+                  }
+               }
+
+            } else {
+               // base class has a member that is not in the sub class
+               // create a deep copy of the list (only the MemberInfo's will be copied, not the actual MemberDef's)
+
+               QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
+
+               // copy the member(s) from the base to the sub class
+
+               for (auto &mi : *srcMni )   {
+                  if (! mi.memberDef->isFriend()) {
+                     // do not inherit friends
+                     Protection prot = mi.prot;
+
+                     if (bcd->prot == Protected) {
+                        if (prot == Public) {
+                           prot = Protected;
                         }
 
-                        if (inlineInheritedMembers) {
-                           if (! isStandardFunc(srcMd)) {                              
-                              internalInsertMember(srcMd, prot, false);
-                           }
-                        }
+                     } else if (bcd->prot == Private) {
+                        prot = Private;
+                     }
 
-                        Specifier virt = srcMi.virt;
-                        if (srcMi.virt == Normal && bcd->virt != Normal) {
+                     if (mi.prot != Private) {
+                        Specifier virt = mi.virt;
+
+                        if (mi.virt == Normal && bcd->virt != Normal) {
                            virt = bcd->virt;
                         }
 
-                        MemberInfo newMi = MemberInfo(srcMd, prot, virt, true);
-                        newMi.scopePath = bClass->name() + sep + srcMi.scopePath;
-
-                        if (ambigue) {
-                          
-                           QString scope = bClass->name() + sep;
-                           if (scope != srcMi.ambiguityResolutionScope.left(scope.length())) {
-                              newMi.ambiguityResolutionScope = scope + srcMi.ambiguityResolutionScope;
+                        if (inlineInheritedMembers) {
+                           if (! isStandardFunc(mi.memberDef)) {
+                              internalInsertMember(mi.memberDef, prot, false);
                            }
                         }
 
-                        if (hidden) {
-                           if (srcMi.ambigClass == 0) {
-                              newMi.ambigClass = bClass;
-                              newMi.ambiguityResolutionScope = bClass->name() + sep;
-
-                           } else {
-                              newMi.ambigClass = srcMi.ambigClass;
-                              newMi.ambiguityResolutionScope = srcMi.ambigClass->name() + sep;
-                           }
-                        }
-
-                        dstMni->append(newMi);
+                        MemberInfo newMi = MemberInfo(mi.memberDef, prot, virt, true);
+                        newMi.scopePath  = bClass->name() + sep + mi.scopePath;
+                        newMi.ambigClass = mi.ambigClass;
+                        newMi.ambiguityResolutionScope = mi.ambiguityResolutionScope;
+                        newMni->append(newMi);
                      }
                   }
-
-               } else { 
-                  // base class has a member that is not in the sub class
-                  // create a deep copy of the list (only the MemberInfo's will be copied, not the actual MemberDef's)
-
-                  QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
-
-                  // copy the member(s) from the base to the sub class
-               
-                  for (auto &mi : *srcMni )   {
-                     if (! mi.memberDef->isFriend()) { 
-                        // do not inherit friends
-                        Protection prot = mi.prot;
-
-                        if (bcd->prot == Protected) {
-                           if (prot == Public) {
-                              prot = Protected;
-                           }
-
-                        } else if (bcd->prot == Private) {
-                           prot = Private;
-                        }
-                       
-                        if (mi.prot != Private) {
-                           Specifier virt = mi.virt;
-
-                           if (mi.virt == Normal && bcd->virt != Normal) {
-                              virt = bcd->virt;
-                           }
-
-                           if (inlineInheritedMembers) {
-                              if (! isStandardFunc(mi.memberDef)) {                                 
-                                 internalInsertMember(mi.memberDef, prot, false);
-                              }
-                           }
-                           
-                           MemberInfo newMi = MemberInfo(mi.memberDef, prot, virt, true);
-                           newMi.scopePath  = bClass->name() + sep + mi.scopePath;
-                           newMi.ambigClass = mi.ambigClass;
-                           newMi.ambiguityResolutionScope = mi.ambiguityResolutionScope;
-                           newMni->append(newMi);
-                        }
-                     }
-                  }
-
-                  if (dstMnd == 0) {
-                     m_allMemberNameInfoSDict = new MemberNameInfoSDict();                     
-                     dstMnd = m_allMemberNameInfoSDict;
-                  }
-
-                  // add it to the dictionary
-                  dstMnd->insert(newMni->memberName(), newMni);
                }
+
+               // add it to the dictionary
+               dstMnd.insert(newMni->memberName(), newMni);
             }
          }
       }
-   }   
+   }
 }
 
 /*! Merges the members of a Objective-C category into this class.
@@ -2760,7 +2730,7 @@ void ClassDef::mergeMembers()
 void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
-   static bool extractLocalMethods = Config::getBool("extract-local-methods");
+   static const bool extractLocalMethods = Config::getBool("extract-local-methods");
 
    bool makePrivate = category->isLocal();
    // in case extract local methods is not enabled we don't add the methods
@@ -2768,7 +2738,7 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
    if (makePrivate && !extractLocalMethods) {
       return;
    }
-   
+
    bool isExtension = category->isExtension();
 
    category->setCategoryOf(self);
@@ -2778,15 +2748,15 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 
       // copy base classes/protocols from extension
       if (category->baseClasses()) {
-         
-         for (auto bcd : *category->baseClasses() ) { 
+
+         for (auto bcd : *category->baseClasses() ) {
             insertBaseClass(bcd->classDef, bcd->usedName, bcd->prot, bcd->virt, bcd->templSpecifiers);
 
             // correct bcd->classDef so that they do no longer derive from
             // category, but from this class
 
             if (bcd->classDef->subClasses()) {
-              
+
                for (auto scd : *bcd->classDef->subClasses() ) {
                   if (scd->classDef == category) {
                      scd->classDef = self;
@@ -2799,85 +2769,82 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
    }
 
    // make methods private for categories defined in the .m file
-  
-   MemberNameInfoSDict *srcMnd  = category->memberNameInfoSDict();
-   MemberNameInfoSDict *dstMnd  = m_allMemberNameInfoSDict;
 
-   if (srcMnd && dstMnd) {     
+   const MemberNameInfoSDict &srcMnd  = category->memberNameInfoSDict();
+   MemberNameInfoSDict &dstMnd        = m_allMemberNameInfoSDict;
 
-      for (auto srcMni : *srcMnd )   {
-         QSharedPointer<MemberNameInfo> dstMni = dstMnd->find(srcMni->memberName());
+     for (auto srcMni : srcMnd )   {
+      QSharedPointer<MemberNameInfo> dstMni = dstMnd.find(srcMni->memberName());
 
-         if (dstMni) { 
-            // method is already defined in the class           
+      if (dstMni) {
+         // method is already defined in the class
 
-            if (! dstMni->isEmpty() && ! srcMni->isEmpty()) {
+         if (! dstMni->isEmpty() && ! srcMni->isEmpty()) {
 
-               MemberInfo &dstMi = dstMni->first();
-               MemberInfo &srcMi = srcMni->first();
-                      
-               combineDeclarationAndDefinition(srcMi.memberDef, dstMi.memberDef);
+            MemberInfo &dstMi = dstMni->first();
+            MemberInfo &srcMi = srcMni->first();
 
-               dstMi.memberDef->setCategory(category);
-               dstMi.memberDef->setCategoryRelation(srcMi.memberDef);
-               srcMi.memberDef->setCategoryRelation(dstMi.memberDef);
-            }
+            combineDeclarationAndDefinition(srcMi.memberDef, dstMi.memberDef);
 
-         } else { 
-            // new method name            
-            // create a deep copy of the list
-
-            QSharedPointer<ClassDef> self = sharedFrom(this);
-            QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
-
-            // copy the member(s) from the category to this class
-                         
-            for (auto &mi : *srcMni )   {
-               Protection prot = mi.prot;
-
-               // deepCopy() is in memberDef.cpp                 
-               QSharedPointer<MemberDef> newMd(mi.memberDef->deepCopy());              
-              
-               // also add the newly created member to the global members list
-               if (newMd) {
-                  newMd->moveTo(self);
-
-                  MemberInfo newMi = MemberInfo(newMd, prot, mi.virt, mi.inherited);
-
-                  newMi.scopePath  = mi.scopePath;
-                  newMi.ambigClass = mi.ambigClass;
-                  newMi.ambiguityResolutionScope = mi.ambiguityResolutionScope;
-
-                  newMni->append(newMi);
-
-                  QSharedPointer<MemberName> mn;
-                  QString name = newMd->name();
-
-                  if ((mn = Doxy_Globals::memberNameSDict.find(name))) {
-                     mn->append(newMd);
-
-                  } else {
-                     mn = QMakeShared<MemberName>(newMd->name());
-                     mn->append(newMd);
-
-                     Doxy_Globals::memberNameSDict.insert(name, mn);
-                  }
-
-                  newMd->setCategory(category);
-                  newMd->setCategoryRelation(mi.memberDef);
-                  mi.memberDef->setCategoryRelation(newMd);
-
-                  if (makePrivate || isExtension) {
-                     newMd->makeImplementationDetail();
-                  }
-
-                  internalInsertMember(newMd, prot, false);
-               }
-            }
-
-            // add it to the dictionary
-            dstMnd->insert(newMni->memberName(), newMni);
+            dstMi.memberDef->setCategory(category);
+            dstMi.memberDef->setCategoryRelation(srcMi.memberDef);
+            srcMi.memberDef->setCategoryRelation(dstMi.memberDef);
          }
+
+      } else {
+         // new method name
+         // create a deep copy of the list
+
+         QSharedPointer<ClassDef> self = sharedFrom(this);
+         QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
+
+         // copy the member(s) from the category to this class
+
+         for (auto &mi : *srcMni )   {
+            Protection prot = mi.prot;
+
+            // deepCopy() is in memberDef.cpp
+            QSharedPointer<MemberDef> newMd(mi.memberDef->deepCopy());
+
+            // also add the newly created member to the global members list
+            if (newMd) {
+               newMd->moveTo(self);
+
+               MemberInfo newMi = MemberInfo(newMd, prot, mi.virt, mi.inherited);
+
+               newMi.scopePath  = mi.scopePath;
+               newMi.ambigClass = mi.ambigClass;
+               newMi.ambiguityResolutionScope = mi.ambiguityResolutionScope;
+
+               newMni->append(newMi);
+
+               QSharedPointer<MemberName> mn;
+               QString name = newMd->name();
+
+               if ((mn = Doxy_Globals::memberNameSDict.find(name))) {
+                  mn->append(newMd);
+
+               } else {
+                  mn = QMakeShared<MemberName>(newMd->name());
+                  mn->append(newMd);
+
+                  Doxy_Globals::memberNameSDict.insert(name, mn);
+               }
+
+               newMd->setCategory(category);
+               newMd->setCategoryRelation(mi.memberDef);
+               mi.memberDef->setCategoryRelation(newMd);
+
+               if (makePrivate || isExtension) {
+                  newMd->makeImplementationDetail();
+               }
+
+               internalInsertMember(newMd, prot, false);
+            }
+         }
+
+         // add it to the dictionary
+         dstMnd.insert(newMni->memberName(), newMni);
       }
    }
 }
@@ -2890,12 +2857,12 @@ void ClassDef::addUsedClass(QSharedPointer<ClassDef> cd, const QString &accessNa
    if (prot == Private && ! extractPrivate) {
       return;
    }
- 
+
    auto ucd = m_usesImplClassDict.find(cd->name());
 
-   if (ucd == m_usesImplClassDict.end()) {      
+   if (ucd == m_usesImplClassDict.end()) {
       m_usesImplClassDict.insert(cd->name(), UsesClassDef(cd));
-      
+
       ucd = m_usesImplClassDict.find(cd->name());
    }
 
@@ -2932,12 +2899,12 @@ void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const QString &access
    if (prot == Private && ! extractPrivate) {
       return;
    }
-   
+
    auto ucd = m_usedByImplClassDict.find(cd->name());
 
-   if (ucd == m_usedByImplClassDict.end()) {      
+   if (ucd == m_usedByImplClassDict.end()) {
       m_usedByImplClassDict.insert(cd->name(), UsesClassDef(cd));
-      
+
       ucd = m_usedByImplClassDict.find(cd->name());
    }
 
@@ -3038,11 +3005,11 @@ QString ClassDef::getOutputFileBase() const
 
       } else if (inlineSimpleClasses && m_isSimple && (scope = getOuterScope())) {
 
-         if (scope == Doxy_Globals::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) { 
+         if (scope == Doxy_Globals::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) {
             // simple struct embedded in file
             return getFileDef()->getOutputFileBase();
 
-         } else if (scope->isLinkableInProject()) {       
+         } else if (scope->isLinkableInProject()) {
             // simple struct embedded in other container (namespace/group/class)
             return getOuterScope()->getOutputFileBase();
          }
@@ -3091,17 +3058,13 @@ QString ClassDef::getSourceFileBase() const
    }
 }
 
-void ClassDef::setGroupDefForAllMembers(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri, const QString &fileName, 
+void ClassDef::setGroupDefForAllMembers(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri, const QString &fileName,
                   int startLine, bool hasDocs)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
-   gd->addClass(self);  
-   
-   if (m_allMemberNameInfoSDict == 0) {
-      return;
-   }
-  
-   for (auto mni : *m_allMemberNameInfoSDict) {    
+   gd->addClass(self);
+
+   for (auto mni : m_allMemberNameInfoSDict) {
 
       for (auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
@@ -3118,17 +3081,13 @@ void ClassDef::setGroupDefForAllMembers(QSharedPointer<GroupDef> gd, Grouping::G
 }
 
 void ClassDef::addInnerCompound(QSharedPointer<Definition> d)
-{  
-   if (d->definitionType() == Definition::TypeClass)  {   
+{
+   if (d->definitionType() == Definition::TypeClass)  {
 
      QSharedPointer<ClassDef> cd = d.dynamicCast<ClassDef>();
-     assert(cd);    
-     
-     if (m_innerClasses == 0) {
-         m_innerClasses = new ClassSDict();
-     }
-     
-     m_innerClasses->insert(d->localName(), cd);
+     assert(cd);
+
+     m_innerClasses.insert(d->localName(), cd);
    }
 }
 
@@ -3140,14 +3099,12 @@ QSharedPointer<Definition> ClassDef::findInnerCompound(const QString &name)
       return result;
    }
 
-   if (m_innerClasses) {
-      result = m_innerClasses->find(name);
-   }
+   result = m_innerClasses.find(name);
 
    return result;
 }
 
-QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileName, int startLine, 
+QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileName, int startLine,
                   int startColumn, const QString &templSpec, bool &freshInstance)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
@@ -3160,7 +3117,7 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileNam
 
       QString tcname = removeRedundantWhiteSpace(localName() + templSpec);
 
-      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, CompoundType::Class); 
+      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, CompoundType::Class);
 
       temp->setTemplateMaster(self);
       temp->setOuterScope(getOuterScope());
@@ -3179,23 +3136,19 @@ QSharedPointer<ClassDef> ClassDef::getVariableInstance(const QString &templSpec)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (m_variableInstances == 0) {
-      m_variableInstances = new QHash<QString, QSharedPointer<ClassDef>>();
-   }
+   auto templateClass = m_variableInstances.find(templSpec);
 
-   auto templateClass = m_variableInstances->find(templSpec);
-
-   if (templateClass == m_variableInstances->end()) {
-      Debug::print(Debug::Classes, 0, "      New template variable instance class `%s'`%s'\n", qPrintable(name()), qPrintable(templSpec));
+   if (templateClass == m_variableInstances.end()) {
       QString tcname = removeRedundantWhiteSpace(name() + templSpec);
 
-      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>("<code>", 1, 1, tcname, CompoundType::Class, nullptr, "", false);
+      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>("<code>", 1, 1, tcname, CompoundType::Class,
+                  nullptr, "", false);
 
       temp->addMembersToTemplateInstance(self, templSpec);
       temp->setTemplateMaster(self);
 
-      m_variableInstances->insert(templSpec, temp);
-      templateClass = m_variableInstances->find(templSpec);
+      m_variableInstances.insert(templSpec, temp);
+      templateClass = m_variableInstances.find(templSpec);
    }
 
    return *templateClass;
@@ -3221,19 +3174,16 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (cd->memberNameInfoSDict() == nullptr) {
-      return;
-   }
-  
-   for (auto mni : *cd->memberNameInfoSDict()) {
+   for (auto mni : cd->memberNameInfoSDict()) {
 
       for (auto &mi : *mni) {
+
          ArgumentList actualArguments;
          actualArguments = stringToArgumentList(templSpec);
 
          QSharedPointer<MemberDef> md = mi.memberDef;
          QSharedPointer<MemberDef> imd(md->createTemplateInstanceMember(cd->getTemplateArgumentList(), actualArguments));
-         
+
          imd->setMemberClass(self);
          imd->setTemplateMaster(md);
          imd->setDocumentation(md->documentation(), md->docFile(), md->docLine());
@@ -3243,7 +3193,6 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
          imd->setMemberGroupId(md->getMemberGroupId());
 
          insertMember(imd);
-        
          QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict.find(imd->name());
 
          if (! mn) {
@@ -3274,7 +3223,7 @@ bool ClassDef::isReference() const
    }
 }
 
-void ClassDef::getTemplateParameterLists(QList<ArgumentList> &lists) const
+void ClassDef::getTemplateParameterLists(QVector<ArgumentList> &lists) const
 {
    QSharedPointer<Definition> def = getOuterScope();
 
@@ -3292,10 +3241,10 @@ void ClassDef::getTemplateParameterLists(QList<ArgumentList> &lists) const
    }
 }
 
-QString ClassDef::qualifiedNameWithTemplateParameters(const QList<ArgumentList> &actualParams, int *actualParamIndex) const
+QString ClassDef::qualifiedNameWithTemplateParameters(const QVector<ArgumentList> &actualParams, int *actualParamIndex) const
 {
    //static bool optimizeOutputJava = Config::getBool("optimize-java");
-   static bool hideScopeNames = Config::getBool("hide-scope-names");
+   static const bool hideScopeNames = Config::getBool("hide-scope-names");
 
    QString scName;
    QSharedPointer<Definition> d = getOuterScope();
@@ -3337,7 +3286,7 @@ QString ClassDef::qualifiedNameWithTemplateParameters(const QList<ArgumentList> 
          (*actualParamIndex)++;
 
       } else if (! isSpecialization) {
-         scName += tempArgListToString(tmpList, lang);         
+         scName += tempArgListToString(tmpList, lang);
       }
    }
 
@@ -3367,18 +3316,16 @@ void ClassDef::addListReferences()
       return;
    }
 
-   const QList<ListItemInfo> &xrefItems = getRefItems();
+   const QVector<ListItemInfo> &xrefItems = getRefItems();
 
-   addRefItem(xrefItems, qualifiedName(), 
+   addRefItem(xrefItems, qualifiedName(),
                  lang == SrcLangExt_Fortran ? theTranslator->trType(true, true) : theTranslator->trClass(true, true),
                  getOutputFileBase(), displayName(), 0, self);
-   
-   if (m_memberGroupSDict) {     
-      for (auto mg : *m_memberGroupSDict) {   
-         mg->addListReferences(self);
-      }
+
+   for (auto mg : m_memberGroupSDict) {
+      mg->addListReferences(self);
    }
- 
+
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_detailedLists) {
          ml->addListReferences(self);
@@ -3391,26 +3338,24 @@ QSharedPointer<MemberDef> ClassDef::getMemberByName(const QString &name) const
    QSharedPointer<const ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberDef> xmd;
 
-   if (m_allMemberNameInfoSDict) {
-      QSharedPointer<MemberNameInfo> mni = m_allMemberNameInfoSDict->find(name);
+   QSharedPointer<MemberNameInfo> mni = m_allMemberNameInfoSDict.find(name);
 
-      if (mni) {
-         const int maxInheritanceDepth = 100000;
-         int mdist = maxInheritanceDepth;
-        
-         for (auto &mi : *mni) {  
-            QSharedPointer<ClassDef> mcd = mi.memberDef->getClassDef();
+   if (mni) {
+      const int maxInheritanceDepth = 100000;
+      int mdist = maxInheritanceDepth;
 
-            int m = minClassDistance(self, mcd);
-          
-            if (m < mdist && mcd->isLinkable()) {
-               mdist = m;
-               xmd = mi.memberDef;
-            }
+      for (auto &mi : *mni) {
+         QSharedPointer<ClassDef> mcd = mi.memberDef->getClassDef();
+
+         int m = minClassDistance(self, mcd);
+
+         if (m < mdist && mcd->isLinkable()) {
+            mdist = m;
+            xmd = mi.memberDef;
          }
       }
    }
-   
+
    return xmd;
 }
 
@@ -3420,7 +3365,7 @@ bool ClassDef::isAccessibleMember(QSharedPointer<MemberDef> md)
 }
 
 QSharedPointer<MemberList> ClassDef::createMemberList(MemberListType lt)
-{  
+{
    for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
@@ -3435,7 +3380,7 @@ QSharedPointer<MemberList> ClassDef::createMemberList(MemberListType lt)
 }
 
 QSharedPointer<MemberList> ClassDef::getMemberList(MemberListType lt)
-{  
+{
    for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
@@ -3448,7 +3393,7 @@ QSharedPointer<MemberList> ClassDef::getMemberList(MemberListType lt)
 void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, bool isBrief)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
-   QSharedPointer<MemberList> ml = createMemberList(lt); 
+   QSharedPointer<MemberList> ml = createMemberList(lt);
 
    static bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static bool sortMemberDocs = Config::getBool("sort-member-docs");
@@ -3483,7 +3428,7 @@ int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef
 
    if (ml) {
       ml->countDecMembers();
-      count += ml->numDecMembers();     
+      count += ml->numDecMembers();
    }
 
    if (ml2) {
@@ -3492,8 +3437,8 @@ int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef
    }
 
    // also include grouped members that have their own section in the class (see bug 722759)
-   if (inheritedFrom && m_memberGroupSDict) {       
-      for (auto mg : *m_memberGroupSDict) {  
+   if (inheritedFrom) {
+      for (auto mg : m_memberGroupSDict) {
          count += mg->countGroupedInheritedMembers(lt);
 
          if (lt2 != 1) {
@@ -3512,13 +3457,13 @@ int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef
    return count;
 }
 
-int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert, 
+int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert,
                   bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
    int inhCount = 0;
    int count    = countMembersIncludingGrouped(lt, inheritedFrom, false);
    bool process = count > 0;
-   
+
    if ((process ^ invert) || showAlways) {
 
       if (m_parents) {
@@ -3530,10 +3475,10 @@ int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDe
 
             if (icd->isLinkable()) {
                convertProtectionLevel(lt, ibcd->prot, &lt1, &lt2);
-               
+
                if (! visitedClasses->contains(icd)) {
                   // guard for multiple virtual inheritance
-                  visitedClasses->insert(icd); 
+                  visitedClasses->insert(icd);
 
                   if (lt1 != -1) {
                      inhCount += icd->countMemberDeclarations((MemberListType)lt1, inheritedFrom, lt2, false, true, visitedClasses);
@@ -3549,8 +3494,8 @@ int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDe
 void ClassDef::getTitleForMemberListType(MemberListType type, QString &title, QString &subtitle)
 {
    SrcLangExt lang = getLanguage();
-  
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) {  
+
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) {
       if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
 
@@ -3570,17 +3515,17 @@ int ClassDef::countAdditionalInheritedMembers()
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
    int totalCount = 0;
- 
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class)) {
 
       if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
 
-         if (lmd->type != MemberListType_friends) { 
-            // friendship is not inherited                       
+         if (lmd->type != MemberListType_friends) {
+            // friendship is not inherited
             QSet<QSharedPointer<ClassDef>> visited;
 
-            totalCount += countInheritedDecMembers(lmd->type, self, true, false, &visited);            
+            totalCount += countInheritedDecMembers(lmd->type, self, true, false, &visited);
          }
       }
    }
@@ -3614,23 +3559,20 @@ int ClassDef::countMembersIncludingGrouped(MemberListType lt, QSharedPointer<Cla
       count = ml->countInheritableMembers(inheritedFrom);
    }
 
-   if (m_memberGroupSDict) {
-      
-      for (auto mg : *m_memberGroupSDict) { 
-         bool hasOwnSection = ! mg->allMembersInSameSection() || ! m_subGrouping; 
+   for (auto mg : m_memberGroupSDict) {
+      bool hasOwnSection = ! mg->allMembersInSameSection() || ! m_subGrouping;
 
-         // group is in its own section
-         if ((additional && hasOwnSection) || (!additional && !hasOwnSection)) {
-            count += mg->countGroupedInheritedMembers(lt);
-         }
+      // group is in its own section
+      if ((additional && hasOwnSection) || (!additional && ! hasOwnSection)) {
+         count += mg->countGroupedInheritedMembers(lt);
       }
    }
-   
+
    return count;
 }
 
 void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType lt, int lt2, const QString &title,
-                                                QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways, 
+                                                QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways,
                                                 QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
    ol.pushGeneratorState();
@@ -3638,10 +3580,10 @@ void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType l
 
    int count = countMembersIncludingGrouped(lt, inheritedFrom, false);
    bool process = count > 0;
-   
+
    if ((process ^ invert) || showAlways) {
 
-      if (m_parents) {       
+      if (m_parents) {
 
          for (auto ibcd : *m_parents) {
             QSharedPointer<ClassDef> icd = ibcd->classDef;
@@ -3653,15 +3595,15 @@ void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType l
                if (lt2 == -1 && lt3 != -1) {
                   lt2 = lt3;
                }
-               
+
                if (! visitedClasses->contains(icd)) {
                   // guard for multiple virtual inheritance
-                  visitedClasses->insert(icd); 
+                  visitedClasses->insert(icd);
 
                   if (lt1 != -1) {
-                     icd->writeMemberDeclarations(ol, (MemberListType)lt1, title, QString(), false, 
+                     icd->writeMemberDeclarations(ol, (MemberListType)lt1, title, QString(), false,
                                                   inheritedFrom, lt2, false, true, visitedClasses);
-                  }              
+                  }
                }
             }
          }
@@ -3678,11 +3620,11 @@ void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
 
    QSharedPointer<MemberList> ml  = getMemberList(lt);
    QSharedPointer<MemberList> ml2 = getMemberList((MemberListType)lt2);
-      
+
    QString tt = title;
    QString st = subTitle;
 
-   if (ml) {     
+   if (ml) {
       ml->writeDeclarations(ol, self, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
                             QSharedPointer<GroupDef>(), tt, st, false, showInline, inheritedFrom, lt);
       tt.resize(0);
@@ -3691,56 +3633,54 @@ void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
 
    if (ml2) {
       ml2->writeDeclarations(ol, self,  QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
-                             QSharedPointer<GroupDef>(), tt, st, false, showInline, inheritedFrom, lt);
+                 QSharedPointer<GroupDef>(), tt, st, false, showInline, inheritedFrom, lt);
    }
 
    static bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
-   if (! inlineInheritedMembers) { 
+   if (! inlineInheritedMembers) {
       // show inherited members as separate lists
 
-      if (visitedClasses == nullptr) { 
+      if (visitedClasses == nullptr) {
          QSet<QSharedPointer<ClassDef>> visited;
 
          writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : self,
-                                       invert, showAlways, &visited);
+                 invert, showAlways, &visited);
 
       } else {
          writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : self,
-                                       invert, showAlways, visitedClasses);
+                 invert, showAlways, visitedClasses);
 
       }
 
-   } 
+   }
 }
 
-void ClassDef::addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, 
-                                          const QString &inheritId)
-{   
+void ClassDef::addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
+                 const QString &inheritId)
+{
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   if (m_memberGroupSDict) {     
-      for (auto mg : *m_memberGroupSDict) {
-         if (! mg->allMembersInSameSection() || ! m_subGrouping) { 
-            // group is in its own section
-            mg->addGroupedInheritedMembers(ol, self, lt, inheritedFrom, inheritId);
-         }
+   for (auto mg : m_memberGroupSDict) {
+      if (! mg->allMembersInSameSection() || ! m_subGrouping) {
+         // group is in its own section
+         mg->addGroupedInheritedMembers(ol, self, lt, inheritedFrom, inheritId);
       }
    }
 }
 
 void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline)
-{ 
+{
    QSharedPointer<ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, csPrintable(displayName()), self, title, false, showInline); 
+      ml->writeDocumentation(ol, csPrintable(displayName()), self, title, false, showInline);
    }
 }
 
 void ClassDef::writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt)
-{ 
+{
    QSharedPointer<ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
@@ -3767,7 +3707,7 @@ bool ClassDef::isLocal() const
    return m_isLocal;
 }
 
-ClassSDict *ClassDef::getClassSDict()
+const ClassSDict &ClassDef::getClassSDict()
 {
    return m_innerClasses;
 }
@@ -3787,7 +3727,7 @@ SortedList<BaseClassDef *> *ClassDef::subClasses() const
    return m_inheritedBy;
 }
 
-MemberNameInfoSDict *ClassDef::memberNameInfoSDict() const
+const MemberNameInfoSDict &ClassDef::memberNameInfoSDict() const
 {
    return m_allMemberNameInfoSDict;
 }
@@ -3799,12 +3739,12 @@ Protection ClassDef::protection() const
 
 const ArgumentList &ClassDef::getTemplateArgumentList() const
 {
-   return m_tempArgs;   
+   return m_tempArgs;
 }
 
 ArgumentList &ClassDef::getTemplateArgumentList()
 {
-   return m_tempArgs;   
+   return m_tempArgs;
 }
 
 QSharedPointer<NamespaceDef> ClassDef::getNamespaceDef() const
@@ -3869,7 +3809,7 @@ bool ClassDef::isAbstract() const
 
 bool ClassDef::isFinal() const
 {
-   return m_classTraits.hasTrait(Entry::Virtue::Final);   
+   return m_classTraits.hasTrait(Entry::Virtue::Final);
 }
 
 bool ClassDef::isSealed() const
@@ -3907,7 +3847,7 @@ const QList<QSharedPointer<MemberList>> &ClassDef::getMemberLists() const
    return m_memberLists;
 }
 
-MemberGroupSDict *ClassDef::getMemberGroupSDict() const
+const MemberGroupSDict &ClassDef::getMemberGroupSDict() const
 {
    return m_memberGroupSDict;
 }
@@ -3980,7 +3920,7 @@ QSharedPointer<MemberDef> ClassDef::isSmartPointer() const
 void ClassDef::reclassifyMember(QSharedPointer<MemberDef> md, MemberType t)
 {
    md->setMemberType(t);
-  
+
    for(auto ml : m_memberLists) {
       ml->removeOne(md);
    }
@@ -4053,7 +3993,7 @@ void ClassDef::setTagLessReference(QSharedPointer<ClassDef> cd)
 }
 
 void ClassDef::removeMemberFromLists(QSharedPointer<MemberDef> md)
-{ 
+{
    for(auto ml : m_memberLists) {
       ml->removeOne(md);
    }
@@ -4070,7 +4010,7 @@ bool ClassDef::isGeneric() const
 }
 
 void ClassDef::setClassTraits(Entry::Traits traits)
-{   
+{
    m_classTraits = traits;
 }
 
@@ -4088,11 +4028,6 @@ bool ClassDef::isExtension() const
    }
 
    return retval;
-}
-
-const ClassSDict *ClassDef::innerClasses() const
-{
-   return m_innerClasses;
 }
 
 const FileList &ClassDef::usedFiles() const

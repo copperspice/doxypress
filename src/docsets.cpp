@@ -24,32 +24,27 @@
 
 DocSets::DocSets()
 {
-   m_nf = 0;
-   m_tf = 0;
-
    m_dc = 0;
    m_id = 0;
 }
 
 DocSets::~DocSets()
 {
-   delete m_nf;
-   delete m_tf;
 }
 
 void DocSets::initialize()
 {
    // get config options
-   QString projectName    = Config::getString("project-name");
-   QString bundleId       = Config::getString("docset-bundle-id");
-   QString feedName       = Config::getString("docset-feedname");
-   QString publisherId    = Config::getString("docset-publisher-id");
-   QString publisherName  = Config::getString("docset-publisher-name");
-   QString projectVersion = Config::getString("project-version");
+   static const QString projectName    = Config::getString("project-name");
+   static const QString bundleId       = Config::getString("docset-bundle-id");
+   static const QString feedName       = Config::getString("docset-feedname");
+   static const QString publisherId    = Config::getString("docset-publisher-id");
+   static const QString publisherName  = Config::getString("docset-publisher-name");
+   static const QString projectVersion = Config::getString("project-version");
 
    // write Makefile
    {
-      QString mfName = Config::getString("html-output") + "/Makefile";
+      static const QString mfName = Config::getString("html-output") + "/Makefile";
 
       QFile makefile(mfName);
 
@@ -102,7 +97,7 @@ void DocSets::initialize()
 
    // write Info.plist
    {
-      QString plName = Config::getString("html-output") + "/Info.plist";
+      static const QString plName = Config::getString("html-output") + "/Info.plist";
       QFile plist(plName);
 
       if (! plist.open(QIODevice::WriteOnly)) {
@@ -138,18 +133,18 @@ void DocSets::initialize()
    }
 
    // start Nodes.xml
-   QString notes = Config::getString("html-output") + "/Nodes.xml";
-   m_nf = new QFile(notes);
+   static const QString notes = Config::getString("html-output") + "/Nodes.xml";
+   m_nf.setFileName(notes);
 
-   if (! m_nf->open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(notes), m_nf->error());
+   if (! m_nf.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(notes), m_nf.error());
       Doxy_Work::stopDoxyPress();
    }
 
    // QString indexName = Config::getBool("generate-treeview") ? "main" : "index";
    QString indexName = "index";
 
-   m_nts.setDevice(m_nf);
+   m_nts.setDevice(&m_nf);
    m_nts << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
    m_nts << "<DocSetNodes version=\"1.0\">" << endl;
    m_nts << "  <TOC>" << endl;
@@ -162,22 +157,23 @@ void DocSets::initialize()
    m_firstNode.resize(m_dc);
    m_firstNode[0] = true;
 
-   QString tokens = Config::getString("html-output") + "/Tokens.xml";
-   m_tf = new QFile(tokens);
+   //
+   static const QString tokens = Config::getString("html-output") + "/Tokens.xml";
+   m_tf.setFileName(tokens);
 
-   if (! m_tf->open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(tokens), m_tf->error());
+   if (! m_tf.open(QIODevice::WriteOnly)) {
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(tokens), m_tf.error());
       Doxy_Work::stopDoxyPress();
    }
 
-   m_tts.setDevice(m_tf);
+   m_tts.setDevice(&m_tf);
    m_tts << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
    m_tts << "<Tokens version=\"1.0\">" << endl;
 }
 
 void DocSets::finalize()
 {
-   if (!m_firstNode.at(m_dc - 1)) {
+   if (! m_firstNode.at(m_dc - 1)) {
       m_nts << indent() << " </Node>" << endl;
    }
 
@@ -186,16 +182,10 @@ void DocSets::finalize()
    m_nts << "    </Node>" << endl;
    m_nts << "  </TOC>" << endl;
    m_nts << "</DocSetNodes>" << endl;
-   m_nf->close();
-
-   delete m_nf;
-   m_nf = 0;
+   m_nf.close(); 
 
    m_tts << "</Tokens>" << endl;
-   m_tf->close();
-
-   delete m_tf;
-   m_tf = 0;
+   m_tf.close(); 
 }
 
 QString DocSets::indent()

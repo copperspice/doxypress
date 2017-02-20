@@ -85,7 +85,7 @@ void marshalArgumentList(StorageIntf *s, const ArgumentList &argList)
    ArgumentList::marshal(s, argList);
 }
 
-void marshalArgumentLists(StorageIntf *s, const QList<ArgumentList> &argLists)
+void marshalArgumentLists(StorageIntf *s, const QVector<ArgumentList> &argLists)
 {
    if (argLists.isEmpty()) {
       marshalUInt(s, NULL_LIST);
@@ -99,7 +99,7 @@ void marshalArgumentLists(StorageIntf *s, const QList<ArgumentList> &argLists)
    }
 }
 
-void marshalBaseInfoList(StorageIntf *s, QList<BaseInfo> *baseList)
+void marshalBaseInfoList(StorageIntf *s, QVector<BaseInfo> *baseList)
 {
    if (baseList == nullptr) {
       marshalUInt(s, NULL_LIST);
@@ -115,7 +115,7 @@ void marshalBaseInfoList(StorageIntf *s, QList<BaseInfo> *baseList)
    }
 }
 
-void marshalGroupingList(StorageIntf *s, const QList<Grouping> &groups)
+void marshalGroupingList(StorageIntf *s, const QVector<Grouping> &groups)
 {
    if (groups.isEmpty()) {
       marshalUInt(s, NULL_LIST);
@@ -130,7 +130,7 @@ void marshalGroupingList(StorageIntf *s, const QList<Grouping> &groups)
    }
 }
 
-void marshalSectionInfoList(StorageIntf *s, const QList<SectionInfo> &anchors)
+void marshalSectionInfoList(StorageIntf *s, const QVector<SectionInfo> &anchors)
 {
    if (anchors.isEmpty()) {
       marshalUInt(s, NULL_LIST);
@@ -150,7 +150,7 @@ void marshalSectionInfoList(StorageIntf *s, const QList<SectionInfo> &anchors)
    }
 }
 
-void marshalItemInfoList(StorageIntf *s, const QList<ListItemInfo> &list)
+void marshalItemInfoList(StorageIntf *s, const QVector<ListItemInfo> &list)
 {
    if (list.isEmpty()) {
       marshalUInt(s, NULL_LIST);
@@ -330,15 +330,15 @@ ArgumentList unmarshalArgumentList(StorageIntf *s)
    return ArgumentList::unmarshal(s);
 }
 
-QList<ArgumentList> unmarshalArgumentLists(StorageIntf *s)
+QVector<ArgumentList> unmarshalArgumentLists(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return QList<ArgumentList>();
+      return QVector<ArgumentList>();
    }
 
-   QList<ArgumentList> result;
+   QVector<ArgumentList> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
@@ -348,15 +348,15 @@ QList<ArgumentList> unmarshalArgumentLists(StorageIntf *s)
    return result;
 }
 
-QList<BaseInfo> unmarshalBaseInfoList(StorageIntf *s)
+QVector<BaseInfo> unmarshalBaseInfoList(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return QList<BaseInfo>();
+      return QVector<BaseInfo>();
    }
 
-   QList<BaseInfo> result;
+   QVector<BaseInfo> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
@@ -371,15 +371,15 @@ QList<BaseInfo> unmarshalBaseInfoList(StorageIntf *s)
    return result;
 }
 
-QList<Grouping> unmarshalGroupingList(StorageIntf *s)
+QVector<Grouping> unmarshalGroupingList(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return QList<Grouping>();
+      return QVector<Grouping>();
    }
 
-   QList<Grouping> result;
+   QVector<Grouping> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
@@ -392,15 +392,15 @@ QList<Grouping> unmarshalGroupingList(StorageIntf *s)
    return result;
 }
 
-QList<SectionInfo> unmarshalSectionInfoList(StorageIntf *s)
+QVector<SectionInfo> unmarshalSectionInfoList(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return QList<SectionInfo>();
+      return QVector<SectionInfo>();
    }
 
-   QList<SectionInfo> result;
+   QVector<SectionInfo> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {
@@ -420,15 +420,15 @@ QList<SectionInfo> unmarshalSectionInfoList(StorageIntf *s)
    return result;
 }
 
-QList<ListItemInfo> unmarshalItemInfoList(StorageIntf *s)
+QVector<ListItemInfo> unmarshalItemInfoList(StorageIntf *s)
 {
    uint count = unmarshalUInt(s);
 
    if (count == NULL_LIST) {
-      return QList<ListItemInfo>();
+      return QVector<ListItemInfo>();
    }
 
-   QList<ListItemInfo> result;
+   QVector<ListItemInfo> result;
    assert(count < 1000000);
 
    for (int i = 0; i < count; i++) {

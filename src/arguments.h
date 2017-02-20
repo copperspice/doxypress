@@ -18,8 +18,8 @@
 #ifndef ARGUMENTS_H
 #define ARGUMENTS_H
 
-#include <QList>
 #include <QString>
+#include <QVector>
 
 #include <types.h>
 
@@ -69,13 +69,12 @@ struct Argument {
    QString typeConstraint;     /*!< Used for Java generics: <T extends C> */
 };
 
-/*! \brief This class represents an function or template argument list.
+/*! \brief This class represents a function or template argument list.
  *
- *  This class also stores some information about member that is typically
- *  put after the argument list, such as whether the member is const,
- *  volatile or pure virtual.
+ *  stores information about a member which is typically found  after the argument list, 
+ *  such as whether the member is const, volatile or pure virtual.
  */
-class ArgumentList : public QList<Argument>
+class ArgumentList : public QVector<Argument>
 {
  public:
    /*! Creates an empty argument list */
@@ -114,10 +113,10 @@ class ArgumentList : public QList<Argument>
    bool isEmpty() const = delete;
 
    bool listEmpty() const {
-      return QList<Argument>::isEmpty();
+      return QVector<Argument>::isEmpty();
    }
 };
 
-using ArgumentListIterator = QListIterator<Argument>;
+using ArgumentListIterator = QVectorIterator<Argument>;
 
 #endif

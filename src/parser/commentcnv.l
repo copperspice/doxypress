@@ -60,9 +60,9 @@ static QString  g_fileName;
 static int      g_lineNr;
 static int      g_condCtx;
 
-static QStack<CondCtx *>     g_condStack;
-static QStack<CommentCtx *>  g_commentStack;
-static QString               g_blockName;
+static QStack<CondCtx>     g_condStack;
+static QStack<CommentCtx>  g_commentStack;
+static QString             g_blockName;
 
 static int      g_lastCommentContext;
 static bool     g_inSpecialComment;
@@ -80,7 +80,7 @@ static bool     g_pythonDocString;
 static int      g_nestingCount;
 
 static SrcLangExt g_lang;
-static bool       isFixedForm;    // For Fortran
+static bool       isFixedForm;    // for Fortran
 
 static void replaceCommentMarker(const QString &s, int len)
 {
@@ -188,7 +188,7 @@ static void startCondSection(const QString &sectId)
    CondParser prs;
    bool expResult = prs.parse(g_fileName, g_lineNr, sectId);
 
-   g_condStack.push(new CondCtx(g_lineNr, sectId, g_skip));
+   g_condStack.push(CondCtx(g_lineNr, sectId, g_skip));
 
    if (! expResult) {
       // not enabled
@@ -203,8 +203,8 @@ static void endCondSection()
       g_skip = false;
 
    } else {
-      CondCtx *ctx = g_condStack.pop();
-      g_skip = ctx->skip;
+      CondCtx ctx = g_condStack.pop();
+      g_skip = ctx.skip;
    }
 }
 
@@ -295,7 +295,7 @@ void replaceComment(int offset);
          copyToOutput(text, text.length());
 
          BEGIN(CComment);
-         g_commentStack.push(new CommentCtx(g_lineNr));
+         g_commentStack.push(CommentCtx(g_lineNr));
       }
    }
 
@@ -311,7 +311,7 @@ void replaceComment(int offset);
          g_commentStack.clear();
 
          BEGIN(CComment);
-         g_commentStack.push(new CommentCtx(g_lineNr));
+         g_commentStack.push(CommentCtx(g_lineNr));
       }
    }
 
@@ -330,7 +330,7 @@ void replaceComment(int offset);
             g_commentStack.clear();
 
             BEGIN(CComment);
-            g_commentStack.push(new CommentCtx(g_lineNr));
+            g_commentStack.push(CommentCtx(g_lineNr));
 
          } else {
             REJECT;
@@ -383,7 +383,7 @@ void replaceComment(int offset);
    }
 
 <Scan>\n    {
-      /* new line */
+      // new line
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
@@ -474,7 +474,7 @@ void replaceComment(int offset);
       copyToOutput(text, text.length());
 
       BEGIN(CComment);
-      g_commentStack.push(new CommentCtx(g_lineNr));
+      g_commentStack.push(CommentCtx(g_lineNr));
    }
 
 <Scan>"#"("#")?   {
@@ -489,7 +489,7 @@ void replaceComment(int offset);
          g_commentStack.clear();
 
          BEGIN(CComment);
-         g_commentStack.push(new CommentCtx(g_lineNr));
+         g_commentStack.push(CommentCtx(g_lineNr));
       }
    }
 
@@ -509,7 +509,7 @@ void replaceComment(int offset);
          g_commentStack.clear();
 
          BEGIN(CComment);
-         g_commentStack.push(new CommentCtx(g_lineNr));
+         g_commentStack.push(CommentCtx(g_lineNr));
       }
    }
 
@@ -791,7 +791,7 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
 
       g_nestingCount++;
-      g_commentStack.push(new CommentCtx(g_lineNr));
+      g_commentStack.push(CommentCtx(g_lineNr));
       copyToOutput(text, text.length());
    }
 
@@ -809,7 +809,7 @@ void replaceComment(int offset);
 
          } else {
             g_nestingCount--;
-            delete g_commentStack.pop();
+            g_commentStack.pop();
          }
       }
    }
@@ -1259,7 +1259,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
    if (g_lang == SrcLangExt_Markdown) {
       g_nestingCount = 0;
       BEGIN(CComment);
-      g_commentStack.push(new CommentCtx(g_lineNr));
+      g_commentStack.push(CommentCtx(g_lineNr));
 
    } else {
       BEGIN(Scan);
@@ -1268,14 +1268,14 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
    yylex();
 
    while (! g_condStack.isEmpty()) {
-      CondCtx *ctx = g_condStack.pop();
+      CondCtx ctx = g_condStack.pop();
       QString sectionInfo = " ";
 
-      if (ctx->sectionId != " ") {
-         sectionInfo = QString(" with label %1 ").arg(ctx->sectionId);
+      if (ctx.sectionId != " ") {
+         sectionInfo = QString(" with label %1 ").arg(ctx.sectionId);
       }
 
-      warn(g_fileName, ctx->lineNr, "Conditional section %s does not have "
+      warn(g_fileName, ctx.lineNr, "Conditional section %s does not have "
            "a corresponding \\endcond command", csPrintable(sectionInfo));
    }
 
@@ -1285,15 +1285,14 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
       bool first = true;
 
       while (! g_commentStack.isEmpty()) {
-         CommentCtx *ctx = g_commentStack.pop();
+         CommentCtx ctx = g_commentStack.pop();
 
          if (! first) {
             tmp += ", ";
          }
 
-         tmp += QString::number(ctx->lineNr);
-         first = false;
-         delete ctx;
+         tmp += QString::number(ctx.lineNr);
+         first = false;         
       }
 
       tmp += ")";
@@ -1305,12 +1304,6 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
 
    g_commentStack.clear();
    g_nestingCount = 0;
-
-   if (Debug::isFlagSet(Debug::CommentCnv)) {
-      msg("-------------\n%s\n-------------\n", csPrintable(g_outBuf));
-   }
-
-   printlex(commentcnvYY_flex_debug, false, __FILE__, csPrintable(fileName) );
-
+   
    return g_outBuf;
 }

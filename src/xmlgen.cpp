@@ -1247,75 +1247,21 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
 static void writeListOfAllMembers(QSharedPointer<ClassDef> cd, QTextStream &t)
 {
    t << "    <listofallmembers>" << endl;
-
-   if (cd->memberNameInfoSDict()) {
      
-      for (auto mni : *cd->memberNameInfoSDict()) {
+   for (auto mni : cd->memberNameInfoSDict()) {
 
-        for (auto mi : *mni) {
-            QSharedPointer<MemberDef> md = mi.memberDef;
+     for (auto mi : *mni) {
+         QSharedPointer<MemberDef> md = mi.memberDef;
 
-            if (md->name().size() > 0 &&  md->name().at(0) != '@') {          
-               // skip anonymous members
-               Protection prot = mi.prot;
-               Specifier virt = md->virtualness();
+         if (md->name().size() > 0 &&  md->name().at(0) != '@') {          
+            // skip anonymous members
+            Protection prot = mi.prot;
+            Specifier virt = md->virtualness();
 
-               t << "      <member refid=\"" << memberOutputFileBase(md) << "_1" <<
-                 md->anchor() << "\" prot=\"";
+            t << "      <member refid=\"" << memberOutputFileBase(md) << "_1" <<
+              md->anchor() << "\" prot=\"";
 
-               switch (prot) {
-                  case Public:
-                     t << "public";
-                     break;
-                  case Protected:
-                     t << "protected";
-                     break;
-                  case Private:
-                     t << "private";
-                     break;
-                  case Package:
-                     t << "package";
-                     break;
-               }
-
-               t << "\" virt=\"";
-               switch (virt) {
-                  case Normal:
-                     t << "non-virtual";
-                     break;
-                  case Virtual:
-                     t << "virtual";
-                     break;
-                  case Pure:
-                     t << "pure-virtual";
-                     break;
-               }
-               t << "\"";
-
-               if (! mi.ambiguityResolutionScope.isEmpty()) {
-                  t << " ambiguityscope=\"" << convertToXML(mi.ambiguityResolutionScope) << "\"";
-               }
-
-               t << "><scope>" << convertToXML(cd->name()) << "</scope><name>" <<
-                 convertToXML(md->name()) << "</name></member>" << endl;
-            }
-         }
-      }
-   }
-   t << "    </listofallmembers>" << endl;
-}
-
-static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
-{
-   if (cl) {
-
-      for (auto cd : *cl) {
-         if (! cd->isHidden() && cd->name().indexOf('@') == -1) { 
-            // skip anonymous scopes
-            t << "    <innerclass refid=\"" << classOutputFileBase(cd)
-              << "\" prot=\"";
-
-            switch (cd->protection()) {
+            switch (prot) {
                case Public:
                   t << "public";
                   break;
@@ -1329,10 +1275,59 @@ static void writeInnerClasses(const ClassSDict *cl, QTextStream &t)
                   t << "package";
                   break;
             }
-            t << "\">" << convertToXML(cd->name()) << "</innerclass>" << endl;
+
+            t << "\" virt=\"";
+            switch (virt) {
+               case Normal:
+                  t << "non-virtual";
+                  break;
+               case Virtual:
+                  t << "virtual";
+                  break;
+               case Pure:
+                  t << "pure-virtual";
+                  break;
+            }
+            t << "\"";
+
+            if (! mi.ambiguityResolutionScope.isEmpty()) {
+               t << " ambiguityscope=\"" << convertToXML(mi.ambiguityResolutionScope) << "\"";
+            }
+
+            t << "><scope>" << convertToXML(cd->name()) << "</scope><name>" <<
+              convertToXML(md->name()) << "</name></member>" << endl;
          }
       }
    }
+   
+   t << "    </listofallmembers>" << endl;
+}
+
+static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
+{
+   for (auto cd : cl) {
+      if (! cd->isHidden() && cd->name().indexOf('@') == -1) { 
+         // skip anonymous scopes
+         t << "    <innerclass refid=\"" << classOutputFileBase(cd) << "\" prot=\"";
+
+         switch (cd->protection()) {
+            case Public:
+               t << "public";
+               break;
+            case Protected:
+               t << "protected";
+               break;
+            case Private:
+               t << "private";
+               break;
+            case Package:
+               t << "package";
+               break;
+         }
+         t << "\">" << convertToXML(cd->name()) << "</innerclass>" << endl;
+      }
+   }
+
 }
 
 static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
@@ -1591,14 +1586,11 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       t << "</includes>" << endl;
    }
 
-
    writeInnerClasses(cd->getClassSDict(), t);
    writeTemplateList(cd, t);
-
-   if (cd->getMemberGroupSDict()) {     
-      for (auto mg : *cd->getMemberGroupSDict() ) {
-         generateXMLSection(cd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
-      }
+ 
+   for (auto mg : cd->getMemberGroupSDict() ) {
+      generateXMLSection(cd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
    for (auto ml : cd->getMemberLists() ) {
@@ -1695,13 +1687,11 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
 
    writeInnerClasses(nd->getClassSDict(), t);
    writeInnerNamespaces(nd->getNamespaceSDict(), t);
-
-   if (nd->getMemberGroupSDict()) {    
-       for (auto mg : *nd->getMemberGroupSDict()) {
-         generateXMLSection(nd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
-      }
+   
+   for (auto mg : nd->getMemberGroupSDict()) {
+      generateXMLSection(nd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
-  
+    
    for (auto ml : nd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateXMLSection(nd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
@@ -1817,18 +1807,16 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       t << "    </invincdepgraph>" << endl;
    }
 
-   if (fd->getClassSDict()) {
+   if (fd->getClassSDict().count() > 0) {
       writeInnerClasses(fd->getClassSDict(), t);
    }
 
    if (! fd->getNamespaceSDict().isEmpty() ) {
       writeInnerNamespaces(fd->getNamespaceSDict(), t);
    }
-
-   if (fd->getMemberGroupSDict()) {     
-      for (auto mg : *fd->getMemberGroupSDict() ) {
-         generateXMLSection(fd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
-      }
+      
+   for (auto mg : fd->getMemberGroupSDict() ) {
+      generateXMLSection(fd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
  
    for (auto ml : fd->getMemberLists()) {
@@ -1903,14 +1891,11 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
    writeInnerNamespaces(gd->getNamespaces(), t);
    writeInnerPages(gd->getPages(), t);
    writeInnerGroups(gd->getSubGroups(), t);
-
-   if (gd->getMemberGroupSDict()) {
      
-      for (auto mg : *gd->getMemberGroupSDict()) {
-         generateXMLSection(gd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
-      }
+   for (auto mg : gd->getMemberGroupSDict()) {
+      generateXMLSection(gd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
-   
+      
    for (auto ml : gd->getMemberLists()) {
       if ((ml->listType() & MemberListType_declarationLists) != 0) {
          generateXMLSection(gd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));

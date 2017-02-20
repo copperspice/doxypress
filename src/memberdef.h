@@ -22,6 +22,7 @@
 #include <QList>
 #include <QStringList>
 #include <QTextStream>
+#include <QVector>
 
 #include <sys/types.h>
 
@@ -239,7 +240,7 @@ class MemberDef : public Definition
    void setArgumentList(const ArgumentList &al);
    void setDeclArgumentList(const ArgumentList &al);
    void setTypeConstraints(const ArgumentList &al);
-   void setTemplateParameterLists(const QList<ArgumentList> &lists);
+   void setTemplateParameterLists(const QVector<ArgumentList> &lists);
 
    const ArgumentList &getArgumentList() const;
          ArgumentList &getArgumentList();
@@ -248,7 +249,7 @@ class MemberDef : public Definition
          ArgumentList &getTemplateArgumentList();
    const ArgumentList &getTypeConstraints() const;
 
-   const QList<ArgumentList> &getTemplateParameterLists() const;
+   const QVector<ArgumentList> &getTemplateParameterLists() const;
 
    // member group related members
    int getMemberGroupId() const;

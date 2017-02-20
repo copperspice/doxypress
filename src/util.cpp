@@ -5263,7 +5263,7 @@ QString convertCharEntities(const QString &str)
    return retval;
 }
 
-void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **ppMemberGroupSDict, QSharedPointer<Definition> context)
+void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict &memberGroupSDict, QSharedPointer<Definition> context)
 {
    assert(context != 0);
 
@@ -5285,15 +5285,11 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
                   QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[groupId];
 
                   if (info) {
-                     if (*ppMemberGroupSDict == nullptr) {
-                        *ppMemberGroupSDict = new MemberGroupSDict;
-                     }
-
-                     QSharedPointer<MemberGroup> mg = (*ppMemberGroupSDict)->find(groupId);
+                     QSharedPointer<MemberGroup> mg = memberGroupSDict.find(groupId);
 
                      if (mg == nullptr) {
                         mg = QMakeShared<MemberGroup>(context, groupId, info->header, info->doc, info->docFile, info->docLine);
-                        (*ppMemberGroupSDict)->insert(groupId, mg);
+                        memberGroupSDict.insert(groupId, mg);
                      }
 
                      mg->insertMember(fmd);          // insert in member group
@@ -5310,16 +5306,11 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict **p
          QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[groupId];
 
          if (info) {
-
-            if (*ppMemberGroupSDict == nullptr) {
-               *ppMemberGroupSDict = new MemberGroupSDict;
-            }
-
-            QSharedPointer<MemberGroup> mg = (*ppMemberGroupSDict)->find(groupId);
+            QSharedPointer<MemberGroup> mg = memberGroupSDict.find(groupId);
 
             if (mg == nullptr) {
                mg = QMakeShared<MemberGroup>(context, groupId, info->header, info->doc, info->docFile, info->docLine);
-               (*ppMemberGroupSDict)->insert(groupId, mg);
+               memberGroupSDict.insert(groupId, mg);
             }
 
             mg->insertMember(md);             // copy this element to a different member group
@@ -5804,7 +5795,7 @@ int getScopeFragment(const QString &str, int p, int *l)
 }
 
 QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
-                  const QString &fileName, int startLine, const QList<ListItemInfo> &list,
+                  const QString &fileName, int startLine, const QVector<ListItemInfo> &list,
                   QSharedPointer<GroupDef> gd, const TagInfo &tagInfo, SrcLangExt lang)
 {
    static int id = 1;
@@ -5880,7 +5871,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
    return pd;
 }
 
-void addRefItem(const QList<ListItemInfo> &list, const QString &key, const QString &prefix,
+void addRefItem(const QVector<ListItemInfo> &list, const QString &key, const QString &prefix,
                   const QString &name, const QString &title, const QString &args, QSharedPointer<Definition> scope)
 {
    static const bool todoList  = Config::getBool("generate-todo-list");
@@ -7725,8 +7716,8 @@ bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClass
       }
    }
 
-   if (includeClasses && nd->getClassSDict()) {
-      for (auto cd : *nd->getClassSDict()) {
+   if (includeClasses) {
+      for (auto cd : nd->getClassSDict()) {
          if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
             return true;
          }

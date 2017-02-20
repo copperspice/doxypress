@@ -2264,8 +2264,8 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
  public:
    DocHtmlTable(DocNode *parent, const HtmlAttribList &attribs)
       : m_attribs(attribs) {
-      m_caption = 0;
-      m_parent = parent;
+      m_caption = nullptr;
+      m_parent  = parent;
    }
 
    ~DocHtmlTable()         {
@@ -2281,7 +2281,7 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
    }
 
    bool hasCaption()       {
-      return m_caption != 0;
+      return m_caption != nullptr;
    }
 
    const HtmlAttribList &attribs() const {
@@ -2317,8 +2317,8 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
 
  private:
    void computeTableGrid();
-   DocHtmlCaption    *m_caption;
-   HtmlAttribList     m_attribs;
+   DocHtmlCaption *m_caption;
+   HtmlAttribList  m_attribs;
    int m_numCols;
 };
 

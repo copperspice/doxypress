@@ -18,6 +18,9 @@
 #ifndef TAGREADER_H
 #define TAGREADER_H
 
+#include <QSharedPointer>
+#include <QString>
+
 class Entry;
 
 void parseTagFile(QSharedPointer<Entry> root, const QString &fullPathName);

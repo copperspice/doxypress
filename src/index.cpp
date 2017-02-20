@@ -356,23 +356,20 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
    static bool inlineSimpleStructs = Config::getBool("inline-simple-struct");
    static bool hideNavtreeMembers  = Config::getBool("hide-navtree-members");
 
-   bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict() != 0;
+   bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict().count() > 0;
 
    Doxy_Globals::indexList.addContentsItem(hasMembers, name, def->getReference(), def->getOutputFileBase(), anchor,
                   addToIndex, def, category); 
 
    int numClasses = 0;
-
-   ClassSDict *classes = def->getClassSDict();
-
-   if (classes) {    
-      for (auto cd : *classes) {
-         if (cd->isLinkable()) {
-            numClasses++;
-         }
+   const ClassSDict &classes = def->getClassSDict();
+       
+   for (auto cd : classes) {
+      if (cd->isLinkable()) {
+         numClasses++;
       }
    }
- 
+  
    if (hasMembers || numClasses > 0) {
 
       Doxy_Globals::indexList.incContentsDepth();
@@ -438,20 +435,18 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
 
          } else if (lde->kind() == LayoutDocEntry::NamespaceClasses || lde->kind() == LayoutDocEntry::FileClasses ||
                     lde->kind() == LayoutDocEntry::ClassNestedClasses ) {
-
-            if (classes) {               
-               for (auto cd : *classes ) {
-                  if (cd->isLinkable() && (cd->partOfGroups() == 0 || def->definitionType() == Definition::TypeGroup)) {      
-           
-                     bool separateIndex = (preventSeparateIndex || cd->isEmbeddedInOuterScope());
-                     bool isNestedClass = (def->definitionType() == Definition::TypeClass);
-                     bool addToNavIndex = (addToIndex && (isNestedClass || (cd->isSimple() && inlineSimpleStructs)));
-                     
-                     addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), 
-                              separateIndex, addToNavIndex);                                      
-                  }
+                      
+            for (auto cd : classes ) {
+               if (cd->isLinkable() && (cd->partOfGroups() == 0 || def->definitionType() == Definition::TypeGroup)) {      
+        
+                  bool separateIndex = (preventSeparateIndex || cd->isEmbeddedInOuterScope());
+                  bool isNestedClass = (def->definitionType() == Definition::TypeClass);
+                  bool addToNavIndex = (addToIndex && (isNestedClass || (cd->isSimple() && inlineSimpleStructs)));
+                  
+                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), 
+                           separateIndex, addToNavIndex);                                      
                }
-            }
+            }            
          }
       }
 
@@ -1433,47 +1428,41 @@ static int countNamespaces()
    return count;
 }
 
-void writeClassTree(ClassSDict *clDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
-{
-   if (clDict) {
-    
-      for (auto cd : *clDict) {
-        
-         if (! globalOnly || cd->getOuterScope() == 0 || cd->getOuterScope() == Doxy_Globals::globalScope ) {
-            int count = 0;
+void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
+{      
+   for (auto cd : clDict) {
+     
+      if (! globalOnly || cd->getOuterScope() == 0 || cd->getOuterScope() == Doxy_Globals::globalScope ) {
+         int count = 0;
+                
+         for (auto ccd : cd->getClassSDict()) {
+            if (ccd->isLinkableInProject() && ccd->templateMaster() == 0) {
+               count++;
+            }
+         }           
 
-            if (cd->getClassSDict()) {
-              
-               for (auto ccd : *cd->getClassSDict()) {
-                  if (ccd->isLinkableInProject() && ccd->templateMaster() == 0) {
-                     count++;
-                  }
-               }
+         // passing cd->displayName(false) will strip the template parameters on at least annotated.html
+         // modify to show based on a new project tag (2/2/2016)
+
+         if (classVisibleInIndex(cd) && cd->templateMaster() == 0) { 
+
+            ftv->addContentsItem(count > 0, cd->displayName(false), cd->getReference(),
+                                 cd->getOutputFileBase(), cd->anchor(), true, cd);
+
+            if (addToIndex && (cd->getOuterScope() == 0 || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
+
+               bool tmp_addToIndex = cd->partOfGroups() == 0 && ! cd->isSimple();
+               addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), false, tmp_addToIndex);
             }
 
-            // passing cd->displayName(false) will strip the template parameters on at least annotated.html
-            // modify to show based on a new project tag (2/2/2016)
-
-            if (classVisibleInIndex(cd) && cd->templateMaster() == 0) { 
-
-               ftv->addContentsItem(count > 0, cd->displayName(false), cd->getReference(),
-                                    cd->getOutputFileBase(), cd->anchor(), true, cd);
-
-               if (addToIndex && (cd->getOuterScope() == 0 || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
-
-                  bool tmp_addToIndex = cd->partOfGroups() == 0 && ! cd->isSimple();
-                  addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), false, tmp_addToIndex);
-               }
-
-               if (count > 0) {
-                  ftv->incContentsDepth();
-                  writeClassTree(cd->getClassSDict(), ftv, addToIndex, false);
-                  ftv->decContentsDepth();
-               }
+            if (count > 0) {
+               ftv->incContentsDepth();
+               writeClassTree(cd->getClassSDict(), ftv, addToIndex, false);
+               ftv->decContentsDepth();
             }
          }
       }
-   }
+   }   
 }
 
 static void writeNamespaceTree(const NamespaceSDict &nsDict, FTVHelp *ftv, bool rootOnly, bool showClasses, bool addToIndex)
@@ -2102,7 +2091,7 @@ static void writeAnnotatedIndex(OutputList &ol)
 
       FTVHelp *ftv = new FTVHelp(false);
       writeNamespaceTree(Doxy_Globals::namespaceSDict, ftv, true, true, addToIndex);
-      writeClassTree(&Doxy_Globals::classSDict, ftv, addToIndex, true);
+      writeClassTree(Doxy_Globals::classSDict, ftv, addToIndex, true);
 
       QString outStr;
       QTextStream t(&outStr);
@@ -3377,7 +3366,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
       }
 
       numSubItems += gd->getNamespaces().count();
-      numSubItems += gd->getClasses()->count();
+      numSubItems += gd->getClasses().count();
       numSubItems += gd->getFiles().count();
       numSubItems += gd->getDirs()->count();
       numSubItems += gd->getPages()->count();
@@ -3442,7 +3431,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
          } else if (lde->kind() == LayoutDocEntry::GroupClasses && addToIndex) {
             
-            for (auto cd : *gd->getClasses()) {
+            for (auto cd : gd->getClasses()) {
                 if (cd->isVisible()) {                
                   addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), true, addToIndex);                 
                }

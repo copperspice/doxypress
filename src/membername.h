@@ -27,8 +27,7 @@ class MemberName : public QList<QSharedPointer<MemberDef>>
 {
  public:
    MemberName(const QString &name);
-   ~MemberName();
-
+  
    QString memberName() const {
       return name;
    }

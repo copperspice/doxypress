@@ -186,16 +186,16 @@ class FileDef : public Definition
    }
 
    /* user defined member groups */
-   MemberGroupSDict *getMemberGroupSDict() {
-      return &m_memberGroupSDict;
+   const MemberGroupSDict &getMemberGroupSDict() {
+      return m_memberGroupSDict;
    }
 
    const NamespaceSDict &getNamespaceSDict() {
       return m_namespaceSDict;
    }
 
-   ClassSDict *getClassSDict()  {
-      return &m_classSDict;
+   const ClassSDict &getClassSDict()  {
+      return m_classSDict;
    }
 
    QString title() const;
