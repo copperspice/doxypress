@@ -17,6 +17,8 @@
 
 #include <parse_lib_tooling.h>
 
+static QMap<QString, clang::DeclContext *> s_parentNodeMap;
+
 static Protection getAccessSpecifier(const clang::Decl *node)
 {
    Protection retval;
@@ -341,6 +343,12 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   // handle these case by case
                   tmpAfter.replace("__attribute__((thiscall))", "");
                }
+            }
+
+            if (tmpAfter.contains("...")) {
+               // adjust location of parameter pack
+               tmpType += "... ";
+               tmpAfter.replace("...", "");
             }
 
             args += tmpType + " " + tmpName + tmpAfter;
@@ -873,7 +881,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
 
          // printf("\n  Broom - Macro Definition  name: %s   line: %d  col: %d \n",
-         //         qPrintable(name), current->startLine, current->startColumn );
+         //         csPrintable(name), current->startLine, current->startColumn );
 
 
          s_current_root->addSubEntry(current, s_current_root);
@@ -888,7 +896,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          QString name = toQString(node->getName());
 
-         // printf("\n  Broom - Macro Expansion  %s\n", qPrintable(name));
+         // printf("\n  Broom - Macro Expansion  %s\n", csPrintable(name));
 
          if (name == "CS_OBJECT" || name == "Q_OBJECT") {
             // do nothing at this time
@@ -944,6 +952,15 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          parentEntry = s_entryMap.value(parentUSR);
 
          if (parentEntry != nullptr) {
+
+            auto parentNode = node->getParentFunctionOrMethod();
+
+            if (s_parentNodeMap.contains(parentUSR) && (s_parentNodeMap.value(parentUSR) != parentNode) ) {
+               // already have this template parameter
+               return true;
+            }
+
+            s_parentNodeMap.insert(parentUSR, parentNode);
 
             QString currentUSR = getUSR_Decl(node);
             s_entryMap.insert(currentUSR, current);
