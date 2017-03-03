@@ -22,16 +22,21 @@ include(CheckTypeSize)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-# FIXME - find packages not working
+
+# ISSUE: Testing on Windows only at this point, hard coded values will be changed
+set(CS_PATH  "z:/cs5_x_lib")
+
+
+# ISSUE: find packages
 find_package(CopperSpice REQUIRED)
 # find_package(LibClang REQUIRED)
 # find_package(LibTooling REQUIRED)
 
 include(CopperSpiceMacros)
 
-# FIXME - hard coded, I believe these should be  CopperSpice::Core
-set(CopperSpiceCore "z:/cs5_x_lib/bin/libCsCore1.4.dll")
-set(CopperSpiceXml  "z:/cs5_x_lib/bin/libCsXml1.4.dll")
+# ISSUE: should be CopperSpice::Core, CopperSpice::Xml
+set(CopperSpiceCore ${CS_PATH}/bin/libCsCore1.4.dll)
+set(CopperSpiceXml  ${CS_PATH}/bin/libCsXml1.4.dll)
 
 # list of CopperSpice libraries
 set(CS_LIBS ${CopperSpiceCore}  ${CopperSpiceXml})
@@ -46,17 +51,22 @@ set(CLANG_LIBS ${CLANG_PATH}/bin/libclang.dll)
 set(CLANG_INC ${CLANG_PATH}/include/3.7.1)
 
 # file locations for installing
-if(DARWIN)
+if(APPLE)
+   # osx
    include(GNUInstallDirs)
 
 elseif(WIN32)
    set(CMAKE_INSTALL_BINDIR ${CMAKE_INSTALL_PREFIX})   
    set(CMAKE_INSTALL_INCLUDEDIR ${CMAKE_INSTALL_PREFIX}/include)
-  
-   # path to gcc  FIXME
-   # gccpath=$(dir $(shell which $(word 1,$(CC))))
-   set(GCC_PATH "z:/w_retain/gcc_libs")
 
+ 
+   # ISSUE: this code might be a hint related to obtaining the path to mingw
+   # set(GCC_PATH $(dir $(shell which $(word 1, $(CC))))
+
+   # ISSUE: path to gcc on Windows 32 bit testing system
+   set(GCC_PATH  "c:/MingW_64_4.9/x86_64-w64-mingw32/lib32")
+
+ 
    # list of gcc libraries  sjlj or seh
    file(GLOB wild ${GCC_PATH}/libgcc_s_*-1.dll)
    set(GCC_LIBS ${wild} ${GCC_PATH}/libstdc++-6.dll  ${GCC_PATH}/libwinpthread-1.dll )
@@ -68,7 +78,7 @@ endif()
 
 set(BUILD_MAJOR "1")
 set(BUILD_MINOR "2")
-set(BUILD_MICRO "6")
+set(BUILD_MICRO "7")
 
 set(BUILD_COMPONENTS "DOXYPRESS")
 
@@ -143,7 +153,7 @@ configure_file(
 # file locations for building
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-# for install, not sure why this is required  FIXME?
+# for install ( ISSUE: Is this required? ) 
 set(CMAKE_INSTALL_LOCAL_ONLY ON)
 
 add_subdirectory(src)

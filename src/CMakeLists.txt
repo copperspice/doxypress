@@ -11,8 +11,8 @@
 # Documents produced by DoxyPress are derivative works derived from the
 # input used in their production; they are not affected by this license.
 
-# (todo: enhance) hard coded for testing
-set(CS_INCLUDE_DIR "z:/cs5_x_lib/include" "z:/cs5_x_lib/include/QtCore" "z:/cs5_x_lib/include/QtXml")
+# location of include files
+set(CS_INCLUDE_DIR ${CS_PATH}/include  ${CS_PATH}/include/QtCore  ${CS_PATH}/include/QtXml)
 
 set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
 set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
@@ -242,14 +242,14 @@ COPPERSPICE_RESOURCES(${CMAKE_CURRENT_SOURCE_DIR}/../doxypress.qrc)
 
 add_executable(doxypress ${DOXYPRESS_SOURCES})
 
-# (todo: enhance)
+# ISSUE: resolve so this works
 # target_link_libraries(doxypress CopperSpice::CsCore CopperSpice::CsXml ${CLANG_LIB_DIR})
 
 target_link_libraries(doxypress  
 
-# FIXME - hard coded
-   "z:/cs5_x_lib/lib/libCsCore1.4.dll.a"
-   "z:/cs5_x_lib/lib/libCsXml1.4.dll.a"
+   # ISSUE: may be able to change and remove the path and the suffix, windows only for testing
+   ${CS_PATH}/lib/libCsCore1.4.dll.a
+   ${CS_PATH}/lib/libCsXml1.4.dll.a
 
    -L${CLANG_LIB_DIR}
    -Wl,--start-group

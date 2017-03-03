@@ -11,6 +11,6 @@ dist-test-project:
 
 EXTRA_DIST= \
 	CMakeLists.txt \
-	cmake/modules/FindCopperSpice.cmake \
-	cmake/modules/FindLibClang.cmake \
+	cmake/FindCopperSpice.cmake \
+	cmake/FindLibClang.cmake \
 	src/CMakeLists.txt
