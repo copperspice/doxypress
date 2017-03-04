@@ -356,6 +356,7 @@
         "rtf-extension": "",
         "rtf-hyperlinks": false,
         "rtf-output": "rtf",
+        "rtf-paper-type": "",
         "rtf-source-code": false,
         "rtf-stylesheet": ""
     },

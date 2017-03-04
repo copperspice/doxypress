@@ -362,6 +362,7 @@
         "rtf-extension": "",
         "rtf-hyperlinks": false,
         "rtf-output": "rtf",
+        "rtf-paper-type": "a4",
         "rtf-source-code": false,
         "rtf-stylesheet": ""
     },
