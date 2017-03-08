@@ -563,7 +563,7 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
    p->curLine  = 1;
    p->curToken = 0;
 
-   // provide the input and their dependencies as unsaved files in memory
+   // provide the input and their dependencies as files in memory
    static bool filterSourceFiles = Config::getBool("filter-source-files");
 
    uint numUnsavedFiles = includeFiles.count() + 1;
@@ -572,6 +572,7 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
    p->sources  = new QByteArray[numUnsavedFiles];
    p->ufs      = new CXUnsavedFile[numUnsavedFiles];
 
+   // load main file
    p->sources[0]      = detab(fileToString(fileName, filterSourceFiles, true)).toUtf8();
    p->ufs[0].Filename = strdup(fileName.toUtf8());
    p->ufs[0].Contents = p->sources[0].constData();
@@ -583,6 +584,7 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
 
       p->fileMapping.insert(item, i);
 
+      // load include files
       p->sources[i]      = detab(fileToString(item, filterSourceFiles, true)).toUtf8();
       p->ufs[i].Filename = strdup(item.toUtf8());
       p->ufs[i].Contents = p->sources[i].constData();
@@ -591,8 +593,9 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
       i++;
    }
 
+   // what is in argList ( check this one more time )
    // data structure, source filename (in argv), cmd line args, num of cmd line args
-   // pass unsaved files(?), num of unsaved files, options flag, trans unit
+   // pass include files, num of unsaved files, clang flag, trans unit (file name)
 
    std::vector<const char *> argv;
    for (auto &item : argList) {
@@ -601,6 +604,7 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
 
    int argc = argList.size();
 
+   // libClang - used to set up the tokens for comments
    CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, &argv[0], argc, p->ufs, numUnsavedFiles,
                   CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
 
@@ -629,15 +633,19 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
          // called from writeSouce in fileDef
 
       } else {
+         // libTooling - used to parse the source
+
          // start adding to entry
          s_current_root = root;
+         s_entryMap.insert("TranslationUnit", root);
 
+         // strip out the fileName 
          argList.erase(argList.end() - 1);
 
-         // pass the list of files to parse
+         // pass all arguments except the file name, which was just removed
          clang::tooling::FixedCompilationDatabase options(".", argList);
 
-         // pass the list of files to parse
+         // pass the main file to parse
          std::vector<std::string> sourceList;
          sourceList.push_back(fileName.toUtf8().constData());
 

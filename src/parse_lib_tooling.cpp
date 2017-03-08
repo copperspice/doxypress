@@ -17,7 +17,8 @@
 
 #include <parse_lib_tooling.h>
 
-static QMap<QString, clang::DeclContext *> s_parentNodeMap;
+static QMap<QString, clang::DeclContext *>  s_parentNodeMap;
+static QMultiMap<QString, QSharedPointer<Entry>> s_orphanMap;
 
 static Protection getAccessSpecifier(const clang::Decl *node)
 {
@@ -68,6 +69,10 @@ static QString getUSR_Decl(const clang::Decl *node)
    QString retval;
    llvm::SmallVector<char, 100> buffer;
 
+   if (node->getLocStart().isInvalid() && (std::string(node->getDeclKindName()) == "TranslationUnit") ) {
+      return "TranslationUnit";
+   }
+
    bool ignore = clang::index::generateUSRForDecl(node, buffer);
 
    if (! ignore) {
@@ -80,8 +85,8 @@ static QString getUSR_Decl(const clang::Decl *node)
 static QString getUSR_DeclContext(const clang::DeclContext *node)
 {
    QString retval;
-
    const clang::Decl *d = llvm::dyn_cast<clang::Decl>(node);
+
    retval = getUSR_Decl(d);
 
    return retval;
@@ -174,6 +179,34 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                return true;
             }
 
+            //
+            clang::ClassTemplatePartialSpecializationDecl *specialNode = llvm::dyn_cast<clang::ClassTemplatePartialSpecializationDecl>(node);
+
+            if (specialNode != nullptr) {
+               // partial
+
+               std::string tString;
+               llvm::raw_string_ostream tStream(tString);
+
+               auto tmp = specialNode->getTemplateArgsAsWritten();
+               clang::TemplateSpecializationType::PrintTemplateArgumentList(tStream, tmp->getTemplateArgs(), tmp->NumTemplateArgs, m_policy);
+               current->name += toQString(tStream.str());
+
+            } else {
+               clang::ClassTemplateSpecializationDecl *specialNode = llvm::dyn_cast<clang::ClassTemplateSpecializationDecl>(node);
+
+               if (specialNode != nullptr) {
+                  // full
+
+                  std::string tString;
+                  llvm::raw_string_ostream tStream(tString);
+
+                  specialNode->getNameForDiagnostic(tStream, m_policy, true);
+                  current->name = toQString(tStream.str());
+               }
+            }
+
+
             // inheritance
             for (auto &item : node->bases()) {
                QString name = toQString(item.getType());
@@ -189,7 +222,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                current->extends.append(tmpBase);
             }
 
-            if (parentUSR.isEmpty())  {
+            if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
                s_current_root->addSubEntry(current, s_current_root);
 
             } else {
@@ -222,7 +255,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                current->m_traits.setTrait(Entry::Virtue::Final);
             }
 
-            if (parentUSR.isEmpty())  {
+            if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
                s_current_root->addSubEntry(current, s_current_root);
 
             } else {
@@ -251,7 +284,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             current->m_traits.setTrait(Entry::Virtue::Union);
 
-            if (parentUSR.isEmpty())  {
+            if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
                s_current_root->addSubEntry(current, s_current_root);
 
             } else {
@@ -276,7 +309,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QSharedPointer<Entry> parentEntry;
          QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-         QString parentUSR  = getUSR_DeclContext(node->getParent());
+         QString parentUSR = getUSR_DeclContext(node->getParent());
+
          if (! parentUSR.isEmpty()) {
             parentEntry = s_entryMap.value(parentUSR);
          }
@@ -525,7 +559,13 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
 
-            parentEntry->addSubEntry(current, parentEntry);
+            if (parentEntry) {
+               parentEntry->addSubEntry(current, parentEntry);
+
+            } else {
+               // hold until we visit the parent
+               s_orphanMap.insert(parentUSR, current);
+            }
          }
 
          return true;
@@ -600,18 +640,21 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString name = toQString(node->getNameAsString());
          QString className;
 
-         if (parentEntry == nullptr) {
-            // might need to reslove
-
-         } else {
+         if (parentEntry) {
             className = parentEntry->name;
 
-         }
+            if (! name.isEmpty()) {
+               // do not test for an anonymous enum
 
-         for (auto entry : parentEntry->children() ) {
-            if (entry->name == className + name) {
-                return true;
+               for (auto entry : parentEntry->children() ) {
+                  if (entry->name == className + name) {
+                   return true;
+                  }
+               }
             }
+
+         } else {
+            printf("\n BROOM - enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
          }
 
          QString currentUSR = getUSR_Decl(node);
@@ -633,7 +676,13 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->m_traits.setTrait(Entry::Virtue::Strong);
          }
 
-         parentEntry->addSubEntry(current, parentEntry);
+         if (parentEntry) {
+            parentEntry->addSubEntry(current, parentEntry);
+
+         } else {
+            // hold until we visit the parent
+            s_orphanMap.insert(parentUSR, current);
+         }
 
          return true;
       }
@@ -649,12 +698,24 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
-         QString name       = toQString(node->getNameAsString());
-         QString className  = parentEntry->name;
+         QString name = toQString(node->getNameAsString());
+         QString className;
 
-         for (auto entry : parentEntry->children() ) {
-            if (entry->name == className + name) {
-                return true;
+         if (parentEntry == nullptr) {
+           // might need to reslove
+
+         } else {
+            className = parentEntry->name;
+
+         }
+
+         if (! name.isEmpty()) {
+            // not sure there is an anonymous enum constant
+
+            for (auto entry : parentEntry->children() ) {
+               if (entry->name == className + name) {
+                   return true;
+               }
             }
          }
 
@@ -951,7 +1012,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         if (parentEntry != nullptr) {
+         if (parentEntry != nullptr && parentUSR != "TranslationUnit") {
 
             auto parentNode = node->getParentFunctionOrMethod();
 
@@ -1034,7 +1095,6 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          parentEntry->addSubEntry(current, parentEntry);
-
          return true;
       }
 
@@ -1053,6 +1113,32 @@ class DoxyASTConsumer : public clang::ASTConsumer {
 
       virtual void HandleTranslationUnit(clang::ASTContext &context)  override {
          m_visitor.TraverseDecl(context.getTranslationUnitDecl());
+
+         // clean up orphan list
+         auto iter = s_orphanMap.begin();
+
+         while (iter != s_orphanMap.end()) {
+            QSharedPointer<Entry> parentEntry = s_entryMap.value(iter.key());
+
+            if (parentEntry) {
+               // found a match
+               parentEntry->addSubEntry(iter.value(), parentEntry);
+
+
+
+if (iter.key().contains("SerializedDiagnosticReader")) {
+   printf("\n BROOM - enum found a MATCH  name = %s", csPrintable(iter.key()) );
+}
+
+
+               // remove and reset the iter
+               iter = s_orphanMap.erase(iter);
+
+            } else {
+               ++iter;
+
+            }
+         }
       }
 
    private:
