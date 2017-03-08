@@ -489,8 +489,8 @@ void Definition::setDocumentation(const QString &tDoc, const QString &docFile, i
 
 void Definition::setBriefDescription(const QString &b, const QString &briefFile, int briefLine)
 {
-   static QString outputLanguage = Config::getEnum("output-language");
-   static bool needsDot = (outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean");
+   static const QString outputLanguage = Config::getEnum("output-language");
+   static const bool needsDot          = (outputLanguage != "Japanese" && outputLanguage != "Chinese" && outputLanguage != "Korean");
 
    QString brief = b.trimmed();
 

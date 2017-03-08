@@ -260,7 +260,8 @@ namespace Doxy_Work{
 
    QString createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName);
    void createTemplateInstanceMembersX();
-   QSharedPointer<ClassDef> createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, const QString &fieldName);
+   QSharedPointer<ClassDef> createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ, 
+               const QString &fieldName);
 
    void distributeMemberGroupDocumentation();
    void dumpPhrase(QTextStream &t, QSharedPointer<Definition> d);
@@ -9350,7 +9351,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
    QFileInfo fi(fileName);
    QString fileContents;
 
-   // broom - not completed if clangParsing, do not preprocess
+   // broom - if clangParsing, preprocessing needs to be done a different way
 
    if (Config::getBool("enable-preprocessing") && parser->needsPreprocessing(extension)) {
       msg("Processing %s\n", csPrintable(fileName));
@@ -9607,7 +9608,8 @@ void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const QString &tagLine)
    parseTagFile(root, fi.absoluteFilePath());
 }
 
-QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName)
+QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, 
+                  const QString &defaultDirName)
 {
    QString formatDirName = Config::getString(formatDirOption);
 
@@ -9620,8 +9622,8 @@ QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QStri
 
    QDir formatDir(formatDirName);
 
-   if (! formatDir.exists() && ! formatDir.mkdir(formatDirName)) {
-      err("Unable to create output directory %s", csPrintable(formatDirName));
+   if (! formatDir.exists() && ! formatDir.mkpath(formatDirName)) {
+      err("Unable to create output directory %s\n", csPrintable(formatDirName));
       stopDoxyPress();
    }
 
@@ -9925,6 +9927,8 @@ void Doxy_Work::stopDoxyPress(int unused)
 #endif
 
    msg("DoxyPress aborted\n");
+
+   Doxy_Globals::programExit = true;
    exit(1);
 }
 

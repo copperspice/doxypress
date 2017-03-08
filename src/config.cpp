@@ -586,7 +586,11 @@ bool Config::verify()
          QFileInfo dp(dotPath + "/dot" + portable_commandExtension());
 
          if (! dp.exists() || ! dp.isFile()) {
-            warnMsg("Unable to locate the dot program in %s\n", csPrintable(dotPath));
+
+            if (Config::getBool("have-dot")) {
+               warnMsg("Unable to locate the dot program in %s\n", csPrintable(dotPath));
+            }
+
             dotPath = "";
 
          } else {

@@ -2337,9 +2337,9 @@ QString transcodeToQString(const QByteArray &input)
    return temp->toUnicode(input);
 }
 
-/*! reads a file with name \a name and returns it as a string. If \a filter
- *  is true the file will be filtered by any user specified input filter.
- *  If \a name is "-" the string will be read from standard input.
+/*! reads a file with name and returns it as a string. If filter
+ *  is true the file will be filtered by the specified input filter.
+ *  If name is "-" the string will be read from standard input.
  */
 QString fileToString(const QString &name, bool filter, bool isSourceCode)
 {
@@ -2369,7 +2369,6 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
       }
 
    } else {
-      // read from file
       static const QDir configDir = Config::getConfigDir();
 
       QFileInfo fi(name);
@@ -7111,7 +7110,7 @@ void stackTrace()
 #endif
 }
 
-//! read a file name \a fileName
+// read a file name
 QString readInputFile(const QString &fileName)
 {
    QString retval;
@@ -7120,7 +7119,7 @@ QString readInputFile(const QString &fileName)
    return retval;
 }
 
-//! read a file name \a fileName
+// read a file name
 bool readInputFile(const QString &fileName, QString &fileContents, bool filter, bool isSourceCode)
 {
    int size = 0;
@@ -7130,14 +7129,18 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
       return false;
    }
 
-   QString filterName = getFileFilter(fileName, isSourceCode);
+   // hold the data for fileContents
    QByteArray buffer;
 
+   QString filterName = getFileFilter(fileName, isSourceCode);
+
    if (filterName.isEmpty() || ! filter) {
+      // do not filter
+
       QFile f(fileName);
 
       if (! f.open(QIODevice::ReadOnly)) {
-         err("Unable to open file %s, error: %d\n", qPrintable(fileName), f.error());
+         err("Unable to open file %s, error: %d\n", csPrintable(fileName), f.error());
          return false;
       }
 
@@ -7145,18 +7148,18 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
       buffer.resize(size);
 
       if (f.read(buffer.data(), size) != size) {
-         err("Unable to read file %s, error: %d\n", qPrintable(fileName), f.error());
+         err("Unable to read file %s, error: %d\n", csPrintable(fileName), f.error());
          return false;
       }
 
    } else {
+      // filter the file
       QString cmd = filterName + " \"" + fileName + "\"";
-      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", csPrintable(cmd));
 
-      FILE *f = popen(qPrintable(cmd), "r");
+      FILE *f = popen(csPrintable(cmd), "r");
 
       if (! f) {
-         err("Unable to execute filer %s, error: %d\n", csPrintable(filterName));
+         err("Unable to execute filter %s, error: %d\n", csPrintable(filterName));
          return false;
       }
 
@@ -7170,9 +7173,6 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
       }
 
       pclose(f);
-
-      Debug::print(Debug::FilterOutput, 0, "Filter output\n");
-      Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", buffer.constData() );
    }
 
    if (size >= 2 && ((buffer.at(0) == -1 && buffer.at(1) == -2) || (buffer.at(0) == -2 && buffer.at(1) == -1) )) {

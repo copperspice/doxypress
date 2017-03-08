@@ -27,9 +27,9 @@
 
 static int compItems(const QSharedPointer<ClassDef> &c1, const QSharedPointer<ClassDef> &c2)
 {
-   static bool b = Config::getBool("sort-by-scope-name");
+   static const bool sortByScopeName = Config::getBool("sort-by-scope-name");
 
-   if (b) {
+   if (sortByScopeName) {
       return c1->name().compare(c2->name(), Qt::CaseInsensitive);
 
    } else {
@@ -44,8 +44,8 @@ int ClassSDict::compareMapValues(const QSharedPointer<ClassDef> &item1, const QS
 
 bool ClassSDict::declVisible(const enum CompoundType *filter) const
 {
-   static bool hideUndocClasses    = Config::getBool("hide-undoc-classes");
-   static bool extractLocalClasses = Config::getBool("extract-local-classes");
+   static const bool hideUndocClasses    = Config::getBool("hide-undoc-classes");
+   static const bool extractLocalClasses = Config::getBool("extract-local-classes");
 
    if (count() > 0) {
       ClassSDict::Iterator sdi(*this);
@@ -68,7 +68,7 @@ bool ClassSDict::declVisible(const enum CompoundType *filter) const
 
 void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filter, const QString &header, bool localNames)
 {
-   static bool extractPrivate = Config::getBool("extract-private");
+   static const bool extractPrivate = Config::getBool("extract-private");
 
    if (count() > 0) {
 
@@ -93,12 +93,11 @@ void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filte
 
 void ClassSDict::writeDocumentation(OutputList &ol, QSharedPointer<Definition> container)
 {
-   static bool fortranOpt = Config::getBool("optimize-fortran");
+   static const bool optimizeFortran      = Config::getBool("optimize-fortran");
+   static const bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
+   static const bool inlineSimpleClasses  = Config::getBool("inline-simple-struct");
 
-   static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
-   static bool inlineSimpleClasses  = Config::getBool("inline-simple-struct");
-
-   if (! inlineGroupedClasses && !inlineSimpleClasses) {
+   if (! inlineGroupedClasses && ! inlineSimpleClasses) {
       return;
    }
 
@@ -112,7 +111,7 @@ void ClassSDict::writeDocumentation(OutputList &ol, QSharedPointer<Definition> c
             if (! found) {
                ol.writeRuler();
                ol.startGroupHeader();
-               ol.parseText(fortranOpt ? theTranslator->trTypeDocumentation() : theTranslator->trClassDocumentation());
+               ol.parseText(optimizeFortran ? theTranslator->trTypeDocumentation() : theTranslator->trClassDocumentation());
                ol.endGroupHeader();
                found = true;
             }

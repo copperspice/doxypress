@@ -1178,7 +1178,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    }
   
    static const QString docbookOutDir = Config::getString("docbook-output");
-   static const bool    haveDot       = Config::getBool("have-dot"); 
+   static const bool haveDot          = Config::getBool("have-dot"); 
    static const bool repeatBrief      = Config::getBool("repeat-brief");
  
    msg("Generating Docbook output for class %s\n", csPrintable(cd->name()));
@@ -1407,13 +1407,15 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    // + location
    // - number of lines
 
+   static const bool haveDot = Config::getBool("have-dot"); 
+
    if (fd->isReference()) {
       return;   // skip external references
    }
 
    QString fileDocbook = fd->getOutputFileBase() + ".xml";
 
-  //Add the file Documentation info to index file
+   //Add the file Documentation info to index file
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
    QString outputDirectory = Config::getString("docbook-output");
@@ -1457,7 +1459,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       }
    }
 
-   if (Config::getBool("have-dot")) {
+   if (haveDot) {
 
       if (Config::getBool("dot-include")) {
          t << "<para>Include dependency diagram for " << convertToXML(fd->name()) << "</para>" << endl;

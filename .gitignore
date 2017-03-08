@@ -14,6 +14,7 @@ configure
 config.log
 error.log
 
+/src/doxy_build_info.h
 /src/parser/read_me_important.txt
 /src/parser/do-*
 /src/parser/license.txt
@@ -30,6 +31,7 @@ error.log
 /install
 
 test_build/do-gdb
+test_build/do-run
 test_build/*.log
 test_build/*.txt
 test_build/hold
@@ -41,5 +43,3 @@ test_build/output_py
 test_doxy/output_clang
 test_doxy/output_test
 test_doxy/output_py
-
-

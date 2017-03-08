@@ -147,8 +147,8 @@ void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> self)
 
 void Entry::reset()
 {
-   static bool dotCallGraph = Config::getBool("dot-call");
-   static bool dotCalledBy  = Config::getBool("dot-called-by");
+   static const bool dotCallGraph = Config::getBool("dot-call");
+   static const bool dotCalledBy  = Config::getBool("dot-called-by");
 
    name.resize(0);
    type.resize(0);

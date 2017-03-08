@@ -313,6 +313,7 @@ void FileDef::writeBriefDescription(OutputList &ol)
    QSharedPointer<FileDef> self  = sharedFrom(this);
 
    if (hasBriefDescription()) {
+
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false, "", true, false);
 
@@ -601,7 +602,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 void FileDef::writeDocumentation(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
-   static bool generateTreeView = Config::getBool("generate-treeview");
+   static const bool generateTreeView = Config::getBool("generate-treeview");
 
    QString versionTitle;
 
@@ -668,58 +669,73 @@ void FileDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
             break;
+
          case LayoutDocEntry::MemberDeclStart:
             startMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::FileIncludes:
             writeIncludeFiles(ol);
             break;
+
          case LayoutDocEntry::FileIncludeGraph:
             writeIncludeGraph(ol);
             break;
+
          case LayoutDocEntry::FileIncludedByGraph:
             writeIncludedByGraph(ol);
             break;
+
          case LayoutDocEntry::FileSourceLink:
             writeSourceLink(ol);
             break;
+
          case LayoutDocEntry::FileClasses: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeClassDeclarations(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::FileNamespaces: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeNamespaceDeclarations(ol, ls->title(lang), false);
          }
          break;
+
          case LayoutDocEntry::FileConstantGroups: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeNamespaceDeclarations(ol, ls->title(lang), true);
          }
          break;
+
          case LayoutDocEntry::MemberGroups:
             writeMemberGroups(ol);
             break;
+
          case LayoutDocEntry::MemberDecl: {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
             writeMemberDeclarations(ol, lmd->type, lmd->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDeclEnd:
             endMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::DetailedDesc: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeDetailedDescription(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDefStart:
             startMemberDocumentation(ol);
             break;
+
          case LayoutDocEntry::FileInlineClasses:
             writeInlineClasses(ol);
             break;
+
          case LayoutDocEntry::MemberDef: {
             LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
             writeMemberDocumentation(ol, lmd->type, lmd->title(lang));
