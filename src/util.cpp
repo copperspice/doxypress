@@ -20,6 +20,7 @@
 #include <QCryptographicHash>
 #include <QDateTime>
 #include <QHash>
+#include <QProcess>
 #include <QRegExp>
 #include <QTextCodec>
 
@@ -7122,17 +7123,16 @@ QString readInputFile(const QString &fileName)
 // read a file name
 bool readInputFile(const QString &fileName, QString &fileContents, bool filter, bool isSourceCode)
 {
-   int size = 0;
-
    QFileInfo fi(fileName);
    if (! fi.exists()) {
       return false;
    }
 
-   // hold the data for fileContents
+   // holds the data for fileContents
    QByteArray buffer;
 
    QString filterName = getFileFilter(fileName, isSourceCode);
+   int size = 0;
 
    if (filterName.isEmpty() || ! filter) {
       // do not filter
@@ -7156,23 +7156,21 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
       // filter the file
       QString cmd = filterName + " \"" + fileName + "\"";
 
-      FILE *f = popen(csPrintable(cmd), "r");
+      QProcess filterProcess;
+      filterProcess.start(cmd);
+      filterProcess.waitForFinished(-1);
 
-      if (! f) {
-         err("Unable to execute filter %s, error: %d\n", csPrintable(filterName));
+      if (filterProcess.exitStatus() != QProcess::NormalExit) {        
+         err("Unable to execute command:  %s\n", csPrintable(cmd) );
          return false;
       }
 
-      const int bufSize = 1024;
-      char buf[bufSize];
-      int numRead;
+      buffer = filterProcess.readAllStandardOutput();     
 
-      while ((numRead = fread(buf, 1, bufSize, f)) > 0) {
-         buffer.append(buf, numRead);
-         size += numRead;
+      QByteArray errorMsg = filterProcess.readAllStandardError();
+       if (! errorMsg.isEmpty()) {        
+         err("Possible filter problem: %s\n", errorMsg.constData());
       }
-
-      pclose(f);
    }
 
    if (size >= 2 && ((buffer.at(0) == -1 && buffer.at(1) == -2) || (buffer.at(0) == -2 && buffer.at(1) == -1) )) {
@@ -7692,16 +7690,28 @@ void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDe
 
 uint getUtf8Code( const QString &s, int idx )
 {
+   if (s.isEmpty()) {
+      return 0;
+   }
+
    return s[idx].unicode();
 }
 
 uint getUtf8CodeToLower( const QString &s, int idx )
 {
+   if (s.isEmpty()) {
+      return 0;
+   }
+
    return s[idx].toLower().unicode();
 }
 
 uint getUtf8CodeToUpper( const QString &s, int idx )
 {
+   if (s.isEmpty()) {
+      return 0;
+   }
+
    return s[idx].toUpper().unicode();
 }
 

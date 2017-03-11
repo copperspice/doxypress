@@ -848,7 +848,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> cu
 }
 
 /*! Write a source listing of this file to the output */
-void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameTu)
+void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFiles)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
@@ -934,7 +934,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
       ol.startCodeFragment();
 
       if (! sameTu) {
-         ClangParser::instance()->start(getFilePath(), filesInSameTu, QSharedPointer<Entry>());
+         ClangParser::instance()->start(getFilePath(), QByteArray(), includedFiles, QSharedPointer<Entry>());
 
       } else {
          ClangParser::instance()->switchToFile(getFilePath());
@@ -973,7 +973,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &filesInSameT
    ol.enableAll();
 }
 
-void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
+void FileDef::parseSource(bool sameTu, QStringList &includedFiles)
 {
    QSharedPointer<FileDef> self  = sharedFrom(this);
    static bool filterSourceFiles = Config::getBool("filter-source-files");
@@ -987,7 +987,7 @@ void FileDef::parseSource(bool sameTu, QStringList &filesInSameTu)
       // use clang parser
  
       if (! sameTu) {
-         ClangParser::instance()->start(getFilePath(), filesInSameTu, QSharedPointer<Entry>());
+         ClangParser::instance()->start(getFilePath(), QByteArray(), includedFiles, QSharedPointer<Entry>());
 
       } else {
          ClangParser::instance()->switchToFile(getFilePath());

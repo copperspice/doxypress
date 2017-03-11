@@ -676,9 +676,12 @@ class SearchIndexCategoryMapping
 
 void writeJavascriptSearchIndex()
 {
-   if (! Config::getBool("generate-html")) {
+   const bool generateHtml = Config::getBool("generate-html");
+
+   if (! generateHtml) {
       return;
    }
+
 
    // index classes
    for (auto cd : Doxy_Globals::classSDict) {

@@ -24650,8 +24650,8 @@ void cstyleFreeParser()
    }
 }
 
-static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> rt,
-                      enum ParserMode mode, QStringList &includedFiles, bool useClang)
+static void parseMain(const QString &fileName, const QString &fileBuf, QStringList &includedFiles,
+                  QSharedPointer<Entry> rt)
 {
    s_inputFile.setFileName(fileName);
 
@@ -24774,14 +24774,13 @@ bool CPPLanguageParser::needsPreprocessing(const QString &extension)
                       fe == ".php4" || fe == ".inc" || fe == ".phtml");
 }
 
-void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileBuf,
-                  QSharedPointer<Entry> root, enum ParserMode mode,
-                  QStringList & filesInSameTU, bool useClang)
+void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileBuffer,
+                  QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    if (useClang) {
 
       if (mode == ParserMode::SOURCE_FILE) {
-         ClangParser::instance()->start(fileName, filesInSameTU, root);
+         ClangParser::instance()->start(fileName, fileBuffer, includedFiles, root);
 
       } else {
          // an include file
@@ -24793,7 +24792,7 @@ void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileB
       s_thisParser = this;
 
       printlex(parse_cstyle_YY_flex_debug, true, __FILE__, fileName);
-      ::parseMain(fileName, fileBuf, root, mode, filesInSameTU, useClang);
+      ::parseMain(fileName, fileBuffer, includedFiles, root);
       printlex(parse_cstyle_YY_flex_debug, false, __FILE__, fileName);
    }
 }

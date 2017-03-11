@@ -67,7 +67,7 @@ int Config::getInt(const QString &name)
       retval = hashIter.value().value;
 
    } else {
-      fprintf(stderr, "Warning: %s was not retrieved from the project integer table\n", qPrintable(name) );
+      fprintf(stderr, "Warning: %s was not retrieved from the project integer table\n", csPrintable(name) );
 
    }
 
@@ -83,7 +83,7 @@ QStringList Config::getList(const QString &name)
       retval = hashIter.value().value;
 
    } else {
-      fprintf(stderr, "Warning: %s was not retrieved from the project list table\n", qPrintable(name) );
+      fprintf(stderr, "Warning: %s was not retrieved from the project list table\n", csPrintable(name) );
 
    }
 
@@ -99,7 +99,7 @@ QString Config::getString(const QString &name)
       retval = hashIter.value().value;
 
    } else {
-      fprintf(stderr, "Warning: %s was not retrieved from the project string table\n", qPrintable(name) );
+      fprintf(stderr, "Warning: %s was not retrieved from the project string table\n", csPrintable(name) );
 
    }
 
@@ -927,9 +927,7 @@ bool Config::verify()
    // **
    const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
 
-   for (auto item : expandAsDefinedList) {
-      // add predefined macro names to dictionary
-
+   for (auto item : expandAsDefinedList) {      
       if (! Doxy_Globals::expandAsDefinedDict.contains(item)) {
          Doxy_Globals::expandAsDefinedDict.insert(item);
       }

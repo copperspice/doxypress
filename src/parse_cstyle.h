@@ -32,7 +32,7 @@ class CPPLanguageParser : public ParserInterface
   
    void finishTranslationUnit() override {};
 
-   void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
+   void parseInput(const QString &fileName, const QString &fileBuffer, QSharedPointer<Entry> root,
                    enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
    bool needsPreprocessing(const QString &extension) override;

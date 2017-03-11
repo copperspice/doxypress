@@ -205,7 +205,7 @@ static QString detab(const QString &str)
          break;
 
          case '\n':
-            // reset colomn counter
+            // reset column counter
             out += c;
             col = 0;
             break;
@@ -488,32 +488,51 @@ static bool documentKind(CXCursor cursor)
 }
 
 // ** entry point
-void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSharedPointer<Entry> root)
+void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStringList &includeFiles, QSharedPointer<Entry> root)
 {
-   static QStringList includePath = Config::getList("include-path");
-   static QStringList clangFlags  = Config::getList("clang-flags");
+   static QStringList const includePath      = Config::getList("include-path");
+   static QStringList const clangFlags       = Config::getList("clang-flags");
+   static QStringList const preDefinedMacros = Config::getList("predefined-macros");
 
+   static std::vector<std::string> clangCmdArgs;
    std::vector<std::string> argList;
 
-   // add include paths for input files
-   for (auto &item : Doxy_Globals::inputPaths) {
-      std::string inc = std::string("-I") + item.toUtf8().constData();
-      argList.push_back(std::move(inc));
-   }
+   if (clangCmdArgs.empty()) {
 
-   // add external include paths
-   for (auto &item : includePath) {
-      std::string inc = std::string("-I") + item.toUtf8().constData();
-      argList.push_back(std::move(inc));
-   }
+      // add include paths for input files
+      for (auto &item : Doxy_Globals::inputPaths) {
+         std::string inc = std::string("-I") + item.toUtf8().constData();
+         argList.push_back(std::move(inc));
+      }
+   
+      // add external include paths
+      for (auto &item : includePath) {
+         std::string inc = std::string("-I") + item.toUtf8().constData();
+         argList.push_back(std::move(inc));
+      }
 
-   // user specified flags
-   for (auto &item : clangFlags) {
-      argList.push_back(item.toUtf8().constData());
-   }
+      // add predefinded macros
+      for (const auto &item : preDefinedMacros) {
+         std::string macro = std::string("-D") + item.toUtf8().constData();
+         argList.push_back(std::move(macro));
+      }
 
-   argList.push_back("-ferror-limit=0");
-   argList.push_back("-x");
+      // user specified flags
+      for (auto &item : clangFlags) {
+         argList.push_back(item.toUtf8().constData());
+      }
+   
+      argList.push_back("-ferror-limit=0");
+      argList.push_back("-x");
+
+      // save for the next pass
+      clangCmdArgs = argList;
+
+   } else { 
+      // just copy the first x args since they do not change
+      argList = clangCmdArgs;
+
+   }
 
    // if the file is an .h file it can contain C, C++, or Objective C  (review)
    // detection will fail if we pass .h files containing ObjC code and no source
@@ -573,14 +592,20 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
    p->ufs      = new CXUnsavedFile[numUnsavedFiles];
 
    // load main file
-   p->sources[0]      = detab(fileToString(fileName, filterSourceFiles, true)).toUtf8();
+
+   if (fileBuffer.isEmpty()) {
+      p->sources[0]   = detab(fileToString(fileName, filterSourceFiles, true)).toUtf8();
+   } else  {
+      p->sources[0]   = fileBuffer.toUtf8();
+   }
+
    p->ufs[0].Filename = strdup(fileName.toUtf8());
    p->ufs[0].Contents = p->sources[0].constData();
    p->ufs[0].Length   = p->sources[0].length();
 
    //
    uint i = 1;
-   for (auto item : includeFiles) {
+   for (const auto &item : includeFiles) {
 
       p->fileMapping.insert(item, i);
 
@@ -645,12 +670,17 @@ void ClangParser::start(const QString &fileName, QStringList &includeFiles, QSha
          // pass all arguments except the file name, which was just removed
          clang::tooling::FixedCompilationDatabase options(".", argList);
 
+         const std::string tmpFName = fileName.toUtf8().constData();
+
          // pass the main file to parse
          std::vector<std::string> sourceList;
-         sourceList.push_back(fileName.toUtf8().constData());
+         sourceList.push_back(tmpFName);
 
          // create a new clang tooling instance
          clang::tooling::ClangTool tool(options, sourceList);
+
+         // use the file in memory            
+         tool.mapVirtualFile(tmpFName, p->sources[0].constData());
 
          // run the clang tooling to create a new FrontendAction
          int result = tool.run(clang::tooling::newFrontendActionFactory<DoxyFrontEnd>().get());

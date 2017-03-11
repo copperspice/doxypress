@@ -32,12 +32,9 @@ class ClangParser
  public:  
    static ClangParser *instance();
 
-   // Start parsing a file, returns a subset of the files only including the
-   // ones which were actually found during parsing
-
-   // fileName- name of the file to parse
-   // filesInTranslationUnit- other files which are included by this file
-   void start(const QString &fileName, QStringList &includeFiles, QSharedPointer<Entry> root);
+   // fileName  name of the file to parse
+   // includeFiles- other files which are included by this file
+   void start(const QString &fileName, const QString &fileBuffer, QStringList &includeFiles, QSharedPointer<Entry> root);
 
    // Switch to another file within the translation unit
    // fileName - name of the file to switch to   
