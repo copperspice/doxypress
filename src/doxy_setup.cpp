@@ -115,12 +115,12 @@ void initDoxyPress()
    initClassMemberIndices();
    initNamespaceMemberIndices();
    initFileMemberIndices();
-   
+
    Doxy_Globals::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
-   
-   // Broom - review this
-   Doxy_Globals::classSDict        = ClassSDict(Config::getCase("sort-class-case-sensitive"));  
-  
+
+   // broom - review this
+   Doxy_Globals::classSDict        = ClassSDict(Config::getCase("sort-class-case-sensitive"));
+
    // initialize global constants
    Doxy_Globals::g_compoundKeywordDict.insert("template class");
    Doxy_Globals::g_compoundKeywordDict.insert("template struct");
@@ -132,7 +132,7 @@ void initDoxyPress()
 }
 
 void shutDownDoxyPress()
-{  
+{
    Doxy_Globals::symbolStorage.close();
 
    QDir thisDir;

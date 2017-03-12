@@ -363,7 +363,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
 }
 
 /*! Collects the parameters found with \@param or \@retval commands in a global
- *  list s_paramsFound. If \a isParam is set to true and the parameter is not 
+ *  list s_paramsFound. If \a isParam is set to true and the parameter is not
  *  an actual parameter of the current member s_memberDef, then a warning is
  *  raised (unless warnings are disabled altogether).
  */
@@ -385,7 +385,7 @@ static void checkArgumentName(const QString &name, bool isParam)
    } else {
       al = &s_memberDef->getDeclArgumentList();
 
-   }  
+   }
 
    if (al == nullptr) {
       return;
@@ -423,7 +423,7 @@ static void checkArgumentName(const QString &name, bool isParam)
             argName = argName.left(argName.length() - 3);
          }
 
-         if (aName == argName) { 
+         if (aName == argName) {
             s_paramsFound.insert(aName);
             found = true;
             break;
@@ -493,12 +493,12 @@ static void checkUndocumentedParams()
          for (const auto &arg : *al) {
             QString argName;
 
-            if (s_memberDef->isDefine()) { 
+            if (s_memberDef->isDefine()) {
                argName = arg.type;
 
             } else {
                argName = arg.name;
-         
+
             }
 
             if (lang == SrcLangExt_Fortran) {
@@ -1097,9 +1097,9 @@ static void handleUnclosedStyleCommands()
 
 static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool ignoreAutoLinkFlag = false)
 {
-   QString name = linkToText(SrcLangExt_Unknown, g_token->name, true);
+  static const bool autolinkSupport = Config::getBool("auto-link");
 
-   static const bool autolinkSupport = Config::getBool("auto-link");
+   QString name = linkToText(SrcLangExt_Unknown, g_token->name, true);
 
    if (! autolinkSupport && ! ignoreAutoLinkFlag) {
       // no autolinking so add as normal word
@@ -1116,7 +1116,6 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    int len = g_token->name.length();
 
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, s_fileName, ambig);
-
    bool partA = false;
 
    if (! s_insideHtmlLink) {
@@ -1355,7 +1354,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
    while ((tok = doctokenizerYYlex())) {
 
       if (tok == TK_WORD && g_token->name == "width=" || g_token->name == "height=") {
-         // special case: no title, but we do have a size indicator       
+         // special case: no title, but we do have a size indicator
          break;
        }
 
@@ -1392,13 +1391,13 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
             doctokenizerYYsetStateTitleAttrValue();
             g_token->name = g_token->name.left(g_token->name.length() - 1);
          }
-   
+
          if (g_token->name == "width")  {
             width = g_token->chars;
-   
+
          } else if (g_token->name == "height")  {
             height = g_token->chars;
-   
+
          } else {
             warn_doc_error(s_fileName,doctokenizerYYlineno,"Unknown option %s after \\%s command, expected 'width' or 'height'",
                      csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)));
@@ -1406,7 +1405,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
             break;
          }
       }
-   
+
       tok = doctokenizerYYlex();
    }
 
@@ -2197,7 +2196,7 @@ void DocCopy::parse(QList<DocNode *> &children)
 
    if (def) {
 
-      if (s_copyStack.indexOf(def) == -1) { 
+      if (s_copyStack.indexOf(def) == -1) {
          // definition not parsed earlier
 
          bool  hasParamCommand  = s_hasParamCommand;
@@ -2590,7 +2589,7 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
       } else {
          m_refType = Section;
       }
-     
+
       m_isSubPage = pd && pd->hasParentPage();
 
       if (sec->type != SectionInfo::Page || m_isSubPage) {
@@ -3369,26 +3368,26 @@ DocHtmlCaption::DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs)
    for (const auto &item : attribs)  {
 
       if (item.name == "id") {
-         // interpret id attribute as an anchor 
-      
+         // interpret id attribute as an anchor
+
          QSharedPointer<SectionInfo> sec = Doxy_Globals::sectionDict.find(item.value);
-   
+
          if (sec) {
             m_file   = sec->fileName;
             m_anchor = sec->label;
             m_hasCaptionId = true;
-   
+
             if (s_sectionDict && s_sectionDict->find(item.value) == 0) {
                s_sectionDict->insert(item.value, sec);
             }
-   
+
          } else {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid caption id '%s'", csPrintable(item.value));
-   
+
          }
-   
+
       } else  {
-         // copy attribute      
+         // copy attribute
          m_attribs.append(item);
       }
    }
@@ -3976,7 +3975,7 @@ void DocHtmlTable::accept(DocVisitor *v)
 
    for (auto n : m_children) {
       n->accept(v);
-   } 
+   }
 
    v->visitPost(this);
 }
@@ -5019,16 +5018,16 @@ int DocParamList::parse(const QString &cmdName)
 
    doctokenizerYYsetStatePara();
 
-   if (tok == 0) {    
-      // premature end of comment block 
+   if (tok == 0) {
+      // premature end of comment block
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
                      "argument of command %s", csPrintable(cmdName));
       retval = 0;
       goto endparamlist;
    }
 
-   if (tok != TK_WHITESPACE) { 
-      // premature end of comment block 
+   if (tok != TK_WHITESPACE) {
+      // premature end of comment block
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token in comment block while parsing the "
                      "argument of command %s", csPrintable(saveCmdName));
       retval = 0;
@@ -5199,7 +5198,7 @@ int DocPara::handleParamSection(const QString &cmdName, DocParamSect::Type t, bo
 {
    DocParamSect *ps = nullptr;
 
-   if (! m_children.isEmpty() && m_children.last()->kind() == Kind_ParamSect &&    
+   if (! m_children.isEmpty() && m_children.last()->kind() == Kind_ParamSect &&
          ((DocParamSect *)m_children.last())->type() == t) {
 
       // previous element was a param sect of same type
@@ -6324,11 +6323,11 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          if (/*getLanguageFromFileName(s_fileName)==SrcLangExt_CSharp ||*/ s_xmlComment)  {
             // for C# source or inside a <summary> or <remark> section we
             // treat <code> as an XML tag (so similar to @code)
-         
+
             doctokenizerYYsetStateXmlCode();
             retval = handleStartCode();
 
-         } else { 
+         } else {
             // normal HTML markup
             handleStyleEnter(this, m_children, DocStyleChange::Code, &g_token->attribs);
 
@@ -7012,7 +7011,7 @@ int DocPara::parse(bool skipParse, int token)
                   g_token->text = g_token->simpleSectText;
                   tok = TK_RCSTAG;
 
-               } else { 
+               } else {
                   // other section
                   tok = TK_COMMAND;
 
@@ -7194,7 +7193,7 @@ int DocPara::parse(bool skipParse, int token)
                n = n->parent();
             }
 
-            if (n) { 
+            if (n) {
                // already in a simple section
                // simple section cannot start in this paragraph, need
                // to unwind the stack and remember the command
@@ -7586,7 +7585,8 @@ void DocRoot::parse()
          retval = s->parse();
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid section id '%s'; ignoring section", qPrintable(g_token->sectionId));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid section id '%s', ignoring section",
+                  csPrintable(g_token->sectionId));
          retval = 0;
       }
    }
@@ -7754,8 +7754,8 @@ static QString processCopyDoc(const QString &data, uint &len)
 }
 
 // main entry point
-DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, 
-                  QSharedPointer<MemberDef> md, const QString &input, bool indexWords, bool isExample, 
+DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx,
+                  QSharedPointer<MemberDef> md, const QString &input, bool indexWords, bool isExample,
                   const QString &exampleName, bool singleLine, bool linkFromIndex)
 {
    // store parser state so we can re-enter this function if needed

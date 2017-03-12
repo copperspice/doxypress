@@ -4461,6 +4461,8 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
    QFileInfo fi(name);
 
    QString fName = fi.fileName();
+
+   // this will cause an error in fileSystemEngine if the name starts with ::
    QString path  = fi.absolutePath() + "/";
 
    if (fName.isEmpty()) {
@@ -5668,34 +5670,39 @@ QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnl
  */
 QString mergeScopes(const QString &leftScope, const QString &rightScope)
 {
-   // case leftScope=="A" rightScope=="A::B" => result = "A::B"
-
+   // case leftScope == "A" rightScope == "A::B" => result = "A::B"
    if (leftScopeMatch(rightScope, leftScope)) {
       return rightScope;
    }
 
    QString result;
-   int i = 0;
-   int p = leftScope.length() - 1;
 
-   // case leftScope=="A::B" rightScope=="B::C" => result = "A::B::C"
-   // case leftScope=="A::B" rightScope=="B" => result = "A::B"
-
+   int index  = 0;
+   int pos    = leftScope.length() - 1;
    bool found = false;
-   while ((i = leftScope.lastIndexOf("::", p)) != -1) {
-      if (leftScopeMatch(rightScope, leftScope.right(leftScope.length() - i - 2))) {
-         result = leftScope.left(i + 2) + rightScope;
-         found = true;
+
+   // case leftScope == "A::B" rightScope == "B::C" => result = "A::B::C"
+   // case leftScope == "A::B" rightScop e== "B"    => result = "A::B"
+
+   while ((index = leftScope.lastIndexOf("::", pos)) != -1) {
+
+      if (leftScopeMatch(rightScope, leftScope.right(leftScope.length() - index - 2))) {
+         result = leftScope.left(index + 2) + rightScope;
+         found  = true;
       }
 
-      p = i - 1;
+      pos = index - 1;
+
+      if (pos < 0)  {
+         break;
+      }
    }
 
    if (found) {
       return result;
    }
 
-   // case leftScope=="A" rightScope=="B" => result = "A::B"
+   // case leftScope == "A" rightScope == "B" => result = "A::B"
    result = leftScope;
 
    if (! result.isEmpty() && ! rightScope.isEmpty()) {
@@ -5703,6 +5710,7 @@ QString mergeScopes(const QString &leftScope, const QString &rightScope)
    }
 
    result += rightScope;
+
    return result;
 }
 
@@ -7160,15 +7168,15 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
       filterProcess.start(cmd);
       filterProcess.waitForFinished(-1);
 
-      if (filterProcess.exitStatus() != QProcess::NormalExit) {        
+      if (filterProcess.exitStatus() != QProcess::NormalExit) {
          err("Unable to execute command:  %s\n", csPrintable(cmd) );
          return false;
       }
 
-      buffer = filterProcess.readAllStandardOutput();     
+      buffer = filterProcess.readAllStandardOutput();
 
       QByteArray errorMsg = filterProcess.readAllStandardError();
-       if (! errorMsg.isEmpty()) {        
+       if (! errorMsg.isEmpty()) {
          err("Possible filter problem: %s\n", errorMsg.constData());
       }
    }

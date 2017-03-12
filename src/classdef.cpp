@@ -754,13 +754,16 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    // repeat brief description
    if (! briefDescription().isEmpty() && repeatBrief) {
       ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
-   }
 
-   if (! briefDescription().isEmpty() && repeatBrief && ! docText.isEmpty()) {
-      ol.pushGeneratorState();
-      ol.disable(OutputGenerator::Html);
-      ol.writeString("\n\n");
-      ol.popGeneratorState();
+
+      if (! docText.isEmpty()) {
+
+         ol.pushGeneratorState();
+         ol.disable(OutputGenerator::Html);
+
+         ol.writeString("\n\n");
+         ol.popGeneratorState();
+      }
    }
 
    // write documentation
@@ -800,7 +803,7 @@ bool ClassDef::hasDetailedDescription() const
 
 // write the detailed description for this class
 void ClassDef::writeDetailedDescription(OutputList &ol, const QString &, bool exampleFlag,
-                                        const QString &title, const QString &anchor)
+                  const QString &title, const QString &anchor)
 {
    if (hasDetailedDescription() || exampleFlag) {
       ol.pushGeneratorState();
@@ -813,7 +816,7 @@ void ClassDef::writeDetailedDescription(OutputList &ol, const QString &, bool ex
       ol.writeAnchor(0, anchor.isEmpty() ? QString("details") : anchor);
       ol.popGeneratorState();
 
-      if (!anchor.isEmpty()) {
+      if (! anchor.isEmpty()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Html);
          ol.disable(OutputGenerator::Man);
@@ -885,7 +888,7 @@ void ClassDef::showUsedFiles(OutputList &ol)
       }
 
       QString fname = fd->name();
-      if (! fd->getVersion().isEmpty()) { 
+      if (! fd->getVersion().isEmpty()) {
          // append version if available
          fname += " (" + fd->getVersion() + ")";
       }
@@ -1893,7 +1896,6 @@ void ClassDef::writeDocumentation(OutputList &ol)
    static const bool separateMemberPages = Config::getBool("separate-member-pages");
    // static const bool optimizeFortran  = Config::getBool("optimize-fortran");
 
-
    QString pageTitle = title();
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ClassVisible, ! generateTreeView);
 
@@ -1909,8 +1911,8 @@ void ClassDef::writeDocumentation(OutputList &ol)
 
    addClassAttributes(ol);
    addGroupListToTitle(ol, self);
-
    endTitle(ol, getOutputFileBase(), displayName());
+
    writeDocumentationContents(ol, pageTitle);
    endFileWithNavPath(self, ol);
 
@@ -2545,7 +2547,7 @@ void ClassDef::mergeMembers()
    QString sep = getLanguageSpecificSeparator(lang, true);
    int sepLen  = sep.length();
 
-   m_membersMerged = true;  
+   m_membersMerged = true;
 
    if (baseClasses()) {
 
@@ -3259,7 +3261,7 @@ void ClassDef::getTemplateParameterLists(QVector<ArgumentList> &lists) const
 }
 
 QString ClassDef::qualifiedNameWithTemplateParameters(const QVector<ArgumentList> &actualParams, int *actualParamIndex) const
-{   
+{
    static const bool hideScopeNames  = Config::getBool("hide-scope-names");
    // static const bool optimizeJava = Config::getBool("optimize-java");
 

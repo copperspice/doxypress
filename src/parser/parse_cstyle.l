@@ -7544,6 +7544,8 @@ SkipC11Attribute>"]]"                 {
    }
 
 <CompoundName,ClassVar>{B}*"{"{B}*  {
+      static const bool extractAnonNS = Config::getBool("extract-anon-namespaces")
+
       current->fileName    = yyFileName;
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
@@ -7556,9 +7558,9 @@ SkipC11Attribute>"]]"                 {
          if (current->section == Entry::NAMESPACE_SEC) {
             // allow reopening of anonymous namespaces
 
-            if (Config::getBool("extract-anon-namespaces")) {
+            if (extractAnonNS) {
                // use visible name
-               current->name = "anonymous_namespace{"+stripPath(current->fileName)+"}";
+               current->name = "anonymous_namespace{" + stripPath(current->fileName) + "}";
 
             } else {
                // use invisible name

@@ -17,8 +17,12 @@
 
 #include <parse_lib_tooling.h>
 
+#include <config.h>
+#include <util.h>
+
 static QMap<QString, clang::DeclContext *>  s_parentNodeMap;
 static QMultiMap<QString, QSharedPointer<Entry>> s_orphanMap;
+static int anonNSCount  = 0;
 
 static Protection getAccessSpecifier(const clang::Decl *node)
 {
@@ -59,6 +63,24 @@ static Protection getAccessSpecifier(const clang::CXXBaseSpecifier *node)
       case clang::AS_private:
          retval = Private;
          break;
+   }
+
+   return retval;
+}
+
+static QString getName(const clang::NamedDecl *node)
+{
+   QString retval = "";
+
+   if (node->getDeclName().isIdentifier()) {
+
+      llvm::StringRef tmp = node->getName();
+      retval = QString::fromUtf8(tmp.data(), tmp.size());
+
+   } else {
+
+      // BROOM  add something here - look at Reid's work
+
    }
 
    return retval;
@@ -115,6 +137,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          m_policy.PolishForDeclaration = true;
       }
 
+
       static QString toQString(const llvm::StringRef &value) {
          return QString::fromUtf8(value.data(), value.size());
       }
@@ -156,7 +179,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
-         QString name = toQString(node->getName());
+         QString name = getName(node);
 
          if (node->isClass() ) {
 
@@ -362,7 +385,6 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                // simulate printBefore printAfter
                std::string tString;
                llvm::raw_string_ostream tStream(tString);
-
                llvm::Twine twine("\n");
 
                clang::QualType::print(tQualType.split(), tStream, m_policy, twine);
@@ -378,6 +400,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   tmpAfter.replace("__attribute__((thiscall))", "");
                }
             }
+
+            tmpType.remove("(anonymous namespace)::");
 
             if (tmpAfter.contains("...")) {
                // adjust location of parameter pack
@@ -465,6 +489,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                current->m_traits.setTrait(Entry::Virtue::NoExcept);
                break;
          }
+
+         returnType.remove("(anonymous namespace)::");
 
          if (methodDecl == nullptr) {
             // function
@@ -583,8 +609,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
          auto tQualType = node->getType();
-
-         QString name = toQString(node->getName());
+         QString name   = getName(node);
 
          // handle array
          QString args;
@@ -654,7 +679,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
          } else {
-            printf("\n BROOM - enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
+            printf("\n BROOM - enum parentEntry NULLPTR   name = %s  USR = %s",
+                  csPrintable(name), csPrintable(parentUSR) );
          }
 
          QString currentUSR = getUSR_Decl(node);
@@ -851,7 +877,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                return true;
             }
 
-            name       = toQString(functionDecl->getName());
+            name       = getName(functionDecl);
             returnType = "friend " + toQString(functionDecl->getReturnType());
 
             args = "(";
@@ -929,7 +955,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          clang::SourceRange smRange     = node->getSourceRange();
          clang::SourceLocation location = smRange.getBegin();
 
-         QString name = toQString(node->getName());
+         QString name         = toQString(node->getName());
 
          current->section     = Entry::DEFINE_SEC;
          current->name        = name;
@@ -941,7 +967,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->bodyLine    = current->startLine;
 
 
-         // printf("\n  Broom - Macro Definition  name: %s   line: %d  col: %d \n",
+         // printf("\n  BROOM - Macro Definition  name: %s   line: %d  col: %d \n",
          //         csPrintable(name), current->startLine, current->startColumn );
 
 
@@ -957,7 +983,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          QString name = toQString(node->getName());
 
-         // printf("\n  Broom - Macro Expansion  %s\n", csPrintable(name));
+         // printf("\n  BROOM - Macro Expansion  %s\n", csPrintable(name));
 
          if (name == "CS_OBJECT" || name == "Q_OBJECT") {
             // do nothing at this time
@@ -968,6 +994,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
       virtual bool VisitNamespaceDecl(clang::NamespaceDecl *node) {
          // namespace
+         static const bool extractAnonNS = Config::getBool("extract-anon-namespaces");
 
          QSharedPointer<Entry> parentEntry;
          QSharedPointer<Entry> current = QMakeShared<Entry>();
@@ -980,7 +1007,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString currentUSR   = getUSR_Decl(node);
          s_entryMap.insert(currentUSR, current);
 
-         QString name         = toQString(node->getName());
+         QString name         = getName(node);
 
          current->section     = Entry::NAMESPACE_SEC;
          current->name        = name;
@@ -991,6 +1018,19 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
+
+         if (name.isEmpty() ) {
+            // anonymous namespace
+
+            if (extractAnonNS) {
+               // use visible name
+               current->name = "anonymous_namespace{" + stripPath(current->fileName) + "}";
+
+            } else {
+               // use invisible name
+               current->name = QString("@%1").arg(anonNSCount);
+            }
+         }
 
          if (parentEntry == nullptr)  {
             s_current_root->addSubEntry(current, s_current_root);
@@ -1034,7 +1074,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             parentEntry->m_traits.setTrait(Entry::Virtue::Template);
 
             QString type = "class";
-            QString name = toQString(node->getName());
+            QString name = getName(node);
             QString defValue;
 
             if (node->wasDeclaredWithTypename())  {
@@ -1076,7 +1116,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
-         QString name = toQString(node->getName());
+         QString name = getName(node);
 
          current->section     = Entry::VARIABLE_SEC;
          current->name        = name;
@@ -1139,6 +1179,9 @@ if (iter.key().contains("SerializedDiagnosticReader")) {
 
             }
          }
+
+         // increment for each TU
+         anonNSCount++;
       }
 
    private:
