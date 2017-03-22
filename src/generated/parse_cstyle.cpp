@@ -14401,7 +14401,7 @@ YY_RULE_SETUP
       if (insideIDL) {
          isTypedef = false;
          current->section     = Entry::NAMESPACE_SEC;
-         current->type        = "module" ;
+         current->type        = "module";
          current->fileName    = yyFileName;
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
@@ -14487,7 +14487,7 @@ YY_RULE_SETUP
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
          addType(current);
-         current->type      += " service " ;
+         current->type      += " service ";
          current->fileName  = yyFileName;
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
@@ -14523,7 +14523,7 @@ YY_RULE_SETUP
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
          addType( current );
-         current->type      += " singleton " ;
+         current->type      += " singleton ";
          current->fileName  = yyFileName;
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
@@ -21717,6 +21717,8 @@ YY_RULE_SETUP
 case 678:
 YY_RULE_SETUP
 {
+      static const bool extractAnonNS = Config::getBool("extract-anon-namespaces");
+
       current->fileName    = yyFileName;
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
@@ -21729,9 +21731,9 @@ YY_RULE_SETUP
          if (current->section == Entry::NAMESPACE_SEC) {
             // allow reopening of anonymous namespaces
 
-            if (Config::getBool("extract-anon-namespaces")) {
+            if (extractAnonNS) {
                // use visible name
-               current->name = "anonymous_namespace{"+stripPath(current->fileName)+"}";
+               current->name = "anonymous_namespace{" + stripPath(current->fileName) + "}";
 
             } else {
                // use invisible name
@@ -23018,7 +23020,7 @@ YY_RULE_SETUP
       currentArgumentContext = PrototypeQual;
       fullArgString = current->args;
       copyArgString = &current->args;
-      BEGIN( ReadFuncArgType ) ;
+      BEGIN( ReadFuncArgType );
    }
 	YY_BREAK
 case 776:
@@ -23042,17 +23044,17 @@ case 778:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->args+=text[0];
+      current->args += text[0];
       currentArgumentContext = PrototypeQual;
       fullArgString = current->args;
       copyArgString = &current->args;
-      BEGIN( ReadFuncArgType ) ;
+      BEGIN( ReadFuncArgType );
    }
 	YY_BREAK
 case 779:
 YY_RULE_SETUP
 {
-      current->type+=')';
+      current->type += ')';
       BEGIN( Prototype );
    }
 	YY_BREAK
@@ -23073,14 +23075,14 @@ case 782:
 YY_RULE_SETUP
 {
       current->args += " const ";
-      current->argList.constSpecifier=true;
+      current->argList.constSpecifier = true;
    }
 	YY_BREAK
 case 783:
 YY_RULE_SETUP
 {
       current->args += " volatile ";
-      current->argList.volatileSpecifier=true;
+      current->argList.volatileSpecifier = true;
    }
 	YY_BREAK
 case 784:
@@ -23088,7 +23090,7 @@ YY_RULE_SETUP
 {
       current->args += " = 0";
       current->virt = Pure;
-      current->argList.pureSpecifier=true;
+      current->argList.pureSpecifier = true;
    }
 	YY_BREAK
 case 785:
@@ -24718,7 +24720,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
 static void parsePrototype(const QString &text)
 {
    if (text.isEmpty()) {
-      warn(yyFileName,yyLineNr,"Empty prototype found");
+      warn(yyFileName, yyLineNr,"Empty prototype found");
       return;
    }
 
@@ -24750,8 +24752,9 @@ static void parsePrototype(const QString &text)
    s_lexInit = true;
 
    current->name = current->name.trimmed();
-   if (current->section == Entry::MEMBERDOC_SEC && current->args.isEmpty())
-    current->section = Entry::VARIABLEDOC_SEC;
+   if (current->section == Entry::MEMBERDOC_SEC && current->args.isEmpty()) {
+      current->section = Entry::VARIABLEDOC_SEC;
+   }
 
    // restore original scanner state
    YY_BUFFER_STATE tmpState = YY_CURRENT_BUFFER;

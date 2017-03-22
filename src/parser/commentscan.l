@@ -388,7 +388,7 @@ static GuardType        guardType;           // kind of guard for conditional se
 static bool             enabledSectionFound;
 static QString          functionProto;       // function prototype
 
-static QStack<GuardedSection> s_guards;      // tracks nested conditional sections (if,ifnot,..)
+static QStack<GuardedSection> s_guards;      // tracks nested conditional sections (if, ifnot, ..)
 static QSharedPointer<Entry>  current;       // working entry
 
 static bool             s_needNewEntry;
@@ -1220,8 +1220,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <Comment>{B}*{CMD}"{"        {
-      // begin of a group
-      // langParser->handleGroupStartCommand(s_memberGroupHeader);
+      // beginning of a group     
       openGroup(current, yyFileName, yyLineNr);
    }
 
@@ -1231,7 +1230,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       closeGroup(current, yyFileName, yyLineNr, true);
 
-      s_memberGroupHeader.resize(0);
+      s_memberGroupHeader.clear();
       s_parseMore    = true;
       s_needNewEntry = true;
 
@@ -1613,7 +1612,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       current->name = substitute(text,".","::");
-      if (current->section==Entry::PROTOCOLDOC_SEC) {
+      if (current->section == Entry::PROTOCOLDOC_SEC) {
          current->name+="-p";
       }
 
@@ -1622,7 +1621,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <CategoryDocArg1>{SCOPENAME}{B}*"("[^\)]+")" {
-      QString text = QString::fromUtf8(yytext);
+      QString text  = QString::fromUtf8(yytext);
       current->name = substitute(text,".","::");
       BEGIN( ClassDocArg2 );
    }
@@ -1653,7 +1652,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <ClassDocArg2>{FILE}|"<>"     {
-      // second argument; include file
+      // second argument, include file
       QString text = QString::fromUtf8(yytext);
       current->includeFile = text;
       BEGIN( ClassDocArg3 );
@@ -1682,7 +1681,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 
 <ClassDocArg3>[<"]?{FILE}?[">]?     {
-      // third argument; include file name
+      // third argument, include file name
       QString text = QString::fromUtf8(yytext);
       current->includeName = text;
       BEGIN( Comment );
@@ -2610,7 +2609,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          }
 
          addOutput('\n');
-         langParser->parsePrototype(functionProto);
+
+         if (langParser != nullptr) {
+            // not used for clang parsing
+            langParser->parsePrototype(functionProto);
+         }   
+
          BEGIN( Comment );
       }
    }
@@ -2647,6 +2651,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 
   /* ----- handle argument of overload command ------- */
+
 <OverloadParam>{DOCNL}        {
       // end of argument
       QString text = QString::fromUtf8(yytext);
@@ -2662,7 +2667,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       }  else   {
          // overload declaration
          makeStructuralIndicator(Entry::OVERLOADDOC_SEC);
-         langParser->parsePrototype(functionProto);
+
+         if (langParser != nullptr) {
+            // not used for clang parsing
+            langParser->parsePrototype(functionProto);
+         }
       }
 
       BEGIN( Comment );
@@ -3516,31 +3525,32 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
                   Protection &r_protection, int &r_position, bool &r_newEntryNeeded )
 {
    initParser();
-
    s_guards.clear();
-   langParser = parser;
-   current    = curEntry;
-
+ 
    if (comment.isEmpty()) {
       // avoid empty strings
-      return FALSE;
+      return false;
    }
 
-   inputString    = comment;
-   inputString.append(" ");
-
-   inputPosition  = r_position;
+   langParser     = parser;
+   current        = curEntry;
+   inputString    = comment; 
    yyFileName     = fileName;
    yyLineNr       = lineNr;
+   briefEndsAtDot = isAutoBrief;
+   inBody         = isInbody;
+
    protection     = r_protection;
-   s_needNewEntry = false;
+   inputPosition  = r_position;  
+   
    xrefKind       = XRef_None;
    xrefAppendFlag = false;
    insidePre      = false;
-   s_parseMore    = false;
-   inBody         = isInbody;
+   s_needNewEntry = false;
+   s_parseMore    = false;   
 
-   outputXRef.resize(0);
+   outputXRef.clear();
+   inputString.append(" ");
 
    if (isBrief || isAutoBrief) {
       setOutput(OutputBrief);
@@ -3548,17 +3558,13 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    } else {
       setOutput(OutputDoc);
    }
-
-   briefEndsAtDot = isAutoBrief;
-
+ 
    s_condCount    = 0;
    s_sectionLevel = 0;
 
-   s_spaceBeforeCmd.resize(0);
-   s_spaceBeforeIf.resize(0);
-
-   printlex(yy_flex_debug, true, __FILE__, fileName);
-
+   s_spaceBeforeCmd.clear();
+   s_spaceBeforeIf.clear();
+ 
    if (! current->doc.isEmpty()) {
       // separate detailed doc fragments
       current->doc += "\n\n";
@@ -3568,10 +3574,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       // separate in body fragments
       current->inbodyDocs += "\n\n";
    }
-
-   Debug::print(Debug::CommentScan, 0, "-----------\nCommentScanner: %s:%d\n"
-                "input=[\n%s]\n", csPrintable(fileName), lineNr, csPrintable(comment) );
-
+  
    yyrestart(yyin);
    BEGIN( Comment );
 
@@ -3610,10 +3613,6 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       current->inbodyDocs = processMarkdown(fileName, lineNr, current, current->inbodyDocs);
    }
 
-   Debug::print(Debug::CommentScan, 0, "brief=[line=%d\n%s]\ndocs=[line=%d\n%s]\ninbody=[line=%d\n%s]\n===========\n",
-                current->briefLine,  qPrintable(current->brief), current->docLine, qPrintable(current->doc),
-                current->inbodyLine, qPrintable(current->inbodyDocs) );
-
    checkFormula();
    r_protection = protection;
 
@@ -3633,8 +3632,6 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    lineNr = yyLineNr;
 
-   printlex(yy_flex_debug, false, __FILE__, fileName);
-
    return s_parseMore;
 }
 
@@ -3642,16 +3639,16 @@ void groupEnterFile(const QString &fileName, int)
 {
    s_autoGroupStack.clear();
    s_memberGroupId = DOX_NOGROUP;
-   s_memberGroupDocs.resize(0);
-   s_memberGroupRelates.resize(0);
+   s_memberGroupDocs.clear();
+   s_memberGroupRelates.clear();
    s_compoundName = fileName;
 }
 
 void groupLeaveFile(const QString &fileName, int line)
 {
    s_memberGroupId = DOX_NOGROUP;
-   s_memberGroupRelates.resize(0);
-   s_memberGroupDocs.resize(0);
+   s_memberGroupRelates.clear();
+   s_memberGroupDocs.clear();
 
    if (! s_autoGroupStack.isEmpty()) {
       warn(fileName, line, "End of file while inside a group\n");
@@ -3665,8 +3662,8 @@ void groupEnterCompound(const QString &fileName, int line, const QString &name)
    }
 
    s_memberGroupId = DOX_NOGROUP;
-   s_memberGroupRelates.resize(0);
-   s_memberGroupDocs.resize(0);
+   s_memberGroupRelates.clear();
+   s_memberGroupDocs.clear();
    s_compoundName = name;
 
    int i = s_compoundName.indexOf('(');

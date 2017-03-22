@@ -280,7 +280,7 @@ class Entry
       m_parent = parent;
    }
 
-   // Returns the parent for this Entry or 0 if this entry has no parent.
+   // Returns the parent for this Entry or null_ptr if this entry has no parent
    QSharedPointer<Entry> parent() const {
       return m_parent.toStrongRef();
    }
@@ -292,7 +292,7 @@ class Entry
       return m_sublist;
    }
 
-   // Adds entry \a e as a child to this entry /
+   // Adds entry e as a child to this entry /
    void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self);
 
    // Removes entry \a e from the list of children

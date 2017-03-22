@@ -1626,7 +1626,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       if (insideIDL) {
          isTypedef = false;
          current->section     = Entry::NAMESPACE_SEC;
-         current->type        = "module" ;
+         current->type        = "module";
          current->fileName    = yyFileName;
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
@@ -1703,7 +1703,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
          addType(current);
-         current->type      += " service " ;
+         current->type      += " service ";
          current->fileName  = yyFileName;
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
@@ -1736,7 +1736,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
          addType( current );
-         current->type      += " singleton " ;
+         current->type      += " singleton ";
          current->fileName  = yyFileName;
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
@@ -2454,8 +2454,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       QChar tmpChar = text[text.length() - 2];
-      s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) ||
-                  ( tmpChar == '!' && qt_auto_brief );
+      s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
 
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
 
@@ -7544,7 +7543,7 @@ SkipC11Attribute>"]]"                 {
    }
 
 <CompoundName,ClassVar>{B}*"{"{B}*  {
-      static const bool extractAnonNS = Config::getBool("extract-anon-namespaces")
+      static const bool extractAnonNS = Config::getBool("extract-anon-namespaces");
 
       current->fileName    = yyFileName;
       current->startLine   = yyLineNr;
@@ -8586,7 +8585,7 @@ SkipC11Attribute>"]]"                 {
       currentArgumentContext = PrototypeQual;
       fullArgString = current->args;
       copyArgString = &current->args;
-      BEGIN( ReadFuncArgType ) ;
+      BEGIN( ReadFuncArgType );
    }
 
 <Prototype>"("({ID}"::")*({B}*[&*])+   {
@@ -8603,15 +8602,15 @@ SkipC11Attribute>"]]"                 {
 
 <PrototypePtr>"("          {
       QString text = QString::fromUtf8(yytext);
-      current->args+=text[0];
+      current->args += text[0];
       currentArgumentContext = PrototypeQual;
       fullArgString = current->args;
       copyArgString = &current->args;
-      BEGIN( ReadFuncArgType ) ;
+      BEGIN( ReadFuncArgType );
    }
 
 <PrototypePtr>")"          {
-      current->type+=')';
+      current->type += ')';
       BEGIN( Prototype );
    }
 
@@ -8626,18 +8625,18 @@ SkipC11Attribute>"]]"                 {
 
 <PrototypeQual>{B}*"const"{B}*      {
       current->args += " const ";
-      current->argList.constSpecifier=true;
+      current->argList.constSpecifier = true;
    }
 
 <PrototypeQual>{B}*"volatile"{B}*   {
       current->args += " volatile ";
-      current->argList.volatileSpecifier=true;
+      current->argList.volatileSpecifier = true;
    }
 
 <PrototypeQual>{B}*"="{B}*"0"{B}*   {
       current->args += " = 0";
       current->virt = Pure;
-      current->argList.pureSpecifier=true;
+      current->argList.pureSpecifier = true;
    }
 
 <PrototypeQual>"throw"{B}*"("            {
@@ -9081,7 +9080,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
 static void parsePrototype(const QString &text)
 {
    if (text.isEmpty()) {
-      warn(yyFileName,yyLineNr,"Empty prototype found");
+      warn(yyFileName, yyLineNr,"Empty prototype found");
       return;
    }
 
@@ -9113,8 +9112,9 @@ static void parsePrototype(const QString &text)
    s_lexInit = true;
 
    current->name = current->name.trimmed();
-   if (current->section == Entry::MEMBERDOC_SEC && current->args.isEmpty())
-    current->section = Entry::VARIABLEDOC_SEC;
+   if (current->section == Entry::MEMBERDOC_SEC && current->args.isEmpty()) {
+      current->section = Entry::VARIABLEDOC_SEC;
+   }
 
    // restore original scanner state
    YY_BUFFER_STATE tmpState = YY_CURRENT_BUFFER;

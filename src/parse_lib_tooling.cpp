@@ -203,7 +203,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
             //
-            clang::ClassTemplatePartialSpecializationDecl *specialNode = llvm::dyn_cast<clang::ClassTemplatePartialSpecializationDecl>(node);
+            clang::ClassTemplatePartialSpecializationDecl *specialNode =
+                  llvm::dyn_cast<clang::ClassTemplatePartialSpecializationDecl>(node);
 
             if (specialNode != nullptr) {
                // partial
@@ -212,11 +213,15 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                llvm::raw_string_ostream tStream(tString);
 
                auto tmp = specialNode->getTemplateArgsAsWritten();
-               clang::TemplateSpecializationType::PrintTemplateArgumentList(tStream, tmp->getTemplateArgs(), tmp->NumTemplateArgs, m_policy);
+
+               clang::TemplateSpecializationType::PrintTemplateArgumentList(tStream,
+                  tmp->getTemplateArgs(), tmp->NumTemplateArgs, m_policy);
+
                current->name += toQString(tStream.str());
 
             } else {
-               clang::ClassTemplateSpecializationDecl *specialNode = llvm::dyn_cast<clang::ClassTemplateSpecializationDecl>(node);
+               clang::ClassTemplateSpecializationDecl *specialNode =
+                  llvm::dyn_cast<clang::ClassTemplateSpecializationDecl>(node);
 
                if (specialNode != nullptr) {
                   // full
@@ -591,6 +596,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             } else {
                // hold until we visit the parent
                s_orphanMap.insert(parentUSR, current);
+
             }
          }
 

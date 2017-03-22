@@ -24,6 +24,7 @@
 
 #include <parse_clang.h>
 
+#include <commentscan.h>
 #include <config.h>
 #include <doxy_globals.h>
 #include <entry.h>
@@ -34,6 +35,8 @@
 #include <stringmap.h>
 #include <tooltip.h>
 #include <util.h>
+
+static void handleCommentBlock(const QString &comment, bool brief, const QString &fileName, QSharedPointer<Entry> current);
 
 static QSet<QString>                 s_includedFiles;
 static QSharedPointer<Definition>    s_currentDefinition;
@@ -504,7 +507,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
          std::string inc = std::string("-I") + item.toUtf8().constData();
          argList.push_back(std::move(inc));
       }
-   
+
       // add external include paths
       for (auto &item : includePath) {
          std::string inc = std::string("-I") + item.toUtf8().constData();
@@ -521,14 +524,14 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       for (auto &item : clangFlags) {
          argList.push_back(item.toUtf8().constData());
       }
-   
+
       argList.push_back("-ferror-limit=0");
       argList.push_back("-x");
 
       // save for the next pass
       clangCmdArgs = argList;
 
-   } else { 
+   } else {
       // just copy the first x args since they do not change
       argList = clangCmdArgs;
 
@@ -664,7 +667,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
          s_current_root = root;
          s_entryMap.insert("TranslationUnit", root);
 
-         // strip out the fileName 
+         // strip out the fileName
          argList.erase(argList.end() - 1);
 
          // pass all arguments except the file name, which was just removed
@@ -679,7 +682,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
          // create a new clang tooling instance
          clang::tooling::ClangTool tool(options, sourceList);
 
-         // use the file in memory            
+         // use the file in memory
          tool.mapVirtualFile(tmpFName, p->sources[0].constData());
 
          // run the clang tooling to create a new FrontendAction
@@ -706,17 +709,16 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
          return;
       }
 
-      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       // walk the tokens
-      for (int index = 0; index < p->numTokens; index++)  {
+      for (int index = 0; index < p->numTokens; ++index)  {
 
          CXTokenKind tokenKind = clang_getTokenKind(p->tokens[index]);
 
          if (tokenKind == CXToken_Comment) {
-            QString comment = getTokenSpelling(p->tu, p->tokens[index]);
-            comment = comment.trimmed();
+            QString comment = getTokenSpelling(p->tu, p->tokens[index]).trimmed();
 
             CXCursor cursor;
             bool isBrief = false;
@@ -754,7 +756,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   }
                }
 
-               QChar char2  = comment.at(2);
+               QChar char2 = comment.at(2);
 
                if (javadoc_auto_brief && char2 == '*') {
                   isBrief = true;
@@ -781,10 +783,37 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
             } else if (comment.startsWith("/**")) {
                // */ (editor syntax fix),   javadoc comment
 
-               cursor = p->cursors[index+1];
-
                int len = comment.length() - 5;
                comment = comment.mid(3, len);
+
+               ++index;
+
+               while (index < p->numTokens) {
+                  // skip over the cursor comment
+                  cursor = p->cursors[index];
+
+                  tokenKind = clang_getTokenKind(p->tokens[index]);
+
+                  if (tokenKind == CXToken_Comment) {
+                     // next cursor is also a comment, merge
+                     QString extra = getTokenSpelling(p->tu, p->tokens[index]).trimmed();
+
+                     int len = extra.length() - 5;
+                     extra = extra.mid(3, len);
+
+                     comment += "\n\n" + extra;
+
+                   } else {
+                     break;
+
+                   }
+
+                   ++index;
+               }
+
+               while (index < p->numTokens && ! documentKind(cursor) ) {
+                  cursor = p->cursors[++index];
+               }
 
                // remove single *
                QRegExp reg("\n\\s*\\*");
@@ -797,10 +826,37 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
             } else if (comment.startsWith("/*!")) {
                // */ (editor syntax fix),   qt comment
 
-               cursor = p->cursors[index+1];
-
                int len = comment.length() - 5;
                comment = comment.mid(3, len);
+
+               ++index;
+
+               while (index < p->numTokens) {
+                  // skip over the cursor comment
+                  cursor = p->cursors[index];
+
+                  tokenKind = clang_getTokenKind(p->tokens[index]);
+
+                  if (tokenKind == CXToken_Comment) {
+                     // next cursor is also a comment, merge
+                     QString extra = getTokenSpelling(p->tu, p->tokens[index]).trimmed();
+
+                     int len = extra.length() - 5;
+                     extra = extra.mid(3, len);
+
+                     comment += "\n\n" + extra;
+
+                   } else {
+                     break;
+
+                   }
+
+                   ++index;
+               }
+
+               while (index < p->numTokens && ! documentKind(cursor) ) {
+                  cursor = p->cursors[++index];
+               }
 
                if (qt_auto_brief) {
                   isBrief = true;
@@ -815,7 +871,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                int tmpIndex = index + 1;
 
                while (tmpIndex < p->numTokens)  {
-
                   // is this next cursor a comment?
                   CXTokenKind tokenKind = clang_getTokenKind(p->tokens[tmpIndex]);
 
@@ -833,7 +888,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
             }
 
-            // test the cursor
+            // test if the cursor is related to documentation
             if (documentKind(cursor)) {
 
                // add the comment to cursor
@@ -843,6 +898,8 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                QSharedPointer<Entry> current = s_entryMap.value(key);
 
                if (current) {
+                  handleCommentBlock(comment, false, fileName, current);
+
                   if (isBrief && current->brief.isEmpty()) {
                      QString brief;
                      QRegExp reg("([^.]*\\.)\\s(.*)");
@@ -857,9 +914,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      }
 
                      current->brief = brief;
-                  }
-
-                  current->doc += comment;
+                  }                  
                }
             }
          }
@@ -901,6 +956,70 @@ void ClangParser::finish()
    p->sources   = 0;
    p->numFiles  = 0;
    p->tu        = 0;
+}
+
+static void handleCommentBlock(const QString &comment, bool brief, const QString &fileName, QSharedPointer<Entry> current)
+{
+   static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
+   bool docBlockInBody = false; 
+
+/*
+   if (docBlockInBody && hideInBodyDocs) {
+      return;
+   }
+*/
+   
+   int lineNum         = 0;
+   int position        = 0;
+
+   bool needsEntry     = false;
+   bool isBrief        = false;
+   bool isJavaDocStyle = false;
+
+   if (brief) {
+      lineNum = current->briefLine;
+   } else {
+      lineNum = current->docLine;
+   }
+
+/*
+   if (! docBlockInBody) {
+      isBrief = brief;
+     
+      bool docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
+      isJavaDocStyle = docBlockAutoBrief;
+   }
+   
+   QSharedPointer<Entry> docEntry = docBlockInBody && previous ? previous : current;
+
+   if (docBlockInBody && docEntry && docEntry->inbodyLine == -1) {
+      docEntry->inbodyFile = fileName;
+      docEntry->inbodyLine = lineNum;
+   }
+*/
+
+   QSharedPointer<Entry> docEntry = current;
+
+   while (parseCommentBlock(nullptr, docEntry, comment,
+                  fileName,
+                  lineNum,                                         // passed by reference
+                  isBrief, isJavaDocStyle, docBlockInBody,
+                  current->protection, position, needsEntry) ) {   // last 3 are passed by reference
+
+      if (needsEntry) {
+         QString docFile = current->docFile;
+
+         QSharedPointer<Entry> parent = current->parent();
+
+         current = QMakeShared<Entry>();
+         parent->addSubEntry(current, parent);
+
+         current->docFile = docFile;
+         current->docLine = lineNum;
+
+         docEntry = current;
+      }
+   }
 }
 
 // filter the files keeping those which where found as include files within the TU
