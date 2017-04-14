@@ -4112,9 +4112,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       codifyLines(text); 
    }
 
-<*>.              {
+<*>.[\x80-\xAF]*     {
       QString text = QString::fromUtf8(yytext);
-      g_yyColNr++;
+      g_yyColNr += text.size();
       g_code->codify(text);
    }
 

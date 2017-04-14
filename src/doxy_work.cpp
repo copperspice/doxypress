@@ -528,7 +528,7 @@ void processFiles()
    QFile layoutFile(layoutFileName);
 
    if (layoutFile.open(QIODevice::ReadOnly)) {
-      msg("Parsing layout file %s\n", csPrintable(layoutFileName));
+      msg("Parse layout file %s\n", csPrintable(layoutFileName));
 
       QTextStream t(&layoutFile);
       t.setCodec("UTF-8");
@@ -585,7 +585,7 @@ void processFiles()
    QSharedPointer<EntryNav> rootNav = QMakeShared<EntryNav>(QSharedPointer<EntryNav>(), root);
    rootNav->setEntry(root);
 
-   msg("Parsing tag files\n");
+   msg("Parse tag files\n");
 
    const QStringList tagFileList = Config::getList("tag-files");
 
@@ -600,7 +600,7 @@ void processFiles()
    }
 
    msg("\n**  ");
-   Doxy_Globals::infoLog_Stat.begin("Parsing files\n");
+   Doxy_Globals::infoLog_Stat.begin("Parsing\n");
    parseFiles(root, rootNav);
 
    Doxy_Globals::fileStorage.close();

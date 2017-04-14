@@ -1755,7 +1755,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
       return TK_COMMAND;
    }
 
-<*>.       {
+<*>.[\x80-\xAF]*       {
       QString text = QString::fromUtf8(yytext);
       warn(s_fileName, yylineno,"Unexpected character `%s'", csPrintable(text));
    }

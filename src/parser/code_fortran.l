@@ -1433,7 +1433,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       g_code->codify(text);
    }
 
-<*>.                                    {
+<*>.[\x80-\xAF]*                        {
       QString text = QString::fromUtf8(yytext);
 
       if (g_isFixedForm && yy_my_start > fixedCommentAfter) {

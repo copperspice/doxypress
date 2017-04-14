@@ -2931,7 +2931,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       yyLineNr = 1 ;
       yyFileName = fileName;
-      msg("Parsing file %s\n", qPrintable(yyFileName));
+      msg("Parsing %s\n", csPrintable(yyFileName));
 
       startScope(rt); // implies current_root = rt
       initParser();

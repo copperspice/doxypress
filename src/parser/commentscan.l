@@ -1419,18 +1419,19 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       }
    }
 
+
 <Comment>\n             {
       // newline
       addOutput('\n');
       yyLineNr++;
    }
 
-<Comment>.           {
+<Comment>.[\x80-\xAF]*    {
       // catch-all for anything else
       QString text = QString::fromUtf8(yytext);
-      addOutput(text[0]);
-   }
 
+      addOutput(text);
+   }
 
  /* --------------   Rules for handling HTML comments ----------- */
 

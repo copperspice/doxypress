@@ -4981,7 +4981,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       yyFileName = fileName;
 
       //setContext();
-      msg("Parsing file %s\n", csPrintable(yyFileName));
+      msg("Parsing %s\n", csPrintable(yyFileName));
 
       QFileInfo fi(fileName);
       g_moduleScope = findPackageScope(fileName);

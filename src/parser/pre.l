@@ -3400,10 +3400,13 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       g_yyLineNr++;
    }
 
-<*>.                   {
-      QString text = QString::fromUtf8(yytext);
+<*>.[\x80-\xAF]*     {
+      QString text  = QString::fromUtf8(yytext);
       g_expectGuard = false;
-      outputChar(text[0]);
+
+      for (QChar c : text) {
+         outputChar(c);
+      }
    }
 
 %%

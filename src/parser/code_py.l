@@ -1526,7 +1526,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       BEGIN(Body);
    }
 
-<*>.                           {
+<*>.[\x80-\xAF]*               {
       QString text = QString::fromUtf8(yytext);
       codify(text);
 

@@ -15361,8 +15361,7 @@ YY_RULE_SETUP
       static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       QChar tmpChar = text[text.length() - 2];
-      s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) ||
-                  ( tmpChar == '!' && qt_auto_brief );
+      s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
 
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
 
