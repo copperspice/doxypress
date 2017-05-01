@@ -180,7 +180,7 @@
         ],
         "example-recursive": false,
         "example-source": [
-            ""
+            "examples"
         ],
         "exclude-files": [
             ""
@@ -196,7 +196,7 @@
             ""
         ],
         "filter-program": "",
-        "filter-source-files": false,
+        "filter-source-files": true,
         "filter-source-patterns": [
             ""
         ],
@@ -267,13 +267,13 @@
             ""
         ],
         "html-file-extension": ".html",
-        "html-footer": "",
+        "html-footer": "doxy_footer.html",
         "html-header": "",
         "html-index-num-entries": 100,
-        "html-output": "html",
+        "html-output": "html_7",
         "html-search": false,
         "html-stylesheets": [
-            ""
+            "doxy_custom.css"
         ],
         "html-timestamp": true,
         "mathjax-codefile": "",
@@ -366,37 +366,36 @@
         "xml-program-listing": true
     },
     "preprocessor": {
-        "enable-preprocessing": true,
+        "enable-preprocessing": false,
         "expand-as-defined": [
             ""
         ],
         "expand-only-predefined": false,
         "include-path": [
-            ""
+            "z:/cs5_lib/include",
+            "z:/cs5_lib/include/QtCore"
         ],
         "include-patterns": [
             ""
         ],
         "macro-expansion": false,
         "predefined-macros": [
-            "__linux="
+            ""
         ],
-        "search-includes": true,
+        "search-includes": false,
         "skip-function-macros": false
     },
     "project": {
         "project-brief": "",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test - Lib Tooling",
-        "project-version": "1.2.6"
+        "project-version": "1.2.7 clang (March 7)"
     },
     "source": {
         "clang-flags": [
             "-c",
             "--std=c++11",
-            "-Iz:/doxypress/clang_lib/include/3.7.1/include",
-            "-Iz:/cs5_lib/include",
-            "-Iz:/cs5_lib/include/QtCore"
+            "-Iz:/doxypress/clang_lib/include/3.7.1/include"
         ],
         "clang-parsing": true,
         "inline-source": false,

@@ -8,20 +8,22 @@
 *************************************************************************/
 
 /**
-* @file test_commands.h
+* @file test_cmd.h
 * @author Barbara Geller
-* @date January 15 2017
-* @brief This file contains samples of a few DoxyPress commands.
+* @date March 14 2017
+* @brief This file contains samples of DoxyPress commands.
 *
 * \version 1.2.3.4
 * \copyright GNU Public License
 *
-* \example example_1.h
+* \example test_cmd_example.h
 *
 */
 
-/** Documentation for testClass goes here */
-class testCommands
+
+
+/** Documentation for test_Commands goes here */
+class test_Commands
 {
    private:
       int size;

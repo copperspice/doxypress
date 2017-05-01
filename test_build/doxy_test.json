@@ -182,6 +182,7 @@
         ],
         "example-recursive": true,
         "example-source": [
+            "examples",
             "input_test"
         ],
         "exclude-files": [
@@ -398,7 +399,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.6"
+        "project-version": "1.2.8"
     },
     "source": {
         "clang-flags": [

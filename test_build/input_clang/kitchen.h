@@ -145,7 +145,7 @@ class gameSports : public gameBase
 };
 
 
-/// documentation for a templated class
+/// documentation for a normal templated class
 template<class T>
 class eventScoring
 {
@@ -155,14 +155,24 @@ class eventScoring
 };
 
 
-/// documentation for a templated specialization class
+/// documentation for a partially specialized templated class
 template<class T>
 class eventScoring<T *>
 {
    public:
-      /// documentation for templated method in eVent Scoring
+      /// documentation for a templated method of a partially specialized class
       template<typename ...Us>
-      std::string eventPlannig(T data, Us... Vs);
+      std::string eventPlanning(T data, Us... Vs);
+};
+
+
+/// documentation for a fully specialized templated class
+template< >
+class eventScoring<bool>
+{
+   public:
+      /// documentation for the bool version, which is a fully specialized templated class
+      int maxTwoPlayers();
 };
 
 

@@ -7,7 +7,7 @@
 *
 *************************************************************************/
 
-class example_1
+class test_Cmd_Example
 {
    public:
       QString plantName;
