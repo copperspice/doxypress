@@ -1526,10 +1526,17 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       BEGIN(Body);
    }
 
-<*>.[\x80-\xAF]*               {
+<*>[\xC0-\xFF][\x80-\xBF]+     {
+      // utf-8 code point
       QString text = QString::fromUtf8(yytext);
       codify(text);
+      BEGIN(Body);
+   }
 
+<*>.                           {
+      // catch all
+      QString text = QString::fromUtf8(yytext);
+      codify(text);
       BEGIN(Body);
    }
 

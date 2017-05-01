@@ -117,7 +117,7 @@ class DefineManager
       }
       return *theInstance;
    }
-  
+
    static void deleteInstance() {
       delete theInstance;
       theInstance = nullptr;
@@ -3400,7 +3400,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       g_yyLineNr++;
    }
 
-<*>.[\x80-\xAF]*     {
+<*>[\xC0-\xFF][\x80-\xBF]+    {
+      // utf-8 code point
       QString text  = QString::fromUtf8(yytext);
       g_expectGuard = false;
 
@@ -3408,6 +3409,17 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
          outputChar(c);
       }
    }
+
+<*>.                {
+      // catch all
+      QString text  = QString::fromUtf8(yytext);
+      g_expectGuard = false;
+
+      for (QChar c : text) {
+         outputChar(c);
+      }
+   }
+
 
 %%
 

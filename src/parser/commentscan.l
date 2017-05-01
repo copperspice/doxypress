@@ -1220,7 +1220,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <Comment>{B}*{CMD}"{"        {
-      // beginning of a group     
+      // beginning of a group
       openGroup(current, yyFileName, yyLineNr);
    }
 
@@ -1426,10 +1426,17 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       yyLineNr++;
    }
 
-<Comment>.[\x80-\xAF]*    {
-      // catch-all for anything else
-      QString text = QString::fromUtf8(yytext);
 
+<Comment>[\xC0-\xFF][\x80-\xBF]+    {
+      // utf-8 code point
+      QString text = QString::fromUtf8(yytext);
+      addOutput(text);
+   }
+
+
+<Comment>.    {
+      // catch all for anything else
+      QString text = QString::fromUtf8(yytext);
       addOutput(text);
    }
 
@@ -1845,7 +1852,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
-<ParamArg1>.    { 
+<ParamArg1>.    {
       unput(yytext[0]);
       BEGIN( Comment );
    }
@@ -2397,7 +2404,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
        } else {
          GuardedSection s   = s_guards.pop();
-         bool parentVisible = s.parentVisible();        
+         bool parentVisible = s.parentVisible();
 
          if (parentVisible) {
             enabledSectionFound = true;
@@ -2614,7 +2621,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          if (langParser != nullptr) {
             // not used for clang parsing
             langParser->parsePrototype(functionProto);
-         }   
+         }
 
          BEGIN( Comment );
       }
@@ -3527,7 +3534,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 {
    initParser();
    s_guards.clear();
- 
+
    if (comment.isEmpty()) {
       // avoid empty strings
       return false;
@@ -3535,20 +3542,20 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    langParser     = parser;
    current        = curEntry;
-   inputString    = comment; 
+   inputString    = comment;
    yyFileName     = fileName;
    yyLineNr       = lineNr;
    briefEndsAtDot = isAutoBrief;
    inBody         = isInbody;
 
    protection     = r_protection;
-   inputPosition  = r_position;  
-   
+   inputPosition  = r_position;
+
    xrefKind       = XRef_None;
    xrefAppendFlag = false;
    insidePre      = false;
    s_needNewEntry = false;
-   s_parseMore    = false;   
+   s_parseMore    = false;
 
    outputXRef.clear();
    inputString.append(" ");
@@ -3559,13 +3566,13 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    } else {
       setOutput(OutputDoc);
    }
- 
+
    s_condCount    = 0;
    s_sectionLevel = 0;
 
    s_spaceBeforeCmd.clear();
    s_spaceBeforeIf.clear();
- 
+
    if (! current->doc.isEmpty()) {
       // separate detailed doc fragments
       current->doc += "\n\n";
@@ -3575,7 +3582,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       // separate in body fragments
       current->inbodyDocs += "\n\n";
    }
-  
+
    yyrestart(yyin);
    BEGIN( Comment );
 

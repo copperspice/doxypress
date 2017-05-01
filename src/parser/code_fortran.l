@@ -1428,19 +1428,29 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       YY_FTN_RESET
    }
 
-<*>^{BS}"type"{BS}"="                   {
+<*>^{BS}"type"{BS}"="          {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 
-<*>.[\x80-\xAF]*                        {
+<*>[\xC0-\xFF][\x80-\xBF]+     {
+      // utf-8 code point
       QString text = QString::fromUtf8(yytext);
 
       if (g_isFixedForm && yy_my_start > fixedCommentAfter) {
-         // yy_push_state(YY_START);
-         // BEGIN(DocBlock);
-         // docBlock = text;
+         startFontClass("comment");
+         codifyLines(text);
 
+      } else {
+         g_code->codify(text);
+      }
+   }
+
+<*>.                           {
+      // catch all
+      QString text = QString::fromUtf8(yytext);
+
+      if (g_isFixedForm && yy_my_start > fixedCommentAfter) {
          startFontClass("comment");
          codifyLines(text);
 

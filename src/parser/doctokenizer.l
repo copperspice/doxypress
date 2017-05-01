@@ -148,7 +148,7 @@ static int computeIndent(const QString &str, int length)
    static const int tabSize = Config::getInt("tab-size");
 
    int i;
-   int indent = 0;   
+   int indent = 0;
 
    for (i = 0; i < length; i++) {
       if (str[i] == '\t') {
@@ -1446,7 +1446,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_Ref2>{WORD1NQ}     |
 <St_Ref2>{WORD2NQ}     {
       /* word */
-      g_token->name = QString::fromUtf8(yytext);   
+      g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
    }
 
@@ -1755,10 +1755,17 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
       return TK_COMMAND;
    }
 
-<*>.[\x80-\xAF]*       {
+<*>[\xC0-\xFF][\x80-\xBF]+    {
+      // utf-8 code point
       QString text = QString::fromUtf8(yytext);
-      warn(s_fileName, yylineno,"Unexpected character `%s'", csPrintable(text));
+      warn(s_fileName, yylineno,"Unexpected character '%s'", text.toUtf8().constData());
    }
+
+<*>.                   {
+      QString text = QString::fromUtf8(yytext);
+      warn(s_fileName, yylineno,"Unexpected character '%s'", csPrintable(text));
+   }
+
 %%
 
 
