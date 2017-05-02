@@ -38,6 +38,7 @@ test_build/hold
 
 test_build/output_test
 test_build/output_clang
+test_build/output_clang_lex
 test_build/output_py
 
 test_doxy/output_clang

@@ -6639,15 +6639,20 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                         // value from source code
                         QString memType = md->typeString();
 
+                        memType  = stripPrefix(memType, "virtual ");
+                        memType  = stripPrefix(memType, "explicit ");
                         memType  = stripPrefix(memType, "friend ");
                         memType  = stripPrefix(memType, "static ");
-                        memType  = stripPrefix(memType, "virtual ");
 
                         if (memType == "class") {
                            memType = "";
                         }
 
                         if (memType == "virtual") {
+                           memType = "";
+                        }
+
+                        if (memType == "explicit") {
                            memType = "";
                         }
 
@@ -9361,7 +9366,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       fileContents = preprocessFile(fileName, fileContents);
 
    } else {
-      // no preprocessing, only path allowed when clang processing
+      // no preprocessing, if clang processing this branch is forced
       msg("Reading %s\n", csPrintable(fileName));
       fileContents = readInputFile(fileName);
 
@@ -9383,7 +9388,7 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root, Q
       parser->parseInput(fileName, buffer, root, mode, includedFiles, true);
 
    } else {
-      // use lex parser
+      // use lex for parser
       parser->parseInput(fileName, buffer, root, mode, includedFiles, false);
 
    }

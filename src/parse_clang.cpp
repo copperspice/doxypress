@@ -914,7 +914,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      }
 
                      current->brief = brief;
-                  }                  
+                  }
                }
             }
          }
@@ -961,14 +961,14 @@ void ClangParser::finish()
 static void handleCommentBlock(const QString &comment, bool brief, const QString &fileName, QSharedPointer<Entry> current)
 {
    static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
-   bool docBlockInBody = false; 
+   bool docBlockInBody = false;
 
 /*
    if (docBlockInBody && hideInBodyDocs) {
       return;
    }
 */
-   
+
    int lineNum         = 0;
    int position        = 0;
 
@@ -985,11 +985,11 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
 /*
    if (! docBlockInBody) {
       isBrief = brief;
-     
+
       bool docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
       isJavaDocStyle = docBlockAutoBrief;
    }
-   
+
    QSharedPointer<Entry> docEntry = docBlockInBody && previous ? previous : current;
 
    if (docBlockInBody && docEntry && docEntry->inbodyLine == -1) {
@@ -1010,9 +1010,12 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
          QString docFile = current->docFile;
 
          QSharedPointer<Entry> parent = current->parent();
-
          current = QMakeShared<Entry>();
-         parent->addSubEntry(current, parent);
+
+         // resolve better by adding to orphan map
+         if (parent) {
+            parent->addSubEntry(current, parent);
+         }
 
          current->docFile = docFile;
          current->docLine = lineNum;
