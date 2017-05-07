@@ -78,7 +78,7 @@ endif()
 
 set(BUILD_MAJOR "1")
 set(BUILD_MINOR "2")
-set(BUILD_MICRO "8")
+set(BUILD_MICRO "9")
 
 set(BUILD_COMPONENTS "DOXYPRESS")
 
