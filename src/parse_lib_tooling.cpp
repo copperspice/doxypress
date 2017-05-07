@@ -685,8 +685,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
          } else {
-            printf("\n BROOM - enum parentEntry NULLPTR   name = %s  USR = %s",
-                  csPrintable(name), csPrintable(parentUSR) );
+//          printf("\n Broom enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
          }
 
          QString currentUSR = getUSR_Decl(node);
@@ -1169,13 +1168,6 @@ class DoxyASTConsumer : public clang::ASTConsumer {
             if (parentEntry) {
                // found a match
                parentEntry->addSubEntry(iter.value(), parentEntry);
-
-
-
-if (iter.key().contains("SerializedDiagnosticReader")) {
-   printf("\n BROOM - enum found a MATCH  name = %s", csPrintable(iter.key()) );
-}
-
 
                // remove and reset the iter
                iter = s_orphanMap.erase(iter);

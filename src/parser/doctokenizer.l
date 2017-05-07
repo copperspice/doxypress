@@ -281,10 +281,15 @@ static void handleHtmlTag()
          c = tagText.at(i);
       }
 
-
       if (i < len && tagText.at(i) == '=') {
-         // option has value
-         c = tagText.at(++i);
+         ++i;
+
+         if (i < len) {
+            // option has value
+            c = tagText.at(i);
+         } else {
+            c = '\0';
+         }
 
          // skip spaces
          while (i < len && c.isSpace()) {
@@ -298,8 +303,14 @@ static void handleHtmlTag()
          }
 
          if (i < len && tagText.at(i) == '\'') {
-            // option '...'
-            c = tagText.at(++i);
+            ++i;
+
+            if (i < len) {
+               c = tagText.at(i);
+            } else {
+               c = '\0';
+            }
+
             startAttrib = i;
 
             // search for matching quote
@@ -314,13 +325,24 @@ static void handleHtmlTag()
             }
 
             endAttrib = i;
+            ++i;
+
             if (i < len) {
-               c = tagText.at(++i);
+               c = tagText.at(i);
+            } else {
+               c = '\0';
             }
 
          } else if (tagText.at(i) == '"') {
-            // option "..."
-            c = tagText.at(++i);
+
+            ++i;
+
+            if (i < len) {
+               c = tagText.at(i);
+            } else {
+               c = '\0';
+            }
+
             startAttrib = i;
 
             // search for matching quote
@@ -335,8 +357,12 @@ static void handleHtmlTag()
             }
 
             endAttrib = i;
+            ++i;
+
             if (i < len) {
-               c = tagText.at(++i);
+               c = tagText.at(i);
+            } else {
+               c = '\0';
             }
 
          } else {
@@ -355,9 +381,15 @@ static void handleHtmlTag()
             }
 
             endAttrib = i;
+            ++i;
+
             if (i < len) {
-               c = tagText.at(++i);
+               // option has value
+               c = tagText.at(i);
+            } else {
+               c = '\0';
             }
+
          }
 
          opt.value = tagText.mid(startAttrib, endAttrib - startAttrib);

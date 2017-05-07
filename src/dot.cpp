@@ -387,16 +387,8 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
       return false;
    }
 
-   const int maxLineLen = 10240;
-
    while (! f.atEnd()) {
-      // foreach line
-
-      QByteArray buf;
-      buf.resize(maxLineLen);
-
-      int numBytes = f.readLine(buf.data(), maxLineLen);
-      buf.resize(numBytes);
+      QByteArray buf = f.readLine();
 
       if (buf.startsWith("<area")) {
          t << replaceRef(buf, relPath, urlOnly, context);
@@ -456,17 +448,11 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
       return false;
    }
 
-   const int maxLineLen = 1024;
-
-   QByteArray buf;
-   buf.resize(maxLineLen);
-
    while (! f.atEnd()) {
-      int numBytes = f.readLine(buf.data(), maxLineLen - 1);
+      QByteArray buf = f.readLine();
 
-      if (numBytes > 0) {
-         buf.resize(numBytes);
-
+      if (! buf.isEmpty()) {
+        
          int p = buf.indexOf(bb);
 
          if (p != -1) {
@@ -474,7 +460,7 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
             int x;
             int y;
 
-            if ( sscanf(buf.constData() + (p + bb.length() ), "%d %d %d %d", &x, &y, width, height) != 4) {
+            if (sscanf(buf.constData() + (p + bb.length() ), "%d %d %d %d", &x, &y, width, height) != 4) {
                return false;
             }
 
@@ -549,17 +535,11 @@ static bool readSVGSize(const QString &fileName, int *width, int *height)
       return false;
    }
 
-   const int maxLineLen = 4096;
-
-   QByteArray buf;
-   buf.resize(maxLineLen);
-
    while (! f.atEnd() && ! found) {
-      int numBytes = f.readLine(buf.data(), maxLineLen - 1);
-
-      if (numBytes > 0) {
-         buf.resize(numBytes);
-
+      QByteArray buf = f.readLine();
+    
+      if (! buf.isEmpty()) {
+  
          if (qstrncmp(buf, "<!--zoomable ", 13) == 0) {
 
             *width  = -1;
@@ -938,8 +918,9 @@ int DotFilePatcher::addSVGObject(const QString &baseName, const QString &absImgN
 bool DotFilePatcher::run()
 {
    static bool interactiveSVG = Config::getBool("interactive-svg");
-   bool isSVGFile = (m_patchFile.right(4) == ".svg");
-   int graphId = -1;
+
+   bool isSVGFile = m_patchFile.endsWith(".svg");
+   int graphId    = -1;
 
    QString relPath;
 
@@ -956,7 +937,7 @@ bool DotFilePatcher::run()
    QString patchFile = m_patchFile;
 
    if (! QDir::current().rename(patchFile, tmpName)) {
-      err("Unable to rename file %s to %s\n", qPrintable(m_patchFile), qPrintable(tmpName));
+      err("Unable to rename file %s to %s\n", csPrintable(m_patchFile), csPrintable(tmpName));
       return false;
    }
 
@@ -964,21 +945,21 @@ bool DotFilePatcher::run()
    QFile fo(patchFile);
 
    if (! fi.open(QIODevice::ReadOnly)) {
-      err("Unable to open file for updating %s, error: %d\n", qPrintable(tmpName), fi.error());
+      err("Unable to open file for updating %s, error: %d\n", csPrintable(tmpName), fi.error());
 
       QDir::current().rename(tmpName, patchFile);
       return false;
    }
 
    if (! fo.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for updating %s, error: %d\n", qPrintable(m_patchFile), fo.error());
+      err("Unable to open file for updating %s, error: %d\n", csPrintable(m_patchFile), fo.error());
 
       QDir::current().rename(tmpName, patchFile);
       return false;
    }
 
    QTextStream t(&fo);
-   const int maxLineLen = 100 * 1024;
+ 
    int lineNr = 1;
    int width;
    int height;
@@ -988,21 +969,14 @@ bool DotFilePatcher::run()
    bool foundSize      = false;
 
    while (! fi.atEnd()) {
-      // foreach line
 
-      QByteArray line;
-      line.resize(maxLineLen);
-
-      int numBytes = fi.readLine(line.data(), maxLineLen);
-
-      if (numBytes <= 0) {
+      QByteArray line = fi.readLine();
+    
+      if (line.isEmpty()) {
          break;
       }
-
-      line.resize(numBytes);
-
+     
       int i;
-      assert(numBytes < maxLineLen);
 
       if (isSVGFile) {
          if (interactiveSVG) {
@@ -1047,7 +1021,8 @@ bool DotFilePatcher::run()
          }
 
       } else if ((i = line.indexOf("<!-- SVG")) != -1 || (i = line.indexOf("[!-- SVG")) != -1) {
-         //printf("Found marker at %d\n",i);
+         // printf("Found marker at %d\n",i);
+
          int mapId = -1;
          t << line.left(i);
 
@@ -1070,6 +1045,7 @@ bool DotFilePatcher::run()
          }
 
       } else if ((i = line.indexOf("<!-- MAP")) != -1) {
+
          int mapId = -1;
          t << line.left(i);
          int n = sscanf(line.data() + i, "<!-- MAP %d", &mapId);
@@ -1081,12 +1057,14 @@ bool DotFilePatcher::run()
             convertMapFile(t, map.mapFile, map.relPath, map.urlOnly, map.context);
             t << "</map>" << endl;
 
-         } else { // error invalid map id!
-            err("Invalid MAP id found in file %s\n", qPrintable(m_patchFile));
+         } else { 
+            // error invalid map id!
+            err("Invalid MAP id found in file %s\n", csPrintable(m_patchFile));
             t << line.mid(i);
-         }
+         } 
 
       } else if ((i = line.indexOf("% FIG")) != -1) {
+
          int mapId = -1;
          int n = sscanf(line.data() + i + 2, "FIG %d", &mapId);
 
@@ -1098,13 +1076,17 @@ bool DotFilePatcher::run()
                return false;
             }
 
-         } else { // error invalid map id!
-            err("Invalid bounding FIG %d in file %s\n", mapId, qPrintable(m_patchFile));
+         } else { 
+            // error invalid map id
+
+            err("Invalid bounding FIG %d in file %s\n", mapId, csPrintable(m_patchFile));
             t << line;
          }
 
       } else {
+
          t << line;
+
       }
 
       lineNr++;
@@ -1135,13 +1117,11 @@ bool DotFilePatcher::run()
 
       QTextStream t(&fo);
 
-      while (! fi.atEnd()) { // foreach line
-         QByteArray line;
-         line.resize(maxLineLen);
+      while (! fi.atEnd()) { 
 
-         int numBytes = fi.readLine(line.data(), maxLineLen);
-
-         if (numBytes <= 0) {
+         QByteArray line = fi.readLine();
+    
+         if (line.isEmpty()) {
             break;
          }
 
@@ -1405,8 +1385,8 @@ bool DotManager::run()
    // after the SVG is patched, first process the .svg files and then the other files
 
    for (auto mapItem : m_dotMaps) {
-      if (mapItem->file().right(4) == ".svg") {
-         msg("Patching output file %d/%d\n", i, numDotMaps);
+      if (mapItem->file().endsWith(".svg")) {
+         msg("Patching output file %d/%d %s\n", i, numDotMaps, csPrintable(mapItem->file()));
 
          if (! mapItem->run()) {
             return false;
@@ -1416,8 +1396,8 @@ bool DotManager::run()
    }
 
    for (auto mapItem : m_dotMaps) {
-      if (mapItem->file().right(4) != ".svg") {
-         msg("Patching output file %d/%d\n", i, numDotMaps);
+      if (! mapItem->file().endsWith(".svg")) {
+         msg("Patching output file %d/%d  %s\n", i, numDotMaps, csPrintable(mapItem->file()));
 
          if (! mapItem->run()) {
             return false;
