@@ -1,6 +1,6 @@
 #
 # Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
-# All rights reserved.    
+# All rights reserved.
 #
 # Permission to use, copy, modify, and distribute this software and its
 # documentation under the terms of the GNU General Public License version 2
@@ -11,17 +11,10 @@
 # Documents produced by DoxyPress are derivative works derived from the
 # input used in their production; they are not affected by this license.
 
-# location of include files
-set(CS_INCLUDE_DIR ${CS_PATH}/include  ${CS_PATH}/include/QtCore  ${CS_PATH}/include/QtXml)
-
-set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
-set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
-
-
-include_directories( ${CMAKE_SOURCE_DIR}/src
-                     ${CS_INCLUDE_DIR}
-                     ${CLANG_INCLUDE_DIR}
-)
+macro(cs_copy_dll APP DLL)
+   get_target_property(CS_${DLL}_LIB  CopperSpice::Cs${DLL}1.4 LOCATION)
+   install(FILES  ${CS_${DLL}_LIB}  DESTINATION .)
+endmacro()
 
 check_include_file(windows.h HAVE_WINDOWS_H)
 
@@ -242,14 +235,24 @@ COPPERSPICE_RESOURCES(${CMAKE_CURRENT_SOURCE_DIR}/../doxypress.qrc)
 
 add_executable(doxypress ${DOXYPRESS_SOURCES})
 
-# ISSUE: resolve so this works
-# target_link_libraries(doxypress CopperSpice::CsCore CopperSpice::CsXml ${CLANG_LIB_DIR})
+if(WIN32)
+   set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
+   set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
 
-target_link_libraries(doxypress  
+   target_include_directories(doxypress PRIVATE
+      ${CMAKE_SOURCE_DIR}/src
+      ${CLANG_INCLUDE_DIR}
+   )
 
-   # ISSUE: may be able to change and remove the path and the suffix, windows only for testing
-   ${CS_PATH}/lib/libCsCore1.4.dll.a
-   ${CS_PATH}/lib/libCsXml1.4.dll.a
+else ()
+   # ISSUE (broom),  now sure what to do here
+   # set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
+
+endif ()
+
+target_link_libraries(doxypress
+   CopperSpice::CsCore1.4
+   CopperSpice::CsXml1.4
 
    -L${CLANG_LIB_DIR}
    -Wl,--start-group
@@ -283,11 +286,39 @@ target_link_libraries(doxypress
 )
 
 install(TARGETS   doxypress      DESTINATION .)
-install(FILES     ${CS_LIBS}     DESTINATION .)
-install(FILES     ${CLANG_LIBS}  DESTINATION .)
-install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
 
 if(WIN32)
-   # copy MingW files, windows only
-   install(FILES ${GCC_LIBS}  DESTINATION .)
+   install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
+   install(FILES     ${CLANG_LIBS}  DESTINATION .)
+
+   cs_copy_dll(doxypress Core)
+   cs_copy_dll(doxypress Xml)
+
+   # ISSUE (broom), not sure how to include the required DLL files
+   # install(FILES     ${GCC_LIBS}    DESTINATION .)
+
+else()
+
+   # ISSUE (broom),  is anything required here?
+
+
 endif()
+
+
+# extra things we were playing with
+
+#   set(GCC_PATH $(dir $(shell which $(word 1, $(CC))))
+#   set(GCC_PATH  "c:/MingW_64_4.9/x86_64-w64-mingw32/lib32")
+
+#   list of gcc libraries for GCC sjlj or seh
+#   file(GLOB wild ${GCC_PATH}/libgcc_s_*-1.dll)
+#   set(GCC_LIBS ${wild} ${GCC_PATH}/libstdc++-6.dll  ${GCC_PATH}/libwinpthread-1.dll )
+
+#   install(CODE 
+#      "
+#         include(BundleUtilities)
+#         fixup_bundle(${CMAKE_INSTALL_PREFIX}/crap.app \"\" \"\") 
+#      "   
+#      COMPONENT Runtime
+#   )
+
