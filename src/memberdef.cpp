@@ -3353,7 +3353,7 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
 
    } else {
       // use standard auto linking
-      linkifyText(TextGeneratorOLImpl(ol), scopeDef, getBodyDef(), self, ts, true);
+      linkifyText(TextGeneratorOLImpl(ol), scopeDef, getBodyDef(), self, ts);
    }
 
    ol.endDoxyAnchor(cfname, memAnchor);

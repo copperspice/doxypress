@@ -3035,11 +3035,21 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       outputChar(*yytext);
    }
 
-<CopyCComment>[^*a-z_A-Z\x80-\xFF\n]+     {
+<CopyCComment>[^*a-z_A-Z\x80-\xFF\n]*[^*a-z_A-Z\x80-\xFF\\\n] {
       QString text = QString::fromUtf8(yytext);
 
       g_defLitText += text;
       g_defText    += escapeAt(text);
+   }
+
+<CopyCComment>\\[\r]?\n    {
+      QString text = QString::fromUtf8(yytext);
+      g_defLitText += text;
+
+      outputChar('\n');
+      g_defText += " ";
+      g_yyLineNr++;
+      g_yyMLines++;
    }
 
 <CopyCComment>"*/"         {

@@ -1878,7 +1878,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
 
       if (text[0] == '{') {
-         g_curlyCount++;
 
          if (g_searchingForBody) {
             g_searchingForBody = false;
@@ -2031,13 +2030,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
    }
 
-<Body,FuncCall>"}"         {
-      QString text = QString::fromUtf8(yytext);
-      g_theVarContext.popScope();
-      g_yyColNr++;
-      g_code->codify(text);
-   }
-
 <Body,FuncCall>"{"         {
       QString text = QString::fromUtf8(yytext);
       g_theVarContext.pushScope();
@@ -2051,7 +2043,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
 
       g_code->codify(text);
-      g_curlyCount++;
 
       if (g_insideBody)  {
          g_bodyCurlyCount++;
@@ -2062,7 +2053,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN( Body );
    }
 
-<Body,MemberCall,MemberCall2>"}"    {
+<Body,FuncCall,MemberCall,MemberCall2>"}"    {
       QString text = QString::fromUtf8(yytext);
 
       g_theVarContext.popScope();
@@ -2296,7 +2287,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       g_theVarContext.pushScope();
       g_code->codify(text);
-      g_curlyCount++;
 
       if (YY_START == ClassVar && g_curClassName.isEmpty()) {
          g_curClassName = g_name;
@@ -3549,7 +3539,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          g_bodyCurlyCount++;
       }
 
-      g_curlyCount++;
       g_type.resize(0);
       g_name.resize(0);
       BEGIN( Body );
@@ -3629,7 +3618,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <SkipInits>"{"             {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
-      g_curlyCount++;
 
       if (g_searchingForBody) {
          g_searchingForBody = false;

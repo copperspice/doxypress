@@ -2035,18 +2035,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       current->section = Entry::CLASS_SEC;
 
+      // preserve UNO IDL & Inline attributes
+      // can be a struct nested in an interface so keep insideObjC state
+
       bool isPublished = current->m_traits.hasTrait(Entry::Virtue::Published);
+      bool isInline    = current->m_traits.hasTrait(Entry::Virtue::Inline);
 
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Struct);
-
       current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
+      current->m_traits.setTrait(Entry::Virtue::Inline, isInline);
 
-      // preserve UNO IDL
-      // bug 582676: can be a struct nested in an interface so keep insideObjC state
-      //current->objc = insideObjC = false;
-
-      addType( current ) ;
+      addType( current );
       if (isConst) {
          current->type += " const";
 
