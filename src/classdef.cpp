@@ -752,9 +752,10 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    }
 
    // repeat brief description
-   if (! briefDescription().isEmpty() && repeatBrief) {
-      ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), briefDescription(), false, false);
+   QString brief = briefDescription();
 
+   if (! brief.isEmpty() && repeatBrief) {
+      ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), brief, false, false);
 
       if (! docText.isEmpty()) {
 
@@ -1655,11 +1656,14 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
 
       ol.endMemberItem();
 
+      //
+      QString brief = briefDescription(true);
+
       // add the brief description if available
-      if (! briefDescription().isEmpty() && briefMemberDesc) {
+      if (! brief.isEmpty() && briefMemberDesc) {
 
          DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                                                briefDescription(), false, false, "", true, false);
+                                                brief, false, false, "", true, false);
 
          if (rootNode && ! rootNode->isEmpty()) {
             ol.startMemberDescription(anchor());
