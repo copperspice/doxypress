@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -22,7 +22,7 @@
 
 
 /*
- * C++ Expression parser for ENABLED_SECTIONS 
+ * C++ Expression parser for ENABLED_SECTIONS
  *
  * Features used:
  *     Operators:
@@ -123,7 +123,7 @@ void CondParser::getToken()
    //printf("\tgetToken e:{%c}, ascii=%i, col=%i\n", *e, *e, e-expr);
 
    // skip over whitespaces
-   while (*m_e == ' ' || *m_e == '\t') {   
+   while (*m_e == ' ' || *m_e == '\t') {
       // space or tab
       m_e++;
    }
@@ -280,10 +280,11 @@ bool CondParser::evalOperator(int opId, bool lhs, bool rhs)
  */
 bool CondParser::evalVariable(const QString &varName)
 {
-   if (Config::getList("enabled-sections").indexOf(varName) == -1) {
+   static const QStringList enabledSections = Config::getList("enabled-sections");
+
+   if (enabledSections.indexOf(varName) == -1) {
       return false;
    }
 
    return true;
 }
-

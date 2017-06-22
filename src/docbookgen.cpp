@@ -1609,6 +1609,9 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
       return;   // skip external references
    }
 
+   static const bool directoryGraph = Config::getBool("directory-graph");
+   static const bool haveDot        = Config::getBool("have-dot");
+
    QString fileDocbook = dd->getOutputFileBase() + ".xml";
 
    //Add the file Documentation info to index file
@@ -1632,7 +1635,7 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    t << theTranslator->trDirReference(dd->displayName());
    t << "</title>" << endl;
 
-   if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
+   if (directoryGraph && haveDot) {
       t << "<para>Directory dependency diagram for " << convertToXML(dd->displayName()) << "</para>" << endl;
       DotDirDeps dirdepGraph(dd);
       dirdepGraph.writeGraph(t, GOF_BITMAP, EOF_DocBook, Config::getString("docbook-output"), fileName, relPath, false);

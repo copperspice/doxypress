@@ -204,7 +204,10 @@ void DirDef::writeBriefDescription(OutputList &ol)
 void DirDef::writeDirectoryGraph(OutputList &ol)
 {
    // write graph dependency graph
-   if (Config::getBool("directory-graph") && Config::getBool("have-dot")) {
+   static const bool directoryGraph = Config::getBool("directory-graph");
+   static const bool haveDot        = Config::getBool("have-dot");
+
+   if (directoryGraph && haveDot) {
 
       QSharedPointer<DirDef> self = sharedFrom(this);
       DotDirDeps dirDep(self);
@@ -924,11 +927,13 @@ void computeDirDependencies()
 
 void generateDirDocs(OutputList &ol)
 {
+   static const bool directoryGraph = Config::getBool("directory-graph");
+
    for (auto dir : Doxy_Globals::directories) {
       dir->writeDocumentation(ol);
    }
 
-   if (Config::getBool("directory-graph")) {
+   if (directoryGraph) {
       for (auto item : Doxy_Globals::dirRelations) {
          item->writeDocumentation(ol);
       }

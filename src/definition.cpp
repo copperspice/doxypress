@@ -1554,41 +1554,45 @@ QString Definition::docFile() const
    return retval;
 }
 
-// strips prefix from str
-static void stripWord(QString &str, const QString &prefix)
-{
-   if (str.startsWith(prefix)) {
-      str = str.mid(prefix.length());
-   }
-}
-
 // remove some text from the brief description
-QString abbreviate(const QString &data, const QString &name)
+QString abbreviate(const QString &brief, const QString &name)
 {
-   QString scopelessName = name;
-   int i = scopelessName.lastIndexOf("::");
+   static const QStringList abbreviateBrief = Config::getList("abbreviate-brief");
+
+   QString className = name;
+   int i = className.lastIndexOf("::");
 
    if (i != -1) {
-      scopelessName = scopelessName.mid(i + 2);
+      className = className.mid(i + 2);
    }
 
-   QString result = data;
+   QString result = brief;
    result = result.trimmed();
 
-   // strip trailing .
-   if (! result.isEmpty() && result.at(result.length() - 1) == '.') {
-      result = result.left(result.length() - 1);
+   // strip trailing period
+   if (result.endsWith('.')) {
+      result.chop(1);
    }
 
    // strip any predefined prefix
-   static const QStringList abbreviateBrief = Config::getList("abbreviate-brief");
 
-   for (auto str : abbreviateBrief) {
+   for (auto prefix : abbreviateBrief) {
       // replace $name with entity name
-      str.replace("$name", scopelessName);
-      str += " ";
+      prefix.replace("$name", className);
+      prefix += " ";
 
-      stripWord(result, str);
+
+      if (result.startsWith(prefix)) {
+         result = result.mid(prefix.length());
+
+      } else if (prefix.contains("<")) {
+         // brief has no <T> where as className does
+         prefix.replace(QRegExp("<.*>"), "");
+
+         if (result.startsWith(prefix)) {
+            result = result.mid(prefix.length());
+         }
+      }
    }
 
    // capitalize first word
