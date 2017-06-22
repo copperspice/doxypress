@@ -120,8 +120,8 @@ QSet<QString>             Doxy_Globals::g_pathsVisited;
 
 QMap<QString, QString>    Doxy_Globals::g_moduleHint;               // experimental
 
-QHash<QString, Definition *>  &Doxy_Globals::glossary()
+QMultiHash<QString, Definition *>  &Doxy_Globals::glossary()
 {
-   static QHash<QString, Definition *> data;
+   static QMultiHash<QString, Definition *> data;
    return data;
 }

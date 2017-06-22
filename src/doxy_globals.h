@@ -21,6 +21,7 @@
 #include <QByteArray>
 #include <QCache>
 #include <QHash>
+#include <QMultiHash>
 #include <QList>
 #include <QString>
 #include <QSharedPointer>
@@ -221,7 +222,7 @@ class Doxy_Globals
       static QHash<QString, FileDef>   g_usingDeclarations;
 
       // must use a raw pointer since this method is called from a constructor
-      static QHash<QString, Definition *> &glossary();
+      static QMultiHash<QString, Definition *> &glossary();
 };
 
 #endif
