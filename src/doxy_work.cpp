@@ -459,42 +459,42 @@ void processFiles()
 
    // Check/create output directorties
    QString htmlOutput;
-   const bool generateHtml = Config::getBool("generate-html");
+   static const bool generateHtml = Config::getBool("generate-html");
 
    if (generateHtml) {
       htmlOutput = createOutputDirectory(outputDirectory, "html-output", "/html");
    }
 
    QString docbookOutput;
-   const bool generateDocbook = Config::getBool("generate-docbook");
+   static const bool generateDocbook = Config::getBool("generate-docbook");
 
    if (generateDocbook) {
       docbookOutput = createOutputDirectory(outputDirectory, "docbook-output", "/docbook");
    }
 
    QString xmlOutput;
-   const bool generateXml = Config::getBool("generate-xml");
+   static const bool generateXml = Config::getBool("generate-xml");
 
    if (generateXml) {
       xmlOutput = createOutputDirectory(outputDirectory, "xml-output", "/xml");
    }
 
    QString latexOutput;
-   const bool generateLatex = Config::getBool("generate-latex");
+   static const bool generateLatex = Config::getBool("generate-latex");
 
    if (generateLatex) {
       latexOutput = createOutputDirectory(outputDirectory, "latex-output", "/latex");
    }
 
    QString rtfOutput;
-   const bool generateRtf = Config::getBool("generate-rtf");
+   static const bool generateRtf = Config::getBool("generate-rtf");
 
    if (generateRtf) {
       rtfOutput = createOutputDirectory(outputDirectory, "rtf-output", "/rtf");
    }
 
    QString manOutput;
-   const bool generateMan = Config::getBool("generate-man");
+   static const bool generateMan = Config::getBool("generate-man");
 
    if (generateMan) {
       manOutput = createOutputDirectory(outputDirectory, "man-output", "/man");
@@ -1558,7 +1558,7 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
 
             } else if ( root->type.length() > 0 && root->name != root->type && gd->groupTitle() != root->type ) {
                warn( root->fileName, root->startLine,
-                     "group %s: ignoring title \"%s\" that does not match old title \"%s\"\n",
+                     "Group %s: ignoring title \"%s\" which does not match old title \"%s\"\n",
                      csPrintable(root->name), csPrintable(root->type), csPrintable(gd->groupTitle()) );
             }
 
@@ -1582,7 +1582,7 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<EntryNav> rootNav, bool ad
 
             // allow empty docs for group
             gd->setDocumentation(! root->doc.isEmpty() ? root->doc : QString(" "), root->docFile, root->docLine, false);
-            gd->setInbodyDocumentation( root->inbodyDocs, root->inbodyFile, root->inbodyLine );
+            gd->setInbodyDocumentation(root->inbodyDocs, root->inbodyFile, root->inbodyLine );
             gd->addSectionsToDefinition(root->m_anchors);
 
             Doxy_Globals::groupSDict.insert(root->name, gd);

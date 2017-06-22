@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -33,7 +33,7 @@ static int compItems(const QSharedPointer<ClassDef> &c1, const QSharedPointer<Cl
       return c1->name().compare(c2->name(), Qt::CaseInsensitive);
 
    } else {
-      return c1->className().compare(c2->className(), Qt::CaseInsensitive);      
+      return c1->className().compare(c2->className(), Qt::CaseInsensitive);
    }
 }
 
@@ -78,7 +78,7 @@ void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filte
       bool found = false;
 
       for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
-         
+
          if (cd->name().indexOf('@') == -1 && ! cd->isExtension() && (cd->protection() != Private || extractPrivate) &&
                (filter == 0 || *filter == cd->compoundType()) ) {
             cd->writeDeclarationLink(ol, found, header, localNames);
@@ -103,7 +103,7 @@ void ClassSDict::writeDocumentation(OutputList &ol, QSharedPointer<Definition> c
 
    if (count() > 0) {
       bool found = false;
-           
+
       for (auto cd : *this) {
          if (cd->name().indexOf('@') == -1 && cd->isLinkableInProject() && cd->isEmbeddedInOuterScope() &&
                (container == 0 || cd->partOfGroups() == 0) ) {
@@ -143,7 +143,7 @@ void GenericsSDict::insert(const QString &key, QSharedPointer<ClassDef> cd)
 
    if (collection == 0) {
       // new hash
-      collection = QMakeShared<QHash<long, QSharedPointer<ClassDef>>>();       
+      collection = QMakeShared<QHash<long, QSharedPointer<ClassDef>>>();
 
       // add new hash to m_dict
       m_dict.insert(key.left(i), collection);
@@ -162,7 +162,7 @@ QSharedPointer<ClassDef> GenericsSDict::find(const QString &key)
    if (i == -1) {
        QSharedPointer<QHash<long, QSharedPointer<ClassDef>>> collection = m_dict.find(key);
 
-      if (collection && collection->count() == 1) {        
+      if (collection && collection->count() == 1) {
          return collection->begin().value();
       }
 

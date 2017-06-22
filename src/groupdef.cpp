@@ -774,7 +774,8 @@ void GroupDef::writeGroupGraph(OutputList &ol)
 
 void GroupDef::writeFiles(OutputList &ol, const QString &title)
 {
-   // write list of files
+   static const bool briefMemberDesc = Config::getBool("brief-member-desc");
+
    if (fileList.count() > 0) {
       ol.startMemberHeader("files");
       ol.parseText(title);
@@ -795,7 +796,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
          ol.writeObjectLink(item->getReference(), item->getOutputFileBase(), 0, item->name());
          ol.endMemberItem();
 
-         if (! item->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+         if (! item->briefDescription().isEmpty() && briefMemberDesc) {
             ol.startMemberDescription(item->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), item, QSharedPointer<MemberDef>(),
                            item->briefDescription(), false, false, "", true, false);
@@ -817,6 +818,8 @@ void GroupDef::writeNamespaces(OutputList &ol, const QString &title)
 
 void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
 {
+   static const bool briefMemberDesc = Config::getBool("brief-member-desc");
+
    // write list of groups
    int count = 0;
 
@@ -852,7 +855,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
             ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
             ol.endMemberItem();
 
-            if (! gd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+            if (! gd->briefDescription().isEmpty() && briefMemberDesc) {
                ol.startMemberDescription(gd->getOutputFileBase());
                ol.generateDoc(briefFile(), briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription(),
                               false, false, "", true, false);
@@ -868,6 +871,8 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
 
 void GroupDef::writeDirs(OutputList &ol, const QString &title)
 {
+   static const bool briefMemberDesc = Config::getBool("brief-member-desc");
+
    // write list of directories
    if (dirList->count() > 0) {
       ol.startMemberHeader("dirs");
@@ -889,7 +894,7 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
          ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
          ol.endMemberItem();
 
-         if (! dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
+         if (! dd->briefDescription().isEmpty() && briefMemberDesc) {
             ol.startMemberDescription(dd->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
                            false, false, "", true, false);

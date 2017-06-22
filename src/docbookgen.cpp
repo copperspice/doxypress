@@ -317,7 +317,7 @@ static void writeTemplateArgumentList(const ArgumentList &argList, QTextStream &
    }
 
    t << indentStr << "</templateparamlist>" << endl;
- 
+
 }
 
 static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
@@ -353,13 +353,15 @@ static void writeDocbookDocBlock(QTextStream &t, const QString &fileName, int li
 
 void writeDocbookCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 {
+   static const bool filterSourceFiles = Config::getBool("filter-source-files");
+
    ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(fd->getDefFileExtension());
    SrcLangExt langExt = getLanguageFromFileName(fd->getDefFileExtension());
    pIntf->resetCodeParserState();
 
    DocbookCodeGenerator *docbookGen = new DocbookCodeGenerator(t);
 
-   pIntf->parseCode(*docbookGen, 0, fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
+   pIntf->parseCode(*docbookGen, 0, fileToString(fd->getFilePath(), filterSourceFiles),
                     langExt, false, 0, fd, -1, -1, false, QSharedPointer<MemberDef>(), true);
 
    docbookGen->finish();
@@ -606,7 +608,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          t << "_1" << md->anchor() << "\">" << convertToXML(md->name()) << "</link>";
          t << " (" << endl;
 
-         const ArgumentList &declAl = md->getDeclArgumentList();        
+         const ArgumentList &declAl = md->getDeclArgumentList();
          int cnt = 0;
 
          for (auto &arg : declAl) {
@@ -625,11 +627,11 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             }
 
             cnt++;
-         }    
+         }
 
          t << ")";
 
-         if (! md->briefDescription().isEmpty()) {      
+         if (! md->briefDescription().isEmpty()) {
            t << "<para><emphasis>";
            writeDocbookString(t,md->briefDescription());
            t << "</emphasis></para>" << endl;
@@ -873,8 +875,8 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
          break;
 
       case MemberListType_decTypedefMembers:
-         title     = theTranslator->trTypedefs(); 
-         desctitle = theTranslator->trTypedefDocumentation();  
+         title     = theTranslator->trTypedefs();
+         desctitle = theTranslator->trTypedefDocumentation();
          break;
 
       case MemberListType_decEnumMembers:
@@ -888,7 +890,7 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
          break;
 
       case MemberListType_decVarMembers:
-         title     = theTranslator->trVariables(); 
+         title     = theTranslator->trVariables();
          desctitle = theTranslator->trVariableDocumentation();
          break;
 
@@ -898,13 +900,13 @@ static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t,
          break;
 
       case MemberListType_priAttribs:
-         title     = theTranslator->trPrivateAttribs(); 
+         title     = theTranslator->trPrivateAttribs();
          desctitle = theTranslator->trMemberDataDocumentation();
          break;
 
       case MemberListType_proAttribs:
          title     = theTranslator->trProtectedAttribs();
-         desctitle = theTranslator->trMemberDataDocumentation(); 
+         desctitle = theTranslator->trMemberDataDocumentation();
          break;
 
       default:
@@ -1010,7 +1012,7 @@ static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
 
    if (! cl.isEmpty()) {
       t << "        </section>" << endl;
-   }  
+   }
 }
 
 static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
@@ -1020,12 +1022,12 @@ static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
    }
 
    static const QString title = theTranslator->trNamespaces();
-  
+
    t << "        <simplesect>" << endl;
    t << "            <title> " << title << " </title>" << endl;
-   
+
    for (auto &nd : nl) {
-      if (! nd->isHidden() && nd->name().indexOf('@') == -1) { 
+      if (! nd->isHidden() && nd->name().indexOf('@') == -1) {
          // skip anonymouse scopes
 
          t << "            <para>" << endl;
@@ -1041,19 +1043,19 @@ static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
          t << "            </para>" << endl;
       }
    }
-   
+
    t << "        </simplesect>" << endl;
 }
 
 static void writeInnerFiles(const FileList &fl, QTextStream &t)
-{  
+{
    QString title = theTranslator->trFile(true, true);
-   
+
    if (! fl.isEmpty()) {
       t << "        <simplesect>" << endl;
       t << "            <title> " << title << " </title>" << endl;
    }
-   
+
    for (auto fd : fl) {
       t << "            <para>" << endl;
       t << "                <itemizedlist>" << endl;
@@ -1064,7 +1066,7 @@ static void writeInnerFiles(const FileList &fl, QTextStream &t)
       t << "                </itemizedlist>" << endl;
       t << "            </para>" << endl;
    }
-   
+
    if (! fl.isEmpty()) {
       t << "        </simplesect>" << endl;
    }
@@ -1137,7 +1139,7 @@ static void writeInnerGroupFiles(const SortedList<QSharedPointer<GroupDef>> *gl,
 {
    if (gl) {
       for (auto sgd : *gl) {
-         t << "<xi:include href=\"" << sgd->getOutputFileBase() 
+         t << "<xi:include href=\"" << sgd->getOutputFileBase()
            << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>"  << endl;
       }
    }
@@ -1176,21 +1178,21 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    if (cd->templateMaster() != 0) {
       return;   // skip generated template instances.
    }
-  
+
    static const QString docbookOutDir = Config::getString("docbook-output");
-   static const bool haveDot          = Config::getBool("have-dot"); 
+   static const bool haveDot          = Config::getBool("have-dot");
    static const bool repeatBrief      = Config::getBool("repeat-brief");
- 
+
    msg("Generating Docbook output for class %s\n", csPrintable(cd->name()));
 
    // Add the file Documentation info to index file
    QString fileDocbook = cd->getOutputFileBase() + ".xml";
    ti << "        <xi:include href=\"" << fileDocbook << "\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
-      
-   //  
+
+   //
    QString fileName  = docbookOutDir + "/" + classOutputFileBase(cd) + ".xml";
    QString relPath   = relativePathToRoot(fileName);
- 
+
    QFile fi(fileName);
 
    if (! fi.open(QIODevice::WriteOnly)) {
@@ -1199,7 +1201,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
    }
 
    QTextStream t(&fi);
- 
+
    writeDocbookHeader_ID(t, classOutputFileBase(cd));
    t << "<title>";
 
@@ -1245,7 +1247,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
       t << "</programlisting>" << endl;
       t << "</para>" << endl;
    }
-  
+
 
    if (haveDot && (Config::getBool("class-diagrams") || Config::getBool("dot-class-graph"))) {
       t << "<para>Inheritance diagram for " << convertToXML(cd->name()) << "</para>" << endl;
@@ -1261,11 +1263,11 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
 
    writeInnerClasses(cd->getClassSDict(), t);
    writeTemplateList(cd, t);
-   
+
    for (auto mg : cd->getMemberGroupSDict()) {
       generateDocbookSection(cd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
    }
-   
+
 
    for (auto ml : cd->getMemberLists()) {
       if ((ml->listType() & MemberListType_detailedLists) == 0) {
@@ -1289,7 +1291,7 @@ static void generateDocbookForClass(QSharedPointer<ClassDef> cd, QTextStream &ti
 
       writeDocbookDocBlock(t, cd->docFile(), cd->docLine(), cd, QSharedPointer<MemberDef>(), cd->documentation());
 
-      t << "                <para>Definition at line " << cd->getDefLine() << " of file " 
+      t << "                <para>Definition at line " << cd->getDefLine() << " of file "
         << stripPath(cd->getDefFileName()) << "</para>" << endl;
 
       t << "                <para>The Documentation for this struct was generated from the following file: </para>" << endl;
@@ -1323,7 +1325,7 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
    if (nd->isReference() || nd->isHidden()) {
       return;   // skip external references
    }
-   
+
    QString outputDirectory       = Config::getString("docbook-output");
    static const bool repeatBrief = Config::getBool("repeat-brief");
 
@@ -1349,9 +1351,9 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
    t << "</title>" << endl;
    writeInnerClasses(nd->getClassSDict(), t);
    writeInnerNamespaces(nd->getNamespaceSDict(), t);
- 
+
    for (auto mg : nd->getMemberGroupSDict() ) {
-      generateDocbookSection(nd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());      
+      generateDocbookSection(nd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
    }
 
    for (auto ml : nd->getMemberLists()) {
@@ -1365,7 +1367,7 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
       if (! nd->briefDescription().isEmpty()) {
          t << "    <simplesect>" << endl;
 
-         writeDocbookDocBlock(t, nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(), 
+         writeDocbookDocBlock(t, nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(),
                   nd->briefDescription());
 
          t << "    </simplesect>" << endl;
@@ -1378,7 +1380,7 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
 
       writeDocbookDocBlock(t, nd->docFile(), nd->docLine(), nd, QSharedPointer<MemberDef>(), nd->documentation());
 
-      t << "                <para>Definition at line " << nd->getDefLine() << " of file "; 
+      t << "                <para>Definition at line " << nd->getDefLine() << " of file ";
       t << stripPath(nd->getDefFileName()) << "</para>" << endl;
       t << "                <para>The Documentation for this struct was generated from the following file: </para>";
       t << endl;
@@ -1407,7 +1409,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    // + location
    // - number of lines
 
-   static const bool haveDot = Config::getBool("have-dot"); 
+   static const bool haveDot = Config::getBool("have-dot");
 
    if (fd->isReference()) {
       return;   // skip external references
@@ -1482,7 +1484,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    if (! fd->getNamespaceSDict().isEmpty()) {
       writeInnerNamespaces(fd->getNamespaceSDict(), t);
    }
-   
+
    for (auto mg : fd->getMemberGroupSDict()) {
       generateDocbookSection(fd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
    }
@@ -1579,9 +1581,9 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    writeInnerNamespaces(gd->getNamespaces(), t);
    writeInnerPages(gd->getPages(), t);
    writeInnerGroups(gd->getSubGroups(), t);
-  
+
    for (auto mg : gd->getMemberGroupSDict()) {
-      generateDocbookSection(gd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());      
+      generateDocbookSection(gd, t, mg->members(), "user-defined", false, mg->header(), mg->documentation());
    }
 
    for (auto ml : gd->getMemberLists()) {
@@ -1873,7 +1875,7 @@ void generateDocbook()
       }
    }
 
-   // file documentation 
+   // file documentation
    if (showFiles) {
 
       // File Documentation index header

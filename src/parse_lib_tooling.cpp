@@ -685,7 +685,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
          } else {
-//          printf("\n Broom enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
+            // printf("\n Broom enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
          }
 
          QString currentUSR = getUSR_Decl(node);

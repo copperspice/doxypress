@@ -240,6 +240,12 @@ static void unescapeCRef(QString &value)
  */
 static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
 {
+   static const bool generateHtml    = Config::getBool("generate-html");
+   static const bool generateLatex   = Config::getBool("generate-latex");
+   static const bool generateDocbook = Config::getBool("generate-docbook");
+   static const bool generateRtf     = Config::getBool("generate-rtf");
+   static const bool generateXml     = Config::getBool("generate-xml");
+
    QString result;
    bool ambig;
 
@@ -263,28 +269,28 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
          switch (type) {
             case DocImage::Html:
 
-               if (! Config::getBool("generate-html")) {
+               if (! generateHtml) {
                   return result;
                }
                outputDir = Config::getString("html-output");
                break;
 
             case DocImage::Latex:
-               if (! Config::getBool("generate-latex")) {
+               if (! generateLatex) {
                   return result;
                }
                outputDir = Config::getString("latex-output");
                break;
 
             case DocImage::DocBook:
-               if (! Config::getBool("generate-docbook")) {
+               if (! generateDocbook) {
                   return result;
                }
                outputDir = Config::getString("docbook-output");
                break;
 
             case DocImage::Rtf:
-               if (! Config::getBool("generate-rtf")) {
+               if (! generateRtf) {
                   return result;
                }
                outputDir = Config::getString("rtf-output");

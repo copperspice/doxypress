@@ -117,8 +117,6 @@ void initDoxyPress()
    initFileMemberIndices();
 
    Doxy_Globals::globalScope       = QMakeShared<NamespaceDef>("<globalScope>", 1, 1, "<globalScope>");
-
-   // broom - review this
    Doxy_Globals::classSDict        = ClassSDict(Config::getCase("sort-class-case-sensitive"));
 
    // initialize global constants

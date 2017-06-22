@@ -183,7 +183,7 @@ void FTVHelp::decContentsDepth()
  *  \param name           name of the item
  *  \param ref            URL of to the item
  *  \param file           file containing the definition of the item
- *  \param anchor         anchor within the file 
+ *  \param anchor         anchor within the file
  *  \param addToNavIndex  add this entry to the quick navigation index
  *  \param def            definition corresponding to this entry
  */
@@ -333,22 +333,6 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
 static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
 {
    QString brief = def->briefDescription(true);
-
-/* ( save for testing )
-   if (brief.isEmpty()) {
-      SortedList<QSharedPointer<GroupDef>> *groups = def->partOfGroups();
-
-      if (groups) {
-         for (auto gd : *groups) {
-            brief = gd->briefDescription(true);
-
-            if (! brief.isEmpty()) {
-               break;
-            }
-         }
-      }
-   }
-*/
 
    if (! brief.isEmpty()) {
 
