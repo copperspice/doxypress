@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -35,9 +35,9 @@
 #include <outputlist.h>
 #include <util.h>
 
-GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &t, QString refFileName) 
+GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &t, QString refFileName)
                   : Definition(df, dl, 1, na)
-{   
+{
    pageDict       = new PageSDict();
    exampleDict    = new PageSDict();
 
@@ -45,7 +45,7 @@ GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &
    groupList      = new SortedList<QSharedPointer<GroupDef>>;
 
    allMemberNameInfoSDict = new MemberNameInfoSDict();
-   
+
    if (! refFileName.isEmpty() ) {
       fileName = stripExtension(refFileName);
 
@@ -56,18 +56,18 @@ GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &
    setGroupTitle(t);
 
    allMemberList = QMakeShared<MemberList>(MemberListType_allMembersList);
-   visited       = 0;   
+   visited       = 0;
 
    m_subGrouping = Config::getBool("allow-sub-grouping");
 }
 
 GroupDef::~GroupDef()
 {
-   delete dirList; 
+   delete dirList;
    delete groupList;
-    
+
    delete pageDict;
-   delete exampleDict;   
+   delete exampleDict;
    delete allMemberNameInfoSDict;
 }
 
@@ -100,10 +100,10 @@ void GroupDef::findSectionsInDocumentation()
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
    docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
-  
+
    for (auto mg : m_memberGroupSDict) {
       mg->findSectionsInDocumentation();
-   }  
+   }
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
@@ -137,10 +137,10 @@ bool GroupDef::addClass(QSharedPointer<ClassDef> cd)
    }
 
    updateLanguage(cd);
-   QString qn = cd->qualifiedName();  
+   QString key = cd->name();
 
-   if (m_classSDict.find(qn) == nullptr) {          
-      m_classSDict.insert(qn, cd); 
+   if (m_classSDict.find(key) == nullptr) {
+      m_classSDict.insert(key, cd);
       return true;
    }
 
@@ -156,7 +156,7 @@ bool GroupDef::addNamespace(QSharedPointer<NamespaceDef> def)
    updateLanguage(def);
 
    if (m_namespaceSDict.find(def->name()) == 0) {
-      m_namespaceSDict.insert(def->name(), def);      
+      m_namespaceSDict.insert(def->name(), def);
       return true;
    }
 
@@ -178,13 +178,13 @@ void GroupDef::addDir(QSharedPointer<DirDef> def)
 }
 
 void GroupDef::addPage(QSharedPointer<PageDef> def)
-{   
+{
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
    if (def->isHidden()) {
       return;
    }
-   
+
    pageDict->insert(def->name(), def);
 
    def->makePartOfGroup(self);
@@ -208,7 +208,7 @@ void GroupDef::addMembersToMemberGroup()
          ::addMembersToMemberGroup(ml, m_memberGroupSDict, self);
       }
    }
-   
+
    for (auto mg : m_memberGroupSDict) {
       mg->setInGroup(true);
    }
@@ -222,12 +222,12 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
    }
 
    updateLanguage(md);
-  
+
    QSharedPointer<MemberNameInfo> mni;
 
    if ((mni = (*allMemberNameInfoSDict)[md->name()])) {
       // member with this name already found
-  
+
       for (auto &srcMi : *mni) {
          QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
 
@@ -238,7 +238,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          // same class or namespace
          // both inside a file => definition and declaration do not have to be in the same file
 
-         bool sameScope = srcMd->getOuterScope() == md->getOuterScope() || 
+         bool sameScope = srcMd->getOuterScope() == md->getOuterScope() ||
                   (srcMd->getOuterScope()->definitionType() == Definition::TypeFile &&
                   md->getOuterScope()->definitionType() == Definition::TypeFile);
 
@@ -249,18 +249,18 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
          if ( (srcMd->isFunction() && md->isFunction()) && (tSrcMdAl.count() == tMdAl.count()) ) {
 
-            bool ok = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcMdAl, md->getOuterScope(), 
+            bool ok = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcMdAl, md->getOuterScope(),
                      md->getFileDef(), mdAl, true);
 
             if (ok && sameScope) {
                if (srcMd->getGroupAlias() == 0) {
                   md->setGroupAlias(srcMd);
-   
+
                } else if (md != srcMd->getGroupAlias()) {
                   md->setGroupAlias(srcMd->getGroupAlias());
-   
+
                }
-   
+
                return false; // member is the same as the one already added
             }
          }
@@ -274,7 +274,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
       allMemberNameInfoSDict->insert(mni->memberName(), mni);
    }
- 
+
    allMemberList->append(md);
 
    switch (md->memberType()) {
@@ -327,22 +327,22 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_Signal:
-         if (md->protection() == Public) { 
+         if (md->protection() == Public) {
             if (! docOnly) {
                addMemberToList(MemberListType_decPubSignalMembers, md);
-            }   
+            }
             addMemberToList(MemberListType_docPubSignalMembers, md);
 
          } else if (md->protection() == Protected) {
             if (! docOnly) {
                addMemberToList(MemberListType_decProSignalMembers, md);
-            }   
+            }
             addMemberToList(MemberListType_docProSignalMembers, md);
 
          } else if (md->protection() == Private) {
             if (! docOnly) {
                addMemberToList(MemberListType_decPriSignalMembers, md);
-            }   
+            }
             addMemberToList(MemberListType_docPriSignalMembers, md);
 
          }
@@ -392,7 +392,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
       default:
          err("GroupDef::insertMembers(): member `%s' (typeid=%d) with scope `%s' inserted in group scope `%s'\n",
-             qPrintable(md->name()), qPrintable(md->memberType()), 
+             qPrintable(md->name()), qPrintable(md->memberType()),
              md->getClassDef() ? qPrintable(md->getClassDef()->name()) : "", qPrintable(name()) );
    }
    return true;
@@ -404,7 +404,7 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
 
    if (mni) {
 
-      for (auto iter = mni->begin(); iter != mni->end(); ++iter) { 
+      for (auto iter = mni->begin(); iter != mni->end(); ++iter) {
 
          if (iter->memberDef == md) {
             mni->erase(iter);
@@ -462,8 +462,8 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
                removeMemberFromList(MemberListType_docPriSignalMembers, md);
             }
             break;
-           
-           
+
+
          case MemberType_Slot:
             if (md->protection() == Public) {
                removeMemberFromList(MemberListType_decPubSlotMembers, md);
@@ -502,8 +502,8 @@ bool GroupDef::findGroup(QSharedPointer<const GroupDef> def) const
    if (this == def) {
       return true;
 
-   } else if (groupList) {       
-    
+   } else if (groupList) {
+
       for (auto gd : *groupList) {
          if (gd->findGroup(def)) {
             return true;
@@ -511,11 +511,11 @@ bool GroupDef::findGroup(QSharedPointer<const GroupDef> def) const
       }
    }
 
-   return false;   
+   return false;
 }
 
 void GroupDef::addGroup(QSharedPointer<GroupDef> def)
-{   
+{
    groupList->append(def);
 }
 
@@ -533,7 +533,7 @@ int GroupDef::countMembers() const
 
 /*! Compute the HTML anchor names for all members in the group */
 void GroupDef::computeAnchors()
-{   
+{
    setAnchors(allMemberList);
 }
 
@@ -543,47 +543,47 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
    tagFile << "    <title>" << convertToXML(m_title) << "</title>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
- 
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
       switch (lde->kind()) {
 
          case LayoutDocEntry::GroupClasses:
-         {                     
+         {
             for (auto cd : m_classSDict) {
                if (cd->isLinkableInProject()) {
                   tagFile << "    <class kind=\"" << cd->compoundTypeString()
                           << "\">" << convertToXML(cd->name()) << "</class>" << endl;
                }
-            }            
+            }
          }
          break;
 
-         case LayoutDocEntry::GroupNamespaces: 
+         case LayoutDocEntry::GroupNamespaces:
          {
-                       
+
             for (auto &nd : m_namespaceSDict) {
                if (nd->isLinkableInProject()) {
                   tagFile << "    <namespace>" << convertToXML(nd->name())
                           << "</namespace>" << endl;
                }
             }
-            
+
          }
          break;
 
-         case LayoutDocEntry::GroupFiles: 
-         {                        
+         case LayoutDocEntry::GroupFiles:
+         {
             for (auto item : fileList)  {
                if (item->isLinkableInProject()) {
                   tagFile << "    <file>" << convertToXML(item->name()) << "</file>" << endl;
                }
-            }            
+            }
          }
          break;
 
-         case LayoutDocEntry::GroupPageDocs: 
+         case LayoutDocEntry::GroupPageDocs:
          {
-            if (pageDict) {              
+            if (pageDict) {
                for (auto item : *pageDict)  {
                   QString pageName = item->getOutputFileBase();
 
@@ -597,7 +597,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::GroupDirs:
          {
-            if (dirList) {          
+            if (dirList) {
                for (auto item : *dirList)  {
                   if (item->isLinkableInProject()) {
                      tagFile << "    <dir>" << convertToXML(item->displayName()) << "</dir>" << endl;
@@ -607,9 +607,9 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          }
          break;
 
-         case LayoutDocEntry::GroupNestedGroups: 
+         case LayoutDocEntry::GroupNestedGroups:
          {
-            if (groupList) {              
+            if (groupList) {
                for (auto item : *groupList)  {
                   if (item->isVisible()) {
                      tagFile << "    <subgroup>" << convertToXML(item->name()) << "</subgroup>" << endl;
@@ -630,9 +630,9 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          break;
 
          case LayoutDocEntry::MemberGroups: {
-              
+
             for (auto mg : m_memberGroupSDict) {
-               mg->writeTagFile(tagFile);               
+               mg->writeTagFile(tagFile);
             }
          }
          break;
@@ -650,15 +650,15 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
    static const bool repeatBrief = Config::getBool("repeat-brief");
 
    QSharedPointer<GroupDef> self = sharedFrom(this);
- 
+
    if ((! briefDescription().isEmpty() && repeatBrief)
          || ! documentation().isEmpty() || ! inbodyDocumentation().isEmpty()) {
 
       ol.pushGeneratorState();
 
-      if (pageDict->count() != countMembers()) { 
+      if (pageDict->count() != countMembers()) {
          // not only pages -> classical layout
-        
+
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Html);
          ol.writeRuler();
@@ -705,7 +705,7 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
       // write inbody documentation
       if (! inbodyDocumentation().isEmpty()) {
-         ol.generateDoc(inbodyFile(), inbodyLine(), self, QSharedPointer<MemberDef>(), 
+         ol.generateDoc(inbodyFile(), inbodyLine(), self, QSharedPointer<MemberDef>(),
                   inbodyDocumentation() + "\n", true, false);
       }
    }
@@ -715,9 +715,9 @@ void GroupDef::writeBriefDescription(OutputList &ol)
 {
    static const bool repeatBrief = Config::getBool("repeat-brief");
    QSharedPointer<GroupDef> self = sharedFrom(this);
-  
+
    if (hasBriefDescription()) {
-      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(), 
+      DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
                                              briefDescription(), true, false, "", true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
@@ -779,7 +779,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
       ol.startMemberHeader("files");
       ol.parseText(title);
       ol.endMemberHeader();
-      ol.startMemberList();   
+      ol.startMemberList();
 
       for (auto item : fileList) {
 
@@ -797,7 +797,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
 
          if (! item->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(item->getOutputFileBase());
-            ol.generateDoc(briefFile(), briefLine(), item, QSharedPointer<MemberDef>(), 
+            ol.generateDoc(briefFile(), briefLine(), item, QSharedPointer<MemberDef>(),
                            item->briefDescription(), false, false, "", true, false);
 
             ol.endMemberDescription();
@@ -820,7 +820,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
    // write list of groups
    int count = 0;
 
-   if (groupList->count() > 0) {    
+   if (groupList->count() > 0) {
       for (auto gd : *groupList) {
          if (gd->isVisible()) {
             count++;
@@ -847,14 +847,14 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
 
             ol.startMemberDeclaration();
             ol.startMemberItem(gd->getOutputFileBase(), 0);
-     
+
             ol.insertMemberAlign();
             ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
             ol.endMemberItem();
 
             if (! gd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
                ol.startMemberDescription(gd->getOutputFileBase());
-               ol.generateDoc(briefFile(), briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription(), 
+               ol.generateDoc(briefFile(), briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription(),
                               false, false, "", true, false);
 
                ol.endMemberDescription();
@@ -874,8 +874,8 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
       ol.parseText(title);
       ol.endMemberHeader();
       ol.startMemberList();
-      
-      for (auto dd : *dirList ) { 
+
+      for (auto dd : *dirList ) {
 
          if (! dd->hasDocumentation()) {
             continue;
@@ -891,7 +891,7 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
 
          if (! dd->briefDescription().isEmpty() && Config::getBool("brief-member-desc")) {
             ol.startMemberDescription(dd->getOutputFileBase());
-            ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(), 
+            ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
                            false, false, "", true, false);
 
             ol.endMemberDescription();
@@ -920,7 +920,7 @@ void GroupDef::writePageDocumentation(OutputList &ol)
       if (! pd->isReference()) {
          QSharedPointer<SectionInfo> si;
 
-         if (! pd->title().isEmpty() && ! pd->name().isEmpty() && 
+         if (! pd->title().isEmpty() && ! pd->name().isEmpty() &&
                   (si = Doxy_Globals::sectionDict.find(pd->name())) != 0) {
 
             ol.startSection(si->label, si->title, SectionInfo::Subsection);
@@ -929,7 +929,7 @@ void GroupDef::writePageDocumentation(OutputList &ol)
          }
 
          ol.startTextBlock();
-         ol.generateDoc(pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(), 
+         ol.generateDoc(pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(),
                   pd->documentation() + pd->inbodyDocumentation(), true, false, "", true, false);
 
          ol.endTextBlock();
@@ -938,14 +938,14 @@ void GroupDef::writePageDocumentation(OutputList &ol)
 }
 
 void GroupDef::writeMemberGroups(OutputList &ol)
-{  
+{
    QSharedPointer<GroupDef> self = sharedFrom(this);
-     
+
    // write user defined member groups
-      
+
    for (auto mg : m_memberGroupSDict) {
-      mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), 
-                 QSharedPointer<FileDef>(), self);      
+      mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(),
+                 QSharedPointer<FileDef>(), self);
    }
 }
 
@@ -960,7 +960,7 @@ void GroupDef::endMemberDeclarations(OutputList &ol)
 }
 
 void GroupDef::startMemberDocumentation(OutputList &ol)
-{  
+{
    if (Config::getBool("separate-member-pages")) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
@@ -969,7 +969,7 @@ void GroupDef::startMemberDocumentation(OutputList &ol)
 }
 
 void GroupDef::endMemberDocumentation(OutputList &ol)
-{   
+{
    if (Config::getBool("separate-member-pages")) {
       ol.popGeneratorState();
       Doxy_Globals::suppressDocWarnings = false;
@@ -995,7 +995,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
 
    bool first = true;
    SrcLangExt lang = getLanguage();
-   
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group) ) {
 
       if ((lde->kind() == LayoutDocEntry::GroupClasses && m_classSDict.declVisible()) ||
@@ -1018,7 +1018,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
             label = "files";
 
          } else if (lde->kind() == LayoutDocEntry::GroupNestedGroups) {
-            label = "groups"; 
+            label = "groups";
 
          } else {
             label = "dirs";
@@ -1071,7 +1071,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Man);
    ol.endTitleHead(getOutputFileBase(), name());
-   
+
    ol.popGeneratorState();
    ol.endHeaderSection();
    ol.startContents();
@@ -1082,10 +1082,10 @@ void GroupDef::writeDocumentation(OutputList &ol)
       static QRegExp re("[a-zA-Z_][-a-zA-Z_0-9]*");
       int i = 0, p = 0, l = 0;
 
-      while ((i = re.indexIn(m_title, p)) != -1) { 
+      while ((i = re.indexIn(m_title, p)) != -1) {
          // foreach word in the title
          l = re.matchedLength();
-   
+
          Doxy_Globals::searchIndexBase->addWord(m_title.mid(i, l), true);
          p = i + l;
       }
@@ -1096,7 +1096,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
    //---------------------------------------- start flexible part -------------------------------
 
    SrcLangExt lang = getLanguage();
-   
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
       switch (lde->kind()) {
          case LayoutDocEntry::BriefDesc:
@@ -1216,7 +1216,7 @@ void GroupDef::writeMemberPages(OutputList &ol)
 
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
- 
+
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_documentationLists) {
          ml->writeDocumentationPage(ol, name(), self);
@@ -1232,7 +1232,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> c
 
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
-   
+
    for (auto md : *allMemberList) {
 
       if (md->getGroupDef() == this && md->isLinkable() && !md->isEnumValue()) {
@@ -1278,14 +1278,14 @@ void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
 }
 
 void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd)
-{ 
+{
    for (auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
          if (gd->addNamespace(nd)) {
             nd->makePartOfGroup(gd);
-         }       
+         }
       }
    }
 }
@@ -1303,7 +1303,7 @@ void addDirToGroups(QSharedPointer<Entry> root, QSharedPointer<DirDef> dd)
 }
 
 void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGroup)
-{ 
+{
    for (auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
@@ -1331,7 +1331,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 
    Grouping::GroupPri_t pri = Grouping::GROUPING_LOWEST;
    QSharedPointer<GroupDef> fgd;
-  
+
    for (auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
@@ -1339,8 +1339,8 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 
          if (fgd && gd != fgd && g.pri == pri) {
             warn(root->fileName, root->startLine, "Member %s found in multiple %s groups. "
-                 "The member will be put in group %s, and not in group %s", 
-                 csPrintable(md->name()), csPrintable(Grouping::getGroupPriName(pri)), 
+                 "The member will be put in group %s, and not in group %s",
+                 csPrintable(md->name()), csPrintable(Grouping::getGroupPriName(pri)),
                  csPrintable(gd->name()), csPrintable(fgd->name()) );
          }
 
@@ -1352,7 +1352,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
    // put member into group defined by this entry?
    if (fgd) {
       QSharedPointer<GroupDef> mgd = md->getGroupDef();
-     
+
       bool insertit = false;
 
       if (mgd == 0) {
@@ -1385,16 +1385,16 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
             }
          }
 
-         if (moveit) {          
+         if (moveit) {
             mgd->removeMember(md);
             insertit = true;
          }
       }
 
-      if (insertit) {        
+      if (insertit) {
          bool success = fgd->insertMember(md);
 
-         if (success) {         
+         if (success) {
             md->setGroupDef(fgd, pri, root->fileName, root->startLine, !root->doc.isEmpty());
             QSharedPointer<ClassDef> cd = md->getClassDefOfAnonymousType();
 
@@ -1413,7 +1413,7 @@ void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
          gd->addExample(eg);
-         eg->makePartOfGroup(gd);        
+         eg->makePartOfGroup(gd);
       }
    }
 }
@@ -1445,9 +1445,9 @@ void GroupDef::addListReferences()
       title = theTranslator->trGroup(true, true);
    }
 
-   addRefItem(xrefItems, getOutputFileBase(), title, getOutputFileBase(), 
+   addRefItem(xrefItems, getOutputFileBase(), title, getOutputFileBase(),
               name(), 0, QSharedPointer<Definition>() );
-    
+
    for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);
    }
@@ -1460,8 +1460,8 @@ void GroupDef::addListReferences()
 }
 
 QSharedPointer<MemberList> GroupDef::createMemberList(MemberListType lt)
-{    
-   for (auto ml : m_memberLists) { 
+{
+   for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
@@ -1469,16 +1469,16 @@ QSharedPointer<MemberList> GroupDef::createMemberList(MemberListType lt)
 
    // not found, create a new member list
    QSharedPointer<MemberList> ml = QMakeShared<MemberList>(lt);
-   
+
    ml->setInGroup(true);
    m_memberLists.append(ml);
-  
+
    return m_memberLists.last();
 }
 
 void GroupDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
-{ 
-   QSharedPointer<MemberList> ml = createMemberList(lt);  
+{
+   QSharedPointer<MemberList> ml = createMemberList(lt);
 
    static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static const bool sortMemberDocs = Config::getBool("sort-member-docs");
@@ -1495,12 +1495,12 @@ void GroupDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
       ml->inSort(md);
    } else {
       ml->append(md);
-   } 
+   }
 }
 
-QSharedPointer<MemberList> GroupDef::getMemberList(MemberListType lt) 
+QSharedPointer<MemberList> GroupDef::getMemberList(MemberListType lt)
 {
-   for (auto ml : m_memberLists) { 
+   for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
@@ -1510,10 +1510,10 @@ QSharedPointer<MemberList> GroupDef::getMemberList(MemberListType lt)
 }
 
 void GroupDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title)
-{   
+{
    QSharedPointer<GroupDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
-  
+
    if (ml) {
       ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(),
                             QSharedPointer<FileDef>(), self, title, 0);
