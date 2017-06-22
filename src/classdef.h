@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -37,17 +37,44 @@
 #include <sortedlist_fwd.h>
 #include <types.h>
 
+class ClassDef;
+
 class ConstraintClassDef;
 class ClassDict;
 class FileDef;
 class StringDict;
-class UsesClassDef;
 
-/** A class representing a compound symbol
- *
- *  A compound symbol can be a class, struct, union, interface, service, singleton, or exception.
- *  \note This class should be renamed to CompoundDef
- */
+// Class that contains information about a usage relation.
+class UsesClassDef
+{
+ public:
+   UsesClassDef(QSharedPointer<ClassDef> cd) : m_classDef(cd) {
+      m_containment = true;
+   }
+
+   ~UsesClassDef()
+   { }
+
+   void addAccessor(const QString &s) {
+      if (m_accessors.contains(s)) {
+         m_accessors.insert(s);
+      }
+   }
+
+   /** Class definition this relation uses. */
+   QSharedPointer<ClassDef> m_classDef;
+
+   /** Dictionary of member variable names that form the edge labels of the
+    *  usage relation.
+    */
+   QSet<QString> m_accessors;
+
+   /** Template arguments used for the base class */
+   QByteArray m_templSpecifiers;
+
+   bool m_containment;
+};
+
 class ClassDef : public Definition
 {
  public:
@@ -72,13 +99,12 @@ class ClassDef : public Definition
     *                    I didn't add this to CompoundType to avoid having
     *                    to adapt all translators.
     */
-   ClassDef(const QString &fileName, int startLine, int startColumn, const QString &name, enum CompoundType ct,
-            const QString &ref = QString(), const QString &fName = QString(), bool isSymbol = true, bool isJavaEnum = false);
-  
-   /** Destroys a compound definition. */
+   ClassDef(const QString &fileName, int startLine, int startColumn, const QString &name,
+                  enum CompoundType ct, const QString &ref = QString(), const QString &fName = QString(),
+                  bool isSymbol = true, bool isJavaEnum = false);
+
    ~ClassDef();
 
-   /** Used for RTTI, this is a class */
    DefType definitionType() const override {
       return TypeClass;
    }
@@ -152,7 +178,7 @@ class ClassDef : public Definition
    /** show this class in the declaration section of its parent? */
    bool visibleInParentsDeclList() const;
 
-   // Returns the template arguments of this class      
+   // Returns the template arguments of this class
    const ArgumentList &getTemplateArgumentList() const;
    ArgumentList &getTemplateArgumentList();
 
@@ -225,7 +251,7 @@ class ClassDef : public Definition
     */
    void getTemplateParameterLists(QVector<ArgumentList> &lists) const;
 
-   QString qualifiedNameWithTemplateParameters(const QVector<ArgumentList> &actualParams = QVector<ArgumentList>(), 
+   QString qualifiedNameWithTemplateParameters(const QVector<ArgumentList> &actualParams = QVector<ArgumentList>(),
                   int *actualParamIndex = 0) const;
 
    /** Returns true if there is at least one pure virtual member in this
@@ -290,7 +316,7 @@ class ClassDef : public Definition
    bool isJavaEnum() const;
 
    bool isGeneric() const;
-   bool isAnonymous() const;   
+   bool isAnonymous() const;
    QString title() const;
 
    QString generatedFromFiles() const;
@@ -314,10 +340,10 @@ class ClassDef : public Definition
    void setSubGrouping(bool enabled);
    void setProtection(Protection p);
 
-   void setGroupDefForAllMembers(QSharedPointer<GroupDef> g, Grouping::GroupPri_t pri, const QString &fileName, 
+   void setGroupDefForAllMembers(QSharedPointer<GroupDef> g, Grouping::GroupPri_t pri, const QString &fileName,
                   int startLine, bool hasDocs);
 
-   void addInnerCompound(QSharedPointer<Definition> d) override; 
+   void addInnerCompound(QSharedPointer<Definition> d) override;
 
    QSharedPointer<ClassDef> insertTemplateInstance(const QString &fileName, int startLine, int startColumn,
                   const QString &templSpec, bool &freshInstance);
@@ -356,7 +382,7 @@ class ClassDef : public Definition
    void writeMemberPages(OutputList &ol);
    void writeMemberList(OutputList &ol);
 
-   void writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup, 
+   void writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup,
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> md) const override;
@@ -390,17 +416,17 @@ class ClassDef : public Definition
 
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
                   const QString &subTitle = 0, bool showInline = false,
-                  QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1, 
+                  QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1,
                   bool invert = false, bool showAlways = false, QSet<QSharedPointer<ClassDef>> *visitedClasses = 0);
 
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline = false);
    void writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt);
-   void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup, 
+   void writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bool inGroup,
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    void writeBriefDescription(OutputList &ol, bool exampleFlag);
    void writeDetailedDescription(OutputList &ol, const QString &pageType, bool exampleFlag,
-                  const QString &title, const QString &anchor = QString()); 
+                  const QString &title, const QString &anchor = QString());
 
    void writeIncludeFiles(OutputList &ol);
    //void writeAllMembersLink(OutputList &ol);
@@ -424,14 +450,14 @@ class ClassDef : public Definition
    int countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
                   int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
-   int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, 
+   int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
                   bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
    void getTitleForMemberListType(MemberListType type, QString &title, QString &subtitle);
    QString includeStatement() const;
 
    void addTypeConstraint(const QString &typeConstraint, const QString &type);
-  
+
    /*! file name that forms the base for the output file containing the
     *  class documentation. For compatibility with Qt (e.g. links via tag
     *  files) this name cannot be derived from the class name directly.
@@ -439,27 +465,27 @@ class ClassDef : public Definition
    QString m_fileName;
 
    // Include information about the header file should be included
-   // in the documentation. 0 by default, set by setIncludeFile().    
+   // in the documentation. 0 by default, set by setIncludeFile().
    IncludeInfo m_incInfo;
 
-   // List of base class (or super-classes) from which this class derives directly    
+   // List of base class (or super-classes) from which this class derives directly
    SortedList<BaseClassDef *> *m_parents;
 
-   // List of sub-classes that directly derive from this class    
+   // List of sub-classes that directly derive from this class
    SortedList<BaseClassDef *> *m_inheritedBy;
 
    SortedList<QSharedPointer<ClassDef>> *m_taggedInnerClasses;
 
-   // Namespace this class is part of (this is the inner most namespace in case of nested namespaces)    
+   // Namespace this class is part of (this is the inner most namespace in case of nested namespaces)
    QSharedPointer<NamespaceDef> m_nspace;
 
-   // File this class is defined in 
+   // File this class is defined in
    QSharedPointer<FileDef> m_fileDef;
 
    // List of all members (including inherited members)
    MemberNameInfoSDict m_allMemberNameInfoSDict;
 
-   // Template arguments of this class 
+   // Template arguments of this class
    ArgumentList m_tempArgs;
 
    // Type constraints for template parameters
@@ -479,7 +505,7 @@ class ClassDef : public Definition
     */
    Protection m_prot;
 
-   // The inner classes contained in this class. Will be empty if there are  no inner classes. 
+   // The inner classes contained in this class. Will be empty if there are  no inner classes.
    ClassSDict m_innerClasses;
 
    // classes for the collaboration diagram
@@ -546,7 +572,7 @@ class ClassDef : public Definition
 
    /** Does this class overloaded the -> operator? */
    QSharedPointer<MemberDef> m_arrowOperator;
-   
+
    QSharedPointer<ClassDef> m_tagLessRef;
 
    /** Does this class represent a Java style enum? */
@@ -558,42 +584,11 @@ class ClassDef : public Definition
    Entry::Traits m_classTraits;
 };
 
-/** Class that contains information about a usage relation.
- */
-class UsesClassDef 
-{
- public:
-   UsesClassDef(QSharedPointer<ClassDef> cd) : m_classDef(cd) {      
-      m_containment = true;
-   }
-
-   ~UsesClassDef() 
-   { }
-
-   void addAccessor(const QString &s) {
-      if (m_accessors.contains(s)) {
-         m_accessors.insert(s);        
-      }
-   }
-
-   /** Class definition this relation uses. */
-   QSharedPointer<ClassDef> m_classDef;
-
-   /** Dictionary of member variable names that form the edge labels of the
-    *  usage relation.
-    */
-   QSet<QString> m_accessors;
-
-   /** Template arguments used for the base class */
-   QByteArray m_templSpecifiers;
-
-   bool m_containment;
-};
 
 /** Class that contains information about an inheritance relation
  */
 struct BaseClassDef {
-   BaseClassDef(QSharedPointer<ClassDef> cd, const QString &n, Protection p, Specifier v, const QString &t) 
+   BaseClassDef(QSharedPointer<ClassDef> cd, const QString &n, Protection p, Specifier v, const QString &t)
       : classDef(cd), usedName(n), prot(p), virt(v), templSpecifiers(t)
    {}
 
@@ -624,7 +619,7 @@ struct BaseClassDef {
  */
 struct ConstraintClassDef
 {
-   ConstraintClassDef(QSharedPointer<ClassDef> cd) 
+   ConstraintClassDef(QSharedPointer<ClassDef> cd)
       : classDef(cd) {}
 
    void addAccessor(const QString &s)  {
