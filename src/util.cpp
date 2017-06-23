@@ -348,8 +348,8 @@ QString stripFromIncludePath(const QString &path)
  */
 int determineSection(const QString &fname)
 {
-   const QStringList suffixSource = Config::getList("suffix-source-navtree");
-   const QStringList suffixHeader = Config::getList("suffix-header-navtree");
+   static const QStringList suffixSource = Config::getList("suffix-source-navtree");
+   static const QStringList suffixHeader = Config::getList("suffix-header-navtree");
 
    QFileInfo fi(fname);
    QString suffix = fi.suffix().toLower();
@@ -1125,7 +1125,6 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPoi
                   }
                }
             }
-
          }
 
          // repeat for the parent scope
@@ -1365,7 +1364,9 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
       return QSharedPointer<ClassDef>();
    }
 
-   if (! Doxy_Globals::glossary().contains(name)) {
+   auto iter = Doxy_Globals::glossary().find(name);
+
+   if (iter == Doxy_Globals::glossary().end() ) {
       // -p (for ObjC protocols)
 
       if (! Doxy_Globals::glossary().contains(name + "-p")) {
@@ -1438,8 +1439,6 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
    // init at "infinite"
    int minDistance = 10000;
 
-   auto iter = Doxy_Globals::glossary().find(name);
-
    while (iter != Doxy_Globals::glossary().end() && iter.key() == name)  {
       QSharedPointer<Definition> def = sharedFrom(iter.value());
 
@@ -1472,8 +1471,8 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
 
    } else {
       // not likely to get to this code, only way is if the cache expired an entry
-      Doxy_Globals::lookupCache.insert(key, new LookupInfo(bestMatch, bestTypedef, bestTemplSpec, bestResolvedType));
-
+      Doxy_Globals::lookupCache.insert(key, new LookupInfo(bestMatch, bestTypedef, bestTemplSpec,
+                  bestResolvedType));
    }
 
    return bestMatch;

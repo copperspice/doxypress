@@ -4174,7 +4174,9 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
          int memIndex = rname.lastIndexOf("::");
 
          cd = getClass(scope);
-         if (cd && scope + "::" == rname.left(scope.length() + 2)) { // found A::f inside A
+         if (cd && scope + "::" == rname.left(scope.length() + 2)) {
+            // found A::f inside A
+
             // strip scope from name
             rname = rname.right(rname.length() - rootNav->parent()->name().length() - 2);
          }
@@ -4228,14 +4230,13 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
          } else if (! ((rootNav->parent()->section() & Entry::COMPOUND_MASK) ||
                     rootNav->parent()->section() == Entry::OBJCIMPL_SEC) &&
                     ! isMember && (root->relates.isEmpty() || root->relatesType == Duplicate) &&
-                    root->type.left(7) != "extern " && root->type.left(8) != "typedef ") {
+                    ! root->type.startsWith("extern ") && ! root->type.startsWith("typedef ") )   {
 
             // no member => unrelated function
 
-            /* check the uniqueness of the function name in the file.
-             * A file could contain a function prototype and a function definition
-             * or even multiple function prototypes.
-             */
+            // check the uniqueness of the function name in the file. A file could contain a
+            // function prototype and a function definition or even multiple function prototypes.
+
             QSharedPointer<MemberName> mn;
             mn = Doxy_Globals::functionNameSDict.find(rname);
 
@@ -4488,7 +4489,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
                addMemberToGroups(root, md);
 
                if (root->relatesType == Simple)  {
-                  // if this is a relatesalso command, allow find Member to pick it up
+                  // if this is a relatesalso command allow find Member to pick it up
 
                   rootNav->changeSection(Entry::EMPTY_SEC);
                   // Otherwise we have finished with this entry
