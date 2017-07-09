@@ -1,0 +1,25 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* All rights reserved.
+*
+* GNU Free Documentation License
+*
+*************************************************************************/
+
+/**
+@page py_codeblock Python Code Block
+
+\code{.py}
+   import sys #Comment here should explain the source code.
+
+\endcode
+
+
+~~~{.py}
+   import sys #Check markdown comment locaton
+
+~~~
+
+
+*/

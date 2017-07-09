@@ -2,7 +2,7 @@
     "configuration": {
         "allow-sub-grouping": true,
         "allow-unicode-names": false,
-        "always-detailed-sec": true,
+        "always-detailed-sec": false,
         "auto-link": true,
         "brief-member-desc": true,
         "built-in-stl-support": false,
@@ -56,7 +56,7 @@
             ""
         ],
         "qt-auto-brief": true,
-        "repeat-brief": true,
+        "repeat-brief": false,
         "separate-member-pages": false,
         "short-names": false,
         "show-file-page": false,
@@ -399,7 +399,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.8"
+        "project-version": "1.2.10"
     },
     "source": {
         "clang-flags": [
