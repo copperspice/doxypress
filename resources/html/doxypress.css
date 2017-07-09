@@ -193,7 +193,7 @@ div.line {
    font-family: monospace, fixed;
    font-size: 13px;
    min-height: 13px;
-   line-height: 1.0;   
+   line-height: 1.0;
    white-space: -moz-pre-wrap; /* Moz */
    white-space: -pre-wrap;     /* Opera 4-6 */
    white-space: -o-pre-wrap;   /* Opera 7 */
@@ -255,8 +255,8 @@ div.classindex span.ai {
    display: inline-block;
 }
 
-.lineno { 
-   user-select: none;   
+.lineno {
+   user-select: none;
    -webkit-user-select: none;
    -moz-user-select: none;
    -webkit-touch-callout: none;
@@ -379,22 +379,6 @@ span.stringliteral {
 
 span.charliteral {
    color: #008080
-}
-
-span.vhdldigit {
-   color: #ff00ff
-}
-
-span.vhdlchar {
-   color: #000000
-}
-
-span.vhdlkeyword {
-   color: #700070
-}
-
-span.vhdllogic {
-   color: #ff0000
 }
 
 blockquote {
@@ -792,7 +776,7 @@ div.directory .levels span {
     -webkit-user-select: none;
     -khtml-user-select: none;
     -moz-user-select: none;
-    -ms-user-select: none;    
+    -ms-user-select: none;
     cursor: pointer;
     font-size: 80%;
     display: inline-block;
@@ -807,7 +791,7 @@ div.directory .levels span {
     margin-left: 4px;
     margin-right: 4px;
     display: inline-block;
-    color: white;   
+    color: white;
     position: relative;
     top: -3px;
 }
@@ -893,7 +877,7 @@ div.dynheader {
    -webkit-user-select: none;
    -khtml-user-select: none;
    -moz-user-select: none;
-   -ms-user-select: none;   
+   -ms-user-select: none;
 }
 
 address {
@@ -994,7 +978,7 @@ table.classindex
    margin-right: 3%;
    width: 94%;
    border: 0;
-   border-spacing: 0; 
+   border-spacing: 0;
    padding: 0;
 }
 
@@ -1519,12 +1503,14 @@ tr.heading h2 {
 #powerTip.w:after, #powerTip.w:before {
    right: 100%;
 }
+
 #powerTip.w:after {
    border-right-color: #ffffff;
    border-width: 10px;
    top: 50%;
    margin-top: -10px;
 }
+
 #powerTip.w:before {
    border-right-color: #808080;
    border-width: 11px;
@@ -1536,7 +1522,7 @@ tr.heading h2 {
 {
   #top { display: none; }
   #breadcrumb { display: none; }
-  #side-nav { display: none; } 
+  #side-nav { display: none; }
   #nav-path { display: none; }
   body { overflow:visible; }
   h1, h2, h3, h4, h5, h6 { page-break-after: avoid; }

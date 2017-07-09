@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
- * All rights reserved.    
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -38,7 +38,7 @@ class DevNullCodeDocInterface : public CodeOutputInterface
  public:
    void codify(const QString &) override {}
 
-   void writeCodeLink(const QString &, const QString &, const QString &, 
+   void writeCodeLink(const QString &, const QString &, const QString &,
                   const QString &, const QString &) override  {}
 
    void writeTooltip(const QString &, const DocLinkInfo &, const QString &,
@@ -74,7 +74,7 @@ FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const
    }
 
    setReference(lref);
-      
+
    m_package   = QSharedPointer<PackageDef>();
    m_isSource  = determineSection(nm) == Entry::SOURCE_SEC;
    m_docname   = nm;
@@ -85,14 +85,14 @@ FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const
    }
 
    setLanguage(getLanguageFromFileName(name()));
-   
+
    acquireFileVersion();
    m_subGrouping = Config::getBool("allow-sub-grouping");
 }
 
 /*! destroy the file definition */
 FileDef::~FileDef()
-{       
+{
 }
 
 /*! Compute the HTML anchor names for all members in the class */
@@ -116,10 +116,10 @@ void FileDef::findSectionsInDocumentation()
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
    docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
-  
+
    for (auto mg : m_memberGroupSDict) {
       mg->findSectionsInDocumentation();
-   }   
+   }
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
@@ -147,7 +147,7 @@ void FileDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << "</filename>" << endl;
 
    if (m_includeList.count() > 0) {
-      
+
       for (auto item : m_includeList) {
          if (! item.indirect) {
             QSharedPointer<FileDef> fd = item.fileDef;
@@ -172,11 +172,11 @@ void FileDef::writeTagFile(QTextStream &tagFile)
          }
       }
    }
-     
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
       switch (lde->kind())  {
-      
-         case LayoutDocEntry::FileClasses: 
+
+         case LayoutDocEntry::FileClasses:
          {
             for (auto cd : m_classSDict) {
                if (cd->isLinkableInProject()) {
@@ -184,21 +184,21 @@ void FileDef::writeTagFile(QTextStream &tagFile)
                           "\">" << convertToXML(cd->name()) << "</class>" << endl;
                }
             }
-            
+
          }
          break;
 
-         case LayoutDocEntry::FileNamespaces: 
+         case LayoutDocEntry::FileNamespaces:
          {
             for (auto nd : m_namespaceSDict) {
                if (nd->isLinkableInProject()) {
                   tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
-               }               
+               }
             }
          }
          break;
 
-         case LayoutDocEntry::MemberDecl: 
+         case LayoutDocEntry::MemberDecl:
          {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
             QSharedPointer<MemberList> ml = getMemberList(lmd->type);
@@ -210,11 +210,11 @@ void FileDef::writeTagFile(QTextStream &tagFile)
          break;
 
          case LayoutDocEntry::MemberGroups: {
-        
+
             for (auto mg : m_memberGroupSDict) {
                mg->writeTagFile(tagFile);
             }
-        
+
          }
          break;
          default:
@@ -231,7 +231,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
    QSharedPointer<FileDef> self = sharedFrom(this);
 
    static const bool sourceCode      = Config::getBool("source-code");
-   static const bool repeatBrief     = Config::getBool("repeat-brief"); 
+   static const bool repeatBrief     = Config::getBool("repeat-brief");
    static const bool latexSourceCode = Config::getBool("latex-source-code");
    static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
 
@@ -269,7 +269,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
       if (! documentation().isEmpty()) {
          ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), documentation() + "\n", true, false);
       }
-      
+
       if (sourceCode) {
          //if Latex enabled and LATEX_SOURCE_CODE is not, then skip
 
@@ -287,7 +287,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
          QString refText = theTranslator->trDefinedInSourceFile();
          int fileMarkerPos = refText.indexOf("@0");
 
-         if (fileMarkerPos != -1) { 
+         if (fileMarkerPos != -1) {
             // should always pass this
 
             ol.parseText(refText.left(fileMarkerPos));                          //text left from marker 1
@@ -297,9 +297,9 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
          } else {
             err("Invalid translation markers in trDefinedInSourceFile\n");
 
-         }         
+         }
 
-         ol.endParagraph();        
+         ol.endParagraph();
          ol.popGeneratorState();
       }
 
@@ -353,7 +353,7 @@ void FileDef::writeIncludeFiles(OutputList &ol)
 {
    if (m_includeList.count() > 0) {
       ol.startTextBlock(true);
-     
+
       for (auto item : m_includeList) {
          if (! item.indirect) {
             QSharedPointer<FileDef> fd = item.fileDef;
@@ -366,11 +366,11 @@ void FileDef::writeIncludeFiles(OutputList &ol)
 
             ol.startTypewriter();
 
-            if (isIDLorJava) { 
+            if (isIDLorJava) {
                // IDL/Java include
                ol.docify("import ");
 
-            } else if (item.imported) { 
+            } else if (item.imported) {
                // Objective-C include
                ol.docify("#import ");
 
@@ -394,7 +394,7 @@ void FileDef::writeIncludeFiles(OutputList &ol)
             // then we should have used fd->docName() instead of ii->includeName
 
             if (fd && fd->isLinkable()) {
-               ol.writeObjectLink(fd->getReference(),  
+               ol.writeObjectLink(fd->getReference(),
                   fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(), 0, item.includeName);
 
             } else {
@@ -426,7 +426,7 @@ void FileDef::writeIncludeGraph(OutputList &ol)
    QSharedPointer<FileDef> self = sharedFrom(this);
 
    if (Config::getBool("have-dot") /*&& Config::getBool("dot-include")*/) {
-     
+
       DotInclDepGraph incDepGraph(self, false);
 
       if (incDepGraph.isTooBig()) {
@@ -440,7 +440,7 @@ void FileDef::writeIncludeGraph(OutputList &ol)
          ol.endInclDepGraph(incDepGraph);
          ol.enableAll();
          ol.endTextBlock(true);
-      }      
+      }
    }
 }
 
@@ -448,7 +448,7 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config::getBool("dot-included-by")*/) {      
+   if (Config::getBool("have-dot") /*&& Config::getBool("dot-included-by")*/) {
       DotInclDepGraph incDepGraph(self, true);
 
       if (incDepGraph.isTooBig()) {
@@ -469,7 +469,7 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 }
 
 void FileDef::writeSourceLink(OutputList &ol)
-{   
+{
    if (generateSourceFile()) {
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
@@ -483,14 +483,14 @@ void FileDef::writeSourceLink(OutputList &ol)
 
 void FileDef::writeNamespaceDeclarations(OutputList &ol, const QString &title, bool isConstantGroup)
 {
-   // write list of namespaces 
-   m_namespaceSDict.writeDeclaration(ol, title, isConstantGroup);   
+   // write list of namespaces
+   m_namespaceSDict.writeDeclaration(ol, title, isConstantGroup);
 }
 
 void FileDef::writeClassDeclarations(OutputList &ol, const QString &title)
 {
-   // write list of classes  
-   m_classSDict.writeDeclaration(ol, nullptr, title, false);   
+   // write list of classes
+   m_classSDict.writeDeclaration(ol, nullptr, title, false);
 }
 
 void FileDef::writeInlineClasses(OutputList &ol)
@@ -502,9 +502,9 @@ void FileDef::writeInlineClasses(OutputList &ol)
 
    bool isEnabled = ol.isEnabled(OutputGenerator::Html);
    ol.enable(OutputGenerator::Html);
-   
+
    m_classSDict.writeDocumentation(ol, self);
-   
+
    // restore the initial state if needed
    if (! isEnabled) {
       ol.disable(OutputGenerator::Html);
@@ -541,12 +541,12 @@ void FileDef::writeMemberGroups(OutputList &ol)
 {
    /* write user defined member groups */
    QSharedPointer<FileDef> self = sharedFrom(this);
-  
+
    for (auto mg : m_memberGroupSDict) {
       if ((! mg->allMembersInSameSection() || ! m_subGrouping) && mg->header() != "[NOHEADER]") {
          mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), self, QSharedPointer<GroupDef>());
       }
-   }  
+   }
 }
 
 void FileDef::writeAuthorSection(OutputList &ol)
@@ -565,10 +565,10 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 {
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-  
+
    bool first = true;
    SrcLangExt lang = getLanguage();
-  
+
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
 
       if ((lde->kind() == LayoutDocEntry::FileClasses && m_classSDict.declVisible()) ||
@@ -596,7 +596,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
    ol.popGeneratorState();
 }
 
-/*! Write the documentation page for this file to the file of output 
+/*! Write the documentation page for this file to the file of output
     generators \a ol.
 */
 void FileDef::writeDocumentation(OutputList &ol)
@@ -659,9 +659,9 @@ void FileDef::writeDocumentation(OutputList &ol)
    if (Doxy_Globals::searchIndexBase != nullptr) {
       Doxy_Globals::searchIndexBase->setCurrentDoc(self, anchor(), false);
       Doxy_Globals::searchIndexBase->addWord(localName(), true);
-   } 
+   }
 
-   SrcLangExt lang = getLanguage();    
+   SrcLangExt lang = getLanguage();
 
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
 
@@ -777,9 +777,9 @@ void FileDef::writeDocumentation(OutputList &ol)
             break;
       }
    }
-  
+
    ol.endContents();
-  
+
    endFileWithNavPath(self, ol);
 
    if (Config::getBool("separate-member-pages")) {
@@ -798,7 +798,7 @@ void FileDef::writeMemberPages(OutputList &ol)
 
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-  
+
    for (auto ml : m_memberLists) {
       if (ml->listType()&MemberListType_documentationLists) {
          ml->writeDocumentationPage(ol, name(), self);
@@ -818,7 +818,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> cu
    QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
    if (allMemberList) {
-      
+
       for (auto md : *allMemberList) {
 
          if (md->getFileDef() == this && md->getNamespaceDef() == 0 && md->isLinkable() && !md->isEnumValue()) {
@@ -880,7 +880,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
 
    if (getDirDef()) {
 
-      startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible, ! generateTreeView, 
+      startFile(ol, getSourceFileBase(), QString(), pageTitle, HLI_FileVisible, ! generateTreeView,
                   isDocFile && genSourceFile ? QString() : getOutputFileBase());
 
       if (! generateTreeView) {
@@ -925,7 +925,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
       }
    }
 
-   // user specified  
+   // user specified
    static bool clangParsing = Config::getBool("clang-parsing");
    auto srcLang = getLanguage();
 
@@ -939,19 +939,19 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
       } else {
          ClangParser::instance()->switchToFile(getFilePath());
       }
- 
-      ClangParser::instance()->writeSources(ol, self); 
+
+      ClangParser::instance()->writeSources(ol, self);
       ol.endCodeFragment();
 
    } else  {
       // use lex
-   
+
       ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       ol.startCodeFragment();
 
-      bool needs2PassParsing = Doxy_Globals::parseSourcesNeeded && ! filterSourceFiles &&                         
-                  ! getFileFilter(getFilePath(), true).isEmpty(); 
+      bool needs2PassParsing = Doxy_Globals::parseSourcesNeeded && ! filterSourceFiles &&
+                  ! getFileFilter(getFilePath(), true).isEmpty();
 
       // need to parse (filtered) sources for cross-references, however the user wants to show sources as-is
       // and there is a filter used while parsing
@@ -964,10 +964,10 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
       pIntf->parseCode(ol, 0, fileToString(getFilePath(), filterSourceFiles, true),
                        srcLang, false, 0, self, -1, -1, false,
                        QSharedPointer<MemberDef>(), true, QSharedPointer<Definition>(), ! needs2PassParsing);
-                      
+
       ol.endCodeFragment();
    }
-  
+
    ol.endContents();
    endFileWithNavPath(self, ol);
    ol.enableAll();
@@ -978,14 +978,14 @@ void FileDef::parseSource(bool sameTu, QStringList &includedFiles)
    QSharedPointer<FileDef> self  = sharedFrom(this);
    static bool filterSourceFiles = Config::getBool("filter-source-files");
 
-   DevNullCodeDocInterface devNullIntf;  
+   DevNullCodeDocInterface devNullIntf;
 
    static bool clangParsing = Config::getBool("clang-parsing");
    auto srcLang = getLanguage();
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
       // use clang parser
- 
+
       if (! sameTu) {
          ClangParser::instance()->start(getFilePath(), QByteArray(), includedFiles, QSharedPointer<Entry>());
 
@@ -996,8 +996,8 @@ void FileDef::parseSource(bool sameTu, QStringList &includedFiles)
       ClangParser::instance()->writeSources(devNullIntf, self);
 
    } else {
-      // use lex parser    
-   
+      // use lex parser
+
       ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
       pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), srcLang, false, 0, self);
@@ -1014,22 +1014,22 @@ void FileDef::finishParsing()
 }
 
 void FileDef::addMembersToMemberGroup()
-{ 
+{
    QSharedPointer<FileDef> self = sharedFrom(this);
 
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
-         ::addMembersToMemberGroup(ml, m_memberGroupSDict, self);    
+         ::addMembersToMemberGroup(ml, m_memberGroupSDict, self);
       }
    }
 
    // add members inside sections to their groups
    for (auto mg : m_memberGroupSDict) {
-      if (mg->allMembersInSameSection() && m_subGrouping) {           
+      if (mg->allMembersInSameSection() && m_subGrouping) {
          mg->addToDeclarationSection();
       }
    }
- 
+
 }
 
 /*! Adds member definition \a md to the list of all members of this file */
@@ -1041,17 +1041,17 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
 
    QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
-   if (allMemberList && allMemberList->lastIndexOf(md) != -1) { 
+   if (allMemberList && allMemberList->lastIndexOf(md) != -1) {
       return;
    }
 
-   if (allMemberList == nullptr) {   
+   if (allMemberList == nullptr) {
       m_memberLists.append(QMakeShared<MemberList>(MemberListType_allMembersList));
       allMemberList = m_memberLists.last();
    }
 
    allMemberList->append(md);
-  
+
    switch (md->memberType()) {
       case MemberType_Variable:
       case MemberType_Property:
@@ -1088,7 +1088,7 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
            err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
              qPrintable(md->name()), qPrintable(md->getClassDef()->name()), qPrintable(name()) );
 
-         } else  { 
+         } else  {
 
            err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
              qPrintable(md->name()), "<global>", qPrintable(name()) );
@@ -1102,9 +1102,9 @@ void FileDef::insertClass(QSharedPointer<ClassDef> cd)
 {
    if (cd->isHidden()) {
       return;
-   } 
- 
-   m_classSDict.insert(cd->name(), cd);   
+   }
+
+   m_classSDict.insert(cd->name(), cd);
 }
 
 /*! Adds namespace definition \a nd to the list of all compounds of this file */
@@ -1114,8 +1114,8 @@ void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
       return;
    }
 
-   if (! nd->name().isEmpty() && m_namespaceSDict.find(nd->name()) == 0) {    
-      m_namespaceSDict.insert(nd->name(), nd);      
+   if (! nd->name().isEmpty() && m_namespaceSDict.find(nd->name()) == 0) {
+      m_namespaceSDict.insert(nd->name(), nd);
    }
 }
 
@@ -1129,21 +1129,21 @@ QString FileDef::name() const
 }
 
 void FileDef::addSourceRef(int line, QSharedPointer<Definition> d, QSharedPointer<MemberDef> md)
-{   
-   if (d) {          
+{
+   if (d) {
       m_srcDefDict.insert(line, d);
 
       if (md) {
          m_srcMemberDict.insert(line, md);
-      }      
+      }
    }
 }
 
 QSharedPointer<Definition> FileDef::getSourceDefinition(int lineNr) const
 {
-   QSharedPointer<Definition> result; 
+   QSharedPointer<Definition> result;
    result = m_srcDefDict.value(lineNr);
-    
+
    return result;
 }
 
@@ -1151,7 +1151,7 @@ QSharedPointer<MemberDef> FileDef::getSourceMember(int lineNr) const
 {
    QSharedPointer<MemberDef> result;
    result = m_srcMemberDict.value(lineNr);
-     
+
    return result;
 }
 
@@ -1159,7 +1159,7 @@ void FileDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)
 {
    if (! m_usingDirList.find(nd->qualifiedName()) ) {
       m_usingDirList.insert(nd->qualifiedName(), nd);
-   }   
+   }
 }
 
 NamespaceSDict *FileDef::getUsedNamespaces()
@@ -1206,45 +1206,45 @@ void FileDef::addIncludedUsingDirectives()
    }
 
    visited = true;
-  
-   if (! m_includeList.isEmpty()) { 
+
+   if (! m_includeList.isEmpty()) {
       // file contains #includes
-            
+
       for (auto &item : m_includeList) {
          // foreach #include which is a known file
 
-         if (item.fileDef && ! item.fileDef->visited) {                
+         if (item.fileDef && ! item.fileDef->visited) {
             // recurse into this file
             item.fileDef->addIncludedUsingDirectives();
          }
       }
-                 
+
       for (auto incList : m_includeList) {
 
          if (incList.fileDef && incList.fileDef != this) {
             // add using directives
             NamespaceSDict &unl = incList.fileDef->m_usingDirList;
-                      
+
             for (auto nd : unl) {
                // append each using directive found in a #include file
-                              
-               if (m_usingDirList.find(nd->qualifiedName()) == 0) {                    
+
+               if (m_usingDirList.find(nd->qualifiedName()) == 0) {
                   m_usingDirList.insert(nd->qualifiedName(), nd);
                }
             }
-           
+
             // add using declarations
             StringMap<QSharedPointer<Definition>> &udl = incList.fileDef->m_usingDeclList;
-                     
-            for (auto d : udl) {                           
+
+            for (auto d : udl) {
                if (m_usingDeclList.find(d->qualifiedName()) == 0) {
                   m_usingDeclList.insert(d->qualifiedName(), d);
                }
             }
-           
+
          }
-      }      
-   }   
+      }
+   }
 }
 
 void FileDef::addIncludedByDependency(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool imported)
@@ -1252,7 +1252,7 @@ void FileDef::addIncludedByDependency(QSharedPointer<FileDef> fd, const QString 
    QString iName = fd ? fd->getFilePath() : incName;
 
    if (! iName.isEmpty() && ! m_includedByDict.contains(iName)) {
-     
+
       IncludeInfo ii;
       ii.fileDef     = fd;
       ii.includeName = incName;
@@ -1277,17 +1277,17 @@ bool FileDef::isIncluded(const QString &name) const
 bool FileDef::generateSourceFile() const
 {
    static bool sourceBrowser   = Config::getBool("source-code");
-   static bool verbatimHeaders = Config::getBool("verbatim-headers");   
-      
+   static bool verbatimHeaders = Config::getBool("verbatim-headers");
+
    bool retval = ! isReference();
 
    if (retval) {
-      retval = (sourceBrowser || (verbatimHeaders && determineSection(name()) == Entry::HEADER_SEC));     
+      retval = (sourceBrowser || (verbatimHeaders && determineSection(name()) == Entry::HEADER_SEC));
    }
 
-   if (retval) {      
-      retval = isDocumentationFile();      
-   }     
+   if (retval) {
+      retval = isDocumentationFile();
+   }
 
    return retval;
 }
@@ -1310,18 +1310,18 @@ bool FileDef::isDocumentationFile() const
 }
 
 void FileDef::addListReferences()
-{   
+{
    QSharedPointer<FileDef> self = sharedFrom(this);
 
    const QVector<ListItemInfo> &xrefItems = getRefItems();
 
-   addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(), 
+   addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(),
               "", QSharedPointer<Definition>());
-      
+
    for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);
    }
-   
+
    for (auto ml : m_memberLists) {
       if (ml->listType() & MemberListType_documentationLists) {
          ml->addListReferences(self);
@@ -1337,13 +1337,13 @@ static int findMatchingPart(const QString &path, const QString dir)
 
    while ((si1 = path.indexOf('/', pos1)) != -1) {
       int si2 = dir.indexOf('/', pos2);
-     
-      if (si2 == -1 && path.mid(pos1, si1 - pos2) == dir.mid(pos2)) { 
+
+      if (si2 == -1 && path.mid(pos1, si1 - pos2) == dir.mid(pos2)) {
          // match at end
          return dir.length();
       }
 
-      if (si1 != si2 || path.mid(pos1, si1 - pos2) != dir.mid(pos2, si2 - pos2)) { 
+      if (si1 != si2 || path.mid(pos1, si1 - pos2) != dir.mid(pos2, si2 - pos2)) {
          // no match in middle
          return qMax(pos1 - 1, 0);
       }
@@ -1356,7 +1356,7 @@ static int findMatchingPart(const QString &path, const QString dir)
 }
 
 static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> root, const QString &name)
-{  
+{
    for (auto de : root->children()) {
 
       if (de->kind() == DirEntry::Dir) {
@@ -1365,10 +1365,10 @@ static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> roo
          QString dirName = dir->name();
          int sp = findMatchingPart(name, dirName);
 
-         if (sp > 0) { 
+         if (sp > 0) {
             // match found
 
-            if (sp == dirName.length()) { 
+            if (sp == dirName.length()) {
                // whole directory matches, recurse into the directory
                return findDirNode(dir, name.mid(dirName.length() + 1));
 
@@ -1383,7 +1383,7 @@ static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> roo
                if (newIndex > 0) {
                   newBranchName = newBranchName.left(newIndex);
                }
-              
+
                QSharedPointer<DirEntryTree> base      = QMakeShared<DirEntryTree>(root, baseName);
                QSharedPointer<DirEntryTree> newBranch = QMakeShared<DirEntryTree>(base, newBranchName);
 
@@ -1393,9 +1393,9 @@ static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> roo
                base->addChild(newBranch);
                dir->setLast(false);
 
-               // remove DirEntry container from list (without deleting it)               
+               // remove DirEntry container from list (without deleting it)
                root->children().removeOne(dir);
-              
+
                // add new branch to the root
                if (! root->children().isEmpty()) {
                   root->children().last()->setLast(false);
@@ -1410,11 +1410,11 @@ static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> roo
 
    int si = name.lastIndexOf('/');
 
-   if (si == -1) { 
+   if (si == -1) {
       // no subdir, put the file under the root node.
-      return root; 
+      return root;
 
-   } else { 
+   } else {
       // need to create a subdir
       QString baseName = name.left(si);
 
@@ -1429,9 +1429,9 @@ static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> roo
 }
 
 static void mergeFileDef(QSharedPointer<DirEntryTree> root, QSharedPointer<FileDef> fd)
-{  
+{
    QString filePath = fd->getFilePath();
- 
+
    QSharedPointer<DirEntryTree> dirNode = findDirNode(root, filePath);
 
    if (! dirNode->children().isEmpty()) {
@@ -1457,7 +1457,7 @@ static void addDirsAsGroups(QSharedPointer<DirEntryTree> root, QSharedPointer<Gr
          Doxy_Globals::groupSDict.insert(root->path(), gd);
       }
    }
-  
+
    for (auto de : root->children()) {
       if (de->kind() == DirEntry::Dir) {
          QSharedPointer<DirEntryTree> dir = de.dynamicCast<DirEntryTree>();
@@ -1471,15 +1471,15 @@ static void addDirsAsGroups(QSharedPointer<DirEntryTree> root, QSharedPointer<Gr
    {
       QSharedPointer<DirEntryTree> root = QMakeShared<DirEntryTree>(0, "root");
       root->setLast(true);
-     
-      for (auto fn : *Doxy_Globals::inputNameList ) {    
-         for (auto fd :*fn) { 
+
+      for (auto fn : *Doxy_Globals::inputNameList ) {
+         for (auto fd :*fn) {
             mergeFileDef(root, fd);
          }
       }
-    
+
       addDirsAsGroups(root, QSharedPointer<GroupDef>(), 0);
-   
+
       delete root;
    }
 #endif
@@ -1491,22 +1491,22 @@ void FileDef::combineUsingRelations()
    }
 
    visited = true;
-       
+
    for (auto nd : m_usingDirList) {
       nd->combineUsingRelations();
    }
 
    for (auto nd : m_usingDirList) {
       // add used namespaces of namespace nd to this namespace
-          
-      for (auto und : nd->getUsedNamespaces()) {  
+
+      for (auto und : nd->getUsedNamespaces()) {
          addUsingDirective(und);
       }
-     
-      // add used classes of namespace nd to this namespace                 
+
+      // add used classes of namespace nd to this namespace
       for (auto ucd : nd->getUsedClasses()) {
          addUsingDeclaration(ucd);
-      }            
+      }
    }
 }
 
@@ -1514,7 +1514,7 @@ void FileDef::acquireFileVersion()
 {
    QString vercmd = Config::getString("file-version-filter");
 
-   if (! vercmd.isEmpty() && ! m_filePath.isEmpty() && 
+   if (! vercmd.isEmpty() && ! m_filePath.isEmpty() &&
                m_filePath != "generated" && m_filePath != "graph_legend") {
 
       msg("Version of %s : ", csPrintable(m_filePath));
@@ -1539,11 +1539,10 @@ void FileDef::acquireFileVersion()
 
       if (numRead > 0 && numRead < bufSize) {
          buf.resize(numRead);
-
-         m_fileVersion = QByteArray(buf, numRead).trimmed();
+         m_fileVersion = buf.trimmed();
 
          if (! m_fileVersion.isEmpty()) {
-            msg("%s\n", qPrintable(m_fileVersion));
+            msg("%s\n", csPrintable(m_fileVersion));
             return;
          }
       }
@@ -1568,23 +1567,23 @@ QString FileDef::includeName() const
 }
 
 QSharedPointer<MemberList> FileDef::createMemberList(MemberListType lt)
-{     
+{
    for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
    }
 
-   // not found, create a new member list   
+   // not found, create a new member list
    m_memberLists.append(QMakeShared<MemberList>(lt));
-   
+
    return m_memberLists.last();
 }
 
 void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {
    QSharedPointer<FileDef> self  = sharedFrom(this);
-   QSharedPointer<MemberList> ml = createMemberList(lt);  
+   QSharedPointer<MemberList> ml = createMemberList(lt);
 
    static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static const bool sortMemberDocs = Config::getBool("sort-member-docs");
@@ -1624,13 +1623,13 @@ QSharedPointer<MemberList> FileDef::getMemberList(MemberListType lt) const
 }
 
 void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title)
-{ 
+{
    QSharedPointer<FileDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
-   if (ml) {     
-      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), self, 
-                           QSharedPointer<GroupDef>(), title, 0);      
+   if (ml) {
+      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), self,
+                           QSharedPointer<GroupDef>(), title, 0);
    }
 }
 
@@ -1655,7 +1654,7 @@ static void getAllIncludeFilesRecursively(QSet<QString> &filesVisited, QSharedPo
 {
    if (fd->includeFileList()) {
 
-      for (auto &item : *fd->includeFileList() ) {   
+      for (auto &item : *fd->includeFileList() ) {
          if (item.fileDef && ! item.fileDef->isReference() && ! filesVisited.contains(item.fileDef->getFilePath())) {
 
             incFiles.append(item.fileDef->getFilePath());

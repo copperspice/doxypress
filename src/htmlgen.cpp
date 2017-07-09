@@ -834,18 +834,18 @@ void HtmlGenerator::writeSearchData(const QString &dir)
       } else {
          searchCss = mgr.getAsString("html/search.css");
       }
-   
+
       if (! searchCss.isEmpty()) {
-            
+
          QTextStream t(&f);
-        
+
          searchCss = replaceColorMarkers(searchCss);
 
          searchCss.replace("$doxypressversion", versionString);
          searchCss.replace("$doxygenversion",   versionString);         // compatibility
 
          t << searchCss;
-         Doxy_Globals::indexList.addStyleSheetFile("search/search.css");       
+         Doxy_Globals::indexList.addStyleSheetFile("search/search.css");
       }
 
    } else {
@@ -898,7 +898,6 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    }
 
    startPlainFile(fileName);
-
    m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath);
 
    //
@@ -906,7 +905,6 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
 
    m_lastFile = fileName;
    m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
-
    m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->" << endl;
 
    static bool searchEngine = Config::getBool("html-search");
@@ -1021,7 +1019,7 @@ void HtmlGenerator::writeStyleInfo(int part)
          resData.replace("$doxypressversion", versionString);
          resData.replace("$doxygenversion",   versionString);            // compatibility
 
-         m_textStream << replaceColorMarkers(resData);        
+         m_textStream << replaceColorMarkers(resData);
       }
 
       endPlainFile();
@@ -1656,7 +1654,7 @@ void HtmlGenerator::endMemberDocList()
    DBG_HTML(m_textStream << "<!-- endMemberDocList -->" << endl;)
 }
 
-void HtmlGenerator::startMemberDoc(const QString &clName, const QString &memName, 
+void HtmlGenerator::startMemberDoc(const QString &clName, const QString &memName,
                   const QString &anchor, const QString &title, bool showInline)
 {
    DBG_HTML(m_textStream << "<!-- startMemberDoc -->" << endl;)

@@ -359,9 +359,10 @@ void LatexDocVisitor::visit(DocVerbatim *s)
    switch (s->type()) {
       case DocVerbatim::Code: {
          m_t << "\n\\begin{DoxyCode}\n";
-         Doxy_Globals::parserManager.getParser(lang)
-         ->parseCode(m_ci, s->context(), s->text(), langExt,
-                     s->isExample(), s->exampleFile());
+
+         Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
+                  langExt, s->isExample(), s->exampleFile());
+
          m_t << "\\end{DoxyCode}\n";
       }
       break;
@@ -500,26 +501,25 @@ void LatexDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::DontInclude:
          break;
+
       case DocInclude::HtmlInclude:
          break;
+
       case DocInclude::LatexInclude:
          m_t << inc->text();
          break;
+
       case DocInclude::VerbInclude:
          m_t << "\n\\begin{DoxyVerbInclude}\n";
          m_t << inc->text();
          m_t << "\\end{DoxyVerbInclude}\n";
          break;
+
       case DocInclude::Snippet: {
          m_t << "\n\\begin{DoxyCodeInclude}\n";
-         Doxy_Globals::parserManager.getParser(inc->extension())
-         ->parseCode(m_ci,
-                     inc->context(),
-                     extractBlock(inc->text(), inc->blockId()),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile()
-                    );
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci,
+                     inc->context(), extractBlock(inc->text(), inc->blockId()),
+                     langExt, inc->isExample(), inc->exampleFile());
          m_t << "\\end{DoxyCodeInclude}" << endl;
       }
       break;
@@ -539,9 +539,8 @@ void LatexDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (!m_hide) {
-         Doxy_Globals::parserManager.getParser(m_langExt)
-         ->parseCode(m_ci, op->context(), op->text(), langExt,
-                     op->isExample(), op->exampleFile());
+         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
+                  langExt, op->isExample(), op->exampleFile());
       }
       pushEnabled();
       m_hide = true;
@@ -1143,7 +1142,7 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
    for (int i = 0; i < rowSpans().count(); i++) {
       ActiveRowSpan &span = const_cast<ActiveRowSpan &>(rowSpans()[i]);
 
-      if (span.rowSpan > 0) {         
+      if (span.rowSpan > 0) {
          span.rowSpan--;
       }
 

@@ -246,7 +246,7 @@ HtmlHelp::HtmlHelp()
 {
    // initial depth
    dc = 0;
-   
+
    index = new HtmlHelpIndex(this);
 }
 
@@ -480,7 +480,7 @@ void HtmlHelp::finalize()
    cts << "</HTML>\n";
    cts.setDevice(0);
    cf.close();
- 
+
    index->writeFields(kts);
 
    // end the index file
@@ -489,7 +489,7 @@ void HtmlHelp::finalize()
    kts << "</HTML>\n";
    kts.setDevice(0);
    kf.close();
-  
+
    createProjectFile();
    s_languageDict.clear();
 }
@@ -499,7 +499,7 @@ void HtmlHelp::finalize()
  *  \sa decContentsDepth()
  */
 void HtmlHelp::incContentsDepth()
-{  
+{
    for (int i = 0; i < dc + 1; i++) {
       cts << "  ";
    }
@@ -589,7 +589,7 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &r
    cts << "</OBJECT>\n";
 }
 
-void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
+void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
                   const QString &sectionAnchor, const QString &word)
 {
    if (md) {

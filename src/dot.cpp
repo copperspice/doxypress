@@ -452,7 +452,7 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
       QByteArray buf = f.readLine();
 
       if (! buf.isEmpty()) {
-        
+
          int p = buf.indexOf(bb);
 
          if (p != -1) {
@@ -531,24 +531,23 @@ static bool readSVGSize(const QString &fileName, int *width, int *height)
    QFile f(fileName);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("Unable to open file for reading %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for reading %s, error: %d\n", csPrintable(fileName), f.error());
       return false;
    }
 
    while (! f.atEnd() && ! found) {
       QByteArray buf = f.readLine();
-    
-      if (! buf.isEmpty()) {
-  
-         if (qstrncmp(buf, "<!--zoomable ", 13) == 0) {
 
+      if (! buf.isEmpty()) {
+
+         if (buf.startsWith("<!--zoomable ")) {
             *width  = -1;
             *height = -1;
             sscanf(buf.constData(), "<!--zoomable %d", height);
 
             found = true;
 
-         } else if (sscanf(buf, "<svg width=\"%dpt\" height=\"%dpt\"", width, height) == 2) {
+         } else if (sscanf(buf.constData(), "<svg width=\"%dpt\" height=\"%dpt\"", width, height) == 2) {
             found = true;
          }
 
@@ -625,7 +624,7 @@ static void checkDotResult(const QString &imgName)
    static const QString imageExt = Config::getEnum("dot-image-extension");
 
    if (imageExt == "png") {
-      FILE *f = fopen(imgName.toUtf8(), "rb");
+      FILE *f = fopen(imgName.toUtf8().constData(), "rb");
 
       if (f) {
          char data[4];
@@ -959,7 +958,7 @@ bool DotFilePatcher::run()
    }
 
    QTextStream t(&fo);
- 
+
    int lineNr = 1;
    int width;
    int height;
@@ -971,11 +970,11 @@ bool DotFilePatcher::run()
    while (! fi.atEnd()) {
 
       QByteArray line = fi.readLine();
-    
+
       if (line.isEmpty()) {
          break;
       }
-     
+
       int i;
 
       if (isSVGFile) {
@@ -1057,11 +1056,11 @@ bool DotFilePatcher::run()
             convertMapFile(t, map.mapFile, map.relPath, map.urlOnly, map.context);
             t << "</map>" << endl;
 
-         } else { 
+         } else {
             // error invalid map id!
             err("Invalid MAP id found in file %s\n", csPrintable(m_patchFile));
             t << line.mid(i);
-         } 
+         }
 
       } else if ((i = line.indexOf("% FIG")) != -1) {
 
@@ -1076,7 +1075,7 @@ bool DotFilePatcher::run()
                return false;
             }
 
-         } else { 
+         } else {
             // error invalid map id
 
             err("Invalid bounding FIG %d in file %s\n", mapId, csPrintable(m_patchFile));
@@ -1117,10 +1116,10 @@ bool DotFilePatcher::run()
 
       QTextStream t(&fo);
 
-      while (! fi.atEnd()) { 
+      while (! fi.atEnd()) {
 
          QByteArray line = fi.readLine();
-    
+
          if (line.isEmpty()) {
             break;
          }
@@ -2339,7 +2338,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
       }
 
       writeGraphFooter(md5stream);
-     
+
       QString sigStr;
       sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
 
@@ -2359,7 +2358,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
          QTextStream t(&f);
          t << theGraph;
          f.close();
-         
+
          DotRunner *dotRun = new DotRunner(dotName, d.absolutePath(), true, absImgName);
          dotRun->addJob(imageFormat, absImgName);
          dotRun->addJob(MAP_CMD, absMapName);
@@ -2485,7 +2484,7 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
 
 DotGfxHierarchyTable::DotGfxHierarchyTable()
    : m_curNodeNumber(0)
-{  
+{
    m_rootNodes = new QList<DotNode *>;
    m_usedNodes = new QHash<QString, DotNode *>;
 
@@ -2540,7 +2539,7 @@ DotGfxHierarchyTable::DotGfxHierarchyTable()
       }
    }
 
-   for (auto n : *m_rootSubgraphs) {   
+   for (auto n : *m_rootSubgraphs) {
       int number = 0;
       n->renumberNodes(number);
    }
@@ -2568,7 +2567,7 @@ void DotClassGraph::addClass(QSharedPointer<ClassDef> cd, DotNode *n, int prot, 
    }
 
    int edgeStyle;
- 
+
    if (! label.isEmpty() || prot == EdgeInfo::Orange || prot == EdgeInfo::Orange2) {
       edgeStyle = EdgeInfo::Dashed;
    } else {
@@ -2809,7 +2808,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
    if (m_graphType == DotNode::Collaboration) {
       // add usage relations
       const QHash<QString, UsesClassDef> &dict = base ? cd->usedImplementationClasses() : cd->usedByImplementationClasses();
-    
+
       for (auto &ucd : dict) {
          QString label;
 
@@ -2839,7 +2838,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
          }
 
          addClass(ucd.m_classDef, n, EdgeInfo::Purple, label, "", ucd.m_templSpecifiers, base, distance);
-      }      
+      }
    }
 
    if (templateRelations && base) {
@@ -2909,7 +2908,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
             addClass(templInstance, n, EdgeInfo::Orange, iter.key(), 0, 0, false, distance);
 
             ++iter;
-         }         
+         }
       }
    }
 }
@@ -4334,7 +4333,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    addMemberList( gd->getMemberList(MemberListType_allMembersList) );
    QString htmlEntenstion = Doxy_Globals::htmlFileExtension;
 
-   // Add classes   
+   // Add classes
    for (auto def : gd->getClasses()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
 
@@ -4343,19 +4342,19 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
       }
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tclass);
    }
-  
+
    // Add namespaces
    for (auto &def : gd->getNamespaces()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tnamespace);
    }
 
-   // Add files  
+   // Add files
    for (auto def : gd->getFiles()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile);
    }
-  
+
    // Add pages
    if (gd->getPages()) {
 
@@ -4485,7 +4484,7 @@ QString DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat gra
    }
 
    writeGraphFooter(md5stream);
- 
+
    QString sigStr;
    sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
 
@@ -4642,7 +4641,7 @@ void DotGroupCollaboration::Edge::write(QTextStream &t) const
    t << "Node" << pNEnd->number();
 
    t << " [shape=plaintext";
-   if (m_links.count() > 0) { 
+   if (m_links.count() > 0) {
       // there are links
 
       t << ", ";

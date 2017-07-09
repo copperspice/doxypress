@@ -49,7 +49,7 @@ class LatexDocVisitor : public DocVisitor
    void visit(DocIndexEntry *) override;
    void visit(DocSimpleSectSep *) override;
    void visit(DocCite *) override;
-   
+
    // visitor functions for compound nodes
 
    void visitPre(DocAutoList *) override;
@@ -177,7 +177,7 @@ class LatexDocVisitor : public DocVisitor
    QString m_langExt;
 
    struct TableState {
-      TableState() : numCols(0), currentColumn(0), inRowSpan(false), inColSpan(false), firstRow(false) 
+      TableState() : numCols(0), currentColumn(0), inRowSpan(false), inColSpan(false), firstRow(false)
       { }
 
       RowSpanList rowSpans;
@@ -201,7 +201,7 @@ class LatexDocVisitor : public DocVisitor
    {
       m_tableStateStack.pop();
    }
-  
+
    int currentColumn() const
    {
       return ! m_tableStateStack.isEmpty() ? m_tableStateStack.top().currentColumn : 0;
@@ -275,7 +275,7 @@ class LatexDocVisitor : public DocVisitor
    bool insideTable() const
    {
       return ! m_tableStateStack.isEmpty();
-   }  
+   }
 };
 
 #endif

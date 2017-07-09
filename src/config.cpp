@@ -31,7 +31,7 @@ bool Config::getBool(const QString &name)
    bool retval   = false;
    auto hashIter = m_cfgBool.find(name);
 
-    if (hashIter != m_cfgBool.end()) {
+   if (hashIter != m_cfgBool.end()) {
       retval = hashIter.value().value;
 
    } else {
@@ -518,7 +518,7 @@ bool Config::verify()
 
       dotImageFormat = "png";
    }
-   
+
    iterEnum.value().value = dotImageFormat;
 
    // save the stripped extension (png, jpeg)
@@ -529,7 +529,7 @@ bool Config::verify()
    }
 
    m_cfgEnum.insert("dot-image-extension", struc_CfgEnum{ dotImage, DEFAULT } );
- 
+
 
    //
    iterString = m_cfgString.find("mscgen-path");
@@ -851,8 +851,8 @@ bool Config::verify()
       }
    }
 
-   // ** rtf 
-   iterEnum = m_cfgEnum.find("rtf-paper-type");  
+   // ** rtf
+   iterEnum = m_cfgEnum.find("rtf-paper-type");
 
    paperType = paperType.toLower().trimmed();
 
@@ -872,9 +872,9 @@ bool Config::verify()
 
    // **
    if (Config::getBool("generate-treeview") && Config::getBool("generate-chm")) {
-      warnMsg("When enabling 'GENERATE CHM', 'GENERATE TREEVIEW' tag must be disabled\n");
+      warnMsg("When enabling 'GENERATE CHM', 'GENERATE NAVIGATION TREEVIEW' tag must be disabled\n");
 
-      auto iterBool = m_cfgBool.find("generate-treeeview");
+      auto iterBool = m_cfgBool.find("generate-treeview");
       bool data = iterBool.value().value;
 
       iterBool.value().value = false;
@@ -927,7 +927,7 @@ bool Config::verify()
    // **
    const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
 
-   for (auto item : expandAsDefinedList) {      
+   for (auto item : expandAsDefinedList) {
       if (! Doxy_Globals::expandAsDefinedDict.contains(item)) {
          Doxy_Globals::expandAsDefinedDict.insert(item);
       }

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -74,7 +74,7 @@ class CodeOutputInterface
     *  \param name     The text to display as a placeholder for the link.
     *  \param tooltip  The tooltip to display when the mouse is on the link.
     */
-   virtual void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
+   virtual void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
                               const QString &name, const QString &tooltip) = 0;
 
    /*! Writes the line number of a source listing
@@ -93,7 +93,7 @@ class CodeOutputInterface
     *  \param defInfo  Info about the symbol's definition in the source code
     *  \param declInfo Info about the symbol's declaration in the source code
     */
-   virtual void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl, const QString &desc, 
+   virtual void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl, const QString &desc,
                              const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo ) = 0;
 
    virtual void startCodeLine(bool hasLineNumbers) = 0;
@@ -110,9 +110,7 @@ class CodeOutputInterface
    /*! Ends a block started with startFontClass() */
    virtual void endFontClass() = 0;
 
-   /*! Write an anchor to a source listing.
-    *  \param name The name of the anchor.
-    */
+   /*! Write an anchor to a source listing. */
    virtual void writeCodeAnchor(const QString &name) = 0;
 
    virtual void setCurrentDoc(QSharedPointer<Definition> context, const QString &anchor, bool isSourceFile) = 0;
@@ -160,8 +158,8 @@ class BaseOutputDocInterface : public CodeOutputInterface
    /*! Writes an ASCII string to the output. Converts characters that have
     *  A special meaning, like \c & in html.
     */
-   virtual void docify(const QString &text) = 0; 
-  
+   virtual void docify(const QString &text) = 0;
+
    /*! Writes a single ASCII character to the output. Converts characters
     *  that have a special meaning.
     */
@@ -305,7 +303,7 @@ class OutputGenerator : public BaseOutputDocInterface
 
    OutputGenerator();
    virtual ~OutputGenerator();
-    
+
    // generic generator methods
    virtual void enable() = 0;
    virtual void disable() = 0;
@@ -317,7 +315,7 @@ class OutputGenerator : public BaseOutputDocInterface
 
    void startPlainFile(const QString &name);
    void endPlainFile();
-  
+
    bool isEnabled() const {
       return active;
    }
@@ -326,8 +324,8 @@ class OutputGenerator : public BaseOutputDocInterface
    void popGeneratorState();
 
    virtual void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) = 0;
-  
-   // structural output interface   
+
+   // structural output interface
    virtual void startFile(const QString &name, const QString &manName, const QString &title) = 0;
    virtual void writeSearchInfo() = 0;
    virtual void writeFooter(const QString &navPath) = 0;
