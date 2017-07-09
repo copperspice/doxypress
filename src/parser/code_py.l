@@ -453,9 +453,9 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Defin
 
 static void codifyLines(const QString &text)
 {
-   QString tmp;
-
    const QString tmp_currentFontClass = g_currentFontClass;
+
+   QString tmp;
 
    for (auto c : text) {
 
@@ -526,7 +526,8 @@ static bool getLinkInScope(const QString &c, const QString &m,  const QString &m
    return false;
 }
 
-static bool getLink(const QString &className, const QString &memberName, CodeOutputInterface &ol, const QString &text = QString())
+static bool getLink(const QString &className, const QString &memberName, CodeOutputInterface &ol,
+                  const QString &text = QString())
 {
    QString m = removeRedundantWhiteSpace(memberName);
    QString c = className;
@@ -1499,12 +1500,13 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
 <*>"#".*                       {
       // normal comment
-      if (YY_START==SingleQuoteString || YY_START==DoubleQuoteString || YY_START==TripleString) {
+      if (YY_START == SingleQuoteString || YY_START == DoubleQuoteString || YY_START == TripleString) {
          REJECT;
       }
 
       QString text = QString::fromUtf8(yytext);
       startFontClass("comment");
+
       codifyLines(text);
       endFontClass();
    }
