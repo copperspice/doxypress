@@ -596,12 +596,12 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
 
    if (! usePipe) {
       // no filter given or wanted
-      f = fopen(fileName.toUtf8(), "r");
+      f = fopen(fileName.toUtf8().constData(), "r");
 
    } else {
       // use filter
       QString cmd = filter + " \"" + fileName + "\"";
-      f = popen(cmd.toUtf8(), "r");
+      f = popen(cmd.toUtf8().constData(), "r");
    }
 
    // for TCL, Python, and Fortran no bracket search is possible

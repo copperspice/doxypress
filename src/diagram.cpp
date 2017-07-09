@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -90,7 +90,7 @@ class DiagramItem
    }
 
    QSharedPointer<ClassDef> getClassDef() const {
-      return classDef;      
+      return classDef;
    }
 
  private:
@@ -115,10 +115,10 @@ class DiagramRow : public QList<DiagramItem *>
  public:
    DiagramRow(TreeDiagram *d, int l) : QList<DiagramItem *>() {
       diagram = d;
-      level = l;      
+      level = l;
    }
 
-   void insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, 
+   void insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot,
                   Specifier virt, const QString &ts);
 
    uint number() {
@@ -144,7 +144,7 @@ class TreeDiagram : public QList<DiagramRow *>
    void moveChildren(DiagramItem *root, int dx);
    void computeExtremes(uint *labelWidth, uint *xpos);
 
-   void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows, 
+   void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
                   uint cellWidth, uint cellHeight, QString relPath = "", bool generateMap = true);
 
    void drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap,
@@ -226,11 +226,11 @@ static uint virtToMask(Specifier p)
 
 // pre: dil is not empty
 static Protection getMinProtectionLevel(QList<DiagramItem *> &dil)
-{     
+{
    Protection result = dil.first()->protection();
 
-   for (auto item : dil) {    
-    
+   for (auto item : dil) {
+
       Protection p = item->protection();
 
       if (p != result) {
@@ -318,9 +318,9 @@ DiagramItem::DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd
    parent = p;
    x = 0;
    y = 0;
-  
+
    num  = number;
-   
+
    prot = pr;
    virt = vi;
 
@@ -364,10 +364,10 @@ QString DiagramItem::fileName() const
 }
 
 int DiagramItem::avgChildPos() const
-{   
+{
    int c = children.count();
 
-   if (c == 0) { 
+   if (c == 0) {
       // no children -> don't move
       return xPos();
    }
@@ -379,11 +379,11 @@ int DiagramItem::avgChildPos() const
       return di->xPos();
    }
 
-   if (c & 1) { 
+   if (c & 1) {
       // odd number of children -> get pos of middle child
       return children.at(c / 2)->xPos();
 
-   } else { 
+   } else {
       // even number of children -> get middle of most middle children
       return (children.at(c / 2 - 1)->xPos() + children.at(c / 2)->xPos()) / 2;
 
@@ -400,14 +400,14 @@ void DiagramItem::addChild(DiagramItem *di)
    children.append(di);
 }
 
-void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot, 
+void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, bool doBases, Protection prot,
                   Specifier virt, const QString &ts)
 {
    // the visit check does not work in case of multiple inheritance of the same class
-   // if (cd->visited) return; 
+   // if (cd->visited) return;
 
    DiagramItem *di = new DiagramItem(parent, diagram->at(level)->count(), cd, prot, virt, ts);
-   
+
    if (parent) {
       parent->addChild(di);
    }
@@ -420,8 +420,8 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
 
    if (bcl) {
       /* there are base/sub classes */
-     
-      for (auto bcd : *bcl) { 
+
+      for (auto bcd : *bcl) {
          QSharedPointer<ClassDef> ccd = bcd->classDef;
          if (ccd && ccd->isVisibleInHierarchy() /*&& !ccd->visited*/) {
             count++;
@@ -442,7 +442,7 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
 
       /* insert base classes in the next row */
 
-      for (auto bcd : *bcl) { 
+      for (auto bcd : *bcl) {
          QSharedPointer<ClassDef> ccd = bcd->classDef;
 
          if (ccd && ccd->isVisibleInHierarchy()) {
@@ -469,8 +469,8 @@ TreeDiagram::~TreeDiagram()
 void TreeDiagram::moveChildren(DiagramItem *root, int dx)
 {
    QList<DiagramItem *> &dil = root->getChildren();
-   
-   for (auto di : dil) { 
+
+   for (auto di : dil) {
       di->move(dx, 0);
       moveChildren(di, dx);
    }
@@ -479,7 +479,7 @@ void TreeDiagram::moveChildren(DiagramItem *root, int dx)
 bool TreeDiagram::layoutTree(DiagramItem *root, int r)
 {
    bool moved = false;
-   
+
    QList<DiagramItem *> &dil = root->getChildren();
 
    if (dil.count() > 0) {
@@ -487,7 +487,7 @@ bool TreeDiagram::layoutTree(DiagramItem *root, int r)
       int pPos = root->xPos();
       int cPos = root->avgChildPos();
 
-      if (pPos > cPos) { 
+      if (pPos > cPos) {
          // move children
          DiagramRow &row = *at(r + 1);
 
@@ -497,10 +497,10 @@ bool TreeDiagram::layoutTree(DiagramItem *root, int r)
 
          moved = true;
 
-      } else if (pPos < cPos) { 
+      } else if (pPos < cPos) {
          // move parent
          DiagramRow &row = *at(r);
-         
+
          for (k = root->number(); k < row.count(); k++) {
             row[k]->move(cPos - pPos, 0);
          }
@@ -508,8 +508,8 @@ bool TreeDiagram::layoutTree(DiagramItem *root, int r)
          moved = true;
       }
 
-      // recurse to children     
-      for (auto di : dil) { 
+      // recurse to children
+      for (auto di : dil) {
 
          if (moved || di->isInList() ) {
             break;
@@ -523,10 +523,10 @@ bool TreeDiagram::layoutTree(DiagramItem *root, int r)
 }
 
 void TreeDiagram::computeLayout()
-{    
-   QList<DiagramRow *>::iterator iter(this->begin());  
-   
-   while (iter != this->end()) { 
+{
+   QList<DiagramRow *>::iterator iter(this->begin());
+
+   while (iter != this->end()) {
 
       if ((*iter)->count() >= maxTreeWidth)   {
          break;
@@ -534,8 +534,8 @@ void TreeDiagram::computeLayout()
 
       ++iter;
    }
-   
-   DiagramRow *row; 
+
+   DiagramRow *row;
 
    if (iter == this->end()) {
       row = nullptr;
@@ -545,12 +545,12 @@ void TreeDiagram::computeLayout()
 
    }
 
-   if (row) {         
+   if (row) {
       DiagramItem *opi = 0;
 
       int delta  = 0;
       bool first = true;
-   
+
       for (auto item : *row) {
          DiagramItem *pi = item->parentItem();
 
@@ -608,23 +608,23 @@ uint TreeDiagram::computeRows()
    int count = 0;
 
    DiagramRow *row = 0;
-  
+
    for (auto item : *this) {
       if (item->first()->isInList())  {
-         row = item; 
+         row = item;
          break;
       }
 
       count++;
-   }      
+   }
 
    if (row) {
       int maxListLen = 0;
       int curListLen = 0;
 
       DiagramItem *opi = 0;
-     
-      for (auto di : *row) { 
+
+      for (auto di : *row) {
 
          if (di->parentItem() != opi) {
             curListLen = 1;
@@ -650,15 +650,15 @@ void TreeDiagram::computeExtremes(uint *maxLabelLen, uint *maxXPos)
 {
    uint ml = 0;
    uint mx = 0;
- 
+
    bool done = false;
-  
-   for (auto dr : *this) { 
+
+   for (auto dr : *this) {
       if (done) {
          break;
-      }      
-    
-      for (auto di : *dr) { 
+      }
+
+      for (auto di : *dr) {
          if (di->isInList()) {
             done = true;
          }
@@ -683,17 +683,17 @@ void TreeDiagram::computeExtremes(uint *maxLabelLen, uint *maxXPos)
 }
 
 void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
-                            uint cellWidth, uint cellHeight, QString relPath, bool generateMap) 
-{      
+                            uint cellWidth, uint cellHeight, QString relPath, bool generateMap)
+{
    bool skipFirst  = false;
    bool done       = false;
-   bool firstRow   = doBase;  
+   bool firstRow   = doBase;
 
    if (! doBase) {
       skipFirst= true;
    }
-  
-   for (auto iter = this->begin(); iter != this->end(); ++iter) { 
+
+   for (auto iter = this->begin(); iter != this->end(); ++iter) {
 
       if (skipFirst) {
          skipFirst = false;
@@ -702,24 +702,24 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
 
       if (done) {
          break;
-      }         
+      }
 
       int x    = 0;
       int y    = 0;
       float xf = 0.0f;
       float yf = 0.0f;
 
-      auto dr = *iter;  
- 
+      auto dr = *iter;
+
       if (dr->isEmpty()) {
-         // not very likely 
-         continue;   
+         // not very likely
+         continue;
       }
 
       QList<DiagramItem *>::iterator rit = dr->begin();
       DiagramItem *di = *rit;
 
-      if (di->isInList()) {    
+      if (di->isInList()) {
          // put boxes in a list
          DiagramItem *opi = nullptr;
 
@@ -730,7 +730,7 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
             rit = dr->begin();
          }
 
-         while (true) {  
+         while (true) {
             di = *rit;
 
             if (di->parentItem() == opi) {
@@ -756,7 +756,7 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
                   x = di->xPos() * (cellWidth + labelHorSpacing) / gridWidth;
                   if (doBase) {
                      y = image->getHeight() - superRows * cellHeight -
-                         (superRows - 1) * labelVertSpacing - di->yPos() * (cellHeight + labelVertSpacing) / gridHeight; 
+                         (superRows - 1) * labelVertSpacing - di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
                   } else {
                      y = (baseRows - 1) * (cellHeight + labelVertSpacing) +
@@ -775,8 +775,8 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
             opi = di->parentItem();
 
             if (bitmap) {
-              
-               bool hasDocs = di->getClassDef()->isLinkable();          
+
+               bool hasDocs = di->getClassDef()->isLinkable();
                writeBitmapBox(di, image, x, y, cellWidth, cellHeight, firstRow, hasDocs, di->getChildren().count() > 0);
 
                if (! firstRow && generateMap) {
@@ -800,7 +800,7 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
                ++rit;
 
                if (rit == dr->end()) {
-                  break;   
+                  break;
                }
 
             }
@@ -809,10 +809,10 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
          done = true;
 
 
-      } else { 
+      } else {
          // draw a tree of boxes
-       
-         for (auto di : *dr) {   
+
+         for (auto di : *dr) {
 
             if (bitmap) {
                x = di->xPos() * (cellWidth + labelHorSpacing) / gridWidth;
@@ -852,27 +852,27 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
    }
 }
 
-void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap, 
+void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap,
                                  uint baseRows, uint superRows, uint cellWidth, uint cellHeight)
-{   
+{
    bool done = false;
-   
-   for (auto dr : *this) { 
+
+   for (auto dr : *this) {
       // for each row
 
       if (done) {
          break;
       }
-    
+
       DiagramItem *di = dr->first();
 
-      if (di->isInList()) { 
+      if (di->isInList()) {
          // row consists of list connectors
 
          int x = 0, y = 0, ys = 0;
          float xf = 0.0f, yf = 0.0f, ysf = 0.0f;
-       
-         for (auto rit = dr->begin(); rit != dr->end(); ++rit) { 
+
+         for (auto rit = dr->begin(); rit != dr->end(); ++rit) {
 
             di = *rit;
 
@@ -881,10 +881,10 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
             QList<DiagramItem *> &dil = pi->getChildren();
             DiagramItem *last = dil.last();
 
-            if (di == last) { 
+            if (di == last) {
                // single child
 
-               if (bitmap) { 
+               if (bitmap) {
                   // draw pixels
 
                   x = di->xPos() * (cellWidth + labelHorSpacing) / gridWidth + cellWidth / 2;
@@ -893,14 +893,14 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
                      y = image->getHeight() - (superRows - 1) * (cellHeight + labelVertSpacing) -
                          di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
-                     image->drawVertArrow(x, y, y + labelVertSpacing / 2,                                           
+                     image->drawVertArrow(x, y, y + labelVertSpacing / 2,
                            protToColor(di->protection()),protToMask(di->protection()));
 
                   } else { // super classes
                      y = (baseRows - 1) * (cellHeight + labelVertSpacing) -
                          labelVertSpacing / 2 + di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
-                     image->drawVertLine(x, y, y + labelVertSpacing / 2, protToColor(di->protection()), 
+                     image->drawVertLine(x, y, y + labelVertSpacing / 2, protToColor(di->protection()),
                            protToMask(di->protection()));
                   }
 
@@ -921,7 +921,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
                if (bitmap) {
                   x = di->parentItem()->xPos() * (cellWidth + labelHorSpacing) / gridWidth + cellWidth / 2;
 
-                  if (doBase) { 
+                  if (doBase) {
                      // base classes
                      ys = image->getHeight() - (superRows - 1) * (cellHeight + labelVertSpacing) -
                           di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
@@ -948,7 +948,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
                   }
                }
 
-               while (di != last) { 
+               while (di != last) {
                   // more children to add
 
                   if (bitmap) {
@@ -1019,9 +1019,9 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
 
          done = true; // the tree is drawn now
 
-      } else { 
+      } else {
          // normal tree connector
-       
+
          for (auto di : *dr) {
 
             int x = 0;
@@ -1030,7 +1030,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
             QList<DiagramItem *> &dil = di->getChildren();
             DiagramItem *parent  = di->parentItem();
 
-            if (parent) { 
+            if (parent) {
                // item has a parent -> connect to it
 
                if (bitmap) { // draw pixels
@@ -1041,16 +1041,16 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
                          di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
                      /* write input line */
-                     image->drawVertArrow(x, y, y + labelVertSpacing / 2, 
-                                          protToColor(di->protection()),protToMask(di->protection())); 
+                     image->drawVertArrow(x, y, y + labelVertSpacing / 2,
+                                          protToColor(di->protection()),protToMask(di->protection()));
 
-                  } else { 
+                  } else {
                      // super classes
                      y = (baseRows - 1) * (cellHeight + labelVertSpacing) -
                          labelVertSpacing / 2 + di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
                      /* write output line */
-                     image->drawVertLine(x, y, y + labelVertSpacing / 2, 
+                     image->drawVertLine(x, y, y + labelVertSpacing / 2,
                                          protToColor(di->protection()), protToMask(di->protection()));
                   }
                } else { // draw pixels
@@ -1083,7 +1083,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
 
                   } else { // super classes
                      y = (baseRows - 1) * (cellHeight + labelVertSpacing) + cellHeight +
-                         di->yPos() * (cellHeight + labelVertSpacing) / gridHeight; 
+                         di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
                      image->drawVertArrow(x, y, y + labelVertSpacing / 2 - 1, col, mask);
                   }
@@ -1106,7 +1106,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
                DiagramItem *first = dil.first();
                DiagramItem *last  = dil.last();
 
-               if (first != last && !first->isInList()) { 
+               if (first != last && !first->isInList()) {
                   /* connect with all base classes */
 
                   if (bitmap) {
@@ -1145,7 +1145,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
 
 
 void clearVisitFlags()
-{   
+{
    for (auto cd : Doxy_Globals::classSDict) {
       cd->visited = false;
    }
@@ -1201,7 +1201,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
    uint estHeight = rows * 40;
    uint estWidth  = cols * (20 + qMax(baseMaxLabelWidth, superMaxLabelWidth));
 
-   const float pageWidth = 14.0f; 
+   const float pageWidth = 14.0f;
 
    // estimated page width in cm. Somewhat lower to deal with estimation errors.
 
@@ -1209,7 +1209,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
    float realHeight = qMin(rows, 12u); // real height in cm
    float realWidth  = realHeight * estWidth / (float)estHeight;
 
-   if (realWidth > pageWidth) { 
+   if (realWidth > pageWidth) {
       // assume that the page width is about 15 cm
       realHeight *= pageWidth / realWidth;
       realWidth = pageWidth;
@@ -1224,7 +1224,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
           << fileName << "}" << endl;
    output << "\\end{center}\n"
           "\\end{figure}\n";
-  
+
    QString epsBaseName = QString(path) + "/" + QString(fileName);
    QString epsName = epsBaseName + ".eps";
 
@@ -1232,7 +1232,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
    f1.setFileName(epsName);
 
    if (! f1.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(epsName), f1.error());     
+      err("Unable to open file for writing %s, error: %d\n", qPrintable(epsName), f1.error());
       Doxy_Work::stopDoxyPress();
    }
 
@@ -1418,26 +1418,26 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
 
 
    bool done = false;
-   
-   for (auto dr : *base ) { 
+
+   for (auto dr : *base ) {
       if (done) {
          break;
       }
- 
-      for (auto di : *dr ) { 
+
+      for (auto di : *dr ) {
          done = di->isInList();
          t << "(" << di->label() << ") cw\n";
       }
    }
-   
+
    done = false;
 
-   for (auto sit = super->begin() + 1; sit != super->end(); ++sit ) { 
+   for (auto sit = super->begin() + 1; sit != super->end(); ++sit ) {
       if (done) {
          break;
       }
-     
-      for (auto di : **sit) { 
+
+      for (auto di : **sit) {
          done = di->isInList();
          t << "(" << di->label() << ") cw\n";
       }
@@ -1463,7 +1463,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
    f1.close();
 
    if (Config::getBool("latex-pdf")) {
-          
+
       QString epstopdfArgs;
       epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(epsBaseName).arg(epsBaseName);
 
@@ -1508,7 +1508,7 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
    QString fileName = path + "/" + fName + IMAGE_EXT;
    QFile f(fileName);
 
-   if (f.open(QIODevice::WriteOnly)) {         
+   if (f.open(QIODevice::WriteOnly)) {
       QByteArray buffer = image.convert();
 
       f.write(buffer);
@@ -1517,9 +1517,9 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
    } else {
       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
 
-   }            
+   }
 
-   Doxy_Globals::indexList.addImageFile(fileName);
+   Doxy_Globals::indexList.addImageFile(fName);
 
    if (generateMap) {
       t << "</map>" << endl;

@@ -7966,7 +7966,7 @@ QString stripPrefix(QString input, const QByteArray &prefix)
    QString retval = input;
 
    if (input.startsWith(prefix)) {
-      retval = retval.remove(0, strlen(prefix));
+      retval = retval.remove(0, strlen(prefix.constData()));
    }
 
    return retval;
@@ -7977,7 +7977,7 @@ QByteArray stripPrefix(QByteArray input, const QByteArray &prefix)
    QByteArray retval = input;
 
    if (input.startsWith(prefix)) {
-      retval = retval.remove(0, strlen(prefix));
+      retval = retval.remove(0, strlen(prefix.constData()));
    }
 
    return retval;

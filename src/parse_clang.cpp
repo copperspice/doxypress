@@ -602,7 +602,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       p->sources[0]   = fileBuffer.toUtf8();
    }
 
-   p->ufs[0].Filename = strdup(fileName.toUtf8());
+   p->ufs[0].Filename = strdup(fileName.toUtf8().constData());
    p->ufs[0].Contents = p->sources[0].constData();
    p->ufs[0].Length   = p->sources[0].length();
 
@@ -614,7 +614,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
       // load include files
       p->sources[i]      = detab(fileToString(item, filterSourceFiles, true)).toUtf8();
-      p->ufs[i].Filename = strdup(item.toUtf8());
+      p->ufs[i].Filename = strdup(item.toUtf8().constData());
       p->ufs[i].Contents = p->sources[i].constData();
       p->ufs[i].Length   = p->sources[i].length();
 
@@ -691,7 +691,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
       // create a source range for the file
       QFileInfo fi(fileName);
-      CXFile f = clang_getFile(p->tu, fileName.toUtf8());
+      CXFile f = clang_getFile(p->tu, fileName.toUtf8().constData());
 
       CXSourceLocation fileBegin = clang_getLocationForOffset(p->tu, f, 0);
       CXSourceLocation fileEnd   = clang_getLocationForOffset(p->tu, f, p->ufs[0].Length);
@@ -1079,7 +1079,7 @@ QString ClangParser::lookup(uint line, const QString &symbol)
       int tl         = strlen(ts);
       int startIndex = p->curToken;
 
-      if (tokenLine == line && strncmp(ts, symbol.toUtf8(), tl) == 0) {
+      if (tokenLine == line && strncmp(ts, symbol.toUtf8().constData(), tl) == 0) {
          // found partial match at the correct line
          int offset = tl;
 
@@ -1107,7 +1107,7 @@ QString ClangParser::lookup(uint line, const QString &symbol)
                offset++;
             }
 
-            if (strncmp(ts, symbol.mid(offset).toUtf8(), tl) != 0) {
+            if (strncmp(ts, symbol.mid(offset).toUtf8().constData(), tl) != 0) {
                // next token does not match
                break;
             }
@@ -1249,7 +1249,7 @@ void ClangParser::switchToFile(const QString &fileName)
       p->cursors   = 0;
 
       QFileInfo fi(fileName);
-      CXFile f = clang_getFile(p->tu, fileName.toUtf8());
+      CXFile f = clang_getFile(p->tu, fileName.toUtf8().constData());
 
       uint pIndex = p->fileMapping.value(fileName);
 

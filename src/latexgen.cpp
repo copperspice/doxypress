@@ -35,21 +35,9 @@
 #include <util.h>
 
 LatexCodeGenerator::LatexCodeGenerator(QTextStream &t, const QString &relPath, const QString &sourceFileName)
-  : m_relPath(relPath), m_sourceFileName(sourceFileName), m_col(0)
+   : m_relPath(relPath), m_sourceFileName(sourceFileName), m_col(0), m_t(t)
 {
    m_prettyCode = Config::getBool("latex-source-code");
-   setTextStream(t);
-}
-
-LatexCodeGenerator::LatexCodeGenerator() : m_col(0)
-{
-   m_prettyCode = Config::getBool("latex-source-code");
-}
-
-void LatexCodeGenerator::setTextStream(QTextStream &t)
-{
-   m_streamSet = (t.device() != nullptr);
-   m_t.setDevice(t.device());
 }
 
 void LatexCodeGenerator::setRelativePath(const QString &path)
@@ -64,6 +52,9 @@ void LatexCodeGenerator::setSourceFileName(const QString &name)
 
 void LatexCodeGenerator::codify(const QString &str)
 {
+   static int tabSize   = Config::getInt("tab-size");
+   const int maxLineLen = 108;
+
    if (str.isEmpty()) {
       return;
    }
@@ -72,9 +63,6 @@ void LatexCodeGenerator::codify(const QString &str)
 
    const QChar *p = str.constData();
    QChar c;
-
-   static int tabSize   = Config::getInt("tab-size");
-   const int maxLineLen = 108;
 
    while ((c = *p) != 0) {
 
@@ -85,7 +73,6 @@ void LatexCodeGenerator::codify(const QString &str)
             break;
 
          case '\t':  {
-
             int spacesToNextTabStop = tabSize - (m_col % tabSize);
             m_t << QString(spacesToNextTabStop, QChar(' '));
             m_col += spacesToNextTabStop;
@@ -103,8 +90,8 @@ void LatexCodeGenerator::codify(const QString &str)
             break;
 
          default:
-            // gather characters until we find whitespace or are at the end of a line
-            result += c;
+            // gather characters until we find whitespace or reach the end of a line
+            result = c;
             p++;
 
             if (m_col >= maxLineLen) {
@@ -125,7 +112,7 @@ void LatexCodeGenerator::codify(const QString &str)
                   // force line break
 
                   m_t << "\n      ";
-                  m_col=0;
+                  m_col = 0;
                }
             }
 
@@ -674,7 +661,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n"
      "\\begin{document}\n";
 
-  
+
    // set to the indicated language
    if (! outputLanguage.isEmpty() && outputLanguage != "english") {
       t_stream << "\\selectlanguage{" << outputLanguage << "}\n";
@@ -684,7 +671,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
 
    // Front matter
    t_stream << "% Titlepage & ToC\n";
-   
+
    if (pdfHyperlinks && usePDFLatex) {
       // To avoid duplicate page anchors due to reuse of same numbers for
       // the index (be it as roman numbers)
@@ -825,16 +812,13 @@ void LatexGenerator::startFile(const QString &name, const QString &, const QStri
    }
 
    startPlainFile(fileName);
-
-   m_codeGen.setTextStream(m_textStream);
-   m_codeGen.setRelativePath(m_relPath);
-   m_codeGen.setSourceFileName(stripPath(fileName));
+   m_codeGen = QMakeShared<LatexCodeGenerator> (m_textStream, m_relPath, stripPath(fileName));
 }
 
 void LatexGenerator::endFile()
 {
    endPlainFile();
-   m_codeGen.setSourceFileName("");
+   m_codeGen->setSourceFileName("");
 }
 
 //void LatexGenerator::writeIndex()
@@ -2220,7 +2204,9 @@ void LatexGenerator::endCodeFragment()
 
 void LatexGenerator::startInlineHeader()
 {
-   if (Config::getBool("latex-compact")) {
+   static const bool latexCompact = Config::getBool("latex-compact");
+
+   if (latexCompact) {
       m_textStream << "\\paragraph*{";
    } else {
       m_textStream << "\\subsubsection*{";

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -72,15 +72,15 @@ Store::~Store()
 }
 
 int Store::open(QString name)
-{  
+{
    STORE_ASSERT(m_state == Init);
 
    if (m_fileHandle) {
       // already open
-      return 0;   
+      return 0;
    }
 
-   m_fileHandle = fopen(name.toUtf8(), "w+b");
+   m_fileHandle = fopen(name.toUtf8().constData(), "w+b");
 
    if (m_fileHandle == nullptr) {
       return -1;
@@ -123,7 +123,7 @@ portable_off_t Store::alloc()
    m_state = Writing;
    portable_off_t pos;
 
-   if (m_head == 0) { 
+   if (m_head == 0) {
       // allocate new block
 
       if (portable_fseek(m_fileHandle, 0, SEEK_END) == -1) { // go to end of the file
@@ -142,7 +142,7 @@ portable_off_t Store::alloc()
       m_front = pos + BLOCK_SIZE;
 #endif
 
-   } else { 
+   } else {
       // reuse freed block
 
       Node *node = m_head;
@@ -161,7 +161,7 @@ portable_off_t Store::alloc()
       m_cur = pos;
       STORE_ASSERT( (pos & (BLOCK_SIZE - 1)) == 0 );
    }
-   
+
    return pos;
 }
 
@@ -194,7 +194,7 @@ int Store::write(const char *buf, uint size)
          m_writes++;
       }
 
-      if (bytesLeft > 0) { 
+      if (bytesLeft > 0) {
          // still more bytes to write
 
 #if USE_FTELL
@@ -204,7 +204,7 @@ int Store::write(const char *buf, uint size)
 #endif
 
          // allocate new block
-         if (m_head == 0) { 
+         if (m_head == 0) {
             // no free blocks to reuse
             // write pointer to next block
 
@@ -236,7 +236,7 @@ int Store::write(const char *buf, uint size)
             // move front to the next of the block
             m_front += BLOCK_SIZE;
 
-         } else { 
+         } else {
             // reuse block from the free list
             // write pointer to next block
 
@@ -259,7 +259,7 @@ int Store::write(const char *buf, uint size)
             }
 
             m_cur = pos;
-            
+
          }
       }
 
@@ -293,7 +293,7 @@ void Store::end()
 
 void Store::release(portable_off_t pos)
 {
-   STORE_ASSERT(m_state == Reading);  
+   STORE_ASSERT(m_state == Reading);
    STORE_ASSERT(pos > 0 && (pos & (BLOCK_SIZE - 1)) == 0);
 
    // goto end of the block
@@ -326,7 +326,7 @@ void Store::release(portable_off_t pos)
       }
       STORE_ASSERT((next & (BLOCK_SIZE - 1)) == 0);
       cur = next;
-      
+
    }
 }
 
@@ -360,7 +360,7 @@ int Store::read(char *buf, uint size)
       //printf("  Store::read: pos=%x num=%d left=%d\n",(int)curPos,numBytes,bytesLeft);
 
       if (numBytes > 0) {
-         
+
          if ((int)fread(buf, 1, numBytes, m_fileHandle) != numBytes) {
             fprintf(stderr, "Error reading from store: %s\n", strerror(errno));
             Doxy_Work::stopDoxyPress();

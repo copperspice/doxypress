@@ -27,9 +27,7 @@ class LatexCodeGenerator : public CodeOutputInterface
 {
    public:
       LatexCodeGenerator(QTextStream &t, const QString &relPath, const QString &sourceFile);
-      LatexCodeGenerator();
 
-      void setTextStream(QTextStream &t);
       void setRelativePath(const QString &path);
       void setSourceFileName(const QString &sourceFileName);
 
@@ -56,11 +54,11 @@ class LatexCodeGenerator : public CodeOutputInterface
       void docify(const QString &str);
       bool m_streamSet;
 
-      QTextStream  m_t;
       QString      m_relPath;
       QString      m_sourceFileName;
       int          m_col;
       bool         m_prettyCode;
+      QTextStream  &m_t;
 };
 
 class LatexGenerator : public OutputGenerator
@@ -114,41 +112,41 @@ class LatexGenerator : public OutputGenerator
 
    // CodeOutputInterface
    void codify(const QString &text) override {
-      m_codeGen.codify(text);
+      m_codeGen->codify(text);
    }
 
    void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
                   const QString &name, const QString &tooltip) override {
-      m_codeGen.writeCodeLink(ref, file, anchor, name, tooltip);
+      m_codeGen->writeCodeLink(ref, file, anchor, name, tooltip);
    }
 
    void writeLineNumber(const QString &ref,const QString &file,const QString &anchor, int lineNumber) override {
-      m_codeGen.writeLineNumber(ref, file, anchor, lineNumber);
+      m_codeGen->writeLineNumber(ref, file, anchor, lineNumber);
    }
 
    void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl,
                   const QString &desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo) override  {
-      m_codeGen.writeTooltip(id, docInfo, decl, desc, defInfo, declInfo);
+      m_codeGen->writeTooltip(id, docInfo, decl, desc, defInfo, declInfo);
    }
 
    void startCodeLine(bool hasLineNumbers) override  {
-      m_codeGen.startCodeLine(hasLineNumbers);
+      m_codeGen->startCodeLine(hasLineNumbers);
    }
 
    void endCodeLine() override {
-      m_codeGen.endCodeLine();
+      m_codeGen->endCodeLine();
    }
 
    void startFontClass(const QString &s) override {
-      m_codeGen.startFontClass(s);
+      m_codeGen->startFontClass(s);
    }
 
    void endFontClass()  override {
-      m_codeGen.endFontClass();
+      m_codeGen->endFontClass();
    }
 
    void writeCodeAnchor(const QString &anchor) override {
-      m_codeGen.writeCodeAnchor(anchor);
+      m_codeGen->writeCodeAnchor(anchor);
    }
 
    //
@@ -426,8 +424,8 @@ class LatexGenerator : public OutputGenerator
 
    void startMemberDocPrefixItem() override {}
 
-   void endMemberDocPrefixItem() override { 
-      m_textStream << "\\\\" << endl; 
+   void endMemberDocPrefixItem() override {
+      m_textStream << "\\\\" << endl;
    }
 
    void startMemberDocName(bool) override {}
@@ -480,7 +478,7 @@ class LatexGenerator : public OutputGenerator
    bool templateMemberItem;
    bool m_prettyCode;
 
-   LatexCodeGenerator m_codeGen;
+   QSharedPointer<LatexCodeGenerator> m_codeGen;
 };
 
 #endif

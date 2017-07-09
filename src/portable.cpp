@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -63,7 +63,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    fullCmd += " " + args;
 
 #ifdef HAVE_FORK
-  
+
    int pid;
    int status = 0;
 
@@ -103,20 +103,20 @@ int portable_system(const QString &command, const QString &args, bool commandHas
       }
    }
 
-#else 
+#else
    // Windows
 
    if (commandHasConsole) {
-      return system(fullCmd.toUtf8());
+      return system(fullCmd.toUtf8().constData());
 
-   } else {               
+   } else {
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
       SHELLEXECUTEINFOW sInfo = {
-         sizeof(SHELLEXECUTEINFOW),   
+         sizeof(SHELLEXECUTEINFOW),
 
-         // wait till the process is  done, do not display msg box if there is an error                                                       
-         SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,     
+         // wait till the process is  done, do not display msg box if there is an error
+         SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,
 
          NULL,                       /* window handle */
          NULL,                       /* action to perform: open */
@@ -136,11 +136,11 @@ int portable_system(const QString &command, const QString &args, bool commandHas
       if (! ShellExecuteExW(&sInfo)) {
          return -1;
 
-      } else if (sInfo.hProcess) {  
-         // executable was launched, wait for it to finish 
+      } else if (sInfo.hProcess) {
+         // executable was launched, wait for it to finish
          WaitForSingleObject(sInfo.hProcess, INFINITE);
 
-         // get process exit code 
+         // get process exit code
          DWORD exitCode;
 
          if (! GetExitCodeProcess(sInfo.hProcess, &exitCode)) {
@@ -177,7 +177,7 @@ uint portable_pid()
 #endif
 
 void portable_setenv(const QString &name_T, const QString &value_T)
-{    
+{
 
 #ifdef HAVE_WINDOWS_H
 
@@ -199,7 +199,7 @@ void portable_setenv(const QString &name_T, const QString &value_T)
 
    char **ep = 0;
    size_t size;
- 
+
    const size_t namelen = name.length();
    const size_t vallen  = value.size() + 1;
 
@@ -247,7 +247,7 @@ void portable_setenv(const QString &name_T, const QString &value_T)
       new_environ[size + 1] = 0;
       last_environ = environ = new_environ;
 
-   } else { 
+   } else {
       /* replace existing string */
 
       size_t len = qstrlen (*ep);
@@ -292,12 +292,12 @@ void portable_unsetenv(const QString &variable)
 
    size_t len = tmp.length();
 
-   char **ep;  
+   char **ep;
    ep  = environ;
 
    while (*ep != nullptr) {
       if (! qstrncmp(*ep, tmp.constData(), len) && (*ep)[len] == '=') {
-         // found it, remove this pointer by moving later ones back. 
+         // found it, remove this pointer by moving later ones back.
          char **dp = ep;
 
          do {
@@ -315,7 +315,7 @@ void portable_unsetenv(const QString &variable)
 
 QString portable_getenv(const QString &variable)
 {
-   return getenv(variable.toUtf8());
+   return getenv(variable.toUtf8().constData());
 }
 
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence)
@@ -367,8 +367,8 @@ QString portable_commandExtension()
 Qt::CaseSensitivity portable_fileSystemIsCaseSensitive()
 {
    QFSFileEngine engine;
-   
-   if (engine.caseSensitive()){ 
+
+   if (engine.caseSensitive()){
       return Qt::CaseSensitive;
    } else {
       return Qt::CaseInsensitive;
