@@ -206,7 +206,7 @@ void portable_setenv(const QString &name_T, const QString &value_T)
    size = 0;
    if (environ != 0) {
       for (ep = environ; *ep; ++ep) {
-         if (! qstrncmp (*ep, name, (uint)namelen) && (*ep)[namelen] == '=') {
+         if (! qstrncmp (*ep, name.constData(), (uint)namelen) && (*ep)[namelen] == '=') {
             break;
          } else {
             ++size;
@@ -240,7 +240,7 @@ void portable_setenv(const QString &name_T, const QString &value_T)
          memcpy ((char *) new_environ, environ, size * sizeof (char *));
       }
 
-      memcpy(new_environ[size], name, namelen);
+      memcpy(new_environ[size], name.constData(), namelen);
       new_environ[size][namelen] = '=';
 
       memcpy(&new_environ[size][namelen + 1], value.constData(), vallen);
@@ -261,7 +261,7 @@ void portable_setenv(const QString &name_T, const QString &value_T)
          *ep = newString;
       }
 
-      memcpy(*ep, name, namelen);
+      memcpy(*ep, name.constData(), namelen);
       (*ep)[namelen] = '=';
 
       memcpy(&(*ep)[namelen + 1], value.constData(), vallen);
