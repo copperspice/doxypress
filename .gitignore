@@ -5,19 +5,6 @@ autotools/build-aux/*
 autotools/m4/lt*.m4
 autotools/m4/libtool.m4
 autotools/m4/pkg.m4
-config.status
-libtool
-Makefile
-Makefile.in
-aclocal.m4
-configure
-config.log
-error.log
-
-/src/doxy_build_info.h
-/src/parser/read_me_important.txt
-/src/parser/do-*
-/src/parser/license.txt
 
 /bin/Makefile
 /bin/src
@@ -27,8 +14,24 @@ error.log
 /bin/*.o
 /bin/*.exe
 
+/build
 /deploy
 /install
+
+/src/doxy_build_info.h
+/src/parser/read_me_important.txt
+/src/parser/do-*
+/src/parser/license.txt
+
+config.status
+libtool
+Makefile
+Makefile.in
+aclocal.m4
+configure
+config.log
+error.log
+/do-*
 
 test_build/do-gdb
 test_build/do-run

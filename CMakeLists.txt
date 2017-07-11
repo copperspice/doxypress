@@ -20,12 +20,9 @@ include(CheckIncludeFile)
 include(CheckIncludeFiles)
 include(CheckTypeSize)
 
-set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
-
 find_package(CopperSpice REQUIRED)
 
 if(WIN32)
-   # path to lib clang
    set(CLANG_PATH "../clang_lib")
 
    # lib clang dll
@@ -34,20 +31,17 @@ if(WIN32)
    # lib clang hdr
    set(CLANG_INC ${CLANG_PATH}/include/3.7.1)
 
-else()
-   # ISSUE (broom),  is this required?
+   set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
+   include(${CopperSpice_DIR}/InstallMinGW.cmake)
 
+else()
    # find_package(LibClang REQUIRED)
    # find_package(LibTooling REQUIRED)
 
 endif()
 
 # file locations for installing
-if(APPLE)
-   # osx
-   include(GNUInstallDirs)
-
-elseif(WIN32)
+if(WIN32)
    set(CMAKE_INSTALL_BINDIR bin)
    set(CMAKE_INSTALL_INCLUDEDIR include)
 
@@ -58,7 +52,7 @@ endif()
 
 set(BUILD_MAJOR "1")
 set(BUILD_MINOR "2")
-set(BUILD_MICRO "9")
+set(BUILD_MICRO "10")
 set(BUILD_COMPONENTS "DOXYPRESS")
 
 set(PACKAGE "doxypress")
@@ -68,7 +62,6 @@ set(PACKAGE_STRING "doxypress ${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_MICRO}")
 set(PACKAGE_TARNAME "doxypress")
 set(PACKAGE_BUGREPORT "info@copperspice.com")
 set(PACKAGE_URL "http://www.copperspice.com/")
-set(HEX_VERSION "0x0${BUILD_MAJOR}0${BUILD_MINOR}0${BUILD_MICRO}")      # ISSUE (broom), possible break ?
 set(VERSION "${PACKAGE_VERSION}")
 set(prefix "${CMAKE_INSTALL_PREFIX}")
 

@@ -11,8 +11,10 @@
 # Documents produced by DoxyPress are derivative works derived from the
 # input used in their production; they are not affected by this license.
 
+set(CS_VERSION 1.4)
+
 macro(cs_copy_dll APP DLL)
-   get_target_property(CS_${DLL}_LIB  CopperSpice::Cs${DLL}1.4 LOCATION)
+   get_target_property(CS_${DLL}_LIB  CopperSpice::Cs${DLL}${CS_VERSION} LOCATION)
    install(FILES  ${CS_${DLL}_LIB}  DESTINATION .)
 endmacro()
 
@@ -243,16 +245,11 @@ if(WIN32)
       ${CMAKE_SOURCE_DIR}/src
       ${CLANG_INCLUDE_DIR}
    )
-
-else ()
-   # ISSUE (broom),  now sure what to do here
-   # set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
-
 endif ()
 
 target_link_libraries(doxypress
-   CopperSpice::CsCore1.4
-   CopperSpice::CsXml1.4
+   CopperSpice::CsCore${CS_VERSION}
+   CopperSpice::CsXml${CS_VERSION}
 
    -L${CLANG_LIB_DIR}
    -Wl,--start-group
@@ -285,7 +282,7 @@ target_link_libraries(doxypress
    -llibclang
 )
 
-install(TARGETS   doxypress      DESTINATION .)
+install(TARGETS doxypress DESTINATION .)
 
 if(WIN32)
    install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
@@ -294,31 +291,7 @@ if(WIN32)
    cs_copy_dll(doxypress Core)
    cs_copy_dll(doxypress Xml)
 
-   # ISSUE (broom), not sure how to include the required DLL files
-   # install(FILES     ${GCC_LIBS}    DESTINATION .)
-
 else()
-
-   # ISSUE (broom),  is anything required here?
-
+   # other platforms
 
 endif()
-
-
-# extra things we were playing with
-
-#   set(GCC_PATH $(dir $(shell which $(word 1, $(CC))))
-#   set(GCC_PATH  "c:/MingW_64_4.9/x86_64-w64-mingw32/lib32")
-
-#   list of gcc libraries for GCC sjlj or seh
-#   file(GLOB wild ${GCC_PATH}/libgcc_s_*-1.dll)
-#   set(GCC_LIBS ${wild} ${GCC_PATH}/libstdc++-6.dll  ${GCC_PATH}/libwinpthread-1.dll )
-
-#   install(CODE 
-#      "
-#         include(BundleUtilities)
-#         fixup_bundle(${CMAKE_INSTALL_PREFIX}/crap.app \"\" \"\") 
-#      "   
-#      COMPONENT Runtime
-#   )
-

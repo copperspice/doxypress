@@ -1,10 +1,10 @@
 # project name, version, email
-AC_INIT([DoxyPress], 1.2.9, [info@copperspice.com])
+AC_INIT([DoxyPress], 1.2.10, [info@copperspice.com])
 
 # location of temp autotools files
 # note: space can not exist between ] and  )
 AC_CONFIG_AUX_DIR([autotools/build-aux])
-AC_CONFIG_MACRO_DIR([autotools/m4]) 
+AC_CONFIG_MACRO_DIR([autotools/m4])
 
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
@@ -29,7 +29,7 @@ AX_CXX_COMPILE_STDCXX_11([noext])
 
 case "$target" in
 *-*-mingw*)
-   prefix=`pwd`/install   
+   prefix=`pwd`/install
    OSTYPE=WIN ;;
 *-*-linux-*)
    OSTYPE=LINUX ;;
@@ -48,7 +48,7 @@ AC_CHECK_HEADERS([windows.h], [HAVE_WINDOWS_H=yes])
 AC_CHECK_FUNCS([fork getpid])
 
 # display 32-bit or 64-bit
-m4_pushdef([AS_MESSAGE_FD],[/dev/null]) 
+m4_pushdef([AS_MESSAGE_FD],[/dev/null])
 AC_CHECK_SIZEOF(size_t)
 
 case "$ac_cv_sizeof_size_t" in
@@ -59,10 +59,10 @@ case "$ac_cv_sizeof_size_t" in
 *)
 	BITSIZE="an unknown" ;;
 esac
-m4_popdef([AS_MESSAGE_FD]) 
+m4_popdef([AS_MESSAGE_FD])
 
 echo
-echo "Application configured for "$BITSIZE"-bit system" 
+echo "Application configured for "$BITSIZE"-bit system"
 echo
 
 # location of .am files that will create Makefiles
