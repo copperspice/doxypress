@@ -127,7 +127,7 @@ Entry::Entry(const Entry &e)
    m_groups    = e.m_groups;
    m_anchors   = e.m_anchors;
 
-   typeConstr  = e.typeConstr;   
+   typeConstr  = e.typeConstr;
 }
 
 Entry::~Entry()
@@ -203,7 +203,7 @@ void Entry::reset()
 
    m_sublist.clear();
    argList.clear();
-   m_tagInfoEntry.clear();     
+   m_tagInfoEntry.clear();
    typeConstr.clear();
 
    m_templateArgLists.clear();
@@ -218,8 +218,8 @@ int Entry::getSize()
    return sizeof(Entry);
 }
 
-void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage, QSharedPointer<FileDef> fd,
-                  QSharedPointer<Entry> self)
+void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage,
+                  QSharedPointer<FileDef> fd, QSharedPointer<Entry> self)
 {
    assert(self == this);
    QSharedPointer<EntryNav> childNav = QMakeShared<EntryNav>(nav, self);
@@ -236,8 +236,8 @@ void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storag
    m_sublist.clear();
 }
 
-void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage, QSharedPointer<FileDef> fd,
-                  QSharedPointer<Entry> self)
+void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage,
+                  QSharedPointer<FileDef> fd, QSharedPointer<Entry> self)
 {
    createSubtreeIndex(rootNav, storage, fd, self);
 }
@@ -267,8 +267,8 @@ EntryNav::EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e)
    : m_parent(parent), m_section(e->section), m_type(e->type), m_name(e->name),
      m_fileDef(0), m_lang(e->lang), m_offset(-1), m_noLoad(false)
 {
-   
-   m_tagInfoNav = e->m_tagInfoEntry;  
+
+   m_tagInfoNav = e->m_tagInfoEntry;
 }
 
 EntryNav::~EntryNav()

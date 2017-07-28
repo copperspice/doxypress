@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -98,8 +98,8 @@ void OutputList::popGeneratorState()
    }
 }
 
-bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, 
-                  QSharedPointer<MemberDef> md, const QString &docStr, bool indexWords, bool isExample, 
+bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx,
+                  QSharedPointer<MemberDef> md, const QString &docStr, bool indexWords, bool isExample,
                   const QString &exampleName, bool singleLine, bool linkFromIndex)
 {
    if (docStr.isEmpty()) {
@@ -119,7 +119,7 @@ bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPoin
    }
 
    DocRoot *root = nullptr;
-   root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample, 
+   root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample,
                   exampleName, singleLine, linkFromIndex);
 
    writeDoc(root, ctx, md);
@@ -143,7 +143,7 @@ void OutputList::writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QShared
 bool OutputList::parseText(const QString &textStr)
 {
    int count = 0;
- 
+
    for (auto item : m_outputs) {
       if (item->isEnabled()) {
          count++;
@@ -152,13 +152,13 @@ bool OutputList::parseText(const QString &textStr)
 
    if (count == 0) {
       // no output formats enabled
-      return true;  
+      return true;
    }
 
    DocText *root = validatingParseText(textStr);
 
    for (auto item : m_outputs) {
-  
+
       if (item->isEnabled()) {
          item->writeDoc(root, QSharedPointer<Definition>(), QSharedPointer<MemberDef>());
       }

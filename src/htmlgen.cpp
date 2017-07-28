@@ -1659,7 +1659,8 @@ void HtmlGenerator::startMemberDoc(const QString &clName, const QString &memName
 {
    DBG_HTML(m_textStream << "<!-- startMemberDoc -->" << endl;)
 
-/* looks awful, set up as an tag option
+/* odd styple where a tab sticks up and only the method name is displayed
+   set up as an tag option to turn on/off
 
    m_textStream << "\n<h2 class=\"memtitle\">" << title << " "
                 << "<a href=\"#" << anchor << "\" class=\"permalink\"" "title=\"Permalink to this headline\">&#9854;</a>"

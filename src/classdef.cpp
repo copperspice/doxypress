@@ -834,6 +834,7 @@ void ClassDef::writeDetailedDescription(OutputList &ol, const QString &, bool ex
    } else {
       //writeTemplateSpec(ol,this,pageType);
    }
+
 }
 
 QString ClassDef::generatedFromFiles() const
@@ -1757,7 +1758,7 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTit
             break;
 
          case LayoutDocEntry::ClassAllMembersLink:
-            //writeAllMembersLink(ol); // this is now part of the summary links
+            // writeAllMembersLink(ol); // this is now part of the summary links
             break;
 
          case LayoutDocEntry::MemberDeclStart:
@@ -1907,6 +1908,7 @@ void ClassDef::writeDocumentation(OutputList &ol)
       if (getOuterScope() != Doxy_Globals::globalScope) {
          writeNavigationPath(ol);
       }
+
       ol.endQuickIndices();
    }
 
@@ -2023,12 +2025,13 @@ void ClassDef::writeMemberList(OutputList &ol)
    QString memListFile = getMemberListFileName();
 
    startFile(ol, memListFile, memListFile, theTranslator->trMemberList(),
-             HLI_ClassVisible, !generateTreeView, getOutputFileBase());
+                  HLI_ClassVisible, !generateTreeView, getOutputFileBase());
 
    if (! generateTreeView) {
       if (getOuterScope() != Doxy_Globals::globalScope) {
          writeNavigationPath(ol);
       }
+
       ol.endQuickIndices();
    }
 
@@ -2084,6 +2087,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                      ol.writeString("</td><td class=\"entry\">");
                   }
                }
+
                if (md->isObjCMethod()) {
                   ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), md->name());
 

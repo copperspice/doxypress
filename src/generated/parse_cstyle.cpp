@@ -14202,17 +14202,20 @@ YY_RULE_SETUP
 case 78:
 YY_RULE_SETUP
 {
-      QString text  = QString::fromUtf8(parse_cstyle_YYtext);
-      isTypedef     = false;
-      current->name = text;
-      current->name = substitute(current->name,".","::");
-      current->name = substitute(current->name,"\\","::");
+      QString text         = QString::fromUtf8(parse_cstyle_YYtext);
+      isTypedef            = false;
+
+      current->name        = text;
+      current->name        = substitute(current->name,".","::");
+      current->name        = substitute(current->name,"\\","::");
+
       current->section     = Entry::NAMESPACE_SEC;
       current->type        = "namespace";
       current->fileName    = yyFileName;
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
    }
 	YY_BREAK
@@ -14376,7 +14379,7 @@ case 93:
 YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
 YY_RULE_SETUP
 {
-      isTypedef = false;
+      isTypedef            = false;
       current->section     = Entry::NAMESPACE_SEC;
       current->type        = "namespace";
       current->fileName    = yyFileName;
@@ -14399,7 +14402,7 @@ YY_RULE_SETUP
       lineCount();
 
       if (insideIDL) {
-         isTypedef = false;
+         isTypedef            = false;
          current->section     = Entry::NAMESPACE_SEC;
          current->type        = "module";
          current->fileName    = yyFileName;
@@ -14424,6 +14427,7 @@ case 95:
 YY_RULE_SETUP
 {
       lineCount();
+
       if (insideIDL) {
          isTypedef = false;
          current->section     = Entry::NAMESPACE_SEC;
@@ -14691,10 +14695,9 @@ YY_RULE_SETUP
       // add a new class
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      isTypedef = text.indexOf("typedef") != -1;
-
-      bool isConst     = text.indexOf("const")    != -1;
-      bool isVolatile  = text.indexOf("volatile") != -1;
+      isTypedef        = text.contains("typedef");
+      bool isConst     = text.contains("const");
+      bool isVolatile  = text.contains("volatile");
 
       current->section = Entry::CLASS_SEC;
       addType(current);
@@ -14820,6 +14823,7 @@ case 113:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
+
       if (insideIDL) {
          isTypedef = false;
          current->section = Entry::CLASS_SEC;
@@ -14987,8 +14991,8 @@ YY_RULE_SETUP
       isTypedef        = text.indexOf("typedef")  !=-1;
       bool isConst     = text.indexOf("const")    !=-1;
       bool isVolatile  = text.indexOf("volatile") !=-1;
-      current->section = Entry::CLASS_SEC;
 
+      current->section = Entry::CLASS_SEC;
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Union);
 
@@ -15300,9 +15304,9 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       lineCount();
 
-      current->name     = text;
-      current->fileName = yyFileName;
-      current->section  = Entry::USINGDECL_SEC;
+      current->name      = text;
+      current->fileName  = yyFileName;
+      current->section   = Entry::USINGDECL_SEC;
       current->startLine = yyLineNr;
       current_root->addSubEntry(current, current_root);
 
@@ -17975,11 +17979,11 @@ YY_RULE_SETUP
          current->bodyLine = yyLineNr;
       }
 
-      if (insidePHP && current->type.left(3) == "var") {
+      if (insidePHP && current->type.startsWith("var") ) {
          current->type = current->type.mid(3);
       }
 
-      if (isTypedef && current->type.left(8) != "typedef ") {
+      if (isTypedef && ! current->type.startsWith("typedef ") ) {
         current->type.prepend("typedef ");
       }
 
@@ -18000,7 +18004,7 @@ YY_RULE_SETUP
          current->startLine   = yyBegLineNr;
          current->startColumn = yyBegColNr;
 
-         current_root->addSubEntry( current, current_root);
+         current_root->addSubEntry(current, current_root);
          needNewCurrent = true;
       }
 
@@ -21329,7 +21333,7 @@ YY_RULE_SETUP
       if (insideIDL && text.startsWith("switch") == 0 && ! isId(text[6])) {
 
          // Corba IDL style union
-         roundCount=0;
+         roundCount = 0;
          BEGIN(SkipUnionSwitch);
 
       }  else {
@@ -21468,10 +21472,11 @@ YY_RULE_SETUP
       lastCopyArgChar = '#';       // end marker
       lastCommentInArgContext = YY_START;
 
-      if (text[1] == '/')
-       BEGIN( CopyArgCommentLine );
-      else
-       BEGIN( CopyArgComment );
+      if (text[1] == '/') {
+         BEGIN( CopyArgCommentLine );
+      } else {
+         BEGIN( CopyArgComment );
+      }
    }
 	YY_BREAK
 case 658:
@@ -24405,7 +24410,7 @@ static void newEntry()
    if (tempEntry == nullptr) {
       // if temp entry is not 0 it holds current
       // current is replaced by previous which was already added to current_root
-      // do not add it again  (see bug723314)
+      // do not add it again
 
       current_root->addSubEntry(current, current_root);
    }
