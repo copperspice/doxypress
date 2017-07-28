@@ -122,18 +122,20 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
    const ArgumentList &defArgList = *tmp;
 
-   if (! md->isSignal() && ! md->isSlot() && ! md->isFunction() && ! md->isFunctionPtr() ) {
-      // these do not arguement lists
-      // avoids display ( ) afer the enum, property, etc
+   if (md->isSignal() || md->isSlot() || md->isFunction() || md->isFunctionPtr()) {
+     // keep going and document
 
+   } else {
+      // no arguments
       return false;
+
    }
 
    // simple argument list for tcl
    if (md->getLanguage() == SrcLangExt_Tcl) {
 
       if (defArgList.count() == 0) {
-         return false;   
+         return false;
       }
 
       ol.endMemberDocName();
@@ -657,7 +659,7 @@ class MemberDefImpl
    bool hasDocumentedReturnType;
    bool isDMember;
 
-   Relationship related;     // relationship of this to the class
+   Relationship m_related;   // relationship of this to the class
 
    bool stat;                // is it a static function?
    bool proto;               // is it a prototype;
@@ -722,7 +724,7 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
    memberGroup = QSharedPointer<MemberGroup>();
    virt        = v;
    prot        = p;
-   related     = r;
+   m_related   = r;
    stat        = s;
    mtype       = mt;
    exception   = e;
@@ -778,24 +780,20 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
 
 /*! Creates a new member definition.
  *
- * \param df File containing the definition of this member.
- * \param dl Line at which the member definition was found.
- * \param dc Column at which the member definition was found.
- * \param t  A string representing the type of the member.
- * \param na A string representing the name of the member.
- * \param a  A string representing the arguments of the member.
- * \param e  A string representing the throw clause of the members.
- * \param p  The protection context of the member, possible values are:
- *           \c Public, \c Protected, \c Private.
- * \param v  The degree of `virtualness' of the member, possible values are:
- *           \c Normal, \c Virtual, \c Pure.
- * \param s  A boolean that is true iff the member is static.
- * \param r  The relationship between the class and the member.
- * \param mt The kind of member. See #MemberType for a list of
- *           all types.
+ * \param df  File containing the definition of this member.
+ * \param dl  Line at which the member definition was found.
+ * \param dc  Column at which the member definition was found.
+ * \param t   A string representing the type of the member.
+ * \param na  A string representing the name of the member.
+ * \param a   A string representing the arguments of the member.
+ * \param e   A string representing the throw clause of the members.
+ * \param p   The protection context of the member
+ * \param v   The degree of `virtualness' of the member, possible values are: Normal, Virtual, Pure
+ * \param s   A boolean that is true if the member is static.
+ * \param r   The relationship between the class and the member.
+ * \param mt  The kind of member. See #MemberType for a list of all types.
  * \param tal The template arguments of this member.
- * \param al  The arguments of this member. This is a structured form of
- *            the string past as argument \a a.
+ * \param al  The arguments of this member. This is a structured form of the string past as argument a.
  */
 
 MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &t, const QString &na,
@@ -1098,27 +1096,27 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (! m_impl->group && m_impl->nspace && ! m_impl->related && !m_impl->nspace->isLinkableInProject()) {
+   if (! m_impl->group && m_impl->nspace && ! m_impl->m_related && !m_impl->nspace->isLinkableInProject()) {
       m_isLinkableCached = 1; // in namespace but namespace not linkable
       return;
    }
 
-  if (! m_impl->group && !m_impl->nspace && ! m_impl->related && !m_impl->classDef &&
+  if (! m_impl->group && !m_impl->nspace && ! m_impl->m_related && !m_impl->classDef &&
          m_impl->fileDef && !m_impl->fileDef->isLinkableInProject()) {
 
-      m_isLinkableCached = 1; // in file (and not in namespace) but file not linkable
+      m_isLinkableCached = 1;    // in file (and not in namespace) but file not linkable
       return;
    }
-   if (! protectionLevelVisible(m_impl->prot) && m_impl->mtype != MemberType_Friend) {
-      m_isLinkableCached = 1; // hidden due to protection
+   if (! protectionLevelVisible(m_impl->prot) && ! isFriend() ) {
+      m_isLinkableCached = 1;    // hidden due to protection
       return;
    }
 
-   if (m_impl->stat && m_impl->classDef == 0 && !extractStatic) {
-      m_isLinkableCached = 1; // hidden due to staticness
+   if (m_impl->stat && m_impl->classDef == 0 && ! extractStatic) {
+      m_isLinkableCached = 1;    // hidden due to staticness
       return;   }
 
-   return; // linkable
+   return;    // linkable
 }
 
 void MemberDef::setDocumentation(const QString &d, const QString &docFile, int docLine, bool stripWhiteSpace, bool atTop)
@@ -1195,7 +1193,9 @@ void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPo
       }
    }
 
-   if (! onlyText && isLinkable()) { // write link
+   if (! onlyText && isLinkable()) {
+      // write link
+
       if (m_impl->mtype == MemberType_EnumValue && getGroupDef() == 0 &&      // enum value is not grouped
             getEnumScope() && getEnumScope()->getGroupDef()) {
 
@@ -1320,7 +1320,7 @@ bool MemberDef::isBriefSectionVisible() const
 
    // only include members that are non-private unless extract_private is
    // set to YES or the member is part of a group
-   bool visibleIfPrivate = (protectionLevelVisible(protection()) || m_impl->mtype == MemberType_Friend);
+   bool visibleIfPrivate = (protectionLevelVisible(protection()) || isFriend() );
 
    // true if this member is a constructor or destructor
    bool cOrDTor = isConstructor() || isDestructor();
@@ -1590,7 +1590,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       // hide anonymous stuff
 
       if (! (name().isEmpty() || name().at(0) == '@') && (hasDocumentation() || isReference()) &&
-            ! (m_impl->prot == Private && ! extractPrivate && m_impl->mtype != MemberType_Friend) &&
+            ! (m_impl->prot == Private && ! extractPrivate && ! isFriend()) &&
             ! (isStatic() && m_impl->classDef == 0 && ! extractStatic)) {
 
          if (m_impl->annMemb) {
@@ -1880,7 +1880,7 @@ bool MemberDef::isDetailedSectionLinkable() const
    bool staticFilter = getClassDef() != 0 || ! isStatic() || extractStatic;
 
    // only include members which are non-private unless extract_private is set or the member is part of a group
-   bool privateFilter = protectionLevelVisible(protection()) || m_impl->mtype == MemberType_Friend;
+   bool privateFilter = protectionLevelVisible(protection()) || isFriend();
 
 
    // (not used ) member is part of an anonymous scope that is the type of another member in the list
@@ -1931,7 +1931,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
           (m_impl->classDef && m_impl->classDef != container && container->definitionType() == TypeClass) ||
           (m_impl->memSpec & ~Entry::Inline) != 0 ) ) {
 */
-
 
       if (isFriend()) {
          sl.append("friend");
@@ -2630,8 +2629,10 @@ QString MemberDef::displayDefinition() const
          ldef.prepend("- ");
       }
    }
+
    SrcLangExt lang = getLanguage();
    QString sep = getLanguageSpecificSeparator(lang, true);
+
    return substitute(ldef, "::", sep);
 }
 
@@ -2698,6 +2699,8 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
    bool hasParameterList = false;
    bool inFile  = container->definitionType() == Definition::TypeFile;
    bool hasDocs = isDetailedSectionVisible(inGroup, inFile);
+
+   QSharedPointer<ClassDef> cd = getClassDef();
 
    if (! hasDocs) {
       return;
@@ -2865,7 +2868,6 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       if (! hideScopeNames) {
          bool first = true;
 
-         SrcLangExt lang = getLanguage();
          if (! m_impl->m_defaultTemplateArgLists.isEmpty() && lang == SrcLangExt_Cpp) {
 
             // definition has explicit template parameter declarations
@@ -2882,18 +2884,20 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
                }
             }
 
-         } else  {
-            // definition gets it template parameters from its class
+         } else if (lang == SrcLangExt_Cpp)  {
+            // definition gets template parameters from its class
             // (since no definition was found)
 
-            if (cd && lang == SrcLangExt_Cpp && ! isTemplateSpecialization()) {
+            if (cd && ! isTemplateSpecialization()) {
+
                QVector<ArgumentList> tempParamLists;
                cd->getTemplateParameterLists(tempParamLists);
 
                for (auto &tal : tempParamLists) {
+
                   if (tal.count() > 0) {
 
-                     if (!first) {
+                     if (! first) {
                         ol.docify(" ");
                      }
 
@@ -2904,7 +2908,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
                }
             }
 
-            if (! m_impl->m_templateArgList.listEmpty() && lang == SrcLangExt_Cpp) {
+            if (! m_impl->m_templateArgList.listEmpty()) {
                // function template prefix
 
                ol.startMemberDocPrefixItem();
@@ -2917,6 +2921,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       if (sl.count() > 0) {
          ol.pushGeneratorState();
          ol.disableAll();
+
          ol.enable(OutputGenerator::Html);
          ol.writeString("<table class=\"mlabels\">\n");
          ol.writeString("  <tr>\n");
@@ -2978,7 +2983,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          scopeDef = nd;
       }
 
-      // writes ( argList ) for member
+      // writes argList for member
       hasParameterList = writeDefArgumentList(ol, scopeDef, self);
 
       if (hasOneLineInitializer()) {
@@ -3394,37 +3399,54 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
 
 QString MemberDef::memberTypeName() const
 {
+   QString retval;
+
    switch (m_impl->mtype) {
       case MemberType_Define:
-         return "macro definition";
+         retval = "macro definition";
+
       case MemberType_Function:
-         return "function";
+         retval = "function";
+
       case MemberType_Variable:
-         return "variable";
+         retval = "variable";
+
       case MemberType_Typedef:
-         return "typedef";
+         retval = "typedef";
+
       case MemberType_Enumeration:
-         return "enumeration";
+         retval = "enumeration";
+
       case MemberType_EnumValue:
-         return "enumvalue";
+         retval = "enumvalue";
+
       case MemberType_Signal:
-         return "signal";
+         retval = "signal";
+
       case MemberType_Slot:
-         return "slot";
-      case MemberType_Friend:
-         return "friend";
+         retval = "slot";
+
       case MemberType_DCOP:
-         return "dcop";
+         retval = "dcop";
+
       case MemberType_Property:
-         return "property";
+         retval = "property";
+
       case MemberType_Event:
-         return "event";
+         retval = "event";
+
       case MemberType_Interface:
-         return "interface";
+         retval = "interface";
+
       case MemberType_Service:
-         return "service";
+         retval = "service";
+
       default:
          return "unknown";
+   }
+
+   if (isFriend()) {
+      retval.prepend("friend ");
    }
 }
 
@@ -3470,7 +3492,7 @@ void MemberDef::warnIfUndocumented()
    }
 
    if ((! hasUserDocumentation() && ! extractAll) && ! isFriendClass() && name().indexOf('@') == -1 &&
-                  def != nullptr && def->name().indexOf('@') == -1 && 
+                  def != nullptr && def->name().indexOf('@') == -1 &&
                   protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 
       warn_undoc(getDefFileName(),getDefLine(), "Member %s%s (%s) of %s %s is undocumented.",
@@ -3494,7 +3516,7 @@ void MemberDef::warnIfUndocumentedParams()
          warn_doc_error(getDefFileName(), getDefLine(), "Parameters for member %s are not fully documented",
                      csPrintable(qualifiedName()));
       }
-   
+
       if (!hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Return type of member %s is not documented",
                      csPrintable(qualifiedName()));
@@ -3504,9 +3526,8 @@ void MemberDef::warnIfUndocumentedParams()
 
 bool MemberDef::isFriendClass() const
 {
-   return (isFriend() && 
-                  (m_impl->type == "friend class" || m_impl->type == "friend struct" || 
-                   m_impl->type == "friend union"));
+   return (isFriend() &&  (m_impl->type == "friend class" || m_impl->type == "friend struct" ||
+                  m_impl->type == "friend union"));
 }
 
 bool MemberDef::isDocumentedFriendClass() const
@@ -3630,10 +3651,10 @@ void MemberDef::setNamespace(QSharedPointer<NamespaceDef> nd)
    setOuterScope(nd);
 }
 
-QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const ArgumentList &formalArgs, 
+QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const ArgumentList &formalArgs,
                   const ArgumentList &actualArgs)
 {
-   ArgumentList actualArgList; 
+   ArgumentList actualArgList;
    actualArgList = m_impl->m_defArgList;
 
    // replace formal arguments with actuals
@@ -3654,7 +3675,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
    QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(getDefFileName(), getDefLine(), getDefColumn(),
          substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs), methodName,
          substituteTemplateArgumentsInString(m_impl->args, formalArgs, actualArgs),
-         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->related, m_impl->mtype, 
+         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->m_related, m_impl->mtype,
          ArgumentList(), ArgumentList());
 
    imd->setArgumentList(actualArgList);
@@ -3783,55 +3804,70 @@ Specifier MemberDef::virtualness(int count) const
 
 void MemberDef::writeTagFile(QTextStream &tagFile)
 {
-   if (!isLinkableInProject()) {
+   if (! isLinkableInProject()) {
       return;
    }
 
    tagFile << "    <member kind=\"";
+
+   if (isFriend()) {
+      tagFile << "friend";
+   }
+
    switch (m_impl->mtype) {
       case MemberType_Define:
          tagFile << "define";
          break;
+
       case MemberType_EnumValue:
          tagFile << "enumvalue";
          break;
+
       case MemberType_Property:
          tagFile << "property";
          break;
+
       case MemberType_Event:
          tagFile << "event";
          break;
+
       case MemberType_Variable:
          tagFile << "variable";
          break;
+
       case MemberType_Typedef:
          tagFile << "typedef";
          break;
+
       case MemberType_Enumeration:
          tagFile << "enumeration";
          break;
+
       case MemberType_Function:
          tagFile << "function";
          break;
+
       case MemberType_Signal:
          tagFile << "signal";
          break;
-      case MemberType_Friend:
-         tagFile << "friend";
-         break;
+
       case MemberType_DCOP:
          tagFile << "dcop";
          break;
+
       case MemberType_Slot:
          tagFile << "slot";
          break;
+
       case MemberType_Interface:
          tagFile << "interface";
          break;
+
       case MemberType_Service:
          tagFile << "service";
          break;
    }
+
    if (m_impl->prot != Public) {
       tagFile << "\" protection=\"";
       if (m_impl->prot == Protected) {
@@ -3842,6 +3878,7 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
          tagFile << "private";
       }
    }
+
    if (m_impl->virt != Normal) {
       tagFile << "\" virtualness=\"";
       if (m_impl->virt == Virtual) {
@@ -3850,6 +3887,7 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
          tagFile << "pure";
       }
    }
+
    if (isStatic()) {
       tagFile << "\" static=\"yes";
    }
@@ -3861,7 +3899,9 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
    }
 
    tagFile << "      <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "      <anchorfile>" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension) << "</anchorfile>" << endl;
+   tagFile << "      <anchorfile>" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension)
+           << "</anchorfile>" << endl;
+
    tagFile << "      <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
 
    QString idStr = id();
@@ -3890,6 +3930,7 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
          }
       }
    }
+
    writeDocAnchorsToTagFile(tagFile);
    tagFile << "    </member>" << endl;
 }
@@ -4403,7 +4444,7 @@ bool MemberDef::isDefine() const
 
 bool MemberDef::isFriend() const
 {
-   return m_impl->mtype == MemberType_Friend;
+   return m_impl->m_related == Relationship::Friend;
 }
 
 bool MemberDef::isDCOP() const
@@ -4423,12 +4464,12 @@ bool MemberDef::isEvent() const
 
 bool MemberDef::isRelated() const
 {
-   return m_impl->related == Related;
+   return m_impl->m_related == Relationship::Related;
 }
 
 bool MemberDef::isForeign() const
 {
-   return m_impl->related == Foreign;
+   return m_impl->m_related == Relationship::Foreign;
 }
 
 bool MemberDef::isStatic() const
@@ -4892,7 +4933,7 @@ QSharedPointer<MemberDef> MemberDef::getGroupAlias() const
 
 void MemberDef::setMemberType(MemberType t)
 {
-   m_impl->mtype = t;
+   m_impl->mtype      = t;
    m_isLinkableCached = 0;
 }
 
@@ -4967,15 +5008,28 @@ void MemberDef::setTemplateSpecialization(bool b)
    m_impl->tspec = b;
 }
 
+void MemberDef::setFriend(bool isFriend)
+{
+   if (isFriend) {
+      m_impl->m_related  = Relationship::Friend;
+   }
+}
+
+void MemberDef::makeFriend()
+{
+   m_impl->m_related  = Relationship::Friend;
+   m_isLinkableCached = 0;
+}
+
 void MemberDef::makeRelated()
 {
-   m_impl->related = Related;
+   m_impl->m_related  = Relationship::Related;
    m_isLinkableCached = 0;
 }
 
 void MemberDef::makeForeign()
 {
-   m_impl->related = Foreign;
+   m_impl->m_related  = Foreign;
    m_isLinkableCached = 0;
 }
 
@@ -5240,22 +5294,22 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
          if (! mdef->documentation().isEmpty()) {
             mdec->setDocumentation(mdef->documentation(), mdef->docFile(), mdef->docLine());
             mdec->setDocsForDefinition(mdef->isDocsForDefinition());
-            
+
             ArgumentList mdefAlComb = stringToArgumentList(mdef->argsString());
 
             transferArgumentDocumentation(mdefAl, mdefAlComb);
             mdec->setArgumentList(mdefAlComb);
-            
+
 
          } else if (! mdec->documentation().isEmpty()) {
             mdef->setDocumentation(mdec->documentation(), mdec->docFile(), mdec->docLine());
             mdef->setDocsForDefinition(mdec->isDocsForDefinition());
-            
+
             ArgumentList mdecAlComb = stringToArgumentList(mdec->argsString());
 
             transferArgumentDocumentation(mdecAl, mdecAlComb);
             mdef->setDeclArgumentList(mdecAlComb);
-            
+
          }
 
          if (! mdef->inbodyDocumentation().isEmpty()) {
@@ -5327,14 +5381,14 @@ bool MemberDef::isFriendToHide() const
    static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
 
    bool isFriendToHide = hideFriendCompounds && (m_impl->type == "friend class"  ||
-                          m_impl->type == "friend struct" || m_impl->type == "friend union");
+                  m_impl->type == "friend struct" || m_impl->type == "friend union");
 
    return isFriendToHide;
 }
 
 bool MemberDef::isNotFriend() const
 {
-   return !(isFriend() && isFriendToHide());
+   return ! (isFriend() && isFriendToHide());
 }
 
 bool MemberDef::isFunctionOrSignalSlot() const

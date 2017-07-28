@@ -2,7 +2,7 @@
  *
  * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim documentation().
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -48,7 +48,7 @@ struct TagInfo;
 class MemberDef : public Definition
 {
  public:
-   MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &name, 
+   MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &name,
              const QString &args, const QString &excp, Protection prot, Specifier virt, bool stat,
              Relationship related, MemberType t, const ArgumentList &tal, const ArgumentList &al);
 
@@ -61,7 +61,7 @@ class MemberDef : public Definition
    // move this member into a different scope
    QSharedPointer<MemberDef> deepCopy() const;
    void moveTo(QSharedPointer<Definition> scope);
-  
+
    // link id
    QString getOutputFileBase() const override;
    QString getReference() const override;
@@ -150,11 +150,11 @@ class MemberDef : public Definition
    bool isUser() const;
    bool isConstant() const;
    bool isFinal_Property() const;
- 
+
    bool isAddable() const;
    bool isFinal() const;
    bool isRemovable() const;
-   bool isRaisable() const;   
+   bool isRaisable() const;
    bool isAbstract() const;
    bool isOverride() const;
    bool isInitonly() const;
@@ -210,7 +210,7 @@ class MemberDef : public Definition
 
    bool hasDocumentation() const override;
    bool isDeleted() const;
-  
+
    bool isBriefSectionVisible() const;
    bool isDetailedSectionVisible(bool inGroup, bool inFile) const;
    bool isDetailedSectionLinkable() const;
@@ -220,7 +220,7 @@ class MemberDef : public Definition
    QSharedPointer<MemberDef>  reimplements() const;
    QSharedPointer<MemberList> reimplementedBy() const;
    bool isReimplementedBy(QSharedPointer<ClassDef> cd) const;
- 
+
    QSharedPointer<ClassDef> relatedAlso() const;
 
    bool hasDocumentedEnumValues() const;
@@ -285,7 +285,7 @@ class MemberDef : public Definition
    QString displayName(bool = true) const override;
    QString getDeclType() const;
    void getLabels(QStringList &sl, QSharedPointer<Definition> container) const;
- 
+
    //
    QString documentation() const override;
    QString briefDescription(bool abbr = false) const override;
@@ -309,7 +309,7 @@ class MemberDef : public Definition
    void setSectionList(QSharedPointer<Definition> d, QSharedPointer<MemberList> sl);
 
    void setGroupDef(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri,
-                    const QString &fileName, int startLine, bool hasDocs, 
+                    const QString &fileName, int startLine, bool hasDocs,
                     QSharedPointer<MemberDef> member = QSharedPointer<MemberDef>());
 
    void setExplicitExternal(bool b);
@@ -324,6 +324,8 @@ class MemberDef : public Definition
 
    void setTemplateSpecialization(bool b);
 
+   void setFriend(bool isFriend);
+   void makeFriend();
    void makeRelated();
    void makeForeign();
    void setHasDocumentedParams(bool b);
@@ -351,7 +353,7 @@ class MemberDef : public Definition
    // prototype related members
    void setPrototype(bool p);
 
-   //    
+   //
    void setType(const QString &t);
    void setAccessorType(QSharedPointer<ClassDef> cd, const QString &t);
 
@@ -390,26 +392,27 @@ class MemberDef : public Definition
    void setCategory(QSharedPointer<ClassDef> cd);
    void setCategoryRelation(QSharedPointer<MemberDef> md);
 
-   void setDocumentation(const QString &d, const QString &docFile, int docLine, 
+   void setDocumentation(const QString &d, const QString &docFile, int docLine,
             bool stripWhiteSpace = true, bool atTop = false) override;
 
    void setBriefDescription(const QString &b, const QString &briefFile, int briefLine)  override;
    void setInbodyDocumentation(const QString &d, const QString &inbodyFile, int inbodyLine) override;
 
    void setHidden(bool b) override;
-   
+
    // output generation
    void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
-                 QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
-                 bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(), 
-                 const QString &inheritId = 0);
+                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
+                  bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(),
+                  const QString &inheritId = 0);
 
-   void writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
-                 bool inGroup, bool showEnumValues = false, bool showInline = false);
+   void writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol, const QString &scopeName,
+                  QSharedPointer<Definition> container,
+                  bool inGroup, bool showEnumValues = false, bool showInline = false);
 
    void writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> container);
 
-   void writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassDef> cd, 
+   void writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassDef> cd,
                   QSharedPointer<NamespaceDef> nd, QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd);
 
    void writeTagFile(QTextStream &);
@@ -427,7 +430,7 @@ class MemberDef : public Definition
    void loadFromDisk() const;
 
  private:
-   MemberDef(const MemberDef &);  
+   MemberDef(const MemberDef &);
 
    void lock() const;
    void unlock() const;
@@ -454,8 +457,8 @@ class MemberDef : public Definition
    void _addToSearchIndex();
 
    static int s_indentLevel;
-    
-   void writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+
+   void writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool onlyText = false);
 
    // unsure if this is needed

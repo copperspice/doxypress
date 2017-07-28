@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -17,10 +17,6 @@
 
 #ifndef TYPES_H
 #define TYPES_H
-
-/** @file
- *  @brief This file contains a number of basic enums and types.
- */
 
 /** Protection level of members */
 enum Protection   { Public, Protected, Private, Package };
@@ -38,7 +34,8 @@ enum MethodTypes  { Method, Signal, Slot, DCOP, Property, Event };
 enum RelatesType  { Simple, Duplicate, MemberOf };
 
 /** Kind of member relationship */
-enum Relationship { Member, Related, Foreign };
+enum Relationship { Member, Related, Foreign, Friend };
+
 
 /** Language as given by extension */
 enum SrcLangExt {
@@ -52,11 +49,11 @@ enum SrcLangExt {
    SrcLangExt_Cpp      = 0x00200,
    SrcLangExt_JS       = 0x00400,
    SrcLangExt_Python   = 0x00800,
-   SrcLangExt_Fortran  = 0x01000,   
+   SrcLangExt_Fortran  = 0x01000,
    SrcLangExt_XML      = 0x04000,
    SrcLangExt_Tcl      = 0x08000,
-   SrcLangExt_Markdown = 0x10000, 
-   SrcLangExt_Make     = 0x20000, 
+   SrcLangExt_Markdown = 0x10000,
+   SrcLangExt_Make     = 0x20000,
    SrcLangExt_Docs     = 0x40000,
 };
 
@@ -108,7 +105,6 @@ struct Grouping {
 
    QString groupname;      // name of the group
    GroupPri_t pri;         // priority of this definition
-
 };
 
 struct ListItemInfo {
@@ -116,7 +112,7 @@ struct ListItemInfo {
    int itemId;
 };
 
-enum MemberListType {  
+enum MemberListType {
    MemberListType_detailedLists      = 0x1000,
    MemberListType_declarationLists   = 0x2000,
    MemberListType_documentationLists = 0x4000,
@@ -131,12 +127,12 @@ enum MemberListType {
    MemberListType_priStaticMethods        = 7,
 
    MemberListType_pubSignals              = 8,
-   MemberListType_proSignals              = 9,                                        
+   MemberListType_proSignals              = 9,
    MemberListType_priSignals              = 10,
    MemberListType_pubSlots                = 11,
    MemberListType_proSlots                = 12,
    MemberListType_priSlots                = 13,
-  
+
    MemberListType_pubAttribs              = 14,
    MemberListType_proAttribs              = 15,
    MemberListType_pacAttribs              = 16,
@@ -162,9 +158,9 @@ enum MemberListType {
    MemberListType_events                  = 33,
    MemberListType_friends                 = 34,
    MemberListType_related                 = 35,
-   
+
    MemberListType_dcopMethods             = 36,
-    
+
    MemberListType_typedefMembers          = 37 + MemberListType_detailedLists,
    MemberListType_enumMembers             = 38 + MemberListType_detailedLists,
    MemberListType_enumValMembers          = 39 + MemberListType_detailedLists,
@@ -189,7 +185,7 @@ enum MemberListType {
    MemberListType_decProSlotMembers       = 55 + MemberListType_declarationLists,
    MemberListType_decPriSlotMembers       = 56 + MemberListType_declarationLists,
    MemberListType_decPubSignalMembers     = 57 + MemberListType_declarationLists,
-   MemberListType_decProSignalMembers     = 58 + MemberListType_declarationLists,   
+   MemberListType_decProSignalMembers     = 58 + MemberListType_declarationLists,
    MemberListType_decPriSignalMembers     = 59 + MemberListType_declarationLists,
 
    MemberListType_decEventMembers         = 60 + MemberListType_declarationLists,
@@ -219,9 +215,9 @@ enum MemberListType {
    MemberListType_redefinedBy             = 79,
    MemberListType_enumFields              = 80,
    MemberListType_memberGroup             = 81,
-  
+
    // this one is for the detailed section on the class page
-   MemberListType_interfaceMembers        = 82 + MemberListType_detailedLists,   
+   MemberListType_interfaceMembers        = 82 + MemberListType_detailedLists,
    MemberListType_serviceMembers          = 83 + MemberListType_detailedLists,
 };
 
@@ -234,7 +230,6 @@ enum MemberType {
    MemberType_EnumValue,
    MemberType_Signal,
    MemberType_Slot,
-   MemberType_Friend,
    MemberType_DCOP,
    MemberType_Property,
    MemberType_Event,

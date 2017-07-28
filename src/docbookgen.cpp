@@ -416,45 +416,58 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
       case MemberType_Define:
          memType = "define";
          break;
+
       case MemberType_Function:
          memType = "function";
          break;
+
       case MemberType_Variable:
          memType = "variable";
          break;
+
       case MemberType_Typedef:
          memType = "typedef";
          break;
+
       case MemberType_Enumeration:
          memType = "enum";
          break;
+
       case MemberType_EnumValue:
          assert(0);
          break;
+
       case MemberType_Signal:
          memType = "signal";
          break;
+
       case MemberType_Slot:
          memType = "slot";
          break;
-      case MemberType_Friend:
-         memType = "friend";
-         break;
+
       case MemberType_DCOP:
          memType = "dcop";
          break;
+
       case MemberType_Property:
          memType = "property";
          break;
+
       case MemberType_Event:
          memType = "event";
          break;
+
       case MemberType_Interface:
          memType = "interface";
          break;
+
       case MemberType_Service:
          memType = "service";
          break;
+   }
+
+   if (md->isFriend()) {
+      memType.prepend("friend ");
    }
 
    QString scopeName;

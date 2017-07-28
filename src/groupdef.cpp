@@ -278,8 +278,9 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
    allMemberList->append(md);
 
    switch (md->memberType()) {
+
       case MemberType_Variable:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decVarMembers, md);
          }
 
@@ -287,7 +288,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_Function:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decFuncMembers, md);
          }
 
@@ -295,7 +296,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_Typedef:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decTypedefMembers, md);
          }
 
@@ -303,7 +304,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_Enumeration:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decEnumMembers, md);
          }
 
@@ -311,7 +312,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          break;
 
       case MemberType_EnumValue:
-         if (!docOnly) {
+         if (! docOnly) {
             addMemberToList(MemberListType_decEnumValMembers, md);
          }
 
@@ -373,6 +374,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          if (! docOnly) {
             addMemberToList(MemberListType_decEventMembers, md);
          }
+
          addMemberToList(MemberListType_docEventMembers, md);
          break;
 
@@ -380,21 +382,29 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          if (! docOnly) {
             addMemberToList(MemberListType_decPropMembers, md);
          }
+
          addMemberToList(MemberListType_docPropMembers, md);
          break;
 
-      case MemberType_Friend:
-         if (!docOnly) {
-            addMemberToList(MemberListType_decFriendMembers, md);
-         }
-         addMemberToList(MemberListType_docFriendMembers, md);
-         break;
-
       default:
-         err("GroupDef::insertMembers(): member `%s' (typeid=%d) with scope `%s' inserted in group scope `%s'\n",
-             qPrintable(md->name()), qPrintable(md->memberType()),
-             md->getClassDef() ? qPrintable(md->getClassDef()->name()) : "", qPrintable(name()) );
+         err("GroupDef::insertMember(): Member `%s' (typeid = %d) with scope `%s' inserted in group scope `%s'\n",
+             csPrintable(md->name()), csPrintable(md->memberType()),
+             md->getClassDef() ? csPrintable(md->getClassDef()->name()) : "", csPrintable(name()) );
    }
+
+/* broom - unclear if this will be required
+
+   if (md->isFriend()) {
+
+      if (! docOnly) {
+         addMemberToList(MemberListType_decFriendMembers, md);
+      }
+
+      addMemberToList(MemberListType_docFriendMembers, md);
+   }
+
+*/
+
    return true;
 }
 
@@ -412,11 +422,12 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
           }
       }
 
-      if ( mni->isEmpty() ) {
+      if (mni->isEmpty()) {
          allMemberNameInfoSDict->remove(md->name());
       }
 
       removeMemberFromList(MemberListType_allMembersList, md);
+
       switch (md->memberType()) {
          case MemberType_Variable:
             removeMemberFromList(MemberListType_decVarMembers, md);
@@ -483,17 +494,25 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
             removeMemberFromList(MemberListType_decEventMembers, md);
             removeMemberFromList(MemberListType_docEventMembers, md);
             break;
+
          case MemberType_Property:
             removeMemberFromList(MemberListType_decPropMembers, md);
             removeMemberFromList(MemberListType_docPropMembers, md);
             break;
-         case MemberType_Friend:
-            removeMemberFromList(MemberListType_decFriendMembers, md);
-            removeMemberFromList(MemberListType_docFriendMembers, md);
-            break;
+
          default:
             err("GroupDef::removeMember(): unexpected member remove in file\n");
       }
+
+/* broom - unclear if this will be required
+
+      if (md->isFriend()) {
+         removeMemberFromList(MemberListType_decFriendMembers, md);
+         removeMemberFromList(MemberListType_docFriendMembers, md);
+      }
+
+*/
+
    }
 }
 

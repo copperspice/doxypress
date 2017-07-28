@@ -182,10 +182,10 @@ void DocSets::finalize()
    m_nts << "    </Node>" << endl;
    m_nts << "  </TOC>" << endl;
    m_nts << "</DocSetNodes>" << endl;
-   m_nf.close(); 
+   m_nf.close();
 
    m_tts << "</Tokens>" << endl;
-   m_tf.close(); 
+   m_tf.close();
 }
 
 QString DocSets::indent()
@@ -403,29 +403,35 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
                type = "func";
             }
             break;
+
          case MemberType_Variable:
             type = "data";
             break;
+
          case MemberType_Typedef:
             type = "tdef";
             break;
+
          case MemberType_Enumeration:
             type = "enum";
             break;
+
          case MemberType_EnumValue:
             type = "econst";
             break;
-         //case MemberDef::Prototype:
-         //  type="prototype"; break;
+
+         // case MemberDef::Prototype:
+         //   type = "prototype";
+         //   break;
+
          case MemberType_Signal:
             type = "signal";
             break;
+
          case MemberType_Slot:
             type = "slot";
             break;
-         case MemberType_Friend:
-            type = "ffunc";
-            break;
+
          case MemberType_DCOP:
             type = "dcop";
             break;
@@ -437,16 +443,25 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
                type = "instp";   // instance property
             }
             break;
+
          case MemberType_Event:
             type = "event";
             break;
+
          case MemberType_Interface:
             type = "ifc";
             break;
+
          case MemberType_Service:
             type = "svc";
             break;
       }
+
+      // broom - check something
+      if (md->isFriend()) {
+         type.prepend("ffunc ");
+      }
+
       cd = md->getClassDef();
       nd = md->getNamespaceDef();
 

@@ -91,7 +91,7 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
    for ( auto md : *this ) {
       if (md->isBriefSectionVisible()) {
 
-         if (md->memberType() != MemberType_Friend && md->memberType() != MemberType_EnumValue) {
+         if (! md->isFriend() && md->memberType() != MemberType_EnumValue) {
 
             if (md->memberType() == MemberType_Function) {
                if (! md->isReimplementedBy(inheritedFrom)) {
@@ -130,6 +130,11 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
    for (auto md : *this) {
 
       if (md->isBriefSectionVisible()) {
+
+         if (md->isFriend()) {
+            m_friendCnt++;
+         }
+
          switch (md->memberType()) {
             case MemberType_Variable:    // fall through
             case MemberType_Event:       // fall through
@@ -176,11 +181,6 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
                   m_defCnt++;
                   m_numDecMembers++;
                }
-               break;
-
-            case MemberType_Friend:
-               m_friendCnt++;
-               m_numDecMembers++;
                break;
 
             default:
@@ -292,9 +292,6 @@ bool MemberList::declVisible() const
                   return true;
                }
                break;
-
-            case MemberType_Friend:
-               return true;
 
             case MemberType_EnumValue:
 
@@ -411,16 +408,6 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                md->warnIfUndocumented();
                break;
             }
-
-            case MemberType_Friend:
-               if (inheritedFrom == 0) {
-                  if (first) {
-                     ol.startMemberList();
-                     first = false;
-                  }
-                  md->writeDeclaration(ol, cd, nd, fd, gd, m_inGroup, inheritedFrom, inheritId);
-                  break;
-               }
 
             case MemberType_EnumValue: {
                if (m_inGroup) {
@@ -647,14 +634,15 @@ void MemberList::writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definit
    for (auto md : *this) {
       md->writeMemberDocSimple(ol, container);
    }
+
    ol.endMemberDocSimple();
 }
 
 // separate member pages
 void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container)
 {
-   QSharedPointer<MemberList> self = sharedFrom(this);
    static bool generateTreeView = Config::getBool("generate-treeview");
+   QSharedPointer<MemberList> self = sharedFrom(this);
 
    for (auto md : *this) {
       if (md->isDetailedSectionLinkable()) {
@@ -662,7 +650,7 @@ void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName
          QString title = md->qualifiedName();
 
          startFile(ol, diskName, md->name(), title, HLI_None, ! generateTreeView, diskName);
-         if (!generateTreeView) {
+         if (! generateTreeView) {
             container->writeNavigationPath(ol);
             ol.endQuickIndices();
          }
