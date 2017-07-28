@@ -1515,11 +1515,11 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
       f.close();
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
 
    }
 
-   Doxy_Globals::indexList.addImageFile(fName);
+   Doxy_Globals::indexList.addImageFile(fName + IMAGE_EXT);
 
    if (generateMap) {
       t << "</map>" << endl;
