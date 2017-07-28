@@ -230,6 +230,11 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalQString(s, e->m_write);
    marshalQString(s, e->m_reset);
    marshalQString(s, e->m_notify);
+   marshalQString(s, e->m_revision);
+   marshalQString(s, e->m_designable);
+   marshalQString(s, e->m_scriptable);
+   marshalQString(s, e->m_stored);
+   marshalQString(s, e->m_user);
 
    marshalQString(s, e->inside);
    marshalQString(s, e->exception);
@@ -516,6 +521,11 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->m_write          = unmarshalQString(s);
    e->m_reset          = unmarshalQString(s);
    e->m_notify         = unmarshalQString(s);
+   e->m_revision       = unmarshalQString(s);
+   e->m_designable     = unmarshalQString(s);
+   e->m_scriptable     = unmarshalQString(s);
+   e->m_stored         = unmarshalQString(s);
+   e->m_user           = unmarshalQString(s);
 
    e->inside           = unmarshalQString(s);
    e->exception        = unmarshalQString(s);
@@ -525,7 +535,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->mGrpId           = unmarshalInt(s);
 
    e->extends          = unmarshalBaseInfoList(s);
-   e->m_groups         = unmarshalGroupingList(s);   
+   e->m_groups         = unmarshalGroupingList(s);
    e->m_anchors        = unmarshalSectionInfoList(s);
 
    e->fileName         = unmarshalQString(s);
