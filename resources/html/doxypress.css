@@ -460,9 +460,10 @@ table.memberdecls {
    box-shadow: 0 0 15px cyan;
 }
 
-.mdescLeft, .mdescRight,
-.memItemLeft, .memItemRight,
-.memTemplItemLeft, .memTemplItemRight, .memTemplParams {
+.mdescLeft,        .mdescRight,
+.memItemLeft,      .memItemRight,
+.memTemplItemLeft, .memTemplItemRight,
+.memTemplParams {
    background-color: ##FA;
    border: none;
    margin: 4px;
@@ -485,7 +486,7 @@ table.memberdecls {
    white-space: nowrap;
 }
 
-.memItemRight {
+.memItemRight, .memTemplItemRight {
    width: 100%;
 }
 
