@@ -20,7 +20,7 @@
 #include <arguments.h>
 #include <marshal.h>
 
-// the argument list is documented if one of its arguments is documented 
+// the argument list is documented if one of its arguments is documented
 bool ArgumentList::hasDocumentation() const
 {
    for (auto &item : *this)  {

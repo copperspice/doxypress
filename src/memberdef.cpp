@@ -217,7 +217,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       } else {
          // no template specifier
-         cName.resize(0);
+         cName = "";
       }
    }
 
@@ -456,7 +456,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 }
 
 static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> md,
-                                   const QString &exception)
+                  const QString &exception)
 {
    // this is an ordinary exception spec - there must be a '('
 

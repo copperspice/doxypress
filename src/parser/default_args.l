@@ -456,11 +456,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
                if (arg.type.left(6) == "const ") {
                   sv = 6;
 
-               } else if (arg.type.left(9) == "volatile ") {
+               } else if (arg.type.startsWith("volatile ")) {
                   sv = 9;
 
                }
-             
+
                if (arg.type.mid(sv, 6) == "struct"   || arg.type.mid(sv, 5) == "union" ||
                      arg.type.mid(sv, 5) == "class"  || arg.type.mid(sv, 8) == "typename" ||
                      arg.type == "const" || arg.type == "volatile") {
@@ -470,35 +470,35 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
                }
 
             } else {
-               // assume only the type was specified, try to determine name later         
+               // assume only the type was specified, try to determine name later
                arg.type = removeRedundantWhiteSpace(g_curArgTypeName);
 
             }
 
             if (! arg.type.isEmpty() && arg.type.at(0) == '$')  {
                // typeless PHP name?
-            
+
                arg.name = arg.type;
                arg.type = "";
             }
-      
+
             arg.array  += removeRedundantWhiteSpace(g_curArgArray);
-           
+
             int alen = arg.array.length();
-      
+
             if (alen > 2 && arg.array.at(0) == '(' && arg.array.at(alen-1) == ')') {
                // fix-up for int *(a[10])
-      
+
                int i     = arg.array.indexOf('[') - 1;
                arg.array = arg.array.mid(1, alen - 2);
-      
+
                if (i > 0 && arg.name.isEmpty()) {
                   arg.name  = arg.array.left(i).trimmed();
                   arg.array = arg.array.mid(i);
                }
-      
+
             }
-   
+
             arg.defval = g_curArgDefValue;
             arg.docs   = g_curArgDocs.trimmed();
 
@@ -592,7 +592,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_argList.refSpecifier = RefType::LValueRef;
    }
 
-<FuncQual>"&&"                     {
+<FuncQual>"&&"                  {
       g_argList.refSpecifier = RefType::RValueRef;
    }
 
@@ -665,10 +665,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <*>("/*"[*!]|"//"[/!])("<"?)     {
    // */ (editor syntax fix)
-   g_lastDocContext=YY_START;
-   g_lastDocChar=0;
+   g_lastDocContext = YY_START;
+   g_lastDocChar    = 0;
 
-   if (yytext[1]=='/')  {
+   if (yytext[1] == '/')  {
       BEGIN( ReadDocLine );
    } else {
       BEGIN( ReadDocBlock );
@@ -692,10 +692,9 @@ static void yyunput(QChar c, char *yy_bp)
 }
 
 /*! Converts an argument string into an ArgumentList.
- *  \param[in] argsString the list of Arguments.
- *  \param[out] al a reference to resulting argument list pointer.
- *  \param[out] extraTypeChars point to string to which trailing characters
- *              for complex types are written to
+ *  \param[in]  list of Arguments.
+ *  \param[out] a reference to resulting argument list pointer.
+ *  \param[out] extraTypeChars point to string to which trailing characters for complex types are written to
  */
 
 ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &al)
@@ -736,9 +735,9 @@ ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList 
    yyrestart( yyin );
    BEGIN( Start );
    yylex();
-   
+
    extraTypeChars = g_extraTypeChars;
-   
+
    printlex(yy_flex_debug, false, __FILE__, NULL);
 
    return g_argList;

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -21,16 +21,16 @@
 #include <QByteArray>
 #include <QString>
 
-/** @brief Singleton for managing resources compiled into an executable */
+// manages resources compiled into an executable
 class ResourceMgr
 {
  public:
    /** Returns the one and only instance of this class */
    static ResourceMgr &instance();
-  
+
    /** Copies a registered resource to a given target directory under a given target name */
    bool copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const;
- 
+
    /** Gets the resource data as a QByteArray */
    QByteArray getAsString(const QString &fName) const;
 

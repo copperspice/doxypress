@@ -3388,7 +3388,7 @@ int Doxy_Work::findFunctionPtr(const QString &type, int lang, int *pLength)
    }
 }
 
-/*! Returns true iff \a type is a class within scope \a context.
+/*! Returns true if \a type is a class within scope \a context.
  *  Used to detect variable declarations that look like function prototypes.
  */
 bool Doxy_Work::isVarWithConstructor(QSharedPointer<EntryNav> rootNav)
@@ -4370,13 +4370,13 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                      // otherwise, allow a duplicate global member with the same argument list
                      if (! found && gd && gd == item->getGroupDef() && nsName == rnsName) {
-                        // member is already in the group, so we do not want to add it again
+                        // member is already in the group, do not add it again
 
                         found = true;
                      }
 
                      if (found) {
-                        // md is used after this for loop
+                        // md is used after this for() loop
                         md = item;
 
                         // merge argument lists
@@ -4384,6 +4384,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<EntryNav> rootNav)
 
                         // merge documentation
                         if (item->documentation().isEmpty() && ! root->doc.isEmpty()) {
+
                            const ArgumentList &argList = stringToArgumentList(root->args);
 
                            if (root->proto) {
@@ -6280,7 +6281,7 @@ ArgumentList Doxy_Work::substituteTemplatesInArgList(const QVector<ArgumentList>
 }
 
 /*! This function tries to find a member (in a documented class/file/namespace)
- * that corresponds to the function/variable declaration given in funcDecl.
+ * which corresponds to the function/variable declaration given in funcDecl.
  *
  * The boolean overloaded is used to specify whether or not a standard
  * overload documentation line should be generated.
@@ -6891,6 +6892,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                   }
 
                   QString fullFuncDecl = funcDecl;
+
                   if (isFunc) {
                      fullFuncDecl += argListToString(root->argList, true);
                   }
@@ -7452,6 +7454,7 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
          findMember(rootNav, root->type + " " + root->name + root->args + root->exception, false, isFunc);
       }
 
+
    } else if (root->section == Entry::OVERLOADDOC_SEC) {
       findMember(rootNav, root->name, true, isFunc);
 
@@ -7478,7 +7481,6 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<EntryNav> rootNav)
       findMember(rootNav, root->name, false, false);
 
    } else if (root->section == Entry::EXPORTED_INTERFACE_SEC || root->section == Entry::INCLUDED_SERVICE_SEC) {
-
       findMember(rootNav, root->type + " " + root->name, false, false);
 
    } else {

@@ -3473,8 +3473,9 @@ void mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool for
    }
 }
 
-static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QString &args, bool checkStatics, QSharedPointer<FileDef> currentFile,
-                  bool checkCV, const QString &forceTagFile, QList<QSharedPointer<MemberDef>> &members)
+static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QString &args, bool checkStatics,
+                  QSharedPointer<FileDef> currentFile, bool checkCV, const QString &forceTagFile,
+                  QList<QSharedPointer<MemberDef>> &members)
 {
    for (auto md : *mn) {
       QSharedPointer<FileDef> fd  = md->getFileDef();

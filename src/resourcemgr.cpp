@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2017 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -44,8 +44,8 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
 {
    QString outputName = targetDir + "/" + targetName;
 
-   QByteArray resData = getAsString(fName);     
-   
+   QByteArray resData = getAsString(fName);
+
    if (! resData.isEmpty()) {
       ResourceMgr::Type type =  ResourceMgr::Verbatim;
 
@@ -78,29 +78,29 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
          case ResourceMgr::Luminance: {
             // replace .lum with .png
 
-            // convert file, throw out any line starting with #            
+            // convert file, throw out any line starting with #
             QString data = resData;
 
-            QRegExp comment("#.*\\n"); 
+            QRegExp comment("#.*\\n");
             comment.setMinimal(true);
 
             data.replace(comment, "");
 
-            QRegExp blanks("\\s+"); 
+            QRegExp blanks("\\s+");
             QStringList dataList = data.split(blanks);
 
             int width  = dataList[0].toInt();
-            int height = dataList[1].toInt();     
+            int height = dataList[1].toInt();
 
             resData.clear();
-            
+
             for (int k = 2; k < dataList.size(); ++k) {
                resData.append(dataList[k].toInt());
-            }               
+            }
 
             //
             const uchar *p = (const uchar *)resData.constData();
-           
+
             ColoredImgDataItem images;
             images.path    = targetDir;
             images.name    = targetName;
@@ -108,7 +108,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             images.height  = height;
             images.content = p;
             images.alpha   = 0;
-          
+
             writeColoredImgData(images);
             return true;
          }
@@ -117,29 +117,28 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
          case ResourceMgr::LumAlpha: {
             // replace .luma with .png
 
-            // convert file, throw out any line starting with #            
+            // convert file, throw out any line starting with #
             QString data = resData;
-            
-            QRegExp comment("#.*\\n"); 
-            comment.setMinimal(true);
 
+            QRegExp comment("#.*\\n");
+            comment.setMinimal(true);
             data.replace(comment, "");
 
-            QRegExp blanks("\\s+"); 
+            QRegExp blanks("\\s+");
             QStringList dataList = data.split(blanks);
 
             int width  = dataList[0].toInt();
-            int height = dataList[1].toInt();         
+            int height = dataList[1].toInt();
 
             resData.clear();
-            
+
             for (int k = 2; k < dataList.size(); ++k) {
                resData.append(dataList[k].toInt());
-            }           
-            
-            //       
+            }
+
+            //
             const uchar *p = (const uchar *)resData.constData();
-          
+
             ColoredImgDataItem images;
             images.path    = targetDir;
             images.name    = targetName;
@@ -147,7 +146,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             images.height  = height;
             images.content = p;
             images.alpha   = p + (width * height);
-        
+
             writeColoredImgData(images);
             return true;
          }
@@ -157,13 +156,13 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             QFile f(outputName);
 
             if (f.open(QIODevice::WriteOnly)) {
-              
+
                QTextStream t(&f);
                QString data = replaceColorMarkers(resData);
 
                if (fName.endsWith("navtree.css")) {
                   QString temp = QString::number(Config::getInt("treeview-width")) + "px";
-                  t << substitute(data, "$width", temp);         
+                  t << substitute(data, "$width", temp);
 
                } else {
                   t << substitute(data, "$doxypressversion", versionString);
@@ -189,13 +188,12 @@ QByteArray ResourceMgr::getAsString(const QString &fName) const
 {
    QByteArray retval;
 
-   QString resourceFileName = ":/resources/" + fName; 
+   QString resourceFileName = ":/resources/" + fName;
    QFile resource(resourceFileName);
 
    if (resource.open(QIODevice::ReadOnly)) {
-      retval = resource.readAll();            
+      retval = resource.readAll();
    }
-              
+
    return retval;
 }
-
