@@ -6495,7 +6495,7 @@ case 185:
 /* rule 185 can match eol */
 YY_RULE_SETUP
 {
-      // end of argument
+      // end of fn declaration, pass to langParser as a "prototype"
       QString text = QString::fromUtf8(commentscanYYtext);
 
       if (braceCount == 0) {
@@ -6560,7 +6560,7 @@ case 191:
 /* rule 191 can match eol */
 YY_RULE_SETUP
 {
-      // end of argument
+      // end of overload declaration, pass to langParser as a "prototype"
       QString text = QString::fromUtf8(commentscanYYtext);
       if (text[0] == '\n')  {
          yyLineNr++;

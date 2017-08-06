@@ -440,7 +440,7 @@ static bool checkForKnRstyleC()
       }
    }
 
-  return true;
+   return true;
 }
 
 static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
@@ -6191,28 +6191,28 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncQual>{BN}*"const"{BN}*         {
       // const member function
-      lineCount() ;
+      lineCount();
       current->args += " const ";
       current->argList.constSpecifier = true;
    }
 
 <FuncQual>{BN}*"volatile"{BN}*      {
       // volatile member function
-      lineCount() ;
+      lineCount();
       current->args += " volatile ";
       current->argList.volatileSpecifier = true;
    }
 
 <FuncQual>{BN}*"noexcept"{BN}*      {
       // noexcept qualifier
-      lineCount() ;
+      lineCount();
       current->args += " noexcept ";
       current->m_traits.setTrait(Entry::Virtue::NoExcept);
    }
 
 <FuncQual>{BN}*"noexcept"{BN}*"("      {
       // noexcept expression
-      lineCount() ;
+      lineCount();
       current->args += " noexcept(";
       current->m_traits.setTrait(Entry::Virtue::NoExcept);
       lastRoundContext = FuncQual;
@@ -6585,7 +6585,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          }
 
       } else  {
-         // a global function prototype or function variable
+         // a global function or function variable
 
          if (! current->type.isEmpty() && (re.indexIn(current->type, 0) !=-1 || current->type.left(8) == "typedef ")) {
 
@@ -8586,17 +8586,20 @@ SkipC11Attribute>"]]"                 {
 
 <Prototype>"("                 {
       QString text = QString::fromUtf8(yytext);
+
       current->args += text[0];
-      currentArgumentContext = PrototypeQual;
       fullArgString = current->args;
       copyArgString = &current->args;
+
+      currentArgumentContext = PrototypeQual;
       BEGIN( ReadFuncArgType );
    }
 
 <Prototype>"("({ID}"::")*({B}*[&*])+   {
       QString text = QString::fromUtf8(yytext);
+
       current->type += current->name + text;
-      current->name.resize(0);
+      current->name = "";
       BEGIN( PrototypePtr );
    }
 
@@ -8607,10 +8610,12 @@ SkipC11Attribute>"]]"                 {
 
 <PrototypePtr>"("          {
       QString text = QString::fromUtf8(yytext);
+
       current->args += text[0];
-      currentArgumentContext = PrototypeQual;
       fullArgString = current->args;
       copyArgString = &current->args;
+
+      currentArgumentContext = PrototypeQual;
       BEGIN( ReadFuncArgType );
    }
 
@@ -8636,6 +8641,16 @@ SkipC11Attribute>"]]"                 {
 <PrototypeQual>{B}*"volatile"{B}*   {
       current->args += " volatile ";
       current->argList.volatileSpecifier = true;
+   }
+
+<PrototypeQual>{B}*"&"{B}*          {
+      current->args += " &";
+      current->argList.refSpecifier = RefType::LValueRef;
+   }
+
+<PrototypeQual>{B}*"&&"{B}*         {
+      current->args += " &&";
+      current->argList.refSpecifier = RefType::RValueRef;
    }
 
 <PrototypeQual>{B}*"="{B}*"0"{B}*   {

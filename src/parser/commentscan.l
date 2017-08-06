@@ -2608,7 +2608,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ----- handle argument of fn command ------- */
 
 <FnParam>{DOCNL}        {
-      // end of argument
+      // end of fn declaration, pass to langParser as a "prototype"
       QString text = QString::fromUtf8(yytext);
 
       if (braceCount == 0) {
@@ -2661,7 +2661,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ----- handle argument of overload command ------- */
 
 <OverloadParam>{DOCNL}        {
-      // end of argument
+      // end of overload declaration, pass to langParser as a "prototype"
       QString text = QString::fromUtf8(yytext);
       if (text[0] == '\n')  {
          yyLineNr++;
