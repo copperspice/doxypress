@@ -2042,7 +2042,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    ti << "  </compound>" << endl;
 }
 
-void generateXML()
+void generateXML_output()
 {
    // + classes
    // + namespaces

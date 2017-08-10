@@ -1751,7 +1751,7 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
    }
 }
 
-void generateDocbook()
+void generateDocbook_output()
 {
    // + classes
    // + namespaces

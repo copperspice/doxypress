@@ -3202,7 +3202,7 @@ void PerlModGenerator::generate()
    }
 }
 
-void generatePerlMod()
+void generatePerl_output()
 {
    PerlModGenerator pmg(Config::getBool("perl-pretty"));
    pmg.generate();

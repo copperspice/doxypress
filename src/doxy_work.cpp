@@ -883,7 +883,7 @@ void processFiles()
 
 void generateOutput()
 {
-   // Initialize output generators
+   // initialize output generators
    printf("\n**  Generate Documentation Output\n");
 
    if (Doxy_Globals::dumpGlossary) {
@@ -897,24 +897,29 @@ void generateOutput()
 
    initSearchIndexer();
 
-   bool generateHtml  = Config::getBool("generate-html");
-   bool generateLatex = Config::getBool("generate-latex");
-   bool generateMan   = Config::getBool("generate-man");
-   bool generateRtf   = Config::getBool("generate-rtf");
+   const bool generateHtml     = Config::getBool("generate-html");
+   const bool generateDocbook  = Config::getBool("generate-docbook");
+   const bool generateLatex    = Config::getBool("generate-latex");
+   const bool generatePerl     = Config::getBool("generate-perl");
+   const bool generateMan      = Config::getBool("generate-man");
+   const bool generateRtf      = Config::getBool("generate-rtf");
+   const bool generateXml      = Config::getBool("generate-xml");
 
-   static const QString htmlOutput  = Config::getString("html-output");
-   static const QString latexOutput = Config::getString("latex-output");
+   const QString htmlOutput    = Config::getString("html-output");
+   const QString latexOutput   = Config::getString("latex-output");
+
+   // only used when HTML is enabled
+   const bool generateHtmlHelp     = Config::getBool("generate-chm");
+   const bool generateEclipseHelp  = Config::getBool("generate-eclipse");
+   const bool generateQhp          = Config::getBool("generate-qthelp");
+   const bool generateTreeView     = Config::getBool("generate-treeview");
+   const bool generateDocSet       = Config::getBool("generate-docset");
 
    if (generateHtml) {
+      Doxy_Globals::infoLog_Stat.begin("Enable HTML output\n");
+
       Doxy_Globals::outputList.add(QMakeShared<HtmlGenerator>());
       HtmlGenerator::init();
-
-      // add HTML indexers that are enabled
-      bool generateHtmlHelp     = Config::getBool("generate-chm");
-      bool generateEclipseHelp  = Config::getBool("generate-eclipse");
-      bool generateQhp          = Config::getBool("generate-qthelp");
-      bool generateTreeView     = Config::getBool("generate-treeview");
-      bool generateDocSet       = Config::getBool("generate-docset");
 
       if (generateEclipseHelp) {
          Doxy_Globals::indexList.addIndex(QSharedPointer<EclipseHelp>(new EclipseHelp));
@@ -940,23 +945,40 @@ void generateOutput()
       HtmlGenerator::writeTabData();
    }
 
+   if (generateDocbook) {
+      Doxy_Globals::infoLog_Stat.begin("Enable Docbook output\n");
+   }
+
    if (generateLatex) {
+      Doxy_Globals::infoLog_Stat.begin("Enable Latex output\n");
+
       Doxy_Globals::outputList.add(QMakeShared<LatexGenerator>());
       LatexGenerator::init();
    }
 
    if (generateMan) {
+      Doxy_Globals::infoLog_Stat.begin("Enable Man output\n");
+
       Doxy_Globals::outputList.add(QMakeShared<ManGenerator>());
       ManGenerator::init();
    }
 
-   if (generateRtf) {
-      static QString rtfOutput = Config::getString("rtf-output");
+   if (generatePerl) {
+      Doxy_Globals::infoLog_Stat.begin("Enable Perl output\n");
+   }
 
+   if (generateRtf) {
+      Doxy_Globals::infoLog_Stat.begin("Enable RTF output\n");
+
+      static QString rtfOutput = Config::getString("rtf-output");
       Doxy_Globals::outputList.add(QMakeShared<RTFGenerator>());
       RTFGenerator::init();
 
       copyLogo(rtfOutput);
+   }
+
+   if (generateXml) {
+      Doxy_Globals::infoLog_Stat.begin("Enable XML output\n");
    }
 
    if (Config::getBool("use-htags")) {
@@ -1094,25 +1116,25 @@ void generateOutput()
       }
    }
 
-   if (Config::getBool("generate-xml")) {
+   if (generateXml) {
       Doxy_Globals::infoLog_Stat.begin("Generating XML output\n");
 
       Doxy_Globals::generatingXmlOutput = true;
-      generateXML();
+      generateXML_output();
       Doxy_Globals::generatingXmlOutput = false;
 
       Doxy_Globals::infoLog_Stat.end();
    }
 
-   if (Config::getBool("generate-docbook")) {
+   if (generateDocbook) {
       Doxy_Globals::infoLog_Stat.begin("Generating Docbook output\n");
-      generateDocbook();
+      generateDocbook_output();
       Doxy_Globals::infoLog_Stat.end();
    }
 
-   if (Config::getBool("generate-perl")) {
-      Doxy_Globals::infoLog_Stat.begin("Generating Perl module output\n");
-      generatePerlMod();
+   if (generatePerl) {
+      Doxy_Globals::infoLog_Stat.begin("Generating Perl output\n");
+      generatePerl_output();
       Doxy_Globals::infoLog_Stat.end();
    }
 
@@ -1182,7 +1204,7 @@ void generateOutput()
       Doxy_Globals::infoLog_Stat.end();
    }
 
-   if (generateHtml && Config::getBool("generate-chm") && ! Config::getString("hhc-location").isEmpty()) {
+   if (generateHtml && generateHtmlHelp && ! Config::getString("hhc-location").isEmpty()) {
 
       Doxy_Globals::infoLog_Stat.begin("Running html help compiler\n");
       QString oldDir = QDir::currentPath();
@@ -1202,7 +1224,7 @@ void generateOutput()
       Doxy_Globals::infoLog_Stat.end();
    }
 
-   if ( generateHtml && Config::getBool("generate-qthelp") && ! Config::getString("qthelp-gen-path").isEmpty()) {
+   if ( generateHtml && generateQhp && ! Config::getString("qthelp-gen-path").isEmpty()) {
       Doxy_Globals::infoLog_Stat.begin("Running QtHelp generator\n");
 
       QString qhpFileName = Qhp::getQhpFileName();
