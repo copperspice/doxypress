@@ -93,7 +93,7 @@ deploy : all
 	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%$(csver).dll,$(cslibs))  $(deploydir)
 
 	rsync -W -a --modify-window=2  $(clang_dll)        $(deploydir)
-	rsync -W -a --modify-window=2  $(clang_hdr)/3.7.1  $(deploydir)/include/
+	rsync -W -a --modify-window=2  $(clang_hdr)/3.8.1  $(deploydir)/include/
 endif
 
 # search path for source
@@ -103,7 +103,7 @@ VPATH = ../
 doxypress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%$(csver),$(cslibs)) $(clang_link)
 
 if OSTYPE_WIN
-   doxypress_LDFLAGS+= -lole32
+   doxypress_LDFLAGS+= -lole32 -luuid
 endif
 
 doxypress_SOURCES = \

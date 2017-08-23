@@ -29,7 +29,7 @@ if(WIN32)
    set(CLANG_LIBS ${CLANG_PATH}/bin/libclang.dll)
 
    # lib clang hdr
-   set(CLANG_INC ${CLANG_PATH}/include/3.7.1)
+   set(CLANG_INC ${CLANG_PATH}/include/3.8.1)
 
    set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
    include(${CopperSpice_DIR}/InstallMinGW.cmake)
@@ -82,7 +82,7 @@ include(CPack)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_INCLUDE_DIRECTORIES_BEFORE ON)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 14)
 
 if(APPLE)
     set(CMAKE_EXE_LINKER_FLAGS    "${CMAKE_EXE_LINKER_FLAGS}    -Wl,-undefined,error")

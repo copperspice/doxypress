@@ -23,9 +23,9 @@ AC_PROG_CC_C99
 AC_PROG_CC_C_O
 AC_PROG_CXX
 
-# set flags for c+11
+# set flags for c++14
 AC_LANG([C++])
-AX_CXX_COMPILE_STDCXX_11([noext])
+AX_CXX_COMPILE_STDCXX(14,[noext])
 
 case "$target" in
 *-*-mingw*)
