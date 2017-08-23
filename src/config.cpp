@@ -229,11 +229,9 @@ bool Config::preVerify()
       }
    }
 
-   // ** temporary
+   // ** currently not used
    if (Config::getBool("clang-parsing")) {
-
-      errNoPrefixAll("\n");
-      warnAll("Clang parsing is currently under development, some aspects may not be enabled\n");
+      // errNoPrefixAll("\n");
    }
 
    return isOk;
