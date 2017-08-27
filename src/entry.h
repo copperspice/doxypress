@@ -55,14 +55,14 @@ struct TagInfo {
    QString anchor;
 
    bool isEmpty() const {
-      if (tagName.isEmpty() &&  fileName.isEmpty() && anchor.isEmpty()) {
+      if (tagName.isEmpty() && fileName.isEmpty() && anchor.isEmpty()) {
          return true;
       } else {
          return false;
       }
    }
 
-   bool clear() {
+   void clear() {
       tagName  = "";
       fileName = "";
       anchor   = "";

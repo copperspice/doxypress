@@ -150,67 +150,73 @@ void Entry::reset()
    static const bool dotCallGraph = Config::getBool("dot-call");
    static const bool dotCalledBy  = Config::getBool("dot-called-by");
 
-   name.resize(0);
-   type.resize(0);
-   args.resize(0);
-   bitfields.resize(0);
-   exception.resize(0);
-   m_program.resize(0);
-   includeFile.resize(0);
-   includeName.resize(0);
-   doc.resize(0);
-   docFile.resize(0);
-   docLine = -1;
-   relates.resize(0);
-   relatesType = Simple;
-   brief.resize(0);
-   briefFile.resize(0);
-   briefLine = -1;
-   inbodyDocs.resize(0);
-   inbodyFile.resize(0);
-   inbodyLine = -1;
-   inside.resize(0);
-   fileName.resize(0);
-   initializer.resize(0);
+   m_tagInfoEntry.clear();
+   argList.clear();
+   typeConstr.clear();
 
-   initLines = -1;
-   startLine = 1;
-   startColumn = 1;
-   bodyLine = -1;
-   endBodyLine = -1;
-   mGrpId = -1;
+   relatesType  = Simple;
+   virt         = Normal;
+   protection   = Public;
+   mtype        = Method;
+   groupDocType = GROUPDOC_NORMAL;
+   lang         = SrcLangExt_Unknown;
+
+   m_traits.clear();
+
+   section = Entry::EMPTY_SEC;
+   initLines    = -1;
+   docLine      = -1;
+
+   briefLine    = -1;
+   inbodyLine   = -1;
+   bodyLine     = -1;
+   endBodyLine  = -1;
+   mGrpId       = -1;
+
+   startLine    = 1;
+   startColumn  = 1;
+
+   stat             = false;
+   explicitExternal = false;
+   proto            = false;
+   subGrouping      = true;
 
    callGraph   = dotCallGraph;
    callerGraph = dotCalledBy;
 
-   section = Entry::EMPTY_SEC;
-   mtype   = Method;
-   virt    = Normal;
-   stat    = false;
-   proto   = false;
-   explicitExternal = false;
+   type         = "";
+   name         = "";
+   args         = "";
+   bitfields    = "";
+   m_program    = "";
+   initializer  = "";
+   includeFile  = "";
+   includeName  = "";
+   doc          = "";
+   docFile      = "";
+   brief        = "";
+   briefFile    = "";
+   inbodyDocs   = "";
+   inbodyFile   = "";
+   relates      = "";
 
-   m_traits.clear();
+   // missing m_read, m_write, etc
 
-   lang         = SrcLangExt_Unknown;
+   inside       = "";
+   exception    = "";
+   fileName     = "";
+   id           = "";
+
    hidden       = false;
    artificial   = false;
-   subGrouping  = true;
-   protection   = Public;
-   groupDocType = GROUPDOC_NORMAL;
-
-   id.resize(0);
-
-   m_sublist.clear();
-   argList.clear();
-   m_tagInfoEntry.clear();
-   typeConstr.clear();
 
    m_templateArgLists.clear();
    extends.clear();
    m_groups.clear();
    m_anchors.clear();
    m_specialLists.clear();
+
+   m_sublist.clear();
 }
 
 int Entry::getSize()
