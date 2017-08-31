@@ -19,6 +19,9 @@ AM_CXXFLAGS+=-I../src
 if OSTYPE_LINUX
 endif
 
+if OSTYPE_BSD
+endif
+
 if OSTYPE_DARWIN
 endif
 
@@ -71,6 +74,15 @@ bin_PROGRAMS = doxypress
 .PHONY: deploy
 
 if OSTYPE_LINUX
+deploy : all
+	mkdir -p $(deploydir)
+
+	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
+
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%$(csver).so*,$(cslibs)) $(deploydir)
+endif
+
+if OSTYPE_BSD
 deploy : all
 	mkdir -p $(deploydir)
 
