@@ -389,13 +389,14 @@
         "project-brief": "",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test - Lib Tooling",
-        "project-version": "1.2.7 clang (March 7)"
+        "project-version": "1.2.11 clang"
     },
     "source": {
         "clang-flags": [
             "-c",
-            "--std=c++11",
-            "-Iz:/doxypress/clang_lib/include/3.7.1/include"
+            "--std=c++14",
+            "-Iz:/doxypress/clang_lib/include/3.8.1/include",
+            "-Wno-ignored-attributes"
         ],
         "clang-parsing": true,
         "inline-source": false,

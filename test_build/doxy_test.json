@@ -237,7 +237,7 @@
         "chm-file": "",
         "chm-index-encoding": "",
         "generate-chi": false,
-        "generate-chm": false,
+        "generate-chm": true,
         "hhc-location": "",
         "toc-expanded": false
     },
@@ -399,7 +399,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.10"
+        "project-version": "1.2.11"
     },
     "source": {
         "clang-flags": [
