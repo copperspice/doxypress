@@ -39,7 +39,7 @@ endif()
 
 set(BUILD_MAJOR "1")
 set(BUILD_MINOR "2")
-set(BUILD_MICRO "10")
+set(BUILD_MICRO "11")
 set(BUILD_COMPONENTS "DOXYPRESS")
 
 set(PACKAGE "doxypress")
