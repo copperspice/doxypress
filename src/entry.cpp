@@ -28,12 +28,8 @@
 #include <section.h>
 #include <util.h>
 
-int Entry::m_EntryCount = 0;
-
 Entry::Entry()
 {
-   m_EntryCount++;
-
    m_parent.clear();
 
    section      = Entry::EMPTY_SEC;
@@ -47,8 +43,6 @@ Entry::Entry()
 
 Entry::Entry(const Entry &e)
 {
-   m_EntryCount++;
-
    section          = e.section;
    type             = e.type;
    name             = e.name;
@@ -132,7 +126,6 @@ Entry::Entry(const Entry &e)
 
 Entry::~Entry()
 {
-   m_EntryCount--;
 }
 
 void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> self)
@@ -219,10 +212,6 @@ void Entry::reset()
    m_sublist.clear();
 }
 
-int Entry::getSize()
-{
-   return sizeof(Entry);
-}
 
 void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage,
                   QSharedPointer<FileDef> fd, QSharedPointer<Entry> self)

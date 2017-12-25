@@ -262,10 +262,8 @@ class Entry
 
    Entry();
    Entry(const Entry &);
-   ~Entry();
 
-   // Returns the static size of the Entry (so excluding any dynamic memory)
-   int getSize();
+   ~Entry();
 
    void addSpecialListItem(const QString &listName, int index);
    void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage, QSharedPointer<FileDef> fd,
@@ -307,8 +305,6 @@ class Entry
    SrcLangExt   lang;              // programming language in which this entry was found
 
    Traits m_traits;
-
-   static int m_EntryCount;        // counts the total number of entries
 
    int  section;                   // entry type (see Sections);
    int  initLines;                 // define/variable initializer lines to show
