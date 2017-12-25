@@ -592,11 +592,9 @@ class MemberDefImpl
    QString decl;            // member declaration in class
    QString bitfields;       // struct member bitfields
 
-   // properties
+   // copperspice properties
    QString m_read;
    QString m_write;
-
-   // copperspice - additional properties
    QString m_reset;
    QString m_notify;
 

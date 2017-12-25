@@ -44,9 +44,9 @@ static QSharedPointer<Entry>   g_current;
 static QString  g_fileName;
 static int      g_lineNr;
 
-// In case a markdown page starts with a level1 header, that header is used as a title of
-// of the page, in effect making it a level0 header. So the level of all other sections
-// will need to be corrected. This flag is true if corrections are needed.
+// If a markdown page starts with a level1 header, that header is used as a title of the page.
+// This makes it a level0 header. So the level of all other sections will need to be corrected.
+// This flag is true if corrections are needed.
 // static bool g_correctSectionLevel;
 
 const int codeBlockIndent = 4;
@@ -100,7 +100,7 @@ static bool extraChar(const QChar &text)
 {
    bool retval = false;
 
-   if (text == '-' || text == '+' || text == '!' || text == '?' || text == '$' || 
+   if (text == '-' || text == '+' || text == '!' || text == '?' || text == '$' ||
        text == '@' || text == '&' || text == '*' || text == '%') {
 
       retval = true;
@@ -1016,7 +1016,7 @@ static int processLink(QString &out, const QString &data, int, int size)
 
       if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(&Doxy_Globals::imageNameDict, link, ambig))) {
          // assume DoxyPress symbol link or local image link
-      
+
          out += "@image html ";
          out += link.mid(fd ? 0 : 5);
 
@@ -2839,7 +2839,7 @@ QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointe
 
 QString markdownFileNameToId(const QString &fileName)
 {
-   QString baseFn  = stripFromPath(QFileInfo(fileName).absoluteFilePath());
+   QString baseFn = stripFromPath(QFileInfo(fileName).absoluteFilePath());
 
    int i = baseFn.lastIndexOf('.');
    if (i != -1) {
@@ -2852,22 +2852,23 @@ QString markdownFileNameToId(const QString &fileName)
 }
 
 void MarkdownFileParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
-                                    enum ParserMode mode, QStringList &includedFiles, bool useClang)
+                  enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    QSharedPointer<Entry> current = QMakeShared<Entry>();
+
+   static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
 
    current->lang = SrcLangExt_Markdown;
    current->fileName = fileName;
    current->docFile  = fileName;
    current->docLine  = 1;
 
-   QString docs = fileBuf;
    QString id;
+   QString docs    = fileBuf;
    QString title   = extractPageTitle(docs, id).trimmed();
+
    QString titleFn = QFileInfo(fileName).baseName();
    QString fn      = QFileInfo(fileName).fileName();
-
-   static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
 
    if (id.isEmpty()) {
       id = markdownFileNameToId(fileName);
@@ -2878,7 +2879,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
       if (! mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage ||
                   QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) )  {
 
-          // name reference, file reference with path
+         // tag option set to use md file as mainpage
          docs.prepend("@mainpage " + title + "\n");
 
       } else if (id == "mainpage" || id == "index") {
@@ -2902,7 +2903,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    int lineNr   = 1;
    int position = 0;
 
-   // even without markdown support enabled, we still parse markdown files as such
+   // even without markdown support enabled, still parse an md file as markdown
    bool markdownEnabled = Doxy_Globals::markdownSupport;
    Doxy_Globals::markdownSupport = true;
 
@@ -2910,12 +2911,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    Protection prot = Public;
 
    while (parseCommentBlock(this, current, docs, fileName,lineNr,
-             false,     // isBrief
-             false,     // javadoc autobrief
-             false,     // inBodyDocs
-             prot,      // protection
-             position,
-             needsEntry)) {
+             false, false, false, prot, position, needsEntry)) {
 
       if (needsEntry) {
          QString docFile = current->docFile;
@@ -2936,10 +2932,11 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    Doxy_Globals::markdownSupport = markdownEnabled;
 }
 
-void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
-                                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
-                                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
-                                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
+void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
+                  const QString &input, SrcLangExt lang, bool isExampleBlock, const QString &exampleName,
+                  QSharedPointer<FileDef> fileDef, int startLine, int endLine, bool inlineFragment,
+                  QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
+                  bool collectXRefs )
 {
    ParserInterface *pIntf = Doxy_Globals::parserManager.getParser("*.cpp");
 

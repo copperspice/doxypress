@@ -36,23 +36,18 @@ class StorageIntf;
 
 struct ListItemInfo;
 
-// this class stores information about an inheritance relation
+// stores information about an inheritance relationship
 struct BaseInfo {
-   /* Creates an object representing an inheritance relation */
-
    BaseInfo(const QString &n, Protection p, Specifier v)
       : name(n), prot(p), virt(v) {}
 
-   QString    name;      // the name of the base class
+   QString    name;      // name of the base class
    Protection prot;      // inheritance type
-   Specifier  virt;      //  virtualness
+   Specifier  virt;      // virtualness
 };
 
-// used to capture the tag file information for an entry
+// store information about the tag file for an entry
 struct TagInfo {
-   QString tagName;
-   QString fileName;
-   QString anchor;
 
    bool isEmpty() const {
       if (tagName.isEmpty() && fileName.isEmpty() && anchor.isEmpty()) {
@@ -67,17 +62,18 @@ struct TagInfo {
       fileName = "";
       anchor   = "";
    }
+
+   QString tagName;
+   QString fileName;
+   QString anchor;
 };
 
-/** Represents some information, about an entity found in the source.
- *
- *  parseMain() will generate a tree of these entries.
- */
+// stores information about an entity found in the source code
 class Entry
 {
  public:
 
-   // supported entries
+   // supported entry types
    enum Sections {
       CLASS_SEC        = 0x00000001,
       NAMESPACE_SEC    = 0x00000010,
@@ -217,7 +213,7 @@ class Entry
       LastVirtue = Published
    };
 
-   // kind of group
+   // group types for docs
    enum GroupDocType {
       GROUPDOC_NORMAL,        // def group
       GROUPDOC_ADD,           // add group
@@ -275,30 +271,27 @@ class Entry
    void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage, QSharedPointer<FileDef> fd,
                               QSharedPointer<Entry> self);
 
-   // while parsing a file these function can be used to navigate/build the tree
    void setParent(QSharedPointer<Entry> parent) {
       m_parent = parent;
    }
 
-   // Returns the parent for this Entry or null_ptr if this entry has no parent
+   // returns the parent for this Entry or null_ptr if this entry has no parent
    QSharedPointer<Entry> parent() const {
       return m_parent.toStrongRef();
    }
 
-   /*! Returns the list of children for this Entry
-    *  @see addSubEntry() and removeSubEntry()
-    */
+   // returns the list of children for this Entry
    const QVector<QSharedPointer<Entry>> &children() const {
       return m_sublist;
    }
 
-   // Adds entry e as a child to this entry /
+   // adds entry e as a child to this entry
    void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self);
 
-   // Removes entry \a e from the list of children
+   // Removes entry e from the list of children
    void removeSubEntry(QSharedPointer<Entry> e);
 
-   // Restore the state of this Entry to the default value it has at construction time.
+   // restore the state of this Entry to the default value when constructed
    void reset();
 
  public:

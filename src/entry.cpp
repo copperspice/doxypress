@@ -181,8 +181,8 @@ void Entry::reset()
    proto            = false;
    subGrouping      = true;
 
-   callGraph   = dotCallGraph;
-   callerGraph = dotCalledBy;
+   callGraph    = dotCallGraph;
+   callerGraph  = dotCalledBy;
 
    type         = "";
    name         = "";
