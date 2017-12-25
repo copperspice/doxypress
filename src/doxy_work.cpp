@@ -6749,7 +6749,7 @@ void Doxy_Work::findMember(QSharedPointer<EntryNav> rootNav, QString funcDecl, b
                            funcType = substitute(funcType, className + "::", "");
                         }
 
-                        if (memType != funcType) {
+                        if (memType != funcType && memType != "auto" && funcType != "auto") {
                            warn(root->fileName, root->startLine, "Return types do not agree for member: %s\n"
                                 "   return type: %s   return type: %s\n",
                                 csPrintable(funcName), csPrintable(memType), csPrintable(funcType) );
