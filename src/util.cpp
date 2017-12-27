@@ -328,28 +328,26 @@ static QString stripFromPath(const QString &path, const QStringList &list)
    return retval;
 }
 
-/*! strip part of \a path if it matches
- *  one of the paths in the Config::getList("strip-from-path") list
- */
 QString stripFromPath(const QString &path)
 {
-   return stripFromPath(path, Config::getList("strip-from-path"));
+   // strip part of path if it matches one of the paths in the Config::getList("strip-from-path") list
+   static const QStringList strip = Config::getList("strip-from-path");
+   return stripFromPath(path, strip);
 }
 
-/*! strip part of \a path if it matches
- *  one of the paths in the Config::getList("include-path") list
- */
 QString stripFromIncludePath(const QString &path)
 {
-   return stripFromPath(path, Config::getList("strip-from-inc-path"));
+   // strip part of path if it matches one of the paths in the Config::getList("include-path") list
+   static const QStringList strip = Config::getList("strip-inc-path");
+   return stripFromPath(path, strip);
 }
 
-/*! check if \a fname is a source or a header file name by looking at the extension
- */
 int determineSection(const QString &fname)
 {
    static const QStringList suffixSource = Config::getList("suffix-source-navtree");
    static const QStringList suffixHeader = Config::getList("suffix-header-navtree");
+
+   // check if  fname is a source or a header file name by looking at the extension
 
    QFileInfo fi(fname);
    QString suffix = fi.suffix().toLower();
@@ -4650,13 +4648,23 @@ bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl)
 
 QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnderscore)
 {
-   static const bool caseSenseNames    = Config::getBool("case-sensitive-fname");
-   static const bool allowUnicodeNames = Config::getBool("allow-unicode-names");
+   static const bool allowUpperCaseNames = Config::getBool("case-sensitive-fname");
+   static const bool allowUnicodeNames   = Config::getBool("allow-unicode-names");
 
    QString retval;
 
    const QChar *p = name.constData();
    QChar c;
+
+   bool isFirstUpper = true;
+   static QHash<QString, QString> usedNames;         // name, modified name
+   static QHash<QString, int> mangleCnt;             // modified name, cnt
+
+   auto iter1 = usedNames.find(name);
+
+   if (iter1 != usedNames.end()) {
+      return iter1.value();
+   }
 
    while ((c = *p++) != 0) {
 
@@ -4781,24 +4789,55 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
                   retval += tmp;
                }
 
-            } else if (caseSenseNames || ! c.isUpper()) {
+            } else if (allowUpperCaseNames) {
                retval += c;
 
             } else {
-               retval += '_';
-               retval += c.toLower();
+
+               if (c.isUpper()) {
+
+                  if (isFirstUpper)  {
+                     retval += '_';
+                     isFirstUpper = false;
+                  }
+
+                  retval += c.toLower();
+
+               } else {
+                  retval += c;
+               }
             }
+
             break;
       }
    }
 
+   auto iter2 = mangleCnt.find(retval);
+
+   if (iter2 != mangleCnt.end()) {
+      int mangle = iter2.value() + 1;
+
+      QString tmp = QString("_%1").arg(mangle);
+      retval += tmp;
+
+      iter2.value() = mangle;
+
+printf("\n\n\n  BROOM  - we found one  %s", csPrintable(retval) );
+
+
+   } else {
+      // not found
+      mangleCnt.insert(retval, 0);
+   }
+
+   usedNames.insert(name, retval);
+
    return retval;
 }
 
-/*! This function determines the file name on disk of an item
- *  given its name, which could be a class name with template
- *  arguments, so special characters need to be escaped.
- */
+// determines the file name on disk of an item given its name, could be a class name with template arguments
+// so special characters need to be escaped
+
 QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnderscore)
 {
    static const bool shortNames    = Config::getBool("short-names");
