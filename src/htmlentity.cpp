@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -18,13 +18,13 @@
 #include <htmlentity.h>
 #include <message.h>
 
-//! number of commands mapped as if it were HTML entities
+// number of commands mapped as if it were HTML entities
 static const int g_numberHtmlMappedCmds = 11;
 
-//! @brief Structure defining all HTML4 entities, DoxyPress extensions and commands representing special symbols.
-//! @details In case an entity does not exist a NULL is given for the entity. The first column contains the symbolic code
-//!          for the entity, see also doxparser.h The second column contains the name of the enitity (without the starting \& and
-//!          ending ;)
+// Structure defining all HTML4 entities, DoxyPress extensions and commands representing special symbols.
+// In case an entity does not exist a NULL is given for the entity. The first column contains the symbolic code
+// for the entity, see also doxparser.h, the second column contains the name of the entity
+// (without the starting \& and ending ;)
 
 struct htmlEntityInfo {
    DocSymbol::SymType symb;
@@ -42,7 +42,7 @@ struct htmlEntityInfo {
 };
 
 
-#undef SYM 
+#undef SYM
 #define SYM(s)    DocSymbol::Sym_##s,"&"#s";"
 
 static struct htmlEntityInfo g_htmlEntities[] = {
@@ -330,7 +330,7 @@ static const int g_numHtmlEntities = (int)(sizeof(g_htmlEntities) / sizeof(*g_ht
 HtmlEntityMapper *HtmlEntityMapper::s_instance = 0;
 
 HtmlEntityMapper::HtmlEntityMapper()
-{ 
+{
    for (int i = 0; i < g_numHtmlEntities; i++) {
       m_name2sym.insert(g_htmlEntities[i].item, g_htmlEntities[i].symb);
    }
@@ -372,7 +372,7 @@ QString HtmlEntityMapper::utf8(DocSymbol::SymType symb, bool useInPrintf) const
 {
    if (useInPrintf && symb == DocSymbol::Sym_Percent) {
       // escape for printf
-      return "%%"; 
+      return "%%";
 
    } else {
       return g_htmlEntities[symb].utf8;
@@ -391,7 +391,7 @@ QString HtmlEntityMapper::html(DocSymbol::SymType symb, bool useInPrintf) const
 {
    if (useInPrintf && symb == DocSymbol::Sym_Percent) {
       // escape for printf
-      return "%%"; 
+      return "%%";
 
    } else {
       return g_htmlEntities[symb].html;
@@ -474,14 +474,14 @@ const DocSymbol::PerlSymb *HtmlEntityMapper::perl(DocSymbol::SymType symb) const
 DocSymbol::SymType HtmlEntityMapper::name2sym(const QString &symName) const
 {
    auto item = m_name2sym.find(symName);
-  
+
    if (item == m_name2sym.end()) {
       return DocSymbol::Sym_Unknown;
 
-   } else {   
+   } else {
       return ((DocSymbol::SymType) item.value());
 
-   }   
+   }
 }
 
 void HtmlEntityMapper::writeXMLSchema(QTextStream &t)

@@ -1075,22 +1075,26 @@ void MemberDef::computeLinkableInProject() const
    }
 
    if (name().isEmpty() || name().at(0) == '@') {
-      m_isLinkableCached = 1; // not a valid or a dummy name
+      // not a valid or a dummy name
+      m_isLinkableCached = 1;
       return;
    }
 
    if (! hasDocumentation() || isReference()) {
-      m_isLinkableCached = 1; // no documentation
+      // no documentation
+      m_isLinkableCached = 1;
       return;
    }
 
    if (m_impl->group && !m_impl->group->isLinkableInProject()) {
-      m_isLinkableCached = 1; // group but group not linkable
+      // group but group not linkable
+      m_isLinkableCached = 1;
       return;
    }
 
    if (! m_impl->group && m_impl->classDef && ! m_impl->classDef->isLinkableInProject()) {
-      m_isLinkableCached = 1; // in class but class not linkable
+      // in class but class not linkable
+      m_isLinkableCached = 1;
       return;
    }
 
@@ -3508,7 +3512,7 @@ void MemberDef::warnIfUndocumentedParams()
    static const bool warnUndoc      = Config::getBool("warn-undoc");
    static const bool warnUndocParam = Config::getBool("warn-undoc-param");
 
-   if (! extractAll && warnUndoc &&  warnUndocParam && ! Doxy_Globals::suppressDocWarnings) {
+   if (! extractAll && warnUndoc &&  warnUndocParam && ! isReference() && ! Doxy_Globals::suppressDocWarnings) {
 
       if (!hasDocumentedParams()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Parameters for member %s are not fully documented",
@@ -4246,9 +4250,9 @@ QString MemberDef::qualifiedName() const
 void MemberDef::setTagInfo(const TagInfo &tag)
 {
    if (! tag.isEmpty()) {
-      m_impl->anc = tag.anchor;
-      setReference(tag.tagName);
-      m_impl->explicitOutputFileBase = stripExtension(tag.fileName);
+      m_impl->anc = tag.tag_Anchor;
+      setReference(tag.tag_Name);
+      m_impl->explicitOutputFileBase = stripExtension(tag.tag_FileName);
    }
 }
 

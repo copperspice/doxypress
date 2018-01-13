@@ -559,14 +559,14 @@ char *constexpYYtext;
 
 *************************************************************************/
 
-#include <constexp.h>  
+#include <constexp.h>
 #include <cppvalue.h>
 #include <ce_parse.h>         // generated header file
 #include <message.h>
 
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
-  
+
 QString    g_strToken;
 CPPValue   g_resultValue;
 int        g_constExpLineNr;
@@ -592,14 +592,14 @@ static int yyread(char *buf, int max_size)
          break;
       }
 
-      c += tmp2.length();     
-   
+      c += tmp2.length();
+
       for (auto letters : tmp2) {
          *buf = letters;
           buf++;
       }
 
-      g_inputPosition++;     
+      g_inputPosition++;
    }
 
    return c;
@@ -967,46 +967,46 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-{ 
-      g_strToken = QString::fromUtf8(constexpYYtext);  
-      return TOK_CHARACTER; 
+{
+      g_strToken = QString::fromUtf8(constexpYYtext);
+      return TOK_CHARACTER;
    }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-{ 
-      g_strToken = QString::fromUtf8(constexpYYtext); 
-      return TOK_OCTALINT; 
+{
+      g_strToken = QString::fromUtf8(constexpYYtext);
+      return TOK_OCTALINT;
    }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-{ 
-      g_strToken = QString::fromUtf8(constexpYYtext); 
-      return TOK_DECIMALINT; 
+{
+      g_strToken = QString::fromUtf8(constexpYYtext);
+      return TOK_DECIMALINT;
    }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-{ 
+{
       QString text = QString::fromUtf8(constexpYYtext);
       g_strToken   = text.mid(2);
 
-      return TOK_HEXADECIMALINT; 
+      return TOK_HEXADECIMALINT;
    }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-{ 
+{
       g_strToken = QString::fromUtf8(constexpYYtext);
-      return TOK_FLOAT; 
+      return TOK_FLOAT;
    }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-{ 
+{
       g_strToken = QString::fromUtf8(constexpYYtext);
-      return TOK_FLOAT; 
+      return TOK_FLOAT;
    }
 	YY_BREAK
 case 31:
@@ -1988,20 +1988,20 @@ bool parseconstexp(const QString &fileName, int lineNr, const QString &data)
    g_constExpLineNr   = lineNr;
    g_inputString      = data;
    g_inputPosition    = 0;
-   
+
    QString s = data.simplified();
 
-   if (s == "0L"|| s == "! 1L") { 
+   if (s == "0L"|| s == "! 1L") {
       return false;
 
-   } else if (s == "1L" || s == "! 0L") { 
+   } else if (s == "1L" || s == "! 0L") {
       return true;
 
-   }   
+   }
 
    constexpYYrestart(constexpYYin);
    constexpYYparse();
- 
+
    return ((long)g_resultValue != 0);
 }
 

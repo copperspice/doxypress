@@ -337,8 +337,8 @@ QString stripFromPath(const QString &path)
 
 QString stripFromIncludePath(const QString &path)
 {
-   // strip part of path if it matches one of the paths in the Config::getList("include-path") list
-   static const QStringList strip = Config::getList("strip-inc-path");
+   // strip part of path if it matches one of the paths in the Config::getList("strip-from-inc-path") list
+   static const QStringList strip = Config::getList("strip-from-inc-path");
    return stripFromPath(path, strip);
 }
 
@@ -347,7 +347,7 @@ int determineSection(const QString &fname)
    static const QStringList suffixSource = Config::getList("suffix-source-navtree");
    static const QStringList suffixHeader = Config::getList("suffix-header-navtree");
 
-   // check if  fname is a source or a header file name by looking at the extension
+   // check if fname is a source or a header file name by looking at the extension
 
    QFileInfo fi(fname);
    QString suffix = fi.suffix().toLower();
@@ -4223,7 +4223,7 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
    }
 
    if (bracePos != -1) {
-      // try without parameters as well, could be a contructor invocation
+      // try without parameters as well, could be a constructor
       *resContext = getClass(fullName.left(bracePos));
 
       if (*resContext) {
@@ -4821,9 +4821,6 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
       retval += tmp;
 
       iter2.value() = mangle;
-
-printf("\n\n\n  BROOM  - we found one  %s", csPrintable(retval) );
-
 
    } else {
       // not found
@@ -5871,8 +5868,8 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
       pd->setLanguage(lang);
 
       if (! tagInfo.isEmpty()) {
-         pd->setReference(tagInfo.tagName);
-         pd->setFileName(tagInfo.fileName);
+         pd->setReference(tagInfo.tag_Name);
+         pd->setFileName(tagInfo.tag_FileName);
       }
 
       pd->setInputOrderId(id);
@@ -7270,6 +7267,13 @@ QString filterTitle(const QString &title)
 
 bool patternMatch(const QFileInfo &fi, const QStringList &patList)
 {
+   static Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
+
+   // For Windows and Mac OS X always do the case insensitive match
+#if defined(_WIN32) || defined(__MACOSX__)
+   allowUpperCaseNames_enum = Qt::CaseInsensitive;
+#endif
+
    bool found = false;
 
    QString fn  = fi.fileName();
@@ -7285,13 +7289,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
             pattern = pattern.left(i);   // strip off the extension
          }
 
-#if defined(_WIN32) || defined(__MACOSX__)
-         // Windows or MacOSX
-         QRegExp re(pattern, Qt::CaseInsensitive, QRegExp::Wildcard);
-#else
-         // unix
-         QRegExp re(pattern, Qt::CaseSensitive, QRegExp::Wildcard);
-#endif
+         QRegExp re(pattern, allowUpperCaseNames_enum, QRegExp::Wildcard);
 
          // input-patterns
          // possilbe issue if the pattern has something other than a wildcard for the name

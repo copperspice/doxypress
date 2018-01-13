@@ -478,9 +478,9 @@ class ExampleSDict : public StringMap<QSharedPointer<Example>>
 class FileNameStringCompare {
    public:
       bool operator()(const QString &a, const QString &b) const {
-         static const Qt::CaseSensitivity sortCase_enum = Config::getCase("case-sensitive-fname");
+         static const Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
 
-         return a.compare(b, sortCase_enum) < 0;
+         return a.compare(b, allowUpperCaseNames_enum) < 0;
       }
 };
 

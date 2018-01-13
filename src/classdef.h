@@ -544,7 +544,7 @@ class ClassDef : public Definition
    /* user defined member groups */
    MemberGroupSDict m_memberGroupSDict;
 
-   /*! Is this an abstact class? */
+   /*! Is this an abstract class? */
    bool m_isAbstract;
 
    // Is the class part of an unnamed namespace?

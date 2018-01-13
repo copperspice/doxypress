@@ -663,7 +663,7 @@ char *declinfoYYtext;
 
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
-   
+
 static QString  inputString;
 static int      inputPosition;
 static QString  className;
@@ -699,10 +699,10 @@ static void addType()
    s_scope.resize(0);
    s_name.resize(0);
 }
-  
+
 static void addTypeName()
 {
-   if (s_name.isEmpty() || s_name.at(s_name.length() - 1) == ':') { 
+   if (s_name.isEmpty() || s_name.at(s_name.length() - 1) == ':') {
       // end of Objective-C keyword => append to name not type
       return;
    }
@@ -714,12 +714,12 @@ static void addTypeName()
    s_type += s_name;
    s_name.resize(0);
 }
- 
+
 #undef   YY_INPUT
 #define  YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
-{  
+{
    int c = 0;
 
    while (inputString[inputPosition] != 0) {
@@ -732,14 +732,14 @@ static int yyread(char *buf, int max_size)
          break;
       }
 
-      c += tmp2.length();     
-   
+      c += tmp2.length();
+
       for (auto letters : tmp2) {
          *buf = letters;
           buf++;
       }
 
-      inputPosition++;     
+      inputPosition++;
    }
 
    return c;
@@ -1064,20 +1064,20 @@ YY_RULE_SETUP
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-{ 
+{
       // Objective-C class categories
 
       if (! insideObjC) {
-         REJECT; 
-      } else {                  
+         REJECT;
+      } else {
          s_name += QString::fromUtf8(declinfoYYtext);
       }
    }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-{ 
-      // the []'s are for Java, 
+{
+      // the []'s are for Java,
       // the / was add to deal with multi-
       // dimensional C++ arrays like A[][15]
       // the leading ~ is for a destructor
@@ -1091,7 +1091,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-{ 
+{
       // found a scope specifier
 
       if (! s_scope.isEmpty()) {
@@ -1106,7 +1106,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-{ 
+{
       // Objective-C argument separator
       s_name += QString::fromUtf8(declinfoYYtext);
    }
@@ -1139,7 +1139,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-{ 
+{
       // TODO: function pointers
       s_args += "(";
       BEGIN(ReadArgs);
@@ -1162,14 +1162,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-{ 
-      s_name += "<<"; 
+{
+      s_name += "<<";
    }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-{ 
-      s_name += ">>"; 
+{
+      s_name += ">>";
    }
 	YY_BREAK
 case 15:
@@ -1187,7 +1187,7 @@ YY_RULE_SETUP
       if (sharpCount) {
          --sharpCount;
 
-      } else {      
+      } else {
          BEGIN(Start);
       }
    }
@@ -2221,7 +2221,7 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
    inputPosition      = 0;
    classTempListFound = FALSE;
    funcTempListFound  = FALSE;
-   insideObjC = objC;  
+   insideObjC = objC;
    className.resize(0);
    classTempList.resize(0);
    funcTempList.resize(0);
@@ -2232,7 +2232,7 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
    s_args.resize(0);
 
    exceptionString.resize(0);
- 
+
    // try to find the type, scope, name and arguments
    declinfoYYrestart( declinfoYYin );
    BEGIN( Start );
@@ -2240,7 +2240,7 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
 
    int nb = s_name.lastIndexOf('[');
 
-   if (nb != -1 && s_args.isEmpty()) { 
+   if (nb != -1 && s_args.isEmpty()) {
       // correct for [] in name ambigity (due to Java return type allowing [])
       s_args.prepend(s_name.right(s_name.length() - nb));
       s_name = s_name.left(nb);
@@ -2253,16 +2253,16 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
 
    if ((il = n.indexOf('<')) != -1 && (ir = n.lastIndexOf('>')) != -1) {
       // TODO: handle cases like where n="operator<< <T>"
-   
+
       ftl = removeRedundantWhiteSpace(n.right(n.length() - il));
       n = n.left(il);
    }
-  
+
    t   = removeRedundantWhiteSpace(s_type);
    a   = removeRedundantWhiteSpace(s_args);
    exc = removeRedundantWhiteSpace(exceptionString);
 
-   if (!t.isEmpty() && t.at(t.length() - 1) == ')') { 
+   if (!t.isEmpty() && t.at(t.length() - 1) == ')') {
       // for function pointers
       a.prepend(")");
       t = t.left(t.length() - 1);
@@ -2270,6 +2270,6 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
 
    printlex(declinfoYY_flex_debug, FALSE, __FILE__, NULL);
 
-   return;  
+   return;
 }
 

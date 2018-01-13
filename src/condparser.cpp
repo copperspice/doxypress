@@ -67,7 +67,7 @@ bool CondParser::parse(const QString &fileName, int lineNr, const QString &expr)
 
 
 /**
- * checks if the given char c is a delimeter
+ * checks if the given char c is a delimiter
  * minus is checked apart, can be unary minus
  */
 static bool isDelimiter(const QChar c)
@@ -142,7 +142,7 @@ void CondParser::getToken()
       return;
    }
 
-   // check for operators (delimeters)
+   // check for operators (delimiters)
    if (isDelimiter(*m_e)) {
       m_tokenType = DELIMITER;
 

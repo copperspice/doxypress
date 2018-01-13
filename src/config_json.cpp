@@ -327,7 +327,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("template-relations",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("directory-graph",           struc_CfgBool   { true,           DEFAULT } );
 
-   m_cfgEnum.insert("dot-image-format",          struc_CfgEnum   { "png",          DEFAULT } );  
+   m_cfgEnum.insert("dot-image-format",          struc_CfgEnum   { "png",          DEFAULT } );
    m_cfgBool.insert("interactive-svg",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("dot-path",                struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("dot-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
@@ -393,7 +393,7 @@ void Config::load_Defaults()
    m_cfgString.insert("ghostscript",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgBool.insert("use-mathjax",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgEnum.insert("mathjax-format",            struc_CfgEnum   { "HTML-CSS",     DEFAULT } );
-   m_cfgString.insert("mathjax-relpath",         struc_CfgString { "http://cdn.mathjax.com/mathjax/latest", DEFAULT } );
+   m_cfgString.insert("mathjax-relpath",         struc_CfgString { "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/", DEFAULT } );
    m_cfgList.insert("mathjax-extensions",        struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("mathjax-codefile",        struc_CfgString { QString(),      DEFAULT } );
 

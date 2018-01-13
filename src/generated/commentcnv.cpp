@@ -2057,7 +2057,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentcnvYYtext);
       copyToOutput(text, text.length());
 
-      if (text.mid(1,1) == g_blockName) {          
+      if (text.mid(1,1) == g_blockName) {
          // end of formula
          BEGIN(g_lastCommentContext);
 
@@ -3768,7 +3768,7 @@ void replaceComment(int offset)
       } else {
          copyToOutput(" */", 3);
 
-         for (int i = commentcnvYYleng - 1; i >= 0; i--) {         
+         for (int i = commentcnvYYleng - 1; i >= 0; i--) {
             char tmp = commentcnvYYtext[i];
             unput(tmp);
          }
@@ -3839,7 +3839,7 @@ static bool recognizeFixedForm(const QString &contents)
 }
 
 /*! This function does three things:
- *  1 Convert multi-line C++ style comment blocks (which are aligned) to C style 
+ *  1 Convert multi-line C++ style comment blocks (which are aligned) to C style
  *    comment blocks (if MULTILINE_CPP_IS_BRIEF is set to NO)
  *  2 Replaces aliases with their definition (see ALIASES)
  *  3 Handles conditional sections (cond...endcond blocks)
@@ -3908,7 +3908,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
          }
 
          tmp += QString::number(ctx.lineNr);
-         first = false;         
+         first = false;
       }
 
       tmp += ")";
@@ -3920,6 +3920,6 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
 
    g_commentStack.clear();
    g_nestingCount = 0;
-   
+
    return g_outBuf;
 }

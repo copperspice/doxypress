@@ -289,6 +289,31 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
    }
 
+<CopyArgSharp>">>)"                     {
+      // combined token
+      QString text = QString::fromUtf8(yytext);
+      *g_copyArgValue += text;
+
+		if (g_argSharpCount > 0) {
+         g_argSharpCount--;
+
+      } else {
+         BEGIN(g_readArgContext);
+
+      }
+
+		if (g_argSharpCount > 0) {
+         g_argSharpCount--;
+
+      } else {
+         BEGIN(g_readArgContext);
+
+      }
+
+      g_argRoundCount--;
+   }
+
+
 <CopyArgSharp>">>"                      {
       QString text = QString::fromUtf8(yytext);
 

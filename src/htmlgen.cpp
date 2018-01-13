@@ -315,7 +315,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
       }
 
       mathJaxJs += "</script>";
-      mathJaxJs += "<script src=\"" + path + "MathJax.js\"></script>\n";
+      mathJaxJs += "<script type=\"text/javascript\" async src=\"" + path + "MathJax.js\"></script>\n";
    }
 
    QString result = output;

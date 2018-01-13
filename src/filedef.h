@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -35,11 +35,11 @@ class FileDef;
 class MemberDef;
 class MemberList;
 class OutputList;
-class PackageDef; 
+class PackageDef;
 
 /** Class representing the data associated with a \#include statement. */
 struct IncludeInfo {
-   IncludeInfo() {      
+   IncludeInfo() {
       local    = false;
       imported = false;
       indirect = false;
@@ -238,7 +238,7 @@ class FileDef : public Definition
    void combineUsingRelations();
 
    bool generateSourceFile() const;
-  
+
    void addIncludeDependency(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool imported, bool indirect);
    void addIncludedByDependency(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool imported);
 
@@ -318,7 +318,7 @@ class DirEntry
    enum EntryKind { Dir, File };
 
    DirEntry(QSharedPointer<DirEntry> parent, QSharedPointer<FileDef> fd)
-      : m_parent(parent), m_name(fd->name()), m_kind(File), m_fd(fd), m_isLast(false) 
+      : m_parent(parent), m_name(fd->name()), m_kind(File), m_fd(fd), m_isLast(false)
    { }
 
    DirEntry(QSharedPointer<DirEntry> parent, QString name)
@@ -370,7 +370,7 @@ class DirEntryTree : public DirEntry
  public:
    DirEntryTree(QSharedPointer<DirEntryTree> parent, const QString &name)
       : DirEntry(parent, name)
-   {      
+   {
    }
 
    virtual ~DirEntryTree() {}

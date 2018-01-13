@@ -115,10 +115,10 @@ class RTFGenerator : public OutputGenerator
 
    void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override;
 
-   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor, 
-                      const QString &name, const QString &tooltip) override;  
+   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
+                      const QString &name, const QString &tooltip) override;
 
-   void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &, 
+   void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &,
                      const SourceLinkInfo &, const SourceLinkInfo & ) override {}
 
    void startTextLink(const QString &f, const QString &anchor) override;
@@ -136,7 +136,7 @@ class RTFGenerator : public OutputGenerator
 
    void startGroupHeader(int) override;
    void endGroupHeader(int) override;
-  
+
    void startItemListItem() override;
    void endItemListItem() override;
 
@@ -218,8 +218,8 @@ class RTFGenerator : public OutputGenerator
    void endDoxyAnchor(const QString &, const QString &) override;
 
    void writeChar(char c) override;
-   void writeLatexSpacing() override {};      
-   
+   void writeLatexSpacing() override {};
+
    void writeStartAnnoItem(const QString &type, const QString &file, const QString &path, const QString &name) override;
    void writeEndAnnoItem(const QString &name) override;
 

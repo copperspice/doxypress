@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -32,14 +32,14 @@
 #include <xmlgen.h>
 
 static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
-{   
+{
    for (auto n : children) {
       n->accept(parent);
-   } 
+   }
 }
 
 static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCaption, XmlDocVisitor *parent,
-                  QList<DocNode *> children, const QString &name, bool writeType, DocImage::Type type, 
+                  QList<DocNode *> children, const QString &name, bool writeType, DocImage::Type type,
                   const QString &width, const QString &height)
 {
    t << "<" << cmd;
@@ -49,16 +49,16 @@ static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCapti
 
       switch(type)     {
          case DocImage::Html:
-            t << "html"; 
+            t << "html";
             break;
          case DocImage::Latex:
-            t << "latex"; 
+            t << "latex";
             break;
-         case DocImage::Rtf:   
-            t << "rtf"; 
+         case DocImage::Rtf:
+            t << "rtf";
             break;
-         case DocImage::DocBook: 
-            t << "docbook"; 
+         case DocImage::DocBook:
+            t << "docbook";
             break;
       }
 
@@ -133,7 +133,7 @@ void XmlDocVisitor::visit(DocSymbol *s)
    if (m_hide) {
       return;
    }
-   
+
    QString res = HtmlEntityMapper::instance()->xml(s->symbol());
 
    if (! res.isEmpty()) {
@@ -255,7 +255,7 @@ void XmlDocVisitor::visit(DocVerbatim *s)
    }
 
    QString lang = m_langExt;
-   if (! s->language().isEmpty()) { 
+   if (! s->language().isEmpty()) {
       // explicit language setting
       lang = s->language();
    }
@@ -263,7 +263,7 @@ void XmlDocVisitor::visit(DocVerbatim *s)
    SrcLangExt langExt = getLanguageFromFileName(lang);
 
    switch (s->type()) {
-      case DocVerbatim::Code: 
+      case DocVerbatim::Code:
          m_t << "<programlisting>";
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                    langExt, s->isExample(), s->exampleFile());
@@ -276,7 +276,7 @@ void XmlDocVisitor::visit(DocVerbatim *s)
          filter(s->text());
          m_t << "</verbatim>";
          break;
-    
+
       case DocVerbatim::HtmlOnly:
       case DocVerbatim::RtfOnly:
       case DocVerbatim::ManOnly:
@@ -290,21 +290,21 @@ void XmlDocVisitor::visit(DocVerbatim *s)
          break;
 
       case DocVerbatim::Dot:
-         visitPreStart(m_t, "dot", s->hasCaption(), this, s->children(), QString(""), false, 
+         visitPreStart(m_t, "dot", s->hasCaption(), this, s->children(), QString(""), false,
                      DocImage::Html, s->width(), s->height());
          filter(s->text());
          visitPostEnd(m_t, "dot");
          break;
 
       case DocVerbatim::Msc:
-         visitPreStart(m_t, "msc", s->hasCaption(), this, s->children(),  QString(""), false, 
+         visitPreStart(m_t, "msc", s->hasCaption(), this, s->children(),  QString(""), false,
                      DocImage::Html, s->width(), s->height());
          filter(s->text());
-         visitPostEnd(m_t, "msc");        
+         visitPostEnd(m_t, "msc");
          break;
 
       case DocVerbatim::PlantUML:
-         visitPreStart(m_t, "plantuml", s->hasCaption(), this, s->children(),  QString(""), false, 
+         visitPreStart(m_t, "plantuml", s->hasCaption(), this, s->children(),  QString(""), false,
                      DocImage::Html, s->width(), s->height());
          filter(s->text());
          visitPostEnd(m_t, "plantuml");
@@ -346,7 +346,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
       case DocInclude::Include:
          m_t << "<programlisting>";
 
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
                      -1, -1, true, QSharedPointer<MemberDef>(), false);
 
@@ -885,8 +885,7 @@ void XmlDocVisitor::visitPre(DocImage *img)
       return;
    }
 
-   static const QString xmlOutDir = Config::getString("xml-output"); 
-
+   static const QString xmlOutDir = Config::getString("xml-output");
    QString baseName = img->name();
 
    int i;
@@ -897,20 +896,27 @@ void XmlDocVisitor::visitPre(DocImage *img)
    visitPreStart(m_t, "image", false, this, img->children(), baseName, true, img->type(), img->width(), img->height());
 
    // copy the image to the output dir
-   QFile inImage(img->name());
-   QString outputFile = xmlOutDir + "/" + baseName;
+   QSharedPointer<FileDef> fd;
+   bool ambig;
 
-   if (inImage.open(QIODevice::ReadOnly)) {
+   fd = findFileDef(&Doxy_Globals::imageNameDict, img->name(), ambig);
 
-      QFile::remove(outputFile);
-      bool copyOk = inImage.copy(outputFile);
+   if (fd != nullptr)  {
+      QFile inImage(fd->getFilePath());
+      QString outputFile = xmlOutDir + "/" + baseName;
 
-      if (! copyOk) { 
-         err("Unable to open image file for writing %s, error: %d\n", csPrintable(outputFile), inImage.error());
-      }        
+      if (inImage.open(QIODevice::ReadOnly)) {
 
-   } else {
-      err("Unable to open image file for reading %s, error: %d\n", csPrintable( img->name() ), inImage.error());                
+         QFile::remove(outputFile);
+         bool copyOk = inImage.copy(outputFile);
+
+         if (! copyOk) {
+            err("Unable to open image file for writing %s, error: %d\n", csPrintable(outputFile), inImage.error());
+         }
+
+      } else {
+         err("Unable to open image file for reading %s, error: %d\n", csPrintable( img->name() ), inImage.error());
+      }
    }
 }
 
@@ -919,7 +925,7 @@ void XmlDocVisitor::visitPost(DocImage *)
    if (m_hide) {
       return;
    }
-   
+
    visitPostEnd(m_t, "image");
 }
 
@@ -1105,7 +1111,7 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
    for (auto param : pl->parameters()) {
 
       if (pl->paramTypes().count() > 0) {
-        
+
          for (auto type : pl->paramTypes()) {
             m_t << "<parametertype>";
 
@@ -1266,7 +1272,7 @@ void XmlDocVisitor::filter(const QString &str)
 }
 
 void XmlDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor)
-{ 
+{
    m_t << "<ref refid=\"" << file;
 
    if (!anchor.isEmpty()) {
@@ -1301,6 +1307,6 @@ void XmlDocVisitor::pushEnabled()
 void XmlDocVisitor::popEnabled()
 {
    bool v = m_enabled.pop();
-   m_hide = v;   
+   m_hide = v;
 }
 
