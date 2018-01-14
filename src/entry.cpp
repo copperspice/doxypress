@@ -20,7 +20,6 @@
 #include <stdlib.h>
 
 #include <entry.h>
-
 #include <arguments.h>
 #include <doxy_globals.h>
 #include <filestorage.h>
@@ -31,97 +30,68 @@
 Entry::Entry()
 {
    m_parent.clear();
-
-   section      = Entry::EMPTY_SEC;
-   mGrpId       = -1;
-   relatesType  = Simple;
-   hidden       = false;
-   groupDocType = GROUPDOC_NORMAL;
-
    reset();
 }
 
 Entry::Entry(const Entry &e)
 {
-   section          = e.section;
-   type             = e.type;
-   name             = e.name;
    m_tagInfoEntry   = e.m_tagInfoEntry;
+   argList          = e.argList;
+   typeConstr       = e.typeConstr;
+
+   relatesType      = e.relatesType;
+   virt             = e.virt;
    protection       = e.protection;
    mtype            = e.mtype;
+   groupDocType     = e.groupDocType;
+   lang             = e.lang;
+
    m_traits         = e.m_traits;
+
+   // int
+   section          = e.section;
    initLines        = e.initLines;
+   docLine          = e.docLine;
+   briefLine        = e.briefLine;
+   inbodyLine       = e.inbodyLine;
+   bodyLine         = e.bodyLine;
+   endBodyLine      = e.endBodyLine;
+   mGrpId           = e.mGrpId;
+   startLine        = e.startLine;
+   startColumn      = e.startColumn;
+
+   // bool
    stat             = e.stat;
    explicitExternal = e.explicitExternal;
    proto            = e.proto;
    subGrouping      = e.subGrouping;
    callGraph        = e.callGraph;
    callerGraph      = e.callerGraph;
-   virt             = e.virt;
-   args             = e.args;
-   bitfields        = e.bitfields;
-   argList          = e.argList;
-
-   m_program        = e.m_program;
-   initializer      = e.initializer;
-   includeFile      = e.includeFile;
-   includeName      = e.includeName;
-   doc              = e.doc;
-   docLine          = e.docLine;
-   docFile          = e.docFile;
-   brief            = e.brief;
-   briefLine        = e.briefLine;
-   briefFile        = e.briefFile;
-   inbodyDocs       = e.inbodyDocs;
-   inbodyLine       = e.inbodyLine;
-   inbodyFile       = e.inbodyFile;
-   relates          = e.relates;
-   relatesType      = e.relatesType;
-
-   m_read           = e.m_read;
-   m_write          = e.m_write;
-   m_reset          = e.m_reset;
-   m_notify         = e.m_notify;
-   m_revision       = e.m_revision;
-   m_designable     = e.m_designable;
-   m_scriptable     = e.m_scriptable;
-   m_stored         = e.m_stored;
-   m_user           = e.m_user;
-
-   inside           = e.inside;
-   exception        = e.exception;
-   bodyLine         = e.bodyLine;
-   endBodyLine      = e.endBodyLine;
-   mGrpId           = e.mGrpId;
-
-   fileName         = e.fileName;
-   startLine        = e.startLine;
-   startColumn      = e.startColumn;
-
-   m_specialLists   = e.m_specialLists;
-
-   lang             = e.lang;
    hidden           = e.hidden;
    artificial       = e.artificial;
-   groupDocType     = e.groupDocType;
-   id               = e.id;
-   m_parent         = e.m_parent;
 
-   // deep copy of the child entry list
-   for (auto item : e.m_sublist) {
-      m_sublist.append(QMakeShared<Entry>(*item));
-   }
+   // string
+   name             = e.name;
 
-   // copy base class list
+   m_templateArgLists = e.m_templateArgLists;
+
+   // list of base classes
    for (auto item : e.extends) {
       extends.append(item);
    }
 
-   m_templateArgLists = e.m_templateArgLists;
-   m_groups    = e.m_groups;
-   m_anchors   = e.m_anchors;
+   m_groups           = e.m_groups;
+   m_anchors          = e.m_anchors;
+   m_specialLists     = e.m_specialLists;
 
-   typeConstr  = e.typeConstr;
+   // private members
+   m_entryMap       = e.m_entryMap;
+   m_parent         = e.m_parent;
+
+   // deep copy, list of children
+   for (auto item : e.m_sublist) {
+      m_sublist.append(QMakeShared<Entry>(*item));
+   }
 }
 
 Entry::~Entry()
@@ -156,85 +126,65 @@ void Entry::reset()
 
    m_traits.clear();
 
-   section = Entry::EMPTY_SEC;
+   // int
+   section      = Entry::EMPTY_SEC;
    initLines    = -1;
    docLine      = -1;
-
    briefLine    = -1;
    inbodyLine   = -1;
    bodyLine     = -1;
    endBodyLine  = -1;
    mGrpId       = -1;
-
    startLine    = 1;
    startColumn  = 1;
 
+   // bool
    stat             = false;
    explicitExternal = false;
    proto            = false;
    subGrouping      = true;
+   callGraph        = dotCallGraph;
+   callerGraph      = dotCalledBy;
+   hidden           = false;
+   artificial       = false;
 
-   callGraph    = dotCallGraph;
-   callerGraph  = dotCalledBy;
-
-   type         = "";
-   name         = "";
-   args         = "";
-   bitfields    = "";
-   m_program    = "";
-   initializer  = "";
-   includeFile  = "";
-   includeName  = "";
-   doc          = "";
-   docFile      = "";
-   brief        = "";
-   briefFile    = "";
-   inbodyDocs   = "";
-   inbodyFile   = "";
-   relates      = "";
-
-   // missing m_read, m_write, etc
-
-   inside       = "";
-   exception    = "";
-   fileName     = "";
-   id           = "";
-
-   hidden       = false;
-   artificial   = false;
+   // string
+   name             = "";
 
    m_templateArgLists.clear();
    extends.clear();
+
    m_groups.clear();
    m_anchors.clear();
    m_specialLists.clear();
 
+   // private members
+   m_entryMap.clear();
    m_sublist.clear();
 }
 
-
-void Entry::createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage,
+void Entry::createSubtreeIndex(QSharedPointer<MiniEntry> ptr_miniEntry, FileStorage &storage,
                   QSharedPointer<FileDef> fd, QSharedPointer<Entry> self)
 {
    assert(self == this);
-   QSharedPointer<EntryNav> childNav = QMakeShared<EntryNav>(nav, self);
 
-   nav->addChild(childNav);
+   QSharedPointer<MiniEntry> ptr_B = QMakeShared<MiniEntry>(ptr_miniEntry, self);
+   ptr_miniEntry->addChild(ptr_B);
 
-   childNav->setFileDef(fd);
-   childNav->saveEntry(self, storage);
+   ptr_B->setFileDef(fd);
+   ptr_B->saveEntry(self, storage);
 
    for (auto childNode : m_sublist) {
-      childNode->createSubtreeIndex(childNav, storage, fd, childNode);
+      childNode->createSubtreeIndex(ptr_B, storage, fd, childNode);
    }
 
    m_sublist.clear();
 }
 
-void Entry::createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage,
+void Entry::createNavigationIndex(QSharedPointer<MiniEntry> ptr_miniEntry, FileStorage &storage,
                   QSharedPointer<FileDef> fd, QSharedPointer<Entry> self)
 {
-   createSubtreeIndex(rootNav, storage, fd, self);
+   createSubtreeIndex(ptr_miniEntry, storage, fd, self);
 }
 
 void Entry::addSpecialListItem(const QString &listName, int itemId)
@@ -258,24 +208,24 @@ void Entry::removeSubEntry(QSharedPointer<Entry> e)
    }
 }
 
-EntryNav::EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e)
-   : m_parent(parent), m_section(e->section), m_type(e->type), m_name(e->name),
+// **
+MiniEntry::MiniEntry(QSharedPointer<MiniEntry> parent, QSharedPointer<Entry> e)
+   : m_parent(parent), m_section(e->section), m_type(e->getData(EntryKey::Member_Type)), m_name(e->name),
      m_fileDef(0), m_lang(e->lang), m_offset(-1), m_noLoad(false)
 {
-
    m_tagInfoNav = e->m_tagInfoEntry;
 }
 
-EntryNav::~EntryNav()
+MiniEntry::~MiniEntry()
 {
 }
 
-void EntryNav::addChild( QSharedPointer<EntryNav> e)
+void MiniEntry::addChild( QSharedPointer<MiniEntry> ptr_miniEntry)
 {
-   m_subList.append(e);
+   m_subList.append(ptr_miniEntry);
 }
 
-bool EntryNav::loadEntry(FileStorage &storage)
+bool MiniEntry::loadEntry(FileStorage &storage)
 {
    if (m_noLoad) {
       return true;
@@ -292,13 +242,13 @@ bool EntryNav::loadEntry(FileStorage &storage)
    m_info = unmarshalEntry(&storage);
 
    m_info->name    = m_name;
-   m_info->type    = m_type;
    m_info->section = m_section;
+   m_info->setData(EntryKey::Member_Type, m_type);
 
    return true;
 }
 
-bool EntryNav::saveEntry(QSharedPointer<Entry> e, FileStorage &storage)
+bool MiniEntry::saveEntry(QSharedPointer<Entry> e, FileStorage &storage)
 {
    m_offset = storage.pos();
    marshalEntry(&storage, e);
@@ -306,14 +256,14 @@ bool EntryNav::saveEntry(QSharedPointer<Entry> e, FileStorage &storage)
    return true;
 }
 
-void EntryNav::releaseEntry()
+void MiniEntry::releaseEntry()
 {
    if (! m_noLoad) {
       m_info =  QSharedPointer<Entry>();
    }
 }
 
-void EntryNav::setEntry(QSharedPointer<Entry> e)
+void MiniEntry::setEntry(QSharedPointer<Entry> e)
 {
    m_info   = e;
    m_noLoad = true;

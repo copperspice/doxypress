@@ -65,11 +65,11 @@ class TagAnchorInfoList : public QList<TagAnchorInfo>
 /** Container for enum values that are scoped within an enum */
 class TagEnumValueInfo
 {
- public:
-   QString name;
-   QString file;
-   QString anchor;
-   QString clangid;
+   public:
+      QString name;
+      QString file;
+      QString anchor;
+      QString clangId;
 };
 
 /** Container for member specific info that can be read from a tagfile */
@@ -521,7 +521,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_curEnumValue = new TagEnumValueInfo;
          m_curEnumValue->file    = attrib.value("file");
          m_curEnumValue->anchor  = attrib.value("anchor");
-         m_curEnumValue->clangid = attrib.value("clangid");
+         m_curEnumValue->clangId = attrib.value("clangid");
 
          m_stateStack.push(m_state);
          m_state = InEnumValue;
@@ -839,10 +839,13 @@ class TagFileParser : public QXmlDefaultHandler
    void endClangId() {
       if (m_state == InMember) {
          m_curMember->clangId = m_curString;
+
       } else if (m_state == InClass) {
          m_curClass->clangId =  m_curString;
+
       } else if (m_state == InNamespace) {
          m_curNamespace->clangId = m_curString;
+
       } else {
          warn("warning: Unexpected tag `anchor' found\n");
       }
@@ -1217,12 +1220,12 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
    for (auto tmi : members) {
       QSharedPointer<Entry> me = QMakeShared<Entry>();
 
-      me->type  = tmi.type;
       me->name  = tmi.name;
-      me->args  = tmi.arglist;
+      me->setData(EntryKey::Member_Type, tmi.type);
+      me->setData(EntryKey::Member_Args, tmi.arglist);
 
-      if (! me->args.isEmpty()) {        
-         me->argList = stringToArgumentList(me->args);
+      if (! tmi.arglist.isEmpty()) {
+         me->argList = stringToArgumentList(tmi.arglist);
       }
 
       if (tmi.enumValues.count() > 0) {
@@ -1231,15 +1234,16 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
          for (auto evi : tmi.enumValues) {
             QSharedPointer<Entry> ev = QMakeShared<Entry>();
 
-            ev->type       = "@";
-            ev->name       = evi.name;
-            ev->id         = evi.clangid;
-            ev->section    = Entry::VARIABLE_SEC;
+            ev->name    = evi.name;
+            ev->section = Entry::VARIABLE_SEC;
+
+            ev->setData(EntryKey::Member_Type, "@");
+            ev->setData(EntryKey::Clang_Id, evi.clangId);
 
             TagInfo ti;
-            ti.tagName     = m_tagName;
-            ti.anchor      = evi.anchor;
-            ti.fileName    = evi.file;
+            ti.tag_Name     = m_tagName;
+            ti.tag_Anchor   = evi.anchor;
+            ti.tag_FileName = evi.file;
 
             ev->m_tagInfoEntry = ti;
             me->addSubEntry(ev, me);
@@ -1249,8 +1253,9 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       me->protection = tmi.prot;
       me->virt       = tmi.virt;
       me->stat       = tmi.isStatic;
-      me->fileName   = ce->fileName;
-      me->id         = tmi.clangId;
+
+      me->setData(EntryKey::File_Name,  ce->getData(EntryKey::File_Name));
+      me->setData(EntryKey::Clang_Id,   tmi.clangId);
 
       if (ce->section == Entry::GROUPDOC_SEC) {
          me->m_groups.append(Grouping(ce->name, Grouping::GROUPING_INGROUP));
@@ -1259,14 +1264,14 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       addDocAnchors(me, tmi.docAnchors);
 
       TagInfo ti;
-      ti.tagName    = m_tagName;
-      ti.anchor     = tmi.anchor;
-      ti.fileName   = tmi.anchorFile;
+      ti.tag_Name      = m_tagName;
+      ti.tag_Anchor    = tmi.anchor;
+      ti.tag_FileName  = tmi.anchorFile;
 
       me->m_tagInfoEntry = ti;
 
       if (tmi.kind == "define") {
-         me->type = "#define";
+         me->setData(EntryKey::Member_Type, "#define");
          me->section = Entry::DEFINE_SEC;
 
       } else if (tmi.kind == "enumvalue") {
@@ -1286,8 +1291,8 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
          me->mtype = Method;
 
       } else if (tmi.kind == "typedef") {
-         me->section = Entry::VARIABLE_SEC; //Entry::TYPEDEF_SEC;
-         me->type.prepend("typedef ");
+         me->section = Entry::VARIABLE_SEC;       // Entry::TYPEDEF_SEC;
+         me->prependData(EntryKey::Member_Type, "typedef ");
          me->mtype = Method;
 
       } else if (tmi.kind == "enumeration") {
@@ -1308,7 +1313,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
 
       } else if (tmi.kind == "friend") {
          me->section = Entry::FUNCTION_SEC;
-         me->type.prepend("friend ");
+         me->prependData(EntryKey::Member_Type, "friend ");
          me->mtype = Method;
 
       } else if (tmi.kind == "dcop") {
@@ -1408,10 +1413,11 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       addDocAnchors(ce, tci.docAnchors);
 
       TagInfo ti;
-      ti.tagName   = m_tagName;
-      ti.fileName  = tci.filename;
+      ti.tag_Name        = m_tagName;
+      ti.tag_FileName    = tci.filename;
 
-      ce->id             = tci.clangId;
+      ce->setData(EntryKey::Clang_Id, tci.clangId);
+
       ce->m_tagInfoEntry = ti;
       ce->lang           = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
 
@@ -1450,13 +1456,13 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       addDocAnchors(fe, tfi.docAnchors);
 
       TagInfo ti;
-      ti.tagName  = m_tagName;
-      ti.fileName = tfi.filename;
+      ti.tag_Name     = m_tagName;
+      ti.tag_FileName = tfi.filename;
 
       fe->m_tagInfoEntry = ti;
 
       QString fullName = m_tagName + ":" + tfi.path + stripPath_tag(tfi.name);
-      fe->fileName = fullName;
+      fe->setData(EntryKey::File_Name, fullName);
 
       QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
 
@@ -1486,11 +1492,11 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       addDocAnchors(ne, tni.docAnchors);
 
       TagInfo ti;
-      ti.tagName   = m_tagName;
-      ti.fileName  = tni.filename;
+      ti.tag_Name         = m_tagName;
+      ti.tag_FileName     = tni.filename;
 
-      ne->id              = tni.clangId;
       ne->m_tagInfoEntry  = ti;
+      ne->setData(EntryKey::Clang_Id, tni.clangId);
 
       buildMemberList(ne, tni.members);
       root->addSubEntry(ne, root);
@@ -1505,8 +1511,8 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       addDocAnchors(pe, tpgi.docAnchors);
 
       TagInfo ti;
-      ti.tagName  = m_tagName;
-      ti.fileName = tpgi.filename;
+      ti.tag_Name     = m_tagName;
+      ti.tag_FileName = tpgi.filename;
 
       pe->m_tagInfoEntry  = ti;
 
@@ -1520,13 +1526,13 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 
       ge->section  = Entry::GROUPDOC_SEC;
       ge->name     = tgi.name;
-      ge->type     = tgi.title;
+      ge->setData(EntryKey::Member_Type, tgi.title);
 
       addDocAnchors(ge, tgi.docAnchors);
 
       TagInfo ti;
-      ti.tagName  = m_tagName;
-      ti.fileName = tgi.filename;
+      ti.tag_Name     = m_tagName;
+      ti.tag_FileName = tgi.filename;
 
       ge->m_tagInfoEntry  = ti;
 
@@ -1546,14 +1552,14 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
          pe->section = Entry::PAGEDOC_SEC;
       }
 
-      pe->name     = tpi.name;
-      pe->args     = tpi.title;
+      pe->name = tpi.name;
+      pe->setData(EntryKey::Member_Args, tpi.title);
 
       addDocAnchors(pe, tpi.docAnchors);
 
       TagInfo ti;
-      ti.tagName  = m_tagName;
-      ti.fileName = tpi.filename;
+      ti.tag_Name     = m_tagName;
+      ti.tag_FileName = tpi.filename;
 
       pe->m_tagInfoEntry = ti;
       root->addSubEntry(pe, root);

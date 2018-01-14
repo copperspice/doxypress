@@ -900,7 +900,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                if (current) {
                   handleCommentBlock(comment, false, fileName, current);
 
-                  if (isBrief && current->brief.isEmpty()) {
+                  if (isBrief && current->getData(EntryKey::Brief_Docs).isEmpty()) {
                      QString brief;
                      QRegExp reg("([^.]*\\.)\\s(.*)");
 
@@ -913,7 +913,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                         comment = "";
                      }
 
-                     current->brief = brief;
+                     current->setData(EntryKey::Brief_Docs, brief);
                   }
                }
             }
@@ -1000,14 +1000,11 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
 
    QSharedPointer<Entry> docEntry = current;
 
-   while (parseCommentBlock(nullptr, docEntry, comment,
-                  fileName,
-                  lineNum,                                         // passed by reference
-                  isBrief, isJavaDocStyle, docBlockInBody,
-                  current->protection, position, needsEntry) ) {   // last 3 are passed by reference
+   while (parseCommentBlock(nullptr, docEntry, comment, fileName, lineNum, isBrief, isJavaDocStyle,
+                  docBlockInBody, current->protection, position, needsEntry) ) {
 
       if (needsEntry) {
-         QString docFile = current->docFile;
+         QString docFile = current->getData(EntryKey::MainDocs_File);
 
          QSharedPointer<Entry> parent = current->parent();
          current = QMakeShared<Entry>();
@@ -1017,7 +1014,7 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
             parent->addSubEntry(current, parent);
          }
 
-         current->docFile = docFile;
+         current->setData(EntryKey::MainDocs_File, docFile);
          current->docLine = lineNum;
 
          docEntry = current;

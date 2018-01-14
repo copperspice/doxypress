@@ -190,7 +190,8 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalUInt(s, HEADER);
 
    marshalQString(s, e->name);
-   marshalQString(s, e->type);
+   marshalQString(s, e->getData(EntryKey::Member_Type));
+
    marshalInt(s,     e->section);
    marshalInt(s,     e->protection);
    marshalInt(s,     e->mtype);
@@ -203,41 +204,45 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalBool(s,    e->callGraph);
    marshalBool(s,    e->callerGraph);
    marshalInt(s,     e->virt);
-   marshalQString(s, e->args);
-   marshalQString(s, e->bitfields);
+
+   marshalQString(s, e->getData(EntryKey::Member_Args));
+   marshalQString(s, e->getData(EntryKey::Member_Bitfields));
 
    marshalArgumentList(s,  e->argList);
    marshalArgumentLists(s, e->m_templateArgLists);
 
-   marshalQString(s, e->m_program);
-   marshalQString(s, e->initializer);
+   marshalQString(s, e->getData(EntryKey::Source_Text));
+   marshalQString(s, e->getData(EntryKey::Initial_Value));
+   marshalQString(s, e->getData(EntryKey::Include_File));
+   marshalQString(s, e->getData(EntryKey::Include_Name));
+   marshalQString(s, e->getData(EntryKey::Main_Docs));
 
-   marshalQString(s, e->includeFile);
-   marshalQString(s, e->includeName);
-   marshalQString(s, e->doc);
    marshalInt(s,     e->docLine);
-   marshalQString(s, e->docFile);
-   marshalQString(s, e->brief);
+
+   marshalQString(s, e->getData(EntryKey::MainDocs_File));
+   marshalQString(s, e->getData(EntryKey::Brief_Docs));
+
    marshalInt(s,     e->briefLine);
-   marshalQString(s, e->briefFile);
-   marshalQString(s, e->inbodyDocs);
+   marshalQString(s, e->getData(EntryKey::Brief_File));
+   marshalQString(s, e->getData(EntryKey::Inbody_Docs));
    marshalInt(s,     e->inbodyLine);
-   marshalQString(s, e->inbodyFile);
-   marshalQString(s, e->relates);
+   marshalQString(s, e->getData(EntryKey::Inbody_File));
+   marshalQString(s, e->getData(EntryKey::Related_Class));
    marshalInt(s,     e->relatesType);
 
-   marshalQString(s, e->m_read);
-   marshalQString(s, e->m_write);
-   marshalQString(s, e->m_reset);
-   marshalQString(s, e->m_notify);
-   marshalQString(s, e->m_revision);
-   marshalQString(s, e->m_designable);
-   marshalQString(s, e->m_scriptable);
-   marshalQString(s, e->m_stored);
-   marshalQString(s, e->m_user);
+   marshalQString(s, e->getData(EntryKey::Read_Property));
+   marshalQString(s, e->getData(EntryKey::Write_Property));
+   marshalQString(s, e->getData(EntryKey::Reset_Property));
+   marshalQString(s, e->getData(EntryKey::Notify_Property));
+   marshalQString(s, e->getData(EntryKey::Revision_Property));
+   marshalQString(s, e->getData(EntryKey::Designable_Property));
+   marshalQString(s, e->getData(EntryKey::Scriptable_Property));
+   marshalQString(s, e->getData(EntryKey::Stored_Property));
+   marshalQString(s, e->getData(EntryKey::User_Property));
 
-   marshalQString(s, e->inside);
-   marshalQString(s, e->exception);
+   marshalQString(s, e->getData(EntryKey::Class_Name));
+   marshalQString(s, e->getData(EntryKey::Exception_Spec));
+
    marshalArgumentList(s, e->typeConstr);
    marshalInt(s, e->bodyLine);
    marshalInt(s, e->endBodyLine);
@@ -248,14 +253,15 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
    marshalGroupingList(s,    e->m_groups);
    marshalSectionInfoList(s, e->m_anchors);
 
-   marshalQString(s,         e->fileName);
+   marshalQString(s,         e->getData(EntryKey::File_Name));
+
    marshalInt(s,             e->startLine);
    marshalItemInfoList(s,    e->m_specialLists);
    marshalInt(s,             e->lang);
    marshalBool(s,            e->hidden);
    marshalBool(s,            e->artificial);
    marshalInt(s,             e->groupDocType);
-   marshalQString(s,         e->id);
+   marshalQString(s,         e->getData(EntryKey::Clang_Id));
 }
 
 void marshalEntryTree(StorageIntf *s, QSharedPointer<Entry> e)
@@ -481,7 +487,8 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    assert(header == HEADER);
 
    e->name             = unmarshalQString(s);
-   e->type             = unmarshalQString(s);
+   e->setData(EntryKey::Member_Type,       unmarshalQString(s));
+
    e->section          = unmarshalInt(s);
    e->protection       = static_cast<Protection>(unmarshalInt(s));
    e->mtype            = static_cast<MethodTypes>(unmarshalInt(s));
@@ -494,41 +501,44 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->callGraph        = unmarshalBool(s);
    e->callerGraph      = unmarshalBool(s);
    e->virt             = static_cast<Specifier>(unmarshalInt(s));
-   e->args             = unmarshalQString(s);
-   e->bitfields        = unmarshalQString(s);
+
+   e->setData(EntryKey::Member_Args,       unmarshalQString(s));
+   e->setData(EntryKey::Member_Bitfields,  unmarshalQString(s));
 
    e->argList            = unmarshalArgumentList(s);
    e->m_templateArgLists = unmarshalArgumentLists(s);
 
-   e->m_program        = unmarshalQString(s);
-   e->initializer      = unmarshalQString(s);
+   e->setData(EntryKey::Source_Text,       unmarshalQString(s));
+   e->setData(EntryKey::Initial_Value,     unmarshalQString(s));
+   e->setData(EntryKey::Include_File,      unmarshalQString(s));
+   e->setData(EntryKey::Include_Name,      unmarshalQString(s));
+   e->setData(EntryKey::Main_Docs,         unmarshalQString(s));
 
-   e->includeFile      = unmarshalQString(s);
-   e->includeName      = unmarshalQString(s);
-   e->doc              = unmarshalQString(s);
    e->docLine          = unmarshalInt(s);
-   e->docFile          = unmarshalQString(s);
-   e->brief            = unmarshalQString(s);
+
+   e->setData(EntryKey::MainDocs_File,     unmarshalQString(s));
+   e->setData(EntryKey::Brief_Docs,        unmarshalQString(s));
    e->briefLine        = unmarshalInt(s);
-   e->briefFile        = unmarshalQString(s);
-   e->inbodyDocs       = unmarshalQString(s);
+   e->setData(EntryKey::Brief_File,        unmarshalQString(s));
+   e->setData(EntryKey::Inbody_Docs,       unmarshalQString(s));
    e->inbodyLine       = unmarshalInt(s);
-   e->inbodyFile       = unmarshalQString(s);
-   e->relates          = unmarshalQString(s);
+   e->setData(EntryKey::Inbody_File,       unmarshalQString(s));
+   e->setData(EntryKey::Related_Class,     unmarshalQString(s));
    e->relatesType      = static_cast<RelatesType>(unmarshalInt(s));
 
-   e->m_read           = unmarshalQString(s);
-   e->m_write          = unmarshalQString(s);
-   e->m_reset          = unmarshalQString(s);
-   e->m_notify         = unmarshalQString(s);
-   e->m_revision       = unmarshalQString(s);
-   e->m_designable     = unmarshalQString(s);
-   e->m_scriptable     = unmarshalQString(s);
-   e->m_stored         = unmarshalQString(s);
-   e->m_user           = unmarshalQString(s);
+   e->setData(EntryKey::Read_Property,       unmarshalQString(s));
+   e->setData(EntryKey::Write_Property,      unmarshalQString(s));
+   e->setData(EntryKey::Reset_Property,      unmarshalQString(s));
+   e->setData(EntryKey::Notify_Property,     unmarshalQString(s));
+   e->setData(EntryKey::Revision_Property,   unmarshalQString(s));
+   e->setData(EntryKey::Designable_Property, unmarshalQString(s));
+   e->setData(EntryKey::Scriptable_Property, unmarshalQString(s));
+   e->setData(EntryKey::Stored_Property,     unmarshalQString(s));
+   e->setData(EntryKey::User_Property,       unmarshalQString(s));
 
-   e->inside           = unmarshalQString(s);
-   e->exception        = unmarshalQString(s);
+   e->setData(EntryKey::Class_Name,          unmarshalQString(s));
+   e->setData(EntryKey::Exception_Spec,      unmarshalQString(s));
+
    e->typeConstr       = unmarshalArgumentList(s);
    e->bodyLine         = unmarshalInt(s);
    e->endBodyLine      = unmarshalInt(s);
@@ -538,14 +548,16 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    e->m_groups         = unmarshalGroupingList(s);
    e->m_anchors        = unmarshalSectionInfoList(s);
 
-   e->fileName         = unmarshalQString(s);
+   e->setData(EntryKey::File_Name,    unmarshalQString(s));
+
    e->startLine        = unmarshalInt(s);
    e->m_specialLists   = unmarshalItemInfoList(s);
    e->lang             = static_cast<SrcLangExt>(unmarshalInt(s));
    e->hidden           = unmarshalBool(s);
    e->artificial       = unmarshalBool(s);
    e->groupDocType     = static_cast<Entry::GroupDocType>(unmarshalInt(s));
-   e->id               = unmarshalQString(s);
+
+   e->setData(EntryKey::Clang_Id,    unmarshalQString(s));
 
    return e;
 }

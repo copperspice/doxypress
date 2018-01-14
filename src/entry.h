@@ -20,20 +20,19 @@
 
 #include <bitset>
 
-#include <QString>
 #include <QFile>
+#include <QFlatMap>
+#include <QString>
 #include <QVector>
 
 #include <types.h>
-
 #include <arguments.h>
 #include <section.h>
 
-class EntryNav;
+class MiniEntry;
 class FileDef;
 class FileStorage;
 class StorageIntf;
-
 struct ListItemInfo;
 
 // stores information about an inheritance relationship
@@ -50,7 +49,7 @@ struct BaseInfo {
 struct TagInfo {
 
    bool isEmpty() const {
-      if (tagName.isEmpty() && fileName.isEmpty() && anchor.isEmpty()) {
+      if (tag_Name.isEmpty() && tag_FileName.isEmpty() && tag_Anchor.isEmpty()) {
          return true;
       } else {
          return false;
@@ -58,17 +57,54 @@ struct TagInfo {
    }
 
    void clear() {
-      tagName  = "";
-      fileName = "";
-      anchor   = "";
+      tag_Name     = "";
+      tag_FileName = "";
+      tag_Anchor   = "";
    }
 
-   QString tagName;
-   QString fileName;
-   QString anchor;
+   QString tag_Name;
+   QString tag_FileName;
+   QString tag_Anchor;
 };
 
-// stores information about an entity found in the source code
+// used in m_entryMap
+enum class EntryKey {
+   File_Name,                      // file name this entry was extracted from            filename
+
+   Brief_Docs,                     // brief description (doc block)                      brief
+   Brief_File,                     // file in which the brief desc. was found            briefFile
+   Main_Docs,                      // documentation block (partly parsed)                doc
+   MainDocs_File,                  // file in which the documentation was found          docFile
+   Inbody_Docs,                    // documentation inside the body of a function        inbodyDocs
+   Inbody_File,                    // file in which the body doc was found               inbodyFile
+   Class_Name,                     // name of the class in which documents are found     inside
+
+   Include_File,                   // include file (2nd arg of \\class, must be unique)
+   Include_Name,                   // include name (3rd arg of \\class)
+   Source_Text,                    // the program text                                    m_program
+   Clang_Id,                       // libclang id
+
+   Member_Type,                    // member type                                         type
+   Member_Args,                    // member argument string                              args
+   Member_Bitfields,               // member's bit fields                                 bitfields
+
+   Exception_Spec,                 // throw specification                                 exception
+   Related_Class,                  // related class (doc block)                           relates
+   Initial_Value,                  // initial value (for variables)                       Initializer
+
+   // copperspice properties
+   Read_Property,
+   Write_Property,
+   Reset_Property,
+   Notify_Property,
+   Revision_Property,
+   Designable_Property,
+   Scriptable_Property,
+   Stored_Property,
+   User_Property
+};
+
+// store information about an entity found in the source code
 class Entry
 {
  public:
@@ -128,7 +164,6 @@ class Entry
    };
 
    enum Virtue {
-
       // class specifiers
       AbstractClass,
       Exception,
@@ -266,8 +301,8 @@ class Entry
    ~Entry();
 
    void addSpecialListItem(const QString &listName, int index);
-   void createNavigationIndex(QSharedPointer<EntryNav> rootNav, FileStorage &storage, QSharedPointer<FileDef> fd,
-                              QSharedPointer<Entry> self);
+   void createNavigationIndex(QSharedPointer<MiniEntry> ptr_miniEntry, FileStorage &storage,
+                  QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
    void setParent(QSharedPointer<Entry> parent) {
       m_parent = parent;
@@ -283,16 +318,52 @@ class Entry
       return m_sublist;
    }
 
-   // adds entry e as a child to this entry
+   // adds entry E as a child to this entry
    void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self);
 
-   // Removes entry e from the list of children
+   // Removes entry E from the list of children
    void removeSubEntry(QSharedPointer<Entry> e);
 
    // restore the state of this Entry to the default value when constructed
    void reset();
 
- public:
+   void setData(EntryKey key, QString data)  {
+
+      if (! data.isEmpty() || m_entryMap.contains(key)) {
+         m_entryMap.insert(key, data);
+      }
+   }
+
+   void appendData(EntryKey key, QString data)  {
+
+      auto iter = m_entryMap.find(key);
+
+      if (iter == m_entryMap.end()) {
+         m_entryMap.insert(key, data);
+
+      } else {
+         iter.value() += data;
+
+      }
+   }
+
+   void prependData(EntryKey key, QString data)  {
+
+      auto iter = m_entryMap.find(key);
+
+      if (iter == m_entryMap.end()) {
+         m_entryMap.insert(key, data);
+
+      } else {
+         iter.value().prepend(data);
+
+      }
+   }
+
+   QString getData(EntryKey key) const {
+      return m_entryMap.value(key);
+   }
+
    TagInfo       m_tagInfoEntry;   // tag file info
    ArgumentList  argList;          // member arguments as a list
    ArgumentList  typeConstr;       // where clause (C#) for type constraints
@@ -304,7 +375,7 @@ class Entry
    GroupDocType groupDocType;
    SrcLangExt   lang;              // programming language in which this entry was found
 
-   Traits m_traits;
+   Traits       m_traits;
 
    int  section;                   // entry type (see Sections);
    int  initLines;                 // define/variable initializer lines to show
@@ -323,42 +394,10 @@ class Entry
    bool subGrouping;               // automatically group class members ?
    bool callGraph;                 // do we need to draw the call graph ?
    bool callerGraph;               // do we need to draw the caller graph ?
+   bool hidden;                    // does this represent an entity that is hidden from the output
+   bool artificial;                // artificially introduced item
 
-   QString   type;                 // member type
-   QString   name;                 // member name
-   QString   args;                 // member argument string
-   QString   bitfields;            // member's bit fields
-   QString   m_program;            // the program text
-   QString   initializer;          // initial value (for variables)
-   QString   includeFile;          // include file (2 arg of \\class, must be unique)
-   QString   includeName;          // include name (3 arg of \\class)
-   QString   doc;                  // documentation block (partly parsed)
-   QString   docFile;              // file in which the documentation was found
-   QString   brief;                // brief description (doc block)
-   QString   briefFile;            // file in which the brief desc. was found
-   QString   inbodyDocs;           // documentation inside the body of a function
-   QString   inbodyFile;           // file in which the body doc was found
-   QString   relates;              // related class (doc block)
-
-   QString   m_read;               // property read
-   QString   m_write;              // property write
-
-   // copperspice - additional properties
-   QString   m_reset;
-   QString   m_notify;
-   QString   m_revision;
-   QString   m_designable;
-   QString   m_scriptable;
-   QString   m_stored;
-   QString   m_user;
-
-   QString   inside;               // name of the class in which documents are found
-   QString   exception;            // throw specification
-   QString	 fileName;             // file this entry was extracted from
-   QString   id;                   // libclang id
-
-   bool      hidden;               // does this represent an entity that is hidden from the output
-   bool      artificial;           // Artificially introduced item
+   QString  name;                  // member name
 
    QVector<ArgumentList>  m_templateArgLists;    // template argument declarations
    QVector<BaseInfo>      extends;               // list of base classes
@@ -366,7 +405,7 @@ class Entry
    QVector<SectionInfo>   m_anchors;             // list of anchors defined in this entry
    QVector<ListItemInfo>  m_specialLists;        // special lists (test/todo/bug/deprecated/..)
 
-   // return the command name used to define GROUPDOC_SEC
+   // return command name used to define GROUPDOC_SEC
    QString groupDocCmd() const {
 
       switch ( groupDocType ) {
@@ -405,29 +444,31 @@ class Entry
    }
 
  private:
-   void createSubtreeIndex(QSharedPointer<EntryNav> nav, FileStorage &storage,
+   Entry &operator=(const Entry &);
+
+   void createSubtreeIndex(QSharedPointer<MiniEntry> ptr_miniEntry, FileStorage &storage,
                   QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
-   QWeakPointer<Entry> m_parent;                // parent node in the tree
-   QVector<QSharedPointer<Entry>> m_sublist;    // entries that are children
+   QFlatMap<EntryKey, QString> m_entryMap;        // contains details about this entry
 
-   Entry &operator=(const Entry &);
+   QWeakPointer<Entry> m_parent;                  // parent node in the tree
+   QVector<QSharedPointer<Entry>> m_sublist;      // entries which are children
 };
 
-/** Wrapper for a node in the Entry tree.
- *
- *  Allows navigating through the Entry tree to load and storing Entry objects persistently to disk
+/** For a node in the master tree, where each node is an Entry *
+ *  Allows navigating through the master tree to load and store Entry objects persistently to disk
  */
-class EntryNav
+class MiniEntry
 {
  public:
-   EntryNav(QSharedPointer<EntryNav> parent, QSharedPointer<Entry> e);
-   ~EntryNav();
+   MiniEntry(QSharedPointer<MiniEntry> parent, QSharedPointer<Entry> e);
+   ~MiniEntry();
 
-   void addChild(QSharedPointer<EntryNav> e);
+   void addChild(QSharedPointer<MiniEntry> ptr_miniEntry);
+   void setEntry(QSharedPointer<Entry> e);
+
    bool loadEntry(FileStorage &storage);
    bool saveEntry(QSharedPointer<Entry> e, FileStorage &storage);
-   void setEntry(QSharedPointer<Entry> e);
    void releaseEntry();
 
    void changeSection(int section) {
@@ -462,11 +503,11 @@ class EntryNav
       return m_tagInfoNav;
    }
 
-   const QVector<QSharedPointer<EntryNav>> &children() const {
+   const QVector<QSharedPointer<MiniEntry>> &children() const {
       return m_subList;
    }
 
-   QSharedPointer<EntryNav> parent() const {
+   QSharedPointer<MiniEntry> parent() const {
       return m_parent.toStrongRef();
    }
 
@@ -475,8 +516,14 @@ class EntryNav
    }
 
  private:
-   QWeakPointer<EntryNav> m_parent;                // parent node in the tree
-   QVector<QSharedPointer<EntryNav>>  m_subList;   // entries that are children
+   QWeakPointer<MiniEntry> m_parent;                // parent node in the tree
+   QVector<QSharedPointer<MiniEntry>> m_subList;    // entries that are children
+
+   QSharedPointer<FileDef> m_fileDef;
+   QSharedPointer<Entry>   m_info;
+
+   bool         m_noLoad;
+   int64_t      m_offset;
 
    int          m_section;     // entry type (see Sections);
    QString	    m_type;        // member type
@@ -484,12 +531,6 @@ class EntryNav
 
    TagInfo      m_tagInfoNav;  // tag file info
    SrcLangExt   m_lang;        // programming language in which this entry was found
-
-   QSharedPointer<FileDef> m_fileDef;
-   QSharedPointer<Entry>   m_info;
-
-   int64_t      m_offset;
-   bool         m_noLoad;
 };
 
 #endif

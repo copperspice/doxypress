@@ -213,7 +213,7 @@ class Doxy_Globals
 
       static QDateTime dateTime;
 
-      static QHash<QString, QSharedPointer<EntryNav>>   g_classEntries;
+      static QHash<QString, QSharedPointer<MiniEntry>>   g_classEntries;
 
       static QStringList               g_inputFiles;
       static QSet<QString>             g_compoundKeywordDict;

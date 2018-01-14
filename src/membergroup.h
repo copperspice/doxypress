@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -44,7 +44,7 @@ class MemberGroup : public EnableSharedFromThis
 {
   public:
    MemberGroup();
-   MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docs,    
+   MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docs,
          const QString &docFile, int docLine);
 
    ~MemberGroup();
@@ -58,14 +58,14 @@ class MemberGroup : public EnableSharedFromThis
    }
    void insertMember(QSharedPointer<MemberDef> md);
    void setAnchors();
-   void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+   void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
-   void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd, 
+   void writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool showInline = false);
 
-   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container, 
+   void writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
                   bool showEnumValues, bool showInline);
 
    void writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container);
@@ -113,14 +113,14 @@ class MemberGroup : public EnableSharedFromThis
 
    QString anchor() const;
 
-   QString docFile() const {  
+   QString docFile() const {
       return m_docFile;
-   }  
-   
-   int docLine() const { 
+   }
+
+   int docLine() const {
       return m_docLine;
    }
- 
+
  private:
    QSharedPointer<MemberList> memberList;      // list of all members in the group
    QSharedPointer<MemberList> inDeclSection;
@@ -135,10 +135,10 @@ class MemberGroup : public EnableSharedFromThis
 
    QSharedPointer<Definition> scope;
    QSharedPointer<Definition> m_parent;
-  
+
    bool inSameSection;
    int  m_numDecMembers;
-   int  m_numDocMembers; 
+   int  m_numDocMembers;
 
    QVector<ListItemInfo> m_xrefListItems;
 };
@@ -154,10 +154,11 @@ struct MemberGroupInfo {
    void setRefItems(const QVector<ListItemInfo> &list);
 
    QString header;
+   QString compoundName;
    QString doc;
    QString docFile;
+
    int docLine;
-   QString compoundName;
 
    QVector<ListItemInfo> m_listInfo;
 };

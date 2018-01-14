@@ -185,10 +185,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             current->section     = Entry::CLASS_SEC;
             current->name        = name;
-            current->type        = "class";
+
+            current->setData(EntryKey::Member_Type,  "class");
+            current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
             current->lang        = SrcLangExt_Cpp;
-            current->fileName    = toQString(location.getManager().getFilename(location));
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
@@ -269,10 +270,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             current->section     = Entry::CLASS_SEC;
             current->name        = name;
-            current->type        = "struct";
+
+            current->setData(EntryKey::Member_Type,  "struct");
+            current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
             current->lang        = SrcLangExt_Cpp;
-            current->fileName    = toQString(location.getManager().getFilename(location));
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
@@ -302,10 +304,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             current->section     = Entry::CLASS_SEC;
             current->name        = name;
-            current->type        = " union";
+
+            current->setData(EntryKey::Member_Type,  " union");
+            current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
             current->lang        = SrcLangExt_Cpp;
-            current->fileName    = toQString(location.getManager().getFilename(location));
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
@@ -502,13 +505,14 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             current->section     = Entry::FUNCTION_SEC;
             current->name        = name;
-            current->type        = returnType;
 
-            current->args        = args;
+            current->setData(EntryKey::Member_Type,  returnType);
+            current->setData(EntryKey::Member_Args,  args);
+            current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
+
             current->argList     = argList;
 
             current->lang        = SrcLangExt_Cpp;
-            current->fileName    = toQString(location.getManager().getFilename(location));
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
@@ -578,14 +582,15 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             current->section     = Entry::FUNCTION_SEC;
             current->name        = name;
-            current->type        = returnType;
 
-            current->args        = args;
+            current->setData(EntryKey::Member_Type,  returnType);
+            current->setData(EntryKey::Member_Args,  args);
+            current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
+
             current->argList     = argList;
             current->protection  = getAccessSpecifier(node);
 
             current->lang        = SrcLangExt_Cpp;
-            current->fileName    = toQString(location.getManager().getFilename(location));
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
@@ -633,19 +638,20 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->section     = Entry::VARIABLE_SEC;
          current->name        = name;
-         current->type        = type;
 
-         current->args        = args;
+         current->setData(EntryKey::Member_Type,  type);
+         current->setData(EntryKey::Member_Args,  args);
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
+
          current->protection  = getAccessSpecifier(node);
 
          current->lang        = SrcLangExt_Cpp;
-         current->fileName    = toQString(location.getManager().getFilename(location));
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
 
          if (node->isMutable()) {
-            current->type.prepend("mutable ");
+            current->prependData(EntryKey::Member_Type,  "mutable ");
             current->m_traits.setTrait(Entry::Virtue::Mutable);
          }
 
@@ -693,12 +699,12 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->section     = Entry::ENUM_SEC;
          current->name        = className + "::" + name;
-         current->type        = "enum";
+
+         current->setData(EntryKey::Member_Type,  "enum");
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
          current->protection  = getAccessSpecifier(node);
-
          current->lang        = SrcLangExt_Cpp;
-         current->fileName    = toQString(location.getManager().getFilename(location));
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -755,12 +761,13 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->section     = Entry::VARIABLE_SEC;
          current->name        = name;
-         current->type        = "@";
+
+         current->setData(EntryKey::Member_Type,  "@");
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
          current->protection  = getAccessSpecifier(node);
 
          current->lang        = SrcLangExt_Cpp;
-         current->fileName    = toQString(location.getManager().getFilename(location));
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -774,7 +781,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             llvm::raw_string_ostream tStream(tString);
             tExpr->printPretty(tStream, 0, m_policy);
 
-            current->initializer = " = " + toQString(tStream.str());
+            current->setData(EntryKey::Initial_Value, " = " + toQString(tStream.str()));
          }
 
          parentEntry->addSubEntry(current, parentEntry);
@@ -812,18 +819,19 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->section     = Entry::VARIABLE_SEC;
          current->name        = name;
-         current->type        = toQString(node->getType());
+
+         current->setData(EntryKey::Member_Type,  toQString(node->getType()));
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
          current->protection  = getAccessSpecifier(node);
 
          current->lang        = SrcLangExt_Cpp;
-         current->fileName    = toQString(location.getManager().getFilename(location));
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
 
          if (node->getStorageClass() == clang::SC_Static) {
-            current->type.prepend("static ");
+            current->prependData(EntryKey::Member_Type,  "static ");
             current->stat     = true;
          }
 
@@ -930,15 +938,15 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->section     = Entry::FUNCTION_SEC;
          current->name        = name;
-         current->type        = returnType;
 
-         current->args        = args;
+         current->setData(EntryKey::Member_Type,  returnType);
+         current->setData(EntryKey::Member_Args,  args);
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
+
          current->argList     = argList;
-
          current->protection  = getAccessSpecifier(node);
 
          current->lang        = SrcLangExt_Cpp;
-         current->fileName    = toQString(location.getManager().getFilename(location));
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -966,15 +974,13 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->name        = name;
 
          current->lang        = SrcLangExt_Cpp;
-//       current->fileName    = toQString(location.getManager().getFilename(location));
+//       current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 //       current->startLine   = location.getSpellingLineNumber();
 //       current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
 
-
          // printf("\n  BROOM - Macro Definition  name: %s   line: %d  col: %d \n",
          //         csPrintable(name), current->startLine, current->startColumn );
-
 
          s_current_root->addSubEntry(current, s_current_root);
 
@@ -1016,10 +1022,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->section     = Entry::NAMESPACE_SEC;
          current->name        = name;
-         current->type        = "namespace";
+
+         current->setData(EntryKey::Member_Type,  "namespace");
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
          current->lang        = SrcLangExt_Cpp;
-         current->fileName    = toQString(location.getManager().getFilename(location));
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -1029,7 +1036,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             if (extractAnonNS) {
                // use visible name
-               current->name = "anonymous_namespace{" + stripPath(current->fileName) + "}";
+               current->name = "anonymous_namespace{" + stripPath(current->getData(EntryKey::File_Name)) + "}";
 
             } else {
                // use invisible name
@@ -1125,12 +1132,12 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->section     = Entry::VARIABLE_SEC;
          current->name        = name;
-         current->type        = "typedef " + toQString(node->getUnderlyingType());
+
+         current->setData(EntryKey::Member_Type,  "typedef " + toQString(node->getUnderlyingType()));
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
          current->protection  = getAccessSpecifier(node);
-
          current->lang        = SrcLangExt_Cpp;
-         current->fileName    = toQString(location.getManager().getFilename(location));
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;

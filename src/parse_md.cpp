@@ -2854,19 +2854,17 @@ QString markdownFileNameToId(const QString &fileName)
 void MarkdownFileParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                   enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
+   static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
    QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-   static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
-
-   current->lang = SrcLangExt_Markdown;
-   current->fileName = fileName;
-   current->docFile  = fileName;
-   current->docLine  = 1;
+   current->lang    = SrcLangExt_Markdown;
+   current->setData(EntryKey::File_Name, fileName);
+   current->setData(EntryKey::MainDocs_File, fileName);
+   current->docLine = 1;
 
    QString id;
    QString docs    = fileBuf;
    QString title   = extractPageTitle(docs, id).trimmed();
-
    QString titleFn = QFileInfo(fileName).baseName();
    QString fn      = QFileInfo(fileName).fileName();
 
@@ -2914,12 +2912,13 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
              false, false, false, prot, position, needsEntry)) {
 
       if (needsEntry) {
-         QString docFile = current->docFile;
+         QString docFile = current->getData(EntryKey::MainDocs_File);
          root->addSubEntry(current, root);
 
          current = QMakeShared<Entry>();
          current->lang = SrcLangExt_Markdown;
-         current->docFile = docFile;
+
+         current->setData(EntryKey::MainDocs_File, docFile);
          current->docLine = lineNr;
       }
    }

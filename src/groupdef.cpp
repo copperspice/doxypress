@@ -1334,10 +1334,10 @@ void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGr
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
 
          if (gd == subGroup) {
-            warn(root->fileName, root->startLine, "Refusing to add group %s to itself", qPrintable(gd->name()));
+            warn(root->getData(EntryKey::File_Name), root->startLine, "Refusing to add group %s to itself", csPrintable(gd->name()));
 
          } else if (subGroup->findGroup(gd)) {
-            warn(root->fileName, root->startLine, "Refusing to add group %s to group %s, since the latter is already a "
+            warn(root->getData(EntryKey::File_Name), root->startLine, "Refusing to add group %s to group %s, since the latter is already a "
                  "subgroup of the former\n", qPrintable(subGroup->name()), qPrintable(gd->name()));
 
          } else if (! gd->findGroup(subGroup)) {
@@ -1362,7 +1362,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname)) && g.pri >= pri) {
 
          if (fgd && gd != fgd && g.pri == pri) {
-            warn(root->fileName, root->startLine, "Member %s found in multiple %s groups. "
+            warn(root->getData(EntryKey::File_Name), root->startLine, "Member %s found in multiple %s groups. "
                  "The member will be put in group %s, and not in group %s",
                  csPrintable(md->name()), csPrintable(Grouping::getGroupPriName(pri)),
                  csPrintable(gd->name()), csPrintable(fgd->name()) );
@@ -1395,16 +1395,16 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
          } else {
 
             if (md->getGroupPri() == pri) {
-               if (!root->doc.isEmpty() && !md->getGroupHasDocs()) {
+               if (! root->getData(EntryKey::Main_Docs).isEmpty() && !md->getGroupHasDocs()) {
                   moveit = true;
 
-               } else if (! root->doc.isEmpty() && md->getGroupHasDocs()) {
+               } else if (! root->getData(EntryKey::Main_Docs).isEmpty() && md->getGroupHasDocs()) {
 
                   warn(md->getGroupFileName(), md->getGroupStartLine(),
                        "Member documentation for %s found several times in %s groups\n"
                        "%s:%d: The member will remain in group %s, and will not be put into group %s",
                        csPrintable(md->name()), csPrintable(Grouping::getGroupPriName(pri)),
-                       csPrintable(root->fileName), root->startLine, csPrintable(mgd->name()), csPrintable(fgd->name()) );
+                       csPrintable(root->getData(EntryKey::File_Name)), root->startLine, csPrintable(mgd->name()), csPrintable(fgd->name()) );
                }
             }
          }
@@ -1419,11 +1419,11 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
          bool success = fgd->insertMember(md);
 
          if (success) {
-            md->setGroupDef(fgd, pri, root->fileName, root->startLine, !root->doc.isEmpty());
+            md->setGroupDef(fgd, pri, root->getData(EntryKey::File_Name), root->startLine, ! root->getData(EntryKey::Main_Docs).isEmpty());
             QSharedPointer<ClassDef> cd = md->getClassDefOfAnonymousType();
 
             if (cd) {
-               cd->setGroupDefForAllMembers(fgd, pri, root->fileName, root->startLine, root->doc.length() != 0);
+               cd->setGroupDefForAllMembers(fgd, pri, root->getData(EntryKey::File_Name), root->startLine, root->getData(EntryKey::Main_Docs).length() != 0);
             }
          }
       }
