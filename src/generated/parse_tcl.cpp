@@ -1036,7 +1036,7 @@ static struct {
    ParserInterface *this_parser;        // myself
 
    int command;          // true if command was found
-   int comment;          // set true if comment was scaned
+   int comment;          // set true if comment was scanned
    int brace_level;      // bookkeeping of braces
    int bracket_level;    // bookkeeping of brackets
    int bracket_quote;    // bookkeeping of quotes (toggles)
@@ -1096,10 +1096,11 @@ QSharedPointer<Entry> tcl_entry_new()
    myEntry->section    = Entry::EMPTY_SEC;
 
    myEntry->name       = "";
-   myEntry->brief      = "";
    myEntry->protection = Public;
-   myEntry->fileName   = tcl.file_name;
    myEntry->lang       = SrcLangExt_Tcl;
+
+   myEntry->setData(EntryKey::File_Name,    tcl.file_name);
+   myEntry->setData(EntryKey::Brief_Docs,   "");
 
    initGroupInfo(myEntry);
 
@@ -2014,12 +2015,13 @@ YY_DECL {
 
             {
                yy_pop_state();
-               if (tcl.string_commentline.length())
-               {
-                  tcl.entry_current->brief = tcl.string_commentline;
+
+               if (tcl.string_commentline.length()) {
+                  tcl.entry_current->setData(EntryKey::Brief_Docs,  tcl.string_commentline);
+                  tcl.entry_current->setData(EntryKey::Brief_File,  tcl.file_name);
                   tcl.entry_current->briefLine = tcl.line_commentline;
-                  tcl.entry_current->briefFile = tcl.file_name;
                }
+
                yyless(0);
                tcl_command(-1, tcl.string_commentcodify);
                tcl.string_commentline = "";
@@ -3917,7 +3919,7 @@ static void tcl_command_ArgList(QString &arglist)
    }
 
    arglist = myArglist;
-   tcl.entry_current->args = arglist;
+   tcl.entry_current->setData(EntryKey::Member_Args, arglist);
 }
 
 //! Create link.
@@ -5351,17 +5353,17 @@ void TclLanguageParser::parseInput(const QString &fileName, const QString &input
    groupEnterFile(fileName, tclscannerYYlineno);
 
    tcl_init();
-   tcl.code = NULL;
+   tcl.code        = NULL;
    tcl.file_name   = fileName;
    tcl.this_parser = this;
-   tcl.entry_main          = root; /* toplevel entry */
+   tcl.entry_main  = root;       /* toplevel entry */
    tcl_parse("", "");
 
    groupLeaveFile(tcl.file_name, tclscannerYYlineno);
-   root->m_program.resize(0);
+   root->setData(EntryKey::Source_Text, "");
    myFile.close();
 
-   printlex(tclscannerYY_flex_debug, FALSE, __FILE__, fileName);
+   printlex(tclscannerYY_flex_debug, false, __FILE__, fileName);
 }
 
 //! Parse file and codify.

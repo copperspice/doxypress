@@ -3522,7 +3522,7 @@ enum XRefKind {
 };
 
 enum OutputContext {
-  OutputDoc,
+  OutputMainDoc,
   OutputBrief,
   OutputXRef,
   OutputInbody
@@ -3556,31 +3556,34 @@ void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool fou
 void initGroupInfo(QSharedPointer<Entry> e);
 static void groupAddDocs(QSharedPointer<Entry> e);
 
-static ParserInterface *langParser;          // the language parser that is calling us
-static QString          inputString;         // input string
-static int              inputPosition;       // read pointer
+static ParserInterface *langParser;            // the language parser that is calling us
+static QString          inputString;           // input string
+static int              inputPosition;         // read pointer
 static int              prevPosition;
 static char *           s_bufferPosition;
 
-static QString          yyFileName;          // file name that is read from
-static int              yyLineNr;            // line number in the input
-static bool             inBody;              // was the comment found inside the body of a function?
-static OutputContext    inContext;           // are we inside the brief, details or xref part
-static bool             briefEndsAtDot;      // does the brief description stop at a dot?
-static QString          formulaText;         // Running text of a formula
-static QString          formulaEnv;          // environment name
-static int              formulaNewLines;     // amount of new lines in the formula
-static QString         *pOutputString;       // pointer to string to which the output is appended
-static QString          outputXRef;          // temp argument of todo/test/../xrefitem commands
-static QString          blockName;           // preformatted block name (e.g. verbatim, latexonly,...)
-static XRefKind         xrefKind;            // kind of cross-reference command
-static XRefKind         newXRefKind;         //
-static GuardType        guardType;           // kind of guard for conditional section
-static bool             enabledSectionFound;
-static QString          functionProto;       // function prototype
+static QString          yyFileName;            // file name that is read from
+static int              yyLineNr;              // line number in the input
+static bool             inBody;                // was the comment found inside the body of a function?
+static OutputContext    inContext;             // are we inside the brief, details or xref part
+static bool             briefEndsAtDot;        // does the brief description stop at a dot?
+static QString          formulaText;           // Running text of a formula
+static QString          formulaEnv;            // environment name
+static int              formulaNewLines;       // amount of new lines in the formula
 
-static QStack<GuardedSection> s_guards;      // tracks nested conditional sections (if, ifnot, ..)
-static QSharedPointer<Entry>  current;       // working entry
+static QString          s_outputXRef;          // tmp argument of todo/test/../xrefitem commands
+static QString          blockName;             // preformatted block name (e.g. verbatim, latexonly,...)
+static XRefKind         xrefKind;              // kind of cross-reference command
+static XRefKind         newXRefKind;
+static GuardType        guardType;             // kind of guard for conditional section
+static bool             enabledSectionFound;
+static QString          functionProto;         // function prototype
+
+static QSharedPointer<Entry>  s_docsEntry;     // which entry
+static EntryKey               s_docsEnum;      // which enum in EntryKey (brief, main, inbody)
+
+static QStack<GuardedSection> s_guards;        // tracks nested conditional sections (if, ifnot, ..)
+static QSharedPointer<Entry>  current;         // working entry
 
 static bool             s_needNewEntry;
 static int              s_docBlockContext;
@@ -3667,8 +3670,9 @@ static bool makeStructuralIndicator(Entry::Sections s)
   } else {
     s_needNewEntry     = true;
     current->section   = s;
-    current->fileName  = yyFileName;
     current->startLine = yyLineNr;
+
+    current->setData(EntryKey::File_Name, yyFileName);
     return false;
   }
 }
@@ -3729,9 +3733,9 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       item->text += " <p>";
 
       if (Doxy_Globals::markdownSupport) {
-         item->text += processMarkdown(yyFileName, yyLineNr, current, outputXRef);
+         item->text += processMarkdown(yyFileName, yyLineNr, current, s_outputXRef);
       } else {
-         item->text += outputXRef;
+         item->text += s_outputXRef;
       }
 
    } else {
@@ -3748,9 +3752,9 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       assert(item != 0);
 
       if (Doxy_Globals::markdownSupport) {
-         item->text = processMarkdown(yyFileName, yyLineNr, current, outputXRef);
+         item->text = processMarkdown(yyFileName, yyLineNr, current, s_outputXRef);
       } else {
-         item->text = outputXRef;
+         item->text = s_outputXRef;
       }
 
       item->listAnchor = anchorLabel;
@@ -3759,9 +3763,9 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       QString cmdString = QString("\\xrefitem %1 %2.").arg(listName).arg(itemId);
 
       if (inBody) {
-         docEntry->inbodyDocs += cmdString;
+         docEntry->appendData(EntryKey::Inbody_Docs, cmdString);
       } else {
-         docEntry->doc += cmdString;
+         docEntry->appendData(EntryKey::Main_Docs,   cmdString);
       }
 
       QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(anchorLabel);
@@ -3783,7 +3787,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       }
    }
 
-   outputXRef.resize(0);
+   s_outputXRef = "";
 }
 
 // Adds a formula text to the list/dictionary of formulas if it was
@@ -3942,45 +3946,55 @@ static inline void setOutput(OutputContext ctx)
    }
 
   switch(inContext) {
-      case OutputDoc:
+      case OutputMainDoc:
          if (oldContext != inContext) {
-            stripTrailingWhiteSpace(current->doc);
 
-            if (current->docFile.isEmpty()) {
-               current->docFile = yyFileName;
+            QString tmpDocs = current->getData(EntryKey::Main_Docs);
+            stripTrailingWhiteSpace(tmpDocs);
+            current->setData(EntryKey::Main_Docs, tmpDocs);
+
+            if (current->getData(EntryKey::MainDocs_File).isEmpty()) {
+               current->setData(EntryKey::MainDocs_File, yyFileName);
                current->docLine = yyLineNr;
             }
          }
-         pOutputString = &current->doc;
+
+         s_docsEntry = current;
+         s_docsEnum  = EntryKey::Main_Docs;
+
          break;
 
       case OutputBrief:
          if (oldContext != inContext) {
 
-            if (current->briefFile.isEmpty()) {
-               current->briefFile = yyFileName;
+            if (current->getData(EntryKey::Brief_File).isEmpty()) {
+               current->setData(EntryKey::Brief_File,   yyFileName);
                current->briefLine = yyLineNr;
             }
          }
 
-         if (current->brief.trimmed().isEmpty())  {
+         if (current->getData(EntryKey::Brief_Docs).trimmed().isEmpty())  {
             // we only want one brief description even if multiple are given
-            pOutputString = &current->brief;
+            s_docsEntry = current;
+            s_docsEnum  = EntryKey::Brief_Docs;
 
          } else {
-            pOutputString = &current->doc;
-            inContext = OutputDoc;             // need to switch to detailed docs, see bug 631380
+            s_docsEntry  = current;
+            s_docsEnum   = EntryKey::Main_Docs;
+
+            inContext    = OutputMainDoc;             // need to switch to detailed docs
          }
          break;
 
-      case OutputXRef:
-         pOutputString = &outputXRef;
-         // first item found, so can not append to previous
-         // xrefAppendFlag = false;
+      case OutputInbody:
+         s_docsEntry = current;
+         s_docsEnum  = EntryKey::Inbody_Docs;
          break;
 
-      case OutputInbody:
-         pOutputString = &current->inbodyDocs;
+      case OutputXRef:
+         // indicates s_outputXRef should be used for the output string
+         s_docsEntry = QSharedPointer<Entry>();
+
          break;
    }
 }
@@ -4003,29 +4017,40 @@ static void addAnchor(const QString &anchorName)
    }
 }
 
-// add a string in the output
-static inline void addOutput(const QString &s)
+// add a string to one of the three doc outputs
+static void addToOutput(const QString &str)
 {
-   *pOutputString += s;
+   if (s_docsEntry == nullptr) {
+      // indicates s_outputXRef should be used for the output string
+      s_outputXRef += str;
+
+   } else {
+      s_docsEntry->appendData(s_docsEnum, str);
+   }
 }
 
-static inline void addOutput(QChar s)
+static void addToOutput(QChar c)
 {
-   *pOutputString += s;
+   if (s_docsEntry == nullptr) {
+      // indicates s_outputXRef should be used for the output string
+      s_outputXRef += c;
+
+   } else {
+      s_docsEntry->appendData(s_docsEnum, c);
+   }
 }
 
-static void endBrief(bool addToOutput = true)
+static void endBrief(bool isOutput = true)
 {
-   if (! current->brief.trimmed().isEmpty()) {
-      // only go to the detailed description if we have
-      // found some brief description and not just whitespace
+   if (! current->getData(EntryKey::Brief_Docs).trimmed().isEmpty()) {
+      // only go to the detailed description if we found some brief description and not just whitespace
 
       briefEndsAtDot = false;
-      setOutput(OutputDoc);
+      setOutput(OutputMainDoc);
 
-      if (addToOutput) {
+      if (isOutput) {
          QString text = QString::fromUtf8(commentscanYYtext);
-         addOutput(text);
+         addToOutput(text);
       }
    }
 }
@@ -4434,7 +4459,7 @@ YY_RULE_SETUP
 {
       // escaped command
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 2:
@@ -4442,7 +4467,7 @@ YY_RULE_SETUP
 {
       // escaped command
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 3:
@@ -4450,7 +4475,7 @@ YY_RULE_SETUP
 {
       // mail address
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 4:
@@ -4458,7 +4483,7 @@ YY_RULE_SETUP
 {
       // quoted text
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 5:
@@ -4466,14 +4491,14 @@ YY_RULE_SETUP
 {
       // directory (or chain of commands)
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 {
       // HTML command ends a brief description
-      setOutput(OutputDoc);
+      setOutput(OutputMainDoc);
 
       // continue with the same input
       REJECT;
@@ -4484,7 +4509,7 @@ YY_RULE_SETUP
 {
       // HTML command that ends a brief description
       if (current->lang == SrcLangExt_CSharp) {
-         setOutput(OutputDoc);
+         setOutput(OutputMainDoc);
       }
 
       // continue with the same input
@@ -4496,7 +4521,7 @@ YY_RULE_SETUP
 {
       // start of a .NET XML style brief description
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
       setOutput(OutputBrief);
    }
 	YY_BREAK
@@ -4505,7 +4530,7 @@ YY_RULE_SETUP
 {
       // start of a .NET XML style detailed description
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
       setOutput(OutputBrief);
    }
 	YY_BREAK
@@ -4514,8 +4539,8 @@ YY_RULE_SETUP
 {
       // start of a .NET XML style detailed description
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
-      setOutput(OutputDoc);
+      addToOutput(text);
+      setOutput(OutputMainDoc);
    }
 	YY_BREAK
 case 11:
@@ -4523,7 +4548,7 @@ YY_RULE_SETUP
 {
       // end of a brief or detailed description
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 12:
@@ -4550,7 +4575,7 @@ YY_RULE_SETUP
          }
       }
 
-      addOutput(tag);
+      addToOutput(tag);
    }
 	YY_BREAK
 case 13:
@@ -4558,7 +4583,7 @@ YY_RULE_SETUP
 {
       insidePre = true;
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 14:
@@ -4566,14 +4591,14 @@ YY_RULE_SETUP
 {
       insidePre = false;
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 {
       // RCS tag which end a brief description
-      setOutput(OutputDoc);
+      setOutput(OutputMainDoc);
       REJECT;
    }
 	YY_BREAK
@@ -4586,7 +4611,7 @@ YY_RULE_SETUP
 case 17:
 YY_RULE_SETUP
 {
-      addOutput("\\endinternal ");
+      addToOutput("\\endinternal ");
 
       if (! s_processInternalDocs) {
          warn(yyFileName, yyLineNr, "Found \\endinternal without matching \\internal");
@@ -4620,7 +4645,7 @@ YY_RULE_SETUP
             briefEndsAtDot = false;
 
             // this command forces the end of brief description
-            setOutput(OutputDoc);
+            setOutput(OutputMainDoc);
          }
 
          if (cmdPtr->func && cmdPtr->func(cmdName)) {
@@ -4634,12 +4659,12 @@ YY_RULE_SETUP
 
          } else if (cmdPtr->func == nullptr) {
             // command without handler is processed later by parserdoc.cpp
-            addOutput(text);
+            addToOutput(text);
          }
 
       } else {
          // command not relevant
-         addOutput(text);
+         addToOutput(text);
       }
    }
 	YY_BREAK
@@ -4648,7 +4673,7 @@ YY_RULE_SETUP
 {
       // escaped formula command
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 20:
@@ -4731,7 +4756,7 @@ YY_RULE_SETUP
 {
       // escaped character
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 27:
@@ -4739,7 +4764,7 @@ YY_RULE_SETUP
 {
       // normal word
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 28:
@@ -4751,7 +4776,7 @@ YY_RULE_SETUP
 {
       // explicit end autolist: e.g "  ."
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 29:
@@ -4766,11 +4791,11 @@ YY_RULE_SETUP
 
          if (inContext != OutputXRef) {
             briefEndsAtDot = false;
-            setOutput(OutputDoc);
+            setOutput(OutputMainDoc);
          }
 
          QString text = QString::fromUtf8(commentscanYYtext);
-         addOutput(text);
+         addToOutput(text);
       }
    }
 	YY_BREAK
@@ -4780,11 +4805,11 @@ YY_RULE_SETUP
       // start of autolist
       if (inContext != OutputXRef) {
          briefEndsAtDot = false;
-         setOutput(OutputDoc);
+         setOutput(OutputMainDoc);
       }
 
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 32:
@@ -4796,7 +4821,7 @@ YY_RULE_SETUP
 {
       // horizontal line (dashed)
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 33:
@@ -4804,7 +4829,7 @@ YY_RULE_SETUP
 {
       // escaped mdash
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 34:
@@ -4812,7 +4837,7 @@ YY_RULE_SETUP
 {
       // escaped mdash
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 35:
@@ -4820,7 +4845,7 @@ YY_RULE_SETUP
 {
       // mdash
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(insidePre || Doxy_Globals::markdownSupport ? text : "&mdash;");
+      addToOutput(insidePre || Doxy_Globals::markdownSupport ? text : "&mdash;");
    }
 	YY_BREAK
 case 36:
@@ -4828,7 +4853,7 @@ YY_RULE_SETUP
 {
       // ndash
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(insidePre || Doxy_Globals::markdownSupport ? text : "&ndash;");
+      addToOutput(insidePre || Doxy_Globals::markdownSupport ? text : "&ndash;");
    }
 	YY_BREAK
 case 37:
@@ -4836,7 +4861,7 @@ YY_RULE_SETUP
 {
       // numbered item
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 38:
@@ -4844,7 +4869,7 @@ YY_RULE_SETUP
 {
       // . at start or in the middle of a word, or ellipsis
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 39:
@@ -4853,8 +4878,8 @@ YY_RULE_SETUP
       // . with escaped space
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      addOutput(text[0]);
-      addOutput(text[2]);
+      addToOutput(text[0]);
+      addToOutput(text[2]);
    }
 	YY_BREAK
 case 40:
@@ -4862,14 +4887,14 @@ YY_RULE_SETUP
 {
       // . with comma such as "e.g.,"
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 {
       // ellipsis with escaped space
-      addOutput("... ");
+      addToOutput("... ");
    }
 	YY_BREAK
 case 42:
@@ -4880,7 +4905,7 @@ YY_RULE_SETUP
 {
       // internal ellipsis
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 43:
@@ -4895,16 +4920,16 @@ YY_RULE_SETUP
          // see bug 613024, need to put the newlines after ending the XRef section.
 
          if (! s_insideParBlock) {
-            setOutput(OutputDoc);
+            setOutput(OutputMainDoc);
          }
 
          for (int i = 0; i < text.length();  ) {
             if (text[i] == '\n') {
-               addOutput('\n');
+               addToOutput('\n');
                i++;
 
             } else if (text.mid(i) == "\\_linebr")  {
-               addOutput('\n');
+               addToOutput('\n');
                i += 8;
 
             } else  {
@@ -4916,11 +4941,11 @@ YY_RULE_SETUP
 
          for (int i = 0; i< text.length(); ) {
             if (text[i] == '\n') {
-               addOutput('\n');
+               addToOutput('\n');
                i++;
 
             } else if (text.mid(i) == "\\_linebr")  {
-                addOutput('\n');
+                addToOutput('\n');
                 i += 8;
 
             } else  {
@@ -4929,7 +4954,7 @@ YY_RULE_SETUP
             }
          }
 
-         setOutput(OutputDoc);
+         setOutput(OutputMainDoc);
 
       } else {
           // inContext == OutputBrief
@@ -4947,10 +4972,10 @@ YY_RULE_SETUP
 {
       // potential end of a JavaDoc style comment
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text[0]);
+      addToOutput(text[0]);
 
       if (briefEndsAtDot) {
-         setOutput(OutputDoc);
+         setOutput(OutputMainDoc);
          briefEndsAtDot = false;
       }
    }
@@ -4960,7 +4985,7 @@ case 45:
 YY_RULE_SETUP
 {
       // newline
-      addOutput('\n');
+      addToOutput('\n');
       yyLineNr++;
    }
 	YY_BREAK
@@ -4969,7 +4994,7 @@ YY_RULE_SETUP
 {
       // utf-8 code point
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 47:
@@ -4977,7 +5002,7 @@ YY_RULE_SETUP
 {
       // catch all for anything else
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 /* --------------   Rules for handling HTML comments ----------- */
@@ -5016,7 +5041,7 @@ YY_RULE_SETUP
 {
       // end of inline formula
       formulaText += "$";
-      addOutput(" " + addFormula());
+      addToOutput(" " + addFormula());
       BEGIN(Comment);
    }
 	YY_BREAK
@@ -5025,7 +5050,7 @@ YY_RULE_SETUP
 {
       // end of block formula
       formulaText += "\\]";
-      addOutput(" " + addFormula());
+      addToOutput(" " + addFormula());
       BEGIN(Comment);
    }
 	YY_BREAK
@@ -5035,7 +5060,7 @@ YY_RULE_SETUP
       // end of custom env formula
       formulaText += "\\end";
       formulaText += formulaEnv;
-      addOutput(" " + addFormula());
+      addToOutput(" " + addFormula());
       BEGIN(Comment);
    }
 	YY_BREAK
@@ -5084,7 +5109,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 60:
@@ -5096,7 +5121,7 @@ YY_RULE_SETUP
 
       warn(yyFileName, yyLineNr, "Missing argument after \\enum");
 
-      addOutput('\n');
+      addToOutput('\n');
       if (text[0] == '\n') {
          yyLineNr++;
       }
@@ -5127,7 +5152,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 64:
@@ -5138,7 +5163,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
       warn(yyFileName, yyLineNr, "Missing argument after \\namespace");
 
-      addOutput('\n');
+      addToOutput('\n');
       if (text[0] == '\n') {
          yyLineNr++;
       }
@@ -5167,7 +5192,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 68:
@@ -5178,7 +5203,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       warn(yyFileName, yyLineNr, "Missing argument after \\package");
-      addOutput('\n');
+      addToOutput('\n');
 
       if (text[0] == '\n') {
          yyLineNr++;
@@ -5233,7 +5258,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 74:
@@ -5246,7 +5271,7 @@ YY_RULE_SETUP
       warn(yyFileName, yyLineNr, "Missing argument after \\%s",
                   YY_START == ClassDocArg1 ? "class" : "category" );
 
-      addOutput('\n');
+      addToOutput('\n');
 
       if (text[0] == '\n') {
          yyLineNr++;
@@ -5265,7 +5290,7 @@ YY_RULE_SETUP
 {
       // second argument, include file
       QString text = QString::fromUtf8(commentscanYYtext);
-      current->includeFile = text;
+      current->setData(EntryKey::Include_File, text);
       BEGIN( ClassDocArg3 );
    }
 	YY_BREAK
@@ -5275,7 +5300,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 78:
@@ -5284,7 +5309,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      addOutput('\n');
+      addToOutput('\n');
 
       if (text[0] == '\n')  {
          yyLineNr++;
@@ -5303,7 +5328,7 @@ YY_RULE_SETUP
 {
       // third argument, include file name
       QString text = QString::fromUtf8(commentscanYYtext);
-      current->includeName = text;
+      current->setData(EntryKey::Include_Name, text);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5313,7 +5338,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 82:
@@ -5351,7 +5376,7 @@ YY_RULE_SETUP
          current->name = current->name.left(current->name.length()-5);
       }
 
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
       BEGIN(GroupDocArg2);
    }
 	YY_BREAK
@@ -5361,7 +5386,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 86:
@@ -5373,7 +5398,7 @@ YY_RULE_SETUP
 
       warn(yyFileName, yyLineNr, "Missing group name after %s", csPrintable(current->groupDocCmd()) );
 
-      addOutput('\n');
+      addToOutput('\n');
       if (text[0] == '\n') {
          yyLineNr++;
       }
@@ -5386,7 +5411,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 88:
@@ -5394,7 +5419,7 @@ YY_RULE_SETUP
 {
       // title (stored in type)
       QString text = QString::fromUtf8(commentscanYYtext);
-      current->type += text.trimmed();
+      current->appendData(EntryKey::Member_Type, text.trimmed());
    }
 	YY_BREAK
 case 89:
@@ -5403,17 +5428,16 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      if ( current->groupDocType == Entry::GROUPDOC_NORMAL && current->type.isEmpty()) {
+      if ( current->groupDocType == Entry::GROUPDOC_NORMAL && current->getData(EntryKey::Member_Type).isEmpty()) {
             // defgroup requires second argument
-            warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s",
-                  csPrintable(current->name) );
+            warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", csPrintable(current->name) );
       }
 
       if (text[0] == '\n') {
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5432,7 +5456,7 @@ case 91:
 YY_RULE_SETUP
 {
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 92:
@@ -5447,7 +5471,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5465,9 +5489,9 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       yyLineNr++;
-      current->args = text;
+      current->setData(EntryKey::Member_Args, text);
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5478,16 +5502,16 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       if (text[0] == '_' && Doxy_Globals::markdownSupport) {
-         addOutput('\\');
+         addToOutput('\\');
       }
 
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 96:
 YY_RULE_SETUP
 {
-      addOutput(" , ");
+      addToOutput(" , ");
    }
 	YY_BREAK
 case 97:
@@ -5496,10 +5520,10 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       if (text[0] == '_' && Doxy_Globals::markdownSupport) {
-         addOutput('\\');
+         addToOutput('\\');
       }
 
-      addOutput(text);
+      addToOutput(text);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5515,14 +5539,14 @@ case 99:
 /* rule 99 can match eol */
 YY_RULE_SETUP
 {
-      // no file name specfied
+      // no file name specified
       QString text = QString::fromUtf8(commentscanYYtext);
 
       if (text[0] == '\n') {
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5540,7 +5564,7 @@ case 101:
 YY_RULE_SETUP
 {
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 102:
@@ -5568,7 +5592,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 105:
@@ -5583,8 +5607,8 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
-      inContext = OutputDoc;
+      addToOutput('\n');
+      inContext = OutputMainDoc;
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5609,7 +5633,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 109:
@@ -5624,8 +5648,8 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
-      inContext = OutputDoc;
+      addToOutput('\n');
+      inContext = OutputMainDoc;
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5653,7 +5677,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 113:
@@ -5668,8 +5692,8 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
-      inContext = OutputDoc;
+      addToOutput('\n');
+      inContext = OutputMainDoc;
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5686,7 +5710,7 @@ YY_RULE_SETUP
       // argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      current->relates = text;
+      current->setData(EntryKey::Related_Class, text);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5696,7 +5720,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 117:
@@ -5711,7 +5735,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5733,7 +5757,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5743,7 +5767,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 121:
@@ -5751,7 +5775,7 @@ YY_RULE_SETUP
 {
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text[0]);
+      addToOutput(text[0]);
    }
 	YY_BREAK
 /* ----- handle arguments of the section/subsection/.. commands ------- */
@@ -5762,7 +5786,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       s_sectionLabel = text;
-      addOutput(text);
+      addToOutput(text);
       s_sectionTitle.resize(0);
 
       BEGIN(SectionTitle);
@@ -5780,7 +5804,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5802,7 +5826,7 @@ YY_RULE_SETUP
       // end of section title
       QString text = QString::fromUtf8(commentscanYYtext);
       addSection();
-      addOutput(text);
+      addToOutput(text);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5815,7 +5839,7 @@ YY_RULE_SETUP
       // end of section title
       QString text = QString::fromUtf8(commentscanYYtext);
       addSection();
-      addOutput(text);
+      addToOutput(text);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5825,7 +5849,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 128:
@@ -5834,7 +5858,7 @@ YY_RULE_SETUP
       // any character without special meaning
       QString text = QString::fromUtf8(commentscanYYtext);
       s_sectionTitle += text;
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 129:
@@ -5844,7 +5868,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       s_sectionTitle += text.mid(1);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 130:
@@ -5854,7 +5878,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       s_sectionTitle += text[1];
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 131:
@@ -5864,7 +5888,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       s_sectionTitle += text;
-      addOutput(text[0]);
+      addToOutput(text[0]);
    }
 	YY_BREAK
 /* ----- handle arguments of the subpage command ------- */
@@ -5873,7 +5897,7 @@ YY_RULE_SETUP
 {
       // first argument
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
 
       // we add subpage labels as a kind of "inheritance" relation to prevent
       // needing to add another list to the Entry class.
@@ -5894,7 +5918,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5904,7 +5928,7 @@ YY_RULE_SETUP
 {
       // no title, end command
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5913,7 +5937,7 @@ YY_RULE_SETUP
 {
       // add title, end of command
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5933,7 +5957,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       addAnchor(text);
-      addOutput(text);
+      addToOutput(text);
 
       BEGIN( Comment );
    }
@@ -5950,7 +5974,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5972,7 +5996,7 @@ YY_RULE_SETUP
 {
       // possible ends
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
 
       if (text.mid(4) == blockName)  {
          // found end of the block
@@ -5984,7 +6008,7 @@ case 141:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
 
       if (blockName == "startuml")   {
          // found end of the block
@@ -5997,7 +6021,7 @@ YY_RULE_SETUP
 {
       // some word
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 143:
@@ -6011,7 +6035,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 144:
@@ -6022,7 +6046,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       s_commentCount++;
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 145:
@@ -6030,7 +6054,7 @@ YY_RULE_SETUP
 {
       // end of a C-comment
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text);
+      addToOutput(text);
 
       s_commentCount--;
 
@@ -6045,7 +6069,7 @@ YY_RULE_SETUP
 {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text[0]);
+      addToOutput(text[0]);
    }
 	YY_BREAK
 case YY_STATE_EOF(FormatBlock):
@@ -6129,7 +6153,7 @@ YY_RULE_SETUP
       }
 
       // next line is commented out due to bug620924
-      // addOutput('\n');
+      // addToOutput('\n');
 
       BEGIN( Comment );
    }
@@ -6140,7 +6164,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 155:
@@ -6148,7 +6172,7 @@ YY_RULE_SETUP
 {
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text[0]);
+      addToOutput(text[0]);
    }
 	YY_BREAK
 case 156:
@@ -6165,7 +6189,7 @@ YY_RULE_SETUP
       if (! s_spaceBeforeIf.isEmpty()) {
          // needed for 665313 in combation with bug620924
 
-         addOutput(s_spaceBeforeIf);
+         addToOutput(s_spaceBeforeIf);
       }
 
       s_spaceBeforeIf.resize(0);
@@ -6277,7 +6301,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      // addOutput('\n');
+      // addToOutput('\n');
    }
 	YY_BREAK
 case 165:
@@ -6304,7 +6328,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 168:
@@ -6392,7 +6416,7 @@ YY_RULE_SETUP
 case 175:
 YY_RULE_SETUP
 {
-      addOutput("\\endinternal ");
+      addToOutput("\\endinternal ");
       BEGIN(Comment);
    }
 	YY_BREAK
@@ -6420,7 +6444,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -6430,7 +6454,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
       s_memberGroupHeader+=' ';
    }
 	YY_BREAK
@@ -6469,7 +6493,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -6479,7 +6503,7 @@ YY_RULE_SETUP
 {
       // line continuation
       yyLineNr++;
-      addOutput('\n');
+      addToOutput('\n');
    }
 	YY_BREAK
 case 184:
@@ -6487,7 +6511,7 @@ YY_RULE_SETUP
 {
       // ignore other stuff
       QString text = QString::fromUtf8(commentscanYYtext);
-      addOutput(text[0]);
+      addToOutput(text[0]);
    }
 	YY_BREAK
 /* ----- handle argument of fn command ------- */
@@ -6503,7 +6527,7 @@ YY_RULE_SETUP
             yyLineNr++;
          }
 
-         addOutput('\n');
+         addToOutput('\n');
 
          if (langParser != nullptr) {
             // not used for clang parsing
@@ -6568,8 +6592,8 @@ YY_RULE_SETUP
 
       if (functionProto.trimmed().isEmpty()) {
          // plain overload command
-         addOutput(theTranslator->trOverloadText());
-         addOutput('\n');
+         addToOutput(theTranslator->trOverloadText());
+         addToOutput('\n');
 
       }  else   {
          // overload declaration
@@ -6625,7 +6649,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -6659,7 +6683,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -6715,7 +6739,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       addCite();
-      addOutput(text);
+      addToOutput(text);
       BEGIN(Comment);
    }
 	YY_BREAK
@@ -6731,7 +6755,7 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -6754,13 +6778,13 @@ YY_RULE_SETUP
          yyLineNr++;
       }
 
-      addOutput('\n');
+      addToOutput('\n');
 
-      setOutput(OutputDoc);
-      addOutput("\\copydetails ");
-      addOutput(s_copyDocArg);
+      setOutput(OutputMainDoc);
+      addToOutput("\\copydetails ");
+      addToOutput(s_copyDocArg);
 
-      addOutput("\n");
+      addToOutput("\n");
 
       BEGIN(Comment);
    }
@@ -6770,7 +6794,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_copyDocArg += text;
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 209:
@@ -6778,7 +6802,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
       s_copyDocArg += text;
-      addOutput(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 210:
@@ -7970,7 +7994,7 @@ static bool handleParam(const QString &)
   // process param and retval arguments to escape leading underscores
   // in case of markdown processing
 
-  addOutput("@param ");
+  addToOutput("@param ");
   BEGIN( ParamArg1 );
 
   return false;
@@ -7978,7 +8002,7 @@ static bool handleParam(const QString &)
 
 static bool handleRetval(const QString &)
 {
-  addOutput("@retval ");
+  addToOutput("@retval ");
   BEGIN( ParamArg1 );
 
   return false;
@@ -8012,10 +8036,10 @@ static bool handleDetails(const QString &)
 {
    if (inContext != OutputBrief) {
       // treat @details outside brief description as a new paragraph
-      addOutput("\n\n");
+      addToOutput("\n\n");
    }
 
-   setOutput(OutputDoc);
+   setOutput(OutputMainDoc);
    return false;
 }
 
@@ -8083,11 +8107,11 @@ static bool handleParBlock(const QString &)
    }
 
    if (! s_spaceBeforeCmd.isEmpty()) {
-      addOutput(s_spaceBeforeCmd);
+      addToOutput(s_spaceBeforeCmd);
       s_spaceBeforeCmd.resize(0);
    }
 
-   addOutput("@parblock ");
+   addToOutput("@parblock ");
    s_insideParBlock = true;
 
    return false;
@@ -8099,8 +8123,8 @@ static bool handleEndParBlock(const QString &)
      warn(yyFileName,yyLineNr, "Found \\endparblock command without matching \\parblock");
    }
 
-   addOutput("@endparblock");
-   setOutput(OutputDoc); // to end a parblock inside a xrefitem like context
+   addToOutput("@endparblock");
+   setOutput(OutputMainDoc);    // to end a parblock inside a xrefitem like context
    s_insideParBlock = false;
 
    return false;
@@ -8128,15 +8152,15 @@ static bool handleMemberOf(const QString &)
 
 static bool handleRefItem(const QString &)
 {
-   addOutput("@refitem ");
+   addToOutput("@refitem ");
    BEGIN(LineParam);
    return false;
 }
 
 static bool handleSection(const QString &s)
 {
-   setOutput(OutputDoc);
-   addOutput("@"+s+" ");
+   setOutput(OutputMainDoc);
+   addToOutput("@"+s+" ");
    BEGIN(SectionLabel);
 
    if (s == "section") {
@@ -8165,11 +8189,11 @@ static bool handleSubpage(const QString &s)
   }
 
   if (! s_spaceBeforeCmd.isEmpty()) {
-     addOutput(s_spaceBeforeCmd);
+     addToOutput(s_spaceBeforeCmd);
       s_spaceBeforeCmd.resize(0);
   }
 
-   addOutput("@"+s+" ");
+   addToOutput("@"+s+" ");
    BEGIN(SubpageLabel);
 
    return false;
@@ -8177,7 +8201,7 @@ static bool handleSubpage(const QString &s)
 
 static bool handleAnchor(const QString &s)
 {
-   addOutput("@"+s+" ");
+   addToOutput("@"+s+" ");
    BEGIN(AnchorLabel);
    return false;
 }
@@ -8185,18 +8209,18 @@ static bool handleAnchor(const QString &s)
 static bool handleCite(const QString &s)
 {
    if (! s_spaceBeforeCmd.isEmpty()) {
-     addOutput(s_spaceBeforeCmd);
+     addToOutput(s_spaceBeforeCmd);
      s_spaceBeforeCmd.resize(0);
    }
 
-   addOutput("@" + s + " ");
+   addToOutput("@" + s + " ");
    BEGIN(CiteLabel);
    return false;
 }
 
 static bool handleFormatBlock(const QString &s)
 {
-   addOutput("@" + s + " ");
+   addToOutput("@" + s + " ");
 
    blockName      = s;
    s_commentCount = 0;
@@ -8207,7 +8231,7 @@ static bool handleFormatBlock(const QString &s)
 
 static bool handleAddIndex(const QString &)
 {
-   addOutput("@addindex ");
+   addToOutput("@addindex ");
    BEGIN(LineParam);
    return false;
 }
@@ -8266,7 +8290,7 @@ static bool handleEndIf(const QString &)
 
    enabledSectionFound = false;
    if (! s_spaceBeforeCmd.isEmpty()) {
-      addOutput(s_spaceBeforeCmd);
+      addToOutput(s_spaceBeforeCmd);
       s_spaceBeforeCmd.resize(0);
    }
 
@@ -8326,16 +8350,15 @@ static bool handleHideCallergraph(const QString &)
 static bool handleInternal(const QString &)
 {
    if (s_internalDocs) {
-      // re-enabled for bug640828
-      addOutput("\\internal ");
+      addToOutput("\\internal ");
       s_processInternalDocs = true;
 
    } else {
       // make sure some whitespace before an \internal command
       // is not treated as "documentation"
 
-      if (current->doc.trimmed().isEmpty()) {
-         current->doc.resize(0);
+      if (current->getData(EntryKey::Main_Docs).trimmed().isEmpty()) {
+         current->setData(EntryKey::Main_Docs,   "");
       }
 
       s_condCount = 0;
@@ -8347,7 +8370,7 @@ static bool handleInternal(const QString &)
 
 static bool handleLineBr(const QString &)
 {
-   addOutput('\n');
+   addToOutput('\n');
    return false;
 }
 
@@ -8423,9 +8446,9 @@ static bool handleExtends(const QString &)
 
 static bool handleCopyBrief(const QString &)
 {
-   if (current->brief.isEmpty() && current->doc.isEmpty()) {
+   if (current->getData(EntryKey::Brief_Docs).isEmpty() && current->getData(EntryKey::Main_Docs).isEmpty()) {
 
-      // if we don't have a brief or detailed description yet,
+      // if we do not have a brief or detailed description yet,
       // then the @copybrief should end up in the brief description.
       // otherwise it will be copied inline (see bug691315 & bug700788)
 
@@ -8433,23 +8456,23 @@ static bool handleCopyBrief(const QString &)
    }
 
    if (! s_spaceBeforeCmd.isEmpty()) {
-      addOutput(s_spaceBeforeCmd);
+      addToOutput(s_spaceBeforeCmd);
       s_spaceBeforeCmd.resize(0);
    }
 
-   addOutput("\\copybrief ");
+   addToOutput("\\copybrief ");
    return false;
 }
 
 static bool handleCopyDetails(const QString &)
 {
-   setOutput(OutputDoc);
+   setOutput(OutputMainDoc);
    if (! s_spaceBeforeCmd.isEmpty()) {
-     addOutput(s_spaceBeforeCmd);
+     addToOutput(s_spaceBeforeCmd);
      s_spaceBeforeCmd.resize(0);
    }
 
-   addOutput("\\copydetails ");
+   addToOutput("\\copydetails ");
    return false;
 }
 
@@ -8457,11 +8480,11 @@ static bool handleCopyDoc(const QString &)
 {
    setOutput(OutputBrief);
    if (! s_spaceBeforeCmd.isEmpty()) {
-     addOutput(s_spaceBeforeCmd);
+     addToOutput(s_spaceBeforeCmd);
      s_spaceBeforeCmd.resize(0);
    }
 
-   addOutput("\\copybrief ");
+   addToOutput("\\copybrief ");
    s_copyDocArg.resize(0);
    BEGIN(CopyDoc);
 
@@ -8505,14 +8528,14 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    s_needNewEntry = false;
    s_parseMore    = false;
 
-   outputXRef.clear();
+   s_outputXRef   = "";
    inputString.append(" ");
 
    if (isBrief || isAutoBrief) {
       setOutput(OutputBrief);
 
    } else {
-      setOutput(OutputDoc);
+      setOutput(OutputMainDoc);
    }
 
    s_condCount    = 0;
@@ -8521,25 +8544,25 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    s_spaceBeforeCmd.clear();
    s_spaceBeforeIf.clear();
 
-   if (! current->doc.isEmpty()) {
+   if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
       // separate detailed doc fragments
-      current->doc += "\n\n";
+      current->appendData(EntryKey::Main_Docs,  "\n\n");
    }
 
-   if (! current->inbodyDocs.isEmpty() && isInbody) {
+   if (! current->getData(EntryKey::Inbody_Docs).isEmpty() && isInbody) {
       // separate in body fragments
-      current->inbodyDocs += "\n\n";
+      current->appendData(EntryKey::Inbody_Docs, "\n\n");
    }
 
    commentscanYYrestart(commentscanYYin);
    BEGIN( Comment );
 
    commentscanYYlex();
-   setOutput(OutputDoc);
+   setOutput(OutputMainDoc);
 
    if (YY_START == OverloadParam) {
       // comment ended with \overload
-      addOutput(theTranslator->trOverloadText());
+      addToOutput(theTranslator->trOverloadText());
    }
 
    if (! s_guards.isEmpty()) {
@@ -8551,11 +8574,11 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    // removes blank lines from the detailed docs
-   current->doc = trimEmptyLines(current->doc, current->docLine);
+   current->setData(EntryKey::Main_Docs, trimEmptyLines(current->getData(EntryKey::Main_Docs), current->docLine));
 
-   if (current->section == Entry::FILEDOC_SEC && current->doc.isEmpty()) {
+   if (current->section == Entry::FILEDOC_SEC && current->getData(EntryKey::Main_Docs).isEmpty()) {
       // to allow a comment block with just a @file command
-      current->doc = "\n\n";
+      current->setData(EntryKey::Main_Docs, "\n\n");
    }
 
    if (current->section == Entry::MEMBERGRP_SEC && s_memberGroupId == DOX_NOGROUP) {
@@ -8564,9 +8587,9 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    if (Doxy_Globals::markdownSupport) {
-      current->brief      = processMarkdown(fileName, lineNr, current, current->brief);
-      current->doc        = processMarkdown(fileName, lineNr, current, current->doc);
-      current->inbodyDocs = processMarkdown(fileName, lineNr, current, current->inbodyDocs);
+      current->setData(EntryKey::Brief_Docs,  processMarkdown(fileName, lineNr, current, current->getData(EntryKey::Brief_Docs)  ));
+      current->setData(EntryKey::Main_Docs,   processMarkdown(fileName, lineNr, current, current->getData(EntryKey::Main_Docs)   ));
+      current->setData(EntryKey::Inbody_Docs, processMarkdown(fileName, lineNr, current, current->getData(EntryKey::Inbody_Docs) ));
    }
 
    checkFormula();
@@ -8652,7 +8675,6 @@ static int findExistingGroup(int &groupId, const QSharedPointer<MemberGroupInfo>
                mi->header.compare(info->header, Qt::CaseInsensitive) == 0) {
 
          // same file or scope, not a nameless group, same header name
-
          return (int)di.key();    // put the item in this group
       }
    }
@@ -8682,7 +8704,7 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
 
          Doxy_Globals::memGrpInfoDict.insert(s_memberGroupId, info);
 
-         s_memberGroupRelates = e->relates;
+         s_memberGroupRelates = e->getData(EntryKey::Related_Class);
          e->mGrpId = s_memberGroupId;
       }
    }
@@ -8697,7 +8719,7 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
 
       if (info) {
          // known group
-         info->doc = s_memberGroupDocs;
+         info->doc     = s_memberGroupDocs;
          info->docFile = fileName;
          info->docLine = line;
       }
@@ -8728,7 +8750,7 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
 void initGroupInfo(QSharedPointer<Entry> e)
 {
    e->mGrpId  = s_memberGroupId;
-   e->relates = s_memberGroupRelates;
+   e->setData(EntryKey::Related_Class, s_memberGroupRelates);
 
    if (! s_autoGroupStack.isEmpty()) {
       e->m_groups.append(*s_autoGroupStack.top());
@@ -8738,25 +8760,25 @@ void initGroupInfo(QSharedPointer<Entry> e)
 static void groupAddDocs(QSharedPointer<Entry> e)
 {
    if (e->section == Entry::MEMBERGRP_SEC) {
-      s_memberGroupDocs = e->brief.trimmed();
-      e->doc = trimEmptyLines(e->doc, e->docLine);
+      s_memberGroupDocs = e->getData(EntryKey::Brief_Docs).trimmed();
+      e->setData(EntryKey::Main_Docs, trimEmptyLines(e->getData(EntryKey::Main_Docs), e->docLine));
 
-      if (! s_memberGroupDocs.isEmpty() && ! e->doc.isEmpty()) {
+      if (! s_memberGroupDocs.isEmpty() && ! e->getData(EntryKey::Main_Docs).isEmpty()) {
          s_memberGroupDocs+="\n\n";
       }
 
-      s_memberGroupDocs += e->doc;
+      s_memberGroupDocs += e->getData(EntryKey::Main_Docs);
       QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict.value(s_memberGroupId);
 
       if (info) {
-         info->doc     = s_memberGroupDocs;
-         info->docFile = e->docFile;
-         info->docLine = e->docLine;
+         info->doc      = s_memberGroupDocs;
+         info->docFile  = e->getData(EntryKey::MainDocs_File);
+         info->docLine  = e->docLine;
          info->setRefItems(e->m_specialLists);
       }
 
-      e->doc.resize(0);
-      e->brief.resize(0);
+      e->setData(EntryKey::Brief_Docs, "");
+      e->setData(EntryKey::Main_Docs,  "");
    }
 }
 

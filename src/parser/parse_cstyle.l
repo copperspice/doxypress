@@ -35,8 +35,8 @@
 
 static ParserInterface *s_thisParser;
 static QString          s_inputString;
-static int              s_inputPosition;
 static QFile            s_inputFile;
+static int              s_inputPosition;
 
 static int              lastContext;
 static int              lastCContext;
@@ -91,13 +91,15 @@ static bool             removeSlashes;
 static Specifier        virt;
 static Specifier        baseVirt;
 
-static QString          msType, msName, msArgs;
+static QString          msType;
+static QString          msName;
+static QString          msArgs;
+
 static bool             isTypedef;
 static int              tmpDocType;
 static QString          sectionLabel;
 static QString          sectionTitle;
 static QString          funcPtrType;
-static QString          templateStr;
 static QString          aliasName;
 static QString          baseName;
 static QString         *specName;
@@ -106,15 +108,15 @@ static bool             useOverrideCommands = false;
 
 static SrcLangExt       language;
 
-static bool             insideIDL    = false;       //!< processing IDL code?
-static bool             insideJava   = false;       //!< processing Java code?
-static bool             insideCSharp = false;       //!< processing C# code?
-static bool             insideD      = false;       //!< processing D code?
-static bool             insidePHP    = false;       //!< processing PHP code?
-static bool             insideObjC   = false;       //!< processing Objective C code?
-static bool             insideCli    = false;       //!< processing C++/CLI code?
-static bool             insideJS     = false;       //!< processing JavaScript code?
-static bool             insideCpp    = true;        //!< processing C/C++ code
+static bool             insideIDL    = false;         // processing IDL code
+static bool             insideJava   = false;         // processing Java code
+static bool             insideCSharp = false;         // processing C# code
+static bool             insideD      = false;         // processing D code
+static bool             insidePHP    = false;         // processing PHP code
+static bool             insideObjC   = false;         // processing Objective C code
+static bool             insideCli    = false;         // processing C++/CLI code
+static bool             insideJS     = false;         // processing JavaScript code
+static bool             insideCpp    = true;          // processing C/C++ code
 
 static bool             insideCppQuote     = false;
 static bool             insideProtocolList = false;
@@ -125,23 +127,50 @@ static int              currentArgumentContext;
 static int              lastCopyArgStringContext;
 static int              lastCopyArgContext;
 
-static QString          *copyArgString;
 static QString          fullArgString;
 static ArgumentList     *currentArgumentList;
 static QChar            lastCopyArgChar;
 
-static QString          *pCopyQuotedString;
-static QString          *pCopyRoundString;
-static QString          *pCopyCurlyString;
-static QString          *pCopyRawString;
+enum class ArgKey {
+   Entry_Name,
+   Member_Args,
+   Template_Args,
+};
 
-static QString          *pCopyCurlyGString;
-static QString          *pCopyRoundGString;
-static QString          *pCopyQuotedGString;
-static QString          *pCopyHereDocGString;
-static QString          *pCopyRawGString;
-static QString          *pSkipVerbString;
-static QStack<Grouping *>  autoGroupStack;
+static QString                s_template_args;
+
+static QSharedPointer<Entry>  s_argEntry;         // which entry
+static ArgKey                 s_argEnum;          // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_quotedEntry;      // which entry
+static EntryKey               s_quotedEnum;       // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_roundEntry;       // which entry
+static EntryKey               s_roundEnum;        // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_curlyEntry;       // which entry
+static EntryKey               s_curlyEnum;        // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_rawEntry;         // which entry
+static EntryKey               s_rawEnum;          // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_quotedGEntry;     // which entry
+static EntryKey               s_quotedGEnum;      // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_roundGEntry;      // which entry
+static EntryKey               s_roundGEnum;       // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_curlyGEntry;      // which entry
+static EntryKey               s_curlyGEnum;       // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_rawGEntry;        // which entry
+static EntryKey               s_rawGEnum;         // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_hereDocEntry;     // which entry
+static EntryKey               s_hereDocEnum;      // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_skipVerbEntry;    // which entry
+static EntryKey               s_skipVerbEnum;     // which enum in EntryKey
 
 static bool             insideFormula;
 static bool             insideTryBlock = false;
@@ -150,8 +179,8 @@ static bool             needsSemi;
 static int              initBracketCount;
 
 static QString          oldStyleArgType;
-static QString          docBackup;
-static QString          briefBackup;
+static QString          s_mainBackup;
+static QString          s_briefBackup;
 
 static int              s_docBlockContext;
 static QString          s_docBlock;
@@ -172,6 +201,8 @@ static QString          s_delimiter;
 static int              s_column;
 static int              s_fencedSize = 0;
 static bool             s_nestedComment = 0;
+
+static QStack<Grouping *>     autoGroupStack;
 
 // double declared
 static void yyunput (int c, char *buf_ptr);
@@ -319,23 +350,21 @@ static int computeIndent(const QString &str, int startIndent)
 
 static void addType(QSharedPointer<Entry> ce)
 {
-   uint tl = ce->type.length();
+   QString tmpType = ce->getData(EntryKey::Member_Type);
 
-   if (tl > 0 && ! ce->name.isEmpty() && ce->type.at(tl - 1) != '.') {
-      ce->type += ' ' ;
+   if (! tmpType.isEmpty() && ! ce->name.isEmpty() && ! tmpType.endsWith('.')) {
+      tmpType += ' ' ;
    }
 
-   ce->type += ce->name;
+   tmpType += ce->name;
    ce->name.clear();
-   tl = ce->type.length();
 
-   if (tl > 0 && ! ce->args.isEmpty() && ce->type.at(tl - 1) != '.') {
-      ce->type += ' ';
+   if (! tmpType.isEmpty() && ! ce->getData(EntryKey::Member_Args).isEmpty() && ! tmpType.endsWith('.'))  {
+      tmpType += ' ';
    }
 
-   ce->type += ce->args;
-
-   ce->args.clear();
+   ce->setData(EntryKey::Member_Type, tmpType + ce->getData(EntryKey::Member_Args));
+   ce->setData(EntryKey::Member_Args, "");
    ce->argList.clear();
 }
 
@@ -418,6 +447,12 @@ static void prependScope()
    }
 }
 
+static bool containsWord(const QString &str, const QString &word)
+{
+   QRegExp wordExp("\\b"+word+"\\b");
+   return str.contains(wordExp);
+}
+
 /*! Returns true if the current entry could be a K&R style C function */
 static bool checkForKnRstyleC()
 {
@@ -445,100 +480,110 @@ static bool checkForKnRstyleC()
 
 static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
 {
-   int si = current->args.length();
+   QString tmpArgs = current->getData(EntryKey::Member_Args);
+   int lenArgs     = tmpArgs.length();
 
    if (oldStyleArgType.isEmpty()) {
       // new argument
       static QRegExp re("\\([^)]*\\)");
 
-      int bi1 = re.lastIndexIn(current->args);
-      int bi2 = bi1 != -1 ? re.lastIndexIn(current->args, bi1 - 1) : -1;
+      int bi1 = re.lastIndexIn(tmpArgs);
+      int bi2 = bi1 != -1 ? re.lastIndexIn(tmpArgs, bi1 - 1) : -1;
+
       QChar c;
 
-      if (bi1 != -1 && bi2 != -1) { // found something like "int (*func)(int arg)"
-         int s = bi2 + 1;
-         oldStyleArgType = current->args.left(s);
+      if (bi1 != -1 && bi2 != -1) {
+         // found something like "int (*func)(int arg)"
 
-         int i = s;
+         int pos = bi2 + 1;
+         oldStyleArgType = tmpArgs.left(pos);
 
-         while (i < si && ((c = current->args.at(i)) == '*' || c.isSpace() )) {
+         int i = pos;
+
+         while (i < lenArgs && ((c = tmpArgs.at(i)) == '*' || c.isSpace() )) {
             i++;
          }
 
-         oldStyleArgType += current->args.mid(s, i - s);
-         s = i;
+         oldStyleArgType += tmpArgs.mid(pos, i - pos);
+         pos = i;
 
-         while (i < si && isId(current->args.at(i))) {
+         while (i < lenArgs && isId(tmpArgs.at(i))) {
             i++;
          }
 
-         oldStyleArgName = current->args.mid(s, i - s);
-         oldStyleArgType += current->args.mid(i);
+         oldStyleArgName = tmpArgs.mid(pos, i - pos);
+         oldStyleArgType += tmpArgs.mid(i);
 
       } else if (bi1 != -1) {
          // redundant braces like in "int (*var)"
-         int s = bi1;
-         oldStyleArgType = current->args.left(s);
-         s++;
+         int pos = bi1;
 
-         int i = s + 1;
-         while (i < si && ((c = current->args.at(i)) == '*' || c.isSpace() )) {
+         oldStyleArgType = tmpArgs.left(pos);
+         pos++;
+
+         int i = pos + 1;
+         while (i < lenArgs && ((c = tmpArgs.at(i)) == '*' || c.isSpace() )) {
             i++;
          }
 
-         oldStyleArgType += current->args.mid(s, i - s);
-         s = i;
-         while (i < si && isId(current->args.at(i))) {
+         oldStyleArgType += tmpArgs.mid(pos, i - pos);
+         pos = i;
+
+         while (i < lenArgs && isId(tmpArgs.at(i))) {
             i++;
          }
-         oldStyleArgName = current->args.mid(s, i - s);
+
+         oldStyleArgName = tmpArgs.mid(pos, i - pos);
 
       } else {
          // normal "int *var"
-         int l = si;
-         int i = l - 1;
+         int len = lenArgs;
+         int i   = len - 1;
          int j;
+
          QChar c;
 
          // look for start of name in "type *name"
-         while (i >= 0 && isId(current->args.at(i))) {
+         while (i >= 0 && isId(tmpArgs.at(i))) {
             i--;
          }
 
          j = i + 1;
+
          // look for start of *'s
-         while (i >= 0 && ((c = current->args.at(i)) == '*' || c.isSpace() )) {
+         while (i >= 0 && ((c = tmpArgs.at(i)) == '*' || c.isSpace() )) {
             i--;
          }
 
          i++;
 
-         if (i != l) {
-            oldStyleArgType = current->args.left(i);
-            oldStyleArgPtr  = current->args.mid(i, j - i);
-            oldStyleArgName = current->args.mid(j).trimmed();
+         if (i != len) {
+            oldStyleArgType = tmpArgs.left(i);
+            oldStyleArgPtr  = tmpArgs.mid(i, j - i);
+            oldStyleArgName = tmpArgs.mid(j).trimmed();
 
          } else {
-            oldStyleArgName = current->args.trimmed();
+            oldStyleArgName = tmpArgs.trimmed();
          }
       }
 
    } else {
       // continuation like *arg2 in "int *args,*arg2"
-      int l = si;
-      int j = 0;
+      int len = lenArgs;
+      int j   = 0;
+
       QChar c;
 
-      while (j < l && ((c = current->args.at(j)) == '*' || c.isSpace() )) {
+      while (j < len && ((c = tmpArgs.at(j)) == '*' || c.isSpace() )) {
          j++;
       }
 
       if (j > 0) {
-         oldStyleArgPtr = current->args.left(j);
-         oldStyleArgName = current->args.mid(j).trimmed();
+         oldStyleArgPtr  = tmpArgs.left(j);
+         oldStyleArgName = tmpArgs.mid(j).trimmed();
 
       } else {
-         oldStyleArgName = current->args.trimmed();
+         oldStyleArgName = tmpArgs.trimmed();
       }
    }
 }
@@ -571,6 +616,53 @@ static void addKnRArgInfo(const QString &type, const QString &name, const QStrin
             a.docs = docs;
          }
       }
+   }
+}
+
+static void addToArgs(const QString &str)
+{
+   if (s_argEnum == ArgKey::Entry_Name) {
+      s_argEntry->name += str;
+
+   } else if (s_argEnum == ArgKey::Template_Args) {
+      s_template_args += str;
+
+   } else if (s_argEnum == ArgKey::Member_Args) {
+      s_argEntry->appendData(EntryKey::Member_Args, str);
+
+   }
+}
+
+static void addToOutput(QSharedPointer<Entry> entry, EntryKey key, const QString &str)
+{
+   if (entry == nullptr)  {
+      addToArgs(str);
+
+   } else {
+      entry->appendData(key, str);
+   }
+}
+
+static void addToOutput(QSharedPointer<Entry> entry, EntryKey key, QChar c)
+{
+   if (entry == nullptr)  {
+      addToArgs(c);
+   } else {
+      entry->appendData(key, c);
+   }
+}
+
+static void addToArgs(QChar str)
+{
+   if (s_argEnum == ArgKey::Entry_Name) {
+      s_argEntry->name += str;
+
+   } else if (s_argEnum == ArgKey::Template_Args) {
+      s_template_args += str;
+
+   } else if (s_argEnum == ArgKey::Member_Args) {
+      s_argEntry->appendData(EntryKey::Member_Args, str);
+
    }
 }
 
@@ -832,8 +924,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 %%
 
 <NextSemi>"{"   {
-      curlyCount=0;
-      needsSemi = true;
+      curlyCount = 0;
+      needsSemi  = true;
       BEGIN(SkipCurlyBlock);
    }
 
@@ -872,7 +964,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <NextSemi>\'     {
       if (insidePHP) {
-         lastStringContext=NextSemi;
+         lastStringContext = NextSemi;
          BEGIN(SkipPHPString);
       }
    }
@@ -884,7 +976,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <NextSemi>\"            {
-      lastStringContext=NextSemi;
+      lastStringContext = NextSemi;
       BEGIN(SkipString);
    }
 
@@ -898,7 +990,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <EnumBaseType>[{;,]   {
-      current->args = current->args.simplified();
+      current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
+
       unput(*yytext);
       BEGIN( ClassVar );
    }
@@ -962,85 +1055,102 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*("properties"){BN}*":"{BN}*  {
       // IDL or Borland C++ builder property
-      current->mtype = mtype = MethodTypes::Property;
-      current->protection = protection = Public ;
-      current->type.resize(0);
+
+      current->mtype      = mtype = MethodTypes::Property;
+      current->protection = protection = Public;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*"k_dcop"{BN}*":"{BN}*  {
-      current->mtype = mtype = MethodTypes::DCOP;
-      current->protection = protection = Public ;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::DCOP;
+      current->protection = protection = Public;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*("signals"|"Q_SIGNALS"){BN}*":"{BN}* {
-      current->mtype = mtype = MethodTypes::Signal;
+      current->mtype      = mtype = MethodTypes::Signal;
       current->protection = protection = Public ;
-      current->type.resize(0);
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*"public"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-      current->mtype = mtype = MethodTypes::Slot;
+      current->mtype      = mtype = MethodTypes::Slot;
       current->protection = protection = Public ;
-      current->type.resize(0);
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
+
       lineCount();
    }
 
 <FindMembers>{B}*"protected"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-      current->protection = protection = Protected ;
-      current->mtype = mtype = MethodTypes::Slot;
-      current->type.resize(0);
+      current->protection  = protection = Protected ;
+      current->mtype       = mtype = MethodTypes::Slot;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
+
       lineCount();
    }
 
 <FindMembers>{B}*"private"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
       current->protection = protection = Private ;
-      current->mtype = mtype = MethodTypes::Slot;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::Slot;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
+
       lineCount();
    }
 
 <FindMembers>{B}*("public"|"methods"|"__published"){BN}*":"{BN}* {
       current->protection = protection = Public ;
-      current->mtype = mtype = MethodTypes::Method;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::Method;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*"internal"{BN}*":"{BN}* {
       // for now treat C++/CLI's internal as package...
       if (insideCli) {
          current->protection = protection = Package ;
-         current->mtype = mtype = MethodTypes::Method;
-         current->type.resize(0);
+         current->mtype      = mtype = MethodTypes::Method;
+
          current->name.resize(0);
-         current->args.resize(0);
+         current->setData(EntryKey::Member_Type, "");
+         current->setData(EntryKey::Member_Args, "");
          current->argList.clear();
-         lineCount() ;
+
+         lineCount();
 
       } else {
          REJECT;
@@ -1049,37 +1159,43 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*"protected"{BN}*":"{BN}* {
       current->protection = protection = Protected ;
-      current->mtype = mtype = MethodTypes::Method;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::Method;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*"private"{BN}*":"{BN}*   {
       current->protection = protection = Private ;
-      current->mtype = mtype = MethodTypes::Method;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::Method;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*"event"{BN}+           {
       if (insideCli) {
          // C++/CLI event
-         lineCount() ;
-          current->mtype   = mtype = MethodTypes::Event;
+         lineCount();
+
+         current->mtype    = mtype = MethodTypes::Event;
          current->bodyLine = yyLineNr;
-         curlyCount = 0;
+         curlyCount        = 0;
 
          BEGIN( CliPropertyType );
 
       } else if (insideCSharp) {
-         lineCount() ;
-         current->mtype = MethodTypes::Event;
+         lineCount();
+
+         current->mtype    = MethodTypes::Event;
          current->bodyLine = yyLineNr;
 
       } else {
@@ -1090,14 +1206,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"property"{BN}+    {
       if (insideCli) {
          // C++/CLI property
-         lineCount() ;
-         current->mtype = mtype = MethodTypes::Property;
+         lineCount();
+         current->mtype    = mtype = MethodTypes::Property;
          current->bodyLine = yyLineNr;
-         curlyCount=0;
+         curlyCount        = 0;
+
          BEGIN( CliPropertyType );
-         }
-         else
-         {
+
+      } else {
          REJECT;
       }
    }
@@ -1110,12 +1226,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CliPropertyType>"["               {
       // C++/CLI indexed property
-      current->args = "[";
+      current->setData(EntryKey::Member_Args, "[");
       BEGIN( CliPropertyIndex );
    }
 
 <CliPropertyType>"{"          {
-      curlyCount=0;
+      curlyCount = 0;
       BEGIN( CSAccessorDecl );
    }
 
@@ -1134,23 +1250,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CliPropertyType>.         {
       QString text = QString::fromUtf8(yytext);
       addType( current );
-      current->type += text;
+      current->appendData(EntryKey::Member_Type, text);
    }
 
 <CliPropertyIndex>"]"         {
       QString text = QString::fromUtf8(yytext);
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
       BEGIN( CliPropertyType );
    }
 
 <CliPropertyIndex>.        {
       QString text = QString::fromUtf8(yytext);
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
    }
 
   /*
 <FindMembers>{B}*"property"{BN}+        {
-      if (! current->type.isEmpty()) {
+      if (! current->getData(EntryKey::Member_Type).isEmpty()) {
          REJECT;
      } else {
          current->mtype = mtype = MethodTypes::Property;
@@ -1161,60 +1277,70 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*"@private"{BN}+    {
       current->protection = protection = Private ;
-      current->mtype = mtype = MethodTypes::Method;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::Method;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*"@protected"{BN}+  {
       current->protection = protection = Protected ;
-      current->mtype = mtype = MethodTypes::Method;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::Method;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>{B}*"@public"{BN}+  {
       current->protection = protection = Public ;
-      current->mtype = mtype = MethodTypes::Method;
-      current->type.resize(0);
+      current->mtype      = mtype = MethodTypes::Method;
+
       current->name.resize(0);
-      current->args.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
-      lineCount() ;
+
+      lineCount();
    }
 
 <FindMembers>[\-+]{BN}*          {
       QString text = QString::fromUtf8(yytext);
 
       if (! insideObjC) {
-       REJECT;
+         REJECT;
 
       } else {
-       lineCount();
-       current->fileName    = yyFileName;
-       current->startLine   = yyLineNr;
-       current->startColumn = yyColNr;
-       current->bodyLine    = yyLineNr;
-       current->section     = Entry::FUNCTION_SEC;
-       current->protection  = protection = Public;
+         lineCount();
 
-       language   = current->lang = SrcLangExt_ObjC;
-       insideObjC = true;
+         current->setData(EntryKey::File_Name, yyFileName);
+         current->startLine   = yyLineNr;
+         current->startColumn = yyColNr;
 
-       current->virt  = Specifier::Virtual;
-       current->stat  = (text[0]=='+');
-       current->mtype = mtype = MethodTypes::Method;
-       current->type.resize(0);
-       current->name.resize(0);
-       current->args.resize(0);
-       current->argList.clear();
-       BEGIN( ObjCMethod );
+         current->bodyLine    = yyLineNr;
+         current->section     = Entry::FUNCTION_SEC;
+         current->protection  = protection = Public;
+
+         language   = current->lang = SrcLangExt_ObjC;
+         insideObjC = true;
+
+         current->virt  = Specifier::Virtual;
+         current->stat  = (text[0]=='+');
+         current->mtype = mtype = MethodTypes::Method;
+
+         current->name.resize(0);
+         current->setData(EntryKey::Member_Type, "");
+         current->setData(EntryKey::Member_Args, "");
+         current->argList.clear();
+
+         BEGIN( ObjCMethod );
       }
    }
 
@@ -1227,13 +1353,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // found method name
       QString text = QString::fromUtf8(yytext);
 
-      if (current->type.isEmpty()) {
-         current->type = "id";
+      if (current->getData(EntryKey::Member_Type).isEmpty()) {
+         current->setData(EntryKey::Member_Type, "id");
       }
 
       current->name = text;
       if (insideCpp || insideObjC) {
-         current->id = ClangParser::instance()->lookup(yyLineNr, text);
+         current->setData(EntryKey::Clang_Id, ClangParser::instance()->lookup(yyLineNr, text));
       }
    }
 
@@ -1250,7 +1376,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ObjCReturnType>[^)]*         {
       // TODO: check if nested braches are possible.
       QString text = QString::fromUtf8(yytext);
-      current->type = text;
+      current->setData(EntryKey::Member_Type, text);
    }
 
 <ObjCReturnType>")"        {
@@ -1260,18 +1386,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ObjCParams>({ID})?":"        {
       // Keyword of parameter
       QString text = QString::fromUtf8(yytext);
-
-      text = text.left(text.length()-1);    // strip :
+      text = text.left(text.length() - 1);
 
       if (text.isEmpty()) {
-       current->name += " :";
+         current->name += " :";
 
       } else {
-       current->name += text + ":";
+         current->name += text + ":";
       }
 
       if (current->argList.last().type.isEmpty()) {
-       current->argList.last().type="id";
+         current->argList.last().type = "id";
       }
 
       Argument a;
@@ -1330,7 +1455,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ObjCParamType>[^()]*         {
       QString text = QString::fromUtf8(yytext);
-      current->argList.last().type += QString(text).trimmed();
+      current->argList.last().type += text.trimmed();
    }
 
 <ObjCMethod,ObjCParams>";"       {
@@ -1339,7 +1464,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->argList.last().type = "id";
       }
 
-      current->args = argListToString(current->argList);
+      current->setData(EntryKey::Member_Args, argListToString(current->argList));
 
       unput(';');
       BEGIN( Function );
@@ -1353,7 +1478,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->argList.last().type = "id";
       }
 
-      current->args = argListToString(current->argList);
+      current->setData(EntryKey::Member_Args, argListToString(current->argList));
+
       unput('{');
       BEGIN( Function );
    }
@@ -1391,12 +1517,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ObjCPropAttr>"getter="{ID}      {
       QString text = QString::fromUtf8(yytext);
-      current->m_read = text.mid(7);
+      current->setData(EntryKey::Read_Property, text.mid(7));
    }
 
 <ObjCPropAttr>"setter="{ID}      {
       QString text = QString::fromUtf8(yytext);
-      current->m_write = text.mid(7);
+      current->setData(EntryKey::Write_Property, text.mid(7));
    }
 
 <ObjCPropAttr>"readonly"      {
@@ -1483,8 +1609,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->name        = substitute(current->name,"\\","::");
 
       current->section     = Entry::NAMESPACE_SEC;
-      current->type        = "namespace";
-      current->fileName    = yyFileName;
+      current->setData(EntryKey::Member_Type, "namespace");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
@@ -1506,7 +1633,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <FindMembers>{B}*"initonly"{BN}+    {
-      current->type += " initonly ";
+      current->appendData(EntryKey::Member_Type, "initonly ");
 
       if (insideCli)  {
          current->m_traits.setTrait(Entry::Virtue::Initonly);
@@ -1515,9 +1642,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
    }
 
-<FindMembers>{B}*"static"{BN}+         {
-      current->type += " static ";
+<FindMembers>{B}*"static"{BN}+      {
+      current->appendData(EntryKey::Member_Type, " static ");
       current->stat = true;
+
       lineCount();
    }
 
@@ -1527,8 +1655,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
    }
 
-<FindMembers>{B}*"virtual"{BN}+        {
-      current->type += " virtual ";
+<FindMembers>{B}*"virtual"{BN}+     {
+
+      current->appendData(EntryKey::Member_Type, " virtual ");
       current->virt = Virtual;
       lineCount();
    }
@@ -1546,7 +1675,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>{B}*"abstract"{BN}+       {
       if (! insidePHP) {
-         current->type += " abstract ";
+         current->appendData(EntryKey::Member_Type, " abstract ");
 
          if (! insideJava) {
             current->virt = Pure;
@@ -1609,11 +1738,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"namespace"{BN}*/[^a-z_A-Z0-9]    {
       isTypedef            = false;
       current->section     = Entry::NAMESPACE_SEC;
-      current->type        = "namespace";
-      current->fileName    = yyFileName;
+      current->setData(EntryKey::Member_Type, "namespace");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
 
       if (insidePHP) {
@@ -1629,11 +1760,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       if (insideIDL) {
          isTypedef            = false;
          current->section     = Entry::NAMESPACE_SEC;
-         current->type        = "module";
-         current->fileName    = yyFileName;
+         current->setData(EntryKey::Member_Type, "module");
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
          current->bodyLine    = yyLineNr;
+
          BEGIN( CompoundName );
 
       } else if (insideD) {
@@ -1652,12 +1785,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (insideIDL) {
          isTypedef = false;
+
          current->section     = Entry::NAMESPACE_SEC;
-         current->type        = "library" ;
-         current->fileName    = yyFileName;
+         current->setData(EntryKey::Member_Type, "library");
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
          current->bodyLine    = yyLineNr;
+
          BEGIN( CompoundName );
 
       } else {
@@ -1673,12 +1809,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (insideIDL) {
          isTypedef = false;
+
          current->section     = Entry::NAMESPACE_SEC;
-         current->type        = "constants";
-         current->fileName    = yyFileName;
+         current->setData(EntryKey::Member_Type, "constants");
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
          current->bodyLine    = yyLineNr;
+
          BEGIN( CompoundName );
 
       } else {
@@ -1707,8 +1846,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
          addType(current);
-         current->type      += " service ";
-         current->fileName  = yyFileName;
+
+         current->appendData(EntryKey::Member_Type, " service");
+         current->setData(EntryKey::File_Name, yyFileName);
+
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
 
@@ -1740,8 +1881,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
          addType( current );
-         current->type      += " singleton ";
-         current->fileName  = yyFileName;
+         current->appendData(EntryKey::Member_Type, " singleton ");
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
 
@@ -1777,8 +1919,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
          addType( current );
-         current->type += " interface";
-         current->fileName    = yyFileName;
+         current->appendData(EntryKey::Member_Type, " interface");
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
          current->bodyLine    = yyLineNr;
@@ -1802,8 +1945,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->protection = protection = Public;
 
       addType(current);
-      current->type += " implementation";
-      current->fileName  = yyFileName;
+      current->appendData(EntryKey::Member_Type, " implementation");
+
+      current->setData(EntryKey::File_Name, yyFileName);;
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
 
@@ -1827,8 +1971,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->protection = protection = Public;
 
       addType(current);
-      current->type        += " interface";
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " interface");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
@@ -1839,6 +1984,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"@protocol"{BN}+   {
       // Objective-C protocol definition
       lineCount();
+
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
 
@@ -1851,8 +1997,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->protection = protection = Public;
 
       addType(current);
-      current->type        += " protocol";
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " protocol");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
@@ -1869,12 +2016,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Exception);
-
       current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
       addType(current);
-      current->type        += " exception";
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " exception");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
@@ -1897,15 +2044,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       addType(current);
 
       if (isConst) {
-        current->type += " const";
+        current->appendData(EntryKey::Member_Type, " const");
 
       } else if (isVolatile) {
-        current->type += " volatile";
+        current->appendData(EntryKey::Member_Type, " volatile");
 
       }
 
-      current->type        += " class" ;
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " class");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
@@ -1936,17 +2084,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       isTypedef = false;
-      current->section   = Entry::CLASS_SEC;
+      current->section = Entry::CLASS_SEC;
 
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Value);
 
       addType(current);
-      current->type        += " value class";
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " value class");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount() ;
 
       if (text.endsWith('{')) {
@@ -1960,17 +2110,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"ref class"{BN}+      {
       QString text = QString::fromUtf8(yytext);
       isTypedef = false;
-      current->section = Entry::CLASS_SEC;
 
+      current->section = Entry::CLASS_SEC;
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Ref);
 
       addType(current);
-      current->type        += " ref class" ;
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " ref class");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
 
       if (text.endsWith('{')) {
@@ -1983,18 +2135,20 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"interface class"{BN}+ {
       QString text = QString::fromUtf8(yytext);
       isTypedef = false;
-      current->section = Entry::CLASS_SEC;
 
+      current->section = Entry::CLASS_SEC;
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Interface);
 
-      addType( current ) ;
-      current->type += " interface class" ;
-      current->fileName  = yyFileName;
+      addType( current );
+      current->appendData(EntryKey::Member_Type, " interface class");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine  = yyLineNr;
-      lineCount() ;
+
+      lineCount();
 
       if (text.endsWith('{')) {
          unput('{');
@@ -2008,16 +2162,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (insideIDL) {
          isTypedef = false;
+
          current->section = Entry::CLASS_SEC;
 
          addType(current);
-         current->type += " coclass" ;
-         current->fileName    = yyFileName;
+         current->appendData(EntryKey::Member_Type, " coclass");
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
          current->bodyLine    = yyLineNr;
 
          lineCount();
+
          BEGIN( CompoundName );
 
       } else  {
@@ -2052,17 +2209,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       addType( current );
       if (isConst) {
-         current->type += " const";
+         current->appendData(EntryKey::Member_Type, " const");
 
       } else if (isVolatile) {
-         current->type += " volatile";
+         current->appendData(EntryKey::Member_Type, " volatile");
       }
 
-      current->type += " struct" ;
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " struct");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
 
       if (text.endsWith('{')) {
@@ -2084,11 +2243,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->m_traits.setTrait(Entry::Virtue::Value);
 
       addType(current);
-      current->type        += " value struct";
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " value struct");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
 
       if (text.endsWith('{')) {
@@ -2101,6 +2262,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>{B}*"ref struct{" |       // C++/CLI extension
 <FindMembers>{B}*"ref struct"{BN}+     {
       QString text = QString::fromUtf8(yytext);
+
       isTypedef = false;
       current->section = Entry::CLASS_SEC;
 
@@ -2109,11 +2271,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->m_traits.setTrait(Entry::Virtue::Ref);
 
       addType(current);
-      current->type        += " ref struct" ;
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " ref struct");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
 
       if (text.endsWith('{')) {
@@ -2135,11 +2299,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->m_traits.setTrait(Entry::Virtue::Interface);
 
       addType(current);
-      current->type        += " interface struct";
-      current->fileName    = yyFileName;
+      current->appendData(EntryKey::Member_Type, " interface struct");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
 
       if (text.endsWith('{')) {
@@ -2161,23 +2327,25 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Union);
 
-      // bug 582676: can be a struct nested in an interface so keep insideObjC state
-      // current->objc    = insideObjC = false;
+      // can be a struct nested in an interface so keep insideObjC state
+      // current->objc = insideObjC = false;
 
       addType(current);
       if (isConst) {
-         current->type += " const";
+         current->appendData(EntryKey::Member_Type, " const");
 
       } else if (isVolatile) {
-         current->type += " volatile";
+         current->appendData(EntryKey::Member_Type, " volatile");
 
       }
 
-      current->type        += " union" ;
-      current->fileName     = yyFileName;
+      current->appendData(EntryKey::Member_Type, " union");
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine    = yyLineNr;
       current->startColumn  = yyColNr;
       current->bodyLine     = yyLineNr;
+
       lineCount();
 
       if (text.endsWith('{')) {
@@ -2192,7 +2360,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // for IDL: typedef [something] enum
       QString text = QString::fromUtf8(yytext);
 
-      isTypedef = text.indexOf("typedef")!=-1;
+      isTypedef = text.indexOf("typedef") != -1;
       bool isStrongEnum = text.indexOf("struct") != -1 || text.indexOf("class") != -1 || insideCSharp;
 
       if (insideJava) {
@@ -2206,17 +2374,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       }
 
-      addType( current ) ;
-      current->type += " enum";
+      addType( current );
+      current->appendData(EntryKey::Member_Type, " enum");
 
       if (isStrongEnum) {
          current->m_traits.setTrait(Entry::Virtue::Strong);
       }
 
-      current->fileName    = yyFileName;
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
+
       lineCount();
 
       if (text.endsWith('{')) {
@@ -2271,10 +2440,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       currentArgumentList = &current->m_templateArgLists.last();
 
-      templateStr = "<";
+      s_template_args = "<";
 
-      fullArgString = templateStr;
-      copyArgString = &templateStr;
+      fullArgString = s_template_args;
+
+      s_argEntry    = QSharedPointer<Entry>();
+      s_argEnum     = ArgKey::Template_Args;
+
       currentArgumentContext = FindMembers;
 
       BEGIN( ReadTempArgs );
@@ -2314,17 +2486,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       lineCount();
       current->name = removeRedundantWhiteSpace(substitute(text,"\\","::"));
-      current->fileName = yyFileName;
+      current->setData(EntryKey::File_Name, yyFileName);
 
       // add a using declaraton
-      current->section=Entry::USINGDECL_SEC;
+      current->section = Entry::USINGDECL_SEC;
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>(*current);
 
       // also add it as a using directive
-      current->section=Entry::USINGDIR_SEC;
+      current->section = Entry::USINGDIR_SEC;
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
+
       initEntry();
       aliasName.resize(0);
    }
@@ -2358,8 +2531,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       lineCount();
       current->name = removeRedundantWhiteSpace(substitute(text.left(text.length()-1),".","::"));
-      current->fileName = yyFileName;
+      current->setData(EntryKey::File_Name, yyFileName);
       current->section  = Entry::USINGDIR_SEC;
+
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
@@ -2372,7 +2546,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       lineCount();
       current->name = removeRedundantWhiteSpace(substitute(text,".","::"));
-      current->fileName = yyFileName;
+      current->setData(EntryKey::File_Name, yyFileName);
 
       if (insideD) {
          current->section=Entry::USINGDIR_SEC;
@@ -2382,16 +2556,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       current_root->addSubEntry(current, current_root);
       previous = current;
-
-      current = QMakeShared<Entry>();
+      current  = QMakeShared<Entry>();
       initEntry();
       BEGIN(Using);
    }
 
 <FindMembers>"using"{BN}+     {
-      current->startLine=yyLineNr;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       lineCount();
+
       BEGIN(Using);
    }
 
@@ -2402,14 +2576,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <Using>({ID}{BN}*("::"|"."){BN}*)*({ID}|{OPERATOR}) {
       QString text = QString::fromUtf8(yytext);
+
       lineCount();
 
       current->name      = text;
-      current->fileName  = yyFileName;
       current->section   = Entry::USINGDECL_SEC;
-      current->startLine = yyLineNr;
-      current_root->addSubEntry(current, current_root);
 
+      current->setData(EntryKey::File_Name, yyFileName);
+      current->startLine = yyLineNr;
+
+      current_root->addSubEntry(current, current_root);
       previous = current;
       current = QMakeShared<Entry>();
 
@@ -2418,10 +2594,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          // also add it as a using directive here
 
          current->name        = text;
-         current->fileName    = yyFileName;
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
          current->section     = Entry::USINGDIR_SEC;
+
          current_root->addSubEntry(current, current_root);
          current = QMakeShared<Entry>();
       }
@@ -2435,13 +2613,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <UsingAlias>";"                         {
+      QString tmpType = "";
+
+      tmpType = "typedef " + previous->getData(EntryKey::Member_Args);
+      tmpType =  tmpType.simplified();
+
       previous->section  = Entry::VARIABLE_SEC;
-      previous->type     = "typedef " + previous->args;
-      previous->type     = previous->type.simplified();
       previous->name     = previous->name.trimmed();
       previous->bodyLine = yyLineNr;
 
-      previous->args.clear();
+      previous->setData(EntryKey::Member_Type, tmpType);
+      previous->setData(EntryKey::Member_Args, "");
+
       previous->m_traits.setTrait(Entry::Virtue::Alias);
 
       BEGIN(FindMembers);
@@ -2476,25 +2659,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <UsingAlias>">>"  {
-      previous->args += "> >";
+      previous->appendData(EntryKey::Member_Args, "> >");
    }
 
 <UsingAlias>.                           {
       QString text = QString::fromUtf8(yytext);
-      previous->args += text;
+      previous->appendData(EntryKey::Member_Args, text);
    }
 
 <UsingAlias>\n                          {
       QString text = QString::fromUtf8(yytext);
-      previous->args += text;
+      previous->appendData(EntryKey::Member_Args, text);
       lineCount();
    }
 
 <UsingAliasEnd>";"                      {
-      previous->doc   = current->doc;
-      previous->brief = current->brief;
-      current->doc.resize(0);
-      current->brief.resize(0);
+      previous->setData(EntryKey::Brief_Docs, current->getData(EntryKey::Brief_Docs));
+      previous->setData(EntryKey::Main_Docs,  current->getData(EntryKey::Main_Docs));
+
+      current->setData(EntryKey::Brief_Docs,   "");
+      current->setData(EntryKey::Main_Docs,    "");
 
       unput(';');
       BEGIN(UsingAlias);
@@ -2502,9 +2686,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <UsingDirective>{SCOPENAME}      {
       QString text = QString::fromUtf8(yytext);
-      current->name = removeRedundantWhiteSpace(text);
-      current->fileName = yyFileName;
-      current->section=Entry::USINGDIR_SEC;
+
+      current->name    = removeRedundantWhiteSpace(text);
+      current->section = Entry::USINGDIR_SEC;
+
+      current->setData(EntryKey::File_Name, yyFileName);
+
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
@@ -2527,7 +2714,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
       roundCount = 0;
       sharpCount = 0;
+
       lineCount();
+
       addType( current );
       current->name = text;
       current->name = current->name.trimmed();
@@ -2597,13 +2786,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
       current->name += '>';
 
-      if (roundCount==0 && --sharpCount<=0) {
+      if (roundCount == 0 && --sharpCount <= 0) {
+
          current->bodyLine = yyLineNr;
-         current->args = "(";
+         current->setData(EntryKey::Member_Args, "(");
+
+         fullArgString = "(";
+
+         s_argEntry  = current;
+         s_argEnum   = ArgKey::Member_Args;
+
          currentArgumentContext = FuncQual;
-         fullArgString = current->args;
-         copyArgString = &current->args;
-         BEGIN( ReadFuncArgType ) ;
+
+         BEGIN( ReadFuncArgType );
       }
    }
 
@@ -2659,7 +2854,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // PHP heredoc
       QString text = QString::fromUtf8(yytext);
       s_delimiter = text;
-      *pCopyHereDocGString += text;
+
+      addToOutput(s_hereDocEntry, s_hereDocEnum, text);
+
       BEGIN(CopyHereDocEnd);
    }
 
@@ -2667,7 +2864,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // PHP nowdoc
       QString text = QString::fromUtf8(yytext);
       s_delimiter = text.mid(1);
-      *pCopyHereDocGString += text;
+
+      addToOutput(s_hereDocEntry, s_hereDocEnum, text);
+
       BEGIN(CopyHereDocEnd);
    }
 
@@ -2701,7 +2900,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CopyHereDocEnd>^{ID}   {
       // id at start of the line could mark the end of the block
       QString text = QString::fromUtf8(yytext);
-      *pCopyHereDocGString += text;
+      addToOutput(s_hereDocEntry, s_hereDocEnum, text);
 
       if (s_delimiter == text) {
          // it is the end marker
@@ -2711,12 +2910,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CopyHereDocEnd>\n         {
       QString text = QString::fromUtf8(yytext);
-      *pCopyHereDocGString += text;
+      addToOutput(s_hereDocEntry, s_hereDocEnum, text);
    }
 
 <CopyHereDocEnd>.             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyHereDocGString += text;
+      addToOutput(s_hereDocEntry, s_hereDocEnum, text);
    }
 
 <FindMembers>"Q_OBJECT"    {
@@ -2726,8 +2925,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>"Q_PROPERTY"  {
       // Q_property
      current->protection = Public;
-     current->mtype = MethodTypes::Property;
-     current->type.resize(0);
+     current->mtype      = MethodTypes::Property;
+     current->setData(EntryKey::Member_Type, "");
+
      BEGIN(QtPropType);
    }
 
@@ -2743,17 +2943,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <QtPropType>"const"|"volatile"|"unsigned"|"signed"|"long"|"short" {
       QString text = QString::fromUtf8(yytext);
-      current->type += text;
+      current->appendData(EntryKey::Member_Type, text);
    }
 
 <QtPropType>{B}+           {
       QString text = QString::fromUtf8(yytext);
-      current->type += text;
+      current->appendData(EntryKey::Member_Type, text);
    }
 
 <QtPropType>({TSCOPE}"::")*{TSCOPE}    {
       QString text = QString::fromUtf8(yytext);
-      current->type += text;
+      current->appendData(EntryKey::Member_Type, text);
       BEGIN(QtPropName);
    }
 
@@ -2787,13 +2987,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <QtPropRead>{ID}           {
       QString text = QString::fromUtf8(yytext);
-      current->m_read = text;
+      current->setData(EntryKey::Read_Property, text);
       BEGIN(QtPropAttr);
    }
 
 <QtPropWrite>{ID}             {
       QString text = QString::fromUtf8(yytext);
-      current->m_write = text;
+      current->setData(EntryKey::Write_Property, text);
       BEGIN(QtPropAttr);
    }
 
@@ -2813,26 +3013,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       BEGIN(CsObjectClose);
    }
 
-<CsObjectClose>")"                 {
+<CsObjectClose>")"                  {
       // end of cs_object
       BEGIN(FindMembers);
    }
 
-<FindMembers>{CS_MACRO}            {
+<FindMembers>{CS_MACRO}             {
       // ignore this macro
       roundCount = 0;
       BEGIN(CsIgnore);
    }
 
-<CsIgnore>"("                      {
+<CsIgnore>"("                       {
       ++roundCount;
    }
 
-<CsIgnore>")"                      {
+<CsIgnore>")"                       {
       // end of macro ignore
       --roundCount;
 
-      if (roundCount == 0)  {
+      if (roundCount == 0)          {
         BEGIN(FindMembers);
       }
    }
@@ -2849,7 +3049,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CsPropClose>")"                    {
       // end property
      lineCount();
-     current->fileName    = yyFileName;
+
+     current->setData(EntryKey::File_Name, yyFileName);
      current->startLine   = yyLineNr;
      current->startColumn = yyColNr;
 
@@ -2857,7 +3058,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
      current->section     = Entry::VARIABLE_SEC;
 
      // unknown data type, decipher later on
-     // current->type = "";
+     // current->setData(EntryKey::Member_Type, = "");
 
      current_root->addSubEntry(current, current_root);
      current = QMakeShared<Entry>();
@@ -2869,8 +3070,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
      current->protection = Public;
      current->mtype      = MethodTypes::Property;
      current->m_traits.setTrait(Entry::Virtue::Readable);
+     current->setData(EntryKey::Member_Type, "");
 
-     current->type.resize(0);
      BEGIN(CsPropReadVar);
    }
 
@@ -2890,7 +3091,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CsPropReadMethod>{ID}               {
       // cs property read method
       QString text = QString::fromUtf8(yytext);
-      current->m_read = text;
+      current->setData(EntryKey::Read_Property, text);
       BEGIN(CsPropClose);
    }
 
@@ -2898,7 +3099,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->protection = Public;
       current->mtype      = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Writable);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
 
       BEGIN(CsPropWriteVar);
    }
@@ -2916,18 +3117,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       BEGIN(CsPropWriteMethod);
    }
 
-<CsPropWriteMethod>{ID}                 {
+<CsPropWriteMethod>{ID}              {
       QString text = QString::fromUtf8(yytext);
-      current->m_write = text;
+      current->setData(EntryKey::Write_Property, text);
       BEGIN(CsPropClose);
    }
 
-<FindMembers>"CS_PROPERTY_RESET"        {
+<FindMembers>"CS_PROPERTY_RESET"     {
       QString text = QString::fromUtf8(yytext);
+
       current->protection = Public;
       current->mtype = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Reset);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
 
       BEGIN(CsPropResetVar);
    }
@@ -2935,7 +3137,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CsPropResetVar>"("                  {
    }
 
-<CsPropResetVar>{ID}                    {
+<CsPropResetVar>{ID}                 {
       QString text = QString::fromUtf8(yytext);
       current->name = text;
    }
@@ -2946,15 +3148,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CsPropResetMethod>{ID}                 {
       QString text = QString::fromUtf8(yytext);
-      current->m_reset = text;
+      current->setData(EntryKey::Reset_Property, text);
       BEGIN(CsPropClose);
    }
 
 <FindMembers>"CS_PROPERTY_NOTIFY"       {
-      current->protection    = Public;
-      current->mtype = MethodTypes::Property;
+      current->protection  = Public;
+      current->mtype       = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Notify);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
 
       BEGIN(CsPropNotifyVar);
    }
@@ -2967,13 +3169,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->name = text;
    }
 
-<CsPropNotifyVar>","                    {
+<CsPropNotifyVar>","                  {
       BEGIN(CsPropNotifyMethod);
    }
 
 <CsPropNotifyMethod>{ID}              {
       QString text = QString::fromUtf8(yytext);
-      current->m_notify = text;
+      current->setData(EntryKey::Notify_Property, text);
       BEGIN(CsPropClose);
    }
 
@@ -2981,7 +3183,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->protection = Public;
       current->mtype      = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Revision);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
 
       BEGIN(CsPropVar);
    }
@@ -2990,24 +3192,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->protection = Public;
       current->mtype      = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Designable);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
 
       BEGIN(CsPropVar);
    }
 
 <FindMembers>"CS_PROPERTY_SCRIPTABLE"      {
-      current->protection    = Public;
-      current->mtype = MethodTypes::Property;
+      current->protection = Public;
+      current->mtype      = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Scriptable);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+
       BEGIN(CsPropVar);
    }
 
 <FindMembers>"CS_PROPERTY_STORED"       {
-      current->protection    = Public;
-      current->mtype = MethodTypes::Property;
+      current->protection = Public;
+      current->mtype      = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Stored);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+
       BEGIN(CsPropVar);
    }
 
@@ -3015,23 +3219,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->protection    = Public;
       current->mtype = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::User);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+
       BEGIN(CsPropVar);
    }
 
 <FindMembers>"CS_PROPERTY_CONSTANT"     {
-      current->protection    = Public;
-      current->mtype = MethodTypes::Property;
+      current->protection  = Public;
+      current->mtype       = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Constant);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+
       BEGIN(CsPropJustVar);
    }
 
 <FindMembers>"CS_PROPERTY_FINAL"        {
       current->protection = Public;
-      current->mtype = MethodTypes::Property;
+      current->mtype      = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Final_Property);
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
+
       BEGIN(CsPropJustVar);
    }
 
@@ -3060,7 +3267,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (roundCount == 0)  {
         lineCount();
-        current->fileName    = yyFileName;
+        current->setData(EntryKey::File_Name, yyFileName);
         current->startLine   = yyLineNr;
         current->startColumn = yyColNr;
 
@@ -3085,7 +3292,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>"CS_SIGNAL_1"     {
       current->mtype = MethodTypes::Signal;
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
       BEGIN(CsSignal);
    }
 
@@ -3105,7 +3312,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>"CS_SLOT_1"       {
       current->mtype = MethodTypes::Slot;
-      current->type.resize(0);
+      current->setData(EntryKey::Member_Type, "");
       BEGIN(CsSlot);
    }
 
@@ -3156,11 +3363,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       if (! current->name.isEmpty()) {
-         current->args     = text;
+
+         current->setData(EntryKey::Member_Args, text);
          current->bodyLine = yyLineNr;
-         fullArgString     = current->args;
-         copyArgString     = &current->args;
+
+         fullArgString = text;
+
+         s_argEntry    = current;
+         s_argEnum     = ArgKey::Member_Args;
+
          currentArgumentContext = CsSignalSlotClose;
+
          BEGIN(ReadFuncArgType);
       }
    }
@@ -3168,7 +3381,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CsSignalSlotClose>")"             {
       // end of cs signal
       lineCount();
-      current->fileName    = yyFileName;
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
@@ -3247,7 +3461,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       if (insideCpp || insideObjC)  {
-         current->id = ClangParser::instance()->lookup(yyLineNr, text);
+         current->setData(EntryKey::Clang_Id, ClangParser::instance()->lookup(yyLineNr, text));
       }
 
       yyBegColNr  = yyColNr;
@@ -3287,11 +3501,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       } else if (insideJS && text == "var") {
          // javascript variable
-         current->type ="var";
+         current->setData(EntryKey::Member_Type, "var");
 
       } else if (insideJS && text == "function") {
          // javascript function
-         current->type = "function";
+         current->setData(EntryKey::Member_Type, "function");
 
       } else if (insideCSharp && text == "this") {
          // C# indexer
@@ -3305,7 +3519,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       } else if (insideCpp && text == "decltype") {
          // C++11 decltype(x)
-         current->type += text;
+         current->appendData(EntryKey::Member_Type, text);
+
          BEGIN(DeclType);
 
       } else {
@@ -3352,21 +3567,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
             } else if (current->name.left(7) == "inline ")  {
 
-               if (current->type.isEmpty()) {
-                  current->type = "inline";
+               if (current->getData(EntryKey::Member_Type).isEmpty()) {
+                  current->setData(EntryKey::Member_Type, "inline");
+
                } else {
-                  current->type += "inline ";
+                  current->appendData(EntryKey::Member_Type, "inline ");
+
                }
 
                current->name = current->name.mid(7);
 
             } else if (current->name.left(6) == "const ") {
 
-               if (current->type.isEmpty()) {
-                  current->type = "const";
+               if (current->getData(EntryKey::Member_Type).isEmpty()) {
+                  current->setData(EntryKey::Member_Type, "const");
 
                } else {
-                  current->type += "const ";
+                  current->appendData(EntryKey::Member_Type, "const ");
                }
 
                current->name = current->name.mid(6);
@@ -3401,10 +3618,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <DeclType>"("   {
       QString text = QString::fromUtf8(yytext);
-      current->type += text;
+      current->appendData(EntryKey::Member_Type, text);
+
       lastRoundContext = FindMembers;
-      pCopyRoundString = &current->type;
-      roundCount = 0;
+
+      s_roundEntry = current;
+      s_roundEnum  = EntryKey::Member_Type;
+      roundCount   = 0;
+
       BEGIN(CopyRound);
    }
 
@@ -3515,7 +3736,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lastPreLineCtrlContext = YY_START;
 
       if (YY_START == ReadBody || YY_START == ReadNSBody || YY_START == ReadBodyIntf) {
-        current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
       }
 
       BEGIN( PreLineCtrl );
@@ -3526,21 +3747,21 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       yyFileName = stripQuotes(text);
 
       if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
-         current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
       }
    }
 
 <PreLineCtrl>.             {
       QString text = QString::fromUtf8(yytext);
       if (lastPreLineCtrlContext==ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
-         current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
       }
    }
 
 <PreLineCtrl>\n            {
       QString text = QString::fromUtf8(yytext);
       if (lastPreLineCtrlContext == ReadBody || lastPreLineCtrlContext==ReadNSBody || lastPreLineCtrlContext==ReadBodyIntf) {
-         current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
       }
 
       lineCount();
@@ -3562,24 +3783,29 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       current->name = text;
       current->name = current->name.left(current->name.length() - 1).trimmed();
-      current->args = "(";
-      current->bodyLine = yyLineNr;
+
+      current->setData(EntryKey::Member_Args, "(");
+
+      current->bodyLine      = yyLineNr;
       currentArgumentContext = DefineEnd;
-      fullArgString=current->args;
-      copyArgString=&current->args;
+
+      fullArgString = "(";
+
+      s_argEntry  = current;
+      s_argEnum   = ArgKey::Member_Args;
 
       BEGIN( ReadFuncArgType ) ;
    }
 
  /*
 <DefineArg>")"             {
-      current->args += ')';
+      current->appendData(EntryKey::Member_Args, "(");
       BEGIN( DefineEnd );
    }
 
 <DefineArg>.            {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args,  text[0]);
    }
  */
 
@@ -3587,41 +3813,44 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       current->bodyLine = yyLineNr;
-      current->name = text;
+      current->name     = text;
       BEGIN(DefineEnd);
    }
 
 <DefineEnd>\n           {
       lineCount();
-      current->fileName   = yyFileName;
-      current->startLine  = yyLineNr;
-      current->startColumn = yyColNr;
-      current->type.resize(0);
-      current->args       = current->args.simplified();
-      current->name       = current->name.trimmed();
-      current->section    = Entry::DEFINE_SEC;
-      current_root->addSubEntry(current, current_root);
 
+      current->setData(EntryKey::File_Name, yyFileName);
+      current->startLine   = yyLineNr;
+      current->startColumn = yyColNr;
+
+      current->setData(EntryKey::Member_Type,  "");
+      current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
+
+      current->name        = current->name.trimmed();
+      current->section     = Entry::DEFINE_SEC;
+
+      current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(lastDefineContext);
    }
 
 <DefinePHPEnd>";"          {
-      current->fileName   = yyFileName;
-      current->startLine  = yyLineNr;
+      current->setData(EntryKey::File_Name, yyFileName);
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
-      current->type.resize(0);
-      current->type       = "const";
+      current->setData(EntryKey::Member_Type, "const");
 
-      QString init = current->initializer;
+      QString init = current->getData(EntryKey::Initial_Value);
       init = init.simplified();
       init = init.left(init.length()-1);
+      current->setData(EntryKey::Initial_Value, init);
 
-      current->initializer = init;
       current->name       = current->name.trimmed();
       current->section    = Entry::VARIABLE_SEC;
+
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
@@ -3645,13 +3874,18 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <DefineEnd>.
 <DefinePHP>{ID}["']{BN}*","{BN}*    {
       QString text = QString::fromUtf8(yytext);
+
       current->name = text;
       current->name = current->name.trimmed();
       current->name = current->name.left(current->name.length() - 1).trimmed();
       current->name = current->name.left(current->name.length() - 1);
       current->bodyLine = yyLineNr;
+
       lastRoundContext  = DefinePHPEnd;
-      pCopyRoundGString = &current->initializer;
+
+      s_roundGEntry = current;
+      s_roundGEnum  = EntryKey::Initial_Value;
+
       roundCount = 0;
       BEGIN( GCopyRound );
    }
@@ -3698,8 +3932,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       s_docBlockTerm = ';';
 
       if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC) {
-         current->bitfields = ":" + current->args;
-         current->args.resize(0);
+         current->setData(EntryKey::Member_Bitfields,  ":" + current->getData(EntryKey::Member_Args));
+         current->setData(EntryKey::Member_Args,       "");
          current->section = Entry::VARIABLE_SEC;
       }
 
@@ -3732,8 +3966,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       s_docBlockTerm = ',';
 
       if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC) {
-        current->bitfields = ":" + current->args;
-        current->args.resize(0);
+        current->setData(EntryKey::Member_Bitfields,  ":" + current->getData(EntryKey::Member_Args));
+        current->setData(EntryKey::Member_Args,       "");
+
         current->section = Entry::VARIABLE_SEC;
       }
 
@@ -3842,41 +4077,54 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindMembers>"="                                {
       // in PHP code this could also be due to "<?="
       QString text = QString::fromUtf8(yytext);
+
       current->bodyLine      = yyLineNr;
-      current->initializer   = text;
+      current->setData(EntryKey::Initial_Value, text);
+
       lastInitializerContext = YY_START;
       initBracketCount       = 0;
+
       BEGIN(ReadInitializer);
    }
 
 <UNOIDLAttributeBlock>{BN}*[gs]"et"{BN}+"raises"{BN}*"("{BN}*{SCOPENAME}{BN}*(","{BN}*{SCOPENAME}{BN}*)*")"{BN}*";"  {
       QString text = QString::fromUtf8(yytext);
       lineCount();
-      current->exception += " ";
-      current->exception += removeRedundantWhiteSpace(text);
+
+      current->appendData(EntryKey::Exception_Spec, " " + removeRedundantWhiteSpace(text));
    }
 
 <UNOIDLAttributeBlock>"}"     {
-      current->exception += " }";
+      current->appendData(EntryKey::Exception_Spec, " }");
       BEGIN(FindMembers);
    }
 
   /* Read initializer rules */
 <ReadInitializer>"("          {
       QString text = QString::fromUtf8(yytext);
+
       lastRoundContext  = YY_START;
-      pCopyRoundGString = &current->initializer;
-      roundCount = 0;
-      current->initializer += text[0];
+
+      s_roundGEntry = current;
+      s_roundGEnum  = EntryKey::Initial_Value;
+      roundCount    = 0;
+
+      current->appendData(EntryKey::Initial_Value,  text[0]);
+
       BEGIN(GCopyRound);
    }
 
 <ReadInitializer>"{"          {
       QString text = QString::fromUtf8(yytext);
+
       lastCurlyContext  = YY_START;
-      pCopyCurlyGString = &current->initializer;
-      curlyCount = 0;
-      current->initializer += text[0];
+
+      s_curlyGEntry = current;
+      s_curlyGEnum  = EntryKey::Initial_Value;
+      curlyCount    = 0;
+
+      current->appendData(EntryKey::Initial_Value,  text[0]);
+
       BEGIN(GCopyCurly);
    }
 
@@ -3886,16 +4134,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
 
       if (text[0] == ';' && isEnum) {
-         current->fileName    = yyFileName;
+         current->setData(EntryKey::File_Name,  yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
-         current->args        = current->args.simplified();
+
+         current->setData(EntryKey::Member_Args, current->getData(EntryKey::Member_Args).simplified());
+
          current->name        = current->name.trimmed();
          current->section     = Entry::VARIABLE_SEC;
-         current_root->addSubEntry(current, current_root);
 
+         current_root->addSubEntry(current, current_root);
          current = QMakeShared<Entry>();
          initEntry();
+
          BEGIN(FindMembers);
 
          } else if (text[0] == ';' || (lastInitializerContext == FindFields && initBracketCount==0))  {
@@ -3911,7 +4162,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             BEGIN(lastInitializerContext);
 
       } else  {
-         current->initializer += text[0];
+         current->appendData(EntryKey::Initial_Value,  text[0]);
 
       }
    }
@@ -3924,21 +4175,25 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          REJECT;
 
       } else {
-        current->initializer += text;
+        current->appendData(EntryKey::Initial_Value, text);
 
-        int i = text.indexOf('"');
+        int i       = text.indexOf('"');
         s_delimiter = text.mid(i + 1);
-
         s_delimiter = s_delimiter.left(s_delimiter.length() - 1);
+
         lastRawStringContext = YY_START;
-        pCopyRawGString = &current->initializer;
+
+        s_rawGEntry = current;
+        s_rawGEnum  = EntryKey::Initial_Value;
+
         BEGIN(RawGString);
       }
    }
 
 <RawGString>{RAWEND}                    {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawGString += text;
+
+      addToOutput(s_rawGEntry, s_rawGEnum, text);
 
       QString delimiter = text.mid(1);
       delimiter = delimiter.left(delimiter.length() - 1);
@@ -3950,27 +4205,29 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <RawGString>[^)\n]+                     {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawGString += text;
+      addToOutput(s_rawGEntry, s_rawGEnum, text);
    }
 
 <RawGString>.                           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawGString += text;
+      addToOutput(s_rawGEntry, s_rawGEnum, text);
    }
 
 <RawGString>\n                          {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawGString += text;
+      addToOutput(s_rawGEntry, s_rawGEnum, text);
       lineCount();
    }
 
 <RawString>{RAWEND}                     {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawString += text;
+      addToOutput(s_rawEntry, s_rawEnum, text);
+
       fullArgString   += text;
 
       QString delimiter = text.mid(1);
       delimiter = delimiter.left(delimiter.length() - 1);
+
       if (delimiter == s_delimiter) {
          BEGIN(lastRawStringContext);
       }
@@ -3978,231 +4235,253 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <RawString>[^)]+                        {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawString += text;
+      addToOutput(s_rawEntry, s_rawEnum, text);
       fullArgString   += text;
     }
 
 <RawString>.                            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawString += text;
+      addToOutput(s_rawEntry, s_rawEnum, text);
       fullArgString   += text;
    }
 
 <RawString>\n                           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRawString += text;
+      addToOutput(s_rawEntry, s_rawEnum, text);
       fullArgString   += text;
       lineCount();
    }
 
 <ReadInitializer>\"        {
       QString text = QString::fromUtf8(yytext);
-      if (insideIDL && insideCppQuote) {
+
+     if (insideIDL && insideCppQuote) {
          BEGIN(EndCppQuote);
+
       } else {
          lastStringContext    =  YY_START;
-         current->initializer += text;
-         pCopyQuotedGString   =  &current->initializer;
+         current->appendData(EntryKey::Initial_Value, text);
+
+         s_quotedGEntry = current;
+         s_quotedGEnum  = EntryKey::Initial_Value;
+
          BEGIN(CopyGString);
       }
    }
 
 <ReadInitializer>"->"         {
       QString text = QString::fromUtf8(yytext);
-      current->initializer += text;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 
 <ReadInitializer>"<<"         {
       QString text = QString::fromUtf8(yytext);
-      current->initializer += text;
+      current->appendData(EntryKey::Initial_Value, text);;
    }
 
 <ReadInitializer>">>"         {
       QString text = QString::fromUtf8(yytext);
-      current->initializer += text;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 
 <ReadInitializer>[<\[{(]      {
       QString text = QString::fromUtf8(yytext);
       initBracketCount++;
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value,  text[0]);
    }
 
 <ReadInitializer>[>\]})]      {
       QString text = QString::fromUtf8(yytext);
       initBracketCount--;
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value,  text[0]);
    }
 
 <ReadInitializer>\'        {
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP) {
-         current->initializer += text;
-         pCopyQuotedGString = &current->initializer;
+         current->appendData(EntryKey::Initial_Value, text);
+
+         s_quotedGEntry = current;
+         s_quotedGEnum  = EntryKey::Initial_Value;
+
          lastStringContext  = YY_START;
+
          BEGIN(CopyPHPGString);
+
       } else {
-         current->initializer += text;
+         current->appendData(EntryKey::Initial_Value, text);
       }
    }
 
 <ReadInitializer>{CHARLIT}              {
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP) {
          REJECT;
       } else {
-         current->initializer += text;
+         current->appendData(EntryKey::Initial_Value, text);
       }
    }
 
 <ReadInitializer>\n        {
       QString text = QString::fromUtf8(yytext);
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value,  text[0]);
       lineCount();
    }
 
 <ReadInitializer>"@\""        {
       QString text = QString::fromUtf8(yytext);
-      current->initializer += text;
+      current->appendData(EntryKey::Initial_Value, text);
 
       if (! insideCSharp && ! insideObjC)  {
          REJECT;
+
       }  else {
          // C#/ObjC verbatim string
          lastSkipVerbStringContext = YY_START;
-         pSkipVerbString=&current->initializer;
+
+         s_skipVerbEntry = current;
+         s_skipVerbEnum  = EntryKey::Initial_Value;
+
          BEGIN(SkipVerbString);
       }
    }
 
 <SkipVerbString>[^\n"]+          {
       QString text = QString::fromUtf8(yytext);
-      *pSkipVerbString += text;
+      addToOutput(s_skipVerbEntry, s_skipVerbEnum, text);
    }
 
 <SkipVerbString>"\"\""        {
       // quote escape
       QString text = QString::fromUtf8(yytext);
-      *pSkipVerbString += text;
+      addToOutput(s_skipVerbEntry, s_skipVerbEnum, text);;
    }
 
 <SkipVerbString>"\""          {
       QString text = QString::fromUtf8(yytext);
-      *pSkipVerbString += text[0];
+      addToOutput(s_skipVerbEntry, s_skipVerbEnum, text[0]);
       BEGIN(lastSkipVerbStringContext);
    }
 
 <SkipVerbString>\n         {
       QString text = QString::fromUtf8(yytext);
-      *pSkipVerbString += text[0];
+      addToOutput(s_skipVerbEntry, s_skipVerbEnum, text[0]);
       lineCount();
    }
 
 <SkipVerbString>.          {
       QString text = QString::fromUtf8(yytext);
-      *pSkipVerbString += text[0];
+      addToOutput(s_skipVerbEntry, s_skipVerbEnum, text[0]);
    }
 
 <ReadInitializer>"?>"         {
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP) {
          BEGIN( FindMembersPHP );
       }  else {
-         current->initializer += text;
+         current->appendData(EntryKey::Initial_Value, text);
       }
    }
 
 <ReadInitializer>.         {
       QString text = QString::fromUtf8(yytext);
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value,  text[0]);
    }
 
   /* generic quoted string copy rules */
 <CopyString,CopyPHPString>\\.       {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedString += text;
+      addToOutput(s_quotedEntry, s_quotedEnum, text);
    }
 
 <CopyString>\"             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedString += text[0];
-                    BEGIN( lastStringContext );
+      addToOutput(s_quotedEntry, s_quotedEnum, text[0]);
+      BEGIN( lastStringContext );
    }
 
 <CopyPHPString>\'          {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedString += text[0];
+      addToOutput(s_quotedEntry, s_quotedEnum, text[0]);
       BEGIN( lastStringContext );
    }
 
 <CopyString,CopyPHPString>"/*"|"*/"|"//" {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedString += text;
+      addToOutput(s_quotedEntry, s_quotedEnum, text);
    }
 
 <CopyString,CopyPHPString>\n     {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedString += text[0];
+      addToOutput(s_quotedEntry, s_quotedEnum, text);
       lineCount();
    }
 
 <CopyString,CopyPHPString>.      {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedString += text[0];
+      addToOutput(s_quotedEntry, s_quotedEnum, text[0]);
    }
 
   /* generic quoted growable string copy rules */
 <CopyGString,CopyPHPGString>\\.     {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedGString += text;
+      addToOutput(s_quotedGEntry, s_quotedGEnum, text);
    }
 
 <CopyGString>\"           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedGString += text[0];
+      addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
       BEGIN( lastStringContext );
    }
 
 <CopyPHPGString>\'         {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedGString += text[0];
+      addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
       BEGIN( lastStringContext );
    }
 
 <CopyGString,CopyPHPGString>"/*"|"*/"|"//" {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedGString += text;
+      addToOutput(s_quotedGEntry, s_quotedGEnum, text);
    }
 
 <CopyGString,CopyPHPGString>\n      {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedGString += text[0];
+      addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
       lineCount();
    }
 
 <CopyGString,CopyPHPGString>.       {
       QString text = QString::fromUtf8(yytext);
-      *pCopyQuotedGString += text[0];
+      addToOutput(s_quotedGEntry, s_quotedGEnum, text[0]);
    }
 
   /* generic round bracket list copy rules */
 <CopyRound>\"           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundString += text[0];
-      pCopyQuotedString = pCopyRoundString;
+      addToOutput(s_roundEntry, s_roundEnum, text[0]);
+
+      s_quotedEntry = s_roundEntry;
+      s_quotedEnum  = s_roundEnum;
+
       lastStringContext = YY_START;
+
       BEGIN(CopyString);
    }
 
 <CopyRound>"("             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundString += text[0];
+      addToOutput(s_roundEntry, s_roundEnum, text[0]);
       roundCount++;
    }
 
 <CopyRound>")"             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundString += text[0];
+      addToOutput(s_roundEntry, s_roundEnum, text[0]);
+
       if (--roundCount < 0) {
          BEGIN(lastRoundContext);
       }
@@ -4211,58 +4490,69 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CopyRound>\n           {
       QString text = QString::fromUtf8(yytext);
       lineCount();
-      *pCopyRoundString += text[0];
+      addToOutput(s_roundEntry, s_roundEnum, text[0]);
    }
 
 <CopyRound>\'           {
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP) {
-         current->initializer += text;
-         pCopyQuotedString = pCopyRoundString;
-            lastStringContext = YY_START;
+         current->appendData(EntryKey::Initial_Value, text);
+
+         s_quotedEntry = s_roundEntry;
+         s_quotedEnum  = s_roundEnum;
+
+         lastStringContext = YY_START;
+
          BEGIN(CopyPHPString);
+
       } else {
-         *pCopyRoundString += text;
+         addToOutput(s_roundEntry, s_roundEnum, text);
       }
    }
 
 <CopyRound>{CHARLIT}               {
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP)  {
          REJECT;
       } else  {
-         *pCopyRoundString += yytext;
+         addToOutput(s_roundEntry, s_roundEnum, text);
       }
    }
 
 <CopyRound>[^"'()\n]+         {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundString += text;
+      addToOutput(s_roundEntry, s_roundEnum, text);
    }
 
 <CopyRound>.            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundString += text[0];
+      addToOutput(s_roundEntry, s_roundEnum, text[0]);
    }
 
   /* generic round bracket list copy rules for growable strings */
 <GCopyRound>\"             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundGString += text[0];
-      pCopyQuotedGString =  pCopyRoundGString;
+      addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
+
+      s_quotedGEntry = s_roundGEntry;
+      s_quotedGEnum  = s_roundGEnum;
+
       lastStringContext  =  YY_START;
       BEGIN(CopyGString);
    }
 
 <GCopyRound>"("            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundGString += text[0];
+      addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
       roundCount++;
    }
 
 <GCopyRound>")"            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundGString += text[0];
+      addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
+
       if (--roundCount<0)
          BEGIN(lastRoundContext);
    }
@@ -4270,19 +4560,24 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <GCopyRound>\n             {
       QString text = QString::fromUtf8(yytext);
       lineCount();
-      *pCopyRoundGString += text[0];
+      addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
    }
 
 <GCopyRound>\'             {
       QString text = QString::fromUtf8(yytext);
-      if (insidePHP) {
-         current->initializer += text;
-         pCopyQuotedGString = pCopyRoundGString;
-         lastStringContext=YY_START;
+
+     if (insidePHP) {
+         current->appendData(EntryKey::Initial_Value, text);
+
+         s_quotedGEntry = s_roundGEntry;
+         s_quotedGEnum  = s_roundGEnum;
+
+         lastStringContext  = YY_START;
+
          BEGIN(CopyPHPGString);
 
       } else {
-         *pCopyRoundGString += text;
+         addToOutput(s_roundGEntry, s_roundGEnum, text);
       }
    }
 
@@ -4292,49 +4587,55 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       if (insidePHP) {
          REJECT;
       } else {
-         *pCopyRoundGString += text;
+         addToOutput(s_roundGEntry, s_roundGEnum, text);
       }
    }
 
 <GCopyRound>[^"'()\n/]+          {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundGString += text;
+      addToOutput(s_roundGEntry, s_roundGEnum, text);
    }
 
 <GCopyRound>.           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyRoundGString += text[0];
+      addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
    }
 
   /* generic curly bracket list copy rules */
 <CopyCurly>\"           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyString += text[0];
-      pCopyQuotedString = pCopyCurlyString;
+      addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
+
+      s_quotedEntry = s_curlyEntry;
+      s_quotedEnum  = s_curlyEnum;
+
       lastStringContext = YY_START;
+
       BEGIN(CopyString);
    }
 
 <CopyCurly>\'           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyString += text[0];
+      addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
 
       if (insidePHP) {
-         pCopyQuotedString=pCopyCurlyString;
-         lastStringContext=YY_START;
+         s_quotedEntry = s_curlyEntry;
+         s_quotedEnum  = s_curlyEnum;
+
+         lastStringContext = YY_START;
          BEGIN(CopyPHPString);
       }
    }
 
 <CopyCurly>"{"             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyString += text[0];
+      addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
       curlyCount++;
    }
 
 <CopyCurly>"}"             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyString += text[0];
+      addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
 
       if (--curlyCount < 0) {
          BEGIN(lastCurlyContext);
@@ -4343,31 +4644,33 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CopyCurly>{CHARLIT}                    {
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP) {
          REJECT;
       } else {
-         *pCopyCurlyString += text;
+         addToOutput(s_curlyEntry, s_curlyEnum, text);
       }
    }
 
 <CopyCurly>[^"'{}\/\n]+          {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyString += text;
+      addToOutput(s_curlyEntry, s_curlyEnum, text);
    }
 
 <CopyCurly>"/"             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyString += yytext;
+      addToOutput(s_curlyEntry, s_curlyEnum, text);
    }
+
 <CopyCurly>\n           {
       QString text = QString::fromUtf8(yytext);
       lineCount();
-      *pCopyCurlyString += text[0];
+      addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
    }
 
 <CopyCurly>.            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyString += text[0];
+      addToOutput(s_curlyEntry, s_curlyEnum, text[0]);
    }
 
   /* generic curly bracket list copy rules for growable strings */
@@ -4378,6 +4681,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <GCopyCurly>^"#"{B}+[0-9]+{B}+"\""[^\"\n]+"\""{B}+"2"{B}*\n? {
       // end of included file marker
       QString text = QString::fromUtf8(yytext);
+
       int s = text.indexOf(' ');
       int e = text.indexOf('"',s);
       yyLineNr = text.mid(s, e-s).toInt();
@@ -4390,31 +4694,38 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <GCopyCurly>\"             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString += text[0];
-      pCopyQuotedGString=pCopyCurlyGString;
-      lastStringContext=YY_START;
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
+
+      s_quotedGEntry = s_curlyGEntry;
+      s_quotedGEnum  = s_curlyGEnum;
+
+      lastStringContext  = YY_START;
+
       BEGIN(CopyGString);
    }
 
 <GCopyCurly>\'             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString += text[0];
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
+
       if (insidePHP) {
-         pCopyQuotedGString=pCopyCurlyGString;
-         lastStringContext=YY_START;
+         s_quotedGEntry = s_curlyGEntry;
+         s_quotedGEnum  = s_curlyGEnum;
+
+         lastStringContext  = YY_START;
          BEGIN(CopyPHPGString);
       }
    }
 
 <GCopyCurly>"{"            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString += text[0];
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
       curlyCount++;
    }
 
 <GCopyCurly>"}"            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString += text[0];
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
 
       if (--curlyCount < 0) {
          BEGIN(lastCurlyContext);
@@ -4428,95 +4739,98 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          REJECT;
 
       } else {
-         *pCopyCurlyGString += text;
+         addToOutput(s_curlyGEntry, s_curlyGEnum, text);
       }
    }
 
 <GCopyCurly>[^"'{}\/\n,]+     {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString += text;
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text);
    }
 
 <GCopyCurly>[,]+             {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString +=text;
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text);
    }
 
 <GCopyCurly>"/"            {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString += text;
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text);
    }
 
 <GCopyCurly>\n             {
       QString text = QString::fromUtf8(yytext);
       lineCount();
-      *pCopyCurlyGString += text[0];
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
    }
 
 <GCopyCurly>.           {
       QString text = QString::fromUtf8(yytext);
-      *pCopyCurlyGString += text[0];
+      addToOutput(s_curlyGEntry, s_curlyGEnum, text[0]);
    }
 
 <FindMembers>":"        {
-      if (current->type.isEmpty() && current->name == "enum")  {
+      if (current->getData(EntryKey::Member_Type).isEmpty() && current->name == "enum")  {
          // see bug 69041, C++11 style anon enum: 'enum : unsigned int {...}'
 
-         current->section=Entry::ENUM_SEC;
+         current->section = Entry::ENUM_SEC;
          current->name.resize(0);
-         current->args.resize(0);
+         current->setData(EntryKey::Member_Args, "");
+
          BEGIN(EnumBaseType);
 
       } else {
 
-         if (current->type.isEmpty()) {
-            // anonymous padding field, e.g. "int :7;"
+         if (current->getData(EntryKey::Member_Type).isEmpty()) {
+            // anonymous padding field, "int :7;"
 
             addType(current);
             current->name = QString("__pad%1__").arg(padCount++);
          }
 
          BEGIN(BitFields);
-         current->bitfields+=":";
+         current->appendData(EntryKey::Member_Bitfields, ":");
       }
    }
 
 <BitFields>.            {
       QString text = QString::fromUtf8(yytext);
-      current->bitfields += text[0];
+      current->appendData(EntryKey::Member_Bitfields,  text[0]);
    }
 
 <EnumBaseType>.            {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
    }
 
 <EnumBaseType>\n        {
       lineCount();
-      current->args+=' ';
+      current->appendData(EntryKey::Member_Args, " ");
    }
 
 <FindMembers>[;,]       {
-      QString text = QString::fromUtf8(yytext);
-      QString oldType = current->type;
+      QString text    = QString::fromUtf8(yytext);
+      QString tmpType = current->getData(EntryKey::Member_Type);
+      QString oldType = tmpType;
 
       if (current->bodyLine == -1) {
          current->bodyLine = yyLineNr;
       }
 
-      if (insidePHP && current->type.startsWith("var") ) {
-         current->type = current->type.mid(3);
+      if (insidePHP && tmpType.startsWith("var") ) {
+         tmpType = tmpType.mid(3);
       }
 
-      if (isTypedef && ! current->type.startsWith("typedef ") ) {
-        current->type.prepend("typedef ");
+      if (isTypedef && ! tmpType.startsWith("typedef ") ) {
+        tmpType.prepend("typedef ");
       }
 
       bool needNewCurrent = false;
 
       if (! current->name.isEmpty() && current->section != Entry::ENUM_SEC) {
-         current->type = current->type.simplified();
-         current->args = removeRedundantWhiteSpace(current->args);
+         tmpType = tmpType.simplified();
+
+         current->setData(EntryKey::Member_Args, removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
          current->name = current->name.trimmed();
 
          if (current->section == Entry::CLASS_SEC)  {
@@ -4525,13 +4839,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          }
 
          current->section     = Entry::VARIABLE_SEC;
-         current->fileName    = yyFileName;
+
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyBegLineNr;
          current->startColumn = yyBegColNr;
 
          current_root->addSubEntry(current, current_root);
          needNewCurrent = true;
       }
+
+      current->setData(EntryKey::Member_Type, tmpType);
 
       if (text[0] == ',') {
          bool stat = current->stat;
@@ -4542,18 +4859,21 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
           }
 
          current->stat = stat;         // the static attribute holds for all variables
+
          current->name.resize(0);
-         current->args.resize(0);
-         current->brief.resize(0);
-         current->doc.resize(0);
-         current->initializer.resize(0);
-         current->bitfields.resize(0);
+         current->setData(EntryKey::Member_Args,      "");
+         current->setData(EntryKey::Brief_Docs,       "");
+         current->setData(EntryKey::Main_Docs,        "");
+         current->setData(EntryKey::Initial_Value,    "");
+         current->setData(EntryKey::Member_Bitfields, "");
 
          int i = oldType.length();
 
-         while (i > 0 && (oldType[i-1]=='*' || oldType[i-1]=='&' || oldType[i-1]==' ')) i--; {
-            current->type = oldType.left(i);
+         while (i > 0 && (oldType[i-1]=='*' || oldType[i-1]=='&' || oldType[i-1]==' ')) {
+            i--;
          }
+
+         current->setData(EntryKey::Member_Type, oldType.left(i));
 
       } else {
          mtype = MethodTypes::Method;
@@ -4596,14 +4916,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
          squareCount = 1;
          lastSquareContext = YY_START;
+
          // Skip the C# attribute for this member
-         current->args.resize(0);
+         current->setData(EntryKey::Member_Args, "");
          BEGIN( SkipSquare );
 
       } else {
-         current->args += text;
+         current->appendData(EntryKey::Member_Args, text);
          squareCount = 1;
-         externC = false;
+         externC     = false;
          BEGIN( Array );
       }
    }
@@ -4753,43 +5074,48 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <IDLProp>{BN}*{ID}{BN}*","          {
       // Rare: Another parameter ([propput] HRESULT Item(int index, [in] Type theRealProperty);)
-      QString text = QString::fromUtf8(yytext);
+      QString text    = QString::fromUtf8(yytext);
+      QString tmpArgs = current->getData(EntryKey::Member_Args);
 
-      if (current->args.isEmpty()) {
-         current->args = "(";
+      if (tmpArgs.isEmpty()) {
+         current->setData(EntryKey::Member_Args, "(");
+
       } else {
-         current->args += ", ";
-         current->args += idlAttr;
-         current->args += " ";
-         current->args += idlProp;   // prop was actually type of extra parameter
-         current->args += " ";
-         current->args += text;
-         current->args = current->args.left(current->args.length() - 1);    // strip comma
+         // idlProp was actually type of extra parameter
+         tmpArgs += ", " + idlAttr + " " + idlProp + " " + text;
+
+         tmpArgs = tmpArgs.left(tmpArgs.length() - 1);             // strip comma
+         current->setData(EntryKey::Member_Args, tmpArgs);
+
          idlProp.resize(0);
          idlAttr.resize(0);
+
          BEGIN( IDLProp );
       }
    }
 
 <IDLProp>{BN}*{ID}{BN}*")"{BN}*     {
-      // the parameter name for the property - just skip.
+      // the parameter name for the property -just skip
    }
 
 <IDLProp>";"            {
-      current->fileName   = yyFileName;
-      current->type       = idlProp;
-      current->args       = current->args.simplified();
+      QString tmpArgs = current->getData(EntryKey::Member_Args).simplified();
 
-      if (! current->args.isEmpty())   {
-         current->args += ")";
+      current->setData(EntryKey::Member_Type,  idlProp);
+
+      if (! tmpArgs.isEmpty())   {
+         current->setData(EntryKey::Member_Args, tmpArgs + ")");
       }
 
       current->name       = current->name.trimmed();
       current->section    = Entry::VARIABLE_SEC;
-      current_root->addSubEntry(current, current_root);
 
+      current->setData(EntryKey::File_Name, yyFileName);
+
+      current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
+
       BEGIN( FindMembers );
    }
 
@@ -4801,7 +5127,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <Array>"]"                     {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
 
       if (--squareCount <= 0) {
          BEGIN( FindMembers );
@@ -4810,8 +5136,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncFuncArray>"]"              {
       QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Member_Args, text[0]);
 
-      current->args += text[0];
       if (--squareCount <= 0) {
          BEGIN( Function );
       }
@@ -4819,13 +5145,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <Array,FuncFuncArray>"["      {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
       squareCount++;
    }
 
 <Array,FuncFuncArray>.        {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
    }
 
 <SkipSquare>"["            {
@@ -4839,21 +5165,24 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <SkipSquare>\"             {
-      lastStringContext=YY_START;
+      lastStringContext = YY_START;
       BEGIN( SkipString );
    }
 
 <SkipSquare>[^\n\[\]\"]+
 <FindMembers>"<"        {
       QString text = QString::fromUtf8(yytext);
+
       addType( current );
-      current->type += text;
+      current->appendData(EntryKey::Member_Type, text);
+
       BEGIN( Sharp );
    }
 
 <Sharp>">"                           {
       QString text = QString::fromUtf8(yytext);
-      current->type += text[0];
+      current->appendData(EntryKey::Member_Type, text[0]);
+
       if (--sharpCount <= 0) {
          BEGIN( FindMembers );
       }
@@ -4861,55 +5190,62 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <Sharp>"<"           {
       QString text = QString::fromUtf8(yytext);
-      current->type += text[0];
+      current->appendData(EntryKey::Member_Type, text[0]);
       sharpCount++;
    }
 
 <Sharp>{BN}+         {
-      current->type += ' ';
+      current->appendData(EntryKey::Member_Type, " ");
       lineCount();
    }
 
 <Sharp>.             {
       QString text = QString::fromUtf8(yytext);
-      current->type += text[0];
+      current->appendData(EntryKey::Member_Type, text[0]);
    }
 
-<FindFields>{ID}                    {
+<FindFields>{ID}     {
       QString text = QString::fromUtf8(yytext);
       current->bodyLine = yyLineNr;
       current->name     = text;
    }
 
-<FindFields>"("            {
+<FindFields>"("      {
       // Java enum initializer
       unput('(');
+
       lastInitializerContext = YY_START;
       initBracketCount       = 0;
-      current->initializer   = "=";
+
+      current->setData(EntryKey::Initial_Value, "=");
+
       BEGIN(ReadInitializer);
    }
 
-<FindFields>"="            {
+<FindFields>"="      {
       QString text = QString::fromUtf8(yytext);
+
       lastInitializerContext = YY_START;
       initBracketCount       = 0;
-      current->initializer   = text;
+      current->setData(EntryKey::Initial_Value, text);
+
       BEGIN(ReadInitializer);
    }
 
-<FindFields>";"                         {
+<FindFields>";"      {
       if (insideJava)   {
          // last enum field in Java class
 
          if (! current->name.isEmpty()) {
-            current->fileName    = yyFileName;
+            current->setData(EntryKey::File_Name, yyFileName);
             current->startLine   = yyLineNr;
             current->startColumn = yyColNr;
-            current->type        = "@"; // enum marker
-            current->args        = current->args.simplified();
+
             current->name        = current->name.trimmed();
             current->section     = Entry::VARIABLE_SEC;
+
+            current->setData(EntryKey::Member_Type,  "@");          // enum marker
+            current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
 
             current_root->addSubEntry(current, current_root);
             current = QMakeShared<Entry>();
@@ -4931,7 +5267,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FindFields>","       {
       if (! current->name.isEmpty()) {
 
-         current->fileName    = yyFileName;
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
 
@@ -4939,12 +5275,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
          if (! isEnum) {
             // enum marker (this might be Java-style enums
-            current->type = "@";
+            current->setData(EntryKey::Member_Type,  "@");
          }
 
          current->section = Entry::VARIABLE_SEC;
          current->name    = current->name.trimmed();
-         current->args    = current->args.simplified();
+
+         current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
 
          // add enum value to the enum data type
          current_root->addSubEntry(current, current_root);
@@ -4987,13 +5324,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadBody,ReadNSBody,ReadBodyIntf>[^\r\n\#{}"@'/<]*   {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"//".*     {
       // read a comment
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"#".*   {
@@ -5004,14 +5341,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       }
 
       // append PHP comment
-      current->m_program += text ;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>@\"  {
       QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Source_Text, text);
 
-      current->m_program += text ;
-      pSkipVerbString = &current->m_program;
+      s_skipVerbEntry = current;
+      s_skipVerbEnum  = EntryKey::Source_Text;
+
       lastSkipVerbStringContext = YY_START;
       BEGIN( SkipVerbString );
    }
@@ -5020,9 +5359,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
-         current->m_program += text ;
-         pCopyHereDocGString = &current->m_program;
-         lastHereDocContext = YY_START;
+         current->appendData(EntryKey::Source_Text, text);
+
+         s_hereDocEntry = current;
+         s_hereDocEnum  = EntryKey::Source_Text;
+
+         lastHereDocContext  = YY_START;
+
          BEGIN( CopyHereDoc );
 
       } else {
@@ -5033,8 +5376,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ReadBody,ReadNSBody,ReadBodyIntf>\"   {
       QString text = QString::fromUtf8(yytext);
 
-      current->m_program += text ;
-      pCopyQuotedGString = &current->m_program;
+      current->appendData(EntryKey::Source_Text, text);
+
+      s_quotedGEntry = current;
+      s_quotedGEnum  = EntryKey::Source_Text;
+
       lastStringContext = YY_START;
       BEGIN( CopyGString );
    }
@@ -5043,7 +5389,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       lastContext = YY_START;
       BEGIN( Comment );
    }
@@ -5052,7 +5398,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       ++yyLineNr;
       lastContext = YY_START;
       BEGIN( Comment );
@@ -5060,13 +5406,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"'"  {
       QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Source_Text, text);
 
-      if (! insidePHP) {
-         current->m_program += text;
-      } else {
+      if (insidePHP) {
          // begin of single quoted string
-         current->m_program += text;
-         pCopyQuotedGString = &current->m_program;
+         s_quotedGEntry = current;
+         s_quotedGEnum  = EntryKey::Source_Text;
+
          lastStringContext  = YY_START;
 
          BEGIN(CopyPHPGString);
@@ -5081,19 +5427,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          REJECT;
 
       } else {
-         current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
       }
    }
 
 <ReadBody,ReadNSBody,ReadBodyIntf>"{"   {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       ++curlyCount;
    }
 
 <ReadBodyIntf>"}"          {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       --curlyCount ;
    }
 
@@ -5101,7 +5447,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       if ( curlyCount > 0 )  {
-         current->m_program += text ;
+         current->appendData(EntryKey::Source_Text, text);
          --curlyCount;
 
       } else {
@@ -5120,13 +5466,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
 
             if ((current->section == Entry::ENUM_SEC) || isEnum) {
-               current->m_program += ','; // add field terminator
+               // add field terminator
+               current->appendData(EntryKey::Source_Text, ",");
             }
 
             // add compound definition to the tree
-            current->args = removeRedundantWhiteSpace(current->args);
+            current->setData(EntryKey::Member_Args,  removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
 
-            current->type = current->type.simplified();
+            current->setData(EntryKey::Member_Type, current->getData(EntryKey::Member_Type).simplified());
             current->name = current->name.trimmed();
 
             bool isInterface     = current->m_traits.hasTrait(Entry::Virtue::Interface);
@@ -5157,12 +5504,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                } else {
                   static QRegExp re("@[0-9]+$");
 
-                  if (! isTypedef && memspecEntry &&  re.indexIn(memspecEntry->name) == -1) {
-                     // not typedef or anonymous type (see bug691071)
-                     // enabled the next two lines for bug 623424
+                  if (! isTypedef && memspecEntry && re.indexIn(memspecEntry->name) == -1) {
+                     // not typedef or anonymous type
+                     // enabled the next two lines for
 
-                     current->doc.resize(0);
-                     current->brief.resize(0);
+                     current->setData(EntryKey::Brief_Docs,  "");
+                     current->setData(EntryKey::Main_Docs,   "");
                   }
 
                   BEGIN( MemberSpec );
@@ -5177,7 +5524,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       lineCount();
       if ( curlyCount >0 ) {
-         current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
          --curlyCount;
 
       } else {
@@ -5198,7 +5545,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // late "const" or "volatile" keyword
       QString text = QString::fromUtf8(yytext);
       lineCount();
-      current->type.prepend(text);
+
+      current->prependData(EntryKey::Member_Type, text);
    }
 
 <TypedefName>{ID}          {
@@ -5207,17 +5555,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
 
       if ((current->section == Entry::ENUM_SEC) || isEnum) {
-         current->m_program += ",";    // add field terminator
+         // add field terminator
+         current->appendData(EntryKey::Source_Text, ",");
       }
 
       current->name = text;
+
       prependScope();
-      current->args = current->args.simplified();
-      current->type = current->type.simplified();
+      current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
+      current->setData(EntryKey::Member_Type,  current->getData(EntryKey::Member_Type).simplified());
 
       current_root->addSubEntry(current , current_root);
 
-      if (!firstTypedefEntry) {
+      if (! firstTypedefEntry) {
          firstTypedefEntry = current;
       }
 
@@ -5234,12 +5584,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
 
       if ((current->section == Entry::ENUM_SEC) || isEnum) {
-         current->m_program+=','; // add field terminator
+         // add field terminator
+         current->appendData(EntryKey::Source_Text, ",");
       }
 
       // add compound definition to the tree
-      current->args = current->args.simplified();
-      current->type = current->type.simplified();
+      current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
+      current->setData(EntryKey::Member_Type,  current->getData(EntryKey::Member_Type).simplified());
+
       current_root->addSubEntry( current , current_root);
       memspecEntry = current;
       current = QMakeShared<Entry>(*current);
@@ -5361,11 +5713,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             varEntry->stat       = current->stat;
             varEntry->section    = Entry::VARIABLE_SEC;
             varEntry->name       = msName.trimmed();
-            varEntry->type       = current->type.simplified()+" ";
-            varEntry->args       = msArgs;
+
+            varEntry->setData(EntryKey::Member_Type,  current->getData(EntryKey::Member_Type).simplified() + " ");
+            varEntry->setData(EntryKey::Member_Args,  msArgs);
 
             if (isTypedef) {
-               varEntry->type.prepend("typedef ");
+               varEntry->prependData(EntryKey::Member_Type, "typedef ");
             }
 
             bool isUnion  = current->m_traits.hasTrait(Entry::Virtue::Union);
@@ -5374,21 +5727,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             if (typedefHidesStruct && isTypedef && (isUnion || isStruct) && memspecEntry) {
                // case 1: use S_t as type for pS_t in "typedef struct _S {} S_t, *pS_t;"
 
-               varEntry->type += memspecEntry->name + msType;
+               varEntry->appendData(EntryKey::Member_Type, memspecEntry->name + msType);
 
             } else {
                // case 2: use _S as type for for pS_t
 
-               varEntry->type += current->name + msType;
+               varEntry->appendData(EntryKey::Member_Type,  current->name + msType);
             }
 
-            varEntry->fileName    = yyFileName;
+            varEntry->setData(EntryKey::File_Name, yyFileName);
             varEntry->startLine   = yyLineNr;
             varEntry->startColumn = yyColNr;
-            varEntry->doc         = current->doc;
-            varEntry->brief       = current->brief;
+
             varEntry->mGrpId      = current->mGrpId;
-            varEntry->initializer = current->initializer;
+
+            varEntry->setData(EntryKey::Brief_Docs,     current->getData(EntryKey::Brief_Docs));
+            varEntry->setData(EntryKey::Main_Docs,      current->getData(EntryKey::Main_Docs));
+            varEntry->setData(EntryKey::Initial_Value,  current->getData(EntryKey::Initial_Value));
 
             // copy group list
             for (auto &g : current->m_groups) {
@@ -5410,12 +5765,12 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          if (! isTypedef && msName.isEmpty() && memspecEntry && (current->section&Entry::COMPOUND_MASK)) {
             // case where a class/struct has a doc block after it
 
-            if (! current->doc.isEmpty()) {
-               memspecEntry->doc += current->doc;
+            if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
+               memspecEntry->appendData(EntryKey::Main_Docs,  current->getData(EntryKey::Main_Docs));
             }
 
-            if (! current->brief.isEmpty()) {
-               memspecEntry->brief += current->brief;
+            if (! current->getData(EntryKey::Brief_Docs).isEmpty()) {
+               memspecEntry->appendData(EntryKey::Brief_Docs, current->getData(EntryKey::Brief_Docs));
             }
          }
 
@@ -5425,23 +5780,26 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          isTypedef = false;
 
          firstTypedefEntry = QSharedPointer<Entry>();
-         memspecEntry = QSharedPointer<Entry>();
+         memspecEntry      = QSharedPointer<Entry>();
 
          current->reset();
          initEntry();
          BEGIN( FindMembers );
 
       } else {
-         current->doc.resize(0);
-         current->brief.resize(0);
+         current->getData(EntryKey::Brief_Docs);
+         current->getData(EntryKey::Main_Docs);
       }
     }
 
 <MemberSpec>"="            {
       QString text = QString::fromUtf8(yytext);
+
       lastInitializerContext = YY_START;
       initBracketCount = 0;
-      current->initializer = text;
+
+      current->setData(EntryKey::Initial_Value, text);
+
       BEGIN(ReadInitializer);
    }
 
@@ -5465,7 +5823,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadBody,ReadNSBody,ReadBodyIntf>{BN}{1,80} {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       lineCount();
    }
 
@@ -5483,7 +5841,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadBody,ReadNSBody,ReadBodyIntf>.    {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);;
    }
 
 <FindMembers>"("/{BN}*"::"*{BN}*({TSCOPE}{BN}*"::")*{TSCOPE}{BN}*")"{BN}*"(" | /* typedef void (A<int>::func_t)(args...) */
@@ -5550,22 +5908,23 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <EndFuncPtr>")"{BN}*/";"      {
       // a variable with extra braces
       lineCount();
-      current->type += funcPtrType.mid(1);
+      current->appendData(EntryKey::Member_Type, funcPtrType.mid(1));
       BEGIN(FindMembers);
    }
 
 <EndFuncPtr>")"{BN}*/"("      {
       // a function pointer
       lineCount();
-      current->type += funcPtrType + ")";
+      current->appendData(EntryKey::Member_Type, funcPtrType + ")");
       BEGIN(FindMembers);
    }
 
 <EndFuncPtr>")"{BN}*/"["      {
       // an array of variables
       lineCount();
-      current->type += funcPtrType;
-      current->args += ")";
+      current->appendData(EntryKey::Member_Type, funcPtrType);
+      current->appendData(EntryKey::Member_Args, ")");
+
       BEGIN(FindMembers);
    }
 
@@ -5573,12 +5932,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // a function returning a function or
       // a function returning a pointer to an array
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
 
-      current->bodyLine = yyLineNr;
+      current->bodyLine      = yyLineNr;
       currentArgumentContext = FuncFuncEnd;
-      fullArgString=current->args;
-      copyArgString=&current->args;
+      fullArgString          = current->getData(EntryKey::Member_Args);
+
+      s_argEntry  = current;
+      s_argEnum   = ArgKey::Member_Args;
+
       BEGIN( ReadFuncArgType );
    }
 
@@ -5593,13 +5955,13 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncFunc>"("           {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
       ++roundCount;
    }
 
 <FuncFunc>")"           {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
 
       if ( roundCount ) {
          --roundCount;
@@ -5610,37 +5972,40 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncFuncEnd>")"{BN}*"("      {
       lineCount();
-      current->type += funcPtrType + ")(";
+      current->appendData(EntryKey::Member_Type,  funcPtrType + ")(");
       BEGIN(FuncFuncType);
    }
 
 <FuncFuncEnd>")"{BN}*/[;{]       {
       lineCount();
-      current->type += funcPtrType.mid(1);
+      current->appendData(EntryKey::Member_Type,  funcPtrType.mid(1));
       BEGIN(Function);
    }
 
-<FuncFuncEnd>")"{BN}*/"["     { // function returning a pointer to an array
+<FuncFuncEnd>")"{BN}*/"["     {
+      // function returning a pointer to an array
       lineCount();
-      current->type += funcPtrType;
-      current->args += ")";
+
+      current->appendData(EntryKey::Member_Type, funcPtrType);
+      current->appendData(EntryKey::Member_Args, ")");
+
       BEGIN(FuncFuncArray);
    }
 
 <FuncFuncEnd>.             {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
    }
 
 <FuncFuncType>"("          {
       QString text = QString::fromUtf8(yytext);
-      current->type += text[0];
+      current->appendData(EntryKey::Member_Type, text[0]);
       roundCount++;
    }
 
 <FuncFuncType>")"          {
       QString text = QString::fromUtf8(yytext);
-      current->type += text[0];
+      current->appendData(EntryKey::Member_Type, text[0]);
 
       if (roundCount) {
          --roundCount;
@@ -5651,37 +6016,40 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncFuncType>{BN}*","{BN}*      {
       lineCount();
-      current->type += ", " ;
+      current->appendData(EntryKey::Member_Type, ", ");
    }
 
 <FuncFuncType>{BN}+        {
       lineCount();
-      current->type += ' ' ;
+      current->appendData(EntryKey::Member_Type, " ");
    }
 
 <FuncFuncType>.            {
       QString text = QString::fromUtf8(yytext);
-      current->type += text[0];
+      current->appendData(EntryKey::Member_Type, text[0]);
    }
 
 <FindMembers>"("/{BN}*{ID}{BN}*"*"{BN}*{ID}*")"{BN}*"("  {
       // for catching typedef void (__stdcall *f)() like definitions
       QString text = QString::fromUtf8(yytext);
 
-      if (current->type.left(7) == "typedef" && current->bodyLine == -1) {
+      if (current->getData(EntryKey::Member_Type).startsWith("typedef") && current->bodyLine == -1) {
          // the bodyLine check is to prevent this guard to be true more than once
 
          current->bodyLine = yyLineNr;
          BEGIN( GetCallType );
 
-       } else if (!current->name.isEmpty())  {
+       } else if (! current->name.isEmpty())  {
          // normal function
+         current->setData(EntryKey::Member_Args, text);
 
-         current->args = text;
-         current->bodyLine = yyLineNr;
+         current->bodyLine      = yyLineNr;
          currentArgumentContext = FuncQual;
-         fullArgString=current->args;
-         copyArgString=&current->args;
+         fullArgString          = text;
+
+         s_argEntry  = current;
+         s_argEnum   = ArgKey::Member_Args;
+
          BEGIN( ReadFuncArgType );
       }
    }
@@ -5700,11 +6068,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       if (! current->name.isEmpty()) {
-         current->args          = text;
+         current->setData(EntryKey::Member_Args, text);
+
          current->bodyLine      = yyLineNr;
          currentArgumentContext = FuncQual;
-         fullArgString          = current->args;
-         copyArgString          = &current->args;
+         fullArgString          = text;
+
+         s_argEntry  = current;
+         s_argEnum   = ArgKey::Member_Args;
+
          BEGIN( ReadFuncArgType );
       }
    }
@@ -5712,7 +6084,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
   /*
 <FindMembers>"("{BN}*("void"{BN}*)?")"    {
       lineCount();
-      current->args = "()";
+      current->setData(EntryKey::Member_Args, "()");
       BEGIN( FuncQual );
    }
   */
@@ -5721,60 +6093,73 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadFuncArgType>[^ \/\r\t\n\)\(\"\'#]+ {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text;
+      addToArgs(text);
+
       fullArgString  += text;
    }
 
 <CopyArgString,CopyArgPHPString>[^\n\\\"\']+       {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text;
+      addToArgs(text);
       fullArgString  += text;
    }
 
 <CopyArgRound>[^\/\n\)\(\"\']+      {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text;
+      addToArgs(text);
       fullArgString  += text;
    }
 
 <ReadFuncArgType,ReadTempArgs>{BN}*    {
-      *copyArgString+=" ";
-      fullArgString+=" ";
+      addToArgs(" ");
+      fullArgString  += " ";
       lineCount();
    }
 
 <ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>{RAWBEGIN}   {
       QString text = QString::fromUtf8(yytext);
+
       s_delimiter = text.mid(2);
       s_delimiter = s_delimiter.left(s_delimiter.length() - 1);
+
       lastRawStringContext = YY_START;
-      pCopyRawString   = copyArgString;
-      *pCopyRawString += text;
+
+      s_rawEntry = QSharedPointer<Entry>();
+      // s_rawEnum  = do not set
+
+      addToOutput(s_rawEntry, s_rawEnum, text);
+
       fullArgString   += text;
+
       BEGIN(RawString);
    }
 
 <ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>\"  {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
-      fullArgString  += text[0];
+
+      addToArgs(text[0]);
+      fullArgString += text[0];
+
       lastCopyArgStringContext = YY_START;
       BEGIN(CopyArgString);
    }
 
 <ReadFuncArgType,ReadTempArgs>"("   {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+
+      addToArgs(text[0]);
       fullArgString  += text[0];
-      argRoundCount=0;
+      argRoundCount  = 0;
+
       lastCopyArgContext = YY_START;
+
       BEGIN(CopyArgRound);
    }
 
 <ReadFuncArgType>")"          {
       QString text = QString::fromUtf8(yytext);
 
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
 
       current->argList = stringToArgumentList(fullArgString, current->argList);
@@ -5786,8 +6171,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       handleParametersCommentBlocks(current->argList);
 
       // save the current documentation block
-      docBackup   = current->doc;
-      briefBackup = current->brief;
+      s_briefBackup = current->getData(EntryKey::Brief_Docs);
+      s_mainBackup  = current->getData(EntryKey::Main_Docs);
 
       // go back to the saved state
       BEGIN(currentArgumentContext);
@@ -5842,15 +6227,17 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
   /*
 <ReadFuncArgType,ReadTempArgs>"'#"  {
       QString text = QString::fromUtf8(yytext);
-      if (insidePHP)
+      if (insidePHP) {
          REJECT;
-      *copyArgString  += text;
+      }
+      addToArgs(text[0]);
       fullArgString   += text;
    }
 
 <ReadFuncArgType,ReadTempArgs>"#"   {
-      if (!insidePHP)
+      if (!insidePHP) {
          REJECT;
+      }
       lastCContext = YY_START;
       BEGIN( SkipCxxComment );
    }
@@ -5865,10 +6252,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       if (currentArgumentContext == DefineEnd) {
          // for defines we interpret a comment as documentation for the define
          for (int i = yyleng -1; i > 0; i--) {
-         unput(yytext[i]);
+            unput(yytext[i]);
          }
 
-         *copyArgString += text[0];
+         addToArgs(text[0]);
          fullArgString  += text[0];
 
          current->argList = stringToArgumentList(fullArgString, current->argList);
@@ -5991,7 +6378,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadTempArgs>"<"          {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
       argSharpCount  =  1;
       BEGIN( CopyArgSharp );
@@ -5999,7 +6386,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ReadTempArgs>">"          {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
 
       *currentArgumentList = stringToArgumentList(fullArgString, *currentArgumentList);
@@ -6010,39 +6397,43 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <CopyArgRound>"("          {
       QString text = QString::fromUtf8(yytext);
       argRoundCount++;
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
    }
 
 <CopyArgRound>")"          {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
-      if (argRoundCount > 0)
+
+      if (argRoundCount > 0) {
          argRoundCount--;
-      else
+      } else {
          BEGIN( lastCopyArgContext );
+      }
    }
 
 <CopyArgSharp>"("                       {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
+
       fullArgString  += text[0];
       argRoundCount  = 0;
       lastCopyArgContext = YY_START;
+
       BEGIN( CopyArgRound );
    }
 
 <CopyArgSharp>"<"          {
       QString text = QString::fromUtf8(yytext);
       argSharpCount++;
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
    }
 
 <CopyArgSharp>">"          {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
       argSharpCount--;
 
@@ -6057,37 +6448,38 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <CopyArgString,CopyArgPHPString>\\.    {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text;
+      addToArgs(text[0]);
       fullArgString  += text;
    }
 
 <CopyArgString>\"          {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
       BEGIN( lastCopyArgStringContext );
    }
 
 <CopyArgPHPString>\'          {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
       BEGIN( lastCopyArgStringContext );
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>{CHARLIT}     {
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP) {
          REJECT;
       } else {
-         *copyArgString += text;
+         addToArgs(text);
          fullArgString  += text;
       }
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>\'     {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text;
+      addToArgs(text);
       fullArgString  += text;
 
       if (insidePHP) {
@@ -6099,30 +6491,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>\n  {
       QString text = QString::fromUtf8(yytext);
       lineCount();
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
    }
 
 <ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>.    {
       QString text = QString::fromUtf8(yytext);
-      *copyArgString += text[0];
+      addToArgs(text[0]);
       fullArgString  += text[0];
    }
 
 <FuncRound>"("             {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
-      ++roundCount ;
+      current->appendData(EntryKey::Member_Args,  text[0]);
+      ++roundCount;
    }
 
 <FuncRound>")"                          {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args,  text[0]);
 
-      if ( roundCount )
-         --roundCount ;
-      else
-         BEGIN( FuncQual ) ;
+      if (roundCount) {
+         --roundCount;
+      } else {
+         BEGIN( FuncQual );
+      }
    }
 
   /*
@@ -6138,10 +6531,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FuncQual>[{:;,]    {
       QString text = QString::fromUtf8(yytext);
 
-      if (text == ";" && insidePHP &&  ! containsWord(current->type,"function") ) {
+      if (text == ";" && insidePHP &&  ! containsWord(current->getData(EntryKey::Member_Type), "function") ) {
          current->reset();
          initEntry();
          BEGIN( FindMembers );
+
       } else {
          unput(*yytext);
          BEGIN( Function );
@@ -6152,7 +6546,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // pure virtual member function
       lineCount() ;
       current->virt = Pure;
-      current->args += " override ";
+      current->appendData(EntryKey::Member_Args, " override ");
    }
 
 <FuncQual,TrailingReturn>{BN}*"override"{BN}*          {
@@ -6160,7 +6554,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
 
       current->m_traits.setTrait(Entry::Virtue::Override);
-      current->args += " override ";
+      current->appendData(EntryKey::Member_Args, " override ");
 
       BEGIN(FuncQual);
    }
@@ -6170,7 +6564,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       lineCount();
 
       current->m_traits.setTrait(Entry::Virtue::Final);
-      current->args += " final ";
+      current->appendData(EntryKey::Member_Args, " final ");
 
       BEGIN(FuncQual);
    }
@@ -6179,62 +6573,66 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       // sealed member function
       lineCount() ;
       current->m_traits.setTrait(Entry::Virtue::Sealed);
-      current->args += " sealed ";
+      current->appendData(EntryKey::Member_Args, " sealed ");
    }
 
 <FuncQual>{BN}*"new"{BN}*               {
       // new member function
       lineCount() ;
       current->m_traits.setTrait(Entry::Virtue::New);
-      current->args += " new ";
+      current->appendData(EntryKey::Member_Args, " new ");
    }
 
 <FuncQual>{BN}*"const"{BN}*         {
       // const member function
       lineCount();
-      current->args += " const ";
+      current->appendData(EntryKey::Member_Args, " const ");
       current->argList.constSpecifier = true;
    }
 
 <FuncQual>{BN}*"volatile"{BN}*      {
       // volatile member function
       lineCount();
-      current->args += " volatile ";
+      current->appendData(EntryKey::Member_Args, " volatile ");
       current->argList.volatileSpecifier = true;
    }
 
 <FuncQual>{BN}*"noexcept"{BN}*      {
       // noexcept qualifier
       lineCount();
-      current->args += " noexcept ";
+      current->appendData(EntryKey::Member_Args, " noexcept ");
       current->m_traits.setTrait(Entry::Virtue::NoExcept);
    }
 
 <FuncQual>{BN}*"noexcept"{BN}*"("      {
       // noexcept expression
       lineCount();
-      current->args += " noexcept(";
+
+      current->appendData(EntryKey::Member_Args, " noexcept(");
       current->m_traits.setTrait(Entry::Virtue::NoExcept);
       lastRoundContext = FuncQual;
-      pCopyRoundString = &current->args;
-      roundCount = 0;
+
+      s_roundEntry = current;
+      s_roundEnum  = EntryKey::Member_Args;
+      roundCount   = 0;
+
       BEGIN(CopyRound);
    }
 
 <FuncQual>{BN}*"&"   {
-      current->args += " &";
+      current->appendData(EntryKey::Member_Args, " &");
       current->argList.refSpecifier = RefType::LValueRef;
    }
 
 <FuncQual>{BN}*"&&"  {
-      current->args += " &&";
+      current->appendData(EntryKey::Member_Args, " &&");
       current->argList.refSpecifier = RefType::RValueRef;
    }
 
 <FuncQual,TrailingReturn>{BN}*"="{BN}*"0"{BN}*     {
       // pure virtual member function
       lineCount() ;
-      current->args += " = 0";
+      current->appendData(EntryKey::Member_Args, " = 0");
       current->virt = Pure;
       current->argList.pureSpecifier = true;
       BEGIN(FuncQual);
@@ -6243,7 +6641,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FuncQual,TrailingReturn>{BN}*"="{BN}*"delete"{BN}*     {
       // C++11 explicitly delete member
       lineCount();
-      current->args += " = delete";
+      current->appendData(EntryKey::Member_Args, " = delete");
       current->m_traits.setTrait(Entry::Virtue::Delete);
       current->argList.isDeleted = true;
       BEGIN(FuncQual);
@@ -6252,7 +6650,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FuncQual,TrailingReturn>{BN}*"="{BN}*"default"{BN}*     {
       // C++11 explicitly defaulted constructor/assignment operator
       lineCount();
-      current->args += " = default";
+      current->appendData(EntryKey::Member_Args, " = default");
       current->m_traits.setTrait(Entry::Virtue::Default);
       BEGIN(FuncQual);
    }
@@ -6260,7 +6658,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <FuncQual>{BN}*"->"{BN}*                {
       lineCount();
       current->argList.trailingReturnType = " -> ";
-      current->args += " -> ";
+      current->appendData(EntryKey::Member_Args, " -> ");
       BEGIN(TrailingReturn);
    }
 
@@ -6272,30 +6670,31 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 <TrailingReturn>.                       {
       QString text = QString::fromUtf8(yytext);
       current->argList.trailingReturnType += text;
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
    }
 
 <TrailingReturn>\n                      {
       QString text = QString::fromUtf8(yytext);
       lineCount();
       current->argList.trailingReturnType += text;
-      current->args+=' ';
+      current->appendData(EntryKey::Member_Args, " ");
    }
 
 <FuncRound,FuncFunc>{BN}*","{BN}*   {
       lineCount();
-      current->args += ", " ;
+      current->appendData(EntryKey::Member_Args, ", ");
    }
 
 <FuncQual,FuncRound,FuncFunc>{BN}+     {
       lineCount() ;
-      current->args += ' ' ;
+      current->appendData(EntryKey::Member_Args, " ");
    }
 
 <Function,FuncQual,FuncRound,FuncFunc>"#" {
       if (insidePHP)  {
          REJECT;
       }
+
       lastCPPContext = YY_START;
       BEGIN(SkipCPP);
    }
@@ -6309,8 +6708,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       } else {
          // typically an initialized function pointer
          lastInitializerContext = YY_START;
-         initBracketCount = 0;
-         current->initializer = text;
+         initBracketCount       = 0;
+
+         current->setData(EntryKey::Initial_Value, text);
+
          BEGIN(ReadInitializer);
       }
    }
@@ -6337,120 +6738,134 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncPtrInit>\"            {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
-      pCopyQuotedString = &current->args;
+      current->appendData(EntryKey::Member_Args, text[0]);
+
+      s_quotedEntry = current;
+      s_quotedEnum  = EntryKey::Member_Args;
+
       lastStringContext = FuncPtrInit;
+
       BEGIN(CopyString);
    }
 
 <FuncPtrInit>\'            {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
+
       if (insidePHP)  {
-         pCopyQuotedString = &current->args;
+         s_quotedEntry = current;
+         s_quotedEnum  = EntryKey::Member_Args;
+
          lastStringContext = FuncPtrInit;
          BEGIN(CopyPHPString);
       }
    }
 
 <FuncPtrInit>{CHARLIT}        {
+      QString text = QString::fromUtf8(yytext);
+
       if (insidePHP) {
          REJECT;
       } else {
-         current->args += yytext;
+         current->appendData(EntryKey::Member_Args, text);
       }
    }
 
 <FuncPtrInit>{ID}          {
       QString text = QString::fromUtf8(yytext);
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
    }
 
 <FuncPtrInit>.             {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
    }
 
 <FuncPtrInit>\n            {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
       lineCount();
    }
 
 <FuncQual>{ID}             {
       // typically a K&R style C function
       QString text = QString::fromUtf8(yytext);
+
       if (insideCSharp && text == "where") {
          // type contraint for a method
 
          current->typeConstr = ArgumentList();
          current->typeConstr.append(Argument());
+
          lastCSConstraint = YY_START;
          BEGIN( CSConstraintName );
 
       } else if (checkForKnRstyleC()) {
-         current->args = text;
+         current->setData(EntryKey::Member_Args, text);
          oldStyleArgType.resize(0);
          BEGIN(OldStyleArgs);
 
       } else {
-         current->args += text;
+         current->appendData(EntryKey::Member_Args, text);
       }
    }
 
 <OldStyleArgs>[,;]         {
       QString text = QString::fromUtf8(yytext);
+
       QString oldStyleArgPtr;
       QString oldStyleArgName;
-      splitKnRArg(oldStyleArgPtr,oldStyleArgName);
+      splitKnRArg(oldStyleArgPtr, oldStyleArgName);
 
-      QString doc;
-      QString brief;
+      QString tmpBrief  = current->getData(EntryKey::Brief_Docs);
+      QString tmpMain   = current->getData(EntryKey::Main_Docs);
 
-      if (current->doc != docBackup) {
-         doc = current->doc;
-         current->doc=docBackup;
+      if (tmpBrief != s_briefBackup) {
+         current->setData(EntryKey::Brief_Docs, s_briefBackup);
+      } else{
+         tmpBrief = "";
       }
 
-      if (current->brief != briefBackup) {
-         brief = current->brief;
-         current->brief = briefBackup;
+      if (tmpMain != s_mainBackup) {
+         current->setData(EntryKey::Main_Docs, s_mainBackup);
+      } else {
+         tmpMain = "";
       }
 
-      addKnRArgInfo(oldStyleArgType+oldStyleArgPtr,
-      oldStyleArgName,brief,doc);
-      current->args.resize(0);
+      addKnRArgInfo(oldStyleArgType + oldStyleArgPtr, oldStyleArgName, tmpBrief, tmpMain);
+      current->setData(EntryKey::Member_Args, "");
 
       if (text[0] == ';') {
-        oldStyleArgType.resize(0);
+        oldStyleArgType = "";
       }
    }
 
 <OldStyleArgs>{ID}         {
       QString text = QString::fromUtf8(yytext);
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
    }
 
 <OldStyleArgs>"{"          {
-      current->args = argListToString(current->argList);
+      current->setData(EntryKey::Member_Args, argListToString(current->argList));
       unput('{');
       BEGIN(FuncQual);
    }
 
 <OldStyleArgs>.            {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
    }
 
 <FuncQual,FuncRound,FuncFunc>.      {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
    }
 
 <FuncQual>{BN}*"try:"         |
 <FuncQual>{BN}*"try"{BN}+     {
       /* try-function-block */
       QString text = QString::fromUtf8(yytext);
+
       insideTryBlock = true;
       lineCount();
 
@@ -6462,35 +6877,39 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FuncQual>{BN}*"throw"{BN}*"("      {
       // C++ style throw clause
-      current->exception = " throw (";
+      current->setData(EntryKey::Exception_Spec, "  throw (");
       roundCount = 0;
+
       lineCount();
       BEGIN( ExcpRound );
    }
 
 <FuncQual>{BN}*"raises"{BN}*"("         {
-      current->exception = " raises (" ;
+      current->setData(EntryKey::Exception_Spec, " raises (");
+
       lineCount() ;
-      roundCount=0;
-      BEGIN( ExcpRound ) ;
+      roundCount = 0;
+      BEGIN( ExcpRound );
    }
 
 <FuncQual>{BN}*"throws"{BN}+     {
       // Java style throw clause
-      current->exception = " throws " ;
-      lineCount() ;
+      current->setData(EntryKey::Exception_Spec, " throws ");
+
+      lineCount();
       BEGIN( ExcpList );
    }
 
 <ExcpRound>"("             {
       QString text = QString::fromUtf8(yytext);
-      current->exception += text[0];
+      current->appendData(EntryKey::Exception_Spec, text[0]);
       ++roundCount;
    }
 
 <ExcpRound>")"                          {
       QString text = QString::fromUtf8(yytext);
-      current->exception += text[0];
+      current->appendData(EntryKey::Exception_Spec, text[0]);
+
       if ( roundCount )
          --roundCount ;
       else
@@ -6499,7 +6918,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ExcpRound>.            {
       QString text = QString::fromUtf8(yytext);
-      current->exception += text[0];
+      current->appendData(EntryKey::Exception_Spec, text[0]);
    }
 
 <ExcpList>"{"           {
@@ -6513,21 +6932,24 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
    }
 
 <ExcpList>"\n"             {
-      current->exception += ' ';
+      current->appendData(EntryKey::Exception_Spec, " ");
       lineCount();
    }
 
 <ExcpList>.             {
       QString text = QString::fromUtf8(yytext);
-      current->exception += text[0];
+      current->appendData(EntryKey::Exception_Spec, text[0]);
    }
 
 <Function>"("           {
       QString text = QString::fromUtf8(yytext);
-      current->type += current->name;
-      current->name  = current->args;
-      current->args  = text;
-      roundCount=0;
+
+      current->appendData(EntryKey::Member_Type, current->name);
+      current->name = current->getData(EntryKey::Member_Args);
+      current->appendData(EntryKey::Member_Args, text);
+
+      roundCount    = 0;
+
       BEGIN( FuncRound ) ;
    }
 
@@ -6541,9 +6963,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       QString text = QString::fromUtf8(yytext);
 
       current->name        = current->name.simplified();
-      current->type        = current->type.simplified();
-      current->args        = removeRedundantWhiteSpace(current->args);
-      current->fileName    = yyFileName;
+      current->setData(EntryKey::Member_Type,  current->getData(EntryKey::Member_Type).simplified());
+      current->setData(EntryKey::Member_Args,  removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyBegLineNr;
       current->startColumn = yyBegColNr;
 
@@ -6552,9 +6975,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
          int tempArg = current->name.indexOf('<');
 
-         int ts = current->type.indexOf('<');
-         int te = current->type.lastIndexOf('>');
-         int ti = re.indexIn(current->type, 0);
+         QString tmpType = current->getData(EntryKey::Member_Type);
+
+         int ts = tmpType.indexOf('<');
+         int te = tmpType.lastIndexOf('>');
+         int ti = re.indexIn(tmpType, 0);
 
          // bug677315: A<int(void *, char *)> get(); is not a function pointer
          // not a (...*...) pattern
@@ -6571,10 +6996,10 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
          }
 
-         if (! current->type.isEmpty() && (! isFunction || current->type.startsWith("typedef ")) )  {
+         if (! tmpType.isEmpty() && (! isFunction || tmpType.startsWith("typedef ")) )  {
 
-            if (isTypedef && ! current->type.startsWith("typedef ")) {
-               current->type.prepend("typedef ");
+            if (isTypedef && ! tmpType.startsWith("typedef ")) {
+               current->prependData(EntryKey::Member_Type, "typedef ");
             }
 
             current->section = Entry::VARIABLE_SEC;
@@ -6586,38 +7011,44 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       } else  {
          // a global function or function variable
+         QString tmpType = current->getData(EntryKey::Member_Type);
 
-         if (! current->type.isEmpty() && (re.indexIn(current->type, 0) !=-1 || current->type.left(8) == "typedef ")) {
+         if (! tmpType.isEmpty() && (re.indexIn(tmpType, 0) !=-1 || tmpType.startsWith("typedef ")) ) {
 
-            if (isTypedef && current->type.left(8) != "typedef ") {
-               current->type.prepend("typedef ");
+            if (isTypedef && ! tmpType.startsWith("typedef ")) {
+               current->prependData(EntryKey::Member_Type, "typedef ");
             }
 
             current->section = Entry::VARIABLE_SEC;
 
          } else {
             current->section = Entry::FUNCTION_SEC;
-            current->proto = true;
+            current->proto   = true;
          }
 
       }
 
-      if ( insidePHP) {
-         if (findAndRemoveWord(current->type,"final")) {
+      //
+      QString tmpType = current->getData(EntryKey::Member_Type);
+
+      if (insidePHP) {
+         if (findAndRemoveWord(tmpType, "final")) {
             current->m_traits.setTrait(Entry::Virtue::Final);
          }
 
-         if (findAndRemoveWord(current->type,"abstract")) {
+         if (findAndRemoveWord(tmpType, "abstract")) {
             current->m_traits.setTrait(Entry::Virtue::Abstract);
          }
       }
 
-      if ( insidePHP && !containsWord(current->type,"function")) {
+      current->setData(EntryKey::Member_Type, tmpType);
+
+      if (insidePHP && ! containsWord(tmpType, "function")) {
          initEntry();
 
          if (text[0] == '{' ) {
             lastCurlyContext = FindMembers;
-            curlyCount = 0;
+            curlyCount       = 0;
             BEGIN( SkipCurly );
 
          } else {
@@ -6627,12 +7058,14 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       } else {
          if (insidePHP) {
-            findAndRemoveWord(current->type,"function");
+            findAndRemoveWord(tmpType, "function");
+            current->setData(EntryKey::Member_Type, tmpType);
          }
 
          previous = current;
+
          current_root->addSubEntry(current, current_root);
-         current = QMakeShared<Entry>();
+         current  = QMakeShared<Entry>();
          initEntry();
 
          bool isOptional_Prev = previous->m_traits.hasTrait(Entry::Virtue::Optional);
@@ -6651,15 +7084,16 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          lastCurlyContext = FindMembers;
 
          if (text[0] == ',' ) {
-            current->type = previous->type;
-            // we need to strip any trailing * and & (see bugs 623023 and 649103 for test cases)
-            int i = current->type.length();
+            QString tmpType = previous->getData(EntryKey::Member_Type);
 
-            while (i > 0 && (current->type[i-1] == '*' || current->type[i-1] == '&' || current->type[i-1] == ' ')) {
+            // strip any trailing * and & (see bugs 623023 and 649103 for test cases)
+            int i = tmpType.length();
+
+            while (i > 0 && (tmpType[i-1] == '*' || tmpType[i-1] == '&' || tmpType[i-1] == ' ')) {
                i--;
             }
 
-            current->type = current->type.left(i);
+            current->setData(EntryKey::Member_Type, tmpType.left(i));
          }
 
          if (text[0] == '{' ) {
@@ -6682,8 +7116,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       }
    }
 
+<SkipInits>">"{BN}*"{"                {
+      // C++11 style initializer
+      lineCount();
+      curlyCount = 1;
+      BEGIN(SkipC11Inits);
+   }
+
 <SkipInits>{ID}{BN}*"{"               {
-      // C++11 style initializer (see bug 688647)
+      // C++11 style initializer
       lineCount();
       curlyCount = 1;
       BEGIN(SkipC11Inits);
@@ -6877,7 +7318,7 @@ SkipC11Attribute>"]]"                 {
       BEGIN( SkipString );
    }
 
-<SkipInits>;                          {
+<SkipInits>;                           {
       warn(yyFileName, yyLineNr, "Found a ';' while parsing an initializer list. "
             "Some macros which are used without semicolons may not be parsed accurately.\n");
 
@@ -6899,8 +7340,11 @@ SkipC11Attribute>"]]"                 {
       }
 
       // C# verbatim string
-      lastSkipVerbStringContext=YY_START;
-      pSkipVerbString=&current->initializer;
+      lastSkipVerbStringContext = YY_START;
+
+      s_skipVerbEntry = current;
+      s_skipVerbEnum  = EntryKey::Initial_Value;
+
       BEGIN(SkipVerbString);
    }
 
@@ -6912,7 +7356,7 @@ SkipC11Attribute>"]]"                 {
 
 <SkipInits,SkipCurly,SkipCurlyCpp>\'              {
       if (insidePHP) {
-         lastStringContext=YY_START;
+         lastStringContext = YY_START;
          BEGIN(SkipPHPString);
       }
    }
@@ -6946,11 +7390,14 @@ SkipC11Attribute>"]]"                 {
    }
 
 <CompoundName>";"          {
-      current->section = Entry::EMPTY_SEC ;
-      current->type.resize(0) ;
-      current->name.resize(0) ;
-      current->args.resize(0) ;
+      current->name    = "";
+      current->section = Entry::EMPTY_SEC;
+
+      current->setData(EntryKey::Member_Type, "");
+      current->setData(EntryKey::Member_Args, "");
+
       current->argList.clear();
+
       BEGIN( FindMembers ) ;
    }
 
@@ -6979,9 +7426,11 @@ SkipC11Attribute>"]]"                 {
 
       } else {
          current->section = Entry::EMPTY_SEC;
-         current->type.resize(0) ;
-         current->name.resize(0) ;
-         current->args.resize(0) ;
+         current->name    = "";
+
+         current->setData(EntryKey::Member_Type, "");
+         current->setData(EntryKey::Member_Args, "");
+
          current->argList.clear();
       }
 
@@ -7025,10 +7474,13 @@ SkipC11Attribute>"]]"                 {
       current->m_templateArgLists.append(ArgumentList());
       currentArgumentList = &current->m_templateArgLists.last();
 
-      templateStr   =  "<";
-      current->name += "<";
-      fullArgString =  templateStr;
-      copyArgString =  &current->name;
+      s_template_args = "<";
+      fullArgString   = s_template_args;
+
+      current->name   += "<";
+
+      s_argEntry  = current;
+      s_argEnum   = ArgKey::Entry_Name;
 
       currentArgumentContext = ClassVar;
       BEGIN( ReadTempArgs );
@@ -7130,13 +7582,13 @@ SkipC11Attribute>"]]"                 {
       initEntry();
 
       if (insideObjC) {
-         language = current->lang = SrcLangExt_Cpp;
+         language   = (current->lang = SrcLangExt_Cpp);
          insideObjC = false;
       }
 
       if (isTypedef) {
          // typedef of a class, put typedef keyword back
-         current->type.prepend("typedef");
+         current->prependData(EntryKey::Member_Type, "typedef");
       }
 
       BEGIN( FindMembers );
@@ -7227,7 +7679,6 @@ SkipC11Attribute>"]]"                 {
       QString text = QString::fromUtf8(yytext);
 
       if (insideIDL && text.startsWith("switch") == 0 && ! isId(text[6])) {
-
          // Corba IDL style union
          roundCount = 0;
          BEGIN(SkipUnionSwitch);
@@ -7236,6 +7687,7 @@ SkipC11Attribute>"]]"                 {
          addType(current);
          current->name = text;
          current->name = current->name.trimmed();
+
          lineCount();
          BEGIN( FindMembers );
       }
@@ -7245,7 +7697,8 @@ SkipC11Attribute>"]]"                 {
       if (isTypedef) {
          // multiple types in one typedef
          unput(',');
-         current->type.prepend("typedef ");
+         current->prependData(EntryKey::Member_Type, "typedef ");
+
          BEGIN(FindMembers);
 
       } else {
@@ -7284,7 +7737,7 @@ SkipC11Attribute>"]]"                 {
           BEGIN(SkipUnionSwitch);
 
       } else if ((insideJava || insidePHP || insideJS) && (text == "implements" || text =="extends") ) {
-          current->type.resize(0);
+          current->setData(EntryKey::Member_Type, "");
           baseProt = Public;
           baseVirt = Normal;
           baseName.resize(0);
@@ -7315,9 +7768,8 @@ SkipC11Attribute>"]]"                 {
             current->section = Entry::VARIABLE_SEC ;
          }
 
-         current->type += ' ' ;
-         current->type += current->name ;
-         current->name = text ;
+         current->appendData(EntryKey::Member_Type, " " + current->name);
+         current->name = text;
 
          if (nameIsOperator(current->name)) {
             BEGIN( Operator );
@@ -7455,19 +7907,19 @@ SkipC11Attribute>"]]"                 {
       if (current->section == Entry::VARIABLE_SEC) {
          // enum A B:2, see bug 748208
 
-         current->bitfields += ":";
-         current->args.resize(0);
+         current->appendData(EntryKey::Member_Bitfields, ":");
+         current->setData(EntryKey::Member_Args,         "" );
          BEGIN(BitFields);
 
       } else if (current->section == Entry::ENUM_SEC) {
          // enum E:2, see bug 313527,
          // or C++11 style enum: 'E : unsigned int {...}'
 
-         current->args.resize(0);
+         current->setData(EntryKey::Member_Args, "");
          BEGIN(EnumBaseType);
 
       } else {
-         current->type.resize(0);
+         current->setData(EntryKey::Member_Type, "");
 
          bool isInterface = current->m_traits.hasTrait(Entry::Virtue::Interface);
          bool isStruct    = current->m_traits.hasTrait(Entry::Virtue::Struct);
@@ -7497,7 +7949,7 @@ SkipC11Attribute>"]]"                 {
 
       if (isTypedef) {
          // typedef of a class, put typedef keyword back
-         current->type.prepend("typedef");
+         current->prependData(EntryKey::Member_Type, "typedef");
       }
 
       if ((text[0] == '*' || text[0] == '&') && current->section == Entry::ENUM_SEC) {
@@ -7515,11 +7967,14 @@ SkipC11Attribute>"]]"                 {
 
       } else {
         lineCount();
-        current->m_program   += text;
-        current->fileName    = yyFileName ;
-        current->startLine   = yyLineNr ;
+
+        current->appendData(EntryKey::Source_Text, text);
+
+        current->setData(EntryKey::File_Name, yyFileName);
+        current->startLine   = yyLineNr;
         current->startColumn = yyColNr;
-        curlyCount = 0;
+
+        curlyCount           = 0;
 
         BEGIN( ReadBodyIntf );
       }
@@ -7537,11 +7992,13 @@ SkipC11Attribute>"]]"                 {
 
       } else {
          lineCount();
-         current->m_program   += text;
-         current->fileName    = yyFileName ;
-         current->startLine   = yyLineNr ;
+
+         current->appendData(EntryKey::Source_Text, text);
+
+         current->setData(EntryKey::File_Name, yyFileName);
+         current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
-         curlyCount = 0;
+         curlyCount           = 0;
 
          BEGIN( ReadBodyIntf );
       }
@@ -7550,7 +8007,7 @@ SkipC11Attribute>"]]"                 {
 <CompoundName,ClassVar>{B}*"{"{B}*  {
       static const bool extractAnonNS = Config::getBool("extract-anon-namespaces");
 
-      current->fileName    = yyFileName;
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
@@ -7564,7 +8021,7 @@ SkipC11Attribute>"]]"                 {
 
             if (extractAnonNS) {
                // use visible name
-               current->name = "anonymous_namespace{" + stripPath(current->fileName) + "}";
+               current->name = "anonymous_namespace{" + stripPath(current->getData(EntryKey::File_Name)) + "}";
 
             } else {
                // use invisible name
@@ -7660,8 +8117,7 @@ SkipC11Attribute>"]]"                 {
          lineCount();
 
          baseName += substitute(text,"\\","::");
-         current->args += ' ';
-         current->args += text;
+         current->appendData(EntryKey::Member_Args, " " + text);
       }
    }
 
@@ -7677,20 +8133,21 @@ SkipC11Attribute>"]]"                 {
 
          lastCSConstraint = YY_START;
          BEGIN( CSConstraintName );
+
      } else {
        baseName += text;
-       current->args += ' ';
-       current->args += text;
+       current->appendData(EntryKey::Member_Args, " " + text);
      }
    }
 
 <Bases>{BN}*{ID}("."{ID})*       {
       // Java style class
       QString text = QString::fromUtf8(yytext);
-      QString name = substitute(text,".","::");
+      QString name = substitute(text, ".","::");
+
       baseName += name;
-      current->args += ' ';
-      current->args += name;
+
+      current->appendData(EntryKey::Member_Args, " " + name);
    }
 
 <ClassVar,Bases>\n/{BN}*[^{, \t\n]  {
@@ -7715,10 +8172,13 @@ SkipC11Attribute>"]]"                 {
 <ClassVar>"<"                     {
       QString text = QString::fromUtf8(yytext);
       current->name += text[0];
-      sharpCount=1;
-      roundCount=0;
+
+      sharpCount = 1;
+      roundCount = 0;
+
       lastSkipSharpContext = YY_START;
-      specName = &current->name;
+      specName             = &current->name;
+
       BEGIN ( Specialization );
    }
 
@@ -7741,8 +8201,9 @@ SkipC11Attribute>"]]"                 {
          //  baseName+="-g";
          //}
 
-         templateStr = text;
-         specName = &templateStr;
+         s_template_args = text;
+         specName = &s_template_args;
+
          BEGIN ( Specialization );
       }
    }
@@ -7750,6 +8211,7 @@ SkipC11Attribute>"]]"                 {
 <Specialization>"<"        {
       QString text = QString::fromUtf8(yytext);
       *specName += text[0];
+
       if (roundCount == 0) {
          sharpCount++;
       }
@@ -7758,6 +8220,7 @@ SkipC11Attribute>"]]"                 {
 <Specialization>">"        {
       QString text = QString::fromUtf8(yytext);
       *specName += text[0];
+
       if (roundCount == 0 && --sharpCount <= 0) {
          baseName += removeRedundantWhiteSpace(*specName);
          BEGIN(lastSkipSharpContext);
@@ -7846,7 +8309,7 @@ SkipC11Attribute>"]]"                 {
       if (insideProtocolList) {
          baseName += "-p";
       } else {
-         current->args += ',' ;
+         current->appendData(EntryKey::Member_Args, ",");
       }
 
       current->name = removeRedundantWhiteSpace(current->name);
@@ -7892,9 +8355,10 @@ SkipC11Attribute>"]]"                 {
    }
 
 <Bases>{B}*"{"{B}*         {
-      current->fileName    = yyFileName;
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
+
       current->name = removeRedundantWhiteSpace(current->name);
 
       if (! baseName.isEmpty()) {
@@ -7927,51 +8391,50 @@ SkipC11Attribute>"]]"                 {
 <SkipUnionSwitch>.
 <Comment>{BN}+             {
       QString text = QString::fromUtf8(yytext);
-
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       lineCount() ;
    }
 
 <Comment>"/*"           {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <Comment>"//"           {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <Comment>{CMD}("code"|"verbatim")   {
       QString text = QString::fromUtf8(yytext);
-      insideCode=true;
-      current->m_program += text;
+      insideCode   = true;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <Comment>{CMD}("endcode"|"endverbatim")   {
       QString text = QString::fromUtf8(yytext);
-      insideCode = false;
-      current->m_program += text;
+      insideCode   = false;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <Comment>[^ \.\t\r\n\/\*]+       {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 
 <Comment>"*/"           {
       QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Source_Text, text);
 
-      current->m_program += text;
-
-      if (! insideCode)
+      if (! insideCode) {
          BEGIN(lastContext);
+      }
    }
 
 <Comment>.           {
       QString text = QString::fromUtf8(yytext);
-      current->m_program += text[0];
+      current->appendData(EntryKey::Source_Text, text[0]);
    }
 
 <FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,SkipC11Inits,SkipC11Attribute,Bases,OldStyleArgs>("//"{B}*)?"/*!" {
@@ -7982,13 +8445,13 @@ SkipC11Attribute>"]]"                 {
       removeSlashes = (text[1] == '/');
       tmpDocType    =- 1;
 
-      if (! current->doc.isEmpty()) {
-         current->doc += "\n\n";
+      if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
+         current->appendData(EntryKey::Main_Docs, "\n\n");
       }
 
       lastDocContext = YY_START;
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->inside = current_root->name + "::";
+         current->setData(EntryKey::Class_Name, current_root->name + "::");
       }
 
       s_docBlockContext   = YY_START;
@@ -7999,8 +8462,8 @@ SkipC11Attribute>"]]"                 {
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
 
       if (s_docBlockAutoBrief) {
+         current->setData(EntryKey::Brief_File, yyFileName);
          current->briefLine = yyLineNr;
-         current->briefFile = yyFileName;
       }
 
       startCommentBlock(false);
@@ -8015,7 +8478,7 @@ SkipC11Attribute>"]]"                 {
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->inside = current_root->name+"::";
+         current->setData(EntryKey::Class_Name, current_root->name+"::");
       }
 
       s_docBlockContext  = YY_START;
@@ -8027,8 +8490,8 @@ SkipC11Attribute>"]]"                 {
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
 
       if (s_docBlockAutoBrief) {
+         current->setData(EntryKey::Brief_File, yyFileName);
          current->briefLine = yyLineNr;
-         current->briefFile = yyFileName;
       }
 
       startCommentBlock(false);
@@ -8042,7 +8505,7 @@ SkipC11Attribute>"]]"                 {
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->inside = current_root->name+"::";
+         current->setData(EntryKey::Class_Name,  current_root->name+"::");
       }
 
       s_docBlockContext   = YY_START;
@@ -8051,7 +8514,7 @@ SkipC11Attribute>"]]"                 {
 
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
 
-      startCommentBlock(current->brief.isEmpty());
+      startCommentBlock(current->getData(EntryKey::Brief_Docs).isEmpty());
       BEGIN( DocLine );
    }
 
@@ -8062,7 +8525,7 @@ SkipC11Attribute>"]]"                 {
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->inside = current_root->name+"::";
+         current->setData(EntryKey::Class_Name, current_root->name+"::");
       }
 
       s_docBlockContext   = YY_START;
@@ -8071,7 +8534,7 @@ SkipC11Attribute>"]]"                 {
 
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
 
-      startCommentBlock(current->brief.isEmpty());
+      startCommentBlock(current->getData(EntryKey::Brief_Docs).isEmpty());
       BEGIN( DocLine );
    }
 
@@ -8084,13 +8547,14 @@ SkipC11Attribute>"]]"                 {
       QString text = QString::fromUtf8(yytext);
 
       bool isAttribute = current->m_traits.hasTrait(Entry::Virtue::Attribute);
+      QString tmpType  = current->getData(EntryKey::Member_Type);
 
       if (externC) {
          externC = false;
 
-      } else if (insideCSharp && ! current->name.isEmpty() && ! current->type.isEmpty())  {
+      } else if (insideCSharp && ! current->name.isEmpty() && ! tmpType.isEmpty())  {
 
-         if (containsWord(current->type,"event")) {
+         if (containsWord(tmpType, "event")) {
             // event
             current->mtype = mtype = MethodTypes::Event;
 
@@ -8106,8 +8570,8 @@ SkipC11Attribute>"]]"                 {
 
       }  else if (insideIDL && isAttribute) {
          // UNO IDL: attributes may have setter and getter
-         // exception specifications
-         current->exception = " {";
+         current->setData(EntryKey::Exception_Spec, " {");
+
          BEGIN(UNOIDLAttributeBlock);
 
       } else {
@@ -8116,10 +8580,10 @@ SkipC11Attribute>"]]"                 {
             needsSemi = false;
 
             if (current->stat) {
-               current->name="[static initializer]";
-               current->type.resize(0);
+               current->name = "[static initializer]";
+               current->setData(EntryKey::Member_Type, "");
             } else {
-               current->name="[instance initializer]";
+               current->name = "[instance initializer]";
             }
 
             unput(*yytext);
@@ -8127,10 +8591,12 @@ SkipC11Attribute>"]]"                 {
 
          } else {
             // C++11 style initializer list
+            current->setData(EntryKey::Initial_Value, text);
+
             current->bodyLine      = yyLineNr;
-            current->initializer   = text;
             lastInitializerContext = YY_START;
-            initBracketCount=1;
+            initBracketCount       = 1;
+
             BEGIN(ReadInitializer);
          }
       }
@@ -8246,16 +8712,16 @@ SkipC11Attribute>"]]"                 {
 
 <DocLine>{B}*"///"[/]+{B}*/"\n"     {
       // ignore marker line (see bug700345)
-      handleCommentBlock(s_docBlock, current->brief.isEmpty());
+      handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
       BEGIN( s_docBlockContext );
    }
 
 <DocLine>[^\n]*/"\n"{B}*"//"[!/]{B}*{CMD}"}"	{
-      // next line is an end group marker, see bug 752712
+      // next line is an end group marker
       QString text = QString::fromUtf8(yytext);
 
   		s_docBlock += text;
-		handleCommentBlock(s_docBlock, current->brief.isEmpty());
+		handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
 
 	   BEGIN( s_docBlockContext );
    }
@@ -8265,7 +8731,7 @@ SkipC11Attribute>"]]"                 {
       QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;
-      handleCommentBlock(s_docBlock, current->brief.isEmpty());
+      handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
       BEGIN( s_docBlockContext );
    }
 
@@ -8586,19 +9052,22 @@ SkipC11Attribute>"]]"                 {
 
 <Prototype>"("                 {
       QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Member_Args, text[0]);
 
-      current->args += text[0];
-      fullArgString = current->args;
-      copyArgString = &current->args;
+      fullArgString = current->getData(EntryKey::Member_Args);
+
+      s_argEntry = current;
+      s_argEnum  = ArgKey::Member_Args;
 
       currentArgumentContext = PrototypeQual;
+
       BEGIN( ReadFuncArgType );
    }
 
 <Prototype>"("({ID}"::")*({B}*[&*])+   {
       QString text = QString::fromUtf8(yytext);
 
-      current->type += current->name + text;
+      current->appendData(EntryKey::Member_Type, current->name + text);
       current->name = "";
       BEGIN( PrototypePtr );
    }
@@ -8610,17 +9079,20 @@ SkipC11Attribute>"]]"                 {
 
 <PrototypePtr>"("          {
       QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Member_Args, text[0]);
 
-      current->args += text[0];
-      fullArgString = current->args;
-      copyArgString = &current->args;
+      fullArgString = current->getData(EntryKey::Member_Args);
+
+      s_argEntry = current;
+      s_argEnum  = ArgKey::Member_Args;
 
       currentArgumentContext = PrototypeQual;
+
       BEGIN( ReadFuncArgType );
    }
 
 <PrototypePtr>")"          {
-      current->type += ')';
+      current->appendData(EntryKey::Member_Type, ")");
       BEGIN( Prototype );
    }
 
@@ -8634,49 +9106,49 @@ SkipC11Attribute>"]]"                 {
    }
 
 <PrototypeQual>{B}*"const"{B}*      {
-      current->args += " const ";
+      current->appendData(EntryKey::Member_Args, " const ");
       current->argList.constSpecifier = true;
    }
 
 <PrototypeQual>{B}*"volatile"{B}*   {
-      current->args += " volatile ";
+      current->appendData(EntryKey::Member_Args, " volatile ");
       current->argList.volatileSpecifier = true;
    }
 
 <PrototypeQual>{B}*"&"{B}*          {
-      current->args += " &";
+      current->appendData(EntryKey::Member_Args, " &");
       current->argList.refSpecifier = RefType::LValueRef;
    }
 
 <PrototypeQual>{B}*"&&"{B}*         {
-      current->args += " &&";
+      current->appendData(EntryKey::Member_Args, " &&");
       current->argList.refSpecifier = RefType::RValueRef;
    }
 
 <PrototypeQual>{B}*"="{B}*"0"{B}*   {
-      current->args += " = 0";
+      current->appendData(EntryKey::Member_Args, " = 0");
       current->virt = Pure;
       current->argList.pureSpecifier = true;
    }
 
 <PrototypeQual>"throw"{B}*"("            {
-      current->exception = "throw(";
+      current->setData(EntryKey::Exception_Spec, "throw(");
       BEGIN(PrototypeExc);
    }
 
 <PrototypeExc>")"       {
-      current->exception += ')';
+      current->appendData(EntryKey::Exception_Spec, ")");
       BEGIN(PrototypeQual);
    }
 
 <PrototypeExc>.         {
       QString text = QString::fromUtf8(yytext);
-      current->exception += text[0];
+      current->appendData(EntryKey::Exception_Spec, text[0]);
    }
 
 <PrototypeQual>.        {
       QString text = QString::fromUtf8(yytext);
-      current->args += text[0];
+      current->appendData(EntryKey::Member_Args, text[0]);
    }
 
 <Prototype>.           {
@@ -8770,11 +9242,11 @@ SkipC11Attribute>"]]"                 {
 static void startCommentBlock(bool brief)
 {
    if (brief) {
-      current->briefFile = yyFileName;
+      current->setData(EntryKey::Brief_File, yyFileName);
       current->briefLine = yyLineNr;
 
    } else {
-      current->docFile = yyFileName;
+      current->setData(EntryKey::MainDocs_File, yyFileName);
       current->docLine = yyLineNr;
    }
 }
@@ -8818,7 +9290,7 @@ static void handleCommentBlock(const QString &doc, bool brief)
    QSharedPointer<Entry> docEntry = s_docBlockInBody && previous ? previous : current;
 
    if (s_docBlockInBody && docEntry && docEntry->inbodyLine == -1) {
-      docEntry->inbodyFile = yyFileName;
+      docEntry->setData(EntryKey::Inbody_File, yyFileName);
       docEntry->inbodyLine = lineNr;
    }
 
@@ -8831,16 +9303,15 @@ static void handleCommentBlock(const QString &doc, bool brief)
    }
 
    while (parseCommentBlock(s_thisParser, docEntry, stripIndentation(doc), yyFileName,
-                  lineNr,                                       // passed by reference
-                  isBrief, isJavaDocStyle, s_docBlockInBody,
+                  lineNr, isBrief, isJavaDocStyle, s_docBlockInBody,
                   protection, position, needsEntry) ) {         // last 3 are passed by reference
 
       if (needsEntry) {
-         QString docFile = current->docFile;
+         QString tmpDocFile = current->getData(EntryKey::MainDocs_File),
 
          newEntry();
 
-         current->docFile = docFile;
+         current->setData(EntryKey::MainDocs_File, tmpDocFile);
          current->docLine = lineNr;
 
          //
@@ -8867,18 +9338,17 @@ static void handleParametersCommentBlocks(ArgumentList &argList)
          bool needsEntry;
 
          // save context
-         QString orgDoc    = current->doc;
-         QString orgBrief  = current->brief;
-         int orgDocLine    = current->docLine;
+         QString orgBrief  = current->getData(EntryKey::Brief_Docs);
+         QString orgMain   = current->getData(EntryKey::Main_Docs);
+
          int orgBriefLine  = current->briefLine;
+         int orgDocLine    = current->docLine;
 
-         current->doc.resize(0);
-         current->brief.resize(0);
+         current->setData(EntryKey::Brief_Docs, "");
+         current->setData(EntryKey::Main_Docs,  "");
 
-         while (parseCommentBlock(s_thisParser, current, a.docs, yyFileName,
-                   current->docLine,                        // passed by reference
-                   false, false, false,
-                   protection, position, needsEntry ) ) {   // last 3 are passed by reference
+         while (parseCommentBlock(s_thisParser, current, a.docs, yyFileName, current->docLine,
+                   false, false, false, protection, position, needsEntry ) ) {
 
             if (needsEntry) {
                newEntry();
@@ -8889,13 +9359,13 @@ static void handleParametersCommentBlocks(ArgumentList &argList)
             newEntry();
          }
 
-         a.docs = current->doc;
+         a.docs = current->getData(EntryKey::Main_Docs);
 
          // restore context
-         current->doc       = orgDoc;
-         current->brief     = orgBrief;
-         current->docLine   = orgDocLine;
+         current->setData(EntryKey::Brief_Docs, orgBrief);
+         current->setData(EntryKey::Main_Docs,  orgMain );
          current->briefLine = orgBriefLine;
+         current->docLine   = orgDocLine;
       }
    }
 }
@@ -8909,12 +9379,12 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
    for (auto ce : tmpChildren) {
 
-      if (! ce->m_program.isEmpty()) {
+      if (! ce->getData(EntryKey::Source_Text).isEmpty()) {
 
          padCount = 0;
          s_column = 0;
 
-         s_inputString   = ce->m_program;
+         s_inputString   = ce->getData(EntryKey::Source_Text);
          s_inputPosition = 0;
 
          yyrestart( yyin );
@@ -8928,7 +9398,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          }
 
          current_root = ce;
-         yyFileName   = ce->fileName;
+         yyFileName   = ce->getData(EntryKey::File_Name);
 
          yyLineNr     = ce->startLine;
          yyColNr      = ce->startColumn;
@@ -9014,7 +9484,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          groupLeaveCompound(yyFileName, yyLineNr, ce->name);
          current = QSharedPointer<Entry>();
 
-         ce->m_program.resize(0);
+         ce->setData(EntryKey::Source_Text, "");
       }
 
       parseCompounds(ce);
@@ -9084,7 +9554,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
       }
 
       groupLeaveFile(yyFileName, yyLineNr);
-      rt->m_program.resize(0);
+      rt->setData(EntryKey::Source_Text, "");
 
       if (rt->children().contains(current) == 0)  {
          current = QSharedPointer<Entry>();
@@ -9132,7 +9602,7 @@ static void parsePrototype(const QString &text)
    s_lexInit = true;
 
    current->name = current->name.trimmed();
-   if (current->section == Entry::MEMBERDOC_SEC && current->args.isEmpty()) {
+   if (current->section == Entry::MEMBERDOC_SEC && current->getData(EntryKey::Member_Args).isEmpty()) {
       current->section = Entry::VARIABLEDOC_SEC;
    }
 

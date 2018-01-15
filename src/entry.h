@@ -347,6 +347,11 @@ class Entry
       }
    }
 
+   void appendData(EntryKey key, QCharRef data)  {
+      // remove when QString8 activated
+      appendData(key, QString(data));
+   }
+
    void prependData(EntryKey key, QString data)  {
 
       auto iter = m_entryMap.find(key);
@@ -397,7 +402,7 @@ class Entry
    bool hidden;                    // does this represent an entity that is hidden from the output
    bool artificial;                // artificially introduced item
 
-   QString  name;                  // member name
+   QString  name;                  // entry name
 
    QVector<ArgumentList>  m_templateArgLists;    // template argument declarations
    QVector<BaseInfo>      extends;               // list of base classes

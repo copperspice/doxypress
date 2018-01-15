@@ -1475,53 +1475,56 @@ char *parse_py_YYtext;
 #define YY_NO_INPUT 1
 #define YY_NEVER_INTERACTIVE 1
 
-static ParserInterface *s_thisParser;
-static QString          s_inputString;
-static int		         s_inputPosition;
-static QFile            s_inputFile;
-
-static Protection	protection;
-
 static QSharedPointer<Entry> current_root;
 static QSharedPointer<Entry> current;
 static QSharedPointer<Entry> previous;
 static QSharedPointer<Entry> bodyEntry;
 
-static int		         yyLineNr = 1;
-static QString 		   yyFileName;
-static MethodTypes    	mtype;
-static bool       		gstat;
-static Specifier       	virt;
+static QSharedPointer<Entry>  s_docsEntry;    // which entry
+static EntryKey               s_docsEnum;     // which enum in EntryKey (Source_Text, Initial_Value)
 
-static int              docBlockContext;
-static QString          docBlock;
-static bool             docBlockInBody;
-static bool             isJavaDocStyle;
-static bool             docBrief;
-static bool             docBlockSpecial;
+static ParserInterface  *s_thisParser;
+static QString           s_inputString;
+static int		          s_inputPosition;
+static QFile             s_inputFile;
 
-static bool             g_doubleQuote;
-static bool             g_specialBlock;
-static int              g_stringContext;
-static QString         *g_copyString;
-static int              g_indent    = 0;
-static int              g_curIndent = 0;
+static int		          yyLineNr = 1;
+static QString 		    yyFileName;
 
-static char             g_atomStart;
-static char             g_atomEnd;
-static int              g_atomCount;
+static Protection	       protection;
+static MethodTypes    	 mtype;
+static Specifier       	 virt;
 
-static QString          g_moduleScope;
-static QString          g_packageName;
-static QString          g_defVal;
+static bool       		 gstat;
 
-static int              g_braceCount;
+static int               docBlockContext;
+static QString           docBlock;
+static bool              docBlockInBody;
+static bool              isJavaDocStyle;
+static bool              docBrief;
+static bool              docBlockSpecial;
 
-static bool             g_lexInit = false;
-static bool             g_packageCommentAllowed;
+static bool              s_doubleQuote;
+static bool              s_specialBlock;
+static int               s_stringContext;
+static int               s_indent    = 0;
+static int               s_curIndent = 0;
 
-static bool             g_start_init = false;
-static int              g_search_count = 0;
+static char              s_atomStart;
+static char              s_atomEnd;
+static int               s_atomCount;
+
+static QString           s_moduleScope;
+static QString           s_packageName;
+static QString           s_defVal;
+
+static int               s_braceCount;
+
+static bool              s_lexInit = false;
+static bool              s_packageCommentAllowed;
+
+static bool              s_start_init = false;
+static int               s_search_count = 0;
 
 static void initParser()
 {
@@ -1531,7 +1534,7 @@ static void initParser()
    virt  = Normal;
 
    previous = QSharedPointer<Entry>();
-   g_packageCommentAllowed = true;
+   s_packageCommentAllowed = true;
 }
 
 static void initEntry()
@@ -1608,16 +1611,16 @@ static inline int computeIndent(const QString &str)
 
 static QString findPackageScopeFromPath(const QString &path)
 {
-   static QHash<QString, QString> g_packageNameCache;
+   static QHash<QString, QString> s_packageNameCache;
 
-   QString pScope = g_packageNameCache.value(path);
+   QString pScope = s_packageNameCache.value(path);
 
    if (! pScope.isEmpty()) {
       return pScope;
    }
 
    // found package initialization file
-   QFileInfo pf(path + "/__init__.py"); 
+   QFileInfo pf(path + "/__init__.py");
 
    if (pf.exists()) {
       int pos = path.lastIndexOf('/');
@@ -1630,7 +1633,7 @@ static QString findPackageScopeFromPath(const QString &path)
          }
 
          scope += path.mid(pos + 1);
-         g_packageNameCache.insert(path, scope);
+         s_packageNameCache.insert(path, scope);
          return scope;
       }
    }
@@ -1667,11 +1670,13 @@ static void incLineNr()
 static void startCommentBlock(bool brief)
 {
    if (brief) {
-      current->briefFile = yyFileName;
+      current->setData(EntryKey::Brief_File, yyFileName);
       current->briefLine = yyLineNr;
+
    } else {
-      current->docFile = yyFileName;
+      current->setData(EntryKey::MainDocs_File, yyFileName);
       current->docLine = yyLineNr;
+
    }
 }
 
@@ -1680,8 +1685,12 @@ static void handleCommentBlock(const QString &doc, bool isBrief)
    // TODO: Fix this
    docBlockInBody = false;
 
-   if (docBlockInBody && previous && ! previous->doc.isEmpty()) {
-      previous->doc = previous->doc.trimmed() + "\n\n";
+   if (docBlockInBody && previous) {
+      QString tmpDocs = previous->getData(EntryKey::Main_Docs);
+
+      if (! tmpDocs.isEmpty()) {
+         previous->setData(EntryKey::Main_Docs,  tmpDocs.trimmed() + "\n\n");
+      }
    }
 
    bool needsEntry;
@@ -1689,10 +1698,8 @@ static void handleCommentBlock(const QString &doc, bool isBrief)
    int lineNr   = isBrief ? current->briefLine : current->docLine;
 
    while (parseCommentBlock(s_thisParser, (docBlockInBody && previous) ? previous : current,
-             doc, yyFileName,
-             lineNr,                                      // passed by reference
-             docBlockInBody ? false : isBrief, isJavaDocStyle, docBlockInBody,
-             protection, position, needsEntry)) {         // last 3 are passed by reference
+             doc, yyFileName, lineNr, docBlockInBody ? false : isBrief, isJavaDocStyle, docBlockInBody,
+             protection, position, needsEntry)) {
 
       if (needsEntry) {
          newEntry();
@@ -1702,7 +1709,6 @@ static void handleCommentBlock(const QString &doc, bool isBrief)
    if (needsEntry) {
       newEntry();
    }
-
 }
 
 static void endOfDef(int correction = 0)
@@ -1715,10 +1721,10 @@ static void endOfDef(int correction = 0)
    newEntry();
 }
 
-static inline void addToString(const QString &s)
+static void addToOutput(const QString &str)
 {
-   if (g_copyString) {
-      (*g_copyString) += s;
+   if (s_docsEntry != nullptr) {
+      s_docsEntry->appendData(s_docsEnum, str);
    }
 }
 
@@ -1732,7 +1738,7 @@ static void initTriDoubleQuoteBlock()
    docBlockSpecial = text.endsWith('!');
 
    docBlock.resize(0);
-   g_doubleQuote = true;
+   s_doubleQuote = true;
    startCommentBlock(false);
 }
 
@@ -1746,7 +1752,7 @@ static void initTriSingleQuoteBlock()
    docBlockSpecial = text.endsWith('!');
 
    docBlock.resize(0);
-   g_doubleQuote = false;
+   s_doubleQuote = false;
    startCommentBlock(false);
 }
 
@@ -1763,22 +1769,22 @@ static void initSpecialBlock()
 
 static void searchFoundDef()
 {
-   current->fileName  = yyFileName;
+   current->setData(EntryKey::File_Name, yyFileName);
    current->startLine = yyLineNr;
    current->bodyLine  = yyLineNr;
+
    current->section   = Entry::FUNCTION_SEC;
+   current->lang      = SrcLangExt_Python;
+   current->virt      = Normal;
+   current->stat      = gstat;
+   current->mtype     = (mtype = Method);
 
-   current->lang = SrcLangExt_Python;
-   current->virt = Normal;
-   current->stat = gstat;
-   current->mtype = mtype = Method;
-   current->type.resize(0);
    current->name.resize(0);
-   current->args.resize(0);
-
+   current->setData(EntryKey::Member_Type, "");
+   current->setData(EntryKey::Member_Args, "");
    current->argList.clear();
 
-   g_packageCommentAllowed = false;
+   s_packageCommentAllowed = false;
    gstat = false;
 }
 
@@ -1786,12 +1792,14 @@ static void searchFoundClass()
 {
    current->section = Entry::CLASS_SEC;
    current->argList.clear();
-   current->type += "class" ;
 
-   current->fileName  = yyFileName;
-   current->startLine  = yyLineNr;
+   current->appendData(EntryKey::Member_Type, "class");
+
+   current->setData(EntryKey::File_Name, yyFileName);
+   current->startLine = yyLineNr;
    current->bodyLine  = yyLineNr;
-   g_packageCommentAllowed = false;
+
+   s_packageCommentAllowed = false;
 }
 
 #undef	YY_INPUT
@@ -2174,7 +2182,7 @@ YY_RULE_SETUP
 
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      g_indent = computeIndent(text);
+      s_indent = computeIndent(text);
       searchFoundDef();
       BEGIN( FunctionDec );
    }
@@ -2195,7 +2203,7 @@ YY_RULE_SETUP
 
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      g_indent = computeIndent(text);
+      s_indent = computeIndent(text);
       searchFoundClass();
       BEGIN( ClassDec ) ;
    }
@@ -2214,7 +2222,7 @@ YY_RULE_SETUP
 {
 
       // start of an from import
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
       BEGIN( FromMod );
    }
 	YY_BREAK
@@ -2224,7 +2232,7 @@ YY_RULE_SETUP
 {
 
       // start of an import statement
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
       BEGIN( Import );
    }
 	YY_BREAK
@@ -2237,10 +2245,12 @@ YY_RULE_SETUP
       current->section   = Entry::VARIABLE_SEC;
       current->mtype     = Property;
       current->name      = text.trimmed();
-      current->fileName  = yyFileName;
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
-      g_packageCommentAllowed = false;
+
+      s_packageCommentAllowed = false;
 
       BEGIN(VariableDec);
    }
@@ -2250,19 +2260,20 @@ case 10:
 YY_RULE_SETUP
 {
       // variable
-      if (g_search_count) {
+      if (s_search_count) {
          REJECT;
       }
 
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      g_indent = computeIndent(parse_py_YYtext);
+      s_indent = computeIndent(parse_py_YYtext);
       current->section   = Entry::VARIABLE_SEC;
       current->name      = text.trimmed();
-      current->fileName  = yyFileName;
+
+      current->setData(EntryKey::File_Name, yyFileName);;
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
 
       BEGIN(VariableDec);
    }
@@ -2275,20 +2286,21 @@ YY_RULE_SETUP
       // Also note ")" this is to catch also (a,b). the "("
       // is caught in the rule: [(], the ")" will be handled in [)]
 
-      if (g_search_count > 1) {
+      if (s_search_count > 1) {
          REJECT;
       }
 
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_indent = computeIndent(text);
+      s_indent = computeIndent(text);
 
       current->section   = Entry::VARIABLE_SEC;
       current->name      = text.trimmed();
-      current->fileName  = yyFileName;
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
 
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
       newVariable();
    }
 	YY_BREAK
@@ -2296,9 +2308,10 @@ case 12:
 YY_RULE_SETUP
 {
       // start of a single quoted string
-      g_stringContext = YY_START;
-      g_copyString    = 0;
-      g_packageCommentAllowed = false;
+      s_stringContext = YY_START;
+      s_docsEntry     = QSharedPointer<Entry>();
+
+      s_packageCommentAllowed = false;
 
       BEGIN( SingleQuoteString );
    }
@@ -2307,9 +2320,11 @@ case 13:
 YY_RULE_SETUP
 {
       // start of a double quoted string
-      g_stringContext = YY_START;
-      g_copyString    = 0;
-      g_packageCommentAllowed = false;
+      s_stringContext = YY_START;
+      s_docsEntry     = QSharedPointer<Entry>();
+
+      s_packageCommentAllowed = false;
+
       BEGIN( DoubleQuoteString );
    }
 	YY_BREAK
@@ -2332,21 +2347,21 @@ case 16:
 YY_RULE_SETUP
 {
       // normal comment
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
    }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 {
       // some other identifier
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
    }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_curIndent  = computeIndent(text);
+      s_curIndent  = computeIndent(text);
    }
 	YY_BREAK
 case 19:
@@ -2382,9 +2397,9 @@ YY_RULE_SETUP
 {
       // start of a special comment
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_curIndent  = computeIndent(text);
+      s_curIndent  = computeIndent(text);
 
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
       initSpecialBlock();
       BEGIN(SpecialComment);
    }
@@ -2393,14 +2408,14 @@ case 23:
 YY_RULE_SETUP
 {
       // we have to do something with (
-      g_search_count += 1;
+      s_search_count += 1;
    }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
 {
       // we have to do something with )
-      g_search_count -= 1;
+      s_search_count -= 1;
    }
 	YY_BREAK
 case 25:
@@ -2422,7 +2437,7 @@ YY_RULE_SETUP
 {
       // from package import
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_packageName = text;
+      s_packageName = text;
    }
 	YY_BREAK
 case 28:
@@ -2456,10 +2471,12 @@ case 32:
 YY_RULE_SETUP
 {
       // import all
-      QString item      = g_packageName;
+      QString item      = s_packageName;
+
       current->name     = removeRedundantWhiteSpace(substitute(item,".","::"));
-      current->fileName = yyFileName;
       current->section  = Entry::USINGDIR_SEC;
+      current->setData(EntryKey::File_Name, yyFileName);
+
       current_root->addSubEntry(current, current_root);
 
       current = QMakeShared<Entry>();
@@ -2471,14 +2488,13 @@ case 33:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      QString item = g_packageName+"." + text;
+      QString item = s_packageName+"." + text;
 
       current->name = removeRedundantWhiteSpace(substitute(item,".","::"));
-      current->fileName = yyFileName;
-
       current->section  = Entry::USINGDECL_SEC;
-      current_root->addSubEntry(current, current_root);
+      current->setData(EntryKey::File_Name, yyFileName);
 
+      current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
    }
@@ -2487,14 +2503,13 @@ case 34:
 YY_RULE_SETUP
 {
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      QString item  = g_packageName+"." + text;
+      QString item  = s_packageName+"." + text;
 
       current->name = removeRedundantWhiteSpace(substitute(item,".","::"));
-      current->fileName = yyFileName;
-
       current->section  = Entry::USINGDECL_SEC;
-      current_root->addSubEntry(current, current_root);
+      current->setData(EntryKey::File_Name, yyFileName);
 
+      current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(Search);
@@ -2530,12 +2545,12 @@ case 39:
 YY_RULE_SETUP
 {
       QString text  = QString::fromUtf8(parse_py_YYtext);
+
       current->name = removeRedundantWhiteSpace(substitute(text,".","::"));
-
-      current->fileName = yyFileName;
       current->section  = Entry::USINGDECL_SEC;
-      current_root->addSubEntry(current, current_root);
+      current->setData(EntryKey::File_Name, yyFileName);
 
+      current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(Search);
@@ -2571,10 +2586,12 @@ YY_RULE_SETUP
 
          current->name      = text.mid(5);
          current->section   = Entry::VARIABLE_SEC;
-         current->fileName  = yyFileName;
+
+         current->setData(EntryKey::File_Name,   yyFileName);
          current->startLine = yyLineNr;
          current->bodyLine  = yyLineNr;
-         current->type.resize(0);
+
+         current->setData(EntryKey::Member_Type, "");
 
          if (current->name.at(0) == '_') {
             // mark as private
@@ -2594,10 +2611,12 @@ YY_RULE_SETUP
 
       current->name      = text.mid(4);
       current->section   = Entry::VARIABLE_SEC;
-      current->fileName  = yyFileName;
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
-      current->type.resize(0);
+
+      current->setData(EntryKey::Member_Type, "");
 
       if (current->name.at(0)=='_') {
          // mark as private
@@ -2645,8 +2664,9 @@ case 49:
 YY_RULE_SETUP
 {
       // start of a single quoted string
-      g_stringContext = YY_START;
-      g_copyString    = 0;
+      s_stringContext = YY_START;
+      s_docsEntry     = QSharedPointer<Entry>();
+
       BEGIN( SingleQuoteString );
    }
 	YY_BREAK
@@ -2654,8 +2674,8 @@ case 50:
 YY_RULE_SETUP
 {
       // start of a double quoted string
-      g_stringContext = YY_START;
-      g_copyString    = 0;
+      s_stringContext = YY_START;
+      s_docsEntry     = QSharedPointer<Entry>();
       BEGIN( DoubleQuoteString );
    }
 	YY_BREAK
@@ -2689,11 +2709,11 @@ case 55:
 /* rule 55 can match eol */
 YY_RULE_SETUP
 {
-      DBG_CTX((stderr, "indent %d <= %d\n", computeIndent(text.mid(1)), g_indent));
+      DBG_CTX((stderr, "indent %d <= %d\n", computeIndent(text.mid(1)), s_indent));
 
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      if (computeIndent(text.mid(1)) <= g_indent)  {
+      if (computeIndent(text.mid(1)) <= s_indent)  {
 
          for (int i = parse_py_YYleng - 1; i >= 0; i--) {
             unput(parse_py_YYtext[i]);
@@ -2704,7 +2724,7 @@ YY_RULE_SETUP
 
       } else {
          incLineNr();
-         current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
       }
    }
 	YY_BREAK
@@ -2717,7 +2737,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      if (computeIndent(text.mid(1)) <= g_indent)  {
+      if (computeIndent(text.mid(1)) <= s_indent)  {
 
          for (int i = parse_py_YYleng - 1; i >= 0; i--) {
            unput(parse_py_YYtext[i]);
@@ -2728,7 +2748,7 @@ YY_RULE_SETUP
 
       } else {
          incLineNr();
-         current->m_program += text;
+         current->appendData(EntryKey::Source_Text, text);
       }
    }
 	YY_BREAK
@@ -2747,7 +2767,7 @@ YY_RULE_SETUP
 {
       // skip empty line
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 58:
@@ -2755,11 +2775,11 @@ YY_RULE_SETUP
 {
       // something at indent >0
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
 
-      g_curIndent = computeIndent(text);
+      s_curIndent = computeIndent(text);
 
-      if (g_curIndent <= g_indent) {
+      if (s_curIndent <= s_indent) {
          // jumped out of the function
          endOfDef(1);
          BEGIN(Search);
@@ -2771,12 +2791,14 @@ YY_RULE_SETUP
 {
       // start of a single quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
 
-      g_stringContext    = YY_START;
-      g_specialBlock     = false;
+      s_stringContext    = YY_START;
+      s_specialBlock     = false;
 
-      g_copyString = &current->m_program;
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Source_Text;
+
       BEGIN( SingleQuoteString );
    }
 	YY_BREAK
@@ -2785,12 +2807,14 @@ YY_RULE_SETUP
 {
       // start of a double quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
 
-      g_stringContext = YY_START;
-      g_specialBlock  = false;
+      s_stringContext = YY_START;
+      s_specialBlock  = false;
 
-      g_copyString = &current->m_program;
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Source_Text;
+
       BEGIN( DoubleQuoteString );
    }
 	YY_BREAK
@@ -2799,8 +2823,8 @@ YY_RULE_SETUP
 {
       // non-special stuff
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
-      g_specialBlock = false;
+      current->appendData(EntryKey::Source_Text, text);;
+      s_specialBlock = false;
    }
 	YY_BREAK
 case 62:
@@ -2808,7 +2832,7 @@ YY_RULE_SETUP
 {
       // normal comment
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 63:
@@ -2816,7 +2840,7 @@ YY_RULE_SETUP
 {
       // comment half way
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 64:
@@ -2825,7 +2849,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       incLineNr();
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 65:
@@ -2833,8 +2857,9 @@ YY_RULE_SETUP
 {
       // any character
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text[0];
-      g_specialBlock = false;
+      current->appendData(EntryKey::Source_Text, text[0]);
+
+      s_specialBlock = false;
    }
 	YY_BREAK
 case 66:
@@ -2842,8 +2867,9 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       initTriDoubleQuoteBlock();
+
       BEGIN(TripleComment);
    }
 	YY_BREAK
@@ -2852,7 +2878,7 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       initTriSingleQuoteBlock();
       BEGIN(TripleComment);
    }
@@ -2876,8 +2902,8 @@ YY_RULE_SETUP
       //found function name
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty())  {
-         current->type = "def";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "def");
       }
 
       current->name = text;
@@ -2889,8 +2915,8 @@ case 70:
 YY_RULE_SETUP
 {
       // function without arguments
-      g_specialBlock = true; // expecting a docstring
-      bodyEntry = current;
+      s_specialBlock     = true;          // expecting a docstring
+      bodyEntry          = current;
       current->bodyLine  = yyLineNr;
       BEGIN( FunctionBody );
    }
@@ -2927,8 +2953,8 @@ YY_RULE_SETUP
       // TODO: this rule is too simple, need to be able to
       // match things like =")" as well
 
-      g_defVal.resize(0);
-      g_braceCount = 0;
+      s_defVal.resize(0);
+      s_braceCount = 0;
       BEGIN(FunctionParamDefVal);
    }
 	YY_BREAK
@@ -2936,13 +2962,13 @@ case 75:
 YY_RULE_SETUP
 {
       // end of parameter list
-      current->args = argListToString(current->argList);
+      current->setData(EntryKey::Member_Args, argListToString(current->argList));
    }
 	YY_BREAK
 case 76:
 YY_RULE_SETUP
 {
-      g_specialBlock    = true; // expecting a docstring
+      s_specialBlock    = true; // expecting a docstring
       bodyEntry         = current;
       current->bodyLine = yyLineNr;
       BEGIN( FunctionBody );
@@ -2966,8 +2992,8 @@ YY_RULE_SETUP
 {
       // internal opening brace
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_braceCount++;
-      g_defVal += text[0];
+      s_braceCount++;
+      s_defVal += text[0];
    }
 	YY_BREAK
 case 80:
@@ -2976,15 +3002,15 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      if (g_braceCount == 0)   {
+      if (s_braceCount == 0)   {
          // end of default argument
 
          if (current->argList.listEmpty()) {
-            current->argList.last().defval = g_defVal.trimmed();
+            current->argList.last().defval = s_defVal.trimmed();
          }
 
           if (text[0] == ')') {
-             current->args = argListToString(current->argList);
+             current->setData(EntryKey::Member_Args,  argListToString(current->argList));
           }
 
           BEGIN(FunctionParams);
@@ -2993,10 +3019,10 @@ YY_RULE_SETUP
          // continue
 
          if (text[0] == ')') {
-            g_braceCount--;
+            s_braceCount--;
          }
 
-         g_defVal += text[0];
+         s_defVal += text[0];
       }
    }
 	YY_BREAK
@@ -3004,7 +3030,7 @@ case 82:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_defVal += text[0];
+      s_defVal += text[0];
    }
 	YY_BREAK
 case 83:
@@ -3012,7 +3038,7 @@ case 83:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_defVal += text[0];
+      s_defVal += text[0];
       incLineNr();
    }
 	YY_BREAK
@@ -3052,7 +3078,7 @@ YY_RULE_SETUP
 {
       // skip empty line
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case YY_STATE_EOF(ClassBody):
@@ -3066,32 +3092,34 @@ YY_RULE_SETUP
 {
       // something at indent >0
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_curIndent  = computeIndent(text);
+      s_curIndent  = computeIndent(text);
 
-      DBG_CTX((stderr,"g_curIndent = %d g_indent = %d\n", g_curIndent, g_indent));
+      DBG_CTX((stderr,"s_curIndent = %d s_indent = %d\n", s_curIndent, s_indent));
 
-      if (g_curIndent<=g_indent)  {
+      if (s_curIndent<=s_indent)  {
          // jumped out of the class/method
 
          endOfDef(1);
-         g_indent = g_curIndent;
+         s_indent = s_curIndent;
          BEGIN(Search);
 
       } else {
-         current->m_program += text;
-         }
-                  }
+         current->appendData(EntryKey::Source_Text, text);
+      }
+   }
 	YY_BREAK
 case 88:
 YY_RULE_SETUP
 {
       // start of a single quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text[0];
+      current->appendData(EntryKey::Source_Text, text[0]);
 
-      g_stringContext = YY_START;
-      g_specialBlock  = false;
-      g_copyString    = &current->m_program;
+      s_stringContext = YY_START;
+      s_specialBlock  = false;
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Source_Text;
 
       BEGIN( SingleQuoteString );
    }
@@ -3101,11 +3129,14 @@ YY_RULE_SETUP
 {
       // start of a double quoted string
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text[0];
+      current->appendData(EntryKey::Source_Text, text[0]);
 
-      g_stringContext = YY_START;
-      g_specialBlock  = false;
-      g_copyString    = &current->m_program;
+      s_stringContext = YY_START;
+      s_specialBlock  = false;
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Source_Text;
+
       BEGIN( DoubleQuoteString );
    }
 	YY_BREAK
@@ -3114,8 +3145,8 @@ YY_RULE_SETUP
 {
       // non-special stuff
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
-      g_specialBlock = false;
+      current->appendData(EntryKey::Source_Text, text);
+      s_specialBlock = false;
    }
 	YY_BREAK
 case 91:
@@ -3123,7 +3154,7 @@ case 91:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text[0];
+      current->appendData(EntryKey::Source_Text, text[0]);
       incLineNr();
    }
 	YY_BREAK
@@ -3132,7 +3163,7 @@ YY_RULE_SETUP
 {
       // normal comment
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 93:
@@ -3140,8 +3171,8 @@ YY_RULE_SETUP
 {
       // any character
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_specialBlock = false;
-      current->m_program += text[0];
+      s_specialBlock = false;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 94:
@@ -3149,7 +3180,7 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
 
       initTriDoubleQuoteBlock();
       BEGIN(TripleComment);
@@ -3160,7 +3191,7 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
 
       initTriSingleQuoteBlock();
       BEGIN(TripleComment);
@@ -3172,20 +3203,21 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty())  {
-         current->type = "class";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "class");
       }
 
       current->section = Entry::CLASS_SEC;
       current->name = text;
 
       // prepend scope in case of nested classes
-      if (current_root->section&Entry::SCOPE_MASK) {
+      if (current_root->section & Entry::SCOPE_MASK) {
          current->name.prepend(current_root->name+"::");
       }
 
       current->name     = current->name.trimmed();
-      current->fileName = yyFileName;
+      current->setData(EntryKey::File_Name,   yyFileName);
+
       docBlockContext   = YY_START;
       docBlockInBody    = false;
       isJavaDocStyle    = false;
@@ -3205,9 +3237,9 @@ case 98:
 YY_RULE_SETUP
 {
       // begin of the class definition
-      g_specialBlock = true; // expecting a docstring
+      s_specialBlock     = true;                // expecting a docstring
       current->bodyLine  = yyLineNr;
-      current->m_program.resize(0);
+      current->setData(EntryKey::Source_Text, "");
       BEGIN(ClassCaptureIndent);
    }
 	YY_BREAK
@@ -3216,7 +3248,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       current->extends.append(BaseInfo(substitute(text,".","::"), Public, Normal));
-      //Has base class-do stuff
+      // Has base class-do stuff
    }
 	YY_BREAK
 
@@ -3226,8 +3258,9 @@ YY_RULE_SETUP
 {
       // Blankline - ignore, keep looking for indentation.
       QString text = QString::fromUtf8(parse_py_YYtext);
+      current->appendData(EntryKey::Source_Text, text);
+
       lineCount();
-      current->m_program += text;
    }
 	YY_BREAK
 case 101:
@@ -3237,7 +3270,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_py_YYtext);
 
       initTriDoubleQuoteBlock();
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       BEGIN(TripleComment);
    }
 	YY_BREAK
@@ -3248,7 +3281,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_py_YYtext);
 
       initTriSingleQuoteBlock();
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
       BEGIN(TripleComment);
    }
 	YY_BREAK
@@ -3256,12 +3289,12 @@ case 103:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
 
-      g_curIndent = computeIndent(text);
+      s_curIndent = computeIndent(text);
       bodyEntry   = current;
 
-      DBG_CTX((stderr,"setting indent %d\n",g_curIndent));
+      DBG_CTX((stderr,"setting indent %d\n",s_curIndent));
 
       BEGIN(ClassBody);
    }
@@ -3271,8 +3304,9 @@ YY_RULE_SETUP
 {
       // Just pushback an empty class, and resume parsing the body
       QString text = QString::fromUtf8(parse_py_YYtext);
+
       newEntry();
-      current->m_program += text;
+      current->appendData(EntryKey::Source_Text, text);
 
       BEGIN( Search );
    }
@@ -3283,9 +3317,9 @@ YY_RULE_SETUP
 {
       // the assignment operator
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_start_init = true;
-      current->initializer = text;
-      current->initializer += " ";
+      s_start_init = true;
+
+      current->setData(EntryKey::Initial_Value, text + " ");
    }
 	YY_BREAK
 case 106:
@@ -3293,7 +3327,7 @@ YY_RULE_SETUP
 {
       // spaces
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->initializer += text;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 107:
@@ -3302,11 +3336,11 @@ YY_RULE_SETUP
       // integer value
       QString text  = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty()) {
-         current->type = "int";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "int");
       }
 
-      current->initializer += text;      
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 108:
@@ -3315,11 +3349,11 @@ YY_RULE_SETUP
       // floating point value
       QString text  = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty()) {
-         current->type = "float";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "float");
       }
 
-      current->initializer += text;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 109:
@@ -3328,11 +3362,11 @@ YY_RULE_SETUP
       // boolean value
       QString text  = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty()) {
-         current->type = "bool";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "bool");
       }
 
-      current->initializer += text;      
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 110:
@@ -3341,13 +3375,17 @@ YY_RULE_SETUP
       // string
       QString text  = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty()) {
-         current->type = "string";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "string");
       }
 
-      current->initializer += text;
-      g_copyString = &current->initializer;
-      g_stringContext = VariableDec;
+      current->appendData(EntryKey::Initial_Value, text);
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Initial_Value;
+
+      s_stringContext = VariableDec;
+
       BEGIN( SingleQuoteString );
    }
 	YY_BREAK
@@ -3357,13 +3395,16 @@ YY_RULE_SETUP
       // string
       QString text  = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty()) {
-         current->type = "string";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "string");
       }
 
-      current->initializer += text;
-      g_copyString    = &current->initializer;
-      g_stringContext = VariableDec;
+      current->appendData(EntryKey::Initial_Value, text);
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Initial_Value;
+
+      s_stringContext = VariableDec;
       BEGIN( DoubleQuoteString );
    }
 	YY_BREAK
@@ -3373,14 +3414,19 @@ YY_RULE_SETUP
       // start of a comment block
       QString text  = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->type.isEmpty()) {
-         current->type = "string";
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "string");
       }
 
-      current->initializer += text;
-      g_doubleQuote   = true;
-      g_copyString    = &current->initializer;
-      g_stringContext = VariableDec;
+      current->appendData(EntryKey::Initial_Value, text);
+
+      s_doubleQuote = true;
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Initial_Value;
+
+      s_stringContext = VariableDec;
+
       BEGIN(TripleString);
    }
 	YY_BREAK
@@ -3389,15 +3435,20 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text  = QString::fromUtf8(parse_py_YYtext);
-      
-      if (current->type.isEmpty()) {
-         current->type = "string";
+
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+         current->setData(EntryKey::Member_Type, "string");
       }
 
-      current->initializer += text;
-      g_doubleQuote   = false;
-      g_copyString    = &current->initializer;
-      g_stringContext = VariableDec;
+      current->appendData(EntryKey::Initial_Value, text);
+
+      s_doubleQuote = false;
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Initial_Value;
+
+      s_stringContext = VariableDec;
+
       BEGIN(TripleString);
    }
 	YY_BREAK
@@ -3405,16 +3456,16 @@ case 114:
 YY_RULE_SETUP
 {
       // tuple, only when direct after =
-      QString text = QString::fromUtf8(parse_py_YYtext);
 
-      if (current->mtype != Property && g_start_init) {
-         current->type = "tuple";
+      if (current->mtype != Property && s_start_init) {
+         current->setData(EntryKey::Member_Type, "tuple");
       }
 
-      current->initializer += text[0];
-      g_atomStart = '(';
-      g_atomEnd   = ')';
-      g_atomCount = 1;
+      current->appendData(EntryKey::Initial_Value, "(");
+
+      s_atomStart = '(';
+      s_atomEnd   = ')';
+      s_atomCount = 1;
       BEGIN( VariableAtom );
    }
 	YY_BREAK
@@ -3422,15 +3473,15 @@ case 115:
 YY_RULE_SETUP
 {
       // list
-      QString text = QString::fromUtf8(parse_py_YYtext);
-      if (g_start_init) {
-         current->type = "list";
+      if (s_start_init) {
+         current->setData(EntryKey::Member_Type, "list");
       }
 
-      current->initializer += text[0];
-      g_atomStart = '[';
-      g_atomEnd   = ']';
-      g_atomCount = 1;
+      current->appendData(EntryKey::Initial_Value, "[");
+
+      s_atomStart = '[';
+      s_atomEnd   = ']';
+      s_atomCount = 1;
       BEGIN( VariableAtom );
    }
 	YY_BREAK
@@ -3438,13 +3489,16 @@ case 116:
 YY_RULE_SETUP
 {
       // dictionary
-      QString text = QString::fromUtf8(parse_py_YYtext);
-      if (g_start_init) current->type = "dictionary";
 
-      current->initializer += text[0];
-      g_atomStart = '{';
-      g_atomEnd   = '}';
-      g_atomCount = 1;
+      if (s_start_init) {
+         current->setData(EntryKey::Member_Type, "dictionary");
+      }
+
+      current->appendData(EntryKey::Initial_Value, "{");
+
+      s_atomStart = '{';
+      s_atomEnd   = '}';
+      s_atomCount = 1;
       BEGIN( VariableAtom );
    }
 	YY_BREAK
@@ -3461,27 +3515,27 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_py_YYtext);
 
       // do something based on the type of the IDENTIFIER
-      if (current->type.isEmpty()) {
-       
+      if (current->getData(EntryKey::Member_Type).isEmpty())  {
+
          for (auto child : current_root->children() )  {
 
             if (child->name == text) {
-               current->type = child->type;
+               current->setData(EntryKey::Member_Type,  child->getData(EntryKey::Member_Type));
                break;
             }
          }
       }
 
-      g_start_init = false;
-      current->initializer += text;
+      s_start_init = false;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 119:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_start_init = false;
-      current->initializer += text[0];
+      s_start_init = false;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 120:
@@ -3497,10 +3551,10 @@ case 121:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value,  text[0]);
 
-      if (g_atomStart == text[0]) {
-         g_atomCount++;
+      if (s_atomStart == text[0]) {
+         s_atomCount++;
       }
    }
 	YY_BREAK
@@ -3508,15 +3562,15 @@ case 122:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value,  text[0]);
 
-      if (g_atomEnd == text[0]) {
-         g_atomCount--;
+      if (s_atomEnd == text[0]) {
+         s_atomCount--;
       }
 
-      if (g_atomCount == 0) {
-      g_start_init = false;
-      BEGIN(VariableDec);
+      if (s_atomCount == 0) {
+         s_start_init = false;
+         BEGIN(VariableDec);
       }
    }
 	YY_BREAK
@@ -3525,8 +3579,8 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
-      g_specialBlock = false;
-      current->m_program += text;
+      s_specialBlock = false;
+      current->appendData(EntryKey::Source_Text, text);
       initTriDoubleQuoteBlock();
       BEGIN(TripleComment);
    }
@@ -3536,27 +3590,35 @@ YY_RULE_SETUP
 {
       // start of a comment block
       QString text = QString::fromUtf8(parse_py_YYtext);
-                        g_specialBlock = false;
-         current->m_program += text;
-         initTriSingleQuoteBlock();
-         BEGIN(TripleComment);
+
+      s_specialBlock = false;
+      current->appendData(EntryKey::Source_Text, text);
+      initTriSingleQuoteBlock();
+
+      BEGIN(TripleComment);
    }
 	YY_BREAK
 case 125:
 YY_RULE_SETUP
 {
-      g_stringContext = YY_START;
-      current->initializer += "'";
-      g_copyString = &current->initializer;
+      s_stringContext = YY_START;
+      current->appendData(EntryKey::Initial_Value, "'");
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Initial_Value;
+
       BEGIN( SingleQuoteString );
    }
 	YY_BREAK
 case 126:
 YY_RULE_SETUP
 {
-      g_stringContext=YY_START;
-      current->initializer += "\"";
-      g_copyString = &current->initializer;
+      s_stringContext = YY_START;
+      current->appendData(EntryKey::Initial_Value, "\"");
+
+      s_docsEntry = current;
+      s_docsEnum  = EntryKey::Initial_Value;
+
       BEGIN( DoubleQuoteString );
    }
 	YY_BREAK
@@ -3564,14 +3626,14 @@ case 127:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->initializer += text;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 128:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 129:
@@ -3579,7 +3641,8 @@ case 129:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      current->initializer += text[0];
+      current->appendData(EntryKey::Initial_Value, text);
+
       incLineNr();
    }
 	YY_BREAK
@@ -3614,9 +3677,9 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      if (g_doubleQuote == (text[0] == '"'))  {
+      if (s_doubleQuote == (text[0] == '"'))  {
 
-         if (g_specialBlock) {
+         if (s_specialBlock) {
             // expecting a docstring
             QString actualDoc = docBlock;
 
@@ -3629,7 +3692,7 @@ YY_RULE_SETUP
 
             handleCommentBlock(actualDoc, false);
 
-         } else if (g_packageCommentAllowed) {
+         } else if (s_packageCommentAllowed) {
             // expecting module docs
             QString actualDoc = docBlock;
 
@@ -3640,14 +3703,13 @@ YY_RULE_SETUP
                actualDoc.append("\\endverbatim ");
             }
 
-            actualDoc.prepend("\\namespace " + g_moduleScope + "\\_linebr ");
+            actualDoc.prepend("\\namespace " + s_moduleScope + "\\_linebr ");
             handleCommentBlock(actualDoc, false);
          }
 
          if ((docBlockContext == ClassBody) || docBlockContext == FunctionBody) {
-
-            current->m_program += docBlock;
-            current->m_program += text;
+            current->appendData(EntryKey::Source_Text, docBlock);
+            current->appendData(EntryKey::Source_Text, text);
          }
 
          BEGIN(docBlockContext);
@@ -3657,7 +3719,7 @@ YY_RULE_SETUP
 
       }
 
-      g_packageCommentAllowed = false;
+      s_packageCommentAllowed = false;
    }
 	YY_BREAK
 case 134:
@@ -3667,17 +3729,17 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_py_YYtext);
       int indent   = computeIndent(text);
 
-      if (indent >= g_curIndent) {
-         // strip g_curIndent amount of whitespace
+      if (indent >= s_curIndent) {
+         // strip s_curIndent amount of whitespace
 
-         for (int i= 0; i<indent - g_curIndent; i++) {
+         for (int i= 0; i<indent - s_curIndent; i++) {
             docBlock+=' ';
          }
 
-         DBG_CTX((stderr,"stripping indent %d\n",g_curIndent));
+         DBG_CTX((stderr,"stripping indent %d\n",s_curIndent));
 
       } else {
-         DBG_CTX((stderr,"not stripping: %d<%d\n",indent,g_curIndent));
+         DBG_CTX((stderr,"not stripping: %d<%d\n",indent,s_curIndent));
          docBlock += text;
 
       }
@@ -3768,7 +3830,7 @@ YY_RULE_SETUP
 {
       // line continuation
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
       incLineNr();
    }
 	YY_BREAK
@@ -3777,7 +3839,7 @@ YY_RULE_SETUP
 {
       // espaced char
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 146:
@@ -3785,7 +3847,7 @@ YY_RULE_SETUP
 {
       // tripple double quotes
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 147:
@@ -3793,8 +3855,8 @@ YY_RULE_SETUP
 {
       // end of the string
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(parse_py_YYtext);
-      BEGIN(g_stringContext);
+      addToOutput(parse_py_YYtext);
+      BEGIN(s_stringContext);
    }
 	YY_BREAK
 case 148:
@@ -3802,7 +3864,7 @@ YY_RULE_SETUP
 {
       // normal chars
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 149:
@@ -3810,7 +3872,7 @@ YY_RULE_SETUP
 {
       // normal char
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
    }
 	YY_BREAK
 
@@ -3820,7 +3882,7 @@ YY_RULE_SETUP
 {
       // line continuation
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
       incLineNr();
    }
 	YY_BREAK
@@ -3829,7 +3891,7 @@ YY_RULE_SETUP
 {
       // escaped char
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
                                }
 	YY_BREAK
 case 152:
@@ -3837,7 +3899,7 @@ YY_RULE_SETUP
 {
       // tripple single quotes
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 153:
@@ -3845,8 +3907,8 @@ YY_RULE_SETUP
 {
       // end of the string
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
-      BEGIN(g_stringContext);
+      addToOutput(text);
+      BEGIN(s_stringContext);
    }
 	YY_BREAK
 case 154:
@@ -3854,7 +3916,7 @@ YY_RULE_SETUP
 {
       // normal chars
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
    }
 	YY_BREAK
 case 155:
@@ -3862,7 +3924,7 @@ YY_RULE_SETUP
 {
       // normal char
       QString text = QString::fromUtf8(parse_py_YYtext);
-      addToString(text);
+      addToOutput(text);
    }
 	YY_BREAK
 
@@ -3871,10 +3933,12 @@ case 157:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      *g_copyString += text;
+      addToOutput(text);
 
-      if (g_doubleQuote == (text[0]=='"'))  {
-         BEGIN(g_stringContext);
+      bool xx = (text[0] == '"');
+
+      if (s_doubleQuote == xx)  {
+         BEGIN(s_stringContext);
       }
    }
 	YY_BREAK
@@ -3884,7 +3948,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       lineCount();
-      *g_copyString += text;
+      addToOutput(text);
    }
 	YY_BREAK
 case 159:
@@ -3893,14 +3957,14 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
       incLineNr();
-      *g_copyString += text[0];
+      addToOutput(text);
    }
 	YY_BREAK
 case 160:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_py_YYtext);
-      *g_copyString += text[0];
+      addToOutput(text);
    }
 	YY_BREAK
 
@@ -4921,10 +4985,10 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
    for (auto ce : tmpChildren) {
 
-      if (! ce->m_program.isEmpty()) {
+      if (! ce->getData(EntryKey::Source_Text).isEmpty()) {
          // init scanner state
 
-         s_inputString   = ce->m_program;
+         s_inputString   = ce->getData(EntryKey::Source_Text);
          s_inputPosition = 0;
 
          parse_py_YYrestart(parse_py_YYin );
@@ -4938,7 +5002,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
             BEGIN( SearchMemVars );
          }
 
-         yyFileName = ce->fileName;
+         yyFileName = ce->getData(EntryKey::File_Name);
          yyLineNr   = ce->bodyLine ;
 
          current = QMakeShared<Entry>();
@@ -4947,10 +5011,10 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          groupEnterCompound(yyFileName, yyLineNr, ce->name);
 
          parse_py_YYlex() ;
-         g_lexInit = true;
+         s_lexInit = true;
 
          current = QSharedPointer<Entry>();
-         ce->m_program.resize(0);
+         ce->setData(EntryKey::Source_Text, "");
 
          groupLeaveCompound(yyFileName, yyLineNr, ce->name);
 
@@ -4972,7 +5036,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    virt            = Normal;
 
    current_root    = rt;
-   g_specialBlock  = false;
+   s_specialBlock  = false;
 
    s_inputFile.setFileName(fileName);
 
@@ -4984,24 +5048,25 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       msg("Parsing %s\n", csPrintable(yyFileName));
 
       QFileInfo fi(fileName);
-      g_moduleScope = findPackageScope(fileName);
+      s_moduleScope = findPackageScope(fileName);
 
       QString baseName = fi.baseName();
 
       if (baseName != "__init__") { // package initializer file is not a package itself
-         if (!g_moduleScope.isEmpty()) {
-            g_moduleScope += "::";
+         if (!s_moduleScope.isEmpty()) {
+            s_moduleScope += "::";
          }
-         g_moduleScope += baseName;
+         s_moduleScope += baseName;
       }
 
       current            = QMakeShared<Entry>();
       initEntry();
 
-      current->name      = g_moduleScope;
+      current->name      = s_moduleScope;
       current->section   = Entry::NAMESPACE_SEC;
-      current->type      = "namespace";
-      current->fileName  = yyFileName;
+      current->setData(EntryKey::Member_Type, "namespace");
+
+      current->setData(EntryKey::File_Name,   yyFileName);
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
 
@@ -5011,7 +5076,6 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       initParser();
 
       current = QMakeShared<Entry>();
-
       groupEnterFile(yyFileName, yyLineNr);
 
       current->reset();
@@ -5020,11 +5084,11 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       BEGIN( Search );
       parse_py_YYlex();
-      g_lexInit = true;
+      s_lexInit = true;
 
       groupLeaveFile(yyFileName, yyLineNr);
 
-      current_root->m_program.resize(0);
+      current_root->setData(EntryKey::Source_Text, "");
 
       current = QSharedPointer<Entry>();
       parseCompounds(current_root);
@@ -5040,8 +5104,8 @@ static void parsePrototype(const QString &text)
       return;
    }
 
-   g_specialBlock = false;
-   g_packageCommentAllowed = false;
+   s_specialBlock = false;
+   s_packageCommentAllowed = false;
 
    QString orgInputString;
    int orgInputPosition;
@@ -5062,10 +5126,10 @@ static void parsePrototype(const QString &text)
    BEGIN( FunctionDec );
 
    parse_py_YYlex();
-   g_lexInit = true;
+   s_lexInit = true;
 
    current->name = current->name.trimmed();
-   if (current->section == Entry::MEMBERDOC_SEC && current->args.isEmpty()) {
+   if (current->section == Entry::MEMBERDOC_SEC && current->getData(EntryKey::Member_Args).isEmpty()) {
       current->section = Entry::VARIABLEDOC_SEC;
    }
 
@@ -5081,7 +5145,7 @@ static void parsePrototype(const QString &text)
 
 void pyFreeParser()
 {
-   if (g_lexInit) {
+   if (s_lexInit) {
       parse_py_YYlex_destroy();
    }
 }

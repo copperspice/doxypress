@@ -56702,8 +56702,8 @@ struct SymbolModifiers {
    bool pass;
    bool contiguous;
 
-   bool volat;       /* volatile is a reserverd name */
-   bool value;       /* volatile is a reserverd name */
+   bool volat;       /* volatile is a reserved name */
+   bool value;       /* volatile is a reserved name */
    QString passVar;
 
    SymbolModifiers() : type(), returnName(), protection(NONE_P), direction(NONE_D),
@@ -57305,10 +57305,10 @@ YY_RULE_SETUP
       /* string starts */
       QString text = QString::fromUtf8(parse_fortran_YYtext);
 
-      if (YY_START == StrIgnore) { 
-         yyColNr -= parse_fortran_YYleng; 
-         REJECT; 
-      } 
+      if (YY_START == StrIgnore) {
+         yyColNr -= parse_fortran_YYleng;
+         REJECT;
+      }
 
       // ignore in simple comments
       yy_push_state(YY_START);
@@ -57376,8 +57376,9 @@ YY_RULE_SETUP
 
       DBG_CTX((stderr,"using dir %s\n", parse_fortran_YYtext));
       current->name     = text;
-      current->fileName = yyFileName;
       current->section  = Entry::USINGDIR_SEC;
+
+      current->setData(EntryKey::File_Name, yyFileName);
 
       current_root->addSubEntry(current, current_root);
 
@@ -57412,8 +57413,9 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_fortran_YYtext);
 
       current->name     = useModuleName + "::" + text;
-      current->fileName = yyFileName;
       current->section  = Entry::USINGDECL_SEC;
+
+      current->setData(EntryKey::File_Name, yyFileName);
 
       current_root->addSubEntry(current, current_root);
 
@@ -57730,7 +57732,8 @@ YY_RULE_SETUP
       current->m_traits.setTrait(Entry::Virtue::Struct);
 
       current->name      = text;
-      current->fileName  = yyFileName;
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->bodyLine  = yyLineNr;
       current->startLine = yyLineNr;
 
@@ -57753,20 +57756,20 @@ case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
 {
-      current->type = QString::fromUtf8(parse_fortran_YYtext).simplified();
+      current->setData(EntryKey::Member_Type, QString::fromUtf8(parse_fortran_YYtext).simplified());
    }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 {
       current->m_traits.setTrait(Entry::Virtue::Final);
-      current->type = QString::fromUtf8(parse_fortran_YYtext).simplified();
+      current->setData(EntryKey::Member_Type, QString::fromUtf8(parse_fortran_YYtext).simplified());
    }
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 {
-      current->type = QString::fromUtf8(parse_fortran_YYtext).simplified();
+      current->setData(EntryKey::Member_Type, QString::fromUtf8(parse_fortran_YYtext).simplified());
    }
 	YY_BREAK
 case 52:
@@ -57795,9 +57798,11 @@ YY_RULE_SETUP
 
       current->section    = Entry::FUNCTION_SEC;
       current->name       = text;
-      current->fileName   = yyFileName;
+
+      current->setData(EntryKey::File_Name, yyFileName);
       current->bodyLine   = yyLineNr;
       current->startLine  = yyLineNr;
+
       addCurrentEntry(1);
    }
 	YY_BREAK
@@ -57806,7 +57811,7 @@ YY_RULE_SETUP
 {
       /* Specific bindings come after the ID. */
       QString text = QString::fromUtf8(parse_fortran_YYtext);
-      last_entry->args = text;
+      last_entry->setData(EntryKey::Member_Args, text);
    }
 	YY_BREAK
 case 57:
@@ -58035,11 +58040,10 @@ YY_RULE_SETUP
 case 74:
 YY_RULE_SETUP
 {
-      /* parse variable declaration */
-      QString text = QString::fromUtf8(parse_fortran_YYtext);
-      text = text.toLower();
+      // parse variable declaration
+      QString text = QString::fromUtf8(parse_fortran_YYtext).toLower();
 
-      /* remember attributes for the symbol */
+      // remember attributes for the symbol
       modifiers[current_root][text] |= currentModifiers;
 
       argName = text;
@@ -58050,10 +58054,13 @@ YY_RULE_SETUP
          v_type = V_VARIABLE;
          current->section   = Entry::VARIABLE_SEC;
          current->name      = argName;
-         current->type      = argType;
-         current->fileName  = yyFileName;
-         current->bodyLine  = yyLineNr; // used for source reference
+
+         current->setData(EntryKey::Member_Type, argType);
+
+         current->setData(EntryKey::File_Name, yyFileName);
+         current->bodyLine  = yyLineNr;                         // used for source reference
          current->startLine = yyLineNr;
+
          addCurrentEntry(1);
 
       } else if (! argType.isEmpty()) {
@@ -58082,67 +58089,76 @@ YY_RULE_SETUP
             if (rootName == argName.toLower() ||
                   (modifiers[current_root->parent()][rootName].returnName.toLower() == argName.toLower())) {
 
-            int strt = current_root->type.indexOf("function");
+               QString tmpType = current_root->getData(EntryKey::Member_Type);
 
-            QString lft;
-            QString rght;
+               QString tmpLeft;
+               QString tmpRight;
 
-            if (strt != -1) {
-               v_type = V_RESULT;
-               lft    = "";
-               rght   = "";
+               int pos = tmpType.indexOf("function");
 
-               if (strt != 0) {
-                  lft = current_root->type.left(strt).trimmed();
-               }
+               if (pos != -1) {
+                  v_type   = V_RESULT;
+                  tmpLeft  = "";
+                  tmpRight = "";
 
-               if ((current_root->type.length() - strt - strlen("function"))!= 0) {
-                  rght = current_root->type.right(current_root->type.length() - strt - strlen("function")).trimmed();
-               }
+                  if (pos != 0) {
+                     tmpLeft = tmpType.left(pos).trimmed();
+                  }
 
-               current_root->type = lft;
+                  if ((tmpType.length() - pos - strlen("function")) != 0) {
+                     tmpRight = tmpType.right(tmpType.length() - pos - strlen("function")).trimmed();
+                  }
 
-               if (rght.length() > 0)  {
-                  if (current_root->type.length() > 0) current_root->type += " ";
-                     current_root->type += rght;
+                  tmpType = tmpLeft;
+
+                  if (tmpRight.length() > 0)  {
+
+                     if (tmpType.length() > 0) {
+                        tmpType += " ";
+                     }
+
+                     tmpType += tmpRight;
                   }
 
                   if (argType.trimmed().length() > 0) {
 
-                     if (current_root->type.length() > 0) current_root->type += " "; {
-                        current_root->type += argType.trimmed();
+                     if (tmpType.length() > 0)  {
+                        tmpType += " ";
                      }
+
+                     tmpType += argType.trimmed();
                   }
 
-                  if (current_root->type.length() > 0) {
-                     current_root->type += " ";
+                  if (tmpType.length() > 0) {
+                     tmpType += " ";
                   }
 
-                  current_root->type += "function";
+                  tmpType += "function";
 
                   if (! docBlock.isNull()) {
                      subrHandleCommentBlockResult(docBlock,true);
                   }
 
                } else  {
-                  current_root->type += " " + argType.trimmed();
+                  tmpType += " " + argType.trimmed();
 
                }
 
-               current_root->type = current_root->type.trimmed();
-               modifiers[current_root][text].type = current_root->type;
+               tmpType = tmpType.trimmed();
+               current_root->setData(EntryKey::Member_Type, tmpType);
+
+               modifiers[current_root][text].type = tmpType;
 
             } else {
                modifiers[current_root][text].type = argType;
+
             }
          }
 
-         // any accumulated doc for argument should be emptied,
-         // because it is handled other way and this doc can be
-         // unexpectedly passed to the next member.
-         current->doc.resize(0);
-         current->brief.resize(0);
-
+         // accumulated docs for argument should be cleared  because it is handled aother way
+         // and these docsc can be unexpectedly passed to the next member
+         current->setData(EntryKey::Brief_Docs, "");
+         current->setData(EntryKey::Main_Docs,  "");
       }
    }
 	YY_BREAK
@@ -58268,7 +58284,7 @@ YY_RULE_SETUP
          yy_pop_state();                      // end initialization
 
          if (v_type == V_VARIABLE) {
-            last_entry->initializer = initializer;
+            last_entry->setData(EntryKey::Initial_Value, initializer);
          }
 
       } else {
@@ -58283,7 +58299,7 @@ YY_RULE_SETUP
       yy_pop_state();                         // end initialization
 
       if (v_type == V_VARIABLE)  {
-         last_entry->initializer= initializer;
+         last_entry->setData(EntryKey::Initial_Value, initializer);
       }
 
       yyColNr -= 1;
@@ -58312,7 +58328,8 @@ YY_RULE_SETUP
 
       // TYPE_SPEC is for old function style function result
       result = text.trimmed().toLower();
-      current->type = result;
+      current->setData(EntryKey::Member_Type, result);
+
       yy_push_state(SubprogPrefix);
    }
 	YY_BREAK
@@ -58377,14 +58394,16 @@ YY_RULE_SETUP
 case 96:
 YY_RULE_SETUP
 {
-      current->args = "(";
+      current->setData(EntryKey::Member_Args, "(");
    }
 	YY_BREAK
 case 97:
 YY_RULE_SETUP
 {
-      current->args += ")";
-      current->args = removeRedundantWhiteSpace(current->args);
+      QString tmpArgs = current->getData(EntryKey::Member_Args) + ")";
+      tmpArgs = removeRedundantWhiteSpace(tmpArgs);
+      current->setData(EntryKey::Member_Args, tmpArgs);
+
       addCurrentEntry(1);
       startScope(last_entry);
       BEGIN(SubprogBody);
@@ -58394,7 +58413,8 @@ case 98:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_fortran_YYtext);
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
+
       CommentInPrepass *c = locatePrepassComment(yyColNr - parse_fortran_YYleng, yyColNr);
 
       if (c != nullptr) {
@@ -58409,7 +58429,7 @@ YY_RULE_SETUP
 {
       // current->type not yet available
       QString text = QString::fromUtf8(parse_fortran_YYtext);
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
 
       Argument arg;
       arg.name  = text;
@@ -58588,14 +58608,15 @@ YY_RULE_SETUP
 case 112:
 YY_RULE_SETUP
 {
-      current->args += QString::fromUtf8(parse_fortran_YYtext);
+      QString text = QString::fromUtf8(parse_fortran_YYtext);
+      current->appendData(EntryKey::Member_Args, text);
    }
 	YY_BREAK
 case 113:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_fortran_YYtext);
-      current->args += text;
+      current->appendData(EntryKey::Member_Args, text);
 
       Argument args;
       args.name = text.toLower();
@@ -59744,7 +59765,7 @@ static void updateVariablePrepassComment(int from, int to) {
    CommentInPrepass *c = locatePrepassComment(from, to);
 
    if (c != nullptr && v_type == V_VARIABLE) {
-      last_entry->brief = c->str;
+      last_entry->setData(EntryKey::Brief_Docs, c->str);
 
    } else if (c != nullptr && v_type == V_PARAMETER) {
       Argument *parameter = getParameter(argName);
@@ -60162,15 +60183,16 @@ static void popBuffer()
 
 static void copyEntry(QSharedPointer<Entry> dest, QSharedPointer<Entry> src)
 {
-   dest->type        = src->type;
-   dest->fileName    = src->fileName;
+   dest->setData(EntryKey::File_Name,    src->getData(EntryKey::File_Name));
+   dest->setData(EntryKey::Member_Type,  src->getData(EntryKey::Member_Type));
+   dest->setData(EntryKey::Member_Args,  src->getData(EntryKey::Member_Args));
+   dest->setData(EntryKey::Brief_Docs,   src->getData(EntryKey::Brief_Docs));
+   dest->setData(EntryKey::Main_Docs,    src->getData(EntryKey::Main_Docs));
+
    dest->startLine   = src->startLine;
    dest->bodyLine    = src->bodyLine;
    dest->endBodyLine = src->endBodyLine;
-   dest->args        = src->args;
    dest->argList     = src->argList;
-   dest->doc         = src->doc;
-   dest->brief       = src->brief;
 }
 
 /** fill empty interface module procedures with info from
@@ -60553,24 +60575,24 @@ static QString applyModifiers(QString typeName, SymbolModifiers &mdfs)
    return typeName;
 }
 
-/*! Apply modifiers stored in \a mdfs to the \a arg argument. */
+// Apply modifiers stored in \a mdfs to the  arg argument
 static void applyModifiers(Argument *arg, SymbolModifiers &mdfs)
 {
-   QString tmp = arg->type;
-   arg->type   = applyModifiers(tmp, mdfs);
+   QString tmpType = arg->type;
+   arg->type   = applyModifiers(tmpType, mdfs);
 }
 
-/*! Apply modifiers stored in \a mdfs to the \a ent entry. */
-static void applyModifiers(QSharedPointer<Entry> ent, SymbolModifiers &mdfs)
+// Apply modifiers stored in mdfs to the tmpEntry entry
+static void applyModifiers(QSharedPointer<Entry> xEntry, SymbolModifiers &mdfs)
 {
-   QString tmp = ent->type;
-   ent->type = applyModifiers(tmp, mdfs);
+   QString tmpType = xEntry->getData(EntryKey::Member_Type);
+   xEntry->setData(EntryKey::Member_Type, applyModifiers(tmpType, mdfs));
 
    if (mdfs.protection == SymbolModifiers::PUBLIC) {
-      ent->protection = Public;
+      xEntry->protection = Public;
 
    } else if (mdfs.protection == SymbolModifiers::PRIVATE) {
-      ent->protection = Private;
+      xEntry->protection = Private;
 
    }
 }
@@ -60581,7 +60603,7 @@ static void applyModifiers(QSharedPointer<Entry> ent, SymbolModifiers &mdfs)
  */
 static void startScope(QSharedPointer<Entry> scope)
 {
-  current_root= scope;          /* start substructure */
+  current_root = scope;          // start substructure
 
   QMap<QString, SymbolModifiers> mdfMap;
   modifiers.insert(scope, mdfMap);
@@ -60593,7 +60615,7 @@ static void startScope(QSharedPointer<Entry> scope)
 static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
 {
    if (current_root->parent() || isGlobalRoot) {
-      current_root = current_root->parent(); /* end substructure */
+      current_root = current_root->parent();          // end substructure
 
    } else {
       fprintf(stderr, "Parse error in end <scopename>");
@@ -60618,8 +60640,8 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
       QString returnName = modifiers[current_root][scope->name.toLower()].returnName.toLower();
 
       if (modifiers[scope].contains(returnName)) {
-         scope->type = modifiers[scope][returnName].type;          // returning type works
-         applyModifiers(scope, modifiers[scope][returnName]);      // returning array works
+         scope->setData(EntryKey::Member_Type,  modifiers[scope][returnName].type);     // returning type works
+         applyModifiers(scope, modifiers[scope][returnName]);                           // returning array works
       }
    }
 
@@ -60779,22 +60801,23 @@ static void addModule(const QString &name, bool isModule)
 
    if (! name.isEmpty()) {
       current->name = name;
-   
+
    } else {
       QString fname = yyFileName;
-   
+
       int index = max(fname.lastIndexOf('/'), fname.lastIndexOf('\\'));
       fname = fname.right(fname.length() - index - 1);
       fname = fname.prepend("__").append("__");
       current->name = fname;
    }
-   
-   current->type       = "program";
-   current->fileName   = yyFileName;
+
+   current->setData(EntryKey::Member_Type,   "program");
+
+   current->setData(EntryKey::File_Name, yyFileName);
    current->bodyLine   = yyLineNr;       // used for source reference
    current->startLine  = yyLineNr;
    current->protection = Public;
-   
+
    addCurrentEntry(1);
    startScope(last_entry);
 }
@@ -60802,28 +60825,31 @@ static void addModule(const QString &name, bool isModule)
 static void addSubprogram(const QString &text)
 {
    DBG_CTX((stderr,"1=========> got subprog, type: %s\n", text));
+
    subrCurrent.prepend(current);
    current->section = Entry::FUNCTION_SEC;
 
    QString subtype = text;
-   subtype = subtype.toLower().trimmed();
+   subtype      = subtype.toLower().trimmed();
    functionLine = (subtype.indexOf("function") != -1);
 
-   current->type      += " " + subtype;
-   current->type      = current->type.trimmed();
-   current->fileName  = yyFileName;
-   current->bodyLine  = yyLineNr; // used for source reference start of body of routine
-   current->startLine = yyLineNr; // used for source reference start of definition
+   QString tmpType = current->getData(EntryKey::Member_Type);
 
-   current->args.resize(0);
+   tmpType += " " + subtype;
+   tmpType = tmpType.trimmed();
+
+   current->setData(EntryKey::Member_Type, tmpType);
+   current->setData(EntryKey::Member_Args, "");
+
+   current->setData(EntryKey::File_Name, yyFileName);
+   current->bodyLine  = yyLineNr;    // used for source reference start of body of routine
+   current->startLine = yyLineNr;    // used for source reference start of definition
+
    current->argList.clear();
    docBlock.resize(0);
 }
 
-/*! Adds interface to the root entry.
- * \note Code was brought to this procedure from the parser,
- * because there was/is idea to use it in several parts of the parser.
- */
+// Adds interface to the root entry
 static void addInterface(const QString &name, InterfaceType type)
 {
    if (YY_START == Start) {
@@ -60839,17 +60865,18 @@ static void addInterface(const QString &name, InterfaceType type)
 
    switch (type) {
       case IF_ABSTRACT:
-         current->type = "abstract";
+         current->setData(EntryKey::Member_Type, "abstract");
          break;
 
       case IF_GENERIC:
-         current->type = "generic";
+         current->setData(EntryKey::Member_Type, "generic");
          break;
 
       case IF_SPECIFIC:
       case IF_NONE:
       default:
-         current->type = "";
+         current->setData(EntryKey::Member_Type, "");
+
    }
 
    /* if type is part of a module, mod name is necessary for output */
@@ -60858,9 +60885,10 @@ static void addInterface(const QString &name, InterfaceType type)
       current->name = current_root->name + "::" + current->name;
    }
 
-   current->fileName  = yyFileName;
+   current->setData(EntryKey::File_Name, yyFileName);
    current->bodyLine  = yyLineNr;
    current->startLine = yyLineNr;
+
    addCurrentEntry(1);
 }
 
@@ -60882,14 +60910,14 @@ static Argument *getParameter(const QString &name)
 
 static void startCommentBlock(bool brief)
 {
-  if (brief) {
-    current->briefFile = yyFileName;
-    current->briefLine = yyLineNr;
+   if (brief) {
+      current->setData(EntryKey::Brief_File, yyFileName);
+      current->briefLine = yyLineNr;
 
-  } else {
-    current->docFile = yyFileName;
-    current->docLine = yyLineNr;
-  }
+   } else {
+      current->setData(EntryKey::MainDocs_File, yyFileName);
+      current->docLine = yyLineNr;
+   }
 }
 
 static void handleCommentBlock(const QString &doc, bool brief)
@@ -60945,7 +60973,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
    current = subrCurrent.first();
 
    // still in the specification section so no inbodyDocs yet, but parameter documentation
-   current->inbodyDocs = "";
+   current->setData(EntryKey::Inbody_Docs,   "");
 
    // strip \\param or @param, so we can do some extra checking, we will add it later on again.
    if (loc_doc.indexOf("\\param") == 0) {
@@ -60974,7 +61002,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
          // strip direction
          loc_doc = loc_doc.right(loc_doc.length() - directionParam[SymbolModifiers::IN].length());
 
-         // in case of emty documentation or (now) just name, consider it as no documemntation
+         // in case of empty documentation or (now) just name, consider it as no documemntation
          if (loc_doc.isEmpty() || (loc_doc.toLower() == argName.toLower())) {
            // reset current back to the part inside the routine
            current = tmp_entry;
@@ -60987,7 +61015,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
       } else {
          // something different specified, give warning and leave error
 
-         warn(yyFileName, yyLineNr, "Routine: " + current->name + current->args +
+         warn(yyFileName, yyLineNr, "Routine: " + current->name + current->getData(EntryKey::Member_Args) +
                   " inconsistency between intent attribute and documentation for parameter: " + argName);
 
          handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
@@ -61011,7 +61039,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
                   argName + " " + loc_doc, brief);
 
       } else {
-         warn(yyFileName, yyLineNr, "Routine: " + current->name + current->args +
+         warn(yyFileName, yyLineNr, "Routine: " + current->name + current->getData(EntryKey::Member_Args) +
                   " inconsistency between intent attribute and documentation for parameter: " + argName);
 
          handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
@@ -61035,7 +61063,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
                   argName + " " + loc_doc, brief);
 
       } else {
-         warn(yyFileName,yyLineNr, "Routine: " + current->name + current->args +
+         warn(yyFileName,yyLineNr, "Routine: " + current->name + current->getData(EntryKey::Member_Args) +
                   " inconsistency between intent attribute and documentation for parameter: " + argName);
 
          handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
@@ -61069,7 +61097,7 @@ static void subrHandleCommentBlockResult(const QString &doc, bool brief)
    current = subrCurrent.first();
 
    // Still in the specification section so no inbodyDocs yet, but parameter documentation
-   current->inbodyDocs = "";
+   current->setData(EntryKey::Inbody_Docs,   "");
 
    // strip \\returns or @returns, will be added later
 
@@ -61158,7 +61186,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       groupLeaveFile(yyFileName, yyLineNr);
       endScope(current_root, true);          // global root
 
-      rt->m_program.resize(0);
+      rt->setData(EntryKey::Source_Text, "");
       current = QSharedPointer<Entry>();
 
       moduleProcedures.clear();

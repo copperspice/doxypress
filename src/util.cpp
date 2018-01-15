@@ -6541,25 +6541,6 @@ QString stripPath(const QString &s)
    return result;
 }
 
-/** returns \c true iff string \a s contains word \a w */
-bool containsWord(const QString &s, const QString &word)
-{
-   static QRegExp wordExp("[a-z_A-Z\\x80-\\xFF]+");
-   int p = 0, i, l;
-
-   while ((i = wordExp.indexIn(s, p)) != -1) {
-      l = wordExp.matchedLength();
-
-      if (s.mid(i, l) == word) {
-         return true;
-      }
-
-      p = i + l;
-   }
-
-   return false;
-}
-
 bool findAndRemoveWord(QString &str, const QString &word)
 {
    static QRegExp wordExp("[a-z_A-Z\\x80-\\xFF]+");
@@ -6588,6 +6569,7 @@ bool findAndRemoveWord(QString &str, const QString &word)
       p = i + l;
 
    }
+
    return false;
 }
 
