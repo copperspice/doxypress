@@ -237,7 +237,7 @@
         "chm-file": "",
         "chm-index-encoding": "",
         "generate-chi": false,
-        "generate-chm": true,
+        "generate-chm": false,
         "hhc-location": "",
         "toc-expanded": false
     },

@@ -270,7 +270,7 @@
         "html-footer": "doxy_footer.html",
         "html-header": "",
         "html-index-num-entries": 100,
-        "html-output": "html_7",
+        "html-output": "html",
         "html-search": false,
         "html-stylesheets": [
             "doxy_custom.css"

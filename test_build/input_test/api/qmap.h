@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
 * Copyright (C) 2014 Digia Plc 
 * All rights reserved.
 *

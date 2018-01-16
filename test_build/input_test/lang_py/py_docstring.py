@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
 * All rights reserved.
 *
 * GNU Free Documentation License
@@ -25,12 +25,12 @@ class PyClass:
 
     More details (docString-3).
     """
-   
+
     def __init__(self):
         """The constructor documentation."""
         self._memVar = 0;
-   
+
     def PyMethod(self):
         """Documentation for a method."""
         pass
-     
+

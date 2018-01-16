@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
 * All rights reserved.
 *
 * GNU Free Documentation License
@@ -22,16 +22,16 @@ def func():
 #
 #  More details (doxy-3).
 class PyClass:
-   
+
     ## Constructor documentation.
     def __init__(self):
         self._memVar = 0;
-   
+
     ## Documentation for a method.
     #  @param self The object pointer.
     def PyMethod(self):
         pass
-     
+
     ## A class variable.
     classVar = 0;
 

@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
 * All rights reserved.
 *
 * GNU Free Documentation License
@@ -100,7 +100,7 @@ void func_e() {};
 
 
 /** @addtogroup group1
- *  
+ *
  *  More documentation for group A.
  *  @{
  */

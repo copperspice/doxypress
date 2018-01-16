@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2017 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
 * All rights reserved.
 *
 * GNU Free Documentation License
@@ -42,7 +42,7 @@ namespace eval tcl_ns {
     ## Documented common itcl var \c itcl_Var .
     common itcl_Var
     ## \protectedsection
-    
+
     variable itcl_var1;#< Documented itcl var \c itcl_var1 .
     variable itcl_var2;#< Documented itcl var \c itcl_var2 .
   }
