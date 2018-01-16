@@ -121,7 +121,7 @@ static void newEntry()
 
 static void newVariable()
 {
-   if (!current->name.isEmpty() && current->name.at(0) == '_') {
+   if (! current->m_entryName.isEmpty() && current->m_entryName.at(0) == '_') {
       // mark as private
       current->protection = Private;
    }
@@ -136,12 +136,11 @@ static void newVariable()
 
 static void newFunction()
 {
-   if (current->name.left(2) == "__" && current->name.right(2) == "__") {
-      // special method name
-      // refere to http://docs.python.org/ref/specialnames.html
+   if (current->m_entryName.left(2) == "__" && current->m_entryName.right(2) == "__") {
+      // special method name, refer to http://docs.python.org/ref/specialnames.html
       current->protection = Public;
 
-   } else if (current->name.at(0) == '_') {
+   } else if (current->m_entryName.at(0) == '_') {
       current->protection = Private;
 
    }
@@ -149,7 +148,8 @@ static void newFunction()
 
 static inline int computeIndent(const QString &str)
 {
-   static int tabSize = Config::getInt("tab-size");
+   static const int tabSize = Config::getInt("tab-size");
+
    int col = 0;
 
    for (auto c : str)  {
@@ -338,7 +338,7 @@ static void searchFoundDef()
    current->stat      = gstat;
    current->mtype     = (mtype = Method);
 
-   current->name.resize(0);
+   current->m_entryName.resize(0);
    current->setData(EntryKey::Member_Type, "");
    current->setData(EntryKey::Member_Args, "");
    current->argList.clear();
@@ -544,7 +544,7 @@ STARTDOCSYMS      "##"
 
       current->section   = Entry::VARIABLE_SEC;
       current->mtype     = Property;
-      current->name      = text.trimmed();
+      current->m_entryName      = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
@@ -565,7 +565,7 @@ STARTDOCSYMS      "##"
 
       s_indent = computeIndent(yytext);
       current->section   = Entry::VARIABLE_SEC;
-      current->name      = text.trimmed();
+      current->m_entryName      = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);;
       current->startLine = yyLineNr;
@@ -588,7 +588,7 @@ STARTDOCSYMS      "##"
       s_indent = computeIndent(text);
 
       current->section   = Entry::VARIABLE_SEC;
-      current->name      = text.trimmed();
+      current->m_entryName      = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
@@ -721,7 +721,7 @@ STARTDOCSYMS      "##"
       // import all
       QString item      = s_packageName;
 
-      current->name     = removeRedundantWhiteSpace(substitute(item,".","::"));
+      current->m_entryName     = removeRedundantWhiteSpace(substitute(item,".","::"));
       current->section  = Entry::USINGDIR_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
@@ -736,7 +736,7 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
       QString item = s_packageName+"." + text;
 
-      current->name = removeRedundantWhiteSpace(substitute(item,".","::"));
+      current->m_entryName = removeRedundantWhiteSpace(substitute(item,".","::"));
       current->section  = Entry::USINGDECL_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
@@ -749,7 +749,7 @@ STARTDOCSYMS      "##"
       QString text  = QString::fromUtf8(yytext);
       QString item  = s_packageName+"." + text;
 
-      current->name = removeRedundantWhiteSpace(substitute(item,".","::"));
+      current->m_entryName = removeRedundantWhiteSpace(substitute(item,".","::"));
       current->section  = Entry::USINGDECL_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
@@ -780,7 +780,7 @@ STARTDOCSYMS      "##"
    {IDENTIFIER}({B}"."{B}{IDENTIFIER})* {
       QString text  = QString::fromUtf8(yytext);
 
-      current->name = removeRedundantWhiteSpace(substitute(text,".","::"));
+      current->m_entryName = removeRedundantWhiteSpace(substitute(text,".","::"));
       current->section  = Entry::USINGDECL_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
@@ -808,9 +808,10 @@ STARTDOCSYMS      "##"
    "self."{IDENTIFIER}/{B}"=" {
          QString text = QString::fromUtf8(yytext);
 
-         DBG_CTX((stderr,"Found instance method variable %s in %s at %d\n", csPrintable(text.mid(5)), csPrintable(current_root->name), yyLineNr));
+         DBG_CTX((stderr,"Found instance method variable %s in %s at %d\n", csPrintable(text.mid(5)),
+                  csPrintable(current_root->m_entryName), yyLineNr));
 
-         current->name      = text.mid(5);
+         current->m_entryName      = text.mid(5);
          current->section   = Entry::VARIABLE_SEC;
 
          current->setData(EntryKey::File_Name,   yyFileName);
@@ -819,7 +820,7 @@ STARTDOCSYMS      "##"
 
          current->setData(EntryKey::Member_Type, "");
 
-         if (current->name.at(0) == '_') {
+         if (current->m_entryName.at(0) == '_') {
             // mark as private
             current->protection = Private;
          }
@@ -831,9 +832,9 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
 
       DBG_CTX(stderr, "Found class method variable %s in %s at%d\n",
-                  csPrintable(text.mid(4)), csPrintable(current_root->name), yyLineNr);
+                  csPrintable(text.mid(4)), csPrintable(current_root->m_entryName), yyLineNr);
 
-      current->name      = text.mid(4);
+      current->m_entryName      = text.mid(4);
       current->section   = Entry::VARIABLE_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
@@ -842,7 +843,7 @@ STARTDOCSYMS      "##"
 
       current->setData(EntryKey::Member_Type, "");
 
-      if (current->name.at(0)=='_') {
+      if (current->m_entryName.at(0)=='_') {
          // mark as private
          current->protection = Private;
       }
@@ -1062,8 +1063,8 @@ STARTDOCSYMS      "##"
          current->setData(EntryKey::Member_Type, "def");
       }
 
-      current->name = text;
-      current->name = current->name.trimmed();
+      current->m_entryName = text;
+      current->m_entryName = current->m_entryName.trimmed();
       newFunction();
    }
 
@@ -1302,14 +1303,14 @@ STARTDOCSYMS      "##"
       }
 
       current->section = Entry::CLASS_SEC;
-      current->name = text;
+      current->m_entryName = text;
 
       // prepend scope in case of nested classes
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->name.prepend(current_root->name+"::");
+         current->m_entryName.prepend(current_root->m_entryName + "::");
       }
 
-      current->name     = current->name.trimmed();
+      current->m_entryName     = current->m_entryName.trimmed();
       current->setData(EntryKey::File_Name,   yyFileName);
 
       docBlockContext   = YY_START;
@@ -1570,7 +1571,7 @@ STARTDOCSYMS      "##"
 
          for (auto child : current_root->children() )  {
 
-            if (child->name == text) {
+            if (child->m_entryName == text) {
                current->setData(EntryKey::Member_Type,  child->getData(EntryKey::Member_Type));
                break;
             }
@@ -1974,7 +1975,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          current = QMakeShared<Entry>();
          initEntry();
 
-         groupEnterCompound(yyFileName, yyLineNr, ce->name);
+         groupEnterCompound(yyFileName, yyLineNr, ce->m_entryName);
 
          yylex() ;
          s_lexInit = true;
@@ -1982,7 +1983,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          current = QSharedPointer<Entry>();
          ce->setData(EntryKey::Source_Text, "");
 
-         groupLeaveCompound(yyFileName, yyLineNr, ce->name);
+         groupLeaveCompound(yyFileName, yyLineNr, ce->m_entryName);
 
       }
       parseCompounds(ce);
@@ -2028,7 +2029,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       current            = QMakeShared<Entry>();
       initEntry();
 
-      current->name      = s_moduleScope;
+      current->m_entryName      = s_moduleScope;
       current->section   = Entry::NAMESPACE_SEC;
       current->setData(EntryKey::Member_Type, "namespace");
 
@@ -2094,7 +2095,7 @@ static void parsePrototype(const QString &text)
    yylex();
    s_lexInit = true;
 
-   current->name = current->name.trimmed();
+   current->m_entryName = current->m_entryName.trimmed();
    if (current->section == Entry::MEMBERDOC_SEC && current->getData(EntryKey::Member_Args).isEmpty()) {
       current->section = Entry::VARIABLEDOC_SEC;
    }

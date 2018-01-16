@@ -456,8 +456,8 @@ SCOPENAME ({ID}{BS}"::"{BS})*
       QString text = QString::fromUtf8(yytext);
 
       DBG_CTX((stderr,"using dir %s\n", yytext));
-      current->name     = text;
-      current->section  = Entry::USINGDIR_SEC;
+      current->m_entryName = text;
+      current->section     = Entry::USINGDIR_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
 
@@ -483,8 +483,8 @@ SCOPENAME ({ID}{BS}"::"{BS})*
 <UseOnly>{ID}                           {
       QString text = QString::fromUtf8(yytext);
 
-      current->name     = useModuleName + "::" + text;
-      current->section  = Entry::USINGDECL_SEC;
+      current->m_entryName = useModuleName + "::" + text;
+      current->section     = Entry::USINGDECL_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
 
@@ -566,8 +566,8 @@ SCOPENAME ({ID}{BS}"::"{BS})*
          startScope(last_entry);
       }
 
-      current->section = Entry::FUNCTION_SEC ;
-      current->name    = text;
+      current->section     = Entry::FUNCTION_SEC ;
+      current->m_entryName = text;
       moduleProcedures.append(current);
       addCurrentEntry(1);
    }
@@ -718,20 +718,18 @@ private                                 {
       // type name found
       QString text = QString::fromUtf8(yytext);
 
-      current->section   = Entry::CLASS_SEC;
+      current->section     = Entry::CLASS_SEC;
+      current->m_entryName = text;
 
       current->m_traits.setTrait(Entry::Virtue::Struct);
-
-      current->name      = text;
 
       current->setData(EntryKey::File_Name, yyFileName);
       current->bodyLine  = yyLineNr;
       current->startLine = yyLineNr;
 
       /* if type is part of a module, mod name is necessary for output */
-      if ((current_root) && (current_root->section == Entry::CLASS_SEC ||
-                  current_root->section == Entry::NAMESPACE_SEC)) {
-         current->name = current_root->name + "::" + current->name;
+      if ((current_root) && (current_root->section == Entry::CLASS_SEC || current_root->section == Entry::NAMESPACE_SEC)) {
+         current->m_entryName = current_root->m_entryName + "::" + current->m_entryName;
       }
 
       addCurrentEntry(1);
@@ -772,8 +770,8 @@ private                                 {
 
       modifiers[current_root][text.toLower()] |= currentModifiers;
 
-      current->section    = Entry::FUNCTION_SEC;
-      current->name       = text;
+      current->section     = Entry::FUNCTION_SEC;
+      current->m_entryName = text;
 
       current->setData(EntryKey::File_Name, yyFileName);
       current->bodyLine   = yyLineNr;
@@ -988,8 +986,8 @@ private                                 {
       if (! argType.isEmpty() && current_root->section != Entry::FUNCTION_SEC) {
          // new variable entry
          v_type = V_VARIABLE;
-         current->section   = Entry::VARIABLE_SEC;
-         current->name      = argName;
+         current->section     = Entry::VARIABLE_SEC;
+         current->m_entryName = argName;
 
          current->setData(EntryKey::Member_Type, argType);
 
@@ -1020,7 +1018,7 @@ private                                 {
             modifiers[current_root][text].type = argType;
 
          } else {
-            QString rootName = current_root->name.toLower();
+            QString rootName = current_root->m_entryName.toLower();
 
             if (rootName == argName.toLower() ||
                   (modifiers[current_root->parent()][rootName].returnName.toLower() == argName.toLower())) {
@@ -1274,11 +1272,11 @@ private                                 {
 <Subprog>{ID}                          {
       QString text = QString::fromUtf8(yytext);
 
-      current->name = text;
-      modifiers[current_root][current->name.toLower()].returnName = current->name.toLower();
+      current->m_entryName = text;
+      modifiers[current_root][current->m_entryName.toLower()].returnName = current->m_entryName.toLower();
 
       if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
-         current_root->name.replace(QRegExp("\\$interface\\$"), text);
+         current_root->m_entryName.replace(QRegExp("\\$interface\\$"), text);
       }
 
       BEGIN(Parameterlist);
@@ -1337,7 +1335,7 @@ private                                 {
          result = text;
          result = result.right(result.length() - result.indexOf("(") - 1);
          result = result.trimmed();
-         modifiers[current_root->parent()][current_root->name.toLower()].returnName = result;
+         modifiers[current_root->parent()][current_root->m_entryName.toLower()].returnName = result;
       }
 
    }
@@ -1457,7 +1455,7 @@ private                                 {
 <Prototype,PrototypeSubprog>{BS}{SCOPENAME}?{BS}{ID} {
       QString text = QString::fromUtf8(yytext);
 
-      current->name = text.toLower().trimmed();
+      current->m_entryName = text.toLower().trimmed();
       BEGIN(PrototypeArgs);
    }
 
@@ -1995,10 +1993,9 @@ static void copyEntry(QSharedPointer<Entry> dest, QSharedPointer<Entry> src)
     corresponding module subprogs
     @TODO: handle procedures in used modules
 */
-void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures,
-                  QSharedPointer<Entry> current_root)
+void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures, QSharedPointer<Entry> current_root)
 {
-  if (moduleProcedures.isEmpty()) {
+   if (moduleProcedures.isEmpty()) {
       return;
    }
 
@@ -2008,7 +2005,7 @@ void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures,
       // for procedures in current module
       for (auto ce2 : current_root->children() ) {
 
-         if (ce1->name == ce2->name) {
+         if (ce1->m_entryName == ce2->m_entryName) {
             copyEntry(ce1, ce2);
          }
       }
@@ -2193,11 +2190,11 @@ static Entry *findFunction(Entry* entry, QString name)
   EntryListIterator eli(*entry->children());
   Entry *ce;
 
-  for (;(ce=eli.current());++eli) {
+  for (; (ce=eli.current()); ++eli) {
     if (ce->section != Entry::FUNCTION_SEC)
       continue;
 
-    if (ce->name.toLower() == cname)
+    if (ce->m_entryName.toLower() == cname)
       return ce;
   }
 
@@ -2433,7 +2430,7 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
       }
 
       // find return type for function
-      QString returnName = modifiers[current_root][scope->name.toLower()].returnName.toLower();
+      QString returnName = modifiers[current_root][scope->m_entryName.toLower()].returnName.toLower();
 
       if (modifiers[scope].contains(returnName)) {
          scope->setData(EntryKey::Member_Type,  modifiers[scope][returnName].type);     // returning type works
@@ -2459,15 +2456,15 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
                continue;
             }
 
-            Argument *arg = findArgument(scope->parent(), ce->name, true);
+            Argument *arg = findArgument(scope->parent(), ce->m_entryName, true);
 
             if (arg != 0) {
                // set type of dummy procedure argument to interface
                arg->name = arg->type;
-               arg->type = scope->name;
+               arg->type = scope->m_entryName;
             }
 
-            if (ce->name.toLower() == scope->name.toLower()) {
+            if (ce->m_entryName.toLower() == scope->m_entryName.toLower()) {
                found = true;
             }
          }
@@ -2494,8 +2491,8 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
             continue;
          }
 
-         if (mdfsMap.contains(ce->name.toLower())) {
-            applyModifiers(ce, mdfsMap[ce->name.toLower()]);
+         if (mdfsMap.contains(ce->m_entryName.toLower())) {
+            applyModifiers(ce, mdfsMap[ce->m_entryName.toLower()]);
          }
       }
    }
@@ -2510,8 +2507,8 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
 //! Return full name of the entry. Sometimes we must combine several names recursively.
 static QString getFullName(Entry *e)
 {
-   QString name = e->name;
-   if (e->section == Entry::CLASS_SEC || !e->parent() || e->parent()->name.isEmpty()) {
+   QString name = e->m_entryName;
+   if (e->section == Entry::CLASS_SEC || !e->parent() || e->parent()->m_entryName.isEmpty()) {
       return name;
    }
 
@@ -2572,7 +2569,7 @@ static void initEntry()
 static void addCurrentEntry(int case_insens)
 {
    if (case_insens) {
-      current->name = current->name.toLower();
+      current->m_entryName = current->m_entryName.toLower();
    }
 
    current_root->addSubEntry(current, current_root);
@@ -2596,7 +2593,7 @@ static void addModule(const QString &name, bool isModule)
    }
 
    if (! name.isEmpty()) {
-      current->name = name;
+      current->m_entryName = name;
 
    } else {
       QString fname = yyFileName;
@@ -2604,7 +2601,7 @@ static void addModule(const QString &name, bool isModule)
       int index = max(fname.lastIndexOf('/'), fname.lastIndexOf('\\'));
       fname = fname.right(fname.length() - index - 1);
       fname = fname.prepend("__").append("__");
-      current->name = fname;
+      current->m_entryName = fname;
    }
 
    current->setData(EntryKey::Member_Type,   "program");
@@ -2654,7 +2651,7 @@ static void addInterface(const QString &name, InterfaceType type)
    }
 
    current->section = Entry::CLASS_SEC;
-   current->name    = name;
+   current->m_entryName = name;
 
    current->m_traits.clear();
    current->m_traits.setTrait(Entry::Virtue::Interface);
@@ -2676,9 +2673,8 @@ static void addInterface(const QString &name, InterfaceType type)
    }
 
    /* if type is part of a module, mod name is necessary for output */
-   if ((current_root) && (current_root->section ==  Entry::CLASS_SEC ||
-                  current_root->section ==  Entry::NAMESPACE_SEC))  {
-      current->name = current_root->name + "::" + current->name;
+   if ((current_root) && (current_root->section ==  Entry::CLASS_SEC || current_root->section ==  Entry::NAMESPACE_SEC))  {
+      current->m_entryName = current_root->m_entryName + "::" + current->m_entryName;
    }
 
    current->setData(EntryKey::File_Name, yyFileName);
@@ -2812,7 +2808,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
       } else {
          // something different specified, give warning and leave error
 
-         warn(yyFileName, yyLineNr, "Routine: " + current->name + current->getData(EntryKey::Member_Args) +
+         warn(yyFileName, yyLineNr, "Routine: " + current->m_entryName + current->getData(EntryKey::Member_Args) +
                   " inconsistency between intent attribute and documentation for parameter: " + argName);
 
          handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
@@ -2836,7 +2832,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
                   argName + " " + loc_doc, brief);
 
       } else {
-         warn(yyFileName, yyLineNr, "Routine: " + current->name + current->getData(EntryKey::Member_Args) +
+         warn(yyFileName, yyLineNr, "Routine: " + current->m_entryName + current->getData(EntryKey::Member_Args) +
                   " inconsistency between intent attribute and documentation for parameter: " + argName);
 
          handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
@@ -2860,7 +2856,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
                   argName + " " + loc_doc, brief);
 
       } else {
-         warn(yyFileName,yyLineNr, "Routine: " + current->name + current->getData(EntryKey::Member_Args) +
+         warn(yyFileName,yyLineNr, "Routine: " + current->m_entryName + current->getData(EntryKey::Member_Args) +
                   " inconsistency between intent attribute and documentation for parameter: " + argName);
 
          handleCommentBlock(QString("\n\n@param ") + directionParam[dir1] + " " +
@@ -2965,9 +2961,9 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       initParser();
       groupEnterFile(yyFileName, yyLineNr);
 
-      current          = QMakeShared<Entry>();
-      current->lang    = SrcLangExt_Fortran;
-      current->name    = yyFileName;
+      current              = QMakeShared<Entry>();
+      current->lang        = SrcLangExt_Fortran;
+      current->m_entryName = yyFileName;
       current->section = Entry::SOURCE_SEC;
 
       current_root->addSubEntry(current, current_root);

@@ -1539,7 +1539,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <EnumDocArg1>{SCOPEID}        {
       // handle argument
       QString text = QString::fromUtf8(yytext);
-      current->name = text;
+      current->m_entryName = text;
       BEGIN( Comment );
    }
 
@@ -1573,7 +1573,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <NameSpaceDocArg1>{SCOPENAME}       {
       // handle argument
       QString text  = QString::fromUtf8(yytext);
-      current->name = substitute(text,".", "::");
+      current->m_entryName = substitute(text,".", "::");
       BEGIN( Comment );
    }
 
@@ -1605,7 +1605,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <PackageDocArg1>{ID}("."{ID})*      {
       // handle argument
       QString text = QString::fromUtf8(yytext);
-      current->name = text;
+      current->m_entryName = text;
       BEGIN( Comment );
    }
 
@@ -1636,7 +1636,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <ClassDocArg1>{SCOPENAME}{TMPLSPEC}     {
       QString text = QString::fromUtf8(yytext);
-      current->name = substitute(removeRedundantWhiteSpace(text),".","::");
+      current->m_entryName = substitute(removeRedundantWhiteSpace(text),".","::");
       BEGIN( ClassDocArg2 );
    }
 
@@ -1644,9 +1644,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // first argument
       QString text = QString::fromUtf8(yytext);
 
-      current->name = substitute(text,".","::");
+      current->m_entryName = substitute(text,".","::");
       if (current->section == Entry::PROTOCOLDOC_SEC) {
-         current->name+="-p";
+         current->m_entryName += "-p";
       }
 
       // prepend outer scope name
@@ -1655,7 +1655,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <CategoryDocArg1>{SCOPENAME}{B}*"("[^\)]+")" {
       QString text  = QString::fromUtf8(yytext);
-      current->name = substitute(text,".","::");
+      current->m_entryName = substitute(text,".","::");
       BEGIN( ClassDocArg2 );
    }
 
@@ -1746,14 +1746,14 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <GroupDocArg1>{LABELID}(".html"?)   {
       // group name
       QString text  = QString::fromUtf8(yytext);
-      current->name = text;
+      current->m_entryName = text;
 
       // lastDefGroup.groupname = text;
       // lastDefGroup.pri = current->groupingPri();
       // the .html stuff is for Qt compatibility
 
-      if (current->name.endsWith(".html")) {
-         current->name = current->name.left(current->name.length()-5);
+      if (current->m_entryName.endsWith(".html")) {
+         current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 5);
       }
 
       current->setData(EntryKey::Member_Type, "");
@@ -1796,7 +1796,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       if ( current->groupDocType == Entry::GROUPDOC_NORMAL && current->getData(EntryKey::Member_Type).isEmpty()) {
             // defgroup requires second argument
-            warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", csPrintable(current->name) );
+            warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", csPrintable(current->m_entryName) );
       }
 
       if (text[0] == '\n') {
@@ -1813,7 +1813,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <PageDocArg1>{FILE}        {
       // first argument; page name
       QString text  = QString::fromUtf8(yytext);
-      current->name = stripQuotes(text);
+      current->m_entryName = stripQuotes(text);
       BEGIN( PageDocArg2 );
    }
 
@@ -1898,7 +1898,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <FileDocArg1>{FILE}        {
       // first argument; name
       QString text = QString::fromUtf8(yytext);
-      current->name = stripQuotes(text);
+      current->m_entryName = stripQuotes(text);
       BEGIN( Comment );
    }
 
@@ -2585,8 +2585,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <NameParam>.            {
       // ignore other stuff
       QString text = QString::fromUtf8(yytext);
-      s_memberGroupHeader += text[0];
-      current->name       += text[0];
+      s_memberGroupHeader  += text[0];
+      current->m_entryName += text[0];
    }
 
 
@@ -3022,7 +3022,7 @@ static bool handleMainpage(const QString &)
    bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
 
    if (! stop) {
-      current->name = "mainpage";
+      current->m_entryName = "mainpage";
    }
 
    BEGIN( PageDocArg2 );
@@ -3034,7 +3034,7 @@ static bool handleFile(const QString &)
    bool stop = makeStructuralIndicator(Entry::FILEDOC_SEC);
 
    if (! stop) {
-      current->name = yyFileName;
+      current->m_entryName = yyFileName;
    }
 
    BEGIN( FileDocArg1 );
@@ -3065,7 +3065,7 @@ static bool handleDir(const QString &)
    bool stop = makeStructuralIndicator(Entry::DIRDOC_SEC);
 
    if (! stop) {
-      current->name = yyFileName;
+      current->m_entryName = yyFileName;
    }
 
    BEGIN( FileDocArg1 );
@@ -3077,7 +3077,7 @@ static bool handleExample(const QString &)
    bool stop = makeStructuralIndicator(Entry::EXAMPLE_SEC);
 
    if (! stop) {
-      current->name = yyFileName;
+      current->m_entryName = yyFileName;
    }
 
    BEGIN( FileDocArg1 );
@@ -3739,7 +3739,7 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
 {
    if (e->section == Entry::GROUPDOC_SEC) {
       // auto group
-      s_autoGroupStack.push( QMakeShared<Grouping>(e->name, e->groupingPri()) );
+      s_autoGroupStack.push( QMakeShared<Grouping>(e->m_entryName, e->groupingPri()) );
 
    } else {
       // start of a member group

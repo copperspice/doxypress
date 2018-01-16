@@ -71,7 +71,7 @@ Entry::Entry(const Entry &e)
    artificial       = e.artificial;
 
    // string
-   name             = e.name;
+   m_entryName      = e.m_entryName;
 
    m_templateArgLists = e.m_templateArgLists;
 
@@ -149,7 +149,7 @@ void Entry::reset()
    artificial       = false;
 
    // string
-   name             = "";
+   m_entryName      = "";
 
    m_templateArgLists.clear();
    extends.clear();
@@ -210,7 +210,7 @@ void Entry::removeSubEntry(QSharedPointer<Entry> e)
 
 // **
 MiniEntry::MiniEntry(QSharedPointer<MiniEntry> parent, QSharedPointer<Entry> e)
-   : m_parent(parent), m_section(e->section), m_type(e->getData(EntryKey::Member_Type)), m_name(e->name),
+   : m_parent(parent), m_section(e->section), m_type(e->getData(EntryKey::Member_Type)), m_name(e->m_entryName),
      m_fileDef(0), m_lang(e->lang), m_offset(-1), m_noLoad(false)
 {
    m_tagInfoNav = e->m_tagInfoEntry;
@@ -241,8 +241,8 @@ bool MiniEntry::loadEntry(FileStorage &storage)
 
    m_info = unmarshalEntry(&storage);
 
-   m_info->name    = m_name;
-   m_info->section = m_section;
+   m_info->m_entryName  = m_name;
+   m_info->section      = m_section;
    m_info->setData(EntryKey::Member_Type, m_type);
 
    return true;

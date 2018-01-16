@@ -189,7 +189,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
 {
    marshalUInt(s, HEADER);
 
-   marshalQString(s, e->name);
+   marshalQString(s, e->m_entryName);
    marshalQString(s, e->getData(EntryKey::Member_Type));
 
    marshalInt(s,     e->section);
@@ -486,7 +486,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
    uint header = unmarshalUInt(s);
    assert(header == HEADER);
 
-   e->name             = unmarshalQString(s);
+   e->m_entryName      = unmarshalQString(s);
    e->setData(EntryKey::Member_Type,       unmarshalQString(s));
 
    e->section          = unmarshalInt(s);

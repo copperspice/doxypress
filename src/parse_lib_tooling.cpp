@@ -184,7 +184,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          if (node->isClass() ) {
 
             current->section     = Entry::CLASS_SEC;
-            current->name        = name;
+            current->m_entryName = name;
 
             current->setData(EntryKey::Member_Type,  "class");
             current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -218,7 +218,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                clang::TemplateSpecializationType::PrintTemplateArgumentList(tStream,
                   tmp->getTemplateArgs(), tmp->NumTemplateArgs, m_policy);
 
-               current->name += toQString(tStream.str());
+               current->m_entryName += toQString(tStream.str());
 
             } else {
                clang::ClassTemplateSpecializationDecl *specialNode =
@@ -231,7 +231,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   llvm::raw_string_ostream tStream(tString);
 
                   specialNode->getNameForDiagnostic(tStream, m_policy, true);
-                  current->name = toQString(tStream.str());
+                  current->m_entryName = toQString(tStream.str());
                }
             }
 
@@ -259,7 +259,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                parentEntry = s_entryMap.value(parentUSR);
 
                if (parentEntry != nullptr) {
-                  current->name.prepend(parentEntry->name + "::");
+                  current->m_entryName.prepend(parentEntry->m_entryName + "::");
                   current->protection = getAccessSpecifier(node);
 
                   parentEntry->addSubEntry(current, parentEntry);
@@ -269,7 +269,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          } else if (node->isStruct()) {
 
             current->section     = Entry::CLASS_SEC;
-            current->name        = name;
+            current->m_entryName = name;
 
             current->setData(EntryKey::Member_Type,  "struct");
             current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -293,7 +293,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                parentEntry = s_entryMap.value(parentUSR);
 
                if (parentEntry != nullptr) {
-                  current->name.prepend(parentEntry->name + "::");
+                  current->m_entryName.prepend(parentEntry->m_entryName + "::");
                   current->protection = getAccessSpecifier(node);
 
                   parentEntry->addSubEntry(current, parentEntry);
@@ -303,7 +303,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          } else if (node->isUnion()) {
 
             current->section     = Entry::CLASS_SEC;
-            current->name        = name;
+            current->m_entryName = name;
 
             current->setData(EntryKey::Member_Type,  " union");
             current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -323,7 +323,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                parentEntry = s_entryMap.value(parentUSR);
 
                if (parentEntry != nullptr) {
-                  current->name.prepend(parentEntry->name + "::");
+                  current->m_entryName.prepend(parentEntry->m_entryName + "::");
                   current->protection = getAccessSpecifier(node);
 
                   parentEntry->addSubEntry(current, parentEntry);
@@ -504,7 +504,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             // function
 
             current->section     = Entry::FUNCTION_SEC;
-            current->name        = name;
+            current->m_entryName = name;
 
             current->setData(EntryKey::Member_Type,  returnType);
             current->setData(EntryKey::Member_Args,  args);
@@ -581,7 +581,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
             current->section     = Entry::FUNCTION_SEC;
-            current->name        = name;
+            current->m_entryName = name;
 
             current->setData(EntryKey::Member_Type,  returnType);
             current->setData(EntryKey::Member_Args,  args);
@@ -637,7 +637,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString type = toQString(tQualType);
 
          current->section     = Entry::VARIABLE_SEC;
-         current->name        = name;
+         current->m_entryName = name;
 
          current->setData(EntryKey::Member_Type,  type);
          current->setData(EntryKey::Member_Args,  args);
@@ -678,13 +678,13 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString className;
 
          if (parentEntry) {
-            className = parentEntry->name;
+            className = parentEntry->m_entryName;
 
             if (! name.isEmpty()) {
                // do not test for an anonymous enum
 
                for (auto entry : parentEntry->children() ) {
-                  if (entry->name == className + name) {
+                  if (entry->m_entryName == className + name) {
                    return true;
                   }
                }
@@ -698,7 +698,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          s_entryMap.insert(currentUSR, current);
 
          current->section     = Entry::ENUM_SEC;
-         current->name        = className + "::" + name;
+         current->m_entryName = className + "::" + name;
 
          current->setData(EntryKey::Member_Type,  "enum");
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -742,7 +742,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
            // might need to reslove
 
          } else {
-            className = parentEntry->name;
+            className = parentEntry->m_entryName;
 
          }
 
@@ -750,7 +750,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             // not sure there is an anonymous enum constant
 
             for (auto entry : parentEntry->children() ) {
-               if (entry->name == className + name) {
+               if (entry->m_entryName == className + name) {
                    return true;
                }
             }
@@ -760,7 +760,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          s_entryMap.insert(currentUSR, current);
 
          current->section     = Entry::VARIABLE_SEC;
-         current->name        = name;
+         current->m_entryName = name;
 
          current->setData(EntryKey::Member_Type,  "@");
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -818,7 +818,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString name         = toQString(node->getNameAsString());
 
          current->section     = Entry::VARIABLE_SEC;
-         current->name        = name;
+         current->m_entryName = name;
 
          current->setData(EntryKey::Member_Type,  toQString(node->getType()));
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -937,7 +937,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          current->section     = Entry::FUNCTION_SEC;
-         current->name        = name;
+         current->m_entryName = name;
 
          current->setData(EntryKey::Member_Type,  returnType);
          current->setData(EntryKey::Member_Args,  args);
@@ -971,7 +971,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString name         = toQString(node->getName());
 
          current->section     = Entry::DEFINE_SEC;
-         current->name        = name;
+         current->m_entryName = name;
 
          current->lang        = SrcLangExt_Cpp;
 //       current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -1021,7 +1021,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString name         = getName(node);
 
          current->section     = Entry::NAMESPACE_SEC;
-         current->name        = name;
+         current->m_entryName = name;
 
          current->setData(EntryKey::Member_Type,  "namespace");
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
@@ -1036,11 +1036,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             if (extractAnonNS) {
                // use visible name
-               current->name = "anonymous_namespace{" + stripPath(current->getData(EntryKey::File_Name)) + "}";
+               current->m_entryName = "anonymous_namespace{" + stripPath(current->getData(EntryKey::File_Name)) + "}";
 
             } else {
                // use invisible name
-               current->name = QString("@%1").arg(anonNSCount);
+               current->m_entryName = QString("@%1").arg(anonNSCount);
             }
          }
 
@@ -1131,7 +1131,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString name = getName(node);
 
          current->section     = Entry::VARIABLE_SEC;
-         current->name        = name;
+         current->m_entryName = name;
 
          current->setData(EntryKey::Member_Type,  "typedef " + toQString(node->getUnderlyingType()));
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));

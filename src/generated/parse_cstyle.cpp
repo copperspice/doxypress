@@ -12654,12 +12654,12 @@ static void addType(QSharedPointer<Entry> ce)
 {
    QString tmpType = ce->getData(EntryKey::Member_Type);
 
-   if (! tmpType.isEmpty() && ! ce->name.isEmpty() && ! tmpType.endsWith('.')) {
+   if (! tmpType.isEmpty() && ! ce->m_entryName.isEmpty() && ! tmpType.endsWith('.')) {
       tmpType += ' ' ;
    }
 
-   tmpType += ce->name;
-   ce->name.clear();
+   tmpType += ce->m_entryName;
+   ce->m_entryName = "";
 
    if (! tmpType.isEmpty() && ! ce->getData(EntryKey::Member_Args).isEmpty() && ! tmpType.endsWith('.'))  {
       tmpType += ' ';
@@ -12741,7 +12741,7 @@ static void setContext(const QString &fileName)
 static void prependScope()
 {
    if (current_root->section & Entry::SCOPE_MASK) {
-      current->name.prepend(current_root->name + "::");
+      current->m_entryName.prepend(current_root->m_entryName + "::");
 
       if (! current_root->m_templateArgLists.isEmpty()) {
          current->m_templateArgLists = current_root->m_templateArgLists;
@@ -12923,7 +12923,21 @@ static void addKnRArgInfo(const QString &type, const QString &name, const QStrin
 static void addToArgs(const QString &str)
 {
    if (s_argEnum == ArgKey::Entry_Name) {
-      s_argEntry->name += str;
+      s_argEntry->m_entryName += str;
+
+   } else if (s_argEnum == ArgKey::Template_Args) {
+      s_template_args += str;
+
+   } else if (s_argEnum == ArgKey::Member_Args) {
+      s_argEntry->appendData(EntryKey::Member_Args, str);
+
+   }
+}
+
+static void addToArgs(QChar str)
+{
+   if (s_argEnum == ArgKey::Entry_Name) {
+      s_argEntry->m_entryName += str;
 
    } else if (s_argEnum == ArgKey::Template_Args) {
       s_template_args += str;
@@ -12950,20 +12964,6 @@ static void addToOutput(QSharedPointer<Entry> entry, EntryKey key, QChar c)
       addToArgs(c);
    } else {
       entry->appendData(key, c);
-   }
-}
-
-static void addToArgs(QChar str)
-{
-   if (s_argEnum == ArgKey::Entry_Name) {
-      s_argEntry->name += str;
-
-   } else if (s_argEnum == ArgKey::Template_Args) {
-      s_template_args += str;
-
-   } else if (s_argEnum == ArgKey::Member_Args) {
-      s_argEntry->appendData(EntryKey::Member_Args, str);
-
    }
 }
 
@@ -13602,7 +13602,7 @@ case 15:
 YY_RULE_SETUP
 {
       // PHP code start
-      lineCount() ;
+      lineCount();
       BEGIN( FindMembers );
    }
 	YY_BREAK
@@ -13672,7 +13672,7 @@ YY_RULE_SETUP
       current->mtype      = mtype = MethodTypes::Property;
       current->protection = protection = Public;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13687,7 +13687,7 @@ YY_RULE_SETUP
       current->mtype      = mtype = MethodTypes::DCOP;
       current->protection = protection = Public;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13702,7 +13702,7 @@ YY_RULE_SETUP
       current->mtype      = mtype = MethodTypes::Signal;
       current->protection = protection = Public ;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13717,7 +13717,7 @@ YY_RULE_SETUP
       current->mtype      = mtype = MethodTypes::Slot;
       current->protection = protection = Public ;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13732,7 +13732,7 @@ YY_RULE_SETUP
       current->protection  = protection = Protected ;
       current->mtype       = mtype = MethodTypes::Slot;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13747,7 +13747,7 @@ YY_RULE_SETUP
       current->protection = protection = Private ;
       current->mtype      = mtype = MethodTypes::Slot;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13762,7 +13762,7 @@ YY_RULE_SETUP
       current->protection = protection = Public ;
       current->mtype      = mtype = MethodTypes::Method;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13779,7 +13779,7 @@ YY_RULE_SETUP
          current->protection = protection = Package ;
          current->mtype      = mtype = MethodTypes::Method;
 
-         current->name.resize(0);
+         current->m_entryName = "";
          current->setData(EntryKey::Member_Type, "");
          current->setData(EntryKey::Member_Args, "");
          current->argList.clear();
@@ -13798,7 +13798,7 @@ YY_RULE_SETUP
       current->protection = protection = Protected ;
       current->mtype      = mtype = MethodTypes::Method;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13813,7 +13813,7 @@ YY_RULE_SETUP
       current->protection = protection = Private ;
       current->mtype      = mtype = MethodTypes::Method;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13869,7 +13869,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       addType( current );
-      current->name = text;
+      current->m_entryName = text;
    }
 	YY_BREAK
 case 36:
@@ -13946,7 +13946,7 @@ YY_RULE_SETUP
       current->protection = protection = Private ;
       current->mtype      = mtype = MethodTypes::Method;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13961,7 +13961,7 @@ YY_RULE_SETUP
       current->protection = protection = Protected ;
       current->mtype      = mtype = MethodTypes::Method;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -13976,7 +13976,7 @@ YY_RULE_SETUP
       current->protection = protection = Public ;
       current->mtype      = mtype = MethodTypes::Method;
 
-      current->name.resize(0);
+      current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -14011,7 +14011,7 @@ YY_RULE_SETUP
          current->stat  = (text[0]=='+');
          current->mtype = mtype = MethodTypes::Method;
 
-         current->name.resize(0);
+         current->m_entryName = "";
          current->setData(EntryKey::Member_Type, "");
          current->setData(EntryKey::Member_Args, "");
          current->argList.clear();
@@ -14037,7 +14037,7 @@ YY_RULE_SETUP
          current->setData(EntryKey::Member_Type, "id");
       }
 
-      current->name = text;
+      current->m_entryName = text;
       if (insideCpp || insideObjC) {
          current->setData(EntryKey::Clang_Id, ClangParser::instance()->lookup(yyLineNr, text));
       }
@@ -14047,7 +14047,7 @@ case 50:
 YY_RULE_SETUP
 {
       // start of parameter list
-      current->name += ':';
+      current->m_entryName += ':';
 
       Argument temp;
       current->argList.append(temp);
@@ -14078,10 +14078,10 @@ YY_RULE_SETUP
       text = text.left(text.length() - 1);
 
       if (text.isEmpty()) {
-         current->name += " :";
+         current->m_entryName += " :";
 
       } else {
-         current->name += text + ":";
+         current->m_entryName += text + ":";
       }
 
       if (current->argList.last().type.isEmpty()) {
@@ -14111,7 +14111,7 @@ YY_RULE_SETUP
       lineCount();
 
       // do we want the comma as part of the name?
-      //current->name += ",";
+      //current->m_entryName += ",";
 
       Argument a;
       a.attrib = "[,]";
@@ -14121,7 +14121,7 @@ YY_RULE_SETUP
 	YY_BREAK
 /*
 <ObjCParams>":"            {
-      current->name += ':';
+      current->m_entryName += ':';
    }
    */
 case 56:
@@ -14351,9 +14351,9 @@ YY_RULE_SETUP
       QString text         = QString::fromUtf8(parse_cstyle_YYtext);
       isTypedef            = false;
 
-      current->name        = text;
-      current->name        = substitute(current->name,".","::");
-      current->name        = substitute(current->name,"\\","::");
+      current->m_entryName        = text;
+      current->m_entryName        = substitute(current->m_entryName,".","::");
+      current->m_entryName        = substitute(current->m_entryName,"\\","::");
 
       current->section     = Entry::NAMESPACE_SEC;
       current->setData(EntryKey::Member_Type, "namespace");
@@ -14571,7 +14571,7 @@ YY_RULE_SETUP
       } else {
          QString text = QString::fromUtf8(parse_cstyle_YYtext);
          addType(current);
-         current->name = text.trimmed();
+         current->m_entryName = text.trimmed();
       }
    }
 	YY_BREAK
@@ -14597,7 +14597,7 @@ YY_RULE_SETUP
       } else {
          QString text = QString::fromUtf8(parse_cstyle_YYtext);
          addType(current);
-         current->name = text.trimmed();
+         current->m_entryName = text.trimmed();
       }
    }
 	YY_BREAK
@@ -14624,7 +14624,7 @@ YY_RULE_SETUP
       } else {
          QString text = QString::fromUtf8(parse_cstyle_YYtext);
          addType(current);
-         current->name = text.trimmed();
+         current->m_entryName = text.trimmed();
       }
    }
 	YY_BREAK
@@ -14663,8 +14663,8 @@ YY_RULE_SETUP
          // TODO is addType right? just copy/pasted
 
          QString text = QString::fromUtf8(parse_cstyle_YYtext);
-         addType( current ) ;
-         current->name = text.trimmed();
+         addType( current );
+         current->m_entryName = text.trimmed();
       }
    }
 	YY_BREAK
@@ -14700,8 +14700,8 @@ YY_RULE_SETUP
          // TODO is addType right? just copy/pasted
 
          QString text = QString::fromUtf8(parse_cstyle_YYtext);
-         addType( current ) ;
-         current->name = text.trimmed();
+         addType( current );
+         current->m_entryName = text.trimmed();
       }
    }
 	YY_BREAK
@@ -14739,8 +14739,8 @@ YY_RULE_SETUP
          BEGIN( CompoundName );
 
       } else {
-         addType( current ) ;
-         current->name = text.trimmed();
+         addType( current );
+         current->m_entryName = text.trimmed();
       }
    }
 	YY_BREAK
@@ -14760,7 +14760,7 @@ YY_RULE_SETUP
       addType(current);
       current->appendData(EntryKey::Member_Type, " implementation");
 
-      current->setData(EntryKey::File_Name, yyFileName);;
+      current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
       current->bodyLine  = yyLineNr;
 
@@ -14926,13 +14926,13 @@ YY_RULE_SETUP
       current->startColumn = yyColNr;
       current->bodyLine    = yyLineNr;
 
-      lineCount() ;
+      lineCount();
 
       if (text.endsWith('{')) {
          unput('{');
       }
 
-      BEGIN( CompoundName ) ;
+      BEGIN( CompoundName );
    }
 	YY_BREAK
 case 109:
@@ -14960,7 +14960,7 @@ YY_RULE_SETUP
       if (text.endsWith('{')) {
         unput('{');
       }
-      BEGIN( CompoundName ) ;
+      BEGIN( CompoundName );
     }
 	YY_BREAK
 case 111:
@@ -14989,7 +14989,7 @@ YY_RULE_SETUP
          unput('{');
       }
 
-      BEGIN( CompoundName ) ;
+      BEGIN( CompoundName );
    }
 	YY_BREAK
 case 113:
@@ -15017,8 +15017,8 @@ YY_RULE_SETUP
 
       } else  {
          addType(current);
-         current->name = text;
-         current->name = current->name.trimmed();
+         current->m_entryName = text;
+         current->m_entryName = current->m_entryName.trimmed();
          lineCount();
       }
    }
@@ -15070,7 +15070,7 @@ YY_RULE_SETUP
          unput('{');
       }
 
-      BEGIN( CompoundName ) ;
+      BEGIN( CompoundName );
    }
 	YY_BREAK
 case 116:
@@ -15101,7 +15101,7 @@ YY_RULE_SETUP
          unput('{');
       }
 
-      BEGIN( CompoundName ) ;
+      BEGIN( CompoundName );
    }
 	YY_BREAK
 case 118:
@@ -15132,7 +15132,7 @@ YY_RULE_SETUP
          unput('{');
       }
 
-      BEGIN( CompoundName ) ;
+      BEGIN( CompoundName );
    }
 	YY_BREAK
 case 120:
@@ -15262,7 +15262,7 @@ YY_RULE_SETUP
 {
       // A::operator()<int>(int arg)
       lineCount();
-      current->name += "()";
+      current->m_entryName += "()";
       BEGIN( FindMembers );
    }
 	YY_BREAK
@@ -15275,8 +15275,8 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       lineCount();
-      current->name += text ;
-      current->name = current->name.simplified();
+      current->m_entryName += text ;
+      current->m_entryName = current->m_entryName.simplified();
       BEGIN( FindMembers ) ;
    }
 	YY_BREAK
@@ -15294,7 +15294,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       lineCount();
-      current->name += text[0];
+      current->m_entryName += text[0];
    }
 	YY_BREAK
 case 130:
@@ -15306,7 +15306,7 @@ YY_RULE_SETUP
 case 131:
 YY_RULE_SETUP
 {
-      current->name = current->name.simplified();
+      current->m_entryName = current->m_entryName.simplified();
       unput(*parse_cstyle_YYtext);
       BEGIN( FindMembers ) ;
    }
@@ -15383,7 +15383,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       lineCount();
-      current->name = removeRedundantWhiteSpace(substitute(text,"\\","::"));
+      current->m_entryName = removeRedundantWhiteSpace(substitute(text,"\\","::"));
       current->setData(EntryKey::File_Name, yyFileName);
 
       // add a using declaraton
@@ -15438,7 +15438,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       lineCount();
-      current->name = removeRedundantWhiteSpace(substitute(text.left(text.length()-1),".","::"));
+      current->m_entryName = removeRedundantWhiteSpace(substitute(text.left(text.length()-1),".","::"));
       current->setData(EntryKey::File_Name, yyFileName);
       current->section  = Entry::USINGDIR_SEC;
 
@@ -15456,7 +15456,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       lineCount();
-      current->name = removeRedundantWhiteSpace(substitute(text,".","::"));
+      current->m_entryName = removeRedundantWhiteSpace(substitute(text,".","::"));
       current->setData(EntryKey::File_Name, yyFileName);
 
       if (insideD) {
@@ -15499,7 +15499,7 @@ YY_RULE_SETUP
 
       lineCount();
 
-      current->name      = text;
+      current->m_entryName      = text;
       current->section   = Entry::USINGDECL_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
@@ -15513,7 +15513,7 @@ YY_RULE_SETUP
          // in C# a using declaration and directive have the same syntax, so we
          // also add it as a using directive here
 
-         current->name        = text;
+         current->m_entryName        = text;
 
          current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
@@ -15542,9 +15542,9 @@ YY_RULE_SETUP
       tmpType = "typedef " + previous->getData(EntryKey::Member_Args);
       tmpType =  tmpType.simplified();
 
-      previous->section  = Entry::VARIABLE_SEC;
-      previous->name     = previous->name.trimmed();
-      previous->bodyLine = yyLineNr;
+      previous->section     = Entry::VARIABLE_SEC;
+      previous->m_entryName = previous->m_entryName.trimmed();
+      previous->bodyLine    = yyLineNr;
 
       previous->setData(EntryKey::Member_Type, tmpType);
       previous->setData(EntryKey::Member_Args, "");
@@ -15626,7 +15626,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->name    = removeRedundantWhiteSpace(text);
+      current->m_entryName    = removeRedundantWhiteSpace(text);
       current->section = Entry::USINGDIR_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
@@ -15650,7 +15650,7 @@ YY_RULE_SETUP
       // guided template decl
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       addType( current );
-      current->name= text.left(text.length() - 2);
+      current->m_entryName= text.left(text.length() - 2);
    }
 	YY_BREAK
 case 157:
@@ -15668,10 +15668,10 @@ YY_RULE_SETUP
       lineCount();
 
       addType( current );
-      current->name = text;
-      current->name = current->name.trimmed();
+      current->m_entryName = text;
+      current->m_entryName = current->m_entryName.trimmed();
 
-      if (nameIsOperator(current->name)) {
+      if (nameIsOperator(current->m_entryName)) {
          BEGIN( Operator );
       } else {
          BEGIN( EndTemplate );
@@ -15689,9 +15689,9 @@ YY_RULE_SETUP
       sharpCount = 0;
       roundCount = 0;
       lineCount();
-      current->name += text.trimmed();
+      current->m_entryName += text.trimmed();
 
-      if (nameIsOperator(current->name)) {
+      if (nameIsOperator(current->m_entryName)) {
          BEGIN( Operator );
       } else {
          BEGIN( EndTemplate );
@@ -15713,7 +15713,7 @@ case 160:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 161:
@@ -15723,7 +15723,7 @@ YY_RULE_SETUP
       if (roundCount == 0) {
          sharpCount++;
       }
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 162:
@@ -15735,14 +15735,14 @@ YY_RULE_SETUP
          unput(' ');
          unput('>');
       } else {
-         current->name += text;
+         current->m_entryName += text;
       }
    }
 	YY_BREAK
 case 163:
 YY_RULE_SETUP
 {
-      current->name += '>';
+      current->m_entryName += '>';
       if (roundCount == 0 && --sharpCount <= 0) {
          BEGIN(FindMembers);
       }
@@ -15753,7 +15753,7 @@ case 164:
 YY_RULE_SETUP
 {
       lineCount();
-      current->name += '>';
+      current->m_entryName += '>';
 
       if (roundCount == 0 && --sharpCount <= 0) {
 
@@ -15777,7 +15777,7 @@ YY_RULE_SETUP
 {
       // function pointer returning a template instance
       lineCount();
-      current->name += '>';
+      current->m_entryName += '>';
 
       if (roundCount == 0) {
          BEGIN(FindMembers);
@@ -15792,7 +15792,7 @@ YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
 YY_RULE_SETUP
 {
       lineCount();
-      current->name += '>';
+      current->m_entryName += '>';
 
       if (roundCount==0 && --sharpCount<=0) {
          BEGIN(FindMemberName);
@@ -15803,7 +15803,7 @@ case 167:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text[0];
+      current->m_entryName += text[0];
       roundCount++;
    }
 	YY_BREAK
@@ -15811,7 +15811,7 @@ case 168:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text[0];
+      current->m_entryName += text[0];
 
       if (roundCount>0) {
          roundCount--;
@@ -15822,7 +15822,7 @@ case 169:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text[0];
+      current->m_entryName += text[0];
    }
 	YY_BREAK
 case 170:
@@ -15987,7 +15987,7 @@ case 187:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
       BEGIN(QtPropAttr);
    }
 	YY_BREAK
@@ -16115,7 +16115,7 @@ YY_RULE_SETUP
      current->startLine   = yyLineNr;
      current->startColumn = yyColNr;
 
-     current->name        = current->name.trimmed();
+     current->m_entryName        = current->m_entryName.trimmed();
      current->section     = Entry::VARIABLE_SEC;
 
      // unknown data type, decipher later on
@@ -16148,7 +16148,7 @@ YY_RULE_SETUP
 {
       // cs property read name
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
    }
 	YY_BREAK
 case 208:
@@ -16187,7 +16187,7 @@ YY_RULE_SETUP
 {
       // cs property write name
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
    }
 	YY_BREAK
 case 213:
@@ -16226,7 +16226,7 @@ case 217:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
    }
 	YY_BREAK
 case 218:
@@ -16263,7 +16263,7 @@ case 222:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
    }
 	YY_BREAK
 case 223:
@@ -16367,7 +16367,7 @@ case 233:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
    }
 	YY_BREAK
 case 234:
@@ -16398,7 +16398,7 @@ YY_RULE_SETUP
         current->startLine   = yyLineNr;
         current->startColumn = yyColNr;
 
-        current->name        = current->name.trimmed();
+        current->m_entryName        = current->m_entryName.trimmed();
         current->section     = Entry::VARIABLE_SEC;
 
         current_root->addSubEntry(current, current_root);
@@ -16417,7 +16417,7 @@ case 239:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
       BEGIN(CsPropClose);
    }
 	YY_BREAK
@@ -16481,7 +16481,7 @@ case 248:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 249:
@@ -16496,7 +16496,7 @@ case 250:
 YY_RULE_SETUP
 {
       QString text   = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
 
       addType(current);
    }
@@ -16511,7 +16511,7 @@ YY_RULE_SETUP
       lineCount();
 
       addType(current);
-      current->name += text;
+      current->m_entryName += text;
 
       BEGIN(CsSignalSlotMethod);
    }
@@ -16521,7 +16521,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      if (! current->name.isEmpty()) {
+      if (! current->m_entryName.isEmpty()) {
 
          current->setData(EntryKey::Member_Args, text);
          current->bodyLine = yyLineNr;
@@ -16547,7 +16547,7 @@ YY_RULE_SETUP
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
-      current->name        = current->name.trimmed();
+      current->m_entryName        = current->m_entryName.trimmed();
       current->section     = Entry::FUNCTION_SEC;
 
       currentArgumentContext = FindMembers;
@@ -16597,7 +16597,7 @@ case 259:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 260:
@@ -16636,7 +16636,7 @@ case 264:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
       BEGIN(FindMembers);
    }
 	YY_BREAK
@@ -16696,7 +16696,7 @@ YY_RULE_SETUP
       } else if (insideCSharp && text == "this") {
          // C# indexer
          addType( current ) ;
-         current->name = "this";
+         current->m_entryName = "this";
          BEGIN(CSIndexer);
 
       } else if (insideCpp && text == "static_assert") {
@@ -16732,9 +16732,9 @@ YY_RULE_SETUP
          } else if (javaLike && text == "static") {
 
             if (YY_START == FindMembers)  {
-               current->name  = text;
+               current->m_entryName  = text;
             } else {
-               current->name += text;
+               current->m_entryName += text;
             }
 
             current->stat = true;
@@ -16742,16 +16742,16 @@ YY_RULE_SETUP
          } else {
 
             if (YY_START == FindMembers) {
-               current->name  = text;
+               current->m_entryName  = text;
             }  else  {
-               current->name += text;
+               current->m_entryName += text;
             }
 
-            if (current->name.left(7) == "static ") {
+            if (current->m_entryName.left(7) == "static ") {
                current->stat = true;
-               current->name = current->name.mid(7);
+               current->m_entryName = current->m_entryName.mid(7);
 
-            } else if (current->name.left(7) == "inline ")  {
+            } else if (current->m_entryName.left(7) == "inline ")  {
 
                if (current->getData(EntryKey::Member_Type).isEmpty()) {
                   current->setData(EntryKey::Member_Type, "inline");
@@ -16761,9 +16761,9 @@ YY_RULE_SETUP
 
                }
 
-               current->name = current->name.mid(7);
+               current->m_entryName = current->m_entryName.mid(7);
 
-            } else if (current->name.left(6) == "const ") {
+            } else if (current->m_entryName.left(6) == "const ") {
 
                if (current->getData(EntryKey::Member_Type).isEmpty()) {
                   current->setData(EntryKey::Member_Type, "const");
@@ -16772,7 +16772,7 @@ YY_RULE_SETUP
                   current->appendData(EntryKey::Member_Type, "const ");
                }
 
-               current->name = current->name.mid(6);
+               current->m_entryName = current->m_entryName.mid(6);
             }
          }
 
@@ -16842,7 +16842,7 @@ case 272:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += removeRedundantWhiteSpace(text);
+      current->m_entryName += removeRedundantWhiteSpace(text);
       BEGIN(FindMembers);
    }
 	YY_BREAK
@@ -16856,7 +16856,7 @@ case 274:
 YY_RULE_SETUP
 {
       if (insideJava || insideCSharp || insideD)  {
-         current->name+=".";
+         current->m_entryName+=".";
       }
    }
 	YY_BREAK
@@ -16864,7 +16864,7 @@ case 275:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 276:
@@ -17047,8 +17047,8 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->name = text;
-      current->name = current->name.left(current->name.length() - 1).trimmed();
+      current->m_entryName = text;
+      current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
 
       current->setData(EntryKey::Member_Args, "(");
 
@@ -17080,7 +17080,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       current->bodyLine = yyLineNr;
-      current->name     = text;
+      current->m_entryName     = text;
       BEGIN(DefineEnd);
    }
 	YY_BREAK
@@ -17097,7 +17097,7 @@ YY_RULE_SETUP
       current->setData(EntryKey::Member_Type,  "");
       current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
 
-      current->name        = current->name.trimmed();
+      current->m_entryName        = current->m_entryName.trimmed();
       current->section     = Entry::DEFINE_SEC;
 
       current_root->addSubEntry(current, current_root);
@@ -17120,7 +17120,7 @@ YY_RULE_SETUP
       init = init.left(init.length()-1);
       current->setData(EntryKey::Initial_Value, init);
 
-      current->name       = current->name.trimmed();
+      current->m_entryName       = current->m_entryName.trimmed();
       current->section    = Entry::VARIABLE_SEC;
 
       current_root->addSubEntry(current, current_root);
@@ -17161,10 +17161,10 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->name = text;
-      current->name = current->name.trimmed();
-      current->name = current->name.left(current->name.length() - 1).trimmed();
-      current->name = current->name.left(current->name.length() - 1);
+      current->m_entryName = text;
+      current->m_entryName = current->m_entryName.trimmed();
+      current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
+      current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1);
       current->bodyLine = yyLineNr;
 
       lastRoundContext  = DefinePHPEnd;
@@ -17184,7 +17184,7 @@ YY_RULE_SETUP
 
       if (insideCli) {
           addType( current );
-          current->name = text ;
+          current->m_entryName = text ;
       } else {
          REJECT;
       }
@@ -17194,7 +17194,7 @@ case 307:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
       addType( current );
    }
 	YY_BREAK
@@ -17457,7 +17457,7 @@ YY_RULE_SETUP
 
          current->setData(EntryKey::Member_Args, current->getData(EntryKey::Member_Args).simplified());
 
-         current->name        = current->name.trimmed();
+         current->m_entryName        = current->m_entryName.trimmed();
          current->section     = Entry::VARIABLE_SEC;
 
          current_root->addSubEntry(current, current_root);
@@ -17623,7 +17623,7 @@ case 330:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->appendData(EntryKey::Initial_Value, text);;
+      current->appendData(EntryKey::Initial_Value, text);
    }
 	YY_BREAK
 case 331:
@@ -17722,7 +17722,7 @@ YY_RULE_SETUP
 {
       // quote escape
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      addToOutput(s_skipVerbEntry, s_skipVerbEnum, text);;
+      addToOutput(s_skipVerbEntry, s_skipVerbEnum, text);
    }
 	YY_BREAK
 case 340:
@@ -18255,11 +18255,11 @@ YY_RULE_SETUP
 case 394:
 YY_RULE_SETUP
 {
-      if (current->getData(EntryKey::Member_Type).isEmpty() && current->name == "enum")  {
+      if (current->getData(EntryKey::Member_Type).isEmpty() && current->m_entryName == "enum")  {
          // see bug 69041, C++11 style anon enum: 'enum : unsigned int {...}'
 
-         current->section = Entry::ENUM_SEC;
-         current->name.resize(0);
+         current->section     = Entry::ENUM_SEC;
+         current->m_entryName = "";
          current->setData(EntryKey::Member_Args, "");
 
          BEGIN(EnumBaseType);
@@ -18270,7 +18270,7 @@ YY_RULE_SETUP
             // anonymous padding field, "int :7;"
 
             addType(current);
-            current->name = QString("__pad%1__").arg(padCount++);
+            current->m_entryName = QString("__pad%1__").arg(padCount++);
          }
 
          BEGIN(BitFields);
@@ -18321,11 +18321,11 @@ YY_RULE_SETUP
 
       bool needNewCurrent = false;
 
-      if (! current->name.isEmpty() && current->section != Entry::ENUM_SEC) {
+      if (! current->m_entryName.isEmpty() && current->section != Entry::ENUM_SEC) {
          tmpType = tmpType.simplified();
 
          current->setData(EntryKey::Member_Args, removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
-         current->name = current->name.trimmed();
+         current->m_entryName = current->m_entryName.trimmed();
 
          if (current->section == Entry::CLASS_SEC)  {
             // remove spec for "struct Bla bla;"
@@ -18354,7 +18354,7 @@ YY_RULE_SETUP
 
          current->stat = stat;         // the static attribute holds for all variables
 
-         current->name.resize(0);
+         current->m_entryName = "";
          current->setData(EntryKey::Member_Args,      "");
          current->setData(EntryKey::Brief_Docs,       "");
          current->setData(EntryKey::Main_Docs,        "");
@@ -18390,7 +18390,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      if (! insideCSharp && (current->name.isEmpty() ||  current->name == "typedef"))  {
+      if (! insideCSharp && (current->m_entryName.isEmpty() ||  current->m_entryName == "typedef"))  {
          // IDL function property
          squareCount=1;
          lastSquareContext = YY_START;
@@ -18408,7 +18408,7 @@ YY_RULE_SETUP
 
          BEGIN( IDLAttribute );
 
-      } else if (insideCSharp && current->name.isEmpty()) {
+      } else if (insideCSharp && current->m_entryName.isEmpty()) {
 
          squareCount = 1;
          lastSquareContext = YY_START;
@@ -18565,8 +18565,8 @@ case 416:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
-      current->name = current->name.left(current->name.length()-1).trimmed();
+      current->m_entryName = text;
+      current->m_entryName = current->m_entryName.left(current->m_entryName.length()-1).trimmed();
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
       BEGIN( IDLProp );
@@ -18592,7 +18592,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       if (odlProp) {
-         current->name = text;
+         current->m_entryName = text;
          idlProp = idlProp.trimmed();
          odlProp = false;
 
@@ -18661,7 +18661,7 @@ YY_RULE_SETUP
          current->setData(EntryKey::Member_Args, tmpArgs + ")");
       }
 
-      current->name       = current->name.trimmed();
+      current->m_entryName       = current->m_entryName.trimmed();
       current->section    = Entry::VARIABLE_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
@@ -18793,7 +18793,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       current->bodyLine = yyLineNr;
-      current->name     = text;
+      current->m_entryName     = text;
    }
 	YY_BREAK
 case 439:
@@ -18828,12 +18828,12 @@ YY_RULE_SETUP
       if (insideJava)   {
          // last enum field in Java class
 
-         if (! current->name.isEmpty()) {
+         if (! current->m_entryName.isEmpty()) {
             current->setData(EntryKey::File_Name, yyFileName);
             current->startLine   = yyLineNr;
             current->startColumn = yyColNr;
 
-            current->name        = current->name.trimmed();
+            current->m_entryName        = current->m_entryName.trimmed();
             current->section     = Entry::VARIABLE_SEC;
 
             current->setData(EntryKey::Member_Type,  "@");          // enum marker
@@ -18865,7 +18865,7 @@ YY_RULE_SETUP
 case 444:
 YY_RULE_SETUP
 {
-      if (! current->name.isEmpty()) {
+      if (! current->m_entryName.isEmpty()) {
 
          current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
@@ -18879,7 +18879,7 @@ YY_RULE_SETUP
          }
 
          current->section = Entry::VARIABLE_SEC;
-         current->name    = current->name.trimmed();
+         current->m_entryName    = current->m_entryName.trimmed();
 
          current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
 
@@ -19080,8 +19080,8 @@ YY_RULE_SETUP
 
       } else {
          current->endBodyLine = yyLineNr;
-         QString &cn = current->name;
-         QString rn  = current_root->name;
+         QString &cn = current->m_entryName;
+         QString rn  = current_root->m_entryName;
 
          if (! cn.isEmpty() && ! rn.isEmpty()) {
             prependScope();
@@ -19102,7 +19102,7 @@ YY_RULE_SETUP
             current->setData(EntryKey::Member_Args,  removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
 
             current->setData(EntryKey::Member_Type, current->getData(EntryKey::Member_Type).simplified());
-            current->name = current->name.trimmed();
+            current->m_entryName = current->m_entryName.trimmed();
 
             bool isInterface     = current->m_traits.hasTrait(Entry::Virtue::Interface);
             bool isOnlyCategory  = current->m_traits.onlyHasTrait(Entry::Virtue::Category);
@@ -19132,7 +19132,7 @@ YY_RULE_SETUP
                } else {
                   static QRegExp re("@[0-9]+$");
 
-                  if (! isTypedef && memspecEntry && re.indexIn(memspecEntry->name) == -1) {
+                  if (! isTypedef && memspecEntry && re.indexIn(memspecEntry->m_entryName) == -1) {
                      // not typedef or anonymous type
                      // enabled the next two lines for
 
@@ -19161,10 +19161,10 @@ YY_RULE_SETUP
       } else {
          isTypedef = true;
          current->endBodyLine = yyLineNr;
-         QString &cn = current->name;
-         QString rn = current_root->name;
+         QString &cn = current->m_entryName;
+         QString rn  = current_root->m_entryName;
 
-         if (! cn.isEmpty() && !rn.isEmpty()) {
+         if (! cn.isEmpty() && ! rn.isEmpty()) {
             prependScope();
          }
 
@@ -19195,7 +19195,7 @@ YY_RULE_SETUP
          current->appendData(EntryKey::Source_Text, ",");
       }
 
-      current->name = text;
+      current->m_entryName = text;
 
       prependScope();
       current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
@@ -19217,7 +19217,7 @@ case 462:
 YY_RULE_SETUP
 {
       /* typedef of anonymous type */
-      current->name = QString("@%1").arg(anonCount++);
+      current->m_entryName = QString("@%1").arg(anonCount++);
 
       bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
 
@@ -19272,16 +19272,16 @@ YY_RULE_SETUP
          bool isUnion  = firstTypedefEntry->m_traits.hasTrait(Entry::Virtue::Union);
 
          if (isStruct) {
-            msType.prepend("struct " + firstTypedefEntry->name);
+            msType.prepend("struct " + firstTypedefEntry->m_entryName);
 
          } else if (isUnion) {
-            msType.prepend("union " + firstTypedefEntry->name);
+            msType.prepend("union " + firstTypedefEntry->m_entryName);
 
          }  else if (firstTypedefEntry->section == Entry::ENUM_SEC) {
-            msType.prepend("enum " + firstTypedefEntry->name);
+            msType.prepend("enum " + firstTypedefEntry->m_entryName);
 
          } else {
-            msType.prepend(firstTypedefEntry->name);
+            msType.prepend(firstTypedefEntry->m_entryName);
          }
       }
    }
@@ -19291,7 +19291,7 @@ YY_RULE_SETUP
 {
       // function with struct return type
       addType(current);
-      current->name = msName;
+      current->m_entryName = msName;
       current->m_traits.clear();
 
       unput('(');
@@ -19303,7 +19303,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      if (msName.isEmpty() && ! current->name.isEmpty()) {
+      if (msName.isEmpty() && ! current->m_entryName.isEmpty()) {
          // see if the compound does not have a name or is inside another
          // anonymous compound. If so we insert a special `anonymous' variable.
          // Entry *p=current_root;
@@ -19313,12 +19313,12 @@ YY_RULE_SETUP
 
          while (p) {
             // only look for class scopes, not namespace scopes
-            if ((p->section & Entry::COMPOUND_MASK) && !p->name.isEmpty()) {
-               //printf("Trying scope `%s'\n",p->name.data());
-               int i = p->name.lastIndexOf("::");
+            if ((p->section & Entry::COMPOUND_MASK) && ! p->m_entryName.isEmpty()) {
+
+               int i  = p->m_entryName.lastIndexOf("::");
                int pi = (i==-1) ? 0 : i+2;
 
-               if (p->name.at(pi)=='@') {
+               if (p->m_entryName.at(pi) == '@') {
                   // anonymous compound inside -> insert dummy variable name
 
                   msName = QString("@%1").arg(anonCount++);
@@ -19331,7 +19331,7 @@ YY_RULE_SETUP
       }
 
       if (! msName.isEmpty() ) {
-         //  && msName != current->name )
+         //  && msName != current->m_entryName )
          // skip typedef T {} T;, removed due to bug608493
 
          static bool typedefHidesStruct =  Config::getBool("use-typedef-name");
@@ -19345,19 +19345,19 @@ YY_RULE_SETUP
          if (typedefHidesStruct &&  isTypedef && (isUnion || isStruct || current->section == Entry::ENUM_SEC) &&
                   msType.trimmed().isEmpty() && memspecEntry) {
 
-            memspecEntry->name = msName;
+            memspecEntry->m_entryName = msName;
 
          }  else  {
             // case 2: create a typedef field
 
             QSharedPointer<Entry> varEntry = QMakeShared<Entry>();
-            varEntry->lang       = language;
-            varEntry->protection = current->protection;
-            varEntry->mtype      = current->mtype;
-            varEntry->virt       = current->virt;
-            varEntry->stat       = current->stat;
-            varEntry->section    = Entry::VARIABLE_SEC;
-            varEntry->name       = msName.trimmed();
+            varEntry->lang        = language;
+            varEntry->protection  = current->protection;
+            varEntry->mtype       = current->mtype;
+            varEntry->virt        = current->virt;
+            varEntry->stat        = current->stat;
+            varEntry->section     = Entry::VARIABLE_SEC;
+            varEntry->m_entryName = msName.trimmed();
 
             varEntry->setData(EntryKey::Member_Type,  current->getData(EntryKey::Member_Type).simplified() + " ");
             varEntry->setData(EntryKey::Member_Args,  msArgs);
@@ -19372,12 +19372,12 @@ YY_RULE_SETUP
             if (typedefHidesStruct && isTypedef && (isUnion || isStruct) && memspecEntry) {
                // case 1: use S_t as type for pS_t in "typedef struct _S {} S_t, *pS_t;"
 
-               varEntry->appendData(EntryKey::Member_Type, memspecEntry->name + msType);
+               varEntry->appendData(EntryKey::Member_Type, memspecEntry->m_entryName + msType);
 
             } else {
                // case 2: use _S as type for for pS_t
 
-               varEntry->appendData(EntryKey::Member_Type,  current->name + msType);
+               varEntry->appendData(EntryKey::Member_Type,  current->m_entryName + msType);
             }
 
             varEntry->setData(EntryKey::File_Name, yyFileName);
@@ -19502,7 +19502,7 @@ case 471:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->appendData(EntryKey::Source_Text, text);;
+      current->appendData(EntryKey::Source_Text, text);
    }
 	YY_BREAK
 case 472:
@@ -19535,14 +19535,14 @@ case 474:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
-      if (nameIsOperator(current->name)) {
+      current->m_entryName = text;
+      if (nameIsOperator(current->m_entryName)) {
          BEGIN( FuncPtrOperator );
 
          } else {
 
-         if (current->name == "const" || current->name == "volatile") {
-            funcPtrType += current->name;
+         if (current->m_entryName == "const" || current->m_entryName == "volatile") {
+            funcPtrType += current->m_entryName;
          } else {
             BEGIN( EndFuncPtr );
          }
@@ -19563,8 +19563,8 @@ YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
-      current->name = current->name.simplified();
+      current->m_entryName += text;
+      current->m_entryName = current->m_entryName.simplified();
       lineCount();
    }
 	YY_BREAK
@@ -19574,7 +19574,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       lineCount();
-      current->name += text[0];
+      current->m_entryName += text[0];
    }
 	YY_BREAK
 case 478:
@@ -19588,7 +19588,7 @@ case 479:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text[0];
+      current->m_entryName += text[0];
    }
 	YY_BREAK
 case 480:
@@ -19788,7 +19788,7 @@ YY_RULE_SETUP
          current->bodyLine = yyLineNr;
          BEGIN( GetCallType );
 
-       } else if (! current->name.isEmpty())  {
+       } else if (! current->m_entryName.isEmpty())  {
          // normal function
          current->setData(EntryKey::Member_Args, text);
 
@@ -19821,7 +19821,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      if (! current->name.isEmpty()) {
+      if (! current->m_entryName.isEmpty()) {
          current->setData(EntryKey::Member_Args, text);
 
          current->bodyLine      = yyLineNr;
@@ -20790,7 +20790,7 @@ YY_RULE_SETUP
 case 578:
 YY_RULE_SETUP
 {
-      current->appendData(EntryKey::Member_Args, argListToString(current->argList));
+      current->setData(EntryKey::Member_Args, argListToString(current->argList));
       unput('{');
       BEGIN(FuncQual);
    }
@@ -20832,7 +20832,7 @@ case 583:
 YY_RULE_SETUP
 {
       // C++ style throw clause
-      current->appendData(EntryKey::Exception_Spec, "  throw (");
+      current->setData(EntryKey::Exception_Spec, "  throw (");
       roundCount = 0;
 
       lineCount();
@@ -20843,7 +20843,7 @@ case 584:
 /* rule 584 can match eol */
 YY_RULE_SETUP
 {
-      current->appendData(EntryKey::Exception_Spec, " raises (");
+      current->setData(EntryKey::Exception_Spec, " raises (");
 
       lineCount() ;
       roundCount = 0;
@@ -20855,7 +20855,7 @@ case 585:
 YY_RULE_SETUP
 {
       // Java style throw clause
-      current->appendData(EntryKey::Exception_Spec, " throws ");
+      current->setData(EntryKey::Exception_Spec, " throws ");
 
       lineCount();
       BEGIN( ExcpList );
@@ -20922,13 +20922,13 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->appendData(EntryKey::Member_Type, current->name);
-      current->name = current->getData(EntryKey::Member_Args);
-      current->appendData(EntryKey::Member_Args, text);
+      current->appendData(EntryKey::Member_Type, current->m_entryName);
+      current->m_entryName = current->getData(EntryKey::Member_Args);
+      current->setData(EntryKey::Member_Args, text);
 
-      roundCount    = 0;
+      roundCount = 0;
 
-      BEGIN( FuncRound ) ;
+      BEGIN( FuncRound );
    }
 	YY_BREAK
 case 594:
@@ -20944,7 +20944,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->name        = current->name.simplified();
+      current->m_entryName        = current->m_entryName.simplified();
       current->setData(EntryKey::Member_Type,  current->getData(EntryKey::Member_Type).simplified());
       current->setData(EntryKey::Member_Args,  removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
 
@@ -20955,7 +20955,7 @@ YY_RULE_SETUP
       static QRegExp re("\\([^)]*[*&][^)]*\\)");       // (...*...)
 
       if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
-         int tempArg = current->name.indexOf('<');
+         int tempArg = current->m_entryName.indexOf('<');
 
          QString tmpType = current->getData(EntryKey::Member_Type);
 
@@ -20971,10 +20971,10 @@ YY_RULE_SETUP
 
          QString tempName;
          if (tempArg == -1) {
-            tempName = current->name;
+            tempName = current->m_entryName;
 
          } else {
-            tempName = current->name.left(tempArg);
+            tempName = current->m_entryName.left(tempArg);
 
          }
 
@@ -21458,7 +21458,7 @@ YY_RULE_SETUP
 case 632:
 YY_RULE_SETUP
 {
-      current->name    = "";
+      current->m_entryName    = "";
       current->section = Entry::EMPTY_SEC;
 
       current->setData(EntryKey::Member_Type, "");
@@ -21479,11 +21479,11 @@ YY_RULE_SETUP
          // in UNO IDL a service or singleton may be defined
          // completely like this: "service Foo : XFoo;"
 
-         if (! current->name.isEmpty() && ! current_root->name.isEmpty()) {
+         if (! current->m_entryName.isEmpty() && ! current_root->m_entryName.isEmpty()) {
             prependScope();
          }
 
-         current->name = current->name.trimmed();
+         current->m_entryName = current->m_entryName.trimmed();
 
          // there can be only one base class here
          if (! baseName.isEmpty()) {
@@ -21496,7 +21496,7 @@ YY_RULE_SETUP
 
       } else {
          current->section = Entry::EMPTY_SEC;
-         current->name    = "";
+         current->m_entryName    = "";
 
          current->setData(EntryKey::Member_Type, "");
          current->setData(EntryKey::Member_Args, "");
@@ -21517,12 +21517,12 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       sharpCount    = 0;
-      current->name = text;
+      current->m_entryName = text;
 
       bool isProtocol = current->m_traits.hasTrait(Entry::Virtue::Protocol);
 
       if (isProtocol) {
-         current->name += "-p";
+         current->m_entryName += "-p";
       }
 
       lineCount();
@@ -21535,7 +21535,7 @@ YY_RULE_SETUP
       } else if (insideCSharp) {
          // C# generic class
 
-         // current->name += "-g";
+         // current->m_entryName += "-g";
          BEGIN( CSGeneric );
 
       } else  {
@@ -21555,7 +21555,7 @@ YY_RULE_SETUP
       s_template_args = "<";
       fullArgString   = s_template_args;
 
-      current->name   += "<";
+      current->m_entryName   += "<";
 
       s_argEntry  = current;
       s_argEnum   = ArgKey::Entry_Name;
@@ -21576,12 +21576,12 @@ case 637:
 YY_RULE_SETUP
 {
       QString text   = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
 
       lineCount();
 
       if (roundCount == 0 && --sharpCount <= 0) {
-         current->name = removeRedundantWhiteSpace(current->name);
+         current->m_entryName = removeRedundantWhiteSpace(current->m_entryName);
 
          bool isProtocol  = current->m_traits.hasTrait(Entry::Virtue::Protocol);
 
@@ -21600,7 +21600,7 @@ case 638:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
 
       if (roundCount == 0) {
          sharpCount++;
@@ -21611,7 +21611,7 @@ case 639:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 640:
@@ -21630,12 +21630,12 @@ YY_RULE_SETUP
 
       if (! current->m_templateArgLists.isEmpty()) {
           // found a forward template declaration, this has a purpose of its own
-          current->name = text;
-          current->name = current->name.left(current->name.length()-1).trimmed();
+          current->m_entryName = text;
+          current->m_entryName = current->m_entryName.left(current->m_entryName.length()-1).trimmed();
 
-         QString rn = current_root->name;
+         QString rn = current_root->m_entryName;
 
-         if (! current->name.isEmpty() && ! rn.isEmpty()) {
+         if (! current->m_entryName.isEmpty() && ! rn.isEmpty()) {
             prependScope();
          }
 
@@ -21651,8 +21651,8 @@ YY_RULE_SETUP
          // service inside of UNO IDL service or singleton
          // there may be documentation on the member so do not throw it away
 
-         current->name = text;
-         current->name = current->name.left(current->name.length() - 1).trimmed();
+         current->m_entryName = text;
+         current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
 
          if (isInterface)  {
             current->section = Entry::EXPORTED_INTERFACE_SEC;
@@ -21689,10 +21689,10 @@ case 641:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
       lineCount();
 
-      if (insideCpp && current->name == "alignas") {
+      if (insideCpp && current->m_entryName == "alignas") {
          // C++11
 
          lastAlignAsContext = YY_START;
@@ -21702,7 +21702,7 @@ YY_RULE_SETUP
          bool isProtocol = current->m_traits.hasTrait(Entry::Virtue::Protocol);
 
          if (isProtocol) {
-            current->name += "-p";
+            current->m_entryName += "-p";
          }
 
          BEGIN( ClassVar );
@@ -21768,13 +21768,13 @@ YY_RULE_SETUP
 {
       // have a new scope such as a new class
       QString text  = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = text;
+      current->m_entryName = text;
 
       lineCount();
       bool isProtocol = current->m_traits.hasTrait(Entry::Virtue::Protocol);
 
       if (isProtocol) {
-         current->name += "-p";
+         current->m_entryName += "-p";
       }
 
       if (isProtocol || current->section == Entry::OBJCIMPL_SEC) {
@@ -21790,7 +21790,7 @@ YY_RULE_SETUP
 {
       // C# style scope
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name = substitute(text, ".", "::");
+      current->m_entryName = substitute(text, ".", "::");
       lineCount();
       BEGIN( ClassVar );
    }
@@ -21811,8 +21811,8 @@ YY_RULE_SETUP
 
       }  else {
          addType(current);
-         current->name = text;
-         current->name = current->name.trimmed();
+         current->m_entryName = text;
+         current->m_entryName = current->m_entryName.trimmed();
 
          lineCount();
          BEGIN( FindMembers );
@@ -21901,10 +21901,10 @@ YY_RULE_SETUP
             current->section = Entry::VARIABLE_SEC ;
          }
 
-         current->appendData(EntryKey::Member_Type, " " + current->name);
-         current->name = text;
+         current->appendData(EntryKey::Member_Type, " " + current->m_entryName);
+         current->m_entryName = text;
 
-         if (nameIsOperator(current->name)) {
+         if (nameIsOperator(current->m_entryName)) {
             BEGIN( Operator );
          }
       }
@@ -21918,7 +21918,7 @@ YY_RULE_SETUP
       if (insideObjC && text[0] == '(') {
          // class category
 
-         current->name += '(';
+         current->m_entryName += '(';
          current->m_traits.setTrait(Entry::Virtue::Category);
 
          BEGIN( ClassCategory );
@@ -22035,7 +22035,7 @@ case 668:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 669:
@@ -22045,7 +22045,7 @@ case 669:
 YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
 YY_RULE_SETUP
 {
-      current->name += ')';
+      current->m_entryName += ')';
       BEGIN( ClassVar );
    }
 	YY_BREAK
@@ -22056,14 +22056,14 @@ case 670:
 YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
 YY_RULE_SETUP
 {
-      current->name+=')';
+      current->m_entryName+=')';
       BEGIN( ObjCProtocolList );
    }
 	YY_BREAK
 case 671:
 YY_RULE_SETUP
 {
-      current->name += ')';
+      current->m_entryName += ')';
 
       if ((current->section & Entry::Protocol) || current->section == Entry::OBJCIMPL_SEC) {
          unput('{'); // fake start of body
@@ -22206,9 +22206,9 @@ YY_RULE_SETUP
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
-      current->name = removeRedundantWhiteSpace(current->name);
+      current->m_entryName = removeRedundantWhiteSpace(current->m_entryName);
 
-      if (current->name.isEmpty() && ! isTypedef)  {
+      if (current->m_entryName.isEmpty() && ! isTypedef)  {
          // anonymous compound
 
          if (current->section == Entry::NAMESPACE_SEC) {
@@ -22216,15 +22216,15 @@ YY_RULE_SETUP
 
             if (extractAnonNS) {
                // use visible name
-               current->name = "anonymous_namespace{" + stripPath(current->getData(EntryKey::File_Name)) + "}";
+               current->m_entryName = "anonymous_namespace{" + stripPath(current->getData(EntryKey::File_Name)) + "}";
 
             } else {
                // use invisible name
-               current->name = QString("@%1").arg(anonNSCount);
+               current->m_entryName = QString("@%1").arg(anonNSCount);
             }
 
          } else {
-            current->name = QString("@%1").arg(anonCount++);
+            current->m_entryName = QString("@%1").arg(anonCount++);
          }
       }
 
@@ -22404,13 +22404,13 @@ case 692:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text[0];
+      current->m_entryName += text[0];
 
       sharpCount = 1;
       roundCount = 0;
 
       lastSkipSharpContext = YY_START;
-      specName             = &current->name;
+      specName             = &current->m_entryName;
 
       BEGIN ( Specialization );
    }
@@ -22582,7 +22582,7 @@ YY_RULE_SETUP
          current->appendData(EntryKey::Member_Args, ",");
       }
 
-      current->name = removeRedundantWhiteSpace(current->name);
+      current->m_entryName = removeRedundantWhiteSpace(current->m_entryName);
 
       if (! baseName.isEmpty()) {
          current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
@@ -22631,7 +22631,7 @@ YY_RULE_SETUP
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
-      current->name = removeRedundantWhiteSpace(current->name);
+      current->m_entryName = removeRedundantWhiteSpace(current->m_entryName);
 
       if (! baseName.isEmpty()) {
          current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
@@ -22752,7 +22752,7 @@ YY_RULE_SETUP
 
       lastDocContext = YY_START;
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->setData(EntryKey::Class_Name, current_root->name + "::");
+         current->setData(EntryKey::Class_Name, current_root->m_entryName + "::");
       }
 
       s_docBlockContext   = YY_START;
@@ -22785,7 +22785,7 @@ YY_RULE_SETUP
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->setData(EntryKey::Class_Name, current_root->name+"::");
+         current->setData(EntryKey::Class_Name, current_root->m_entryName + "::");
       }
 
       s_docBlockContext  = YY_START;
@@ -22814,7 +22814,7 @@ YY_RULE_SETUP
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->setData(EntryKey::Class_Name,  current_root->name+"::");
+         current->setData(EntryKey::Class_Name,  current_root->m_entryName + "::");
       }
 
       s_docBlockContext   = YY_START;
@@ -22840,7 +22840,7 @@ YY_RULE_SETUP
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
-         current->setData(EntryKey::Class_Name, current_root->name+"::");
+         current->setData(EntryKey::Class_Name, current_root->m_entryName + "::");
       }
 
       s_docBlockContext   = YY_START;
@@ -22872,7 +22872,7 @@ YY_RULE_SETUP
       if (externC) {
          externC = false;
 
-      } else if (insideCSharp && ! current->name.isEmpty() && ! tmpType.isEmpty())  {
+      } else if (insideCSharp && ! current->m_entryName.isEmpty() && ! tmpType.isEmpty())  {
 
          if (containsWord(tmpType, "event")) {
             // event
@@ -22895,15 +22895,15 @@ YY_RULE_SETUP
          BEGIN(UNOIDLAttributeBlock);
 
       } else {
-         if ((insideJava || insideCSharp || insideD) && current->name.isEmpty()) {
+         if ((insideJava || insideCSharp || insideD) && current->m_entryName.isEmpty()) {
             // static Java initializer
             needsSemi = false;
 
             if (current->stat) {
-               current->name = "[static initializer]";
+               current->m_entryName = "[static initializer]";
                current->setData(EntryKey::Member_Type, "");
             } else {
-               current->name = "[instance initializer]";
+               current->m_entryName = "[instance initializer]";
             }
 
             unput(*parse_cstyle_YYtext);
@@ -23501,7 +23501,7 @@ case 775:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 776:
@@ -23525,8 +23525,8 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->appendData(EntryKey::Member_Type, current->name + text);
-      current->name = "";
+      current->appendData(EntryKey::Member_Type, current->m_entryName + text);
+      current->m_entryName = "";
       BEGIN( PrototypePtr );
    }
 	YY_BREAK
@@ -23535,7 +23535,7 @@ case 778:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 779:
@@ -23565,7 +23565,7 @@ case 781:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text;
+      current->m_entryName += text;
    }
 	YY_BREAK
 case 782:
@@ -23613,7 +23613,7 @@ YY_RULE_SETUP
 case 788:
 YY_RULE_SETUP
 {
-      current->setData(EntryKey::Exception_Spec, " throw(");
+      current->setData(EntryKey::Exception_Spec, "throw(");
       BEGIN(PrototypeExc);
    }
 	YY_BREAK
@@ -23642,7 +23642,7 @@ case 792:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->name += text[0];
+      current->m_entryName += text[0];
    }
 	YY_BREAK
 case 793:
@@ -25083,7 +25083,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
             }
          }
 
-         int ni = ce->name.lastIndexOf("::");
+         int ni = ce->m_entryName.lastIndexOf("::");
          if (ni == -1) {
             ni = 0;
 
@@ -25126,7 +25126,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
             // enum
             current->protection = protection = ce->protection;
 
-         } else if (! ce->name.isEmpty() && ce->name.at(ni) == '@') {
+         } else if (! ce->m_entryName.isEmpty() && ce->m_entryName.at(ni) == '@') {
             // unnamed union or namespace
 
             if (ce->section == Entry::NAMESPACE_SEC ) {
@@ -25137,18 +25137,18 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          } else {
             // named struct, union, protocol, category
-            current->protection = protection = Public ;
+            current->protection = protection = Public;
          }
 
          mtype = Method;
          virt = Normal;
 
-         groupEnterCompound(yyFileName, yyLineNr, ce->name);
+         groupEnterCompound(yyFileName, yyLineNr, ce->m_entryName);
 
          parse_cstyle_YYlex() ;
          s_lexInit = true;
 
-         groupLeaveCompound(yyFileName, yyLineNr, ce->name);
+         groupLeaveCompound(yyFileName, yyLineNr, ce->m_entryName);
          current = QSharedPointer<Entry>();
 
          ce->setData(EntryKey::Source_Text, "");
@@ -25193,7 +25193,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
       int sec = determineSection(yyFileName);
 
       if (sec != 0) {
-         current->name    = yyFileName;
+         current->m_entryName    = yyFileName;
          current->section = sec;
          current_root->addSubEntry(current, current_root);
       }
@@ -25266,7 +25266,7 @@ static void parsePrototype(const QString &text)
    parse_cstyle_YYlex();
    s_lexInit = true;
 
-   current->name = current->name.trimmed();
+   current->m_entryName = current->m_entryName.trimmed();
    if (current->section == Entry::MEMBERDOC_SEC && current->getData(EntryKey::Member_Args).isEmpty()) {
       current->section = Entry::VARIABLEDOC_SEC;
    }

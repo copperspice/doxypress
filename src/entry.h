@@ -402,7 +402,7 @@ class Entry
    bool hidden;                    // does this represent an entity that is hidden from the output
    bool artificial;                // artificially introduced item
 
-   QString  name;                  // entry name
+   QString m_entryName;            // entry name
 
    QVector<ArgumentList>  m_templateArgLists;    // template argument declarations
    QVector<BaseInfo>      extends;               // list of base classes
