@@ -135,7 +135,7 @@
     </message>
     <message>
         <source>Here are the classes, structs, unions and interfaces with brief descriptions:</source>
-        <translation>Hier folgt die Aufzählung aller Klassen, Strukturen, 
+        <translation>Hier folgt die Aufzählung aller Klassen, Strukturen,
                 Varianten und Schnittstellen mit einer Kurzbeschreibung:</translation>
     </message>
     <message>
@@ -160,7 +160,7 @@
     </message>
     <message>
         <source>Here is a list of all functions, variables, defines, enums, and typedefs with links to the files they belong to:</source>
-        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen 
+        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen
                auf die Dokumentation zu jedem Element:</translation>
     </message>
     <message>

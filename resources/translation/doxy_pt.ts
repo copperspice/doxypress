@@ -4,180 +4,140 @@
 <context>
     <name>doxy-rtf</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="1225"/>
         <source>1252</source>
         <comment>trRTFansicp</comment>
-        <translation type="unfinished"></translation>
+        <translation>1252</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="1232"/>
         <source>0</source>
         <comment>trRTFCharSet</comment>
-        <translation type="unfinished"></translation>
+        <translation>0</translation>
     </message>
 </context>
 <context>
     <name>doxy-text</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="50"/>
         <source>Related Functions</source>
-        <translation type="unfinished"></translation>
+        <translation>Funções associadas</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="55"/>
         <source>These are not member functions</source>
-        <translation type="unfinished"></translation>
+        <translation>(Note que não são funções membro)</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="60"/>
         <source>Detailed Description</source>
-        <translation type="unfinished"></translation>
+        <translation>Descrição detalhada</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="65"/>
         <source>Member Typedef Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação das definições de tipo</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="70"/>
         <source>Member Enumeration Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação das enumerações</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="75"/>
         <source>Member Function Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação dos métodos</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="81"/>
         <source>Field Documentation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="83"/>
         <source>Member Data Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação dos dados membro</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="89"/>
         <source>More...</source>
-        <translation type="unfinished"></translation>
+        <translation>Mais...</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="94"/>
         <source>List of all members</source>
-        <translation type="unfinished"></translation>
+        <translation>Mostrar lista completa dos membros</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="99"/>
         <source>Member List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista dos membros</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="104"/>
         <source>This is the complete list of members for </source>
-        <translation type="unfinished"></translation>
+        <translation>Lista completa de todos os membros de </translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="109"/>
         <source>, including all inherited members.</source>
-        <translation type="unfinished"></translation>
+        <translation>, incluindo todos os membros herdados.</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="117"/>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="120"/>
         <source>Generated automatically by DoxyPress from the source code.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="127"/>
         <source>enum name</source>
-        <translation type="unfinished"></translation>
+        <translation>enumeração</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="132"/>
         <source>enum value</source>
-        <translation type="unfinished"></translation>
+        <translation>valor enumerado</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="137"/>
         <source>defined in</source>
-        <translation type="unfinished"></translation>
+        <translation>definido em</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="144"/>
-        <location filename="../../src/translator_cs.h" line="1317"/>
-        <location filename="../../src/translator_cs.h" line="1826"/>
         <source>Modules</source>
-        <translation type="unfinished"></translation>
+        <translation>Módulos</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="149"/>
         <source>Class Hierarchy</source>
-        <translation type="unfinished"></translation>
+        <translation>Hierarquia de classes</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="155"/>
-        <location filename="../../src/translator_cs.h" line="479"/>
-        <location filename="../../src/translator_cs.h" line="1157"/>
         <source>Data Structures</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="157"/>
         <source>Class List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="163"/>
         <source>File List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="169"/>
-        <location filename="../../src/translator_cs.h" line="992"/>
-        <location filename="../../src/translator_cs.h" line="1644"/>
         <source>Data Fields</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="171"/>
         <source>Class Members</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="178"/>
-        <location filename="../../src/translator_cs.h" line="1386"/>
         <source>Globals</source>
-        <translation type="unfinished"></translation>
+        <translation>Globais</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="180"/>
         <source>File Members</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="186"/>
         <source>Related Pages</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="191"/>
         <source>Examples</source>
-        <translation type="unfinished"></translation>
+        <translation>Exemplos</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="196"/>
         <source>Search</source>
-        <translation type="unfinished"></translation>
+        <translation>Localizar</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="201"/>
-        <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
+         <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -251,64 +211,53 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="301"/>
         <source>Here is a list of all modules:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="308"/>
         <source>Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="315"/>
         <source>Module Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Índice dos módulos</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="322"/>
         <source>Hierarchical Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Índice da hierarquia</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="330"/>
         <source>Data Structure Index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="332"/>
         <source>Class Index</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="339"/>
         <source>File Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Índice dos ficheiros</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="346"/>
         <source>Module Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação do módulo</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="354"/>
         <source>Data Structure Documentation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="356"/>
         <source>Class Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação da classe</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="364"/>
         <source>File Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação do ficheiro</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="371"/>
         <source>Example Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Documentação do exemplo</translation>
     </message>
     <message>
         <location filename="../../src/translator_cs.h" line="378"/>
@@ -398,72 +347,58 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="493"/>
         <source>Generated on %1 for %2 &amp;nbsp; by</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="491"/>
         <source>Generated on %1 &amp;nbsp; by</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="499"/>
         <source>Inheritance diagram for %1:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="504"/>
         <source>For internal use only.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="509"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Aviso"</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="514"/>
         <source>Version</source>
-        <translation type="unfinished"></translation>
+        <translation>Versão</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="519"/>
         <source>Date</source>
-        <translation type="unfinished"></translation>
+        <translation>Data</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="524"/>
         <source>Returns</source>
-        <translation type="unfinished"></translation>
+        <translation>Retorna</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="529"/>
         <source>See also</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="534"/>
         <source>Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Parâmetros</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="539"/>
         <source>Exceptions</source>
-        <translation type="unfinished"></translation>
+        <translation>Excepções</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="544"/>
         <source>Generated by</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerado por</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="549"/>
         <source>Namespace List</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="556"/>
         <source>Here is a list of all namespaces with brief descriptions:</source>
         <translation type="unfinished"></translation>
     </message>
