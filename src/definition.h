@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -57,7 +57,7 @@ struct BriefInfo {
 };
 
 /** Abstract interface for a Definition or DefinitionList */
-class DefinitionIntf : public EnableSharedFromThis 
+class DefinitionIntf : public EnableSharedFromThis
 {
  public:
    DefinitionIntf() { }
@@ -88,10 +88,10 @@ class DefinitionIntf : public EnableSharedFromThis
 class Definition : public DefinitionIntf
 {
  public:
-  
-   Definition(const QString &defFileName, int defLine, int defColumn, const QString &name, 
+
+   Definition(const QString &defFileName, int defLine, int defColumn, const QString &name,
       const QString &b = QString(), const QString &d = QString(), bool isPhrase = true);
- 
+
    virtual ~Definition();
 
    /*! Returns the name of the definition */
@@ -180,7 +180,7 @@ class Definition : public DefinitionIntf
       return m_defColumn;
    }
 
-   /*! Returns true iff the definition is documented
+   /*! Returns true if the definition is documented
     *  (which could be generated documentation)
     *  @see hasUserDocumentation()
     */
@@ -261,11 +261,11 @@ class Definition : public DefinitionIntf
 
    int getInputOrderId() {
       return m_inputOrderId;
-   }   
+   }
 
    int getSortId() {
       return m_sortId;
-   }   
+   }
 
    /*! Sets a new \a name for the definition */
    virtual void setName(const QString &name);
@@ -274,7 +274,7 @@ class Definition : public DefinitionIntf
    void setId(const QString &name);
 
    /*! Sets the documentation of this definition to \a d. */
-   virtual void setDocumentation(const QString &d, const QString &docFile, int docLine, 
+   virtual void setDocumentation(const QString &d, const QString &docFile, int docLine,
                   bool stripWhiteSpace = true, bool atTop = false);
 
    /*! Sets the brief description of this definition to \a b.
@@ -315,11 +315,11 @@ class Definition : public DefinitionIntf
 
    void setInputOrderId(int id) {
       m_inputOrderId = id;
-   }   
+   }
 
    void setSortId(int id) {
       m_sortId = id;
-   }   
+   }
 
    QString convertNameToFile(const QString &name, bool allowDots = false) const;
 
@@ -328,18 +328,18 @@ class Definition : public DefinitionIntf
    void writeSourceRefs(OutputList &ol, const QString &scopeName);
    void writeSourceReffedBy(OutputList &ol, const QString &scopeName);
    void makePartOfGroup(QSharedPointer<GroupDef> gd);
-   
+
    void writeNavigationPath(OutputList &ol) const;
    QString navigationPathAsString() const;
 
-   virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const 
+   virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const
    {}
 
-   virtual void writeSummaryLinks(OutputList &) 
+   virtual void writeSummaryLinks(OutputList &)
    {}
 
    QString pathFragment() const;
-   
+
    /*! Writes the documentation anchors of the definition to yhe Doxy_Globals::tagFile stream.
     */
    void writeDocAnchorsToTagFile(QTextStream &);
@@ -358,17 +358,17 @@ class Definition : public DefinitionIntf
 
  private:
    void addToMap(const QString &name);
- 
+
    void setPhraseName(const QString &phrase);
 
    int  _getXRefListId(const QString &listName) const;
-   void _writeSourceRefList(OutputList &ol, const QString &scopeName,const QString &text, 
+   void _writeSourceRefList(OutputList &ol, const QString &scopeName,const QString &text,
                   const MemberSDict &members);
 
    void _setInbodyDocumentation(const QString &d, const QString &docFile, int docLine);
    bool _docsAlreadyAdded(const QString &doc, QString &sigList);
 
-   Definition_Private *m_private; 
+   Definition_Private *m_private;
    QString m_name;
 
    bool m_isPhrase;

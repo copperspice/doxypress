@@ -1,4 +1,4 @@
- /*************************************************************************
+/*************************************************************************
  *
  * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
@@ -1103,7 +1103,7 @@ static void handleUnclosedStyleCommands()
 
 static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool ignoreAutoLinkFlag = false)
 {
-  static const bool autolinkSupport = Config::getBool("auto-link");
+   static const bool autolinkSupport = Config::getBool("auto-link");
 
    QString name = linkToText(SrcLangExt_Unknown, g_token->name, true);
 
@@ -2635,7 +2635,7 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
       } else if (compound && compound->definitionType() == Definition::TypeFile &&
                  compound.dynamicCast<FileDef>()->generateSourceFile() ) {
 
-         // undocumented file that has source code we can link to
+         // undocumented file has source code we can link to
          m_file = compound->getSourceFileBase();
          m_ref  = compound->getReference();
          return;
@@ -2644,7 +2644,7 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
 
    m_text = target;
    warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to '%s' for \\ref command",
-                  qPrintable(target));
+                  csPrintable(target));
 }
 
 static void flattenParagraphs(DocNode *root, QList<DocNode *> &children)
@@ -7413,12 +7413,15 @@ void DocText::parse()
                case CMD_BSLASH:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_BSlash));
                   break;
+
                case CMD_AT:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_At));
                   break;
+
                case CMD_LESS:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Less));
                   break;
+
                case CMD_GREATER:
                   m_children.append(new DocSymbol(this, DocSymbol::Sym_Greater));
                   break;
@@ -7508,7 +7511,6 @@ void DocRoot::parse()
       int tok = doctokenizerYYlex();
 
       if (tok == TK_HTMLTAG) {
-
          int tagId = Mappers::htmlTagMapper->map(g_token->name);
 
          if (tagId == HTML_DIV)   {
@@ -7593,6 +7595,7 @@ void DocRoot::parse()
       } else {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid section id '%s', ignoring section",
                   csPrintable(g_token->sectionId));
+
          retval = 0;
       }
    }

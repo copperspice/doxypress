@@ -335,6 +335,8 @@ DiagramItem::~DiagramItem()
 
 QString DiagramItem::label() const
 {
+   static const bool hideScopeNames = Config::getBool("hide-scope-names");
+
    QString result;
 
    if (! templSpec.isEmpty()) {
@@ -351,7 +353,7 @@ QString DiagramItem::label() const
       result = classDef->displayName();
    }
 
-   if (Config::getBool("hide-scope-names")) {
+   if (hideScopeNames) {
       result = stripScope(result);
    }
 
@@ -1188,6 +1190,8 @@ ClassDiagram::~ClassDiagram()
 
 void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const QString &fileName) const
 {
+   static const bool latexPdf = Config::getBool("latex-pdf");
+
    uint baseRows = base->computeRows();
    uint superRows = super->computeRows();
    uint baseMaxX, baseMaxLabelWidth, superMaxX, superMaxLabelWidth;
@@ -1462,8 +1466,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
 
    f1.close();
 
-   if (Config::getBool("latex-pdf")) {
-
+   if (latexPdf) {
       QString epstopdfArgs;
       epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(epsBaseName).arg(epsBaseName);
 

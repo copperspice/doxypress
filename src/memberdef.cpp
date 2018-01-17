@@ -3115,7 +3115,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    _writeGroupInclude(ol, inGroup);
 
-   /* write multi-line initializer (if any) */
+   // write multi-line initializer (if any)
    if (hasMultiLineInitializer()) {
       ol.startBold();
 
@@ -3384,13 +3384,13 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    QString detailed  = documentation();
 
    /* write brief description */
-   if (!brief.isEmpty()) {
+   if (! brief.isEmpty()) {
       ol.generateDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : container, self,
                      brief, false, false, "", true, false);
    }
 
    /* write detailed description */
-   if (!detailed.isEmpty()) {
+   if (! detailed.isEmpty()) {
       ol.generateDoc(docFile(), docLine(), getOuterScope() ? getOuterScope() : container, self,
                      detailed + "\n", false, false, "", false, false);
 

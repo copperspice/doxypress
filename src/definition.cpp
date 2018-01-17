@@ -578,8 +578,8 @@ void Definition::setInbodyDocumentation(const QString &d, const QString &inbodyF
  */
 static bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QString &result)
 {
-   static bool filterSourceFiles = Config::getBool("filter-source-files");
-   static int tabSize = Config::getInt("tab-size");
+   static const bool filterSourceFiles = Config::getBool("filter-source-files");
+   static const int tabSize            = Config::getInt("tab-size");
 
    if (fileName.isEmpty()) {
       return false;   // not a valid file name
@@ -797,8 +797,8 @@ QString Definition::getSourceAnchor() const
 /*! Write a reference to the source code defining this definition */
 void Definition::writeSourceDef(OutputList &ol, const QString &)
 {
-   static bool latexSourceCode = Config::getBool("latex-source-code");
-   static bool rtfSourceCode   = Config::getBool("rtf-source-code");
+   static const bool latexSourceCode = Config::getBool("latex-source-code");
+   static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
 
    ol.pushGeneratorState();
 
@@ -990,8 +990,9 @@ bool Definition::hasSources() const
 /*! Write code of this definition into the documentation */
 void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
 {
-   QSharedPointer<Definition> self = sharedFrom(this);
    static const bool inlineSources = Config::getBool("inline-source");
+
+   QSharedPointer<Definition> self = sharedFrom(this);
 
    ol.pushGeneratorState();
 
@@ -1158,7 +1159,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 
 void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 {
-   static bool referencedByRelation = Config::getBool("ref-by-relation");
+   static const bool referencedByRelation = Config::getBool("ref-by-relation");
 
    if (referencedByRelation) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_private->m_sourceRefByDict);
@@ -1167,7 +1168,7 @@ void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 
 void Definition::writeSourceRefs(OutputList &ol, const QString &scopeName)
 {
-   static bool referencesRelation = Config::getBool("ref-relation");
+   static const bool referencesRelation = Config::getBool("ref-relation");
 
    if (referencesRelation) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferences(), m_private->m_sourceRefsDict);
@@ -1176,7 +1177,7 @@ void Definition::writeSourceRefs(OutputList &ol, const QString &scopeName)
 
 bool Definition::hasDocumentation() const
 {
-   static bool extractAll = Config::getBool("extract-all");
+   static const bool extractAll = Config::getBool("extract-all");
    // static bool sourceBrowser = Config::getBool("source-code");
 
    bool hasDocs = (! m_private->m_details.doc.isEmpty()    || ! m_private->m_brief.doc.isEmpty() ||
