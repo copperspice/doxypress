@@ -2265,6 +2265,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <FormatBlock>[^ \@\*\/\\\n]*     {
       // some word
       QString text = QString::fromUtf8(yytext);
+
       addToOutput(text);
    }
 
@@ -3608,8 +3609,8 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    yyrestart(yyin);
    BEGIN( Comment );
-
    yylex();
+
    setOutput(OutputMainDoc);
 
    if (YY_START == OverloadParam) {

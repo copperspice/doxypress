@@ -836,23 +836,22 @@ static bool getLink(const QString &className, const QString &memberName, CodeOut
    return true;
 }
 
-static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName,
-                  bool typeOnly = false, bool varOnly = false)
+static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName, bool typeOnly = false, bool varOnly = false)
 {
-   int i = 0;
+   if (clName.isEmpty()) {
+      return;
+   }
 
    QString className = clName;
 
-   if (clName.startsWith('~')) {
-      // correct for matching negated values i.s.o. destructors.
-
+   if (className.startsWith('~')) {
+      // correct for matching negated values for a destructor
       g_code->codify("~");
       className = className.mid(1);
    }
 
-   if (className.isEmpty()) {
-      return;
-   }
+   // passed to writeMultiLineCodeLink() and used a few other places
+   QString tmpClassName = className;
 
    if (g_insideProtocolList) {
       // for Obj-C
@@ -877,14 +876,10 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
       QSharedPointer<Definition> d = g_currentDefinition;
 
       cd = getResolvedClass(d, g_sourceFileDef, className, &md);
-
-      DBG_CTX((stderr, "Non-local variable name = %s context = %d cd = %s md = %s\n",
-               csPrintable(className), g_theVarContext.count(), cd ? csPrintable(cd->name()) : "<none>",
-               md ? csPrintable(md->name()) : "<none>"));
+      int i;
 
       if (cd == nullptr && md == nullptr && (i = className.indexOf('<')) != -1) {
          QString bareName = className.left(i);
-         DBG_CTX((stderr, "bareName = %s\n", csPrintable(bareName)));
 
          if (bareName != className) {
             // try unspecialized version
@@ -897,17 +892,14 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
       if (nd) {
          setScopeCallContext(nd);
          addToSearchIndex(className);
-         writeMultiLineCodeLink(*g_code, nd, clName);
+         writeMultiLineCodeLink(*g_code, nd, tmpClassName);
          return;
       }
 
-      DBG_CTX((stderr, "is found as a type cd=%s nd=%s\n", cd ? csPrintable(cd->name()) : "<null>",
-                  nd ? csPrintable(nd->name()) : "<null>"));
-
-      if (cd == 0 && md == 0) {
+      if (cd == nullptr && md == nullptr) {
          // also see if it is variable or enum or enum value
 
-         if (getLink(g_classScope, clName, ol, clName, varOnly)) {
+         if (getLink(g_classScope, tmpClassName, ol, tmpClassName, varOnly)) {
             return;
          }
       }
@@ -918,12 +910,10 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
       }
 
       isLocal = true;
-      DBG_CTX((stderr, "is a local variable cd=%p!\n", cd));
    }
 
    if (cd && cd->isLinkable()) {
       // is it a linkable class
-      DBG_CTX((stderr, "is linkable class %s\n", clName));
 
       if (g_exampleBlock) {
          QString anchor = QString("_a%1").arg(g_anchorCount);
@@ -934,7 +924,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
          }
       }
 
-      writeMultiLineCodeLink(ol, cd, clName);
+      writeMultiLineCodeLink(ol, cd, tmpClassName);
       addToSearchIndex(className);
       setScopeCallContext(cd);
 
@@ -960,52 +950,46 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
    } else {
       // not a class, maybe a global member
-      DBG_CTX((stderr, "class %s not linkable! cd=%p md=%p typeOnly=%d\n", clName, cd, md, typeOnly));
 
-      if (! isLocal && (md != 0 || (cd == 0 && ! typeOnly))) {
+      if (! isLocal && (md != nullptr || (cd == nullptr && ! typeOnly))) {
          // not a class, see if it is a global enum/variable/typedef
 
-         if (md == 0) {
+         if (md == nullptr) {
             // not found as a typedef
-            md = setCallContextForVar(clName);
-
-            if (md && g_currentDefinition) {
-               DBG_CTX((stderr, "%s accessible from %s? %d md->getOuterScope=%s\n",
-                        csPrintable(md->name()), csPrintable(g_currentDefinition->name()),
-                        isAccessibleFrom(g_currentDefinition, g_sourceFileDef, md),
-                        csPrintable(md->getOuterScope()->name())));
-            }
+            md = setCallContextForVar(tmpClassName);
 
             if (md && g_currentDefinition && isAccessibleFrom(g_currentDefinition, g_sourceFileDef, md) == -1) {
                md = QSharedPointer<MemberDef>(); // variable not accessible
             }
          }
 
-         if (md && (!varOnly || md->isVariable())) {
-            DBG_CTX((stderr, "is a global md=%p g_currentDefinition=%s linkable=%d\n", md,
-                     g_currentDefinition ? csPrintable(g_currentDefinition->name()) : "<none>", md->isLinkable()));
+         if (md && (! varOnly || md->isVariable())) {
 
             if (md->isLinkable()) {
                QString text;
 
-               if (!g_forceTagReference.isEmpty()) { // explicit reference to symbol in tag file
+               if (! g_forceTagReference.isEmpty()) {
+                  // explicit reference to symbol in tag file
                   text = g_forceTagReference;
-                  if (text.right(4) == ".tag") { // strip .tag if present
+
+                  if (text.endsWith(".tag")) {
+                     // strip .tag if present
                      text = text.left(text.length() - 4);
                   }
 
                   text += getLanguageSpecificSeparator(md->getLanguage());
-                  text += clName;
+                  text += tmpClassName;
+
                   md->setName(text);
                   md->setLocalName(text);
 
                } else {
                   // normal reference
-                  text = clName;
+                  text = tmpClassName;
                }
 
                writeMultiLineCodeLink(ol, md, text);
-               addToSearchIndex(clName);
+               addToSearchIndex(tmpClassName);
 
                if (g_currentMemberDef && g_collectXRefs) {
                   addDocCrossReference(g_currentMemberDef, md);
@@ -1017,9 +1001,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
       }
 
       // nothing found, just write out the word
-      DBG_CTX((stderr, "not found!\n"));
-      codifyLines(clName);
-      addToSearchIndex(clName);
+      codifyLines(tmpClassName);
+      addToSearchIndex(tmpClassName);
    }
 }
 
@@ -4183,7 +4166,7 @@ void resetCCodeParserState()
   g_anchorCount = 0;
 }
 
-void parseCCode(CodeOutputInterface &od, const QString &className, const QString &s,
+void parseCCode(CodeOutputInterface &outputX, const QString &className, const QString &s,
                 SrcLangExt lang, bool exBlock, const QString &exName, QSharedPointer<FileDef> fd,
                 int startLine, int endLine, bool inlineFragment,
                 QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
@@ -4199,7 +4182,7 @@ void parseCCode(CodeOutputInterface &od, const QString &className, const QString
 
    TooltipManager::instance()->clearTooltips();
 
-   g_code               = &od;
+   g_code               = &outputX;
    g_inputString        = s;
    g_inputPosition      = 0;
    g_currentFontClass   = "";
@@ -4281,8 +4264,8 @@ void parseCCode(CodeOutputInterface &od, const QString &className, const QString
 
    yyrestart( yyin );
    BEGIN( Body );
-
    yylex();
+
    g_lexInit = true;
 
    if (g_needsTermination) {

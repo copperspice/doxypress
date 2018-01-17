@@ -6021,6 +6021,7 @@ YY_RULE_SETUP
 {
       // some word
       QString text = QString::fromUtf8(commentscanYYtext);
+
       addToOutput(text);
    }
 	YY_BREAK
@@ -8556,8 +8557,8 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    commentscanYYrestart(commentscanYYin);
    BEGIN( Comment );
-
    commentscanYYlex();
+
    setOutput(OutputMainDoc);
 
    if (YY_START == OverloadParam) {

@@ -382,12 +382,19 @@ void HtmlCodeGenerator::codify(const QString &str)
       return;
    }
 
-   static int tabSize = Config::getInt("tab-size");
-   int spacesToNextTabStop;
+   static const int tabSize = Config::getInt("tab-size");
 
+   int spacesToNextTabStop;
    bool isBackSlash = false;
 
    for (auto c : str) {
+
+      if (isBackSlash) {
+         isBackSlash = false;
+
+         m_streamX << "\\";
+         m_col++;
+      }
 
       switch (c.unicode()) {
 
@@ -432,18 +439,7 @@ void HtmlCodeGenerator::codify(const QString &str)
             break;
 
          case '\\':
-
-           if (isBackSlash) {
-              isBackSlash = false;
-
-              m_streamX << "\\";
-              m_col++;
-
-            } else {
-              isBackSlash = true;
-
-            }
-
+            isBackSlash = true;
             break;
 
          default:
@@ -452,9 +448,6 @@ void HtmlCodeGenerator::codify(const QString &str)
             break;
       }
 
-      if (isBackSlash && c != '\\') {
-         isBackSlash = false;
-      }
    }
 }
 
