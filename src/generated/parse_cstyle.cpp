@@ -15275,7 +15275,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       lineCount();
-      current->m_entryName += text ;
+      current->m_entryName += text;
       current->m_entryName = current->m_entryName.simplified();
       BEGIN( FindMembers ) ;
    }
@@ -15300,7 +15300,7 @@ YY_RULE_SETUP
 case 130:
 YY_RULE_SETUP
 {
-      /* skip guided templ specifiers */
+      /* skip guided template specifiers */
    }
 	YY_BREAK
 case 131:
@@ -15499,15 +15499,15 @@ YY_RULE_SETUP
 
       lineCount();
 
-      current->m_entryName      = text;
-      current->section   = Entry::USINGDECL_SEC;
+      current->m_entryName = text;
+      current->section     = Entry::USINGDECL_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
 
       current_root->addSubEntry(current, current_root);
       previous = current;
-      current = QMakeShared<Entry>();
+      current  = QMakeShared<Entry>();
 
       if (insideCSharp) {
          // in C# a using declaration and directive have the same syntax, so we
@@ -15626,7 +15626,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->m_entryName    = removeRedundantWhiteSpace(text);
+      current->m_entryName  = removeRedundantWhiteSpace(text);
       current->section = Entry::USINGDIR_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
@@ -24937,7 +24937,7 @@ static void newEntry()
 
 static void handleCommentBlock(const QString &doc, bool brief)
 {
-   static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
+   static const bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
 
    int position    = 0;
    bool needsEntry = false;
@@ -25315,12 +25315,12 @@ void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileB
    }
 }
 
-void CPPLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+void CPPLanguageParser::parseCode(CodeOutputInterface &outputX, const QString &scopeName, const QString &input,
                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
-   ::parseCCode(codeOutIntf,scopeName, input,lang,isExampleBlock,exampleName, fileDef,startLine, endLine,
+   ::parseCCode(outputX, scopeName, input,lang,isExampleBlock,exampleName, fileDef,startLine, endLine,
                   inlineFragment,memberDef, showLineNumbers,searchCtx,collectXRefs);
 }
 

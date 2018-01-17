@@ -974,6 +974,12 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "        <argsstring>" << convertToXML(md->argsString()) << "</argsstring>" << endl;
    }
 
+   if (md->memberType() == MemberType_Enumeration)  {
+      t << "        <type>";
+      linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, md->enumBaseType());
+      t << "</type>" << endl;
+   }
+
    t << "        <name>" << convertToXML(md->name()) << "</name>" << endl;
 
    if (md->memberType() == MemberType_Property) {

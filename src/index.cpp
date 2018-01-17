@@ -3986,7 +3986,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
                if (showNamespaces) {
                   if (documentedNamespaces > 0 && addToIndex) {
-                     Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", "", "");
+                     Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", lne->baseFile(), "");
                      Doxy_Globals::indexList.incContentsDepth();
                      needsClosing = true;
                   }
@@ -4059,7 +4059,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
                if (showFiles) {
                   if (Doxy_Globals::documentedHtmlFiles > 0 && addToIndex) {
-                     Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", "", "");
+                     Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", lne->baseFile(), "");
                      Doxy_Globals::indexList.incContentsDepth();
                      needsClosing = true;
                   }

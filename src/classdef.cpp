@@ -1668,7 +1668,20 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
 
          if (rootNode && ! rootNode->isEmpty()) {
             ol.startMemberDescription(anchor());
+
+            ol.pushGeneratorState();
+            ol.disableAll();
+            ol.enable(OutputGenerator::RTF);
+            ol.writeString("{");
+            ol.popGeneratorState();
+
             ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
+
+            ol.pushGeneratorState();
+            ol.disableAll();
+            ol.enable(OutputGenerator::RTF);
+            ol.writeString("\\par}");
+            ol.popGeneratorState();
 
             if (isLinkableInProject()) {
                writeMoreLink(ol, anchor());

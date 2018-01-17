@@ -926,7 +926,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
    }
 
    // user specified
-   static bool clangParsing = Config::getBool("clang-parsing");
+   static const bool clangParsing = Config::getBool("clang-parsing");
    auto srcLang = getLanguage();
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {

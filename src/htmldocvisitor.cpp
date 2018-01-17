@@ -386,8 +386,9 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
             auto tmp = Doxy_Globals::parserManager.getParser(lang);
 
             tmp->parseCode(m_ci, s->context(), s->text(), langExt,
-                  s->isExample(), s->exampleFile(), QSharedPointer<FileDef>(), -1, -1, false,
-                  QSharedPointer<MemberDef>(), true, m_ctx);
+                  s->isExample(), s->exampleFile(),
+                  QSharedPointer<FileDef>(), -1, -1, false, QSharedPointer<MemberDef>(),
+                  true, m_ctx);
          }
 
          m_t << PREFRAG_END;
@@ -398,9 +399,12 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Verbatim:
          forceEndParagraph(s);
          m_t << /*PREFRAG_START <<*/ "<pre class=\"fragment\">";
+
          filter(s->text());
+
          m_t << "</pre>" /*<< PREFRAG_END*/;
          forceStartParagraph(s);
+
          break;
 
       case DocVerbatim::HtmlOnly:
@@ -1592,7 +1596,7 @@ void HtmlDocVisitor::visitPre(DocImage *img)
       if (! img->width().isEmpty()) {
          sizeAttribs += " width=\"" + img->width() + "\"";
       }
-      
+
       if (! img->height().isEmpty()) {
          sizeAttribs += " height=\"" + img->height() + "\"";
       }
@@ -1606,7 +1610,7 @@ void HtmlDocVisitor::visitPre(DocImage *img)
                   << "\"" << sizeAttribs << htmlAttribsToString(img->attribs()) << ">" << baseName
                   << "</object>" << endl;
 
-         } else {   
+         } else {
             m_t << "<img src=\"" << img->relPath() << img->name() << "\" alt=\""
                 << baseName << "\"" << sizeAttribs << htmlAttribsToString(img->attribs())
                 << "/>" << endl;
@@ -2274,12 +2278,12 @@ void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPat
    QString baseName = fileName;
    int i;
 
-   if ((i = baseName.lastIndexOf('/')) != -1) { 
+   if ((i = baseName.lastIndexOf('/')) != -1) {
       // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
 
-   if ((i = baseName.indexOf('.')) != -1) { 
+   if ((i = baseName.indexOf('.')) != -1) {
       // strip extension
       baseName = baseName.left(i);
    }

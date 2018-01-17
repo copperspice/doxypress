@@ -457,7 +457,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
             break;
       }
 
-      // broom - check something
+      // broom - unclear if this needs changing
       if (md->isFriend()) {
          type.prepend("ffunc ");
       }
