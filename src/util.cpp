@@ -1562,7 +1562,6 @@ static bool findOperator2(const QString &s, int i)
 static const char constScope[]   = { 'c', 'o', 'n', 's', 't', ':' };
 static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
-// note: this function is not reentrant due to the use of a static buffer
 QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
 {
    if (str.isEmpty()) {
@@ -1753,19 +1752,9 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
                // trailing return type ')->' => ') ->'
                retval += ' ';
             }
-
-         } else if (c == '=')  {
-            // deals with "= delete", add space before the equal sign
-            retval += ' ';
-
          }
 
          retval += c;
-
-         if (c == '=')  {
-            // deals with "= delete", add space after the equal sign
-            retval += ' ';
-         }
 
          if (cliSupport && (c == '^' || c == '%') && i > 1 && isId(str.at(i - 1)) && ! findOperator(str, i) ) {
             // C++ or CLI: Type^ name and Type% name
@@ -1773,6 +1762,10 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
          }
       }
    }
+
+   // handle "= delete", "= default", "= 0"
+   QRegExp regExp { "\\s*=\\s*(default|delete|0)\\s*$" };
+   retval.replace(regExp, " = \\1");
 
    return retval;
 }

@@ -114,7 +114,7 @@ void GroupDef::findSectionsInDocumentation()
 
 void GroupDef::addFile(QSharedPointer<FileDef> def)
 {
-   static bool sortBriefDocs = Config::getBool("sort-brief-docs");
+   static const bool sortBriefDocs = Config::getBool("sort-brief-docs");
 
    if (def->isHidden()) {
       return;
@@ -1565,12 +1565,26 @@ void GroupDef::removeMemberFromList(MemberListType lt, QSharedPointer<MemberDef>
 
 bool GroupDef::isLinkableInProject() const
 {
-   return !isReference() && isLinkable();
+   return ! isReference() && isLinkable();
 }
 
 bool GroupDef::isLinkable() const
 {
-   return hasUserDocumentation();
+   if ( hasUserDocumentation() ) {
+      return true;
+   }
+
+   // no documentation, check if there are classes
+   for (auto cd : m_classSDict) {
+
+      if (! cd->name().isEmpty()) {
+         return true;
+      }
+   }
+
+   // may want to check for other group memmbers
+
+   return false;
 }
 
 // let the "programming language" for a group depend on what is inserted into it.
@@ -1585,6 +1599,6 @@ void GroupDef::updateLanguage(QSharedPointer<const Definition> d)
 
 bool GroupDef::hasDetailedDescription() const
 {
-   static bool repeatBrief = Config::getBool("repeat-brief");
-   return ((! briefDescription().isEmpty() && repeatBrief) || !documentation().isEmpty());
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+   return ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty());
 }
