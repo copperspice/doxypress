@@ -1,7 +1,7 @@
 /*************************************************************************
 *
 * Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
-* Copyright (C) 2014 Digia Plc 
+* Copyright (C) 2014 Digia Plc
 * All rights reserved.
 *
 * GNU Free Documentation License
@@ -9,33 +9,36 @@
 *************************************************************************/
 
 /* test code to force a foward declaration  */
-template <class Key, class Val>
+template <typename Key, typename Val, typename C>
 class QMap;
 
 
 /*!
 \class QMap
-\brief The QMap class is a template class that provides a skip-list-based dictionary. 
+\brief Provides an ordered associative container.
 
-The QMap class is a template class that provides a skip-list-based dictionary.
+The QMap class is a template class which provides an ordered associative container. QMap<Key, Val, C> is one of of the
+CopperSpice generic container classes. It stores (key, value) pairs and provides logarithmic time lookup of the value
+associated with a key.
 
-QMap<Key, T> is one of of the generic container classes. It stores (key, value) pairs and provides fast lookup of the value associated with a key.
-
-QMap and %QHash provide very similar functionality. The differences are:
+QMap and %QHash provide very similar functionality.
 
 <ul>
-   <li>QHash provides faster lookups than QMap.</li>
-   <li>When iterating over a QHash the items are arbitrarily ordered. The QMap items are always sorted by key.</li>
-   <li>The key type of a QHash must provide operator==() and a global qHash(Key) function. The key type of a QMap must provide operator&lt;() specifying a total order.</li>
+   <li>When iterating over a %QHash the items are arbitrarily ordered, with QMap the items are always sorted by \a key.</li>
+
+   <li>%QHash provides faster lookups than QMap.</li>
+
+   <li>The key type of a %QHash must provide operator==() and a global qHash(Key) function. The key type of a QMap must
+    provide operator<() specifying  a total order.</li>
 </ul>
 
-Here is an example of QMap with QString keys and int> values:
+The following uses QMap with QString keys and <tt>int</tt> values.
 
 \code
     QMap<QString, int> map;
 \endcode
 
-To insert a (key, value) pair into the map, you can use operator[]():
+To insert a (key, value) pair into the map the operator[]() can be used as shown:
 
 \code
     map["one"]   = 1;
@@ -46,38 +49,53 @@ To insert a (key, value) pair into the map, you can use operator[]():
 */
 
 
-/*!
+/**
 \fn QMap::QMap ()
 
-Constructs an empty map.
+Constructs an empty QMap.
 
-<b>See also </b>clear().
-
-
-*/
-
-
-/*!
-\fn QMap::QMap ( const QMap<Key, T> & other )
-
-Constructs a copy of <i>other</i>.
-
-This operation occurs in constant time, because QMap is implicitly shared. This makes returning a QMap from a function very fast. If a shared instance is modified, it will be copied (copy-on-write), and this takes linear time.
-
-<b>See also </b>operator=().
-
+\sa clear().
 
 */
 
 
-/*!
+/**
+\fn QMap::QMap ( const QMap<Key, Val, C> & other )
+
+Constructs a copy of \a other.
+
+*/
+
+
+/**
+\fn QMap::QMap ( QMap<Key, Val, C> && other )
+
+Move constructs a map from \a other.
+
+*/
+
+
+/**
 \fn QMap::~QMap ()
 
-Destroys the map. References to the values in the map, and all iterators over this map, become invalid.
+Destroys the map. References to the values in the map and all iterators over this map become invalid.
 
+*/
+
+
+/**
+\fn void QMap::clear ()
+
+Removes all items from the map.
 
 */
 
 
 
+/**
+\fn bool QMap::contains ( const Key & key ) const
+
+Returns true if the map contains an item with key \a key, otherwise it returns false.
+
+*/
 

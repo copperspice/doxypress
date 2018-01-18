@@ -10,13 +10,13 @@
 /**
 \page cite_command  Cite Test
 
-This pages demonstrates how to use the \c \\cite command in your documentation. 
-
-When the documentation for this page is generated the following will be a link to a book citation on the Bibliography page. 
-\cite wrinkle 
+This page demonstrates how to use the \c \\cite command in your documentation.
 
 When the documentation for this page is generated the following will be a link to an article citation on the Bibliography page.
 \cite astoria
+
+When the documentation for this page is generated the following will be a link to a book citation on the Bibliography page.
+\cite wrinkle
 
 
 */

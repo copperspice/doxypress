@@ -9,12 +9,13 @@
 
 /*!
 \page div-test  Div Test
-Shows how documentation can be inside a div 
+
+This test shows how documentation can be inside an html div tag.
 
 <div class="list_page">
 
-The text on this page is located inside a &lt;div&gt; with a CSS class. DoxyPress has been enhanched to repsect the &lt;div&gt; structure according to standard HTML. The 
-text on this page will be shown in a blue box. 
+The text on this page is located inside a &lt;div&gt; with a CSS class. DoxyPress has been enhanched to repsect the &lt;div&gt; structure according to standard HTML. The
+text on this page will be shown in a blue box.
 
 The &lt;div&gt; is no longer closed and reopened for each paragraph.
 

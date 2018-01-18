@@ -1,0 +1,566 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2014 Digia Plc
+* All rights reserved.
+*
+* GNU Free Documentation License
+*
+*************************************************************************/
+
+/*!
+\class QString8
+\brief Provides a UTF-8 string class.
+
+QString8 provides a UTF-8 Unicode aware string class which stores a sequence of QChar32 elements. Each %QChar32 corresponds
+to one Unicode code point. Unicode is an international standard which supports the majority of human languages.
+
+CopperSpice also provides QByteArray to store raw bytes and traditional 8-bit null terminated strings. QString8 is the
+appropriate string class in almost all cases. The %QByteArray class is appropriate when storing raw binary data.
+
+
+<h3>Initializing a String</h3>
+
+One way to initialize a QString8 is to pass a string literal to the constructor. The following code creates a
+QString8 of size 5 containing the data &quot;Hello&quot;.
+
+\code
+   QString8 str = "Hello";
+\endcode
+
+You can also construct a string using an array of QChar32 as shown below.
+
+\code
+   static const QChar32 data[4] = { 0x0055, 0x006e, 0x10e3, 0x03a3 };
+   QString8 str(data, 4);
+\endcode
+
+A third approach is to set the size of the string using resize() and then initialize the data, character by character.
+QString8 uses zero based indexes. To access the code point at a particular index position use operator[](). For non-const
+strings operator[]() returns a reference to a code point which can be used on the left side of an assignment.
+
+\code
+   QString8 str;
+   str.resize(4);
+
+   str[0] = QChar32('U');
+   str[1] = QChar32('n');
+   str[2] = QChar32(0x10e3);
+   str[3] = QChar32(0x03a3);
+\endcode
+
+A QString8 can contain '\0' characters. The size() method always returns the size of the whole string including the
+embedded null characters.
+
+String literals can be passed to methods which take a QString8 as an argument. To compare a QString8 with a string
+literal use code similar to the following.
+
+\code
+   QString8 str;
+
+   if (str == "auto" || str == "extern" || str == "static") {
+      ...
+   }
+\endcode
+
+*/
+
+
+/**
+\fn QString8::QString8 ()
+
+Constructs an empty string.
+
+\sa isEmpty().
+
+*/
+
+
+/**
+\fn QString8::QString8 ( const QString8 & other )
+
+Constructs a copy of \a other.
+
+\sa operator=().
+
+*/
+
+
+/**
+\fn QString8::QString8 ( QString8 && other )
+
+Move constructs from \a other.
+
+*/
+
+
+/**
+\fn QString8::QString8 ( QChar32 c )
+
+Constructs a string of size 1 containing the code point \a c.
+
+*/
+
+
+/**
+\fn void QString8::clear ()
+
+Clears the contents of the string and makes it empty.
+
+\sa isEmpty().
+
+*/
+
+
+/**
+\fn bool QString8::isEmpty () const
+
+Returns true if the string has no characters, otherwise returns false.
+
+\code
+   QString().isEmpty();                          // returns true
+   QString("").isEmpty();                        // returns true
+   QString("x").isEmpty();                       // returns false
+   QString("abc").isEmpty();                     // returns false
+\endcode
+
+*/
+
+/**
+\fn QString8 QString8::left ( size_type numOfChars ) const
+
+Returns a new QString8 containing the first \a numOfChars code points in this string. The entire string is returned if \a
+numOfChars is greater than size() or less than zero.
+
+\code
+   QString8 str1 = "Pineapple";
+   QString8 str2 = x.left(4);                    // str1 == "Pine"
+\endcode
+
+\sa startsWith().
+
+*/
+
+
+/**
+\fn bool QString8::endsWith ( const QString8 &str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+
+Returns true if the string ends with \a str, otherwise returns false. If \a cs is Qt::CaseSensitive the search is case
+sensitive, otherwise the search is case insensitive.
+
+\code
+   QString8 str = "fruitcake";
+   str.endsWith("cake");                         // returns true
+   str.endsWith("pie");                          // returns false
+\endcode
+
+\sa startsWith().
+
+*/
+
+
+/**
+\fn QString8 QString8::leftJustified ( size_type width, QChar32 fill = UCHAR(' '), bool truncate = false ) const
+
+Returns a string of size \a width that contains this string padded by the \a fill character. If \a truncate
+is false and the size() of the string is more than the value of width, then the returned string is a copy of the string.
+
+\code
+   QString8 s = "apple";
+   QString8 t = s.leftJustified(8, '.');        // t == "apple..."
+\endcode
+
+If \a truncate is true and the size() of the string is more than \a width, then any characters in a copy of the string
+after position width are removed, and the copy is returned.
+
+\code
+   QString8 str = "Pineapple";
+   str = str.leftJustified(5, '.', true);       // str == "Pinea"
+\endcode
+
+*/
+
+
+/**
+\fn bool QString8::startsWith ( const QString8 &str, Qt::CaseSensitivity cs = Qt::CaseSensitive ) const
+
+Returns true if the current string starts with \a str, otherwise returns false. If \a cs is Qt::CaseSensitive the search
+is case sensitive, otherwise the search is case insensitive.
+
+\code
+   QString8 str = "Bananas";
+   str.startsWith("Ban");                        // returns true
+   str.startsWith("Car");                        // returns false
+\endcode
+
+\sa endsWith().
+
+*/
+
+
+/**
+\fn void QString8::truncate ( size_type length )
+
+Truncates the string at the given \a length index. If the specified \a length is beyond the end of the string,
+nothing happens. If length is negative it is equivalent to passing zero.
+
+\code
+   QString8 str = "CopperSpice";
+   str.truncate(6);                              // str == "Copper"
+\endcode
+
+\sa left().
+
+*/
+
+
+/**
+\fn QString8 & QString8::operator+= ( QChar32 c )
+
+Appends \a c to this string and returns a reference to this string.
+
+*/
+
+
+/**
+\fn bool operator== ( const QString8 &str1, const QString8 &str2 )
+\relates QString8
+
+Returns true if string \a str1 is equal to \a str2, otherwise returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator== ( const char (&cStr)[N], const QString8 &str )
+\relates QString8
+
+Returns true if the C string \a cStr is equal to string \a str, otherwise returns false.
+
+*/
+
+
+/**
+\fn bool operator== ( const QString8 &str, const char (&cStr)[N] )
+\relates QString8
+
+Returns true if string \a str is equal to the C string \a cStr, otherwise returns false.
+
+*/
+
+
+/**
+\fn bool operator!= ( const QString8 & str1, const QString8 &str2 )
+\relates QString8
+
+Returns true if \a str1 is not equal to string \a str2, otherwise returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator!= ( const char (&cStr)[N], const QString8 &str )
+\relates QString8
+
+Returns true if the C string \a cStr is not equal to the string \a str, otherwise returns false.
+
+*/
+
+
+/**
+\fn bool operator!= ( const QString8 & str, const char (&cStr)[N] )
+\relates QString8
+
+Returns true if the string \a str is not equal to the C string \a cStr, otherwise returns false.
+
+*/
+
+
+/**
+\fn QString8 & QString8::operator= ( QChar32 c )
+
+Assigns \a c to this string and returns a reference to this string.
+
+*/
+
+
+/**
+\fn QString8 & QString8::operator= ( const QString8 & other )
+
+Assigns \a other to this string and returns a reference to this string.
+
+*/
+
+
+/**
+\fn QString8 & QString8::operator= ( QString8 && other )
+
+Move assigns \a other to this string and returns a reference to this string.
+
+*/
+
+
+/**
+\fn QString8 & QString8::operator+= ( QChar32 c )
+
+Appends \a c to this string and returns a reference to this string.
+
+*/
+
+
+/**
+\fn QString8 & QString8::operator+=( QChar32::SpecialCharacter c )
+
+Appends the special Unicode character \a c to this string and returns a reference to this string.
+
+*/
+
+
+/**
+\fn QString8 & QString8::operator+= ( const QString8 & other )
+
+Appends the string \a other to the end of this string and returns a reference to this string.
+
+\code
+   QString8 str1 = "free";
+   QString8 str2 = "dom";
+   str1 += str2;                                 // str1 == "freedom"
+\endcode
+
+*/
+
+
+/**
+\fn QChar32 QString8::operator[] ( size_type index ) const
+
+Returns the code point at the specified \a index in the string. Equivalent to calling <tt>at(index)</tt>.
+
+*/
+
+
+/**
+\fn QString8 operator+ ( const QString8 & str1, const QString8 & str2 )
+\relates QString8
+
+Returns a string which is the result of concatenating \a str1 and \a str2.
+
+*/
+
+
+
+/**
+\fn QString8 &&operator+ ( QString8 && str1, const QString8 & str2 )
+\relates QString8
+
+Returns a string which is the result of concatenating \a str1 and \a str2. This method is only called if str1 is an
+rvalue, this occurs when the string is a temporary or has been moved.
+
+*/
+
+
+/**
+\fn QString8 operator+ ( QChar32 c, const QString8 & str )
+\relates QString8
+
+Returns a string which is the result of concatenating the character \a c and the string \a str.
+
+*/
+
+
+/**
+\fn QString8 operator+ ( const QString8 & str, QChar32 c )
+\relates QString8
+
+Returns a string which is the result of concatenating the string \a str and the character \a c.
+
+*/
+
+
+/**
+\fn QString8 &&operator+ ( QString8 && str, QChar32 c )
+\relates QString8
+
+Returns a string which is the result of concatenating the string \a str and the character \a c. This method is only called
+if the string is an rvalue, this occurs when the string is a temporary or has been moved.
+
+*/
+
+
+/**
+\fn QString8 operator+ ( const char (&cStr)[N], const QString8 & str )
+\relates QString8
+
+Returns a string which is the result of concatenating string literal \a cStr and the string \a str.
+
+*/
+
+
+/**
+\fn QString8 operator+ ( const QString8 & str, const char (&cStr)[N] )
+\relates QString8
+
+Returns a string which is the result of concatenating \a str and the string literal \a cStr.
+
+*/
+
+
+/**
+\fn QString8 &&operator+ ( QString8 && str, const char (&cStr)[N] )
+\relates QString8
+
+Returns a string which is the result of concatenating \a str and the string literal \a cStr. This method is only
+called if the string is an rvalue, this occurs when the string is a temporary or has been moved.
+
+*/
+
+
+/**
+\fn bool operator< ( const QString8 & str1, const QString8 & str2 )
+\relates QString8
+
+Returns true if the string \a str1 is lexically less than string \a str2, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator< ( const char (&cStr)[N], const QString8 & str )
+\relates QString8
+
+Returns true if the C string \a cSstr is lexically less than string \a str, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator< ( const QString8 & str, const char (&cStr)[N] )
+\relates QString8
+
+Returns true if the string \a str is lexically less than C string \a cStr, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator> ( const QString8 & str1, const QString8 & str2 )
+\relates QString8
+
+Returns true if the string \a str1 is lexically greater than string \a str2, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator> ( const char (&cStr)[N], const QString8 & str )
+\relates QString8
+
+Returns true if the C string \a cStr is lexically greater than string \a str, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator> ( const QString8 & str, const char (&cStr)[N] )
+\relates QString8
+
+Returns true if the string \a str is lexically greater than C string \a str, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator<= ( const QString8 & str1, const QString8 &str2 )
+\relates QString8
+
+Returns true if the string \a str1 is lexically less than or equal to than string \a str2, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator<= ( const char (&cStr)[N], const QString8 & str )
+\relates QString8
+
+Returns true if the C string \a str is lexically less than or equal to than string \a str, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator<= ( const QString8 & str, const char (&cStr)[N] )
+\relates QString8
+
+Returns true if the string \a str is lexically less than or equal to than C string \a cStr, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator>= ( const QString8 & str1, const QString8 & str2 )
+\relates QString8
+
+Returns true if the string \a str1 is lexically greater than or equal to than string \a str2, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator>= ( const char (&cStr)[N], const QString8 & str )
+\relates QString8
+
+Returns true if the C string \a cStr is lexically greater than or equal to than string \a str, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+
+/**
+\fn bool operator>= ( const QString8 & str, const char (&cStr)[N] )
+\relates QString8
+
+Returns true if the string \a str is lexically greater than or equal to than C string \a cStr, otherwise it returns false.
+
+The comparison is based exclusively on the numeric Unicode values of the code points and is very fast, but may not be what
+a person would expect. Consider sorting strings which will be displayed to the user with localeAwareCompare().
+
+*/
+
+

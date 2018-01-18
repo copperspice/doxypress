@@ -8,35 +8,35 @@
 *************************************************************************/
 
 /**
-\page table-test  Table Test (blank rows) 
+\page table-test  Table Test (blank rows)
 
 The following table has blank rows in the source. This caused layout issues and has been resolved and works properly
 in DoxyPress. The blank rows are not visible in the table output as shown below.
 
 <br>
- 
-<table class="generic"> 
+
+<table class="generic">
    <tr><th width="225">System</th><th>Information</th></tr>
- 
+
    <tr>
       <td>\subpage metaobjects-c  "Meta Object System"</td>
       <td>Overview of the Meta Object System and introspection</td>
-   </tr> 
+   </tr>
 
    <tr>
       <td>\subpage object-model-c "Object Model"</td>
       <td>Overview of the Object Model System</td>
-   </tr> 
+   </tr>
 
    <tr>
       <td>\subpage object-trees-c</td>
       <td>Overview about the parent-child relationship and object ownership</td>
 
-   </tr>  
+   </tr>
    <tr>
       <td>\subpage  properties-c</td>
       <td>Overview of the Property System</td>
-   </tr> 
+   </tr>
 
    <tr>
       <td>\subpage signals-slots-c</td>
@@ -47,45 +47,44 @@ in DoxyPress. The blank rows are not visible in the table output as shown below.
 */
 
 
-/**  
+/**
 \page metaobjects-c Meta Object System
 
-Meta object system documentation goes here <b>. . .</b> 
+Meta object system documentation goes here. Text follows <b>. . .</b>
+
 
 */
 
 
-/**  
+/**
 \page object-model-c  Object Model
 
-Object model documentation goes here <b>. . .</b> 
-
+Object model documentation goes here. Text follows <b>. . .</b>
 
 */
 
 
-/**  
+/**
 \page object-trees-c Object Trees
 
-Documentation goes here <b>. . .</b>  
-
+Documentation goes here. Text follows <b>. . .</b>
 
 */
 
 
-/**  
+/**
 \page properties-c Property System
 
-Documentation goes here <b>. . .</b>  
+Documentation goes here. Text follows <b>. . .</b>
 
 
 */
 
 
-/**  
+/**
 \page signals-slots-c Signals & Slots
- 
-Signals & Slots documentation goes here<b>. . .</b> 
+
+Signals & Slots documentation goes here. Text follows <b>. . .</b>
 
 
 */

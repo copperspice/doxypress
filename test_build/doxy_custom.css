@@ -79,6 +79,8 @@ div.fragment {
    padding-left: 6px;
    padding-bottom: 6px;
    margin-right: 18px;
+   margin-top: 14px;
+   margin-bottom: 14px;
 }
 
 div.md {
@@ -113,6 +115,24 @@ div.list_page
 div.one-line
 {
    margin: 0px;
+}
+
+
+/* see also */
+dl.see
+{
+}
+
+dl.see dd
+{
+   margin-left: .3em;
+   display: inline;
+}
+
+dl.see dt
+{
+   margin-left: 0px !important;
+   display: inline;
 }
 
 /* cs classes */
@@ -155,7 +175,6 @@ div.one-line
    color: purple;
 }
 
-
 hr {
    height: 0px;
    border: none;
@@ -165,9 +184,28 @@ hr {
    margin-bottom: 20px;
 }
 
+
+/* links */
+a, a:visited, .contents a:visited {
+   font-weight: 500;
+   color: #023CB3;                          /* blue */
+}
+
+a.el, a.el:visited, .contents a.el:visited {
+   font-weight: 500;
+   color: #023CB3;                          /* blue */
+}
+
+a.docs-link {
+   font-weight: bold;
+   text-decoration: underline;
+   color: #023CB3;                          /* blue */
+}
+
 a.www-link {
    font-weight: bold;
    text-decoration: underline;
+   color: #3D578C;                          /* blue */
    padding-left: 12px;
    background: url("closed.png");
    background-repeat: no-repeat;

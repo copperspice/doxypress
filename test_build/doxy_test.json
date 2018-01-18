@@ -56,7 +56,7 @@
             ""
         ],
         "qt-auto-brief": true,
-        "repeat-brief": false,
+        "repeat-brief": true,
         "separate-member-pages": false,
         "short-names": false,
         "show-file-page": false,
@@ -288,7 +288,7 @@
             ""
         ],
         "mathjax-format": "HTML-CSS",
-        "mathjax-relpath": "http://cdn.mathjax.org/mathjax/latest",
+        "mathjax-relpath": "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/",
         "search-data-file": "searchdata.xml",
         "search-external": false,
         "search-external-id": "",
@@ -302,7 +302,7 @@
     },
     "output-latex": {
         "cite-bib-files": [
-            ""
+            "input_test/commands/test_cite.bib"
         ],
         "generate-latex": true,
         "latex-batch-mode": false,
