@@ -33,7 +33,6 @@ class MemberList;
 class MemberDef;
 class NamespaceDef;
 class OutputList;
-class StorageIntf;
 
 struct ListItemInfo;
 

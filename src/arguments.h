@@ -23,8 +23,6 @@
 
 #include <types.h>
 
-class StorageIntf;
-
 // class contains the information about the argument of a function or template
 struct Argument {
    Argument() {}
@@ -54,7 +52,7 @@ struct Argument {
       return *this;
    }
 
-   // return true if this argument is documentation and the argument has a  non empty name 
+   // return true if this argument is documentation and the argument has a  non empty name
    bool hasDocumentation() const {
       return ! name.isEmpty() && ! docs.isEmpty();
    }
@@ -69,47 +67,40 @@ struct Argument {
    QString typeConstraint;     /*!< Used for Java generics: <T extends C> */
 };
 
-/*! \brief This class represents a function or template argument list.
- *
- *  stores information about a member which is typically found  after the argument list, 
- *  such as whether the member is const, volatile or pure virtual.
- */
+// stores information about a member which is typically found  after the argument list,
+//  such as whether the member is const, volatile or pure virtual.
 class ArgumentList : public QVector<Argument>
 {
  public:
-   /*! Creates an empty argument list */
+   // Creates an empty argument list
    ArgumentList() : constSpecifier(false), volatileSpecifier(false), pureSpecifier(false),
                     refSpecifier(RefType::NoRef), isDeleted(false)
    {
    }
 
-   /*! Destroys the argument list */
    ~ArgumentList() {}
 
-   /*! Does any argument of this list have documentation? */
+   // Does any argument of this list have documentation?
    bool hasDocumentation() const;
 
-   /*! Does the member modify the state of the class? default: false. */
+   // Does the member modify the state of the class? default: false.
    bool constSpecifier;
 
-   /*! Is the member volatile? default: false. */
+   // Is the member volatile? default: false.
    bool volatileSpecifier;
 
-   /*! Is this a pure virtual member? default: false */
+   // Is this a pure virtual member? default: false
    bool pureSpecifier;
 
    RefType refSpecifier;
 
-   /*! C++11 style Trailing return type */
+   // C++11 style Trailing return type
    QString trailingReturnType;
 
-   /*! parsing a method with = delete */
+   // parsing a method with = delete
    bool isDeleted;
 
    // methods
-   static ArgumentList unmarshal(StorageIntf *s);
-   static void marshal(StorageIntf *s, const ArgumentList &argList);
-
    bool isEmpty() const = delete;
 
    bool listEmpty() const {

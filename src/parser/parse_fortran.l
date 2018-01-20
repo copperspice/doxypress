@@ -464,7 +464,7 @@ SCOPENAME ({ID}{BS}"::"{BS})*
       current_root->addSubEntry(current, current_root);
 
       current = QMakeShared<Entry>();
-      current->lang = SrcLangExt_Fortran;
+      current->m_srcLang = SrcLangExt_Fortran;
       yy_pop_state();
    }
 
@@ -491,7 +491,7 @@ SCOPENAME ({ID}{BS}"::"{BS})*
       current_root->addSubEntry(current, current_root);
 
       current = QMakeShared<Entry>();
-      current->lang = SrcLangExt_Fortran;
+      current->m_srcLang = SrcLangExt_Fortran;
    }
 
 <Use,UseOnly>"\n"                       {
@@ -2559,7 +2559,7 @@ static void initEntry()
    current->mtype = mtype;
    current->virt  = virt;
    current->stat  = gstat;
-   current->lang  = SrcLangExt_Fortran;
+   current->m_srcLang  = SrcLangExt_Fortran;
    initGroupInfo(current);
 }
 
@@ -2962,15 +2962,15 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       groupEnterFile(yyFileName, yyLineNr);
 
       current              = QMakeShared<Entry>();
-      current->lang        = SrcLangExt_Fortran;
+      current->m_srcLang   = SrcLangExt_Fortran;
       current->m_entryName = yyFileName;
-      current->section = Entry::SOURCE_SEC;
+      current->section     = Entry::SOURCE_SEC;
 
       current_root->addSubEntry(current, current_root);
 
-      file_root        = current;
-      current          = QMakeShared<Entry>();
-      current->lang    = SrcLangExt_Fortran;
+      file_root           = current;
+      current             = QMakeShared<Entry>();
+      current->m_srcLang  = SrcLangExt_Fortran;
 
       yyrestart( yyin );
       BEGIN( Start );

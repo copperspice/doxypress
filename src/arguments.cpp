@@ -18,7 +18,6 @@
 #include <assert.h>
 
 #include <arguments.h>
-#include <marshal.h>
 
 // the argument list is documented if one of its arguments is documented
 bool ArgumentList::hasDocumentation() const
@@ -31,65 +30,5 @@ bool ArgumentList::hasDocumentation() const
    }
 
    return false;
-}
-
-ArgumentList ArgumentList::unmarshal(StorageIntf *s)
-{
-   uint i;
-   uint count = unmarshalUInt(s);
-
-   if (count == NULL_LIST) {
-      return ArgumentList();
-   }
-
-   ArgumentList result;
-   assert(count < 1000000);
-
-   for (i = 0; i < count; i++) {
-      Argument a;
-
-      a.attrib  = unmarshalQString(s);
-      a.type    = unmarshalQString(s);
-      a.canType = unmarshalQString(s);
-      a.name    = unmarshalQString(s);
-      a.array   = unmarshalQString(s);
-      a.defval  = unmarshalQString(s);
-      a.docs    = unmarshalQString(s);
-      a.typeConstraint = unmarshalQString(s);
-
-      result.append(a);
-   }
-
-   result.constSpecifier     = unmarshalBool(s);
-   result.volatileSpecifier  = unmarshalBool(s);
-   result.pureSpecifier      = unmarshalBool(s);
-   result.refSpecifier       = static_cast<RefType>(unmarshalInt(s));
-   result.trailingReturnType = unmarshalQString(s);
-   result.isDeleted          = unmarshalBool(s);
-
-   return result;
-}
-
-void ArgumentList::marshal(StorageIntf *s, const ArgumentList &argList)
-{
-   marshalUInt(s, argList.count());
-
-   for (auto &item : argList)  {
-      marshalQString(s, item.attrib);
-      marshalQString(s, item.type);
-      marshalQString(s, item.canType);
-      marshalQString(s, item.name);
-      marshalQString(s, item.array);
-      marshalQString(s, item.defval);
-      marshalQString(s, item.docs);
-      marshalQString(s, item.typeConstraint);
-   }
-
-   marshalBool(s,    argList.constSpecifier);
-   marshalBool(s,    argList.volatileSpecifier);
-   marshalBool(s,    argList.pureSpecifier);
-   marshalInt(s,     argList.refSpecifier);
-   marshalQString(s, argList.trailingReturnType);
-   marshalBool(s,    argList.isDeleted);
 }
 

@@ -1056,7 +1056,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <Comment>"<"{DETAILEDHTMLOPT}{ATTR}">"    {
       // HTML command that ends a brief description
-      if (current->lang == SrcLangExt_CSharp) {
+      if (current->m_srcLang == SrcLangExt_CSharp) {
          setOutput(OutputMainDoc);
       }
 

@@ -20,19 +20,16 @@
 
 #include <bitset>
 
-#include <QFile>
 #include <QFlatMap>
 #include <QString>
 #include <QVector>
 
 #include <types.h>
 #include <arguments.h>
+#include <doxy_shared.h>
 #include <section.h>
 
-class MiniEntry;
 class FileDef;
-class FileStorage;
-class StorageIntf;
 struct ListItemInfo;
 
 // stores information about an inheritance relationship
@@ -105,9 +102,10 @@ enum class EntryKey {
 };
 
 // store information about an entity found in the source code
-class Entry
+class Entry : public EnableSharedFromThis
 {
- public:
+
+  public:
 
    // supported entry types
    enum Sections {
@@ -301,11 +299,19 @@ class Entry
    ~Entry();
 
    void addSpecialListItem(const QString &listName, int index);
-   void createNavigationIndex(QSharedPointer<MiniEntry> ptr_miniEntry, FileStorage &storage,
-                  QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
+   void createNavigationIndex(QSharedPointer<FileDef> fd);
 
-   void setParent(QSharedPointer<Entry> parent) {
-      m_parent = parent;
+   // returns the list of children for this Entry
+   const QVector<QSharedPointer<Entry>> &children() const {
+      return m_sublist;
+   }
+
+   QSharedPointer<FileDef> fileDef() const {
+      return m_fileDef;
+   }
+
+   void setFileDef(QSharedPointer<FileDef> fd) {
+      m_fileDef = fd;
    }
 
    // returns the parent for this Entry or null_ptr if this entry has no parent
@@ -313,19 +319,32 @@ class Entry
       return m_parent.toStrongRef();
    }
 
-   // returns the list of children for this Entry
-   const QVector<QSharedPointer<Entry>> &children() const {
-      return m_sublist;
+   void setParent(QSharedPointer<Entry> parent) {
+      m_parent = parent;
    }
 
+   void setSection(int tmpSection) {
+      section = tmpSection;
+   }
+
+
+   // ** sub entries
+
    // adds entry E as a child to this entry
-   void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> self);
+   void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> dummy = QSharedPointer<Entry>());
 
    // Removes entry E from the list of children
    void removeSubEntry(QSharedPointer<Entry> e);
 
    // restore the state of this Entry to the default value when constructed
    void reset();
+
+
+   // ** methdods for EnteryKey flatMap
+
+   QString getData(EntryKey key) const {
+      return m_entryMap.value(key);
+   }
 
    void setData(EntryKey key, QString data)  {
 
@@ -365,22 +384,17 @@ class Entry
       }
    }
 
-   QString getData(EntryKey key) const {
-      return m_entryMap.value(key);
-   }
-
    TagInfo       m_tagInfoEntry;   // tag file info
    ArgumentList  argList;          // member arguments as a list
    ArgumentList  typeConstr;       // where clause (C#) for type constraints
 
-   RelatesType  relatesType;       // how relates is handled
-   Specifier    virt;              // virtualness of the entry
-   Protection   protection;        // class protection
-   MethodTypes  mtype;             // signal, slot, (dcop) method, or property
-   GroupDocType groupDocType;
-   SrcLangExt   lang;              // programming language in which this entry was found
-
-   Traits       m_traits;
+   RelatesType   relatesType;      // how relates is handled
+   Specifier     virt;             // virtualness of the entry
+   Protection    protection;       // class protection
+   MethodTypes   mtype;            // signal, slot, (dcop) method, or property
+   GroupDocType  groupDocType;
+   SrcLangExt    m_srcLang;        // programming language in which this entry was found
+   Traits        m_traits;
 
    int  section;                   // entry type (see Sections);
    int  initLines;                 // define/variable initializer lines to show
@@ -448,94 +462,27 @@ class Entry
       }
    }
 
+   // next two methods from miniEntry
+   QSharedPointer<Entry> entry()  {
+      QSharedPointer<Entry> self = sharedFrom(this);
+      return self;
+   }
+
+   const TagInfo &tagInfo() const {
+      return m_tagInfoEntry;
+   }
+
  private:
    Entry &operator=(const Entry &);
-
-   void createSubtreeIndex(QSharedPointer<MiniEntry> ptr_miniEntry, FileStorage &storage,
-                  QSharedPointer<FileDef> fd, QSharedPointer<Entry> self);
 
    QFlatMap<EntryKey, QString> m_entryMap;        // contains details about this entry
 
    QWeakPointer<Entry> m_parent;                  // parent node in the tree
    QVector<QSharedPointer<Entry>> m_sublist;      // entries which are children
+
+   QSharedPointer<FileDef> m_fileDef;             // file associated with the entry
 };
 
-/** For a node in the master tree, where each node is an Entry *
- *  Allows navigating through the master tree to load and store Entry objects persistently to disk
- */
-class MiniEntry
-{
- public:
-   MiniEntry(QSharedPointer<MiniEntry> parent, QSharedPointer<Entry> e);
-   ~MiniEntry();
-
-   void addChild(QSharedPointer<MiniEntry> ptr_miniEntry);
-   void setEntry(QSharedPointer<Entry> e);
-
-   bool loadEntry(FileStorage &storage);
-   bool saveEntry(QSharedPointer<Entry> e, FileStorage &storage);
-   void releaseEntry();
-
-   void changeSection(int section) {
-      m_section = section;
-   }
-
-   void setFileDef(QSharedPointer<FileDef> fd) {
-      m_fileDef = fd;
-   }
-
-   QSharedPointer<Entry> entry() const {
-      return m_info;
-   }
-
-   int section() const {
-      return m_section;
-   }
-
-   SrcLangExt lang() const {
-      return m_lang;
-   }
-
-   const QString &type() const {
-      return m_type;
-   }
-
-   const QString &name() const {
-      return m_name;
-   }
-
-   const TagInfo &tagInfo() const {
-      return m_tagInfoNav;
-   }
-
-   const QVector<QSharedPointer<MiniEntry>> &children() const {
-      return m_subList;
-   }
-
-   QSharedPointer<MiniEntry> parent() const {
-      return m_parent.toStrongRef();
-   }
-
-   QSharedPointer<FileDef> fileDef() const {
-      return m_fileDef;
-   }
-
- private:
-   QWeakPointer<MiniEntry> m_parent;                // parent node in the tree
-   QVector<QSharedPointer<MiniEntry>> m_subList;    // entries that are children
-
-   QSharedPointer<FileDef> m_fileDef;
-   QSharedPointer<Entry>   m_info;
-
-   bool         m_noLoad;
-   int64_t      m_offset;
-
-   int          m_section;     // entry type (see Sections);
-   QString	    m_type;        // member type
-   QString      m_name;        // member name
-
-   TagInfo      m_tagInfoNav;  // tag file info
-   SrcLangExt   m_lang;        // programming language in which this entry was found
-};
+using MiniEntry = Entry;
 
 #endif

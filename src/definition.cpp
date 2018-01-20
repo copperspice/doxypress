@@ -31,7 +31,6 @@
 #include <htags.h>
 #include <language.h>
 #include <message.h>
-#include <marshal.h>
 #include <outputlist.h>
 #include <parse_base.h>
 #include <util.h>

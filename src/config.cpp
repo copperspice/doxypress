@@ -23,6 +23,7 @@
 #include <doxy_globals.h>
 #include <language.h>
 #include <message.h>
+#include <portable.h>
 #include <pre.h>
 #include <util.h>
 

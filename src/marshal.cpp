@@ -257,7 +257,7 @@ void marshalEntry(StorageIntf *s, QSharedPointer<Entry> e)
 
    marshalInt(s,             e->startLine);
    marshalItemInfoList(s,    e->m_specialLists);
-   marshalInt(s,             e->lang);
+   marshalInt(s,             e->m_srcLang);
    marshalBool(s,            e->hidden);
    marshalBool(s,            e->artificial);
    marshalInt(s,             e->groupDocType);
@@ -552,7 +552,7 @@ QSharedPointer<Entry> unmarshalEntry(StorageIntf *s)
 
    e->startLine        = unmarshalInt(s);
    e->m_specialLists   = unmarshalItemInfoList(s);
-   e->lang             = static_cast<SrcLangExt>(unmarshalInt(s));
+   e->m_srcLang        = static_cast<SrcLangExt>(unmarshalInt(s));
    e->hidden           = unmarshalBool(s);
    e->artificial       = unmarshalBool(s);
    e->groupDocType     = static_cast<Entry::GroupDocType>(unmarshalInt(s));

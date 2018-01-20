@@ -4508,7 +4508,7 @@ case 7:
 YY_RULE_SETUP
 {
       // HTML command that ends a brief description
-      if (current->lang == SrcLangExt_CSharp) {
+      if (current->m_srcLang == SrcLangExt_CSharp) {
          setOutput(OutputMainDoc);
       }
 

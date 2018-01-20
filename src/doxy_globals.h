@@ -32,7 +32,6 @@
 #include <dirdef.h>
 #include <entry.h>
 #include <filenamelist.h>
-#include <filestorage.h>
 #include <formula.h>
 #include <groupdef.h>
 #include <membergroup.h>
@@ -160,9 +159,7 @@ class Doxy_Globals
       static FormulaList       formulaList;
       static IndexList         indexList;
       static ParserManager     parserManager;
-      static Store             symbolStorage;
       static OutputList        outputList;
-      static FileStorage       fileStorage;
 
       static Statistics        infoLog_Stat;
 
@@ -189,9 +186,6 @@ class Doxy_Globals
       static QString htmlFileExtension;
       static QString latexStyleExtension;
 
-      static QString tempA_FName;
-      static QString tempB_FName;
-
       static bool gatherDefines;
       static bool outputToApp;
       static bool userComments;
@@ -213,7 +207,7 @@ class Doxy_Globals
 
       static QDateTime dateTime;
 
-      static QHash<QString, QSharedPointer<MiniEntry>>   g_classEntries;
+      static QHash<QString, QSharedPointer<Entry>>  g_classEntries;
 
       static QStringList               g_inputFiles;
       static QSet<QString>             g_compoundKeywordDict;

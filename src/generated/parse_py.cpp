@@ -1543,7 +1543,7 @@ static void initEntry()
    current->mtype      = mtype;
    current->virt       = virt;
    current->stat       = gstat;
-   current->lang       = SrcLangExt_Python;
+   current->m_srcLang  = SrcLangExt_Python;
 
    current->setParent(current_root);
 
@@ -1774,7 +1774,7 @@ static void searchFoundDef()
    current->bodyLine  = yyLineNr;
 
    current->section   = Entry::FUNCTION_SEC;
-   current->lang      = SrcLangExt_Python;
+   current->m_srcLang = SrcLangExt_Python;
    current->virt      = Normal;
    current->stat      = gstat;
    current->mtype     = (mtype = Method);

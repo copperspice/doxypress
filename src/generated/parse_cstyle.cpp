@@ -12566,14 +12566,14 @@ static void initEntry()
   current->mtype      = mtype;
   current->virt       = virt;
   current->stat       = gstat;
-  current->lang       = language;
+  current->m_srcLang  = language;
 
   initGroupInfo(current);
   isTypedef = false;
 }
 
 ///// remove any automatic grouping and add new one (if given)
-//static void setCurrentGroup( QCString *newgroup, Grouping::GroupPri_t pri )
+//static void setCurrentGroup( QString *newgroup, Grouping::GroupPri_t pri )
 //{
 //   /* remove auto group name from current entry and discard it */
 //   Grouping *g = current->m_groups.first();
@@ -14004,8 +14004,9 @@ YY_RULE_SETUP
          current->section     = Entry::FUNCTION_SEC;
          current->protection  = protection = Public;
 
-         language   = current->lang = SrcLangExt_ObjC;
-         insideObjC = true;
+         language             = SrcLangExt_ObjC;
+         current->m_srcLang   = SrcLangExt_ObjC;
+         insideObjC           = true;
 
          current->virt  = Specifier::Virtual;
          current->stat  = (text[0]=='+');
@@ -14370,7 +14371,8 @@ case 79:
 YY_RULE_SETUP
 {
       current_root->addSubEntry(current, current_root);
-      current_root = current ;
+      current_root = current;
+
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(FindMembers);
@@ -14751,10 +14753,12 @@ YY_RULE_SETUP
       // Objective-C class implementation
       lineCount();
 
-      isTypedef = false;
+      isTypedef           = false;
       current->section    = Entry::OBJCIMPL_SEC;
-      language            = current->lang = SrcLangExt_ObjC;
+      language            = SrcLangExt_ObjC;
+      current->m_srcLang  = SrcLangExt_ObjC;
       insideObjC          = true;
+
       current->protection = protection = Public;
 
       addType(current);
@@ -14780,8 +14784,9 @@ YY_RULE_SETUP
       current->m_traits.setTrait(Entry::Virtue::Interface);
 
       if (! insideJava) {
-         language   = current->lang = SrcLangExt_ObjC;
-         insideObjC = true;
+         language            = SrcLangExt_ObjC;
+         current->m_srcLang  = SrcLangExt_ObjC;
+         insideObjC          = true;
       }
 
       current->protection = protection = Public;
@@ -14810,9 +14815,10 @@ YY_RULE_SETUP
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Protocol);
 
-      language = current->lang = SrcLangExt_ObjC;
+      language            = SrcLangExt_ObjC;
+      current->m_srcLang  = SrcLangExt_ObjC;
+      insideObjC          = true;
 
-      insideObjC = true;
       current->protection = protection = Public;
 
       addType(current);
@@ -14885,8 +14891,9 @@ YY_RULE_SETUP
       current->bodyLine    = yyLineNr;
 
       if (text[0] == '@') {
-         language   = current->lang = SrcLangExt_ObjC;
-         insideObjC = true;
+         language            = SrcLangExt_ObjC;
+         current->m_srcLang  = SrcLangExt_ObjC;
+         insideObjC          = true;
       }
 
       lineCount();
@@ -19351,7 +19358,7 @@ YY_RULE_SETUP
             // case 2: create a typedef field
 
             QSharedPointer<Entry> varEntry = QMakeShared<Entry>();
-            varEntry->lang        = language;
+            varEntry->m_srcLang   = language;
             varEntry->protection  = current->protection;
             varEntry->mtype       = current->mtype;
             varEntry->virt        = current->virt;
@@ -19492,8 +19499,9 @@ YY_RULE_SETUP
       current = QMakeShared<Entry>();
       initEntry();
 
-      language = current->lang = SrcLangExt_Cpp;
-      insideObjC = false;
+      language            = SrcLangExt_Cpp;
+      current->m_srcLang  = SrcLangExt_Cpp;
+      insideObjC          = false;
 
       BEGIN( FindMembers );
    }
@@ -21672,8 +21680,9 @@ YY_RULE_SETUP
       initEntry();
 
       if (insideObjC) {
-         language   = (current->lang = SrcLangExt_Cpp);
-         insideObjC = false;
+         language            = SrcLangExt_Cpp;
+         current->m_srcLang  = SrcLangExt_Cpp;
+         insideObjC          = false;
       }
 
       if (isTypedef) {
@@ -25069,7 +25078,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          yyLineNr     = ce->startLine;
          yyColNr      = ce->startColumn;
-         insideObjC   = ce->lang == SrcLangExt_ObjC;
+         insideObjC   = (ce->m_srcLang == SrcLangExt_ObjC);
 
          current = QMakeShared<Entry>();
          gstat = false;
@@ -25111,7 +25120,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
             } else if (isInterface || isRef || isValue || isStruct || isUnion) {
 
-               if (ce->lang == SrcLangExt_ObjC) {
+               if (ce->m_srcLang == SrcLangExt_ObjC) {
                   current->protection = protection = Protected;
 
                } else {
@@ -25185,22 +25194,25 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
 
       yyLineNr        = 1;
       yyFileName      = fileName;
-      rt->lang        = language;
+      rt->m_srcLang   = language;
 
       groupEnterFile(yyFileName, yyLineNr);
 
       current = QMakeShared<Entry>();
       int sec = determineSection(yyFileName);
 
-      if (sec != 0) {
-         current->m_entryName    = yyFileName;
-         current->section = sec;
+      if (sec == 0) {
+         initEntry();
+
+      } else {
+         current->m_entryName = yyFileName;
+         current->section     = sec;
          current_root->addSubEntry(current, current_root);
+
+         current = QMakeShared<Entry>();
+         initEntry();
       }
 
-      current->reset();
-
-      initEntry();
       parse_cstyle_YYrestart(parse_cstyle_YYin);
 
       if (insidePHP) {
@@ -25208,7 +25220,6 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
 
       } else {
          BEGIN( FindMembers );
-
       }
 
       parse_cstyle_YYlex();

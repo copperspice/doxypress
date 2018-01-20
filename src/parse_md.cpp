@@ -2857,10 +2857,10 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
    QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-   current->lang    = SrcLangExt_Markdown;
    current->setData(EntryKey::File_Name, fileName);
    current->setData(EntryKey::MainDocs_File, fileName);
-   current->docLine = 1;
+   current->docLine  = 1;
+   current->m_srcLang = SrcLangExt_Markdown;
 
    QString id;
    QString docs    = fileBuf;
@@ -2916,10 +2916,10 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
          root->addSubEntry(current, root);
 
          current = QMakeShared<Entry>();
-         current->lang = SrcLangExt_Markdown;
 
          current->setData(EntryKey::MainDocs_File, docFile);
-         current->docLine = lineNr;
+         current->docLine   = lineNr;
+         current->m_srcLang = SrcLangExt_Markdown;
       }
    }
 

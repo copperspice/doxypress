@@ -374,7 +374,7 @@ QSharedPointer<Entry> tcl_entry_new()
    myEntry->section     = Entry::EMPTY_SEC;
    myEntry->m_entryName = "";
    myEntry->protection  = Public;
-   myEntry->lang        = SrcLangExt_Tcl;
+   myEntry->m_srcLang   = SrcLangExt_Tcl;
 
    myEntry->setData(EntryKey::File_Name,    tcl.file_name);
    myEntry->setData(EntryKey::Brief_Docs,   "");

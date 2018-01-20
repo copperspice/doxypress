@@ -40,6 +40,7 @@
 #include <image.h>
 #include <language.h>
 #include <message.h>
+#include <portable.h>
 #include <textdocvisitor.h>
 
 struct FindFileCacheElem {

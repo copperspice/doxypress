@@ -1419,7 +1419,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ce->setData(EntryKey::Clang_Id, tci.clangId);
 
       ce->m_tagInfoEntry = ti;
-      ce->lang           = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
+      ce->m_srcLang      = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
 
       // transfer base class list
       if (tci.bases) {

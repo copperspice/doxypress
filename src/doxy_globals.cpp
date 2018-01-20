@@ -59,9 +59,7 @@ StringDict       Doxy_Globals::tagDestinationDict;         // all tag locations
 FormulaList      Doxy_Globals::formulaList;                // all formulas
 IndexList        Doxy_Globals::indexList;
 ParserManager    Doxy_Globals::parserManager;
-Store            Doxy_Globals::symbolStorage;
 OutputList       Doxy_Globals::outputList;                 // list of output generating objects
-FileStorage      Doxy_Globals::fileStorage;
 Statistics       Doxy_Globals::infoLog_Stat;
 
 SortedList<QSharedPointer<FileNameList>> Doxy_Globals::inputNameList;         // all input files
@@ -87,9 +85,6 @@ QCache<QString, LookupInfo>                  Doxy_Globals::lookupCache;
 QString Doxy_Globals::htmlFileExtension;
 QString Doxy_Globals::latexStyleExtension = ".sty";
 
-QString Doxy_Globals::tempA_FName;
-QString Doxy_Globals::tempB_FName;
-
 bool Doxy_Globals::gatherDefines       = true;
 bool Doxy_Globals::insideMainPage      = false;            // indicates if doc are generatedd for the main page
 bool Doxy_Globals::parseSourcesNeeded  = false;
@@ -111,7 +106,7 @@ int Doxy_Globals::subpageNestingLevel;
 
 QDateTime Doxy_Globals::dateTime;
 
-QHash<QString, QSharedPointer<MiniEntry>> Doxy_Globals::g_classEntries;
+QHash<QString, QSharedPointer<Entry>> Doxy_Globals::g_classEntries;
 
 QStringList               Doxy_Globals::g_inputFiles;
 QSet<QString>             Doxy_Globals::g_compoundKeywordDict;      // keywords recognised as compounds

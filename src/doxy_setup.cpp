@@ -33,7 +33,6 @@
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
 #include <entry.h>
-#include <filestorage.h>
 #include <formula.h>
 #include <htmlgen.h>
 #include <index.h>
@@ -131,13 +130,6 @@ void initDoxyPress()
 
 void shutDownDoxyPress()
 {
-   Doxy_Globals::symbolStorage.close();
-
-   QDir thisDir;
-   if (! Doxy_Globals::tempA_FName.isEmpty()) {
-      thisDir.remove(Doxy_Globals::tempA_FName);
-   }
-
    removePreProcessor();
    Mappers::freeMappers();
    codeFreeScanner();
