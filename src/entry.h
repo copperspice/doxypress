@@ -384,7 +384,7 @@ class Entry : public EnableSharedFromThis
       }
    }
 
-   TagInfo       m_tagInfoEntry;   // tag file info
+   TagInfo       m_tagInfo;        // tag file info
    ArgumentList  argList;          // member arguments as a list
    ArgumentList  typeConstr;       // where clause (C#) for type constraints
 
@@ -462,14 +462,10 @@ class Entry : public EnableSharedFromThis
       }
    }
 
-   // next two methods from miniEntry
+   // from old miniEntry
    QSharedPointer<Entry> entry()  {
       QSharedPointer<Entry> self = sharedFrom(this);
       return self;
-   }
-
-   const TagInfo &tagInfo() const {
-      return m_tagInfoEntry;
    }
 
  private:
@@ -482,7 +478,5 @@ class Entry : public EnableSharedFromThis
 
    QSharedPointer<FileDef> m_fileDef;             // file associated with the entry
 };
-
-using MiniEntry = Entry;
 
 #endif

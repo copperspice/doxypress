@@ -29,7 +29,7 @@ Entry::Entry()
 
 Entry::Entry(const Entry &e)
 {
-   m_tagInfoEntry   = e.m_tagInfoEntry;
+   m_tagInfo        = e.m_tagInfo;
    argList          = e.argList;
    typeConstr       = e.typeConstr;
 
@@ -96,7 +96,7 @@ void Entry::reset()
    static const bool dotCallGraph = Config::getBool("dot-call");
    static const bool dotCalledBy  = Config::getBool("dot-called-by");
 
-   m_tagInfoEntry.clear();
+   m_tagInfo.clear();
    argList.clear();
    typeConstr.clear();
 

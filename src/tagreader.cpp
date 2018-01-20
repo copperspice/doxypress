@@ -1245,7 +1245,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
             ti.tag_Anchor   = evi.anchor;
             ti.tag_FileName = evi.file;
 
-            ev->m_tagInfoEntry = ti;
+            ev->m_tagInfo   = ti;
             me->addSubEntry(ev, me);
          }
       }
@@ -1268,7 +1268,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       ti.tag_Anchor    = tmi.anchor;
       ti.tag_FileName  = tmi.anchorFile;
 
-      me->m_tagInfoEntry = ti;
+      me->m_tagInfo    = ti;
 
       if (tmi.kind == "define") {
          me->setData(EntryKey::Member_Type, "#define");
@@ -1418,7 +1418,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 
       ce->setData(EntryKey::Clang_Id, tci.clangId);
 
-      ce->m_tagInfoEntry = ti;
+      ce->m_tagInfo      = ti;
       ce->m_srcLang      = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
 
       // transfer base class list
@@ -1459,7 +1459,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ti.tag_Name     = m_tagName;
       ti.tag_FileName = tfi.filename;
 
-      fe->m_tagInfoEntry = ti;
+      fe->m_tagInfo   = ti;
 
       QString fullName = m_tagName + ":" + tfi.path + stripPath_tag(tfi.name);
       fe->setData(EntryKey::File_Name, fullName);
@@ -1495,7 +1495,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ti.tag_Name         = m_tagName;
       ti.tag_FileName     = tni.filename;
 
-      ne->m_tagInfoEntry  = ti;
+      ne->m_tagInfo       = ti;
       ne->setData(EntryKey::Clang_Id, tni.clangId);
 
       buildMemberList(ne, tni.members);
@@ -1514,7 +1514,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ti.tag_Name     = m_tagName;
       ti.tag_FileName = tpgi.filename;
 
-      pe->m_tagInfoEntry  = ti;
+      pe->m_tagInfo   = ti;
 
       buildMemberList(pe, tpgi.members);
       root->addSubEntry(pe, root);
@@ -1534,7 +1534,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ti.tag_Name     = m_tagName;
       ti.tag_FileName = tgi.filename;
 
-      ge->m_tagInfoEntry  = ti;
+      ge->m_tagInfo   = ti;
 
       buildMemberList(ge, tgi.members);
       root->addSubEntry(ge, root);
@@ -1561,7 +1561,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ti.tag_Name     = m_tagName;
       ti.tag_FileName = tpi.filename;
 
-      pe->m_tagInfoEntry = ti;
+      pe->m_tagInfo   = ti;
       root->addSubEntry(pe, root);
    }
 }
