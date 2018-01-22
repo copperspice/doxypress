@@ -48,7 +48,6 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/example.h
    ${CMAKE_CURRENT_SOURCE_DIR}/filedef.h
    ${CMAKE_CURRENT_SOURCE_DIR}/filenamelist.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/filestorage.h
    ${CMAKE_CURRENT_SOURCE_DIR}/formula.h
    ${CMAKE_CURRENT_SOURCE_DIR}/ftvhelp.h
    ${CMAKE_CURRENT_SOURCE_DIR}/groupdef.h
@@ -68,7 +67,6 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/logos.h
    ${CMAKE_CURRENT_SOURCE_DIR}/mandocvisitor.h
    ${CMAKE_CURRENT_SOURCE_DIR}/mangen.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/marshal.h
    ${CMAKE_CURRENT_SOURCE_DIR}/memberdef.h
    ${CMAKE_CURRENT_SOURCE_DIR}/membergroup.h
    ${CMAKE_CURRENT_SOURCE_DIR}/memberlist.h
@@ -106,7 +104,6 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/section.h
    ${CMAKE_CURRENT_SOURCE_DIR}/sortedlist.h
    ${CMAKE_CURRENT_SOURCE_DIR}/sortedlist_fwd.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/store.h
    ${CMAKE_CURRENT_SOURCE_DIR}/stringmap.h
    ${CMAKE_CURRENT_SOURCE_DIR}/tagreader.h
    ${CMAKE_CURRENT_SOURCE_DIR}/textdocvisitor.h
@@ -164,7 +161,6 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/mandocvisitor.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/mangen.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/marshal.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/memberdef.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/membergroup.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/memberlist.cpp
@@ -189,7 +185,6 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/resourcemgr.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/sortedlist.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/searchindex.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/store.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/stringmap.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/tagreader.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/textdocvisitor.cpp

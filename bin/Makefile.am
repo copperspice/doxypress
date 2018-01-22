@@ -163,7 +163,6 @@ doxypress_SOURCES = \
    src/main.cpp \
    src/mandocvisitor.cpp \
    src/mangen.cpp \
-   src/marshal.cpp \
    src/memberdef.cpp \
    src/membergroup.cpp \
    src/memberlist.cpp \
@@ -188,7 +187,6 @@ doxypress_SOURCES = \
    src/resourcemgr.cpp \
    src/sortedlist.cpp \
    src/searchindex.cpp \
-   src/store.cpp \
    src/stringmap.cpp \
    src/tagreader.cpp \
    src/textdocvisitor.cpp \
@@ -255,7 +253,6 @@ noinst_HEADERS = \
    src/example.h \
    src/filedef.h \
    src/filenamelist.h \
-   src/filestorage.h \
    src/formula.h \
    src/ftvhelp.h \
    src/groupdef.h \
@@ -275,7 +272,6 @@ noinst_HEADERS = \
    src/logos.h \
    src/mandocvisitor.h \
    src/mangen.h \
-   src/marshal.h \
    src/memberdef.h \
    src/membergroup.h \
    src/memberlist.h \
@@ -313,7 +309,6 @@ noinst_HEADERS = \
    src/section.h \
    src/sortedlist.h \
    src/sortedlist_fwd.h \
-   src/store.h \
    src/stringmap.h \
    src/tagreader.h \
    src/textdocvisitor.h \

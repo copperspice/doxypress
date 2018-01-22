@@ -40,7 +40,6 @@
 #include <doxy_globals.h>
 #include <eclipsehelp.h>
 #include <entry.h>
-#include <filestorage.h>
 #include <formula.h>
 #include <ftvhelp.h>
 #include <groupdef.h>
@@ -70,7 +69,6 @@
 #include <pre.h>
 #include <qhp.h>
 #include <rtfgen.h>
-#include <store.h>
 #include <tagreader.h>
 #include <util.h>
 #include <xmlgen.h>
