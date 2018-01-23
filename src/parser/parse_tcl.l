@@ -698,7 +698,7 @@ ws              ([ \t]|\\\n)
 <<EOF>>                 {
       if (tcl.listScan.length() < 1) {
          // error
-         tcl_err("Tcl parser stack empty, parser error in file '%s'.\n", qPrintable(tcl.file_name) );
+         tcl_err("Tcl parser stack empty, parser error in file '%s'.\n", csPrintable(tcl.file_name) );
          yyterminate();
 
       } else if (tcl.listScan.length() == 1) {
@@ -1259,7 +1259,7 @@ static void tcl_word(int what, const QString &text)
       case 1:// all other chars
          if (myWhite != 0) {
             // {x}y "x"y
-            tcl_err("expected word separator: %s\n", qPrintable(text));
+            tcl_err("expected word separator: %s\n", csPrintable(text));
             return;
          }
 
@@ -1276,7 +1276,7 @@ static void tcl_word(int what, const QString &text)
 
             yy_pop_state();
             yyless(0);
-            tcl_inf("(\\\n) ?%s?\n", qPrintable(tcl.string_last));
+            tcl_inf("(\\\n) ?%s?\n", csPrintable(tcl.string_last));
 
             return;
          }
@@ -1293,7 +1293,7 @@ static void tcl_word(int what, const QString &text)
 
                   yy_pop_state();
                   yyless(0);
-                  tcl_inf("(\\\n) ?%s?\n", qPrintable(tcl.string_last));
+                  tcl_inf("(\\\n) ?%s?\n", csPrintable(tcl.string_last));
 
                   return;
                }
@@ -1306,7 +1306,7 @@ static void tcl_word(int what, const QString &text)
       case 3:// {
          if (myWhite != 0) {
             // {x}{ "x"{
-            tcl_err("expected word separator: %s\n", qPrintable(text));
+            tcl_err("expected word separator: %s\n", csPrintable(text));
             return;
          }
 
@@ -1373,7 +1373,7 @@ static void tcl_word(int what, const QString &text)
       case 6:// ]
          if (myWhite != 0) {
             // {x}]
-            tcl_err("expected word separator: %s\n", qPrintable(text));
+            tcl_err("expected word separator: %s\n", csPrintable(text));
             return;
          }
 
@@ -1395,7 +1395,7 @@ static void tcl_word(int what, const QString &text)
       case 7:// "
          if (myWhite != 0) {
             // {x}"
-            tcl_err("expected word separator: %s\n", qPrintable(text));
+            tcl_err("expected word separator: %s\n", csPrintable(text));
             return;
          }
          switch (myList.top().unicode()) {
@@ -1423,7 +1423,7 @@ static void tcl_word(int what, const QString &text)
 
             yy_pop_state();
             yyless(0);
-            tcl_inf("(%d) ?%s?\n", what, qPrintable(tcl.string_last));
+            tcl_inf("(%d) ?%s?\n", what, csPrintable(tcl.string_last));
             return;
          }
 
@@ -1439,7 +1439,7 @@ static void tcl_word(int what, const QString &text)
 
                   yy_pop_state();
                   yyless(0);
-                  tcl_inf("(.%d) ?%s?\n", what, qPrintable(tcl.string_last));
+                  tcl_inf("(.%d) ?%s?\n", what, csPrintable(tcl.string_last));
 
                   return;
 
@@ -1458,7 +1458,7 @@ static void tcl_word(int what, const QString &text)
 
             yy_pop_state();
             yyless(0);
-            tcl_inf("(%d) ?%s?\n", what, qPrintable(tcl.string_last));
+            tcl_inf("(%d) ?%s?\n", what, csPrintable(tcl.string_last));
 
             return;
          }
@@ -1470,7 +1470,7 @@ static void tcl_word(int what, const QString &text)
          myWord = ' ';
          yy_pop_state();
          yyless(0);
-         tcl_inf("(.%d) ?%s?\n", what, qPrintable(tcl.string_last));
+         tcl_inf("(.%d) ?%s?\n", what, csPrintable(tcl.string_last));
 
          return;
 
@@ -1494,7 +1494,7 @@ static void tcl_comment(int what, const QString  &text)
       }
 
       yy_push_state(COMMENT);
-      tcl_inf("<- %s\n", qPrintable(text));
+      tcl_inf("<- %s\n", csPrintable(text));
       tcl.string_comment = "";
       tcl.comment = 0;
 
@@ -1521,7 +1521,7 @@ static void tcl_comment(int what, const QString  &text)
 
       } else {
          tcl.string_last = "";
-         tcl_inf("-> %s\n", qPrintable(tcl.string_comment));
+         tcl_inf("-> %s\n", csPrintable(tcl.string_comment));
       }
 
       yy_pop_state();
@@ -2611,7 +2611,7 @@ static void tcl_command(int what, const QString &text)
       tcl.listScan.at(0)->line1 = yylineno;    // current line in scan context
 
       tcl.line_body0 = yylineno;               // start line of command
-      tcl_inf("<- %s\n", qPrintable(text));
+      tcl_inf("<- %s\n", csPrintable(text));
       yy_push_state(COMMAND);
 
       tcl.listCommandwords.clear();
@@ -3021,7 +3021,7 @@ static void tcl_init()
          QString myValue = myStr.right(myStr.length() - i - 1).trimmed();
 
          if (! myName.isEmpty() && ! myValue.isEmpty()) {
-            tcl_inf("TCL_SUBST: use '%s'\n", qPrintable(s));
+            tcl_inf("TCL_SUBST: use '%s'\n", csPrintable(s));
          }
 
          tcl.config_subst[myName] = myValue;
@@ -3135,7 +3135,7 @@ void TclLanguageParser::parseInput(const QString &fileName, const QString &input
                   enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    QFile  myFile;
-   tcl_inf("%s\n", qPrintable(fileName) );
+   tcl_inf("%s\n", csPrintable(fileName) );
 
    myFile.setFileName(fileName);
    if (! myFile.open(QIODevice::ReadOnly)) {
@@ -3150,7 +3150,7 @@ void TclLanguageParser::parseInput(const QString &fileName, const QString &input
 
    printlex(yy_flex_debug, true, __FILE__, fileName);
 
-   msg("Parsing %s\n", qPrintable(fileName));
+   msg("Parsing %s\n", csPrintable(fileName));
    groupEnterFile(fileName, yylineno);
 
    tcl_init();
@@ -3217,7 +3217,7 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QStrin
       myStr += fileDef->fileName();
    }
 
-   tcl_inf("%s (%d,%d) %d %d\n", qPrintable(myStr), startLine, endLine, isExampleBlock, inlineFragment);
+   tcl_inf("%s (%d,%d) %d %d\n", csPrintable(myStr), startLine, endLine, isExampleBlock, inlineFragment);
 
    if (isExampleBlock) {
       tcl_codify(NULL, input);
@@ -3256,7 +3256,7 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QStrin
    tcl.fn.clear();
    tcl.entry.clear();
 
-   printlex(yy_flex_debug, FALSE, __FILE__, fileDef ? qPrintable(fileDef->fileName()) : "");
+   printlex(yy_flex_debug, FALSE, __FILE__, fileDef ? csPrintable(fileDef->fileName()) : "");
 }
 bool TclLanguageParser::needsPreprocessing(const QString &)
 {

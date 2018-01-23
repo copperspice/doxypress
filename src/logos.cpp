@@ -1948,7 +1948,7 @@ void writeDoxFont(const QString &dir)
       f.write((char *)FreeSans_ttf, FreeSans_ttf_len);
 
    } else {   
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
 
    }
 

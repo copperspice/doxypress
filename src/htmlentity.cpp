@@ -503,7 +503,7 @@ void HtmlEntityMapper::validate()
 {
    for (int i = 0; i < g_numHtmlEntities; i++) {
       if (i != g_htmlEntities[i].symb) {
-         warn_uncond("Internal inconsistency, htmlentries code %d (item=%s)\n", i, qPrintable(g_htmlEntities[i].item) );
+         warn_uncond("Internal inconsistency, htmlentries code %d (item=%s)\n", i, csPrintable(g_htmlEntities[i].item) );
       }
    }
 }

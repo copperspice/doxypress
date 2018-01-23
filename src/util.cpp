@@ -516,7 +516,7 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
       }
 
       if (count == 10) {
-         warn_uncond("Possible recursive namespace alias detected for %s\n", qPrintable(name) );
+         warn_uncond("Possible recursive namespace alias detected for %s\n", csPrintable(name) );
       }
 
       return Doxy_Globals::namespaceSDict.find(subst);
@@ -2322,7 +2322,7 @@ QString transcodeToQString(const QByteArray &input)
    QTextCodec *temp = QTextCodec::codecForName(inputEncoding.toUtf8());
 
    if (! temp) {
-      err("Unsupported character encoding: '%s'\n", qPrintable(inputEncoding));
+      err("Unsupported character encoding: '%s'\n", csPrintable(inputEncoding));
       return input;
    }
 
@@ -2442,7 +2442,7 @@ int minClassDistance(QSharedPointer<const ClassDef> cd, QSharedPointer<const Cla
    }
 
    if (level == 256) {
-      warn_uncond("class %s seem to have a recursive inheritance relation!\n", qPrintable(cd->name()));
+      warn_uncond("class %s seem to have a recursive inheritance relation!\n", csPrintable(cd->name()));
       return -1;
    }
 
@@ -2480,7 +2480,7 @@ Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPoi
 
    if (level == 256) {
       err("Internal issue found in class %s: recursive inheritance relation problem."
-            "Please submit a bug report\n", qPrintable(cd->name()) );
+            "Please submit a bug report\n", csPrintable(cd->name()) );
 
    } else if (cd->baseClasses()) {
 
@@ -5892,11 +5892,11 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
          if (si) {
             if (si->lineNr != -1) {
                warn(file, -1, "multiple use of section label '%s', (first occurrence: %s, line %d)",
-                    qPrintable(pd->name()), qPrintable(si->fileName), si->lineNr);
+                    csPrintable(pd->name()), csPrintable(si->fileName), si->lineNr);
 
             } else {
                warn(file, -1, "multiple use of section label '%s', (first occurrence: %s)",
-                    qPrintable(pd->name()), qPrintable(si->fileName));
+                    csPrintable(pd->name()), csPrintable(si->fileName));
             }
 
          } else {
@@ -7349,13 +7349,13 @@ void writeColoredImgData(ColoredImgDataItem data)
       QByteArray buffer = image.convert();
 
       if (f.write(buffer) == -1) {
-         err("Unable to write file %s, error: %d\n", qPrintable(fileName), f.error());
+         err("Unable to write file %s, error: %d\n", csPrintable(fileName), f.error());
       }
 
       f.close();
 
    } else {
-      err("Unable to save image file %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to save image file %s, error: %d\n", csPrintable(fileName), f.error());
 
    }
 
@@ -7431,12 +7431,12 @@ bool copyFile(const QString &src, const QString &dest)
          delete[] buffer;
 
       } else {
-         err("Unable to open file for writing %s, error: %d\n", qPrintable(dest), df.error());
+         err("Unable to open file for writing %s, error: %d\n", csPrintable(dest), df.error());
          return false;
       }
 
    } else {
-      err("Unable to open file for reading %s, error: %d\n", qPrintable(src), sf.error());
+      err("Unable to open file for reading %s, error: %d\n", csPrintable(src), sf.error());
       return false;
    }
 

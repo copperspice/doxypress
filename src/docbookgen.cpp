@@ -1351,7 +1351,7 @@ static void generateDocbookForNamespace(QSharedPointer<NamespaceDef> nd, QTextSt
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1440,7 +1440,7 @@ static void generateDocbookForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1562,7 +1562,7 @@ static void generateDocbookForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1637,7 +1637,7 @@ static void generateDocbookForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    QString relPath = relativePathToRoot(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1695,7 +1695,7 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1777,11 +1777,11 @@ void generateDocbook_output()
          dir.setPath(QDir::currentPath());
 
          if (! dir.mkdir(outputDirectory)) {
-            err("DocBook Output directory `%s' does not exist and can not be created\n", qPrintable(outputDirectory));
+            err("DocBook Output directory `%s' does not exist and can not be created\n", csPrintable(outputDirectory));
             Doxy_Work::stopDoxyPress();
 
          } else {
-            msg("DOCBOOK Output directory `%s' created\n", qPrintable(outputDirectory));
+            msg("DOCBOOK Output directory `%s' created\n", csPrintable(outputDirectory));
          }
 
          dir.cd(outputDirectory);
@@ -1796,7 +1796,7 @@ void generateDocbook_output()
       dir.setPath(QDir::currentPath());
 
       if (! dir.mkdir(outputDirectory)) {
-         err("Unable to create directory %s\n", qPrintable(outputDirectory));
+         err("Unable to create directory %s\n", csPrintable(outputDirectory));
          return;
       }
    }
@@ -1810,7 +1810,7 @@ void generateDocbook_output()
    f.setFileName(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1833,7 +1833,7 @@ void generateDocbook_output()
    }
 
    for (auto &nd : Doxy_Globals::namespaceSDict)  {
-      msg("Generating Docbook output for namespace %s\n", qPrintable(nd->name()));
+      msg("Generating Docbook output for namespace %s\n", csPrintable(nd->name()));
       generateDocbookForNamespace(nd, t);
    }
 
@@ -1863,7 +1863,7 @@ void generateDocbook_output()
    }
 
    for (auto gd : Doxy_Globals::groupSDict) {
-      msg("Generating Docbook output for group %s\n", qPrintable(gd->name()));
+      msg("Generating Docbook output for group %s\n", csPrintable(gd->name()));
       generateDocbookForGroup(gd, t);
    }
 
@@ -1902,7 +1902,7 @@ void generateDocbook_output()
 
       for (auto &fn : Doxy_Globals::inputNameList) {
          for (auto fd : *fn) {
-            msg("Generating Docbook output for file %s\n", qPrintable(fd->name()));
+            msg("Generating Docbook output for file %s\n", csPrintable(fd->name()));
             generateDocbookForFile(fd, t);
          }
       }
@@ -1923,7 +1923,7 @@ void generateDocbook_output()
       }
 
       for (auto dir : Doxy_Globals::directories) {
-         msg("Generate Docbook output for dir %s\n", qPrintable(dir->name()));
+         msg("Generate Docbook output for dir %s\n", csPrintable(dir->name()));
          generateDocbookForDir(dir, t);
       }
 

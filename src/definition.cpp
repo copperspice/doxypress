@@ -744,7 +744,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
       if (usePipe) {
          pclose(f);
          Debug::print(Debug::FilterOutput, 0, "Filter output\n");
-         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", qPrintable(tempResult));
+         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", csPrintable(tempResult));
 
       } else {
          fclose(f);

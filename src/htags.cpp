@@ -57,7 +57,7 @@ bool Htags::execute(const QString &htmldir)
       g_inputDir.setPath(inputSource.first());
 
       if (! g_inputDir.exists())
-         err("Unable to find directory %s, verify the value of the 'INPUT SOURCE' tag.\n", qPrintable(inputSource.first()) );
+         err("Unable to find directory %s, verify the value of the 'INPUT SOURCE' tag.\n", csPrintable(inputSource.first()) );
 
    } else {
       err("When 'USE HTAGS' are used, 'INPUT SOURCE' must specify a single directory\n");
@@ -158,7 +158,7 @@ bool Htags::loadFilemap(const QString &htmlDir)
          return true;
 
       } else {
-         err("Unable to open file %s, error: %d\n", qPrintable(fileMapName), f.error());  
+         err("Unable to open file %s, error: %d\n", csPrintable(fileMapName), f.error());
          
       }
    }

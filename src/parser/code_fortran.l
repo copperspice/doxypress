@@ -1492,7 +1492,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
       return;
    }
 
-  printlex(yy_flex_debug, true, __FILE__, fd ? qPrintable(fd->fileName()) : "");
+  printlex(yy_flex_debug, true, __FILE__, fd ? csPrintable(fd->fileName()) : "");
 
    TooltipManager::instance()->clearTooltips();
    g_code = &od;

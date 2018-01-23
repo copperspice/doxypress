@@ -239,7 +239,7 @@ static void writeLatexMakefile()
    QFile file(fileName);
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", qPrintable(fileName));
+      err("Unable to open file %s for writing\n", csPrintable(fileName));
       Doxy_Work::stopDoxyPress();
    }
 

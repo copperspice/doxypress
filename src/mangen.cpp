@@ -86,7 +86,7 @@ void ManGenerator::init()
    QDir d(manOutput);
 
    if (! d.exists() && ! QDir::current().mkpath(manOutput)) {
-      err("Unable to create output directory %s\n", qPrintable(manOutput));
+      err("Unable to create output directory %s\n", csPrintable(manOutput));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -94,7 +94,7 @@ void ManGenerator::init()
    d.setPath(manOutput + "/" + subdir);
  
    if (! d.exists() && ! QDir::current().mkpath(manOutput + "/" + subdir)) {
-      err("Unable to create output directory %s/%s\n", qPrintable(manOutput), qPrintable(subdir));
+      err("Unable to create output directory %s/%s\n", csPrintable(manOutput), csPrintable(subdir));
       Doxy_Work::stopDoxyPress();
    }
 

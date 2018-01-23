@@ -482,7 +482,7 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
          ol.exceptionEntry(0, true);
 
       } else {
-         warn(md->getDefFileName(), md->getDefLine(), "missing ) in exception list on member %s", qPrintable(md->name()));
+         warn(md->getDefFileName(), md->getDefLine(), "missing ) in exception list on member %s", csPrintable(md->name()));
       }
 
    } else { // Java Exception
@@ -987,7 +987,7 @@ QString MemberDef::getOutputFileBase() const
    }
 
    if (baseName.isEmpty()) {
-      warn(getDefFileName(), getDefLine(), "Internal problem, member %s does not belong to any container", qPrintable(name()));
+      warn(getDefFileName(), getDefLine(), "Internal problem, member %s does not belong to any container", csPrintable(name()));
       return "dummy";
 
    } else if (separateMemberPages && isDetailedSectionLinkable()) {
@@ -2248,10 +2248,10 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
 
       if (callerGraph.isTooBig()) {
          warn_uncond("Caller graph for '%s' was not generated, too many nodes. "
-                     "Consider increasing DOT_GRAPH_MAX_NODES.\n", qPrintable(qualifiedName()));
+                     "Consider increasing DOT_GRAPH_MAX_NODES.\n", csPrintable(qualifiedName()));
 
       } else if (! callerGraph.isTrivial() && !callerGraph.isTooBig()) {
-         msg("Generating caller graph for function %s\n", qPrintable(qualifiedName()));
+         msg("Generating caller graph for function %s\n", csPrintable(qualifiedName()));
 
          ol.disable(OutputGenerator::Man);
          ol.startCallGraph();
@@ -3135,7 +3135,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          m_impl->initializer = m_impl->initializer.mid(1).trimmed();
       }
 
-      pIntf->parseCode(ol, qPrintable(scopeName), m_impl->initializer, lang, false, 0, getFileDef(),
+      pIntf->parseCode(ol, csPrintable(scopeName), m_impl->initializer, lang, false, 0, getFileDef(),
                        -1, -1, true, self, false, self);
 
       ol.endCodeFragment();
@@ -3788,7 +3788,7 @@ Specifier MemberDef::virtualness(int count) const
 {
    if (count > 25) {
       warn(getDefFileName(), getDefLine(),
-           "Internal inconsistency: recursion detected in overload relation for member %s", qPrintable(name()));
+           "Internal inconsistency: recursion detected in overload relation for member %s", csPrintable(name()));
 
       return Normal;
    }

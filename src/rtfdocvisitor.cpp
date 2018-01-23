@@ -150,7 +150,7 @@ void RTFDocVisitor::visit(DocSymbol *s)
       m_t << res;
 
    } else {
-      err("RTF, Unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("RTF, Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 
    m_lastIsPara = false;
@@ -385,7 +385,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
                          
          QFile file(baseName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", qPrintable(baseName), file.error());
+            err("Unable to open file for writing %s, error: %d\n", csPrintable(baseName), file.error());
          }
 
          QString text = "msc {";

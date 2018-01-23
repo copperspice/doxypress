@@ -174,7 +174,7 @@ struct CommandLine parseCommandLine(QStringList argList)
       switch (value) {
 
          case INVALID:
-            err("Option %s is invalid\n", qPrintable(item));
+            err("Option %s is invalid\n", csPrintable(item));
             Doxy_Work::stopDoxyPress();
 
          case BLANK_LAYOUT:
@@ -310,7 +310,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 
 
             } else  {
-               err("Option \"-w %s\" is invalid\n", qPrintable(cmdArgs.formatName));
+               err("Option \"-w %s\" is invalid\n", csPrintable(cmdArgs.formatName));
                Doxy_Work::stopDoxyPress();
 
             }
@@ -401,7 +401,7 @@ void readConfiguration(struct CommandLine cmdArgs)
    QFileInfo fi(cmdArgs.configName);
 
    if (! fi.exists()) {
-      printf("Project file %s was not found\n", qPrintable(cmdArgs.configName));
+      printf("Project file %s was not found\n", csPrintable(cmdArgs.configName));
       exit(1);
    }
 

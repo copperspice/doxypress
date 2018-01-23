@@ -219,7 +219,7 @@ void DirDef::writeDirectoryGraph(OutputList &ol)
          //ol.startParagraph();
 
          ol.startDirDepGraph();
-         ol.parseText(theTranslator->trDirDepGraph(qPrintable(shortName())));
+         ol.parseText(theTranslator->trDirDepGraph(csPrintable(shortName())));
          ol.endDirDepGraph(dirDep);
 
          //ol.endParagraph();
@@ -353,7 +353,7 @@ void DirDef::endMemberDeclarations(OutputList &ol)
 
 QString DirDef::shortTitle() const
 {
-   return theTranslator->trDirReference(qPrintable(m_shortName));
+   return theTranslator->trDirReference(csPrintable(m_shortName));
 }
 
 bool DirDef::hasDetailedDescription() const
@@ -410,7 +410,7 @@ void DirDef::writeDocumentation(OutputList &ol)
    static bool generateTreeView = Config::getBool("generate-treeview");
    ol.pushGeneratorState();
 
-   QString title = theTranslator->trDirReference(qPrintable(m_dispName));
+   QString title = theTranslator->trDirReference(csPrintable(m_dispName));
    startFile(ol, getOutputFileBase(), name(), title, HLI_None, !generateTreeView);
 
    if (! generateTreeView) {
@@ -752,8 +752,8 @@ void DirRelation::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QString shortTitle = theTranslator->trDirRelation( qPrintable(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName()) );
-   QString title = theTranslator->trDirRelation( qPrintable(m_src->displayName() + " -> " + m_dst->dir()->shortName()) );
+   QString shortTitle = theTranslator->trDirRelation( csPrintable(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName()) );
+   QString title = theTranslator->trDirRelation( csPrintable(m_src->displayName() + " -> " + m_dst->dir()->shortName()) );
 
    startFile(ol, getOutputFileBase(), getOutputFileBase(),
              title, HLI_None, !generateTreeView, m_src->getOutputFileBase());

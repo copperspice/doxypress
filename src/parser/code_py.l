@@ -575,10 +575,10 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
       cd = getResolvedClass(d, g_sourceFileDef, substitute(className, ".", "::"), &md);
 
-      DBG_CTX(stderr, "d=%s g_sourceFileDef=%s\n", d ? qPrintable(d->displayName()) : "<null>",
-               g_currentDefinition ? qPrintable(g_currentDefinition->displayName()) : "<null>");
+      DBG_CTX(stderr, "d=%s g_sourceFileDef=%s\n", d ? csPrintable(d->displayName()) : "<null>",
+               g_currentDefinition ? csPrintable(g_currentDefinition->displayName()) : "<null>");
 
-      DBG_CTX(stderr, "is found as a type %s\n", cd ? qPrintable(cd->name()) : "<null>");
+      DBG_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
 
       if (cd == 0 && md == 0) {
          // also see if it is variable or enum or enum value
@@ -633,7 +633,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
          QSharedPointer<ClassDef> mcd = getClass(scope);
 
-         DBG_CTX(stderr, "scope=%s locName=%s mcd=%p\n", qPrintable(scope), qPrintable(locName), mcd.data());
+         DBG_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
 
          if (mcd) {
             QSharedPointer<MemberDef> md = mcd->getMemberByName(locName);
@@ -750,8 +750,8 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> d
          }
       }
 
-      DBG_CTX(stderr, "cd=%s thisCd=%s\n", cd ? qPrintable(cd->name()) : "<none>",
-                  thisCd ? qPrintable(thisCd->name()) : "<none>");
+      DBG_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
+                  thisCd ? csPrintable(thisCd->name()) : "<none>");
 
       // TODO: find the nearest base class in case cd is a base class of thisCd
 
@@ -1073,11 +1073,11 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
          // Try to find class in global scope
 
          if (baseDefToAdd == 0) {
-            baseDefToAdd = getResolvedClass(g_currentDefinition, g_sourceFileDef, qPrintable(s));
+            baseDefToAdd = getResolvedClass(g_currentDefinition, g_sourceFileDef, csPrintable(s));
          }
 
          if (baseDefToAdd && baseDefToAdd != classDefToAdd) {
-            classDefToAdd->insertBaseClass(baseDefToAdd, qPrintable(s), Public, Normal);
+            classDefToAdd->insertBaseClass(baseDefToAdd, csPrintable(s), Public, Normal);
          }
       }
 

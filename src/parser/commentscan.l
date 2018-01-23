@@ -3690,7 +3690,7 @@ void groupLeaveFile(const QString &fileName, int line)
 void groupEnterCompound(const QString &fileName, int line, const QString &name)
 {
    if (s_memberGroupId != DOX_NOGROUP) {
-      warn(fileName, line, "Try to put compound %s inside a member group\n", qPrintable(name));
+      warn(fileName, line, "Try to put compound %s inside a member group\n", csPrintable(name));
    }
 
    s_memberGroupId = DOX_NOGROUP;

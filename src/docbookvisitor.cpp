@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -35,13 +35,13 @@
 #include <util.h>
 
 static void visitCaption(DocbookDocVisitor *parent, QList<DocNode *> children)
-{ 
+{
    for (auto n : children) {
       n->accept(parent);
    }
 }
 
-static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name,  
+static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name,
                   const QString &width, const QString &height)
 {
   QString tmpStr;
@@ -51,7 +51,7 @@ static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &
   t << "            <imageobject>" << endl;
   t << "                <imagedata";
 
-  if (! width.isEmpty()) {  
+  if (! width.isEmpty()) {
     t << " width=\"" << convertToXML(width) << "\"";
 
   } else {
@@ -59,7 +59,7 @@ static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &
   }
 
   if (! height.isEmpty()) {
-      t << " depth=\"" << convertToXML(tmpStr) << "\"";   
+      t << " depth=\"" << convertToXML(tmpStr) << "\"";
   }
 
   t << " align=\"center\" valign=\"middle\" scalefit=\"1\" fileref=\"" << name << "\">";
@@ -132,7 +132,7 @@ void DocbookDocVisitor::visit(DocSymbol *s)
       m_t << res;
 
    } else {
-      err("DocBook unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("DocBook unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 
@@ -247,9 +247,9 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
 
    switch (s->type()) {
-      case DocVerbatim::Code: 
+      case DocVerbatim::Code:
          m_t << "<literallayout><computeroutput>";
-         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, s->context(), s->text(), 
+         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, s->context(), s->text(),
                   langExt, s->isExample(), s->exampleFile());
 
          m_t << "</computeroutput></literallayout>";
@@ -280,9 +280,9 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
       case DocVerbatim::Dot: {
          static int dotindex = 1;
-        
+
          QString name;
-         QString baseName;       
+         QString baseName;
          QString tempStr = docbookOutDir + "/inline_dotgraph_";
          QString stext   = s->text();
 
@@ -294,14 +294,14 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".dot");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s.dot, error: %d\n", csPrintable(baseName), file.error());          
-         }  
+            err("Unable to open file for writing %s.dot, error: %d\n", csPrintable(baseName), file.error());
+         }
 
          file.write( stext.toUtf8() );
          file.close();
-        
+
          writeDotFile(baseName, s);
-         m_t << "</para>" << endl;         
+         m_t << "</para>" << endl;
       }
       break;
 
@@ -309,19 +309,19 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          static int mscindex = 1;
 
          QString name;
-         QString baseName;  
+         QString baseName;
          QString tempStr = docbookOutDir + "/inline_mscgraph_";
          QString stext   = s->text();
 
          m_t << "<para>" << endl;
-         
+
          name = QString("msc_inline_mscgraph_%1").arg(mscindex);
          baseName = QString("tempStr%1").arg(mscindex++);
 
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s.msc, error: %d\n", csPrintable(baseName), file.error());             
+            err("Unable to open file for writing %s.msc, error: %d\n", csPrintable(baseName), file.error());
          }
 
          QString text = "msc {" + stext + "}";
@@ -334,7 +334,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
       }
       break;
 
-      case DocVerbatim::PlantUML: {        
+      case DocVerbatim::PlantUML: {
          QString baseName  = writePlantUMLSource(docbookOutDir, s->exampleFile(), s->text());
          QString shortName = baseName;
 
@@ -375,7 +375,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
 
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                   inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd);
 
          m_t << "</computeroutput></literallayout>";
@@ -384,7 +384,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Include:
          m_t << "<literallayout><computeroutput>";
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                   inc->text(),langExt, inc->isExample(), inc->exampleFile());
 
          m_t << "</computeroutput></literallayout>";
@@ -404,7 +404,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Snippet:
          m_t << "<literallayout><computeroutput>";
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                   extractBlock(inc->text(), inc->blockId()), langExt, inc->isExample(), inc->exampleFile() );
 
          m_t << "</computeroutput></literallayout>";
@@ -971,7 +971,7 @@ void DocbookDocVisitor::visitPre(DocImage *img)
 
       m_t << endl;
 
-      QString baseName = img->name();         
+      QString baseName = img->name();
       int i;
 
       if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
@@ -1004,7 +1004,7 @@ void DocbookDocVisitor::visitPost(DocImage *img)
       if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
          baseName = baseName.right(baseName.length() - i - 1);
       }
-   
+
       // copy the image to the output dir
       QString m_file;
 
@@ -1023,12 +1023,12 @@ void DocbookDocVisitor::visitPost(DocImage *img)
          QFile::remove(outputFile);
          bool copyOk = inImage.copy(outputFile);
 
-         if (! copyOk) { 
+         if (! copyOk) {
             err("Unable to open image file for writing %s, error: %d\n", csPrintable(outputFile), inImage.error());
-         }        
+         }
 
       } else {
-         err("Unable to open image file for reading %s, error: %d\n", csPrintable(m_file), inImage.error());                
+         err("Unable to open image file for reading %s, error: %d\n", csPrintable(m_file), inImage.error());
       }
 
    } else {
@@ -1207,7 +1207,7 @@ void DocbookDocVisitor::visitPre(DocParamList *pl)
    if (m_hide) {
       return;
    }
- 
+
    m_t << "                            <row>" << endl;
 
    if (pl->parameters().isEmpty()) {
@@ -1371,8 +1371,8 @@ void DocbookDocVisitor::pushEnabled()
 
 void DocbookDocVisitor::popEnabled()
 {
-   bool v = m_enabled.pop();   
-   m_hide = v;   
+   bool v = m_enabled.pop();
+   m_hide = v;
 }
 
 void DocbookDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
@@ -1390,7 +1390,7 @@ void DocbookDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
 
    visitPreStart(m_t, s->hasCaption(), shortName, s->width(),s->height());
    visitCaption(this, s->children());
-   visitPostEnd(m_t,  s->hasCaption()); 
+   visitPostEnd(m_t,  s->hasCaption());
 }
 
 void DocbookDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *s)
@@ -1411,7 +1411,7 @@ void DocbookDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *
    visitPostEnd(m_t,  s->hasCaption());
 }
 
-void DocbookDocVisitor::startMscFile(const QString &fileName, const QString &width, const QString &height, 
+void DocbookDocVisitor::startMscFile(const QString &fileName, const QString &width, const QString &height,
                   bool hasCaption)
 {
    static const QString docbookOutDir = Config::getString("docbook-output");
@@ -1427,7 +1427,7 @@ void DocbookDocVisitor::startMscFile(const QString &fileName, const QString &wid
       baseName = baseName.left(i);
    }
 
-   baseName.prepend("msc_");  
+   baseName.prepend("msc_");
 
    writeMscGraphFromFile(fileName, docbookOutDir, baseName, MSC_BITMAP);
    m_t << "<para>" << endl;
@@ -1478,7 +1478,7 @@ void DocbookDocVisitor::startDiaFile(const QString &fileName, const QString &wid
    }
 
    baseName.prepend("dia_");
- 
+
    writeDiaGraphFromFile(fileName, docbookOutDir, baseName, DIA_BITMAP);
    m_t << "<para>" << endl;
    visitPreStart(m_t, hasCaption, baseName + ".png", width, height);
@@ -1491,7 +1491,7 @@ void DocbookDocVisitor::endDiaFile(bool hasCaption)
    }
 
    visitPostEnd(m_t, hasCaption);
-   m_t << "endl";  
+   m_t << "endl";
 }
 
 void DocbookDocVisitor::writeDotFile(const QString &baseName, DocVerbatim *s)
@@ -1504,15 +1504,15 @@ void DocbookDocVisitor::writeDotFile(const QString &baseName, DocVerbatim *s)
    if ((i = shortName.lastIndexOf('/')) != -1) {
       shortName = shortName.right(shortName.length() - i - 1);
    }
-  
+
    writeDotGraphFromFile(baseName + ".dot", docbookOutDir, shortName, GOF_BITMAP);
 
    visitPreStart(m_t, s->hasCaption(), baseName + ".dot", s->width(), s->height());
    visitCaption(this, s->children());
-   visitPostEnd(m_t,  s->hasCaption());  
+   visitPostEnd(m_t,  s->hasCaption());
 }
 
-void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &width, const QString &height, 
+void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &width, const QString &height,
                   bool hasCaption)
 {
    static const QString docbookOutDir = Config::getString("docbook-output");
@@ -1530,10 +1530,10 @@ void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &wid
    }
 
    baseName.prepend("dot_");
- 
+
    writeDotGraphFromFile(fileName, docbookOutDir, baseName, GOF_BITMAP);
    m_t << "<para>" << endl;
-   visitPreStart(m_t, hasCaption, baseName + "." + imageExt, width, height);  
+   visitPreStart(m_t, hasCaption, baseName + "." + imageExt, width, height);
 }
 
 void DocbookDocVisitor::endDotFile(bool hasCaption)

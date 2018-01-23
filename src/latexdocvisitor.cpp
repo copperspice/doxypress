@@ -228,7 +228,7 @@ void LatexDocVisitor::visit(DocSymbol *s)
       }
 
    } else {
-      err("LaTeX unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("LaTeX unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 
@@ -421,7 +421,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file %s.msc for writing, error: %d\n", qPrintable(baseName), file.error());
+            err("Unable to open file %s.msc for writing, error: %d\n", csPrintable(baseName), file.error());
 
          } else {
 

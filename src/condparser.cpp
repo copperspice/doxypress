@@ -59,7 +59,7 @@ bool CondParser::parse(const QString &fileName, int lineNr, const QString &expr)
    }
 
    if (! m_err.isEmpty()) {
-      warn(fileName, lineNr, "problem evaluating expression '%s': %s", qPrintable(expr), qPrintable(m_err));
+      warn(fileName, lineNr, "problem evaluating expression '%s': %s", csPrintable(expr), csPrintable(m_err));
    }
 
    return answer;

@@ -192,7 +192,7 @@ void HtmlDocVisitor::visit(DocSymbol *s)
       m_t << res;
 
    } else {
-      err("Unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 

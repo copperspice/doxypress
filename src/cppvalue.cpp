@@ -124,7 +124,7 @@ CPPValue parseCharacter()
             return parseHexadecimal();
 
          default:
-            printf("Invalid escape sequence %s found\n", qPrintable(g_strToken));
+            printf("Invalid escape sequence %s found\n", csPrintable(g_strToken));
             return CPPValue(0L);
       }
    }

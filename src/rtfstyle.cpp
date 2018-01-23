@@ -448,7 +448,7 @@ bool StyleData::setStyle(const QString &str, const QString &styleName)
    len = s_clause.matchedLength();   
 
    if (start < 0) {
-      err("Style sheet '%s' contains no '\\s' clause.\n{%s}\n", qPrintable(styleName), qPrintable(s));
+      err("Style sheet '%s' contains no '\\s' clause.\n{%s}\n", csPrintable(styleName), csPrintable(s));
       return false;
    }
 
@@ -524,10 +524,10 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Unable to open RTF style sheet file %s, using default file\n", qPrintable(name));
+      err("Unable to open RTF style sheet file %s, using default file\n", csPrintable(name));
       return;
    }
-   msg("Loading RTF style sheet %s\n", qPrintable(name));
+   msg("Loading RTF style sheet %s\n", csPrintable(name));
 
    static const QRegExp seperator("[ \t]*=[ \t]*");
    uint lineNr = 1;
@@ -550,7 +550,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
 
       if (sepStart <= 0) {
          // no valid assignment statement
-         warn(qPrintable(name), lineNr, "Assignment of style sheet name expected\n");
+         warn(csPrintable(name), lineNr, "Assignment of style sheet name expected\n");
          continue;
       }
 
@@ -558,7 +558,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
 
       if (! dict.contains(key)) { 
          // not a valid style sheet name
-         warn(qPrintable(name), lineNr, "Invalid style sheet name %s ignored.\n", qPrintable(key));
+         warn(csPrintable(name), lineNr, "Invalid style sheet name %s ignored.\n", csPrintable(key));
          continue;
       }
 
@@ -579,10 +579,10 @@ void loadExtensions(const QString &name)
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Unable to open RTF extensions file %s, error: %d, Using defaut values\n", qPrintable(name), file.error());      
+      err("Unable to open RTF extensions file %s, error: %d, Using defaut values\n", csPrintable(name), file.error());      
       return;
    }
-   msg("Loading RTF extensions %s\n", qPrintable(name));
+   msg("Loading RTF extensions %s\n", csPrintable(name));
 
    static const QRegExp separator("[ \t]*=[ \t]*");
    uint lineNr = 1;
@@ -604,7 +604,7 @@ void loadExtensions(const QString &name)
 
       if (sepStart <= 0) { 
          // no valid assignment statement
-         warn(qPrintable(name), lineNr, "Assignment of extension field expected\n");
+         warn(csPrintable(name), lineNr, "Assignment of extension field expected\n");
          continue;
       }
 

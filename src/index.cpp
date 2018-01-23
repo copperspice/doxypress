@@ -3349,7 +3349,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
    if (level > 20) {
       warn(gd->getDefFileName(), gd->getDefLine(), "Maximum nesting level exceeded for group %s: check for possible "
-         "recursive group relation\n", qPrintable(gd->name()) );
+         "recursive group relation\n", csPrintable(gd->name()) );
 
       return;
    }

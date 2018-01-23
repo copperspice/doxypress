@@ -163,7 +163,7 @@ void RTFGenerator::init()
    QDir d(dir);
 
    if (! d.exists() && ! d.mkdir(dir)) {
-      err("Unable to create output directory %s\n", qPrintable(dir));
+      err("Unable to create output directory %s\n", csPrintable(dir));
       Doxy_Work::stopDoxyPress();
    }
  
@@ -172,7 +172,7 @@ void RTFGenerator::init()
 
    while (def->reference != 0) {
       if (def->definition == 0) {
-         err("RTF Style Default [%s] has no definition\n", qPrintable(def->name));
+         err("RTF Style Default [%s] has no definition\n", csPrintable(def->name));
       }
 
       StyleData styleData = StyleData(def->reference, def->definition);
@@ -287,7 +287,7 @@ void RTFGenerator::beginRTFDocument()
 
       if (array.at(index) != 0) {
          QString key(iter.key());
-         msg("Style '%s' redefines \\s%d.\n", qPrintable(key), index);
+         msg("Style '%s' redefines \\s%d.\n", csPrintable(key), index);
       }
 
       array[index] = &iter.value();
@@ -2115,7 +2115,7 @@ static void encodeForOutput(QTextStream &t_stream, const QString &text)
    QTextCodec *outCodec = QTextCodec::codecForName(outputEncoding.toUtf8());
   
    if (! outCodec) {
-      err("Unsupported character conversion: '%s': %s\n", qPrintable(outputEncoding), strerror(errno));
+      err("Unsupported character conversion: '%s': %s\n", csPrintable(outputEncoding), strerror(errno));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -2156,10 +2156,10 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
    if (! f.open(QIODevice::ReadOnly)) {
 
       if (! f.exists())  {    
-         err("Unable to locate missing file '%s', contact the developers\n", qPrintable(input_FName));
+         err("Unable to locate missing file '%s', contact the developers\n", csPrintable(input_FName));
 
       } else {
-         err("Unable to open file for reading %s (rtf, preProcessA), error: %d  \n", qPrintable(input_FName), f.error());
+         err("Unable to open file for reading %s (rtf, preProcessA), error: %d  \n", csPrintable(input_FName), f.error());
       }
 
       return false;
@@ -2174,7 +2174,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
       lineBuf = f.readLine();
    
       if (f.error() != QFile::NoError) {        
-         err("Unable to open file for reading %s, error: %d\n", qPrintable(input_FName), f.error());
+         err("Unable to open file for reading %s, error: %d\n", csPrintable(input_FName), f.error());
          return false;
       }
 
@@ -2191,7 +2191,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
       lineBuf = f.readLine();
    
       if (f.error() != QFile::NoError) {
-         err("Unable to open file for reading %s, error: %d\n", qPrintable(input_FName), f.error());
+         err("Unable to open file for reading %s, error: %d\n", csPrintable(input_FName), f.error());
          return false;     
       }
 
@@ -2228,7 +2228,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
                lineBuf.truncate(bracePos);
 
             } else {
-               err("Last charactor of %s was not a '}' as expected.\n", qPrintable(input_FName) );
+               err("Last charactor of %s was not a '}' as expected.\n", csPrintable(input_FName) );
 
             }
 
@@ -2398,7 +2398,7 @@ void testRTFOutput(const QString &name)
 
 err:
    err("RTF integrity check failed at line %d of %s due to a bracket mismatch. "              
-       "Please notify the developers of DoxyPress at info@copperspice.com\n", line, qPrintable(name));
+       "Please notify the developers of DoxyPress at info@copperspice.com\n", line, csPrintable(name));
 }
 
 /**
@@ -2410,7 +2410,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    QDir d(path);
    
    if (! d.exists()) {      
-      err("RTF, Output directory %s does not exist\n", qPrintable(path));
+      err("RTF, Output directory %s does not exist\n", csPrintable(path));
       return false;
    }
   
@@ -2435,7 +2435,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    QFile outf(combinedName);
 
    if (! outf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s (rtf preProcessB), error: %d\n", qPrintable(combinedName), outf.error());
+      err("Unable to open file for writing %s (rtf preProcessB), error: %d\n", csPrintable(combinedName), outf.error());
 
       // reset the directory to the original location
       QDir::setCurrent(oldDir);

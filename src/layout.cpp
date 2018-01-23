@@ -120,7 +120,7 @@ QString LayoutNavEntry::url() const
 
       if (! found) {
          QString temp = Config::getString("layout-file");
-         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", qPrintable(url.mid(5)), qPrintable(temp));
+         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", csPrintable(url.mid(5)), csPrintable(temp));
       }
    }
 
@@ -1551,7 +1551,7 @@ class LayoutParser : public QXmlDefaultHandler
 
          } else {
             err("Type '%s' is not supported for the entry tag within a navindex, verify the project layout file\n",
-                              qPrintable(type));
+                              csPrintable(type));
          }
 
          m_invalidEntry = true;
@@ -1720,7 +1720,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       } else {
          err("Unable to process layout file, XML tag '%s' was found in scope: '%s', \n",
-                     csPrintable(name), qPrintable(m_scope));
+                     csPrintable(name), csPrintable(m_scope));
       }
 
       return true;
@@ -1773,19 +1773,19 @@ class LayoutErrorHandler : public QXmlErrorHandler
 
    bool warning( const QXmlParseException &exception ) override {
       warn_uncond("at line %d column %d of %s: %s\n",
-                  exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message()));
+                  exception.lineNumber(), exception.columnNumber(), csPrintable(fileName), csPrintable(exception.message()));
       return false;
    }
 
    bool error( const QXmlParseException &exception ) override {
       err("at line %d column %d of %s: %s\n",
-          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message()));
+          exception.lineNumber(), exception.columnNumber(), csPrintable(fileName), csPrintable(exception.message()));
       return false;
    }
 
    bool fatalError( const QXmlParseException &exception ) override {
       err("at line %d column %d of %s: %s\n",
-          exception.lineNumber(), exception.columnNumber(), qPrintable(fileName), qPrintable(exception.message()));
+          exception.lineNumber(), exception.columnNumber(), csPrintable(fileName), csPrintable(exception.message()));
       return false;
    }
 

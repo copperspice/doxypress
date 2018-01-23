@@ -177,7 +177,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
       }
 
    } else {
-      err("Requested resource '%s' is unknown\n", qPrintable(fName));
+      err("Requested resource '%s' is unknown\n", csPrintable(fName));
 
    }
 

@@ -453,7 +453,7 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 
       if (incDepGraph.isTooBig()) {
          warn_uncond("Included by graph for '%s' not generated, too many nodes. "
-                     " Consider increasing 'DOT GRAPH MAX NODES'\n", qPrintable(name()));
+                     " Consider increasing 'DOT GRAPH MAX NODES'\n", csPrintable(name()));
 
       } else if (! incDepGraph.isTrivial()) {
          ol.startTextBlock();
@@ -1086,12 +1086,12 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
 
          if (  md->getClassDef() ) {
            err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
-             qPrintable(md->name()), qPrintable(md->getClassDef()->name()), qPrintable(name()) );
+             csPrintable(md->name()), csPrintable(md->getClassDef()->name()), csPrintable(name()) );
 
          } else  {
 
            err("FileDef::insertMembers(): member `%s' with class scope `%s' inserted in file scope `%s'\n",
-             qPrintable(md->name()), "<global>", qPrintable(name()) );
+             csPrintable(md->name()), "<global>", csPrintable(name()) );
          }
    }
 

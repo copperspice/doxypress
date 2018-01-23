@@ -123,7 +123,7 @@ void TooltipManager::writeTooltips(CodeOutputInterface &ol)
          }
       }
 
-      ol.writeTooltip(qPrintable(iter.key()), docInfo, decl, item->briefDescriptionAsTooltip(), defInfo, declInfo);
+      ol.writeTooltip(csPrintable(iter.key()), docInfo, decl, item->briefDescriptionAsTooltip(), defInfo, declInfo);
       iter++;
    }
 }

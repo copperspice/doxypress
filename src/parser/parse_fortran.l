@@ -2945,7 +2945,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       isFixedForm = recognizeFixedForm(fileBuf, format);
 
       if (isFixedForm) {
-         msg("Prepassing fixed form of %s\n", qPrintable(fileName));
+         msg("Prepassing fixed form of %s\n", csPrintable(fileName));
          inputString = prepassFixedForm(fileBuf);
 
       } else if (! inputString.endsWith('\n') ) {

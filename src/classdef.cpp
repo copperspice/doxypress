@@ -989,10 +989,10 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ol.startClassDiagram();
 
       ol.disable(OutputGenerator::Man);
-      ol.parseText(theTranslator->trClassDiagram( qPrintable(displayName())));
+      ol.parseText(theTranslator->trClassDiagram( csPrintable(displayName())));
 
       ol.enable(OutputGenerator::Man);
-      ol.endClassDiagram(diagram, getOutputFileBase(), qPrintable(displayName()));
+      ol.endClassDiagram(diagram, getOutputFileBase(), csPrintable(displayName()));
       renderDiagram = true;
    }
 
@@ -1099,7 +1099,7 @@ void ClassDef::writeCollaborationGraph(OutputList &ol)
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.startDotGraph();
-         ol.parseText(theTranslator->trCollaborationDiagram(qPrintable(displayName())));
+         ol.parseText(theTranslator->trCollaborationDiagram(csPrintable(displayName())));
          ol.endDotGraph(usageImplGraph);
          ol.popGeneratorState();
       }
@@ -1870,17 +1870,17 @@ QString ClassDef::title() const
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
-      pageTitle = theTranslator->trCompoundReferenceFortran( qPrintable(displayName()), m_compType,
+      pageTitle = theTranslator->trCompoundReferenceFortran( csPrintable(displayName()), m_compType,
                   ! m_tempArgs.listEmpty() );
 
    } else if (isJavaEnum()) {
-      pageTitle = theTranslator->trEnumReference(qPrintable(displayName()));
+      pageTitle = theTranslator->trEnumReference(csPrintable(displayName()));
 
    } else if (m_compType == CompoundType::Service) {
-      pageTitle = theTranslator->trServiceReference(qPrintable(displayName()));
+      pageTitle = theTranslator->trServiceReference(csPrintable(displayName()));
 
    } else if (m_compType == CompoundType::Singleton) {
-      pageTitle = theTranslator->trSingletonReference(qPrintable(displayName()));
+      pageTitle = theTranslator->trSingletonReference(csPrintable(displayName()));
 
    } else {
       if (hideCompoundRef) {
@@ -1897,7 +1897,7 @@ QString ClassDef::title() const
 
          }
 
-         pageTitle = theTranslator->trCompoundReference(qPrintable(displayName()), compType,
+         pageTitle = theTranslator->trCompoundReference(csPrintable(displayName()), compType,
                   ! m_tempArgs.listEmpty() );
       }
    }
@@ -1952,7 +1952,7 @@ void ClassDef::writeMemberPages(OutputList &ol)
       ml->countDocMembers();
 
       if (ml->numDocMembers() > 0 && (ml->listType() & MemberListType_detailedLists)) {
-         ml->writeDocumentationPage(ol, qPrintable(displayName()), self);
+         ml->writeDocumentationPage(ol, csPrintable(displayName()), self);
       }
    }
 
@@ -2009,7 +2009,7 @@ void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
       if (innerCd->isLinkableInProject() && innerCd->templateMaster() == 0 &&
             protectionLevelVisible(innerCd->protection()) && !innerCd->isEmbeddedInOuterScope() ) {
 
-         msg("Generating docs for nested compound %s\n", qPrintable(innerCd->name()));
+         msg("Generating docs for nested compound %s\n", csPrintable(innerCd->name()));
          innerCd->writeDocumentation(ol);
          innerCd->writeMemberList(ol);
       }
@@ -2179,7 +2179,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                      cd->getReference(),
                      cd->getOutputFileBase(),
                      cd->anchor(),
-                     qPrintable(cd->displayName()));
+                     csPrintable(cd->displayName()));
 
                } else {
                   ol.startBold();
@@ -2488,7 +2488,7 @@ bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, i
    bool found = false;
 
    if (level > 256) {
-      err("Possible recursive class relation while inside %s and looking for base class %s\n", qPrintable(name()), qPrintable(bcd->name()));
+      err("Possible recursive class relation while inside %s and looking for base class %s\n", csPrintable(name()), csPrintable(bcd->name()));
       return false;
    }
 
@@ -2518,7 +2518,7 @@ bool ClassDef::isSubClass(QSharedPointer<ClassDef> cd, int level)
    bool found = false;
 
    if (level > 256) {
-      err("Possible recursive class relation while inside %s and looking for derived class %s\n", qPrintable(name()), qPrintable(cd->name()));
+      err("Possible recursive class relation while inside %s and looking for derived class %s\n", csPrintable(name()), csPrintable(cd->name()));
       return false;
    }
 
@@ -3076,7 +3076,7 @@ QString ClassDef::getInstanceOutputFileBase() const
       return m_fileName;
 
    } else {
-      return convertNameToFile(qPrintable(m_fileName));
+      return convertNameToFile(csPrintable(m_fileName));
    }
 }
 

@@ -2134,11 +2134,11 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
          if (si) {
             if (si->lineNr != -1) {
                warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s, line %d)",
-                   qPrintable(header), csPrintable(si->fileName), si->lineNr);
+                   csPrintable(header), csPrintable(si->fileName), si->lineNr);
 
             } else {
                warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s)",
-                    qPrintable(header), csPrintable(si->fileName));
+                    csPrintable(header), csPrintable(si->fileName));
             }
 
          } else {
@@ -2551,11 +2551,11 @@ static QString processBlocks(const QString &str, int indent)
                   if (si) {
                      if (si->lineNr != -1) {
                         warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)",
-                             qPrintable(header), qPrintable(si->fileName), si->lineNr);
+                             csPrintable(header), csPrintable(si->fileName), si->lineNr);
 
                      } else {
                         warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)",
-                             qPrintable(header), qPrintable(si->fileName));
+                             csPrintable(header), csPrintable(si->fileName));
                      }
 
                   } else {

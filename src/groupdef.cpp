@@ -1338,7 +1338,7 @@ void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGr
 
          } else if (subGroup->findGroup(gd)) {
             warn(root->getData(EntryKey::File_Name), root->startLine, "Refusing to add group %s to group %s, since the latter is already a "
-                 "subgroup of the former\n", qPrintable(subGroup->name()), qPrintable(gd->name()));
+                 "subgroup of the former\n", csPrintable(subGroup->name()), csPrintable(gd->name()));
 
          } else if (! gd->findGroup(subGroup)) {
             gd->addGroup(subGroup);

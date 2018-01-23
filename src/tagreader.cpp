@@ -402,7 +402,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_state = InDir;
 
       } else {
-         warn("Unknown compound attribute `%s' found\n", qPrintable(kind) );
+         warn("Unknown compound attribute `%s' found\n", csPrintable(kind) );
          m_state = Invalid;
       }
 
@@ -968,7 +968,7 @@ class TagFileParser : public QXmlDefaultHandler
          handler(attrib);
 
       } else {
-         warn("Unknown tag `%s' found\n", qPrintable(name));
+         warn("Unknown tag `%s' found\n", csPrintable(name));
 
       }
 
@@ -985,7 +985,7 @@ class TagFileParser : public QXmlDefaultHandler
          handler();
 
       } else {
-         warn("Unknown tag `%s' found\n", qPrintable(name));
+         warn("Unknown tag `%s' found\n", csPrintable(name));
 
       }
 
@@ -1102,7 +1102,7 @@ void TagFileParser::dump()
 
       QStringList::Iterator it;
       for ( it = nd.classList.begin(); it != nd.classList.end(); ++it ) {
-         msg( "  class: %s \n", qPrintable((*it)) );
+         msg( "  class: %s \n", csPrintable((*it)) );
       }
 
       for (auto md : nd.members) {
@@ -1121,11 +1121,11 @@ void TagFileParser::dump()
 
       QStringList::Iterator it;
       for ( it = fd.namespaceList.begin(); it != fd.namespaceList.end(); ++it ) {
-         msg( "  namespace: %s \n", qPrintable((*it)) );
+         msg( "  namespace: %s \n", csPrintable((*it)) );
       }
 
       for ( it = fd.classList.begin(); it != fd.classList.end(); ++it ) {
-         msg( "  class: %s \n", qPrintable((*it)) );
+         msg( "  class: %s \n", csPrintable((*it)) );
       }
 
       for (auto md : fd.members) {
@@ -1148,22 +1148,22 @@ void TagFileParser::dump()
 
       QStringList::Iterator it;
       for ( it = gd.namespaceList.begin(); it != gd.namespaceList.end(); ++it ) {
-         msg( "  namespace: %s \n", qPrintable((*it)) );
+         msg( "  namespace: %s \n", csPrintable((*it)) );
       }
 
       for ( it = gd.classList.begin(); it != gd.classList.end(); ++it ) {
-         msg( "  class: %s \n", qPrintable((*it)) );
+         msg( "  class: %s \n", csPrintable((*it)) );
       }
 
       for ( it = gd.fileList.begin(); it != gd.fileList.end(); ++it ) {
-         msg( "  file: %s \n", qPrintable((*it)) );
+         msg( "  file: %s \n", csPrintable((*it)) );
       }
 
       for ( it = gd.subgroupList.begin(); it != gd.subgroupList.end(); ++it ) {
-         msg( "  subgroup: %s \n",qPrintable((*it)) );
+         msg( "  subgroup: %s \n",csPrintable((*it)) );
       }
       for ( it = gd.pageList.begin(); it != gd.pageList.end(); ++it ) {
-         msg( "  page: %s \n", qPrintable((*it)) );
+         msg( "  page: %s \n", csPrintable((*it)) );
       }
 
       for (auto md : gd.members) {
@@ -1189,11 +1189,11 @@ void TagFileParser::dump()
 
       QStringList::Iterator it;
       for ( it = dd.fileList.begin(); it != dd.fileList.end(); ++it ) {
-         msg( "  file: %s \n", qPrintable((*it)) );
+         msg( "  file: %s \n", csPrintable((*it)) );
       }
 
       for ( it = dd.subdirList.begin(); it != dd.subdirList.end(); ++it ) {
-         msg( "  subdir: %s \n", qPrintable((*it)) );
+         msg( "  subdir: %s \n", csPrintable((*it)) );
       }
    }
 }
@@ -1209,7 +1209,7 @@ void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoLi
          e->m_anchors.append(*si);
 
       } else {
-         warn("Duplicate anchor %s found\n", qPrintable(ta.label));
+         warn("Duplicate anchor %s found\n", csPrintable(ta.label));
 
       }
    }

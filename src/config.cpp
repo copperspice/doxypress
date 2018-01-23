@@ -52,7 +52,7 @@ QString Config::getEnum(const QString &name)
       retval = hashIter.value().value;
 
    } else {
-      fprintf(stderr, "Warning: %s was not retrieved from the project enum table\n", qPrintable(name) );
+      fprintf(stderr, "Warning: %s was not retrieved from the project enum table\n", csPrintable(name) );
 
    }
 
@@ -171,7 +171,7 @@ bool Config::preVerify()
       QFileInfo fi(headerFile);
 
       if (! fi.exists()) {
-         err("HTML Header file `%s' does not exist\n", qPrintable(headerFile));
+         err("HTML Header file `%s' does not exist\n", csPrintable(headerFile));
          isOk = false;
       }
    }
@@ -184,7 +184,7 @@ bool Config::preVerify()
       QFileInfo fi(footerFile);
 
       if (! fi.exists()) {
-         err("HTML Footer file `%s' does not exist\n", qPrintable(footerFile));
+         err("HTML Footer file `%s' does not exist\n", csPrintable(footerFile));
          isOk = false;
       }
    }
@@ -197,7 +197,7 @@ bool Config::preVerify()
       QFileInfo fi(latexHeaderFile);
 
       if (! fi.exists()) {
-         err("LaTeX Header file `%s' does not exist\n", qPrintable(latexHeaderFile));
+         err("LaTeX Header file `%s' does not exist\n", csPrintable(latexHeaderFile));
          isOk = false;
       }
    }
@@ -210,7 +210,7 @@ bool Config::preVerify()
       QFileInfo fi(latexFooterFile);
 
       if (! fi.exists()) {
-         err("LaTeX Footer file `%s' does not exist\n", qPrintable(latexFooterFile));
+         err("LaTeX Footer file `%s' does not exist\n", csPrintable(latexFooterFile));
          isOk = false;
       }
    }
@@ -224,7 +224,7 @@ bool Config::preVerify()
          QFileInfo fi(mathJaxCodefile);
 
          if (! fi.exists()) {
-            err("MathJax Codefile file `%s' does not exist\n", qPrintable(mathJaxCodefile));
+            err("MathJax Codefile file `%s' does not exist\n", csPrintable(mathJaxCodefile));
             isOk = false;
          }
       }
@@ -283,7 +283,7 @@ bool Config::verify()
    QString outputLanguage = iterEnum.value().value;
 
    if (outputLanguage.isEmpty()) {
-      warn_uncond("Output language %s was not specified, using English\n", qPrintable(outputLanguage));
+      warn_uncond("Output language %s was not specified, using English\n", csPrintable(outputLanguage));
       outputLanguage = "English";
    }
 
@@ -338,7 +338,7 @@ bool Config::verify()
 
       if (! (re1.indexIn(alias) == 0 || re2.indexIn(alias) == 0)) {
          err("Alias format: `%s' \n is invalid, use \"name=value\" or \"name{n}=value\", where n "
-                  "is the number of arguments\n\n", qPrintable(alias));
+                  "is the number of arguments\n\n", csPrintable(alias));
       }
    }
 
@@ -354,11 +354,11 @@ bool Config::verify()
 
          if (! updateLanguageMapping(extension, language, true)) {
             err("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n",
-                  qPrintable(extension), qPrintable(language));
+                  csPrintable(extension), csPrintable(language));
 
          } else {
             msg("Adding custom extension mapping: .%s, will be treated as language %s\n",
-                  qPrintable(extension), qPrintable(language));
+                  csPrintable(extension), csPrintable(language));
          }
       }
    }
@@ -374,7 +374,7 @@ bool Config::verify()
       QFileInfo fi(layoutFileName);
 
       if (! fi.exists()) {
-         err("Layout file `%s' does not exist\n", qPrintable(layoutFileName));
+         err("Layout file `%s' does not exist\n", csPrintable(layoutFileName));
          isOk = false;
       }
    }
@@ -396,7 +396,7 @@ bool Config::verify()
          QFileInfo fi(item.trimmed());
 
          if (! fi.exists()) {
-            warnMsg("INPUT SOURCE `%s' does not exist\n", qPrintable(item));
+            warnMsg("INPUT SOURCE `%s' does not exist\n", csPrintable(item));
          }
       }
    }
@@ -496,7 +496,7 @@ bool Config::verify()
          addSearchDir(fi.absoluteFilePath());
 
       } else {
-         warnMsg("INCLUDE PATH `%s' does not exist\n", qPrintable(item));
+         warnMsg("INCLUDE PATH `%s' does not exist\n", csPrintable(item));
 
       }
    }
@@ -513,7 +513,7 @@ bool Config::verify()
       dotImageFormat = "png";
 
    } else if (! s_dotImageFormat.contains(dotImageFormat)) {
-      err("Invalid value of %s for Dot Image Format, using the the default of png\n", qPrintable(dotImageFormat));
+      err("Invalid value of %s for Dot Image Format, using the the default of png\n", csPrintable(dotImageFormat));
 
       dotImageFormat = "png";
    }
@@ -558,7 +558,7 @@ bool Config::verify()
       QFileInfo dp(diaPath + "/dia" + portable_commandExtension());
 
       if (! dp.exists() || ! dp.isFile()) {
-         warnMsg("Unable to find the DIA program at %s\n", qPrintable(diaPath));
+         warnMsg("Unable to find the DIA program at %s\n", csPrintable(diaPath));
          diaPath = "";
 
       } else {
@@ -623,7 +623,7 @@ bool Config::verify()
 
          } else {
             err("PlantUml Jar File 'plantuml.jar' was not found at the path specified by "
-                   "PlantUml Jar Path '%s'\n", qPrintable(plantumlJarPath));
+                   "PlantUml Jar Path '%s'\n", csPrintable(plantumlJarPath));
 
             iterString.value().value = QString();
          }
@@ -635,7 +635,7 @@ bool Config::verify()
          iterString.value().value = plantumlJarPath;
 
       } else {
-         err("PlantUml Jar Path does not exist and is not a directory: %s\n", qPrintable(plantumlJarPath));
+         err("PlantUml Jar Path does not exist and is not a directory: %s\n", csPrintable(plantumlJarPath));
          iterString.value().value = QString();
       }
    }
@@ -716,7 +716,7 @@ bool Config::verify()
          err("MathJax Format can not be empty, setting to the default value of HTML-CSS\n");
 
       } else  {
-         err("Invalid value of %s for MathJax Format, setting to the default value of HTML-CSS\n", qPrintable(mathJaxFormat));
+         err("Invalid value of %s for MathJax Format, setting to the default value of HTML-CSS\n", csPrintable(mathJaxFormat));
 
       }
 

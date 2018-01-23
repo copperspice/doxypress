@@ -484,7 +484,7 @@ void SearchIndex_External::write(const QString &fileName)
       t << "</add>" << endl;
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
      
    }
 }
@@ -1092,7 +1092,7 @@ void writeJavascriptSearchIndex()
             ti << "];" << endl;
 
          } else {
-            err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), outFile.error());
+            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), outFile.error());
           
          }
 

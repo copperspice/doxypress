@@ -139,7 +139,7 @@ void XmlDocVisitor::visit(DocSymbol *s)
    if (! res.isEmpty()) {
       m_t << res;
    } else {
-      err("XML, Unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      err("XML, Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
 }
 

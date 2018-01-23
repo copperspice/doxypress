@@ -213,7 +213,7 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const QString &re
 
          if (pnl.isEmpty()) {
             // must test for this condition in decContentsDepth()
-            fprintf(stderr, "Error: Page (%s) contains a subsection (%s) with no parent section\n", qPrintable(file), qPrintable(name) );
+            fprintf(stderr, "Error: Page (%s) contains a subsection (%s) with no parent section\n", csPrintable(file), csPrintable(name) );
 
          } else {
             newNode->parent = pnl.last();
@@ -713,7 +713,7 @@ if  (node->file.contains("getting-started")) {
 //       node->file.contains("implicit") || node->file.contains("unicode") ||
 //       node->file.contains("main-dev") || node->file.contains("sample-project") || item->file.contains("faq") ) {
 
-      printf("\n  file: %-20s   Name: %-20s   Alpha: %-3d", qPrintable(item->file), qPrintable(node->name), node->index );
+      printf("\n  file: %-20s   Name: %-20s   Alpha: %-3d", csPrintable(item->file), csPrintable(node->name), node->index );
 
       if (node->def) {
          printf("  Our OrderId: %-3d",  node->def->getInputOrderId() );

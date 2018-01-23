@@ -503,7 +503,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
          if (! title.isEmpty()) {
             ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(),
-                                          cd->anchor(), title, qPrintable(cd->displayName()) );
+                                          cd->anchor(), title, csPrintable(cd->displayName()) );
          }
 
          ol.popGeneratorState();

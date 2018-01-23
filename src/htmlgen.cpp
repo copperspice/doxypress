@@ -225,7 +225,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
          QFileInfo fi(configDir, fileName);
 
          if (fi.exists()) {
-            extraCssText += "<link href=\"$relpath^" + stripPath(qPrintable(fileName)) +
+            extraCssText += "<link href=\"$relpath^" + stripPath(csPrintable(fileName)) +
                   "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
          } else {
             err("Unable to find stylesheet '%s'\n", csPrintable(fi.absoluteFilePath()));
@@ -690,7 +690,7 @@ void HtmlGenerator::init()
    QDir d(dname);
 
    if (! d.exists() && ! d.mkdir(dname)) {
-      err("HTML Generator, unable to create output directory %s\n", qPrintable(dname));
+      err("HTML Generator, unable to create output directory %s\n", csPrintable(dname));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -754,7 +754,7 @@ void HtmlGenerator::init()
       }
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
 
    }
 
@@ -2446,7 +2446,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << "</script>\n";
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(configFileName), cf.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(configFileName), cf.error());
 
    }
 
@@ -2496,7 +2496,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << ResourceMgr::instance().getAsString("html/extsearch.js");
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(scriptName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(scriptName), f.error());
    }
 }
 
@@ -2555,7 +2555,7 @@ void HtmlGenerator::writeExternalSearchPage()
       writePageFooter(t_stream, "Search", QString(), QString());
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
 
    }
 
@@ -2618,7 +2618,7 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << "});" << endl;
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(scriptName), sf.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(scriptName), sf.error());
    }
 }
 

@@ -444,7 +444,7 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
    QFile f(fileName);
 
    if (! f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
-      err("Unable to open file for reading %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for reading %s, error: %d\n", csPrintable(fileName), f.error());
       return false;
    }
 
@@ -473,7 +473,7 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
       }
    }
 
-   err("Unable to extract bounding box from generated diagram file %s\n", qPrintable(fileName));
+   err("Unable to extract bounding box from generated diagram file %s\n", csPrintable(fileName));
 
    return false;
 }
@@ -1039,7 +1039,7 @@ bool DotFilePatcher::run()
             }
 
          } else {
-            err("Invalid SVG id found in file %s\n", qPrintable(m_patchFile));
+            err("Invalid SVG id found in file %s\n", csPrintable(m_patchFile));
             t << line.mid(i);
          }
 
@@ -1105,12 +1105,12 @@ bool DotFilePatcher::run()
       QFile fo(orgName);
 
       if (! fi.open(QIODevice::ReadOnly)) {
-         err("Unable to open file for reading %s, error: %d\n", qPrintable(tmpName), fi.error());
+         err("Unable to open file for reading %s, error: %d\n", csPrintable(tmpName), fi.error());
          return false;
       }
 
       if (! fo.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", qPrintable(orgName), fi.error());
+         err("Unable to open file for writing %s, error: %d\n", csPrintable(orgName), fi.error());
          return false;
       }
 
@@ -1646,7 +1646,7 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
                QString temp;
                temp = QString("%1").arg(totalCount - count);
 
-               t << theTranslator->trAndMore(qPrintable(temp)) << "\\l";
+               t << theTranslator->trAndMore(csPrintable(temp)) << "\\l";
 
                break;
 
@@ -2296,7 +2296,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", qPrintable(path));
+      err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -3068,7 +3068,7 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", qPrintable(path));
+      err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -3451,7 +3451,7 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", qPrintable(path));
+      err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
    static bool usePDFLatex = Config::getBool("latex-pdf");
@@ -3740,7 +3740,7 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", qPrintable(path));
+      err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -3891,7 +3891,7 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
 
    // store the original directory
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", qPrintable(path));
+      err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -3962,7 +3962,7 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
       QFile f(absDotName);
 
       if (! f.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", qPrintable(baseName), f.error());
+         err("Unable to open file for writing %s, error: %d\n", csPrintable(baseName), f.error());
       }
 
       QTextStream t(&f);
@@ -4155,7 +4155,7 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
    QDir d(outDir);
 
    if (! d.exists()) {
-      err("Output directory %s does not exist\n", qPrintable(outDir));
+      err("Output directory %s does not exist\n", csPrintable(outDir));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -4166,7 +4166,7 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
    static const QString absImgName  = d.absolutePath() + "/" + imageName;
    static const QString absOutFile  = d.absolutePath() + "/" + outFile;
 
-   DotRunner dotRun(inFile, d.absolutePath(), false, qPrintable(absImgName));
+   DotRunner dotRun(inFile, d.absolutePath(), false, csPrintable(absImgName));
 
    if (format == GOF_BITMAP) {
       dotRun.addJob(imageFormat, absImgName);
@@ -4211,7 +4211,7 @@ void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QStri
    QDir d(outDir);
 
    if (! d.exists()) {
-      err("Output dir %s does not exist\n", qPrintable(outDir));
+      err("Output dir %s does not exist\n", csPrintable(outDir));
       Doxy_Work::stopDoxyPress();
    }
 

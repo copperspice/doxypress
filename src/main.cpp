@@ -64,7 +64,7 @@ void loadTranslationFile()
       QCoreApplication::installTranslator(translator);
       
    } else {
-      fprintf(stderr, "\n\nProblem occured while loading the %s translation file\n", qPrintable(transFile) );
+      fprintf(stderr, "\n\nProblem occured while loading the %s translation file\n", csPrintable(transFile) );
 
    }   
 }
@@ -219,7 +219,7 @@ QString getLanguage()
 
    // no match found
    if (retval.isEmpty()) {
-      warn_uncond("Output language %s was not specified, using English\n", qPrintable(outputLanguage));      
+      warn_uncond("Output language %s was not specified, using English\n", csPrintable(outputLanguage));      
       retval = "doxy_en.qm";
    } 
 

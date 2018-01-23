@@ -199,7 +199,7 @@ static void writeCombineScript()
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1675,7 +1675,7 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1751,7 +1751,7 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    QFile f(fileName);
 
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1878,7 +1878,7 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-       err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+       err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1937,7 +1937,7 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    QFile f(fileName);
 
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1995,7 +1995,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -2068,7 +2068,7 @@ void generateXML_output()
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -2110,7 +2110,7 @@ void generateXML_output()
    f.setFileName(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -2127,34 +2127,34 @@ void generateXML_output()
    }
 
    for (auto &nd : Doxy_Globals::namespaceSDict) {
-      msg("Generating XML output for namespace %s\n", qPrintable(nd->name()));
+      msg("Generating XML output for namespace %s\n", csPrintable(nd->name()));
       generateXMLForNamespace(nd, t);
    }
 
    for (auto &fn : Doxy_Globals::inputNameList) {
       for (auto fd : *fn) {
-         msg("Generating XML output for file %s\n", qPrintable(fd->name()));
+         msg("Generating XML output for file %s\n", csPrintable(fd->name()));
          generateXMLForFile(fd, t);
       }
    }
 
    for (auto gd : Doxy_Globals::groupSDict) {
-      msg("Generating XML output for group %s\n", qPrintable(gd->name()));
+      msg("Generating XML output for group %s\n", csPrintable(gd->name()));
       generateXMLForGroup(gd, t);
    }
 
    for (auto &pd : Doxy_Globals::pageSDict) {
-      msg("Generating XML output for page %s\n", qPrintable(pd->name()));
+      msg("Generating XML output for page %s\n", csPrintable(pd->name()));
       generateXMLForPage(pd, t, false);
    }
 
    for (auto dir : Doxy_Globals::directories) {
-      msg("Generating XML output for dir %s\n", qPrintable(dir->name()));
+      msg("Generating XML output for dir %s\n", csPrintable(dir->name()));
       generateXMLForDir(dir, t);
    }
 
    for (auto &pd : Doxy_Globals::exampleSDict) {
-      msg("Generating XML output for example %s\n", qPrintable(pd->name()));
+      msg("Generating XML output for example %s\n", csPrintable(pd->name()));
       generateXMLForPage(pd, t, true);
    }
 

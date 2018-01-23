@@ -544,7 +544,7 @@ bool Config::read_ProjectFile(const QString &fName)
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown enum configuration parameter and not "
-                     "recognized by DoxyPress\n", qPrintable(key) );
+                     "recognized by DoxyPress\n", csPrintable(key) );
 
             }
 
@@ -559,7 +559,7 @@ bool Config::read_ProjectFile(const QString &fName)
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown boolean configuration parameter and not "
-                     "recognized by DoxyPress\n", qPrintable(key) );
+                     "recognized by DoxyPress\n", csPrintable(key) );
 
             }
          }
@@ -572,7 +572,7 @@ bool Config::read_ProjectFile(const QString &fName)
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown integer configuration parameter and not "
-                     "recognized by DoxyPress\n", qPrintable(key) );
+                     "recognized by DoxyPress\n", csPrintable(key) );
 
             }
          }
@@ -597,7 +597,7 @@ bool Config::read_ProjectFile(const QString &fName)
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown array configuration parameter and not "
-                  "recognized by DoxyPress\n", qPrintable(key) );
+                  "recognized by DoxyPress\n", csPrintable(key) );
 
             }
          }
@@ -610,7 +610,7 @@ bool Config::read_ProjectFile(const QString &fName)
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown string configuration parameter and not "
-                  "recognized by DoxyPress\n", qPrintable(key) );
+                  "recognized by DoxyPress\n", csPrintable(key) );
 
             }
          }

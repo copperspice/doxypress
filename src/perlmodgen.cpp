@@ -658,7 +658,7 @@ void PerlModDocVisitor::visit(DocSymbol *sy)
             break;
       }
    } else {
-      err("Perl, Unsupported HTML entity found: %s\n", qPrintable(HtmlEntityMapper::instance()->html(sy->symbol(), true)) );
+      err("Perl, Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(sy->symbol(), true)) );
    }
 }
 
@@ -2460,7 +2460,7 @@ bool PerlModGenerator::createOutputFile(QFile &f, const QString &s)
    f.setFileName(s);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", qPrintable(s), f.error());
+      err("Unable to open file for writing %s, error: %d\n", csPrintable(s), f.error());
       return false;
    }
 

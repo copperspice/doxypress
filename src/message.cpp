@@ -136,7 +136,7 @@ void initWarningFormat()
    QString logFN = Config::getString("warn-logfile");
 
    if (! logFN.isEmpty()) {
-      warnFile = fopen(qPrintable(logFN), "w");
+      warnFile = fopen(csPrintable(logFN), "w");
    }
 
    if (! warnFile) { 
@@ -396,19 +396,19 @@ void printlex(int dbg, bool enter, const QString &lexName, const QString &fileNa
    if (dbg) {
 
       if (! fileName.isEmpty()) {
-         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", qPrintable(enter_txt), qPrintable(lexName), 
-                  qPrintable(fileName));
+         fprintf(stderr, "--%s lexical analyzer: %s (for: %s)\n", csPrintable(enter_txt), csPrintable(lexName), 
+                  csPrintable(fileName));
       } else {
-         fprintf(stderr, "--%s lexical analyzer: %s\n", qPrintable(enter_txt), qPrintable(lexName));
+         fprintf(stderr, "--%s lexical analyzer: %s\n", csPrintable(enter_txt), csPrintable(lexName));
       }
 
    } else {
        if (! fileName.isEmpty()) {
-         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s (for: %s)\n", qPrintable(enter_txt_uc), 
-                  qPrintable(lexName), qPrintable(fileName));
+         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s (for: %s)\n", csPrintable(enter_txt_uc), 
+                  csPrintable(lexName), csPrintable(fileName));
       } else {
-         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", qPrintable(enter_txt_uc), 
-                  qPrintable(lexName));
+         Debug::print(Debug::Lex, 0, "%s lexical analyzer: %s\n", csPrintable(enter_txt_uc), 
+                  csPrintable(lexName));
       }
    }
 }

@@ -136,7 +136,7 @@ void FormulaList::generateBitmaps(const QString &path)
          // run dvips to convert the page with number pageIndex to an encapsulated postscript
 
          char dviArgs[4096];
-         sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",pageIndex, qPrintable(formBase));
+         sprintf(dviArgs, "-q -D 600 -E -n 1 -p %d -o %s.eps _formulas.dvi",pageIndex, csPrintable(formBase));
 
          portable_sysTimerStart();
 
@@ -206,14 +206,14 @@ void FormulaList::generateBitmaps(const QString &path)
          char gsArgs[4096];
          sprintf(gsArgs, "-q -g%dx%d -r%dx%dx -sDEVICE=ppmraw "
                  "-sOutputFile=%s.pnm -dNOPAUSE -dBATCH -- %s.ps",
-                 gx, gy, (int)(scaleFactor * 72), (int)(scaleFactor * 72), qPrintable(formBase), qPrintable(formBase) );
+                 gx, gy, (int)(scaleFactor * 72), (int)(scaleFactor * 72), csPrintable(formBase), csPrintable(formBase) );
 
          portable_sysTimerStart();
 
          QString gsExe = Config::getString("ghostscript");
 
          if (portable_system(gsExe, gsArgs) != 0) {
-            err("Unable to run GhostScript %s %s. Verify your installation\n", qPrintable(gsExe), gsArgs);
+            err("Unable to run GhostScript %s %s. Verify your installation\n", csPrintable(gsExe), gsArgs);
             portable_sysTimerStop();
 
             // reset the directory to the original location
@@ -334,7 +334,7 @@ void FormulaList::generateBitmaps(const QString &path)
                   f.close();
 
                } else {
-                  err("Unable to open file for writing %s, error: %d\n", qPrintable(fileName), f.error());
+                  err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
 
                }
             }
