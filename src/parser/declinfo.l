@@ -18,20 +18,16 @@
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 
-static QString  inputString;
-static int      inputPosition;
-static QString  className;
-static QString  classTempList;
-static QString  funcTempList;
+static int      s_inputPosition;
+static QString  s_inputString;
+static QString  s_exceptionString;
+
 static QString  s_scope;
 static QString  s_type;
 static QString  s_name;
 static QString  s_args;
 
 static int      sharpCount;
-static bool     classTempListFound;
-static bool     funcTempListFound;
-static QString  exceptionString;
 static bool     insideObjC;
 
 static void addType()
@@ -50,8 +46,8 @@ static void addType()
 
    s_type += s_name;
 
-   s_scope.resize(0);
-   s_name.resize(0);
+   s_scope = "";
+   s_name  = "";
 }
 
 static void addTypeName()
@@ -66,7 +62,7 @@ static void addTypeName()
    }
 
    s_type += s_name;
-   s_name.resize(0);
+   s_name  = "";
 }
 
 #undef   YY_INPUT
@@ -76,9 +72,9 @@ static int yyread(char *buf, int max_size)
 {
    int c = 0;
 
-   while (inputString[inputPosition] != 0) {
+   while (s_inputString[s_inputPosition] != 0) {
 
-      QString tmp1    = inputString.at(inputPosition);
+      QString tmp1    = s_inputString.at(s_inputPosition);
       QByteArray tmp2 = tmp1.toUtf8();
 
       if (c + tmp2.length() >= max_size)  {
@@ -93,7 +89,7 @@ static int yyread(char *buf, int max_size)
           buf++;
       }
 
-      inputPosition++;
+      s_inputPosition++;
    }
 
    return c;
@@ -138,10 +134,9 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
 
 <Start>([~!]{B}*)?{ID}/({B}*"["{B}*"]")* {
       // the []'s are for Java,
-      // the / was add to deal with multi-
-      // dimensional C++ arrays like A[][15]
+      // the / was add to deal with multi-dimensional C++ arrays like A[][15]
       // the leading ~ is for a destructor
-      // the leading ! is for a C++/CLI finalizer (see bug 456475 and 635198)
+      // the leading ! is for a C++/CLI finalizer
 
       QString text = QString::fromUtf8(yytext);
 
@@ -197,8 +192,8 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
    }
 
 <Start>{B}*"<"          {
-      s_name     += "<";
-      sharpCount  = 0;
+      s_name += "<";
+      sharpCount = 0;
       BEGIN(Template);
    }
 
@@ -207,7 +202,22 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
    }
 
 <Template>">>"          {
-      s_name += ">>";
+      if (sharpCount == 1) {
+         s_name += "> >";
+
+         sharpCount = 0;
+         BEGIN(Start);
+
+      } else {
+
+         if (s_name.endsWith("operator")) {
+            // special case for  class< operator>> >
+            s_name += ">> ";
+
+         } else {
+            s_name += ">>";
+         }
+      }
    }
 
 <Template>"<"        {
@@ -247,18 +257,18 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
    }
 
 <ReadArgs>"throw"{B}*"("   {
-      exceptionString = "throw(";
+      s_exceptionString = "throw(";
       BEGIN(ReadExceptions);
    }
 
-<ReadArgs>.          {
+<ReadArgs>.                {
       QString text = QString::fromUtf8(yytext);
       s_args += text[0];
    }
 
-<ReadExceptions>.       {
+<ReadExceptions>.          {
       QString text = QString::fromUtf8(yytext);
-      exceptionString += text[0];
+      s_exceptionString += text[0];
    }
 
 <*>.
@@ -266,35 +276,27 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
 
 %%
 
-
 void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
                    QString &n, QString &a, QString &ftl, QString &exc)
 {
-   printlex(declinfoYY_flex_debug, TRUE, __FILE__, NULL);
-
-   inputString   = decl;
-
-   if (inputString == 0) {
+   if (decl.isEmpty()) {
       return;
    }
 
-   inputPosition      = 0;
-   classTempListFound = FALSE;
-   funcTempListFound  = FALSE;
-   insideObjC = objC;
-   className.resize(0);
-   classTempList.resize(0);
-   funcTempList.resize(0);
+   s_inputString        = decl;
+   insideObjC           = objC;
 
-   s_scope.resize(0);
-   s_name.resize(0);
-   s_type.resize(0);
-   s_args.resize(0);
+   s_inputPosition      = 0;
+   s_exceptionString    = "";
 
-   exceptionString.resize(0);
+   s_scope              = "";
+   s_name               = "";
+   s_type               = "";
+   s_args               = "";
 
-   // try to find the type, scope, name and arguments
+   // find the type, scope, name and arguments
    declinfoYYrestart( declinfoYYin );
+
    BEGIN( Start );
    declinfoYYlex();
 
@@ -306,14 +308,14 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
       s_name = s_name.left(nb);
    }
 
-
    cl = s_scope;
-   n = removeRedundantWhiteSpace(s_name);
+   n  = removeRedundantWhiteSpace(s_name);
+
    int il;
    int ir;
 
    if ((il = n.indexOf('<')) != -1 && (ir = n.lastIndexOf('>')) != -1) {
-      // TODO: handle cases like where n="operator<< <T>"
+      // TODO: handle cases like n = "operator<< <T>"
 
       ftl = removeRedundantWhiteSpace(n.right(n.length() - il));
       n = n.left(il);
@@ -321,15 +323,13 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
 
    t   = removeRedundantWhiteSpace(s_type);
    a   = removeRedundantWhiteSpace(s_args);
-   exc = removeRedundantWhiteSpace(exceptionString);
+   exc = removeRedundantWhiteSpace(s_exceptionString);
 
-   if (!t.isEmpty() && t.at(t.length() - 1) == ')') {
+   if (! t.isEmpty() && t.at(t.length() - 1) == ')') {
       // for function pointers
       a.prepend(")");
       t = t.left(t.length() - 1);
    }
-
-   printlex(declinfoYY_flex_debug, FALSE, __FILE__, NULL);
 
    return;
 }

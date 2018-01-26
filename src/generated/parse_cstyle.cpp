@@ -15737,10 +15737,19 @@ case 162:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
+
       if (insideJava || insideCSharp || insideCli || roundCount == 0) {
-         unput('>');
-         unput(' ');
-         unput('>');
+
+         if (insideCpp && current->m_entryName.endsWith("operator")) {
+            // special case for  class< operator>> >
+            current->m_entryName += ">> ";
+
+         } else {
+            unput('>');
+            unput(' ');
+            unput('>');
+         }
+
       } else {
          current->m_entryName += text;
       }
@@ -15750,6 +15759,7 @@ case 163:
 YY_RULE_SETUP
 {
       current->m_entryName += '>';
+
       if (roundCount == 0 && --sharpCount <= 0) {
          BEGIN(FindMembers);
       }
@@ -22497,7 +22507,6 @@ case 698:
 YY_DO_BEFORE_ACTION; /* set up parse_cstyle_YYtext again */
 YY_RULE_SETUP
 {
-      // M$ C++ extension to allow >> to close a template...
       unput('>');
       unput(' ');
       unput('>');
@@ -22507,14 +22516,14 @@ case 699:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
+
       if (insideCSharp) {
          // for C# >> ends a nested template
          REJECT;
 
       } else  {
-         // for C++ >> is a bitshift operator and > > would end a nested template
+         // in C++ >> is a bitshift operator and > > would end a nested template
          // we require the bitshift to be enclosed in braces
-         // See http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1757.html
 
          if (roundCount > 0) {
             *specName += text;

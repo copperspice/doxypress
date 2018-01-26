@@ -2773,10 +2773,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <ClassTemplSpec,EndTemplate>">>"    {
       QString text = QString::fromUtf8(yytext);
+
       if (insideJava || insideCSharp || insideCli || roundCount == 0) {
-         unput('>');
-         unput(' ');
-         unput('>');
+
+         if (insideCpp && current->m_entryName.endsWith("operator")) {
+            // special case for  class< operator>> >
+            current->m_entryName += ">> ";
+
+         } else {
+            unput('>');
+            unput(' ');
+            unput('>');
+         }
+
       } else {
          current->m_entryName += text;
       }
@@ -2784,6 +2793,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <EndTemplate>">"        {
       current->m_entryName += '>';
+
       if (roundCount == 0 && --sharpCount <= 0) {
          BEGIN(FindMembers);
       }
@@ -8247,7 +8257,6 @@ SkipC11Attribute>"]]"                 {
    }
 
 <Specialization>">>"/{B}*"::"       {
-      // M$ C++ extension to allow >> to close a template...
       unput('>');
       unput(' ');
       unput('>');
@@ -8255,14 +8264,14 @@ SkipC11Attribute>"]]"                 {
 
 <Specialization>">>"          {
       QString text = QString::fromUtf8(yytext);
+
       if (insideCSharp) {
          // for C# >> ends a nested template
          REJECT;
 
       } else  {
-         // for C++ >> is a bitshift operator and > > would end a nested template
+         // in C++ >> is a bitshift operator and > > would end a nested template
          // we require the bitshift to be enclosed in braces
-         // See http://www.open-std.org/jtc1/sc22/wg21/docs/papers/2005/n1757.html
 
          if (roundCount > 0) {
             *specName += text;
