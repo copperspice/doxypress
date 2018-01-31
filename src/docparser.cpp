@@ -1223,6 +1223,7 @@ static void handleParameterType(DocNode *parent, QList<DocNode *> &children, con
 
    while ((i = paramTypes.indexOf('|', p)) != -1) {
       g_token->name = paramTypes.mid(p, i - p);
+
       handleLinkedWord(parent, children);
       p = i + 1;
    }

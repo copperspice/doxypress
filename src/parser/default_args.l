@@ -446,7 +446,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             arg.typeConstraint = g_curTypeConstraint.trimmed();
             arg.array          = "";
 
-            if (i == len - 1 && g_curArgTypeName.at(i)==')') {
+            if (i == len - 1 && g_curArgTypeName.at(i) == ')') {
                // function argument
 
                int bi = g_curArgTypeName.indexOf('(');
@@ -466,19 +466,18 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
                }
 
-            } else if (i >= 0 && g_curArgTypeName.at(i)!=':') {
+            } else if (i >= 0 && g_curArgTypeName.at(i) != ':') {
                // type contains a name
 
                arg.type = removeRedundantWhiteSpace(g_curArgTypeName.left(i + 1)).trimmed();
                arg.name = g_curArgTypeName.right(len - i - 1).trimmed();
 
-               // if the type becomes a type specifier only then we make a mistake
-               // and need to correct it to avoid seeing a nameless parameter
-               // "struct A" as a parameter with type "struct" and name "A".
+               // if the argument type is not a complete type, need to correct to avoid seeing a
+               // nameless parameter "struct A" as a parameter with type "struct" and name "A".
 
                int sv = 0;
 
-               if (arg.type.left(6) == "const ") {
+               if (arg.type.startsWith("const ")) {
                   sv = 6;
 
                } else if (arg.type.startsWith("volatile ")) {
@@ -486,8 +485,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
                }
 
-               if (arg.type.mid(sv, 6) == "struct"   || arg.type.mid(sv, 5) == "union" ||
-                     arg.type.mid(sv, 5) == "class"  || arg.type.mid(sv, 8) == "typename" ||
+               if (arg.type.mid(sv) == "struct"   || arg.type.mid(sv) == "union" ||
+                     arg.type.mid(sv) == "class"  || arg.type.mid(sv) == "typename" ||
                      arg.type == "const" || arg.type == "volatile") {
 
                   arg.type = arg.type + " " + arg.name;
@@ -507,7 +506,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
                arg.type = "";
             }
 
-            arg.array  += removeRedundantWhiteSpace(g_curArgArray);
+            arg.array += removeRedundantWhiteSpace(g_curArgArray);
 
             int alen = arg.array.length();
 

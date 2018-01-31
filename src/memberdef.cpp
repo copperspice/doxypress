@@ -145,7 +145,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       ol.startParameterName(false);
 
-      for (auto &a: defArgList) {
+      for (auto &a : defArgList) {
 
          if (a.defval.isEmpty()) {
             ol.docify(a.name + " ");
@@ -192,6 +192,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       if (! md->isObjCMethod()) {
          ol.docify("(");   // start argument list
       }
+
       ol.endMemberDocName();
    }
 
@@ -246,13 +247,13 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       int vp = re.indexIn(arg.type);
       int wp = res.indexIn(arg.type);
 
-      // use the following to put the function pointer type before the name
-      bool hasFuncPtrType = false;
-
       if (! arg.attrib.isEmpty() && ! md->isObjCMethod()) {
          // argument has an IDL attribute
          ol.docify(arg.attrib + " ");
       }
+
+      // use the following to put the function pointer type before the name
+      bool hasFuncPtrType = false;
 
       if (hasFuncPtrType) {
          // argument type is a function pointer
@@ -300,6 +301,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
             ol.endParameterType();
             paramTypeStarted = false;
          }
+
          ol.startParameterName(defArgList.count() < 2);
       }
 
