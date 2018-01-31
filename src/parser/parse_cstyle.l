@@ -9325,7 +9325,7 @@ static void handleCommentBlock(const QString &doc, bool brief)
                   protection, position, needsEntry) ) {         // last 3 are passed by reference
 
       if (needsEntry) {
-         QString tmpDocFile = current->getData(EntryKey::MainDocs_File),
+         QString tmpDocFile = current->getData(EntryKey::MainDocs_File);
 
          newEntry();
 
