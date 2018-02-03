@@ -9,7 +9,6 @@
 
 #include <QFile>
 #include <QStack>
-#include <QRegExp>
 #include <QVector>
 
 #include <stdio.h>
@@ -365,11 +364,10 @@ void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool fou
 void initGroupInfo(QSharedPointer<Entry> e);
 static void groupAddDocs(QSharedPointer<Entry> e);
 
-static ParserInterface *langParser;            // the language parser that is calling us
-static QString          inputString;           // input string
-static int              inputPosition;         // read pointer
-static int              prevPosition;
-static char *           s_bufferPosition;
+static QString          s_inputString;         // input string
+static int              s_inputPosition;       // read pointer
+static int              s_prevPosition;
+static char            *s_bufferPosition;
 
 static QString          yyFileName;            // file name that is read from
 static int              yyLineNr;              // line number in the input
@@ -387,12 +385,6 @@ static XRefKind         newXRefKind;
 static GuardType        guardType;             // kind of guard for conditional section
 static bool             enabledSectionFound;
 static QString          functionProto;         // function prototype
-
-static QSharedPointer<Entry>  s_docsEntry;     // which entry
-static EntryKey               s_docsEnum;      // which enum in EntryKey (brief, main, inbody)
-
-static QStack<GuardedSection> s_guards;        // tracks nested conditional sections (if, ifnot, ..)
-static QSharedPointer<Entry>  current;         // working entry
 
 static bool             s_needNewEntry;
 static int              s_docBlockContext;
@@ -421,8 +413,6 @@ static QString          s_guardExpr;
 static int              s_roundCount;
 static bool             s_insideParBlock;
 
-static QStack<QSharedPointer<Grouping>> s_autoGroupStack;
-
 static int              s_memberGroupId = DOX_NOGROUP;
 static QString          s_memberGroupHeader;
 static QString          s_memberGroupDocs;
@@ -431,6 +421,17 @@ static QString          s_compoundName;
 
 static bool             s_internalDocs;
 static bool             s_processInternalDocs = false;
+
+
+static ParserInterface        *langParser;        // the language parser that is calling us
+
+static QSharedPointer<Entry>  s_docsEntry;        // which entry
+static EntryKey               s_docsEnum;         // which enum in EntryKey (brief, main, inbody)
+
+static QStack<GuardedSection> s_guards;           // tracks nested conditional sections (if, ifnot, ..)
+static QSharedPointer<Entry>  current;            // working entry
+
+static QStack<QSharedPointer<Grouping>> s_autoGroupStack;
 
 static void initParser()
 {
@@ -872,31 +873,25 @@ static void handleGuard(const QString &expr);
 static int yyread(char *buf, int max_size)
 {
    s_bufferPosition = buf;
+   s_prevPosition   = s_inputPosition;
 
-   prevPosition = inputPosition;
-   int c = 0;
+   //
+   int len = max_size;
 
-   while (inputString[inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = inputString.at(inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 %}
@@ -1180,7 +1175,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
             s_parseMore = true;
 
-            inputPosition = prevPosition + (yy_bp - s_bufferPosition);
+            s_inputPosition = s_prevPosition + (yy_bp - s_bufferPosition);
             yyterminate();
 
          } else if (cmdPtr->func == nullptr) {
@@ -1259,7 +1254,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       s_parseMore    = true;
       s_needNewEntry = true;
 
-      inputPosition = prevPosition + (yy_bp - s_bufferPosition) + text.length();
+      s_inputPosition = s_prevPosition + (yy_bp - s_bufferPosition) + text.length();
       yyterminate();
    }
 
@@ -3566,14 +3561,14 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    langParser     = parser;
    current        = curEntry;
-   inputString    = comment;
+   s_inputString    = comment;
    yyFileName     = fileName;
    yyLineNr       = lineNr;
    briefEndsAtDot = isAutoBrief;
    inBody         = isInbody;
 
    protection     = r_protection;
-   inputPosition  = r_position;
+   s_inputPosition  = r_position;
 
    xrefKind       = XRef_None;
    xrefAppendFlag = false;
@@ -3582,7 +3577,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    s_parseMore    = false;
 
    s_outputXRef   = "";
-   inputString.append(" ");
+   s_inputString.append(" ");
 
    if (isBrief || isAutoBrief) {
       setOutput(OutputBrief);
@@ -3651,13 +3646,13 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    groupAddDocs(curEntry);
    r_newEntryNeeded = s_needNewEntry;
 
-   if (s_parseMore && r_position == inputPosition) {
+   if (s_parseMore && r_position == s_inputPosition) {
       // did not proceed during this call, do not continue or there will be an infinate loop
       s_parseMore = false;
    }
 
    if (s_parseMore) {
-      r_position = inputPosition;
+      r_position = s_inputPosition;
    } else {
       r_position = 0;
    }

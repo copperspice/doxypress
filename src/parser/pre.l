@@ -313,117 +313,119 @@ void DefineManager::DefinesPerFile::collectDefines(DefineDict &dict, QSet<QStrin
    }
 }
 
-static QStringList              g_pathList;
-static QString                  g_yyFileName;
-static QSharedPointer<FileDef>  g_yyFileDef;
-static QSharedPointer<FileDef>  g_inputFileDef;
+static QStringList              s_pathList;
+static QString                  s_yyFileName;
+static QSharedPointer<FileDef>  s_yyFileDef;
+static QSharedPointer<FileDef>  s_inputFileDef;
 
-static QSharedPointer<QHash<QString, int>> g_argDict;
-static QStack<QSharedPointer<FileState>>   g_includeStack;
-static QStack<QSharedPointer<CondCtx>>     g_condStack;
-static QSharedPointer<DefineDict>          g_expandedDict;
+static QSharedPointer<QHash<QString, int>> s_argDict;
+static QStack<QSharedPointer<FileState>>   s_includeStack;
+static QStack<QSharedPointer<CondCtx>>     s_condStack;
+static QSharedPointer<DefineDict>          s_expandedDict;
 
-static int          g_yyLineNr   = 1;
-static int          g_yyMLines   = 1;
-static int          g_yyColNr    = 1;
-static int          g_ifcount    = 0;
-static int          g_defArgs    = -1;
+static int          s_yyLineNr   = 1;
+static int          s_yyMLines   = 1;
+static int          s_yyColNr    = 1;
+static int          s_ifcount    = 0;
+static int          s_defArgs    = -1;
 
-static QString      g_defName;
-static QString      g_defText;
-static QString      g_defLitText;
-static QString      g_defArgsStr;
-static QString      g_defExtraSpacing;
-static bool         g_defVarArgs;
-static int          g_lastCContext;
-static int          g_lastCPPContext;
-static QStack<int>  g_levelGuard;
-static QString      g_inputBuf;
-static int          g_inputBufPos;
-static QString      g_outputBuf;
-static int          g_roundCount;
-static bool         g_quoteArg;
+static QString      s_defName;
+static QString      s_defText;
+static QString      s_defLitText;
+static QString      s_defArgsStr;
+static QString      s_defExtraSpacing;
+static bool         s_defVarArgs;
+static int          s_lastCContext;
+static int          s_lastCPPContext;
+static QStack<int>  s_levelGuard;
 
-static int          g_findDefArgContext;
-static bool         g_expectGuard;
-static QString      g_guardName;
-static QString      g_lastGuardName;
-static QString      g_incName;
-static QString      g_guardExpr;
-static int          g_curlyCount;
-static bool         g_nospaces;          // add extra spaces during macro expansion
+static QString      s_outputString;
+static QString      s_inputString;
+static int          s_inputPosition;
 
-static bool         g_macroExpansion;    // from the configuration
-static bool         g_expandOnlyPredef;  // from the configuration
-static int          g_commentCount;
-static bool         g_insideComment;
-static bool         g_isImported;
-static QString      g_blockName;
-static int          g_condCtx;
-static bool         g_skip;
+static int          s_roundCount;
+static bool         s_quoteArg;
 
-static bool         g_insideCS;          // C# has simpler preprocessor
-static bool         g_isSource;
+static int          s_findDefArgContext;
+static bool         s_expectGuard;
+static QString      s_guardName;
+static QString      s_lastGuardName;
+static QString      s_incName;
+static QString      s_guardExpr;
+static int          s_curlyCount;
+static bool         s_nospaces;          // add extra spaces during macro expansion
 
-static bool         g_lexInit   = false;
-static int          g_fenceSize = 0;
-static bool         g_ccomment;
+static bool         s_macroExpansion;    // from the configuration
+static bool         s_expandOnlyPredef;  // from the configuration
+static int          s_commentCount;
+static bool         s_insideComment;
+static bool         s_isImported;
+static QString      s_blockName;
+static int          s_condCtx;
+static bool         s_skip;
+
+static bool         s_insideCS;          // C# has simpler preprocessor
+static bool         s_isSource;
+
+static bool         s_lexInit   = false;
+static int          s_fenceSize = 0;
+static bool         s_ccomment;
 
 static void setFileName(const QString &name)
 {
    bool ambig;
    QFileInfo fi(name);
 
-   g_yyFileName = fi.absoluteFilePath();
-   g_yyFileDef  = findFileDef(&Doxy_Globals::inputNameDict, g_yyFileName, ambig);
+   s_yyFileName = fi.absoluteFilePath();
+   s_yyFileDef  = findFileDef(&Doxy_Globals::inputNameDict, s_yyFileName, ambig);
 
-   if (g_yyFileDef == nullptr) {
+   if (s_yyFileDef == nullptr) {
       // if this is not an input file check if it is an include file
-      g_yyFileDef = findFileDef(&Doxy_Globals::includeNameDict, g_yyFileName, ambig);
+      s_yyFileDef = findFileDef(&Doxy_Globals::includeNameDict, s_yyFileName, ambig);
    }
 
-   if (g_yyFileDef && g_yyFileDef->isReference()) {
-      g_yyFileDef = QSharedPointer<FileDef>();
+   if (s_yyFileDef && s_yyFileDef->isReference()) {
+      s_yyFileDef = QSharedPointer<FileDef>();
    }
 
-   g_insideCS = getLanguageFromFileName(g_yyFileName) == SrcLangExt_CSharp;
-   g_isSource = determineSection(g_yyFileName);
+   s_insideCS = getLanguageFromFileName(s_yyFileName) == SrcLangExt_CSharp;
+   s_isSource = determineSection(s_yyFileName);
 }
 
 static void incrLevel()
 {
-   g_levelGuard.push(0);
+   s_levelGuard.push(0);
 }
 
 static void decrLevel()
 {
-   if (g_levelGuard.size() > 0) {
-      g_levelGuard.pop();
+   if (s_levelGuard.size() > 0) {
+      s_levelGuard.pop();
 
    } else {
-      warn(g_yyFileName, g_yyLineNr, "More #endif's than #if's found\n");
+      warn(s_yyFileName, s_yyLineNr, "More #endif's than #if's found\n");
 
    }
 }
 
 static bool otherCaseDone()
 {
-   if (g_levelGuard.size() == 0) {
-      warn(g_yyFileName, g_yyLineNr, "Found an #else without a preceding #if\n");
+   if (s_levelGuard.size() == 0) {
+      warn(s_yyFileName, s_yyLineNr, "Found an #else without a preceding #if\n");
       return true;
 
    } else {
-      return g_levelGuard.top();
+      return s_levelGuard.top();
 
    }
 }
 
 static void setCaseDone(bool value)
 {
-   g_levelGuard.top() = value;
+   s_levelGuard.top() = value;
 }
 
-static QSet<QString> g_allIncludes;
+static QSet<QString> s_allIncludes;
 
 static QSharedPointer<FileState> checkAndOpenFile(const QString &fileName, bool &alreadyIncluded)
 {
@@ -442,22 +444,22 @@ static QSharedPointer<FileState> checkAndOpenFile(const QString &fileName, bool 
       QString absName = fi.absoluteFilePath();
 
       // global guard
-      if (g_curlyCount == 0) {
+      if (s_curlyCount == 0) {
          // not #include inside { ... }
 
-         if (g_allIncludes.contains(absName)) {
+         if (s_allIncludes.contains(absName)) {
             alreadyIncluded = true;
             return QSharedPointer<FileState>();
          }
 
-         g_allIncludes.insert(absName);
+         s_allIncludes.insert(absName);
       }
 
       // check include stack for absName
       QStack<QSharedPointer<FileState>> tmpStack;
 
-      while (! g_includeStack.isEmpty()) {
-         fs = g_includeStack.pop();
+      while (! s_includeStack.isEmpty()) {
+         fs = s_includeStack.pop();
 
          if (fs->fileName == absName) {
             alreadyIncluded = true;
@@ -469,7 +471,7 @@ static QSharedPointer<FileState> checkAndOpenFile(const QString &fileName, bool 
       while (! tmpStack.isEmpty()) {
          fs = tmpStack.pop();
 
-         g_includeStack.push(fs);
+         s_includeStack.push(fs);
       }
 
       if (alreadyIncluded) {
@@ -484,8 +486,8 @@ static QSharedPointer<FileState> checkAndOpenFile(const QString &fileName, bool 
          fs = QSharedPointer<FileState>();
 
       } else {
-         fs->oldFileBuf    = g_inputBuf;
-         fs->oldFileBufPos = g_inputBufPos;
+         fs->oldFileBuf    = s_inputString;
+         fs->oldFileBufPos = s_inputPosition;
       }
    }
 
@@ -499,7 +501,7 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
 
       if (fs) {
          setFileName(fileName);
-         g_yyLineNr = 1;
+         s_yyLineNr = 1;
          return fs;
 
       } else if (alreadyIncluded) {
@@ -507,8 +509,8 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
       }
    }
 
-   if (localInclude && ! g_yyFileName.isEmpty()) {
-      QFileInfo fi(g_yyFileName);
+   if (localInclude && ! s_yyFileName.isEmpty()) {
+      QFileInfo fi(s_yyFileName);
 
       if (fi.exists()) {
          QString absName = fi.absolutePath() + "/" + fileName;
@@ -516,7 +518,7 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
 
          if (fs) {
             setFileName(absName);
-            g_yyLineNr = 1;
+            s_yyLineNr = 1;
             return fs;
 
          } else if (alreadyIncluded) {
@@ -525,18 +527,18 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
       }
    }
 
-   if (g_pathList.isEmpty()) {
+   if (s_pathList.isEmpty()) {
       return QSharedPointer<FileState>();
    }
 
-   for (auto &s : g_pathList) {
+   for (auto &s : s_pathList) {
       QString absName = s + "/" + fileName;
 
       QSharedPointer<FileState> fs = checkAndOpenFile(absName, alreadyIncluded);
 
       if (fs) {
          setFileName(absName);
-         g_yyLineNr = 1;
+         s_yyLineNr = 1;
          return fs;
 
       } else if (alreadyIncluded) {
@@ -682,7 +684,8 @@ static QString stringize(const QString &s)
  */
 static void processConcatOperators(QString &expr)
 {
-   QRegExp r("[ \\t\\n]*##[ \\t\\n]*");
+   static QRegExp r("[ \\t\\n]*##[ \\t\\n]*");
+
    int l;
    int n;
    int i = 0;
@@ -979,7 +982,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                         // empty argument will be remove later on
                         resExpr += "@E";
 
-                     } else if (g_nospaces) {
+                     } else if (s_nospaces) {
                         resExpr += substArg;
 
                      } else {
@@ -1111,7 +1114,7 @@ static void expandExpression(QString &expr, QString *rest, int pos)
       if (p < 2 || ! (expr.at(p - 2) == '@' && expr.at(p - 1) == '-')) {
          // no-rescan marker?
 
-         if (! g_expandedDict->contains(macroName)) {
+         if (! s_expandedDict->contains(macroName)) {
 
             // expand macro
             QSharedPointer<A_Define> def = DefineManager::instance().isDefined(macroName);
@@ -1133,7 +1136,7 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                // simple macro
                // substitute the definition of the macro
 
-               if (g_nospaces) {
+               if (s_nospaces) {
                   expMacro = def->m_definition.trimmed();
                } else {
                   expMacro = " " + def->m_definition.trimmed() + " ";
@@ -1162,9 +1165,9 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                processConcatOperators(resultExpr);
 
                if (def && !def->nonRecursive) {
-                  g_expandedDict->insert(macroName, def);
+                  s_expandedDict->insert(macroName, def);
                   expandExpression(resultExpr, &restExpr, 0);
-                  g_expandedDict->remove(macroName);
+                  s_expandedDict->remove(macroName);
                }
 
                expr = expr.left(p) + resultExpr + restExpr;
@@ -1425,7 +1428,7 @@ bool computeExpression(const QString &expr)
       return false;
    }
 
-   bool retval = parseconstexp(g_yyFileName, g_yyLineNr, e);
+   bool retval = parseconstexp(s_yyFileName, s_yyLineNr, e);
 
    return retval;
 }
@@ -1448,14 +1451,14 @@ QSharedPointer<A_Define> newDefine()
 {
    QSharedPointer<A_Define> def = QMakeShared<A_Define>();
 
-   def->m_name       = g_defName;
-   def->m_definition = g_defText.trimmed();
-   def->nargs        = g_defArgs;
-   def->m_fileName   = g_yyFileName;
-   def->fileDef      = g_yyFileDef;
-   def->lineNr       = g_yyLineNr - g_yyMLines;
-   def->columnNr     = g_yyColNr;
-   def->varArgs      = g_defVarArgs;
+   def->m_name       = s_defName;
+   def->m_definition = s_defText.trimmed();
+   def->nargs        = s_defArgs;
+   def->m_fileName   = s_yyFileName;
+   def->fileDef      = s_yyFileDef;
+   def->lineNr       = s_yyLineNr - s_yyMLines;
+   def->columnNr     = s_yyColNr;
+   def->varArgs      = s_defVarArgs;
 
    if (! def->m_name.isEmpty() && Doxy_Globals::expandAsDefinedDict.contains(def->m_name)) {
       def->isPredefined = true;
@@ -1466,7 +1469,7 @@ QSharedPointer<A_Define> newDefine()
 
 void addDefine()
 {
-   if (g_skip) {
+   if (s_skip) {
       return;   // do not add this define as it is inside a
    }
 
@@ -1475,66 +1478,66 @@ void addDefine()
       return;
    }
 
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(g_yyFileName, g_yyLineNr - g_yyMLines, g_yyColNr,
-               "#define", g_defName, g_defArgsStr, "", Public, Normal, false, Member,
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(s_yyFileName, s_yyLineNr - s_yyMLines, s_yyColNr,
+               "#define", s_defName, s_defArgsStr, "", Public, Normal, false, Member,
                MemberType_Define, ArgumentList(), ArgumentList());
 
-   if (! g_defArgsStr.isEmpty()) {
+   if (! s_defArgsStr.isEmpty()) {
       ArgumentList argList;
 
-      argList = stringToArgumentList(g_defArgsStr);
+      argList = stringToArgumentList(s_defArgsStr);
       md->setArgumentList(argList);
    }
 
-   int l = g_defLitText.indexOf('\n');
+   int l = s_defLitText.indexOf('\n');
 
-   if (l > 0 && g_defLitText.left(l).trimmed() == "\\") {
+   if (l > 0 && s_defLitText.left(l).trimmed() == "\\") {
       // strip first line if it only contains a slash
-      g_defLitText = g_defLitText.right(g_defLitText.length() - l - 1);
+      s_defLitText = s_defLitText.right(s_defLitText.length() - l - 1);
 
    } else if (l > 0) {
       // align the items on the first line with the items on the second line
       int k = l + 1;
 
-      const QChar *p = g_defLitText.data() + k;
+      const QChar *p = s_defLitText.data() + k;
       QChar c;
 
       while ((c = *p++) != 0 && (c == ' ' || c == '\t')) {
          k++;
       }
 
-      g_defLitText = g_defLitText.mid(l + 1, k - l - 1) + g_defLitText.trimmed();
+      s_defLitText = s_defLitText.mid(l + 1, k - l - 1) + s_defLitText.trimmed();
    }
-   md->setInitializer(g_defLitText.trimmed());
+   md->setInitializer(s_defLitText.trimmed());
 
-   md->setFileDef(g_inputFileDef);
-   md->setDefinition("#define " + g_defName);
+   md->setFileDef(s_inputFileDef);
+   md->setDefinition("#define " + s_defName);
 
-   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(g_defName);
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(s_defName);
 
    if (! mn) {
-      mn = QMakeShared<MemberName>(g_defName);
-      Doxy_Globals::functionNameSDict.insert(g_defName, mn);
+      mn = QMakeShared<MemberName>(s_defName);
+      Doxy_Globals::functionNameSDict.insert(s_defName, mn);
    }
 
    mn->append(md);
 
-   if (g_yyFileDef) {
-      g_yyFileDef->insertMember(md);
+   if (s_yyFileDef) {
+      s_yyFileDef->insertMember(md);
    }
 }
 
 static inline void outputChar(QChar c)
 {
-   if (g_includeStack.isEmpty() || g_curlyCount > 0) {
-      g_outputBuf += c;
+   if (s_includeStack.isEmpty() || s_curlyCount > 0) {
+      s_outputString += c;
    }
 }
 
 static inline void outputArray(const QString &a, int len)
 {
-   if (g_includeStack.isEmpty() || g_curlyCount > 0) {
-      g_outputBuf += a.mid(0, len);
+   if (s_includeStack.isEmpty() || s_curlyCount > 0) {
+      s_outputString += a.mid(0, len);
    }
 }
 
@@ -1569,15 +1572,15 @@ static void readIncludeFile(const QString &inc)
          return;
       }
 
-      QString oldFileName = g_yyFileName;
+      QString oldFileName = s_yyFileName;
 
-      QSharedPointer<FileDef> oldFileDef = g_yyFileDef;
-      int oldLineNr = g_yyLineNr;
+      QSharedPointer<FileDef> oldFileDef = s_yyFileDef;
+      int oldLineNr = s_yyLineNr;
 
       // absIncFileName avoids difficulties for incFileName starting with "../" (bug 641336)
       QString absIncFileName = incFileName;
       {
-         QFileInfo fi(g_yyFileName);
+         QFileInfo fi(s_yyFileName);
 
          if (fi.exists()) {
             QString absName = fi.absolutePath() + "/" + incFileName;
@@ -1610,10 +1613,10 @@ static void readIncludeFile(const QString &inc)
          }
       }
 
-      DefineManager::instance().addInclude(g_yyFileName, absIncFileName);
+      DefineManager::instance().addInclude(s_yyFileName, absIncFileName);
       DefineManager::instance().addFileToContext(absIncFileName);
 
-      // findFile will overwrite g_yyFileDef if found
+      // findFile will overwrite s_yyFileDef if found
       QSharedPointer<FileState> fs;
       bool alreadyIncluded = false;
 
@@ -1634,15 +1637,15 @@ static void readIncludeFile(const QString &inc)
                temp = incFd;
             }
 
-            oldFileDef->addIncludeDependency(temp, incFileName, localInclude, g_isImported, false);
+            oldFileDef->addIncludeDependency(temp, incFileName, localInclude, s_isImported, false);
 
             // add included by dependency
-            if (g_yyFileDef) {
-               g_yyFileDef->addIncludedByDependency(oldFileDef, oldFileDef->docName(), localInclude, g_isImported);
+            if (s_yyFileDef) {
+               s_yyFileDef->addIncludedByDependency(oldFileDef, oldFileDef->docName(), localInclude, s_isImported);
             }
 
-         } else if (g_inputFileDef) {
-            g_inputFileDef->addIncludeDependency(QSharedPointer<FileDef>(), absIncFileName, localInclude, g_isImported, true);
+         } else if (s_inputFileDef) {
+            s_inputFileDef->addIncludeDependency(QSharedPointer<FileDef>(), absIncFileName, localInclude, s_isImported, true);
 
          }
 
@@ -1651,20 +1654,20 @@ static void readIncludeFile(const QString &inc)
          fs->fileName = oldFileName;
 
          // push the state on the stack
-         g_includeStack.push(fs);
+         s_includeStack.push(fs);
 
          // set the scanner to the include file
 
          // Deal with file changes due to
          // #include's within { .. } blocks
 
-         QString lineStr = QString("# 1 \"%1\" 1\n").arg(QString(g_yyFileName));
+         QString lineStr = QString("# 1 \"%1\" 1\n").arg(QString(s_yyFileName));
          outputArray(lineStr, lineStr.length());
 
          DBG_CTX((stderr, "Switching to include file %s\n", csPrintable(incFileName)));
-         g_expectGuard = true;
-         g_inputBuf    = fs->fileBuf;
-         g_inputBufPos = 0;
+         s_expectGuard = true;
+         s_inputString    = fs->fileBuf;
+         s_inputPosition = 0;
 
          preYY_switch_to_buffer(preYY_create_buffer(0, YY_BUF_SIZE));
 
@@ -1677,15 +1680,15 @@ static void readIncludeFile(const QString &inc)
             QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, absIncFileName, ambig);
 
             // add include dependency to the file in which the #include was found
-            oldFileDef->addIncludeDependency(ambig ? QSharedPointer<FileDef>() : fd, incFileName, localInclude, g_isImported, false);
+            oldFileDef->addIncludeDependency(ambig ? QSharedPointer<FileDef>() : fd, incFileName, localInclude, s_isImported, false);
 
             // add included by dependency
             if (fd) {
-               fd->addIncludedByDependency(oldFileDef, oldFileDef->docName(), localInclude, g_isImported);
+               fd->addIncludedByDependency(oldFileDef, oldFileDef->docName(), localInclude, s_isImported);
             }
 
-         } else if (g_inputFileDef) {
-            g_inputFileDef->addIncludeDependency(QSharedPointer<FileDef>(), absIncFileName, localInclude, g_isImported, true);
+         } else if (s_inputFileDef) {
+            s_inputFileDef->addIncludeDependency(QSharedPointer<FileDef>(), absIncFileName, localInclude, s_isImported, true);
          }
 
          if (Debug::isFlagSet(Debug::Preprocessor)) {
@@ -1696,8 +1699,8 @@ static void readIncludeFile(const QString &inc)
             }
          }
 
-         if (g_curlyCount > 0 && !alreadyIncluded) { // failed to find #include inside { ... }
-            warn(g_yyFileName, g_yyLineNr, "include file %s was not found, check the value of INCLUDE_PATH", csPrintable(incFileName));
+         if (s_curlyCount > 0 && !alreadyIncluded) { // failed to find #include inside { ... }
+            warn(s_yyFileName, s_yyLineNr, "include file %s was not found, check the value of INCLUDE_PATH", csPrintable(incFileName));
          }
       }
    }
@@ -1707,32 +1710,32 @@ static void startCondSection(const QString &sectId)
 {
    CondParser prs;
 
-   bool expResult = prs.parse(g_yyFileName, g_yyLineNr, sectId);
-   g_condStack.push( QMakeShared<CondCtx>(g_yyLineNr, sectId, g_skip) );
+   bool expResult = prs.parse(s_yyFileName, s_yyLineNr, sectId);
+   s_condStack.push( QMakeShared<CondCtx>(s_yyLineNr, sectId, s_skip) );
 
    if (! expResult) {
-      g_skip = true;
+      s_skip = true;
    }
 }
 
 static void endCondSection()
 {
-   if (g_condStack.isEmpty()) {
-      g_skip = false;
+   if (s_condStack.isEmpty()) {
+      s_skip = false;
 
    } else {
-      QSharedPointer<CondCtx> ctx = g_condStack.pop();
-      g_skip = ctx->skip;
+      QSharedPointer<CondCtx> ctx = s_condStack.pop();
+      s_skip = ctx->skip;
    }
 }
 
 static void forceEndCondSection()
 {
-   while (! g_condStack.isEmpty()) {
-      g_condStack.pop();
+   while (! s_condStack.isEmpty()) {
+      s_condStack.pop();
    }
 
-   g_skip = false;
+   s_skip = false;
 }
 
 static QString escapeAt(const QString &text)
@@ -1790,29 +1793,22 @@ static char resolveTrigraph(char c)
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+  int len = max_size;
 
-   while (g_inputBuf[g_inputBufPos] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inputBuf.at(g_inputBufPos);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inputBufPos++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 %}
@@ -1873,8 +1869,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <Start>^{B}*"#"            {
       BEGIN(Command);
-      g_yyColNr  += yyleng;
-      g_yyMLines = 0;
+      s_yyColNr  += yyleng;
+      s_yyMLines = 0;
    }
 
 <Start>^{B}*/[^#]          {
@@ -1909,11 +1905,11 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
       QSharedPointer<A_Define> def;
 
-      if (skipFuncMacros && name != "Q_PROPERTY" && ! ( (g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
-                  (def = DefineManager::instance().isDefined(name)) && (! g_expandOnlyPredef || def->isPredefined)) ) {
+      if (skipFuncMacros && name != "Q_PROPERTY" && ! ( (s_includeStack.isEmpty() || s_curlyCount > 0) && s_macroExpansion &&
+                  (def = DefineManager::instance().isDefined(name)) && (! s_expandOnlyPredef || def->isPredefined)) ) {
 
          outputChar('\n');
-         g_yyLineNr++;
+         s_yyLineNr++;
 
       } else {
          // do not skip
@@ -1929,7 +1925,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <CopyLine>"extern"{BN}{0,80}"\"C\""*{BN}{0,80}"{"  {
       QString text = QString::fromUtf8(yytext);
 
-      g_yyLineNr += text.count('\n');
+      s_yyLineNr += text.count('\n');
       outputArray(text, text.length());
    }
 
@@ -1937,8 +1933,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       // count brackets inside the main file
       QString text = QString::fromUtf8(yytext);
 
-      if (g_includeStack.isEmpty())  {
-         g_curlyCount++;
+      if (s_includeStack.isEmpty())  {
+         s_curlyCount++;
       }
 
       outputChar(text[0]);
@@ -1948,8 +1944,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       // count brackets inside the main file
       QString text = QString::fromUtf8(yytext);
 
-      if (g_includeStack.isEmpty() && g_curlyCount > 0)  {
-         g_curlyCount--;
+      if (s_includeStack.isEmpty() && s_curlyCount > 0)  {
+         s_curlyCount--;
       }
 
       outputChar(text[0]);
@@ -1977,7 +1973,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <CopyLine>\'            {
-      if (getLanguageFromFileName(g_yyFileName) != SrcLangExt_Fortran) {
+      if (getLanguageFromFileName(s_yyFileName) != SrcLangExt_Fortran) {
          REJECT;
       }
 
@@ -2022,27 +2018,27 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <CopyLine>{ID}/{BN}{0,80}"("     {
       QString text = QString::fromUtf8(yytext);
 
-      g_expectGuard = false;
+      s_expectGuard = false;
       QSharedPointer<A_Define> def;
 
-      if ((g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
+      if ((s_includeStack.isEmpty() || s_curlyCount > 0) && s_macroExpansion &&
                   (def = DefineManager::instance().isDefined(text)) &&
-                  (! g_expandOnlyPredef || def->isPredefined)) {
+                  (! s_expandOnlyPredef || def->isPredefined)) {
 
          // fount it
-         g_roundCount = 0;
-         g_defArgsStr = text;
+         s_roundCount = 0;
+         s_defArgsStr = text;
 
          if (def->nargs == -1) {
             // no function macro
 
-            QString result = def->isPredefined ? def->m_definition : expandMacro(g_defArgsStr);
+            QString result = def->isPredefined ? def->m_definition : expandMacro(s_defArgsStr);
             outputArray(result, result.length());
 
          } else {
             // zero or more arguments
 
-            g_findDefArgContext = CopyLine;
+            s_findDefArgContext = CopyLine;
             BEGIN(FindDefineArgs);
 
          }
@@ -2057,9 +2053,9 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
       QSharedPointer<A_Define> def;
 
-      if ((g_includeStack.isEmpty() || g_curlyCount > 0) && g_macroExpansion &&
+      if ((s_includeStack.isEmpty() || s_curlyCount > 0) && s_macroExpansion &&
                   (def = DefineManager::instance().isDefined(text)) &&
-                   def->nargs == -1 && (! g_expandOnlyPredef || def->isPredefined)) {
+                   def->nargs == -1 && (! s_expandOnlyPredef || def->isPredefined)) {
 
             QString result = def->isPredefined ? def->m_definition : expandMacro(text);
             outputArray(result, result.length());
@@ -2081,29 +2077,29 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <CopyLine>\n            {
       outputChar('\n');
       BEGIN(Start);
-      g_yyLineNr++;
-      g_yyColNr = 1;
+      s_yyLineNr++;
+      s_yyColNr = 1;
    }
 
 <FindDefineArgs>"("        {
-      g_defArgsStr += '(';
-      g_roundCount++;
+      s_defArgsStr += '(';
+      s_roundCount++;
    }
 
 <FindDefineArgs>")"        {
-      g_defArgsStr += ')';
-      g_roundCount--;
+      s_defArgsStr += ')';
+      s_roundCount--;
 
-      if (g_roundCount == 0) {
-         QString result = expandMacro(g_defArgsStr);
+      if (s_roundCount == 0) {
+         QString result = expandMacro(s_defArgsStr);
 
-         if (g_findDefArgContext == CopyLine) {
+         if (s_findDefArgContext == CopyLine) {
             outputArray(result, result.length());
-            BEGIN(g_findDefArgContext);
+            BEGIN(s_findDefArgContext);
 
          } else {
             readIncludeFile(result);
-            g_nospaces = false;
+            s_nospaces = false;
             BEGIN(Start);
          }
       }
@@ -2112,140 +2108,163 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
   /*
 <FindDefineArgs>")"{B}*"("       {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text;
+      s_defArgsStr += text;
    }
   */
 
 <FindDefineArgs>{CHARLIT}     {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text;
+      s_defArgsStr += text;
     }
 
 <FindDefineArgs>"/*"[*]?                {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text;
+      s_defArgsStr += text;
       BEGIN(ArgCopyCComment);
    }
 
 <FindDefineArgs>\"         {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text[0];
+      s_defArgsStr += text[0];
+      BEGIN(ReadString);
+   }
+
+
+<FindDefineArgs>'           {
+      QString text = QString::fromUtf8(yytext);
+
+      if (getLanguageFromFileName(s_yyFileName) != SrcLangExt_Fortran) {
+         REJECT;
+      }
+
+      s_defArgsStr += text[0];
       BEGIN(ReadString);
    }
 
 <FindDefineArgs>\n         {
-      g_defArgsStr += ' ';
-      g_yyLineNr++;
+      s_defArgsStr += ' ';
+      s_yyLineNr++;
       outputChar('\n');
    }
 
 <FindDefineArgs>"@"        {
-      g_defArgsStr += "@@";
+      s_defArgsStr += "@@";
    }
 
 <FindDefineArgs>.          {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text[0];
+      s_defArgsStr += text[0];
    }
 
 <ArgCopyCComment>[^*\n]+      {
-      g_defArgsStr += QString::fromUtf8(yytext);
+      s_defArgsStr += QString::fromUtf8(yytext);
    }
 
 <ArgCopyCComment>"*/"         {
-      g_defArgsStr += QString::fromUtf8(yytext);
+      s_defArgsStr += QString::fromUtf8(yytext);
       BEGIN(FindDefineArgs);
    }
 
 <ArgCopyCComment>\n        {
-      g_defArgsStr += ' ';
-      g_yyLineNr++;
+      s_defArgsStr += ' ';
+      s_yyLineNr++;
       outputChar('\n');
    }
 
 <ArgCopyCComment>.         {
-      g_defArgsStr += QString::fromUtf8(yytext);
+      s_defArgsStr += QString::fromUtf8(yytext);
    }
 
-<ReadString>"\""        {
+<ReadString>"\""           {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text[0];
+      s_defArgsStr += text[0];
+      BEGIN(FindDefineArgs);
+   }
+
+<ReadString>"'"            {
+      QString text = QString::fromUtf8(yytext);
+
+      if (getLanguageFromFileName(s_yyFileName) != SrcLangExt_Fortran) {
+         REJECT;
+      }
+
+      s_defArgsStr += text[0];
       BEGIN(FindDefineArgs);
    }
 
 <ReadString>"//"|"/*"         {
       // */ (editor syntax fix)
-      g_defArgsStr += QString::fromUtf8(yytext);
+      s_defArgsStr += QString::fromUtf8(yytext);
    }
 
 <ReadString>\\.            {
-      g_defArgsStr += QString::fromUtf8(yytext);
+      s_defArgsStr += QString::fromUtf8(yytext);
    }
 
 <ReadString>.           {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text[0];
+      s_defArgsStr += text[0];
    }
 
 <Command>("include"|"import"){B}+/{ID}    {
       QString text = QString::fromUtf8(yytext);
-      g_isImported = text[1] == 'm';
+      s_isImported = text[1] == 'm';
 
-      if (g_macroExpansion) {
+      if (s_macroExpansion) {
          BEGIN(IncludeID);
       }
    }
 
 <Command>("include"|"import"){B}*[<"]  {
       QString text = QString::fromUtf8(yytext);
-      g_isImported = text[1] == 'm';
-      g_incName = text[text.length() - 1];
+      s_isImported = text[1] == 'm';
+      s_incName = text[text.length() - 1];
       BEGIN(Include);
    }
 
 <Command>("cmake")?"define"{B}+     {
-      g_yyColNr += yyleng;
+      s_yyColNr += yyleng;
       BEGIN(DefName);
    }
 
 <Command>"ifdef"/{B}*"("      {
       incrLevel();
-      g_guardExpr.resize(0);
+      s_guardExpr.resize(0);
       BEGIN(DefinedExpr2);
    }
 
 <Command>"ifdef"/{B}+         {
       incrLevel();
-      g_guardExpr.resize(0);
+      s_guardExpr.resize(0);
       BEGIN(DefinedExpr1);
    }
 
 <Command>"ifndef"/{B}*"("     {
       incrLevel();
-      g_guardExpr = "! ";
+      s_guardExpr = "! ";
       BEGIN(DefinedExpr2);
    }
 
 <Command>"ifndef"/{B}+        {
       incrLevel();
-      g_guardExpr = "! ";
+      s_guardExpr = "! ";
       BEGIN(DefinedExpr1);
    }
 
 <Command>"if"/[ \t(!]         {
       incrLevel();
-      g_guardExpr.resize(0);
+      s_guardExpr.resize(0);
       BEGIN(Guard);
    }
 
 <Command>("elif"|"else"{B}*"if")/[ \t(!]  {
       if (! otherCaseDone()) {
-         g_guardExpr.resize(0);
+         s_guardExpr.resize(0);
          BEGIN(Guard);
 
       } else {
-         g_ifcount = 0;
+         s_ifcount = 0;
          BEGIN(SkipCPPBlock);
       }
    }
@@ -2253,7 +2272,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <Command>"else"/[^a-z_A-Z0-9\x80-\xFF]       {
 
       if (otherCaseDone()) {
-         g_ifcount = 0;
+         s_ifcount = 0;
          BEGIN(SkipCPPBlock);
 
       } else {
@@ -2267,7 +2286,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <Command>("elif"|"else"{B}*"if")/[ \t(!]  {
       if (! otherCaseDone()) {
-         g_guardExpr.resize(0);
+         s_guardExpr.resize(0);
          BEGIN(Guard);
       }
    }
@@ -2279,11 +2298,11 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <Command,IgnoreLine>\n        {
       outputChar('\n');
       BEGIN(Start);
-      g_yyLineNr++;
+      s_yyLineNr++;
    }
 
 <Command>"pragma"{B}+"once"   {
-      g_expectGuard = false;
+      s_expectGuard = false;
    }
 
 <Command>{ID}                 {
@@ -2293,12 +2312,12 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <IgnoreLine>\\[\r]?\n         {
       outputChar('\n');
-      g_yyLineNr++;
+      s_yyLineNr++;
    }
 
 <IgnoreLine>.
 <Command>. {
-      g_yyColNr += yyleng;
+      s_yyColNr += yyleng;
    }
 
 <UndefName>{ID}            {
@@ -2314,8 +2333,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <Guard>\\[\r]?\n        {
       outputChar('\n');
-      g_guardExpr += ' ';
-      g_yyLineNr++;
+      s_guardExpr += ' ';
+      s_yyLineNr++;
    }
 
 <Guard>"defined"/{B}*"("      {
@@ -2328,64 +2347,64 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <Guard>{ID}      {
       QString text = QString::fromUtf8(yytext);
-      g_guardExpr += text;
+      s_guardExpr += text;
    }
 
 <Guard>.         {
       QString text = QString::fromUtf8(yytext);
-      g_guardExpr += text[0];
+      s_guardExpr += text[0];
    }
 
 <Guard>\n            {
       unput(*yytext);
 
-      bool guard = computeExpression(g_guardExpr);
+      bool guard = computeExpression(s_guardExpr);
       setCaseDone(guard);
 
       if (guard) {
          BEGIN(Start);
 
       } else {
-         g_ifcount = 0;
+         s_ifcount = 0;
          BEGIN(SkipCPPBlock);
       }
    }
 
 <DefinedExpr1,DefinedExpr2>\\\n     {
-      g_yyLineNr++;
+      s_yyLineNr++;
       outputChar('\n');
    }
 
 <DefinedExpr1>{ID}         {
       QString text = QString::fromUtf8(yytext);
 
-      if (DefineManager::instance().isDefined(text) || g_guardName == text) {
-         g_guardExpr+=" 1L ";
+      if (DefineManager::instance().isDefined(text) || s_guardName == text) {
+         s_guardExpr+=" 1L ";
       } else {
-         g_guardExpr+=" 0L ";
+         s_guardExpr+=" 0L ";
       }
 
-      g_lastGuardName = text;
+      s_lastGuardName = text;
       BEGIN(Guard);
    }
 
 <DefinedExpr2>{ID}         {
       QString text = QString::fromUtf8(yytext);
 
-      if (DefineManager::instance().isDefined(text) || g_guardName == text){
-         g_guardExpr+=" 1L ";
+      if (DefineManager::instance().isDefined(text) || s_guardName == text){
+         s_guardExpr+=" 1L ";
       } else {
-         g_guardExpr+=" 0L ";
+         s_guardExpr+=" 0L ";
       }
 
-      g_lastGuardName = text;
+      s_lastGuardName = text;
    }
 
 <DefinedExpr1,DefinedExpr2>\n       {
       // should not happen, handle anyway
 
-      g_yyLineNr++;
-      g_ifcount = 0;
+      s_yyLineNr++;
+      s_ifcount = 0;
       BEGIN(SkipCPPBlock);
    }
 
@@ -2404,31 +2423,31 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCPPBlock>\n           {
-      g_yyLineNr++;
+      s_yyLineNr++;
       outputChar('\n');
    }
 
 <SkipCPPBlock>.
 <SkipCommand>"if"(("n")?("def"))?/[ \t(!]    {
       incrLevel();
-      g_ifcount++;
+      s_ifcount++;
    }
 
 <SkipCommand>"else"        {
-      // printf("Else! g_ifcount=%d otherCaseDone=%d\n",g_ifcount,otherCaseDone());
+      // printf("Else! s_ifcount=%d otherCaseDone=%d\n",s_ifcount,otherCaseDone());
 
-      if (g_ifcount == 0 && ! otherCaseDone()) {
+      if (s_ifcount == 0 && ! otherCaseDone()) {
          setCaseDone(true);
          BEGIN(Start);
       }
    }
 
 <SkipCommand>("elif"|"else"{B}*"if")/[ \t(!]       {
-      if (g_ifcount == 0)  {
+      if (s_ifcount == 0)  {
 
          if (! otherCaseDone()) {
-            g_guardExpr.resize(0);
-            g_lastGuardName.resize(0);
+            s_guardExpr.resize(0);
+            s_lastGuardName.resize(0);
             BEGIN(Guard);
 
          } else {
@@ -2438,17 +2457,17 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCommand>"endif"          {
-      g_expectGuard = false;
+      s_expectGuard = false;
       decrLevel();
 
-      if (--g_ifcount < 0) {
+      if (--s_ifcount < 0) {
          BEGIN(Start);
       }
    }
 
 <SkipCommand>\n            {
       outputChar('\n');
-      g_yyLineNr++;
+      s_yyLineNr++;
       BEGIN(SkipCPPBlock);
    }
 
@@ -2471,7 +2490,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipLine,SkipCommand,SkipCPPBlock>"//"[^\n]* {
-      g_lastCPPContext = YY_START;
+      s_lastCPPContext = YY_START;
       BEGIN(RemoveCPPComment);
    }
 
@@ -2482,13 +2501,13 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <SkipLine,SkipCommand,SkipCPPBlock>"/*"/[^\n]* {
       // */ (editor syntax fix)
 
-      g_lastCContext=YY_START;
+      s_lastCContext=YY_START;
       BEGIN(RemoveCComment);
    }
 
 <SkipLine>\n            {
       outputChar('\n');
-      g_yyLineNr++;
+      s_yyLineNr++;
       BEGIN(SkipCPPBlock);
    }
 
@@ -2508,17 +2527,17 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <IncludeID>{ID}{B}*/"("    {
       QString text = QString::fromUtf8(yytext);
 
-      g_nospaces   = true;
-      g_roundCount = 0;
-      g_defArgsStr = text;
-      g_findDefArgContext = IncludeID;
+      s_nospaces   = true;
+      s_roundCount = 0;
+      s_defArgsStr = text;
+      s_findDefArgContext = IncludeID;
       BEGIN(FindDefineArgs);
    }
 
 <IncludeID>{ID}            {
       QString text = QString::fromUtf8(yytext);
 
-      g_nospaces = true;
+      s_nospaces = true;
       readIncludeFile(expandMacro(text));
       BEGIN(Start);
    }
@@ -2526,10 +2545,10 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <Include>[^\">\n]+[\">]          {
       QString text = QString::fromUtf8(yytext);
 
-      g_incName += text;
-      readIncludeFile(g_incName);
+      s_incName += text;
+      readIncludeFile(s_incName);
 
-      if (g_isImported) {
+      if (s_isImported) {
          BEGIN(EndImport);
       } else {
          BEGIN(Start);
@@ -2542,7 +2561,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <EndImport>\\[\r]?"\n"        {
       outputChar('\n');
-      g_yyLineNr++;
+      s_yyLineNr++;
    }
 
 <EndImport>.            {
@@ -2551,78 +2570,78 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <DefName>{ID}/("\\\n")*"("       {
       // define with argument
 
-      g_argDict = QMakeShared<QHash<QString, int>>();
+      s_argDict = QMakeShared<QHash<QString, int>>();
 
-      g_defArgs = 0;
-      g_defArgsStr.resize(0);
-      g_defText.resize(0);
-      g_defLitText.resize(0);
+      s_defArgs = 0;
+      s_defArgsStr.resize(0);
+      s_defText.resize(0);
+      s_defLitText.resize(0);
 
-      g_defName    = QString::fromUtf8(yytext);
-      g_defVarArgs = false;
-      g_defExtraSpacing.resize(0);
+      s_defName    = QString::fromUtf8(yytext);
+      s_defVarArgs = false;
+      s_defExtraSpacing.resize(0);
       BEGIN(DefineArg);
    }
 
 <DefName>{ID}{B}+"1"/[ \r\t\n]      {
       // special case: define with 1 -> can be "guard"
 
-      g_argDict = QSharedPointer<QHash<QString, int>>();
+      s_argDict = QSharedPointer<QHash<QString, int>>();
 
-      g_defArgs = -1;
-      g_defArgsStr.resize(0);
+      s_defArgs = -1;
+      s_defArgsStr.resize(0);
 
-      g_defName = QString::fromUtf8(yytext);
-      g_defName = g_defName.left(g_defName.length() - 1).trimmed();
-      g_defVarArgs = false;
+      s_defName = QString::fromUtf8(yytext);
+      s_defName = s_defName.left(s_defName.length() - 1).trimmed();
+      s_defVarArgs = false;
 
-      if (g_curlyCount > 0 || g_defName != g_lastGuardName || ! g_expectGuard) {
+      if (s_curlyCount > 0 || s_defName != s_lastGuardName || ! s_expectGuard) {
          // define may appear in the output
-         QString tmp = "#define " + g_defName;
+         QString tmp = "#define " + s_defName;
          outputArray(tmp, tmp.length());
 
-         g_quoteArg      = false;
-         g_insideComment = false;
-         g_lastGuardName.resize(0);
-         g_defText    = "1";
-         g_defLitText = "1";
+         s_quoteArg      = false;
+         s_insideComment = false;
+         s_lastGuardName.resize(0);
+         s_defText    = "1";
+         s_defLitText = "1";
          BEGIN(DefineText);
 
       } else  {
          // define is a guard => hide
 
-         g_defText.resize(0);
-         g_defLitText.resize(0);
+         s_defText.resize(0);
+         s_defLitText.resize(0);
          BEGIN(Start);
       }
 
-      g_expectGuard = false;
+      s_expectGuard = false;
    }
 
 <DefName>{ID}/{B}*"\n"        {
       // empty define
       QString text = QString::fromUtf8(yytext);
 
-      g_argDict = QSharedPointer<QHash<QString, int>>();
+      s_argDict = QSharedPointer<QHash<QString, int>>();
 
-      g_defArgs = -1;
-      g_defName = text;
+      s_defArgs = -1;
+      s_defName = text;
 
-      g_defArgsStr.resize(0);
-      g_defText.resize(0);
-      g_defLitText.resize(0);
-      g_defVarArgs = false;
+      s_defArgsStr.resize(0);
+      s_defText.resize(0);
+      s_defLitText.resize(0);
+      s_defVarArgs = false;
 
-      if (g_curlyCount > 0 || g_defName != g_lastGuardName || ! g_expectGuard) {
+      if (s_curlyCount > 0 || s_defName != s_lastGuardName || ! s_expectGuard) {
          // define may appear in the output
-         QString tmp = "#define " + g_defName;
+         QString tmp = "#define " + s_defName;
          outputArray(tmp, tmp.length());
 
-         g_quoteArg      = false;
-         g_insideComment = false;
+         s_quoteArg      = false;
+         s_insideComment = false;
 
-         if (g_insideCS) {
-            g_defText="1"; // for C#, use "1" as define text
+         if (s_insideCS) {
+            s_defText="1"; // for C#, use "1" as define text
          }
 
          BEGIN(DefineText);
@@ -2630,100 +2649,100 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       } else  {
          // define is a guard => hide
 
-         g_guardName = text;
-         g_lastGuardName.resize(0);
+         s_guardName = text;
+         s_lastGuardName.resize(0);
          BEGIN(Start);
       }
 
-      g_expectGuard = false;
+      s_expectGuard = false;
    }
 
 <DefName>{ID}/{B}*         {
       // define with content
       QString text = QString::fromUtf8(yytext);
 
-      g_argDict = QSharedPointer<QHash<QString, int>>();
+      s_argDict = QSharedPointer<QHash<QString, int>>();
 
-      g_defArgs = -1;
-      g_defArgsStr.resize(0);
+      s_defArgs = -1;
+      s_defArgsStr.resize(0);
 
-      g_defText.resize(0);
-      g_defLitText.resize(0);
-      g_defName    = text;
-      g_defVarArgs = false;
+      s_defText.resize(0);
+      s_defLitText.resize(0);
+      s_defName    = text;
+      s_defVarArgs = false;
 
-      QString tmp = "#define " + g_defName + g_defArgsStr;
+      QString tmp = "#define " + s_defName + s_defArgsStr;
       outputArray(tmp, tmp.length());
 
-      g_quoteArg      = false;
-      g_insideComment = false;
+      s_quoteArg      = false;
+      s_insideComment = false;
       BEGIN(DefineText);
    }
 
 <DefineArg>"\\\n"              {
-      g_defExtraSpacing += "\n";
-      g_yyLineNr++;
+      s_defExtraSpacing += "\n";
+      s_yyLineNr++;
    }
 
 <DefineArg>","{B}*             {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text;
+      s_defArgsStr += text;
    }
 
 <DefineArg>"("{B}*             {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text;
+      s_defArgsStr += text;
    }
 
 <DefineArg>{B}*")"{B}*         {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text;
+      s_defArgsStr += text;
 
-      QString tmp = "#define " + g_defName + g_defArgsStr + g_defExtraSpacing;
+      QString tmp = "#define " + s_defName + s_defArgsStr + s_defExtraSpacing;
       outputArray(tmp, tmp.length());
 
-      g_quoteArg      = false;
-      g_insideComment = false;
+      s_quoteArg      = false;
+      s_insideComment = false;
       BEGIN(DefineText);
    }
 
 <DefineArg>"..."        {
       // Variadic macro
-      g_defVarArgs = true;
-      g_defArgsStr +=  QString::fromUtf8(yytext);
+      s_defVarArgs = true;
+      s_defArgsStr +=  QString::fromUtf8(yytext);
 
-      g_argDict->insert("__VA_ARGS__", g_defArgs);
-      g_defArgs++;
+      s_argDict->insert("__VA_ARGS__", s_defArgs);
+      s_defArgs++;
    }
 
 <DefineArg>{ID}{B}*("..."?)      {
       QString text = QString::fromUtf8(yytext);
-      g_defArgsStr += text;
+      s_defArgsStr += text;
 
-      g_defVarArgs = text.endsWith("...");
+      s_defVarArgs = text.endsWith("...");
 
-      if (g_defVarArgs)  {
+      if (s_defVarArgs)  {
          // strip ellipsis
          text = text.left(text.length() - 3);
       }
 
       text = text.trimmed();
 
-      g_argDict->insert(text, g_defArgs);
-      g_defArgs++;
+      s_argDict->insert(text, s_defArgs);
+      s_defArgs++;
    }
 
   /*
 <DefineText>"/ **"|"/ *!"  {
-      g_defText+=yytext;
-      g_defLitText+=yytext;
-      g_insideComment=true;
+      s_defText+=yytext;
+      s_defLitText+=yytext;
+      s_insideComment=true;
    }
 
 <DefineText>"* /"          {
-      g_defText+=yytext;
-      g_defLitText+=yytext;
-      g_insideComment=false;
+      s_defText+=yytext;
+      s_defLitText+=yytext;
+      s_insideComment=false;
    }
   */
 
@@ -2731,10 +2750,10 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       // */ (editor syntax fix)
        QString text = QString::fromUtf8(yytext);
 
-      g_defText   += text;
-      g_defLitText+= text;
-      g_lastCContext = YY_START;
-      g_commentCount = 1;
+      s_defText   += text;
+      s_defLitText+= text;
+      s_lastCContext = YY_START;
+      s_commentCount = 1;
       BEGIN(CopyCComment);
    }
 
@@ -2742,8 +2761,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
 
-      g_lastCPPContext  = YY_START;
-      g_defLitText     += ' ';
+      s_lastCPPContext  = YY_START;
+      s_defLitText     += ' ';
       BEGIN(SkipCPPComment);
    }
 
@@ -2757,16 +2776,16 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       outputChar('*');
       outputChar('/');
 
-      if (--g_commentCount <= 0) {
+      if (--s_commentCount <= 0) {
 
-         if (g_lastCContext == Start) {
+         if (s_lastCContext == Start) {
             // small hack to make sure that ^... rule will
             // match when going to Start... Example: "/*...*/ some stuff..."
 
             YY_CURRENT_BUFFER->yy_at_bol = 1;
          }
 
-         BEGIN(g_lastCContext);
+         BEGIN(s_lastCContext);
       }
    }
 
@@ -2781,7 +2800,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       outputChar('/');
       outputChar('*');
 
-      // g_commentCount++;
+      // s_commentCount++;
    }
 
 <SkipCComment>[\\@][\\@]("f{"|"f$"|"f[") {
@@ -2799,7 +2818,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
          QString text = QString::fromUtf8(yytext);
          outputArray(text, text.length());
 
-         g_fenceSize = yyleng;
+         s_fenceSize = yyleng;
          BEGIN(SkipVerbatim);
       }
    }
@@ -2814,7 +2833,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
          QString text = QString::fromUtf8(yytext);
          outputArray(text, text.length());
 
-         g_fenceSize = yyleng;
+         s_fenceSize = yyleng;
          BEGIN(SkipVerbatim);
       }
    }
@@ -2823,7 +2842,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
 
       outputArray(text, text.length());
-      g_yyLineNr += text.count('\n');
+      s_yyLineNr += text.count('\n');
    }
 
 <SkipCComment>[\\@]("verbatim"|"latexonly"|"htmlonly"|"xmlonly"|"docbookonly"|"rtfonly"|"manonly"|"dot"|"code"("{"[^}]*"}")?){BN}+  {
@@ -2831,11 +2850,11 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
       outputArray(text, text.length());
 
-      g_yyLineNr += text.count('\n');
-      g_fenceSize = 0;
+      s_yyLineNr += text.count('\n');
+      s_fenceSize = 0;
 
       if (text[1] == 'f') {
-         g_blockName = "f";
+         s_blockName = "f";
 
       } else {
          QString bn = text.mid(1);
@@ -2846,7 +2865,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
             bn = bn.left(i);
          }
 
-         g_blockName = bn.trimmed();
+         s_blockName = bn.trimmed();
       }
       BEGIN(SkipVerbatim);
    }
@@ -2859,15 +2878,15 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <SkipCPPComment>[\\@]"cond"[ \t]+   {
       // conditional section
-      g_ccomment = true;
-      g_condCtx  = YY_START;
+      s_ccomment = true;
+      s_condCtx  = YY_START;
       BEGIN(CondLineCpp);
    }
 
 <SkipCComment>[\\@]"cond"[ \t]+  {
       // conditional section
-      g_ccomment = false;
-      g_condCtx  = YY_START;
+      s_ccomment = false;
+      s_condCtx  = YY_START;
       BEGIN(CondLineC);
    }
 
@@ -2875,20 +2894,20 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       startCondSection(text);
 
-      if (g_skip) {
+      if (s_skip) {
          if (YY_START == CondLineC) {
             // end C comment
             outputArray("*/", 2);
-            g_ccomment = true;
+            s_ccomment = true;
 
          } else {
-            g_ccomment = false;
+            s_ccomment = false;
          }
 
          BEGIN(SkipCond);
 
       } else {
-         BEGIN(g_condCtx);
+         BEGIN(s_condCtx);
 
       }
    }
@@ -2898,41 +2917,41 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       unput(*yytext);
       startCondSection(" ");
 
-      if (g_skip) {
+      if (s_skip) {
          if (YY_START == CondLineC) {
             // end C comment
             outputArray("*/",2);
-            g_ccomment = true;
+            s_ccomment = true;
 
          } else {
-            g_ccomment = false;
+            s_ccomment = false;
          }
 
          BEGIN(SkipCond);
 
       } else {
-         BEGIN(g_condCtx);
+         BEGIN(s_condCtx);
       }
    }
 
 <SkipCComment,SkipCPPComment>[\\@]"cond"[ \t\r]*/\n {
       // no guard
       if (YY_START == SkipCComment) {
-         g_ccomment=true;
+         s_ccomment=true;
          // end C comment
          outputArray("*/",2);
 
       } else {
-         g_ccomment = false;
+         s_ccomment = false;
       }
 
-      g_condCtx = YY_START;
+      s_condCtx = YY_START;
       startCondSection(" ");
       BEGIN(SkipCond);
    }
 
 <SkipCond>\n                            {
-      g_yyLineNr++;
+      s_yyLineNr++;
       outputChar('\n');
    }
 
@@ -2943,43 +2962,43 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCond>"//"[/!]                      {
-      g_ccomment = false;
+      s_ccomment = false;
    }
 
 <SkipCond>"/*"[*!]                      {
       // */ (editor syntax fix)
-      g_ccomment = true;
+      s_ccomment = true;
    }
 
 <SkipCond,SkipCComment,SkipCPPComment>[\\@][\\@]"endcond"/[^a-z_A-Z0-9\x80-\xFF] {
-      if (! g_skip) {
+      if (! s_skip) {
          QString text = QString::fromUtf8(yytext);
          outputArray(text, text.length());
       }
    }
 
 <SkipCond>[\\@]"endcond"/[^a-z_A-Z0-9\x80-\xFF]  {
-      bool oldSkip = g_skip;
+      bool oldSkip = s_skip;
       endCondSection();
 
-      if (oldSkip && ! g_skip) {
-         if (g_ccomment) {
+      if (oldSkip && ! s_skip) {
+         if (s_ccomment) {
             outputArray("/** ",4);
 
             // */ (editor syntax fix)
          }
 
-         BEGIN(g_condCtx);
+         BEGIN(s_condCtx);
       }
    }
 
 <SkipCComment,SkipCPPComment>[\\@]"endcond"/[^a-z_A-Z0-9\x80-\xFF] {
       // */ (editor syntax fix)
-      bool oldSkip = g_skip;
+      bool oldSkip = s_skip;
       endCondSection();
 
-      if (oldSkip && ! g_skip)  {
-         BEGIN(g_condCtx);
+      if (oldSkip && ! s_skip)  {
+         BEGIN(s_condCtx);
       }
    }
 
@@ -2989,10 +3008,10 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
 
-      if (text[1] == 'f' && g_blockName == "f") {
+      if (text[1] == 'f' && s_blockName == "f") {
          BEGIN(SkipCComment);
 
-      } else if (text.mid(4) == g_blockName) {
+      } else if (text.mid(4) == s_blockName) {
          BEGIN(SkipCComment);
       }
    }
@@ -3001,7 +3020,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
 
-      if (g_fenceSize == yyleng) {
+      if (s_fenceSize == yyleng) {
          BEGIN(SkipCComment);
       }
    }
@@ -3010,7 +3029,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
 
-      if (g_fenceSize == yyleng) {
+      if (s_fenceSize == yyleng) {
          BEGIN(SkipCComment);
       }
    }
@@ -3027,7 +3046,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCComment,SkipVerbatim>\n       {
-      g_yyLineNr++;
+      s_yyLineNr++;
       outputChar('\n');
    }
 
@@ -3038,40 +3057,40 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <CopyCComment>[^*a-z_A-Z\x80-\xFF\n]*[^*a-z_A-Z\x80-\xFF\\\n] {
       QString text = QString::fromUtf8(yytext);
 
-      g_defLitText += text;
-      g_defText    += escapeAt(text);
+      s_defLitText += text;
+      s_defText    += escapeAt(text);
    }
 
 <CopyCComment>\\[\r]?\n    {
       QString text = QString::fromUtf8(yytext);
-      g_defLitText += text;
+      s_defLitText += text;
 
       outputChar('\n');
-      g_defText += " ";
-      g_yyLineNr++;
-      g_yyMLines++;
+      s_defText += " ";
+      s_yyLineNr++;
+      s_yyMLines++;
    }
 
 <CopyCComment>"*/"         {
       QString text = QString::fromUtf8(yytext);
 
-      g_defLitText += text;
-      g_defText    += text;
-      BEGIN(g_lastCContext);
+      s_defLitText += text;
+      s_defText    += text;
+      BEGIN(s_lastCContext);
    }
 
 <CopyCComment>\n        {
       QString text = QString::fromUtf8(yytext);
 
-      g_yyLineNr++;
+      s_yyLineNr++;
       outputChar('\n');
-      g_defLitText += text;
-      g_defText+=' ';
+      s_defLitText += text;
+      s_defText+=' ';
    }
 
 <RemoveCComment>"*/"{B}*"#"           {
       // see bug 594021 for a usecase for this rule
-      if (g_lastCContext == SkipCPPBlock) {
+      if (s_lastCContext == SkipCPPBlock) {
          BEGIN(SkipCommand);
 
       } else {
@@ -3080,7 +3099,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <RemoveCComment>"*/"               {
-      BEGIN(g_lastCContext);
+      BEGIN(s_lastCContext);
    }
 
 <RemoveCComment>"//"
@@ -3089,7 +3108,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <RemoveCComment>\n         {
       // */ (editor syntax fix)
 
-      g_yyLineNr++;
+      s_yyLineNr++;
       outputChar('\n');
    }
 
@@ -3101,7 +3120,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <SkipCPPComment,RemoveCPPComment>\n    {
       unput(*yytext);
-      BEGIN(g_lastCPPContext);
+      BEGIN(s_lastCPPContext);
    }
 
 <SkipCPPComment>"/*"          {
@@ -3131,88 +3150,88 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <DefineText>"#"            {
       // */ (editor syntax fix)
 
-      g_quoteArg   = true;
-      g_defLitText += QString::fromUtf8(yytext);
+      s_quoteArg   = true;
+      s_defLitText += QString::fromUtf8(yytext);
    }
 
 <DefineText,CopyCComment>{ID}       {
       QString text = QString::fromUtf8(yytext);
-      g_defLitText += text;
+      s_defLitText += text;
 
-      if (g_quoteArg) {
-         g_defText+="\"";
+      if (s_quoteArg) {
+         s_defText+="\"";
       }
 
-      if (g_defArgs > 0) {
-         auto iter = g_argDict->find(text);
+      if (s_defArgs > 0) {
+         auto iter = s_argDict->find(text);
 
-         if (iter != g_argDict->end()) {
+         if (iter != s_argDict->end()) {
             int n = iter.value();
 
-            g_defText += '@';
+            s_defText += '@';
 
             QString numStr = QString("%1").arg(n);
-            g_defText += numStr;
+            s_defText += numStr;
 
          } else {
-            g_defText += text;
+            s_defText += text;
 
          }
 
       } else {
-         g_defText += text;
+         s_defText += text;
       }
 
-      if (g_quoteArg) {
-         g_defText += "\"";
+      if (s_quoteArg) {
+         s_defText += "\"";
       }
 
-      g_quoteArg = false;
+      s_quoteArg = false;
    }
 
 <CopyCComment>.            {
       QString text = QString::fromUtf8(yytext);
 
-      g_defLitText += text;
-      g_defText    += text;
+      s_defLitText += text;
+      s_defText    += text;
    }
 
 <DefineText>\\[\r]?\n         {
       QString text = QString::fromUtf8(yytext);
 
-      g_defLitText += text;
+      s_defLitText += text;
       outputChar('\n');
-      g_defText += ' ';
-      g_yyLineNr++;
-      g_yyMLines++;
+      s_defText += ' ';
+      s_yyLineNr++;
+      s_yyMLines++;
    }
 
 <DefineText>\n             {
       QString text = QString::fromUtf8(yytext);
 
-      QString comment = extractTrailingComment(g_defLitText);
-      g_defLitText += text;
+      QString comment = extractTrailingComment(s_defLitText);
+      s_defLitText += text;
 
       if (! comment.isEmpty()) {
          outputArray(comment, comment.length());
-         g_defLitText = g_defLitText.left(g_defLitText.length() - comment.length() - 1);
+         s_defLitText = s_defLitText.left(s_defLitText.length() - comment.length() - 1);
       }
 
       outputChar('\n');
 
       QSharedPointer<A_Define> def;
 
-      if (g_includeStack.isEmpty() || g_curlyCount > 0) {
+      if (s_includeStack.isEmpty() || s_curlyCount > 0) {
          addDefine();
       }
 
-      def = DefineManager::instance().isDefined(g_defName);
+      def = DefineManager::instance().isDefined(s_defName);
 
       if (def == nullptr)  {
          // new define
 
          QSharedPointer<A_Define> nd = newDefine();
-         DefineManager::instance().addDefine(g_yyFileName, nd);
+         DefineManager::instance().addDefine(s_yyFileName, nd);
 
       } else if (def) {
          // name already exists
@@ -3220,48 +3239,48 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
          if (def->undef) {
             // undefined name
             def->undef        = false;
-            def->m_name       = g_defName;
-            def->m_definition = g_defText.trimmed();
-            def->nargs        = g_defArgs;
-            def->m_fileName   = g_yyFileName;
-            def->lineNr       = g_yyLineNr - g_yyMLines;
-            def->columnNr     = g_yyColNr;
+            def->m_name       = s_defName;
+            def->m_definition = s_defText.trimmed();
+            def->nargs        = s_defArgs;
+            def->m_fileName   = s_yyFileName;
+            def->lineNr       = s_yyLineNr - s_yyMLines;
+            def->columnNr     = s_yyColNr;
          }
       }
 
-      g_argDict = QSharedPointer<QHash<QString, int>>();
+      s_argDict = QSharedPointer<QHash<QString, int>>();
 
-      g_yyLineNr++;
-      g_yyColNr = 1;
-      g_lastGuardName.resize(0);
+      s_yyLineNr++;
+      s_yyColNr = 1;
+      s_lastGuardName.resize(0);
       BEGIN(Start);
    }
 
 <DefineText>{B}*        {
       QString text = QString::fromUtf8(yytext);
-      g_defText    += ' ';
-      g_defLitText += text;
+      s_defText    += ' ';
+      s_defLitText += text;
    }
 
 <DefineText>{B}*"##"{B}*      {
       QString text = QString::fromUtf8(yytext);
-      g_defText    += "##";
-      g_defLitText += text;
+      s_defText    += "##";
+      s_defLitText += text;
    }
 
 <DefineText>"@"            {
       QString text = QString::fromUtf8(yytext);
-      g_defText     += "@@";
-      g_defLitText  += text;
+      s_defText     += "@@";
+      s_defLitText  += text;
    }
 
 <DefineText>\"             {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text[0];
-      g_defLitText += text;
+      s_defText    += text[0];
+      s_defLitText += text;
 
-      if (! g_insideComment) {
+      if (! s_insideComment) {
          BEGIN(SkipDoubleQuote);
       }
    }
@@ -3269,10 +3288,10 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <DefineText>\'             {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text[0];
-      g_defLitText += text;
+      s_defText    += text[0];
+      s_defLitText += text;
 
-      if (! g_insideComment) {
+      if (! s_insideComment) {
          BEGIN(SkipSingleQuote);
       }
    }
@@ -3280,87 +3299,87 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <SkipDoubleQuote>"//"[/]?     {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text;
-      g_defLitText += text;
+      s_defText    += text;
+      s_defLitText += text;
    }
 
 <SkipDoubleQuote>"/*"         {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text;
-      g_defLitText += text;
+      s_defText    += text;
+      s_defLitText += text;
    }
 
 <SkipDoubleQuote>\"        {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text[0];
-      g_defLitText += text;
+      s_defText    += text[0];
+      s_defLitText += text;
       BEGIN(DefineText);
    }
 
 <SkipSingleQuote,SkipDoubleQuote>\\.   {
      QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text;
-      g_defLitText += text;
+      s_defText    += text;
+      s_defLitText += text;
    }
 
 <SkipSingleQuote>\'        {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text[0];
-      g_defLitText += text;
+      s_defText    += text[0];
+      s_defLitText += text;
       BEGIN(DefineText);
    }
 
 <SkipDoubleQuote>.         {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text[0];
-      g_defLitText += text;
+      s_defText    += text[0];
+      s_defLitText += text;
    }
 
 <SkipSingleQuote>.         {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text[0];
-      g_defLitText += text;
+      s_defText    += text[0];
+      s_defLitText += text;
    }
 
 <DefineText>.           {
       QString text = QString::fromUtf8(yytext);
 
-      g_defText    += text[0];
-      g_defLitText += text;
+      s_defText    += text[0];
+      s_defLitText += text;
    }
 
 <<EOF>>              {
       DBG_CTX((stderr, "End of include file\n"));
 
-      if (g_includeStack.isEmpty()) {
+      if (s_includeStack.isEmpty()) {
          DBG_CTX((stderr, "Terminating scanner\n"));
          yyterminate();
 
       } else {
-         QSharedPointer<FileState> fs = g_includeStack.pop();
+         QSharedPointer<FileState> fs = s_includeStack.pop();
 
          YY_BUFFER_STATE oldBuf = YY_CURRENT_BUFFER;
          preYY_switch_to_buffer(fs->bufState );
          preYY_delete_buffer(oldBuf );
 
-         g_yyLineNr    = fs->lineNr;
-         g_inputBuf    = fs->oldFileBuf;
-         g_inputBufPos = fs->oldFileBufPos;
+         s_yyLineNr    = fs->lineNr;
+         s_inputString    = fs->oldFileBuf;
+         s_inputPosition = fs->oldFileBufPos;
          setFileName(fs->fileName);
 
-         DBG_CTX((stderr, "######## FileName %s\n", csPrintable(g_yyFileName)));
+         DBG_CTX((stderr, "######## FileName %s\n", csPrintable(s_yyFileName)));
 
          // deal with file changes due to
          // #include's within { .. } blocks
 
-         QString lineStr = QString("# %1 \"%2\" 2").arg(g_yyLineNr).arg(QString(g_yyFileName));
+         QString lineStr = QString("# %1 \"%2\" 2").arg(s_yyLineNr).arg(QString(s_yyFileName));
          outputArray(lineStr, lineStr.length());
       }
    }
@@ -3376,11 +3395,11 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
          QString text = QString::fromUtf8(yytext);
          outputArray(text, text.length());
 
-         g_lastCContext = YY_START;
-         g_commentCount = 1;
+         s_lastCContext = YY_START;
+         s_commentCount = 1;
 
          if (yyleng == 3) {
-            g_lastGuardName.resize(0); // reset guard in case the #define is documented
+            s_lastGuardName.resize(0); // reset guard in case the #define is documented
          }
 
          BEGIN(SkipCComment);
@@ -3395,10 +3414,10 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
          QString text = QString::fromUtf8(yytext);
          outputArray(text, text.length());
 
-         g_lastCPPContext = YY_START;
+         s_lastCPPContext = YY_START;
 
          if (yyleng == 3) {
-            g_lastGuardName.resize(0); // reset guard in case the #define is documented
+            s_lastGuardName.resize(0); // reset guard in case the #define is documented
          }
 
          BEGIN(SkipCPPComment);
@@ -3407,13 +3426,13 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <*>\n                {
       outputChar('\n');
-      g_yyLineNr++;
+      s_yyLineNr++;
    }
 
 <*>[\xC0-\xFF][\x80-\xBF]+    {
       // utf-8 code point
       QString text  = QString::fromUtf8(yytext);
-      g_expectGuard = false;
+      s_expectGuard = false;
 
       for (QChar c : text) {
          outputChar(c);
@@ -3423,7 +3442,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <*>.                {
       // catch all
       QString text  = QString::fromUtf8(yytext);
-      g_expectGuard = false;
+      s_expectGuard = false;
 
       for (QChar c : text) {
          outputChar(c);
@@ -3489,20 +3508,20 @@ void addSearchDir(const QString &dir)
    QFileInfo fi(dir);
 
    if (fi.isDir()) {
-      g_pathList.append(fi.absoluteFilePath());
+      s_pathList.append(fi.absoluteFilePath());
    }
 }
 
 void initPreprocessor()
 {
    addSearchDir(".");
-   g_expandedDict = QMakeShared<DefineDict>();
+   s_expandedDict = QMakeShared<DefineDict>();
 }
 
 void removePreProcessor()
 {
-   g_expandedDict = QSharedPointer<DefineDict>();
-   g_pathList.clear();
+   s_expandedDict = QSharedPointer<DefineDict>();
+   s_pathList.clear();
 
    DefineManager::deleteInstance();
 }
@@ -3511,27 +3530,27 @@ QString preprocessFile(const QString &fileName, const QString &input)
 {
    printlex(preYY_flex_debug, true, __FILE__, csPrintable(fileName) );
 
-   g_macroExpansion   = Config::getBool("macro-expansion");
-   g_expandOnlyPredef = Config::getBool("expand-only-predefined");
+   s_macroExpansion   = Config::getBool("macro-expansion");
+   s_expandOnlyPredef = Config::getBool("expand-only-predefined");
 
-   g_skip        = false;
-   g_curlyCount  = 0;
-   g_nospaces    = false;
-   g_inputBufPos = 0;
+   s_skip        = false;
+   s_curlyCount  = 0;
+   s_nospaces    = false;
 
-   g_inputBuf    = input;
-   g_outputBuf   = "";
+   s_inputPosition = 0;
+   s_inputString    = input;
+   s_outputString   = "";
 
-   g_includeStack.clear();
-   g_expandedDict->clear();
-   g_condStack.clear();
+   s_includeStack.clear();
+   s_expandedDict->clear();
+   s_condStack.clear();
 
    uint orgOffset = 0;
 
    setFileName(fileName);
 
-   g_inputFileDef = g_yyFileDef;
-   DefineManager::instance().startContext(g_yyFileName);
+   s_inputFileDef = s_yyFileDef;
+   DefineManager::instance().startContext(s_yyFileName);
 
    static bool firstTime = true;
 
@@ -3558,13 +3577,13 @@ QString preprocessFile(const QString &fileName, const QString &input)
             // predefined function macro definition
 
             // regexp matching an id
-            QRegExp reId("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
+            static QRegExp reId("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
             QHash<QString, int> argDict;
 
+            int count = 0;
             int index = posOpen + 1;
             int pos;
             int len;
-            int count = 0;
 
             // gather the formal arguments in a dictionary
             while (index < posClose && (pos = reId.indexIn(definedMacro, index))) {
@@ -3623,10 +3642,10 @@ QString preprocessFile(const QString &fileName, const QString &input)
                def->nargs        = count;
                def->isPredefined = true;
                def->nonRecursive = nonRecursive;
-               def->fileDef      = g_yyFileDef;
+               def->fileDef      = s_yyFileDef;
                def->m_fileName   = fileName;
 
-               DefineManager::instance().addDefine(g_yyFileName, def);
+               DefineManager::instance().addDefine(s_yyFileName, def);
             }
 
          } else if ((posOpen == -1 || posOpen > posEquals)   &&
@@ -3652,33 +3671,33 @@ QString preprocessFile(const QString &fileName, const QString &input)
                def->nargs = -1;
                def->isPredefined = true;
                def->nonRecursive = nonRecursive;
-               def->fileDef      = g_yyFileDef;
+               def->fileDef      = s_yyFileDef;
                def->m_fileName   = fileName;
-               DefineManager::instance().addDefine(g_yyFileName, def);
+               DefineManager::instance().addDefine(s_yyFileName, def);
             }
          }
       }
    }
 
-   g_yyLineNr = 1;
-   g_yyColNr  = 1;
-   g_ifcount  = 0;
+   s_yyLineNr = 1;
+   s_yyColNr  = 1;
+   s_ifcount  = 0;
 
-   g_levelGuard.clear();
+   s_levelGuard.clear();
 
    BEGIN( Start );
 
-   g_expectGuard = determineSection(fileName) == Entry::HEADER_SEC;
-   g_guardName.resize(0);
-   g_lastGuardName.resize(0);
-   g_guardExpr = "";
+   s_expectGuard = determineSection(fileName) == Entry::HEADER_SEC;
+   s_guardName.resize(0);
+   s_lastGuardName.resize(0);
+   s_guardExpr = "";
 
    preYYlex();
 
-   g_lexInit = true;
+   s_lexInit = true;
 
-   while (! g_condStack.isEmpty()) {
-      QSharedPointer<CondCtx> ctx = g_condStack.pop();
+   while (! s_condStack.isEmpty()) {
+      QSharedPointer<CondCtx> ctx = s_condStack.pop();
       QString sectionInfo = " ";
 
       if (ctx->sectionId != " ") {
@@ -3695,12 +3714,12 @@ QString preprocessFile(const QString &fileName, const QString &input)
    DefineManager::instance().endContext();
    printlex(preYY_flex_debug, false, __FILE__, csPrintable(fileName));
 
-   return g_outputBuf;
+   return s_outputString;
 }
 
 void preFreeScanner()
 {
-   if (g_lexInit) {
+   if (s_lexInit) {
       preYYlex_destroy();
    }
 }

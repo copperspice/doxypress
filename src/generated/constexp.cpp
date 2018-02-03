@@ -567,42 +567,35 @@ char *constexpYYtext;
 #define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 
-QString    g_strToken;
-CPPValue   g_resultValue;
-int        g_constExpLineNr;
-QString    g_constExpFileName;
+QString         g_strToken;
+CPPValue        g_resultValue;
+int             g_constExpLineNr;
+QString         g_constExpFileName;
 
-static QString  g_inputString;
-static int      g_inputPosition;
+static QString  s_inputString;
+static int      s_inputPosition;
 
 #undef  YY_INPUT
 #define YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (g_inputString[g_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inputString.at(g_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 #define INITIAL 0
@@ -991,7 +984,6 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(constexpYYtext);
       g_strToken   = text.mid(2);
-
       return TOK_HEXADECIMALINT;
    }
 	YY_BREAK
@@ -1986,8 +1978,9 @@ bool parseconstexp(const QString &fileName, int lineNr, const QString &data)
 {
    g_constExpFileName = fileName;
    g_constExpLineNr   = lineNr;
-   g_inputString      = data;
-   g_inputPosition    = 0;
+
+   s_inputString      = data;
+   s_inputPosition    = 0;
 
    QString s = data.simplified();
 

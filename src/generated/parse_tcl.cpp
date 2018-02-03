@@ -1015,8 +1015,10 @@ static struct
    bool config_autobrief;                  // value of configuration option
 
    QMap<QString, QString> config_subst;    // map of configuration option values
-   QString input_string;                   // file contents
-   int input_position;                     // position in file
+
+   QString s_inputString;                   // file contents
+   int s_inputPosition;                     // position in file
+
    QString file_name;                      // name of used file
    ParserInterface *this_parser;           // myself
 
@@ -5215,14 +5217,14 @@ static void tcl_init()
       }
    }
 
-   if (tcl.input_string.at(tcl.input_string.length() - 1) == 0x1A) {
+   if (tcl.s_inputString.at(tcl.s_inputString.length() - 1) == 0x1A) {
       // no code
 
-   } else if (tcl.input_string.at(tcl.input_string.length() - 1) == '\n') {
-      tcl.input_string[tcl.input_string.length() - 1] = 0x1A;
+   } else if (tcl.s_inputString.at(tcl.s_inputString.length() - 1) == '\n') {
+      tcl.s_inputString[tcl.s_inputString.length() - 1] = 0x1A;
 
    } else {
-      tcl.input_string += 0x1A;
+      tcl.s_inputString += 0x1A;
 
    }
 
@@ -5233,7 +5235,7 @@ static void tcl_init()
 
    tcl.config_autobrief = Config::getBool("javadoc-auto-brief");
 
-   tcl.input_position   = 0;
+   tcl.s_inputPosition   = 0;
    tcl.file_name        = "";
    tcl.this_parser      = nullptr;
    tcl.command          = 0;
@@ -5318,7 +5320,7 @@ static void tcl_parse(const QString ns, const QString cls)
 }
 
 // Parse text file and build up entry tree
-void TclLanguageParser::parseInput(const QString &fileName, const QString &input, QSharedPointer<Entry> root,
+void Tcl_Parser::parseInput(const QString &fileName, const QString &input, QSharedPointer<Entry> root,
                   enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    QFile  myFile;
@@ -5333,7 +5335,7 @@ void TclLanguageParser::parseInput(const QString &fileName, const QString &input
       return;
    }
 
-   tcl.input_string = input;
+   tcl.s_inputString = input;
 
    printlex(parse_tcl_YY_flex_debug, true, __FILE__, fileName);
 
@@ -5355,7 +5357,7 @@ void TclLanguageParser::parseInput(const QString &fileName, const QString &input
 }
 
 //! Parse file and codify.
-void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
                   QSharedPointer<Definition> searchCtx, bool collectXRefs)
@@ -5365,7 +5367,7 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QStrin
    }
 
    printlex(parse_tcl_YY_flex_debug, true, __FILE__, fileDef ? csPrintable(fileDef->fileName()) : "" );
-   tcl.input_string = input;
+   tcl.s_inputString = input;
 
    QString myNs  = "";
    QString myCls = "";
@@ -5443,52 +5445,39 @@ void TclLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QStrin
    tcl.fn.clear();
    tcl.entry.clear();
 
-   printlex(parse_tcl_YY_flex_debug, FALSE, __FILE__, fileDef ? csPrintable(fileDef->fileName()) : "");
+   printlex(parse_tcl_YY_flex_debug, false, __FILE__, fileDef ? csPrintable(fileDef->fileName()) : "");
 }
-bool TclLanguageParser::needsPreprocessing(const QString &)
+bool Tcl_Parser::needsPreprocessing(const QString &)
 {
    return false;
 }
 
-void TclLanguageParser::resetCodeParserState()
+void Tcl_Parser::resetCodeParserState()
 {
 }
 
-void TclLanguageParser::parsePrototype(const QString &text)
+void Tcl_Parser::parsePrototype(const QString &text)
 {
    (void)text;
 }
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (tcl.input_string[tcl.input_position] != 0) {
+   QString tmp1    = tcl.s_inputString.mid(tcl.s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = tcl.input_string.at(tcl.input_position);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   tcl.s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      tcl.input_position++;
-   }
-
-   return c;
-}
-
-// to avoid a warning
-void tclDummy()
-{
-   yy_top_state();
+   return tmp2.size();
 }
 

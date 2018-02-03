@@ -9,7 +9,6 @@
 
 #include <QChar>
 #include <QStack>
-#include <QRegExp>
 #include <QTextStream>
 
 #include <assert.h>
@@ -25,7 +24,7 @@
 #define YY_NO_INPUT 1
 #define YY_NEVER_INTERACTIVE 1
 
-#define ADDCHAR(c)     g_outBuf += c
+#define ADDCHAR(c)     s_outputString += c
 
 struct CondCtx
 {
@@ -47,40 +46,42 @@ struct CommentCtx
    int lineNr;
 };
 
-static QString  g_inBuf;
-static QString  g_outBuf;
+static QString  s_inputString;
+static QString  s_outputString;
+static int      s_inputPosition;
 
-static int      g_inBufPos;
-static int      g_col;
-static int      g_blockHeadCol;
-static bool     g_mlBrief;
-static int      g_readLineCtx;
-static bool     g_skip;
-static QString  g_fileName;
-static int      g_lineNr;
-static int      g_condCtx;
+static int      s_col;
+static int      s_blockHeadCol;
+static bool     s_mlBrief;
+static int      s_readLineCtx;
+static bool     s_skip;
+static QString  s_fileName;
+static int      s_lineNr;
+static int      s_condCtx;
 
-static QStack<CondCtx>     g_condStack;
-static QStack<CommentCtx>  g_commentStack;
-static QString             g_blockName;
+static int      s_lastCommentContext;
+static bool     s_inSpecialComment;
+static bool     s_inRoseComment;
+static int      s_stringContext;
+static int      s_charContext;
+static int      s_javaBlock;
+static bool     s_specialComment;
 
-static int      g_lastCommentContext;
-static bool     g_inSpecialComment;
-static bool     g_inRoseComment;
-static int      g_stringContext;
-static int      g_charContext;
-static int      g_javaBlock;
-static bool     g_specialComment;
+static QString  s_aliasString;
+static int      s_blockCount;
+static bool     s_lastEscaped;
+static int      s_lastBlockContext;
+static bool     s_pythonDocString;
+static int      s_nestingCount;
 
-static QString  g_aliasString;
-static int      g_blockCount;
-static bool     g_lastEscaped;
-static int      g_lastBlockContext;
-static bool     g_pythonDocString;
-static int      g_nestingCount;
-
-static SrcLangExt g_lang;
+static SrcLangExt s_lang;
 static bool       isFixedForm;    // for Fortran
+
+static QStack<CondCtx>     s_condStack;
+static QStack<CommentCtx>  s_commentStack;
+static QString             s_blockName;
+
+void replaceComment(int offset);
 
 static void replaceCommentMarker(const QString &s, int len)
 {
@@ -91,7 +92,7 @@ static void replaceCommentMarker(const QString &s, int len)
    // copy leading blanks
    while ((c = *p) != 0 && (c == ' ' || c == '\t' || c == '\n')) {
       ADDCHAR(c);
-      g_lineNr += c == '\n';
+      s_lineNr += c == '\n';
       p++;
    }
 
@@ -110,6 +111,7 @@ static void replaceCommentMarker(const QString &s, int len)
          break;
       }
    }
+
    if (blanks > 0) {
       while (blanks > 2) {
          ADDCHAR(' ');
@@ -122,7 +124,7 @@ static void replaceCommentMarker(const QString &s, int len)
    }
 
    // copy comment line to output
-   g_outBuf += QString(p, len - (p - ptr) );
+   s_outputString += QString(p, len - (p - ptr) );
 }
 
 static inline int computeIndent(const QString &str)
@@ -148,35 +150,35 @@ static inline int computeIndent(const QString &str)
 
 static inline void copyToOutput(const QString &s, int len)
 {
-   if (g_skip) {
+   if (s_skip) {
       // only add newlines
 
       for (int i = 0; i < len; i++) {
          if (s[i] == '\n') {
             ADDCHAR('\n');
 
-            g_lineNr++;
+            s_lineNr++;
          }
       }
 
    } else if (len > 0) {
-      g_outBuf += s.mid(0, len);
+      s_outputString += s.mid(0, len);
 
       static int tabSize = Config::getInt("tab-size");
 
       for (int i = 0; i < len; i++) {
          switch (s[i].unicode()) {
             case '\n':
-               g_col = 0;
-               g_lineNr++;
+               s_col = 0;
+               s_lineNr++;
                break;
 
             case '\t':
-               g_col += tabSize - (g_col % tabSize);
+               s_col += tabSize - (s_col % tabSize);
                break;
 
             default:
-               g_col++;
+               s_col++;
                break;
          }
       }
@@ -186,25 +188,25 @@ static inline void copyToOutput(const QString &s, int len)
 static void startCondSection(const QString &sectId)
 {
    CondParser prs;
-   bool expResult = prs.parse(g_fileName, g_lineNr, sectId);
+   bool expResult = prs.parse(s_fileName, s_lineNr, sectId);
 
-   g_condStack.push(CondCtx(g_lineNr, sectId, g_skip));
+   s_condStack.push(CondCtx(s_lineNr, sectId, s_skip));
 
    if (! expResult) {
       // not enabled
-      g_skip = true;
+      s_skip = true;
    }
 }
 
 static void endCondSection()
 {
-   if (g_condStack.isEmpty()) {
-      warn(g_fileName, g_lineNr, "Found \\endcond command without matching \\cond");
-      g_skip = false;
+   if (s_condStack.isEmpty()) {
+      warn(s_fileName, s_lineNr, "Found \\endcond command without matching \\cond");
+      s_skip = false;
 
    } else {
-      CondCtx ctx = g_condStack.pop();
-      g_skip = ctx.skip;
+      CondCtx ctx = s_condStack.pop();
+      s_skip = ctx.skip;
    }
 }
 
@@ -218,35 +220,28 @@ static void replaceAliases(const QString &s)
 }
 
 #undef  YY_INPUT
-#define YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
+#define YY_INPUT(buf,result,max_size) result = yyread(buf, max_size);
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (g_inBuf[g_inBufPos] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inBuf.at(g_inBufPos);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inBufPos++;
-   }
-
-   return c;
+   return tmp2.size();
 }
-void replaceComment(int offset);
+
 
 %}
 
@@ -265,7 +260,7 @@ void replaceComment(int offset);
 
 %%
 
-<Scan>[^"'!\/\n\\#-,]*   {
+<Scan>[^"'!\/\n\\#,\-]*   {
       /* consume anything that is not " / , or \n */
 
       QString text = QString::fromUtf8(yytext);
@@ -282,55 +277,55 @@ void replaceComment(int offset);
 <Scan>"\"\"\""!   {
       /* start of python long comment */
 
-      if (g_lang != SrcLangExt_Python) {
+      if (s_lang != SrcLangExt_Python) {
          REJECT;
 
       } else {
          QString text = QString::fromUtf8(yytext);
 
-         g_pythonDocString = true;
-         g_nestingCount    = 0;
-         g_commentStack.clear();
+         s_pythonDocString = true;
+         s_nestingCount    = 0;
+         s_commentStack.clear();
 
          copyToOutput(text, text.length());
 
          BEGIN(CComment);
-         g_commentStack.push(CommentCtx(g_lineNr));
+         s_commentStack.push(CommentCtx(s_lineNr));
       }
    }
 
 <Scan>![><!]/.*\n       {
-      if (g_lang != SrcLangExt_Fortran) {
+      if (s_lang != SrcLangExt_Fortran) {
          REJECT;
 
       } else {
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
 
-         g_nestingCount = 0;
-         g_commentStack.clear();
+         s_nestingCount = 0;
+         s_commentStack.clear();
 
          BEGIN(CComment);
-         g_commentStack.push(CommentCtx(g_lineNr));
+         s_commentStack.push(CommentCtx(s_lineNr));
       }
    }
 
 <Scan>[Cc\*][><!]/.*\n     {
-      if (g_lang != SrcLangExt_Fortran) {
+      if (s_lang != SrcLangExt_Fortran) {
          REJECT;
 
       } else {
          /* check for fixed format; we might have some conditional as part of multilene if like C<5 .and. & */
 
-         if (isFixedForm && (g_col == 0)) {
+         if (isFixedForm && (s_col == 0)) {
             QString text = QString::fromUtf8(yytext);
             copyToOutput(text, text.length());
 
-            g_nestingCount = 0;
-            g_commentStack.clear();
+            s_nestingCount = 0;
+            s_commentStack.clear();
 
             BEGIN(CComment);
-            g_commentStack.push(CommentCtx(g_lineNr));
+            s_commentStack.push(CommentCtx(s_lineNr));
 
          } else {
             REJECT;
@@ -339,7 +334,7 @@ void replaceComment(int offset);
    }
 
 <Scan>!.*\n          {
-      if (g_lang != SrcLangExt_Fortran) {
+      if (s_lang != SrcLangExt_Fortran) {
          REJECT;
 
       } else {
@@ -349,12 +344,12 @@ void replaceComment(int offset);
    }
 
 <Scan>[Cc\*].*\n        {
-      if (g_lang != SrcLangExt_Fortran) {
+      if (s_lang != SrcLangExt_Fortran) {
          REJECT;
 
       } else {
 
-         if (g_col == 0) {
+         if (s_col == 0) {
             QString text = QString::fromUtf8(yytext);
             copyToOutput(text, text.length());
 
@@ -370,7 +365,7 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      g_stringContext = YY_START;
+      s_stringContext = YY_START;
       BEGIN(SkipString);
    }
 
@@ -378,7 +373,7 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      g_charContext = YY_START;
+      s_charContext = YY_START;
       BEGIN(SkipChar);
    }
 
@@ -392,7 +387,7 @@ void replaceComment(int offset);
 <Scan>("///"[/]*)/[^/].*\n[ \t]*"//"[\/!][^\/] {   /* start C++ style special comment block */
       // */ (editor syntax fix)
 
-      if (g_mlBrief)      {
+      if (s_mlBrief)      {
          REJECT;             // bail out if we do not need to convert
 
       } else {
@@ -406,13 +401,13 @@ void replaceComment(int offset);
          }
       }
 
-      g_blockHeadCol = g_col;
+      s_blockHeadCol = s_col;
       copyToOutput("/**",3);      // */ (editor syntax fix)
 
       replaceAliases(text.mid(i));
-      g_inSpecialComment = true;
+      s_inSpecialComment = true;
 
-      g_readLineCtx = SComment;
+      s_readLineCtx = SComment;
       BEGIN(ReadLine);
       }
    }
@@ -421,17 +416,17 @@ void replaceComment(int offset);
       /* Start of Rational Rose ANSI C++ comment block */
       QString text = QString::fromUtf8(yytext);
 
-      if (g_mlBrief) {
+      if (s_mlBrief) {
          REJECT;
       }
 
       int i = QString("//##Documentation").length();
-      g_blockHeadCol = g_col;
+      s_blockHeadCol = s_col;
 
       copyToOutput("/**",3);      // */ (editor syntax fix)
 
       replaceAliases(text.mid(i));
-      g_inRoseComment = true;
+      s_inRoseComment = true;
       BEGIN(SComment);
    }
 
@@ -439,10 +434,10 @@ void replaceComment(int offset);
       // next line contains an end marker, see bug 752712
       QString text = QString::fromUtf8(yytext);
 
-      g_inSpecialComment = text[2] == '/' || text[2] == '!';
+      s_inSpecialComment = text[2] == '/' || text[2] == '!';
       copyToOutput(text, text.length());
 
-      g_readLineCtx = YY_START;
+      s_readLineCtx = YY_START;
       BEGIN(ReadLine);
    }
 
@@ -450,10 +445,10 @@ void replaceComment(int offset);
       /* one line C++ comment */
       QString text = QString::fromUtf8(yytext);
 
-      g_inSpecialComment = text[2] == '/' || text[2] == '!';
+      s_inSpecialComment = text[2] == '/' || text[2] == '!';
       copyToOutput(text, text.length());
 
-      g_readLineCtx = YY_START;
+      s_readLineCtx = YY_START;
       BEGIN(ReadLine);
    }
 
@@ -467,29 +462,29 @@ void replaceComment(int offset);
       /* start of a C comment */
       QString text = QString::fromUtf8(yytext);
 
-      g_specialComment = (yyleng == 3);
-      g_nestingCount   = 0;
-      g_commentStack.clear();
+      s_specialComment = (yyleng == 3);
+      s_nestingCount   = 0;
+      s_commentStack.clear();
 
       copyToOutput(text, text.length());
 
       BEGIN(CComment);
-      g_commentStack.push(CommentCtx(g_lineNr));
+      s_commentStack.push(CommentCtx(s_lineNr));
    }
 
 <Scan>"#"("#")?   {
-      if (g_lang != SrcLangExt_Python) {
+      if (s_lang != SrcLangExt_Python) {
          REJECT;
 
       }  else  {
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
 
-         g_nestingCount = 0;
-         g_commentStack.clear();
+         s_nestingCount = 0;
+         s_commentStack.clear();
 
          BEGIN(CComment);
-         g_commentStack.push(CommentCtx(g_lineNr));
+         s_commentStack.push(CommentCtx(s_lineNr));
       }
    }
 
@@ -498,18 +493,18 @@ void replaceComment(int offset);
    }
 
 <Scan>![><!]                 {
-      if (g_lang != SrcLangExt_Fortran) {
+      if (s_lang != SrcLangExt_Fortran) {
          REJECT;
 
       } else {
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
 
-         g_nestingCount = 0;
-         g_commentStack.clear();
+         s_nestingCount = 0;
+         s_commentStack.clear();
 
          BEGIN(CComment);
-         g_commentStack.push(CommentCtx(g_lineNr));
+         s_commentStack.push(CommentCtx(s_lineNr));
       }
    }
 
@@ -517,9 +512,9 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput("@code", 5);
 
-      g_lastCommentContext = YY_START;
-      g_javaBlock = 1;
-      g_blockName = text.mid(1);
+      s_lastCommentContext = YY_START;
+      s_javaBlock = 1;
+      s_blockName = text.mid(1);
 
       BEGIN(VerbatimCode);
    }
@@ -529,13 +524,13 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      g_lastCommentContext = YY_START;
-      g_javaBlock = 0;
+      s_lastCommentContext = YY_START;
+      s_javaBlock = 0;
 
       if (text.mid(1) == "startuml") {
-         g_blockName = "uml";
+         s_blockName = "uml";
       } else {
-         g_blockName = text.mid(1);
+         s_blockName = text.mid(1);
       }
 
       BEGIN(VerbatimCode);
@@ -545,16 +540,16 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      g_blockName = text.mid(1);
+      s_blockName = text.mid(1);
 
-      if (g_blockName.at(1) == '[') {
-         g_blockName[1] = ']';
+      if (s_blockName.at(1) == '[') {
+         s_blockName[1] = ']';
 
-      } else if (g_blockName.at(1) == '{')  {
-         g_blockName[1] = '}';
+      } else if (s_blockName.at(1) == '{')  {
+         s_blockName[1] = '}';
       }
 
-      g_lastCommentContext = YY_START;
+      s_lastCommentContext = YY_START;
       BEGIN(Verbatim);
    }
 
@@ -563,8 +558,8 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      g_blockName = text.mid(1);
-      g_lastCommentContext = YY_START;
+      s_blockName = text.mid(1);
+      s_lastCommentContext = YY_START;
 
       BEGIN(Verbatim);
    }
@@ -581,21 +576,21 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      if (text.mid(1,1) == g_blockName) {
+      if (text.mid(1,1) == s_blockName) {
          // end of formula
-         BEGIN(g_lastCommentContext);
+         BEGIN(s_lastCommentContext);
 
-      } else if (text.mid(4) == g_blockName) {
-         BEGIN(g_lastCommentContext);
+      } else if (text.mid(4) == s_blockName) {
+         BEGIN(s_lastCommentContext);
       }
    }
 
 <VerbatimCode>"{"     {
-      if (g_javaBlock == 0) {
+      if (s_javaBlock == 0) {
          REJECT;
 
       } else {
-         g_javaBlock++;
+         s_javaBlock++;
 
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
@@ -603,15 +598,15 @@ void replaceComment(int offset);
    }
 
 <VerbatimCode>"}"        {
-      if (g_javaBlock == 0) {
+      if (s_javaBlock == 0) {
          REJECT;
 
       } else {
-         g_javaBlock--;
+         s_javaBlock--;
 
-         if (g_javaBlock == 0) {
+         if (s_javaBlock == 0) {
             copyToOutput(" @endcode ", 10);
-            BEGIN(g_lastCommentContext);
+            BEGIN(s_lastCommentContext);
 
          } else {
             QString text = QString::fromUtf8(yytext);
@@ -625,8 +620,8 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      if (text.mid(4) == g_blockName) {
-         BEGIN(g_lastCommentContext);
+      if (text.mid(4) == s_blockName) {
+         BEGIN(s_lastCommentContext);
       }
    }
 
@@ -634,7 +629,7 @@ void replaceComment(int offset);
       /* skip leading comments */
       QString text = QString::fromUtf8(yytext);
 
-      if (! g_inSpecialComment) {
+      if (! s_inSpecialComment) {
          copyToOutput(text, text.length());
 
       } else {
@@ -670,7 +665,7 @@ void replaceComment(int offset);
    }
 
 <Verbatim>^[ \t]*"///"             {
-      if (g_blockName == "dot" || g_blockName == "msc" || g_blockName == "uml" || g_blockName.startsWith('f') ) {
+      if (s_blockName == "dot" || s_blockName == "msc" || s_blockName == "uml" || s_blockName.startsWith('f') ) {
          // strip /// from dot images and formulas.
 
          QString text = QString::fromUtf8(yytext);
@@ -706,7 +701,7 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      BEGIN(g_stringContext);
+      BEGIN(s_stringContext);
    }
 
 <SkipString>.                  {
@@ -732,7 +727,7 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      BEGIN(g_charContext);
+      BEGIN(s_charContext);
    }
 
 <SkipChar>.                    {
@@ -762,11 +757,11 @@ void replaceComment(int offset);
 <CComment>"\"\"\""             {
       /* end of Python docstring */
 
-      if (g_lang != SrcLangExt_Python) {
+      if (s_lang != SrcLangExt_Python) {
          REJECT;
 
       } else {
-         g_pythonDocString = false;
+         s_pythonDocString = false;
 
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
@@ -781,7 +776,7 @@ void replaceComment(int offset);
       copyToOutput(text, text.length());
 
       /* in case of Fortran always end of comment */
-      if (g_lang == SrcLangExt_Fortran) {
+      if (s_lang == SrcLangExt_Fortran) {
          BEGIN(Scan);
       }
    }
@@ -790,33 +785,34 @@ void replaceComment(int offset);
       /* nested C comment */
       QString text = QString::fromUtf8(yytext);
 
-      g_nestingCount++;
-      g_commentStack.push(CommentCtx(g_lineNr));
+      s_nestingCount++;
+      s_commentStack.push(CommentCtx(s_lineNr));
       copyToOutput(text, text.length());
    }
 
 <CComment>"*"+"/"                  {
       /* end of C comment */
-      if (g_lang == SrcLangExt_Python) {
+      if (s_lang == SrcLangExt_Python) {
          REJECT;
 
       } else {
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
 
-         if (g_nestingCount <= 0) {
+         if (s_nestingCount <= 0) {
             BEGIN(Scan);
 
          } else {
-            g_nestingCount--;
-            g_commentStack.pop();
+            s_nestingCount--;
+            s_commentStack.pop();
          }
       }
    }
 
-<CComment>"\n"/[ \t]*[^#]     {
-      /* end of Python comment */
-      if (g_lang != SrcLangExt_Python || g_pythonDocString) {
+<CComment>"\n"/[ \t]*"-"      {
+      // end of Python comment
+
+      if (s_lang != SrcLangExt_Python || s_pythonDocString) {
          REJECT;
 
       } else {
@@ -827,25 +823,23 @@ void replaceComment(int offset);
       }
    }
 
-<CComment>"\n"/[ \t]*[^\-]       {
-      REJECT;
-   }
-
-   /* removed for bug 674842 (bug was introduced in rev 768)
-<CComment>"'"           {
-      g_charContext = YY_START;
+<CComment>"\n"/[ \t]*[^ \t#\-] 	   {
       QString text = QString::fromUtf8(yytext);
-      copyToOutput(text, text.length());
-      BEGIN(SkipChar);
-   }
 
-<CComment>"\""             {
-      g_stringContext = YY_START;
-      QString text = QString::fromUtf8(yytext);
-      copyToOutput(text, text.length());
-      BEGIN(SkipString);
+      if (s_lang == SrcLangExt_Python) {
+
+         if (s_pythonDocString) {
+            REJECT;
+
+         } else {
+            copyToOutput(text, yyleng);
+            BEGIN(Scan);
+         }
+
+      } else {
+         REJECT;
+      }
    }
-   */
 
 <CComment>.             {
       QString text = QString::fromUtf8(yytext);
@@ -862,7 +856,7 @@ void replaceComment(int offset);
 
 <SComment>^[ \t]*"///"[^\/\n]/.*\n {
       replaceComment(0);
-      g_readLineCtx = YY_START;
+      s_readLineCtx = YY_START;
 
       BEGIN(ReadLine);
    }
@@ -875,15 +869,15 @@ void replaceComment(int offset);
       copyToOutput(" */",3);
       copyToOutput(text, text.length());
 
-      g_inSpecialComment = false;
-      g_inRoseComment    = false;
+      s_inSpecialComment = false;
+      s_inRoseComment    = false;
 
       BEGIN(Scan);
    }
 
 <SComment>\n[ \t]*"///"[^\/\n]/.*\n  {
       replaceComment(1);
-      g_readLineCtx = YY_START;
+      s_readLineCtx = YY_START;
 
       BEGIN(ReadLine);
    }
@@ -892,7 +886,7 @@ void replaceComment(int offset);
 <SComment>^[ \t]*"//!<"/.*\n       |    // or   //!< something
 <SComment>^[ \t]*"//!"[^<]/.*\n    {    // or   //!something
       replaceComment(0);
-      g_readLineCtx = YY_START;
+      s_readLineCtx = YY_START;
 
       BEGIN(ReadLine);
    }
@@ -901,30 +895,30 @@ void replaceComment(int offset);
 <SComment>\n[ \t]*"//!<"/.*\n      |
 <SComment>\n[ \t]*"//!"[^<\n]/.*\n {
       replaceComment(1);
-      g_readLineCtx = YY_START;
+      s_readLineCtx = YY_START;
 
       BEGIN(ReadLine);
    }
 
 <SComment>^[ \t]*"//##"/.*\n       {
-      if (! g_inRoseComment) {
+      if (! s_inRoseComment) {
          REJECT;
 
       } else {
          replaceComment(0);
-         g_readLineCtx = YY_START;
+         s_readLineCtx = YY_START;
 
          BEGIN(ReadLine);
       }
    }
 
 <SComment>\n[ \t]*"//##"/.*\n      {
-      if (! g_inRoseComment) {
+      if (! s_inRoseComment) {
          REJECT;
 
       } else {
          replaceComment(1);
-         g_readLineCtx = YY_START;
+         s_readLineCtx = YY_START;
 
          BEGIN(ReadLine);
       }
@@ -937,8 +931,8 @@ void replaceComment(int offset);
       copyToOutput(" */",3);
       copyToOutput(text, text.length());
 
-      g_inSpecialComment = false;
-      g_inRoseComment    = false;
+      s_inSpecialComment = false;
+      s_inRoseComment    = false;
 
       BEGIN(Scan);
    }
@@ -947,7 +941,7 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      BEGIN(g_readLineCtx);
+      BEGIN(s_readLineCtx);
    }
 
 <CComment,ReadLine>[\\@][\\@][~a-z_A-Z][a-z_A-Z0-9]*[ \t]* {
@@ -958,22 +952,22 @@ void replaceComment(int offset);
 
 <CComment,ReadLine>[\\@]"cond"/[^a-z_A-Z0-9]     {
       // conditional section
-      g_condCtx = YY_START;
+      s_condCtx = YY_START;
       BEGIN(CondLine);
    }
 
 <CComment,ReadLine>[\\@]"endcond"/[^a-z_A-Z0-9]  {
       // end of conditional section
-      bool oldSkip = g_skip;
+      bool oldSkip = s_skip;
       endCondSection();
 
-      if (YY_START == CComment && oldSkip && ! g_skip) {
+      if (YY_START == CComment && oldSkip && ! s_skip) {
 
-         if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Markdown && g_lang != SrcLangExt_Fortran) {
+         if (s_lang != SrcLangExt_Python && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran) {
             ADDCHAR('/');
             ADDCHAR('*');
 
-            if (g_specialComment) {
+            if (s_specialComment) {
                ADDCHAR('*');
             }
          }
@@ -983,23 +977,23 @@ void replaceComment(int offset);
 <CondLine>[!()&| \ta-z_A-Z0-9.\-]+ {
       QString text = QString::fromUtf8(yytext);
 
-      bool oldSkip = g_skip;
+      bool oldSkip = s_skip;
       startCondSection(text);
 
-      if ((g_condCtx == CComment || g_readLineCtx == SComment) && ! oldSkip && g_skip) {
+      if ((s_condCtx == CComment || s_readLineCtx == SComment) && ! oldSkip && s_skip) {
 
-         if (g_lang != SrcLangExt_Python && g_lang != SrcLangExt_Markdown && g_lang != SrcLangExt_Fortran)   {
+         if (s_lang != SrcLangExt_Python && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran)   {
 
             ADDCHAR('*');
             ADDCHAR('/');
          }
       }
 
-      if (g_readLineCtx == SComment) {
+      if (s_readLineCtx == SComment) {
          BEGIN(SComment);
 
       } else {
-         BEGIN(g_condCtx);
+         BEGIN(s_condCtx);
       }
    }
 
@@ -1010,28 +1004,28 @@ void replaceComment(int offset);
       QString text = QString::fromUtf8(yytext);
 
       if (YY_START != CondLine) {
-         g_condCtx = YY_START;
+         s_condCtx = YY_START;
       }
 
-      bool oldSkip = g_skip;
+      bool oldSkip = s_skip;
       startCondSection(" ");    // fake section id causing the section to be hidden unconditionally
 
-      if ((g_condCtx == CComment || g_readLineCtx == SComment) && ! oldSkip && g_skip) {
-         if (g_lang != SrcLangExt_Python) {
+      if ((s_condCtx == CComment || s_readLineCtx == SComment) && ! oldSkip && s_skip) {
+         if (s_lang != SrcLangExt_Python) {
             ADDCHAR('*');
             ADDCHAR('/');
          }
       }
 
       if (text[0] == '\n') {
-         g_lineNr++;
+         s_lineNr++;
       }
 
-      if (g_readLineCtx == SComment) {
+      if (s_readLineCtx == SComment) {
          BEGIN(SComment);
 
       } else {
-         BEGIN(g_condCtx);
+         BEGIN(s_condCtx);
       }
    }
 
@@ -1045,10 +1039,10 @@ void replaceComment(int offset);
       // expand alias with arguments
       QString text = QString::fromUtf8(yytext);
 
-      g_lastBlockContext = YY_START;
-      g_blockCount       = 1;
-      g_aliasString      = text;
-      g_lastEscaped      = 0;
+      s_lastBlockContext = YY_START;
+      s_blockCount       = 1;
+      s_aliasString      = text;
+      s_lastEscaped      = 0;
 
       BEGIN( ReadAliasArgs );
    }
@@ -1059,14 +1053,14 @@ void replaceComment(int offset);
 
 <ReadAliasArgs>"*/"        {
       // end of comment in the middle of an alias?
-      if (g_lang == SrcLangExt_Python) {
+      if (s_lang == SrcLangExt_Python) {
          REJECT;
 
       } else  {
          // abort the alias, restart scanning
          QString text = QString::fromUtf8(yytext);
 
-         copyToOutput(g_aliasString, g_aliasString.length());
+         copyToOutput(s_aliasString, s_aliasString.length());
          copyToOutput(text, text.length());
 
          BEGIN(Scan);
@@ -1074,58 +1068,58 @@ void replaceComment(int offset);
    }
 
 <ReadAliasArgs>[^{}\n\\\*]+      {
-      g_aliasString += QString::fromUtf8(yytext);
-      g_lastEscaped  = false;
+      s_aliasString += QString::fromUtf8(yytext);
+      s_lastEscaped  = false;
    }
 
 <ReadAliasArgs>"\\"        {
 
-      if (g_lastEscaped) {
-         g_lastEscaped = false;
+      if (s_lastEscaped) {
+         s_lastEscaped = false;
 
       } else{
-         g_lastEscaped = true;
+         s_lastEscaped = true;
 
       }
 
-      g_aliasString += QString::fromUtf8(yytext);
+      s_aliasString += QString::fromUtf8(yytext);
    }
 
 <ReadAliasArgs>\n          {
-      g_aliasString += QString::fromUtf8(yytext);
-      g_lineNr++;
-      g_lastEscaped = false;
+      s_aliasString += QString::fromUtf8(yytext);
+      s_lineNr++;
+      s_lastEscaped = false;
    }
 
 <ReadAliasArgs>"{"         {
-      g_aliasString += QString::fromUtf8(yytext);
+      s_aliasString += QString::fromUtf8(yytext);
 
-      if (!g_lastEscaped) {
-         g_blockCount++;
+      if (!s_lastEscaped) {
+         s_blockCount++;
       }
 
-      g_lastEscaped = false;
+      s_lastEscaped = false;
    }
 
 <ReadAliasArgs>"}"         {
-      g_aliasString += QString::fromUtf8(yytext);
+      s_aliasString += QString::fromUtf8(yytext);
 
-      if (! g_lastEscaped) {
-         g_blockCount--;
+      if (! s_lastEscaped) {
+         s_blockCount--;
       }
 
-      if (g_blockCount == 0) {
-         replaceAliases(g_aliasString);
-         BEGIN( g_lastBlockContext );
+      if (s_blockCount == 0) {
+         replaceAliases(s_aliasString);
+         BEGIN( s_lastBlockContext );
       }
 
-      g_lastEscaped = false;
+      s_lastEscaped = false;
 
    }
 
 <ReadAliasArgs>.        {
-      g_aliasString += QString::fromUtf8(yytext);
-      g_lastEscaped =  false;
+      s_aliasString += QString::fromUtf8(yytext);
+      s_lastEscaped =  false;
    }
 
 <ReadLine>.             {
@@ -1139,13 +1133,13 @@ void replaceComment(int offset)
 {
    QString text = QString::fromUtf8(yytext);
 
-   if (g_mlBrief || g_skip) {
+   if (s_mlBrief || s_skip) {
       copyToOutput(text, text.length());
 
    } else {
       int i = computeIndent(text.mid(offset));
 
-      if (i == g_blockHeadCol) {
+      if (i == s_blockHeadCol) {
          replaceCommentMarker(text, text.length());
 
       } else {
@@ -1156,7 +1150,7 @@ void replaceComment(int offset)
             unput(tmp);
          }
 
-         g_inSpecialComment = false;
+         s_inSpecialComment = false;
          BEGIN(Scan);
       }
    }
@@ -1232,34 +1226,34 @@ static bool recognizeFixedForm(const QString &contents)
 // main entry point
 QString convertCppComments(const QString &inBuf, const QString &fileName)
 {
-   g_mlBrief  = Config::getBool("multiline-cpp-brief");
+   s_mlBrief  = Config::getBool("multiline-cpp-brief");
 
-   g_inBuf    = inBuf;
-   g_outBuf   = "";
+   s_inputString  = inBuf;
+   s_outputString       = "";
 
-   g_inBufPos = 0;
-   g_col      = 0;
-   g_skip     = false;
-   g_fileName = fileName;
-   g_lang     = getLanguageFromFileName(fileName);
-   g_lineNr   = 1;
+   s_inputPosition = 0;
+   s_col      = 0;
+   s_skip     = false;
+   s_fileName = fileName;
+   s_lang     = getLanguageFromFileName(fileName);
+   s_lineNr   = 1;
 
-   g_pythonDocString = false;
+   s_pythonDocString = false;
 
-   g_condStack.clear();
-   g_commentStack.clear();
+   s_condStack.clear();
+   s_commentStack.clear();
 
    printlex(commentcnvYY_flex_debug, true, __FILE__, csPrintable(fileName));
    isFixedForm = false;
 
-   if (g_lang == SrcLangExt_Fortran) {
+   if (s_lang == SrcLangExt_Fortran) {
       isFixedForm = recognizeFixedForm(inBuf);
    }
 
-   if (g_lang == SrcLangExt_Markdown) {
-      g_nestingCount = 0;
+   if (s_lang == SrcLangExt_Markdown) {
+      s_nestingCount = 0;
       BEGIN(CComment);
-      g_commentStack.push(CommentCtx(g_lineNr));
+      s_commentStack.push(CommentCtx(s_lineNr));
 
    } else {
       BEGIN(Scan);
@@ -1267,25 +1261,25 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
 
    yylex();
 
-   while (! g_condStack.isEmpty()) {
-      CondCtx ctx = g_condStack.pop();
+   while (! s_condStack.isEmpty()) {
+      CondCtx ctx = s_condStack.pop();
       QString sectionInfo = " ";
 
       if (ctx.sectionId != " ") {
          sectionInfo = QString(" with label %1 ").arg(ctx.sectionId);
       }
 
-      warn(g_fileName, ctx.lineNr, "Conditional section %s does not have "
+      warn(s_fileName, ctx.lineNr, "Conditional section %s does not have "
            "a corresponding \\endcond command", csPrintable(sectionInfo));
    }
 
-   if (g_nestingCount > 0 && g_lang != SrcLangExt_Markdown) {
+   if (s_nestingCount > 0 && s_lang != SrcLangExt_Markdown) {
       QString tmp = "(probable line reference: ";
 
       bool first = true;
 
-      while (! g_commentStack.isEmpty()) {
-         CommentCtx ctx = g_commentStack.pop();
+      while (! s_commentStack.isEmpty()) {
+         CommentCtx ctx = s_commentStack.pop();
 
          if (! first) {
             tmp += ", ";
@@ -1296,14 +1290,14 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
       }
 
       tmp += ")";
-      warn(g_fileName, g_lineNr, "Reached end of file while still inside a (nested) comment. "
-           "Nesting level %d %s", g_nestingCount + 1, csPrintable(tmp) );
+      warn(s_fileName, s_lineNr, "Reached end of file while still inside a (nested) comment. "
+           "Nesting level %d %s", s_nestingCount + 1, csPrintable(tmp) );
 
       // add one for "normal" expected end of comment
    }
 
-   g_commentStack.clear();
-   g_nestingCount = 0;
+   s_commentStack.clear();
+   s_nestingCount = 0;
 
-   return g_outBuf;
+   return s_outputString;
 }

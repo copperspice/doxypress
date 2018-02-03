@@ -103,27 +103,23 @@ static const QString directionParam[] =
    "", "[in]", "[out]", "[in,out]"
 };
 
-static ParserInterface *g_thisParser;
-static QString          inputString;
-static int		         inputPosition;
-static bool             isFixedForm;
-static QString          inputStringPrepass;    // Input string for prepass of line cont. '&'
-static QString          inputStringSemi;       // Input string after command separetor ';'
-static unsigned int     inputPositionPrepass;
-static int              lineCountPrepass = 0;
-
-static QList<QSharedPointer<Entry>>  subrCurrent;
-
 struct CommentInPrepass {
    int column;
    QString str;
    CommentInPrepass(int column, QString str) : column(column), str(str) {}
-   };
-
-static QList<CommentInPrepass *> comments;
+};
 
 QStack<YY_BUFFER_STATE> include_stack;
 QStack<QByteArray>      buffer_stack;
+
+static QString          s_inputString;
+static int		         s_inputPosition;
+
+static bool             s_isFixedForm;
+static QString          s_inputStringPrepass;    // Input string for prepass of line cont. '&'
+static QString          s_inputStringSemi;       // Input string after command separetor ';'
+static unsigned int     s_inputPositionPrepass;
+static int              s_lineCountPrepass = 0;
 
 static QFile            inputFile;
 static QString  		   yyFileName;
@@ -131,27 +127,22 @@ static QString  		   yyFileName;
 static int		         yyLineNr = 1;
 static int		         yyColNr  = 0;
 
-static QSharedPointer<Entry>	current_root;
-static QSharedPointer<Entry>	global_root;
-static QSharedPointer<Entry>	file_root;
-static QSharedPointer<Entry>	current;
-static QSharedPointer<Entry>	last_entry;
-
-static ScanVar v_type  = V_IGNORE;                        // type of parsed variable
-
-static QList<QSharedPointer<Entry>>  moduleProcedures;    // list of all interfaces which contain unresolved
-
 static QString          docBlock;
 static bool             docBlockInBody = false;
 static bool             docBlockJavaStyle;
 
-static MethodTypes      mtype;
 static bool             gstat;
+
+static MethodTypes      mtype;
 static Specifier        virt;
+static Argument         *s_parameter;            // element of parameter list
+
+static ScanVar          v_type  = V_IGNORE;      // type of parsed variable
+static InterfaceType    ifType  = IF_NONE;
 
 static QString          debugStr;
 static QString          result;                  // function result
-static Argument         *s_parameter;            // element of parameter list
+
 static QString          argType;                 // fortran type of an argument of a parameter list
 static QString          argName;                 // last identifier name in variable list
 static QString          initializer;             // initial value of a variable
@@ -160,19 +151,31 @@ static int              initializerScope;        // number if nested function ca
 static QString          useModuleName;           // name of module in the use statement
 static Protection       defaultProtection;
 static Protection       typeProtection;
-static int              typeMode     = false;
-static InterfaceType    ifType       = IF_NONE;
-static bool             functionLine = false;
 
-static QChar             stringStartSymbol;        // single or double quote
-static bool              parsingPrototype = false; // see parsePrototype()
+static int              typeMode          = false;
+static bool             functionLine      = false;
+static bool             parsingPrototype  = false;    // see parsePrototype()
+static QChar            stringStartSymbol;            // single or double quote
 
-// Accumulated modifiers of current statement, eg variable declaration.
-static SymbolModifiers currentModifiers;
+// accumulated modifiers of current statement, eg variable declaration.
+static SymbolModifiers  currentModifiers;
 
-// Holds program scope->symbol name->symbol modifiers.
+// holds program scope->symbol name->symbol modifiers.
 static QMap<QSharedPointer<Entry>, QMap<QString, SymbolModifiers>> modifiers;
 
+static ParserInterface        *g_thisParser;
+
+static QSharedPointer<Entry>	current_root;
+static QSharedPointer<Entry>	global_root;
+static QSharedPointer<Entry>	file_root;
+static QSharedPointer<Entry>	current;
+static QSharedPointer<Entry>	last_entry;
+
+static QList<QSharedPointer<Entry>>  moduleProcedures;    // list of all interfaces which contain unresolved
+static QList<QSharedPointer<Entry>>  subrCurrent;
+static QList<CommentInPrepass *>     comments;
+
+// methods
 static int  yyread(char *buf, int max_size);
 static void startCommentBlock(bool);
 static void handleCommentBlock(const QString &doc, bool brief);
@@ -204,8 +207,8 @@ static void updateVariablePrepassComment(int from, int to);
 static void newLine();
 
 #undef   YY_INPUT
-#define  YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
-#define  YY_USER_ACTION yyColNr+=yyleng;
+#define  YY_INPUT(buf, result, max_size) result = yyread(buf, max_size);
+#define  YY_USER_ACTION yyColNr += yyleng;
 
 
 %}
@@ -296,12 +299,12 @@ SCOPENAME ({ID}{BS}"::"{BS})*
 
 <Prepass>^{BS}[&]*{BS}!.*\n             {
       /* skip lines with just comment. Note code was in free format or has been converted to it */
-      lineCountPrepass ++;
+      s_lineCountPrepass ++;
    }
 
 <Prepass>^{BS}\n                        {
       /* skip empty lines */
-      lineCountPrepass ++;
+      s_lineCountPrepass ++;
    }
 
 <*>^.*\n                                {
@@ -325,9 +328,9 @@ SCOPENAME ({ID}{BS}"::"{BS})*
             // last line in "continuation"
 
             // only take input after initial ampersand
-            inputStringPrepass += text.mid(indexStart + 1);
+            s_inputStringPrepass += text.mid(indexStart + 1);
 
-            pushBuffer(inputStringPrepass);
+            pushBuffer(s_inputStringPrepass);
             yyColNr = 0;
             yy_pop_state();
 
@@ -344,11 +347,11 @@ SCOPENAME ({ID}{BS}"::"{BS})*
             yy_push_state(Prepass);
          }
 
-         int length = inputStringPrepass.length();
+         int length = s_inputStringPrepass.length();
 
          // Only take input after initial ampersand
-         inputStringPrepass += text.mid(indexStart + 1);;
-         lineCountPrepass ++;
+         s_inputStringPrepass += text.mid(indexStart + 1);;
+         s_lineCountPrepass ++;
 
          // cut off & and remove following comment if present
          truncatePrepass(length + indexEnd - (indexStart + 1));
@@ -526,7 +529,7 @@ SCOPENAME ({ID}{BS}"::"{BS})*
       QString text = QString::fromUtf8(yytext);
 
       ifType = IF_GENERIC;
-      current->bodyLine = yyLineNr + lineCountPrepass + 1;
+      current->bodyLine = yyLineNr + s_lineCountPrepass + 1;
 
       // need to be at the line after the definition and we have to take continuation lines into account.
       yy_push_state(InterfaceBody);
@@ -846,7 +849,7 @@ private                                 {
       QString text = QString::fromUtf8(yytext);
 
       current->bodyLine    = yyLineNr + 1;
-      current->endBodyLine = yyLineNr + lineCountPrepass;
+      current->endBodyLine = yyLineNr + s_lineCountPrepass;
 
       /* variable declaration starts */
       if(YY_START == Start) {
@@ -1131,9 +1134,9 @@ private                                 {
       currentModifiers = SymbolModifiers();
       yy_pop_state();                         // end variable declaration list
       docBlock.resize(0);
-      inputStringSemi = " \n" + text.mid(1);
+      s_inputStringSemi = " \n" + text.mid(1);
       yyLineNr--;
-      pushBuffer(inputStringSemi);
+      pushBuffer(s_inputStringSemi);
    }
 
 <*>";".*"\n"                            {
@@ -1142,9 +1145,9 @@ private                                 {
       if (YY_START == Variable) REJECT;       // Just be on the safe side
       if (YY_START == String) REJECT;         // ";" ignored in strings
       if (YY_START == StrIgnore) REJECT;      // ";" ignored in regular comments
-      inputStringSemi = " \n" + text.mid(1);
+      s_inputStringSemi = " \n" + text.mid(1);
       yyLineNr--;
-      pushBuffer(inputStringSemi);
+      pushBuffer(s_inputStringSemi);
    }
 
 <Initialization,ArrayInitializer>"["    |
@@ -1242,7 +1245,7 @@ private                                 {
       BEGIN(Subprog);
 
       // need to be at the line after the definition and we have to take continuation lines into account
-      current->bodyLine  = yyLineNr + lineCountPrepass + 1;
+      current->bodyLine  = yyLineNr + s_lineCountPrepass + 1;
       current->startLine = yyLineNr;
    }
 
@@ -1261,7 +1264,7 @@ private                                 {
       yy_push_state(Subprog);
 
       // need to be at the line after the definition and we have to take continuation lines into account
-      current->bodyLine  = yyLineNr + lineCountPrepass + 1;
+      current->bodyLine  = yyLineNr + s_lineCountPrepass + 1;
       current->startLine = yyLineNr;
     }
 
@@ -1535,8 +1538,8 @@ static void extractPrefix(QString &text)
 
 static void newLine() {
    yyLineNr++;
-   yyLineNr += lineCountPrepass;
-   lineCountPrepass = 0;
+   yyLineNr += s_lineCountPrepass;
+   s_lineCountPrepass = 0;
    comments.clear();
 }
 
@@ -1666,17 +1669,17 @@ static int getAmpOrExclAtTheEnd(const QString &buf, int length, QChar ch)
 */
 void truncatePrepass(int index)
 {
-   int length = inputStringPrepass.length();
+   int length = s_inputStringPrepass.length();
 
    for (int i = index + 1; i < length; i++) {
-      if (inputStringPrepass[i] == '!' && i < length - 1 && inputStringPrepass[i + 1] == '<') {
+      if (s_inputStringPrepass[i] == '!' && i < length - 1 && s_inputStringPrepass[i + 1] == '<') {
          // save comment
-         struct CommentInPrepass *c = new CommentInPrepass(index, inputStringPrepass.right(length - i - 2));
+         struct CommentInPrepass *c = new CommentInPrepass(index, s_inputStringPrepass.right(length - i - 2));
          comments.append(c);
       }
    }
 
-   inputStringPrepass.truncate(index);
+   s_inputStringPrepass.truncate(index);
 }
 
 // simplified way to know if this is fixed form
@@ -2518,29 +2521,22 @@ static QString getFullName(Entry *e)
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+  int len = max_size;
 
-   while (inputString[inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = inputString.at(inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 static void initParser()
@@ -2928,10 +2924,10 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    initParser();
 
    defaultProtection    = Public;
-   inputString          = fileBuf;
-   inputPosition        = 0;
-   inputStringPrepass   = "";
-   inputPositionPrepass = 0;
+   s_inputString          = fileBuf;
+   s_inputPosition        = 0;
+   s_inputStringPrepass   = "";
+   s_inputPositionPrepass = 0;
 
    mtype         = Method;
    gstat         = FALSE;
@@ -2942,14 +2938,14 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    inputFile.setFileName(fileName);
 
    if (inputFile.open(QIODevice::ReadOnly)) {
-      isFixedForm = recognizeFixedForm(fileBuf, format);
+      s_isFixedForm = recognizeFixedForm(fileBuf, format);
 
-      if (isFixedForm) {
+      if (s_isFixedForm) {
          msg("Prepassing fixed form of %s\n", csPrintable(fileName));
-         inputString = prepassFixedForm(fileBuf);
+         s_inputString = prepassFixedForm(fileBuf);
 
-      } else if (! inputString.endsWith('\n') ) {
-         inputString += '\n';
+      } else if (! s_inputString.endsWith('\n') ) {
+         s_inputString += '\n';
 
       }
 
@@ -2984,15 +2980,15 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       moduleProcedures.clear();
 
-      if (isFixedForm) {
-         inputString = "";
+      if (s_isFixedForm) {
+         s_inputString = "";
       }
 
       inputFile.close();
   }
 }
 
-void FortranLanguageParser::parseInput(const QString &fileName, const QString &fileBuf,
+void Fortran_Parser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    g_thisParser = this;
@@ -3002,7 +2998,7 @@ void FortranLanguageParser::parseInput(const QString &fileName, const QString &f
    printlex(yy_flex_debug, false, __FILE__, fileName);
 }
 
-void FortranLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
+void Fortran_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
                   const QString &input, SrcLangExt, bool isExampleBlock, const QString &exampleName,
                   QSharedPointer<FileDef> fileDef, int startLine, int endLine, bool inlineFragment,
                   QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition>
@@ -3013,18 +3009,18 @@ void FortranLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QS
                   collectXRefs, m_format);
 }
 
-bool FortranLanguageParser::needsPreprocessing(const QString &extension)
+bool Fortran_Parser::needsPreprocessing(const QString &extension)
 {
    // use preprocessor only for upper case extensions
    return extension != extension.toLower();
 }
 
-void FortranLanguageParser::resetCodeParserState()
+void Fortran_Parser::resetCodeParserState()
 {
    ::resetFortranCodeParserState();
 }
 
-void FortranLanguageParser::parsePrototype(const QString &text)
+void Fortran_Parser::parsePrototype(const QString &text)
 {
    QString buffer = text;
 

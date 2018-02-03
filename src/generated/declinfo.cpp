@@ -716,29 +716,22 @@ static void addTypeName()
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (s_inputString[s_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = s_inputString.at(s_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      s_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 #define INITIAL 0

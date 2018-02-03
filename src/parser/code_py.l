@@ -23,53 +23,52 @@
 #include <tooltip.h>
 #include <util.h>
 
-#define DBG_CTX(...)     do { } while(0)
+#define DBs_CTX(...)     do { } while(0)
 
 #define YY_NO_INPUT 1
 #define YY_NEVER_INTERACTIVE 1
 
-static ClassSDict     g_codeClassSDict;
-static QString        g_curClassName;
-static QStringList    g_curClassBases;
+static ClassSDict    s_codeClassSDict;
+static QString       s_curClassName;
+static QStringList   s_curClassBases;
 
-static CodeOutputInterface *g_code;
+static QString       s_inputString;        // the code fragment as text
+static int	         s_inputPosition;      // read offset during parsing
+static QString       s_currentFontClass;
+static bool          s_needsTermination;
 
-static QString       g_inputString;     //!< the code fragment as text
-static int	         g_inputPosition;   //!< read offset during parsing
-static QString       g_currentFontClass;
-static bool          g_needsTermination;
+static bool          s_collectXRefs;
+static int           s_inputLines;         // number of line in the code fragment
+static int	         s_yyLineNr;           // current line number
 
-static QSharedPointer<Definition>   g_searchCtx;
-static bool          g_collectXRefs;
-static int           g_inputLines;      //!< number of line in the code fragment
-static int	         g_yyLineNr;        //!< current line number
+static bool          s_includeCodeFragment;
+static QString       s_realScope;
 
-static QSharedPointer<FileDef>      g_sourceFileDef;
-static QSharedPointer<Definition>   g_currentDefinition;
-static QSharedPointer<MemberDef>    g_currentMemberDef;
+static int           s_bodyCurlyCount;
+static bool          s_searchingForBody;
+static QString       s_classScope;
+static int           s_paramParens;
 
-static bool          g_includeCodeFragment;
-static QString       g_realScope;
+static bool          s_exampleBlock;
+static QString       s_exampleName;
+static QString       s_type;
+static QString       s_name;
 
-static int           g_bodyCurlyCount;
-static bool          g_searchingForBody;
-static QString       g_classScope;
-static int           g_paramParens;
+static bool          s_doubleStringIsDoc;
+static bool          s_doubleQuote;
+static bool          s_noSuiteFound;
+static int           s_stringContext;
 
-static bool          g_exampleBlock;
-static QString       g_exampleName;
-static QString       g_type;
-static QString       g_name;
+static QString       s_docBlock;
+static bool          s_endComment;
 
-static bool          g_doubleStringIsDoc;
-static bool          g_doubleQuote;
-static bool          g_noSuiteFound;
-static int           g_stringContext;
+static CodeOutputInterface          *s_code;
 
-static QStack<uint>  g_indents;           // tracks indentation levels for scoping in python
-
-static QString       g_docBlock;
-static bool          g_endComment;
+static QStack<uint>                 s_indents;           // tracks indentation levels for scoping in python
+static QSharedPointer<Definition>   s_searchCtx;
+static QSharedPointer<FileDef>      s_sourceFileDef;
+static QSharedPointer<Definition>   s_currentDefinition;
+static QSharedPointer<MemberDef>    s_currentMemberDef;
 
 static void endFontClass();
 static void adjustScopesAndSuites(unsigned indentLength);
@@ -139,7 +138,7 @@ void PyVariableContext::addVariable(const QString &type, const QString &name)
 
    QSharedPointer<ClassDef> varType;
 
-   if ( (varType = g_codeClassSDict[ltype]) || (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, ltype)) ) {
+   if ( (varType = s_codeClassSDict[ltype]) || (varType = getResolvedClass(s_currentDefinition, s_sourceFileDef, ltype)) ) {
       // look for class definitions inside the code block
       // look for global class definitions
 
@@ -180,13 +179,13 @@ QSharedPointer<ClassDef> PyVariableContext::findVariable(const QString &name)
    return result;
 }
 
-static PyVariableContext g_theVarContext;
+static PyVariableContext s_theVarContext;
 
 class PyCallContext
 {
    public:
       struct Ctx {
-         Ctx() : name(g_name), type(g_type), cd(0)
+         Ctx() : name(s_name), type(s_type), cd(0)
          {}
 
          QString name;
@@ -218,8 +217,8 @@ class PyCallContext
             Ctx *ctx = m_classList.last();
 
             if (ctx) {
-               g_name = ctx->name;
-               g_type = ctx->type;
+               s_name = ctx->name;
+               s_type = ctx->type;
             }
             m_classList.removeLast();
          }
@@ -244,18 +243,18 @@ class PyCallContext
       QList<Ctx *> m_classList;
 };
 
-static PyCallContext g_theCallContext;
+static PyCallContext s_theCallContext;
 
 /* counts the number of lines in the input */
 static int countLines()
 {
    int count = 1;
 
-   if (g_inputString.isEmpty() ) {
+   if (s_inputString.isEmpty() ) {
       return count;
    }
 
-   const QChar *p = g_inputString.constData();
+   const QChar *p = s_inputString.constData();
    QChar c;
 
    while ((c = *p) != 0) {
@@ -270,7 +269,7 @@ static int countLines()
       // last line does not end with a \n, so we add an extra
       // line and explicitly terminate the line after parsing
       count++;
-      g_needsTermination = true;
+      s_needsTermination = true;
    }
 
    return count;
@@ -279,10 +278,10 @@ static int countLines()
 static void setCurrentDoc(const QString &anchor)
 {
    if (Doxy_Globals::searchIndexBase != nullptr) {
-      if (g_searchCtx) {
-         Doxy_Globals::searchIndexBase->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), false);
+      if (s_searchCtx) {
+         Doxy_Globals::searchIndexBase->setCurrentDoc(s_searchCtx, s_searchCtx->anchor(), false);
       } else {
-         Doxy_Globals::searchIndexBase->setCurrentDoc(g_sourceFileDef, anchor, true);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(s_sourceFileDef, anchor, true);
       }
    }
 }
@@ -294,7 +293,7 @@ static void addToSearchIndex(const QString &text)
    }
 }
 
-static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<Definition> d = g_currentDefinition)
+static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<Definition> d = s_currentDefinition)
 {
    int pos = 0;
 
@@ -307,12 +306,12 @@ static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<
 
       QSharedPointer<ClassDef> cd;
 
-      if (! g_classScope.isEmpty()) {
-         cd = getResolvedClass(d, g_sourceFileDef, g_classScope + "::" + clName);
+      if (! s_classScope.isEmpty()) {
+         cd = getResolvedClass(d, s_sourceFileDef, s_classScope + "::" + clName);
       }
 
       if (cd == 0) {
-         cd = getResolvedClass(d, g_sourceFileDef, clName);
+         cd = getResolvedClass(d, s_sourceFileDef, clName);
       }
 
       if (cd) {
@@ -323,70 +322,70 @@ static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<
    return QSharedPointer<ClassDef>();
 }
 
-/* start a new line of code, inserting a line number if g_sourceFileDef
+/* start a new line of code, inserting a line number if s_sourceFileDef
  * is true. If a definition starts at the current line, then the line
  * number is linked to the documentation of that definition.
  */
 static void startCodeLine()
 {
-   if (g_sourceFileDef) {
-      QSharedPointer<Definition> d = g_sourceFileDef->getSourceDefinition(g_yyLineNr);
+   if (s_sourceFileDef) {
+      QSharedPointer<Definition> d = s_sourceFileDef->getSourceDefinition(s_yyLineNr);
 
-      if (! g_includeCodeFragment && d && d->isLinkableInProject()) {
-         g_currentDefinition = d;
-         g_currentMemberDef  = g_sourceFileDef->getSourceMember(g_yyLineNr);
-         g_endComment        = false;
-         g_searchingForBody  = true;
+      if (! s_includeCodeFragment && d && d->isLinkableInProject()) {
+         s_currentDefinition = d;
+         s_currentMemberDef  = s_sourceFileDef->getSourceMember(s_yyLineNr);
+         s_endComment        = false;
+         s_searchingForBody  = true;
 
-         g_realScope  = d->name();
-         g_classScope = d->name();
+         s_realScope  = d->name();
+         s_classScope = d->name();
 
-         g_bodyCurlyCount = 0;
+         s_bodyCurlyCount = 0;
 
          QString lineAnchor;
-         lineAnchor = QString("l%1").arg(g_yyLineNr, 5, 10, QChar('0'));
+         lineAnchor = QString("l%1").arg(s_yyLineNr, 5, 10, QChar('0'));
 
-         if (g_currentMemberDef) {
-            g_code->writeLineNumber(g_currentMemberDef->getReference(),
-                  g_currentMemberDef->getOutputFileBase(), g_currentMemberDef->anchor(), g_yyLineNr);
+         if (s_currentMemberDef) {
+            s_code->writeLineNumber(s_currentMemberDef->getReference(),
+                  s_currentMemberDef->getOutputFileBase(), s_currentMemberDef->anchor(), s_yyLineNr);
 
             setCurrentDoc(lineAnchor);
 
          } else {
-            g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), 0, g_yyLineNr);
+            s_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), 0, s_yyLineNr);
             setCurrentDoc(lineAnchor);
          }
 
       } else {
-         g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
+         s_code->writeLineNumber(0, 0, 0, s_yyLineNr);
       }
    }
 
-   g_code->startCodeLine(g_sourceFileDef);
+   s_code->startCodeLine(s_sourceFileDef);
 
-   if (! g_currentFontClass.isEmpty()) {
-      g_code->startFontClass(g_currentFontClass);
+   if (! s_currentFontClass.isEmpty()) {
+      s_code->startFontClass(s_currentFontClass);
    }
 }
 
 static void codify(const QString &text)
 {
-   g_code->codify(text);
+   s_code->codify(text);
 }
 
 static void endCodeLine()
 {
    endFontClass();
-   g_code->endCodeLine();
+   s_code->endCodeLine();
 }
 
 static void nextCodeLine()
 {
-   QString fc = g_currentFontClass;
+   QString fc = s_currentFontClass;
    endCodeLine();
 
-   if (g_yyLineNr < g_inputLines) {
-      g_currentFontClass = fc;
+   if (s_yyLineNr < s_inputLines) {
+      s_currentFontClass = fc;
       startCodeLine();
    }
 }
@@ -394,18 +393,18 @@ static void nextCodeLine()
 static void startFontClass(const QString &s)
 {
    // if font class is already set do not stop and start it again
-   if (g_currentFontClass != s) {
+   if (s_currentFontClass != s) {
       endFontClass();
-      g_code->startFontClass(s);
-      g_currentFontClass = s;
+      s_code->startFontClass(s);
+      s_currentFontClass = s;
    }
 }
 
 static void endFontClass()
 {
-   if (! g_currentFontClass.isEmpty() ) {
-      g_code->endFontClass();
-      g_currentFontClass = "";
+   if (! s_currentFontClass.isEmpty() ) {
+      s_code->endFontClass();
+      s_currentFontClass = "";
    }
 }
 
@@ -433,7 +432,7 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Defin
    for (auto c : text) {
 
       if (c == '\n') {
-         g_yyLineNr++;
+         s_yyLineNr++;
 
          ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
          nextCodeLine();
@@ -453,19 +452,19 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Defin
 
 static void codifyLines(const QString &text)
 {
-   const QString tmp_currentFontClass = g_currentFontClass;
+   const QString tmp_currentFontClass = s_currentFontClass;
 
    QString tmp;
 
    for (auto c : text) {
 
       if (c == '\n') {
-         g_yyLineNr++;
+         s_yyLineNr++;
 
-         g_code->codify(tmp);
+         s_code->codify(tmp);
          endCodeLine();
 
-         if (g_yyLineNr < g_inputLines) {
+         if (s_yyLineNr < s_inputLines) {
             startCodeLine();
          }
 
@@ -482,7 +481,7 @@ static void codifyLines(const QString &text)
    }
 
    if (! tmp.isEmpty() )  {
-      g_code->codify(tmp);
+      s_code->codify(tmp);
    }
 }
 
@@ -495,7 +494,7 @@ static bool getLinkInScope(const QString &c, const QString &m,  const QString &m
    QSharedPointer<NamespaceDef> nd;
    QSharedPointer<GroupDef>     gd;
 
-   if (getDefs(c, m, "()", md, cd, fd, nd, gd, false, g_sourceFileDef) && md->isLinkable()) {
+   if (getDefs(c, m, "()", md, cd, fd, nd, gd, false, s_sourceFileDef) && md->isLinkable()) {
 
       QSharedPointer<Definition> d;
 
@@ -510,10 +509,10 @@ static bool getLinkInScope(const QString &c, const QString &m,  const QString &m
       }
 
       if (d && d->isLinkable()) {
-         g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()));
+         s_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()));
 
-         if (g_currentDefinition && g_currentMemberDef && md != g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, md);
+         if (s_currentDefinition && s_currentMemberDef && md != s_currentMemberDef && s_collectXRefs) {
+            addDocCrossReference(s_currentMemberDef, md);
          }
 
          writeMultiLineCodeLink(ol, md, ! text.isEmpty() ? text : memberText);
@@ -533,13 +532,13 @@ static bool getLink(const QString &className, const QString &memberName, CodeOut
    QString c = className;
 
    if (! getLinkInScope(c, m, memberName, ol, text)) {
-      if (! g_curClassName.isEmpty()) {
+      if (! s_curClassName.isEmpty()) {
 
          if (! c.isEmpty()) {
             c.prepend("::");
          }
 
-         c.prepend(g_curClassName);
+         c.prepend(s_curClassName);
          return getLinkInScope(c, m, memberName, ol, text);
       }
       return false;
@@ -560,7 +559,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
       return;
    }
 
-   DBG_CTX(stderr, "generateClassOrGlobalLink(className=%s)\n", csPrintable(className) );
+   DBs_CTX(stderr, "generateClassOrGlobalLink(className=%s)\n", csPrintable(className) );
 
    QSharedPointer<ClassDef> cd;
    QSharedPointer<ClassDef> lcd;
@@ -568,17 +567,17 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
    // Member def that we may find
    QSharedPointer<MemberDef> md;
 
-   if ((lcd = g_theVarContext.findVariable(className)) == 0) { // not a local variable
-      QSharedPointer<Definition> d = g_currentDefinition;
+   if ((lcd = s_theVarContext.findVariable(className)) == 0) { // not a local variable
+      QSharedPointer<Definition> d = s_currentDefinition;
 
       QString scope = substitute(className, ".", "::");
 
-      cd = getResolvedClass(d, g_sourceFileDef, substitute(className, ".", "::"), &md);
+      cd = getResolvedClass(d, s_sourceFileDef, substitute(className, ".", "::"), &md);
 
-      DBG_CTX(stderr, "d=%s g_sourceFileDef=%s\n", d ? csPrintable(d->displayName()) : "<null>",
-               g_currentDefinition ? csPrintable(g_currentDefinition->displayName()) : "<null>");
+      DBs_CTX(stderr, "d=%s s_sourceFileDef=%s\n", d ? csPrintable(d->displayName()) : "<null>",
+               s_currentDefinition ? csPrintable(s_currentDefinition->displayName()) : "<null>");
 
-      DBG_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
+      DBs_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
 
       if (cd == 0 && md == 0) {
          // also see if it is variable or enum or enum value
@@ -589,17 +588,17 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
             addToSearchIndex(className);
             return;
 
-         } else if (getLink(g_classScope, clName, ol, clName)) {
+         } else if (getLink(s_classScope, clName, ol, clName)) {
             return;
          }
       }
 
    } else {
       if (lcd != PyVariableContext::dummyContext()) {
-         g_theCallContext.setClass(lcd);
+         s_theCallContext.setClass(lcd);
       }
 
-      DBG_CTX(stderr, "is a local variable cd=%p\n", cd.data());
+      DBs_CTX(stderr, "is a local variable cd=%p\n", cd.data());
    }
 
    if (cd && cd->isLinkable()) { // is it a linkable class
@@ -619,8 +618,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
             d = md->getGroupDef();
          }
 
-         if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, md);
+         if (d && d->isLinkable() && md->isLinkable() && s_currentMemberDef && s_collectXRefs) {
+            addDocCrossReference(s_currentMemberDef, md);
          }
       }
 
@@ -633,13 +632,13 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
          QSharedPointer<ClassDef> mcd = getClass(scope);
 
-         DBG_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
+         DBs_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
 
          if (mcd) {
             QSharedPointer<MemberDef> md = mcd->getMemberByName(locName);
 
             if (md) {
-               g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
+               s_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
                writeMultiLineCodeLink(ol, md, clName);
                addToSearchIndex(className);
 
@@ -655,8 +654,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
                   d = md->getGroupDef();
                }
 
-               if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
-                  addDocCrossReference(g_currentMemberDef, md);
+               if (d && d->isLinkable() && md->isLinkable() && s_currentMemberDef && s_collectXRefs) {
+                  addDocCrossReference(s_currentMemberDef, md);
                }
 
                return;
@@ -669,7 +668,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
                QSharedPointer<MemberDef> md = mnd->getMemberByName(locName);
 
                if (md) {
-                  g_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
+                  s_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
                   writeMultiLineCodeLink(ol, md, clName);
                   addToSearchIndex(className);
 
@@ -687,8 +686,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
                      d = md->getGroupDef();
                   }
 
-                  if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
-                     addDocCrossReference(g_currentMemberDef, md);
+                  if (d && d->isLinkable() && md->isLinkable() && s_currentMemberDef && s_collectXRefs) {
+                     addDocCrossReference(s_currentMemberDef, md);
                   }
 
                   return;
@@ -708,10 +707,10 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
 {
    QSharedPointer<ClassDef> ccd;
 
-   QString locScope = g_classScope;
+   QString locScope = s_classScope;
    QString locFunc = removeRedundantWhiteSpace(funcName);
 
-   DBG_CTX(stdout, "*** locScope=%s locFunc=%s\n", csPrintable(locScope), csPrintable(locFunc));
+   DBs_CTX(stdout, "*** locScope=%s locFunc=%s\n", csPrintable(locScope), csPrintable(locFunc));
    int i = locFunc.lastIndexOf("::");
 
    if (i > 0) {
@@ -719,7 +718,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
       locFunc  = locFunc.right(locFunc.length() - i - 2).trimmed();
    }
 
-   if (! locScope.isEmpty() && (ccd = g_codeClassSDict[locScope])) {
+   if (! locScope.isEmpty() && (ccd = s_codeClassSDict[locScope])) {
 
       if (ccd->baseClasses()) {
          for (auto item : *ccd->baseClasses() ) {
@@ -739,18 +738,18 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
 static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> def, const QString &name)
 {
    if (def->getOuterScope() && def->getOuterScope()->definitionType() == Definition::TypeClass &&
-         g_currentDefinition->definitionType() == Definition::TypeClass) {
+         s_currentDefinition->definitionType() == Definition::TypeClass) {
 
       QSharedPointer<ClassDef> cd     = def->getOuterScope().dynamicCast<ClassDef>();
-      QSharedPointer<ClassDef> thisCd = g_currentDefinition.dynamicCast<ClassDef>();
+      QSharedPointer<ClassDef> thisCd = s_currentDefinition.dynamicCast<ClassDef>();
 
       if (def->definitionType() == Definition::TypeMember) {
-         if (g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, def.dynamicCast<MemberDef>());
+         if (s_currentMemberDef && s_collectXRefs) {
+            addDocCrossReference(s_currentMemberDef, def.dynamicCast<MemberDef>());
          }
       }
 
-      DBG_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
+      DBs_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
                   thisCd ? csPrintable(thisCd->name()) : "<none>");
 
       // TODO: find the nearest base class in case cd is a base class of thisCd
@@ -766,7 +765,7 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> d
 
 static void findMemberLink(CodeOutputInterface &ol, const QString &phrase)
 {
-   if (g_currentDefinition) {
+   if (s_currentDefinition) {
       auto iter = Doxy_Globals::glossary().find(phrase);
 
       while (iter != Doxy_Globals::glossary().end() && iter.key() == phrase) {
@@ -788,29 +787,22 @@ static void findMemberLink(CodeOutputInterface &ol, const QString &phrase)
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (g_inputString[g_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inputString.at(g_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 %}
@@ -865,7 +857,7 @@ FRACTION             "."{DIGIT}+
 EXPONENT             ("e"|"E")("+"|"-")?{DIGIT}+
 IMAGNUMBER           ({FLOATNUMBER}|{INTPART})("j"|"J")
 ATOM                 ({IDENTIFIER}|{LITERAL}|{ENCLOSURE})
-ENCLOSURE            ({PARENTH_FORM}|{LIST_DISPLAY}|{DICT_DISPLAY}|{STRING_CONVERSION})
+ENCLOSURE            ({PARENTH_FORM}|{LIST_DISPLAY}|{DICT_DISPLAY}|{STRINs_CONVERSION})
 LITERAL              ({STRINGLITERAL}|{INTEGER}|{LONGINTEGER}|{FLOATNUMBER}|{IMAGNUMBER})
 PARENTH_FORM         "("{EXPRESSION_LIST}?")"
 TEST                 ({AND_TEST}("or"{AND_TEST})*|{LAMBDA_FORM})
@@ -878,7 +870,7 @@ LIST_IF              "if"{TEST}{LIST_ITER}?
 DICT_DISPLAY         "\{"{KEY_DATUM_LIST}?"\}"
 KEY_DATUM_LIST       {KEY_DATUM}(","{KEY_DATUM})*","?
 KEY_DATUM            {EXPRESSION}":"{EXPRESSION}
-STRING_CONVERSION    "`"{EXPRESSION_LIST}"`"
+STRINs_CONVERSION    "`"{EXPRESSION_LIST}"`"
 PRIMARY              ({ATOM}|{ATTRIBUTEREF}|{SUBSCRIPTION}|{SLICING}|{CALL})
 ATTRIBUTEREF         {PRIMARY}"."{IDENTIFIER}
 SUBSCRIPTION         {PRIMARY}"["{EXPRESSION_LIST}"]"
@@ -887,9 +879,9 @@ SIMPLE_SLICING       {PRIMARY}"["{SHORT_SLICE}"]"
 EXTENDED_SLICING     {PRIMARY}"["{SLICE_LIST}"]"
 SLICE_LIST           {SLICE_ITEM}(","{SLICE_ITEM})*","?
 SLICE_ITEM           ({EXPRESSION}|{PROPER_SLICE}|{ELLIPSIS})
-PROPER_SLICE         ({SHORT_SLICE}|{LONG_SLICE})
+PROPER_SLICE         ({SHORT_SLICE}|{LONs_SLICE})
 SHORT_SLICE          {LOWER_BOUND}?":"{UPPER_BOUND}?
-LONG_SLICE           {SHORT_SLICE}":"{STRIDE}?
+LONs_SLICE           {SHORT_SLICE}":"{STRIDE}?
 LOWER_BOUND          {EXPRESSION}
 UPPER_BOUND          {EXPRESSION}
 STRIDE               {EXPRESSION}
@@ -980,58 +972,58 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    "self."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER}"(" {
       QString text = QString::fromUtf8(code_py_YYtext);
       codify("self.");
-		findMemberLink(*g_code, text.mid(5));
+		findMemberLink(*s_code, text.mid(5));
    }
 
    "self."{IDENTIFIER}/"("       {
       QString text = QString::fromUtf8(yytext);
       codify("self.");
-      findMemberLink(*g_code, text.mid(5));
+      findMemberLink(*s_code, text.mid(5));
    }
 
    "self."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER} {
       QString text = QString::fromUtf8(code_py_YYtext);
       codify("self.");
-		findMemberLink(*g_code, text.mid(5));
+		findMemberLink(*s_code, text.mid(5));
    }
 
    "self."{IDENTIFIER}           {
       QString text = QString::fromUtf8(yytext);
       codify("self.");
-      findMemberLink(*g_code, text.mid(5));
+      findMemberLink(*s_code, text.mid(5));
    }
 
    "cls."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER}"(" {
       QString text = QString::fromUtf8(code_py_YYtext);
 		codify("cls.");
-	   findMemberLink(*g_code, text.mid(4));
+	   findMemberLink(*s_code, text.mid(4));
    }
 
    "cls."{IDENTIFIER}/"("       {
       QString text = QString::fromUtf8(yytext);
       codify("cls.");
-      findMemberLink(*g_code, text.mid(4));
+      findMemberLink(*s_code, text.mid(4));
    }
 
    "cls."{IDENTIFIER}/"."({IDENTIFIER}".")*{IDENTIFIER} {
       QString text = QString::fromUtf8(code_py_YYtext);
 		codify("cls.");
-	   findMemberLink(*g_code, text.mid(4));
+	   findMemberLink(*s_code, text.mid(4));
    }
 
    "cls."{IDENTIFIER}           {
       QString text = QString::fromUtf8(yytext);
       codify("cls.");
-      findMemberLink(*g_code, text.mid(4));
+      findMemberLink(*s_code, text.mid(4));
     }
 }
 
 <ClassDec>{IDENTIFIER}              {
    QString text = QString::fromUtf8(yytext);
-   generateClassOrGlobalLink(*g_code, text);
+   generateClassOrGlobalLink(*s_code, text);
 
-   g_curClassName = text;
-   g_curClassBases.clear();
+   s_curClassName = text;
+   s_curClassBases.clear();
    BEGIN( ClassInheritance );
 }
 
@@ -1047,9 +1039,9 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       // it should probably be more strict about what to accept.
 
       QString text = QString::fromUtf8(yytext);
-      g_curClassBases.append(text);
+      s_curClassBases.append(text);
 
-      generateClassOrGlobalLink(*g_code, text);
+      generateClassOrGlobalLink(*s_code, text);
    }
 
    ":"                             {
@@ -1060,20 +1052,20 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       // found counter-example in SuiteStart.
 
       // Push a class scope
-      QSharedPointer<ClassDef> classDefToAdd = QMakeShared<ClassDef> ("<code>", 1, 1, g_curClassName,
+      QSharedPointer<ClassDef> classDefToAdd = QMakeShared<ClassDef> ("<code>", 1, 1, s_curClassName,
                   CompoundType::Class, "", "", false);
 
-      g_codeClassSDict.insert(g_curClassName, classDefToAdd);
+      s_codeClassSDict.insert(s_curClassName, classDefToAdd);
 
-      for (auto s : g_curClassBases) {
+      for (auto s : s_curClassBases) {
 
          QSharedPointer<ClassDef> baseDefToAdd;
-         baseDefToAdd = g_codeClassSDict[s];
+         baseDefToAdd = s_codeClassSDict[s];
 
          // Try to find class in global scope
 
          if (baseDefToAdd == 0) {
-            baseDefToAdd = getResolvedClass(g_currentDefinition, g_sourceFileDef, csPrintable(s));
+            baseDefToAdd = getResolvedClass(s_currentDefinition, s_sourceFileDef, csPrintable(s));
          }
 
          if (baseDefToAdd && baseDefToAdd != classDefToAdd) {
@@ -1082,10 +1074,10 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       }
 
       // Reset class-parsing variables.
-      g_curClassName.resize(0);
-      g_curClassBases.clear();
+      s_curClassName.resize(0);
+      s_curClassBases.clear();
 
-      g_noSuiteFound = true;
+      s_noSuiteFound = true;
       BEGIN( SuiteStart );
    }
 }
@@ -1093,7 +1085,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 <FunctionDec>{
    {IDENTIFIER}                    {
       QString text = QString::fromUtf8(yytext);
-      generateFunctionLink(*g_code, text);
+      generateFunctionLink(*s_code, text);
    }
 
    {B}"("                          {
@@ -1132,7 +1124,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       // assume this will be a one-line suite
       // found counter-example in SuiteStart.
 
-      g_noSuiteFound = true;
+      s_noSuiteFound = true;
       BEGIN( SuiteStart );
    }
 }
@@ -1157,12 +1149,12 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
                                }
    ({IDENTIFIER}".")*{IDENTIFIER}/"("  {
       QString text = QString::fromUtf8(yytext);
-      generateClassOrGlobalLink(*g_code, text);
+      generateClassOrGlobalLink(*s_code, text);
    }
 
    ({IDENTIFIER}".")+{IDENTIFIER} {
       QString text = QString::fromUtf8(yytext);
-      generateClassOrGlobalLink(*g_code, text, true);
+      generateClassOrGlobalLink(*s_code, text, true);
    }
 
    {IDENTIFIER}               {
@@ -1193,7 +1185,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       endFontClass();
 
       // no indentation necessary
-      g_noSuiteFound = false;
+      s_noSuiteFound = false;
    }
 
    {FLOWKW}                           {
@@ -1203,7 +1195,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       endFontClass();
 
       // no indentation necessary
-      g_noSuiteFound = false;
+      s_noSuiteFound = false;
    }
 
    {IDENTIFIER}                       {
@@ -1219,14 +1211,14 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
       yy_push_state(YY_START);
       BEGIN(DocBlock);
-      g_docBlock = text;
+      s_docBlock = text;
    }
 
    {NEWLINE}                          {
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
 
-      if ( g_noSuiteFound ) {
+      if ( s_noSuiteFound ) {
          BEGIN ( SuiteCaptureIndent );
       }
    }
@@ -1245,7 +1237,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
 
-      g_indents.push(yyleng);
+      s_indents.push(yyleng);
       BEGIN( Suite );
    }
 }
@@ -1319,7 +1311,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       codify(text);
       endFontClass();
 
-      BEGIN(g_stringContext);
+      BEGIN(s_stringContext);
    }
 
    [^"'\n\\]+                   {
@@ -1364,7 +1356,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       codify(text);
       endFontClass();
 
-      BEGIN( g_stringContext );
+      BEGIN( s_stringContext );
    }
 
    [^"'\n\\]+                   {
@@ -1387,9 +1379,9 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       QString text = QString::fromUtf8(yytext);
       codify(text);
 
-      if (g_doubleQuote == (text[0] == '"')) {
+      if (s_doubleQuote == (text[0] == '"')) {
          endFontClass();
-         BEGIN(g_stringContext);
+         BEGIN(s_stringContext);
       }
     }
 
@@ -1425,8 +1417,8 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       QString text = QString::fromUtf8(yytext);
 
       startFontClass("stringliteral");
-      g_stringContext = YY_START;
-      g_doubleQuote   = text[yyleng-1] == '"';
+      s_stringContext = YY_START;
+      s_doubleQuote   = text[yyleng-1] == '"';
       codify(text);
 
       BEGIN(TripleString);
@@ -1437,7 +1429,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       QString text = QString::fromUtf8(yytext);
 
       startFontClass("stringliteral");
-      g_stringContext = YY_START;
+      s_stringContext = YY_START;
       codify(text);
 
       BEGIN(SingleQuoteString);
@@ -1448,7 +1440,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       QString text = QString::fromUtf8(yytext);
 
       startFontClass("stringliteral");
-      g_stringContext = YY_START;
+      s_stringContext = YY_START;
       codify(text);
 
       BEGIN(DoubleQuoteString);
@@ -1457,13 +1449,13 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 <DocBlock>.*             {
       // contents of current comment line
       QString text = QString::fromUtf8(yytext);
-      g_docBlock += text;
+      s_docBlock += text;
    }
 
 <DocBlock>"\n"{B}("#")         {
       // comment block (next line is also comment line)
       QString text = QString::fromUtf8(yytext);
-      g_docBlock += text;
+      s_docBlock += text;
    }
 
 <DocBlock>{NEWLINE}            {
@@ -1471,14 +1463,14 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       // remove special comment (default config)
 
       if (Config::getBool("strip-code-comments"))  {
-         g_yyLineNr   += g_docBlock.count('\n');
-         g_endComment = true;
+         s_yyLineNr   += s_docBlock.count('\n');
+         s_endComment = true;
 
       } else  {
          // do not remove comment
 
          startFontClass("comment");
-         codifyLines(g_docBlock);
+         codifyLines(s_docBlock);
          endFontClass();
       }
 
@@ -1495,7 +1487,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       yy_push_state(YY_START);
 
       BEGIN(DocBlock);
-      g_docBlock = text;
+      s_docBlock = text;
    }
 
 <*>"#".*                       {
@@ -1512,8 +1504,8 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
 <*>{NEWLINE}                   {
-      if (g_endComment) {
-         g_endComment = false;
+      if (s_endComment) {
+         s_endComment = false;
       } else {
          QString text = QString::fromUtf8(yytext);
          codifyLines(text);
@@ -1547,7 +1539,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
          if (! Config::getBool("strip-code-comments"))  {
             startFontClass("comment");
-            codifyLines(g_docBlock);
+            codifyLines(s_docBlock);
             endFontClass();
          }
        }
@@ -1558,12 +1550,12 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
 void resetPythonCodeParserState()
 {
-   g_currentDefinition = QSharedPointer<Definition>();
-   g_currentMemberDef  = QSharedPointer<MemberDef>();
+   s_currentDefinition = QSharedPointer<Definition>();
+   s_currentMemberDef  = QSharedPointer<MemberDef>();
 
-   g_doubleStringIsDoc = false;
-   g_paramParens = 0;
-   g_indents.clear();
+   s_doubleStringIsDoc = false;
+   s_paramParens = 0;
+   s_indents.clear();
    BEGIN( Body );
 }
 
@@ -1574,22 +1566,22 @@ void resetPythonCodeParserState()
 static void adjustScopesAndSuites(unsigned indentLength)
 {
    // States to pop
-   if (!g_indents.isEmpty() && indentLength < g_indents.top()) {
+   if (!s_indents.isEmpty() && indentLength < s_indents.top()) {
 
-      while (! g_indents.isEmpty() && indentLength < g_indents.top()) {
+      while (! s_indents.isEmpty() && indentLength < s_indents.top()) {
          // pop the old suite's indentation
-         g_indents.pop();
+         s_indents.pop();
 
-         g_currentMemberDef = QSharedPointer<MemberDef>();
+         s_currentMemberDef = QSharedPointer<MemberDef>();
 
-         if (g_currentDefinition) {
-            g_currentDefinition = g_currentDefinition->getOuterScope();
+         if (s_currentDefinition) {
+            s_currentDefinition = s_currentDefinition->getOuterScope();
          }
       }
    }
 
    // Are there any remaining indentation levels for suites?
-   if (! g_indents.isEmpty()) {
+   if (! s_indents.isEmpty()) {
     BEGIN( Suite );
 
    } else {
@@ -1609,39 +1601,39 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
    printlex(yy_flex_debug, true, __FILE__, fd ? fd->fileName() : NULL);
 
    TooltipManager::instance()->clearTooltips();
-   g_code             = &od;
-   g_inputString      = s;
-   g_inputPosition    = 0;
-   g_currentFontClass = "";
-   g_needsTermination = false;
-   g_searchCtx = searchCtx;
-   g_collectXRefs = collectXRefs;
+   s_code             = &od;
+   s_inputString      = s;
+   s_inputPosition    = 0;
+   s_currentFontClass = "";
+   s_needsTermination = false;
+   s_searchCtx = searchCtx;
+   s_collectXRefs = collectXRefs;
 
    if (endLine != -1) {
-      g_inputLines  = endLine + 1;
+      s_inputLines  = endLine + 1;
    } else {
-      g_inputLines  = countLines();
+      s_inputLines  = countLines();
    }
 
    if (startLine != -1) {
-      g_yyLineNr    = startLine;
+      s_yyLineNr    = startLine;
    } else {
-      g_yyLineNr    = 1;
+      s_yyLineNr    = 1;
    }
 
-   g_exampleBlock  = exBlock;
-   g_exampleName   = exName;
-   g_sourceFileDef = fd;
+   s_exampleBlock  = exBlock;
+   s_exampleName   = exName;
+   s_sourceFileDef = fd;
 
    bool cleanupSourceDef = false;
 
    if (fd == nullptr) {
       // create a dummy filedef for the example
-      g_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? exName : "generated"));
+      s_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? exName : "generated"));
       cleanupSourceDef = true;
    }
 
-   if (g_sourceFileDef) {
+   if (s_sourceFileDef) {
       setCurrentDoc("l00001");
    }
 
@@ -1652,17 +1644,17 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
    yylex();
 
 
-   if (g_needsTermination) {
+   if (s_needsTermination) {
       endCodeLine();
    }
 
    if (fd) {
-      TooltipManager::instance()->writeTooltips(*g_code);
+      TooltipManager::instance()->writeTooltips(*s_code);
    }
 
    if (cleanupSourceDef) {
       // clear the temporary file definition used for this example
-      g_sourceFileDef = QSharedPointer<FileDef>();
+      s_sourceFileDef = QSharedPointer<FileDef>();
    }
 
    printlex(yy_flex_debug, false, __FILE__, fd ? fd->fileName() : "");

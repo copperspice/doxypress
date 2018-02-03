@@ -878,26 +878,26 @@ char *default_argsYYtext;
 #define YY_NO_INPUT 1
 #define YY_NEVER_INTERACTIVE 1
 
-static QString          g_inputString;
-static int              g_inputPosition;
-static ArgumentList     g_argList;
-static QString         *g_copyArgValue;
-static QString          g_curArgTypeName;
-static QString          g_curArgDefValue;
-static QString          g_curArgName;
-static QString          g_curArgDocs;
-static QString          g_curArgAttrib;
-static QString          g_curArgArray;
-static QString          g_curTypeConstraint;
-static QString          g_extraTypeChars;
-static int              g_argRoundCount;
-static int              g_argSharpCount;
-static int              g_argCurlyCount;
-static int              g_readArgContext;
-static int              g_lastDocContext;
-static QChar            g_lastDocChar;
-static int              g_lastExtendsContext;
-static QString          g_delimiter;
+static QString          s_inputString;
+static int              s_inputPosition;
+static ArgumentList     s_argList;
+static QString         *s_copyArgValue;
+static QString          s_curArgTypeName;
+static QString          s_curArgDefValue;
+static QString          s_curArgName;
+static QString          s_curArgDocs;
+static QString          s_curArgAttrib;
+static QString          s_curArgArray;
+static QString          s_curTypeConstraint;
+static QString          s_extraTypeChars;
+static int              s_argRoundCount;
+static int              s_argSharpCount;
+static int              s_argCurlyCount;
+static int              s_readArgContext;
+static int              s_lastDocContext;
+static QChar            s_lastDocChar;
+static int              s_lastExtendsContext;
+static QString          s_delimiter;
 
 // static functions
 static void yyunput(QChar c, char *yy_bp);
@@ -907,29 +907,22 @@ static void yyunput(QChar c, char *yy_bp);
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (g_inputString[g_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inputString.at(g_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 #define INITIAL 0
@@ -1254,7 +1247,7 @@ YY_RULE_SETUP
 case 2:
 YY_RULE_SETUP
 {
-      g_curArgTypeName += " ";
+      s_curArgTypeName += " ";
    }
 	YY_BREAK
 case 3:
@@ -1263,14 +1256,14 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
 
-      if (g_curArgTypeName.trimmed().isEmpty()) {
+      if (s_curArgTypeName.trimmed().isEmpty()) {
          // for M$-ID
-         g_curArgAttrib = text;
+         s_curArgAttrib = text;
 
       } else {
          // array type
 
-         g_curArgArray += text;
+         s_curArgArray += text;
       }
    }
 	YY_BREAK
@@ -1278,21 +1271,21 @@ case 4:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 	YY_BREAK
 case 7:
@@ -1300,12 +1293,12 @@ case 7:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
 
       int i = text.indexOf('"');
 
-      g_delimiter = text.mid(i + 1);
-      g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
+      s_delimiter = text.mid(i + 1);
+      s_delimiter = s_delimiter.left(s_delimiter.length() - 1);
       BEGIN( CopyRawString );
    }
 	YY_BREAK
@@ -1313,7 +1306,7 @@ case 8:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text[0];
+      s_curArgDefValue += text[0];
       BEGIN( CopyArgString );
    }
 	YY_BREAK
@@ -1323,9 +1316,9 @@ YY_RULE_SETUP
 {
       // function pointer as argument
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
 
-      // g_curArgTypeName = g_curArgTypeName.simplifyWhiteSpace();
+      // s_curArgTypeName = s_curArgTypeName.simplifyWhiteSpace();
       BEGIN( ReadFuncArgPtr );
    }
 	YY_BREAK
@@ -1333,7 +1326,7 @@ case 10:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgName = text;
+      s_curArgName = text;
    }
 	YY_BREAK
 case 11:
@@ -1341,11 +1334,11 @@ YY_RULE_SETUP
 {
       // function pointer
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
 
-      g_readArgContext = ReadFuncArgType;
-      g_copyArgValue   = &g_curArgTypeName;
-      g_argRoundCount  = 0;
+      s_readArgContext = ReadFuncArgType;
+      s_copyArgValue   = &s_curArgTypeName;
+      s_argRoundCount  = 0;
       BEGIN( CopyArgRound2 );
    }
 	YY_BREAK
@@ -1358,8 +1351,8 @@ YY_RULE_SETUP
       // pointer to fixed size array
       QString text = QString::fromUtf8(default_argsYYtext);
 
-      g_curArgTypeName += text;
-      g_curArgTypeName += g_curArgName;
+      s_curArgTypeName += text;
+      s_curArgTypeName += s_curArgName;
       BEGIN( ReadFuncArgType );
    }
 	YY_BREAK
@@ -1367,14 +1360,14 @@ case 13:
 YY_RULE_SETUP
 {
       // redundant braces detected, remove them
-      int i   = g_curArgTypeName.lastIndexOf('(');
-      int len = g_curArgTypeName.length();
+      int i   = s_curArgTypeName.lastIndexOf('(');
+      int len = s_curArgTypeName.length();
 
       if (i != -1) {
-         g_curArgTypeName = g_curArgTypeName.left(i) + g_curArgTypeName.right(len - i - 1);
+         s_curArgTypeName = s_curArgTypeName.left(i) + s_curArgTypeName.right(len - i - 1);
       }
 
-      g_curArgTypeName += g_curArgName;
+      s_curArgTypeName += s_curArgName;
       BEGIN( ReadFuncArgType );
    }
 	YY_BREAK
@@ -1383,7 +1376,7 @@ YY_RULE_SETUP
 {
       // handle operators
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
    }
 	YY_BREAK
 case 15:
@@ -1392,29 +1385,29 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(default_argsYYtext);
 
       if (YY_START == ReadFuncArgType) {
-         g_curArgTypeName += text[0];
-         g_copyArgValue    = &g_curArgTypeName;
+         s_curArgTypeName += text[0];
+         s_copyArgValue    = &s_curArgTypeName;
 
       } else {
-         g_curArgDefValue += text[0];
-         g_copyArgValue    = &g_curArgDefValue;
+         s_curArgDefValue += text[0];
+         s_copyArgValue    = &s_curArgDefValue;
       }
 
-      g_readArgContext = YY_START;
+      s_readArgContext = YY_START;
 
       if (text[0] == '(') {
-         g_argRoundCount = 0;
+         s_argRoundCount = 0;
          BEGIN( CopyArgRound );
 
       } else if (text[0] == '{') {
-         g_argCurlyCount = 0;
+         s_argCurlyCount = 0;
          BEGIN( CopyArgCurly );
 
       } else {
          //  text == '<'
 
-         g_argSharpCount = 0;
-         g_argRoundCount = 0;
+         s_argSharpCount = 0;
+         s_argRoundCount = 0;
          BEGIN( CopyArgSharp );
       }
    }
@@ -1423,26 +1416,26 @@ case 16:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_argRoundCount++;
-      *g_copyArgValue += text[0];
+      s_argRoundCount++;
+      *s_copyArgValue += text[0];
    }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      *g_copyArgValue += text;
+      *s_copyArgValue += text;
 
-      if (g_argRoundCount > 0) {
-         g_argRoundCount--;
+      if (s_argRoundCount > 0) {
+         s_argRoundCount--;
 
       } else {
 
          if (YY_START == CopyArgRound2) {
-            *g_copyArgValue += " " + g_curArgName;
+            *s_copyArgValue += " " + s_curArgName;
          }
 
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
       }
    }
 	YY_BREAK
@@ -1453,13 +1446,13 @@ YY_DO_BEFORE_ACTION; /* set up default_argsYYtext again */
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
 
-      if (g_argRoundCount > 0) {
-         g_argRoundCount--;
+      if (s_argRoundCount > 0) {
+         s_argRoundCount--;
 
       } else {
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
 
       }
    }
@@ -1469,8 +1462,8 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
 
-      if (g_argRoundCount > 0) {
-         *g_copyArgValue += text;
+      if (s_argRoundCount > 0) {
+         *s_copyArgValue += text;
 
       } else {
          REJECT;
@@ -1482,25 +1475,25 @@ YY_RULE_SETUP
 {
       // combined token
       QString text = QString::fromUtf8(default_argsYYtext);
-      *g_copyArgValue += text;
+      *s_copyArgValue += text;
 
-		if (g_argSharpCount > 0) {
-         g_argSharpCount--;
+		if (s_argSharpCount > 0) {
+         s_argSharpCount--;
 
       } else {
-         BEGIN(g_readArgContext);
+         BEGIN(s_readArgContext);
 
       }
 
-		if (g_argSharpCount > 0) {
-         g_argSharpCount--;
+		if (s_argSharpCount > 0) {
+         s_argSharpCount--;
 
       } else {
-         BEGIN(g_readArgContext);
+         BEGIN(s_readArgContext);
 
       }
 
-      g_argRoundCount--;
+      s_argRoundCount--;
    }
 	YY_BREAK
 case 21:
@@ -1508,8 +1501,8 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
 
-      if (g_argRoundCount > 0) {
-         *g_copyArgValue += text;
+      if (s_argRoundCount > 0) {
+         *s_copyArgValue += text;
 
       } else {
          REJECT;
@@ -1520,21 +1513,21 @@ case 22:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_argSharpCount++;
-      *g_copyArgValue += text[0];
+      s_argSharpCount++;
+      *s_copyArgValue += text[0];
    }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
 
-      if (g_argSharpCount > 0) {
-         g_argSharpCount--;
+      if (s_argSharpCount > 0) {
+         s_argSharpCount--;
 
       } else  {
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
       }
    }
 	YY_BREAK
@@ -1542,37 +1535,37 @@ case 24:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_argRoundCount++;
-      *g_copyArgValue += text[0];
+      s_argRoundCount++;
+      *s_copyArgValue += text[0];
    }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_argRoundCount--;
-      *g_copyArgValue += text[0];
+      s_argRoundCount--;
+      *s_copyArgValue += text[0];
    }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_argCurlyCount++;
-      *g_copyArgValue += text[0];
+      s_argCurlyCount++;
+      *s_copyArgValue += text[0];
    }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
 
-      if (g_argCurlyCount > 0) {
-         g_argCurlyCount--;
+      if (s_argCurlyCount > 0) {
+         s_argCurlyCount--;
 
       } else {
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
       }
    }
 	YY_BREAK
@@ -1580,7 +1573,7 @@ case 28:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 	YY_BREAK
 case 29:
@@ -1588,12 +1581,12 @@ case 29:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
 
       QString delimiter = text.mid(1);
       delimiter = delimiter.left(delimiter.length() - 1);
 
-      if (delimiter == g_delimiter) {
+      if (delimiter == s_delimiter) {
          BEGIN( ReadFuncArgDef );
       }
    }
@@ -1602,7 +1595,7 @@ case 30:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text[0];
+      s_curArgDefValue += text[0];
       BEGIN( ReadFuncArgDef );
    }
 	YY_BREAK
@@ -1618,8 +1611,8 @@ YY_RULE_SETUP
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(default_argsYYtext);
 
-      g_lastDocContext = YY_START;
-      g_lastDocChar    = text[0];
+      s_lastDocContext = YY_START;
+      s_lastDocChar    = text[0];
 
      if (text.indexOf("//") != -1) {
          BEGIN( ReadDocLine );
@@ -1634,59 +1627,59 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
 
-      if (text[0] == ')' && g_curArgTypeName.trimmed().isEmpty()) {
-         g_curArgTypeName += text[0];
+      if (text[0] == ')' && s_curArgTypeName.trimmed().isEmpty()) {
+         s_curArgTypeName += text[0];
          BEGIN(FuncQual);
 
       } else {
 
-         g_curArgTypeName = removeRedundantWhiteSpace(g_curArgTypeName);
-         g_curArgDefValue = g_curArgDefValue.trimmed();
+         s_curArgTypeName = removeRedundantWhiteSpace(s_curArgTypeName);
+         s_curArgDefValue = s_curArgDefValue.trimmed();
 
-         int len = g_curArgTypeName.length();
+         int len = s_curArgTypeName.length();
 
          if (len > 0) {
             int i = len - 1;
 
-            while (i >= 0 && (g_curArgTypeName.at(i).isSpace() || g_curArgTypeName.at(i) == '.')) {
+            while (i >= 0 && (s_curArgTypeName.at(i).isSpace() || s_curArgTypeName.at(i) == '.')) {
                i--;
             }
 
-            while (i >= 0 && (isId(g_curArgTypeName.at(i)) || g_curArgTypeName.at(i) == '$')) {
+            while (i >= 0 && (isId(s_curArgTypeName.at(i)) || s_curArgTypeName.at(i) == '$')) {
                i--;
             }
 
             Argument arg;
 
-            arg.attrib         = g_curArgAttrib;
-            arg.typeConstraint = g_curTypeConstraint.trimmed();
+            arg.attrib         = s_curArgAttrib;
+            arg.typeConstraint = s_curTypeConstraint.trimmed();
             arg.array          = "";
 
-            if (i == len - 1 && g_curArgTypeName.at(i) == ')') {
+            if (i == len - 1 && s_curArgTypeName.at(i) == ')') {
                // function argument
 
-               int bi = g_curArgTypeName.indexOf('(');
+               int bi = s_curArgTypeName.indexOf('(');
                int fi = bi - 1;
 
-               while (fi >= 0 && (isId(g_curArgTypeName.at(fi)) || g_curArgTypeName.at(fi) == ':')) {
+               while (fi >= 0 && (isId(s_curArgTypeName.at(fi)) || s_curArgTypeName.at(fi) == ':')) {
                   fi--;
                }
 
                if (fi >= 0) {
-                  arg.type  = g_curArgTypeName.left(fi + 1);
-                  arg.name  = g_curArgTypeName.mid(fi + 1, bi - fi - 1).trimmed();
-                  arg.array = g_curArgTypeName.right(len - bi);
+                  arg.type  = s_curArgTypeName.left(fi + 1);
+                  arg.name  = s_curArgTypeName.mid(fi + 1, bi - fi - 1).trimmed();
+                  arg.array = s_curArgTypeName.right(len - bi);
 
                } else {
-                  arg.type = g_curArgTypeName;
+                  arg.type = s_curArgTypeName;
 
                }
 
-            } else if (i >= 0 && g_curArgTypeName.at(i) != ':') {
+            } else if (i >= 0 && s_curArgTypeName.at(i) != ':') {
                // type contains a name
 
-               arg.type = removeRedundantWhiteSpace(g_curArgTypeName.left(i + 1)).trimmed();
-               arg.name = g_curArgTypeName.right(len - i - 1).trimmed();
+               arg.type = removeRedundantWhiteSpace(s_curArgTypeName.left(i + 1)).trimmed();
+               arg.name = s_curArgTypeName.right(len - i - 1).trimmed();
 
                // if the argument type is not a complete type, need to correct to avoid seeing a
                // nameless parameter "struct A" as a parameter with type "struct" and name "A".
@@ -1711,7 +1704,7 @@ YY_RULE_SETUP
 
             } else {
                // assume only the type was specified, try to determine name later
-               arg.type = removeRedundantWhiteSpace(g_curArgTypeName);
+               arg.type = removeRedundantWhiteSpace(s_curArgTypeName);
 
             }
 
@@ -1722,7 +1715,7 @@ YY_RULE_SETUP
                arg.type = "";
             }
 
-            arg.array += removeRedundantWhiteSpace(g_curArgArray);
+            arg.array += removeRedundantWhiteSpace(s_curArgArray);
 
             int alen = arg.array.length();
 
@@ -1739,18 +1732,18 @@ YY_RULE_SETUP
 
             }
 
-            arg.defval = g_curArgDefValue;
-            arg.docs   = g_curArgDocs.trimmed();
+            arg.defval = s_curArgDefValue;
+            arg.docs   = s_curArgDocs.trimmed();
 
-            g_argList.append(arg);
+            s_argList.append(arg);
          }
 
-         g_curArgAttrib.resize(0);
-         g_curArgTypeName.resize(0);
-         g_curArgDefValue.resize(0);
-         g_curArgArray.resize(0);
-         g_curArgDocs.resize(0);
-         g_curTypeConstraint.resize(0);
+         s_curArgAttrib.resize(0);
+         s_curArgTypeName.resize(0);
+         s_curArgDefValue.resize(0);
+         s_curArgArray.resize(0);
+         s_curArgDocs.resize(0);
+         s_curTypeConstraint.resize(0);
 
          if (text[0] == ')') {
             BEGIN(FuncQual);
@@ -1765,8 +1758,8 @@ YY_RULE_SETUP
 case 34:
 YY_RULE_SETUP
 {
-      g_curTypeConstraint.resize(0);
-      g_lastExtendsContext = YY_START;
+      s_curTypeConstraint.resize(0);
+      s_lastExtendsContext = YY_START;
       BEGIN(ReadTypeConstraint);
    }
 	YY_BREAK
@@ -1775,100 +1768,100 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
 
-      if (YY_START == ReadFuncArgType && g_curArgArray == "[]") {
+      if (YY_START == ReadFuncArgType && s_curArgArray == "[]") {
          // Java style array
 
-         g_curArgTypeName += " []";
-         g_curArgArray.resize(0);
+         s_curArgTypeName += " []";
+         s_curArgArray.resize(0);
       }
 
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
    }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgTypeName += text[0];
+      s_curArgTypeName += text[0];
    }
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDefValue += text[0];
+      s_curArgDefValue += text[0];
    }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      *g_copyArgValue += text;
+      *s_copyArgValue += text;
    }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
    }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
 {
       unput(*default_argsYYtext);
-      BEGIN(g_lastExtendsContext);
+      BEGIN(s_lastExtendsContext);
    }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curTypeConstraint += text;
+      s_curTypeConstraint += text;
    }
 	YY_BREAK
 case 43:
 /* rule 43 can match eol */
 YY_RULE_SETUP
 {
-      g_curTypeConstraint += ' ';
+      s_curTypeConstraint += ' ';
    }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
 {
-      g_argList.constSpecifier = true;
+      s_argList.constSpecifier = true;
    }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
 {
-      g_argList.volatileSpecifier = true;
+      s_argList.volatileSpecifier = true;
    }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
 {
-      g_argList.refSpecifier = RefType::LValueRef;
+      s_argList.refSpecifier = RefType::LValueRef;
    }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
 {
-      g_argList.refSpecifier = RefType::RValueRef;
+      s_argList.refSpecifier = RefType::RValueRef;
    }
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
 {
-      g_argList.pureSpecifier = true;
+      s_argList.pureSpecifier = true;
       BEGIN(FuncQual);
    }
 	YY_BREAK
@@ -1876,7 +1869,7 @@ case 49:
 YY_RULE_SETUP
 {
       // C++11 trailing return type
-      g_argList.trailingReturnType = " -> ";
+      s_argList.trailingReturnType = " -> ";
       BEGIN(TrailingReturn);
    }
 	YY_BREAK
@@ -1894,7 +1887,7 @@ case 51:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_argList.trailingReturnType += text;
+      s_argList.trailingReturnType += text;
    }
 	YY_BREAK
 case 52:
@@ -1902,7 +1895,7 @@ case 52:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_argList.trailingReturnType += text;
+      s_argList.trailingReturnType += text;
    }
 	YY_BREAK
 case 53:
@@ -1912,40 +1905,40 @@ YY_RULE_SETUP
       // for functions returning a pointer to an array,
       // i.e. ")[]" in "int (*f(int))[4]" with argsString="(int))[4]"
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_extraTypeChars = text;
+      s_extraTypeChars = text;
    }
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDocs += text;
+      s_curArgDocs += text;
    }
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDocs += text;
+      s_curArgDocs += text;
    }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
 {
-      if (g_lastDocChar != 0) {
-         unput(g_lastDocChar);
+      if (s_lastDocChar != 0) {
+         unput(s_lastDocChar);
       }
-      BEGIN(g_lastDocContext);
+      BEGIN(s_lastDocContext);
    }
 	YY_BREAK
 case 57:
 /* rule 57 can match eol */
 YY_RULE_SETUP
 {
-      if (g_lastDocChar != 0) {
-         unput(g_lastDocChar);
+      if (s_lastDocChar != 0) {
+         unput(s_lastDocChar);
       }
-      BEGIN(g_lastDocContext);
+      BEGIN(s_lastDocContext);
    }
 	YY_BREAK
 case 58:
@@ -1953,22 +1946,22 @@ case 58:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDocs += text[0];
+      s_curArgDocs += text[0];
    }
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      g_curArgDocs += text[0];
+      s_curArgDocs += text[0];
    }
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
 {
    // */ (editor syntax fix)
-   g_lastDocContext = YY_START;
-   g_lastDocChar    = 0;
+   s_lastDocContext = YY_START;
+   s_lastDocChar    = 0;
 
    if (default_argsYYtext[1] == '/')  {
       BEGIN( ReadDocLine );
@@ -3006,34 +2999,34 @@ ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList 
 
    printlex(default_argsYY_flex_debug, true, __FILE__, NULL);
 
-   g_copyArgValue = 0;
-   g_curArgDocs.resize(0);
-   g_curArgAttrib.resize(0);
-   g_curArgArray.resize(0);
-   g_curTypeConstraint.resize(0);
-   g_extraTypeChars.resize(0);
+   s_copyArgValue = 0;
+   s_curArgDocs.resize(0);
+   s_curArgAttrib.resize(0);
+   s_curArgArray.resize(0);
+   s_curTypeConstraint.resize(0);
+   s_extraTypeChars.resize(0);
 
-   g_argRoundCount = 0;
-   g_argSharpCount = 0;
-   g_argCurlyCount = 0;
-   g_lastDocChar   = '\0';
-   g_inputString   = argsString;
-   g_inputPosition = 0;
+   s_argRoundCount = 0;
+   s_argSharpCount = 0;
+   s_argCurlyCount = 0;
+   s_lastDocChar   = '\0';
+   s_inputString   = argsString;
+   s_inputPosition = 0;
 
-   g_curArgTypeName.resize(0);
-   g_curArgDefValue.resize(0);
-   g_curArgName.resize(0);
+   s_curArgTypeName.resize(0);
+   s_curArgDefValue.resize(0);
+   s_curArgName.resize(0);
 
-   g_argList = al;
+   s_argList = al;
 
    default_argsYYrestart(default_argsYYin );
    BEGIN( Start );
    default_argsYYlex();
 
-   extraTypeChars = g_extraTypeChars;
+   extraTypeChars = s_extraTypeChars;
 
    printlex(default_argsYY_flex_debug, false, __FILE__, NULL);
 
-   return g_argList;
+   return s_argList;
 }
 

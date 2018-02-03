@@ -29,13 +29,14 @@
 #define YY_NEVER_INTERACTIVE 1
 
 // global
-TokenInfo          *g_token    = 0;
+TokenInfo          *g_token = 0;
 
 // context for tokenizer phase
 static int          s_commentState;
-static int          s_inputPos = 0;
 
+static int          s_inputPosition = 0;
 static QString      s_inputString;
+
 static QString      s_fileName;
 static bool         s_insidePre;
 
@@ -72,7 +73,7 @@ void doctokenizerYYpushContext()
   ctx->rule          = YY_START;
   ctx->autoListLevel = s_autoListLevel;
   ctx->token         = g_token;
-  ctx->inputPos      = s_inputPos;
+  ctx->inputPos      = s_inputPosition;
   ctx->inputString   = s_inputString;
   ctx->state         = YY_CURRENT_BUFFER;
   s_lexerStack.push(ctx);
@@ -89,7 +90,7 @@ bool doctokenizerYYpopContext()
    DocLexerContext *ctx = s_lexerStack.pop();
 
    s_autoListLevel  = ctx->autoListLevel;
-   s_inputPos       = ctx->inputPos;
+   s_inputPosition  = ctx->inputPos;
    s_inputString    = ctx->inputString;
 
    yy_delete_buffer(YY_CURRENT_BUFFER);
@@ -465,29 +466,22 @@ static QString stripEmptyLines(const QString &s)
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (s_inputString[s_inputPos] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = s_inputString.at(s_inputPos);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      s_inputPos++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 
@@ -525,8 +519,9 @@ SPCMD3    {CMD}form#[0-9]+
 SPCMD4    {CMD}"::"
 INOUT      "inout"|"in"|"out"|("in"{BLANK}*","{BLANK}*"out")|("out"{BLANK}*","{BLANK}*"in")
 PARAMIO   {CMD}param{BLANK}*"["{BLANK}*{INOUT}{BLANK}*"]"
+VARARGS   "..."
 TEMPCHAR  [a-z_A-Z0-9.,: \t\*\&\(\)\[\]]
-FUNCCHAR  [a-z_A-Z0-9,:\<\> \t\^\*\&\[\]]
+FUNCCHAR  [a-z_A-Z0-9,:\<\> \t\^\*\&\[\]]|{VARARGS}
 FUNCPART  {FUNCCHAR}*("("{FUNCCHAR}*")"{FUNCCHAR}*)?
 SCOPESEP  "::"|"#"|"."
 TEMPLPART "<"{TEMPCHAR}*">"
@@ -568,10 +563,15 @@ HTMLKEYL  "strong"|"center"|"table"|"caption"|"small"|"code"|"dfn"|"var"|"img"|"
 HTMLKEYU  "STRONG"|"CENTER"|"TABLE"|"CAPTION"|"SMALL"|"CODE"|"DFN"|"VAR"|"IMG"|"PRE"|"SUB"|"SUP"|"TR"|"TD"|"TH"|"OL"|"UL"|"LI"|"TT"|"KBD"|"EM"|"HR"|"DL"|"DT"|"DD"|"BR"|"I"|"A"|"B"|"P"
 
 HTMLKEYW  {HTMLKEYL}|{HTMLKEYU}
-REFWORD2  ("#"|"::")?((({ID}{TEMPLPART}?)|{ANONNS})("."|"#"|"::"|"-"|"/"))*({ID}{TEMPLPART}?(":")?){FUNCARG2}?
-REFWORD3  ({ID}":")*{ID}":"?
-REFWORD4  (({SCOPEPRE}*"operator"{OPMASKOP2})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOP2})){CVSPEC}?
-REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
+
+REFWORD2_PRE   ("#"|"::")?((({ID}{TEMPLPART}?)|{ANONNS})("."|"#"|"::"|"-"|"/"))*({ID}{TEMPLPART}?(":")?)
+REFWORD2       {REFWORD2_PRE}{FUNCARG2}?
+REFWORD2_NOCV  {REFWORD2_PRE}("("{FUNCPART}")")?
+REFWORD3       ({ID}":")*{ID}":"?
+REFWORD4_NOCV  (({SCOPEPRE}*"operator"{OPMASKOP2})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOP2}))
+REFWORD4       {REFWORD4_NOCV}{CVSPEC}?
+REFWORD        {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
+REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 %option noyywrap
 %option yylineno
@@ -1375,19 +1375,29 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_Cite>{BLANK}       {
       // white space
       unput(' ');
-         return 0;
+      return 0;
    }
 
 <St_Cite>\n           {
       // new line
       unput(yytext[0]);
-         return 0;
+      return 0;
    }
 
-<St_Cite>.         {
+<St_Cite>.            {
       // any other character
       unput(yytext[0]);
-         return 0;
+      return 0;
+   }
+
+<St_Ref>{REFWORD_NOCV}/{BLANK}("const")[a-z_A-Z0-9] {
+         g_token->name = QString::fromUtf8(yytext);
+      return TK_WORD;
+   }
+
+<St_Ref>{REFWORD_NOCV}/{BLANK}("volatile")[a-z_A-Z0-9] {
+      g_token->name = QString::fromUtf8(yytext);
+      return TK_WORD;
    }
 
 <St_Ref>{REFWORD}      {
@@ -1399,7 +1409,7 @@ REFWORD   {LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 <St_Ref>{BLANK}        {
       // white space
       unput(' ');
-         return 0;
+      return 0;
    }
 
 <St_Ref>{WS}+"\""{WS}* {
@@ -1820,11 +1830,11 @@ void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition>
 
    printlex(yy_flex_debug, true, __FILE__, fileName);
 
-   s_inputString = input;
-   s_inputPos    = 0;
-   s_definition  = def;
-   s_memberGroup = mg;
-   s_fileName    = fileName;
+   s_inputString   = input;
+   s_inputPosition = 0;
+   s_definition    = def;
+   s_memberGroup   = mg;
+   s_fileName      = fileName;
 
    BEGIN(St_Sections);
    doctokenizerYYlineno = 1;
@@ -1837,7 +1847,7 @@ void doctokenizerYYinit(const QString &input, const QString &fileName)
 {
    s_autoListLevel = 0;
    s_inputString   = input;
-   s_inputPos      = 0;
+   s_inputPosition = 0;
    s_fileName      = fileName;
    s_insidePre     = false;
 

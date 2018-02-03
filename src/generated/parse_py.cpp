@@ -1451,7 +1451,6 @@ char *parse_py_YYtext;
 #include <QFile>
 #include <QFileInfo>
 #include <QHash>
-#include <QRegExp>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1807,29 +1806,22 @@ static void searchFoundClass()
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (s_inputString[s_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = s_inputString.at(s_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      s_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 /* start command character */
@@ -5151,7 +5143,7 @@ void pyFreeParser()
    }
 }
 
-void PythonLanguageParser::parseInput(const QString &fileName, const QString &fileBuf,
+void Python_Parser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    s_thisParser = this;
@@ -5161,12 +5153,12 @@ void PythonLanguageParser::parseInput(const QString &fileName, const QString &fi
    printlex(parse_py_YY_flex_debug, false, __FILE__, fileName);
 }
 
-bool PythonLanguageParser::needsPreprocessing(const QString &)
+bool Python_Parser::needsPreprocessing(const QString &)
 {
   return false;
 }
 
-void PythonLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
+void Python_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
                   const QString &input, SrcLangExt, bool isExampleBlock,
                   const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
@@ -5177,12 +5169,12 @@ void PythonLanguageParser::parseCode(CodeOutputInterface &codeOutIntf, const QSt
                   showLineNumbers, searchCtx, collectXRefs);
 }
 
-void PythonLanguageParser::parsePrototype(const QString &text)
+void Python_Parser::parsePrototype(const QString &text)
 {
    ::parsePrototype(text);
 }
 
-void PythonLanguageParser::resetCodeParserState()
+void Python_Parser::resetCodeParserState()
 {
    ::resetPythonCodeParserState();
 }

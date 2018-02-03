@@ -31,8 +31,6 @@
 #include <tooltip.h>
 #include <util.h>
 
-static const int fixedCommentAfter = 72;
-
 // Toggle for some debugging info
 // #define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)
@@ -60,8 +58,8 @@ int yy_end       = 1;
 class UseEntry
 {
   public:
-   QString module;          // just for debug
-   QStringList onlyNames;   // entries of the ONLY-part
+   QString module;             // just for debug
+   QStringList onlyNames;      // entries of the ONLY-part
 };
 
 class Compare
@@ -72,9 +70,7 @@ class Compare
       }
 };
 
-/**
-  Contains names of used modules and names of local variables.
-*/
+// contains names of used modules and names of local variables
 class Scope
 {
    public:
@@ -84,53 +80,53 @@ class Scope
       std::set<QString, Compare> localVars;      // names of local variables
 };
 
+static const int fixedCommentAfter = 72;
 
 static QString     docBlock;                     // contents of all lines of a documentation bloc
 static QString     currentModule;                // name of the current enclosing module
 static QString     currentClass;                 // name of the current enclosing class
+
 static UseSDict    *useMembers = new UseSDict;   // info about used modules
 static UseEntry    *useEntry = 0;                // current use statement info
-static QList<Scope *> scopeStack;
 
 static QString str = "";                         // contents of fortran string
 
-static CodeOutputInterface *g_code;
+static CodeOutputInterface *s_code;
 
 // TODO: is this still needed? if so, make it work
-static QString     g_parmType;
-static QString     g_parmName;
+static QString     s_parmType;
+static QString     s_parmName;
 
-static QString     g_inputString;                // the code fragment as text
-static int         g_inputPosition;              // read offset during parsing
-static int         g_inputLines;                 // number of line in the code fragment
-static int         g_yyLineNr;                   // current line number
-static bool        g_needsTermination;
+static QString     s_inputString;                // the code fragment as text
+static int         s_inputPosition;              // read offset during parsing
+static int         s_inputLines;                 // number of line in the code fragment
+static int         s_yyLineNr;                   // current line number
+static bool        s_needsTermination;
 
-static bool        g_collectXRefs;
-static bool        g_isFixedForm;
+static bool        s_collectXRefs;
+static bool        s_isFixedForm;
 
-static bool        g_insideBody;                 // inside subprog/program body? => create links
-static QString     g_currentFontClass;
+static bool        s_insideBody;                 // inside subprog/program body? => create links
+static QString     s_currentFontClass;
 
-static bool        g_exampleBlock;
-static QString     g_exampleName;
-static QString     g_exampleFile;
+static bool        s_exampleBlock;
+static QString     s_exampleName;
+static QString     s_exampleFile;
 
-static QSharedPointer<Definition> g_searchCtx;
-static QSharedPointer<FileDef>    g_sourceFileDef;
-static QSharedPointer<Definition> g_currentDefinition;
-static QSharedPointer<MemberDef>  g_currentMemberDef;
-
-static bool        g_includeCodeFragment;
+static bool        s_includeCodeFragment;
 static QChar       stringStartSymbol;            // single or double quote
 
-// count in variable declaration to filter out declared from referenced names
-static int         bracketCount = 0;
+static int         bracketCount = 0;             // count in var declaration to filter out declared from referenced names
+static bool        s_endComment;
 
-static bool        g_endComment;
+static QSharedPointer<Definition> s_searchCtx;
+static QSharedPointer<FileDef>    s_sourceFileDef;
+static QSharedPointer<Definition> s_currentDefinition;
+static QSharedPointer<MemberDef>  s_currentMemberDef;
 
-// simplified way to know if this is fixed form
-// duplicate in parse_fortran.l
+static QList<Scope *>               scopeStack;
+
+// simplified way to know if this is fixed form duplicate in parse_fortran.l
 static bool recognizeFixedForm(const QString &contents, FortranFormat format)
 {
    int column = 0;
@@ -197,18 +193,18 @@ static bool recognizeFixedForm(const QString &contents, FortranFormat format)
 
 static void endFontClass()
 {
-   if (! g_currentFontClass.isEmpty()) {
-      g_code->endFontClass();
-      g_currentFontClass = "";
+   if (! s_currentFontClass.isEmpty()) {
+      s_code->endFontClass();
+      s_currentFontClass = "";
    }
 }
 
 static void startFontClass(const QString &s)
 {
-   if (g_currentFontClass != s)  {
+   if (s_currentFontClass != s)  {
       endFontClass();
-      g_code->startFontClass(s);
-      g_currentFontClass = s;
+      s_code->startFontClass(s);
+      s_currentFontClass = s;
    }
 }
 
@@ -216,11 +212,11 @@ static void setCurrentDoc(const QString &anchor)
 {
    if (Doxy_Globals::searchIndexBase != nullptr) {
 
-      if (g_searchCtx) {
-         Doxy_Globals::searchIndexBase->setCurrentDoc(g_searchCtx, g_searchCtx->anchor(), false);
+      if (s_searchCtx) {
+         Doxy_Globals::searchIndexBase->setCurrentDoc(s_searchCtx, s_searchCtx->anchor(), false);
 
       } else {
-         Doxy_Globals::searchIndexBase->setCurrentDoc(g_sourceFileDef, anchor, true);
+         Doxy_Globals::searchIndexBase->setCurrentDoc(s_sourceFileDef, anchor, true);
       }
    }
 }
@@ -232,51 +228,51 @@ static void addToSearchIndex(const QString &text)
    }
 }
 
-/*! start a new line of code, inserting a line number if g_sourceFileDef
+/* start a new line of code, inserting a line number if s_sourceFileDef
  * is true. If a definition starts at the current line, then the line
  * number is linked to the documentation of that definition.
  */
 static void startCodeLine()
 {
-   if (g_sourceFileDef)   {
+   if (s_sourceFileDef)   {
 
-      QSharedPointer<Definition> d = g_sourceFileDef->getSourceDefinition(g_yyLineNr);
+      QSharedPointer<Definition> d = s_sourceFileDef->getSourceDefinition(s_yyLineNr);
 
-      if (! g_includeCodeFragment && d) {
+      if (! s_includeCodeFragment && d) {
 
-         g_currentDefinition = d;
-         g_currentMemberDef = g_sourceFileDef->getSourceMember(g_yyLineNr);
-         g_insideBody = false;
-         g_endComment = false;
-         g_parmType.resize(0);
-         g_parmName.resize(0);
+         s_currentDefinition = d;
+         s_currentMemberDef  = s_sourceFileDef->getSourceMember(s_yyLineNr);
+         s_insideBody = false;
+         s_endComment = false;
+         s_parmType.resize(0);
+         s_parmName.resize(0);
 
          QString lineAnchor;
-         lineAnchor = QString("l%1").arg(g_yyLineNr, 5, QChar('0'));
+         lineAnchor = QString("l%1").arg(s_yyLineNr, 5, QChar('0'));
 
-         if (g_currentMemberDef) {
+         if (s_currentMemberDef) {
 
-            g_code->writeLineNumber(g_currentMemberDef->getReference(),
-                  g_currentMemberDef->getOutputFileBase(),
-                  g_currentMemberDef->anchor(), g_yyLineNr);
+            s_code->writeLineNumber(s_currentMemberDef->getReference(),
+                  s_currentMemberDef->getOutputFileBase(),
+                  s_currentMemberDef->anchor(), s_yyLineNr);
 
             setCurrentDoc(lineAnchor);
 
          } else if (d->isLinkableInProject()) {
-            g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(),
-                  0, g_yyLineNr);
+            s_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), 0, s_yyLineNr);
 
            setCurrentDoc(lineAnchor);
          }
+
       } else {
-         g_code->writeLineNumber(0,0,0,g_yyLineNr);
+         s_code->writeLineNumber(0, 0, 0, s_yyLineNr);
       }
    }
 
-   g_code->startCodeLine(g_sourceFileDef);
+   s_code->startCodeLine(s_sourceFileDef);
 
-   if (! g_currentFontClass.isEmpty()) {
-      g_code->startFontClass(g_currentFontClass);
+   if (! s_currentFontClass.isEmpty()) {
+      s_code->startFontClass(s_currentFontClass);
    }
 }
 
@@ -286,26 +282,24 @@ static void endFontClass();
 static void endCodeLine()
 {
    endFontClass();
-   g_code->endCodeLine();
+   s_code->endCodeLine();
 }
 
-/*! write a code fragment `text' that may span multiple lines, inserting
- * line numbers for each line.
- */
+// write a code fragment `text' that may span multiple lines, inserting line numbers for each line
 static void codifyLines(const QString &text)
 {
    QString tmp;
-   QString tmp_currentFontClass = g_currentFontClass;
+   QString tmp_currentFontClass = s_currentFontClass;
 
    for (auto c : text) {
 
       if (c == '\n') {
-         g_yyLineNr++;
+         s_yyLineNr++;
 
-         g_code->codify(tmp);
+         s_code->codify(tmp);
          endCodeLine();
 
-         if (g_yyLineNr < g_inputLines) {
+         if (s_yyLineNr < s_inputLines) {
             startCodeLine();
          }
 
@@ -322,11 +316,11 @@ static void codifyLines(const QString &text)
    }
 
    if (! tmp.isEmpty() )  {
-      g_code->codify(tmp);
+      s_code->codify(tmp);
    }
 }
 
-/*! writes a link to a fragment \a text that may span multiple lines, inserting
+/* writes a link to a fragment \a text that may span multiple lines, inserting
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
@@ -351,12 +345,12 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol,
    for (auto c : text) {
 
       if (c == '\n') {
-         g_yyLineNr++;
+         s_yyLineNr++;
 
          ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
          endCodeLine();
 
-         if (g_yyLineNr < g_inputLines) {
+         if (s_yyLineNr < s_inputLines) {
             startCodeLine();
          }
 
@@ -518,14 +512,13 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
 
 /**
  gets the link to a generic procedure which depends not on the name, but on the parameter list
- @todo implementation
+ todo: implementation
 */
 static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
                   const QString &memberText, CodeOutputInterface &ol)
 {
    return false;
 }
-
 
 static bool getLink(UseSDict *usedict, const QString &memberText,
                   CodeOutputInterface &ol, const QString &text)
@@ -550,10 +543,10 @@ static bool getLink(UseSDict *usedict, const QString &memberText,
 
       if (d && d->isLinkable()) {
 
-         if (g_currentDefinition && g_currentMemberDef &&
-                  md != g_currentMemberDef && g_insideBody && g_collectXRefs) {
+         if (s_currentDefinition && s_currentMemberDef &&
+                  md != s_currentMemberDef && s_insideBody && s_collectXRefs) {
 
-            addDocCrossReference(g_currentMemberDef, md);
+            addDocCrossReference(s_currentMemberDef, md);
          }
 
          writeMultiLineCodeLink(ol, md, ! text.isEmpty() ? text : memberText);
@@ -604,16 +597,16 @@ static void generateLink(CodeOutputInterface &ol, const QString &lname)
    }
 }
 
-/*! counts the number of lines in the input */
+// counts the number of lines in the input
 static int countLines()
 {
    int count = 1;
 
-   if (g_inputString.isEmpty() ) {
+   if (s_inputString.isEmpty() ) {
       return count;
    }
 
-   const QChar *p = g_inputString.constData();
+   const QChar *p = s_inputString.constData();
    QChar c;
 
    while ((c = *p) != 0) {
@@ -628,7 +621,7 @@ static int countLines()
       // last line does not end with a \n, so we add an extra
       // line and explicitly terminate the line after parsing
       count++;
-      g_needsTermination = true;
+      s_needsTermination = true;
    }
 
    return count;
@@ -681,29 +674,22 @@ static void addLocalVar(const QString &varName)
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (g_inputString[g_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inputString.at(g_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 %}
@@ -722,7 +708,7 @@ ARGS_L2   "("({ARGS_L0}|[^()]|{ARGS_L1a}|{ARGS_L1})*")"
 ARGS      {BS}({ARGS_L0}|{ARGS_L1}|{ARGS_L2})
 
 NUM_TYPE  (complex|integer|logical|real)
-LOG_OPER  (\.and\.|\.eq\.|\.eqv\.|\.ge\.|\.gt\.|\.le\.|\.lt\.|\.ne\.|\.neqv\.|\.or\.|\.not\.)
+LOs_OPER  (\.and\.|\.eq\.|\.eqv\.|\.ge\.|\.gt\.|\.le\.|\.lt\.|\.ne\.|\.neqv\.|\.or\.|\.not\.)
 KIND      {ARGS}
 CHAR      (CHARACTER{ARGS}?|CHARACTER{BS}"*"({BS}[0-9]+|{ARGS}))
 
@@ -790,7 +776,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 <Start>{FLOW}/{BS}[,( \t\n]               {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_isFixedForm) {
+      if (s_isFixedForm) {
          if ((yy_my_start == 1) && ((text[0] == 'c') || (text[0] == 'C'))) {
             YY_FTN_REJECT;
          }
@@ -853,9 +839,9 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       QString text = QString::fromUtf8(yytext);
       QString tmp = text.toLower();
 
-      g_insideBody = true;
-      generateLink(*g_code, text);
-      g_insideBody = false;
+      s_insideBody = true;
+      generateLink(*s_code, text);
+      s_insideBody = false;
 
       /* append module name to use dict */
       useEntry = new UseEntry();
@@ -895,9 +881,9 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       QString text = QString::fromUtf8(yytext);
 
       useEntry->onlyNames.append(text.toLower());
-      g_insideBody = true;
-      generateLink(*g_code, text);
-      g_insideBody = false;
+      s_insideBody = true;
+      generateLink(*s_code, text);
+      s_insideBody = false;
    }
 
 <Use,UseOnly,Import>"\n"                {
@@ -918,9 +904,9 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 
 <Import>{ID}                            {
       QString text = QString::fromUtf8(yytext);
-      g_insideBody=  true;
-      generateLink(*g_code, text);
-      g_insideBody = false;
+      s_insideBody=  true;
+      generateLink(*s_code, text);
+      s_insideBody = false;
    }
 
  /*-------- fortran module  -----------------------------------------*/
@@ -959,7 +945,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
          currentModule = currentModule.toLower();
       }
 
-      generateLink(*g_code, text);
+      generateLink(*s_code, text);
       yy_pop_state();
    }
 <ClassName>({ACCESS_SPEC}|ABSTRACT|EXTENDS)/[,:( ] {
@@ -967,7 +953,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 
       // variable declaration
       startFontClass("keyword");
-      g_code->codify(text);
+      s_code->codify(text);
       endFontClass();
    }
 
@@ -1017,7 +1003,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       DBG_CTX((stderr, "===> start subprogram %s\n", text));
 
       startScope();
-      generateLink(*g_code, text);
+      generateLink(*s_code, text);
    }
 
 <Subprog>"result"/{BS}"("[^)]*")"       {
@@ -1054,7 +1040,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 
 <Subprogend>{ID}/{BS}(\n|!)             {
       QString text = QString::fromUtf8(yytext);
-      generateLink(*g_code, text);
+      generateLink(*s_code, text);
       yy_pop_state();
    }
 
@@ -1074,14 +1060,14 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       yy_push_state(YY_START);
       BEGIN(Declaration);
       startFontClass("keywordtype");
-      g_code->codify(text);
+      s_code->codify(text);
       endFontClass();
    }
 
 <Start>{ATTR_SPEC}             {
       QString text = QString::fromUtf8(yytext);
       startFontClass("keywordtype");
-      g_code->codify(text);
+      s_code->codify(text);
       endFontClass();
    }
 
@@ -1089,7 +1075,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // variable declaration
       QString text = QString::fromUtf8(yytext);
       startFontClass("keywordtype");
-      g_code->codify(text);
+      s_code->codify(text);
       endFontClass();
     }
 
@@ -1097,12 +1083,12 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // local var
       QString text = QString::fromUtf8(yytext);
 
-      if (g_currentMemberDef && g_currentMemberDef->isFunction() && bracketCount == 0) {
-         g_code->codify(text);
+      if (s_currentMemberDef && s_currentMemberDef->isFunction() && bracketCount == 0) {
+         s_code->codify(text);
          addLocalVar(text);
 
       } else {
-         generateLink(*g_code, text);
+         generateLink(*s_code, text);
       }
    }
 
@@ -1110,13 +1096,13 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // Procedure binding
       QString text = QString::fromUtf8(yytext);
       BEGIN(DeclarationBinding);
-      g_code->codify(text);
+      s_code->codify(text);
    }
 
 <DeclarationBinding>{ID}                       {
       // Type bound procedure link
       QString text = QString::fromUtf8(yytext);
-      generateLink(*g_code, text);
+      generateLink(*s_code, text);
       yy_pop_state();
    }
 
@@ -1124,20 +1110,20 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // start of array specification
       QString text = QString::fromUtf8(yytext);
       bracketCount++;
-      g_code->codify(text);
+      s_code->codify(text);
    }
 
 <Declaration>[)]        {
       // end array specification
       QString text = QString::fromUtf8(yytext);
       bracketCount--;
-      g_code->codify(text);
+      s_code->codify(text);
    }
 
 <Declaration,DeclarationBinding>"&"                        {
       // continuation line
       QString text = QString::fromUtf8(yytext);
-      g_code->codify(text);
+      s_code->codify(text);
       yy_push_state(YY_START);
       BEGIN(DeclContLine);
    }
@@ -1156,8 +1142,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // end declaration line
       QString text = QString::fromUtf8(yytext);
 
-      if (g_endComment) {
-         g_endComment = false;
+      if (s_endComment) {
+         s_endComment = false;
 
       } else {
          codifyLines(text);
@@ -1185,9 +1171,9 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // subroutine call
       QString text = QString::fromUtf8(yytext);
 
-      g_insideBody = true;
-      generateLink(*g_code, text);
-      g_insideBody = false;
+      s_insideBody = true;
+      generateLink(*s_code, text);
+      s_insideBody = false;
       yy_pop_state();
    }
 
@@ -1195,13 +1181,13 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // function call
       QString text = QString::fromUtf8(yytext);
 
-      if (g_isFixedForm && yy_my_start == 6) {
+      if (s_isFixedForm && yy_my_start == 6) {
          // fixed form continuation line
          YY_FTN_REJECT;
       } else {
-         g_insideBody = true;
-         generateLink(*g_code, text);
-         g_insideBody = false;
+         s_insideBody = true;
+         generateLink(*s_code, text);
+         s_insideBody = false;
       }
    }
 
@@ -1258,15 +1244,15 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       static const bool stripCodeComments = Config::getBool("strip-code-comments");
 
       if (stripCodeComments) {
-         g_yyLineNr += docBlock.count('\n');
-         g_yyLineNr += 1;
+         s_yyLineNr += docBlock.count('\n');
+         s_yyLineNr += 1;
          endCodeLine();
 
-         if (g_yyLineNr < g_inputLines) {
+         if (s_yyLineNr < s_inputLines) {
             startCodeLine();
          }
 
-         g_endComment = true;
+         s_endComment = true;
 
       } else {
          // do not remove comment
@@ -1289,7 +1275,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
          YY_FTN_REJECT; // ignore in strings
       }
 
-      if (g_isFixedForm && yy_my_start == 6) {
+      if (s_isFixedForm && yy_my_start == 6) {
          YY_FTN_REJECT;
       }
 
@@ -1302,7 +1288,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // normal comment
       QString text = QString::fromUtf8(yytext);
 
-      if (! g_isFixedForm) {
+      if (! s_isFixedForm) {
          YY_FTN_REJECT;
       }
 
@@ -1330,7 +1316,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 <Start>"#".*\n                          {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_isFixedForm && yy_my_start == 6) {
+      if (s_isFixedForm && yy_my_start == 6) {
          YY_FTN_REJECT;
       }
 
@@ -1345,15 +1331,15 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 <Start>"%"{BS}{ID}         {
       // ignore references to elements
       QString text = QString::fromUtf8(yytext);
-      g_code->codify(text);
+      s_code->codify(text);
    }
 
 <Start>{ID}                             {
       QString text = QString::fromUtf8(yytext);
 
-      g_insideBody = true;
-      generateLink(*g_code, text);
-      g_insideBody = false;
+      s_insideBody = true;
+      generateLink(*s_code, text);
+      s_insideBody = false;
    }
 
  /*------ strings --------------------------------------------------*/
@@ -1406,7 +1392,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       /* if(YY_START == StrIgnore) YY_FTN_REJECT; // ignore in simple comments */
       QString text = QString::fromUtf8(yytext);
 
-      if (g_isFixedForm && yy_my_start == 6) {
+      if (s_isFixedForm && yy_my_start == 6) {
          YY_FTN_REJECT;
       }
 
@@ -1419,8 +1405,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 <*>\n                {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_endComment) {
-         g_endComment = false;
+      if (s_endComment) {
+         s_endComment = false;
       } else {
          codifyLines(text);
       }
@@ -1430,19 +1416,19 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 
 <*>^{BS}"type"{BS}"="          {
       QString text = QString::fromUtf8(yytext);
-      g_code->codify(text);
+      s_code->codify(text);
    }
 
 <*>[\xC0-\xFF][\x80-\xBF]+     {
       // utf-8 code point
       QString text = QString::fromUtf8(yytext);
 
-      if (g_isFixedForm && yy_my_start > fixedCommentAfter) {
+      if (s_isFixedForm && yy_my_start > fixedCommentAfter) {
          startFontClass("comment");
          codifyLines(text);
 
       } else {
-         g_code->codify(text);
+         s_code->codify(text);
       }
    }
 
@@ -1450,19 +1436,19 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // catch all
       QString text = QString::fromUtf8(yytext);
 
-      if (g_isFixedForm && yy_my_start > fixedCommentAfter) {
+      if (s_isFixedForm && yy_my_start > fixedCommentAfter) {
          startFontClass("comment");
          codifyLines(text);
 
       } else {
-         g_code->codify(text);
+         s_code->codify(text);
       }
    }
 
-<*>{LOG_OPER}                           {
+<*>{LOs_OPER}                           {
       // Fortran logical comparison keywords
       QString text = QString::fromUtf8(yytext);
-      g_code->codify(text);
+      s_code->codify(text);
    }
 
 <*><<EOF>>                              {
@@ -1495,70 +1481,70 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
   printlex(yy_flex_debug, true, __FILE__, fd ? csPrintable(fd->fileName()) : "");
 
    TooltipManager::instance()->clearTooltips();
-   g_code = &od;
+   s_code = &od;
 
-   g_inputString      = s;
-   g_inputPosition    = 0;
-   g_isFixedForm      = recognizeFixedForm(s, format);
-   g_currentFontClass = "";
-   g_needsTermination = false;
+   s_inputString      = s;
+   s_inputPosition    = 0;
+   s_isFixedForm      = recognizeFixedForm(s, format);
+   s_currentFontClass = "";
+   s_needsTermination = false;
 
-  g_searchCtx         = searchCtx;
-  g_collectXRefs      = collectXRefs;
+  s_searchCtx         = searchCtx;
+  s_collectXRefs      = collectXRefs;
 
   if (startLine != -1) {
-      g_yyLineNr    = startLine;
+      s_yyLineNr    = startLine;
    } else {
-      g_yyLineNr    = 1;
+      s_yyLineNr    = 1;
    }
 
    if (endLine != -1) {
-      g_inputLines  = endLine + 1;
+      s_inputLines  = endLine + 1;
    } else {
-      g_inputLines  = countLines();
+      s_inputLines  = countLines();
    }
 
-   g_exampleBlock  = exBlock;
-   g_exampleName   = exName;
-   g_sourceFileDef = fd;
+   s_exampleBlock  = exBlock;
+   s_exampleName   = exName;
+   s_sourceFileDef = fd;
 
    if (exBlock && fd == 0) {
       // create a dummy filedef for the example
-      g_sourceFileDef = QMakeShared<FileDef>("", exName);
+      s_sourceFileDef = QMakeShared<FileDef>("", exName);
    }
 
-   if (g_sourceFileDef) {
+   if (s_sourceFileDef) {
       setCurrentDoc("l00001");
    }
 
-   g_currentDefinition = QSharedPointer<Definition>();
-   g_currentMemberDef  = QSharedPointer<MemberDef>();
+   s_currentDefinition = QSharedPointer<Definition>();
+   s_currentMemberDef  = QSharedPointer<MemberDef>();
 
-   if (! g_exampleName.isEmpty()) {
-      g_exampleFile = convertNameToFile_X(g_exampleName + "-example");
+   if (! s_exampleName.isEmpty()) {
+      s_exampleFile = convertNameToFile_X(s_exampleName + "-example");
    }
 
-   g_includeCodeFragment = inlineFragment;
+   s_includeCodeFragment = inlineFragment;
    startCodeLine();
-   g_parmName.resize(0);
-   g_parmType.resize(0);
+   s_parmName.resize(0);
+   s_parmType.resize(0);
 
    yyrestart( yyin );
    BEGIN( Start );
    yylex();
 
-   if (g_needsTermination) {
+   if (s_needsTermination) {
       endFontClass();
-      g_code->endCodeLine();
+      s_code->endCodeLine();
    }
 
    if (fd) {
-      TooltipManager::instance()->writeTooltips(*g_code);
+      TooltipManager::instance()->writeTooltips(*s_code);
    }
 
-   if (exBlock && g_sourceFileDef) {
+   if (exBlock && s_sourceFileDef) {
       // delete the temporary file definition used for this example
-      g_sourceFileDef = QSharedPointer<FileDef>();
+      s_sourceFileDef = QSharedPointer<FileDef>();
    }
 
    printlex(yy_flex_debug, false, __FILE__, fd ? fd->fileName(): NULL);

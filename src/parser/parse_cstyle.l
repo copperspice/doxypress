@@ -682,30 +682,24 @@ void fixArgumentListForJavaScript(ArgumentList &argList)
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (s_inputString[s_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = s_inputString.at(s_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size) {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      s_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
+
 
 %}
 
@@ -3745,7 +3739,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       /* line control directive */
       QString text = QString::fromUtf8(yytext);
 
-      QRegExp intMatch("\\d+");
+      static QRegExp intMatch("\\d+");
       int startPos = intMatch.indexIn(text);
 
       QString tmp = intMatch.cap(0);
@@ -9193,10 +9187,10 @@ SkipC11Attribute>"]]"                 {
       BEGIN( lastCContext ) ;
    }
 
-<SkipComment>[^\*\n]+    {
+<SkipComment>[^\*\n]+         {
    }
 
-"[["      {
+<*>"[["                       {
       // C++11 attribute
       lastC11AttributeContext = YY_START;
       BEGIN( SkipC11Attribute );
@@ -9638,7 +9632,7 @@ static void parsePrototype(const QString &text)
 
 // **
 
-bool CPPLanguageParser::needsPreprocessing(const QString &extension)
+bool CPP_Parser::needsPreprocessing(const QString &extension)
 {
    QString fe = extension.toLower();
    SrcLangExt lang = getLanguageFromFileName(extension);
@@ -9648,7 +9642,7 @@ bool CPPLanguageParser::needsPreprocessing(const QString &extension)
                       fe == ".php4" || fe == ".inc" || fe == ".phtml");
 }
 
-void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileBuffer,
+void CPP_Parser::parseInput(const QString &fileName, const QString &fileBuffer,
                   QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
    if (useClang) {
@@ -9671,7 +9665,7 @@ void CPPLanguageParser::parseInput(const QString &fileName, const QString &fileB
    }
 }
 
-void CPPLanguageParser::parseCode(CodeOutputInterface &outputX, const QString &scopeName, const QString &input,
+void CPP_Parser::parseCode(CodeOutputInterface &outputX, const QString &scopeName, const QString &input,
                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
@@ -9681,13 +9675,13 @@ void CPPLanguageParser::parseCode(CodeOutputInterface &outputX, const QString &s
 }
 
 
-void CPPLanguageParser::parsePrototype(const QString &text)
+void CPP_Parser::parsePrototype(const QString &text)
 {
    ::parsePrototype(text);
 }
 
 
-void CPPLanguageParser::resetCodeParserState()
+void CPP_Parser::resetCodeParserState()
 {
    ::resetCCodeParserState();
 }

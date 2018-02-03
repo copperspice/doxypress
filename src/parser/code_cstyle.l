@@ -8,7 +8,6 @@
 %{
 
 #include <QDir>
-#include <QRegExp>
 
 #include <stdio.h>
 #include <assert.h>
@@ -44,11 +43,11 @@ static QStringList   g_curClassBases;
 static QString       g_parmType;
 static QString       g_parmName;
 
-static QString       g_inputString;     //!< the code fragment as text
-static int	         g_inputPosition;   //!< read offset during parsing
-static int           g_inputLines;      //!< number of line in the code fragment
-static int	         g_yyLineNr;        //!< current line number
-static int	         g_yyColNr;         //!< current column number
+static QString       s_inputString;        // the code fragment as text
+static int	         s_inputPosition;      // read offset during parsing
+static int           g_inputLines;         // number of line in the code fragment
+static int	         g_yyLineNr;           // current line number
+static int	         g_yyColNr;            // current column number
 static bool          g_needsTermination;
 
 static bool          g_exampleBlock;
@@ -102,6 +101,8 @@ static bool          g_insideProtocolList;
 
 static bool          g_lexInit = false;
 static bool          g_collectXRefs;
+
+static int           s_prefix_this = false;
 
 static ClassSDict                  g_codeClassSDict;
 static QSharedPointer<FileDef>     g_sourceFileDef;
@@ -386,11 +387,11 @@ static void startCodeLine()
 
       if (! g_includeCodeFragment && d) {
          g_currentDefinition = d;
-         g_currentMemberDef = g_sourceFileDef->getSourceMember(g_yyLineNr);
+         g_currentMemberDef  = g_sourceFileDef->getSourceMember(g_yyLineNr);
 
-         g_insideBody = false;
+         g_insideBody       = false;
          g_searchingForBody = true;
-         g_realScope = d->name();
+         g_realScope        = d->name();
 
          g_type.resize(0);
          g_name.resize(0);
@@ -871,7 +872,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
    bool isLocal = false;
 
-   if ((lcd = g_theVarContext.findVariable(className)) == 0) {
+   if (! s_prefix_this || (lcd = g_theVarContext.findVariable(className)) == 0) {
       // not a local variable
       QSharedPointer<Definition> d = g_currentDefinition;
 
@@ -911,6 +912,8 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
       isLocal = true;
    }
+
+   s_prefix_this = false;       // discard the "this" prefix for the next calls
 
    if (cd && cd->isLinkable()) {
       // is it a linkable class
@@ -1291,16 +1294,16 @@ exit:
 }
 
 
-/*! counts the number of lines in the input */
+// counts the number of lines in the input
 static int countLines()
 {
   int count = 1;
 
-   if (g_inputString.isEmpty() ) {
+   if (s_inputString.isEmpty() ) {
       return count;
    }
 
-   const QChar *p = g_inputString.constData();
+   const QChar *p = s_inputString.constData();
    QChar c;
 
    while ((c = *p) != 0) {
@@ -1666,29 +1669,22 @@ static QString escapeComment(const QString &s)
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (g_inputString[g_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inputString.at(g_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 %}
@@ -1703,7 +1699,8 @@ SCOPETNAME  (((({ID}{TEMPLIST}?){BN}*)?{SEP}{BN}*)*)((~{BN}*)?{ID})
 SCOPEPREFIX ({ID}{TEMPLIST}?{BN}*{SEP}{BN}*)+
 KEYWORD_OBJC ("@public"|"@private"|"@protected"|"@class"|"@implementation"|"@interface"|"@end"|"@selector"|"@protocol"|"@optional"|"@required"|"@throw"|"@synthesize"|"@property")
 KEYWORD ("asm"|"__assume"|"auto"|"class"|"const"|"delete"|"enum"|"explicit"|"extern"|"false"|"friend"|"gcnew"|"gcroot"|"set"|"get"|"inline"|"internal"|"mutable"|"namespace"|"new"|"nullptr"|"override"|"operator"|"pin_ptr"|"private"|"protected"|"public"|"raise"|"register"|"remove"|"self"|"sizeof"|"static"|"struct"|"__super"|"function"|"template"|"generic"|"this"|"true"|"typedef"|"typeid"|"typename"|"union"|"using"|"virtual"|"volatile"|"abstract"|"final"|"import"|"synchronized"|"transient"|"alignas"|"alignof"|{KEYWORD_OBJC})
-FLOWKW    ("break"|"case"|"catch"|"continue"|"default"|"do"|"else"|"finally"|"for"|"foreach"|"for each"|"goto"|"if"|"return"|"switch"|"throw"|"throws"|"try"|"while"|"@try"|"@catch"|"@finally")
+FLOWKW  ("break"|"catch"|"continue"|"default"|"do"|"else"|"finally"|"return"|"switch"|"throw"|"throws"|"@catch"|"@finally")
+FLOWCONDITION  ("case"|"for"|"foreach"|"for each"|"goto"|"if"|"try"|"while"|"@try")
 TYPEKW    ("bool"|"char"|"double"|"float"|"int"|"long"|"object"|"short"|"signed"|"unsigned"|"void"|"wchar_t"|"size_t"|"boolean"|"id"|"SEL"|"string"|"nullptr")
 CASTKW    ("const_cast"|"dynamic_cast"|"reinterpret_cast"|"static_cast")
 CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^' \\\n]{1,4}"'"))
@@ -2474,7 +2471,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body,FuncCall>"$"?"this"("->"|".")    {
       QString text = QString::fromUtf8(yytext);
-      g_code->codify(text);    // this-> for C++, this. for C#
+      g_code->codify(text);                      // "this->" for C++   "this." for C#
+      s_prefix_this = true;
    }
 
 <Body>{KEYWORD}/([^a-z_A-Z0-9])     {
@@ -2535,6 +2533,29 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN(FuncCall);
    }
 
+<Body>{FLOWCONDITION}/{BN}*"("          {
+      QString text = QString::fromUtf8(yytext);
+
+      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
+         g_currentMemberDef->addFlowKeyWord();
+      }
+
+      startFontClass("keywordflow");
+      codifyLines(text);
+      endFontClass();
+
+      g_name.resize(0);
+      g_type.resize(0);
+
+      if (text == "for each" || text == "foreach") {
+         g_inForEachExpression = true;
+      } else {
+         g_inForEachExpression = false;
+      }
+
+      BEGIN(FuncCall);
+   }
+
 <Body>{FLOWKW}/([^a-z_A-Z0-9])      {
       QString text = QString::fromUtf8(yytext);
       startFontClass("keywordflow");
@@ -2546,8 +2567,37 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
    }
 
+<Body>{FLOWCONDITION}/([^a-z_A-Z0-9]) 	{
+      QString text = QString::fromUtf8(yytext);
+
+      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
+         g_currentMemberDef->addFlowKeyWord();
+      }
+
+      startFontClass("keywordflow");
+      codifyLines(text);
+      endFontClass();
+
+      if (g_inFunctionTryBlock && (text == "catch" || text == "finally")) {
+         g_inFunctionTryBlock = false;
+      }
+   }
+
 <Body>{FLOWKW}/{B}*           {
       QString text = QString::fromUtf8(yytext);
+      startFontClass("keywordflow");
+      codifyLines(text);
+      endFontClass();
+   }
+
+
+<Body>{FLOWCONDITION}/{B}*              {
+      QString text = QString::fromUtf8(yytext);
+
+      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
+         g_currentMemberDef->addFlowKeyWord();
+      }
+
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -3274,6 +3324,20 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <MemberCall2,FuncCall>{FLOWKW}/([^a-z_A-Z0-9]) {
       QString text = QString::fromUtf8(yytext);
+      addParmType();
+      g_parmName = text;
+      startFontClass("keywordflow");
+      g_code->codify(text);
+      endFontClass();
+   }
+
+<MemberCall2,FuncCall>{FLOWCONDITION}/([^a-z_A-Z0-9]) {
+      QString text = QString::fromUtf8(yytext);
+
+      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
+         g_currentMemberDef->addFlowKeyWord();
+      }
+
       addParmType();
       g_parmName = text;
       startFontClass("keywordflow");
@@ -4183,8 +4247,8 @@ void parseCCode(CodeOutputInterface &outputX, const QString &className, const QS
    TooltipManager::instance()->clearTooltips();
 
    g_code               = &outputX;
-   g_inputString        = s;
-   g_inputPosition      = 0;
+   s_inputString        = s;
+   s_inputPosition      = 0;
    g_currentFontClass   = "";
    g_needsTermination   = false;
    g_searchCtx          = searchCtx;

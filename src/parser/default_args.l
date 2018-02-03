@@ -23,26 +23,26 @@
 #define YY_NEVER_INTERACTIVE 1
 
 
-static QString          g_inputString;
-static int              g_inputPosition;
-static ArgumentList     g_argList;
-static QString         *g_copyArgValue;
-static QString          g_curArgTypeName;
-static QString          g_curArgDefValue;
-static QString          g_curArgName;
-static QString          g_curArgDocs;
-static QString          g_curArgAttrib;
-static QString          g_curArgArray;
-static QString          g_curTypeConstraint;
-static QString          g_extraTypeChars;
-static int              g_argRoundCount;
-static int              g_argSharpCount;
-static int              g_argCurlyCount;
-static int              g_readArgContext;
-static int              g_lastDocContext;
-static QChar            g_lastDocChar;
-static int              g_lastExtendsContext;
-static QString          g_delimiter;
+static QString          s_inputString;
+static int              s_inputPosition;
+static ArgumentList     s_argList;
+static QString         *s_copyArgValue;
+static QString          s_curArgTypeName;
+static QString          s_curArgDefValue;
+static QString          s_curArgName;
+static QString          s_curArgDocs;
+static QString          s_curArgAttrib;
+static QString          s_curArgArray;
+static QString          s_curTypeConstraint;
+static QString          s_extraTypeChars;
+static int              s_argRoundCount;
+static int              s_argSharpCount;
+static int              s_argCurlyCount;
+static int              s_readArgContext;
+static int              s_lastDocContext;
+static QChar            s_lastDocChar;
+static int              s_lastExtendsContext;
+static QString          s_delimiter;
 
 // static functions
 static void yyunput(QChar c, char *yy_bp);
@@ -52,29 +52,22 @@ static void yyunput(QChar c, char *yy_bp);
 
 static int yyread(char *buf, int max_size)
 {
-   int c = 0;
+   int len = max_size;
 
-   while (g_inputString[g_inputPosition] != 0) {
+   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
+   QByteArray tmp2 = tmp1.toUtf8();
 
-      QString tmp1    = g_inputString.at(g_inputPosition);
-      QByteArray tmp2 = tmp1.toUtf8();
+   while(len > 0 && tmp2.size() > len) {
+     len = len / 2;
 
-      if (c + tmp2.length() >= max_size)  {
-         // buffer is full
-         break;
-      }
+     tmp1.truncate(len);
+     tmp2 = tmp1.toUtf8();
+   };
 
-      c += tmp2.length();
+   s_inputPosition += len;
+   memcpy(buf, tmp2.constData(), tmp2.size());
 
-      for (auto letters : tmp2) {
-         *buf = letters;
-          buf++;
-      }
-
-      g_inputPosition++;
-   }
-
-   return c;
+   return tmp2.size();
 }
 
 %}
@@ -109,77 +102,77 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <ReadFuncArgType>{B}*         {
-      g_curArgTypeName += " ";
+      s_curArgTypeName += " ";
    }
 
 <ReadFuncArgType>"["[^\]]*"]"       {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_curArgTypeName.trimmed().isEmpty()) {
+      if (s_curArgTypeName.trimmed().isEmpty()) {
          // for M$-ID
-         g_curArgAttrib = text;
+         s_curArgAttrib = text;
 
       } else {
          // array type
 
-         g_curArgArray += text;
+         s_curArgArray += text;
       }
    }
 
 <ReadFuncArgDef>"'"\\[0-7]{1,3}"'"  {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 
 <ReadFuncArgDef>"'"\\."'"     {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 
 <ReadFuncArgDef>"'"."'"          {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 
 <ReadFuncArgDef>{RAWBEGIN}              {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
 
       int i = text.indexOf('"');
 
-      g_delimiter = text.mid(i + 1);
-      g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
+      s_delimiter = text.mid(i + 1);
+      s_delimiter = s_delimiter.left(s_delimiter.length() - 1);
       BEGIN( CopyRawString );
    }
 
 <ReadFuncArgDef>\"         {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text[0];
+      s_curArgDefValue += text[0];
       BEGIN( CopyArgString );
    }
 
 <ReadFuncArgType>"("([^:)]+{B}*"::")*{B}*[&*\^]+{B}*/{ID} {
       // function pointer as argument
       QString text = QString::fromUtf8(yytext);
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
 
-      // g_curArgTypeName = g_curArgTypeName.simplifyWhiteSpace();
+      // s_curArgTypeName = s_curArgTypeName.simplifyWhiteSpace();
       BEGIN( ReadFuncArgPtr );
    }
 
 <ReadFuncArgPtr>{ID}          {
       QString text = QString::fromUtf8(yytext);
-      g_curArgName = text;
+      s_curArgName = text;
    }
 
 <ReadFuncArgPtr>")"{B}*"("       {
       // function pointer
       QString text = QString::fromUtf8(yytext);
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
 
-      g_readArgContext = ReadFuncArgType;
-      g_copyArgValue   = &g_curArgTypeName;
-      g_argRoundCount  = 0;
+      s_readArgContext = ReadFuncArgType;
+      s_copyArgValue   = &s_curArgTypeName;
+      s_argRoundCount  = 0;
       BEGIN( CopyArgRound2 );
    }
 
@@ -187,93 +180,93 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       // pointer to fixed size array
       QString text = QString::fromUtf8(yytext);
 
-      g_curArgTypeName += text;
-      g_curArgTypeName += g_curArgName;
+      s_curArgTypeName += text;
+      s_curArgTypeName += s_curArgName;
       BEGIN( ReadFuncArgType );
    }
 
 <ReadFuncArgPtr>")"        {
       // redundant braces detected, remove them
-      int i   = g_curArgTypeName.lastIndexOf('(');
-      int len = g_curArgTypeName.length();
+      int i   = s_curArgTypeName.lastIndexOf('(');
+      int len = s_curArgTypeName.length();
 
       if (i != -1) {
-         g_curArgTypeName = g_curArgTypeName.left(i) + g_curArgTypeName.right(len - i - 1);
+         s_curArgTypeName = s_curArgTypeName.left(i) + s_curArgTypeName.right(len - i - 1);
       }
 
-      g_curArgTypeName += g_curArgName;
+      s_curArgTypeName += s_curArgName;
       BEGIN( ReadFuncArgType );
    }
 
 <ReadFuncArgType>"<="|">="|"->"|">>"|"<<" {
       // handle operators
       QString text = QString::fromUtf8(yytext);
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
    }
 
 <ReadFuncArgType,ReadFuncArgDef>[({<]  {
       QString text = QString::fromUtf8(yytext);
 
       if (YY_START == ReadFuncArgType) {
-         g_curArgTypeName += text[0];
-         g_copyArgValue    = &g_curArgTypeName;
+         s_curArgTypeName += text[0];
+         s_copyArgValue    = &s_curArgTypeName;
 
       } else {
-         g_curArgDefValue += text[0];
-         g_copyArgValue    = &g_curArgDefValue;
+         s_curArgDefValue += text[0];
+         s_copyArgValue    = &s_curArgDefValue;
       }
 
-      g_readArgContext = YY_START;
+      s_readArgContext = YY_START;
 
       if (text[0] == '(') {
-         g_argRoundCount = 0;
+         s_argRoundCount = 0;
          BEGIN( CopyArgRound );
 
       } else if (text[0] == '{') {
-         g_argCurlyCount = 0;
+         s_argCurlyCount = 0;
          BEGIN( CopyArgCurly );
 
       } else {
          //  text == '<'
 
-         g_argSharpCount = 0;
-         g_argRoundCount = 0;
+         s_argSharpCount = 0;
+         s_argRoundCount = 0;
          BEGIN( CopyArgSharp );
       }
    }
 
 <CopyArgRound,CopyArgRound2>"("     {
       QString text = QString::fromUtf8(yytext);
-      g_argRoundCount++;
-      *g_copyArgValue += text[0];
+      s_argRoundCount++;
+      *s_copyArgValue += text[0];
    }
 
 <CopyArgRound,CopyArgRound2>")"({B}*{ID})* {
       QString text = QString::fromUtf8(yytext);
-      *g_copyArgValue += text;
+      *s_copyArgValue += text;
 
-      if (g_argRoundCount > 0) {
-         g_argRoundCount--;
+      if (s_argRoundCount > 0) {
+         s_argRoundCount--;
 
       } else {
 
          if (YY_START == CopyArgRound2) {
-            *g_copyArgValue += " " + g_curArgName;
+            *s_copyArgValue += " " + s_curArgName;
          }
 
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
       }
    }
 
 <CopyArgRound>")"/{B}*                  {
       QString text = QString::fromUtf8(yytext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
 
-      if (g_argRoundCount > 0) {
-         g_argRoundCount--;
+      if (s_argRoundCount > 0) {
+         s_argRoundCount--;
 
       } else {
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
 
       }
    }
@@ -281,8 +274,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <CopyArgSharp>"<<"                      {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_argRoundCount > 0) {
-         *g_copyArgValue += text;
+      if (s_argRoundCount > 0) {
+         *s_copyArgValue += text;
 
       } else {
          REJECT;
@@ -292,33 +285,33 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <CopyArgSharp>">>)"                     {
       // combined token
       QString text = QString::fromUtf8(yytext);
-      *g_copyArgValue += text;
+      *s_copyArgValue += text;
 
-		if (g_argSharpCount > 0) {
-         g_argSharpCount--;
+		if (s_argSharpCount > 0) {
+         s_argSharpCount--;
 
       } else {
-         BEGIN(g_readArgContext);
+         BEGIN(s_readArgContext);
 
       }
 
-		if (g_argSharpCount > 0) {
-         g_argSharpCount--;
+		if (s_argSharpCount > 0) {
+         s_argSharpCount--;
 
       } else {
-         BEGIN(g_readArgContext);
+         BEGIN(s_readArgContext);
 
       }
 
-      g_argRoundCount--;
+      s_argRoundCount--;
    }
 
 
 <CopyArgSharp>">>"                      {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_argRoundCount > 0) {
-         *g_copyArgValue += text;
+      if (s_argRoundCount > 0) {
+         *s_copyArgValue += text;
 
       } else {
          REJECT;
@@ -327,72 +320,72 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <CopyArgSharp>"<"          {
       QString text = QString::fromUtf8(yytext);
-      g_argSharpCount++;
-      *g_copyArgValue += text[0];
+      s_argSharpCount++;
+      *s_copyArgValue += text[0];
    }
 
 <CopyArgSharp>">"          {
       QString text = QString::fromUtf8(yytext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
 
-      if (g_argSharpCount > 0) {
-         g_argSharpCount--;
+      if (s_argSharpCount > 0) {
+         s_argSharpCount--;
 
       } else  {
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
       }
    }
 
 <CopyArgSharp>"("                       {
       QString text = QString::fromUtf8(yytext);
-      g_argRoundCount++;
-      *g_copyArgValue += text[0];
+      s_argRoundCount++;
+      *s_copyArgValue += text[0];
    }
 
 <CopyArgSharp>")"                       {
       QString text = QString::fromUtf8(yytext);
-      g_argRoundCount--;
-      *g_copyArgValue += text[0];
+      s_argRoundCount--;
+      *s_copyArgValue += text[0];
    }
 
 <CopyArgCurly>"{"          {
       QString text = QString::fromUtf8(yytext);
-      g_argCurlyCount++;
-      *g_copyArgValue += text[0];
+      s_argCurlyCount++;
+      *s_copyArgValue += text[0];
    }
 
 <CopyArgCurly>"}"          {
       QString text = QString::fromUtf8(yytext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
 
-      if (g_argCurlyCount > 0) {
-         g_argCurlyCount--;
+      if (s_argCurlyCount > 0) {
+         s_argCurlyCount--;
 
       } else {
-         BEGIN( g_readArgContext );
+         BEGIN( s_readArgContext );
       }
    }
 
 <CopyArgString>\\.         {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 
 <CopyRawString>{RAWEND}                 {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
 
       QString delimiter = text.mid(1);
       delimiter = delimiter.left(delimiter.length() - 1);
 
-      if (delimiter == g_delimiter) {
+      if (delimiter == s_delimiter) {
          BEGIN( ReadFuncArgDef );
       }
    }
 
 <CopyArgString>\"          {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text[0];
+      s_curArgDefValue += text[0];
       BEGIN( ReadFuncArgDef );
    }
 
@@ -404,8 +397,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
-      g_lastDocContext = YY_START;
-      g_lastDocChar    = text[0];
+      s_lastDocContext = YY_START;
+      s_lastDocChar    = text[0];
 
      if (text.indexOf("//") != -1) {
          BEGIN( ReadDocLine );
@@ -418,59 +411,59 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <ReadFuncArgType,ReadFuncArgDef>[,)>]  {
       QString text = QString::fromUtf8(yytext);
 
-      if (text[0] == ')' && g_curArgTypeName.trimmed().isEmpty()) {
-         g_curArgTypeName += text[0];
+      if (text[0] == ')' && s_curArgTypeName.trimmed().isEmpty()) {
+         s_curArgTypeName += text[0];
          BEGIN(FuncQual);
 
       } else {
 
-         g_curArgTypeName = removeRedundantWhiteSpace(g_curArgTypeName);
-         g_curArgDefValue = g_curArgDefValue.trimmed();
+         s_curArgTypeName = removeRedundantWhiteSpace(s_curArgTypeName);
+         s_curArgDefValue = s_curArgDefValue.trimmed();
 
-         int len = g_curArgTypeName.length();
+         int len = s_curArgTypeName.length();
 
          if (len > 0) {
             int i = len - 1;
 
-            while (i >= 0 && (g_curArgTypeName.at(i).isSpace() || g_curArgTypeName.at(i) == '.')) {
+            while (i >= 0 && (s_curArgTypeName.at(i).isSpace() || s_curArgTypeName.at(i) == '.')) {
                i--;
             }
 
-            while (i >= 0 && (isId(g_curArgTypeName.at(i)) || g_curArgTypeName.at(i) == '$')) {
+            while (i >= 0 && (isId(s_curArgTypeName.at(i)) || s_curArgTypeName.at(i) == '$')) {
                i--;
             }
 
             Argument arg;
 
-            arg.attrib         = g_curArgAttrib;
-            arg.typeConstraint = g_curTypeConstraint.trimmed();
+            arg.attrib         = s_curArgAttrib;
+            arg.typeConstraint = s_curTypeConstraint.trimmed();
             arg.array          = "";
 
-            if (i == len - 1 && g_curArgTypeName.at(i) == ')') {
+            if (i == len - 1 && s_curArgTypeName.at(i) == ')') {
                // function argument
 
-               int bi = g_curArgTypeName.indexOf('(');
+               int bi = s_curArgTypeName.indexOf('(');
                int fi = bi - 1;
 
-               while (fi >= 0 && (isId(g_curArgTypeName.at(fi)) || g_curArgTypeName.at(fi) == ':')) {
+               while (fi >= 0 && (isId(s_curArgTypeName.at(fi)) || s_curArgTypeName.at(fi) == ':')) {
                   fi--;
                }
 
                if (fi >= 0) {
-                  arg.type  = g_curArgTypeName.left(fi + 1);
-                  arg.name  = g_curArgTypeName.mid(fi + 1, bi - fi - 1).trimmed();
-                  arg.array = g_curArgTypeName.right(len - bi);
+                  arg.type  = s_curArgTypeName.left(fi + 1);
+                  arg.name  = s_curArgTypeName.mid(fi + 1, bi - fi - 1).trimmed();
+                  arg.array = s_curArgTypeName.right(len - bi);
 
                } else {
-                  arg.type = g_curArgTypeName;
+                  arg.type = s_curArgTypeName;
 
                }
 
-            } else if (i >= 0 && g_curArgTypeName.at(i) != ':') {
+            } else if (i >= 0 && s_curArgTypeName.at(i) != ':') {
                // type contains a name
 
-               arg.type = removeRedundantWhiteSpace(g_curArgTypeName.left(i + 1)).trimmed();
-               arg.name = g_curArgTypeName.right(len - i - 1).trimmed();
+               arg.type = removeRedundantWhiteSpace(s_curArgTypeName.left(i + 1)).trimmed();
+               arg.name = s_curArgTypeName.right(len - i - 1).trimmed();
 
                // if the argument type is not a complete type, need to correct to avoid seeing a
                // nameless parameter "struct A" as a parameter with type "struct" and name "A".
@@ -495,7 +488,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
             } else {
                // assume only the type was specified, try to determine name later
-               arg.type = removeRedundantWhiteSpace(g_curArgTypeName);
+               arg.type = removeRedundantWhiteSpace(s_curArgTypeName);
 
             }
 
@@ -506,7 +499,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
                arg.type = "";
             }
 
-            arg.array += removeRedundantWhiteSpace(g_curArgArray);
+            arg.array += removeRedundantWhiteSpace(s_curArgArray);
 
             int alen = arg.array.length();
 
@@ -523,18 +516,18 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
             }
 
-            arg.defval = g_curArgDefValue;
-            arg.docs   = g_curArgDocs.trimmed();
+            arg.defval = s_curArgDefValue;
+            arg.docs   = s_curArgDocs.trimmed();
 
-            g_argList.append(arg);
+            s_argList.append(arg);
          }
 
-         g_curArgAttrib.resize(0);
-         g_curArgTypeName.resize(0);
-         g_curArgDefValue.resize(0);
-         g_curArgArray.resize(0);
-         g_curArgDocs.resize(0);
-         g_curTypeConstraint.resize(0);
+         s_curArgAttrib.resize(0);
+         s_curArgTypeName.resize(0);
+         s_curArgDefValue.resize(0);
+         s_curArgArray.resize(0);
+         s_curArgDocs.resize(0);
+         s_curTypeConstraint.resize(0);
 
          if (text[0] == ')') {
             BEGIN(FuncQual);
@@ -547,87 +540,87 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <ReadFuncArgType,ReadFuncArgPtr>"extends" {
-      g_curTypeConstraint.resize(0);
-      g_lastExtendsContext = YY_START;
+      s_curTypeConstraint.resize(0);
+      s_lastExtendsContext = YY_START;
       BEGIN(ReadTypeConstraint);
    }
 
 <ReadFuncArgType,ReadFuncArgPtr>"$"?{ID} {
       QString text = QString::fromUtf8(yytext);
 
-      if (YY_START == ReadFuncArgType && g_curArgArray == "[]") {
+      if (YY_START == ReadFuncArgType && s_curArgArray == "[]") {
          // Java style array
 
-         g_curArgTypeName += " []";
-         g_curArgArray.resize(0);
+         s_curArgTypeName += " []";
+         s_curArgArray.resize(0);
       }
 
-      g_curArgTypeName += text;
+      s_curArgTypeName += text;
    }
 
 <ReadFuncArgType,ReadFuncArgPtr>.   {
       QString text = QString::fromUtf8(yytext);
-      g_curArgTypeName += text[0];
+      s_curArgTypeName += text[0];
    }
 
 <ReadFuncArgDef,CopyArgString>"<="|"->"|">="|">>"|"<<"   {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text;
+      s_curArgDefValue += text;
    }
 
 <ReadFuncArgDef,CopyArgString,CopyRawString>.      {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDefValue += text[0];
+      s_curArgDefValue += text[0];
    }
 
 <CopyArgRound,CopyArgRound2,CopyArgSharp,CopyArgCurly>{ID}  {
       QString text = QString::fromUtf8(yytext);
-      *g_copyArgValue += text;
+      *s_copyArgValue += text;
    }
 
 <CopyArgRound,CopyArgRound2,CopyArgSharp,CopyArgCurly>.  {
       QString text = QString::fromUtf8(yytext);
-      *g_copyArgValue += text[0];
+      *s_copyArgValue += text[0];
    }
 
 <ReadTypeConstraint>[,)>]               {
       unput(*yytext);
-      BEGIN(g_lastExtendsContext);
+      BEGIN(s_lastExtendsContext);
    }
 
 <ReadTypeConstraint>.                   {
       QString text = QString::fromUtf8(yytext);
-      g_curTypeConstraint += text;
+      s_curTypeConstraint += text;
    }
 
 <ReadTypeConstraint>\n                  {
-      g_curTypeConstraint += ' ';
+      s_curTypeConstraint += ' ';
    }
 
 <FuncQual>"const"                {
-      g_argList.constSpecifier = true;
+      s_argList.constSpecifier = true;
    }
 
 <FuncQual>"volatile"             {
-      g_argList.volatileSpecifier = true;
+      s_argList.volatileSpecifier = true;
    }
 
 <FuncQual>"&"                   {
-      g_argList.refSpecifier = RefType::LValueRef;
+      s_argList.refSpecifier = RefType::LValueRef;
    }
 
 <FuncQual>"&&"                  {
-      g_argList.refSpecifier = RefType::RValueRef;
+      s_argList.refSpecifier = RefType::RValueRef;
    }
 
 <FuncQual,TrailingReturn>"="{B}*"0"    {
-      g_argList.pureSpecifier = true;
+      s_argList.pureSpecifier = true;
       BEGIN(FuncQual);
    }
 
 <FuncQual>"->"                          {
       // C++11 trailing return type
-      g_argList.trailingReturnType = " -> ";
+      s_argList.trailingReturnType = " -> ";
       BEGIN(TrailingReturn);
    }
 
@@ -638,59 +631,59 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <TrailingReturn>.                       {
       QString text = QString::fromUtf8(yytext);
-      g_argList.trailingReturnType += text;
+      s_argList.trailingReturnType += text;
    }
 
 <TrailingReturn>\n                      {
       QString text = QString::fromUtf8(yytext);
-      g_argList.trailingReturnType += text;
+      s_argList.trailingReturnType += text;
    }
 
 <FuncQual>")"{B}*"["[^]]*"]"     {
       // for functions returning a pointer to an array,
       // i.e. ")[]" in "int (*f(int))[4]" with argsString="(int))[4]"
       QString text = QString::fromUtf8(yytext);
-      g_extraTypeChars = text;
+      s_extraTypeChars = text;
    }
 
 <ReadDocBlock>[^\*\n]+        {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDocs += text;
+      s_curArgDocs += text;
    }
 
 <ReadDocLine>[^\n]+        {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDocs += text;
+      s_curArgDocs += text;
    }
 
 <ReadDocBlock>"*/"         {
-      if (g_lastDocChar != 0) {
-         unput(g_lastDocChar);
+      if (s_lastDocChar != 0) {
+         unput(s_lastDocChar);
       }
-      BEGIN(g_lastDocContext);
+      BEGIN(s_lastDocContext);
    }
 
 <ReadDocLine>\n            {
-      if (g_lastDocChar != 0) {
-         unput(g_lastDocChar);
+      if (s_lastDocChar != 0) {
+         unput(s_lastDocChar);
       }
-      BEGIN(g_lastDocContext);
+      BEGIN(s_lastDocContext);
    }
 
 <ReadDocBlock>\n        {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDocs += text[0];
+      s_curArgDocs += text[0];
    }
 
 <ReadDocBlock>.            {
       QString text = QString::fromUtf8(yytext);
-      g_curArgDocs += text[0];
+      s_curArgDocs += text[0];
    }
 
 <*>("/*"[*!]|"//"[/!])("<"?)     {
    // */ (editor syntax fix)
-   g_lastDocContext = YY_START;
-   g_lastDocChar    = 0;
+   s_lastDocContext = YY_START;
+   s_lastDocChar    = 0;
 
    if (yytext[1] == '/')  {
       BEGIN( ReadDocLine );
@@ -736,33 +729,33 @@ ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList 
 
    printlex(yy_flex_debug, true, __FILE__, NULL);
 
-   g_copyArgValue = 0;
-   g_curArgDocs.resize(0);
-   g_curArgAttrib.resize(0);
-   g_curArgArray.resize(0);
-   g_curTypeConstraint.resize(0);
-   g_extraTypeChars.resize(0);
+   s_copyArgValue = 0;
+   s_curArgDocs.resize(0);
+   s_curArgAttrib.resize(0);
+   s_curArgArray.resize(0);
+   s_curTypeConstraint.resize(0);
+   s_extraTypeChars.resize(0);
 
-   g_argRoundCount = 0;
-   g_argSharpCount = 0;
-   g_argCurlyCount = 0;
-   g_lastDocChar   = '\0';
-   g_inputString   = argsString;
-   g_inputPosition = 0;
+   s_argRoundCount = 0;
+   s_argSharpCount = 0;
+   s_argCurlyCount = 0;
+   s_lastDocChar   = '\0';
+   s_inputString   = argsString;
+   s_inputPosition = 0;
 
-   g_curArgTypeName.resize(0);
-   g_curArgDefValue.resize(0);
-   g_curArgName.resize(0);
+   s_curArgTypeName.resize(0);
+   s_curArgDefValue.resize(0);
+   s_curArgName.resize(0);
 
-   g_argList = al;
+   s_argList = al;
 
    yyrestart( yyin );
    BEGIN( Start );
    yylex();
 
-   extraTypeChars = g_extraTypeChars;
+   extraTypeChars = s_extraTypeChars;
 
    printlex(yy_flex_debug, false, __FILE__, NULL);
 
-   return g_argList;
+   return s_argList;
 }
