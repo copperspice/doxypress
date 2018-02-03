@@ -268,16 +268,19 @@ QString stripAnonymousNamespaceScope(const QString &s)
 
 void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn)
 {
+   static const bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
+   static const bool rtfHyperLinks = Config::getBool("rtf-hyperlinks");
+
    od.pushGeneratorState();
 
    od.disable(OutputGenerator::Html);
    od.disable(OutputGenerator::Man);
 
-   if (Config::getBool("latex-hyper-pdf")) {
+   if (latexHyperPdf) {
       od.disable(OutputGenerator::Latex);
    }
 
-   if (Config::getBool("rtf-hyperlinks")) {
+   if (rtfHyperLinks) {
       od.disable(OutputGenerator::RTF);
    }
 
@@ -291,12 +294,12 @@ void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn)
 void writeExtraLatexPackages(QTextStream &t_stream)
 {
    // user specified packages
-   const QStringList &extraPackages = Config::getList("latex-extra-packages");
+   static const QStringList extraPackages = Config::getList("latex-extra-packages");
 
    if (! extraPackages.isEmpty()) {
       t_stream << "% Packages requested by user\n";
 
-      for (auto pkgName : extraPackages) {
+      for (const auto &pkgName : extraPackages) {
 
          if (pkgName.startsWith('[') || pkgName.startsWith('{')) {
             t_stream << "\\usepackage" << pkgName << "\n";
@@ -312,11 +315,11 @@ void writeExtraLatexPackages(QTextStream &t_stream)
 static QString stripFromPath(const QString &path, const QStringList &list)
 {
    // look at all the strings in the list and strip the longest match
-   QString retval = path;
+   QString retval  = path;
 
    unsigned int length = 0;
 
-   for (auto prefix : list) {
+   for (const auto &prefix : list) {
 
       if (prefix.length() > length) {
          if (path.startsWith(prefix, Qt::CaseInsensitive)) {
@@ -2036,7 +2039,7 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
    // bool manEnabled   = ol.isEnabled(OutputGenerator::Man);
    // bool htmlEnabled  = ol.isEnabled(OutputGenerator::Html);
 
-   QRegExp marker("@[0-9]+");
+   static QRegExp marker("@[0-9]+");
    int index = 0;
    int newIndex;
    int matchLen;
@@ -2257,9 +2260,9 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
       if (i_equals != -1) {
          QString filterPattern = fs.left(i_equals);
 
-         QRegExp fpat(filterPattern, portable_fileSystemIsCaseSensitive(), QRegExp::Wildcard);
+         QRegExp regexp(filterPattern, portable_fileSystemIsCaseSensitive(), QRegExp::Wildcard);
 
-         if (fpat.indexIn(name) != -1) {
+         if (regexp.indexIn(name) != -1) {
             // found a match
             QString filterName = fs.mid(i_equals + 1);
 
@@ -2278,10 +2281,9 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
    return "";
 }
 
-/*! looks for a filter for the file \a name.  Returns the name of the filter
+/*  looks for a filter for the file \a name.  Returns the name of the filter
  *  if there is a match for the file name, otherwise an empty string.
- *  In case \a inSourceCode is true then first the source filter list is
- *  considered.
+ *  In case \a inSourceCode is true then first the source filter list is considered.
  */
 QString getFileFilter(const QString &name, bool isSourceCode)
 {
@@ -2289,8 +2291,9 @@ QString getFileFilter(const QString &name, bool isSourceCode)
       return "";
    }
 
-   const QStringList filterSrcList = Config::getList("filter-source-patterns");
-   const QStringList filterList    = Config::getList("filter-patterns");
+   static const QStringList filterSrcList = Config::getList("filter-source-patterns");
+   static const QStringList filterList    = Config::getList("filter-patterns");
+   static const QString filterProgram     = Config::getString("filter-program");
 
    QString filterName;
    bool found = false;
@@ -2307,7 +2310,7 @@ QString getFileFilter(const QString &name, bool isSourceCode)
 
    if (! found) {
       // use the generic input filter
-      return Config::getString("filter-program");
+      return filterProgram;
 
    } else {
       // remove surrounding double quotes
@@ -2322,11 +2325,7 @@ QString getFileFilter(const QString &name, bool isSourceCode)
 
 QString transcodeToQString(const QByteArray &input)
 {
-   static QString inputEncoding = Config::getString("input-encoding");
-
-   if (inputEncoding.isEmpty()) {
-      inputEncoding = "UTF-8";
-   }
+   static const QString inputEncoding = Config::getString("input-encoding");
 
    QTextCodec *temp = QTextCodec::codecForName(inputEncoding.toUtf8());
 
@@ -2338,18 +2337,17 @@ QString transcodeToQString(const QByteArray &input)
    return temp->toUnicode(input);
 }
 
-/*! reads a file with name and returns it as a string. If filter
+/*  reads a file with name and returns it as a string. If filter
  *  is true the file will be filtered by the specified input filter.
  *  If name is "-" the string will be read from standard input.
  */
 QString fileToString(const QString &name, bool filter, bool isSourceCode)
 {
    if (name.isEmpty()) {
-      return "";
+      return name;
    }
 
    QFile f;
-
    bool isFileOpened = false;
 
    if (name == "-") {
@@ -3543,8 +3541,8 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
    QString scopeName  = scName;
    QString memberName = mbName;
 
-   scopeName  = substitute(scopeName, "\\", "::");  // for PHP
-   memberName = substitute(memberName, "\\", "::"); // for PHP
+   scopeName  = substitute(scopeName, "\\", "::");     // for PHP
+   memberName = substitute(memberName, "\\", "::");    // for PHP
 
    int is;
    int im = 0;
@@ -4055,7 +4053,7 @@ static bool isLowerCase(const QString &str)
    return true;
 }
 
-/*! Returns an object given its name and context
+/*  Returns an object given its name and context
  *  @post return value true implies *resContext != 0 or *resMember != 0
  */
 bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QSharedPointer<Definition> *resContext,
@@ -4065,7 +4063,7 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
    QString fullName = substitute(tName, "#", "::");
 
    if (fullName.indexOf("anonymous_namespace{") == -1) {
-      fullName = removeRedundantWhiteSpace(substitute(fullName, ".", "::"), false);
+      fullName = removeRedundantWhiteSpace(substituteOne(fullName, '.', "::"), false);
    } else {
       fullName = removeRedundantWhiteSpace(fullName, false);
    }
@@ -4243,12 +4241,12 @@ QString linkToText(SrcLangExt lang, const QString &link, bool isFileName)
    QString result = link;
 
    if (! result.isEmpty()) {
-      // replace # by ::
+      // replace # with ::
       result = substitute(result, "#", "::");
 
-      // replace . by ::
+      // replace . with ::
       if (! isFileName && result.indexOf('<') == -1) {
-         result = substitute(result, ".", "::");
+         result = substituteOne(result, '.', "::");
       }
 
       // strip leading :: prefix if present
@@ -4555,7 +4553,7 @@ QString showFileDefMatches(const FileNameDict &fnDict, const QString &xName)
    return result;
 }
 
-/// substitute all occurrences of \a old in \a str by \a dest
+// substitute all occurrences of oldWord to newWord
 QString substitute(const QString &origString, const QString &oldWord, const QString &newWord)
 {
    QString retval = origString;
@@ -4564,17 +4562,49 @@ QString substitute(const QString &origString, const QString &oldWord, const QStr
    return retval;
 }
 
-/*! Returns the character index within \a name of the first prefix
- *  in Config::getList("ignore-prefix") that matches \a name at the left hand side,
- *  or zero if no match was found
- */
+// substitute all occurrences of oldChar to newWord
+QString substituteOne(const QString &origString, QChar oldChar, const QString &newWord)
+{
+   QString retval;
+   int count = 0;
+
+   for (QChar ch : origString)  {
+
+      if (ch == oldChar)  {
+         ++count;
+
+      } else {
+
+         if (count == 0) {
+            retval.append(ch);
+
+         } else if (count == 1) {
+            count = 0;
+
+            QString tmp = newWord + ch;
+            retval.append(tmp);
+
+         } else {
+            QString tmp = QString(count, oldChar) + ch;
+            retval.append(tmp);
+
+            count = 0;
+         }
+      }
+   }
+
+   return retval;
+}
+
+//  returns the character index within name of the first prefix in "ignore-prefix" which matches
+//  name at the left hand side, or zero if no match was found
 int getPrefixIndex(const QString &name)
 {
+   static const QStringList slist = Config::getList("ignore-prefix");
+
    if (name.isEmpty()) {
       return 0;
    }
-
-   static const QStringList slist = Config::getList("ignore-prefix");
 
    for (auto s : slist) {
 
@@ -5487,20 +5517,21 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
    QString result = name.left(p);
 
    static QRegExp re("[a-z:_A-Z\\x80-\\xFF][a-z:_A-Z0-9\\x80-\\xFF]*");
-   int l, i;
+   int len;
+   int index;
 
    // for each identifier in the template part (e.g. B<T> -> T)
-   while ((i = re.indexIn(name, p)) != -1) {
-      l = re.matchedLength();
+   while ((index = re.indexIn(name, p)) != -1) {
+      len     = re.matchedLength();
+      result += name.mid(p, index - p);
 
-      result     += name.mid(p, i - p);
-      QString n   = name.mid(i, l);
+      QString tmp = name.mid(index, len);
       bool found  = false;
 
-      // check that n is not a formal template argument
+      // check that tmp is not a formal template argument
       for (auto &arg : formalArgList) {
 
-         if (arg.name == n) {
+         if (arg.name == tmp) {
             found = true;
             break;
          }
@@ -5508,19 +5539,19 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
 
       if (! found) {
          // try to resolve the type
-         QSharedPointer<ClassDef> cd = getResolvedClass(context, QSharedPointer<FileDef>(), n);
+         QSharedPointer<ClassDef> cd = getResolvedClass(context, QSharedPointer<FileDef>(), tmp);
 
          if (cd) {
             result += cd->name();
          } else {
-            result += n;
+            result += tmp;
          }
 
       } else {
-         result += n;
+         result += tmp;
       }
 
-      p = i + l;
+      p = index + len;
    }
 
    result += name.right(name.length() - p);
@@ -7775,7 +7806,7 @@ bool classVisibleInIndex(QSharedPointer<ClassDef> cd)
 
 QByteArray extractDirection(QString docs)
 {
-   QRegExp re("\\[[^\\]]+\\]");
+   static QRegExp re("\\[[^\\]]+\\]");
    int len = 0;
 
    if (re.indexIn(docs, 0) == 0) {
@@ -7802,22 +7833,22 @@ QByteArray extractDirection(QString docs)
          }
       }
    }
+
    return QByteArray();
 }
 
-/** Computes for a given list type \a inListType, which are the
- *  the corresponding list type(s) in the base class that are to be
- *  added to this list.
- *
- *  So for public inheritance, the mapping is 1-1, so outListType1=inListType
- *  Private members are to be hidden completely.
- *
- *  For protected inheritance, both protected and public members of the
- *  base class should be joined in the protected member section.
- *
- *  For private inheritance, both protected and public members of the
- *  base class should be joined in the private member section.
- */
+// Computes for a given list type inListType, which are the the corresponding list type(s) in
+// the base class that are to be added to this list.
+//
+// For public inheritance, the mapping is 1-1, so outListType1 = inListType private members
+// are to be hidden completely.
+//
+// For protected inheritance, both protected and public members of the
+// base class should be joined in the protected member section.
+//
+// For private inheritance, both protected and public members of the
+// base class should be joined in the private member section.
+
 void convertProtectionLevel(MemberListType inListType, Protection inProt, int *outListType1, int *outListType2)
 {
    static bool extractPrivate = Config::getBool("extract-private");

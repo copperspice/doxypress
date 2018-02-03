@@ -379,6 +379,8 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                      ol.endDoxyAnchor(md->getOutputFileBase(), md->anchor());
                   }
 
+                  ol.endMemberItem();
+
                   if (! md->briefDescription().isEmpty() && briefMemberDesc) {
 
                      DocRoot *rootNode = validatingParseDoc(md->briefFile(), md->briefLine(),
@@ -402,7 +404,6 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   }
 
                   ol.endMemberDeclaration(md->anchor(), inheritId);
-                  ol.endMemberItem();
                }
 
                md->warnIfUndocumented();

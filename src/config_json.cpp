@@ -334,6 +334,7 @@ void Config::load_Defaults()
    m_cfgList.insert("msc-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("dia-file-dirs",             struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgString.insert("plantuml-jar-path",       struc_CfgString { QString(),      DEFAULT } );
+   m_cfgString.insert("plantuml-cfg-file",       struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("plantuml-inc-path",         struc_CfgList   { QStringList(),  DEFAULT } );
 
    m_cfgInt.insert("dot-graph-max-nodes",        struc_CfgInt    { 50,             DEFAULT } );

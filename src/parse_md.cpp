@@ -2095,7 +2095,6 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
       out += "<hr>\n";
 
    } else if ((level = isAtxHeader(data, size, header, id))) {
-
       QString hTag;
 
       if (level < 5 && ! id.isEmpty()) {
@@ -2164,8 +2163,9 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
       }
 
    } else {
-      // nothing interesting -> just output the line
+      // nothing interesting, just output the line
       out += data.mid(0, size);
+
    }
 }
 

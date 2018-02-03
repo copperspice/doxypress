@@ -930,7 +930,15 @@ void generateDirDocs(OutputList &ol)
    static const bool directoryGraph = Config::getBool("directory-graph");
 
    for (auto dir : Doxy_Globals::directories) {
+      ol.pushGeneratorState();
+
+      if (! dir->hasDocumentation()) {
+         ol.disableAllBut(OutputGenerator::Html);
+       }
+
       dir->writeDocumentation(ol);
+
+      ol.popGeneratorState();
    }
 
    if (directoryGraph) {

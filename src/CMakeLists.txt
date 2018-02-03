@@ -20,6 +20,7 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/classlist.h
    ${CMAKE_CURRENT_SOURCE_DIR}/cmdmapper.h
    ${CMAKE_CURRENT_SOURCE_DIR}/code_cstyle.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/code_xml.h
    ${CMAKE_CURRENT_SOURCE_DIR}/commentcnv.h
    ${CMAKE_CURRENT_SOURCE_DIR}/commentscan.h
    ${CMAKE_CURRENT_SOURCE_DIR}/condparser.h
@@ -88,6 +89,7 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/parse_md.h
    ${CMAKE_CURRENT_SOURCE_DIR}/parse_py.h
    ${CMAKE_CURRENT_SOURCE_DIR}/parse_tcl.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/parse_xml.h
    ${CMAKE_CURRENT_SOURCE_DIR}/perlmodgen.h
    ${CMAKE_CURRENT_SOURCE_DIR}/plantuml.h
    ${CMAKE_CURRENT_SOURCE_DIR}/portable.h
@@ -200,6 +202,7 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_cstyle.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_fortran.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_py.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/generated/code_xml.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/commentcnv.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/commentscan.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/generated/constexp.cpp

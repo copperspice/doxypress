@@ -76,44 +76,18 @@ class Statistics
 
    void begin(const QString &name) {
       msg(name);
-
-      StatData entry(name);
-      statList.append(std::move(entry));
-
-      time.restart();
    }
 
    void end() {
-      statList.last().elapsed = ((double)time.elapsed()) / 1000.00;
    }
 
-   void print() {
-      msg("\n");
-      msg("----------------------\n");
-
-      for (const auto &item : statList) {
-         msg("%.3f seconds %s", item.elapsed, csPrintable(item.name));
-      }
-   }
-
- private:
-   struct StatData {
-      StatData(const QString &n) : name(n), elapsed(0)
-      {}
-
-      QString name;
-      double elapsed;
-   };
-
-   QList<StatData> statList;
-   QTime time;
 };
 
 namespace Doxy_Work{
    void stopDoxyPress(int unused = 0);
 }
 
-/*! \brief This class is for global variables used by DoxyPress
+/*! This class is for global variables used by DoxyPress
  *
  *  All fields in this class are public and static
  */

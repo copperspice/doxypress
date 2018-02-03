@@ -58,12 +58,7 @@
 #include <parse_base.h>
 #include <parse_clang.h>
 #include <parse_cstyle.h>
-#include <parse_file.h>
-#include <parse_fortran.h>
-#include <parse_make.h>
-#include <parse_md.h>
 #include <parse_py.h>
-#include <parse_tcl.h>
 #include <perlmodgen.h>
 #include <portable.h>
 #include <pre.h>
@@ -654,10 +649,8 @@ void processFiles()
    buildTypedefList(root);
    Doxy_Globals::infoLog_Stat.end();
 
-   Doxy_Globals::infoLog_Stat.begin("Searching for members imported via using declarations\n");
-   findUsingDeclImports(root);
-
    // this should be after buildTypedefList in order to properly import used typedefs
+   Doxy_Globals::infoLog_Stat.begin("Searching for members imported via using declarations\n");
    findUsingDeclarations(root);
    Doxy_Globals::infoLog_Stat.end();
 
@@ -721,6 +714,7 @@ void processFiles()
    Doxy_Globals::infoLog_Stat.begin("Searching for member function documentation\n");
    findObjCMethodDefinitions(root);
    findMemberDocumentation(root);       // may introduce new members
+   findUsingDeclImports(root);          // may introduce new members
 
    transferRelatedFunctionDocumentation();
    transferFunctionDocumentation();
@@ -855,30 +849,32 @@ void generateOutput()
       dumpGlossary();
       exit(0);
    }
-
    // move to the output directory
    QString outputDir = Config::getString("output-dir");
    QDir::setCurrent(outputDir);
 
    initSearchIndexer();
 
-   const bool generateHtml     = Config::getBool("generate-html");
-   const bool generateDocbook  = Config::getBool("generate-docbook");
-   const bool generateLatex    = Config::getBool("generate-latex");
-   const bool generatePerl     = Config::getBool("generate-perl");
-   const bool generateMan      = Config::getBool("generate-man");
-   const bool generateRtf      = Config::getBool("generate-rtf");
-   const bool generateXml      = Config::getBool("generate-xml");
+   // add extra languages for which we can only produce syntax highlighted code
+   addCodeOnlyMappings();
 
-   const QString htmlOutput    = Config::getString("html-output");
-   const QString latexOutput   = Config::getString("latex-output");
+   const bool generateHtml        = Config::getBool("generate-html");
+   const bool generateDocbook     = Config::getBool("generate-docbook");
+   const bool generateLatex       = Config::getBool("generate-latex");
+   const bool generatePerl        = Config::getBool("generate-perl");
+   const bool generateMan         = Config::getBool("generate-man");
+   const bool generateRtf         = Config::getBool("generate-rtf");
+   const bool generateXml         = Config::getBool("generate-xml");
+
+   const QString htmlOutput       = Config::getString("html-output");
+   const QString latexOutput      = Config::getString("latex-output");
 
    // only used when HTML is enabled
-   const bool generateHtmlHelp     = Config::getBool("generate-chm");
-   const bool generateEclipseHelp  = Config::getBool("generate-eclipse");
-   const bool generateQhp          = Config::getBool("generate-qthelp");
-   const bool generateTreeView     = Config::getBool("generate-treeview");
-   const bool generateDocSet       = Config::getBool("generate-docset");
+   const bool generateHtmlHelp    = Config::getBool("generate-chm");
+   const bool generateEclipseHelp = Config::getBool("generate-eclipse");
+   const bool generateQhp         = Config::getBool("generate-qthelp");
+   const bool generateTreeView    = Config::getBool("generate-treeview");
+   const bool generateDocSet      = Config::getBool("generate-docset");
 
    if (generateHtml) {
       Doxy_Globals::infoLog_Stat.begin("Enable HTML output\n");
@@ -1212,14 +1208,7 @@ void generateOutput()
    }
 
    msg("Lookup cache used %d/%d \n", Doxy_Globals::lookupCache.count(), Doxy_Globals::lookupCache.size());
-
-   if (Debug::isFlagSet(Debug::Time)) {
-      Doxy_Globals::infoLog_Stat.print();
-
-   } else {
-      msg("Finished\n");
-
-   }
+   msg("Finished\n");
 
    // all done, cleaning up and exit
    shutDownDoxyPress();
@@ -1751,7 +1740,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
       // do need to include a verbatim copy of the header file
 
-      if (! includeFile.isEmpty() && (fd = findFileDef(&Doxy_Globals::inputNameDict, includeFile, ambig)) == 0) {
+      if (! includeFile.isEmpty() && (fd = findFileDef(&Doxy_Globals::inputNameDict, includeFile, ambig)) == nullptr) {
          // explicit request
 
          QString text = QString("the name `%1' supplied as the argument of the \\class, \\struct, \\union, or \\include command ").
@@ -1777,7 +1766,6 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
       // if a file is found, mark it as a source file
       if (fd) {
-
          QString iName = root->getData(EntryKey::Include_Name);
 
          if (iName.isEmpty()) {
@@ -1826,7 +1814,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
    }
 }
 
-/*! returns the Definition object belonging to the first \a level levels of
+/*  returns the Definition object belonging to the first \a level levels of
  *  full qualified name \a name. Creates an artificial scope if the scope is
  *  not found and set the parent/child scope relation if the scope is found.
  */
@@ -1835,19 +1823,19 @@ QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QString 
 {
    int i = 0;
    int p = 0;
-   int l;
+   int len;
 
    QSharedPointer<Definition> prevScope = Doxy_Globals::globalScope;
    QString fullScope;
 
    while (i < level) {
-      int idx = getScopeFragment(name, p, &l);
+      int idx = getScopeFragment(name, p, &len);
 
       if (idx == -1) {
          return prevScope;
       }
 
-      QString nsName = name.mid(idx, l);
+      QString nsName = name.mid(idx, len);
 
       if (nsName.isEmpty()) {
          return prevScope;
@@ -1872,11 +1860,9 @@ QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QString 
          innerScope = cd;
 
       } else if (nd == nullptr && cd == nullptr && ! fullScope.contains('<')) {
-         // scope is not known and could be a namespace
-         // introduce bogus namespace
+         // scope is not known and could be a namespace, introduce bogus namespace
 
          nd = QMakeShared<NamespaceDef>( "[generated]", 1, 1, fullScope, tagInfo.tag_Name, tagInfo.tag_FileName);
-
          nd->setLanguage(lang);
 
          // add namespace to the list
@@ -1899,7 +1885,7 @@ QSharedPointer<Definition> Doxy_Work::buildScopeFromQualifiedName(const QString 
       }
 
       // proceed to the next scope fragment
-      p = idx + l + 2;
+      p = idx + len + 2;
       prevScope = innerScope;
       i++;
    }
@@ -1917,19 +1903,19 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
    }
 
    QString scope = stripTemplateSpecifiersFromScope(n, false);
-   int l1 = 0;
-   int i1 = getScopeFragment(scope, 0, &l1);
+   int len1      = 0;
+   int index1    = getScopeFragment(scope, 0, &len1);
 
-   if (i1 == -1) {
+   if (index1 == -1) {
       return resultScope;
    }
 
-   int p  = i1 + l1;
-   int l2 = 0;
-   int i2;
+   int p    = index1 + len1;
+   int len2 = 0;
+   int index2;
 
-   while ((i2 = getScopeFragment(scope, p, &l2)) != -1) {
-      QString nestedNameSpecifier = scope.mid(i1, l1);
+   while ((index2 = getScopeFragment(scope, p, &len2)) != -1) {
+      QString nestedNameSpecifier = scope.mid(index1, len1);
 
       QSharedPointer<Definition> orgScope = resultScope;
       resultScope = resultScope->findInnerCompound(nestedNameSpecifier);
@@ -1951,23 +1937,25 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
             }
 
             if (resultScope) {
-               // for a nested class A::I in used namespace N, we get
-               // N::A::I while looking for A, so we should compare
-               // resultScope->name() against scope.left(i2+l2)
+               // for a nested class A::I in used namespace N, we get N::A::I while looking for A,
+               // so we should compare resultScope->name() against scope.left(index2 +len2)
 
-               if (rightScopeMatch(resultScope->name(), scope.left(i2 + l2))) {
+               if (rightScopeMatch(resultScope->name(), scope.left(index2 + len2))) {
                   break;
                }
 
-               goto nextFragment;
+               index1 = index2;
+               len1   = len2;
+               p      = index2 + len2;
+
+               continue;
             }
          }
 
-         // also search for used classes. Complication: we haven't been able
-         // to put them in the right scope yet, because we are still resolving
-         // the scope relations!
-         // Therefore loop through all used classes and see if there is a right
-         // scope match between the used class and nestedNameSpecifier.
+         // search for used classes, issue: not been able to put them in the right scope yet,
+         // because we are still resolving the scope relations
+         // therefore loop through all used classes and see if there is a right scope match between the
+         // used class and nestedNameSpecifier.
 
          auto item = Doxy_Globals::g_usingDeclarations.begin();
 
@@ -1980,7 +1968,7 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
                resultScope = buildScopeFromQualifiedName(fqn, fqn.count("::"), startScope->getLanguage(), TagInfo());
 
                if (resultScope) {
-                   return resultScope;
+                  return resultScope;
                }
             }
 
@@ -1990,10 +1978,9 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
          return QSharedPointer<Definition>();
       }
 
-   nextFragment:
-      i1 = i2;
-      l1 = l2;
-      p  = i2 + l2;
+      index1 = index2;
+      len1   = len2;
+      p      = index2 + len2;
    }
 
    return resultScope;
@@ -2506,8 +2493,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
             }
 
             if (ptrEntry->m_tagInfo.isEmpty())  {
-              // if we found the namespace in a tag file and also in a project file,
-              // then remove the tag file reference
+              // if we found the namespace in a tag file and also in a project file, then remove the tag file reference
 
                nd->setReference("");
                nd->setFileName(fullName);
@@ -6101,8 +6087,8 @@ QString Doxy_Work::substituteTemplatesInString(const QVector<ArgumentList> &srcT
       QString dst;
    static QRegExp re( "[A-Za-z_][A-Za-z_0-9]*");
 
-   int index;
    int pos = 0;
+   int index;
    int len;
 
    while ((index = re.indexIn(src, pos)) != -1) {
@@ -10181,6 +10167,7 @@ void searchInputFiles()
 
       if (len > 0) {
          // strip trailing slashes
+
          if (path.at(len - 1) == '\\' || path.at(len - 1) == '/') {
             path = path.left(len - 1);
          }

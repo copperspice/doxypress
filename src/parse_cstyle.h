@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -20,16 +20,16 @@
 
 #include <parse_base.h>
 
-/** \brief C-like language parser using state-based lexical scanning.
- *  
+/** C-like language parser using state-based lexical scanning.
+ *
  *  Language parser for C++ and various languages which are closely related to C++
  *  such as C, C#, Objective-C, Java, PHP, and IDL.
  */
-class CPPLanguageParser : public ParserInterface
+class CPP_Parser : public ParserInterface
 {
  public:
-   virtual ~CPPLanguageParser() {}
-  
+   virtual ~CPP_Parser() {}
+
    void finishTranslationUnit() override {};
 
    void parseInput(const QString &fileName, const QString &fileBuffer, QSharedPointer<Entry> root,
@@ -38,7 +38,7 @@ class CPPLanguageParser : public ParserInterface
    bool needsPreprocessing(const QString &extension) override;
 
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
-                  bool isExampleBlock, const QString &exampleName = QString(), 
+                  bool isExampleBlock, const QString &exampleName = QString(),
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                   int startLine = -1, int endLine = -1, bool inlineFragment = false,
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,

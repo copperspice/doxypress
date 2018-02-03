@@ -4016,7 +4016,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
             case LayoutNavEntry::Classes:
                if (annotatedClasses > 0 && addToIndex) {
-                  Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", "annotated", "");
+                  Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", lne->baseFile(), "");
                   Doxy_Globals::indexList.incContentsDepth();
                   needsClosing = true;
                }

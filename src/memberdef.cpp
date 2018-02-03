@@ -802,6 +802,7 @@ MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &t, const 
 {
    m_impl->init(this, t, a, e, p, v, s, r, mt, tal, al);
 
+   m_flow_count          = 1;
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
    m_isDestructorCached  = 0;
@@ -810,6 +811,7 @@ MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &t, const 
 MemberDef::MemberDef(const MemberDef &md)
    : Definition(md), visited(false), m_impl(new MemberDefImpl(*md.m_impl))
 {
+   m_flow_count          = md.m_flow_count;
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
    m_isDestructorCached  = 0;
@@ -5218,6 +5220,16 @@ void MemberDef::invalidateCachedArgumentTypes()
 {
    invalidateCachedTypesInArgumentList(m_impl->m_defArgList);
    invalidateCachedTypesInArgumentList(m_impl->m_declArgList);
+}
+
+void MemberDef::addFlowKeyWord()
+{
+   m_flow_count++;
+}
+
+int MemberDef::numberOfFlowKeyWords() const
+{
+   return m_flow_count;
 }
 
 QString MemberDef::displayName(bool unused) const

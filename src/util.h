@@ -198,7 +198,9 @@ QString stripFromIncludePath(const QString &path);
 void setAnchors(QSharedPointer<MemberList> ml);
 
 QByteArray substituteClassNames(const QByteArray &s);
-QString substitute(const QString &s, const QString &src, const QString &dst);
+
+QString substitute(const QString &origString, const QString &oldWord, const QString &newWord);
+QString substituteOne(const QString &origString, QChar oldChar, const QString &newWord);
 
 void initClassHierarchy(ClassSDict *cl);
 

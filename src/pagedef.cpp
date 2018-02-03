@@ -155,14 +155,10 @@ void PageDef::writeDocumentation(OutputList &ol)
    manPageName = escapeCharsInString(name(), true, true);
 
    ol.pushGeneratorState();
-   //1.{
 
    if (m_nestingLevel > 0) {
-      //&& // a sub page
-      //(Doxy_Globals::mainPage==0 || getOuterScope()!=Doxy_Globals::mainPage) // and not a subpage of the mainpage
+      // do not generate sub page output for RTF and LaTeX, these are part of their parent page
 
-      // do not generate sub page output for RTF and LaTeX, as these are
-      // part of their parent page
       ol.disableAll();
       ol.enable(OutputGenerator::Man);
       ol.enable(OutputGenerator::Html);
@@ -170,7 +166,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    ol.pushGeneratorState();
 
-   //2.{
+   //
    ol.disableAllBut(OutputGenerator::Man);
    startFile(ol, getOutputFileBase(), manPageName, title(), HLI_Pages, !generateTreeView);
    ol.enableAll();
@@ -178,7 +174,6 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.disable(OutputGenerator::Man);
    startFile(ol, getOutputFileBase(), pageName, title(), HLI_Pages, !generateTreeView);
    ol.popGeneratorState();
-   //2.}
 
    if (! generateTreeView) {
       if (getOuterScope() != Doxy_Globals::globalScope && ! Config::getBool("disable-index")) {
@@ -192,17 +187,22 @@ void PageDef::writeDocumentation(OutputList &ol)
    // save old generator state and write title only to Man generator
    ol.pushGeneratorState();
 
-   //2.{
    ol.disableAllBut(OutputGenerator::Man);
    ol.startTitleHead(manPageName);
    ol.endTitleHead(manPageName, manPageName);
 
    if (si) {
-      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);
-      ol.endSection(si->label, si->type);
+      ol.pushGeneratorState();
+      ol.disableAllBut(OutputGenerator::Man);
+      ol.writeString(" - ");
+      ol.popGeneratorState();
+
+      if (si->title != manPageName) {
+         ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);
+         ol.endSection(si->label, si->type);
+      }
    }
    ol.popGeneratorState();
-   //2.}
 
    // for Latex the section is already generated as a chapter in the index!
    ol.pushGeneratorState();
@@ -222,8 +222,6 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    ol.startContents();
    ol.popGeneratorState();
-   //2.}
-
 
    if (m_showToc && hasSections()) {
       writeToc(ol);
@@ -256,7 +254,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
    ol.startTextBlock();
    QString docStr = documentation() + inbodyDocumentation();
 
-   if (! docStr.isEmpty()) {
+   if (hasBriefDescription() && ! Doxy_Globals::sectionDict.find(name())) {
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Man);
       ol.writeString(" - ");

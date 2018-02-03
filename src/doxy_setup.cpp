@@ -15,6 +15,7 @@
  *
 *************************************************************************/
 
+#include <QDateTime>
 #include <QTextCodec>
 #include <QTextStream>
 
@@ -47,6 +48,7 @@
 #include <parse_md.h>
 #include <parse_py.h>
 #include <parse_tcl.h>
+#include <parse_xml.h>
 #include <perlmodgen.h>
 #include <portable.h>
 #include <pre.h>
@@ -95,15 +97,16 @@ void initDoxyPress()
 
    Doxy_Globals::parserManager.registerDefaultParser(new FileParser);
 
-   Doxy_Globals::parserManager.registerParser("c",            new CPPLanguageParser);
-   Doxy_Globals::parserManager.registerParser("python",       new PythonLanguageParser);
-   Doxy_Globals::parserManager.registerParser("fortran",      new FortranLanguageParser);
-   Doxy_Globals::parserManager.registerParser("fortranfree",  new FortranLanguageParserFree);
-   Doxy_Globals::parserManager.registerParser("fortranfixed", new FortranLanguageParserFixed);
+   Doxy_Globals::parserManager.registerParser("c",            new CPP_Parser);
+   Doxy_Globals::parserManager.registerParser("python",       new Python_Parser);
+   Doxy_Globals::parserManager.registerParser("fortran",      new Fortran_Parser);
+   Doxy_Globals::parserManager.registerParser("fortranfree",  new Fortran_ParserFree);
+   Doxy_Globals::parserManager.registerParser("fortranfixed", new Fortran_ParserFixed);
+   Doxy_Globals::parserManager.registerParser("tcl",          new Tcl_Parser);
+   Doxy_Globals::parserManager.registerParser("xml",          new XML_Parser);
 
-   Doxy_Globals::parserManager.registerParser("tcl",          new TclLanguageParser);
-   Doxy_Globals::parserManager.registerParser("md",           new MarkdownFileParser);
    Doxy_Globals::parserManager.registerParser("make",         new MakeFileParser);
+   Doxy_Globals::parserManager.registerParser("md",           new MarkdownFileParser);
 
    // register additional parsers here
    initDefaultLangMapping();
@@ -503,7 +506,8 @@ static std::map<QString, LangStruct> s_languageTable{
    { "python",       {"python",       SrcLangExt_Python   }},
    { "md",           {"md",           SrcLangExt_Markdown }},
    { "make",         {"make",         SrcLangExt_Make     }},
-   { "tcl",          {"tcl",          SrcLangExt_Tcl      }}
+   { "tcl",          {"tcl",          SrcLangExt_Tcl      }},
+   { "xml",          {"xml",          SrcLangExt_XML      }}
 };
 
 bool updateLanguageMapping(const QString &ext, const QString &language, bool userParser)
@@ -612,6 +616,11 @@ void initDefaultLangMapping()
    updateLanguageMapping(".md",       "md");
    updateLanguageMapping(".markdown", "md");
    updateLanguageMapping(".mk",       "make");
+}
+
+void addCodeOnlyMappings()
+{
+   updateLanguageMapping(".xml",      "xml");
 }
 
 SrcLangExt getLanguageFromFileName(const QString &fileName)

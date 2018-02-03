@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
- * Copyright (C) 1997-2014 by Dimitri van Heesch. 
- * All rights reserved.    
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 1997-2014 by Dimitri van Heesch.
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -23,7 +23,7 @@
 #include <QStringList>
 
 struct CommandLine {
-  
+
    QString dateTimeStr;
 
    QString configName;
@@ -41,8 +41,8 @@ struct CommandLine {
    QString latexHead;
    QString latexFoot;
    QString latexStyle;
-  
-   bool generateLayout = false;   
+
+   bool generateLayout = false;
    bool generateDoxy   = true;
 };
 
@@ -54,7 +54,7 @@ void readConfiguration(struct CommandLine cmdArgs);
 void checkConfiguration();
 void adjustConfiguration();
 
-void searchInputFiles();      
+void searchInputFiles();
 
 void processFiles();
 void generateOutput();
@@ -64,6 +64,7 @@ void shutDownDoxyPress();
 
 void initDefaultLangMapping();
 void initUserLangMapping();
+void addCodeOnlyMappings();
 
 bool openOutputFile(const QString &outFile, QFile &f);
 bool updateLanguageMapping(const QString &extension, const QString &parser, bool userParser = false);

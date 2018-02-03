@@ -2483,7 +2483,7 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
 }
 
 DotGfxHierarchyTable::DotGfxHierarchyTable()
-   : m_curNodeNumber(0)
+   : m_curNodeNumber(1)
 {
    m_rootNodes = new QList<DotNode *>;
    m_usedNodes = new QHash<QString, DotNode *>;

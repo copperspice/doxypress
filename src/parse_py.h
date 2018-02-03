@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -27,15 +27,15 @@
 #include <outputgen.h>
 #include <parse_base.h>
 
-/** \brief Python Parser using state-based lexical scanning.
+/** Python Parser using state-based lexical scanning.
  *
  * This is the Python language parser for doxyPress.
  */
-class PythonLanguageParser : public ParserInterface
+class Python_Parser : public ParserInterface
 {
  public:
-   virtual ~PythonLanguageParser() {}
-   
+   virtual ~Python_Parser() {}
+
    void finishTranslationUnit() override {}
 
    void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
@@ -44,7 +44,7 @@ class PythonLanguageParser : public ParserInterface
    bool needsPreprocessing(const QString &extension) override;
 
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
-                  bool isExampleBlock, const QString &exampleName = QString(), 
+                  bool isExampleBlock, const QString &exampleName = QString(),
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                   int startLine = -1, int endLine = -1, bool inlineFragment = false,
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,

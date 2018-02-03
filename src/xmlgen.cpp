@@ -803,6 +803,19 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "\"";
    }
 
+   if (md->memberType() == MemberType_Enumeration) {
+      t << " strong=\"";
+
+      if (md->isStrong()) {
+         t << "yes";
+
+      } else {
+          t << "no";
+      }
+
+      t << "\"";
+   }
+
    if (md->memberType() == MemberType_Variable) {
 
       t << " mutable=\"";
@@ -959,9 +972,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    t << ">" << endl;
 
    if (md->memberType() != MemberType_Define && md->memberType() != MemberType_Enumeration) {
-      if (md->memberType() != MemberType_Typedef) {
-         writeMemberTemplateLists(md, t);
-      }
+      writeMemberTemplateLists(md, t);
 
       QString typeStr = md->typeString();    // replaceAnonymousScopes(md->typeString());
       stripQualifiers(typeStr);
@@ -1110,17 +1121,19 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "</exceptions>" << endl;
    }
 
-   if (md->memberType() == MemberType_Enumeration) { // enum
+   if (md->memberType() == MemberType_Enumeration) {
+      // enum
       QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
       if (enumFields) {
 
          for (auto emd : *enumFields) {
-            ti << "    <member refid=\"" << memberOutputFileBase(emd)
+
+            ti << "    <member refid=\"" << memberOutputFileBase(md)
                << "_1" << emd->anchor() << "\" kind=\"enumvalue\"><name>"
                << convertToXML(emd->name()) << "</name></member>" << endl;
 
-            t << "        <enumvalue id=\"" << memberOutputFileBase(emd) << "_1"
+            t << "        <enumvalue id=\"" << memberOutputFileBase(md) << "_1"
               << emd->anchor() << "\" prot=\"";
 
             switch (emd->protection()) {
@@ -2032,7 +2045,17 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    }
 
    writeInnerPages(pd->getSubPages(), t);
+
+   if (pd->showToc()) {
+      t << "    <tableofcontents/>" << endl;
+   }
+
+   t << "    <briefdescription>" << endl;
+   writeXMLDocBlock(t,pd->briefFile(), pd->briefLine(),pd, QSharedPointer<MemberDef>(), pd->briefDescription());
+   t << "    </briefdescription>" << endl;
+
    t << "    <detaileddescription>" << endl;
+
    if (isExample) {
       writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(),
                        pd->documentation() + "\n\\include " + pd->name());
@@ -2040,6 +2063,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    } else {
       writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(), pd->documentation());
    }
+
    t << "    </detaileddescription>" << endl;
 
    t << "  </compounddef>" << endl;

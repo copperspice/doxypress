@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -38,7 +38,6 @@ class Debug
                     CommentScan  = 0x00000040,
                     Validate     = 0x00000080,
                     PrintTree    = 0x00000100,
-                    Time         = 0x00000200,
                     ExtCmd       = 0x00000400,
                     Markdown     = 0x00000800,
                     FilterOutput = 0x00001000,
@@ -51,7 +50,7 @@ class Debug
    static bool isFlagSet(DebugMask mask);
    static void printFlags();
    static void setPriority(int p);
-  
+
  private:
    static int labelToEnum(const QString &data);
 

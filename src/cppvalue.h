@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -20,7 +20,7 @@
 
 #include <stdio.h>
 
-/** A class representing a C-preprocessor value. */
+//  class representing a C-preprocessor value
 class CPPValue
 {
  public:
@@ -29,6 +29,7 @@ class CPPValue
    CPPValue(long val = 0) : type(Int) {
       v.l = val;
    }
+
    CPPValue(double val) : type(Float) {
       v.d = val;
    }
@@ -36,6 +37,7 @@ class CPPValue
    operator double () const {
       return type == Int ? (double)v.l : v.d;
    }
+
    operator long ()   const {
       return type == Int ? v.l : (long)v.d;
    }
@@ -47,6 +49,7 @@ class CPPValue
    void print() const {
       if (type == Int) {
          printf("(%ld)\n", v.l);
+
       } else {
          printf("(%f)\n", v.d);
       }
@@ -61,10 +64,10 @@ class CPPValue
    } v;
 };
 
-extern CPPValue parseOctal();
-extern CPPValue parseDecimal();
-extern CPPValue parseHexadecimal();
-extern CPPValue parseCharacter();
-extern CPPValue parseFloat();
+CPPValue parseOctal();
+CPPValue parseDecimal();
+CPPValue parseHexadecimal();
+CPPValue parseCharacter();
+CPPValue parseFloat();
 
 #endif

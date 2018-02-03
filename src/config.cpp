@@ -422,6 +422,13 @@ bool Config::verify()
       iterList.value().value = inputPatterns;
    }
 
+   iterString = m_cfgString.find("input-encoding");
+   QString inputEncoding = iterString.value().value;
+
+   if (inputEncoding.isEmpty()) {
+      inputEncoding = "UTF-8";
+      iterString.value().value = inputEncoding;
+   }
 
    // ** source code
    iterList = m_cfgList.find("suffix-source-navtree");

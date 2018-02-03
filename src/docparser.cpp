@@ -328,9 +328,9 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
       }
 
       if (type == DocImage::Latex && Config::getBool("latex-pdf") && fd->name().right(4) == ".eps") {
-         // we have an .eps image in pdflatex mode => convert it to a pdf.
+         // we have an .eps image in pdflatex mode => convert it to a pdf
 
-         QString outputDir = Config::getString("latex-output");
+         static const QString outputDir = Config::getString("latex-output");
          QString baseName  = fd->name().left(fd->name().length() - 4);
 
          QString epstopdfArgs;

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -20,6 +20,7 @@
 #include <plantuml.h>
 
 #include <config.h>
+#include <doxy_globals.h>
 #include <portable.h>
 #include <message.h>
 
@@ -30,11 +31,11 @@ QString writePlantUMLSource(const QString &outDir, const QString &fileName, cons
    QString baseName;
    static int umlindex = 1;
 
-   if (fileName.isEmpty()) { 
+   if (fileName.isEmpty()) {
       // generate name
       baseName = outDir + "/inline_umlgraph_" + QString::number(umlindex++);
 
-   } else { 
+   } else {
       // user specified name
       baseName = fileName;
 
@@ -64,39 +65,66 @@ QString writePlantUMLSource(const QString &outDir, const QString &fileName, cons
 
 void generatePlantUMLOutput(const QString &baseName, const QString &outDir, PlantUMLOutputFormat format)
 {
-   static QString plantumlJarPath         = Config::getString("plantuml-jar-path"); 
-   static QStringList pumlIncludePathList = Config::getList("plantuml-inc-path");
+   static const QString plantumlJarPath      = Config::getString("plantuml-jar-path");
+   static const QString plantumlCfgFile      = Config::getString("plantuml-cfg-file");
+   static const QStringList plantumlIncPath  = Config::getList("plantuml-inc-path");
+   static const bool haveDot                 = Config::getBool("have-dot");
+   static const QString dotPath              = Config::getString("dot-path");
+   static const bool latexPdf                = Config::getBool("latex-pdf");
 
    QString pumlExe  = "java";
    QString pumlArgs = "";
-   
-   if (! pumlIncludePathList.isEmpty()) {                   
+
+   if (! plantumlIncPath.isEmpty()) {
       pumlArgs += "-Dplantuml.include.path=\"";
-      pumlArgs += pumlIncludePathList.join( QChar(portable_pathListSeparator()) );
-      pumlArgs += "\" ";     
+      pumlArgs += plantumlIncPath.join( QChar(portable_pathListSeparator()) );
+      pumlArgs += "\" ";
    }
-   
+
    pumlArgs += "-Djava.awt.headless=true -jar \"" + plantumlJarPath + "plantuml.jar\" ";
+
+   if (! plantumlCfgFile.isEmpty()) {
+      pumlArgs += "-config \"";
+      pumlArgs += plantumlCfgFile;
+      pumlArgs += "\" ";
+   }
+
+   if (haveDot && ! dotPath.isEmpty())   {
+      pumlArgs += "-graphvizdot \"";
+      pumlArgs += dotPath;
+      pumlArgs += "dot\" ";
+   }
+
    pumlArgs += "-o \"";
    pumlArgs += outDir;
    pumlArgs += "\" ";
 
-   QString extension;
+   // strip path from basename contains path to create the image file
+   // includ in the index.qhp (Qt help index file)
+
+   QString imgName = baseName;
+   int pos;
+
+   if ((pos = imgName.lastIndexOf('/')) !=- 1 )  {
+      // strip path
+      pos     = imgName.length() - pos - 1;
+      imgName = imgName.right(pos);
+   }
 
    switch (format) {
       case PUML_BITMAP:
          pumlArgs += "-tpng";
-         extension = ".png";
+         imgName  += ".png";
          break;
 
       case PUML_EPS:
          pumlArgs += "-teps";
-         extension = ".eps";
+         imgName  += ".eps";
          break;
 
       case PUML_SVG:
          pumlArgs += "-tsvg";
-         extension = ".svg";
+         imgName  += ".svg";
          break;
    }
 
@@ -106,7 +134,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    pumlArgs += "-charset UTF-8 ";
 
    int exitCode;
-   
+
    msg("Running PlantUML on generated file %s.pu\n", csPrintable(baseName));
    portable_sysTimerStart();
 
@@ -120,7 +148,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    }
 
    portable_sysTimerStop();
-   if ( (format == PUML_EPS) && (Config::getBool("latex-pdf")) ) {
+   if ( (format == PUML_EPS) && latexPdf) {
 
       QString epstopdfArgs;
       epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(baseName).arg(baseName);
@@ -133,5 +161,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
 
       portable_sysTimerStop();
    }
+
+   Doxy_Globals::indexList.addImageFile(imgName);
 }
 

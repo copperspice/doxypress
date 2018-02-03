@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -25,63 +25,59 @@
 
 CPPValue parseOctal()
 {
-  long val = 0;
-
+   long retval = 0;
    QString tmp = g_strToken;
 
-   QRegExp reg("[A-Za-z]");    
+   static QRegExp reg("[A-Za-z]");
    tmp.replace(reg, "");
 
-   val = g_strToken.toLong(nullptr, 8); 
- 
-   return CPPValue(val);
+   retval = g_strToken.toLong(nullptr, 8);
+
+   return CPPValue(retval);
 }
 
 CPPValue parseDecimal()
 {
-   long val = 0;
-
+   long retval = 0;
    QString tmp = g_strToken;
 
-   QRegExp reg("[A-Za-z]");    
+   static QRegExp reg("[A-Za-z]");
    tmp.replace(reg, "");
 
-   val = tmp.toLong(nullptr, 10);
+   retval = tmp.toLong(nullptr, 10);
 
-   return CPPValue(val);
+   return CPPValue(retval);
 }
 
 CPPValue parseHexadecimal()
 {
-  long val = 0;
-
+   long retval = 0;
    QString tmp = g_strToken;
 
-   QRegExp reg("[A-Za-z]");    
+   static QRegExp reg("[A-Za-z]");
    tmp.replace(reg, "");
 
-   val = g_strToken.toLong(nullptr, 16);   
+   retval = g_strToken.toLong(nullptr, 16);
 
-   return CPPValue(val);
+   return CPPValue(retval);
 }
 
 CPPValue parseFloat()
 {
-   double val = 0;
+   double retval = 0;
+   QString tmp   = g_strToken;
 
-   QString tmp = g_strToken;
-
-   QRegExp reg("[A-Za-z]");    
+   static QRegExp reg("[A-Za-z]");
    tmp.replace(reg, "");
 
-   val = g_strToken.toDouble();
+   retval = g_strToken.toDouble();
 
-   return CPPValue(val);
+   return CPPValue(retval);
 }
 
 CPPValue parseCharacter()
 {
-   // does not work for '\n' and the alike
+   // does not work for '\n' and the like
 
    if (g_strToken[1] == '\\') {
 

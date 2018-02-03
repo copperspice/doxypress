@@ -202,6 +202,7 @@ doxypress_SOURCES = \
    src/generated/code_cstyle.cpp  \
    src/generated/code_fortran.cpp \
    src/generated/code_py.cpp  \
+   src/generated/code_xml.cpp  \
    src/generated/commentcnv.cpp  \
    src/generated/commentscan.cpp  \
    src/generated/constexp.cpp \
@@ -225,6 +226,7 @@ noinst_HEADERS = \
    src/cmdmapper.h \
    src/code_cstyle.h \
    src/code_cstyle_internal.h \
+   src/code_xml.h \
    src/commentcnv.h \
    src/commentscan.h \
    src/condparser.h \

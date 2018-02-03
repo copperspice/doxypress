@@ -29,6 +29,7 @@
       <xsd:element name="innergroup" type="refType" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="templateparamlist" type="templateparamlistType" minOccurs="0" />
       <xsd:element name="sectiondef" type="sectiondefType" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="tableofcontents" minOccurs="0" maxOccurs="1" />
       <xsd:element name="briefdescription" type="descriptionType" minOccurs="0" />
       <xsd:element name="detaileddescription" type="descriptionType" minOccurs="0" />
       <xsd:element name="inheritancegraph" type="graphType" minOccurs="0" />
@@ -146,6 +147,7 @@
     <xsd:attribute name="id" type="xsd:string" />
     <xsd:attribute name="prot" type="DoxProtectionKind" />
     <xsd:attribute name="static" type="DoxBool" />
+    <xsd:attribute name="strong" type="DoxBool" use="optional"/>
     <xsd:attribute name="const" type="DoxBool" use="optional"/>
     <xsd:attribute name="explicit" type="DoxBool" use="optional"/>
     <xsd:attribute name="inline" type="DoxBool" use="optional"/>
@@ -189,7 +191,7 @@
 
   <xsd:complexType name="descriptionType" mixed="true">
     <xsd:sequence>
-      <xsd:element name="title" type="xsd:string" minOccurs="0"/>	    
+      <xsd:element name="title" type="xsd:string" minOccurs="0"/>
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="sect1" type="docSect1Type" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="internal" type="docInternalType" minOccurs="0" />
@@ -301,7 +303,7 @@
 
   <xsd:complexType name="docSect1Type" mixed="true">
     <xsd:sequence>
-      <xsd:element name="title" type="xsd:string" />	    
+      <xsd:element name="title" type="xsd:string" />
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="sect2" type="docSect2Type" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="internal" type="docInternalS1Type" minOccurs="0" />
@@ -311,7 +313,7 @@
 
   <xsd:complexType name="docSect2Type" mixed="true">
     <xsd:sequence>
-      <xsd:element name="title" type="xsd:string" />	    
+      <xsd:element name="title" type="xsd:string" />
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="sect3" type="docSect3Type" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="internal" type="docInternalS2Type" minOccurs="0" />
@@ -321,7 +323,7 @@
 
   <xsd:complexType name="docSect3Type" mixed="true">
     <xsd:sequence>
-      <xsd:element name="title" type="xsd:string" />	    
+      <xsd:element name="title" type="xsd:string" />
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="sect4" type="docSect4Type" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="internal" type="docInternalS3Type" minOccurs="0" />
@@ -331,7 +333,7 @@
 
   <xsd:complexType name="docSect4Type" mixed="true">
     <xsd:sequence>
-      <xsd:element name="title" type="xsd:string" />	    
+      <xsd:element name="title" type="xsd:string" />
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="internal" type="docInternalS4Type" minOccurs="0" />
     </xsd:sequence>
@@ -371,7 +373,7 @@
       <xsd:element name="para"  type="docParaType"  minOccurs="0" maxOccurs="unbounded" />
     </xsd:sequence>
   </xsd:complexType>
- 
+
   <xsd:group name="docTitleCmdGroup">
     <xsd:choice>
       <xsd:element name="ulink" type="docURLLink" />
@@ -539,20 +541,20 @@
 
   <xsd:complexType name="docImageType" mixed="true">
     <xsd:group ref="docTitleCmdGroup" minOccurs="0" maxOccurs="unbounded" />
-    <xsd:attribute name="type" type="DoxImageKind" /> 
-    <xsd:attribute name="name" type="xsd:string" /> 
-    <xsd:attribute name="width" type="xsd:string" /> 
-    <xsd:attribute name="height" type="xsd:string" /> 
+    <xsd:attribute name="type" type="DoxImageKind" />
+    <xsd:attribute name="name" type="xsd:string" />
+    <xsd:attribute name="width" type="xsd:string" />
+    <xsd:attribute name="height" type="xsd:string" />
   </xsd:complexType>
 
   <xsd:complexType name="docFileType" mixed="true">
     <xsd:group ref="docTitleCmdGroup" minOccurs="0" maxOccurs="unbounded" />
-    <xsd:attribute name="name" type="xsd:string" /> 
+    <xsd:attribute name="name" type="xsd:string" />
   </xsd:complexType>
 
   <xsd:complexType name="docTocItemType" mixed="true">
     <xsd:group ref="docTitleCmdGroup" minOccurs="0" maxOccurs="unbounded" />
-    <xsd:attribute name="id" type="xsd:string" /> 
+    <xsd:attribute name="id" type="xsd:string" />
   </xsd:complexType>
 
   <xsd:complexType name="docTocListType">
@@ -565,14 +567,14 @@
     <xsd:sequence>
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
     </xsd:sequence>
-    <xsd:attribute name="langid" type="xsd:string" /> 
+    <xsd:attribute name="langid" type="xsd:string" />
   </xsd:complexType>
 
   <xsd:complexType name="docParamListType">
     <xsd:sequence>
       <xsd:element name="parameteritem" type="docParamListItem" minOccurs="0" maxOccurs="unbounded" />
     </xsd:sequence>
-    <xsd:attribute name="kind" type="DoxParamListKind" /> 
+    <xsd:attribute name="kind" type="DoxParamListKind" />
   </xsd:complexType>
 
   <xsd:complexType name="docParamListItem">
@@ -607,7 +609,7 @@
       <xsd:element name="xreftitle" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="xrefdescription" type="descriptionType" />
     </xsd:sequence>
-    <xsd:attribute name="id" type="xsd:string" /> 
+    <xsd:attribute name="id" type="xsd:string" />
   </xsd:complexType>
 
   <xsd:complexType name="docCopyType">
@@ -616,7 +618,7 @@
       <xsd:element name="sect1" type="docSect1Type" minOccurs="0" maxOccurs="unbounded" />
       <xsd:element name="internal" type="docInternalType" minOccurs="0" />
     </xsd:sequence>
-    <xsd:attribute name="link" type="xsd:string" /> 
+    <xsd:attribute name="link" type="xsd:string" />
   </xsd:complexType>
 
   <xsd:complexType name="docBlockQuoteType">
