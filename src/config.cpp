@@ -331,8 +331,8 @@ bool Config::verify()
    QStringList aliasList = iterList.value().value;
 
    for (auto alias: aliasList) {
-      QRegExp re1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");               // alias without argument
-      QRegExp re2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*=");   // alias with argument
+      static QRegExp re1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");               // alias without argument
+      static QRegExp re2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*=");   // alias with argument
 
       alias = alias.trimmed();
 
@@ -524,7 +524,8 @@ bool Config::verify()
    QString dotImage = dotImageFormat;
 
    if (dotImage.contains(":"))  {
-      dotImage = dotImage.replace( QRegExp(":.*"), "");
+      static QRegExp regexp(":.*");
+      dotImage = dotImage.replace(regexp , "");
    }
 
    m_cfgEnum.insert("dot-image-extension", struc_CfgEnum{ dotImage, DEFAULT } );

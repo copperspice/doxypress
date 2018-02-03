@@ -359,7 +359,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
    } else {
       result = fileName;
 
-      if (result.left(5) != "http:" && result.left(6) != "https:") {
+      if (! result.startsWith("http:") && ! result.startsWith("https:"))  {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Image file %s was not found in 'IMAGE PATH': "
                         "assuming it is an external image", csPrintable(fileName) );
       }
@@ -1202,7 +1202,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    } else {
       // normal non-linkable word
 
-      if (g_token->name.left(1) == "#" || g_token->name.left(2) == "::") {
+      if (g_token->name.startsWith("#") || g_token->name.startsWith("::")) {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Explicit link request to '%s' could not be resolved",
                   csPrintable(name));
 

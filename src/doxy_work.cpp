@@ -1500,11 +1500,12 @@ void Doxy_Work::addRelatedPage_X(QSharedPointer<Entry> ptrEntry)
    }
 
    QString doc;
+   QString tmpBriefDocs = root->getData(EntryKey::Brief_Docs);
 
-   if (root->getData(EntryKey::Brief_Docs).isEmpty()) {
+   if (tmpBriefDocs.isEmpty()) {
       doc = root->getData(EntryKey::Main_Docs) + root->getData(EntryKey::Inbody_Docs);
    } else {
-      doc = root->getData(EntryKey::Brief_Docs) + "\n\n" + root->getData(EntryKey::Main_Docs) + root->getData(EntryKey::Inbody_Docs);
+      doc = tmpBriefDocs + "\n\n" + root->getData(EntryKey::Main_Docs) + root->getData(EntryKey::Inbody_Docs);
    }
 
    QSharedPointer<PageDef> pd = addRelatedPage(root->m_entryName, root->getData(EntryKey::Member_Args),
@@ -1512,7 +1513,7 @@ void Doxy_Work::addRelatedPage_X(QSharedPointer<Entry> ptrEntry)
                   ptrEntry->m_tagInfo, root->m_srcLang);
 
    if (pd) {
-      pd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+      pd->setBriefDescription(tmpBriefDocs, root->getData(EntryKey::Brief_File), root->briefLine);
       pd->addSectionsToDefinition(root->m_anchors);
       pd->setShowToc(root->stat);
 
@@ -1533,17 +1534,17 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<Entry> ptrEntry, bool addi
          QSharedPointer<GroupDef> gd = Doxy_Globals::groupSDict.find(root->m_entryName);
 
          if (gd) {
-            if (! gd->hasGroupTitle() ) {
-               gd->setGroupTitle(root->getData(EntryKey::Member_Type));
+            QString tmpMemberType = root->getData(EntryKey::Member_Type);
 
-            } else if ( root->getData(EntryKey::Member_Type).length() > 0 &&
-                     root->m_entryName != root->getData(EntryKey::Member_Type) &&
-                     gd->groupTitle() != root->getData(EntryKey::Member_Type) ) {
+            if (! gd->hasGroupTitle() ) {
+               gd->setGroupTitle(tmpMemberType);
+
+            } else if (tmpMemberType.length() > 0 && root->m_entryName != tmpMemberType &&
+                     gd->groupTitle() != tmpMemberType ) {
 
                warn( root->getData(EntryKey::File_Name), root->startLine,
                      "Group %s: ignoring title \"%s\" which does not match old title \"%s\"\n",
-                     csPrintable(root->m_entryName), csPrintable(root->getData(EntryKey::Member_Type)),
-                     csPrintable(gd->groupTitle()) );
+                     csPrintable(root->m_entryName), csPrintable(tmpMemberType), csPrintable(gd->groupTitle()) );
             }
 
             gd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
@@ -1729,10 +1730,10 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
    static const QStringList stripFromIncPath = Config::getList("strip-from-inc-path");
 
-   QString temp1 = root->getData(EntryKey::Main_Docs).trimmed();
-   QString temp2 = root->getData(EntryKey::Brief_Docs).trimmed();
+   QString tmpMainDocs  = root->getData(EntryKey::Main_Docs).trimmed();
+   QString tmpBriefDocs = root->getData(EntryKey::Brief_Docs).trimmed();
 
-   if ( (! temp1.isEmpty() || ! temp2.isEmpty() || extractAll) && root->protection != Private)  {
+   if ( (! tmpMainDocs.isEmpty() || ! tmpBriefDocs.isEmpty() || extractAll) && root->protection != Private)  {
       bool local_inc      = forceLocalInc;
       QString includeFile = root->getData(EntryKey::Include_File);
 
@@ -1753,8 +1754,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
       if (! includeFile.isEmpty() && (fd = findFileDef(&Doxy_Globals::inputNameDict, includeFile, ambig)) == 0) {
          // explicit request
 
-         QString text;
-         text = QString("the name `%1' supplied as the argument of the \\class, \\struct, \\union, or \\include command ").
+         QString text = QString("the name `%1' supplied as the argument of the \\class, \\struct, \\union, or \\include command ").
                         arg( QString(includeFile) );
 
          if (ambig) {
@@ -6098,8 +6098,8 @@ QString Doxy_Work::substituteTemplatesInString(const QVector<ArgumentList> &srcT
 {
    // can be used to match template specializations
 
-   QString dst;
-   QRegExp re( "[A-Za-z_][A-Za-z_0-9]*");
+      QString dst;
+   static QRegExp re( "[A-Za-z_][A-Za-z_0-9]*");
 
    int index;
    int pos = 0;

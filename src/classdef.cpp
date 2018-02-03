@@ -1005,8 +1005,11 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ol.startParagraph();
 
       QString inheritLine = theTranslator->trInheritsList(m_parents->count());
-      QRegExp marker("@[0-9]+");
-      int index = 0, newIndex, matchLen;
+      static QRegExp marker("@[0-9]+");
+
+      int index = 0;
+      int newIndex;
+      int matchLen;
 
       // now replace all markers in inheritLine with links to the classes
       while ((newIndex = marker.indexIn(inheritLine, index)) != -1) {
@@ -1045,7 +1048,8 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
    if (m_inheritedBy && m_inheritedBy->count() > 0) {
       ol.startParagraph();
       QString inheritLine = theTranslator->trInheritedByList(m_inheritedBy->count());
-      QRegExp marker("@[0-9]+");
+
+      static QRegExp marker("@[0-9]+");
 
       int index = 0;
       int newIndex;

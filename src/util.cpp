@@ -1565,11 +1565,20 @@ static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
 QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
 {
-   if (str.isEmpty()) {
-      return str;
+   static bool cliSupport = Config::getBool("cpp-cli-support");
+
+   bool allLetters = true;
+
+   for (auto ch : str) {
+      if (! (ch > 'A' && ch < 'Z') && ! (ch > 'a' && ch < 'z'))   {
+         allLetters = false;
+         break;
+      }
    }
 
-   static bool cliSupport = Config::getBool("cpp-cli-support");
+   if (allLetters) {
+      return str;
+   }
 
    QString retval;
    QChar c;
@@ -1765,7 +1774,7 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
    }
 
    // handle "= delete", "= default", "= 0"
-   QRegExp regExp { "\\s*=\\s*(default|delete|0)\\s*$" };
+   static QRegExp regExp { "\\s*=\\s*(default|delete|0)\\s*$" };
    retval.replace(regExp, " = \\1");
 
    return retval;

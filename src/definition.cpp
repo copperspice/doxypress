@@ -1043,8 +1043,10 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 
       QString ldefLine = theTranslator->trWriteList(members.count());
 
-      QRegExp marker("@[0-9]+");
-      int index = 0, newIndex, matchLen;
+      static QRegExp marker("@[0-9]+");
+      int index = 0;
+      int newIndex;
+      int matchLen;
 
       auto iter = members.begin();
 
@@ -1052,7 +1054,6 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
       while ((newIndex = marker.indexIn(ldefLine, index)) != -1) {
 
          matchLen = marker.matchedLength();
-
          ol.parseText(ldefLine.mid(index, newIndex - index));
 
          QSharedPointer<MemberDef> md = iter.value();
@@ -1581,13 +1582,13 @@ QString abbreviate(const QString &brief, const QString &name)
       prefix.replace("$name", className);
       prefix += " ";
 
-
       if (result.startsWith(prefix)) {
          result = result.mid(prefix.length());
 
       } else if (prefix.contains("<")) {
          // brief has no <T> where as className does
-         prefix.replace(QRegExp("<.*>"), "");
+         static QRegExp regexp("<.*>");
+         prefix.replace(regexp, "");
 
          if (result.startsWith(prefix)) {
             result = result.mid(prefix.length());
