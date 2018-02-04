@@ -19,42 +19,34 @@
 <context>
     <name>doxy-text</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="50"/>
         <source>Related Functions</source>
         <translation>Funzioni correlate</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="55"/>
         <source>These are not member functions</source>
         <translation>Queste non sono funzioni membro</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="60"/>
         <source>Detailed Description</source>
         <translation>Descrizione Dettagliata</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="65"/>
         <source>Member Typedef Documentation</source>
         <translation>Gli Typedef Documentazione</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="70"/>
         <source>Member Enumeration Documentation</source>
         <translation>Gli Enumeration Documentazione</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="75"/>
         <source>Member Function Documentation</source>
         <translation>Documentazione delle funzioni membro</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="81"/>
         <source>Field Documentation</source>
         <translation>Campo Documentazione</translation>
     </message>
     <message>
-        <location filename="../../src/translator_cs.h" line="83"/>
         <source>Member Data Documentation</source>
         <translation>Documentazione membro dati</translation>
     </message>
@@ -1868,9 +1860,8 @@ Le frecce hanno il seguente significato:
 <context>
     <name>latexSupport</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="45"/>
         <source>remove-value</source>
-        <translation>remove-value</translation>
+        <translation>\usepackage[italian]{babel}</translation>
     </message>
 </context>
 </TS>

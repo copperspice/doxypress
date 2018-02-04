@@ -1506,7 +1506,7 @@ template parameters van de instantie. &lt;/li&gt;
     <name>latexSupport</name>
     <message>
         <source>remove-value</source>
-        <translation></translation>
+        <translation>\usepackage[dutch]{babel}</translation>
     </message>
 </context>
 </TS>

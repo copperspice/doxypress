@@ -1504,7 +1504,7 @@ Die Pfeile haben folgende Bedeutung:
     <name>latexSupport</name>
     <message>
         <source>remove-value</source>
-        <translation>remove-Wert</translation>
+        <translation>\usepackage[ngerman]{babel}</translation>
     </message>
 </context>
 </TS>

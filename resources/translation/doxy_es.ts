@@ -1867,7 +1867,6 @@ Las flechas tienen el siguiente significado:
 <context>
     <name>latexSupport</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="45"/>
         <source>remove-value</source>
         <translation>\\usepackage[spanish]{babel}</translation>
     </message>

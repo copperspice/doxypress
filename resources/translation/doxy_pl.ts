@@ -1777,9 +1777,8 @@ The arrows have the following meaning:
 <context>
     <name>latexSupport</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="45"/>
         <source>remove-value</source>
-        <translation type="unfinished"></translation>
+        <translation>\usepackage[polski]{babel}  \usepackage[T1]{fontenc}</translation>
     </message>
 </context>
 </TS>

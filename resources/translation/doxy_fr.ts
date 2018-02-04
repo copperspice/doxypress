@@ -1868,9 +1868,9 @@ Les flèches ont la signification suivante:
 <context>
     <name>latexSupport</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="45"/>
         <source>remove-value</source>
-        <translation>retirez-valeur</translation>
+        <translation>\usepackage[french]{babel}  \NoAutoSpaceBeforeFDP
+        </translation>
     </message>
 </context>
 </TS>

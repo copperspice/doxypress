@@ -1742,9 +1742,8 @@ The arrows have the following meaning:
 <context>
     <name>latexSupport</name>
     <message>
-        <location filename="../../src/translator_cs.h" line="45"/>
         <source>remove-value</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 </TS>
