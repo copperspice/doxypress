@@ -2301,10 +2301,13 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
    QString baseName = fileName;
    int i;
 
-   if ((i = baseName.lastIndexOf('/')) != -1) { // strip path
+   if ((i = baseName.lastIndexOf('/')) != -1) {
+      // strip path
       baseName = baseName.right(baseName.length() - i - 1);
    }
-   if ((i = baseName.lastIndexOf('.')) != -1) { // strip extension
+
+   if ((i = baseName.lastIndexOf('.')) != -1) {
+      // strip extension
       baseName = baseName.left(i);
    }
 

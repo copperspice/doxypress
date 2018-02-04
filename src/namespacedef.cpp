@@ -525,12 +525,13 @@ void NamespaceDef::addNamespaceAttributes(OutputList &ol)
 
 void NamespaceDef::writeDocumentation(OutputList &ol)
 {
-   QSharedPointer<NamespaceDef> self = sharedFrom(this);
    static const bool generateTreeView    = Config::getBool("generate-treeview");
    static const bool separateMemberPages = Config::getBool("separate-member-pages");
 
    // static bool outputJava = Config::getBool("optimize-java");
    // static bool fortranOpt = Config::_getBool("optimize-fortran");
+
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
    QString pageTitle = title();
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_NamespaceVisible, !generateTreeView);
@@ -539,11 +540,13 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
       if (getOuterScope() != Doxy_Globals::globalScope) {
          writeNavigationPath(ol);
       }
+
       ol.endQuickIndices();
    }
 
    startTitle(ol, getOutputFileBase(), self);
    ol.parseText(pageTitle);
+
    addGroupListToTitle(ol, self);
    addNamespaceAttributes(ol);
    endTitle(ol, getOutputFileBase(), displayName());
@@ -594,6 +597,8 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
             break;
 
          case LayoutDocEntry::MemberDecl: {
+            // functions & subroutines in fortran
+
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
             writeMemberDeclarations(ol, lmd->type, lmd->title(lang));
          }
@@ -612,6 +617,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::MemberDefStart:
             startMemberDocumentation(ol);
             break;
+
          case LayoutDocEntry::NamespaceInlineClasses:
             writeInlineClasses(ol);
             break;
@@ -987,6 +993,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
          ol.endMemberDeclaration(0, 0);
       }
    }
+
    ol.endMemberList();
 }
 
@@ -1077,7 +1084,7 @@ bool NamespaceDef::isLinkableInProject() const
       i = 0;
    } else {
       i += 2;
-   } 
+   }
 
    if (extractAnonNameSpace && name().mid(i, 20) == "anonymous_namespace{") {
       return true;
@@ -1156,6 +1163,5 @@ QString NamespaceDef::compoundTypeString() const
       } else {
          err("Internal inconsistency: namespace in IDL not module, library or constant group\n");
       }
-   }
-   return "";
+   }   return "";
 }

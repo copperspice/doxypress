@@ -144,7 +144,7 @@ void CiteDict::generatePage() const
    static const QStringList citeDataList = Config::getList("cite-bib-files");
    static const bool generateLatex       = Config::getBool("generate-latex");
    static const QString latexOutput      = Config::getString("latex-output");
- 
+
    // generate file with markers and citations to outputDir
    QFile f;
 
@@ -285,7 +285,7 @@ void CiteDict::generatePage() const
 
    // 8. for latex copy the bib files to the output and let latex do this work
    if (generateLatex) {
-      QString latexOutputDir = latexOutput + "/";
+      QString latexOutputDir = outputDir + QDir::separator() + latexOutput + QDir::separator();
       int i = 0;
 
       for (auto bibFile : citeDataList)  {
@@ -296,6 +296,7 @@ void CiteDict::generatePage() const
          }
 
          QFileInfo fi(bibFile);
+
          if (fi.exists()) {
             if (! bibFile.isEmpty()) {
                // suffix added to accomodate files with the same name

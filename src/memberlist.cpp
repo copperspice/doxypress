@@ -552,7 +552,6 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
             bool hasHeader = ! mg.header().isEmpty() && mg.header() != "[NOHEADER]";
 
             if (inheritId.isEmpty()) {
-
                ol.startMemberGroupHeader(hasHeader);
 
                if (hasHeader) {
@@ -579,7 +578,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
    }
 
    if (inheritedFrom && cd) {
-      // also add members that of this list type, that are grouped together
+      // also add members of this list type, that are grouped together
       // in a separate list in class 'inheritedFrom'
       cd->addGroupedInheritedMembers(ol, m_listType, inheritedFrom, inheritId);
    }

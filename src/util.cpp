@@ -7450,9 +7450,7 @@ QString replaceColorMarkers(const QString &str)
    return result;
 }
 
-/** Copies the contents of file with name \a src to the newly created
- *  file with name \a dest. Returns true if successful.
- */
+// copys the contents of src to the newly created file dest
 bool copyFile(const QString &src, const QString &dest)
 {
    QFile sf(src);
@@ -7483,9 +7481,8 @@ bool copyFile(const QString &src, const QString &dest)
    return true;
 }
 
-/** Returns the section of text, in between a pair of markers.
- *  Full lines are returned, excluding the lines on which the markers appear.
- */
+// returns the section of text, in between a pair of markers
+// full lines are returned, excluding the lines on which the markers appear
 QString extractBlock(const QString &text, const QString &marker)
 {
    QString result;
