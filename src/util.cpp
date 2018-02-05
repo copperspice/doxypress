@@ -1584,7 +1584,10 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
    }
 
    QString retval;
+
    QChar c;
+   QChar prevC;
+   QChar nextC;
 
    uint len = str.length();
    uint csp = 0;
@@ -1593,8 +1596,18 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
    for (uint i = 0; i < len; i++) {
       c = str.at(i);
 
+
+      // optimize
+      if (i > 0) {
+         prevC = str.at(i - 1);
+      }
+
+      if (i + 1 < len) {
+         nextC = str.at(i + 1);
+      }
+
       // search for "const"
-      if (csp < 6 && c == constScope[csp] && (csp > 0 || i == 0 || ! isId(str.at(i - 1))) ) {
+      if (csp < 6 && c == constScope[csp] && (csp > 0 || i == 0 || ! isId(prevC)) ) {
          // character matches substring "const", if it is the first character, the previous may not be a digit
          csp++;
 
@@ -1604,7 +1617,7 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
       }
 
       // search for "virtual"
-      if (vsp < 8 && c == virtualScope[vsp] && (vsp > 0 || i == 0 || ! isId(str.at(i - 1))) ) {
+      if (vsp < 8 && c == virtualScope[vsp] && (vsp > 0 || i == 0 || ! isId(prevC)) ) {
          // character matches substring "virtual", it is the first character, the previous may not be a digit
          vsp++;
 
@@ -1647,34 +1660,31 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
          }
 
       // current char is <
-      } else if (i < len - 2 && c == '<' &&
-                 (isId(str.at(i + 1)) || str.at(i + 1).isSpace()) && (i < 8 || ! findOperator(str, i)) ) {
+      } else if (i < len - 2 && c == '<' && (isId(nextC) || nextC.isSpace()) && (i < 8 || ! findOperator(str, i)) ) {
 
          // string in front is not "operator"
          retval += '<';
          retval += ' ';
 
       // current char is >
-      } else if (i > 0 && c == '>' &&
-                 (isId(str.at(i - 1)) || str.at(i - 1).isSpace() || str.at(i - 1) == '*'
-                      || str.at(i - 1) == '&' || str.at(i-1)=='.') && (i < 8 || ! findOperator(str, i)) ) {
+      } else if (c == '>' && (isId(prevC) || prevC.isSpace() || prevC == '*' || prevC == '&' || prevC == '.') &&
+                  (i < 8 || ! findOperator(str, i)) ) {
 
          // prev char is an id char or space
          retval += ' ';
          retval += '>';
 
       // current char is comma
-      } else if (i > 0 && c == ',' && ! str.at(i - 1).isSpace() &&
-                  ((i < len - 1 && (isId(str.at(i + 1)) || str.at(i + 1) == '['))
-                     || (i < len - 2 && str.at(i + 1) == '$' && isId(str.at(i + 2)))
-                     || (i < len - 3 && str.at(i + 1) == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))))) {
+      } else if (c == ',' && ! prevC.isSpace() && ((isId(nextC) || nextC == '[')  ||
+                  (i < len - 2 && nextC == '$' && isId(str.at(i + 2))) ||
+                  (i < len - 3 && nextC == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))))) {
 
          // for PHP
          retval += ',';
          retval += ' ';
 
-      } else if (i > 0 && ( (str.at(i - 1) == ')' && isId(c)) || (c == '\'' && str.at(i -1) == ' ')  ||
-                  (i > 1 && str.at(i - 2) == ' ' && str.at(i - 1) == ' ') )) {
+      } else if ((prevC == ')' && isId(c)) || (c == '\'' && prevC == ' ')  ||
+                  (i > 1 && str.at(i - 2) == ' ' && prevC == ' ') ) {
 
          retval += ' ';
          retval += c;
@@ -1684,15 +1694,13 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
             retval += ' ';
          }
 
-      } else if (c == 't' && csp == 5  && i < len -1  && ! (isId(str.at(i + 1)) ||
-                   str.at(i + 1) == ')' || str.at(i + 1) == ',' ) )  {
-
+      } else if (c == 't' && csp == 5  && ! (isId(nextC) || nextC == ')' || nextC == ',' ) )  {
          // prevent const ::A from being converted to const::A
 
          retval += 't';
          retval += ' ';
 
-         if (str.at(i + 1) == ' ') {
+         if (nextC == ' ') {
             i++;
          }
 
@@ -1705,13 +1713,13 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
          retval += ':';
          csp = 0;
 
-      } else if (c == 'l' && vsp == 7 && i < len -1 && ! (isId(str.at(i + 1)) || str.at(i + 1) == ')' || str.at(i + 1) == ',')  ) {
+      } else if (c == 'l' && vsp == 7 && ! (isId(nextC) || nextC == ')' || nextC == ',')  ) {
          // prevent virtual ::A from being converted to virtual::A
 
          retval += 'l';
          retval += ' ';
 
-         if (str.at(i + 1) == ' ') {
+         if (nextC == ' ') {
             i++;
          }
 
@@ -1726,18 +1734,16 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
          vsp = 0;
 
       } else if (! c.isSpace() ||
-                 ( i > 0 && i < len - 1 &&
-                   (isId(str.at(i - 1)) || str.at(i - 1) == ')' || str.at(i - 1) == ',' || str.at(i - 1) == '>' || str.at(i - 1) == ']') &&
-                   (isId(str.at(i + 1)) ||
-                    (i < len - 2 && str.at(i + 1) == '$' && isId(str.at(i + 2))) ||
-                    (i < len - 3 && str.at(i + 1) == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))) ))) {
+                  (i > 0 && i < len - 1 && (isId(prevC) || prevC == ')' || prevC == ',' || prevC == '>' || prevC == ']') &&
+                  (isId(nextC) || (i < len - 2 && nextC == '$' && isId(str.at(i + 2))) ||
+                  (i < len - 3 && nextC == '&' && str.at(i + 2) == '$' && isId(str.at(i + 3))) ))) {
 
          if (c == '\t') {
             c = ' ';
          }
 
          // fix spacing "int(*var"
-         if (c == '(' && ( (i > 1 && isId(str.at(i-1))) || (i > 2 && str.at(i-1) == ' ' && isId(str.at(i-2)) ) ) )   {
+         if (c == '(' && (isId(prevC) || (i > 2 && prevC == ' ' && isId(str.at(i - 2)) ) ) )   {
 
             if (makePretty) {
                retval += ' ';
@@ -1753,7 +1759,7 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
                // avoid splitting operator* and operator->* and operator&
                retval += ' ';
 
-            } else if (c == '&' && i > 0 && (str.at(i-1) == ' ' || str.at(i-1) == ')') ) {
+            } else if (c == '&' && i > 0 && (prevC == ' ' || prevC == ')') ) {
                retval += ' ';
 
             }
@@ -1761,7 +1767,7 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
          } else if (c == '-') {
             uint rl = retval.length();
 
-            if (rl > 0 && retval.at(rl - 1) == ')' && i < len - 1 && str.at(i + 1) == '>') {
+            if (rl > 0 && retval.at(rl - 1) == ')' && nextC == '>') {
                // trailing return type ')->' => ') ->'
                retval += ' ';
             }
@@ -1769,7 +1775,7 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
 
          retval += c;
 
-         if (cliSupport && (c == '^' || c == '%') && i > 1 && isId(str.at(i - 1)) && ! findOperator(str, i) ) {
+         if (cliSupport && (c == '^' || c == '%') && isId(prevC) && ! findOperator(str, i) ) {
             // C++ or CLI: Type^ name and Type% name
             retval += ' ';
          }

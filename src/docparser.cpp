@@ -2813,10 +2813,12 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
                      break;
                }
                break;
+
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
+
             case TK_HTMLTAG:
                if (g_token->name != "see" || !isXmlLink) {
                   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected xml/html command %s found",

@@ -264,7 +264,7 @@ void XmlDocVisitor::visit(DocVerbatim *s)
 
    switch (s->type()) {
       case DocVerbatim::Code:
-         m_t << "<programlisting>";
+         m_t << "<programlisting language=\"" << lang << "\">";
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                    langExt, s->isExample(), s->exampleFile());
 

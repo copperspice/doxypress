@@ -860,10 +860,10 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
    }
 
    if (g_insidePHP) {
-      className = substitute(className, "\\", "::"); // for PHP namespaces
+      className = substitute(className, "\\", "::");   // for PHP namespaces
 
    } else if (g_insideCS || g_insideJava) {
-      className = substitute(className, ".", "::"); // for PHP namespaces
+      className = substitute(className, ".", "::");    // for PHP namespaces
    }
 
    QSharedPointer<ClassDef> cd;
@@ -1438,7 +1438,8 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                   }
                }
 
-            } else if (nc == 'o') { // reference to potential object name
+            } else if (nc == 'o') {
+               // reference to potential object name
                nc = *p++;
                QString refIdStr;
 
@@ -1612,7 +1613,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             } else {
                // illegal marker
-               assert(! "invalid escape sequence");
+               assert(! "Invalid escape sequence");
 
             }
          }
@@ -1698,8 +1699,8 @@ TEMPLIST    "<"[^\"\}\{\(\)\/\n\>]*">"
 SCOPETNAME  (((({ID}{TEMPLIST}?){BN}*)?{SEP}{BN}*)*)((~{BN}*)?{ID})
 SCOPEPREFIX ({ID}{TEMPLIST}?{BN}*{SEP}{BN}*)+
 KEYWORD_OBJC ("@public"|"@private"|"@protected"|"@class"|"@implementation"|"@interface"|"@end"|"@selector"|"@protocol"|"@optional"|"@required"|"@throw"|"@synthesize"|"@property")
-KEYWORD ("asm"|"__assume"|"auto"|"class"|"const"|"delete"|"enum"|"explicit"|"extern"|"false"|"friend"|"gcnew"|"gcroot"|"set"|"get"|"inline"|"internal"|"mutable"|"namespace"|"new"|"nullptr"|"override"|"operator"|"pin_ptr"|"private"|"protected"|"public"|"raise"|"register"|"remove"|"self"|"sizeof"|"static"|"struct"|"__super"|"function"|"template"|"generic"|"this"|"true"|"typedef"|"typeid"|"typename"|"union"|"using"|"virtual"|"volatile"|"abstract"|"final"|"import"|"synchronized"|"transient"|"alignas"|"alignof"|{KEYWORD_OBJC})
-FLOWKW  ("break"|"catch"|"continue"|"default"|"do"|"else"|"finally"|"return"|"switch"|"throw"|"throws"|"@catch"|"@finally")
+KEYWORD ("asm"|"__assume"|"auto"|"class"|"const"|"constexpr"|"delete"|"enum"|"explicit"|"extern"|"false"|"friend"|"gcnew"|"gcroot"|"set"|"get"|"inline"|"internal"|"mutable"|"namespace"|"new"|"nullptr"|"override"|"operator"|"pin_ptr"|"private"|"protected"|"public"|"raise"|"register"|"remove"|"self"|"sizeof"|"static"|"struct"|"__super"|"function"|"template"|"generic"|"this"|"true"|"typedef"|"typeid"|"typename"|"union"|"using"|"virtual"|"volatile"|"abstract"|"final"|"import"|"synchronized"|"transient"|"alignas"|"alignof"|{KEYWORD_OBJC})
+FLOWKW    ("break"|"catch"|"continue"|"default"|"do"|"else"|"finally"|"return"|"switch"|"throw"|"throws"|"@catch"|"@finally")
 FLOWCONDITION  ("case"|"for"|"foreach"|"for each"|"goto"|"if"|"try"|"while"|"@try")
 TYPEKW    ("bool"|"char"|"double"|"float"|"int"|"long"|"object"|"short"|"signed"|"unsigned"|"void"|"wchar_t"|"size_t"|"boolean"|"id"|"SEL"|"string"|"nullptr")
 CASTKW    ("const_cast"|"dynamic_cast"|"reinterpret_cast"|"static_cast")
@@ -1813,9 +1814,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>("package")[ \t\n]+        {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
+
       BEGIN( PackageName );
    }
 
@@ -2070,8 +2073,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (g_sourceFileDef) {
          QSharedPointer<FileDef> fd = g_sourceFileDef;
+
          g_insideObjC = fd->name().toLower().right(2) == ".m" ||
-         fd->name().toLower().right(3) == ".mm";
+                  fd->name().toLower().right(3) == ".mm";
 
       } else {
          g_insideObjC = false;
@@ -2090,7 +2094,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             }
          }
 
-         g_insideBody=false;
+         g_insideBody = false;
       }
 
       startFontClass("keyword");
@@ -2132,10 +2136,12 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_curClassName = text;
 
       addType();
+
       if (g_curClassName == "alignas") {
          startFontClass("keyword");
          g_code->codify(text);
          endFontClass();
+
          BEGIN( AlignAs );
 
       } else {
@@ -2223,22 +2229,27 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <ClassVar>("extends"|"implements")  {
-      // Java
       QString text = QString::fromUtf8(yytext);
+
+      // for Java
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
+
       g_curClassBases.clear();
       BEGIN( Bases );
    }
 
 <ClassVar>("sealed"|"abstract")/{BN}*(":"|"{") {
       QString text = QString::fromUtf8(yytext);
+
       DBG_CTX((stderr, "***** C++/CLI modifier %s on g_curClassName=%s\n", csPrintable(text),
                   csPrintable(g_curClassName)));
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
+
       BEGIN( CppCliTypeModifierFollowup );
    }
 
@@ -2329,6 +2340,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Bases>"virtual"|"public"|"protected"|"private"|"@public"|"@private"|"@protected" {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       g_code->codify(text);
       endFontClass();
@@ -2336,7 +2348,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Bases>{SEP}?({ID}{SEP})*{ID}           {
       QString text = QString::fromUtf8(yytext);
+
       DBG_CTX((stderr, "%s:addBase(%s)\n", csPrintable(g_curClassName), csPrintable(text) ));
+
       g_curClassBases.append(text);
       generateClassOrGlobalLink(*g_code, text);
    }
@@ -2430,18 +2444,22 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body,TemplDecl>("template"|"generic")/([^a-zA-Z0-9])       {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
+
       g_insideTemplate = true;
       g_sharpCount = 0;
    }
 
 <Body>"using"{BN}+"namespace"{BN}+  {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
+
       BEGIN(UsingName);
    }
 
@@ -2477,6 +2495,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>{KEYWORD}/([^a-z_A-Z0-9])     {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
 
@@ -2489,6 +2508,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>{KEYWORD}/{B}*          {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
@@ -2496,9 +2516,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>{KEYWORD}/{BN}*"("      {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
+
       g_name.resize(0);
       g_type.resize(0);
    }
@@ -2513,7 +2535,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       codifyLines(text);
       endFontClass();
 
-      // insert the variable in the parent scope, see bug 546158
+      // insert the variable in the parent scope
       g_theVarContext.popScope();
       g_theVarContext.addVariable(g_parmType, g_parmName);
       g_theVarContext.pushScope();
@@ -2638,9 +2660,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>"generic"/{B}*"<"[^\n\/\-\.\{\"\>]*">"{B}* {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       g_code->codify(text);
       endFontClass();
+
       g_sharpCount = 0;
       BEGIN(TemplDecl);
    }
@@ -2648,15 +2672,18 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>"template"/{B}*"<"[^\n\/\-\.\{\"\>]*">"{B}* {
       // template<...>
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       g_code->codify(text);
       endFontClass();
+
       g_sharpCount = 0;
       BEGIN(TemplDecl);
    }
 
 <TemplDecl>"class"|"typename"       {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
@@ -2706,9 +2733,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body,FuncCall>{CASTKW}"<"                {
       // static_cast<T>(
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
+
       g_lastTemplCastContext = YY_START;
       BEGIN(TemplCast);
    }
@@ -3304,10 +3333,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <MemberCall2,FuncCall>{KEYWORD}/([^a-z_A-Z0-9]) {
-      // addParmType();
-      // g_parmName = yytext;
-
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       g_code->codify(text);
       endFontClass();
@@ -3317,6 +3344,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       addParmType();
       g_parmName = text;
+
       startFontClass("keywordtype");
       g_code->codify(text);
       endFontClass();
