@@ -1,44 +1,44 @@
-# to remove obsolete   -no-obsolete 
+# to remove obsolete   -no-obsolete
 
 ../deploy/lupdate  translator_cs.h -ts  -no-obsolete   ../resources/translation/doxy_en.ts  \
- ../resources/translation/doxy_af.ts  \
- ../resources/translation/doxy_ar.ts  \
- ../resources/translation/doxy_am.ts  \
+ ../resources/translation/doxy_af.ts     \
+ ../resources/translation/doxy_ar.ts     \
+ ../resources/translation/doxy_am.ts     \
  ../resources/translation/doxy_pt_br.ts  \
- ../resources/translation/doxy_ca.ts  \
- ../resources/translation/doxy_zh.ts  \
+ ../resources/translation/doxy_ca.ts     \
+ ../resources/translation/doxy_zh.ts     \
  ../resources/translation/doxy_zh_tw.ts  \
- ../resources/translation/doxy_hr.ts  \
- ../resources/translation/doxy_cz.ts  \
- ../resources/translation/doxy_da.ts  \
- ../resources/translation/doxy_nl.ts  \
- ../resources/translation/doxy_eo.ts  \
- ../resources/translation/doxy_fa.ts  \
- ../resources/translation/doxy_fi.ts  \
- ../resources/translation/doxy_fr.ts  \
- ../resources/translation/doxy_de.ts  \
- ../resources/translation/doxy_el.ts  \
- ../resources/translation/doxy_hu.ts  \
- ../resources/translation/doxy_it.ts  \
- ../resources/translation/doxy_id.ts  \
- ../resources/translation/doxy_ja.ts  \
+ ../resources/translation/doxy_hr.ts     \
+ ../resources/translation/doxy_cz.ts     \
+ ../resources/translation/doxy_da.ts     \
+ ../resources/translation/doxy_nl.ts     \
+ ../resources/translation/doxy_eo.ts     \
+ ../resources/translation/doxy_fa.ts     \
+ ../resources/translation/doxy_fi.ts     \
+ ../resources/translation/doxy_fr.ts     \
+ ../resources/translation/doxy_de.ts     \
+ ../resources/translation/doxy_el.ts     \
+ ../resources/translation/doxy_hu.ts     \
+ ../resources/translation/doxy_it.ts     \
+ ../resources/translation/doxy_id.ts     \
+ ../resources/translation/doxy_ja.ts     \
  ../resources/translation/doxy_ja_en.ts  \
- ../resources/translation/doxy_ko.ts  \
+ ../resources/translation/doxy_ko.ts     \
  ../resources/translation/doxy_ko_en.ts  \
- ../resources/translation/doxy_lv.ts  \
- ../resources/translation/doxy_lt.ts  \
- ../resources/translation/doxy_mk.ts  \
- ../resources/translation/doxy_nb.ts  \
- ../resources/translation/doxy_pl.ts  \
- ../resources/translation/doxy_pt.ts  \
- ../resources/translation/doxy_ro.ts  \
- ../resources/translation/doxy_ru.ts  \
- ../resources/translation/doxy_sr.ts  \
+ ../resources/translation/doxy_lv.ts     \
+ ../resources/translation/doxy_lt.ts     \
+ ../resources/translation/doxy_mk.ts     \
+ ../resources/translation/doxy_nb.ts     \
+ ../resources/translation/doxy_pl.ts     \
+ ../resources/translation/doxy_pt.ts     \
+ ../resources/translation/doxy_ro.ts     \
+ ../resources/translation/doxy_ru.ts     \
+ ../resources/translation/doxy_sr.ts     \
  ../resources/translation/doxy_sr_cyrillic.ts  \
- ../resources/translation/doxy_sk.ts  \
- ../resources/translation/doxy_sl.ts  \
- ../resources/translation/doxy_es.ts  \
- ../resources/translation/doxy_sv.ts  \
- ../resources/translation/doxy_tr.ts  \
- ../resources/translation/doxy_uk.ts  \
+ ../resources/translation/doxy_sk.ts     \
+ ../resources/translation/doxy_sl.ts     \
+ ../resources/translation/doxy_es.ts     \
+ ../resources/translation/doxy_sv.ts     \
+ ../resources/translation/doxy_tr.ts     \
+ ../resources/translation/doxy_uk.ts     \
  ../resources/translation/doxy_vi.ts

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -26,7 +26,7 @@ class Translator
  public:
 
    virtual ~Translator() {}
-    
+
    virtual QString latexLanguageSupportCommand() = 0;
 
    virtual QString trRelatedFunctions() = 0;
@@ -46,10 +46,10 @@ class Translator
    virtual QString trEnumValue() = 0;
    virtual QString trDefinedIn() = 0;
 
-   virtual QString trPublicTypedefs() = 0;   
+   virtual QString trPublicTypedefs() = 0;
    virtual QString trProtectedTypedefs() = 0;
    virtual QString trPackageTypedefs() = 0;
-   virtual QString trPrivateTypedefs() = 0;  
+   virtual QString trPrivateTypedefs() = 0;
 
    virtual QString trPublicTypes() = 0;
    virtual QString trProtectedTypes() = 0;
@@ -72,12 +72,12 @@ class Translator
    virtual QString trFileListDescription(bool extractAll) = 0;
    virtual QString trCompoundListDescription() = 0;
    virtual QString trCompoundMembersDescription(bool extractAll) = 0;
-   virtual QString trFileMembersDescription(bool extractAll) = 0;   
+   virtual QString trFileMembersDescription(bool extractAll) = 0;
    virtual QString trFileSourceDescription() = 0;
    virtual QString trExamplesDescription() = 0;
    virtual QString trRelatedPagesDescription() = 0;
    virtual QString trModulesDescription() = 0;
-      
+
    virtual QString trDocumentation() = 0;
    virtual QString trModuleIndex() = 0;
    virtual QString trHierarchicalIndex() = 0;
@@ -90,13 +90,13 @@ class Translator
    virtual QString trPageDocumentation() = 0;
    virtual QString trReferenceManual() = 0;
    virtual QString trDefines() = 0;
-  
+
    virtual QString trTypedefs() = 0;
    virtual QString trEnumerations() = 0;
    virtual QString trFunctions() = 0;
    virtual QString trVariables() = 0;
    virtual QString trEnumerationValues() = 0;
-   virtual QString trDefineDocumentation() = 0; 
+   virtual QString trDefineDocumentation() = 0;
    virtual QString trTypedefDocumentation() = 0;
    virtual QString trEnumerationTypeDocumentation() = 0;
    virtual QString trFunctionDocumentation() = 0;
@@ -105,8 +105,8 @@ class Translator
    virtual QString trGeneratedAt(const QString &date, const QString &projName) = 0;
 
    virtual QString trClassDiagram(const QString &clName) = 0;
-   virtual QString trForInternalUseOnly() = 0;  
-   virtual QString trWarning() = 0;   
+   virtual QString trForInternalUseOnly() = 0;
+   virtual QString trWarning() = 0;
    virtual QString trVersion() = 0;
    virtual QString trDate() = 0;
    virtual QString trReturns() = 0;
@@ -116,25 +116,25 @@ class Translator
    virtual QString trGeneratedBy() = 0;
    virtual QString trNamespaceList() = 0;
    virtual QString trNamespacesListDescription(bool extractAll) = 0;
-   virtual QString trFriends() = 0; 
+   virtual QString trFriends() = 0;
    virtual QString trRelatedFunctionDocumentation() = 0;
    virtual QString trCompoundReference(const QString &clName, enum CompoundType compType, bool isTemplate) = 0;
 
    virtual QString trFileReference(const QString &fileName) = 0;
    virtual QString trNamespaceReference(const QString &namespaceName) = 0;
 
-   virtual QString trPublicMembers() = 0;  
+   virtual QString trPublicMembers() = 0;
    virtual QString trProtectedMembers() = 0;
-   virtual QString trPrivateMembers() = 0;    
- 
+   virtual QString trPrivateMembers() = 0;
+
    virtual QString trPublicSignals() = 0;
    virtual QString trProtectedSignals() = 0;
    virtual QString trPrivateSignals() = 0;
 
    virtual QString trPublicSlots() = 0;
-   virtual QString trProtectedSlots() = 0;  
+   virtual QString trProtectedSlots() = 0;
    virtual QString trPrivateSlots() = 0;
-   
+
    virtual QString trStaticPublicMembers() = 0;
    virtual QString trStaticProtectedMembers() = 0;
    virtual QString trStaticPrivateMembers() = 0;
@@ -150,14 +150,14 @@ class Translator
    virtual QString trNamespaceIndex() = 0;
    virtual QString trNamespaceDocumentation() = 0;
    virtual QString trNamespaces() = 0;
-  
-   virtual QString trGeneratedFromFiles(enum CompoundType compType, bool single) = 0;  
+
+   virtual QString trGeneratedFromFiles(enum CompoundType compType, bool single) = 0;
    virtual QString trReturnValues() = 0;
    virtual QString trMainPage() = 0;
-   virtual QString trPageAbbreviation() = 0;   
+   virtual QString trPageAbbreviation() = 0;
    virtual QString trDefinedAtLineInSourceFile() = 0;
    virtual QString trDefinedInSourceFile() = 0;
-   virtual QString trDeprecated() = 0; 
+   virtual QString trDeprecated() = 0;
    virtual QString trCollaborationDiagram(const QString &clName) = 0;
    virtual QString trInclDepGraph(const QString &fName) = 0;
    virtual QString trConstructorDocumentation() = 0;
@@ -174,9 +174,9 @@ class Translator
    virtual QString trGotoTextualHierarchy() = 0;
    virtual QString trPageIndex() = 0;
 
-   virtual QString trNote() = 0;  
+   virtual QString trNote() = 0;
    virtual QString trPublicAttribs() = 0;
-   virtual QString trStaticPublicAttribs() = 0; 
+   virtual QString trStaticPublicAttribs() = 0;
    virtual QString trProtectedAttribs() = 0;
    virtual QString trStaticProtectedAttribs() = 0;
    virtual QString trPrivateAttribs() = 0;
@@ -286,12 +286,12 @@ class Translator
    virtual QString trRTFTableOfContents() = 0;
    virtual QString trDeprecatedList() = 0;
    virtual QString trEvents() = 0;
-   virtual QString trEventDocumentation() = 0; 
+   virtual QString trEventDocumentation() = 0;
 
    virtual QString trPackageMembers() = 0;
    virtual QString trStaticPackageMembers() = 0;
    virtual QString trPackageAttribs() = 0;
-   virtual QString trStaticPackageAttribs() = 0; 
+   virtual QString trStaticPackageAttribs() = 0;
    virtual QString trAll() = 0;
    virtual QString trCallGraph() = 0;
 
@@ -304,7 +304,7 @@ class Translator
    virtual QString trDirectories() = 0;
    virtual QString trDirDescription() = 0;
    virtual QString trDirReference(const QString &dirName) = 0;
-   virtual QString trDir(bool first_capital, bool singular) = 0;  
+   virtual QString trDir(bool first_capital, bool singular) = 0;
    virtual QString trOverloadText() = 0;
    virtual QString trCallerGraph() = 0;
    virtual QString trEnumerationValueDocumentation() = 0;
@@ -322,7 +322,7 @@ class Translator
    virtual QString trModulesList() = 0;
    virtual QString trModulesListDescription(bool extractAll) = 0;
 
-   virtual QString trCompoundReferenceFortran(const QString &clName, 
+   virtual QString trCompoundReferenceFortran(const QString &clName,
                   enum CompoundType compType, bool isTemplate) = 0;
 
    virtual QString trModuleReference(const QString &namespaceName) = 0;
@@ -343,10 +343,10 @@ class Translator
    virtual QString trGlobalNamespace() = 0;
    virtual QString trSearching() = 0;
    virtual QString trNoMatches() = 0;
-    
+
    virtual QString trFileIn(const QString &name) = 0;
    virtual QString trIncludesFileIn(const QString &name) = 0;
- 
+
    virtual QString trCiteReferences() = 0;
    virtual QString trCopyright() = 0;
    virtual QString trDirDepGraph(const QString &name) = 0;
@@ -365,7 +365,6 @@ class Translator
    virtual QString trClassMethods() = 0;
    virtual QString trInstanceMethods() = 0;
    virtual QString trMethodDocumentation() = 0;
-   virtual QString trDesignOverview() = 0;
 
    virtual QString trInterfaces() = 0;
    virtual QString trServices() = 0;
