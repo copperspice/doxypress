@@ -60134,7 +60134,7 @@ static QString prepassFixedForm(const QString &contents)
                // first non commented non blank character after position fixedCommentAfter
 
                if (c != '!') {
-                  // not a possible start of doxygen comment
+                  // not a possible start of a comment
 
                   newContents += '!';
                   newContents +=' ';    // so that '<' and '>' as first character are not converted to a doxypress comment

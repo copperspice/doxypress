@@ -2111,8 +2111,8 @@ void HtmlDocVisitor::filter(const QString &str)
       // used in the doxypress test build to show sample translations
 
       result = result.replace("$trPublicTypedefs",           theTranslator->trPublicTypedefs());
-      result = result.replace("$trProtectedTypedefs",        theTranslator->trProtectedTypedefs() );
-      result = result.replace("$trPrivateTypedefs",          theTranslator->trPrivateTypedefs());
+      result = result.replace("$trProtectedMembers",         theTranslator->trProtectedMembers());
+      result = result.replace("$trPrivateSlots",             theTranslator->trPrivateSlots());
       result = result.replace("$trConstructorDocumentation", theTranslator->trConstructorDocumentation());
       result = result.replace("$trModulesDescription",       theTranslator->trModulesDescription());
       result = result.replace("$trDeprecatedList",           theTranslator->trDeprecatedList());
@@ -2140,8 +2140,8 @@ void HtmlDocVisitor::filter(const QString &str)
    }
 }
 
-/// Escape basic entities to produce a valid CDATA attribute value,
-/// assume that the outer quoting will be using the double quote &quot;
+// Escape basic entities to produce a valid CDATA attribute value,
+// assume that the outer quoting will be using the double quote &quot;
 void HtmlDocVisitor::filterQuotedCdataAttr(const QString &str)
 {
    if (str.isEmpty()) {

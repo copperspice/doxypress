@@ -3289,26 +3289,36 @@ static int countDirs()
 
 void writeGraphInfo(OutputList &ol)
 {
-   if (! Config::getBool("have-dot") || ! Config::getBool("generate-html")) {
+   static const bool generateHtml = Config::getBool("generate-html");
+
+   if (! generateHtml) {
       return;
    }
 
-   ol.pushGeneratorState();
-   ol.disableAllBut(OutputGenerator::Html);
+   // used in the doxypress test build to show sample translations
+   static const QString projectDesc = Config::getString("project-brief");
+   static const bool haveDot        = Config::getBool("have-dot");
 
-   generateGraphLegend(Config::getString("html-output"));
+   if (! haveDot && projectDesc != "Sample files to test the functionality of DoxyPress")  {
+      return;
+   }
 
-   const bool stripCommentsStateRef = Config::getBool("strip-code-comments");
-   bool oldStripCommentsState       = stripCommentsStateRef;
-
-   const bool createSubdirs         = Config::getBool("create-subdirs");
-   bool oldCreateSubdirs            = createSubdirs;
+   static const bool stripCommentsStateRef = Config::getBool("strip-code-comments");
+   static const bool createSubdirs         = Config::getBool("create-subdirs");
 
    // temporarily disable the stripping of comments for our own code example
    Config::setBool("strip-code-comments", false);
 
    // temporarily disable create subdirs for linking to our example
    Config::setBool("create-subdirs", false);
+
+   ol.pushGeneratorState();
+   ol.disableAllBut(OutputGenerator::Html);
+
+   generateGraphLegend(Config::getString("html-output"));
+
+   bool oldStripCommentsState  = stripCommentsStateRef;
+   bool oldCreateSubdirs       = createSubdirs;
 
    startFile(ol, "graph_legend", QString(), theTranslator->trLegendTitle());
 

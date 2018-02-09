@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -36,15 +36,15 @@ enum ParserMode {
 
 /** \brief Abstract interface for programming language parsers.
  *
- *  By implementing the methods of this interface you can add a new language parser to DoxyPress. 
+ *  By implementing the methods of this interface you can add a new language parser to DoxyPress.
  *  The parser can make use of the comment block parser to parse the contents of special comment blocks.
  */
 class ParserInterface
 {
  public:
    virtual ~ParserInterface() {}
-  
-   // Called after all files in a translation unit have been processed   
+
+   // Called after all files in a translation unit have been processed
    virtual void finishTranslationUnit() = 0;
 
    /** Parses a single input file and builds an Entry tree.
@@ -82,12 +82,12 @@ class ParserInterface
     *  @param[in] memberDef Member definition to which the code
     *             is associated (non null in case of an inline fragment for a member).
     *  @param[in] showLineNumbers if set to true and also fileDef is not 0,
-    *             line numbers will be added to the source fragement
+    *             line numbers will be added to the source fragment
     *  @param[in] searchCtx context under which search data has to be stored.
     *  @param[in] collectXRefs collect cross-reference relations.
     */
    virtual void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
-                          bool isExampleBlock, const QString &exampleName = QString(), 
+                          bool isExampleBlock, const QString &exampleName = QString(),
                           QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                           int startLine = -1, int endLine = -1, bool inlineFragment = false,
                           QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,
@@ -127,7 +127,7 @@ class ParserManager
    }
 
    /** Registers an additional parser.
-    *  @param[in] name      A symbolic name of the parser, i.e. "c", "python", "fortran" 
+    *  @param[in] name      A symbolic name of the parser, i.e. "c", "python", "fortran"
     *  @param[in] parser    The parser that is to be used for the given name.
     */
    void registerParser(const QString &name, ParserInterface *parser) {
@@ -146,7 +146,7 @@ class ParserManager
          return false;
       }
 
-      if (m_extensions.find(extension) !=  m_extensions.end()) { 
+      if (m_extensions.find(extension) !=  m_extensions.end()) {
          // extension already exists
          m_extensions.remove(extension);
       }
@@ -173,12 +173,12 @@ class ParserManager
          intf = m_extensions.value(ext.left(4));
       }
 
-      if (intf) { 
-         return intf; 
+      if (intf) {
+         return intf;
 
       } else {
          return m_defaultParser;
-      }      
+      }
    }
 
  private:

@@ -590,7 +590,7 @@ static void detectNoDocumentedParams()
          s_memberDef->setHasDocumentedParams(true);
 
       } else if (! s_memberDef->hasDocumentedParams()) {
-         bool allDoc = true; // no paramater => all parameters are documented
+         bool allDoc = true; // no parameter => all parameters are documented
 
          if (! argList.listEmpty() ) {
             // member has parameters but the member has a parameter list

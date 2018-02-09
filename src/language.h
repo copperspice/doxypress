@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -23,15 +23,11 @@
 
 // using the CS i18n system
 extern Translator_Cs translator_Cs;
-extern Translator *theTranslator;      // can be removed when theTranslator is changed to CsTrans
+extern Translator *theTranslator;      // can be removed when theTranslator is changed
 
-void loadTranslationFile();
 QString getLanguage();
 
-/*! Generate a place holder for a position in a list. Used for
- *  translators to be able to specify different elements orders
- *  depending on whether text flows from left to right or visa versa.
- */
+// place holder for a position in a list. Used for translators to be able to specify different elements order
 inline QString generateMarker(int id)
 {
    QString retval;
