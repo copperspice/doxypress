@@ -42,7 +42,7 @@
     </message>
     <message>
         <source>Field Documentation</source>
-        <translation>Dokumentation der Datenelemente</translation>
+        <translation>Dokumentation der Felder</translation>
     </message>
     <message>
         <source>Member Data Documentation</source>
@@ -85,32 +85,8 @@
         <translation>Klassenhierarchie</translation>
     </message>
     <message>
-        <source>Data Structures</source>
-        <translation>Datenstrukturen</translation>
-    </message>
-    <message>
-        <source>Class List</source>
-        <translation>Auflistung der Klassen</translation>
-    </message>
-    <message>
         <source>File List</source>
         <translation>Auflistung der Dateien</translation>
-    </message>
-    <message>
-        <source>Data Fields</source>
-        <translation>Datenstruktur-Elemente</translation>
-    </message>
-    <message>
-        <source>Class Members</source>
-        <translation>Klassen-Elemente</translation>
-    </message>
-    <message>
-        <source>Globals</source>
-        <translation>Datei-Elemente</translation>
-    </message>
-    <message>
-        <source>File Members</source>
-        <translation>Datei-Elemente</translation>
     </message>
     <message>
         <source>Related Pages</source>
@@ -126,8 +102,7 @@
     </message>
     <message>
         <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
-        <translation>Die Liste der Ableitungen ist -mit Einschränkungen- &quot;
-             &quot;alphabetisch sortiert:</translation>
+        <translation>Die Liste der Ableitungen ist -mit Einschränkungen-alphabetisch sortiert:</translation>
     </message>
     <message>
         <source>Here are the data structures with brief descriptions:</source>
@@ -135,12 +110,7 @@
     </message>
     <message>
         <source>Here are the classes, structs, unions and interfaces with brief descriptions:</source>
-        <translation>Hier folgt die Aufzählung aller Klassen, Strukturen,
-                Varianten und Schnittstellen mit einer Kurzbeschreibung:</translation>
-    </message>
-    <message>
-        <source>Modules</source>
-        <translation>Module</translation>
+        <translation>Hier folgt die Aufzählung aller Klassen, Strukturen, Varianten und Schnittstellen mit einer Kurzbeschreibung:</translation>
     </message>
     <message>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
@@ -160,18 +130,15 @@
     </message>
     <message>
         <source>Here is a list of all functions, variables, defines, enums, and typedefs with links to the files they belong to:</source>
-        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen
-               auf die Dokumentation zu jedem Element:</translation>
+        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen auf die Dokumentation zu jedem Element:</translation>
     </message>
     <message>
         <source>Here is a list of all documented file members with links to the files they belong to:</source>
-        <translation>Hier folgt die Aufzählung aller dokumentierten Dateielemente  mit Verweisen auf die Dokumentation zu
-               jedem Element:</translation>
+        <translation>Hier folgt die Aufzählung aller dokumentierten Dateielemente  mit Verweisen auf die Dokumentation zu jedem Element:</translation>
     </message>
     <message>
         <source>Here is a list of all functions, variables, defines, enums, and typedefs with links to the documentation:</source>
-        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen
-               auf die zugehörigen Dateien:</translation>
+        <translation>Hier folgt die Aufzählung aller Funktionen, Variablen, Makros, Aufzählungen und Typdefinitionen  mit Verweisen auf die zugehörigen Dateien:</translation>
     </message>
     <message>
         <source>Here is a list of all documented file members with links to the documentation:</source>
@@ -192,10 +159,6 @@
     <message>
         <source>Documentation</source>
         <translation>Dokumentation</translation>
-    </message>
-    <message>
-        <source>Module Index</source>
-        <translation>Modul-Verzeichnis</translation>
     </message>
     <message>
         <source>Hierarchical Index</source>
@@ -263,7 +226,7 @@
     </message>
     <message>
         <source>Enum Values</source>
-        <translation>Aufzählungswerte</translation>
+        <translation>Dokumentation der Aufzählungswerte</translation>
     </message>
     <message>
         <source>Macro Definition Documentation</source>
@@ -284,10 +247,6 @@
     <message>
         <source>Variable Documentation</source>
         <translation>Variablen-Dokumentation</translation>
-    </message>
-    <message>
-        <source>Classes</source>
-        <translation>Klassen</translation>
     </message>
     <message>
         <source>Inheritance diagram for %1:</source>
@@ -391,7 +350,7 @@
     </message>
     <message>
         <source>Public Slots</source>
-        <translation>Geschützte Slots</translation>
+        <translation>Öffentliche Slots</translation>
     </message>
     <message>
         <source>Protected Slots</source>
@@ -426,10 +385,6 @@
         <translation>Dokumentation der Namensbereiche</translation>
     </message>
     <message>
-        <source>Namespaces</source>
-        <translation>Namensbereiche</translation>
-    </message>
-    <message>
         <source>Return Values</source>
         <translation>Rückgabewerte</translation>
     </message>
@@ -447,7 +402,7 @@
     </message>
     <message>
         <source>Constructor &amp; Destructor Documentation</source>
-        <translation>Constructor &amp; Destructor Documentation</translation>
+        <translation>Beschreibung der Konstruktoren und Destruktoren</translation>
     </message>
     <message>
         <source>Go to the source code of this file.</source>
@@ -502,10 +457,6 @@
         <translation>Öffentliche Typen</translation>
     </message>
     <message>
-        <source>Public Attributes</source>
-        <translation>Öffentliche Attribute</translation>
-    </message>
-    <message>
         <source>Static Public Attributes</source>
         <translation>Statische öffentliche Attribute</translation>
     </message>
@@ -519,7 +470,7 @@
     </message>
     <message>
         <source>Static Protected Attributes</source>
-        <translation>Statische öffentliche Attribute</translation>
+        <translation>Statische, geschützte Attribute</translation>
     </message>
     <message>
         <source>Private Types</source>
@@ -687,7 +638,7 @@
     </message>
     <message>
         <source>Here are the data types with brief descriptions:</source>
-        <translation>Datentyp-Index</translation>
+        <translation>Hier folgen die Datentypen mit Kurzbeschreibungen:</translation>
     </message>
     <message>
         <source>Data Type Index</source>
@@ -699,7 +650,7 @@
     </message>
     <message>
         <source>Functions/Subroutines</source>
-        <translation>Functions/Subroutines</translation>
+        <translation>Funktionen/Unterroutinen</translation>
     </message>
     <message>
         <source>Function/Subroutine Documentation</source>
@@ -712,10 +663,6 @@
     <message>
         <source>Module Members</source>
         <translation>Module Members</translation>
-    </message>
-    <message>
-        <source>Modules Index</source>
-        <translation>Modul-Verzeichnis</translation>
     </message>
     <message>
         <source>Type Constraints</source>
@@ -747,7 +694,7 @@
     </message>
     <message>
         <source>detail level</source>
-        <translation>Detailebene</translation>
+        <translation>detailebene</translation>
     </message>
     <message>
         <source>Template Parameters</source>
@@ -768,10 +715,6 @@
     <message>
         <source>Method Documentation</source>
         <translation>Methodendokumentation</translation>
-    </message>
-    <message>
-        <source>Design Overview</source>
-        <translation>Übersicht</translation>
     </message>
     <message>
         <source>Exported Interfaces</source>
@@ -814,18 +757,6 @@
         <translation>Paket %1</translation>
     </message>
     <message>
-        <source>Class</source>
-        <translation>Klassen</translation>
-    </message>
-    <message>
-        <source>class</source>
-        <translation>klasse</translation>
-    </message>
-    <message>
-        <source>classes</source>
-        <translation>klassen</translation>
-    </message>
-    <message>
         <source>File</source>
         <translation>Datei</translation>
     </message>
@@ -835,35 +766,11 @@
     </message>
     <message>
         <source>file</source>
-        <translation>dateien</translation>
+        <translation>datei</translation>
     </message>
     <message>
         <source>files</source>
         <translation>dateien</translation>
-    </message>
-    <message>
-        <source>Namespace</source>
-        <translation>Namensbereich</translation>
-    </message>
-    <message>
-        <source>namespace</source>
-        <translation>namensbereich</translation>
-    </message>
-    <message>
-        <source>namespaces</source>
-        <translation>namensbereichn</translation>
-    </message>
-    <message>
-        <source>Module</source>
-        <translation>Gruppe</translation>
-    </message>
-    <message>
-        <source>module</source>
-        <translation>gruppe</translation>
-    </message>
-    <message>
-        <source>modules</source>
-        <translation>gruppe</translation>
     </message>
     <message>
         <source>Page</source>
@@ -898,30 +805,6 @@
         <translation>elemente</translation>
     </message>
     <message>
-        <source>Global</source>
-        <translation>Global</translation>
-    </message>
-    <message>
-        <source>global</source>
-        <translation>global</translation>
-    </message>
-    <message>
-        <source>globals</source>
-        <translation>global</translation>
-    </message>
-    <message>
-        <source>Author</source>
-        <translation>Autor</translation>
-    </message>
-    <message>
-        <source>Authors</source>
-        <translation>Autoren</translation>
-    </message>
-    <message>
-        <source>author</source>
-        <translation>autor</translation>
-    </message>
-    <message>
         <source>Sorry, no documents matching your query.</source>
         <translation>Leider sind noch keine Dokumente gefunden, die Ihren Suchbegriffen.</translation>
     </message>
@@ -935,11 +818,12 @@
     </message>
     <message>
         <source>%1 Source File</source>
-        <translation>%1 Source File</translation>
+        <translation>%1 Quellcode</translation>
     </message>
     <message>
         <source>This directory hierarchy is sorted roughly, but not completely, alphabetically:</source>
-        <translation>Diese Verzeichnishierarchie ist grob sortiert, aber nicht vollständig, alphabetischer Reihenfolge:</translation>
+        <translation>Diese Verzeichnishierarchie ist -mit Einschränkungen- &quot;
+         &quot;alphabetisch sortiert:</translation>
     </message>
     <message>
         <source>%1 Directory Reference</source>
@@ -958,8 +842,8 @@
         <translation>verzeichnisse</translation>
     </message>
     <message>
-        <source>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</source>
-        <translation>Dies ist eine überladene Member-Funktion, für die Bequemlichkeit zur Verfügung gestellt. Es unterscheidet sich von der obigen Funktion nur in welchem ​​Argument(e) sie akzeptiert.</translation>
+        <source>This is an overloaded method or function provided for convenience. It differs from the other overloads only in the argument(s).</source>
+        <translation>Dies ist eine überladene Methode oder Funktion, die der Bequemlichkeit dient. Es unterscheidet sich von den anderen Überladungen nur in den Argumenten.</translation>
     </message>
     <message>
         <source>Data Types</source>
@@ -971,7 +855,7 @@
     </message>
     <message>
         <source>%1 Relation</source>
-        <translation>%1 Verhältnis</translation>
+        <translation>Bezug %1</translation>
     </message>
     <message>
         <source>File in %1</source>
@@ -995,11 +879,11 @@
     </message>
     <message>
         <source>Inherits %1.</source>
-        <translation>Erbt %1.</translation>
+        <translation>Abgeleitet von %1.</translation>
     </message>
     <message>
         <source>%1 Class Template Reference</source>
-        <translation>%1 Klasse Template Reference</translation>
+        <translation>%1 Template-Klassenreferenz</translation>
     </message>
     <message>
         <source>%1 Class Reference</source>
@@ -1007,7 +891,7 @@
     </message>
     <message>
         <source>%1 Struct Template Reference</source>
-        <translation>%1 Struct Template Reference</translation>
+        <translation>%1 Template-Strukturreferenz </translation>
     </message>
     <message>
         <source>%1 Struct Reference</source>
@@ -1015,51 +899,51 @@
     </message>
     <message>
         <source>%1 Union Template Reference</source>
-        <translation>%1 Union Template Reference</translation>
+        <translation>%1 Template-Variantenreferenz</translation>
     </message>
     <message>
         <source>%1 Union Reference</source>
-        <translation>%1 Union Reference</translation>
+        <translation>%1 Variantenreferenz</translation>
     </message>
     <message>
         <source>%1 Interface Template Reference</source>
-        <translation>%1 Schnittstelle Template Reference</translation>
+        <translation>%1 Template-Schnittstellenreferenz</translation>
     </message>
     <message>
         <source>%1 Interface Reference</source>
-        <translation>%1 Interface Reference</translation>
+        <translation>%1 Schnittstellenreferenz</translation>
     </message>
     <message>
         <source>%1 Protocol Template Reference</source>
-        <translation>%1 Protocol Template Reference</translation>
+        <translation>%1 Template-Protokollreferenz</translation>
     </message>
     <message>
         <source>%1 Protocol Reference</source>
-        <translation>%1 Protocol Reference</translation>
+        <translation>%1 Protokollreferenz</translation>
     </message>
     <message>
         <source>%1 Category Template Reference</source>
-        <translation>%1 Kategorie Template Reference</translation>
+        <translation>%1 Template-Kategoriereferenze</translation>
     </message>
     <message>
         <source>%1 Category Reference</source>
-        <translation>%1 Kategorie Reference</translation>
+        <translation>%1 Kategoriereferenze</translation>
     </message>
     <message>
         <source>%1 Exception Template Reference</source>
-        <translation>%1 Exception Template Reference</translation>
+        <translation>%1 Template-Ausnahmenreferenz</translation>
     </message>
     <message>
         <source>%1 Exception Reference</source>
-        <translation>%1 Exception Reference</translation>
+        <translation>%1 Ausnahmenreferenz</translation>
     </message>
     <message>
         <source>%1 Template Reference</source>
-        <translation>%1 Template Reference</translation>
+        <translation>%1 Template-referenz</translation>
     </message>
     <message>
         <source>%1 Reference</source>
-        <translation>%1 Bezugs</translation>
+        <translation>%1 Referenz</translation>
     </message>
     <message>
         <source>The documentation for this class  was generated from the following file:</source>
@@ -1191,23 +1075,23 @@
     </message>
     <message>
         <source>Inherited by %1.</source>
-        <translation>Von %1 geerbt.</translation>
+        <translation>Basisklasse für %1.</translation>
     </message>
     <message>
         <source>Reimplemented from %1.</source>
-        <translation>Von %1 neu implementiert.</translation>
+        <translation>Erneute Implementation von %1.</translation>
     </message>
     <message>
         <source>Reimplemented in %1.</source>
-        <translation>In %1 neu implementiert.</translation>
+        <translation>Erneute Implementation in %1.</translation>
     </message>
     <message>
         <source>Definition at line @0 of file @1.</source>
-        <translation>Definiert in Zeile @0 von Datei @1.</translation>
+        <translation>Definiert in Zeile @0 der Datei @1.</translation>
     </message>
     <message>
         <source>Definition in file @0.</source>
-        <translation>Definition in der Datei @0.</translation>
+        <translation>Definiert in Datei @0.</translation>
     </message>
     <message>
         <source>Index</source>
@@ -1247,7 +1131,7 @@
     </message>
     <message>
         <source>Type</source>
-        <translation>Art</translation>
+        <translation>Typ</translation>
     </message>
     <message>
         <source>Types</source>
@@ -1255,7 +1139,7 @@
     </message>
     <message>
         <source>type</source>
-        <translation>Art</translation>
+        <translation>Typ</translation>
     </message>
     <message>
         <source>types</source>
@@ -1359,7 +1243,7 @@
     </message>
     <message>
         <source>, and </source>
-        <translation>Und </translation>
+        <translation>, und </translation>
     </message>
     <message>
         <source>Public Typedefs</source>
@@ -1374,130 +1258,281 @@
         <translation>Private Typedefs</translation>
     </message>
     <message>
-        <source>This page explains how to interpret the graphs which are generated by DoxyPress.
+        <source>Modules</source>
+        <comment>trModules</comment>
+        <translation>Module</translation>
+    </message>
+    <message>
+        <source>Data Structures</source>
+        <comment>trCompoundList</comment>
+        <translation>Datenstrukturen</translation>
+    </message>
+    <message>
+        <source>Class List</source>
+        <comment>trCompoundList</comment>
+        <translation>Auflistung der Klassen</translation>
+    </message>
+    <message>
+        <source>Data Fields</source>
+        <comment>trCompoundMembers</comment>
+        <translation>Datenstruktur-Elemente</translation>
+    </message>
+    <message>
+        <source>Class Members</source>
+        <comment>trCompoundMembers</comment>
+        <translation>Klassen-Elemente</translation>
+    </message>
+    <message>
+        <source>Globals</source>
+        <comment>trFileMembers</comment>
+        <translation>Globale Elemente</translation>
+    </message>
+    <message>
+        <source>File Members</source>
+        <comment>trFileMembers</comment>
+        <translation>Datei-Elemente</translation>
+    </message>
+    <message>
+        <source>File Source</source>
+        <translation>Dateiquelle</translation>
+    </message>
+    <message>
+        <source>Here is a list of all source code files with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Module Index</source>
+        <comment>trModuleIndex</comment>
+        <translation>Modul-Verzeichnis</translation>
+    </message>
+    <message>
+        <source>Package Typedefs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Data Structures</source>
+        <comment>trCompounds</comment>
+        <translation>Datenstrukturen</translation>
+    </message>
+    <message>
+        <source>Classes</source>
+        <comment>trCompounds</comment>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>Dot Graph legend source code</source>
+        <translation>Diese Seite erklärt die Interpretation der von DoxyPress erzeugten Graphen.
 
-Consider the following example:
+Beispiel:
+
 \code
-/*! Invisible class because of truncation */
+/*! Wegen Verkürzung unsichtbare Klasse */
 class Invisible { };
 
-/*! Truncated class, inheritance relation is hidden */
+/*! Klasse verkürzt dargestellt, Vererbungsbeziehung ist versteckt */
 class Truncated : public Invisible { };
 
-/* Class not documented with DoxyPress comments */
+/* Nicht mit DoxyPress-Kommentaren dokumentierte Klasse */
 class Undocumented { };
 
-/*! Class that is inherited using public inheritance */
+/*! Mithilfe öffentlicher Vererbung vererbte Klasse */
 class PublicBase : public Truncated { };
 
-/*! A template class */
+/*! Eine Template-Klasse */
 template&lt;class T&gt; class Templ { };
 
-/*! Class that is inherited using protected inheritance */
+/*! Mithilfe geschützter Vererbung vererbte Klasse */
 class ProtectedBase { };
 
-/*! Class that is inherited using private inheritance */
+/*! Mithilfe privater Vererbung vererbte Klasse */
 class PrivateBase { };
 
-/*! Class that is used by the Inherited class */
+/*! Von der Klasse Inherited benutzte Klasse */
 class Used { };
 
-/*! Super class that inherits a number of other classes */
-class Inherited : public PublicBase,
-                  protected ProtectedBase,
-                  private PrivateBase,
-                  public Undocumented,
-                  public Templ&lt;int&gt;
-{
-  private:
-    Used *m_usedClass;
-};
-\endcode
-This will result in the following graph:
-
-&lt;center&gt;&lt;img alt=&quot;&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
-
-The boxes in the above graph have the following meaning:
-
-&lt;ul&gt;
-&lt;li&gt;%A filled gray box represents the struct or class for which the graph is generated.&lt;/li&gt;
-&lt;li&gt;%A box with a black border denotes a documented struct or class.&lt;/li&gt;
-&lt;li&gt;%A box with a grey border denotes an undocumented struct or class.&lt;/li&gt;
-&lt;li&gt;%A box with a red border denotes a documented struct or class for which not all inheritance/containment relations are shown. %A graph is truncated if it does not fit within the specified boundaries.&lt;/li&gt;
-&lt;/ul&gt;
-
-The arrows have the following meaning:
-
-&lt;ul&gt;
-&lt;li&gt;%A dark blue arrow is used to visualize a public inheritance relation between two classes.&lt;/li&gt;
-&lt;li&gt;%A dark green arrow is used for protected inheritance.&lt;/li&gt;
-&lt;li&gt;%A dark red arrow is used for private inheritance.&lt;/li&gt;
-&lt;li&gt;%A purple dashed arrow is used if a class is contained or used by another class. The arrow is labeled with the variable(s) through which the pointed class or struct is accessible.&lt;/li&gt;
-&lt;li&gt;%A yellow dashed arrow denotes a relation between a template instance and the template class it was instantiated from. The arrow is labeled with the template parameters of the instance.&lt;/li&gt;
-&lt;/ul&gt;
-</source>
-        <translation>Diese Seite erklärt, wie die Diagramme, die durch DoxyPress erzeugt werden interpretieren.
-
-Betrachten Sie das folgende Beispiel:
-\code
-/*! Invisible Klasse wegen der Verkürzung */
-class Invisible {};
-
-/*! Abgeschnittene Klasse wird Vererbungsbeziehung versteckt */
-class  abgeschnitten: public Invisible {};
-
-/* Klasse nicht mit DoxyPress dokumentiert, kommentiert */
-class  Undocumented {};
-
-/*! Klasse, die mit den öffentlichen Vererbung vererbt wird */
-class  PublicBase: public Truncated {};
-
-/*! Eine Template-Klasse */
-template&lt;class T&gt; class Templ {};
-
-/*! Klasse, die unter Verwendung von geschützten Erbe vererbt wird */
-class  ProtectedBase {};
-
-/*! Klasse, die mit dem privaten Erbe vererbt wird */
-class  PrivateBase {};
-
-/*! Klasse, die von der vererbten Klasse verwendet wird */
-class  Used {};
-
-/*! Super-Klasse, die eine Reihe von anderen Klassen erbt */
-class  Geerbte: public PublicBase,
-                protected ProtectedBase,
-                private PrivateBase,
-                public Undocumented,
-                public Templ &lt;int&gt;
+/*! Superklasse, die von mehreren anderen Klassen erbt */
+class Inherited : public PublicBase, protected ProtectedBase, private PrivateBase,
+                  public Undocumented, public Templ&lt;int&gt;
 {
    private:
-      Used * m_usedClass;
+   Used *m_usedClass;
 };
 \endcode
-Dies wird in der folgenden Grafik führen:
 
-&lt;center&gt;&lt;img alt=&quot;&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
+Dies liefert den folgenden Graphen:
 
-Die Boxen in der obigen Grafik haben folgende Bedeutung:
+&lt;center&gt;&lt;img alt=&quot;[Class Graph]&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
 
-&lt;ul&gt;
-&lt;li&gt;%A gefüllt grauen Kasten stellt die Struktur oder Klasse, für die das Diagramm erzeugt wird. &lt;/li&gt;
-&lt;li&gt;%Ein Feld mit einem schwarzen Rand bezeichnet eine dokumentierte Struktur oder Klasse. &lt;/li&gt;
-&lt;li&gt;%A-Box mit einem grauen Rand bezeichnet eine nicht dokumentierte Struktur oder Klasse. &lt;/li&gt;
-&lt;li&gt;%A-Box mit einem roten Rand bezeichnet eine dokumentierte Struktur oder Klasse, für die nicht alle Vererbung / Contain Beziehungen gezeigt. %Ein Graph wird abgeschnitten, wenn sie nicht innerhalb der festgelegten Grenzen zu passen. &lt;/li&gt;
-&lt;/ul&gt;
+Die Rechtecke in obigem Graphen bedeuten:
 
-Die Pfeile haben folgende Bedeutung:
+\li Ein grau gefülltes Rechteck stellt die Struktur oder Klasse dar, für die der Graph erzeugt wurde.
+\li Ein Rechteck mit schwarzem Rahmen kennzeichnet eine dokumentierte Struktur oder Klasse.
+\li Ein Rechteck mit grauem Rahmen kennzeichnet eine undokumentierte Struktur oder Klasse.
+\li Ein Rechteck mit rotem Rahmen kennzeichnet eine dokumentierte Struktur oder Klasse, für die nicht alle Vererbungs-/Enthaltenseinsbeziehungen dargestellt werden. Ein Graph wird gekürzt, wenn er nicht in die angegebenen Schranken passt.
 
-&lt;ul&gt;
-&lt;li&gt;%Ein dunkelblauer Pfeil wird verwendet, um eine öffentliche Vererbungsbeziehung zwischen zwei Klassen zu visualisieren. &lt;/li&gt;
-&lt;li&gt;%Ein dunkelgrüner Pfeil für geschützte Vererbung verwendet.  &lt;/li&gt;
-&lt;li&gt;%Eine dunkle rote Pfeil ist für private Vererbung verwendet. &lt;/li&gt;
-&lt;li&gt;%Ein lila gestrichelten Pfeil wird verwendet, wenn eine Klasse enthalten sind oder von einer anderen Klasse verwendet. Der Pfeil mit der Variablen (n), durch die das spitze Klasse oder Struktur zugänglich markiert. &lt;/li&gt;
-&lt;li&gt;%A gelb gestrichelten Pfeil zeigt eine Beziehung zwischen einer Vorlageninstanz und die Template-Klasse wurde von instanziiert. Der Pfeil mit der Template-Parameter der Instanz bezeichnet. &lt;/li&gt;
-&lt;/ul&gt;
-</translation>
+Die Pfeile bedeuten:
+
+\li Ein dunkelblauer Pfeil stellt eine öffentliche Vererbungsbeziehung zwischen zwei Klassen dar.
+\li Ein dunkelgrüner Pfeil stellt geschützte Vererbung dar.
+\li Ein dunkelroter Pfeil stellt private Vererbung dar.
+\li Ein gestrichelter violetter Pfeil bedeutet, dass eine Klasse in einer anderen enthalten ist oder von einer anderen benutzt wird. Am Pfeil stehen die Variable(n), mit deren Hilfe auf die Struktur oder Klasse an der Pfeilspitze zugegriffen werden kann.
+\li Ein gestrichelter gelber Pfeil kennzeichnet eine Verknüpfung zwischen einer Template-Instanz und der Template-Klasse von welcher es abstammt. Neben dem Pfeil sind die Template-Parameter aufgeführt.
+        </translation>
+    </message>
+    <message>
+        <source>Data Structures</source>
+        <comment>trClasses</comment>
+        <translation>Datenstrukturen</translation>
+    </message>
+    <message>
+        <source>Classes</source>
+        <comment>trClasses</comment>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>Class</source>
+        <comment>trClass</comment>
+        <translation>Klasse</translation>
+    </message>
+    <message>
+        <source>Classes</source>
+        <comment>trClass</comment>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>class</source>
+        <comment>trClass</comment>
+        <translation>Klasse</translation>
+    </message>
+    <message>
+        <source>classes</source>
+        <comment>trClass</comment>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>Module</source>
+        <comment>trGroup</comment>
+        <translation>Gruppe</translation>
+    </message>
+    <message>
+        <source>Modules</source>
+        <comment>trGroup</comment>
+        <translation>Gruppen</translation>
+    </message>
+    <message>
+        <source>module</source>
+        <comment>trGroup</comment>
+        <translation>Gruppe</translation>
+    </message>
+    <message>
+        <source>modules</source>
+        <comment>trGroup</comment>
+        <translation>Gruppen</translation>
+    </message>
+    <message>
+        <source>Global</source>
+        <comment>trGlobal</comment>
+        <translation>Global</translation>
+    </message>
+    <message>
+        <source>Globals</source>
+        <comment>trGlobal</comment>
+        <translation>Global</translation>
+    </message>
+    <message>
+        <source>global</source>
+        <comment>trGlobal</comment>
+        <translation>global</translation>
+    </message>
+    <message>
+        <source>globals</source>
+        <comment>trGlobal</comment>
+        <translation>global</translation>
+    </message>
+    <message>
+        <source>Modules Index</source>
+        <comment>trModulesIndex</comment>
+        <translation>Modul-Index</translation>
+    </message>
+    <message>
+        <source>Module</source>
+        <comment>trModule</comment>
+        <translation>Modul</translation>
+    </message>
+    <message>
+        <source>Modules</source>
+        <comment>trModule</comment>
+        <translation>Module</translation>
+    </message>
+    <message>
+        <source>module</source>
+        <comment>trModule</comment>
+        <translation>Modul</translation>
+    </message>
+    <message>
+        <source>modules</source>
+        <comment>trModule</comment>
+        <translation>Module</translation>
+    </message>
+    <message>
+        <source>Data Fields</source>
+        <comment>trPublicAttribs</comment>
+        <translation>Datenfelder</translation>
+    </message>
+    <message>
+        <source>Public Attributes</source>
+        <comment>trPublicAttribs</comment>
+        <translation>Öffentliche Attribute</translation>
+    </message>
+    <message>
+        <source>Data Fields</source>
+        <comment>trCompoundMembersFortran</comment>
+        <translation>Datenfelder</translation>
+    </message>
+    <message>
+        <source>Namespaces</source>
+        <comment>trNamespaces</comment>
+        <translation>Namensbereiche</translation>
+    </message>
+    <message>
+        <source>Namespace</source>
+        <comment>trNamespace</comment>
+        <translation>Namensbereich</translation>
+    </message>
+    <message>
+        <source>Namespaces</source>
+        <comment>trNamespace</comment>
+        <translation>Namensbereiche</translation>
+    </message>
+    <message>
+        <source>namespace</source>
+        <comment>trNamespace</comment>
+        <translation>namensbereich</translation>
+    </message>
+    <message>
+        <source>namespaces</source>
+        <comment>trNamespace</comment>
+        <translation>namensbereiche</translation>
+    </message>
+    <message>
+        <source>Author</source>
+        <comment>trAuthor</comment>
+        <translation>Autor</translation>
+    </message>
+    <message>
+        <source>Authors</source>
+        <comment>trAuthor</comment>
+        <translation>Autoren</translation>
+    </message>
+    <message>
+        <source>author</source>
+        <comment>trAuthor</comment>
+        <translation>autor</translation>
+    </message>
+    <message>
+        <source>authors</source>
+        <comment>trAuthor</comment>
+        <translation>autoren</translation>
     </message>
 </context>
 <context>

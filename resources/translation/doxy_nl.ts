@@ -26,11 +26,11 @@
     </message>
     <message>
         <source>Detailed Description</source>
-        <translation>gedetailleerde beschrijving</translation>
+        <translation>Gedetailleerde Beschrijving</translation>
     </message>
     <message>
         <source>Member Typedef Documentation</source>
-        <translation>Lid Typedef documentatie</translation>
+        <translation>Documentatie van type definitie members</translation>
     </message>
     <message>
         <source>Member Enumeration Documentation</source>
@@ -46,7 +46,7 @@
     </message>
     <message>
         <source>Member Data Documentation</source>
-        <translation></translation>
+        <translation>Documentatie van data members</translation>
     </message>
     <message>
         <source>More...</source>
@@ -54,15 +54,15 @@
     </message>
     <message>
         <source>List of all members</source>
-        <translation>Lijst van alle leden</translation>
+        <translation>Lijst van alle members</translation>
     </message>
     <message>
         <source>Member List</source>
-        <translation>Ledenlijst</translation>
+        <translation>Member Lijst</translation>
     </message>
     <message>
         <source>This is the complete list of members for </source>
-        <translation>Dit is de complete lijst van alle members voor</translation>
+        <translation>Dit is de complete lijst van alle members voor </translation>
     </message>
     <message>
         <source>, including all inherited members.</source>
@@ -70,7 +70,7 @@
     </message>
     <message>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
-        <translation>Automatisch gegenereerd door DoxyPress voor% 1 uit de broncode.</translation>
+        <translation>Automatisch gegenereerd door DoxyPress voor %1 uit de broncode.</translation>
     </message>
     <message>
         <source>Generated automatically by DoxyPress from the source code.</source>
@@ -89,44 +89,16 @@
         <translation>gedefinieerd in</translation>
     </message>
     <message>
-        <source>Modules</source>
-        <translation>Modules</translation>
-    </message>
-    <message>
         <source>Class Hierarchy</source>
-        <translation>Klassehiërarchie</translation>
-    </message>
-    <message>
-        <source>Data Structures</source>
-        <translation>Data structuren</translation>
-    </message>
-    <message>
-        <source>Class List</source>
-        <translation>Class List</translation>
+        <translation>Klasse Hiërarchie</translation>
     </message>
     <message>
         <source>File List</source>
         <translation>Bestandslijst</translation>
     </message>
     <message>
-        <source>Data Fields</source>
-        <translation>Data velden</translation>
-    </message>
-    <message>
-        <source>Class Members</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Globals</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>File Members</source>
-        <translation>Bestand members</translation>
-    </message>
-    <message>
         <source>Related Pages</source>
-        <translation>Gerelateerde pagina's</translation>
+        <translation>Gerelateerde pagina&apos;s</translation>
     </message>
     <message>
         <source>Examples</source>
@@ -138,19 +110,19 @@
     </message>
     <message>
         <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
-        <translation></translation>
+        <translation>Deze overervingslijst is grofweg, maar niet volledig, alfabetisch gesorteerd:</translation>
     </message>
     <message>
         <source>Here is a list of all files with brief descriptions:</source>
-        <translation></translation>
+        <translation>Hier is een lijst met alle bestanden met korte beschrijvingen:</translation>
     </message>
     <message>
         <source>Here is a list of all documented files with brief descriptions:</source>
-        <translation></translation>
+        <translation>Hier is een lijst van alle gedocumenteerde bestanden met korte beschrijvingen:</translation>
     </message>
     <message>
         <source>Here are the data structures with brief descriptions:</source>
-        <translation></translation>
+        <translation>Hier zijn de gegevensstructuren met korte beschrijvingen:</translation>
     </message>
     <message>
         <source>Here are the classes, structs, unions and interfaces with brief descriptions:</source>
@@ -190,7 +162,7 @@
     </message>
     <message>
         <source>Here is a list of all examples:</source>
-        <translation></translation>
+        <translation>Hieronder volgt de lijst met alle voorbeelden:</translation>
     </message>
     <message>
         <source>Here is a list of all related documentation pages:</source>
@@ -198,27 +170,23 @@
     </message>
     <message>
         <source>Here is a list of all modules:</source>
-        <translation></translation>
+        <translation>Hieronder volgt de lijst met alle modules:</translation>
     </message>
     <message>
         <source>Documentation</source>
         <translation>Documentatie</translation>
     </message>
     <message>
-        <source>Module Index</source>
-        <translation>Module Index</translation>
-    </message>
-    <message>
         <source>Hierarchical Index</source>
-        <translation></translation>
+        <translation>Hiërarchische index</translation>
     </message>
     <message>
         <source>Data Structure Index</source>
-        <translation></translation>
+        <translation>Gegevensstructuurindex</translation>
     </message>
     <message>
         <source>Class Index</source>
-        <translation></translation>
+        <translation>Klasse-index</translation>
     </message>
     <message>
         <source>File Index</source>
@@ -226,11 +194,11 @@
     </message>
     <message>
         <source>Module Documentation</source>
-        <translation></translation>
+        <translation>Module Documentatie</translation>
     </message>
     <message>
         <source>Data Structure Documentation</source>
-        <translation></translation>
+        <translation>Datastructuur documentatie</translation>
     </message>
     <message>
         <source>Class Documentation</source>
@@ -246,7 +214,7 @@
     </message>
     <message>
         <source>Page Documentation</source>
-        <translation>Documentatie van gerelateerde pagina's</translation>
+        <translation>Documentatie van gerelateerde pagina&apos;s</translation>
     </message>
     <message>
         <source>Reference Manual</source>
@@ -258,15 +226,15 @@
     </message>
     <message>
         <source>Public Typedefs</source>
-        <translation></translation>
+        <translation>Publieke typedefs</translation>
     </message>
     <message>
         <source>Protected Typedefs</source>
-        <translation></translation>
+        <translation>Beschermde typedefs</translation>
     </message>
     <message>
         <source>Private Typedefs</source>
-        <translation></translation>
+        <translation>Privé typedefs</translation>
     </message>
     <message>
         <source>Typedefs</source>
@@ -286,11 +254,11 @@
     </message>
     <message>
         <source>Enum Values</source>
-        <translation>Enum waarde</translation>
+        <translation>Enumeratie waarden</translation>
     </message>
     <message>
         <source>Macro Definition Documentation</source>
-        <translation>Documentatie van macro's</translation>
+        <translation>Documentatie van macro&apos;s</translation>
     </message>
     <message>
         <source>Typedef Documentation</source>
@@ -307,10 +275,6 @@
     <message>
         <source>Variable Documentation</source>
         <translation>Documentatie van variabelen</translation>
-    </message>
-    <message>
-        <source>Classes</source>
-        <translation></translation>
     </message>
     <message>
         <source>Generated on %1 for %2 &amp;nbsp; by</source>
@@ -378,7 +342,7 @@
     </message>
     <message>
         <source>Friends And Related Function Documentation</source>
-        <translation></translation>
+        <translation>Documentatie van friends en gerelateerde functies</translation>
     </message>
     <message>
         <source>%1 Class Template Reference</source>
@@ -454,51 +418,51 @@
     </message>
     <message>
         <source>Public Member Functions</source>
-        <translation></translation>
+        <translation>Publieke leden functies</translation>
     </message>
     <message>
         <source>Public Signals</source>
-        <translation></translation>
+        <translation>Publieke Signalen</translation>
     </message>
     <message>
         <source>Protected Signals</source>
-        <translation></translation>
+        <translation>Beschermde Signalen</translation>
     </message>
     <message>
         <source>Private Signals</source>
-        <translation></translation>
+        <translation>Prive Signalen</translation>
     </message>
     <message>
         <source>Static Public Member Functions</source>
-        <translation></translation>
+        <translation>Statische openbare functies</translation>
     </message>
     <message>
         <source>Protected Member Functions</source>
-        <translation></translation>
+        <translation>Beschermde leden functies</translation>
     </message>
     <message>
         <source>Public Slots</source>
-        <translation></translation>
+        <translation>Publieke gokautomaten</translation>
     </message>
     <message>
         <source>Protected Slots</source>
-        <translation></translation>
+        <translation>Beschermde fruitmachines</translation>
     </message>
     <message>
         <source>Static Protected Member Functions</source>
-        <translation></translation>
+        <translation>Statische beschermde lidfuncties</translation>
     </message>
     <message>
         <source>Private Member Functions</source>
-        <translation></translation>
+        <translation>Private Member Functies</translation>
     </message>
     <message>
         <source>Private Slots</source>
-        <translation></translation>
+        <translation>Privé gokautomaten</translation>
     </message>
     <message>
         <source>Static Private Member Functions</source>
-        <translation></translation>
+        <translation>Statische privé leden functies</translation>
     </message>
     <message>
         <source>, and </source>
@@ -522,7 +486,7 @@
     </message>
     <message>
         <source>Namespace Members</source>
-        <translation></translation>
+        <translation>Namespace-leden</translation>
     </message>
     <message>
         <source>Here is a list of all namespace members with links to the namespace documentation for each member:</source>
@@ -534,15 +498,11 @@
     </message>
     <message>
         <source>Namespace Index</source>
-        <translation></translation>
+        <translation>Namespace Index</translation>
     </message>
     <message>
         <source>Namespace Documentation</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Namespaces</source>
-        <translation></translation>
+        <translation>Namespace Documentatie</translation>
     </message>
     <message>
         <source>The documentation for this class  was generated from the following file:</source>
@@ -610,15 +570,15 @@
     </message>
     <message>
         <source>Return Values</source>
-        <translation></translation>
+        <translation>Retour waarden</translation>
     </message>
     <message>
         <source>Main Page</source>
-        <translation></translation>
+        <translation>Hoofd Pagina</translation>
     </message>
     <message>
         <source>p,</source>
-        <translation></translation>
+        <translation>p.</translation>
     </message>
     <message>
         <source>Definition at line @0 of file @1.</source>
@@ -630,7 +590,7 @@
     </message>
     <message>
         <source>Deprecated</source>
-        <translation></translation>
+        <translation>Verouderd</translation>
     </message>
     <message>
         <source>Collaboration diagram for %1:</source>
@@ -642,7 +602,7 @@
     </message>
     <message>
         <source>Constructor &amp; Destructor Documentation</source>
-        <translation></translation>
+        <translation>Constructor &amp; Destructor Documentatie</translation>
     </message>
     <message>
         <source>Go to the source code of this file.</source>
@@ -654,15 +614,15 @@
     </message>
     <message>
         <source>Precondition</source>
-        <translation></translation>
+        <translation>Preconditie</translation>
     </message>
     <message>
         <source>Postcondition</source>
-        <translation></translation>
+        <translation>Postconditie</translation>
     </message>
     <message>
         <source>Invariant</source>
-        <translation></translation>
+        <translation>Invariant</translation>
     </message>
     <message>
         <source>Initial value:</source>
@@ -670,7 +630,7 @@
     </message>
     <message>
         <source>code</source>
-        <translation></translation>
+        <translation>code</translation>
     </message>
     <message>
         <source>Graphical Class Hierarchy</source>
@@ -686,99 +646,95 @@
     </message>
     <message>
         <source>Page Index</source>
-        <translation></translation>
+        <translation>Pagina Index</translation>
     </message>
     <message>
         <source>Note</source>
-        <translation></translation>
+        <translation>Noot</translation>
     </message>
     <message>
         <source>Public Types</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Public Attributes</source>
-        <translation></translation>
+        <translation>Public Typen</translation>
     </message>
     <message>
         <source>Static Public Attributes</source>
-        <translation></translation>
+        <translation>Static Public Attributen</translation>
     </message>
     <message>
         <source>Protected Types</source>
-        <translation></translation>
+        <translation>Protected Typen</translation>
     </message>
     <message>
         <source>Protected Attributes</source>
-        <translation></translation>
+        <translation>Protected Attributen</translation>
     </message>
     <message>
         <source>Static Protected Attributes</source>
-        <translation></translation>
+        <translation>Static Protected Attributen</translation>
     </message>
     <message>
         <source>Private Types</source>
-        <translation></translation>
+        <translation>Private Typen</translation>
     </message>
     <message>
         <source>Private Attributes</source>
-        <translation></translation>
+        <translation>Private Attribute</translation>
     </message>
     <message>
         <source>Static Private Attributes</source>
-        <translation></translation>
+        <translation>Static Private Attributen</translation>
     </message>
     <message>
         <source>Todo</source>
-        <translation></translation>
+        <translation>Todo</translation>
     </message>
     <message>
         <source>Todo List</source>
-        <translation></translation>
+        <translation>Todo Lijst</translation>
     </message>
     <message>
         <source>Referenced by</source>
-        <translation></translation>
+        <translation>Wordt aangeroepen door</translation>
     </message>
     <message>
         <source>Remarks</source>
-        <translation></translation>
+        <translation>Opmerkingen</translation>
     </message>
     <message>
         <source>Attention</source>
-        <translation></translation>
+        <translation>Attentie</translation>
     </message>
     <message>
         <source>This graph shows which files directly or indirectly include this file</source>
-        <translation></translation>
+        <translation>Deze graaf geeft aan welke bestanden direct of indirect afhankelijk zijn van dit bestand:</translation>
     </message>
     <message>
         <source>Since</source>
-        <translation></translation>
+        <translation>Sinds</translation>
     </message>
     <message>
         <source>Graph Legend</source>
-        <translation></translation>
+        <translation>Graaf Legenda</translation>
     </message>
     <message>
         <source>legend</source>
-        <translation></translation>
+        <translation>legenda</translation>
     </message>
     <message>
         <source>Test</source>
-        <translation></translation>
+        <translation>Test</translation>
     </message>
     <message>
         <source>Test List</source>
-        <translation></translation>
+        <translation>Test Lijst</translation>
     </message>
     <message>
         <source>Properties</source>
-        <translation></translation>
+        <translation>Properties</translation>
     </message>
     <message>
         <source>Property Documentation</source>
-        <translation></translation>
+        <translation>Property Documentatie</translation>
     </message>
     <message>
         <source>Package %1</source>
@@ -786,7 +742,7 @@
     </message>
     <message>
         <source>Package List</source>
-        <translation></translation>
+        <translation>Package Lijst</translation>
     </message>
     <message>
         <source>Here are the packages with brief descriptions (if available):</source>
@@ -794,191 +750,131 @@
     </message>
     <message>
         <source>Packages</source>
-        <translation></translation>
+        <translation>Packages</translation>
     </message>
     <message>
         <source>Value:</source>
-        <translation></translation>
+        <translation>Waarde:</translation>
     </message>
     <message>
         <source>Bug</source>
-        <translation></translation>
+        <translation>Bug</translation>
     </message>
     <message>
         <source>Bug List</source>
-        <translation></translation>
+        <translation>Bug Lijst</translation>
     </message>
     <message>
         <source>Index</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Class</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>class</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>classes</source>
-        <translation></translation>
+        <translation>Index</translation>
     </message>
     <message>
         <source>File</source>
-        <translation></translation>
+        <translation>Bestand</translation>
     </message>
     <message>
         <source>Files</source>
-        <translation></translation>
+        <translation>Bestanden</translation>
     </message>
     <message>
         <source>file</source>
-        <translation></translation>
+        <translation>bestand</translation>
     </message>
     <message>
         <source>files</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Namespace</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>namespace</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>namespaces</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Module</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>module</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>modules</source>
-        <translation></translation>
+        <translation>bestanden</translation>
     </message>
     <message>
         <source>Page</source>
-        <translation></translation>
+        <translation>Pagina</translation>
     </message>
     <message>
         <source>Pages</source>
-        <translation></translation>
+        <translation>Paginas</translation>
     </message>
     <message>
         <source>page</source>
-        <translation></translation>
+        <translation>Pagina</translation>
     </message>
     <message>
         <source>pages</source>
-        <translation></translation>
+        <translation>paginas</translation>
     </message>
     <message>
         <source>Member</source>
-        <translation></translation>
+        <translation>Member</translation>
     </message>
     <message>
         <source>Members</source>
-        <translation></translation>
+        <translation>Members</translation>
     </message>
     <message>
         <source>member</source>
-        <translation></translation>
+        <translation>member</translation>
     </message>
     <message>
         <source>members</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Global</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>global</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>globals</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Author</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Authors</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>author</source>
-        <translation></translation>
+        <translation>members</translation>
     </message>
     <message>
         <source>References</source>
-        <translation></translation>
+        <translation>Gebruikt</translation>
     </message>
     <message>
         <source>Implements %1.</source>
-        <translation></translation>
+        <translation>Implementeert %1</translation>
     </message>
     <message>
         <source>Implemented %1.</source>
-        <translation></translation>
+        <translation>Wordt geïmplementeerd door %1</translation>
     </message>
     <message>
         <source>Table of Contents</source>
-        <translation></translation>
+        <translation>Inhoudsopgave</translation>
     </message>
     <message>
         <source>Deprecated List</source>
-        <translation></translation>
+        <translation>Verouderde lijst</translation>
     </message>
     <message>
         <source>Events</source>
-        <translation></translation>
+        <translation>Events</translation>
     </message>
     <message>
         <source>Event Documentation</source>
-        <translation></translation>
+        <translation>Event Documentatie&quot;</translation>
     </message>
     <message>
         <source>Package Types</source>
-        <translation></translation>
+        <translation>Package Types</translation>
     </message>
     <message>
         <source>Package Functions</source>
-        <translation></translation>
+        <translation>Package Functies</translation>
     </message>
     <message>
         <source>Static Package Functions</source>
-        <translation></translation>
+        <translation>Statische Package Functies</translation>
     </message>
     <message>
         <source>Package Attributes</source>
-        <translation></translation>
+        <translation>Package Attributen</translation>
     </message>
     <message>
         <source>Static Package Attributes</source>
-        <translation></translation>
+        <translation>Statische Package Attributen</translation>
     </message>
     <message>
         <source>All</source>
-        <translation></translation>
+        <translation>Alle</translation>
     </message>
     <message>
         <source>Here is the call graph for this function:</source>
-        <translation></translation>
+        <translation>Hier is de call graaf voor deze functie:</translation>
     </message>
     <message>
         <source>Search Results</source>
-        <translation></translation>
+        <translation>Zoek Resultaten</translation>
     </message>
     <message>
         <source>Sorry, no documents matching your query.</source>
@@ -994,27 +890,27 @@
     </message>
     <message>
         <source>Matches:</source>
-        <translation></translation>
+        <translation>Gevonden:</translation>
     </message>
     <message>
         <source>%1 Source File</source>
-        <translation></translation>
+        <translation>%1  Bron Bestand</translation>
     </message>
     <message>
         <source>Directory Hierarchy</source>
-        <translation></translation>
+        <translation>Folder Hiërarchie</translation>
     </message>
     <message>
         <source>Directory Documentation</source>
-        <translation></translation>
+        <translation>Folder Documentatie</translation>
     </message>
     <message>
         <source>Directories</source>
-        <translation></translation>
+        <translation>Folders</translation>
     </message>
     <message>
         <source>This directory hierarchy is sorted roughly, but not completely, alphabetically:</source>
-        <translation></translation>
+        <translation>Deze folder hiërarchie is min of meer alfabetisch gesorteerd:</translation>
     </message>
     <message>
         <source>%1 Directory Reference</source>
@@ -1022,35 +918,35 @@
     </message>
     <message>
         <source>Directory</source>
-        <translation></translation>
+        <translation>Folder</translation>
     </message>
     <message>
         <source>directory</source>
-        <translation></translation>
+        <translation>folder</translation>
     </message>
     <message>
         <source>directories</source>
-        <translation></translation>
+        <translation>folders</translation>
     </message>
     <message>
-        <source>This is an overloaded member function, provided for convenience. It differs from the above function only in what argument(s) it accepts.</source>
-        <translation></translation>
+        <source>This is an overloaded method or function provided for convenience. It differs from the other overloads only in the argument(s).</source>
+        <translation>Dit is een overbelaste methode of functie die voor het gemak wordt aangeboden. Het verschilt alleen van de andere overbelastingen in de argument (en).</translation>
     </message>
     <message>
         <source>Here is the caller graph for this function:</source>
-        <translation></translation>
+        <translation>Hier is de caller graaf voor deze functie</translation>
     </message>
     <message>
         <source>Enumerator Documentation</source>
-        <translation></translation>
+        <translation>Documentatie van enumeratie waarden</translation>
     </message>
     <message>
         <source>Member Function/Subroutine Documentation</source>
-        <translation></translation>
+        <translation>Member Functie/Subroutine Documentatie</translation>
     </message>
     <message>
         <source>Data Types List</source>
-        <translation></translation>
+        <translation>Lijst met data types</translation>
     </message>
     <message>
         <source>Here are the data types with brief descriptions:</source>
@@ -1066,27 +962,27 @@
     </message>
     <message>
         <source>Data Type Index</source>
-        <translation></translation>
+        <translation>Data Type Index</translation>
     </message>
     <message>
         <source>Data Type Documentation</source>
-        <translation></translation>
+        <translation>Data Type Documentatie</translation>
     </message>
     <message>
         <source>Functions/Subroutines</source>
-        <translation></translation>
+        <translation>Functies/Subroutines</translation>
     </message>
     <message>
         <source>Function/Subroutine Documentation</source>
-        <translation></translation>
+        <translation>Functie/Subroutine Documentatie</translation>
     </message>
     <message>
         <source>Data Types</source>
-        <translation></translation>
+        <translation>Data Types</translation>
     </message>
     <message>
         <source>Modules List</source>
-        <translation></translation>
+        <translation>Module Lijst</translation>
     </message>
     <message>
         <source>Here is a list of all modules with brief descriptions:</source>
@@ -1118,7 +1014,7 @@
     </message>
     <message>
         <source>Module Members</source>
-        <translation></translation>
+        <translation>Module Members</translation>
     </message>
     <message>
         <source>Here is a list of all module members with links to the module documentation for each member:</source>
@@ -1126,10 +1022,6 @@
     </message>
     <message>
         <source>Here is a list of all documented module members with links to the modules they belong to:</source>
-        <translation></translation>
-    </message>
-    <message>
-        <source>Modules Index</source>
         <translation></translation>
     </message>
     <message>
@@ -1254,11 +1146,11 @@
     </message>
     <message>
         <source>Bibliography</source>
-        <translation></translation>
+        <translation>Bibliografie</translation>
     </message>
     <message>
         <source>Copyright</source>
-        <translation></translation>
+        <translation>Copyright</translation>
     </message>
     <message>
         <source>Directory dependency graph for %1:</source>
@@ -1266,15 +1158,15 @@
     </message>
     <message>
         <source>detail level</source>
-        <translation></translation>
+        <translation>detail niveau</translation>
     </message>
     <message>
         <source>Template Parameters</source>
-        <translation></translation>
+        <translation>Template Parameters</translation>
     </message>
     <message>
         <source>and %1 more...</source>
-        <translation></translation>
+        <translation>en %1 anderen...</translation>
     </message>
     <message>
         <source>The documentation for this enum was generated from the following file:</source>
@@ -1333,72 +1225,105 @@
         <translation></translation>
     </message>
     <message>
-        <source>This page explains how to interpret the graphs which are generated by DoxyPress.
+        <source>click to enable panel synchronization</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>click to disable panel synchronization</source>
+        <translation></translation>
+    </message>
+    <message>
+        <source>Class Methods</source>
+        <translation>Klasse Methoden</translation>
+    </message>
+    <message>
+        <source>Instance Methods</source>
+        <translation>Instantie Methoden</translation>
+    </message>
+    <message>
+        <source>Method Documentation</source>
+        <translation>Methode Documentatie</translation>
+    </message>
+    <message>
+        <source>Exported Interfaces</source>
+        <translation>Geëporteerde Interfaces</translation>
+    </message>
+    <message>
+        <source>Included Services</source>
+        <translation>Geïncludeerde Services</translation>
+    </message>
+    <message>
+        <source>Constant Groups</source>
+        <translation>Konstanten Groepen</translation>
+    </message>
+    <message>
+        <source>Modules</source>
+        <comment>trModules</comment>
+        <translation>Modules</translation>
+    </message>
+    <message>
+        <source>Data Structures</source>
+        <comment>trCompoundList</comment>
+        <translation>Klasse Lijst</translation>
+    </message>
+    <message>
+        <source>Class List</source>
+        <comment>trCompoundList</comment>
+        <translation>Klasse Lijst</translation>
+    </message>
+    <message>
+        <source>Data Fields</source>
+        <comment>trCompoundMembers</comment>
+        <translation>Klasse Members</translation>
+    </message>
+    <message>
+        <source>Class Members</source>
+        <comment>trCompoundMembers</comment>
+        <translation>Klasse Members</translation>
+    </message>
+    <message>
+        <source>Globals</source>
+        <comment>trFileMembers</comment>
+        <translation>Bestand members</translation>
+    </message>
+    <message>
+        <source>File Members</source>
+        <comment>trFileMembers</comment>
+        <translation>Bestand members</translation>
+    </message>
+    <message>
+        <source>File Source</source>
+        <translation>Bestandsbron</translation>
+    </message>
+    <message>
+        <source>Here is a list of all source code files with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Module Index</source>
+        <comment>trModuleIndex</comment>
+        <translation>Module Index</translation>
+    </message>
+    <message>
+        <source>Package Typedefs</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Data Structures</source>
+        <comment>trCompounds</comment>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>Classes</source>
+        <comment>trCompounds</comment>
+        <translation>Klassen</translation>
+    </message>
+    <message>
+        <source>Dot Graph legend source code</source>
+        <translation>Deze pagina legt uit hoe de grafen die gegenereerd worden door DoxyPress geïnterpreteerd dienen te worden.
 
-Consider the following example:
-\code
-/*! Invisible class because of truncation */
-class Invisible { };
-
-/*! Truncated class, inheritance relation is hidden */
-class Truncated : public Invisible { };
-
-/* Class not documented with DoxyPress comments */
-class Undocumented { };
-
-/*! Class that is inherited using public inheritance */
-class PublicBase : public Truncated { };
-
-/*! A template class */
-template&lt;class T&gt; class Templ { };
-
-/*! Class that is inherited using protected inheritance */
-class ProtectedBase { };
-
-/*! Class that is inherited using private inheritance */
-class PrivateBase { };
-
-/*! Class that is used by the Inherited class */
-class Used { };
-
-/*! Super class that inherits a number of other classes */
-class Inherited : public PublicBase,
-                  protected ProtectedBase,
-                  private PrivateBase,
-                  public Undocumented,
-                  public Templ&lt;int&gt;
-{
-  private:
-    Used *m_usedClass;
-};
-\endcode
-This will result in the following graph:
-
-&lt;center&gt;&lt;img alt=&quot;&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
-
-The boxes in the above graph have the following meaning:
-
-&lt;ul&gt;
-&lt;li&gt;%A filled gray box represents the struct or class for which the graph is generated.&lt;/li&gt;
-&lt;li&gt;%A box with a black border denotes a documented struct or class.&lt;/li&gt;
-&lt;li&gt;%A box with a grey border denotes an undocumented struct or class.&lt;/li&gt;
-&lt;li&gt;%A box with a red border denotes a documented struct or class for which not all inheritance/containment relations are shown. %A graph is truncated if it does not fit within the specified boundaries.&lt;/li&gt;
-&lt;/ul&gt;
-
-The arrows have the following meaning:
-
-&lt;ul&gt;
-&lt;li&gt;%A dark blue arrow is used to visualize a public inheritance relation between two classes.&lt;/li&gt;
-&lt;li&gt;%A dark green arrow is used for protected inheritance.&lt;/li&gt;
-&lt;li&gt;%A dark red arrow is used for private inheritance.&lt;/li&gt;
-&lt;li&gt;%A purple dashed arrow is used if a class is contained or used by another class. The arrow is labeled with the variable(s) through which the pointed class or struct is accessible.&lt;/li&gt;
-&lt;li&gt;%A yellow dashed arrow denotes a relation between a template instance and the template class it was instantiated from. The arrow is labeled with the template parameters of the instance.&lt;/li&gt;
-&lt;/ul&gt;
-</source>
-        <translation>Deze pagina legt uit hoe de grafen die gegenereerd worden door DoxyPress
-
-geïnterpreteerd dienen te worden.
 Beschouw het volgende voorbeeld:
+
 \code
 /*! Onzichtbare klasse vanwege afkappen van de graaf */
 class Invisible { };
@@ -1424,12 +1349,9 @@ class PrivateBase { };
 /*! Klasse die wordt gebruikt door de klasse Inherited */
 class Used { };
 
-/*! Super klasse die overerft van een aantal andere klassen */
-class Inherited : public PublicBase,
-                  protected ProtectedBase,
-                  private PrivateBase,
-                  public Undocumented,
-                  public Templ &lt;int&gt;
+/*! Super klasse die overerft van een aantal andere klassen */\n&quot;
+class Inherited : public PublicBase, protected ProtectedBase, private PrivateBase,
+                  public Undocumented, public Templ&lt;int&gt;
 {
   private:
     Used *m_usedClass;
@@ -1437,69 +1359,178 @@ class Inherited : public PublicBase,
 \endcode
 Dit voorbeeld zal resulteren in de volgende graaf:
 
-&lt;center&gt;&lt;img alt=&quot;&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
+&lt;center&gt;&lt;img alt=&quot;[Class Graph]&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
 
 De rechthoeken in the bovenstaande graaf hebben de volgende betekenis:
 
-&lt;ul&gt;
-&lt;li&gt;%Een gevulde grijze rechthoek representeert de structure of klasse waarvoor de graaf is gegenereerd. &lt;/li&gt;
-&lt;li&gt;%Een rechthoek met een zwarte rand representeert een gedocumenteerde structure of klasse. &lt;/li&gt;
-&lt;li&gt;%Een rechthoek met een grijze rand representeert een ongedocumenteerde structure of klasse. &lt;/li&gt;
-&lt;li&gt;%Een rechthoek met een rode rand representeert een gedocumenteerde structure or klasse waarvoor
-niet alle overervings- of gebruiksrelaties konden worden getoond. Een graaf wordt
-afgekapt als hij niet past binnen de gespecificeerde grenzen. &lt;/li&gt;
-&lt;ul&gt;
+\li Een gevulde grijze rechthoek representeert de structure of klasse waarvoor de graaf is gegenereerd.
+\li Een rechthoek met een zwarte rand representeert een gedocumenteerde structure of klasse.
+\li Een rechthoek met een grijze rand representeert een ongedocumenteerde structure of klasse.
+\li Een rechthoek met een rode rand representeert een gedocumenteerde structure or klasse waarvoor niet alle overervings- of gebruiksrelaties konden worden getoond. Een graaf wordt afgekapt als hij niet past binnen de gespecificeerde grenzen.
 
 De pijlen hebben de volgende betekenis:
 
-&lt;ul&gt;
-&lt;li&gt;%Een donkerblauwe pijl visualizeert een public inheritance relatie tussen twee klassen. &lt;/li&gt;
-&lt;li&gt;%Een donkergroene pijl wordt gebruikt voor protected inheritance. &lt;/li&gt;
-&lt;li&gt;%Een donkerrode pijl wordt gebruikt voor private inheritance. &lt;/li&gt;
-&lt;li&gt;%Een paars gestippelde pijl wordt gebruikt indien een klasse bevat is of gebruikt wordt
-door een andere klasse. De pijl is gelabeled met de variable(n)
-die toegang geven tot de aangewezen klasse of structure. &lt;/li&gt;
-&lt;li&gt;%Een geel gestippelde pijl wordt gebruikt om een relatie tussen een
-template instantie en een template klasse aan te geven. De pijl is gelabeld met
-template parameters van de instantie. &lt;/li&gt;
-&lt;ul&gt;
-        </translation>
+\li Een donkerblauwe pijl visualizeert een public inheritance relatie tussen twee klassen.
+\li Een donkergroene pijl wordt gebruikt voor protected inheritance.
+\li Een donkerrode pijl wordt gebruikt voor private inheritance.
+\li Een paars gestippelde pijl wordt gebruikt indien een klasse bevat is of gebruikt wordt door een andere klasse. De pijl is gelabeled met de variable(n) die toegang geven tot de aangewezen klasse of structure.
+\li Een geel gestippelde pijl wordt gebruikt om een relatie tussen een template instantie en een template klasse aan te geven. De pijl is gelabeld met template parameters van de instantie.
+         </translation>
     </message>
     <message>
-        <source>click to enable panel synchronization</source>
-        <translation></translation>
+        <source>Data Structures</source>
+        <comment>trClasses</comment>
+        <translation>Klassen</translation>
     </message>
     <message>
-        <source>click to disable panel synchronization</source>
-        <translation></translation>
+        <source>Classes</source>
+        <comment>trClasses</comment>
+        <translation>Klassen</translation>
     </message>
     <message>
-        <source>Class Methods</source>
-        <translation></translation>
+        <source>Class</source>
+        <comment>trClass</comment>
+        <translation>Klasse</translation>
     </message>
     <message>
-        <source>Instance Methods</source>
-        <translation></translation>
+        <source>Classes</source>
+        <comment>trClass</comment>
+        <translation>Klassen</translation>
     </message>
     <message>
-        <source>Method Documentation</source>
-        <translation></translation>
+        <source>class</source>
+        <comment>trClass</comment>
+        <translation>klass</translation>
     </message>
     <message>
-        <source>Design Overview</source>
-        <translation></translation>
+        <source>classes</source>
+        <comment>trClass</comment>
+        <translation>klassn</translation>
     </message>
     <message>
-        <source>Exported Interfaces</source>
-        <translation></translation>
+        <source>Module</source>
+        <comment>trGroup</comment>
+        <translation>Groep</translation>
     </message>
     <message>
-        <source>Included Services</source>
-        <translation></translation>
+        <source>Modules</source>
+        <comment>trGroup</comment>
+        <translation>Groepen</translation>
     </message>
     <message>
-        <source>Constant Groups</source>
-        <translation></translation>
+        <source>module</source>
+        <comment>trGroup</comment>
+        <translation>groep</translation>
+    </message>
+    <message>
+        <source>modules</source>
+        <comment>trGroup</comment>
+        <translation>groepen</translation>
+    </message>
+    <message>
+        <source>Global</source>
+        <comment>trGlobal</comment>
+        <translation>Globale member</translation>
+    </message>
+    <message>
+        <source>Globals</source>
+        <comment>trGlobal</comment>
+        <translation>Globale members</translation>
+    </message>
+    <message>
+        <source>global</source>
+        <comment>trGlobal</comment>
+        <translation>globale member</translation>
+    </message>
+    <message>
+        <source>globals</source>
+        <comment>trGlobal</comment>
+        <translation>globale members</translation>
+    </message>
+    <message>
+        <source>Modules Index</source>
+        <comment>trModulesIndex</comment>
+        <translation>Module Index</translation>
+    </message>
+    <message>
+        <source>Module</source>
+        <comment>trModule</comment>
+        <translation>Module</translation>
+    </message>
+    <message>
+        <source>Modules</source>
+        <comment>trModule</comment>
+        <translation>Modulen</translation>
+    </message>
+    <message>
+        <source>module</source>
+        <comment>trModule</comment>
+        <translation>module</translation>
+    </message>
+    <message>
+        <source>modules</source>
+        <comment>trModule</comment>
+        <translation>modulen</translation>
+    </message>
+    <message>
+        <source>Data Fields</source>
+        <comment>trPublicAttribs</comment>
+        <translation>Public Attributen</translation>
+    </message>
+    <message>
+        <source>Public Attributes</source>
+        <comment>trPublicAttribs</comment>
+        <translation>Public Attributen</translation>
+    </message>
+    <message>
+        <source>Data Fields</source>
+        <comment>trCompoundMembersFortran</comment>
+        <translation>Data velden</translation>
+    </message>
+    <message>
+        <source>Namespaces</source>
+        <comment>trNamespaces</comment>
+        <translation type="unfinished">Namespaces</translation>
+    </message>
+    <message>
+        <source>Namespace</source>
+        <comment>trNamespace</comment>
+        <translation type="unfinished">Namespace</translation>
+    </message>
+    <message>
+        <source>Namespaces</source>
+        <comment>trNamespace</comment>
+        <translation type="unfinished">Namespaces</translation>
+    </message>
+    <message>
+        <source>namespace</source>
+        <comment>trNamespace</comment>
+        <translation type="unfinished">namespace</translation>
+    </message>
+    <message>
+        <source>namespaces</source>
+        <comment>trNamespace</comment>
+        <translation type="unfinished">namespaces</translation>
+    </message>
+    <message>
+        <source>Author</source>
+        <comment>trAuthor</comment>
+        <translation>auteur</translation>
+    </message>
+    <message>
+        <source>Authors</source>
+        <comment>trAuthor</comment>
+        <translation>Auteurs</translation>
+    </message>
+    <message>
+        <source>author</source>
+        <comment>trAuthor</comment>
+        <translation>auteur</translation>
+    </message>
+    <message>
+        <source>authors</source>
+        <comment>trAuthor</comment>
+        <translation>auteurs</translation>
     </message>
 </context>
 <context>
