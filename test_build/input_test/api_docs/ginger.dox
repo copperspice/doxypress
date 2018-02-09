@@ -11,7 +11,7 @@
 \class Ginger
 \brief Test class to review how to document
 
-Ginger is a test class to review how documentation is generated in DoxyPress for CopperSpice specific syntax. 
+Ginger is a test class to review how documentation is generated in DoxyPress for CopperSpice specific syntax.
 
 The following should be valid links: Lemongrass::monthName and Lemongrass::monthName()
 
@@ -75,23 +75,21 @@ Indicates if the ginger should be grated. This only pertains to fresh ginger.
 /*!
 \fn bool Ginger::isSpice ()
 
-Documentation for a public static method. 
+Documentation for a public static method. Ginger is a spice so this method will always return true.
 
-Ginger is a spice so this method will always return true.
+This method will test a link where the parameter is variadic: \link grindSpices(Spices ...) \endlink
 
 */
-
 
 
 /*!
 \fn bool Ginger::isPowder ()
 
-Documentation for an inline public method. 
+Documentation for an inline public method.
 
 Powdered ginger should only be used for making a marinade like a Turkey Jerky recipe.
 
 */
-
 
 
 /*!
@@ -99,6 +97,14 @@ Powdered ginger should only be used for making a marinade like a Turkey Jerky re
 
 Documentation for a protected method.
 
+*/
+
+
+
+/*!
+\fn void Ginger::grindSpices(Spices ... data);
+
+Grind an assortment of spices.
 
 */
 
@@ -170,7 +176,7 @@ The isScriptTitle documentation is connected to a property.
 /*!
 \fn void Ginger::ready ()
 
-The ready method is a signal in Ginger. 
+The ready method is a signal in Ginger.
 
 */
 
@@ -178,7 +184,7 @@ The ready method is a signal in Ginger.
 /*!
 \fn void Ginger::titleChanged (QString title)
 
-The titleChanged method is a signal in Ginger. 
+The titleChanged method is a signal in Ginger.
 
 */
 
@@ -186,7 +192,7 @@ The titleChanged method is a signal in Ginger.
 /*!
 \fn void Ginger::newTitle (QString)
 
-The titleChanged method is a public slot in Ginger. 
+The titleChanged method is a public slot in Ginger.
 
 */
 
@@ -194,7 +200,7 @@ The titleChanged method is a public slot in Ginger.
 /*!
 \fn void Ginger::someProtectedSlot ()
 
-The someProtectedSlot method is a protected slot in Ginger. 
+The someProtectedSlot method is a protected slot in Ginger.
 
 */
 
@@ -202,7 +208,7 @@ The someProtectedSlot method is a protected slot in Ginger.
 /*!
 \fn void Ginger::somePrivateSlot (int)
 
-The somePrivateSlot titleChanged method is a private slot in Ginger. 
+The somePrivateSlot titleChanged method is a private slot in Ginger.
 
 */
 
@@ -231,7 +237,7 @@ This is a private signal in Ginger.
 */
 
 
-/*! 
+/*!
 \fn void Ginger::test_D(int data[][42], void (*ptr)(int,QString *))
 
 This is a protectred signal in Ginger.
@@ -282,14 +288,14 @@ This is another name for Jamaican ginger.
 /*!
 \enum Ginger::Spices
 
-An enum list of different Spices. 
+An enum list of different Spices.
 
 The possible values are:
 
    \li mint
    \li basil
    \li Salt
-   \li Pepper 
+   \li Pepper
    \li cloves
 
 */
@@ -298,7 +304,7 @@ The possible values are:
 /*!
 \enum Ginger::Shapes
 
-An enum list of different Shapes. 
+An enum list of different Shapes.
 
 */
 

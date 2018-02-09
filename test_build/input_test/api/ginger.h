@@ -95,6 +95,8 @@ class Ginger : public CSObject
          m_favorite = data;
       }
 
+      void grindSpices(Spices ... data);
+
       CS_SLOT_1(Public, void newTitle(QString))
       CS_SLOT_2(newTitle)
 

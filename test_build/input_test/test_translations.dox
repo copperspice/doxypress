@@ -9,49 +9,71 @@
 
 /**
 \page translation-test  Translation Test
-This page contains samples of the DoxyPress translation phrases. In addition to English the following translation files have been added to DoxyPress. To see the following phrases in one of these languages simply select the corresponding language in your project file.
 
+This page contains samples of the DoxyPress translation phrases. In addition to English there are several translation files
+which have been added to DoxyPress. To view this sample document in another language you will need to generate it using
+DoxyPress. You can edit the project file by hand or use our DoxyPressApp to select a different language. From the
+DoxyPressApp go to the drop down for "Output Language" which is located on the Build Settings tab under Project
+Configuration.
+
+   \li Dutch
    \li French
    \li German
    \li Italian
-   \li Spanish 
-
-If you find a translation which is incorrect please submit a report on forum.copperspice.com in the DoxyPress issues topic. If you need a different translation file let us know or help us generate the translations.  The untranslated files can be found in the DoxyPress source in Resources/Translations.
-
-
-   \li (English) Public Typedefs
-
-       $trPublicTypedefs      
+   \li Polish
+   \li Portuguese
+   \li Russian
+   \li Spanish
 
 
-   \li (English) Protected Typedefs
-
-       $trProtectedTypedefs
-
-
-   \li (English) Private Typedefs
-
-       $trPrivateTypedefs
+If you find a translation which is incorrect please submit a report to <b>forum.copperspice.com</b> in the DoxyPress issues topic.
+If you need a different translation file let us know or help us generate the translations. The untranslated files can be
+found in the DoxyPress source in <b>resources/translations</b>.
 
 
-   \li (English) Constructor & Destructor Documentation
+   \li Public Typedefs
+
+       $trPublicTypedefs
+
+
+   \li Protected Member Functions
+
+       $trProtectedMembers
+
+
+   \li Private Signals
+
+       $trPrivateSlots
+
+
+   \li Constructor & Destructor Documentation
 
        $trConstructorDocumentation
 
 
-   \li (English) Modules Description
+   \li Modules Description
 
        $trModulesDescription
 
 
-   \li (English) Deprecated List
+   \li Deprecated List
 
        $trDeprecatedList
 
 
-   \li (English) Legend Docs
+<br>
+To view the 'Graph Legend' as generated HTML refer to: <a class="www-link" href="graph_legend.html">Legend</a>
+
+
+The following is the contents of the 'Graph Legend' as it appears in the langugage translation file.
+
+   \li Legend Docs
 
        $trLegendDocs
+
+
+
+
 
 <br>
 

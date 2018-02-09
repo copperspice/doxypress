@@ -114,6 +114,7 @@
             ""
         ],
         "mscgen-path": "",
+        "plantuml-cfg-file": "",
         "plantuml-inc-path": [
             ""
         ],
@@ -399,7 +400,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.2.11"
+        "project-version": "1.2.12"
     },
     "source": {
         "clang-flags": [
