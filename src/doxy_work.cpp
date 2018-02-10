@@ -398,7 +398,7 @@ struct ReadDirArgs {
    QString resolveSymlink(QString path);
    void resolveUserReferences();
 
-   void readTagFile(QSharedPointer<Entry> root, const QString &tl);
+   void readTagFile(QSharedPointer<Entry> root, const QString &tag_file);
 
    bool scopeIsTemplate(QSharedPointer<Definition> d);
    ArgumentList substituteTemplatesInArgList(const QVector<ArgumentList> &srcTempArgLists, QVector<ArgumentList> &dstTempArgLists,
@@ -549,7 +549,6 @@ void processFiles()
 
    // update project data
    Config::setList("exclude-patterns", exclPatterns);
-
    searchInputFiles();
 
    // **  Note: the order of the function calls below are important
@@ -560,12 +559,11 @@ void processFiles()
 
    msg("Parse tag files\n");
 
+   const QStringList tagFileList = Config::getList("tag-files");
    QSharedPointer<Entry> root = QMakeShared<Entry>();
 
-   const QStringList tagFileList = Config::getList("tag-files");
-
-   for (auto s : tagFileList) {
-      readTagFile(root, csPrintable(s));
+   for (const auto &s : tagFileList) {
+      readTagFile(root, s);
       root->createNavigationIndex(QSharedPointer<FileDef>());          // BROOM - fix (saving a nullptr which gets changed later on)
    }
 
@@ -9551,37 +9549,37 @@ QString  Doxy_Work::resolveSymlink(QString  path)
    return QDir::cleanPath(result);
 }
 
-void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const QString &tagLine)
+void Doxy_Work::readTagFile(QSharedPointer<Entry> root, const QString &tagFile)
 {
-   QString fileName;
-   QString destName;
+   QString fname;
+   QString url;
 
-   int eqPos = tagLine.indexOf('=');
+   int pos = tagFile.indexOf('=');
 
-   if (eqPos != -1) {
+   if (pos != -1) {
       // tag command contains a destination
-      fileName = tagLine.left(eqPos).trimmed();
-      destName = tagLine.right(tagLine.length() - eqPos - 1).trimmed();
+      fname = tagFile.left(pos).trimmed();
+      url   = tagFile.right(tagFile.length() - pos - 1).trimmed();
 
-      QFileInfo fi(fileName);
-      Doxy_Globals::tagDestinationDict.insert(fi.absoluteFilePath(), destName);
+      QFileInfo fi(fname);
+      Doxy_Globals::tagDestinationDict.insert(fi.absoluteFilePath(), url);
 
    } else {
-      fileName = tagLine;
+      fname = tagFile;
 
    }
 
-   QFileInfo fi(fileName);
+   QFileInfo fi(fname);
    if (! fi.exists() || ! fi.isFile()) {
-      err("Tag file `%s' does not exist or is not a file\n", csPrintable(fileName));
+      err("Tag file `%s' does not exist or is not a file\n", csPrintable(fname));
       return;
    }
 
-   if (! destName.isEmpty()) {
-      msg("Reading tag file `%s', location `%s'\n", csPrintable(fileName), csPrintable(destName));
+   if (! url.isEmpty()) {
+      msg("Reading tag file `%s', location `%s'\n", csPrintable(fname), csPrintable(url));
 
    } else {
-      msg("Reading tag file `%s'\n", csPrintable(fileName));
+      msg("Reading tag file `%s'\n", csPrintable(fname));
    }
 
    parseTagFile(root, fi.absoluteFilePath());
