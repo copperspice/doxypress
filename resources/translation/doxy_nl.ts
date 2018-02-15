@@ -22,7 +22,7 @@
     </message>
     <message>
         <source>These are not member functions</source>
-        <translation>Dit zijn geen lidfuncties</translation>
+        <translation>(Merk op dat dit geen member functies zijn.)</translation>
     </message>
     <message>
         <source>Detailed Description</source>
@@ -70,11 +70,11 @@
     </message>
     <message>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
-        <translation>Automatisch gegenereerd door DoxyPress voor %1 uit de broncode.</translation>
+        <translation>Automatisch gegenereerd door DoxyPress voor %1 uit de programmatekst.</translation>
     </message>
     <message>
         <source>Generated automatically by DoxyPress from the source code.</source>
-        <translation>Automatisch gegenereerd door DoxyPress uit de broncode.</translation>
+        <translation>Automatisch gegenereerd door DoxyPress uit de programmatekst.</translation>
     </message>
     <message>
         <source>enum name</source>
@@ -98,7 +98,7 @@
     </message>
     <message>
         <source>Related Pages</source>
-        <translation>Gerelateerde pagina&apos;s</translation>
+        <translation>Gerelateerde pagina's</translation>
     </message>
     <message>
         <source>Examples</source>
@@ -126,7 +126,7 @@
     </message>
     <message>
         <source>Here are the classes, structs, unions and interfaces with brief descriptions:</source>
-        <translation></translation>
+        <translation>Hieronder volgen de klassen, structs en unions met voor elk een korte beschrijving:</translation>
     </message>
     <message>
         <source>Here is a list of all struct and union fields with links to the structures/unions they belong to:</source>
@@ -166,7 +166,7 @@
     </message>
     <message>
         <source>Here is a list of all related documentation pages:</source>
-        <translation></translation>
+        <translation>Hieronder volgt de lijst met alle pagina's die gerelateerde documentatie bevatten:</translation>
     </message>
     <message>
         <source>Here is a list of all modules:</source>
@@ -286,7 +286,7 @@
     </message>
     <message>
         <source>Inheritance diagram for %1:</source>
-        <translation></translation>
+        <translation>Klasse diagram voor %1:</translation>
     </message>
     <message>
         <source>For internal use only.</source>
@@ -410,11 +410,11 @@
     </message>
     <message>
         <source>%1 File Reference</source>
-        <translation></translation>
+        <translation>%1 Bestand Referentie</translation>
     </message>
     <message>
         <source>%1 Namespace Reference</source>
-        <translation></translation>
+        <translation>%1 Namespace Referentie</translation>
     </message>
     <message>
         <source>Public Member Functions</source>
@@ -470,19 +470,19 @@
     </message>
     <message>
         <source>Inherits %1.</source>
-        <translation></translation>
+        <translation>Erft over van %1.</translation>
     </message>
     <message>
         <source>Inherited by %1.</source>
-        <translation></translation>
+        <translation>Wordt overgeërfd door %1.</translation>
     </message>
     <message>
         <source>Reimplemented from %1.</source>
-        <translation></translation>
+        <translation>Nieuwe implementatie van %1.</translation>
     </message>
     <message>
         <source>Reimplemented in %1.</source>
-        <translation></translation>
+        <translation>Opnieuw geïmplementeerd in %1.</translation>
     </message>
     <message>
         <source>Namespace Members</source>
@@ -582,11 +582,11 @@
     </message>
     <message>
         <source>Definition at line @0 of file @1.</source>
-        <translation></translation>
+        <translation>De definitie bevindt zich op regel @0 in het bestand @1.</translation>
     </message>
     <message>
         <source>Definition in file @0.</source>
-        <translation></translation>
+        <translation>De definitie bevindt zich in het bestand @0.</translation>
     </message>
     <message>
         <source>Deprecated</source>
@@ -594,11 +594,11 @@
     </message>
     <message>
         <source>Collaboration diagram for %1:</source>
-        <translation></translation>
+        <translation>Collaboratie diagram voor %1:</translation>
     </message>
     <message>
         <source>Include dependency graph for %1:</source>
-        <translation></translation>
+        <translation>Include afhankelijkheidsgraaf voor %1:</translation>
     </message>
     <message>
         <source>Constructor &amp; Destructor Documentation</source>
@@ -606,11 +606,11 @@
     </message>
     <message>
         <source>Go to the source code of this file.</source>
-        <translation></translation>
+        <translation>Ga naar de broncode van dit bestand.</translation>
     </message>
     <message>
         <source>Go to the documentation of this file.</source>
-        <translation></translation>
+        <translation>Ga naar de documentatie van dit bestand.</translation>
     </message>
     <message>
         <source>Precondition</source>
@@ -626,7 +626,7 @@
     </message>
     <message>
         <source>Initial value:</source>
-        <translation></translation>
+        <translation>Initiële waarde:</translation>
     </message>
     <message>
         <source>code</source>
@@ -634,15 +634,15 @@
     </message>
     <message>
         <source>Graphical Class Hierarchy</source>
-        <translation></translation>
+        <translation>Grafische Klasse Hiërarchie</translation>
     </message>
     <message>
         <source>Go to the graphical class hierarchy</source>
-        <translation></translation>
+        <translation>Ga naar de grafische klasse hiërarchie</translation>
     </message>
     <message>
         <source>Go to the textual class hierarchy</source>
-        <translation></translation>
+        <translation>Ga naar de tekstuele klasse hiërarchie</translation>
     </message>
     <message>
         <source>Page Index</source>
@@ -738,7 +738,7 @@
     </message>
     <message>
         <source>Package %1</source>
-        <translation></translation>
+        <translation>Package %1</translation>
     </message>
     <message>
         <source>Package List</source>
@@ -746,7 +746,7 @@
     </message>
     <message>
         <source>Here are the packages with brief descriptions (if available):</source>
-        <translation></translation>
+        <translation>Hier volgen de packages, elk met een korte beschrijving (indien aanwezig):</translation>
     </message>
     <message>
         <source>Packages</source>
@@ -914,7 +914,7 @@
     </message>
     <message>
         <source>%1 Directory Reference</source>
-        <translation></translation>
+        <translation>%1 Folder Referentie</translation>
     </message>
     <message>
         <source>Directory</source>
@@ -998,7 +998,7 @@
     </message>
     <message>
         <source>%1 Module Reference</source>
-        <translation></translation>
+        <translation>%1 Module Referentie</translation>
     </message>
     <message>
         <source>%1 Type Template Reference</source>
@@ -1082,63 +1082,63 @@
     </message>
     <message>
         <source>Type</source>
-        <translation></translation>
+        <translation>Type</translation>
     </message>
     <message>
         <source>Types</source>
-        <translation></translation>
+        <translation>Types</translation>
     </message>
     <message>
         <source>type</source>
-        <translation></translation>
+        <translation>type</translation>
     </message>
     <message>
         <source>types</source>
-        <translation></translation>
+        <translation>types</translation>
     </message>
     <message>
         <source>Subprogram</source>
-        <translation></translation>
+        <translation>Subprogramma</translation>
     </message>
     <message>
         <source>Subprograms</source>
-        <translation></translation>
+        <translation>Subprogrammas</translation>
     </message>
     <message>
         <source>subprogram</source>
-        <translation></translation>
+        <translation>subprogramma</translation>
     </message>
     <message>
         <source>subprograms</source>
-        <translation></translation>
+        <translation>subprogrammas</translation>
     </message>
     <message>
         <source>Type Constraints</source>
-        <translation></translation>
+        <translation>Type Beperkingen</translation>
     </message>
     <message>
         <source>%1 Relation</source>
-        <translation></translation>
+        <translation>%1 Relatie</translation>
     </message>
     <message>
         <source>Loading...</source>
-        <translation></translation>
+        <translation>Laden...</translation>
     </message>
     <message>
         <source>Global Namespace</source>
-        <translation></translation>
+        <translation>Globale Namespace</translation>
     </message>
     <message>
         <source>Searching...</source>
-        <translation></translation>
+        <translation>Zoeken...</translation>
     </message>
     <message>
         <source>No Matches</source>
-        <translation></translation>
+        <translation>Niets gevonden</translation>
     </message>
     <message>
         <source>File in %1</source>
-        <translation></translation>
+        <translation>Bestand in %1</translation>
     </message>
     <message>
         <source>Includes file in %1</source>
@@ -1154,7 +1154,7 @@
     </message>
     <message>
         <source>Directory dependency graph for %1:</source>
-        <translation></translation>
+        <translation>Folder afhankelijkheidsgraaf voor %1</translation>
     </message>
     <message>
         <source>detail level</source>
@@ -1173,24 +1173,24 @@
         <translation></translation>
     </message>
     <message>
-        <source>The documentation for this enum was generated  from the following files:</source>
+        <source>The documentation for this enum was generated from the following files:</source>
         <translation></translation>
     </message>
     <message>
         <source>%1 Enum Reference</source>
-        <translation></translation>
+        <translation>%1 Enum Referentie</translation>
     </message>
     <message>
         <source>%1 inherited from %2</source>
-        <translation></translation>
+        <translation>%1 overgeërfd van %2</translation>
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation></translation>
+        <translation>Wordt aangeboden door category @0.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation></translation>
+        <translation>Uitbereiding van klasse @0.</translation>
     </message>
     <message>
         <source>%1 Constant Group Reference</source>
@@ -1198,11 +1198,11 @@
     </message>
     <message>
         <source>%1 Service Reference</source>
-        <translation></translation>
+        <translation>%1 Service</translation>
     </message>
     <message>
         <source>%1 Singleton Reference</source>
-        <translation></translation>
+        <translation>%1 Singleton Referentie</translation>
     </message>
     <message>
         <source>The documentation for this service was generated from the following file:</source>
@@ -1222,7 +1222,7 @@
     </message>
     <message>
         <source>Additional Inherited Members</source>
-        <translation></translation>
+        <translation>Additionele Overgeërfde Members</translation>
     </message>
     <message>
         <source>click to enable panel synchronization</source>
@@ -1490,27 +1490,27 @@ De pijlen hebben de volgende betekenis:
     <message>
         <source>Namespaces</source>
         <comment>trNamespaces</comment>
-        <translation type="unfinished">Namespaces</translation>
+        <translation>Namespaces</translation>
     </message>
     <message>
         <source>Namespace</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">Namespace</translation>
+        <translation>Namespace</translation>
     </message>
     <message>
         <source>Namespaces</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">Namespaces</translation>
+        <translation>Namespaces</translation>
     </message>
     <message>
         <source>namespace</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">namespace</translation>
+        <translation>namespace</translation>
     </message>
     <message>
         <source>namespaces</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">namespaces</translation>
+        <translation>namespaces</translation>
     </message>
     <message>
         <source>Author</source>

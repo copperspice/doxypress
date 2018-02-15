@@ -18,7 +18,7 @@
     <name>doxy-text</name>
     <message>
         <source>Related Functions</source>
-        <translation>Funzioni correlate</translation>
+        <translation>Si noti che queste non sono funzioni membro.</translation>
     </message>
     <message>
         <source>These are not member functions</source>
@@ -26,15 +26,15 @@
     </message>
     <message>
         <source>Detailed Description</source>
-        <translation>Descrizione Dettagliata</translation>
+        <translation>Descrizione dettagliata</translation>
     </message>
     <message>
         <source>Member Typedef Documentation</source>
-        <translation>Gli Typedef Documentazione</translation>
+        <translation>Documentazione delle ridefinizioni dei tipi (typedef)</translation>
     </message>
     <message>
         <source>Member Enumeration Documentation</source>
-        <translation>Gli Enumeration Documentazione</translation>
+        <translation>Documentazione dei tipi enumerati (enum)</translation>
     </message>
     <message>
         <source>Member Function Documentation</source>
@@ -42,11 +42,11 @@
     </message>
     <message>
         <source>Field Documentation</source>
-        <translation>Campo Documentazione</translation>
+        <translation>Documentazione dei campi</translation>
     </message>
     <message>
         <source>Member Data Documentation</source>
-        <translation>Documentazione membro dati</translation>
+        <translation>Documentazione dei membri dato</translation>
     </message>
     <message>
         <source>More...</source>
@@ -62,11 +62,11 @@
     </message>
     <message>
         <source>This is the complete list of members for </source>
-        <translation>Questa è la lista completa dei membri per </translation>
+        <translation>Questo è l'elenco completo di tutti i membri di </translation>
     </message>
     <message>
         <source>, including all inherited members.</source>
-        <translation>, Compresi tutti i membri ereditati.</translation>
+        <translation>, inclusi tutti i membri ereditati.</translation>
     </message>
     <message>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
@@ -222,7 +222,7 @@
     </message>
     <message>
         <source>Macros</source>
-        <translation>Macro</translation>
+        <translation>Definizioni</translation>
     </message>
     <message>
         <source>Public Typedefs</source>
@@ -258,7 +258,7 @@
     </message>
     <message>
         <source>Macro Definition Documentation</source>
-        <translation>Definizione Documentazione Macro</translation>
+        <translation>Documentazione delle definizioni</translation>
     </message>
     <message>
         <source>Typedef Documentation</source>
@@ -286,7 +286,7 @@
     </message>
     <message>
         <source>Inheritance diagram for %1:</source>
-        <translation>Schema di ereditarietà per %1:</translation>
+        <translation>Diagramma delle classi per %1:</translation>
     </message>
     <message>
         <source>For internal use only.</source>
@@ -342,7 +342,7 @@
     </message>
     <message>
         <source>Friends And Related Function Documentation</source>
-        <translation>Friends And Funzione Documentazione correlata</translation>
+        <translation>Documentazione dei friend e delle funzioni collegate</translation>
     </message>
     <message>
         <source>%1 Class Template Reference</source>
@@ -414,7 +414,7 @@
     </message>
     <message>
         <source>%1 Namespace Reference</source>
-        <translation>%1 Namespace riferimento</translation>
+        <translation>Riferimenti per il namespace %1</translation>
     </message>
     <message>
         <source>Public Member Functions</source>
@@ -434,35 +434,35 @@
     </message>
     <message>
         <source>Static Public Member Functions</source>
-        <translation>Statici Membri pubblici</translation>
+        <translation>Membri pubblici statici</translation>
     </message>
     <message>
         <source>Protected Member Functions</source>
-        <translation>Funzioni membro protette</translation>
+        <translation>Membri protetti</translation>
     </message>
     <message>
         <source>Public Slots</source>
-        <translation>Slot pubblici</translation>
+        <translation>Slots pubblici</translation>
     </message>
     <message>
         <source>Protected Slots</source>
-        <translation>Slot protetti</translation>
+        <translation>Slots protetti</translation>
     </message>
     <message>
         <source>Static Protected Member Functions</source>
-        <translation>Statici funzioni membro protette</translation>
+        <translation>Membri protetti statici</translation>
     </message>
     <message>
         <source>Private Member Functions</source>
-        <translation>Utente privati ​​Funzioni</translation>
+        <translation>Membri privati</translation>
     </message>
     <message>
         <source>Private Slots</source>
-        <translation>Slot privati</translation>
+        <translation>Slots privati</translation>
     </message>
     <message>
         <source>Static Private Member Functions</source>
-        <translation>Statici utente privati ​​Funzioni</translation>
+        <translation>Membri privati statici</translation>
     </message>
     <message>
         <source>, and </source>
@@ -762,7 +762,7 @@
     </message>
     <message>
         <source>Bug List</source>
-        <translation>Elenco Bug</translation>
+        <translation>Lista dei bug</translation>
     </message>
     <message>
         <source>Index</source>
@@ -818,7 +818,7 @@
     </message>
     <message>
         <source>References</source>
-        <translation>Riferimenti</translation>
+        <translation>Referenzia</translation>
     </message>
     <message>
         <source>Implements %1.</source>
@@ -830,11 +830,11 @@
     </message>
     <message>
         <source>Table of Contents</source>
-        <translation>sommario</translation>
+        <translation>Sommario</translation>
     </message>
     <message>
         <source>Deprecated List</source>
-        <translation>Elenco Sconsigliata</translation>
+        <translation>Lista degli elementi deprecati</translation>
     </message>
     <message>
         <source>Events</source>
@@ -842,39 +842,39 @@
     </message>
     <message>
         <source>Event Documentation</source>
-        <translation>Documentazione Evento</translation>
+        <translation>Documentazione degli eventi</translation>
     </message>
     <message>
         <source>Package Types</source>
-        <translation>Tipi di pacchetti</translation>
+        <translation>Tipi con visibilità di package</translation>
     </message>
     <message>
         <source>Package Functions</source>
-        <translation>Funzioni Pacchetto</translation>
+        <translation>Funzioni con visibilità di package</translation>
     </message>
     <message>
         <source>Static Package Functions</source>
-        <translation>Funzioni pacchetti statici</translation>
+        <translation>Funzioni statiche con visibilità di package</translation>
     </message>
     <message>
         <source>Package Attributes</source>
-        <translation>Attributi della confezione</translation>
+        <translation>Attributi con visibilità di package</translation>
     </message>
     <message>
         <source>Static Package Attributes</source>
-        <translation>Attributi pacchetti statici</translation>
+        <translation>Attributi statici con visibilità di packag</translation>
     </message>
     <message>
         <source>All</source>
-        <translation>Tutti</translation>
+        <translation>Tutto</translation>
     </message>
     <message>
         <source>Here is the call graph for this function:</source>
-        <translation>Ecco il grafo delle chiamate per questa funzione:</translation>
+        <translation>Questo è il grafo delle chiamate per questa funzione:</translation>
     </message>
     <message>
         <source>Search Results</source>
-        <translation>Risultati Di Ricerca</translation>
+        <translation>Risultati della ricerca</translation>
     </message>
     <message>
         <source>Sorry, no documents matching your query.</source>
@@ -890,15 +890,15 @@
     </message>
     <message>
         <source>Matches:</source>
-        <translation>Partite:</translation>
+        <translation>Corrispondenze:</translation>
     </message>
     <message>
         <source>%1 Source File</source>
-        <translation>%1 Fonte File</translation>
+        <translation>File sorgente %1</translation>
     </message>
     <message>
         <source>Directory Hierarchy</source>
-        <translation>Directory Gerarchia</translation>
+        <translation>Gerarchia delle directory</translation>
     </message>
     <message>
         <source>Directory Documentation</source>
@@ -906,7 +906,7 @@
     </message>
     <message>
         <source>Directories</source>
-        <translation>Elenchi</translation>
+        <translation>Directory"</translation>
     </message>
     <message>
         <source>This directory hierarchy is sorted roughly, but not completely, alphabetically:</source>
@@ -1134,7 +1134,7 @@
     </message>
     <message>
         <source>No Matches</source>
-        <translation>Nessun Risultato</translation>
+        <translation>Nessun risultato</translation>
     </message>
     <message>
         <source>File in %1</source>
@@ -1146,11 +1146,11 @@
     </message>
     <message>
         <source>Bibliography</source>
-        <translation>Bibliografia</translation>
+        <translation>Riferimenti bibliografici</translation>
     </message>
     <message>
         <source>Copyright</source>
-        <translation>Diritto D&apos;autore</translation>
+        <translation>Diritto D'autore</translation>
     </message>
     <message>
         <source>Directory dependency graph for %1:</source>
@@ -1234,7 +1234,7 @@
     </message>
     <message>
         <source>Class Methods</source>
-        <translation>I metodi di classe</translation>
+        <translation>Metodi della classe</translation>
     </message>
     <message>
         <source>Instance Methods</source>
@@ -1242,7 +1242,7 @@
     </message>
     <message>
         <source>Method Documentation</source>
-        <translation>Metodo Documentazione</translation>
+        <translation>Documentazione dei metodi</translation>
     </message>
     <message>
         <source>Exported Interfaces</source>
@@ -1250,11 +1250,11 @@
     </message>
     <message>
         <source>Included Services</source>
-        <translation>Servizi Inclusi</translation>
+        <translation>Servizi inclusi</translation>
     </message>
     <message>
         <source>Constant Groups</source>
-        <translation>Gruppi Constant</translation>
+        <translation>Gruppi di costanti</translation>
     </message>
     <message>
         <source>Modules</source>
@@ -1320,10 +1320,62 @@
     </message>
     <message>
         <source>Dot Graph legend source code</source>
-        <translation>
+        <translation>Questa pagina spiega come interpretare i grafi generati da DoxyPress.
+
+Si consideri l'esempio seguente:
+
+\code
+/*! Classe invisibile per troncamento */
+class Invisible { };
+
+/*! Classe tronca, la relazione di ereditarietà è nascosta */
+class Truncated : public Invisible { };
+
+/* Classe non documentata con i commenti speciali di DoxyPress
+class Undocumented { };
+
+/*! Classe estesa mediante ereditarietà pubblica */
+class PublicBase : public Truncated { };
+
+/*! Classe templatizzata */
+template&lt;class T&gt; class Templ { };
+
+/*! Classe estesa mediante ereditarietà protetta*
+class ProtectedBase { };
+
+/*! Classe estesa mediante ereditarietà privata*
+class PrivateBase { };
+
+/*! Classe utilizzata dalla classe Inherited *
+class Used { };\n\n"
+
+/*! Classe che eredita da varie classi*/
+class Inherited : public PublicBase, protected ProtectedBase, private PrivateBase,
+                  public Undocumented, public Templ&lt;int&gt;
+{
+  private:
+    Used *m_usedClass;
+}
+\endcode
+
+Verrà prodotto il grafo seguente:
 
 &lt;center&gt;&lt;img alt=&quot;[Class Graph]&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
 
+I riquadri nel grafo qui sopra hanno il seguente significato:
+
+\li Il riquadro grigio pieno rappresenta la struct o la classe per la quale il grafo è stato generato.
+\li Un riquadro con un bordo nero denota una struct o una classe documentata.
+\li Un riquadro con un bordo grigio indica una struct o una classe non documentata.
+\li Un riquadro con un bordo rosso indica una struct o una classe per la quale non sono mostrate tutte le relazioni di ereditarietà/contenimento (un grafo viene troncato se non rientra nei limiti prestabiliti).
+
+Le frecce hanno il seguente significato:
+
+\li Una freccia blu scuro indica una relazione di ereditarietà pubblica tra due classi.
+\li Una freccia verde indica un'ereditarietà protetta.
+\li Una freccia rossa indica un'ereditarietà privata.
+\li Una freccia viola tratteggiata indica che una classe è contenuta o usata da un'altra classe. La freccia viene etichettata con la o le variabili attraverso cui la struct o la classe puntata dalla freccia è accessibile.
+\li Una freccia gialla tratteggiata indica la relazione tra una istanza di un template e la classe templatizzata da cui è stata istanziata. La freccia viene etichettata con i parametri di template dell'istanza.
         </translation>
     </message>
     <message>
@@ -1439,27 +1491,27 @@
     <message>
         <source>Namespaces</source>
         <comment>trNamespaces</comment>
-        <translation type="unfinished">Namespace</translation>
+        <translation>Namespace</translation>
     </message>
     <message>
         <source>Namespace</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">Namespace</translation>
+        <translation>Namespace</translation>
     </message>
     <message>
         <source>Namespaces</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">Namespace</translation>
+        <translation>Namespace</translation>
     </message>
     <message>
         <source>namespace</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">namespace</translation>
+        <translation>namespace</translation>
     </message>
     <message>
         <source>namespaces</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished">spazi dei nomi</translation>
+        <translation>namespace</translation>
     </message>
     <message>
         <source>Author</source>

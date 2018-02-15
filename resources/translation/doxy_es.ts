@@ -30,7 +30,7 @@
     </message>
     <message>
         <source>Member Typedef Documentation</source>
-        <translation>Documentación de los &apos;Typedef&apos; miembros de la clase</translation>
+        <translation>Documentación de los 'Typedef' miembros de la clase</translation>
     </message>
     <message>
         <source>Member Enumeration Documentation</source>
@@ -70,11 +70,11 @@
     </message>
     <message>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
-        <translation>Generado automáticamente por DoxyPress para %1 desde el código fuente.</translation>
+        <translation>Generado automáticamente por DoxyPress para %1 del código fuente.</translation>
     </message>
     <message>
         <source>Generated automatically by DoxyPress from the source code.</source>
-        <translation>Generado automáticamente por DoxyPress partir del código fuente.</translation>
+        <translation>Generado automáticamente por DoxyPress del código fuente.</translation>
     </message>
     <message>
         <source>enum name</source>
@@ -110,11 +110,11 @@
     </message>
     <message>
         <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
-        <translation>Esta lista está ordenada la herencia más o menos, pero no completamente, por orden alfabético:</translation>
+        <translation>Esta lista de herencias esta ordenada aproximadamente por orden alfabético:</translation>
     </message>
     <message>
         <source>Here is a list of all files with brief descriptions:</source>
-        <translation>Aquí está una lista de todos los archivos con una breve descripción:</translation>
+        <translation>Lista de todos los archivos documentados y con descripciones breves:</translation>
     </message>
     <message>
         <source>Here is a list of all documented files with brief descriptions:</source>
@@ -1297,7 +1297,7 @@
     </message>
     <message>
         <source>Here is a list of all source code files with brief descriptions:</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista de todos los archivos con descripciones breves:</translation>
     </message>
     <message>
         <source>Module Index</source>
@@ -1306,7 +1306,7 @@
     </message>
     <message>
         <source>Package Typedefs</source>
-        <translation type="unfinished"></translation>
+        <translation>Typedefs paquetes</translation>
     </message>
     <message>
         <source>Data Structures</source>

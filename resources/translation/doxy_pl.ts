@@ -6,12 +6,12 @@
     <message>
         <source>1252</source>
         <comment>trRTFansicp</comment>
-        <translation>1252</translation>
+        <translation>1250</translation>
     </message>
     <message>
         <source>0</source>
         <comment>trRTFCharSet</comment>
-        <translation>0</translation>
+        <translation>238</translation>
     </message>
 </context>
 <context>
@@ -22,7 +22,7 @@
     </message>
     <message>
         <source>These are not member functions</source>
-        <translation type="unfinished"></translation>
+        <translation>(Zauważ, że to nie są metody klas.)</translation>
     </message>
     <message>
         <source>Detailed Description</source>
@@ -70,11 +70,11 @@
     </message>
     <message>
         <source>Generated automatically by DoxyPress for %1 from the source code.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wygenerowano automatycznie z kodu źródłowego programem DoxyPress dla %1.</translation>
     </message>
     <message>
         <source>Generated automatically by DoxyPress from the source code.</source>
-        <translation type="unfinished"></translation>
+        <translation>Wygenerowano automatycznie z kodu źródłowego programem DoxyPress.</translation>
     </message>
     <message>
         <source>enum name</source>
@@ -110,7 +110,8 @@
     </message>
     <message>
         <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
-        <translation type="unfinished"></translation>
+        <translation>Ta lista dziedziczenia posortowana jest z grubsza, "
+             "choć nie całkowicie, alfabetycznie:</translation>
     </message>
     <message>
         <source>Here is a list of all files with brief descriptions:</source>
@@ -162,11 +163,11 @@
     </message>
     <message>
         <source>Here is a list of all examples:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tutaj znajduje się lista wszystkich przykładów:</translation>
     </message>
     <message>
         <source>Here is a list of all related documentation pages:</source>
-        <translation type="unfinished"></translation>
+        <translation>Tutaj znajduje się lista wszystkich stron dokumentacji:</translation>
     </message>
     <message>
         <source>Here is a list of all modules:</source>
@@ -174,55 +175,55 @@
     </message>
     <message>
         <source>Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja</translation>
     </message>
     <message>
         <source>Hierarchical Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indeks hierarchiczny</translation>
     </message>
     <message>
         <source>Data Structure Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indeks struktur danych</translation>
     </message>
     <message>
         <source>Class Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indeks klas</translation>
     </message>
     <message>
         <source>File Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indeks plików</translation>
     </message>
     <message>
         <source>Module Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja grup</translation>
     </message>
     <message>
         <source>Data Structure Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja struktur danych</translation>
     </message>
     <message>
         <source>Class Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja klas</translation>
     </message>
     <message>
         <source>File Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja plików</translation>
     </message>
     <message>
         <source>Example Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja przykładów</translation>
     </message>
     <message>
         <source>Page Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja stron</translation>
     </message>
     <message>
         <source>Reference Manual</source>
-        <translation type="unfinished"></translation>
+        <translation>Podręcznik</translation>
     </message>
     <message>
         <source>Macros</source>
-        <translation>Makra</translation>
+        <translation>Definicje</translation>
     </message>
     <message>
         <source>Public Typedefs</source>
@@ -286,11 +287,11 @@
     </message>
     <message>
         <source>Inheritance diagram for %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Diagram dziedziczenia dla %1</translation>
     </message>
     <message>
         <source>For internal use only.</source>
-        <translation type="unfinished"></translation>
+        <translation>Tylko do użytku wewnętrznego.</translation>
     </message>
     <message>
         <source>Warning</source>
@@ -338,11 +339,11 @@
     </message>
     <message>
         <source>Friends</source>
-        <translation type="unfinished"></translation>
+        <translation>Przyjaciele</translation>
     </message>
     <message>
         <source>Friends And Related Function Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja przyjaciół i funkcji związanych</translation>
     </message>
     <message>
         <source>%1 Class Template Reference</source>
@@ -470,23 +471,23 @@
     </message>
     <message>
         <source>Inherits %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dziedziczy %1.</translation>
     </message>
     <message>
         <source>Inherited by %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Dziedziczona przez %1.</translation>
     </message>
     <message>
         <source>Reimplemented from %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reimplementowana z %1.</translation>
     </message>
     <message>
         <source>Reimplemented in %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Reimplementowana w  %1</translation>
     </message>
     <message>
         <source>Namespace Members</source>
-        <translation type="unfinished"></translation>
+        <translation>Składowe przestrzeni nazw</translation>
     </message>
     <message>
         <source>Here is a list of all namespace members with links to the namespace documentation for each member:</source>
@@ -498,11 +499,11 @@
     </message>
     <message>
         <source>Namespace Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indeks przestrzeni nazw</translation>
     </message>
     <message>
         <source>Namespace Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja przestrzeni nazw</translation>
     </message>
     <message>
         <source>The documentation for this class  was generated from the following file:</source>
@@ -686,31 +687,31 @@
     </message>
     <message>
         <source>Todo</source>
-        <translation type="unfinished"></translation>
+        <translation>Do zrobienia</translation>
     </message>
     <message>
         <source>Todo List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista rzeczy do zrobienia</translation>
     </message>
     <message>
         <source>Referenced by</source>
-        <translation type="unfinished"></translation>
+        <translation>Odwołania w</translation>
     </message>
     <message>
         <source>Remarks</source>
-        <translation type="unfinished"></translation>
+        <translation>Spostrzeżenia</translation>
     </message>
     <message>
         <source>Attention</source>
-        <translation type="unfinished"></translation>
+        <translation>Uwaga</translation>
     </message>
     <message>
         <source>This graph shows which files directly or indirectly include this file</source>
-        <translation type="unfinished"></translation>
+        <translation>Ten wykres pokazuje, które pliki bezpośrednio lub pośrednio załączają ten plik:</translation>
     </message>
     <message>
         <source>Since</source>
-        <translation type="unfinished"></translation>
+        <translation>Od</translation>
     </message>
     <message>
         <source>Graph Legend</source>
@@ -730,43 +731,43 @@
     </message>
     <message>
         <source>Properties</source>
-        <translation type="unfinished"></translation>
+        <translation>Właściwości</translation>
     </message>
     <message>
         <source>Property Documentation</source>
-        <translation type="unfinished"></translation>
+        <translation>Dokumentacja właściwości</translation>
     </message>
     <message>
         <source>Package %1</source>
-        <translation type="unfinished"></translation>
+        <translation>Pakie %1</translation>
     </message>
     <message>
         <source>Package List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista Pakietów</translation>
     </message>
     <message>
         <source>Here are the packages with brief descriptions (if available):</source>
-        <translation type="unfinished"></translation>
+        <translation>Oto lista pakietów wraz z krótkim opisem (o ile jest dostępny):</translation>
     </message>
     <message>
         <source>Packages</source>
-        <translation type="unfinished"></translation>
+        <translation>Pakiety</translation>
     </message>
     <message>
         <source>Value:</source>
-        <translation type="unfinished"></translation>
+        <translation>Wartość:</translation>
     </message>
     <message>
         <source>Bug</source>
-        <translation type="unfinished"></translation>
+        <translation>Błąd</translation>
     </message>
     <message>
         <source>Bug List</source>
-        <translation type="unfinished"></translation>
+        <translation>Lista błędów</translation>
     </message>
     <message>
         <source>Index</source>
-        <translation type="unfinished"></translation>
+        <translation>Indeks</translation>
     </message>
     <message>
         <source>File</source>
@@ -786,19 +787,19 @@
     </message>
     <message>
         <source>Page</source>
-        <translation type="unfinished"></translation>
+        <translation>Strona</translation>
     </message>
     <message>
         <source>Pages</source>
-        <translation type="unfinished"></translation>
+        <translation>Strony</translation>
     </message>
     <message>
         <source>page</source>
-        <translation type="unfinished"></translation>
+        <translation>strona</translation>
     </message>
     <message>
         <source>pages</source>
-        <translation type="unfinished"></translation>
+        <translation>strony</translation>
     </message>
     <message>
         <source>Member</source>
@@ -1246,7 +1247,7 @@
     </message>
     <message>
         <source>Exported Interfaces</source>
-        <translation type="unfinished"></translation>
+        <translation>Interfejsy</translation>
     </message>
     <message>
         <source>Included Services</source>
@@ -1320,10 +1321,61 @@
     </message>
     <message>
         <source>Dot Graph legend source code</source>
-        <translation>
+        <translation>Ta strona wyjaśnia jak interpretować wykresy, które są wygenerowane przez DoxyPress.
+
+Rozważ następujący przykład:
+
+\code
+/*! Klasa Niewidzialna z powodu okrojenia */
+class Niewidzialna { };
+
+/*! Klasa Okrojona, relacja dziedziczenia jest ukryta */"
+class Okrojona : public Niewidzialna { };
+
+/* Klasa nie udokumentowana komentarzami DoxyPress */
+class Nieudokumentowana { };
+
+/*! Klasa, która jest dziedziczona publicznie */
+class PublicznaBaza : public Okrojona { };
+
+/*! Szablon klasy */
+template&lt;class T&gt; class Templ { };
+
+/*! Klasa, która jest dziedziczona przy użyciu dziedziczenia chronionego */
+class ChronionaBaza { };
+
+/*! Klasa, która jest dziedziczona prywatnie */
+class PrywatnaBaza { };
+
+/*! Klasa, która jest użyta przez klasę Dziedziczona *
+class Uzyta { };
+
+/*! Superklasa, która dziedziczy kilka innych klas */\n"
+class Dziedziczona : public PublicznaBaza, protected ChronionaBaza, private PrywatnaBaza,
+                     public Nieudokumentowana, public Templ&lt;int&gt;
+{
+  private:
+    Uzyta *m_usedClass;
+}
+\endcode
+
+Rezultat na następującym wykresie:
 
 &lt;center&gt;&lt;img alt=&quot;[Class Graph]&quot; src=&quot;graph_legend.%1&quot;&gt;&lt;/center&gt;
 
+Prostokąty w powyższym wykresie mają następujące znaczenie:
+
+\li Wypełniony czarny prostokąt reprezentuje strukturę lub klasę dla której został wygenerowany wykres.
+\li Prostokąt z czarną obwolutą oznacza udokumentowaną strukturę lub klasę.
+\li Prostokąt z szarą obwolutą oznacza nieudokumentowaną strukturę lub klasę.
+\li Prostokąt z czerwoną obwolutą oznacza udokumentowaną strukturę lub klasę dla której nie są pokazane wszystkie relacje dziedziczenia/zawierania. Wykres jest okrojony, jeśli nie mieści się w określonych brzegach.
+
+Strzałki mają następujące znaczenie:
+
+\li Ciemno niebieska strzałka jest używana do wizualizacji relacji dziedziczenia publicznego pomiędzy dwiema klasami.
+\li Ciemno zielona strzałka jest używana dla dziedziczenia chronionego.
+\li Ciemno czerwona strzałka jest używana dla dziedziczenia prywatnego.
+\li Fioletowa przerywana strzałka jest używana jeśli klasa jest zawarta lub użyta przez inną klasę. Strzałka jest podpisana zmienną(ymi) przez które wskazywana klasa lub struktura jest dostępna.
         </translation>
     </message>
     <message>
@@ -1439,27 +1491,27 @@
     <message>
         <source>Namespaces</source>
         <comment>trNamespaces</comment>
-        <translation type="unfinished"></translation>
+        <translation>Przestrzenie nazw</translation>
     </message>
     <message>
         <source>Namespace</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished"></translation>
+        <translation>Przestrzeń nazw</translation>
     </message>
     <message>
         <source>Namespaces</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished"></translation>
+        <translation>Przestrzenie nazw</translation>
     </message>
     <message>
         <source>namespace</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished"></translation>
+        <translation>przestrzeń nazw</translation>
     </message>
     <message>
         <source>namespaces</source>
         <comment>trNamespace</comment>
-        <translation type="unfinished"></translation>
+        <translation>przestrzenie nazw</translation>
     </message>
     <message>
         <source>Author</source>
