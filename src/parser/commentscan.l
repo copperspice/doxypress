@@ -736,7 +736,8 @@ static inline void setOutput(OutputContext ctx)
             addXRefItem("deprecated", theTranslator->trDeprecated(), theTranslator->trDeprecatedList(), xrefAppendToPrev);
             break;
 
-         case XRef_Item:  // user defined list
+         case XRef_Item:
+            // user defined list
             addXRefItem(xrefItemKey, xrefItemTitle, xrefListTitle, xrefAppendToPrev);
             break;
 

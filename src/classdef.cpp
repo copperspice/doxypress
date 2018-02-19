@@ -1641,7 +1641,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
       }
 
       ol.startMemberDeclaration();
-      ol.startMemberItem(anchor(), false);
+      ol.startMemberItem(anchor(), 0);
 
       QString ctype = compoundTypeString();
       QString cname = displayName(! localNames);

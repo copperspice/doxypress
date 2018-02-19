@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -31,20 +31,20 @@
 #include <message.h>
 #include <util.h>
 
-//   http://www.cubic.org/source/archive/fileform/txt/man/ 
+//   http://www.cubic.org/source/archive/fileform/txt/man/
 
 static QString getSubdir()
 {
    QString dirName = Config::getString("man-subdir");
-  
-   if (dirName.isEmpty()) { 
+
+   if (dirName.isEmpty()) {
       dirName = "man" + Config::getString("man-extension");
    }
 
    return dirName;
 }
 
-ManGenerator::ManGenerator() 
+ManGenerator::ManGenerator()
    : OutputGenerator()
 {
    m_dir = Config::getString("man-output") + "/" + getSubdir();
@@ -52,7 +52,7 @@ ManGenerator::ManGenerator()
    col = 0;
 
    firstCol  = true;
-   paragraph = true;   
+   paragraph = true;
    upperCase = false;
 
    insideTabbing = false;
@@ -80,7 +80,7 @@ ManGenerator::~ManGenerator()
 //}
 
 void ManGenerator::init()
-{  
+{
    QString manOutput = Config::getString("man-output");
 
    QDir d(manOutput);
@@ -92,7 +92,7 @@ void ManGenerator::init()
 
    QString subdir = getSubdir();
    d.setPath(manOutput + "/" + subdir);
- 
+
    if (! d.exists() && ! QDir::current().mkpath(manOutput + "/" + subdir)) {
       err("Unable to create output directory %s/%s\n", csPrintable(manOutput), csPrintable(subdir));
       Doxy_Work::stopDoxyPress();
@@ -102,13 +102,13 @@ void ManGenerator::init()
 }
 
 static QString buildFileName(const QString &name)
-{  
+{
    if (name.isEmpty()) {
       return "noname";
    }
 
    QString fname;
-   
+
    const QChar *p  = name.constData();
    QChar c;
 
@@ -164,7 +164,7 @@ void ManGenerator::endFile()
 
 void ManGenerator::endTitleHead(const QString &, const QString &name)
 {
-   QString extension = Config::getString("man-extension");  
+   QString extension = Config::getString("man-extension");
 
    m_textStream << ".TH \"" << name << "\" " << extension << " \""
      << dateToString(false) << "\" \"";
@@ -251,7 +251,7 @@ void ManGenerator::writeObjectLink(const QString &, const QString &, const QStri
    endBold();
 }
 
-void ManGenerator::writeCodeLink(const QString &, const QString &, const QString &, 
+void ManGenerator::writeCodeLink(const QString &, const QString &, const QString &,
                                  const QString &name, const QString &)
 {
    docify(name);
@@ -311,15 +311,15 @@ void ManGenerator::docify(const QString &text)
    }
 
    for (auto c : text) {
-      
+
       switch (c.unicode()) {
-         case '-':  
-            m_textStream << "\\-"; 
+         case '-':
+            m_textStream << "\\-";
             break;
 
          case '.':
             m_textStream << "\\&.";
-            break; 
+            break;
 
          case '\\':
             m_textStream << "\\\\";
@@ -332,7 +332,7 @@ void ManGenerator::docify(const QString &text)
             break;
 
          case '\"':
-            c = '\''; 
+            c = '\'';
             // no break is correct
 
          default:
@@ -340,27 +340,27 @@ void ManGenerator::docify(const QString &text)
             col++;
             break;
       }
-   
-      firstCol = (c == '\n');      
+
+      firstCol = (c == '\n');
    }
 
    paragraph = false;
 }
 
 void ManGenerator::codify(const QString &str)
-{   
+{
    if (str.isEmpty()) {
       return;
    }
 
    int spacesToNextTabStop;
 
-   for (auto c : str) { 
-   
+   for (auto c : str) {
+
       switch (c.unicode()) {
          case '.':
             m_textStream << "\\&.";
-            break; 
+            break;
 
          case '\t':
             spacesToNextTabStop = Config::getInt("tab-size") - (col %  Config::getInt("tab-size"));
@@ -387,7 +387,7 @@ void ManGenerator::codify(const QString &str)
             m_textStream << c;
             firstCol = false;
             col++;
-            break;         
+            break;
       }
    }
 
@@ -492,7 +492,7 @@ void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, cons
 {
    // something to be done?
    if ( ! Config::getBool("man-links") ) {
-      return; 
+      return;
    }
 
    // the name of the link file is derived from the name of the anchor:
@@ -504,7 +504,7 @@ void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, cons
    if (i != -1) {
       baseName = baseName.right(baseName.length() - i - 2);
    }
-   
+
    // - remove dangerous characters and append suffix, then add dir prefix
    QString fname = m_dir + "/" + buildFileName(baseName);
    QFile linkfile(fname);
@@ -514,7 +514,7 @@ void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, cons
       if ( linkfile.open( QIODevice::WriteOnly ) ) {
          QTextStream linkstream;
 
-         linkstream.setDevice(&linkfile);       
+         linkstream.setDevice(&linkfile);
          linkstream << ".so " << getSubdir() << "/" << buildFileName(manName) << endl;
       }
    }

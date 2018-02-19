@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -60,14 +60,14 @@ class OutputList : public OutputDocInterface
 
 
    //  OutputDocInterface implementation
-   bool generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md, 
+   bool generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md,
                     const QString &docStr,bool indexWords, bool isExample, const QString &exampleName = 0,
                     bool singleLine = false, bool linkFromIndex = false);
 
    void writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
 
    bool parseText(const QString &textStr) override;
-  
+
    void startIndexSection(IndexSections is) {
       forall(&OutputGenerator::startIndexSection, is);
    }
@@ -126,7 +126,7 @@ class OutputList : public OutputDocInterface
 
    // void newParagraph()
    //    { forall(&OutputGenerator::newParagraph); }
-   
+
    void startParagraph(const QString &className = "") override {
       forall(&OutputGenerator::startParagraph, className);
    }
@@ -190,10 +190,10 @@ class OutputList : public OutputDocInterface
    void docify(const QString &text)  override {
       forall(&OutputGenerator::docify, text);
    }
- 
+
    void codify(const QString &s)  override {
       forall(&OutputGenerator::codify, s);
-   } 
+   }
 
    void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override {
       forall(&OutputGenerator::writeObjectLink, ref, file, anchor, name);
@@ -205,7 +205,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeCodeLink, ref, file, anchor, name, tooltip);
    }
 
-   void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl, const QString &desc, 
+   void writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl, const QString &desc,
                      const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo)  override {
       forall(&OutputGenerator::writeTooltip, id, docInfo, decl, desc, defInfo, declInfo);
    }
@@ -830,15 +830,15 @@ class OutputList : public OutputDocInterface
  private:
    void debug();
    void clear();
-  
+
    template<class BaseClass, class... Args, class... Ts>
    void forall( void (BaseClass::*func)(Args...), Ts&&... vs)  {
 
-      for (auto item : m_outputs ) {                              
+      for (auto item : m_outputs ) {
          if (item->isEnabled()) {
-            ((*item).*func)(vs...);           // BROOM - resolve when we update CS with operator->    
+            ((*item).*func)(vs...);           // BROOM - resolve when we update CS with operator->
          }
-      }      
+      }
    }
 
    QList<QSharedPointer<OutputGenerator>> m_outputs;

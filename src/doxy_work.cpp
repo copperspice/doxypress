@@ -8965,10 +8965,9 @@ void Doxy_Work::resolveUserReferences()
     for (auto si : Doxy_Globals::sectionDict) {
       QSharedPointer<PageDef> pd;
 
-      // hack: the items of a todo/test/bug/deprecated list are all fragments from
-      // different files, so the resulting section's all have the wrong file
-      // name (not from the todo/test/bug/deprecated list, but from the file in
-      // which they are defined). We correct this here by looking at the generated section labels
+      // hack: the items of a todo/test/bug/deprecated list are all fragments from different files
+      // resulting section's all have the wrong file name (not from the todo/test/bug/deprecated list,
+      // but from the file in which they are defined). Correct this here by looking at the generated section labels
 
       for (auto &rl : Doxy_Globals::xrefLists) {
          QString label = "_" + rl.listName();
