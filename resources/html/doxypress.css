@@ -318,6 +318,22 @@ tr.memlist {
    background-color: ##f0;
 }
 
+/* single row in brief description  */
+tr.deprecated  > td.memItemLeft
+{
+}
+
+/* single row in brief description  */
+tr.deprecated  > td.memItemRight::after
+{
+   content: "D";
+   float: right;
+   color: #FFFFFF;
+   background-color: #B6B6B6;
+   padding-left: 5px;
+   padding-right: 5px;
+}
+
 p.formulaDsp {
    text-align: center;
 }

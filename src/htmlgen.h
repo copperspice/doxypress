@@ -224,7 +224,7 @@ class HtmlGenerator : public OutputGenerator
    void startAnonTypeScope(int) override {}
    void endAnonTypeScope(int) override {}
 
-   void startMemberItem(const QString &anchor, int, const QString &inheritId) override;
+   void startMemberItem(const QString &anchor, int, const QString &inheritId, bool deprecated = false) override;
    void endMemberItem() override;
    void startMemberTemplateParams() override;
    void endMemberTemplateParams(const QString &anchor, const QString &inheritId) override;

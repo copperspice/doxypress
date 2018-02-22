@@ -620,7 +620,7 @@ void ManGenerator::endAnonTypeScope(int indentLevel)
    }
 }
 
-void ManGenerator::startMemberItem(const QString &, int, const QString &)
+void ManGenerator::startMemberItem(const QString &, int, const QString &, bool deprecated)
 {
    if (firstCol && !insideTabbing) {
       m_textStream << ".in +1c\n";

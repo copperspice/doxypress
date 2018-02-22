@@ -369,7 +369,7 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void endInlineHeader() = 0;
    virtual void startAnonTypeScope(int) = 0;
    virtual void endAnonTypeScope(int) = 0;
-   virtual void startMemberItem(const QString &, int, const QString &) = 0;
+   virtual void startMemberItem(const QString &, int, const QString &, bool deprecated = false) = 0;
    virtual void endMemberItem() = 0;
    virtual void startMemberTemplateParams() = 0;
    virtual void endMemberTemplateParams(const QString &, const QString &) = 0;

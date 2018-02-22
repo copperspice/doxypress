@@ -245,7 +245,7 @@ class LatexGenerator : public OutputGenerator
    void endInlineHeader() override;
    void startAnonTypeScope(int) override;
    void endAnonTypeScope(int) override;
-   void startMemberItem(const QString &, int, const QString &) override;
+   void startMemberItem(const QString &, int, const QString &, bool deprecated = false) override;
    void endMemberItem() override;
    void startMemberTemplateParams() override;
    void endMemberTemplateParams(const QString &, const QString &) override;

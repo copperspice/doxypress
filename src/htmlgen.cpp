@@ -1460,16 +1460,19 @@ void HtmlGenerator::endMemberList()
 //  0 = single column right aligned
 //  1 = double column left aligned
 //  2 = single column left aligned
-void HtmlGenerator::startMemberItem(const QString &anchor, int annoType, const QString &inheritId)
+void HtmlGenerator::startMemberItem(const QString &anchor, int annoType, const QString &inheritId, bool deprecated)
 {
-   DBG_HTML(m_textStream << "<!-- startMemberItem() -->" << endl)
-
    if (m_emptySection) {
       m_textStream << "<table class=\"memberdecls\">" << endl;
       m_emptySection = false;
    }
 
-   m_textStream << "<tr class=\"memitem:" << anchor;
+   if (deprecated) {
+      m_textStream << "<tr class=\"deprecated memitem:" << anchor;
+   } else {
+      m_textStream << "<tr class=\"memitem:" << anchor;
+   }
+
    if (! inheritId.isEmpty()) {
       m_textStream << " inherit " << inheritId;
    }
@@ -1517,7 +1520,6 @@ void HtmlGenerator::endMemberTemplateParams(const QString &anchor, const QString
 
 void HtmlGenerator::insertMemberAlign(bool templ)
 {
-   DBG_HTML(m_textStream << "<!-- insertMemberAlign -->" << endl)
    QString className = templ ? "memTemplItemRight" : "memItemRight";
 
    m_textStream << "&#160;</td><td class=\"" << className << "\" valign=\"bottom\">";
@@ -1525,8 +1527,6 @@ void HtmlGenerator::insertMemberAlign(bool templ)
 
 void HtmlGenerator::startMemberDescription(const QString &anchor, const QString &inheritId)
 {
-   DBG_HTML(m_textStream << "<!-- startMemberDescription -->" << endl)
-
    if (m_emptySection) {
       m_textStream << "<table class=\"memberdecls\">" << endl;
       m_emptySection = false;

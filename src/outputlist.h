@@ -311,8 +311,8 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endAnonTypeScope, i1);
    }
 
-   void startMemberItem(const QString &anchor, int i1, const QString &id = QString() ) {
-      forall(&OutputGenerator::startMemberItem, anchor, i1, id);
+   void startMemberItem(const QString &anchor, int i1, const QString &id = QString(), bool deprecated = false) {
+      forall(&OutputGenerator::startMemberItem, anchor, i1, id, deprecated);
    }
 
    void endMemberItem() {
@@ -344,7 +344,7 @@ class OutputList : public OutputDocInterface
    void endMemberGroup(bool last) {
       forall(&OutputGenerator::endMemberGroup, last);
    }
- 
+
   void insertMemberAlign(bool templ = false) {
       forall(&OutputGenerator::insertMemberAlign, templ);
    }
@@ -352,7 +352,7 @@ class OutputList : public OutputDocInterface
    void writeRuler() override {
       forall(&OutputGenerator::writeRuler);
    }
- 
+
   void writeAnchor(const QString &fileName, const QString &name) override {
       forall(&OutputGenerator::writeAnchor, fileName, name);
    }
@@ -368,7 +368,7 @@ class OutputList : public OutputDocInterface
    void startCodeLine(bool hasLineNumbers) override {
       forall(&OutputGenerator::startCodeLine, hasLineNumbers);
    }
- 
+
    void endCodeLine() override {
       forall(&OutputGenerator::endCodeLine);
    }

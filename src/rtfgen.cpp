@@ -1781,7 +1781,7 @@ void RTFGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname, 
 //  m_textStream << text;
 //}
 
-void RTFGenerator::startMemberItem(const QString &, int, const QString &)
+void RTFGenerator::startMemberItem(const QString &, int, const QString &, bool deprecated)
 {
    DBG_RTF(m_textStream << "{\\comment startMemberItem }" << endl)
    m_textStream << rtf_Style_Reset << rtf_BList_DepthStyle() << endl;    // set style to appropriate depth

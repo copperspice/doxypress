@@ -733,6 +733,9 @@ static inline void setOutput(OutputContext ctx)
             break;
 
          case XRef_Deprecated:
+            // ensure the current entry is marked
+            current->m_traits.setTrait(Entry::Virtue::Deprecated);
+
             addXRefItem("deprecated", theTranslator->trDeprecated(), theTranslator->trDeprecatedList(), xrefAppendToPrev);
             break;
 

@@ -1884,7 +1884,7 @@ void LatexGenerator::endMemberTemplateParams(const QString &, const QString &)
    }
 }
 
-void LatexGenerator::startMemberItem(const QString &, int annoType, const QString &)
+void LatexGenerator::startMemberItem(const QString &, int annoType, const QString &, bool deprecated)
 {
    if (! insideTabbing) {
       m_textStream << "\\item " << endl;

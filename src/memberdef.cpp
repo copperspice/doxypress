@@ -1435,7 +1435,11 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    }
 
-   ol.startMemberItem(anchor(), x, inheritId);
+   if (isDeprecated()) {
+      ol.startMemberItem(anchor(), x, inheritId, true);
+   } else {
+      ol.startMemberItem(anchor(), x, inheritId, false);
+   }
 
    // if there is no detailed description, write the anchor here
    bool detailsVisible = isDetailedSectionLinkable();
@@ -1484,6 +1488,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    // *** write type
    QString ltype(m_impl->type);
+
    if (m_impl->mtype == MemberType_Typedef) {
       ltype.prepend("typedef ");
    }
