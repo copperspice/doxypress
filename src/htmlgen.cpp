@@ -498,14 +498,13 @@ void HtmlCodeGenerator::docify(const QString &text)
    }
 }
 
-void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filename, const QString &anchor, int l)
+void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filename, const QString &anchor, int len)
 {
-   const int maxLineNrStr = 10;
-   char lineNumber[maxLineNrStr];
-   char lineAnchor[maxLineNrStr];
+   QString lineNumber;
+   QString lineAnchor;
 
-   qsnprintf(lineNumber, maxLineNrStr, "%5d", l);
-   qsnprintf(lineAnchor, maxLineNrStr, "l%05d", l);
+   lineNumber = QString("%1").arg(len, 5, 10);
+   lineAnchor = QString("l%1").arg(len, 5, 10,  QChar('0'));
 
    m_streamX << "<div class=\"line\">";
    m_streamX << "<a name=\"" << lineAnchor << "\"></a><span class=\"lineno\">";
@@ -521,13 +520,13 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
 }
 
 void HtmlCodeGenerator::writeCodeLink(const QString &ref, const QString &f, const QString &anchor,
-                                      const QString &name, const QString &tooltip)
+                  const QString &name, const QString &tooltip)
 {
    _writeCodeLink("code", ref, f, anchor, name, tooltip);
 }
 
 void HtmlCodeGenerator::_writeCodeLink(const QString &className, const QString &ref, const QString &f,
-                                       const QString &anchor, const QString &name, const QString &tooltip)
+                  const QString &anchor, const QString &name, const QString &tooltip)
 {
    if (! ref.isEmpty()) {
       m_streamX << "<a class=\"" << className << "Ref\" ";
@@ -548,7 +547,7 @@ void HtmlCodeGenerator::_writeCodeLink(const QString &className, const QString &
       m_streamX << "#" << anchor;
    }
 
-  m_streamX << "\"";
+   m_streamX << "\"";
 
    if (! tooltip.isEmpty()) {
       m_streamX << " title=\"" << tooltip << "\"";
@@ -562,7 +561,7 @@ void HtmlCodeGenerator::_writeCodeLink(const QString &className, const QString &
 }
 
 void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl,
-                                     const QString &desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo)
+                  const QString &desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo)
 {
    m_streamX << "<div class=\"ttc\" id=\"" << id << "\">";
    m_streamX << "<div class=\"ttname\">";

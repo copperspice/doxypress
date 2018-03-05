@@ -777,16 +777,15 @@ QString Definition::getSourceFileBase() const
 
 QString Definition::getSourceAnchor() const
 {
-   const int maxAnchorStrLen = 20;
-
-   char anchorStr[maxAnchorStrLen];
-   anchorStr[0] = '\0';
+   QString anchorStr;
 
    if (m_private->m_body_startLine != -1) {
+
       if (Htags::useHtags) {
-         qsnprintf(anchorStr, maxAnchorStrLen, "L%d",   m_private->m_body_startLine);
+         anchorStr = QString("L%1").arg(m_private->m_body_startLine);
+
       } else {
-         qsnprintf(anchorStr, maxAnchorStrLen, "l%05d", m_private->m_body_startLine);
+         anchorStr = QString("l%1").arg(m_private->m_body_startLine, 5, 10, QChar('0'));
       }
    }
 
@@ -1087,9 +1086,8 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   ol.disable(OutputGenerator::RTF);
                }
 
-               const int maxLineNrStr = 10;
-               char anchorStr[maxLineNrStr];
-               qsnprintf(anchorStr, maxLineNrStr, "l%05d", md->getStartBodyLine());
+               QString anchorStr;
+               anchorStr = QString("l%1").arg(md->getStartBodyLine(), 5, 10, QChar('0'));
 
                ol.writeObjectLink(0, md->getBodyDef()->getSourceFileBase(), anchorStr, name);
                ol.popGeneratorState();
