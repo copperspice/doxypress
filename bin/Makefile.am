@@ -295,6 +295,7 @@ noinst_HEADERS = \
    src/parse_md.h \
    src/parse_py.h \
    src/parse_tcl.h \
+   src/parse_xml.h \
    src/perlmodgen.h \
    src/plantuml.h \
    src/portable.h \
