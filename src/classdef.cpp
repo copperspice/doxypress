@@ -121,7 +121,6 @@ QString ClassDef::displayName(bool includeScope) const
       retval = "<" + retval.left(retval.length() - 2) + ">";
    }
 
-   // added 01/2016
    retval = renameNS_Aliases(retval);
 
    if (retval.indexOf('@') != -1) {

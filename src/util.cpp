@@ -1566,9 +1566,12 @@ static bool findOperator2(const QString &s, int i)
 static const char constScope[]   = { 'c', 'o', 'n', 's', 't', ':' };
 static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
-QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
+QString removeRedundantWhiteSpace(const QString &str_x, bool makePretty)
 {
    static bool cliSupport = Config::getBool("cpp-cli-support");
+
+   QString str = str_x.trimmed();
+   uint len    = str.length();
 
    bool allLetters = true;
 
@@ -1589,15 +1592,13 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
    QChar prevC;
    QChar nextC;
 
-   uint len = str.length();
    uint csp = 0;
    uint vsp = 0;
 
    for (uint i = 0; i < len; i++) {
       c = str.at(i);
 
-
-      // optimize
+      // get previous and next char
       if (i > 0) {
          prevC = str.at(i - 1);
       }
@@ -1686,7 +1687,10 @@ QString removeRedundantWhiteSpace(const QString &str, bool makePretty)
       } else if ((prevC == ')' && isId(c)) || (c == '\'' && prevC == ' ')  ||
                   (i > 1 && str.at(i - 2) == ' ' && prevC == ' ') ) {
 
-         retval += ' ';
+         if (! retval.endsWith(' ')) {
+            retval += ' ';
+         }
+
          retval += c;
 
          // fix spacing "var = 15"
@@ -2101,8 +2105,16 @@ QString argListToString(const ArgumentList &argList, bool useCanonicalType, bool
    for (auto &arg : argList)  {
       ++nextItem;
 
-      QString type1 = (useCanonicalType && ! arg.canType.isEmpty()) ? arg.canType : arg.type;
+      QString type1;
       QString type2;
+
+      if (useCanonicalType && ! arg.canType.isEmpty()) {
+         type1 = arg.canType;
+
+      } else {
+         type1 = arg.type;
+
+      }
 
       // deal with function pointers
       int i = type1.indexOf(")(");
@@ -3094,7 +3106,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
       }
 
       if (mType && mType->isTypedef()) {
-         // but via a typedef, +ts was added for bug 685125
+         // via a typedef, + ts was added for bug 685125
          result = resolvedType + ts;
 
       } else {
@@ -3148,6 +3160,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
          result = mType->typeString();
 
       }
+
 
    } else {
       // fallback
@@ -3266,8 +3279,9 @@ static QString extractCanonicalArgType(QSharedPointer<Definition> d, QSharedPoin
 
 // called from matchArguments2
 static bool matchArgument_Internal(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope,
-                  const Argument &srcArg, QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope,
-                  const Argument &dstArg)
+            const Argument &srcArg,
+            QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope,
+            const Argument &dstArg)
 {
    QString srcName = " " + srcArg.name;
    QString dstName = " " + dstArg.name;
@@ -3312,9 +3326,6 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
 {
 
 /*
-   * only valid for C, elected to disable since this should not be done without the consent of the user
-   * if this is really required add a user tag and reconsider the best way to actually implement
-
    // handle special case with void argument
    if (srcArgList.count() == 0 && dstArgList.count() == 1 && dstArgList.first().type == "void" ) {
       // special case for finding match between func() and func(void)
@@ -6477,14 +6488,19 @@ QString renameNS_Aliases(const QString &scope, bool fromTo)
       if (fromTo) {
 
          if (to.isEmpty()) {
-            // do the same for now - this may be incorrect
+            // not used, to can not be empty at this time
 
             QStringList list = retval.split(" ");
             retval = "";
 
             for (auto str : list) {
-               if (str.startsWith(from + "::") || str == from) {
-                  str.replace(0, from.length(), to);
+
+               if (str.startsWith(from + "::")) {
+                  str.replace(0, from.length() + 2, to);
+
+               } else if (str == from) {
+                  str = "";
+
                }
 
                if (retval.isEmpty()) {
@@ -6519,7 +6535,7 @@ QString renameNS_Aliases(const QString &scope, bool fromTo)
          // reverse used in docparser
 
          if (to.isEmpty()) {
-            // hold on this for now
+            // not used, to can not be empty at this time
 
          } else {
             QStringList list = retval.split(" ");

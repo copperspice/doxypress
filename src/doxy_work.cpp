@@ -2465,7 +2465,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
 
       fullName = stripAnonymousNamespaceScope(fullName);
 
-      // change the namespace to be match the ns alias
+      // change the namespace to match the ns alias
       auto iter = Doxy_Globals::nsRenameAlias.find(fullName);
 
       if (iter != Doxy_Globals::nsRenameAlias.end()) {
@@ -2559,9 +2559,9 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
             QSharedPointer<Definition> d = findScopeFromQualifiedName(Doxy_Globals::globalScope, fullName,
                   QSharedPointer<FileDef>(), tagInfo);
 
-            if (d == 0)  {
-               // we did not find anything, create the scope artificially
-               // anyway, so we can at least relate scopes properly.
+            if (d == nullptr)  {
+               // did not find anything, create the scope artificially
+               // so we can at least relate scopes properly
 
                d = buildScopeFromQualifiedName(fullName, fullName.count("::"), nd->getLanguage(), tagInfo);
 
@@ -5201,7 +5201,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
          }
 
          QSharedPointer<ClassDef> baseClass = getResolvedClass(scope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
-                                                               &templSpec, mode == Undocumented, true);
+                  &templSpec, mode == Undocumented, true);
 
          if (! isRecursiveBaseClass(ptrEntry->m_entryName, baseClassName) || isExplicitGlobalScope
                || (ptrEntry->m_srcLang == SrcLangExt_IDL &&
@@ -5257,7 +5257,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                   }
 
                   baseClass = getResolvedClass(scope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
-                                               0, mode == Undocumented, true);
+                                 0, mode == Undocumented, true);
                }
 
             } else if (baseClass && !templSpec.isEmpty())  {
@@ -6310,7 +6310,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
    // the class name can also be a namespace name, we decide this later.
    // if a related class name is specified and the class name could
-   // not be derived from the function declaration, then use the related field
+   // not be derived from the function declaration then use the related field
 
    if (! root->getData(EntryKey::Related_Class).isEmpty()) {
       // related member, prefix user specified scope
@@ -6584,8 +6584,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                      bool matching = md->isVariable() || md->isTypedef();
 
-                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(), argList, cd, fd,
-                           root->argList, true)) {
+                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(), argList,
+                            cd, fd, root->argList, true)) {
                         matching = true;
                      }
 
@@ -6700,6 +6700,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      if (matching) {
                         ArgumentList tmp;
                         addMemberDocs(ptrEntry, md, funcDecl, tmp, overloaded, nullptr);
+
                         count++;
                         memFound = true;
                      }
@@ -6719,11 +6720,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                if (count == 0 && ! (isFriend && funcType == "class")) {
                   int candidates = 0;
 
-                  QSharedPointer<ClassDef> ecd = QSharedPointer<ClassDef>();
-                  QSharedPointer<ClassDef> ucd = QSharedPointer<ClassDef>();
+                  QSharedPointer<ClassDef> exact_cd;
+                  QSharedPointer<ClassDef> maybe_cd;
 
-                  QSharedPointer<MemberDef> emd;
-                  QSharedPointer<MemberDef> umd;
+                  QSharedPointer<MemberDef> exact_md;
+                  QSharedPointer<MemberDef> maybe_md;
 
                   if (mn->count() > 0) {
 
@@ -6732,32 +6733,36 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         QSharedPointer<MemberDef> cmd = md;
 
                         if (ccd != nullptr && rightScopeMatch(ccd->name(), className)) {
-                           const ArgumentList &templAl = md->getTemplateArgumentList();
 
-                           if (! root->m_templateArgLists.isEmpty() && ! templAl.listEmpty() &&
-                                    root->m_templateArgLists.last().count() <= templAl.count()) {
+                           const ArgumentList &md_tArgList = md->getTemplateArgumentList();
 
-                              addMethodToClass(ptrEntry, ccd, md->name(), isFriend);
-                              return;
+                           if (! root->m_templateArgLists.isEmpty() && ! md_tArgList.listEmpty()) {
+
+                              if (root->m_templateArgLists.last().count() <= md_tArgList.count()) {
+                                 addMethodToClass(ptrEntry, ccd, md->name(), isFriend);
+                                 return;
+                              }
                            }
 
-                           if (md->argsString() == argListToString(root->argList, true, false)) {
-                              // exact argument list match -> remember
-                              ucd = ecd = ccd;
-                              umd = emd = cmd;
+                           if (matchArguments2(md->getClassDef(), md->getFileDef(), md->getArgumentList(),
+                                      ccd, ptrEntry->fileDef(), ptrEntry->argList, true)) {
 
-                              Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [8] className= %s   scope= %s\n"
-                                 "  args= %s [Exact Match]\n", csPrintable(className), csPrintable(ccd->name()),
-                                 csPrintable(md->argsString()) );
+                              // exact argument list match
+
+                              exact_cd = ccd;
+                              maybe_cd = ccd;
+
+                              exact_md = cmd;
+                              maybe_md = cmd;
+
+                              candidates++;
+                              break;
 
                            } else {
-                              // arguments do not match, but member name and scope do -> remember
-                              ucd = ccd;
-                              umd = cmd;
+                              // arguments do not match exactly, but class and member name match
+                              maybe_cd = ccd;
+                              maybe_md = cmd;
 
-                              Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [9] className= %s scope= %s args= %s"
-                                 " [No Match]\n", csPrintable(className),
-                                 csPrintable(ccd->name()), csPrintable(md->argsString()) );
                            }
 
                            candidates++;
@@ -6769,20 +6774,20 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                   if (! strictSigMatching) {
 
-                     if (candidates == 1 && ucd && umd) {
-                        // did not find a full signature match on arguments, there is only one member
-                        // with this name in this same scope, use the mtype for the .h file
+                     if (candidates == 1 && maybe_cd != nullptr && maybe_md != nullptr) {
+                        // did not find a full signature match on arguments, however there is only one member
+                        // with this name in the scope, use the found match
 
                         ArgumentList tmp;
-                        addMemberDocs(ptrEntry, umd, funcDecl, tmp, overloaded, nullptr);
+                        addMemberDocs(ptrEntry, maybe_md, funcDecl, tmp, overloaded, nullptr);
                         return;
 
-                     } else if (candidates > 1 && ecd && emd) {
-                        // did not find a unique match using type resolution, but one of the matches
-                        // has the exact same signature so we take it
+                     } else if (candidates > 1 && exact_cd != nullptr && exact_md != nullptr) {
+                        // did not find a unique match using type resolution however one of the matches
+                        // has the exact same signature, use it
 
                         ArgumentList tmp;
-                        addMemberDocs(ptrEntry, emd, funcDecl, tmp, overloaded, nullptr);
+                        addMemberDocs(ptrEntry, exact_md, funcDecl, tmp, overloaded, nullptr);
                         return;
                      }
                   }
@@ -6800,9 +6805,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         warnMsg = "no class member or template specialization found for: \n";
                      }
 
-                     // might be might be docs with no matching method, function, class
+                     // might be docs with no matching method, function, or class
                      // might be a template specialization of a method with no specialization of the class
-
                   }
 
                   for (auto &al : root->m_templateArgLists) {
@@ -6813,8 +6817,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                   QString fullFuncDecl = funcDecl;
 
+
                   if (isFunc) {
-                     fullFuncDecl += argListToString(root->argList, true);
+                     fullFuncDecl += argListToString(root->argList, false);
                   }
 
                   warnMsg += "  ";

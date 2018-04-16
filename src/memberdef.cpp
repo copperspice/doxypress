@@ -583,7 +583,7 @@ class MemberDefImpl
 
    QSharedPointer<ClassDef> accessorClass;        // class that this member accesses (for anonymous types)
 
-   QString args;            // function arguments/variable array specifiers
+   QString m_args;          // function arguments/variable array specifiers
    QString def;             // member definition in code (fully qualified name)
    QString anc;             // HTML anchor name
 
@@ -709,15 +709,13 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
       type = stripPrefix(type, "typedef ");
    }
 
-   type = removeRedundantWhiteSpace(type);
-
-   args = a;
-   args = removeRedundantWhiteSpace(args);
+   type   = removeRedundantWhiteSpace(type);
+   m_args = removeRedundantWhiteSpace(a);
 
    if (type.isEmpty()) {
-      decl = def->name() + args;
+      decl = def->name() + m_args;
    } else {
-      decl = type + " " + def->name() + args;
+      decl = type + " " + def->name() + m_args;
    }
 
    memberGroup = QSharedPointer<MemberGroup>();
@@ -754,8 +752,8 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
    // convert function declaration arguments (if any)
    m_declArgList = ArgumentList();
 
-   if (! args.isEmpty()) {
-      m_declArgList = stringToArgumentList(args, m_declArgList, extraTypeChars);
+   if (! m_args.isEmpty()) {
+      m_declArgList = stringToArgumentList(m_args, m_declArgList, extraTypeChars);
    }
 
    templateMaster = QSharedPointer<MemberDef>();
@@ -3595,8 +3593,8 @@ void MemberDef::setAnchor()
 {
    QString memAnchor = name();
 
-   if (! m_impl->args.isEmpty()) {
-      memAnchor += m_impl->args;
+   if (! m_impl->m_args.isEmpty()) {
+      memAnchor += m_impl->m_args;
    }
 
    memAnchor.prepend(definition());
@@ -3684,7 +3682,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
 
    QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(getDefFileName(), getDefLine(), getDefColumn(),
          substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs), methodName,
-         substituteTemplateArgumentsInString(m_impl->args, formalArgs, actualArgs),
+         substituteTemplateArgumentsInString(m_impl->m_args, formalArgs, actualArgs),
          m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->m_related, m_impl->mtype,
          ArgumentList(), ArgumentList());
 
@@ -3776,7 +3774,7 @@ void MemberDef::addListReference(QSharedPointer<Definition> d)
    const QVector<ListItemInfo> &xrefItems = getRefItems();
 
    if (! xrefItems.isEmpty()) {
-      // argsString is needed for overloaded functions (see bug 609624)
+      // argsString is needed for overloaded functions
 
       addRefItem(xrefItems, qualifiedName() + argsString(), memLabel, getOutputFileBase() + "#" + anchor(),
                   memName, memArgs, pd);
@@ -4309,7 +4307,7 @@ QString MemberDef::typeString() const
 
 QString MemberDef::argsString() const
 {
-   return m_impl->args;
+   return m_impl->m_args;
 }
 
 QString MemberDef::excpString() const
@@ -5060,7 +5058,7 @@ void MemberDef::setInheritsDocsFrom(QSharedPointer<MemberDef> md)
 
 void MemberDef::setArgsString(const QString &as)
 {
-   m_impl->args = as;
+   m_impl->m_args = removeRedundantWhiteSpace(as);
 }
 
 void MemberDef::setRelatedAlso(QSharedPointer<ClassDef> cd)
