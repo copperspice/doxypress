@@ -1,9 +1,9 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 2008 by Sebastian Pipping.
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -34,11 +34,11 @@ static QString makeFileName(const QString &withoutExtension)
    QString result = withoutExtension;
 
    if (! result.isEmpty()) {
-      if (result.at(0) == '!') { 
+      if (result.at(0) == '!') {
          // relative URL -> strip marker
          result = result.mid(1);
 
-      } else { 
+      } else {
          // add specified HTML extension
          result += Doxy_Globals::htmlFileExtension;
       }
@@ -78,14 +78,14 @@ Qhp::~Qhp()
 }
 
 void Qhp::initialize()
-{   
+{
    QString nameSpace     = Config::getString("qhp-namespace");
    QString virtualFolder = Config::getString("qhp-virtual-folder");
- 
+
    QMap<QString, QString> rootAttributes;
    rootAttributes.insert("version", "1.0");
 
-   m_doc.declaration("1.0", "UTF-8"); 
+   m_doc.declaration("1.0", "UTF-8");
    m_doc.open("QtHelpProject", rootAttributes);
    m_doc.openCloseContent("namespace", nameSpace);
    m_doc.openCloseContent("virtualFolder", virtualFolder);
@@ -94,7 +94,7 @@ void Qhp::initialize()
    QString filterName = Config::getString("qhp-cust-filter-name");
 
    if (! filterName.isEmpty()) {
-    
+
       QMap<QString, QString> tagAttributes;
       tagAttributes.insert("name", filterName);
 
@@ -124,7 +124,7 @@ void Qhp::initialize()
    // Add extra root node
    QString fullProjectName = getFullProjectName();
    QString indexFile       = "index" + Doxy_Globals::htmlFileExtension;
- 
+
    QMap<QString, QString> attributes;
    attributes.insert("title", fullProjectName);
    attributes.insert("ref", indexFile);
@@ -203,7 +203,7 @@ void Qhp::addContentsItem(bool, const QString &name, const QString &, const QStr
    handlePrevSection();
    setPrevSection(name, f, anchor, m_sectionLevel);
 
-   // close sections as needed  
+   // close sections as needed
    for (; diff > 0; diff--) {
       m_toc.close("section");
    }
@@ -212,11 +212,11 @@ void Qhp::addContentsItem(bool, const QString &name, const QString &, const QStr
 void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
                        const QString &sectionAnchor, const QString &word)
 {
-   if (md) { 
+   if (md) {
       // member
       static bool separateMemberPages = Config::getBool("separate-member-pages");
 
-      if (context == 0) { 
+      if (context == 0) {
          // global member
 
          if (md->getGroupDef()) {
@@ -230,7 +230,7 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
 
       if (context == 0) {
          // should not happen
-         return;   
+         return;
       }
 
       QString cfname  = md->getOutputFileBase();
@@ -243,12 +243,12 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
          level2 = md->name();
 
       } else {
-         level2 = word;         
+         level2 = word;
       }
 
       QString contRef;
 
-      if (separateMemberPages) { 
+      if (separateMemberPages) {
          contRef = cfname;
       } else {
          contRef = cfiname;
@@ -274,11 +274,11 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
 
       m_index.openClose("keyword", attributes);
 
-   } else if (context) { 
+   } else if (context) {
       // container
       // <keyword name="Foo" id="Foo" ref="doc.html#Foo"/>
 
-      QString contRef = context->getOutputFileBase();     
+      QString contRef = context->getOutputFileBase();
       QString level1;
 
       if (! word.isEmpty()) {
@@ -290,7 +290,7 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
       }
 
       QString ref = makeRef(contRef, sectionAnchor);
-     
+
       QMap<QString, QString> attributes;
       attributes.insert("name", level1);
       attributes.insert("id",   level1);
@@ -307,7 +307,7 @@ void Qhp::addIndexFile(const QString &name)
 
 QString Qhp::getQhpFileName()
 {
-   return "index.qhp";
+   return QString("index.qhp");
 }
 
 QString Qhp::getFullProjectName()
@@ -319,23 +319,23 @@ QString Qhp::getFullProjectName()
       projectName = "Root";
    }
 
-   if (projectVersion.isEmpty()) { 
-      return projectName; 
+   if (projectVersion.isEmpty()) {
+      return projectName;
    } else {
      return projectName + " " + projectVersion;
-   } 
+   }
 }
 
 void Qhp::handlePrevSection()
 {
-   if (m_prevSectionTitle.isNull()) {
-      m_prevSectionTitle = " "; 
+   if (m_prevSectionTitle.isEmpty()) {
+      m_prevSectionTitle = " ";
    }
 
    // skip "Main Page" as our extra root is pointing to that
    if (! ((m_prevSectionLevel == 1) && (m_prevSectionTitle == getFullProjectName()))) {
       QString finalRef = makeRef(m_prevSectionBaseName, m_prevSectionAnchor);
-   
+
       QMap<QString, QString> attributes;
       attributes.insert("title", m_prevSectionTitle);
       attributes.insert("ref", finalRef);

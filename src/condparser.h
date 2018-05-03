@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -32,11 +32,13 @@
 
 class CondParser
 {
- 
+
  public:
-   CondParser() : m_e(0), m_tokenType(NOTHING) {}
+   CondParser()
+      : m_tokenType(NOTHING) {}
+
    bool parse(const QString &fileName, int lineNr, const QString &expr);
- 
+
  private:
    enum TOKENTYPE {
       NOTHING = -1,
@@ -51,16 +53,16 @@ class CondParser
       OR,
       NOT
    };
- 
+
  private:
+   QString m_err;                    // error state
+   QString m_expr;                   // holds the expression
 
-   QString m_err;                 //!< error state
-   QString m_expr;                //!< holds the expression
-   const QChar *m_e;              //!< points to a character in expr
+   QString::const_iterator m_iter;   // points to a character in expr
 
-   QString m_token;               //!< holds the token
-   TOKENTYPE m_tokenType;         //!< type of the token
-  
+   QString m_token;                  // holds the token
+   TOKENTYPE m_tokenType;            // type of the token
+
    void getToken();
 
    bool parseLevel1();

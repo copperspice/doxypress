@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -46,7 +46,7 @@ class DirDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const override {
-      return "";
+      return QString("");
    }
 
    bool isLinkableInProject() const override;
@@ -136,7 +136,7 @@ class DirDef : public Definition
    QString m_diskName;
 
    // list of files in the group
-   FileList m_fileList;                 
+   FileList m_fileList;
 
    int m_dirCount;
    int m_level;
@@ -149,7 +149,7 @@ class DirDef : public Definition
 class FilePair
 {
  public:
-   FilePair(QSharedPointer<FileDef> src, QSharedPointer<FileDef> dst) 
+   FilePair(QSharedPointer<FileDef> src, QSharedPointer<FileDef> dst)
       : m_src(src), m_dst(dst) {}
 
    QSharedPointer<const FileDef> source() const {

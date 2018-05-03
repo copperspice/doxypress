@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -31,7 +31,7 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
    QString absOutFile = outDir + QDir::separator() +outFile;
 
    // move to the output dir so dot can find the font file.
-   QString oldDir = QDir::currentPath();   
+   QString oldDir = QDir::currentPath();
    QDir::setCurrent(outDir);
 
    QString diaExe = Config::getString("dia-path") + "dia" + portable_commandExtension();
@@ -65,17 +65,17 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
    if ((exitCode = portable_system(diaExe, diaArgs, false)) != 0) {
       portable_sysTimerStop();
-      ok = false;     
+      ok = false;
    }
 
    if (ok) {
       portable_sysTimerStop();
-   
-      if ( (format == DIA_EPS) && (Config::getBool("latex-pdf")) ) {      
+
+      if ( (format == DIA_EPS) && (Config::getBool("latex-pdf")) ) {
 
          QString epstopdfArgs;
-         epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(outFile).arg(outFile);
-   
+         epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").formatArgs(outFile, outFile);
+
          portable_sysTimerStart();
 
          if (portable_system("epstopdf", epstopdfArgs) != 0) {

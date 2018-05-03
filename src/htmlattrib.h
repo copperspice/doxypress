@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -51,13 +51,13 @@ class HtmlAttribList : public QList<HtmlAttrib>
       return *this;
    }
 
-   QString find(const QString &name) const {          
+   QString find(const QString &name) const {
       for (auto &item : *this) {
          if (item.name == name) {
             return item.value;
          }
       }
-      return "";
+      return QString("");
    }
 
    QString toString() const {

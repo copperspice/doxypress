@@ -151,7 +151,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    if ( (format == PUML_EPS) && latexPdf) {
 
       QString epstopdfArgs;
-      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(baseName).arg(baseName);
+      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").formatArg(baseName).formatArg(baseName);
 
       portable_sysTimerStart();
 

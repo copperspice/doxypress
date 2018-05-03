@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -33,7 +33,7 @@ class HtmlDocVisitor : public DocVisitor
 {
  public:
    HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, QSharedPointer<Definition> ctx);
-  
+
    // visitor functions for leaf nodes
 
    void visit(DocWord *) override;
@@ -52,7 +52,7 @@ class HtmlDocVisitor : public DocVisitor
    void visit(DocIndexEntry *) override;
    void visit(DocSimpleSectSep *) override;
    void visit(DocCite *) override;
-  
+
    // visitor functions for compound nodes
 
    void visitPre(DocAutoList *) override;
@@ -130,12 +130,12 @@ class HtmlDocVisitor : public DocVisitor
    void visitPre(DocParBlock *) override;
    void visitPost(DocParBlock *) override;
 
- private:    
+ private:
    void filter(const QString &str);
    void filterQuotedCdataAttr(const QString &str);
 
    void startLink(const QString &ref, const QString &file, const QString &relPath, const QString &anchor,
-                  const QString &tooltip = "");
+                  const QString &tooltip = QString(""));
 
    void endLink();
 
@@ -149,7 +149,7 @@ class HtmlDocVisitor : public DocVisitor
 
    void forceEndParagraph(DocNode *n);
    void forceStartParagraph(DocNode *n);
- 
+
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;

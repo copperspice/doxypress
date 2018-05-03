@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -39,14 +39,12 @@ static QHash<QString, QByteArray> g_symbolDict;
 bool Htags::execute(const QString &htmldir)
 {
    static const QStringList inputSource = Config::getList("input-source");
+   static const QString projectName     = Config::getString("project-name");
+   static const QString projectVersion  = Config::getString("project-version");
+   static const bool quiet              = Config::getBool("quiet");
+   static const bool warnings           = Config::getBool("warnings");
 
-   static bool quiet    = Config::getBool("quiet");
-   static bool warnings = Config::getBool("warnings");
-
-   static QByteArray htagsOptions  = "";       // Config::getString("htags-options");
-
-   static QString projectName    = Config::getString("project-name");
-   static QString projectVersion = Config::getString("project-version");
+   static QString htagsOptions  = "";     // Config::getString("htags-options");
 
    QByteArray cwd = QDir::currentPath().toUtf8();
 
@@ -64,10 +62,9 @@ bool Htags::execute(const QString &htmldir)
       return false;
    }
 
-   /*
-    * Construct command line for htags(1).
-    */
-   QByteArray commandLine = " -g -s -a -n ";
+   // Construct command line for htags(1)
+   QString commandLine = " -g -s -a -n ";
+
    if (! quiet) {
       commandLine += "-v ";
    }
@@ -77,8 +74,7 @@ bool Htags::execute(const QString &htmldir)
    }
 
    if (! htagsOptions.isEmpty()) {
-      commandLine += ' ';
-      commandLine += htagsOptions;
+      commandLine += " " + htagsOptions;
    }
 
    if (! projectName.isEmpty()) {
@@ -92,14 +88,14 @@ bool Htags::execute(const QString &htmldir)
       commandLine += "\" ";
    }
 
-   commandLine += " \"" + htmldir.toUtf8() + "\"";
+   commandLine += " \"" + htmldir + "\"";
 
    QString oldDir = QDir::currentPath();
    QDir::setCurrent(g_inputDir.absolutePath());
-  
+
    portable_sysTimerStart();
 
-   bool result = portable_system("htags", commandLine, false) == 0;
+   bool result = ( portable_system("htags", commandLine, false) == 0 );
    portable_sysTimerStop();
 
    QDir::setCurrent(oldDir);
@@ -116,7 +112,7 @@ bool Htags::execute(const QString &htmldir)
 bool Htags::loadFilemap(const QString &htmlDir)
 {
    QString fileMapName = htmlDir + "/HTML/FILEMAP";
-  
+
    QFileInfo fi(fileMapName);
 
    /*
@@ -133,13 +129,13 @@ bool Htags::loadFilemap(const QString &htmlDir)
 
    if (fi.exists() && fi.isReadable()) {
       QFile f(fileMapName);
-     
-      QByteArray line;     
+
+      QByteArray line;
 
       if (f.open(QIODevice::ReadOnly)) {
 
          while (! (line = f.readLine()).isEmpty()) {
-           
+
             int sep = line.indexOf('\t');
 
             if (sep != -1) {
@@ -151,15 +147,15 @@ bool Htags::loadFilemap(const QString &htmlDir)
                if (ext != -1) {
                   value = value.left(ext);   // strip extension
                }
-              
-               g_symbolDict.insert(key, value);               
+
+               g_symbolDict.insert(key, value);
             }
          }
          return true;
 
       } else {
          err("Unable to open file %s, error: %d\n", csPrintable(fileMapName), f.error());
-         
+
       }
    }
 

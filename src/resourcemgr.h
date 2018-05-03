@@ -25,14 +25,11 @@
 class ResourceMgr
 {
  public:
-   /** Returns the one and only instance of this class */
    static ResourceMgr &instance();
-
-   /** Copies a registered resource to a given target directory under a given target name */
-   bool copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const;
-
-   /** Gets the resource data as a QByteArray */
    QByteArray getAsString(const QString &fName) const;
+
+   // Copies a registered resource to a given target directory under a given target name
+   bool copyResourceAs(const QString &fName, const QString &targetDir, const QString &targetName) const;
 
  private:
    ResourceMgr();

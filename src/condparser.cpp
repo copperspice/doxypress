@@ -20,32 +20,13 @@
 #include <config.h>
 #include <message.h>
 
-
-/*
- * C++ Expression parser for ENABLED_SECTIONS
- *
- * Features used:
- *     Operators:
- *         &&    AND operator
- *         ||    OR  operator
- *         !     NOT operator
- */
-
-// declarations
-
-/**
- * parses and evaluates the given expression.
- * @returns
- * - On error, an error message is returned.
- * - On success, the result of the expression is either "1" or "0".
- */
 bool CondParser::parse(const QString &fileName, int lineNr, const QString &expr)
 {
    m_expr      = expr;
    m_tokenType = NOTHING;
 
    // initialize all variables
-   m_e = m_expr.constData();    // let m_e point to the start of the expression
+   m_iter = m_expr.constBegin();
 
    bool answer = false;
    getToken();
@@ -120,43 +101,47 @@ void CondParser::getToken()
    m_tokenType = NOTHING;
    m_token.resize(0);
 
-   //printf("\tgetToken e:{%c}, ascii=%i, col=%i\n", *e, *e, e-expr);
-
    // skip over whitespaces
-   while (*m_e == ' ' || *m_e == '\t') {
+   while (*m_iter == ' ' || *m_iter == '\t') {
       // space or tab
-      m_e++;
+      ++m_iter;
    }
 
    // check for end of expression
-   if (*m_e == '\0') {
+   if (*m_iter == '\0') {
       // token is still empty
       m_tokenType = DELIMITER;
       return;
    }
 
    // check for parentheses
-   if (*m_e == '(' || *m_e == ')') {
+   if (*m_iter == '(' || *m_iter == ')') {
       m_tokenType = DELIMITER;
-      m_token += *m_e++;
+
+      m_token += *m_iter;
+      ++m_iter;
+
       return;
    }
 
    // check for operators (delimiters)
-   if (isDelimiter(*m_e)) {
+   if (isDelimiter(*m_iter)) {
       m_tokenType = DELIMITER;
 
-      while (isDelimiter(*m_e)) {
-         m_token += *m_e++;
+      while (isDelimiter(*m_iter)) {
+         m_token += *m_iter;
+         ++m_iter;
       }
       return;
    }
 
    // check for variables
-   if (isAlpha(*m_e)) {
+   if (isAlpha(*m_iter)) {
       m_tokenType = VARIABLE;
-      while (isAlphaNum(*m_e)) {
-         m_token += *m_e++;
+
+      while (isAlphaNum(*m_iter)) {
+         m_token += *m_iter;
+         ++m_iter;
       }
       return;
    }
@@ -164,8 +149,9 @@ void CondParser::getToken()
    // something unknown is found, wrong characters -> a syntax error
    m_tokenType = UNKNOWN;
 
-   while (*m_e != 0) {
-      m_token += *m_e++;
+   while (m_iter != m_expr.constEnd() ) {
+      m_token += *m_iter;
+      ++m_iter;
    }
 
    m_err = "Syntax error in part '" + m_token + "'";
@@ -198,16 +184,16 @@ bool CondParser::parseLevel2()
 {
    bool ans;
    int opId = getOperatorId(m_token);
+
    if (opId == NOT) {
       getToken();
-      ans = !parseLevel3();
+      ans = ! parseLevel3();
    } else {
       ans = parseLevel3();
    }
 
    return ans;
 }
-
 
 /**
  * parenthesized expression or variable
@@ -219,6 +205,7 @@ bool CondParser::parseLevel3()
       if (m_token == "(") {
          getToken();
          int ans = parseLevel1();
+
          if (m_tokenType != DELIMITER || m_token != ")") {
             m_err = "Parenthesis ) missing";
             return false;
@@ -231,7 +218,6 @@ bool CondParser::parseLevel3()
    // if not parenthesized then the expression is a variable
    return parseVar();
 }
-
 
 bool CondParser::parseVar()
 {
@@ -267,11 +253,12 @@ bool CondParser::evalOperator(int opId, bool lhs, bool rhs)
       // level 2
       case AND:
          return lhs && rhs;
+
       case OR:
          return lhs || rhs;
    }
 
-   m_err = "Internal error unknown operator: id=" + QByteArray().setNum(opId);
+   m_err = "Internal error unknown operator: id = " + QString::number(opId);
    return false;
 }
 

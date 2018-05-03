@@ -83,7 +83,7 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
             }
 
             i++;
-            t << bibTmpFile << QString().setNum(i);
+            t << bibTmpFile << QString::number(i);
          }
       }
 
@@ -106,13 +106,13 @@ void CiteDict::insert(const QString &label)
 QString CiteDict::find(const QString &label) const
 {
    if (label.isEmpty())  {
-      return "";
+      return QString("");
 
    } else {
       auto entry = m_entries.find(label);
 
       if (entry == m_entries.end()) {
-        return "";
+        return QString("");
 
       } else {
         return entry.value();
@@ -197,8 +197,10 @@ void CiteDict::generatePage() const
 
       if (fi.exists()) {
          if (! bibFile.isEmpty()) {
-            copyFile(bibFile, bibOutputDir + bibTmpFile + QString().setNum(++i) + ".bib");
-            bibOutputFiles = bibOutputFiles + " " + bibTmpDir + bibTmpFile + QString().setNum(i) + ".bib";
+            copyFile(bibFile, bibOutputDir + bibTmpFile + QString::number(i) + ".bib");
+            ++i;
+
+            bibOutputFiles = bibOutputFiles + " " + bibTmpDir + bibTmpFile + QString::number(i) + ".bib";
          }
 
       } else if (! fi.exists()) {
@@ -213,8 +215,8 @@ void CiteDict::generatePage() const
    QString curDir = QDir::currentPath() + QDir::separator();
 
    // perl "bib2xhtml.pl" curDir  bibOutputFiles  "citeList.doc"
-   QString args   = "\"" + bib2xhtmlFile + "\" " +  curDir + " " + bibOutputFiles + " \"" + citeListFile + "\"";
-   int exitCode   = portable_system("perl", args);
+   QString args  = "\"" + bib2xhtmlFile + "\" " +  curDir + " " + bibOutputFiles + " \"" + citeListFile + "\"";
+   int exitCode  = portable_system("perl", args);
 
    if (exitCode == 1) {
       err("Issue with Perl or BibTeX. Verify 'perl --version' works from a Windows or Shell command line.\n\n");
@@ -233,16 +235,16 @@ void CiteDict::generatePage() const
      err("Unable to open file for reading %s, error: %d\n", csPrintable(citeListFile), f.error());
    }
 
-   bool insideBib = false;
+   QByteArray data = f.readAll();
+   f.close();
 
    QString doc;
-   QString input;
-
-   input = f.readAll();
-   f.close();
+   QString input = QString::fromUtf8(data);
 
    int p = 0;
    int s;
+
+   bool insideBib = false;
 
    while ((s = input.indexOf('\n', p)) != -1) {
       QString line = input.mid(p, s - p);
@@ -300,7 +302,8 @@ void CiteDict::generatePage() const
          if (fi.exists()) {
             if (! bibFile.isEmpty()) {
                // suffix added to accomodate files with the same name
-               copyFile(bibFile, latexOutputDir + bibTmpFile + QString().setNum(++i) + ".bib");
+               copyFile(bibFile, latexOutputDir + bibTmpFile + QString::number(i) + ".bib");
+               ++i;
             }
 
          } else {
@@ -316,7 +319,7 @@ void CiteDict::generatePage() const
    thisDir.remove(bib2xhtmlFile);
 
    for (int j = 1; j <= citeDataList.count(); j++) {
-      thisDir.remove(bibOutputDir + bibTmpFile + QString().setNum(j) + ".bib");
+      thisDir.remove(bibOutputDir + bibTmpFile + QString::number(j) + ".bib");
    }
 
    thisDir.rmdir(bibOutputDir);

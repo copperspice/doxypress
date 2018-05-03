@@ -457,7 +457,6 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
             break;
       }
 
-      // broom - unclear if this needs changing
       if (md->isFriend()) {
          type.prepend("ffunc ");
       }
@@ -581,7 +580,7 @@ void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QSt
       t << "    <Abstract>" << convertToXML(tooltip) << "</Abstract>" << endl;
    }
 
-   if (! decl.isNull() ) {
+   if (! decl.isEmpty() ) {
       t << "    <DeclaredIn>" << convertToXML(decl) << "</DeclaredIn>" << endl;
    }
 

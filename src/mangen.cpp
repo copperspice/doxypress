@@ -103,23 +103,25 @@ void ManGenerator::init()
 
 static QString buildFileName(const QString &name)
 {
+   static const QString manExtension = "." + Config::getString("man-extension");
+
    if (name.isEmpty()) {
-      return "noname";
+      return QString("noname");
    }
 
    QString fname;
+   QString::const_iterator iter = name.constBegin();
 
-   const QChar *p  = name.constData();
-   QChar c;
-
-   while ((c = *p++)  != 0) {
+   while (iter != name.constEnd()) {
+      QChar c = *iter;
+      ++iter;
 
       switch (c.unicode()) {
          case ':':
             fname += "_";
 
-            if (*p == ':') {
-               p++;
+            if (iter != name.constEnd() && *iter == ':') {
+               ++iter;
             }
             break;
 
@@ -140,8 +142,6 @@ static QString buildFileName(const QString &name)
             fname += c;
       }
    }
-
-   QString manExtension = "." + Config::getString("man-extension");
 
    if (fname.right(manExtension.length()) != manExtension) {
       fname += manExtension;

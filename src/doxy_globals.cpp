@@ -16,10 +16,13 @@
 *************************************************************************/
 
 #include <doxy_globals.h>
+#include <doxy_build_info.h>
 #include <filedef.h>
 
 class GenericsSDict;
 class IndexList;
+
+const QString versionString = QString::fromLatin1(versionLiteral);
 
 CiteDict         Doxy_Globals::citeDict;                   // database of bibliographic references
 ClassSDict       Doxy_Globals::classSDict;

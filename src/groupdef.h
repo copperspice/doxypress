@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -52,7 +52,7 @@ class GroupDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const  override {
-      return "";
+      return QString("");
    }
 
    QString displayName(bool = true) const override {
@@ -72,13 +72,13 @@ class GroupDef : public Definition
    void addFile(QSharedPointer<FileDef> def);
    bool addClass(QSharedPointer<ClassDef> cd);
    bool addNamespace(QSharedPointer<NamespaceDef> def);
-   void addGroup(QSharedPointer<GroupDef> def);  
+   void addGroup(QSharedPointer<GroupDef> def);
    void addPage(QSharedPointer<PageDef> def);
    void addExample(QSharedPointer<PageDef> def);
    void addDir(QSharedPointer<DirDef> def);
 
    bool insertMember(QSharedPointer<MemberDef> def, bool docOnly = false);
-   void removeMember(QSharedPointer<MemberDef> md);   
+   void removeMember(QSharedPointer<MemberDef> md);
    bool findGroup(QSharedPointer<const GroupDef> def) const;                 // true if def is a subgroup of this group
 
    void writeDocumentation(OutputList &ol);
@@ -96,7 +96,7 @@ class GroupDef : public Definition
    void findSectionsInDocumentation();
 
    void addListReferences();
-  
+
    bool subGrouping() const {
       return m_subGrouping;
    }
@@ -135,11 +135,11 @@ class GroupDef : public Definition
    PageSDict *getPages() const {
       return pageDict;
    }
-  
+
    PageSDict *getExamples() const {
       return exampleDict;
-   } 
- 
+   }
+
    SortedList<QSharedPointer<DirDef>> *getDirs() const {
       return dirList;
    }
@@ -151,8 +151,8 @@ class GroupDef : public Definition
    SortedList<QSharedPointer<GroupDef>> *getSubGroups() const {
       return groupList;
    }
-    
-   bool hasDetailedDescription() const;   
+
+   bool hasDetailedDescription() const;
 
    QString getHint()  override {
       return m_hint;
@@ -161,7 +161,7 @@ class GroupDef : public Definition
    void setHint(QString data) {
       m_hint = data;
    }
-  
+
  protected:
    void addMemberListToGroup(QSharedPointer<MemberList>, bool (MemberDef::*)() const);
    QString pathFragment_Internal() const override;
@@ -196,9 +196,9 @@ class GroupDef : public Definition
    QString m_title;                     // title of the group
    bool titleSet;                       // true if title is not the same as the name
    QString fileName;                    // base name of the generated file
-   
+
    ClassSDict      m_classSDict;        // list of classes in the group
-   NamespaceSDict  m_namespaceSDict;    // list of namespaces in the group 
+   NamespaceSDict  m_namespaceSDict;    // list of namespaces in the group
    PageSDict      *pageDict;            // list of pages in the group
    PageSDict      *exampleDict;         // list of examples in the group
 
@@ -206,7 +206,7 @@ class GroupDef : public Definition
    FileList fileList;                                 // list of files in the group
 
    SortedList<QSharedPointer<GroupDef>> *groupList;   // list of sub groups
-  
+
    QSharedPointer<MemberList> allMemberList;
    MemberNameInfoSDict *allMemberNameInfoSDict;
 

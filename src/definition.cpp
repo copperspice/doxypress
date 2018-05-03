@@ -170,13 +170,13 @@ static bool matchExcludedSymbols(const QString &name)
          int i = symName.indexOf(pattern);
 
          if (i != -1) {
-            // we have a match!
+            // we have a match
             int pl = pattern.length();
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0  || (! isId(symName.at(i - 1).unicode())  && ! forceStart)) && (i + pl == sl ||
-                     (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {
+            if ((i == 0  || (! isId(symName.at(i - 1))  && ! forceStart)) && (i + pl == sl ||
+                     (! isId(symName.at(i + pl)) && ! forceEnd)) ) {
                return true;
             }
          }
@@ -431,8 +431,8 @@ bool Definition::_docsAlreadyAdded(const QString &doc, QString &sigList)
 
    QString docStr = doc.simplified();
 
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(docStr.toUtf8(), QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(docStr.toUtf8(), QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
 
    if (sigList.indexOf(sigStr) == -1) {
       // new docs, add signature to prevent re-adding it
@@ -584,8 +584,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
       return false;   // not a valid file name
    }
 
-   QByteArray tempResult;
-
+   QString tmpResult;
    QString filter = getFileFilter(fileName, true);
 
    FILE *f = 0;
@@ -687,18 +686,18 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
                QString spaces;
                spaces.fill(' ', col);
 
-               tempResult += spaces;
+               tmpResult += spaces;
             }
 
             // copy until end of line
             if (c) {
-               tempResult += c;
+               tmpResult += c;
             }
 
             startLine = lineNr;
 
             if (c == ':') {
-               tempResult += cn;
+               tmpResult += cn;
 
                if (cn == '\n') {
                   lineNr++;
@@ -722,7 +721,8 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
                      size_read = -1;
                      lineStr[0] = '\0';
                   }
-                  tempResult += lineStr;
+                  tmpResult += lineStr;
+
                } while (size_read == (maxLineLength - 1));
 
                lineNr++;
@@ -730,11 +730,11 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
             } while (lineNr <= endLine && ! feof(f));
 
             // strip stuff after closing bracket
-            int newLineIndex = tempResult.lastIndexOf('\n');
-            int braceIndex   = tempResult.lastIndexOf('}');
+            int newLineIndex = tmpResult.lastIndexOf('\n');
+            int braceIndex   = tmpResult.lastIndexOf('}');
 
             if (braceIndex > newLineIndex) {
-               tempResult.truncate(braceIndex + 1);
+               tmpResult.truncate(braceIndex + 1);
             }
 
             endLine = lineNr - 1;
@@ -744,14 +744,14 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
       if (usePipe) {
          pclose(f);
          Debug::print(Debug::FilterOutput, 0, "Filter output\n");
-         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", csPrintable(tempResult));
+         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", csPrintable(tmpResult));
 
       } else {
          fclose(f);
       }
    }
 
-   result = transcodeToQString(tempResult);
+   result = tmpResult;
 
    if (! result.isEmpty() && ! result.endsWith('\n')) {
       result += "\n";
@@ -782,10 +782,10 @@ QString Definition::getSourceAnchor() const
    if (m_private->m_body_startLine != -1) {
 
       if (Htags::useHtags) {
-         anchorStr = QString("L%1").arg(m_private->m_body_startLine);
+         anchorStr = QString("L%1").formatArg(m_private->m_body_startLine);
 
       } else {
-         anchorStr = QString("l%1").arg(m_private->m_body_startLine, 5, 10, QChar('0'));
+         anchorStr = QString("l%1").formatArg(m_private->m_body_startLine, 5, 10, QChar('0'));
       }
    }
 
@@ -810,7 +810,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
 
       if (lineMarkerPos != -1 && fileMarkerPos != -1) {
          // should always pass this
-         QString lineStr = QString("%1").arg(m_private->m_body_startLine);
+         QString lineStr = QString("%1").formatArg(m_private->m_body_startLine);
 
          QString anchorStr = getSourceAnchor();
          ol.startParagraph("definition");
@@ -844,7 +844,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::RTF);
             }
 
-            // write normal text (Man/RTF, Latex optionally)
+            // write normal text (Man / RTF, Latex optionally)
             ol.docify(lineStr);
             ol.popGeneratorState();
 
@@ -922,18 +922,16 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             ol.parseText(refText.mid(fileMarkerPos + 2, lineMarkerPos - fileMarkerPos - 2));
 
             ol.pushGeneratorState();
-
             ol.disable(OutputGenerator::Man);
-
-            if (! latexSourceCode) {
-               ol.disable(OutputGenerator::Latex);
-            }
-
-            if (! rtfSourceCode) {
-               ol.disable(OutputGenerator::RTF);
-            }
-
             ol.disableAllBut(OutputGenerator::Html);
+
+            if (latexSourceCode) {
+               ol.enable(OutputGenerator::Latex);
+            }
+
+            if (rtfSourceCode) {
+               ol.enable(OutputGenerator::RTF);
+            }
 
             // write line link (HTML only)
             ol.writeObjectLink(0, fn, anchorStr, lineStr);
@@ -1042,7 +1040,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 
       QString ldefLine = theTranslator->trWriteList(members.count());
 
-      static QRegExp marker("@[0-9]+");
+      static QRegularExpression marker("@[0-9]+");
       int index = 0;
       int newIndex;
       int matchLen;
@@ -1087,7 +1085,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                }
 
                QString anchorStr;
-               anchorStr = QString("l%1").arg(md->getStartBodyLine(), 5, 10, QChar('0'));
+               anchorStr = QString("l%1").formatArg(md->getStartBodyLine(), 5, 10, QChar('0'));
 
                ol.writeObjectLink(0, md->getBodyDef()->getSourceFileBase(), anchorStr, name);
                ol.popGeneratorState();
@@ -1235,7 +1233,7 @@ QString Definition::qualifiedName() const
 
    if (! m_private->outerScope) {
       if (m_private->localName == "<globalScope>") {
-         return "";
+         return QString("");
 
       } else {
          return m_private->localName;
@@ -1565,8 +1563,7 @@ QString abbreviate(const QString &brief, const QString &name)
       className = className.mid(i + 2);
    }
 
-   QString result = brief;
-   result = result.trimmed();
+   QString result = brief.trimmed();
 
    // strip trailing period
    if (result.endsWith('.')) {
@@ -1574,7 +1571,6 @@ QString abbreviate(const QString &brief, const QString &name)
    }
 
    // strip any predefined prefix
-
    for (auto prefix : abbreviateBrief) {
       // replace $name with entity name
       prefix.replace("$name", className);
@@ -1596,7 +1592,7 @@ QString abbreviate(const QString &brief, const QString &name)
 
    // capitalize first word
    if (! result.isEmpty()) {
-      result[0] = result[0].toUpper();
+      result.replace(0, 1, result[0].toUpper());
    }
 
    return result;

@@ -975,7 +975,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.startDotGraph();
-         ol.parseText(theTranslator->trClassDiagram(csPrintable(displayName())));
+         ol.parseText(theTranslator->trClassDiagram(displayName()));
          ol.endDotGraph(inheritanceGraph);
          ol.popGeneratorState();
          renderDiagram = true;
@@ -988,10 +988,10 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ol.startClassDiagram();
 
       ol.disable(OutputGenerator::Man);
-      ol.parseText(theTranslator->trClassDiagram( csPrintable(displayName())));
+      ol.parseText(theTranslator->trClassDiagram(displayName()));
 
       ol.enable(OutputGenerator::Man);
-      ol.endClassDiagram(diagram, getOutputFileBase(), csPrintable(displayName()));
+      ol.endClassDiagram(diagram, getOutputFileBase(), displayName());
       renderDiagram = true;
    }
 
@@ -1018,7 +1018,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
          ol.parseText(inheritLine.mid(index, newIndex - index));
          bool ok;
 
-         uint entryIndex = inheritLine.mid(newIndex + 1, matchLen - 1).toUInt(&ok);
+         uint entryIndex = inheritLine.mid(newIndex + 1, matchLen - 1).toInteger<uint>(&ok);
          BaseClassDef *bcd = m_parents->at(entryIndex);
 
          if (ok && bcd) {
@@ -1048,7 +1048,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ol.startParagraph();
       QString inheritLine = theTranslator->trInheritedByList(m_inheritedBy->count());
 
-      static QRegExp marker("@[0-9]+");
+      static QRegularExpression marker("@[0-9]+");
 
       int index = 0;
       int newIndex;
@@ -1062,7 +1062,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
          ol.parseText(inheritLine.mid(index, newIndex - index));
 
          bool ok;
-         uint entryIndex = inheritLine.mid(newIndex + 1, matchLen - 1).toUInt(&ok);
+         uint entryIndex = inheritLine.mid(newIndex + 1, matchLen - 1).toInteger<uint>(&ok);
 
          BaseClassDef *bcd = m_inheritedBy->at(entryIndex);
 
@@ -1102,7 +1102,7 @@ void ClassDef::writeCollaborationGraph(OutputList &ol)
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.startDotGraph();
-         ol.parseText(theTranslator->trCollaborationDiagram(csPrintable(displayName())));
+         ol.parseText(theTranslator->trCollaborationDiagram(displayName()));
          ol.endDotGraph(usageImplGraph);
          ol.popGeneratorState();
       }
@@ -1115,13 +1115,13 @@ QString ClassDef::includeStatement() const
    bool isIDLorJava = (lang == SrcLangExt_IDL || lang == SrcLangExt_Java);
 
    if (isIDLorJava) {
-      return "import";
+      return QString("import");
 
    } else if (isObjectiveC()) {
-      return "#import ";
+      return QString("#import ");
 
    } else {
-      return "#include ";
+      return QString("#include ");
    }
 }
 
@@ -1873,17 +1873,16 @@ QString ClassDef::title() const
    SrcLangExt lang = getLanguage();
 
    if (lang == SrcLangExt_Fortran) {
-      pageTitle = theTranslator->trCompoundReferenceFortran( csPrintable(displayName()), m_compType,
-                  ! m_tempArgs.listEmpty() );
+      pageTitle = theTranslator->trCompoundReferenceFortran(displayName(), m_compType, ! m_tempArgs.listEmpty() );
 
    } else if (isJavaEnum()) {
-      pageTitle = theTranslator->trEnumReference(csPrintable(displayName()));
+      pageTitle = theTranslator->trEnumReference(displayName());
 
    } else if (m_compType == CompoundType::Service) {
-      pageTitle = theTranslator->trServiceReference(csPrintable(displayName()));
+      pageTitle = theTranslator->trServiceReference(displayName());
 
    } else if (m_compType == CompoundType::Singleton) {
-      pageTitle = theTranslator->trSingletonReference(csPrintable(displayName()));
+      pageTitle = theTranslator->trSingletonReference(displayName());
 
    } else {
       if (hideCompoundRef) {
@@ -1900,7 +1899,7 @@ QString ClassDef::title() const
 
          }
 
-         pageTitle = theTranslator->trCompoundReference(csPrintable(displayName()), compType,
+         pageTitle = theTranslator->trCompoundReference(displayName(), compType,
                   ! m_tempArgs.listEmpty() );
       }
    }
@@ -1955,7 +1954,7 @@ void ClassDef::writeMemberPages(OutputList &ol)
       ml->countDocMembers();
 
       if (ml->numDocMembers() > 0 && (ml->listType() & MemberListType_detailedLists)) {
-         ml->writeDocumentationPage(ol, csPrintable(displayName()), self);
+         ml->writeDocumentationPage(ol, displayName(), self);
       }
    }
 
@@ -2012,7 +2011,7 @@ void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
       if (innerCd->isLinkableInProject() && innerCd->templateMaster() == 0 &&
             protectionLevelVisible(innerCd->protection()) && !innerCd->isEmbeddedInOuterScope() ) {
 
-         msg("Generating docs for nested compound %s\n", csPrintable(innerCd->name()));
+         msg("Generating docs for nested compound %s\n", innerCd->name());
          innerCd->writeDocumentation(ol);
          innerCd->writeMemberList(ol);
       }
@@ -2178,11 +2177,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                ol.parseText(theTranslator->trDefinedIn() + " ");
 
                if (cd->isLinkable()) {
-                  ol.writeObjectLink(
-                     cd->getReference(),
-                     cd->getOutputFileBase(),
-                     cd->anchor(),
-                     csPrintable(cd->displayName()));
+                  ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), cd->displayName());
 
                } else {
                   ol.startBold();
@@ -2974,52 +2969,91 @@ void ClassDef::addUsedByClass(QSharedPointer<ClassDef> cd, const QString &access
 
 QString ClassDef::compoundTypeString() const
 {
+   QString retval;
+
    if (getLanguage() == SrcLangExt_Fortran) {
 
       switch (m_compType) {
          case CompoundType::Class:
-            return "module";
+            retval = "module";
+            break;
+
          case CompoundType::Struct:
-            return "type";
+            retval = "type";
+            break;
+
          case CompoundType::Union:
-            return "union";
+            retval = "union";
+            break;
+
          case CompoundType::Interface:
-            return "interface";
+            retval = "interface";
+            break;
+
          case CompoundType::Protocol:
-            return "protocol";
+            retval = "protocol";
+            break;
+
          case CompoundType::Category:
-            return "category";
+            retval = "category";
+            break;
+
          case CompoundType::Exception:
-            return "exception";
+            retval = "exception";
+            break;
+
          default:
-            return "unknown";
+            retval = "unknown";
+            break;
       }
 
    } else {
 
       switch (m_compType) {
          case CompoundType::Class:
-            return isJavaEnum() ? "enum" : "class";
+            retval = isJavaEnum() ? "enum" : "class";
+            break;
+
          case CompoundType::Struct:
-            return "struct";
+            retval = "struct";
+            break;
+
          case CompoundType::Union:
-            return "union";
+            retval = "union";
+            break;
+
          case CompoundType::Interface:
-            return getLanguage() == SrcLangExt_ObjC ? "class" : "interface";
+            retval = getLanguage() == SrcLangExt_ObjC ? "class" : "interface";
+            break;
+
          case CompoundType::Protocol:
-            return "protocol";
+            retval = "protocol";
+            break;
+
          case CompoundType::Category:
-            return "category";
+            retval = "category";
+            break;
+
          case CompoundType::Exception:
-            return "exception";
+            retval = "exception";
+            break;
+
          case CompoundType::Service:
-            return "service";
+            retval = "service";
+            break;
+
          case CompoundType::Singleton:
-            return "singleton";
+            retval = "singleton";
+            break;
+
          default:
-            return "unknown";
+            retval = "unknown";
+            break;
+
       }
    }
+
+   return retval;
 }
 
 QString ClassDef::getOutputFileBase() const
@@ -3079,7 +3113,7 @@ QString ClassDef::getInstanceOutputFileBase() const
       return m_fileName;
 
    } else {
-      return convertNameToFile(csPrintable(m_fileName));
+      return convertNameToFile(m_fileName);
    }
 }
 
@@ -3718,7 +3752,7 @@ void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, csPrintable(displayName()), self, title, false, showInline);
+      ml->writeDocumentation(ol, displayName(), self, title, false, showInline);
    }
 }
 

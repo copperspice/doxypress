@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -53,7 +53,7 @@ class PageDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const  override{
-      return "";
+      return QString("");
    }
 
    void findSectionsInDocumentation();
@@ -67,7 +67,7 @@ class PageDef : public Definition
       return m_subPageDict;
    }
 
-   void addInnerCompound(QSharedPointer<Definition> d) override; 
+   void addInnerCompound(QSharedPointer<Definition> d) override;
 
    bool visibleInIndex() const;
    bool documentedPage() const;

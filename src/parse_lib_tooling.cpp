@@ -92,7 +92,7 @@ static QString getUSR_Decl(const clang::Decl *node)
    llvm::SmallVector<char, 100> buffer;
 
    if (node->getLocStart().isInvalid() && (std::string(node->getDeclKindName()) == "TranslationUnit") ) {
-      return "TranslationUnit";
+      return QString("TranslationUnit");
    }
 
    bool ignore = clang::index::generateUSRForDecl(node, buffer);
@@ -1040,7 +1040,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             } else {
                // use invisible name
-               current->m_entryName = QString("@%1").arg(anonNSCount);
+               current->m_entryName = QString("@%1").formatArg(anonNSCount);
             }
          }
 

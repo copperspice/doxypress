@@ -49,7 +49,7 @@ static QString convertIndexWordToAnchor(const QString &word)
          result += c;
 
       } else {
-         result += QString(":%1").arg(c.unicode(), 2, 16, QChar('0'));
+         result += QString(":%1").formatArg(c.unicode(), 2, 16, QChar('0'));
 
       }
    }
@@ -432,7 +432,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
 
          QString fileName;
-         fileName = QString("%1%2.dot").arg(Config::getString("html-output") + "/inline_dotgraph_").arg(dotindex++);
+         fileName = QString("%1%2.dot").formatArg(Config::getString("html-output") + "/inline_dotgraph_").formatArg(dotindex++);
 
          QFile file(fileName);
 
@@ -470,7 +470,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          static int mscindex = 1;
 
          QString baseName;
-         baseName = QString("%1%2").arg(Config::getString("html-output") + "/inline_mscgraph_").arg(mscindex++);
+         baseName = QString("%1%2").formatArg(Config::getString("html-output") + "/inline_mscgraph_").formatArg(mscindex++);
 
          QFile file(baseName + ".msc");
 

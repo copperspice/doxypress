@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -52,7 +52,7 @@ class NamespaceDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const override {
-      return "";
+      return QString("");
    }
 
    void insertUsedFile(QSharedPointer<FileDef> fd);
@@ -97,7 +97,7 @@ class NamespaceDef : public Definition
    void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
- 
+
    QSharedPointer<Definition> findInnerCompound(const QString &name) override;
    void addInnerCompound(QSharedPointer<Definition> d) override;
 
@@ -161,7 +161,7 @@ class NamespaceDef : public Definition
 
    QString  fileName;
    FileList files;
-  
+
    StringMap<QSharedPointer<Definition>>  m_usingDeclMap;
    StringMap<QSharedPointer<Definition>>  m_innerCompounds;
 
@@ -170,10 +170,10 @@ class NamespaceDef : public Definition
    MemberSDict       m_allMembersDict;
    MemberGroupSDict  m_memberGroupSDict;
    ClassSDict        m_classSDict;
-  
+
    QList<QSharedPointer<MemberList>> m_memberLists;
- 
-   enum { NAMESPACE, MODULE, CONSTANT_GROUP, LIBRARY } m_type;   
+
+   enum { NAMESPACE, MODULE, CONSTANT_GROUP, LIBRARY } m_type;
 };
 
 #endif

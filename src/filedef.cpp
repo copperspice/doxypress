@@ -575,7 +575,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
             (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict.declVisible()) ) {
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         QString label = lde->kind() == LayoutDocEntry::FileClasses ? "nested-classes" : "namespaces";
+         QString label = lde->kind() == LayoutDocEntry::FileClasses ? QString("nested-classes") : QString("namespaces");
          ol.writeSummaryLink("", label, ls->title(lang), first);
          first = false;
 
@@ -1512,16 +1512,13 @@ void FileDef::combineUsingRelations()
 
 void FileDef::acquireFileVersion()
 {
-   QString vercmd = Config::getString("file-version-filter");
+   static const QString vercmd = Config::getString("file-version-filter");
 
-   if (! vercmd.isEmpty() && ! m_filePath.isEmpty() &&
-               m_filePath != "generated" && m_filePath != "graph_legend") {
+   if (! vercmd.isEmpty() && ! m_filePath.isEmpty() && m_filePath != "generated" && m_filePath != "graph_legend") {
 
       msg("Version of %s : ", csPrintable(m_filePath));
 
       QString cmd = vercmd + " \"" + m_filePath + "\"";
-      Debug::print(Debug::ExtCmd, 0, "Executing popen(`%s`)\n", csPrintable(cmd));
-
       FILE *f = popen(csPrintable(cmd), "r");
 
       if (! f) {
@@ -1529,17 +1526,18 @@ void FileDef::acquireFileVersion()
          return;
       }
 
+      // get the file version
       const int bufSize = 1024;
 
-      QByteArray buf;
-      buf.resize(bufSize);
+      QByteArray buffer;
+      buffer.resize(bufSize);
 
-      int numRead = fread(buf.data(), 1, bufSize - 1, f);
+      int numRead = fread(buffer.data(), 1, bufSize - 1, f);
       pclose(f);
 
       if (numRead > 0 && numRead < bufSize) {
-         buf.resize(numRead);
-         m_fileVersion = buf.trimmed();
+         buffer.resize(numRead);
+         m_fileVersion = QString::fromUtf8(buffer.trimmed());
 
          if (! m_fileVersion.isEmpty()) {
             msg("%s\n", csPrintable(m_fileVersion));
@@ -1547,7 +1545,7 @@ void FileDef::acquireFileVersion()
          }
       }
 
-      msg("No version available\n");
+      msg("No file version available\n");
    }
 }
 
@@ -1560,7 +1558,7 @@ QString FileDef::getSourceFileBase() const
    }
 }
 
-/*! Returns the name of the verbatim copy of this file (if any) */
+// Returns the name of the verbatim copy of this file (if any)
 QString FileDef::includeName() const
 {
    return getSourceFileBase();

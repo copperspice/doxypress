@@ -33,7 +33,7 @@ int main(int argc, char **argv)
    QStringList argList;
 
    for (int k = 1; k < argc; ++k)   {
-      QString value = argv[k];
+      QString value = QString::fromUtf8(argv[k]);
       argList.append(value);
    }
 

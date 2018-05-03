@@ -389,7 +389,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          static int dotindex = 1;
 
          QString latexOutput = Config::getString("latex-output") + "/inline_dotgraph_";
-         QString fileName = QString("%1%2.dot").arg(latexOutput).arg(dotindex++);
+         QString fileName = QString("%1%2.dot").formatArg(latexOutput).formatArg(dotindex++);
 
          QFile file(fileName);
 
@@ -416,7 +416,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
          static int mscindex = 1;
 
          QString latexOutput = Config::getString("latex-output") + "/inline_mscgraph_";
-         QString baseName = QString("%1%2").arg(latexOutput).arg(mscindex++);
+         QString baseName = QString("%1%2").formatArg(latexOutput).formatArg(mscindex++);
 
          QFile file(baseName + ".msc");
 

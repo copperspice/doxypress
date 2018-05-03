@@ -19,6 +19,8 @@
 #define DOXY_BUILD_INFO_H_IN
 
 // DoxyPress Version  "1.0.0"
-constexpr const char *versionString = "@PACKAGE_VERSION@";
+constexpr const char *versionLiteral = "@PACKAGE_VERSION@";
+
+extern const QString versionString;
 
 #endif

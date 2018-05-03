@@ -150,9 +150,7 @@ static void format_warn(const QString &file, int line, const QString &text)
       fileSubst = "<unknown>";
    }
 
-   QString lineSubst;
-   lineSubst.setNum(line);
-
+   QString lineSubst = QString::number(line);
    QString textSubst = text;
    QString versionSubst;
 

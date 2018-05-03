@@ -48,11 +48,10 @@ bool ClassSDict::declVisible(const enum CompoundType *filter) const
    static const bool extractLocalClasses = Config::getBool("extract-local-classes");
 
    if (count() > 0) {
-      ClassSDict::Iterator sdi(*this);
-
       QSharedPointer<ClassDef> cd;
 
-      for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
+      for (auto cd : *this) {
+
          if (cd->name().indexOf('@') == -1 && (filter == 0 || *filter == cd->compoundType()) ) {
             bool isLink = cd->isLinkable();
 
@@ -71,13 +70,10 @@ void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filte
    static const bool extractPrivate = Config::getBool("extract-private");
 
    if (count() > 0) {
-
-      ClassSDict::Iterator sdi(*this);
-
       QSharedPointer<ClassDef> cd;
       bool found = false;
 
-      for (sdi.toFirst(); (cd = sdi.current()); ++sdi) {
+      for (auto cd : *this) {
 
          if (cd->name().indexOf('@') == -1 && ! cd->isExtension() && (cd->protection() != Private || extractPrivate) &&
                (filter == 0 || *filter == cd->compoundType()) ) {

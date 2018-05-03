@@ -145,7 +145,7 @@ class TreeDiagram : public QList<DiagramRow *>
    void computeExtremes(uint *labelWidth, uint *xpos);
 
    void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
-                  uint cellWidth, uint cellHeight, QString relPath = "", bool generateMap = true);
+                  uint cellWidth, uint cellHeight, QString relPath = QString(""), bool generateMap = true);
 
    void drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap,
                        uint baseRows, uint superRows, uint cellWidth, uint cellheight);
@@ -170,9 +170,11 @@ static uint protToMask(Protection p)
    switch (p) {
       case Public:
          return 0xffffffff;
+
       case Package: // package is not possible!
       case Protected:
          return 0xcccccccc;
+
       case Private:
          return 0xaaaaaaaa;
    }
@@ -185,9 +187,11 @@ static uint protToColor(Protection p)
    switch (p) {
       case Public:
          return 6;
+
       case Package: // package is not possible!
       case Protected:
          return 5;
+
       case Private:
          return 4;
    }
@@ -197,17 +201,21 @@ static uint protToColor(Protection p)
 
 static QString protToString(Protection p)
 {
+   QString retval;
+
    switch (p) {
       case Public:
-         return "solid";
+         retval = "solid";
+
       case Package: // package is not possible!
       case Protected:
-         return "dashed";
+         retval = "dashed";
+
       case Private:
-         return "dotted";
+         retval = "dotted";
    }
 
-   return 0;
+   return retval;
 }
 
 static uint virtToMask(Specifier p)
@@ -215,8 +223,10 @@ static uint virtToMask(Specifier p)
    switch (p) {
       case Normal:
          return 0xffffffff;
+
       case Virtual:
          return 0xf0f0f0f0;
+
       default:
          return 0;
    }
@@ -1468,7 +1478,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
 
    if (latexPdf) {
       QString epstopdfArgs;
-      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(epsBaseName).arg(epsBaseName);
+      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").formatArgs(epsBaseName, epsBaseName);
 
       portable_sysTimerStart();
 

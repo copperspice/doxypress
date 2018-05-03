@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -40,25 +40,31 @@
 
 static QString align(DocHtmlCell *cell)
 {
+   QString retval;
+
    HtmlAttribList attrs = cell->attribs();
-   uint i;
 
-   for (i = 0; i < attrs.count(); ++i) {
-  
-      if (attrs.at(i).name.toLower() == "align") {
-         if (attrs.at(i).value.toLower() == "center") {
-            return "\\qc ";
+   for (const auto &item : attrs) {
 
-         } else if (attrs.at(i).value.toLower() == "right") {
-            return "\\qr ";
+      if (item.name.toLower() == "align") {
+         QString tmp = item.value.toLower();
+
+         if (tmp == "center") {
+            retval = "\\qc ";
+            break;
+
+         } else if (tmp == "right") {
+            retval = "\\qr ";
+            break;
 
          } else {
-            return "";
+            break;
+
          }
       }
    }
 
-   return "";
+   return retval;
 }
 
 RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt)
@@ -69,15 +75,15 @@ RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QStr
 
 QString RTFDocVisitor::getStyle(const QString &name)
 {
-   QString n = QString("%1%2").arg(name).arg(m_indentLevel);
+   QString n = QString("%1%2").formatArg(name).formatArg(m_indentLevel);
 
    auto sd = rtf_Style.find(n);
-   
+
    if (sd == rtf_Style.end()) {
       assert(sd != rtf_Style.end());
    }
-  
-   return sd->reference;
+
+   return sd->m_reference;
 }
 
 void RTFDocVisitor::incIndentLevel()
@@ -313,7 +319,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
    QString lang = m_langExt;
 
-   if (! s->language().isEmpty()) { 
+   if (! s->language().isEmpty()) {
       // explicit language setting
       lang = s->language();
    }
@@ -357,12 +363,12 @@ void RTFDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
-         QString fileName;     
-         fileName = QString("%1%2.dot").arg(Config::getString("rtf-output") + "/inline_dotgraph_").arg(dotindex++);
+         QString fileName;
+         fileName = QString("%1%2.dot").formatArg(Config::getString("rtf-output") + "/inline_dotgraph_").formatArg(dotindex++);
 
          QFile file(fileName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());            
+            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());
          }
 
          file.write( s->text().toUtf8() );
@@ -381,8 +387,8 @@ void RTFDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Msc: {
          static int mscindex = 1;
 
-         QString baseName = QString("%1%2.msc").arg(Config::getString("rtf-output") + "/inline_mscgraph_").arg(mscindex++);
-                         
+         QString baseName = QString("%1%2.msc").formatArg(Config::getString("rtf-output") + "/inline_mscgraph_").formatArg(mscindex++);
+
          QFile file(baseName);
          if (! file.open(QIODevice::WriteOnly)) {
             err("Unable to open file for writing %s, error: %d\n", csPrintable(baseName), file.error());
@@ -695,8 +701,8 @@ void RTFDocVisitor::visitPre(DocRoot *r)
    if (r->indent()) {
       incIndentLevel();
    }
-  
-   m_t << "{" << rtf_Style["BodyText"].reference << endl;
+
+   m_t << "{" << rtf_Style["BodyText"].m_reference << endl;
 }
 
 void RTFDocVisitor::visitPost(DocRoot *r)
@@ -711,7 +717,7 @@ void RTFDocVisitor::visitPost(DocRoot *r)
       m_t << "\\par" << endl;
    }
 
-   m_t << "}";   
+   m_t << "}";
    m_lastIsPara = true;
 
    if (r->indent()) {
@@ -731,11 +737,11 @@ void RTFDocVisitor::visitPre(DocSimpleSect *s)
       m_t << "\\par" << endl;
    }
 
-   m_t << "{"; 
+   m_t << "{";
 
    // start desc
 
-   m_t << "{" << rtf_Style["Heading5"].reference << endl;
+   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
 
    switch (s->type()) {
       case DocSimpleSect::See:
@@ -900,10 +906,10 @@ void RTFDocVisitor::visitPre(DocSection *s)
    QString heading;
    int level = qMin(s->level() + 1, 4);
 
-   heading = QString("Heading%1").arg(level);
-   
+   heading = QString("Heading%1").formatArg(level);
+
    // set style
-   m_t << rtf_Style[heading].reference << endl;
+   m_t << rtf_Style[heading].m_reference << endl;
 
    // make table of contents entry
 
@@ -1001,8 +1007,8 @@ void RTFDocVisitor::visitPre(DocHtmlDescTitle *)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlDescTitle)}\n");
-  
-   m_t << "{" << rtf_Style["Heading5"].reference << endl;
+
+   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
    m_lastIsPara = false;
 }
 
@@ -1220,10 +1226,10 @@ void RTFDocVisitor::visitPre(DocHtmlHeader *header)
 
    QString heading;
    int level = qMin(header->level() + 2, 4);
-   heading = QString("Heading%1").arg(level);
+   heading = QString("Heading%1").formatArg(level);
 
    // set style
-   m_t << rtf_Style[heading].reference;
+   m_t << rtf_Style[heading].m_reference;
 
    // make open table of contents entry that will be closed in visitPost method
    m_t << "{\\tc\\tcl" << level << " ";
@@ -1240,11 +1246,11 @@ void RTFDocVisitor::visitPost(DocHtmlHeader *)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlHeader)}\n");
 
-   // close open table of contens entry  
+   // close open table of contens entry
    m_t << "} \\par";
 
    // end section
-   m_t << "}" << endl; 
+   m_t << "}" << endl;
 
    m_lastIsPara = true;
 }
@@ -1262,7 +1268,7 @@ void RTFDocVisitor::includePicturePreRTF(const QString name, const bool isTypeRT
       m_t << "\\par" << endl;
       m_t << "{" << endl;
       m_t << rtf_Style_Reset << endl;
-      
+
       if (hasCaption || m_lastIsPara) {
          m_t << "\\par" << endl;
       }
@@ -1279,9 +1285,9 @@ void RTFDocVisitor::includePicturePreRTF(const QString name, const bool isTypeRT
 
       m_lastIsPara = true;
 
-   } else { 
+   } else {
       // other format -> skip
-   
+
       pushEnabled();
       m_hide = true;
    }
@@ -1329,19 +1335,19 @@ void RTFDocVisitor::visitPost(DocDotFile *df)
 void RTFDocVisitor::visitPre(DocMscFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocMscFile)}\n");
-   writeMscFile(df);  
+   writeMscFile(df);
 }
 
 void RTFDocVisitor::visitPost(DocMscFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocMscFile)}\n");
-   includePicturePostRTF(true, df->hasCaption());  
+   includePicturePostRTF(true, df->hasCaption());
 }
 
 void RTFDocVisitor::visitPre(DocDiaFile *df)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocDiaFile)}\n");
-   writeDiaFile(df); 
+   writeDiaFile(df);
 }
 
 void RTFDocVisitor::visitPost(DocDiaFile *df)
@@ -1476,7 +1482,7 @@ void RTFDocVisitor::visitPre(DocParamSect *s)
       m_t << "\\par" << endl;
    }
    //m_t << "{\\b "; // start bold
-   m_t << "{" << rtf_Style["Heading5"].reference << endl;
+   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
 
    switch (s->type()) {
       case DocParamSect::Param:
@@ -1603,7 +1609,7 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
       if (useTable) {
          m_t << "{";
       }
-   
+
 
       bool first = true;
 
@@ -1630,11 +1636,11 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
    }
 
    m_t << "{\\i ";
-  
-   
+
+
    bool first = true;
- 
-   for (auto param : pl->parameters()) { 
+
+   for (auto param : pl->parameters()) {
       if (!first) {
          m_t << ",";
       } else {
@@ -1700,12 +1706,12 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
       m_lastIsPara = true;
    }
 
-   m_t << "{"; 
+   m_t << "{";
 
    // start param list
    // m_t << "{\\b "; // start bold
 
-   m_t << "{" << rtf_Style["Heading5"].reference << endl;
+   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
 
    if (Config::getBool("rtf-hyperlinks") && ! anonymousEnum) {
       QString refName;
@@ -1857,7 +1863,7 @@ void RTFDocVisitor::filter(const QString &str, bool verbatim)
       return;
    }
 
-   for (auto c : str) {   
+   for (auto c : str) {
       switch (c.unicode()) {
          case '{':
             m_t << "\\{";
@@ -1880,8 +1886,8 @@ void RTFDocVisitor::filter(const QString &str, bool verbatim)
             break;
 
          default:
-            m_t << c;        
-         
+            m_t << c;
+
       }
    }
 }
@@ -1933,7 +1939,7 @@ void RTFDocVisitor::pushEnabled()
 void RTFDocVisitor::popEnabled()
 {
    bool v = m_enabled.pop();
-   m_hide = v;  
+   m_hide = v;
 }
 
 void RTFDocVisitor::writeDotFile(DocDotFile *df)
@@ -1954,7 +1960,7 @@ void RTFDocVisitor::writeDotFile(const QString &fileName, const bool hasCaption)
    writeDotGraphFromFile(fileName, outDir, baseName, GOF_BITMAP);
 
    static const QString imageExt = Config::getEnum("dot-image-extension");
-   includePicturePreRTF(baseName + "." + imageExt, true, hasCaption);  
+   includePicturePreRTF(baseName + "." + imageExt, true, hasCaption);
 }
 
 void RTFDocVisitor::writeMscFile(DocMscFile *df)
@@ -1972,7 +1978,7 @@ void RTFDocVisitor::writeMscFile(const QString &fileName, const bool hasCaption)
    }
 
    QString outDir = Config::getString("rtf-output");
-   writeMscGraphFromFile(fileName, outDir, baseName, MSC_BITMAP);   
+   writeMscGraphFromFile(fileName, outDir, baseName, MSC_BITMAP);
 
    includePicturePreRTF(baseName + ".png", true, hasCaption);
 }
@@ -1987,7 +1993,7 @@ void RTFDocVisitor::writeDiaFile(DocDiaFile *df)
    }
 
    QString outDir = Config::getString("rtf-output");
-   writeDiaGraphFromFile(df->file(), outDir, baseName, DIA_BITMAP); 
+   writeDiaGraphFromFile(df->file(), outDir, baseName, DIA_BITMAP);
    includePicturePreRTF(baseName + ".png", true, df->hasCaption());
 }
 
@@ -1997,11 +2003,11 @@ void RTFDocVisitor::writePlantUMLFile(const QString &fileName, const bool hasCap
 
    int i;
    if ((i = baseName.lastIndexOf('/')) != -1) {
-      baseName = baseName.right(baseName.length() - i - 1);   
+      baseName = baseName.right(baseName.length() - i - 1);
    }
 
    QString outDir = Config::getString("rtf-output");
    generatePlantUMLOutput(fileName, outDir, PUML_BITMAP);
-   includePicturePreRTF(baseName + ".png", true, hasCaption); 
+   includePicturePreRTF(baseName + ".png", true, hasCaption);
 }
 

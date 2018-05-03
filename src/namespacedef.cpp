@@ -488,7 +488,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
              m_namespaceSDict.declVisible())) {
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         QString label = lde->kind() == LayoutDocEntry::NamespaceClasses ? "nested-classes" : "namespaces";
+         QString label = lde->kind() == LayoutDocEntry::NamespaceClasses ? QString("nested-classes") : QString("namespaces");
 
          ol.writeSummaryLink("", label, ls->title(lang), first);
          first = false;
@@ -917,7 +917,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
          break;
       }
 
-      if (nd->isLinkable()) {
+      if (nd->isLinkable() && nd->hasDocumentation()) {
          SrcLangExt lang = nd->getLanguage();
 
          if (SrcLangExt_IDL == lang) {
@@ -1070,7 +1070,7 @@ void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, c
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
    if (ml) {
-      ml->writeDocumentation(ol, csPrintable(displayName()), self, title);
+      ml->writeDocumentation(ol, displayName(), self, title);
    }
 }
 
@@ -1139,29 +1139,32 @@ QString NamespaceDef::title() const
 QString NamespaceDef::compoundTypeString() const
 {
    SrcLangExt lang = getLanguage();
+   QString retval;
 
    if (lang == SrcLangExt_Java) {
-      return "package";
+      retval = "package";
 
    } else if (lang == SrcLangExt_CSharp) {
-      return "namespace";
+      retval = "namespace";
 
    } else if (lang == SrcLangExt_Fortran) {
-      return "module";
+      retval = "module";
 
    } else if (lang == SrcLangExt_IDL) {
 
       if (isModule()) {
-         return "module";
+         retval = "module";
 
       } else if (isConstantGroup()) {
-         return "constants";
+         retval = "constants";
 
       } else if (isLibrary()) {
-         return "library";
+         retval = "library";
 
       } else {
          err("Internal inconsistency: namespace in IDL not module, library or constant group\n");
       }
-   }   return "";
+   }
+
+   return retval;
 }

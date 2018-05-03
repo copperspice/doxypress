@@ -349,7 +349,7 @@ class Definition : public DefinitionIntf
    void writeToc(OutputList &ol);
 
    virtual QString getHint() {
-      return "";
+      return QString("");
    }
 
  protected:

@@ -30,9 +30,7 @@ QString getLanguage();
 // place holder for a position in a list. Used for translators to be able to specify different elements order
 inline QString generateMarker(int id)
 {
-   QString retval;
-
-   retval.setNum(id);
+   QString retval = QString::number(id);
    retval.prepend('@');
 
    return retval;

@@ -86,18 +86,18 @@ struct Grouping {
    static QString getGroupPriName( GroupPri_t priority ) {
       switch ( priority ) {
          case GROUPING_AUTO_WEAK:
-            return "@weakgroup";
+            return QString("@weakgroup");
 
          case GROUPING_AUTO_ADD:
-            return "@addtogroup";
+            return QString("@addtogroup");
 
          case GROUPING_AUTO_DEF:
-            return "@defgroup";
+            return QString("@defgroup");
 
          case GROUPING_INGROUP:
-            return "@ingroup";
+            return QString("@ingroup");
       }
-      return "???";
+      return QString("???");
    }
 
    Grouping( const QString &gn, GroupPri_t p ) : groupname(gn), pri(p) {}

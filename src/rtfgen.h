@@ -178,7 +178,7 @@ class RTFGenerator : public OutputGenerator
    void endCodeFragment() override;
 
    void writeLineNumber(const QString &, const QString &, const QString &, int l) override {
-      m_textStream << QString("%1").arg(l, 5) << " ";
+      m_textStream << QString("%1").formatArg(l, 5) << " ";
    }
 
    void startCodeLine(bool) override {

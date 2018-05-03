@@ -61,15 +61,17 @@ void LatexCodeGenerator::codify(const QString &str)
 
    QString result;
 
-   const QChar *p = str.constData();
+   QString::const_iterator iter     = str.constBegin();
+   QString::const_iterator iter_end = str.constEnd();
    QChar c;
 
-   while ((c = *p) != 0) {
+   while (iter != iter_end) {
+      c = *iter;
 
       switch(c.unicode())  {
          case 0x0c:
             // remove ^L
-            p++;
+            ++iter;
             break;
 
          case '\t':  {
@@ -77,22 +79,21 @@ void LatexCodeGenerator::codify(const QString &str)
             m_t << QString(spacesToNextTabStop, QChar(' '));
             m_col += spacesToNextTabStop;
 
-            p++;
-
+            ++iter;
             break;
          }
 
          case '\n':
             m_t << '\n';
             m_col = 0;
-            p++;
+            ++iter;
 
             break;
 
          default:
             // gather characters until we find whitespace or reach the end of a line
             result = c;
-            p++;
+            ++iter;
 
             if (m_col >= maxLineLen) {
                // force line break
@@ -103,9 +104,15 @@ void LatexCodeGenerator::codify(const QString &str)
             } else  {
                // copy more characters
 
-               while (m_col < maxLineLen && ((c = *p) != 0) && c != 0x0c && c != '\t' && c != '\n' && c != ' ')  {
-                  result += c;
-                  p++;
+               while (m_col < maxLineLen && iter != iter_end) {
+                  c = *iter;
+
+                  if (c != 0x0c && c != '\t' && c != '\n' && c != ' ')  {
+                     result += c;
+                     ++iter;
+                  } else {
+                     break;
+                  }
                }
 
                if (m_col >= maxLineLen) {
@@ -168,7 +175,7 @@ void LatexCodeGenerator::writeLineNumber(const QString &ref, const QString &file
    static bool usePDFLatex   = Config::getBool("latex-pdf");
 
    if (m_prettyCode) {
-      QString lineNumber = QString("%1").arg(len, 5, 10, QChar('0'));
+      QString lineNumber = QString("%1").formatArg(len, 5, 10, QChar('0'));
 
       if (! fileName.isEmpty() && ! m_sourceFileName.isEmpty()) {
          QString lineAnchor = "_l" + lineNumber;
@@ -656,11 +663,13 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    << "\\captionsetup{labelsep=space,justification=centering,font={bf},"
                   "singlelinecheck=off,skip=4pt,position=top}\n\n";
 
+   // prevent numbers overlap the titles in toc
+   t_stream << "\\renewcommand{\\numberline}[1]{#1~}\n";
+
    // End of preamble, now comes the document contents
    t_stream << "%===== C O N T E N T S =====\n"
      "\n"
      "\\begin{document}\n";
-
 
    // set to the indicated language
    if (! outputLanguage.isEmpty() && outputLanguage != "english") {
@@ -770,7 +779,7 @@ static void writeDefaultFooter(QTextStream &t)
    t << "\\newpage\n"
         "\\phantomsection\n"
         "\\clearemptydoublepage\n"
-        "\\addcontentsline{toc}{" << unit << "}{" << theTranslator->trRTFGeneralIndex() << "}\n"
+        "\\addcontentsline{toc}{" << unit << "}{\\indexname}\n"
         "\\printindex\n"
         "\n"
         "\\end{document}\n";
@@ -1293,18 +1302,18 @@ QString LatexGenerator::modifyKeywords(const QString &output)
 
    QString result = output;
 
-   result = result.replace("$datetimeHHMM",   dateTimeHHMM());
-   result = result.replace("$datetime",       dateToString(true));
-   result = result.replace("$date",           dateToString(false));
-   result = result.replace("$year",           yearToString());
+   result = result.replace("$datetimeHHMM",     dateTimeHHMM());
+   result = result.replace("$datetime",         dateToString(true));
+   result = result.replace("$date",             dateToString(false));
+   result = result.replace("$year",             yearToString());
 
    result = result.replace("$doxypressversion", versionString);
    result = result.replace("$doxygenversion",   versionString);         // compatibility
 
-   result = result.replace("$projectname",    projectName);
-   result = result.replace("$projectversion", projectVersion);
-   result = result.replace("$projectbrief",   projectBrief);
-   result = result.replace("$projectlogo",    stripPath(projectLogo));
+   result = result.replace("$projectname",      projectName);
+   result = result.replace("$projectversion",   projectVersion);
+   result = result.replace("$projectbrief",     projectBrief);
+   result = result.replace("$projectlogo",      stripPath(projectLogo));
 
    return result;
 }

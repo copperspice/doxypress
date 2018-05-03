@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -28,11 +28,11 @@
 TooltipManager *TooltipManager::s_theInstance = 0;
 
 TooltipManager::TooltipManager()
-{   
+{
 }
 
 TooltipManager::~TooltipManager()
-{ 
+{
 }
 
 TooltipManager *TooltipManager::instance()
@@ -51,16 +51,18 @@ void TooltipManager::clearTooltips()
 
 static QString escapeId(const QString &file)
 {
-   QString res = file;
+   QString retval;
 
-   for (auto &c : res) {
- 
-      if (! isId(c.unicode())) {
-         c = '_';
-      }     
+   for (QChar c : file) {
+
+      if (isId(c)) {
+         retval.append(c);
+      } else {
+         retval.append('_');
+      }
    }
 
-   return res;
+   return retval;
 }
 
 void TooltipManager::addTooltip(QSharedPointer<Definition> d)
@@ -110,7 +112,7 @@ void TooltipManager::writeTooltips(CodeOutputInterface &ol)
          defInfo.anchor  = item->getSourceAnchor();
       }
 
-      SourceLinkInfo declInfo; 
+      SourceLinkInfo declInfo;
       QString decl;
 
       if (item->definitionType() == Definition::TypeMember) {
@@ -123,7 +125,7 @@ void TooltipManager::writeTooltips(CodeOutputInterface &ol)
          }
       }
 
-      ol.writeTooltip(csPrintable(iter.key()), docInfo, decl, item->briefDescriptionAsTooltip(), defInfo, declInfo);
+      ol.writeTooltip(iter.key(), docInfo, decl, item->briefDescriptionAsTooltip(), defInfo, declInfo);
       iter++;
    }
 }

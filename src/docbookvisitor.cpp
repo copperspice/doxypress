@@ -288,8 +288,8 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          m_t << "<para>" << endl;
 
-         name = QString("dot_inline_dotgraph_%1").arg(dotindex);
-         baseName = QString("tempStr%1").arg(dotindex++);
+         name = QString("dot_inline_dotgraph_%1").formatArg(dotindex);
+         baseName = QString("tempStr%1").formatArg(dotindex++);
 
          QFile file(baseName + ".dot");
 
@@ -315,8 +315,8 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          m_t << "<para>" << endl;
 
-         name = QString("msc_inline_mscgraph_%1").arg(mscindex);
-         baseName = QString("tempStr%1").arg(mscindex++);
+         name = QString("msc_inline_mscgraph_%1").formatArg(mscindex);
+         baseName = QString("tempStr%1").formatArg(mscindex++);
 
          QFile file(baseName + ".msc");
 

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -34,21 +34,21 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
    static int logCount = 0;
    QFile f(mapName);
 
-   if (! f.open(QIODevice::ReadOnly)) { 
+   if (! f.open(QIODevice::ReadOnly)) {
 
-      if (logCount < 5) {      
-         logCount++;  
+      if (logCount < 5) {
+         logCount++;
 
          errNoPrefixAll("\n");
-         errAll("Unable to open dot map file %s\n" 
-                  "If dot was installed after a previous issue, delete the output directory and run DoxyPress again\n", 
+         errAll("Unable to open dot map file %s\n"
+                  "If dot was installed after a previous issue, delete the output directory and run DoxyPress again\n",
                    csPrintable(mapName));
-               
-      } else if (logCount == 5) {   
+
+      } else if (logCount == 5) {
          logCount++;
-         errNoPrefixAll("\n** Suppressing all further messages regarding dot map file\n\n");      
-   
-      }    
+         errNoPrefixAll("\n** Suppressing all further messages regarding dot map file\n\n");
+
+      }
 
       return false;
    }
@@ -65,7 +65,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
       int numBytes = f.readLine(buf, maxLineLen);
 
       buf[numBytes - 1] = '\0';
-      
+
       if (qstrncmp(buf, "rect", 4) == 0) {
          // obtain the url and the coordinates in the order used by graphviz-1.5
          sscanf(buf, "rect %s %d,%d %d,%d", url, &x1, &y1, &x2, &y2);
@@ -115,17 +115,17 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
 
 void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, MscOutputFormat format)
 {
-   QString absOutFile = outDir + "/" + outFile; 
- 
+   QString absOutFile = outDir + "/" + outFile;
+
    // move to output dir so dot can find the font file
-   QString oldDir = QDir::currentPath(); 
+   QString oldDir = QDir::currentPath();
    QDir::setCurrent(outDir);
-    
+
    QString mscExe = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
    QString mscArgs;
 
    QString imageName = outFile;
- 
+
    switch (format) {
       case MSC_BITMAP:
          mscArgs   += "-T png";
@@ -150,15 +150,15 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    mscArgs += " -i \"";
    mscArgs += inFile;
 
-   mscArgs += "\" -o \"";  
+   mscArgs += "\" -o \"";
    mscArgs += imageName + "\"";
 
    int exitCode;
-   
+
    portable_sysTimerStart();
    if ((exitCode = portable_system(mscExe, mscArgs, false)) != 0) {
       portable_sysTimerStop();
-     
+
       QDir::setCurrent(oldDir);
       return;
    }
@@ -168,7 +168,7 @@ void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const Q
    if ( (format == MSC_EPS) && (Config::getBool("latex-pdf")) ) {
 
       QString epstopdfArgs;
-      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").arg(outFile).arg(outFile);
+      epstopdfArgs = QString("\"%1.eps\" --outfile=\"%2.pdf\"").formatArgs(outFile, outFile);
 
       portable_sysTimerStart();
       if (portable_system("epstopdf", epstopdfArgs) != 0) {
@@ -188,11 +188,11 @@ QString getMscImageMapFromFile(const QString &inFile, const QString &outDir, con
    QString result;
 
    QString outFile = inFile + ".map";
-   
+
    // move to the output directory so dot can find the font file
    QString oldDir = QDir::currentPath();
    QDir::setCurrent(outDir);
-  
+
    QString mscExe  = Config::getString("mscgen-path") + "mscgen" + portable_commandExtension();
    QString mscArgs = "-T ismap -i \"" + inFile + "\" -o \"" + outFile + "\"";
 
@@ -200,23 +200,23 @@ QString getMscImageMapFromFile(const QString &inFile, const QString &outDir, con
    int exitCode = portable_system(mscExe, mscArgs, false);
    portable_sysTimerStop();
 
-   if (exitCode == 0) {         
+   if (exitCode == 0) {
       QTextStream tmpout(&result);
-   
+
       convertMapFile(tmpout, outFile, relPath, context);
-      QDir().remove(outFile); 
+      QDir().remove(outFile);
    }
-  
+
    QDir::setCurrent(oldDir);
 
    return result;
 }
 
-void writeMscImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath, 
+void writeMscImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath,
                   const QString &baseName, const QString &context, MscOutputFormat format)
 {
    QString mapName = baseName + ".map";
-  
+
    t << "<img src=\"" << relPath << baseName << ".";
 
    switch (format) {

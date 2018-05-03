@@ -127,7 +127,7 @@ class OutputList : public OutputDocInterface
    // void newParagraph()
    //    { forall(&OutputGenerator::newParagraph); }
 
-   void startParagraph(const QString &className = "") override {
+   void startParagraph(const QString &className = QString("")) override {
       forall(&OutputGenerator::startParagraph, className);
    }
 

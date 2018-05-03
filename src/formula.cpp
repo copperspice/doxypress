@@ -90,7 +90,7 @@ void FormulaList::generateBitmaps(const QString &path)
       int page = 0;
 
       for (auto &formula : *this) {
-         QString resultName = QString("form_%1.png").arg(formula.getId());
+         QString resultName = QString("form_%1.png").formatArg(formula.getId());
 
          // only formulas for which no image exists are generated
          QFileInfo fi(resultName);
@@ -131,7 +131,7 @@ void FormulaList::generateBitmaps(const QString &path)
          msg("Generating image form_%d.png for formula\n", pageNum);
 
          QString formBase;
-         formBase = QString("_form%1").arg(pageNum);
+         formBase = QString("_form%1").formatArg(pageNum);
 
          // run dvips to convert the page with number pageIndex to an encapsulated postscript
 
@@ -321,7 +321,7 @@ void FormulaList::generateBitmaps(const QString &path)
                }
 
                // save the result as a bitmap
-               QString fileName = QString("form_%1.png").arg(pageNum);
+               QString fileName = QString("form_%1.png").formatArg(pageNum);
 
                QFile f(fileName);
 

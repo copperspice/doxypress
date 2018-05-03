@@ -354,7 +354,6 @@ class Entry : public EnableSharedFromThis
    }
 
    void appendData(EntryKey key, QString data)  {
-
       auto iter = m_entryMap.find(key);
 
       if (iter == m_entryMap.end()) {
@@ -364,11 +363,6 @@ class Entry : public EnableSharedFromThis
          iter.value() += data;
 
       }
-   }
-
-   void appendData(EntryKey key, QCharRef data)  {
-      // remove when QString8 activated
-      appendData(key, QString(data));
    }
 
    void prependData(EntryKey key, QString data)  {
@@ -429,16 +423,16 @@ class Entry : public EnableSharedFromThis
 
       switch ( groupDocType ) {
          case GROUPDOC_NORMAL:
-            return "\\defgroup";
+            return QString("\\defgroup");
 
          case GROUPDOC_ADD:
-            return "\\addgroup";
+            return QString("\\addgroup");
 
          case GROUPDOC_WEAK:
-            return "\\weakgroup";
+            return QString("\\weakgroup");
 
          default:
-            return "unknown group command";
+            return QString("unknown group command");
       }
    }
 

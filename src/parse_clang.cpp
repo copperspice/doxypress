@@ -266,7 +266,7 @@ static void detectFunctionBody(const QString s)
 static QString getCursorSpelling(CXCursor cursor)
 {
    CXString text  = clang_getCursorSpelling(cursor);
-   QString retval = clang_getCString(text);
+   QString retval = QString::fromLatin1(clang_getCString(text));
 
    clang_disposeString(text);
 
@@ -276,7 +276,7 @@ static QString getCursorSpelling(CXCursor cursor)
 static QString getCursorUSR(CXCursor cursor)
 {
    CXString text  = clang_getCursorUSR(cursor);
-   QString retval = clang_getCString(text);
+   QString retval = QString::fromLatin1(clang_getCString(text));
 
    clang_disposeString(text);
 
@@ -286,7 +286,7 @@ static QString getCursorUSR(CXCursor cursor)
 static QString getFileName(CXFile file)
 {
    CXString text  = clang_getFileName(file);
-   QString retval = clang_getCString(text);
+   QString retval = QString::fromLatin1(clang_getCString(text));
 
    clang_disposeString(text);
 
@@ -296,7 +296,7 @@ static QString getFileName(CXFile file)
 static QString getTokenSpelling(CXTranslationUnit tu, CXToken token)
 {
    CXString text   = clang_getTokenSpelling(tu, token);
-   QString  retval = clang_getCString(text);
+   QString  retval = QString::fromLatin1(clang_getCString(text));
 
    clang_disposeString(text);
 
@@ -360,7 +360,7 @@ static QString keywordToType(const QString &key)
       return iter.value();
    }
 
-   return "keyword";
+   return QString("keyword");
 }
 
 static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint line)
@@ -404,7 +404,7 @@ static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
 
    // set search page target
    if (Doxy_Globals::searchIndexBase != nullptr) {
-      QString lineAnchor = QString("l%1").arg(line, 5, 10, QChar('0'));
+      QString lineAnchor = QString("l%1").formatArg(line, 5, 10, QChar('0'));
       ol.setCurrentDoc(fd, lineAnchor, true);
    }
 }

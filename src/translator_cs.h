@@ -41,7 +41,6 @@ class Translator_Cs : public Translator
     * English LaTeX does not use these commands, return an empty string
     */
    QString latexLanguageSupportCommand() override {
-
       QString retval = QCoreApplication::translate("latexSupport", "remove-value");
 
       if (retval == "remove-value") {
@@ -118,7 +117,7 @@ class Translator_Cs : public Translator
    /*! the author sections at the bottom of man pages, s is the project name. */
    QString trGeneratedAutomatically(const QString &s) override {
       if (! s.isEmpty() ) {
-         return QCoreApplication::translate("doxy-text", "Generated automatically by DoxyPress for %1 from the source code.").arg(s);
+         return QCoreApplication::translate("doxy-text", "Generated automatically by DoxyPress for %1 from the source code.").formatArg(s);
 
       } else {
          return QCoreApplication::translate("doxy-text", "Generated automatically by DoxyPress from the source code.");
@@ -503,15 +502,15 @@ class Translator_Cs : public Translator
    QString trGeneratedAt(const QString &date, const QString &projName) override {
 
       if (projName.isEmpty()) {
-         return QCoreApplication::translate("doxy-text", "Generated on %1 &nbsp; by").arg(date);
+         return QCoreApplication::translate("doxy-text", "Generated on %1 &nbsp; by").formatArg(date);
       } else  {
-         return QCoreApplication::translate("doxy-text", "Generated on %1 for %2 &nbsp; by").arg(date).arg(projName);
+         return QCoreApplication::translate("doxy-text", "Generated on %1 for %2 &nbsp; by").formatArg(date).formatArg(projName);
       }
    }
 
    /*! this text is put before a class diagram */
    QString trClassDiagram(const QString &clName) override {
-      return QCoreApplication::translate("doxy-text", "Inheritance diagram for %1:").arg(clName);
+      return QCoreApplication::translate("doxy-text", "Inheritance diagram for %1:").formatArg(clName);
    }
 
    /*! this text is generated when the \\internal command is used. */
@@ -597,65 +596,65 @@ class Translator_Cs : public Translator
       switch (compType) {
          case CompoundType::Class:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Class Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Class Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Class Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Class Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Struct:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Struct Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Struct Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Struct Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Struct Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Union:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Union Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Union Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Union Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Union Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Interface:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Interface Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Interface Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Interface Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Interface Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Protocol:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Protocol Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Protocol Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Protocol Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Protocol Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Category:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Category Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Category Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Category Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Category Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Exception:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Exception Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Exception Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Exception Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Exception Reference").formatArg(clName);
             }
             break;
 
          default:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Reference").formatArg(clName);
             }
             break;
       }
@@ -665,12 +664,12 @@ class Translator_Cs : public Translator
 
    /*! used as the title of the HTML page of a file */
    QString trFileReference(const QString &fileName)  override {
-      return QCoreApplication::translate("doxy-text", "%1 File Reference").arg(fileName);
+      return QCoreApplication::translate("doxy-text", "%1 File Reference").formatArg(fileName);
    }
 
    /*! used as the title of the HTML page of a namespace */
    QString trNamespaceReference(const QString &name)  override {
-      return QCoreApplication::translate("doxy-text", "%1 Namespace Reference").arg(name);
+      return QCoreApplication::translate("doxy-text", "%1 Namespace Reference").formatArg(name);
    }
 
    QString trPublicMembers() override {
@@ -754,28 +753,28 @@ class Translator_Cs : public Translator
     *  if class diagrams are disabled.
     */
    QString trInheritsList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Inherits %1.").arg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Inherits %1.").formatArg( trWriteList(numEntries));
    }
 
    /*! used in class documentation to produce a list of super classes,
     *  if class diagrams are disabled.
     */
    QString trInheritedByList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Inherited by %1.").arg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Inherited by %1.").formatArg( trWriteList(numEntries));
    }
 
    /*! used in member documentation blocks to produce a list of
     *  members that are hidden by this one.
     */
    QString trReimplementedFromList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Reimplemented from %1.").arg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Reimplemented from %1.").formatArg( trWriteList(numEntries));
    }
 
    /*! used in member documentation blocks to produce a list of
     *  all member that overwrite the implementation of this member.
     */
    QString trReimplementedInList(int numEntries)  override {
-      return QCoreApplication::translate("doxy-text", "Reimplemented in %1.").arg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Reimplemented in %1.").formatArg( trWriteList(numEntries));
    }
 
    /*! This is put above each page as a link to all members of namespaces. */
@@ -942,12 +941,12 @@ class Translator_Cs : public Translator
 
    /*! this text is put before a collaboration diagram */
    QString trCollaborationDiagram(const QString &clName) override {
-      return QCoreApplication::translate("doxy-text", "Collaboration diagram for %1:").arg(clName);
+      return QCoreApplication::translate("doxy-text", "Collaboration diagram for %1:").formatArg(clName);
    }
 
    /*! this text is put before an include dependency graph */
    QString trInclDepGraph(const QString &fName)  override {
-      return QCoreApplication::translate("doxy-text", "Include dependency graph for %1:").arg(fName);
+      return QCoreApplication::translate("doxy-text", "Include dependency graph for %1:").formatArg(fName);
    }
 
    /*! header that is put before the list of constructor/destructors. */
@@ -1075,7 +1074,7 @@ class Translator_Cs : public Translator
    /*! page explaining how the dot graph's should be interpreted
     *  The %A in the text below are to prevent link to classes called "A". */
    QString trLegendDocs(const QString &dotFormat) override {
-      return QCoreApplication::translate("doxy-text", "Dot Graph legend source code").arg(dotFormat);
+      return QCoreApplication::translate("doxy-text", "Dot Graph legend source code").formatArg(dotFormat);
    }
 
    /*! text for the link to the legend page */
@@ -1114,7 +1113,7 @@ class Translator_Cs : public Translator
 
    /*! Used as the title of a Java package */
    QString trPackage(const QString &name) override {
-      return QCoreApplication::translate("doxy-text", "Package %1").arg(name);
+      return QCoreApplication::translate("doxy-text", "Package %1").formatArg(name);
    }
 
    /*! Title of the package index page */
@@ -1379,14 +1378,14 @@ class Translator_Cs : public Translator
     *  members that are implemented by this one.
     */
    QString trImplementedFromList(int numEntries) override {
-     return QCoreApplication::translate("doxy-text", "Implements %1.").arg(trWriteList(numEntries));
+     return QCoreApplication::translate("doxy-text", "Implements %1.").formatArg(trWriteList(numEntries));
    }
 
    /*! used in member documentation blocks to produce a list of
     *  all members that implement this abstract member.
     */
    QString trImplementedInList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Implemented %1.").arg(
+      return QCoreApplication::translate("doxy-text", "Implemented %1.").formatArg(
                   trWriteList(numEntries));
    }
 
@@ -1493,7 +1492,7 @@ class Translator_Cs : public Translator
    /*! This is used in HTML as the title of page with source code for file filename
     */
    QString trSourceFile(const QString &filename) override  {
-      return QCoreApplication::translate("doxy-text", "%1 Source File").arg(filename);
+      return QCoreApplication::translate("doxy-text", "%1 Source File").formatArg(filename);
    }
 
    /*! This is used as the name of the chapter containing the directory
@@ -1527,7 +1526,7 @@ class Translator_Cs : public Translator
 
    /*! This returns the title of a directory page. The name of the directory is passed via dirName. */
    QString trDirReference(const QString &dirName) override {
-      return QCoreApplication::translate("doxy-text", "%1 Directory Reference").arg(dirName);
+      return QCoreApplication::translate("doxy-text", "%1 Directory Reference").formatArg(dirName);
    }
 
    /*! returns the word directory with or without starting capital letter, in sigular or plural form. */
@@ -1660,65 +1659,65 @@ class Translator_Cs : public Translator
       switch (compType) {
          case CompoundType::Class:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Module Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Module Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Module Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Module Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Struct:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Type Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Type Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Type Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Type Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Union:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Union Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Union Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Union Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Union Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Interface:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Interface Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Interface Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Interface Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Interface Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Protocol:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Protocol Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Protocol Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1  Protocol Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1  Protocol Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Category:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Category Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Category Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Category Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Category Reference").formatArg(clName);
             }
             break;
 
          case CompoundType::Exception:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Exception Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Exception Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Exception Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Exception Reference").formatArg(clName);
             }
             break;
 
           default:
             if (isTemplate) {
-               result = QCoreApplication::translate("doxy-text", "%1 Template Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Template Reference").formatArg(clName);
             } else {
-               result = QCoreApplication::translate("doxy-text", "%1 Reference").arg(clName);
+               result = QCoreApplication::translate("doxy-text", "%1 Reference").formatArg(clName);
             }
             break;
       }
@@ -1727,7 +1726,7 @@ class Translator_Cs : public Translator
    }
    /*! used as the title of the HTML page of a module (Fortran) */
    QString trModuleReference(const QString &namespaceName) override  {
-      return QCoreApplication::translate("doxy-text", "%1 Module Reference").arg(namespaceName);
+      return QCoreApplication::translate("doxy-text", "%1 Module Reference").formatArg(namespaceName);
    }
 
    /*! This is put above each page as a link to all members of modules. (Fortran) */
@@ -1912,7 +1911,7 @@ class Translator_Cs : public Translator
 
    /*! directory relation for name */
    QString trDirRelation(const QString &name) override  {
-      return QCoreApplication::translate("doxy-text", "%1 Relation").arg(name);
+      return QCoreApplication::translate("doxy-text", "%1 Relation").formatArg(name);
    }
 
    /*! Loading message shown when loading search results */
@@ -1940,7 +1939,7 @@ class Translator_Cs : public Translator
     *  source file that has a relation to another file.
     */
    QString trFileIn(const QString &name) override {
-      return QCoreApplication::translate("doxy-text", "File in %1").arg(name);
+      return QCoreApplication::translate("doxy-text", "File in %1").formatArg(name);
    }
 
    /*! when clicking a directory dependency label, a page with a
@@ -1948,7 +1947,7 @@ class Translator_Cs : public Translator
     *  destination file that is included.
     */
    QString trIncludesFileIn(const QString &name) override  {
-      return QCoreApplication::translate("doxy-text", "Includes file in %1").arg(name);
+      return QCoreApplication::translate("doxy-text", "Includes file in %1").formatArg(name);
    }
 
    /*! Header for the page with bibliographic citations */
@@ -1963,7 +1962,7 @@ class Translator_Cs : public Translator
 
    /*! Header for the graph showing the directory dependencies */
    QString trDirDepGraph(const QString &name) override  {
-      return QCoreApplication::translate("doxy-text", "Directory dependency graph for %1:").arg(name);
+      return QCoreApplication::translate("doxy-text", "Directory dependency graph for %1:").formatArg(name);
    }
 
    /*! Detail level selector shown for hierarchical indices */
@@ -1978,7 +1977,7 @@ class Translator_Cs : public Translator
 
    /*! Used in dot graph when UML_LOOK is enabled and there are many fields */
    QString trAndMore(const QString &number) override  {
-      return QCoreApplication::translate("doxy-text", "and %1 more...").arg(number);
+      return QCoreApplication::translate("doxy-text", "and %1 more...").formatArg(number);
    }
 
    /*! Used file list for a Java enum */
@@ -1994,12 +1993,12 @@ class Translator_Cs : public Translator
 
    /*! Header of a Java enum page (Java enums are represented as classes). */
    QString trEnumReference(const QString &name) override  {
-      return QCoreApplication::translate("doxy-text", "%1 Enum Reference").arg(name);
+      return QCoreApplication::translate("doxy-text", "%1 Enum Reference").formatArg(name);
    }
 
    /*! Used for a section containing inherited members */
    QString trInheritedFrom(const QString &members, const QString &what) override  {
-      return QCoreApplication::translate("doxy-text", "%1 inherited from %2").arg(members).arg(what);
+      return QCoreApplication::translate("doxy-text", "%1 inherited from %2").formatArg(members).formatArg(what);
    }
 
    /*! Header of the sections with inherited members specific for the  base class(es) */
@@ -2068,17 +2067,17 @@ class Translator_Cs : public Translator
 
    /** UNO IDL constant groups */
    QString trConstantGroupReference(const QString &namespaceName)  override  {
-      return QCoreApplication::translate("doxy-text", "%1 Constant Group Reference").arg(namespaceName);
+      return QCoreApplication::translate("doxy-text", "%1 Constant Group Reference").formatArg(namespaceName);
    }
 
    /** UNO IDL service page title */
    QString trServiceReference(const QString &sName) override {
-      return QCoreApplication::translate("doxy-text", "%1 Service Reference").arg(sName);
+      return QCoreApplication::translate("doxy-text", "%1 Service Reference").formatArg(sName);
    }
 
    /** UNO IDL singleton page title */
    QString trSingletonReference(const QString &sName) override {
-      return QCoreApplication::translate("doxy-text", "%1 Singleton Reference").arg(sName);
+      return QCoreApplication::translate("doxy-text", "%1 Singleton Reference").formatArg(sName);
    }
 
    /** UNO IDL service page */

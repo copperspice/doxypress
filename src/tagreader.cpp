@@ -306,12 +306,12 @@ class TagFileParser : public QXmlDefaultHandler
       m_inputFileName = fileName;
    }
 
-   void warn(const char *fmt) {
+   void warn(const QString &fmt) {
       ::warn(m_inputFileName, m_locator->lineNumber(), fmt);
    }
 
-   void warn(const char *fmt, const char *s) {
-      ::warn(m_inputFileName, m_locator->lineNumber(), fmt, s);
+   void warn(const QString &fmt, const QString &str) {
+      ::warn(m_inputFileName, m_locator->lineNumber(), fmt, str);
    }
 
    void startCompound( const QXmlAttributes &attrib ) {
@@ -395,7 +395,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_state = InDir;
 
       } else {
-         warn("Unknown compound attribute '%s' found in the tag file.\n", csPrintable(kind) );
+         warn("Unknown compound attribute '%s' found in the tag file.\n", kind);
          m_state = Invalid;
       }
 
@@ -952,7 +952,6 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    bool startElement(const QString &, const QString &, const QString &name, const QXmlAttributes &attrib) override {
-
       auto iter = m_startElementHandlers.find(name);
 
       if (iter != m_startElementHandlers.end())  {
@@ -961,7 +960,7 @@ class TagFileParser : public QXmlDefaultHandler
          handler(attrib);
 
       } else {
-         warn("Unknown '<%s>' found in the tag file.\n", csPrintable(name));
+         warn("Unknown '<%s>' found in the tag file.\n", name);
 
       }
 
@@ -969,7 +968,6 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    bool endElement( const QString &, const QString &, const QString &name ) override {
-
       auto iter = m_endElementHandlers.find(name);
 
       if (iter != m_endElementHandlers.end()) {
@@ -978,7 +976,7 @@ class TagFileParser : public QXmlDefaultHandler
          handler();
 
       } else {
-         warn("Unknown '<%s>' found in the tag file.\n", csPrintable(name));
+         warn("Unknown '<%s>' found in the tag file.\n", name);
 
       }
 
@@ -1056,7 +1054,7 @@ class TagFileErrorHandler : public QXmlErrorHandler
    }
 
    QString errorString() const override {
-      return "";
+      return QString("");
    }
 
  private:
@@ -1091,7 +1089,7 @@ void TagFileParser::dump()
       msg("namespace '%s'\n",  csPrintable(nd.name));
       msg("  filename '%s'\n", csPrintable(nd.filename));
 
-      QStringList::Iterator it;
+      QStringList::iterator it;
       for ( it = nd.classList.begin(); it != nd.classList.end(); ++it ) {
          msg( "  class: %s \n", csPrintable((*it)) );
       }
@@ -1110,7 +1108,7 @@ void TagFileParser::dump()
       msg("file '%s'\n",       csPrintable(fd.name));
       msg("  filename '%s'\n", csPrintable(fd.filename));
 
-      QStringList::Iterator it;
+      QStringList::iterator it;
       for ( it = fd.namespaceList.begin(); it != fd.namespaceList.end(); ++it ) {
          msg( "  namespace: %s \n", csPrintable((*it)) );
       }
@@ -1137,7 +1135,7 @@ void TagFileParser::dump()
       msg("group '%s'\n",      csPrintable(gd.name));
       msg("  filename '%s'\n", csPrintable(gd.filename));
 
-      QStringList::Iterator it;
+      QStringList::iterator it;
       for ( it = gd.namespaceList.begin(); it != gd.namespaceList.end(); ++it ) {
          msg( "  namespace: %s \n", csPrintable((*it)) );
       }
@@ -1178,7 +1176,7 @@ void TagFileParser::dump()
       msg("dir '%s'\n",    csPrintable(dd.name));
       msg("  path '%s'\n", csPrintable(dd.path));
 
-      QStringList::Iterator it;
+      QStringList::iterator it;
       for ( it = dd.fileList.begin(); it != dd.fileList.end(); ++it ) {
          msg( "  file: %s \n", csPrintable((*it)) );
       }
@@ -1200,7 +1198,7 @@ void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoLi
          e->m_anchors.append(*si);
 
       } else {
-         warn("Duplicate anchor %s found in the tag file.\n", csPrintable(ta.label));
+         warn("Duplicate anchor %s found in the tag file.\n", ta.label);
 
       }
    }

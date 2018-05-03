@@ -358,9 +358,9 @@ char portable_pathListSeparator()
 QString portable_commandExtension()
 {
 #ifdef Q_OS_WIN
-   return ".exe";
+   return QString(".exe");
 #else
-   return "";
+   return QString("");
 #endif
 }
 

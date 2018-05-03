@@ -104,8 +104,8 @@ void DirDef::sort()
 
 static QString encodeDirName(const QString &anchor)
 {
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(anchor.toUtf8(), QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(anchor.toUtf8(), QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
 
    return sigStr;
 }
@@ -219,7 +219,7 @@ void DirDef::writeDirectoryGraph(OutputList &ol)
          //ol.startParagraph();
 
          ol.startDirDepGraph();
-         ol.parseText(theTranslator->trDirDepGraph(csPrintable(shortName())));
+         ol.parseText(theTranslator->trDirDepGraph(shortName()));
          ol.endDirDepGraph(dirDep);
 
          //ol.endParagraph();
@@ -353,7 +353,7 @@ void DirDef::endMemberDeclarations(OutputList &ol)
 
 QString DirDef::shortTitle() const
 {
-   return theTranslator->trDirReference(csPrintable(m_shortName));
+   return theTranslator->trDirReference(m_shortName);
 }
 
 bool DirDef::hasDetailedDescription() const
@@ -410,7 +410,7 @@ void DirDef::writeDocumentation(OutputList &ol)
    static bool generateTreeView = Config::getBool("generate-treeview");
    ol.pushGeneratorState();
 
-   QString title = theTranslator->trDirReference(csPrintable(m_dispName));
+   QString title = theTranslator->trDirReference(m_dispName);
    startFile(ol, getOutputFileBase(), name(), title, HLI_None, !generateTreeView);
 
    if (! generateTreeView) {
@@ -752,8 +752,8 @@ void DirRelation::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   QString shortTitle = theTranslator->trDirRelation( csPrintable(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName()) );
-   QString title = theTranslator->trDirRelation( csPrintable(m_src->displayName() + " -> " + m_dst->dir()->shortName()) );
+   QString shortTitle = theTranslator->trDirRelation(m_src->shortName() + " &rarr; " + m_dst->dir()->shortName());
+   QString title = theTranslator->trDirRelation(m_src->displayName() + " -> " + m_dst->dir()->shortName() );
 
    startFile(ol, getOutputFileBase(), getOutputFileBase(),
              title, HLI_None, !generateTreeView, m_src->getOutputFileBase());
@@ -808,12 +808,12 @@ static int misMatch(const QString &path, const QString &dirName)
 {
    int retval = 0;
 
-   const QChar *data1 = path.constData();
-   const QChar *data2 = dirName.constData();
+   QString::const_iterator iter1 = path.constBegin();
+   QString::const_iterator iter2 = dirName.constBegin();
 
-   while (*data1 == *data2 && *data1 != 0)  {
-      ++data1;
-      ++data2;
+   while (iter1 != path.constEnd() && iter2 != dirName.constEnd() && *iter1 == *iter2) {
+      ++iter1;
+      ++iter2;
 
       ++retval;
    }
@@ -873,7 +873,7 @@ void buildDirectories()
    for (auto &fn : Doxy_Globals::inputNameList) {
       for (auto fd : *fn) {
 
-         if (fd->getReference().isEmpty() && fd->isDocumentationFile()) {
+         if (fd->getReference().isEmpty()) {
             QSharedPointer<DirDef> dir;
 
             if ((dir = Doxy_Globals::directories.find(fd->getPath())) == 0) {
@@ -881,7 +881,7 @@ void buildDirectories()
                dir = DirDef::mergeDirectoryInTree(fd->getPath());
             }
 
-            if (dir) {
+            if (dir && ! fd->isDocumentationFile()) {
                dir->addFile(fd);
             }
 
