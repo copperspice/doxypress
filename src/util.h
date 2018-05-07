@@ -50,7 +50,7 @@ struct ListItemInfo;
 struct SectionInfo;
 struct TagInfo;
 
-/** Abstract interface for a hyperlinked text fragment. */
+// Abstract interface for a hyperlinked text fragment
 class TextGeneratorIntf
 {
  public:
@@ -61,7 +61,7 @@ class TextGeneratorIntf
    virtual void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const = 0;
 };
 
-/** Implements TextGeneratorIntf for an OutputDocInterface stream. */
+// Implements TextGeneratorIntf for an OutputDocInterface stream
 class TextGeneratorOLImpl : public TextGeneratorIntf
 {
  public:
@@ -76,21 +76,20 @@ class TextGeneratorOLImpl : public TextGeneratorIntf
    OutputDocInterface &m_od;
 };
 
-/** @brief maps a unicode character code to a list of T::ElementType's
- */
+// maps a letter to a QList of T::ElementType
 template<class T>
-class LetterToIndexMap : public LongMap<QSharedPointer<T>>
+class LetterToIndexMap : public QMap<QChar, QSharedPointer<T>>
 {
  public:
    LetterToIndexMap()
-   {
-   }
+   { }
 
    template<class E>
-   void insertElement(uint letter, E elem) {
+   void insertElement(QChar letter, E elem) {
+      auto iter = this->find(letter);
 
-      if (this->contains(letter)) {
-         auto data = this->find(letter);
+      if (iter != this->end()) {
+         QSharedPointer<T> data = iter.value();
          data->insertDef(elem);
 
       } else {
@@ -99,11 +98,6 @@ class LetterToIndexMap : public LongMap<QSharedPointer<T>>
          this->insert(letter, data);
          data->insertDef(elem);
       }
-   }
-
- private:
-   int compareMapValues(const QSharedPointer<T> &l1, const QSharedPointer<T> &l2) const override {
-      return (int)l1->letter() - (int)l2->letter();
    }
 };
 

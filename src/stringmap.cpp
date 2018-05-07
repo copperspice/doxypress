@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -36,12 +36,12 @@ int ExampleSDict::compareMapValues(const QSharedPointer<Example> &item1, const Q
    return item1->name.compare(item2->name, Qt::CaseInsensitive);
 }
 
-int GroupSDict::compareMapValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const 
+int GroupSDict::compareMapValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2) const
 {
    return item1->groupTitle().compare(item2->groupTitle());
 }
 
-int IndexFieldSDict::compareMapValues(const QSharedPointer<IndexField> &item1, 
+int IndexFieldSDict::compareMapValues(const QSharedPointer<IndexField> &item1,
                   const QSharedPointer<IndexField> &item2) const
 {
    return item1->name.compare(item2->name, Qt::CaseInsensitive);
@@ -51,8 +51,8 @@ int MemberGroupSDict::compareMapValues(const QSharedPointer<MemberGroup> &item1,
    return item1->groupId() - item2->groupId();
 }
 
-int MemberNameInfoSDict::compareMapValues(const QSharedPointer<MemberNameInfo> &item1, 
-                  const QSharedPointer<MemberNameInfo> &item2) const  
+int MemberNameInfoSDict::compareMapValues(const QSharedPointer<MemberNameInfo> &item1,
+                  const QSharedPointer<MemberNameInfo> &item2) const
 {
    return item1->memberName().compare(item2->memberName(), Qt::CaseInsensitive );
 }
@@ -65,34 +65,27 @@ int PageSDict::compareMapValues(const QSharedPointer<PageDef> &i1, const QShared
 void SearchIndexMap ::insertDef(QSharedPointer<Definition> d)
 {
    QSharedPointer<SearchDefinitionList> lx = this->find(d->localName());
-   
+
    if (lx == nullptr) {
       lx = QSharedPointer<SearchDefinitionList>(new SearchDefinitionList(m_letter));
       StringMap<QSharedPointer<SearchDefinitionList>>::insert(d->localName(), lx);
    }
-   
+
    lx->append(d);
 }
 
-uint SearchIndexMap::letter() const
+QChar SearchIndexMap::letter() const
 {
    return m_letter;
 }
 
-int SearchIndexMap::compareMapValues(const QSharedPointer<SearchDefinitionList> &md1, 
-                                    const QSharedPointer<SearchDefinitionList> &md2) const 
+int SearchIndexMap::compareMapValues(const QSharedPointer<SearchDefinitionList> &md1,
+                                    const QSharedPointer<SearchDefinitionList> &md2) const
 {
    QString n1 = md1->first()->localName();
    QString n2 = md2->first()->localName();
 
    return n1.compare(n2, Qt::CaseInsensitive);
 }
-
-
-
-
-
-
-
 
 

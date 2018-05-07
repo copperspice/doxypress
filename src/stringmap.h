@@ -72,7 +72,7 @@ class StringMap
    // create an ordered dictionary
    // indicate whether the keys should be sorted in a case sensitive way
 
-   using iterator = typename QMap<QString, T, SC>::iterator;
+   using iterator       = typename QMap<QString, T, SC>::iterator;
    using const_iterator = typename QMap<QString, T, SC>::const_iterator;
 
    StringMap(SC compare) : m_dict(compare) {
@@ -117,26 +117,6 @@ class StringMap
       return m_dict.end();
    }
 
-   T find(const char *key) const {
-      auto item = m_dict.find(key);
-
-      if (item == m_dict.end()) {
-         return T();
-      }
-
-      return item.value();
-   }
-
-   T find(const QByteArray &key) const {
-      auto item = m_dict.find(key);
-
-      if (item == m_dict.end()) {
-         return T();
-      }
-
-      return item.value();
-   }
-
    T find(const QString &key) const {
        auto item = m_dict.find(key);
 
@@ -147,14 +127,6 @@ class StringMap
       return item.value();
    }
 
-   void insert(const char *key, const T &d) {
-      m_dict.insert(key, d);
-   }
-
-   void insert(QByteArray key, const T &d) {
-      m_dict.insert(key, d);
-   }
-
    void insert(QString key, const T &d) {
       m_dict.insert(key, d);
    }
@@ -163,22 +135,14 @@ class StringMap
       return m_dict.isEmpty();
    }
 
-   /*! Remove an item from the dictionary */
+   // Remove an item from the dictionary
    bool remove(const QString &key) {
       return m_dict.remove(key);
    }
 
-   /*! Take an item out of the dictionary without deleting it */
-   T *take(const char *key) {
+   // Take an item out of the dictionary without deleting it
+   T *take(const QString &key) {
       return m_dict.take(key);
-   }
-
-   T &operator[](const char *key) {
-      return m_dict[key];
-   }
-
-   T operator[](const char *key) const {
-      return m_dict[key];
    }
 
    T &operator[](const QString &key) {
@@ -189,25 +153,15 @@ class StringMap
       return m_dict[key];
    }
 
-   T &operator[](const QByteArray &key) {
-      return m_dict[key];
-   }
+   class JavaIterator;         // first forward declare
+   friend class JavaIterator;  // then make it a friend
 
-   T operator[](const QByteArray &key) const {
-      return m_dict[key];
-   }
-
-   class Iterator;         // first forward declare
-   friend class Iterator;  // then make it a friend
-
-   /*! Simple iterator for SDict. It iterates in the order in which the
-    *  elements are stored.
-    */
-   class Iterator
+   // Simple iterator for SDict. It iterates in the order in which the elements are stored.
+   class JavaIterator
    {
     public:
-      /*! Create an iterator given the dictionary. */
-      Iterator(const StringMap<T> &dict) {
+      // Create a java style iterator given the dictionary
+      JavaIterator(const StringMap<T> &dict) {
 
          m_list = dict.m_dict.values();
          std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareMapValues(v1, v2) < 0; } );
@@ -215,13 +169,9 @@ class StringMap
          m_li = m_list.begin();
       }
 
-      /*! Destroys the dictionary */
-      virtual ~Iterator() {
+      virtual ~JavaIterator() {
       }
 
-      /*! Set the iterator to the first element in the list.
-       *  \return The first compound, or zero if the list was empty.
-       */
       T toFirst() {
          m_li = m_list.begin();
 
@@ -232,9 +182,6 @@ class StringMap
          }
       }
 
-      /*! Set the iterator to the last element in the list.
-       *  \return The first compound, or zero if the list was empty.
-       */
       T toLast()  {
          if (m_list.isEmpty()) {
             m_li = m_list.end();
@@ -245,7 +192,6 @@ class StringMap
          return *m_li;
       }
 
-      /*! Returns the current compound */
       T current() const {
 
          if (m_li == m_list.end()) {
@@ -255,18 +201,10 @@ class StringMap
          }
       }
 
-      /*! Moves the iterator to the next element.
-       *  \return the new "current" element, or zero if the iterator was
-       *          already pointing at the last element.
-       */
       void operator++() {
          ++m_li;
       }
 
-      /*! Moves the iterator to the previous element.
-       *  \return the new "current" element, or zero if the iterator was
-       *          already pointing at the first element.
-       */
       void operator--() {
          --m_li;
       }
@@ -278,10 +216,7 @@ class StringMap
 
 };
 
-
-/** Ordered dictionary of elements of type T.
- *
- */
+// Ordered dictionary of elements of type T
 template<class T>
 class LongMap
 {
@@ -295,7 +230,6 @@ class LongMap
    LongMap() {
    }
 
-   /*! Destroys the dictionary */
    virtual ~LongMap() {
    }
 
@@ -338,7 +272,7 @@ class LongMap
    }
 
    T find(long key) {
-       auto item = m_dict.find(key);
+      auto item = m_dict.find(key);
 
       if (item == m_dict.end()) {
          return T();
@@ -363,17 +297,14 @@ class LongMap
       return m_dict[key];
    }
 
-   class Iterator;         // first forward declare
-   friend class Iterator;  // then make it a friend
+   class JavaIterator;         // first forward declare
+   friend class JavaIterator;  // then make it a friend
 
-   /*! Simple iterator for SDict. It iterates in the order in which the
-    *  elements are stored.
-    */
-   class Iterator
+   class JavaIterator
    {
     public:
       /*! Create an iterator given the dictionary. */
-      Iterator(const LongMap<T> &dict) {
+      JavaIterator(const LongMap<T> &dict) {
 
          m_list = dict.m_dict.values();
          std::sort(m_list.begin(), m_list.end(), [&dict](const T &v1, const T &v2){ return dict.compareMapValues(v1, v2) < 0; } );
@@ -381,43 +312,27 @@ class LongMap
           m_li = m_list.begin();
       }
 
-      /*! Destroys the dictionary */
-      virtual ~Iterator() {
+      virtual ~JavaIterator() {
       }
 
-      /*! Set the iterator to the first element in the list.
-       *  \return The first compound, or zero if the list was empty.
-       */
       T toFirst() {
          m_li = m_list.begin();
          return *m_li;
       }
 
-      /*! Set the iterator to the last element in the list.
-       *  \return The first compound, or zero if the list was empty.
-       */
       T toLast() {
          m_li = m_list.end() - 1;
          return *m_li;
       }
 
-      /*! Returns the current compound */
       T current() const {
          return *m_li;
       }
 
-      /*! Moves the iterator to the next element.
-       *  \return the new "current" element, or zero if the iterator was
-       *          already pointing at the last element.
-       */
       void operator++() {
          ++m_li;
       }
 
-      /*! Moves the iterator to the previous element.
-       *  \return the new "current" element, or zero if the iterator was
-       *          already pointing at the first element.
-       */
       void operator--() {
          --m_li;
       }
@@ -591,21 +506,21 @@ class PageSDict : public StringMap<QSharedPointer<PageDef>>
 class SearchIndexMap : public StringMap<QSharedPointer<SearchDefinitionList>>
 {
  public:
-   SearchIndexMap(uint letter) :
-                  StringMap<QSharedPointer<SearchDefinitionList>>(Qt::CaseInsensitive), m_letter(letter)
+   SearchIndexMap(QChar letter)
+      : StringMap<QSharedPointer<SearchDefinitionList>>(Qt::CaseInsensitive), m_letter(letter)
    { }
 
    ~SearchIndexMap()
    { }
 
    void insertDef(QSharedPointer<Definition> d);
-   uint letter() const;
+   QChar letter() const;
 
  private:
    int compareMapValues(const QSharedPointer<SearchDefinitionList> &md1,
                   const QSharedPointer<SearchDefinitionList> &md2) const override;
 
-   uint m_letter;
+   QChar m_letter;
 };
 
 

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -30,7 +30,7 @@ class SearchDocEntry;
 
 void initSearchIndexer();
 
-//------- server side search index ----------------------
+// server side search index
 
 struct URL {
    URL(const QString &n, const QString &u) : name(n), url(u) {}
@@ -47,15 +47,15 @@ struct URLInfo {
 class SearchDefinitionList : public QList<QSharedPointer<Definition>>
 {
    public:
-      SearchDefinitionList(uint letter) : m_letter(letter) 
+      SearchDefinitionList(QChar letter) : m_letter(letter)
       {}
-   
-      uint letter() const {
+
+      QChar letter() const {
          return m_letter;
       }
-   
+
    private:
-      uint m_letter;
+      QChar m_letter;
 };
 
 class IndexWord
@@ -121,7 +121,7 @@ class SearchIndex : public SearchIndex_Base
 
 class SearchIndex_External : public SearchIndex_Base
 {
-  
+
  public:
    SearchIndex_External();
    ~SearchIndex_External();
@@ -129,7 +129,7 @@ class SearchIndex_External : public SearchIndex_Base
    void addWord(const QString &word, bool hiPriority) override;
    void write(const QString &file) override;
 
- private:   
+ private:
    StringMap<QSharedPointer<SearchDocEntry>> m_docEntries;
    QSharedPointer<SearchDocEntry> m_current;
 

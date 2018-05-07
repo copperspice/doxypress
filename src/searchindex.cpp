@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -16,7 +16,7 @@
 *************************************************************************/
 
 #include <QFile>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextStream>
 
 #include <ctype.h>
@@ -33,14 +33,14 @@
 #include <util.h>
 
 IndexWord::IndexWord(const QString &word) : m_word(word)
-{  
+{
 }
 
 void IndexWord::addUrlIndex(int idx, bool hiPriority)
-{  
+{
    QSharedPointer<URLInfo> ui = m_urls.value(idx);
 
-   if (! ui) {     
+   if (! ui) {
       ui = QMakeShared<URLInfo>(idx, 0);
       m_urls.insert(idx, ui);
    }
@@ -53,11 +53,11 @@ void IndexWord::addUrlIndex(int idx, bool hiPriority)
 }
 
 SearchIndex::SearchIndex() : SearchIndex_Base(Internal), m_urlIndex(-1)
-{    
+{
 }
 
 SearchIndex::~SearchIndex()
-{ 
+{
 }
 
 void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile)
@@ -67,7 +67,7 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &a
    }
 
    assert(! isSourceFile || ctx->definitionType() == Definition::TypeFile);
-   
+
    QString url = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
    url += Doxy_Globals::htmlFileExtension;
 
@@ -91,9 +91,9 @@ void SearchIndex::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &a
 
       } else {
          name.prepend(theTranslator->trMember(true, true) + " ");
-      }  
+      }
 
-   } else { 
+   } else {
       // compound type
       SrcLangExt lang = ctx->getLanguage();
 
@@ -172,11 +172,11 @@ static int charsToIndex(const QString &word)
    if (word.length() < 2) {
       return -1;
    }
- 
+
    // hashing that allows for substring searching
-   uint c1 = word[0].unicode(); 
+   uint c1 = word[0].unicode();
    uint c2 = word[1].unicode();
-   
+
    return c1 * 256 + c2;
 }
 
@@ -186,19 +186,19 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
       return;
    }
 
-   static QRegExp nextPart("[_a-z:][A-Z]");
+   static QRegularExpression nextPart("[_a-z:][A-Z]");
 
-   QString wStr = word.toLower();   
+   QString wStr = word.toLower();
    QSharedPointer<IndexWord> w = m_words.value(wStr);
 
    if (! w) {
       int idx = charsToIndex(wStr);
-     
+
       if (idx < 0) {
          return;
       }
 
-      w = QMakeShared<IndexWord>(wStr);     
+      w = QMakeShared<IndexWord>(wStr);
       m_words.insert(wStr, w);
    }
 
@@ -207,22 +207,26 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
    int i;
    bool found = false;
 
-   if (! recurse) { 
+   if (! recurse) {
       // the first time we check if we can strip the prefix
-      i = getPrefixIndex(word);
+      QRegularExpressionMatch match = nextPart.match(word);
 
-      if (i > 0) {
-         addWord(word.mid(i), hiPriority, true);
+      if (match.hasMatch()) {
+         addWord(QString(match.capturedStart(), word.end()), hiPriority, true);
          found = true;
       }
    }
 
-   if (! found) { 
+   if (! found) {
       // no prefix stripped
-      i = nextPart.indexIn(word);
+      QRegularExpressionMatch match = nextPart.match(word);
 
-      if (i >= 1) {       
-         addWord(word.mid(i+1), hiPriority, true);
+      if (match.hasMatch()) {
+         auto iter = match.capturedStart();
+
+         if (iter != word.begin()) {
+            addWord(QString(iter + 1, word.end()), hiPriority, true);
+         }
       }
    }
 }
@@ -241,7 +245,7 @@ static void writeInt(QFile &f, int index)
 }
 
 static void writeString(QFile &file, const QString &str)
-{  
+{
    file.write(str.toUtf8());
    file.putChar(0);
 }
@@ -261,11 +265,11 @@ static void writeString(QFile &file, const QString &str)
 void SearchIndex::write(const QString &fileName)
 {
    static const int numIndexEntries = 256 * 256;
-    
-   QMap<QString, int> wordStatOffsets;  
+
+   QMap<QString, int> wordStatOffsets;
    QMap<QString, int> urlOffsets;
    QMap<int, int> wordOffsets;
-    
+
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
@@ -277,7 +281,7 @@ void SearchIndex::write(const QString &fileName)
 
       f.seek((numIndexEntries * 4) + 4);
 
-      // write urls     
+      // write urls
       for (auto item : m_urls) {
 
          // save the offset of this url
@@ -287,48 +291,48 @@ void SearchIndex::write(const QString &fileName)
          writeString(f, item->url);
       }
 
-      // write word statistics                    
-      for (auto item1 : m_words) {            
+      // write word statistics
+      for (auto item1 : m_words) {
 
          // save the offset of this stats entry
          wordStatOffsets.insert(item1->word(), f.pos() );
 
          int numUrls = item1->urls().count();
          writeInt(f, numUrls);
-        
+
          for (auto item2 : item1->urls() ) {
             writeInt(f, urlOffsets.value(m_urls.value(item2->urlIdx)->name));
             writeInt(f, item2->freq);
          }
-      }                                   
+      }
 
       int lastIndex = -1;
 
       for (auto item : m_words) {
          int currentIndex = charsToIndex(item->word());
-         
+
          if (lastIndex != currentIndex) {
 
             if (lastIndex != -1) {
-               f.putChar(0); 
+               f.putChar(0);
             }
 
-            lastIndex = currentIndex;   
+            lastIndex = currentIndex;
             wordOffsets.insert(currentIndex, f.pos());
          }
 
          writeString(f, item->word());
-         writeInt(f, wordStatOffsets[item->word()]);        
+         writeInt(f, wordStatOffsets[item->word()]);
       }
-       
-      f.putChar(0);  
-     
+
+      f.putChar(0);
+
       // write index
       f.seek(4);
 
       for (int i = 0; i < numIndexEntries; i++) {
          writeInt(f, wordOffsets.value(i));
-      }  
+      }
    }
 }
 
@@ -354,62 +358,89 @@ SearchIndex_External::~SearchIndex_External()
 
 static QString definitionToName(QSharedPointer<Definition> ctx)
 {
+   QString retval = "unknown";
+
    if (ctx && ctx->definitionType() == Definition::TypeMember) {
       QSharedPointer<MemberDef> md = ctx.dynamicCast<MemberDef>();
 
       if (md->isFunction()) {
-         return "function";
+         retval = "function";
+
       } else if (md->isSlot()) {
-         return "slot";
+         retval = "slot";
+
       } else if (md->isSignal()) {
-         return "signal";
+         retval = "signal";
+
       } else if (md->isVariable()) {
-         return "variable";
+         retval = "variable";
+
       } else if (md->isTypedef()) {
-         return "typedef";
+         retval = "typedef";
+
       } else if (md->isEnumerate()) {
-         return "enum";
+         retval = "enum";
+
       } else if (md->isEnumValue()) {
-         return "enumvalue";
+         retval = "enumvalue";
+
       } else if (md->isProperty()) {
-         return "property";
+         retval = "property";
+
       } else if (md->isEvent()) {
-         return "event";
+         retval = "event";
+
       } else if (md->isRelated() || md->isForeign()) {
-         return "related";
+         retval = "related";
+
       } else if (md->isFriend()) {
-         return "friend";
+         retval = "friend";
+
       } else if (md->isDefine()) {
-         return "define";
+         retval = "define";
       }
 
    } else if (ctx) {
+
       switch (ctx->definitionType()) {
          case Definition::TypeClass:
             return ctx.dynamicCast<ClassDef>()->compoundTypeString();
 
          case Definition::TypeFile:
-            return "file";
+            retval = "file";
+            break;
+
          case Definition::TypeNamespace:
-            return "namespace";
+            retval = "namespace";
+            break;
+
          case Definition::TypeGroup:
-            return "group";
+            retval = "group";
+            break;
+
          case Definition::TypePackage:
-            return "package";
+            retval = "package";
+            break;
+
          case Definition::TypePage:
-            return "page";
+            retval = "page";
+            break;
+
          case Definition::TypeDir:
-            return "dir";
+            retval = "dir";
+            break;
+
          default:
             break;
       }
    }
-   return "unknown";
+
+   return retval;
 }
 
 void SearchIndex_External::setCurrentDoc(QSharedPointer<Definition> ctx, const QString &anchor, bool isSourceFile)
 {
-   QString extId = stripPath(Config::getString("external-search-id"));
+   static const QString extId = stripPath(Config::getString("external-search-id"));
 
    QString baseName = isSourceFile ? ctx.dynamicCast<FileDef>()->getSourceFileBase() : ctx->getOutputFileBase();
    QString url = baseName + Doxy_Globals::htmlFileExtension;
@@ -436,23 +467,23 @@ void SearchIndex_External::setCurrentDoc(QSharedPointer<Definition> ctx, const Q
       e->url  = url;
 
       m_current = e;
-      m_docEntries.insert(key, e);      
+      m_docEntries.insert(key, e);
    }
 }
 
 void SearchIndex_External::addWord(const QString &word, bool hiPriority)
 {
-   if (word.isEmpty() || ! isId(word[0].unicode()) || m_current == 0) {
+   if (word.isEmpty() || ! isId(word[0]) || m_current == 0) {
       return;
    }
 
    QString *pText = hiPriority ? &m_current->importantText : &m_current->normalText;
 
-   if (! pText->isEmpty()) {   
+   if (! pText->isEmpty()) {
       *pText += ' ';
    }
 
-   *pText += word; 
+   *pText += word;
 }
 
 void SearchIndex_External::write(const QString &fileName)
@@ -463,7 +494,7 @@ void SearchIndex_External::write(const QString &fileName)
       QTextStream t(&f);
       t << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" << endl;
       t << "<add>" << endl;
-      
+
       for (auto doc : m_docEntries) {
 
          t << "  <doc>" << endl;
@@ -485,7 +516,7 @@ void SearchIndex_External::write(const QString &fileName)
 
    } else {
       err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
-     
+
    }
 }
 
@@ -519,13 +550,13 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
    QSharedPointer<FileDef>      fd;
    QSharedPointer<GroupDef>     gd;
 
-   if (isLinkable &&  (((cd = md->getClassDef()) && cd->isLinkable() && cd->templateMaster() == 0) || 
+   if (isLinkable &&  (((cd = md->getClassDef()) && cd->isLinkable() && cd->templateMaster() == 0) ||
                        ((gd = md->getGroupDef()) && gd->isLinkable())) ) {
 
       QString n = md->name();
 
       if (! n.isEmpty()) {
-         uint letter = getUtf8CodeToLower(n, 0);
+         QChar letter = getUtf8CodeToLower(n, 0);
          bool isFriendToHide = hideFriendCompounds && (md->typeString() == "friend class" ||
                                 md->typeString() == "friend struct" || md->typeString() == "friend union");
 
@@ -574,8 +605,8 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
 
       QString n = md->name();
 
-      if (!n.isEmpty()) {
-         uint letter = getUtf8CodeToLower(n, 0);
+      if (! n.isEmpty()) {
+         QChar letter = getUtf8CodeToLower(n, 0);
          symbols[SEARCH_INDEX_ALL].insertElement(letter, md);
          symbolCount[SEARCH_INDEX_ALL]++;
 
@@ -609,18 +640,18 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
 
 // see also function convertToId() in search.js, which should match in behaviour
 static QString searchId(const QString &str)
-{  
+{
    QString result;
 
-   for ( auto c : str) {          
+   for ( auto c : str) {
 
-      if (c.isLetterOrNumber()) { 
+      if (c.isLetterOrNumber()) {
          // simply alpha numerical character
          result += c.toLower();
 
-      } else { 
-         // other 'unprintable' characters                
-         result += QString("_%1").arg(c.unicode(), 2, 16, QChar('0') );
+      } else {
+         // other 'unprintable' characters
+         result += QString("_%1").formatArg(c.unicode(), 2, 16, QChar('0') );
       }
    }
 
@@ -631,7 +662,7 @@ static int g_searchIndexCount[NUM_SEARCH_INDICES];
 
 static LetterToIndexMap<SearchIndexMap> g_searchIndexSymbols[NUM_SEARCH_INDICES];
 
-static const char *g_searchIndexName[NUM_SEARCH_INDICES] = {
+static const QString g_searchIndexName[NUM_SEARCH_INDICES] = {
    "all",
    "classes",
    "namespaces",
@@ -686,7 +717,7 @@ void writeJavascriptSearchIndex()
    // index classes
    for (auto cd : Doxy_Globals::classSDict) {
 
-      uint letter = getUtf8CodeToLower(cd->localName(), 0);
+      QChar letter = getUtf8CodeToLower(cd->localName(), 0);
 
       if (cd->isLinkable() && isId(letter)) {
          g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, cd);
@@ -697,9 +728,9 @@ void writeJavascriptSearchIndex()
       }
    }
 
-   // index namespaces  
+   // index namespaces
    for (auto &nd : Doxy_Globals::namespaceSDict) {
-      uint letter = getUtf8CodeToLower(nd->name(), 0);
+      QChar letter = getUtf8CodeToLower(nd->name(), 0);
 
       if (nd->isLinkable() && isId(letter)) {
          g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, nd);
@@ -710,11 +741,11 @@ void writeJavascriptSearchIndex()
       }
    }
 
-   // index files 
+   // index files
    for (auto &fn : Doxy_Globals::inputNameList) {
-     
-      for (auto fd : *fn) { 
-         uint letter = getUtf8CodeToLower(fd->name(), 0);
+
+      for (auto fd : *fn) {
+         QChar letter = getUtf8CodeToLower(fd->name(), 0);
 
          if (fd->isLinkable() && isId(letter)) {
             g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, fd);
@@ -728,19 +759,19 @@ void writeJavascriptSearchIndex()
 
    // index class members, for each member name
    for (auto mn : Doxy_Globals::memberNameSDict) {
-     
+
       // for each member definition
-      for (auto md : *mn) {  
+      for (auto md : *mn) {
          addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
       }
    }
 
 
-   // index file/namespace members, for each member name          
+   // index file/namespace members, for each member name
    for (auto mn : Doxy_Globals::functionNameSDict) {
 
-      // for each member definition         
-      for (auto md : *mn) { 
+      // for each member definition
+      for (auto md : *mn) {
          addMemberToSearchIndex(g_searchIndexSymbols, g_searchIndexCount, md);
       }
    }
@@ -751,11 +782,9 @@ void writeJavascriptSearchIndex()
       if (gd->isLinkable()) {
          QString title = gd->groupTitle();
 
-         if (! title.isEmpty()) { 
-            // TODO: able searching for all word in the title
-
-            QChar charCode = title.at(0);
-            uint letter = charCode.toLower().unicode();
+         if (! title.isEmpty()) {
+            // TODO: add the ability to search for all words in the title
+            QChar letter = title.at(0).toLower()[0];
 
             if (isId(letter)) {
                g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, gd);
@@ -768,15 +797,14 @@ void writeJavascriptSearchIndex()
       }
    }
 
-   // index pages 
+   // index pages
    for (auto &pd : Doxy_Globals::pageSDict) {
 
       if (pd->isLinkable()) {
          QString title = pd->title();
 
          if (! title.isEmpty()) {
-            QChar charCode = title.at(0);
-            uint letter = charCode.toLower().unicode();
+            QChar letter = title.at(0).toLower()[0];
 
             if (isId(letter)) {
                g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, pd);
@@ -792,8 +820,7 @@ void writeJavascriptSearchIndex()
       QString title = Doxy_Globals::mainPage->title();
 
       if (! title.isEmpty()) {
-         QChar charCode = title.at(0);
-         uint letter = charCode.toLower().unicode();
+         QChar letter = title.at(0).toLower()[0];
 
          if (isId(letter)) {
             g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, Doxy_Globals::mainPage);
@@ -803,17 +830,17 @@ void writeJavascriptSearchIndex()
          }
       }
    }
-    
+
    // write index files
    QString searchDirName = Config::getString("html-output") + "/search";
 
-   for (int i = 0; i < NUM_SEARCH_INDICES; i++) { 
-      // for each index    
+   for (int i = 0; i < NUM_SEARCH_INDICES; i++) {
+      // for each index
       int p = 0;
-      
-      for (auto sl : g_searchIndexSymbols[i]) {   
+
+      for (auto sl : g_searchIndexSymbols[i]) {
          // for each letter
-         QString baseName = QString("%1_%2").arg(g_searchIndexName[i]).arg(p);
+         QString baseName = QString("%1_%2").formatArg(g_searchIndexName[i]).formatArg(p);
 
          QString fileName     = searchDirName + "/" + baseName + ".html";
          QString dataFileName = searchDirName + "/" + baseName + ".js";
@@ -874,12 +901,12 @@ void writeJavascriptSearchIndex()
 
             ti << "[" << endl;
 
-            bool firstEntry = true;           
+            bool firstEntry = true;
             int itemCount   = 0;
-         
-            for (auto dl : *sl) { 
+
+            for (auto dl : *sl) {
                QSharedPointer<Definition> d = dl->first();
-               
+
                if (! firstEntry) {
                   ti << "," << endl;
                }
@@ -898,7 +925,7 @@ void writeJavascriptSearchIndex()
                ti << "  ['" << searchId(dispName) << "',['"
                   << convertToXML(dispName) << "',[";
 
-               if (dl->count() == 1) { 
+               if (dl->count() == 1) {
                   // item with a unique name
                   QSharedPointer<MemberDef> md;
 
@@ -942,31 +969,31 @@ void writeJavascriptSearchIndex()
 
                   ti << "]]";
 
-               } else { 
+               } else {
                   // multiple items with the same name
                   bool overloadedFunction = false;
                   int childCount = 0;
 
                   QSharedPointer<Definition> next;
-                  QSharedPointer<Definition> prevScope;  
- 
-                  auto nextIter = dl->begin();   
+                  QSharedPointer<Definition> prevScope;
 
-                  for (auto d : *dl)  {               
+                  auto nextIter = dl->begin();
+
+                  for (auto d : *dl)  {
                      QSharedPointer<Definition> scope = d->getOuterScope();
 
-                     if (nextIter != dl->end()) {  
-                        ++nextIter;   
+                     if (nextIter != dl->end()) {
+                        ++nextIter;
                      }
 
-                     if (nextIter == dl->end()) {  
+                     if (nextIter == dl->end()) {
                         next = QSharedPointer<Definition>();
 
                      } else {
                         next = *nextIter;
 
                      }
-                  
+
                      QSharedPointer<Definition> nextScope;
                      QSharedPointer<MemberDef>  md;
 
@@ -1001,7 +1028,7 @@ void writeJavascriptSearchIndex()
                      }
 
                      bool found = false;
-                     overloadedFunction = ((prevScope != 0 && scope == prevScope) || (scope && scope == nextScope)) 
+                     overloadedFunction = ((prevScope != 0 && scope == prevScope) || (scope && scope == nextScope))
                                              && md && (md->isFunction() || md->isSlot());
 
                      QString prefix;
@@ -1031,7 +1058,7 @@ void writeJavascriptSearchIndex()
                         name  = convertToXML(d.dynamicCast<NamespaceDef>()->displayName());
                         found = true;
 
-                     } else if (scope == 0 || scope == Doxy_Globals::globalScope) { 
+                     } else if (scope == 0 || scope == Doxy_Globals::globalScope) {
                         // in global scope
 
                         if (md) {
@@ -1052,7 +1079,7 @@ void writeJavascriptSearchIndex()
 
                      } else if (md && (md->getClassDef() || md->getNamespaceDef())) {
                         // member in class or namespace scope
-                     
+
                         SrcLangExt lang = md->getLanguage();
                         name = convertToXML(d->getOuterScope()->qualifiedName())
                                + getLanguageSpecificSeparator(lang) + prefix;
@@ -1066,7 +1093,7 @@ void writeJavascriptSearchIndex()
                         found = true;
                      }
 
-                     if (! found) { 
+                     if (! found) {
                         // fallback
                         name = prefix + "(" + theTranslator->trGlobalNamespace() + ")";
                      }
@@ -1093,7 +1120,7 @@ void writeJavascriptSearchIndex()
 
          } else {
             err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), outFile.error());
-          
+
          }
 
          ++p;
@@ -1115,22 +1142,28 @@ void writeJavascriptSearchIndex()
 
             if (g_searchIndexCount[i] > 0) {
 
-               if (!first) {
+               if (! first) {
                   t << "," << endl;
                }
                t << "  " << j << ": \"";
 
                for (auto sl : g_searchIndexSymbols[i]) {
                   // for each letter
+
+                  if (sl->letter() == '"') {
+                     t << QString( QChar( '\\' ) );
+                  }
+
                   t << QString( QChar( sl->letter() ) );
                }
+
                t << "\"";
                first = false;
                j++;
             }
          }
 
-         if (!first) {
+         if (! first) {
             t << "\n";
          }
 
@@ -1220,7 +1253,7 @@ void initSearchIndexer()
    static bool externalSearch    = Config::getBool("search-external");
 
    if (searchEngine && serverBasedSearch) {
-      if (externalSearch) { 
+      if (externalSearch) {
          // external tools produce search index and engine
          Doxy_Globals::searchIndexBase = QMakeShared<SearchIndex_External>();
 
@@ -1229,7 +1262,7 @@ void initSearchIndexer()
          Doxy_Globals::searchIndexBase = QMakeShared<SearchIndex>();
       }
 
-   } else { 
+   } else {
       // no search engine or pure javascript based search function
       Doxy_Globals::searchIndexBase = QSharedPointer<SearchIndex_Base>();
    }
