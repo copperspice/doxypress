@@ -21,7 +21,7 @@
 #include <QDateTime>
 #include <QHash>
 #include <QProcess>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextCodec>
 
 #include <stdlib.h>
@@ -153,7 +153,7 @@ QString removeAnonymousScopes(const QString &s)
       return result;
    }
 
-   static QRegExp re("[ :]*@[0-9]+[: ]*");
+   static QRegularExpression re("[ :]*@[0-9]+[: ]*");
    int i;
    int len;
    int sl = s.length();
@@ -202,7 +202,7 @@ QString replaceAnonymousScopes(const QString &s, const QString&replacement)
       return result;
    }
 
-   static QRegExp re("@[0-9]+");
+   static QRegularExpression re("@[0-9]+");
    int i;
    int len;
    int sl = s.length();
@@ -315,7 +315,7 @@ void writeExtraLatexPackages(QTextStream &t_stream)
 static QString stripFromPath(const QString &path, const QStringList &list)
 {
    // look at all the strings in the list and strip the longest match
-   QString retval  = path;
+   QString retval = path;
 
    unsigned int length = 0;
 
@@ -682,7 +682,7 @@ static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<
 
    if (iter == Doxy_Globals::glossary().end()) {
       // could not find a matching def
-      return "";
+      return QString("");
    }
 
    int minDistance = 10000;    // init at "infinite"
@@ -808,7 +808,7 @@ static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, Q
 }
 
 bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<FileDef> fileScope,
-                             QSharedPointer<Definition> item, const QString &explicitScopePart = "" )
+                             QSharedPointer<Definition> item, const QString &explicitScopePart = QString(""))
 {
    if (cl) {
       // see if the class was imported via a using statement
@@ -836,7 +836,7 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
 }
 
 static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope,
-                  QSharedPointer<Definition> item, const QString &explicitScopePart = "")
+                  QSharedPointer<Definition> item, const QString &explicitScopePart = QString(""))
 {
    static QSet<QString> visitedDict;
 
@@ -1787,7 +1787,7 @@ QString removeRedundantWhiteSpace(const QString &str_x, bool makePretty)
    }
 
    // handle "= delete", "= default", "= 0"
-   static QRegExp regExp { "\\s*=\\s*(default|delete|0)\\s*$" };
+   static QRegularExpression regExp { "\\s*=\\s*(default|delete|0)\\s*$" };
    retval.replace(regExp, " = \\1");
 
    return retval;
@@ -1870,8 +1870,8 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
       return;
    }
 
-   static QRegExp regExp("[a-z_A-Z\\x80-\\xFF][~!a-z_A-Z0-9$\\\\.:\\x80-\\xFF]*");
-   static QRegExp regExpSplit(",");
+   static QRegularExpression regExp("[a-z_A-Z\\x80-\\xFF][~!a-z_A-Z0-9$\\\\.:\\x80-\\xFF]*");
+   static QRegularExpression regExpSplit(",");
 
    int matchLen;
    int index = 0;
@@ -2049,7 +2049,8 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
    // bool manEnabled   = ol.isEnabled(OutputGenerator::Man);
    // bool htmlEnabled  = ol.isEnabled(OutputGenerator::Html);
 
-   static QRegExp marker("@[0-9]+");
+   static QRegularExpression marker("@[0-9]+");
+
    int index = 0;
    int newIndex;
    int matchLen;
@@ -2061,14 +2062,23 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
       ol.parseText(exampleLine.mid(index, newIndex - index));
 
       QString tmp    = exampleLine.mid(newIndex + 1, matchLen - 1);
-      int entryIndex = tmp.toInt();
+      int entryIndex = tmp.toInteger<int>();
 
       ExampleSDict::const_iterator iter = ed.begin();
       for (int i = 0; i < entryIndex; i++) {
-         iter++;
+
+         if (iter == ed.end()) {
+            break;
+         }
+
+         ++iter;
       }
 
-      QSharedPointer<Example> e = iter.value();
+      QSharedPointer<Example> e;
+
+      if (iter != ed.end()) {
+         e = iter.value();
+      }
 
       ol.pushGeneratorState();
 
@@ -2278,7 +2288,7 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
       if (i_equals != -1) {
          QString filterPattern = fs.left(i_equals);
 
-         QRegExp regexp(filterPattern, portable_fileSystemIsCaseSensitive(), QRegExp::Wildcard);
+         QRegularExpression regexp(filterPattern, portable_fileSystemIsCaseSensitive(), QPatternOption:WildCardOption);
 
          if (regexp.indexIn(name) != -1) {
             // found a match
@@ -2296,7 +2306,7 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
    }
 
    // no match
-   return "";
+   return QString("");
 }
 
 /*  looks for a filter for the file \a name.  Returns the name of the filter
@@ -2306,7 +2316,7 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
 QString getFileFilter(const QString &name, bool isSourceCode)
 {
    if (name.isEmpty()) {
-      return "";
+      return QString("");
    }
 
    static const QStringList filterSrcList = Config::getList("filter-source-patterns");
@@ -2345,14 +2355,14 @@ QString transcodeToQString(const QByteArray &input)
 {
    static const QString inputEncoding = Config::getString("input-encoding");
 
-   QTextCodec *temp = QTextCodec::codecForName(inputEncoding.toUtf8());
+   QTextCodec *tmp = QTextCodec::codecForName(inputEncoding.constData());
 
-   if (! temp) {
+   if (! tmp) {
       err("Unsupported character encoding: '%s'\n", csPrintable(inputEncoding));
       return input;
    }
 
-   return temp->toUnicode(input);
+   return tmp->toUnicode(input);
 }
 
 /*  reads a file with name and returns it as a string. If filter
@@ -2397,7 +2407,7 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
 
       if (! fi.exists() || ! fi.isFile()) {
          err("Unable to find file '%s'\n", csPrintable(fi.absoluteFilePath()));
-         return "";
+         return QString("");
       }
 
       QString fileContents;
@@ -2418,7 +2428,7 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
       err("Unable to open file `%s' for reading\n", csPrintable(name));
    }
 
-   return "";
+   return QString("");
 }
 
 QString dateTimeHHMM()
@@ -2447,7 +2457,7 @@ QString yearToString()
    const QDate &d = QDate::currentDate();
 
    QString result;
-   result = QString("%1").arg(d.year());
+   result = QString("%1").formatArg(d.year());
 
    return result;
 }
@@ -3225,7 +3235,7 @@ static QString extractCanonicalType(QSharedPointer<Definition> def, QSharedPoint
          // if we did not use up the templSpec already (i.e. type is not a template specialization)
          // then resolve any identifiers inside
 
-         static QRegExp re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
+         static QRegularExpression re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
          int tp = 0;
          int tl;
          int ti;
@@ -4835,7 +4845,7 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
                   retval += c;
 
                } else {
-                  QString tmp = QString("_x%1").arg(c.unicode(), 2, 16, QChar('0') );
+                  QString tmp = QString("_x%1").formatArg(c.unicode(), 2, 16, QChar('0') );
                   retval += tmp;
                }
 
@@ -4867,7 +4877,7 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
    if (iter2 != mangleCnt.end()) {
       int mangle = iter2.value() + 1;
 
-      QString tmp = QString("_%1").arg(mangle);
+      QString tmp = QString("_%1").formatArg(mangle);
       retval += tmp;
 
       iter2.value() = mangle;
@@ -4913,7 +4923,7 @@ QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnder
          num = *value;
       }
 
-      result = QString("a%1").arg(num, 5, 10, QChar('0'));
+      result = QString("a%1").formatArg(num, 5, 10, QChar('0'));
 
    } else {
       // long names
@@ -4924,8 +4934,8 @@ QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnder
          // prevent names that can not be created
          // third algorithm based on MD5 hash
 
-         QString sigStr;
-         sigStr = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5).toHex();
+         QByteArray data = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5).toHex();
+         QString sigStr  = QString::fromLatin1(data);
 
          result = result.left(128 - 32) + sigStr;
       }
@@ -4936,28 +4946,30 @@ QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnder
       int l2Dir = 0;
 
       // algorithm based on MD5 hash
-      QString sigStr;
-      sigStr = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5);
+      QByteArray data = QCryptographicHash::hash(result.toUtf8(), QCryptographicHash::Md5).toHex();
+      QString sigStr  = QString::fromLatin1(data);
 
       l1Dir = sigStr[14].unicode() & 0xf;
       l2Dir = sigStr[15].unicode() & 0xff;
 
-      result = QString("d%1/d%2/").arg(l1Dir, 0, 16).arg(l2Dir, 2, 16, QChar('0')) + result;
+      result = QString("d%1/d%2/").formatArg(l1Dir, 0, 16).formatArg(l2Dir, 2, 16, QChar('0')) + result;
    }
 
    return result;
 }
 
-QByteArray relativePathToRoot(const QString &name)
+QString relativePathToRoot(const QString &name)
 {
+   QString retval;
+
    if (Config::getBool("create-subdirs")) {
 
       if (name.isEmpty() || name.contains("/") ) {
-         return "../../";
+         retval = "../../";
       }
    }
 
-   return QByteArray();
+   return retval;
 }
 
 void createSubDirs(QDir &d)
@@ -4969,11 +4981,11 @@ void createSubDirs(QDir &d)
       int l2;
 
       for (l1 = 0; l1 < 16; l1++) {
-         QString temp = QString("d%1").arg(l1, 0, 16);
+         QString temp = QString("d%1").formatArg(l1, 0, 16);
          d.mkdir(temp);
 
          for (l2 = 0; l2 < 256; l2++) {
-            QString temp = QString("d%1/d%2").arg(l1, 0, 16).arg(l2, 2, 16, QChar('0'));
+            QString temp = QString("d%1/d%2").formatArg(l1, 0, 16).formatArg(l2, 2, 16, QChar('0'));
             d.mkdir(temp);
          }
       }
@@ -5142,7 +5154,6 @@ QString stripScope(const QString &name)
    return name;
 }
 
-
 /*! Converts a string to an XML-encoded string */
 QString convertToXML(const QString &str)
 {
@@ -5158,15 +5169,19 @@ QString convertToXML(const QString &str)
          case '<':
             retval += "&lt;";
             break;
+
          case '>':
             retval += "&gt;";
             break;
+
          case '&':
             retval += "&amp;";
             break;
+
          case '\'':
             retval += "&apos;";
             break;
+
          case '"':
             retval += "&quot;";
             break;
@@ -5215,7 +5230,7 @@ QString convertToXML(const QString &str)
 QString convertToHtml(const QString &str, bool keepEntities)
 {
    if (str.isEmpty()) {
-      return "";
+      return QString("");
    }
 
    QString retval;
@@ -5282,7 +5297,7 @@ QString convertToHtml(const QString &str, bool keepEntities)
 QString convertToJSString(const QString &s)
 {
    if (s.isEmpty()) {
-      return "";
+      return QString("");
    }
 
    QString retval = s;
@@ -5311,7 +5326,7 @@ QString convertCharEntities(const QString &str)
       return retval;
    }
 
-   static QRegExp entityPat("&[a-zA-Z]+[0-9]*;");
+   static QRegularExpression entityPat("&[a-zA-Z]+[0-9]*;");
 
    int i = 0;
    int p;
@@ -5426,9 +5441,9 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict &me
  */
 int extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt lang)
 {
-   static const QRegExp re_norm("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9:\\x80-\\xFF]*");
-   static const QRegExp re_ftn("[a-z_A-Z\\x80-\\xFF][()=_a-z_A-Z0-9:\\x80-\\xFF]*");
-   QRegExp re;
+   static const QRegularExpression re_norm("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9:\\x80-\\xFF]*");
+   static const QRegularExpression re_ftn("[a-z_A-Z\\x80-\\xFF][()=_a-z_A-Z0-9:\\x80-\\xFF]*");
+   QRegularExpression re;
 
    name.resize(0);
    templSpec.resize(0);
@@ -5533,7 +5548,7 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
    p++;
    QString result = name.left(p);
 
-   static QRegExp re("[a-z:_A-Z\\x80-\\xFF][a-z:_A-Z0-9\\x80-\\xFF]*");
+   static QRegularExpression re("[a-z:_A-Z\\x80-\\xFF][a-z:_A-Z0-9\\x80-\\xFF]*");
    int len;
    int index;
 
@@ -5592,7 +5607,7 @@ QString substituteTemplateArgumentsInString(const QString &name, const ArgumentL
 
    QString result;
 
-   static QRegExp re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
+   static QRegularExpression re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
    int p = 0, l, i;
 
    // for each identifier in the base class name (e.g. B<T> -> B and T)
@@ -6599,7 +6614,7 @@ QString stripPath(const QString &s)
 
 bool findAndRemoveWord(QString &str, const QString &word)
 {
-   static QRegExp wordExp("[a-z_A-Z\\x80-\\xFF]+");
+   static QRegularExpression wordExp("[a-z_A-Z\\x80-\\xFF]+");
    int p = 0;
    int i;
    int l;
@@ -6638,7 +6653,7 @@ bool findAndRemoveWord(QString &str, const QString &word)
 QString trimEmptyLines(const QString &str, int &docLine)
 {
    if (str.isEmpty()) {
-      return "";
+      return QString("");;
    }
 
    const QChar *p = str.constData();
@@ -6701,7 +6716,7 @@ QString trimEmptyLines(const QString &str, int &docLine)
 
    if (end <= start) {
       // only empty lines
-      return "";
+      return QString("");
    }
 
    return str.mid(start, end - start + 1);
@@ -6833,7 +6848,10 @@ QString parseCommentAsText(QSharedPointer<const Definition> scope, QSharedPointe
 static QString expandAliasRec(const QString &s, bool allowRecursion = false);
 
 struct Marker {
-   Marker(int p, int n, int s) : pos(p), number(n), size(s) {}
+   Marker(int p, int n, int s)
+      : pos(p), number(n), size(s)
+   {}
+
    int pos;        // position in the string
    int number;     // argument number
    int size;       // size of the marker
@@ -6925,7 +6943,7 @@ static QString replaceAliasArguments(const QString &aliasValue, const QString &a
             int markerLen = markerEnd - markerStart;
 
             // include backslash
-            markerList.append(Marker(markerStart - 1, aliasValue.mid(markerStart, markerLen).toInt(), markerLen + 1));
+            markerList.append(Marker(markerStart - 1, aliasValue.mid(markerStart, markerLen).toInteger<int>(), markerLen + 1));
          }
 
          markerStart = 0; // outside marker
@@ -6941,7 +6959,7 @@ static QString replaceAliasArguments(const QString &aliasValue, const QString &a
       int markerLen = markerEnd - markerStart;
 
       // include backslash
-      markerList.append(Marker(markerStart - 1, aliasValue.mid(markerStart, markerLen).toInt(), markerLen + 1));
+      markerList.append(Marker(markerStart - 1, aliasValue.mid(markerStart, markerLen).toInteger<int>(), markerLen + 1));
 
    }
 
@@ -6981,7 +6999,7 @@ static QString escapeCommas(const QString &s)
 static QString expandAliasRec(const QString &s, bool allowRecursion)
 {
    QString result;
-   static QRegExp cmdPat("[\\\\@][a-z_A-Z][a-z_A-Z0-9]*");
+   static QRegularExpression cmdPat("[\\\\@][a-z_A-Z][a-z_A-Z0-9]*");
 
    QString value = s;
 
@@ -7006,7 +7024,7 @@ static QString expandAliasRec(const QString &s, bool allowRecursion)
       if (hasArgs) {
          numArgs = countAliasArguments(args);
 
-         cmd = cmd + QString("{%1}").arg(numArgs);    // alias name + {n}
+         cmd = cmd + QString("{%1}").formatArg(numArgs);    // alias name + {n}
       }
 
       QString aliasText = Doxy_Globals::cmdAliasDict.value(cmd);
@@ -7111,7 +7129,7 @@ QString extractAliasArgs(const QString &args, int pos)
       }
    }
 
-   return "";
+   return QString("");
 }
 
 QString resolveAliasCmd(const QString &aliasCmd)
@@ -7283,7 +7301,7 @@ QString filterTitle(const QString &title)
 {
    QString tf;
 
-   static QRegExp re("%[A-Z_a-z]");
+   static QRegularExpression re("%[A-Z_a-z]");
    int p = 0, i, l;
 
    while ((i = re.indexIn(title, p)) != -1) {
@@ -7327,7 +7345,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
             pattern = pattern.left(i);   // strip off the extension
          }
 
-         QRegExp re(pattern, allowUpperCaseNames_enum, QRegExp::Wildcard);
+         QRegularExpression re(pattern, allowUpperCaseNames_enum, QRegularExpression::Wildcard);
 
          // input-patterns
          // possilbe issue if the pattern has something other than a wildcard for the name
@@ -7350,10 +7368,10 @@ QString externalLinkTarget()
    static bool extLinksInWindow = Config::getBool("external-links-in-window");
 
    if (extLinksInWindow) {
-      return "target=\"_blank\" ";
+      return QString("target=\"_blank\" ");
 
    } else {
-      return "";
+      return QString("");
    }
 }
 
@@ -7438,7 +7456,7 @@ QString replaceColorMarkers(const QString &str)
       return result;
    }
 
-   static QRegExp re("##([0-9A-Fa-f][0-9A-Fa-f])");
+   static QRegularExpression re("##([0-9A-Fa-f][0-9A-Fa-f])");
 
    static int hue   = Config::getInt("html-colorstyle-hue");
    static int sat   = Config::getInt("html-colorstyle-sat");
@@ -7450,7 +7468,7 @@ QString replaceColorMarkers(const QString &str)
    while (re.indexIn(result, startPos) != -1) {
 
       QString tempColor = re.cap(1);
-      int level = tempColor.toInt(nullptr, 16);
+      int level = tempColor.toInteger<int>(nullptr, 16);
 
       double r, g, b;
       int red, green, blue;
@@ -7462,7 +7480,7 @@ QString replaceColorMarkers(const QString &str)
       blue  = (int)(b * 255.0);
 
       QString colorStr = "#%1%2%3";
-      colorStr = colorStr.arg(red, 2, 16, QChar('0')).arg(green, 2, 16, QChar('0')).arg(blue, 2, 16, QChar('0'));
+      colorStr = colorStr.formatArg(red, 2, 16, QChar('0')).formatArg(green, 2, 16, QChar('0')).formatArg(blue, 2, 16, QChar('0'));
       result.replace(re.pos(0), re.matchedLength(), colorStr);
 
       //
@@ -7555,69 +7573,89 @@ QString extractBlock(const QString &text, const QString &marker)
    return l2 > l1 ? text.mid(l1, l2 - l1) : QString();
 }
 
-/** Returns a string representation of \a lang. */
+// Returns a string representation of lang.
 QString langToString(SrcLangExt lang)
 {
+   QString retval = "Unknown";
+
    switch (lang) {
       case SrcLangExt_Unknown:
-         return "Unknown";
+         retval = "Unknown";
+         break;
 
       case SrcLangExt_IDL:
-         return "IDL";
+         retval = "IDL";
+         break;
 
       case SrcLangExt_Java:
-         return "Java";
+         retval = "Java";
+         break;
 
       case SrcLangExt_CSharp:
-         return "C#";
+         retval = "C#";
+         break;
 
       case SrcLangExt_D:
-         return "D";
+         retval = "D";
+         break;
 
       case SrcLangExt_PHP:
-         return "PHP";
+         retval = "PHP";
+         break;
 
       case SrcLangExt_ObjC:
-         return "Objective-C";
+         retval = "Objective-C";
+         break;
 
       case SrcLangExt_Cpp:
-         return "C++";
+         retval = "C++";
+         break;
 
       case SrcLangExt_JS:
-         return "Javascript";
+         retval = "Javascript";
+         break;
 
       case SrcLangExt_Python:
-         return "Python";
+         retval = "Python";
+         break;
 
       case SrcLangExt_Fortran:
-         return "Fortran";
+         retval = "Fortran";
+         break;
 
       case SrcLangExt_XML:
-         return "XML";
+         retval = "XML";
+         break;
 
       case SrcLangExt_Tcl:
-         return "Tcl";
+         retval = "Tcl";
+         break;
 
       case SrcLangExt_Markdown:
-         return "Markdown";
+         retval = "Markdown";
+         break;
    }
 
-   return "Unknown";
+   return retval;
 }
 
 /** Returns the scope separator to use given the programming language \a lang */
 QString getLanguageSpecificSeparator(SrcLangExt lang, bool classScope)
 {
-   if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp || lang == SrcLangExt_Python) {
-      return ".";
+   QString retval;
 
-   } else if (lang == SrcLangExt_PHP && !classScope) {
-      return "\\";
+   if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp || lang == SrcLangExt_Python) {
+      retval = ".";
+
+   } else if (lang == SrcLangExt_PHP && ! classScope) {
+      retval = "\\";
 
    } else {
-      return "::";
+      retval = "::";
 
    }
+
+   return retval;
 }
 
 /** Corrects URL \a url according to the relative path \a relPath.
@@ -7767,32 +7805,22 @@ void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDe
    }
 }
 
-
-uint getUtf8Code( const QString &s, int idx )
+QChar getUtf8CodeToLower( const QString &s, int idx )
 {
    if (s.isEmpty()) {
-      return 0;
+      return QChar();
    }
 
-   return s[idx].unicode();
+   return s[idx].toLower()[0];
 }
 
-uint getUtf8CodeToLower( const QString &s, int idx )
+QChar getUtf8CodeToUpper( const QString &s, int idx )
 {
    if (s.isEmpty()) {
-      return 0;
+      return QChar();
    }
 
-   return s[idx].toLower().unicode();
-}
-
-uint getUtf8CodeToUpper( const QString &s, int idx )
-{
-   if (s.isEmpty()) {
-      return 0;
-   }
-
-   return s[idx].toUpper().unicode();
+   return s[idx].toUpper()[0];
 }
 
 bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClasses)
@@ -7825,7 +7853,7 @@ bool classVisibleInIndex(QSharedPointer<ClassDef> cd)
 
 QByteArray extractDirection(QString docs)
 {
-   static QRegExp re("\\[[^\\]]+\\]");
+   static QRegularExpression re("\\[[^\\]]+\\]");
    int len = 0;
 
    if (re.indexIn(docs, 0) == 0) {
