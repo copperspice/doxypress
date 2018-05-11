@@ -94,7 +94,7 @@ class DotNode
       return m_label;
    }
 
-   int  number() const {
+   int number() const {
       return m_number;
    }
 
@@ -129,25 +129,25 @@ class DotNode
    }
 
    int           m_number;
-   QString       m_label;     //!< label text
-   QString       m_tooltip;   //!< node's tooltip
-   QString       m_url;       //!< url of the node (format: remote$local)
+   QString       m_label;           // label text
+   QString       m_tooltip;         // node's tooltip
+   QString       m_url;             // url of the node (format: remote$local)
 
-   QList<DotNode *>  *m_parents;   //!< list of parent nodes (incoming arrows)
-   QList<DotNode *>  *m_children;  //!< list of child nodes (outgoing arrows)
+   QList<DotNode *>  *m_parents;    // list of parent nodes (incoming arrows)
+   QList<DotNode *>  *m_children;   // list of child nodes (outgoing arrows)
 
-   QList<EdgeInfo *> *m_edgeInfo;  //!< edge info for each child
+   QList<EdgeInfo *> *m_edgeInfo;   // edge info for each child
 
-   bool             m_deleted;   //!< used to mark a node as deleted
-   bool             m_written;   //!< used to mark a node as written
-   bool             m_hasDoc;    //!< used to mark a node as documented
-   bool             m_isRoot;    //!< indicates if this is a root node
+   QSharedPointer<ClassDef> m_classDef;  // class representing this node (can be 0)
 
-   QSharedPointer<ClassDef> m_classDef;  //!< class representing this node (can be 0)
+   bool             m_deleted;      // used to mark a node as deleted
+   bool             m_written;      // used to mark a node as written
+   bool             m_hasDoc;       // used to mark a node as documented
+   bool             m_isRoot;       // indicates if this is a root node
+   bool             m_visible;      // is the node visible in the output
 
-   bool             m_visible;   //!< is the node visible in the output
-   TruncState       m_truncated; //!< does the node have non-visible children/parents
-   int              m_distance;  //!< shortest path to the root node
+   TruncState       m_truncated;    // does the node have non-visible children/parents
+   int              m_distance;     // shortest path to the root node
 
    friend class DotGfxHierarchyTable;
    friend class DotClassGraph;

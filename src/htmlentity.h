@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -33,13 +33,14 @@ class HtmlEntityMapper
    static void deleteInstance();
 
    DocSymbol::SymType name2sym(const QString &symName) const;
-   QString utf8(DocSymbol::SymType symb, bool useInPrintf = false) const;
+   QString rawString(DocSymbol::SymType symb, bool useInPrintf = false) const;
    QString html(DocSymbol::SymType symb, bool useInPrintf = false) const;
    QString xml(DocSymbol::SymType symb) const;
    QString docbook(DocSymbol::SymType symb) const;
    QString latex(DocSymbol::SymType symb) const;
    QString man(DocSymbol::SymType symb) const;
    QString rtf(DocSymbol::SymType symb) const;
+
    const DocSymbol::PerlSymb *perl(DocSymbol::SymType symb) const;
    void  writeXMLSchema(QTextStream &t);
 

@@ -148,32 +148,10 @@ static const char svgZoomFooter[] =
    "</svg>\n"
    ;
 
-/*! mapping from protection levels to color names */
-static const char *normalEdgeColorMap[] = {
-   "midnightblue",  // Public
-   "darkgreen",     // Protected
-   "firebrick4",    // Private
-   "darkorchid3",   // "use" relation
-   "grey75",        // Undocumented
-   "orange",        // template relation
-   "orange"         // type constraint
-};
+// mapping from protection levels to color names
 
-static const char *normalArrowStyleMap[] = {
-   "empty",         // Public
-   "empty",         // Protected
-   "empty",         // Private
-   "open",          // "use" relation
-   0,               // Undocumented
-   0                // template relation
-};
-
-static const char *normalEdgeStyleMap[] = {
-   "solid",         // inheritance
-   "dashed"         // usage
-};
-
-static const char *umlEdgeColorMap[] = {
+// 1
+static const QStringList umlEdgeColorMap = {
    "midnightblue",  // Public
    "darkgreen",     // Protected
    "firebrick4",    // Private
@@ -183,7 +161,29 @@ static const char *umlEdgeColorMap[] = {
    "orange"         // type constraint
 };
 
-static const char *umlArrowStyleMap[] = {
+static const QStringList umlEdgeStyleMap = {
+   "solid",         // inheritance
+   "solid"          // usage
+};
+
+// 2
+static const QStringList normalEdgeColorMap = {
+   "midnightblue",  // Public
+   "darkgreen",     // Protected
+   "firebrick4",    // Private
+   "darkorchid3",   // "use" relation
+   "grey75",        // Undocumented
+   "orange",        // template relation
+   "orange"         // type constraint
+};
+
+static const QStringList normalEdgeStyleMap = {
+   "solid",         // inheritance
+   "dashed"         // usage
+};
+
+// 3
+static const QStringList umlArrowStyleMap = {
    "onormal",         // Public
    "onormal",         // Protected
    "onormal",         // Private
@@ -192,24 +192,13 @@ static const char *umlArrowStyleMap[] = {
    0                  // template relation
 };
 
-static const char *umlEdgeStyleMap[] = {
-   "solid",         // inheritance
-   "solid"          // usage
-};
-
-/** Helper struct holding the properties of a edge in a dot graph. */
-struct EdgeProperties {
-   const char *const *edgeColorMap;
-   const char *const *arrowStyleMap;
-   const char *const *edgeStyleMap;
-};
-
-static EdgeProperties normalEdgeProps = {
-   normalEdgeColorMap, normalArrowStyleMap, normalEdgeStyleMap
-};
-
-static EdgeProperties umlEdgeProps = {
-   umlEdgeColorMap, umlArrowStyleMap, umlEdgeStyleMap
+static const QStringList normalArrowStyleMap = {
+   "empty",         // Public
+   "empty",         // Protected
+   "empty",         // Private
+   "open",          // "use" relation
+   0,               // Undocumented
+   0                // template relation
 };
 
 static QString getDotFontName()
@@ -236,9 +225,10 @@ static int getDotFontSize()
 
 static void writeGraphHeader(QTextStream &t, const QString &title = QString())
 {
-   static bool interactiveSVG = Config::getBool("interactive-svg");
+   static const bool interactiveSVG = Config::getBool("interactive-svg");
 
    t << "digraph ";
+
    if (title.isEmpty()) {
       t << "\"Dot Graph\"";
    } else {
@@ -433,7 +423,7 @@ static void unsetDotFontPath()
 
 static bool readBoundingBox(const QString &fileName, int *width, int *height, bool isEps)
 {
-   QString bb;
+   QByteArray bb;
 
    if (isEps) {
       bb = "%%PageBoundingBox:";
@@ -449,18 +439,17 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
    }
 
    while (! f.atEnd()) {
-      QByteArray buf = f.readLine();
+      QByteArray buffer = f.readLine();
 
-      if (! buf.isEmpty()) {
-
-         int p = buf.indexOf(bb);
+      if (! buffer.isEmpty()) {
+         int p = buffer.indexOf(bb);
 
          if (p != -1) {
             // found PageBoundingBox or /MediaBox string
             int x;
             int y;
 
-            if (sscanf(buf.constData() + (p + bb.length() ), "%d %d %d %d", &x, &y, width, height) != 4) {
+            if (sscanf(buffer.constData() + (p + bb.length() ), "%d %d %d %d", &x, &y, width, height) != 4) {
                return false;
             }
 
@@ -1408,15 +1397,13 @@ bool DotManager::run()
    return true;
 }
 
-/*! helper function that deletes all nodes in a connected graph, given
- *  one of the graph's nodes
- */
-static void deleteNodes(DotNode *node, StringMap<QSharedPointer<DotNode>> *skipNodes = 0)
+// helper function that deletes all nodes in a connected graph, given one of the graph's nodes
+static void deleteNodes(DotNode *node, StringMap<QSharedPointer<DotNode>> *skipNodes = nullptr)
 {
    static SortedList<DotNode *> deletedNodes;
 
-   node->deleteNode(deletedNodes, skipNodes); // collect nodes to be deleted.
-   deletedNodes.clear(); // actually remove the nodes.
+   node->deleteNode(deletedNodes, skipNodes);    // collect nodes to be deleted
+   deletedNodes.clear();                         // actually remove the nodes
 }
 
 DotNode::DotNode(int n, const QString &label, const QString &tip, const QString &url, bool isRoot, QSharedPointer<ClassDef> cd)
@@ -1434,7 +1421,7 @@ DotNode::~DotNode()
 }
 
 void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &edgeLab,
-                  const QString &edgeURL, int edgeLabCol )
+                  const QString &edgeURL, int edgeLabCol)
 {
    if (m_children == 0) {
       m_children = new QList<DotNode *>;
@@ -1492,19 +1479,20 @@ void DotNode::deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPo
       // delete all parent nodes of this node
 
       for (auto pn : *m_parents) {
-         //pn->removeChild(this);
          pn->deleteNode(deletedList, skipNodes);
       }
    }
 
-   if (m_children != 0) { // delete all child nodes of this node
+   if (m_children != 0) {
+      // delete all child nodes of this node
+
       for (auto cn : *m_children) {
          cn->deleteNode(deletedList, skipNodes);
       }
    }
 
-   // add this node to the list of deleted nodes.
-   if (skipNodes == 0 || skipNodes->find((char *)this) == 0) {
+   // add this node to the list of deleted nodes
+   if (skipNodes == nullptr || skipNodes->find((char *)this) == 0) {            // BROOM - ????
       deletedList.append(this);
    }
 }
@@ -1612,7 +1600,7 @@ static QString convertLabel(const QString &label)
 static QString escapeTooltip(const QString &tooltip)
 {
    if (tooltip.isEmpty()) {
-      return "";
+      return QString("");
    }
 
    QString result = tooltip;
@@ -1644,9 +1632,9 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
             if (limit > 0 && (totalCount > limit * 3 / 2 && count >= limit)) {
 
                QString temp;
-               temp = QString("%1").arg(totalCount - count);
+               temp = QString("%1").formatArg(totalCount - count);
 
-               t << theTranslator->trAndMore(csPrintable(temp)) << "\\l";
+               t << theTranslator->trAndMore(temp) << "\\l";
 
                break;
 
@@ -1816,6 +1804,8 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
 void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format, DotNode *cn,
                   EdgeInfo *ei, bool topDown, bool pointBack)
 {
+   static const bool umlLook = Config::getBool("uml-look");
+
    t << "  Node";
 
    if (topDown) {
@@ -1834,36 +1824,48 @@ void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format,
 
    t << " [";
 
-   static bool umlLook = Config::getBool("uml-look");
+   //
+   QString arrowStyle;
+   QString edgeColor;
+   QString edgeStyle;
 
-   const EdgeProperties *eProps = umlLook ? &umlEdgeProps : &normalEdgeProps;
-   QString aStyle = eProps->arrowStyleMap[ei->m_color];
-   bool umlUseArrow = aStyle == "odiamond";
+   if (umlLook) {
+      arrowStyle = umlArrowStyleMap[ei->m_color];
+      edgeColor  = umlEdgeColorMap[ei->m_color];
+      edgeStyle  = umlEdgeStyleMap[ei->m_color];
 
-   if (pointBack && !umlUseArrow) {
+   } else {
+      arrowStyle = normalArrowStyleMap[ei->m_color];
+      edgeColor  = normalEdgeColorMap[ei->m_color];
+      edgeStyle  = normalEdgeStyleMap[ei->m_color];
+   }
+
+   bool umlUseArrow = (arrowStyle == "odiamond");
+
+   if (pointBack && ! umlUseArrow) {
       t << "dir=\"back\",";
    }
 
-   t << "color=\"" << eProps->edgeColorMap[ei->m_color]
+   t << "color=\"" << edgeColor
      << "\",fontsize=\"" << FONTSIZE << "\",";
-   t << "style=\"" << eProps->edgeStyleMap[ei->m_style] << "\"";
+
+   t << "style=\"" << edgeStyle << "\"";
 
    if (!ei->m_label.isEmpty()) {
       t << ",label=\" " << convertLabel(ei->m_label) << "\" ";
    }
 
-   if (umlLook && eProps->arrowStyleMap[ei->m_color] &&
-                  (gt == Inheritance || gt == Collaboration) ) {
-
+   if (umlLook && ! arrowStyle.isEmpty() && (gt == Inheritance || gt == Collaboration) ) {
       bool rev = pointBack;
+
       if (umlUseArrow) {
          rev = !rev;   // UML use relates has arrow on the start side
       }
 
       if (rev) {
-         t << ",arrowtail=\"" << eProps->arrowStyleMap[ei->m_color] << "\"";
+         t << ",arrowtail=\"" << arrowStyle << "\"";
       } else {
-         t << ",arrowhead=\"" << eProps->arrowStyleMap[ei->m_color] << "\"";
+         t << ",arrowhead=\"" << arrowStyle << "\"";
       }
    }
 
@@ -2309,7 +2311,7 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
       static const QString imageFormat = Config::getEnum("dot-image-format");
       static const QString imageExt    = Config::getEnum("dot-image-extension");
 
-      QString baseName = QString("inherit_graph_%1").arg(count++);
+      QString baseName = QString("inherit_graph_%1").formatArg(count++);
 
       QString imageName = baseName + "." + imageExt;
       QString mapName   = baseName + ".map";
@@ -2339,8 +2341,8 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
 
       writeGraphFooter(md5stream);
 
-      QString sigStr;
-      sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+      QByteArray data = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+      QString sigStr  = QString::fromLatin1(data);
 
       bool regenerate = false;
 
@@ -2989,9 +2991,9 @@ DotClassGraph::~DotClassGraph()
 QString computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutputFormat format, bool lrRank,
                   bool renderParents, bool backArrows, const QString &title, QString &graphStr )
 {
-   QByteArray buf;
+   QByteArray buffer;
 
-   QTextStream md5stream(&buf);
+   QTextStream md5stream(&buffer);
    writeGraphHeader(md5stream, title);
 
    if (lrRank) {
@@ -3005,8 +3007,7 @@ QString computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutputFor
       for (auto pn : *root->m_parents) {
 
          if (pn->isVisible()) {
-            root->writeArrow(md5stream, gt, format, pn, pn->m_edgeInfo->at(pn->m_children->indexOf(root)),
-                             false, backArrows);
+            root->writeArrow(md5stream, gt, format, pn, pn->m_edgeInfo->at(pn->m_children->indexOf(root)), false, backArrows);
          }
 
          pn->write(md5stream, gt, format, true, false, backArrows);
@@ -3015,10 +3016,10 @@ QString computeMd5Signature(DotNode *root, DotNode::GraphType gt, GraphOutputFor
 
    writeGraphFooter(md5stream);
 
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(buf, QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(buffer, QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
 
-   graphStr = buf;
+   graphStr = QString::fromLatin1(buffer);
 
    return sigStr;
 }
@@ -3746,7 +3747,7 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
 
    static bool usePDFLatex = Config::getBool("latex-pdf");
 
-   QString baseName = m_diskName + (m_inverse ? "_icgraph" : "_cgraph");
+   QString baseName = m_diskName + (m_inverse ? QString("_icgraph") : QString("_cgraph"));
    QString mapName  = baseName;
 
    static const QString imageFormat = Config::getEnum("dot-image-format");
@@ -3915,8 +3916,8 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
    QTextStream md5stream(&theGraph);
    m_dir->writeDepGraph(md5stream);
 
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
 
    bool regenerate = false;
 
@@ -4114,8 +4115,9 @@ void generateGraphLegend(const QString &path)
    static const QString imageFormat = Config::getEnum("dot-image-format");
    static const QString imageExt    = Config::getEnum("dot-image-extension");
 
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
+
 
    QString absBaseName = path + "/graph_legend";
    QString absDotName  = absBaseName + ".dot";
@@ -4166,7 +4168,7 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
    static const QString absImgName  = d.absolutePath() + "/" + imageName;
    static const QString absOutFile  = d.absolutePath() + "/" + outFile;
 
-   DotRunner dotRun(inFile, d.absolutePath(), false, csPrintable(absImgName));
+   DotRunner dotRun(inFile, d.absolutePath(), false, absImgName);
 
    if (format == GOF_BITMAP) {
       dotRun.addJob(imageFormat, absImgName);
@@ -4381,10 +4383,8 @@ void DotGroupCollaboration::addMemberList(QSharedPointer<MemberList> ml)
    }
 
    for (auto def : *ml) {
-      QString tmp_url = def->getReference() + "$" + def->getOutputFileBase() + Doxy_Globals::htmlFileExtension +
-                           + "#" + def->anchor();
-
-      addCollaborationMember(def, tmp_url, DotGroupCollaboration::tmember );
+      QString tmpUrl = def->getReference() + "$" + def->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + def->anchor();
+      addCollaborationMember(def, tmpUrl, DotGroupCollaboration::tmember );
    }
 }
 
@@ -4485,8 +4485,8 @@ QString DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat gra
 
    writeGraphFooter(md5stream);
 
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
 
    QString baseName    = m_diskName;
    QString imgName     = baseName + "." + imageExt;
@@ -4824,7 +4824,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
 
             // only point to nodes that are in the graph
             QString relationName;
-            relationName = QString("dir_%1_%2").arg(dir->dirCount(), 6, 10, QChar('0')).arg(usedDir->dirCount(), 6, 10, QChar('0'));
+            relationName = QString("dir_%1_%2").formatArg(dir->dirCount(), 6, 10, QChar('0')).formatArg(usedDir->dirCount(), 6, 10, QChar('0'));
 
             if (Doxy_Globals::dirRelations.find(relationName) == nullptr) {
                // new relation

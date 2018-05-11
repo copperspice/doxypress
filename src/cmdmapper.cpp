@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -19,7 +19,13 @@
 
 /** Call representing a mapping from a command name to a command ID. */
 struct CommandMap {
-   const char *cmdName;
+
+   CommandMap(const char *x1, int x2) {
+      cmdName = QString::fromLatin1(x1);
+      cmdId   = x2;
+   }
+
+   QString cmdName;
    int cmdId;
 };
 
@@ -85,12 +91,12 @@ CommandMap cmdMap[] = {
    { "rtfonly",       CMD_RTFONLY },
    { "sa",            CMD_SA },
    { "secreflist",    CMD_SECREFLIST },
-   { "section",       CMD_SECTION }, 
+   { "section",       CMD_SECTION },
    { "snippet",       CMD_SNIPPET },
    { "sortid",        CMD_SORTID },
    { "subpage",       CMD_SUBPAGE },
    { "subsection",    CMD_SUBSECTION },
-   { "subsubsection", CMD_SUBSUBSECTION }, 
+   { "subsubsection", CMD_SUBSUBSECTION },
    { "see",           CMD_SA },
    { "since",         CMD_SINCE },
    { "skip",          CMD_SKIP },
@@ -98,13 +104,13 @@ CommandMap cmdMap[] = {
    { "throw",         CMD_EXCEPTION },
    { "throws",        CMD_EXCEPTION },
    { "tparam",        CMD_TPARAM },
-   { "until",         CMD_UNTIL },  
+   { "until",         CMD_UNTIL },
    { "verbatim",      CMD_VERBATIM },
    { "verbinclude",   CMD_VERBINCLUDE },
    { "warning",       CMD_WARNING },
    { "version",       CMD_VERSION },
    { "xmlonly",       CMD_XMLONLY },
-   { "xrefitem",      CMD_XREFITEM },   
+   { "xrefitem",      CMD_XREFITEM },
    { "\\",            CMD_BSLASH },
    { "@",             CMD_AT },
    { "<",             CMD_LESS },
@@ -132,7 +138,7 @@ CommandMap cmdMap[] = {
    { "inheritdoc",    CMD_INHERITDOC },
    { "mscfile",       CMD_MSCFILE },
    { "rtfonly",       CMD_RTFONLY },
-   { "endrtfonly",    CMD_ENDRTFONLY }, 
+   { "endrtfonly",    CMD_ENDRTFONLY },
    { "docbookonly",   CMD_DBONLY },
    { "enddocbookonly", CMD_ENDDBONLY },
    { "endinternal",   CMD_ENDINTERNAL },
@@ -209,17 +215,17 @@ CommandMap htmlTagMap[] = {
    { "term",         XML_TERM },
    { "value",        XML_VALUE },
    { "inheritdoc",   XML_INHERITDOC },
-   { 0,              0 }
+   { "",             0 }
 };
 
 Mapper *Mappers::cmdMapper     = new Mapper(cmdMap, true);
 Mapper *Mappers::htmlTagMapper = new Mapper(htmlTagMap, false);
 
 Mapper::Mapper(const CommandMap *cm, bool caseSensitive) : m_cs(caseSensitive)
-{   
+{
    const CommandMap *p = cm;
 
-   while (p->cmdName) {
+   while (! p->cmdName.isEmpty()) {
       m_map.insert(p->cmdName, p->cmdId);
       p++;
    }
@@ -239,11 +245,11 @@ int Mapper::map(const QString &n)
       retval = 0;
 
    } else {
-      auto result = m_map.find(name);            
+      auto result = m_map.find(name);
 
       if (result != m_map.end()) {
          retval = result.value();
-      }  
+      }
    }
 
    return retval;
@@ -254,7 +260,7 @@ QString Mapper::map(const int n)
    QString retval;
 
    for (auto item = m_map.begin(); item != m_map.end(); ++item) {
-      int value = item.value(); 
+      int value = item.value();
 
       if (value == n || (value == (n | SIMPLESECT_BIT))) {
          return item.key();

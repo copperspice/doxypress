@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -23,11 +23,11 @@
 #include <QHash>
 #include <QString>
 #include <QStringList>
-  
+
 class Config
 {
-   public:         
-      Config() = delete;      
+   public:
+      Config() = delete;
 
       static bool parseConfig(const QString &fName);
       static QDir getConfigDir();
@@ -44,7 +44,7 @@ class Config
 
       static Qt::CaseSensitivity getCase(const QString &name);
 
-      enum DataSource { DEFAULT, PROJECT }; 
+      enum DataSource { DEFAULT, PROJECT };
 
       struct struc_CfgBool {
          bool value;
@@ -57,7 +57,18 @@ class Config
       };
 
       struct struc_CfgEnum {
-         QString value;      
+
+         struc_CfgEnum(const char *data, DataSource src) {
+            value = QString::fromLatin1(data);
+            type  = src;
+         }
+
+         struc_CfgEnum(QString data, DataSource src) {
+            value = std::move(data);
+            type  = src;
+         }
+
+         QString value;
          DataSource type;
       };
 
@@ -67,19 +78,30 @@ class Config
       };
 
       struct struc_CfgString {
+
+         struc_CfgString(const char *data, DataSource src) {
+            value = QString::fromLatin1(data);
+            type  = src;
+         }
+
+         struc_CfgString(QString data, DataSource src) {
+            value = std::move(data);
+            type  = src;
+         }
+
          QString value;
          DataSource type;
       };
 
-   private:     
+   private:
       static QHash<QString, struc_CfgBool>   m_cfgBool;
-      static QHash<QString, struc_CfgInt>    m_cfgInt;  
+      static QHash<QString, struc_CfgInt>    m_cfgInt;
       static QHash<QString, struc_CfgEnum>   m_cfgEnum;
-      static QHash<QString, struc_CfgList>   m_cfgList; 
+      static QHash<QString, struc_CfgList>   m_cfgList;
       static QHash<QString, struc_CfgString> m_cfgString;
 
       static QDir m_configDir;
-    
+
       static QByteArray json_ReadFile(const QString &fName);
 
       static void load_Defaults();
@@ -89,7 +111,7 @@ class Config
       static bool verify();
 
       static QStringList getAbbreviateBrief();
-      static QStringList getFilePatterns();  
+      static QStringList getFilePatterns();
       static QStringList getSuffixSource();
       static QStringList getSuffixHeader();
       static QStringList getSuffixExclude();

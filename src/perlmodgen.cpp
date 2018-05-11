@@ -36,11 +36,14 @@
 
 #define PERLOUTPUT_MAX_INDENTATION 40
 
+static QString pathDoxyfile;
+static QString pathDoxyExec;
+
 class PerlModOutputStream
 {
  public:
 
-   QByteArray m_s;
+   QString m_s;
    QTextStream *m_t;
 
    PerlModOutputStream(QTextStream *t = 0) : m_t(t) { }
@@ -48,8 +51,9 @@ class PerlModOutputStream
    void add(char c);
    void add(QChar c);
    void add(const QString &s);
-   void add(int n);
-   void add(unsigned int n);
+
+//     void add(int n);               BROOM - do we need this?
+//     void add(unsigned int n);
 };
 
 
@@ -83,6 +87,8 @@ void PerlModOutputStream::add(const QString &s)
    }
 }
 
+/*
+
 void PerlModOutputStream::add(int n)
 {
    if (m_t != 0) {
@@ -100,6 +106,8 @@ void PerlModOutputStream::add(unsigned int n)
       m_s += n;
    }
 }
+
+*/
 
 class PerlModOutput
 {
@@ -119,12 +127,12 @@ class PerlModOutput
    }
 
    inline PerlModOutput &openSave() {
-      iopenSave();
+      internal_openSave();
       return *this;
    }
 
-   inline PerlModOutput &closeSave(QString &s) {
-      icloseSave(s);
+   inline PerlModOutput &closeSave(QString &str) {
+      str = internal_closeSave();
       return *this;
    }
 
@@ -180,6 +188,7 @@ class PerlModOutput
       iopen(c, s);
       return *this;
    }
+
    inline PerlModOutput &close(char c = 0) {
       iclose(c);
       return *this;
@@ -201,7 +210,7 @@ class PerlModOutput
    }
 
    inline PerlModOutput &addFieldBoolean(const QString &field, bool content) {
-      return addFieldQuotedString(field, content ? "yes" : "no");
+      return addFieldQuotedString(field, content ? QString("yes") : QString("no"));
    }
 
    inline PerlModOutput &openList(const QString &s = QString()) {
@@ -224,8 +233,8 @@ class PerlModOutput
    }
 
  protected:
-   void iopenSave();
-   void icloseSave(QString &);
+   void internal_openSave();
+   QString internal_closeSave();
 
    void incIndent();
    void decIndent();
@@ -247,17 +256,20 @@ class PerlModOutput
    char m_spaces[PERLOUTPUT_MAX_INDENTATION * 2 + 2];
 };
 
-void PerlModOutput::iopenSave()
+void PerlModOutput::internal_openSave()
 {
    m_saved.push(m_stream);
    m_stream = new PerlModOutputStream();
 }
 
-void PerlModOutput::icloseSave(QString &s)
+QString PerlModOutput::internal_closeSave()
 {
-   s = m_stream->m_s;
+   QString retval = m_stream->m_s;
+
    delete m_stream;
    m_stream = m_saved.pop();
+
+   return retval;
 }
 
 void PerlModOutput::incIndent()
@@ -296,7 +308,7 @@ void PerlModOutput::iaddField(const QString &str)
 {
    continueBlock();
    m_stream->add(str);
-   m_stream->add(m_pretty ? " => " : "=>");
+   m_stream->add(m_pretty ? QString(" => ") : QString("=>"));
 }
 
 void PerlModOutput::iaddFieldQuotedChar(const QString &field, QChar content)
@@ -502,6 +514,7 @@ void PerlModDocVisitor::addLink(const QString &, const QString &file, const QStr
    if (!anchor.isEmpty()) {
       (link += "_1") += anchor;
    }
+
    m_output.addFieldQuotedString("link", link);
 }
 
@@ -602,61 +615,75 @@ void PerlModDocVisitor::visit(DocWhiteSpace *)
 void PerlModDocVisitor::visit(DocSymbol *sy)
 {
    const DocSymbol::PerlSymb *res = HtmlEntityMapper::instance()->perl(sy->symbol());
-   const char *accent = 0;
-   if (res-> symb) {
+   QString accent;
+
+   if (! res->symb.isEmpty()) {
       switch (res->type) {
          case DocSymbol::Perl_string:
             enterText();
             m_output.add(res->symb);
             break;
+
          case DocSymbol::Perl_char:
             enterText();
             m_output.add(res->symb[0]);
             break;
+
          case DocSymbol::Perl_symbol:
             leaveText();
             openItem("symbol");
             m_output.addFieldQuotedString("symbol", res->symb);
             closeItem();
             break;
+
          default:
             switch (res->type) {
                case DocSymbol::Perl_umlaut:
                   accent = "umlaut";
                   break;
+
                case DocSymbol::Perl_acute:
                   accent = "acute";
                   break;
+
                case DocSymbol::Perl_grave:
                   accent = "grave";
                   break;
+
                case DocSymbol::Perl_circ:
                   accent = "circ";
                   break;
+
                case DocSymbol::Perl_slash:
                   accent = "slash";
                   break;
+
                case DocSymbol::Perl_tilde:
                   accent = "tilde";
                   break;
+
                case DocSymbol::Perl_cedilla:
                   accent = "cedilla";
                   break;
+
                case DocSymbol::Perl_ring:
                   accent = "ring";
                   break;
+
                default:
                   break;
             }
+
             leaveText();
 
-            if (accent) {
+            if (! accent.isEmpty()) {
                openItem("accent");
                m_output.addFieldQuotedString("accent", accent).addFieldQuotedChar("letter", res->symb[0]);
                closeItem();
             }
             break;
       }
+
    } else {
       err("Perl, Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(sy->symbol(), true)) );
    }
@@ -680,7 +707,8 @@ void PerlModDocVisitor::visit(DocHorRuler *)
 
 void PerlModDocVisitor::visit(DocStyleChange *s)
 {
-   const char *style = 0;
+   QString style;
+
    switch (s->style()) {
       case DocStyleChange::Bold:
          style = "bold";
@@ -722,7 +750,8 @@ void PerlModDocVisitor::visit(DocStyleChange *s)
 
 void PerlModDocVisitor::visit(DocVerbatim *s)
 {
-   const char *type = 0;
+   QString type;
+
    switch (s->type()) {
       case DocVerbatim::Code:
 
@@ -801,7 +830,8 @@ void PerlModDocVisitor::visit(DocAnchor *anc)
 
 void PerlModDocVisitor::visit(DocInclude *inc)
 {
-   const char *type = 0;
+   QString type;
+
    switch (inc->type()) {
       case DocInclude::IncWithLines:
 #if 0
@@ -815,6 +845,7 @@ void PerlModDocVisitor::visit(DocInclude *inc)
       break;
 #endif
       return;
+
       case DocInclude::Include:
 #if 0
          m_output.add("<programlisting>");
@@ -836,6 +867,7 @@ void PerlModDocVisitor::visit(DocInclude *inc)
       case DocInclude::Snippet:
          return;
    }
+
    openItem(type);
    m_output.addFieldQuotedString("content", inc->text());
    closeItem();
@@ -901,7 +933,7 @@ void PerlModDocVisitor::visit(DocCite *cite)
 void PerlModDocVisitor::visitPre(DocAutoList *l)
 {
    openItem("list");
-   m_output.addFieldQuotedString("style", l->isEnumList() ? "ordered" : "itemized");
+   m_output.addFieldQuotedString("style", l->isEnumList() ? QString("ordered") : QString("itemized"));
    openSubBlock("content");
 }
 
@@ -948,7 +980,8 @@ void PerlModDocVisitor::visitPost(DocRoot *)
 
 void PerlModDocVisitor::visitPre(DocSimpleSect *s)
 {
-   const char *type = 0;
+   QString type;
+
    switch (s->type()) {
       case DocSimpleSect::See:
          type = "see";
@@ -1055,7 +1088,7 @@ void PerlModDocVisitor::visitPost(DocSimpleListItem *)
 
 void PerlModDocVisitor::visitPre(DocSection *s)
 {
-   QString sect = QString("sect%1").arg(s->level());
+   QString sect = QString("sect%1").formatArg(s->level());
 
    openItem(sect);
    m_output.addFieldQuotedString("title", s->title());
@@ -1071,7 +1104,7 @@ void PerlModDocVisitor::visitPost(DocSection *)
 void PerlModDocVisitor::visitPre(DocHtmlList *l)
 {
    openItem("list");
-   m_output.addFieldQuotedString("style", (l->type() == DocHtmlList::Ordered) ? "ordered" : "itemized");
+   m_output.addFieldQuotedString("style", (l->type() == DocHtmlList::Ordered) ? QString("ordered") : QString("itemized"));
    openSubBlock("content");
 }
 
@@ -1262,6 +1295,7 @@ void PerlModDocVisitor::visitPre(DocImage *)
 {
 #if 0
    m_output.add("<image type=\"");
+
    switch (img->type()) {
       case DocImage::Html:
          m_output.add("html");
@@ -1277,12 +1311,15 @@ void PerlModDocVisitor::visitPre(DocImage *)
 
    QString baseName = img->name();
    int i;
+
    if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
+
    m_output.add(" name=\"");
    m_output.add(baseName);
    m_output.add("\"");
+
    if (!img->width().isEmpty()) {
       m_output.add(" width=\"");
       m_output.addQuoted(img->width());
@@ -1423,7 +1460,8 @@ void PerlModDocVisitor::visitPost(DocSecRefList *)
 void PerlModDocVisitor::visitPre(DocParamSect *s)
 {
    leaveText();
-   const char *type = 0;
+   QString type;
+
    switch (s->type()) {
       case DocParamSect::Param:
          type = "params";
@@ -1647,36 +1685,52 @@ static void addPerlModDocBlock(PerlModOutput &output, const QString &name, const
    }
 }
 
-static const char *getProtectionName(Protection prot)
+static const QString getProtectionName(Protection prot)
 {
+   QString retval;
+
    switch (prot) {
       case Public:
-         return "public";
+         retval = "public";
+         break;
+
       case Protected:
-         return "protected";
+         retval = "protected";
+         break;
+
       case Private:
-         return "private";
+         retval = "private";
+         break;
+
       case Package:
-         return "package";
+         retval = "package";
+         break;
+
    }
-   return 0;
+
+   return retval;
 }
 
-static const char *getVirtualnessName(Specifier virt)
+static const QString getVirtualnessName(Specifier virt)
 {
+   QString retval;
+
    switch (virt) {
       case Normal:
-         return "non_virtual";
-      case Virtual:
-         return "virtual";
-      case Pure:
-         return "pure_virtual";
-   }
-   return 0;
-}
+         retval = "non_virtual";
+         break;
 
-static QString pathDoxyfile;
-static QString pathDoxyExec;
+      case Virtual:
+         retval = "virtual";
+         break;
+
+      case Pure:
+         retval = "pure_virtual";
+         break;
+   }
+
+   return retval;
+}
 
 void setPerlModDoxyfile(const QString &qs)
 {
@@ -1687,7 +1741,6 @@ void setPerlModDoxyfile(const QString &qs)
 class PerlModGenerator
 {
  public:
-
    PerlModOutput m_output;
 
    QString pathDoxyStructurePM;
@@ -2469,7 +2522,7 @@ bool PerlModGenerator::createOutputFile(QFile &f, const QString &s)
 
 bool PerlModGenerator::createOutputDir(QDir &perlModDir)
 {
-   QString outputDirectory = Config::getString("output-dir");
+   static const QString outputDirectory = Config::getString("output-dir");
 
    QDir dir(outputDirectory);
 
@@ -2483,7 +2536,8 @@ bool PerlModGenerator::createOutputDir(QDir &perlModDir)
    }
 
    perlModDir.setPath(outputDirectory + "/perlmod");
-   if (! perlModDir.exists() && !perlModDir.mkdir(outputDirectory + "/perlmod")) {
+
+   if (! perlModDir.exists() && ! perlModDir.mkdir(outputDirectory + "/perlmod")) {
       err("Unable to create perlmod directory in %s\n", csPrintable(outputDirectory));
       return false;
    }

@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -427,8 +427,8 @@ StyleData::StyleData(const QString &reference, const QString &definition)
 
 StyleData::StyleData()
 {
-   assert(false);  
-} 
+   assert(false);
+}
 
 StyleData::~StyleData()
 {  
@@ -556,16 +556,16 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
 
       QString key = s.left(sepStart);
 
-      if (! dict.contains(key)) { 
+      if (! dict.contains(key)) {
          // not a valid style sheet name
-         warn(csPrintable(name), lineNr, "Invalid style sheet name %s ignored.\n", csPrintable(key));
+         warn(name, lineNr, "Invalid style sheet name %s ignored.\n", csPrintable(key));
          continue;
       }
 
-      // add command separator   
+      // add command separator
       StyleData &styleData = dict.find(key).value();
 
-      s += " "; 
+      s += " ";
       styleData.setStyle(s.mid(sepStart + sepLength), key);
 
       lineNr++;
@@ -579,7 +579,7 @@ void loadExtensions(const QString &name)
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Unable to open RTF extensions file %s, error: %d, Using defaut values\n", csPrintable(name), file.error());      
+      err("Unable to open RTF extensions file %s, error: %d, Using defaut values\n", csPrintable(name), file.error());
       return;
    }
    msg("Loading RTF extensions %s\n", csPrintable(name));

@@ -543,10 +543,22 @@ class DocSymbol : public DocNode
                    Perl_cedilla, Perl_ring
                  };
 
-   typedef struct PerlSymb {
-      const char     *symb;
-      const PerlType  type;
-   } PerlSymb;
+   struct PerlSymb {
+
+      PerlSymb() = default;
+
+      PerlSymb(const char *x1, PerlType x2)  {
+
+         if (x1 == nullptr) {
+            symb = QString::fromUtf8(x1);
+         }
+
+         type = x2;
+      }
+
+      QString  symb;
+      PerlType type;
+   };
 
    DocSymbol(DocNode *parent, SymType s)
       : m_symbol(s) {
@@ -723,7 +735,7 @@ class DocInclude : public DocNode
       if (i != -1) {
          return m_file.right(m_file.length() - i);
       } else {
-         return "";
+         return QString("");
       }
    }
 
@@ -2297,8 +2309,8 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
 
    void accept(DocVisitor *v) override;
 
-   DocHtmlCaption *caption() const { 
-      return m_caption; 
+   DocHtmlCaption *caption() const {
+      return m_caption;
    }
 
    DocHtmlRow *firstRow() const {

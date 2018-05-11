@@ -483,12 +483,18 @@ bool openOutputFile(const QString &outFile, QFile &f)
 }
 
 struct LangStruct {
-   const QString parserName;
+
+   LangStruct(const char *key, SrcLangExt lang) {
+      parserName = QString::fromLatin1(key);
+      parserEnum = lang;
+   }
+
+   QString parserName;
    SrcLangExt    parserEnum;
 };
 
 //  language       parser Name        parser enum
-static std::map<QString, LangStruct> s_languageTable{
+static std::map<QString, LangStruct> s_languageTable {
 
    { "idl",          {"c",            SrcLangExt_IDL      }},
    { "java",         {"c",            SrcLangExt_Java     }},

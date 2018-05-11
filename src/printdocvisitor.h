@@ -50,7 +50,7 @@ class PrintDocVisitor : public DocVisitor
 
    void visit(DocSymbol *s) override {
       indent_leaf();
-      QString res = HtmlEntityMapper::instance()->utf8(s->symbol(), true);
+      QString res = HtmlEntityMapper::instance()->rawString(s->symbol(), true);
 
       if (! res.isEmpty()) {
          printf("%s", csPrintable(res));
@@ -717,8 +717,8 @@ class PrintDocVisitor : public DocVisitor
    void visitPost(DocLink *) override {
       indent_post();
       printf("</link>\n");
-   }    
-                                   
+   }
+
    void visitPre(DocRef *ref) override {
       indent_pre();
       printf("<ref ref=\"%s\" file=\"%s\" "
