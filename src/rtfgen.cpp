@@ -46,9 +46,9 @@ static QString dateToRTFDateString()
 
    QString retval;
 
-   retval = QString("\\yr%1\\mo%2\\dy%3\\hr%4\\min%5\\sec%6").
-                  arg(dt.date().year()).arg(dt.date().month()).arg(dt.date().day()).
-                  arg(dt.time().hour()).arg(dt.time().minute()).arg(dt.time().second());
+   retval = QString("\\yr%1\\mo%2\\dy%3\\hr%4\\min%5\\sec%6")
+                  .formatArg(dt.date().year()).formatArg(dt.date().month()).formatArg(dt.date().day())
+                  .formatArg(dt.time().hour()).formatArg(dt.time().minute()).formatArg(dt.time().second());
 
    return retval;
 }
@@ -97,10 +97,11 @@ void RTFGenerator::writeStyleSheetFile(QFile &file)
    t_stream << "# All text after a hash (#) is considered a comment and will be ignored.\n";
    t_stream << "# Remove a hash to activate a line.\n\n";
 
-   for (int i = 0 ; rtf_Style_Default[i].reference != 0 ; i++ ) {
-      t_stream << "# " << rtf_Style_Default[i].name << " = "
-        << rtf_Style_Default[i].reference
-        << rtf_Style_Default[i].definition << endl;
+   for (int i = 0 ; rtf_Style_Default[i].style_reference != 0 ; i++ ) {
+
+      t_stream << "# " << rtf_Style_Default[i].style_name << " = "
+        << rtf_Style_Default[i].style_reference
+        << rtf_Style_Default[i].style_definition << endl;
    }
 }
 
@@ -159,7 +160,9 @@ void RTFGenerator::writeExtensionsFile(QFile &file)
 
 void RTFGenerator::init()
 {
-   QString dir = Config::getString("rtf-output");
+   static const QString rtfStyleSheetFile = Config::getString("rtf-stylesheet");
+   static const QString dir               = Config::getString("rtf-output");
+
    QDir d(dir);
 
    if (! d.exists() && ! d.mkdir(dir)) {
@@ -170,19 +173,17 @@ void RTFGenerator::init()
    // first duplicate strings of rtf_Style_Default
    const struct Rtf_Style_Default *def = rtf_Style_Default;
 
-   while (def->reference != 0) {
-      if (def->definition == 0) {
-         err("RTF Style Default [%s] has no definition\n", csPrintable(def->name));
+   while (def->style_reference != 0) {
+      if (def->style_definition == 0) {
+         err("RTF Style Default [%s] has no definition\n", def->style_name);
       }
 
-      StyleData styleData = StyleData(def->reference, def->definition);
-      rtf_Style.insert(def->name, styleData);
+      StyleData styleData = StyleData(def->style_reference, def->style_definition);
+      rtf_Style.insert(def->style_name, styleData);
       def++;
    }
 
    // overwrite some (or all) definitions from file
-   QString rtfStyleSheetFile = Config::getString("rtf-stylesheet");
-
    if (! rtfStyleSheetFile.isEmpty()) {
       loadStylesheet(rtfStyleSheetFile, rtf_Style);
    }
@@ -275,7 +276,7 @@ void RTFGenerator::beginRTFDocument()
    array.fill(0);
 
    for (auto iter = rtf_Style.begin(); iter != rtf_Style.end(); ++iter)  {
-      unsigned index = iter->index;
+      unsigned index = iter->m_index;
       unsigned size  = array.size();
 
       if (index >= size) {
@@ -300,7 +301,7 @@ void RTFGenerator::beginRTFDocument()
       const StyleData *style = array.at(i);
 
       if (style != 0) {
-         m_textStream << "{" << style->reference << style->definition << ";}\n";
+         m_textStream << "{" << style->m_reference << style->m_definition << ";}\n";
       }
    }
 
@@ -328,7 +329,7 @@ void RTFGenerator::beginRTFChapter()
       m_textStream << "\\sect\\sbkpage\n";
    }
 
-   m_textStream << rtf_Style["Heading1"].reference << "\n";
+   m_textStream << rtf_Style["Heading1"].m_reference << "\n";
 }
 
 void RTFGenerator::beginRTFSection()
@@ -349,7 +350,7 @@ void RTFGenerator::beginRTFSection()
 
    }
 
-   m_textStream << rtf_Style["Heading2"].reference << "\n";
+   m_textStream << rtf_Style["Heading2"].m_reference << "\n";
 }
 
 void RTFGenerator::startFile(const QString &name, const QString &, const QString &)
@@ -620,12 +621,12 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          // setup for this section
          m_textStream << rtf_Style_Reset << "\n";
          m_textStream << "\\sectd\\pgnlcrm\n";
-         m_textStream << "{\\footer " << rtf_Style["Footer"].reference << "{\\chpgn}}\n";
+         m_textStream << "{\\footer " << rtf_Style["Footer"].m_reference << "{\\chpgn}}\n";
 
          // the title entry
          DBG_RTF(t << "{\\comment begin title page}\n")
 
-         m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to title style
+         m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].m_reference << endl; // set to title style
 
          m_textStream  << "\\vertalc\\qc\\par\\par\\par\\par\\par\\par\\par\n";
          if (! rtf_logoFilename.isEmpty()) {
@@ -637,11 +638,12 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             m_textStream  << rtf_company << "\\par\\par\n";
          }
 
-         m_textStream  << rtf_Style_Reset << rtf_Style["Title"].reference << endl; // set to title style
+         m_textStream  << rtf_Style_Reset << rtf_Style["Title"].m_reference << endl; // set to title style
 
          if (! rtf_title.isEmpty()) {
             // User has overridden document title in extensions file
-            m_textStream << "{\\field\\fldedit {\\*\\fldinst " << rtf_title << " \\\\*MERGEFORMAT}{\\fldrslt " << rtf_title << "}}\\par" << endl;
+            m_textStream << "{\\field\\fldedit {\\*\\fldinst " << rtf_title << " \\\\*MERGEFORMAT}{\\fldrslt "
+                         << rtf_title << "}}\\par" << endl;
 
          } else {
             DocText *root = validatingParseText(projectName);
@@ -651,7 +653,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             m_textStream << "}}\\par" << endl;
          }
 
-         m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to title style
+         m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].m_reference << endl; // set to title style
          m_textStream  << "\\par\n";
 
          if (! rtf_documentType.isEmpty()) {
@@ -664,7 +666,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          m_textStream  << "\\par\\par\\par\\par\\par\\par\\par\\par\\par\\par\\par\\par\n";
 
-         m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].reference << endl; // set to subtitle style
+         m_textStream  << rtf_Style_Reset << rtf_Style["SubTitle"].m_reference << endl; // set to subtitle style
 
          if (! rtf_author.isEmpty())  {
            m_textStream << "{\\field\\fldedit {\\*\\fldinst AUTHOR \\\\*MERGEFORMAT}{\\fldrslt "<< rtf_author << " }}\\par" << endl;
@@ -684,7 +686,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          DBG_RTF(t << "{\\comment Table of contents}\n")
          m_textStream  << "\\vertalt\n";
          m_textStream  << rtf_Style_Reset << endl;
-         m_textStream  << rtf_Style["Heading1"].reference;
+         m_textStream  << rtf_Style["Heading1"].m_reference;
          m_textStream  << theTranslator->trRTFTableOfContents() << "\\par" << endl;
          m_textStream  << rtf_Style_Reset << "\\par" << endl;
          m_textStream  << "{\\field\\fldedit {\\*\\fldinst TOC \\\\f \\\\*MERGEFORMAT}{\\fldrslt Table of contents}}\\par\n";
@@ -938,7 +940,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          //#error "fix me in the same way as the latex index..."
          //t << "{\\tc \\v " << theTranslator->trPageDocumentation() << "}"<< endl;
          //t << "}"<< endl;
-         //PageSDict::Iterator pdi(*Doxy_Globals::pageSDict);
+         //PageSDict::iterator pdi(*Doxy_Globals::pageSDict);
          //PageDef *pd=pdi.toFirst();
          //bool first=true;
          //for (pdi.toFirst();(pd=pdi.current());++pdi)
@@ -963,7 +965,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
       case isEndIndex:
          beginRTFChapter();
-         m_textStream  << rtf_Style["Heading1"].reference;
+         m_textStream  << rtf_Style["Heading1"].m_reference;
          m_textStream  << theTranslator->trRTFGeneralIndex() << "\\par " << endl;
          m_textStream  << rtf_Style_Reset << endl;
          m_textStream  << "{\\tc \\v " << theTranslator->trRTFGeneralIndex() << "}" << endl;
@@ -993,7 +995,7 @@ void RTFGenerator::lastIndexPage()
    m_textStream  << "\\sect \\sectd \\sbknone\n";
 
    // set new footer with arabic numbers
-   m_textStream  << "{\\footer " << rtf_Style["Footer"].reference << "{\\chpgn}}\n";
+   m_textStream  << "{\\footer " << rtf_Style["Footer"].m_reference << "{\\chpgn}}\n";
 }
 
 void RTFGenerator::writeStyleInfo(int)
@@ -1244,7 +1246,7 @@ void RTFGenerator::startSubsection()
    m_textStream << "\n";
    DBG_RTF(m_textStream << "{\\comment Begin SubSection}\n")
    m_textStream << rtf_Style_Reset;
-   m_textStream << rtf_Style["Heading3"].reference << "\n";
+   m_textStream << rtf_Style["Heading3"].m_reference << "\n";
 }
 
 void RTFGenerator::endSubsection()
@@ -1259,7 +1261,7 @@ void RTFGenerator::startSubsubsection()
    m_textStream << "\n";
    DBG_RTF(m_textStream << "{\\comment Begin SubSubSection}\n")
    m_textStream << "{" << endl;
-   m_textStream << rtf_Style_Reset << rtf_Style["Heading4"].reference << "\n";
+   m_textStream << rtf_Style_Reset << rtf_Style["Heading4"].m_reference << "\n";
 }
 
 void RTFGenerator::endSubsubsection()
@@ -1384,7 +1386,7 @@ void RTFGenerator::startTitleHead(const QString &)
    DBG_RTF(m_textStream << "{\\comment startTitleHead}" << endl)
 
    //    beginRTFSection();
-   m_textStream << rtf_Style_Reset << rtf_Style["Heading2"].reference << endl;
+   m_textStream << rtf_Style_Reset << rtf_Style["Heading2"].m_reference << endl;
 }
 
 void RTFGenerator::endTitleHead(const QString &fileName, const QString &name)
@@ -1424,13 +1426,13 @@ void RTFGenerator::startGroupHeader(int extraIndent)
    m_textStream << rtf_Style_Reset;
 
    if (extraIndent == 2) {
-      m_textStream << rtf_Style["Heading5"].reference;
+      m_textStream << rtf_Style["Heading5"].m_reference;
 
    } else if (extraIndent == 1) {
-      m_textStream << rtf_Style["Heading4"].reference;
+      m_textStream << rtf_Style["Heading4"].m_reference;
 
    } else { // extraIndent==0
-      m_textStream << rtf_Style["Heading3"].reference;
+      m_textStream << rtf_Style["Heading3"].m_reference;
    }
 
    m_textStream << endl;
@@ -1453,7 +1455,7 @@ void RTFGenerator::startMemberDoc(const QString &clname, const QString &memname,
       addIndexItem(clname, memname);
    }
 
-   m_textStream << rtf_Style_Reset << rtf_Style[showInline ? "Heading5" : "Heading4"].reference;
+   m_textStream << rtf_Style_Reset << rtf_Style[showInline ? "Heading5" : "Heading4"].m_reference;
    m_textStream << "{" << endl;
 
    startBold();
@@ -1650,10 +1652,10 @@ void RTFGenerator::startSection(const QString &, const QString &title, SectionIn
    }
 
    QString heading;
-   heading = QString("Heading%1").arg(num);
+   heading = QString("Heading%1").formatArg(num);
 
    // set style
-   m_textStream << rtf_Style[heading].reference;
+   m_textStream << rtf_Style[heading].m_reference;
 
    // make table of contents entry
    m_textStream << "{\\tc\\tcl" << num << " \\v ";
@@ -1971,6 +1973,7 @@ void RTFGenerator::incrementIndentLevel()
 void RTFGenerator::decrementIndentLevel()
 {
    m_listLevel--;
+
    if (m_listLevel < 0) {
       err("Negative indent level while generating RTF output\n");
       m_listLevel = 0;
@@ -1981,40 +1984,40 @@ void RTFGenerator::decrementIndentLevel()
 QString RTFGenerator::rtf_CList_DepthStyle()
 {
    QString n = makeIndexName("ListContinue", m_listLevel);
-   return rtf_Style[n].reference;
+   return rtf_Style[n].m_reference;
 }
 
 // a style for list formatted as a "latext style" table of contents
 QString RTFGenerator::rtf_LCList_DepthStyle()
 {
    QString n = makeIndexName("LatexTOC", m_listLevel);
-   return rtf_Style[n].reference;
+   return rtf_Style[n].m_reference;
 }
 
 // a style for list formatted as a "bullet" style
 QString RTFGenerator::rtf_BList_DepthStyle()
 {
    QString n = makeIndexName("ListBullet", m_listLevel);
-   return rtf_Style[n].reference;
+   return rtf_Style[n].m_reference;
 }
 
 // a style for list formatted as a "enumeration" style
 QString RTFGenerator::rtf_EList_DepthStyle()
 {
    QString n = makeIndexName("ListEnum", m_listLevel);
-   return rtf_Style[n].reference;
+   return rtf_Style[n].m_reference;
 }
 
 QString RTFGenerator::rtf_DList_DepthStyle()
 {
    QString n = makeIndexName("DescContinue", m_listLevel);
-   return rtf_Style[n].reference;
+   return rtf_Style[n].m_reference;
 }
 
 QString RTFGenerator::rtf_Code_DepthStyle()
 {
    QString n = makeIndexName("CodeExample", m_listLevel);
-   return rtf_Style[n].reference;
+   return rtf_Style[n].m_reference;
 }
 
 void RTFGenerator::startTextBlock(bool dense)
@@ -2024,10 +2027,10 @@ void RTFGenerator::startTextBlock(bool dense)
    m_textStream << rtf_Style_Reset;
 
    if (dense) { // no spacing between "paragraphs"
-      m_textStream << rtf_Style["DenseText"].reference;
+      m_textStream << rtf_Style["DenseText"].m_reference;
 
    } else { // some spacing
-      m_textStream << rtf_Style["BodyText"].reference;
+      m_textStream << rtf_Style["BodyText"].m_reference;
    }
 }
 
@@ -2111,7 +2114,7 @@ static void encodeForOutput(QTextStream &t_stream, const QString &text)
    }
 
    static QByteArray enc;
-   QString outputEncoding = QString("CP%1").arg(theTranslator->trRTFansicp());
+   QString outputEncoding = QString("CP%1").formatArg(theTranslator->trRTFansicp());
 
    QTextCodec *outCodec = QTextCodec::codecForName(outputEncoding.toUtf8());
 
@@ -2192,7 +2195,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
       }
 
       if (bIncludeHeader) {
-         encodeForOutput(t_stream, lineBuf.constData());
+         encodeForOutput(t_stream, QString::fromUtf8(lineBuf));
       }
    }
 
@@ -2225,7 +2228,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
          // odd code to skip  the final "}" if we did not include the headers
 
          if (! f.atEnd() || bIncludeHeader) {
-            encodeForOutput(t_stream, lineBuf);
+            encodeForOutput(t_stream, QString::fromUtf8(lineBuf));
 
          } else {
             // last line of included file has a "}" which needs to be removed
@@ -2241,7 +2244,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
 
             }
 
-            encodeForOutput(t_stream, lineBuf);
+            encodeForOutput(t_stream, QString::fromUtf8(lineBuf));
          }
       }
 
@@ -2488,7 +2491,7 @@ void RTFGenerator::startMemberGroupHeader(bool hasHeader)
       incrementIndentLevel();
    }
 
-   m_textStream << rtf_Style_Reset << rtf_Style["GroupHeader"].reference;
+   m_textStream << rtf_Style_Reset << rtf_Style["GroupHeader"].m_reference;
 }
 
 void RTFGenerator::endMemberGroupHeader()
@@ -2721,7 +2724,7 @@ void RTFGenerator::startInlineHeader()
 {
    DBG_RTF(m_textStream << "{\\comment (startInlineHeader)}" << endl)
    m_textStream << "{" << endl;
-   m_textStream << rtf_Style_Reset << rtf_Style["Heading5"].reference;
+   m_textStream << rtf_Style_Reset << rtf_Style["Heading5"].m_reference;
    startBold();
 }
 
@@ -2737,7 +2740,7 @@ void RTFGenerator::startMemberDocSimple()
 {
    DBG_RTF(m_textStream << "{\\comment (startMemberDocSimple)}" << endl)
    m_textStream << "{\\par" << endl;
-   m_textStream << "{" << rtf_Style["Heading5"].reference << endl;
+   m_textStream << "{" << rtf_Style["Heading5"].m_reference << endl;
    m_textStream << theTranslator->trCompoundMembers() << ":\\par}" << endl;
    m_textStream << rtf_Style_Reset << rtf_DList_DepthStyle();
 
