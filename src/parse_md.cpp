@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QFileInfo>
 #include <QHash>
 
@@ -113,7 +113,7 @@ static bool extraChar(const QChar &text)
 static QString escapeSpecialChars(const QString &text)
 {
    if (text.isEmpty()) {
-      return "";
+      return QString("");
    }
 
    QString retval;
@@ -245,7 +245,7 @@ static QString isBlockCommand(const QString &data, int offset, int size, const Q
    QString blockName = data.mid(1, end - 1);
 
    if (blockName == "code" && openBracket) {
-      return "}";
+      retval = "}";
 
    } else if (blockName == "dot"         ||
               blockName == "code"        ||
@@ -258,20 +258,20 @@ static QString isBlockCommand(const QString &data, int offset, int size, const Q
               blockName == "manonly"     ||
               blockName == "docbookonly" ) {
 
-      return "end" + blockName;
+      retval = "end" + blockName;
 
    } else if (blockName == "startuml") {
-      return "enduml";
+      retval = "enduml";
 
    } else if (blockName == "f" && end < size) {
       if (data[end] == '$') {
-         return "f$";
+         retval = "f$";
 
       } else if (data[end] == '[') {
-         return "f]";
+         retval = "f]";
 
       } else if (data[end] == '}') {
-         return "f}";
+         retval = "f}";
 
       }
    }
@@ -603,43 +603,40 @@ static int processHtmlTag(QString &out, const QString &data, int offset, int siz
    }
 
    // find the end of the html tag
-   int i = 1;
-   int l = 0;
+   QString::const_iterator iter     = data.begin();
+   QString::const_iterator iter_end = data.begin() + size;
 
-
-   QChar charA = 0;
-   if (! i > data.length()) {
-      charA = data[i];
+   if (iter != iter_end) {
+      ++iter;
    }
 
    // compute length of the tag name
-   while (i < size && isIdChar(charA)) {
-      i++;
-      l++;
+   while (iter != iter_end && isIdChar(*iter))  {
+      ++iter;
    }
 
-   QString tagName = data.mid(1, i - 1);
+   QStringView tagName = QStringView(data.begin() + 1, iter);
 
    if (tagName.toLower() == "pre") {
       bool insideStr = false;
 
-      while (i < size - 6) {
-         QChar c = data[i];
+      while (iter != iter_end) {
+         QChar c = *iter;
 
          if (! insideStr && c == '<') {
-            // potential start of html tag
+            // potential end of pre html element
+            QStringView tmp = QStringView(iter + 1, iter_end);
 
-            if (data[i + 1] == '/' && data[i + 2].toLower() == 'p' && data[i + 3].toLower() == 'r' &&
-                  data[i + 4].toLower() == 'e' && data[i + 5].toLower() == '>') {
+            if (tmp.startsWith("/pre>", Qt::CaseInsensitive)) {
+               // found </pre> element - copy start element, contents, ending element
+               out += QStringView(data.begin(), iter + 6);
 
-               // found </pre> tag, copy from start to end of tag
-               out += data.mid(0, i + 6);
-
-               return i + 6;
+               return (iter - data.begin()) + 6;
             }
 
          } else if (insideStr && c == '"') {
-            if (data[i - 1] != '\\') {
+
+            if (iter[-1] != '\\') {
                insideStr = false;
             }
 
@@ -647,45 +644,49 @@ static int processHtmlTag(QString &out, const QString &data, int offset, int siz
             insideStr = true;
          }
 
-         i++;
+         iter++;
       }
 
    } else {
-      // some other html tag
+      // some other html element
+      QChar c = *iter;
 
-      if (l > 0 && i < size) {
-         if (data[i] == '/' && i < size - 1 && data[i + 1] == '>') {
+      if (iter != iter_end) {
+         if (c == '/' && iter + 1 != iter_end && iter[1] == '>') {
             // <bla/>
 
-            out += data.mid(0, i + 2);
-            return i + 2;
+            out += QStringView(data.begin(), iter + 2);
+            return (iter - data.begin()) + 2;
 
-         } else if (data[i] == '>') {
+         } else if (c == '>') {
             // <bla>
 
-            out += data.mid(0, i + 1);
-            return i + 1;
+            out += QStringView(data.begin(), iter + 1);
+            return (iter - data.begin()) + 1;
 
-         } else if (data[i] == ' ') {
+         } else if (c == ' ') {
             // <bla attr=...
 
-            i++;
+            ++iter;
             bool insideAttr = false;
 
-            while (i < size) {
-               if (!insideAttr && data[i] == '"') {
+            while (iter != iter_end) {
+               c = *iter;
+
+               if (! insideAttr && c == '"') {
                   insideAttr = true;
 
-               } else if (data[i] == '"' && data[i - 1] != '\\') {
+               } else if (c == '"' && iter[-1] != '\\') {
                   insideAttr = false;
 
-               } else if (!insideAttr && data[i] == '>') {
-                  // found end of tag
+               } else if (! insideAttr && c == '>') {
+                  // found end of element
 
-                  out += data.mid(0, i + 1);
-                  return i + 1;
+                  out += QStringView(data.begin(), iter + 1);
+                  return (iter - data.begin()) + 1;
                }
-               i++;
+
+               ++iter;
             }
          }
       }
@@ -1565,28 +1566,34 @@ static int isHRuler(const QString &data, int size)
       } else if (data[i] != ' ') {
          return 0; // line contains non hruler characters
       }
+
       i++;
    }
+
    return n >= 3; // at least 3 characters needed for a hruler
 }
 
 static QString extractTitleId(QString &title)
 {
-   static QRegExp r2("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
+   static QRegularExpression regExp("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
+   QRegularExpressionMatch match = regExp.match(title);
 
-   int l = 0;
-   int i = r2.indexIn(title);
-   l     = r2.matchedLength();
+   QString retval;
 
-   if (i != -1 && title.mid(i + l).trimmed().isEmpty()) {
-      // found {#id} style id
-      QString id = title.mid(i + 2, l - 3);
-      title = title.left(i);
+   if (match.hasMatch()) {
+      QStringView tmp1 = QStringView(match.capturedEnd(), title.constEnd()).trimmed();
 
-      return id;
+      if (tmp1.isEmpty()) {
+         // found {#id} style id
+
+         retval = QStringView(match.capturedStart() + 2, match.capturedEnd() - 1);
+         title  = QStringView(title.constBegin(), match.capturedStart());
+
+         return retval;
+      }
    }
 
-   return "";
+   return retval;
 }
 
 static int isAtxHeader(const QString &data, int size, QString &header, QString &id)
@@ -2155,7 +2162,7 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
             out += "\\anchor " + id + "\n";
          }
 
-         hTag = QString("h%1").arg(level);
+         hTag = QString("h%1").formatArg(level);
 
          out += "<" + hTag + ">";
          out += header;
@@ -2348,10 +2355,9 @@ static void findEndOfLine(QString &out, const QString &data, int size, int &pi, 
       } else if (nb == 0 && data[end - 1] == '<' && end < size - 6 &&
                  (end <= 1 || (data[end - 2] != '\\' && data[end - 2] != '@')) ) {
 
-         if ( data[end].toLower() == 'p' && data[end + 1].toLower() == 'r' &&
-               data[end + 2].toLower() == 'e' && data[end + 3] == '>') {
-
+         if (data.midView(end, 4).toLower() == "pre>") {
             // <pre> tag
+
             if (pi != -1) {
                // output previous line if available
                out += data.mid(pi, i - pi);
@@ -2678,59 +2684,71 @@ static bool isExplicitPage(const QString &text)
 
 static QString extractPageTitle(QString &docs, QString &id)
 {
-   int ln = 0;
-
    // first non-empty line
    QString title;
 
-   const QChar *data = docs.constData();
-   const QChar *ptr  = data;
+   QString::const_iterator iter      = docs.constBegin();
+   QString::const_iterator iter_end  = docs.constEnd();
 
-   int size = docs.size();
-   int i = 0;
+   int maxLen = 0;
 
-   while (i < size && (data[i] == ' ' || data[i] == '\n')) {
-      if (data[i] == '\n') {
-         ln++;
+   while (iter != iter_end) {
+      QChar c = *iter;
+
+      if (c == ' ') {
+         // do nothing
+
+      } else if (c == '\n') {
+         ++maxLen;
+
+      } else {
+         break;
+
       }
-      i++;
+
+      ++iter;
    }
 
-   if (i >= size) {
-      return "";
+   if (iter == iter_end) {
+      return QString("");
    }
 
-   int end1 = i + 1;
+   QString::const_iterator iter_endA = iter + 1;
 
-   while (end1 < size && data[end1 - 1] != '\n') {
-      end1++;
+   while (iter_endA != iter_end && iter_endA[-1] != '\n') {
+      ++iter_endA;
    }
 
+   if (iter_endA != iter_end) {
+      ++maxLen;
 
-   if (end1 < size) {
-      ln++;
       // second line form end1..end2
-      int end2 = end1 + 1;
+      QString::const_iterator iter_endB = iter_endA + 1;
 
-      while (end2 < size && data[end2 - 1] != '\n') {
-         end2++;
+      while (iter_endB != iter_end && iter_endB[-1] != '\n') {
+         ++iter_endB;
       }
 
-      if ( isHeaderline(docs.mid(data - ptr + end1), size - end1) ) {
-         title = docs.mid(data - ptr + i, end1 - i - 1);
+      int level = isHeaderline(QStringView(iter_endA, iter_end), (iter_end - iter_endA));
 
-         QString lns;
-         lns.fill('\n', ln);
+      if (level != 0) {
+         title = QStringView(iter, iter_end - 1);
 
-         docs = lns + docs.mid(end2);
-         id = extractTitleId(title);
+         QString lns(maxLen, '\n');
+
+         docs = lns + QStringView(iter_endB, iter_end);      // modify passed values
+         id   = extractTitleId(title);
 
          return title;
       }
    }
 
-   if (i < end1 && isAtxHeader(docs.mid(data - ptr + i), end1 - i, title, id) > 0) {
-      docs = docs.mid(end1);
+   if (iter < iter_endA) {
+      int level = isAtxHeader(QStringView(iter, iter_end), (iter_endA - iter), title, id);
+
+      if (level > 0) {
+         docs = QStringView(iter_endA, iter_end);               // modify passed values
+      }
    }
 
    return title;
@@ -2822,7 +2840,7 @@ QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointe
    QString s = detab(input, refIndent);
 
    if (s.trimmed().isEmpty()) {
-      return "";
+      return QString("");
    }
 
    // process quotation blocks (as these may contain other blocks)
@@ -2865,6 +2883,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    QString id;
    QString docs    = fileBuf;
    QString title   = extractPageTitle(docs, id).trimmed();
+
    QString titleFn = QFileInfo(fileName).baseName();
    QString fn      = QFileInfo(fileName).fileName();
 

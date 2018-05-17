@@ -17,7 +17,7 @@
 
 #include <QDateTime>
 #include <QDir>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextStream>
 
 #include <stdlib.h>
@@ -127,7 +127,8 @@ static void endIndexHierarchy(OutputList &ol, int level)
 class MemberIndexList : public QList<QSharedPointer<MemberDef>>
 {
  public:
-   MemberIndexList(uint letter) : m_letter(letter)
+   MemberIndexList(QChar letter)
+      : m_letter(letter)
    {}
 
    ~MemberIndexList()
@@ -147,12 +148,12 @@ class MemberIndexList : public QList<QSharedPointer<MemberDef>>
       append(data);
    }
 
-   uint letter() const {
+   QChar letter() const {
       return m_letter;
    }
 
  private:
-   uint m_letter;
+   QChar m_letter;
 };
 
 static LetterToIndexMap<MemberIndexList>   g_memberIndexLetterUsed[CMHL_Total];
@@ -1661,48 +1662,33 @@ static void writeAnnotatedClassList(OutputList &ol)
    ol.endIndexList();
 }
 
-static QString letterToLabel(uint startLetter)
+static QString letterToLabel(QChar startLetter)
 {
-   char s[11]; // max 0x12345678 + '\0'
+   QString retval;
 
    if (startLetter > 0x20 && startLetter <= 0x7f) {
       // printable ASCII character
-      s[0] = (char)startLetter;
-      s[1] = 0;
+      retval = startLetter;
 
    } else {
-      const char hex[] = "0123456789abcdef";
-      int i = 0;
+      retval = QString::number(startLetter.unicode(), 16);
 
-      s[i++] = '0';
-      s[i++] = 'x';
-
-      if (startLetter > (1 << 24)) { // 4 byte character
-         s[i++] = hex[(startLetter >> 28) & 0xf];
-         s[i++] = hex[(startLetter >> 24) & 0xf];
+      if (retval.size() % 2) {
+         retval.prepend("0x0");
+      } else {
+         retval.prepend("0x");
       }
-      if (startLetter > (1 << 16)) { // 3 byte character
-         s[i++] = hex[(startLetter >> 20) & 0xf];
-         s[i++] = hex[(startLetter >> 16) & 0xf];
-      }
-      if (startLetter > (1 << 8)) { // 2 byte character
-         s[i++] = hex[(startLetter >> 12) & 0xf];
-         s[i++] = hex[(startLetter >> 8) & 0xf];
-      }
-      // one byte character
-      s[i++] = hex[(startLetter >> 4) & 0xf];
-      s[i++] = hex[(startLetter >> 0) & 0xf];
-      s[i++] = 0;
    }
 
-   return s;
+   return retval;
 }
 
 /** Special class list where sorting takes IGNORE_PREFIX into account. */
 class PrefixIgnoreClassList : public SortedList<QSharedPointer<ClassDef>>
 {
  public:
-   PrefixIgnoreClassList(uint letter) : m_letter(letter) { }
+   PrefixIgnoreClassList(QChar letter)
+      : m_letter(letter) { }
 
    void insertDef(QSharedPointer<ClassDef> data) {
       iterator location;
@@ -1711,7 +1697,7 @@ class PrefixIgnoreClassList : public SortedList<QSharedPointer<ClassDef>>
       this->insert(location, data);
    }
 
-   uint letter() const {
+   QChar letter() const {
       return m_letter;
    }
 
@@ -1728,67 +1714,51 @@ class PrefixIgnoreClassList : public SortedList<QSharedPointer<ClassDef>>
       return i < 0;
    }
 
-   uint m_letter;
+   QChar m_letter;
 };
 
 /** Class representing a cell in the alphabetical class index. */
 class AlphaIndexTableCell
 {
  public:
-   AlphaIndexTableCell(int row, int col, uint letter, QSharedPointer<ClassDef> cd)
+   AlphaIndexTableCell(int row, int col, QChar letter, QSharedPointer<ClassDef> cd)
       : m_letter(letter), m_class(cd), m_row(row), m_col(col)
    { }
 
    QSharedPointer<ClassDef> classDef() const {
       return m_class;
    }
-   uint letter() const {
+
+   QChar letter() const {
       return m_letter;
    }
+
    int row() const {
       return m_row;
    }
+
    int column() const {
       return m_col;
    }
 
  private:
-   uint m_letter;
+   QChar m_letter;
    QSharedPointer<ClassDef> m_class;
    int m_row;
    int m_col;
 };
 
-class UsedIndexLetters : public LongMap<uint>
-{
- public:
-   UsedIndexLetters()
-      : LongMap<uint>()
-   { }
-
-   void add(uint letter) {
-      if (! this->contains(letter)) {
-         insert(letter, letter);
-      }
-   }
-
- private:
-   int compareMapValues(const uint &p1, const uint &p2) const override {
-      return (int)p1 - (int)p2;
-   }
-};
-
 // write an alphabetical index of all class with a header for each letter
 static void writeAlphabeticalClassList(OutputList &ol)
 {
-   // starting letters which are used
-   UsedIndexLetters indexLettersUsed;
+   // letters which are used
+   QSet<QChar> lettersUsed;
 
-   // list of classes for each starting letter
+   // list of classes for each letter
    LetterToIndexMap<PrefixIgnoreClassList> classesByLetter;
 
    // count the number of headers
-   uint startLetter = 0;
+   QChar startLetter;
    int headerItems  = 0;
 
    for (auto cd : Doxy_Globals::classSDict) {
@@ -1796,7 +1766,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
          int index   = getPrefixIndex(cd->className());
          startLetter = getUtf8CodeToLower(cd->className(), index);
 
-         indexLettersUsed.add(startLetter);
+         lettersUsed.insert(startLetter);
          classesByLetter.insertElement(startLetter, cd);
       }
    }
@@ -1804,16 +1774,13 @@ static void writeAlphabeticalClassList(OutputList &ol)
    // write quick link index (row of letters)
    QString alphaLinks = "<div class=\"qindex\">";
 
-   for (auto pLetter : indexLettersUsed) {
+   for (auto c : lettersUsed) {
       if (headerItems) {
          alphaLinks += "&#160;|&#160;";
       }
 
       headerItems++;
-      QString li = letterToLabel(pLetter);
-      QString ls = QChar(pLetter);
-
-      alphaLinks += "<a class=\"qindex\" href=\"#letter_" + li + "\">" + ls + "</a>";
+      alphaLinks += "<a class=\"qindex\" href=\"#letter_" + letterToLabel(c) + "\">" + c + "</a>";
    }
 
    alphaLinks += "</div>\n";
@@ -1842,7 +1809,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
    static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-index", CompoundType::Class);
 
    for (auto cl : classesByLetter) {
-      uint l = cl->letter();
+      QChar l = cl->letter();
 
       // add special header cell
       tableRows->append(new AlphaIndexTableCell(row, col, l, dummyContext));
@@ -1930,7 +1897,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
                                  "<tr>"
                                  "<td><div class=\"ah\">&#160;&#160;");
 
-                  ol.writeString(QString(QChar(cell->letter())));
+                  ol.writeString(cell->letter());
                   ol.writeString("&#160;&#160;</div>"
                                  "</td>"
                                  "</tr>"
@@ -2224,7 +2191,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
                }
 
                QString cs = letterToLabel(ml->letter());
-               QString cl = QChar(ml->letter());
+               QString cl = ml->letter();
 
                QString anchor = "index_" + cs;
                QString title  = "- " + cl + " -";
@@ -2315,8 +2282,8 @@ void addClassMemberNameToIndex(QSharedPointer<MemberDef> md)
    if (md->isLinkableInProject() && (cd = md->getClassDef())  && cd->isLinkableInProject() && cd->templateMaster() == 0) {
       QString n = md->name();
 
-      int index   = getPrefixIndex(n);
-      uint letter = getUtf8CodeToLower(n, index);
+      int index    = getPrefixIndex(n);
+      QChar letter = getUtf8CodeToLower(n, index);
 
       if (! n.isEmpty()) {
 
@@ -2380,9 +2347,9 @@ void addNamespaceMemberNameToIndex(QSharedPointer<MemberDef> md)
 
    if (nd && nd->isLinkableInProject() && md->isLinkableInProject()) {
 
-      QString n   = md->name();
-      int index   = getPrefixIndex(n);
-      uint letter = getUtf8CodeToLower(n, index);
+      QString n    = md->name();
+      int index    = getPrefixIndex(n);
+      QChar letter = getUtf8CodeToLower(n, index);
 
       if (! n.isEmpty()) {
          if (! md->isEnumValue() || (md->getEnumScope() && ! md->getEnumScope()->isStrong())) {
@@ -2431,8 +2398,8 @@ void addFileMemberNameToIndex(QSharedPointer<MemberDef> md)
    if (fd && fd->isLinkableInProject() && md->isLinkableInProject()) {
       QString n = md->name();
 
-      int index   = getPrefixIndex(n);
-      uint letter = getUtf8CodeToLower(n, index);
+      int index    = getPrefixIndex(n);
+      QChar letter = getUtf8CodeToLower(n, index);
 
       if (! n.isEmpty()) {
 
@@ -2469,13 +2436,13 @@ void addFileMemberNameToIndex(QSharedPointer<MemberDef> md)
    }
 }
 
-static void writeQuickMemberIndex(OutputList &ol, const LetterToIndexMap<MemberIndexList> &charUsed, uint page,
-                                  QString fullName, bool multiPage)
+static void writeQuickMemberIndex(OutputList &ol, const LetterToIndexMap<MemberIndexList> &charUsed,
+                  QChar page, QString fullName, bool multiPage)
 {
    startQuickIndexList(ol, true);
 
    for (auto ml : charUsed) {
-      uint i = ml->letter();
+      QChar i = ml->letter();
 
       QString is = letterToLabel(i);
       QString ci = QChar(i);
@@ -2565,7 +2532,7 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
    }
 
    for (auto ml : g_memberIndexLetterUsed[hl]) {
-      uint page = ml->letter();
+      QChar page = ml->letter();
       QString fileName = getCmhlInfo(hl)->fname;
 
       if (multiPageIndex) {
@@ -2625,7 +2592,7 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
          ol.writeString("&#160;");
       }
 
-      writeMemberList(ol, quickIndex, multiPageIndex ? page : -1, g_memberIndexLetterUsed[hl], Definition::TypeClass);
+      writeMemberList(ol, quickIndex, multiPageIndex ? page.unicode() : -1, g_memberIndexLetterUsed[hl], Definition::TypeClass);
 
       endFile(ol);
    }
@@ -2688,7 +2655,7 @@ static void writeClassMemberIndex(OutputList &ol)
             const LetterToIndexMap<MemberIndexList> &charUsed = g_memberIndexLetterUsed[k];
 
             auto value = *(charUsed.begin());
-            uint firstLetter = value->letter();
+            QChar firstLetter = value->letter();
 
             link += QString("_") + QChar(firstLetter);
 
@@ -2779,7 +2746,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
    }
 
    for (auto ml : g_fileIndexLetterUsed[hl]) {
-      uint page = ml->letter();
+      QChar page = ml->letter();
       QString fileName = getFmhlInfo(hl)->fname;
 
       if (multiPageIndex) {
@@ -2839,7 +2806,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
          ol.writeString("&#160;");
       }
 
-      writeMemberList(ol, quickIndex, multiPageIndex ? page : -1, g_fileIndexLetterUsed[hl], Definition::TypeFile);
+      writeMemberList(ol, quickIndex, multiPageIndex ? page.unicode() : -1, g_fileIndexLetterUsed[hl], Definition::TypeFile);
 
       endFile(ol);
    }
@@ -2873,7 +2840,7 @@ static void writeFileMemberIndex(OutputList &ol)
          const LetterToIndexMap<MemberIndexList> &charUsed = g_fileIndexLetterUsed[k];
 
          auto value = *(charUsed.begin());
-         uint firstLetter = value->letter();
+         QChar firstLetter = value->letter();
 
          link += QString("_") + QChar(firstLetter);
 
@@ -2959,7 +2926,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
 
    for (auto ml : g_namespaceIndexLetterUsed[hl]) {
 
-      uint page = ml->letter();
+      QChar page = ml->letter();
       QString fileName = getNmhlInfo(hl)->fname;
 
       if (multiPageIndex) {
@@ -3015,7 +2982,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
          ol.writeString("&#160;");
       }
 
-      writeMemberList(ol, quickIndex, multiPageIndex ? page : -1, g_namespaceIndexLetterUsed[hl], Definition::TypeNamespace);
+      writeMemberList(ol, quickIndex, multiPageIndex ? page.unicode() : -1, g_namespaceIndexLetterUsed[hl], Definition::TypeNamespace);
       endFile(ol);
    }
 

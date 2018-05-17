@@ -16,7 +16,7 @@
 *************************************************************************/
 
 #include <QDir>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <stdlib.h>
 
@@ -225,7 +225,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
          QFileInfo fi(configDir, fileName);
 
          if (fi.exists()) {
-            extraCssText += "<link href=\"$relpath^" + stripPath(csPrintable(fileName)) +
+            extraCssText += "<link href=\"$relpath^" + stripPath(fileName) +
                   "\" rel=\"stylesheet\" type=\"text/css\"/>\n";
          } else {
             err("Unable to find stylesheet '%s'\n", csPrintable(fi.absoluteFilePath()));
@@ -503,8 +503,8 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
    QString lineNumber;
    QString lineAnchor;
 
-   lineNumber = QString("%1").arg(len, 5, 10);
-   lineAnchor = QString("l%1").arg(len, 5, 10,  QChar('0'));
+   lineNumber = QString("%1").formatArg(len, 5, 10);
+   lineAnchor = QString("l%1").formatArg(len, 5, 10,  QChar('0'));
 
    m_streamX << "<div class=\"line\">";
    m_streamX << "<a name=\"" << lineAnchor << "\"></a><span class=\"lineno\">";
@@ -684,54 +684,55 @@ HtmlGenerator::~HtmlGenerator()
 
 void HtmlGenerator::init()
 {
-   QString dname = Config::getString("html-output");
+   static const QString htmlDirName = Config::getString("html-output");
+   static const QString htmlHeader  = Config::getString("html-header");
+   static const QString htmlFooter  = Config::getString("html-footer");
 
-   QDir d(dname);
+   static bool useMathJax  = Config::getBool("use-mathjax");
 
-   if (! d.exists() && ! d.mkdir(dname)) {
-      err("HTML Generator, unable to create output directory %s\n", csPrintable(dname));
+   QDir d(htmlDirName);
+
+   if (! d.exists() && ! d.mkdir(htmlDirName)) {
+      err("HTML Generator, unable to create output directory %s\n", csPrintable(htmlDirName));
       Doxy_Work::stopDoxyPress();
    }
-
-   QString htmlHeader = Config::getString("html-header");
 
    if (! htmlHeader.isEmpty()) {
       g_header = fileToString(htmlHeader);
    } else {
-      g_header = ResourceMgr::instance().getAsString("html/header.html");
+      QByteArray data = ResourceMgr::instance().getAsString("html/header.html");
+      g_header = QString::fromUtf8(data);
    }
-
-   QString htmlFooter = Config::getString("html-footer");
 
    if (! htmlFooter.isEmpty()) {
       g_footer = fileToString(htmlFooter);
    } else {
-      g_footer = ResourceMgr::instance().getAsString("html/footer.html");
+      QByteArray data = ResourceMgr::instance().getAsString("html/footer.html");
+      g_footer = QString::fromUtf8(data);
    }
 
-   if (Config::getBool("use-mathjax")) {
-      QString temp = Config::getString("mathjax-codefile");
+   if (useMathJax) {
+      static const QString mathJaxCodeFile = Config::getString("mathjax-codefile");
 
-      if (! temp.isEmpty()) {
-         g_mathjax_code = fileToString(temp);
+      if (! mathJaxCodeFile.isEmpty()) {
+         g_mathjax_code = fileToString(mathJaxCodeFile);
       }
    }
    createSubDirs(d);
 
    ResourceMgr &mgr = ResourceMgr::instance();
-   mgr.copyResourceAs("html/tabs.css",  dname, "tabs.css");
-   mgr.copyResourceAs("html/jquery.js", dname, "jquery.js");
+   mgr.copyResourceAs("html/tabs.css",  htmlDirName, "tabs.css");
+   mgr.copyResourceAs("html/jquery.js", htmlDirName, "jquery.js");
 
    if (Config::getBool("interactive-svg")) {
-      mgr.copyResourceAs("html/svgpan.js", dname, "svgpan.js");
+      mgr.copyResourceAs("html/svgpan.js", htmlDirName, "svgpan.js");
    }
 
-   QString fileName = dname + "/dynsections.js";
+   QString fileName = htmlDirName + "/dynsections.js";
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
-
-      QString resource = mgr.getAsString("html/dynsections.js");
+      QByteArray resource = mgr.getAsString("html/dynsections.js");
 
       if (! resource.isEmpty()) {
          QTextStream t(&f);
@@ -763,30 +764,31 @@ void HtmlGenerator::init()
 void HtmlGenerator::writeTabData()
 {
    Doxy_Globals::indexList.addStyleSheetFile("tabs.css");
-   QString dname = Config::getString("html-output");
+   static const QString htmlDirName = Config::getString("html-output");
 
    ResourceMgr &mgr = ResourceMgr::instance();
 
-   // writeColoredImgData(dname,colored_tab_data);
-   mgr.copyResourceAs("html/tab_a.lum",      dname, "tab_a.png");
-   mgr.copyResourceAs("html/tab_b.lum",      dname, "tab_b.png");
-   mgr.copyResourceAs("html/tab_h.lum",      dname, "tab_h.png");
-   mgr.copyResourceAs("html/tab_s.lum",      dname, "tab_s.png");
-   mgr.copyResourceAs("html/nav_h.lum",      dname, "nav_h.png");
-   mgr.copyResourceAs("html/nav_f.lum",      dname, "nav_f.png");
-   mgr.copyResourceAs("html/bc_s.luma",      dname, "bc_s.png");
-   mgr.copyResourceAs("html/doxypress.luma", dname, "doxypress.png");
-   mgr.copyResourceAs("html/closed.luma",    dname, "closed.png");
-   mgr.copyResourceAs("html/open.luma",      dname, "open.png");
-   mgr.copyResourceAs("html/bdwn.luma",      dname, "bdwn.png");
-   mgr.copyResourceAs("html/sync_on.luma",   dname, "sync_on.png");
-   mgr.copyResourceAs("html/sync_off.luma",  dname, "sync_off.png");
-   mgr.copyResourceAs("html/nav_g.png",      dname, "nav_g.png");
+   // writeColoredImgData(htmlDirName,colored_tab_data);
+
+   mgr.copyResourceAs("html/tab_a.lum",      htmlDirName, "tab_a.png");
+   mgr.copyResourceAs("html/tab_b.lum",      htmlDirName, "tab_b.png");
+   mgr.copyResourceAs("html/tab_h.lum",      htmlDirName, "tab_h.png");
+   mgr.copyResourceAs("html/tab_s.lum",      htmlDirName, "tab_s.png");
+   mgr.copyResourceAs("html/nav_h.lum",      htmlDirName, "nav_h.png");
+   mgr.copyResourceAs("html/nav_f.lum",      htmlDirName, "nav_f.png");
+   mgr.copyResourceAs("html/bc_s.luma",      htmlDirName, "bc_s.png");
+   mgr.copyResourceAs("html/doxypress.luma", htmlDirName, "doxypress.png");
+   mgr.copyResourceAs("html/closed.luma",    htmlDirName, "closed.png");
+   mgr.copyResourceAs("html/open.luma",      htmlDirName, "open.png");
+   mgr.copyResourceAs("html/bdwn.luma",      htmlDirName, "bdwn.png");
+   mgr.copyResourceAs("html/sync_on.luma",   htmlDirName, "sync_on.png");
+   mgr.copyResourceAs("html/sync_off.luma",  htmlDirName, "sync_off.png");
+   mgr.copyResourceAs("html/nav_g.png",      htmlDirName, "nav_g.png");
 }
 
 void HtmlGenerator::writeSearchData(const QString &dir)
 {
-   static bool serverBasedSearch = Config::getBool("search-server-based");
+   static const bool serverBasedSearch = Config::getBool("search-server-based");
 
    ResourceMgr &mgr = ResourceMgr::instance();
 
@@ -819,16 +821,17 @@ void HtmlGenerator::writeSearchData(const QString &dir)
    if (f.open(QIODevice::WriteOnly)) {
       static bool disableIndex = Config::getBool("disable-index");
 
-      QString searchCss;
+      QByteArray data;
 
       if (disableIndex) {
-         searchCss = mgr.getAsString("html/search_nomenu.css");
+         data = mgr.getAsString("html/search_nomenu.css");
       } else {
-         searchCss = mgr.getAsString("html/search.css");
+         data = mgr.getAsString("html/search.css");
       }
 
-      if (! searchCss.isEmpty()) {
+      QString searchCss = QString::fromUtf8(data);
 
+      if (! searchCss.isEmpty()) {
          QTextStream t(&f);
 
          searchCss = replaceColorMarkers(searchCss);
@@ -1519,8 +1522,7 @@ void HtmlGenerator::endMemberTemplateParams(const QString &anchor, const QString
 
 void HtmlGenerator::insertMemberAlign(bool templ)
 {
-   QString className = templ ? "memTemplItemRight" : "memItemRight";
-
+   QString className = templ ? QString("memTemplItemRight") : QString("memItemRight");
    m_textStream << "&#160;</td><td class=\"" << className << "\" valign=\"bottom\">";
 }
 

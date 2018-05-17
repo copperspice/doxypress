@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QString>
 
 #include <stdlib.h>
@@ -25,52 +25,48 @@
 
 CPPValue parseOctal()
 {
-   long retval = 0;
    QString tmp = g_strToken;
 
-   static QRegExp reg("[A-Za-z]");
-   tmp.replace(reg, "");
+   static QRegularExpression regExp("[A-Za-z]");
+   tmp.replace(regExp, "");
 
-   retval = g_strToken.toLong(nullptr, 8);
+   long retval = g_strToken.toInteger<long>(nullptr, 8);
 
    return CPPValue(retval);
 }
 
 CPPValue parseDecimal()
 {
-   long retval = 0;
    QString tmp = g_strToken;
 
-   static QRegExp reg("[A-Za-z]");
-   tmp.replace(reg, "");
+   static QRegularExpression regExp("[A-Za-z]");
+   tmp.replace(regExp, "");
 
-   retval = tmp.toLong(nullptr, 10);
+   long retval = tmp.toInteger<long>(nullptr, 10);
 
    return CPPValue(retval);
 }
 
 CPPValue parseHexadecimal()
 {
-   long retval = 0;
    QString tmp = g_strToken;
 
-   static QRegExp reg("[A-Za-z]");
-   tmp.replace(reg, "");
+   static QRegularExpression regExp("[A-Za-z]");
+   tmp.replace(regExp, "");
 
-   retval = g_strToken.toLong(nullptr, 16);
+   long retval = g_strToken.toInteger<long>(nullptr, 16);
 
    return CPPValue(retval);
 }
 
 CPPValue parseFloat()
 {
-   double retval = 0;
-   QString tmp   = g_strToken;
+   QString tmp = g_strToken;
 
-   static QRegExp reg("[A-Za-z]");
-   tmp.replace(reg, "");
+   static QRegularExpression regExp("[A-Za-z]");
+   tmp.replace(regExp, "");
 
-   retval = g_strToken.toDouble();
+   double retval = g_strToken.toDouble();
 
    return CPPValue(retval);
 }

@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <stdio.h>
 #include <assert.h>
@@ -61,7 +61,7 @@ static QString addTemplateNames(const QString &s, const QString  &n, const QStri
       result += s.mid(p, i - p);
       uint j = clRealName.length() + i;
 
-      if (s.length() == j || (s.at(j) != '<' && ! isId(s.at(j).unicode() ))) {
+      if (s.length() == j || (s.at(j) != '<' && ! isId(s.at(j)) )) {
          result += clRealName + t;
       } else {
          result += clRealName;
@@ -74,38 +74,6 @@ static QString addTemplateNames(const QString &s, const QString  &n, const QStri
 
    return result;
 }
-
-// ol.startMemberDocName has already been done before this is called.
-// when this function returns true, ol.endParameterList will be called.
-//
-// typical sequence:
-//   ol.startMemberDoc
-//   ol.startMemberDocName
-//   --- enter writeDefArgumentList
-//   ol.endMemberDocName
-//   ol.startParameterList
-//     ...
-//     ol.startParameterType(first=true)
-//     ol.endParameterType
-//     ol.startParameterName
-//     ol.endParameterName(last==false)
-//     ...
-//     ol.startParameterType(first=false)
-//     ol.endParamtereType
-//     ol.startParameterName
-//     ol.endParameterName(last==true)
-//     ...
-//   --- leave writeDefArgumentList with return value true
-//   ol.endParameterList
-//   ol.endMemberDoc(hasArgs=true)
-//
-//  For an empty list the function should return false, the sequence is
-//   ol.startMemberDoc
-//   ol.startMemberDocName
-//   --- enter writeDefArgumentList
-//   --- leave writeDefArgumentList with return value false
-//   ol.endMemberDocName
-//   ol.endMemberDoc(hasArgs=false);
 
 static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scopeDef, QSharedPointer<MemberDef> md)
 {
@@ -241,8 +209,8 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          }
       }
 
-      QRegExp re("\\)\\(");
-      QRegExp res("\\(.*\\*");
+      QRegularExpression re("\\)\\(");
+      QRegularExpression res("\\(.*\\*");
 
       int vp = re.indexIn(arg.type);
       int wp = res.indexIn(arg.type);
@@ -990,7 +958,7 @@ QString MemberDef::getOutputFileBase() const
 
    if (baseName.isEmpty()) {
       warn(getDefFileName(), getDefLine(), "Internal problem, member %s does not belong to any container", csPrintable(name()));
-      return "dummy";
+      return QString("dummy");
 
    } else if (separateMemberPages && isDetailedSectionLinkable()) {
       if (getEnumScope()) {
@@ -1029,7 +997,7 @@ QString MemberDef::getReference() const
       return m_impl->fileDef->getReference();
    }
 
-   return "";
+   return QString("");
 }
 
 QString MemberDef::anchor() const
@@ -1104,12 +1072,13 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-  if (! m_impl->group && !m_impl->nspace && ! m_impl->m_related && !m_impl->classDef &&
+   if (! m_impl->group && !m_impl->nspace && ! m_impl->m_related && !m_impl->classDef &&
          m_impl->fileDef && !m_impl->fileDef->isLinkableInProject()) {
 
       m_isLinkableCached = 1;    // in file (and not in namespace) but file not linkable
       return;
    }
+
    if (! protectionLevelVisible(m_impl->prot) && ! isFriend() ) {
       m_isLinkableCached = 1;    // hidden due to protection
       return;
@@ -1117,7 +1086,8 @@ void MemberDef::computeLinkableInProject() const
 
    if (m_impl->stat && m_impl->classDef == 0 && ! extractStatic) {
       m_isLinkableCached = 1;    // hidden due to staticness
-      return;   }
+      return;
+   }
 
    return;    // linkable
 }
@@ -1238,47 +1208,55 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
 
    }
 
-   QString ltype(m_impl->type);
-   ltype = stripPrefix(ltype, "friend ");
-
-   static QRegExp r("@[0-9]+");
-   int l;
-
-   int i = r.indexIn(ltype, 0);
-   l = r.matchedLength();
-
    // search for the last anonymous scope in the member type
    QSharedPointer<ClassDef> annoClassDef;
 
-   if (i != -1) {
+   QString xType(m_impl->type);
+   xType = stripPrefix(xType, "friend ");
+
+   static QRegularExpression regExp("@[0-9]+");
+
+   QRegularExpressionMatch match = regExp.match(xType);
+   int len = match.capturedLength(0);
+
+   if (match.hasMatch()) {
       // found anonymous scope in type
-      int il = i - 1, ir = i + l;
+      auto xLeft  = match.capturedStart();
+      auto xRight = match.capturedEnd();
 
       // extract anonymous scope
-      while (il >= 0 && (isId(ltype.at(il).unicode() ) || ltype.at(il) == ':' || ltype.at(il) == '@')) {
-         il--;
+      while (xLeft != xType.begin()) {
+         QChar c = *xLeft;
+
+         if (isId(c) || c == ':' || c == '@') {
+            --xLeft;
+         } else {
+            ++xLeft;
+            break;
+         }
       }
 
-      if (il > 0) {
-         il++;
-      } else if (il < 0) {
-         il = 0;
-      }
-      while (ir < (int)ltype.length() && (isId(ltype.at(ir).unicode() ) || ltype.at(ir) == ':' || ltype.at(ir) == '@')) {
-         ir++;
+      while (xRight != xType.end()) {
+         QChar c = *xRight;
+
+         if (isId(c) || c == ':' || c == '@') {
+            ++xRight;
+         }  else {
+            break;
+         }
       }
 
-      QString annName = ltype.mid(il, ir - il);
+      QStringView annName = QStringView(xLeft, xRight);
 
       // if inside a class or namespace try to prepend the scope name
       if (! cname.isEmpty() && annName.left(cname.length() + 2) != cname + "::") {
-         QString ts = stripAnonymousNamespaceScope(cname + "::" + annName);
+         QString ts   = stripAnonymousNamespaceScope(cname + "::" + annName);
          annoClassDef = getClass(ts);
       }
 
-      // if not found yet, try without scope name
+      // if not found yet try without scope name
       if (annoClassDef == 0) {
-         QString ts = stripAnonymousNamespaceScope(annName);
+         QString ts   = stripAnonymousNamespaceScope(annName);
          annoClassDef = getClass(ts);
       }
    }
@@ -1498,7 +1476,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    // strip `friend' keyword from ltype
    ltype = stripPrefix(ltype, "friend ");
 
-   static QRegExp r("@[0-9]+");
+   static QRegularExpression r("@[0-9]+");
 
    bool endAnonScopeNeeded = false;
    int l;
@@ -2367,7 +2345,7 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
             reimplInLine = theTranslator->trReimplementedInList(count);
          }
 
-         static QRegExp marker("@[0-9]+");
+         static QRegularExpression marker("@[0-9]+");
          int index = 0, newIndex, matchLen;
 
          // now replace all markers in reimplInLine with links to the classes
@@ -2378,7 +2356,7 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
             ol.parseText(reimplInLine.mid(index, newIndex - index));
 
             bool ok;
-            uint entryIndex = reimplInLine.mid(newIndex + 1, matchLen - 1).toUInt(&ok);
+            uint entryIndex = reimplInLine.mid(newIndex + 1, matchLen - 1).toInteger<uint>(&ok);
 
             count = 0;
 
@@ -2566,7 +2544,7 @@ QString MemberDef::displayDefinition() const
       }
    }
 
-   static QRegExp r("@[0-9]+");
+   static QRegularExpression r("@[0-9]+");
    int l;
    int i = r.indexIn(ldef, 0);
    l = r.matchedLength();
@@ -2617,7 +2595,7 @@ QString MemberDef::displayDefinition() const
       l = ldef.length();
 
       i = l - 1;
-      while (i >= 0 && (isId(ldef.at(i).unicode()) || ldef.at(i) == ':')) {
+      while (i >= 0 && (isId(ldef.at(i)) || ldef.at(i) == ':')) {
          i--;
       }
 
@@ -2794,7 +2772,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    int i = 0;
    int l;
-   static QRegExp r("@[0-9]+");
+   static QRegularExpression r("@[0-9]+");
 
    ol.pushGeneratorState();
 
@@ -2963,7 +2941,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          int l = ldef.length();
          int i = l - 1;
 
-         while (i >= 0 && (isId(ldef.at(i).unicode() ) || ldef.at(i) == ':')) {
+         while (i >= 0 && (isId(ldef.at(i)) || ldef.at(i) == ':')) {
             i--;
          }
 
@@ -3142,9 +3120,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          m_impl->initializer = m_impl->initializer.mid(1).trimmed();
       }
 
-      pIntf->parseCode(ol, csPrintable(scopeName), m_impl->initializer, lang, false, 0, getFileDef(),
-                       -1, -1, true, self, false, self);
-
+      pIntf->parseCode(ol, scopeName, m_impl->initializer, lang, false, 0, getFileDef(), -1, -1, true, self, false, self);
       ol.endCodeFragment();
    }
 
@@ -3282,7 +3258,7 @@ static QString simplifyTypeForTable(const QString &s)
       ts = ts.left(ts.length() - 2);
    }
 
-   static QRegExp re("[A-Z_a-z0-9]+::");
+   static QRegularExpression re("[A-Z_a-z0-9]+::");
    int i, l;
 
    while ((i = re.indexIn(ts, 0)) != -1) {
@@ -3333,7 +3309,7 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
       cname = scopeDef->name();
    }
 
-   if (doxyName.at(0) == '@') {
+   if (doxyName.startsWith('@')) {
       doxyName = "__unnamed__";
    }
 
@@ -3345,21 +3321,20 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    QString ts = fieldType();
 
    if (cd)  {
-      // cd points to an anonymous struct pointed to by this member
-      // so we add a link to it from the type column.
-
+      // cd points to an anonymous struct pointed to by this member, add a link to it from the type column
       int i = 0;
-      const char *prefixes[] = { "struct ", "union ", "class ", 0 };
-      const char **p = prefixes;
 
-      while (*p) {
-         int l = qstrlen(*p);
+      if (ts.startsWith("struct ")) {
+         ol.writeString(ts);
+         i = 7;
 
-         if (ts.left(l) == *p) {
-            ol.writeString(*p);
-            i = l;
-         }
-         p++;
+      } else if (ts.startsWith("union ")) {
+         ol.writeString(ts);
+         i = 6;
+
+      } else if (ts.startsWith("class ")) {
+         ol.writeString(ts);
+         i = 6;
       }
 
       ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), ts.mid(i));
@@ -3412,50 +3387,65 @@ QString MemberDef::memberTypeName() const
    switch (m_impl->mtype) {
       case MemberType_Define:
          retval = "macro definition";
+         break;
 
       case MemberType_Function:
          retval = "function";
+         break;
 
       case MemberType_Variable:
          retval = "variable";
+         break;
 
       case MemberType_Typedef:
          retval = "typedef";
+         break;
 
       case MemberType_Enumeration:
          retval = "enumeration";
+         break;
 
       case MemberType_EnumValue:
          retval = "enumvalue";
+         break;
 
       case MemberType_Signal:
          retval = "signal";
+         break;
 
       case MemberType_Slot:
          retval = "slot";
+         break;
 
       case MemberType_DCOP:
          retval = "dcop";
+         break;
 
       case MemberType_Property:
          retval = "property";
+         break;
 
       case MemberType_Event:
          retval = "event";
+         break;
 
       case MemberType_Interface:
          retval = "interface";
+         break;
 
       case MemberType_Service:
          retval = "service";
+         break;
 
       default:
-         return "unknown";
+         retval = "unknown";
    }
 
    if (isFriend()) {
       retval.prepend("friend ");
    }
+
+   return retval;
 }
 
 void MemberDef::warnIfUndocumented()
@@ -3605,13 +3595,13 @@ void MemberDef::setAnchor()
    // specializations that only differ in the template parameters
 
    if (! m_impl->m_templateArgList.listEmpty())   {
-      QString tmp = QString("%1:").arg(m_impl->m_templateArgList.count());
+      QString tmp = QString("%1:").formatArg(m_impl->m_templateArgList.count());
       memAnchor.prepend(tmp);
    }
 
    // convert to md5 hash
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(memAnchor.toUtf8(), QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(memAnchor.toUtf8(), QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
 
    m_impl->anc = "a" + sigStr;
 }

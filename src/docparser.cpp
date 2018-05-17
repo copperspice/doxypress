@@ -19,7 +19,7 @@
 #include <QFileInfo>
 #include <QStack>
 #include <QHash>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -95,9 +95,7 @@ struct DocParserContext {
    QString  searchUrl;
 
    QString  includeFileText;
-
    uint includeFileOffset;
-   uint includeFileLength;
 
    TokenInfo *token;
 };
@@ -130,7 +128,6 @@ static QString                 s_searchUrl;
 
 static QString                 s_includeFileText;
 static uint                    s_includeFileOffset;
-static uint                    s_includeFileLength;
 
 static QStack<DocParserContext> s_parserStack;
 
@@ -166,7 +163,6 @@ static void docParserPushContext(bool saveParamInfo = true)
 
    ctx.includeFileText    = s_includeFileText;
    ctx.includeFileOffset  = s_includeFileOffset;
-   ctx.includeFileLength  = s_includeFileLength;
 
    ctx.token              = g_token;
    g_token = new TokenInfo;
@@ -204,7 +200,6 @@ static void docParserPopContext(bool keepParamInfo = false)
 
    s_includeFileText     = ctx.includeFileText;
    s_includeFileOffset   = ctx.includeFileOffset;
-   s_includeFileLength   = ctx.includeFileLength;
 
    delete g_token;
    g_token               = ctx.token;
@@ -334,7 +329,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
          QString baseName  = fd->name().left(fd->name().length() - 4);
 
          QString epstopdfArgs;
-         epstopdfArgs = QString("\"%1/%2.eps\" --outfile=\"%3/%4.pdf\"").arg(outputDir).arg(baseName).arg(outputDir).arg(baseName);
+         epstopdfArgs = QString("\"%1/%2.eps\" --outfile=\"%3/%4.pdf\"").formatArg(outputDir).formatArg(baseName).formatArg(outputDir).formatArg(baseName);
 
          portable_sysTimerStart();
 
@@ -349,7 +344,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
 
    } else if (ambig) {
       QString text;
-      text = QString("Image file name %1 is ambiguous.\n").arg(fileName);
+      text = QString("Image file name %1 is ambiguous.\n").formatArg(fileName);
 
       text += "Possible candidates:\n";
       text += showFileDefMatches(Doxy_Globals::imageNameDict, fileName);
@@ -399,7 +394,7 @@ static void checkArgumentName(const QString &name, bool isParam)
 
    SrcLangExt lang  = s_memberDef->getLanguage();
 
-   static QRegExp re("\\$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
+   static QRegularExpression re("\\$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
    int p = 0;
    int i = 0;
    int len;
@@ -456,8 +451,8 @@ static void checkArgumentName(const QString &name, bool isParam)
             // documentation was inherited
 
             inheritedFrom = QString(" Inherited from member %1 at line %2 in file %3")
-                  .arg(QString(inheritedMd->name()))
-                  .arg(inheritedMd->docLine()).arg(QString(inheritedMd->docFile()));
+                  .formatArg(QString(inheritedMd->name()))
+                  .formatArg(inheritedMd->docLine()).formatArg(QString(inheritedMd->docFile()));
 
             docFile = s_memberDef->getDefFileName();
             docLine = s_memberDef->getDefLine();
@@ -473,7 +468,7 @@ static void checkArgumentName(const QString &name, bool isParam)
    }
 }
 
-/*! Checks if the parameters that have been specified using \@param are all parameters.
+/*! Checks if the parameters that have been specified using param are all parameters.
  *  Must be called after checkArgumentName() has been called for each argument.
  */
 static void checkUndocumentedParams()
@@ -497,7 +492,10 @@ static void checkUndocumentedParams()
          bool found = false;
 
          for (const auto &arg : *al) {
+            int count = 0;
+
             QString argName;
+            QString tmpName;
 
             if (s_memberDef->isDefine()) {
                argName = arg.type;
@@ -512,18 +510,31 @@ static void checkUndocumentedParams()
             }
 
             argName = argName.trimmed();
+            tmpName = argName;
 
             if (argName.endsWith("...")) {
                argName = argName.left(argName.length() - 3);
             }
 
-            if (s_memberDef->getLanguage() == SrcLangExt_Python && (argName == "self" || argName == "cls")) {
+            if (lang == SrcLangExt_Python && (argName == "self" || argName == "cls")) {
                // allow undocumented self / cls parameter for Python
 
             } else if (! argName.isEmpty() && arg.docs.isEmpty() && ! s_paramsFound.contains(argName)) {
                found = true;
-               break;
+
+            } else {
+               for (const auto &item : s_paramsFound) {
+                  if (argName == item) {
+                     count++;
+                  }
+               }
             }
+
+            if (count > 1) {
+               warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(), "Argument '" + tmpName +
+                  "' from the argument list of " + s_memberDef->qualifiedName() + " has muliple \\param documentation sections");
+            }
+
          }
 
          if (found) {
@@ -547,7 +558,7 @@ static void checkUndocumentedParams()
 
                argName = argName.trimmed();
 
-               if (s_memberDef->getLanguage() == SrcLangExt_Python && (argName == "self" || argName == "cls")) {
+               if (lang == SrcLangExt_Python && (argName == "self" || argName == "cls")) {
                   // allow undocumented self / cls parameter for Python
 
                } else if (! argName.isEmpty() && ! s_paramsFound.contains(argName)) {
@@ -564,8 +575,7 @@ static void checkUndocumentedParams()
                }
             }
 
-            warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(),
-                     csPrintable(substitute(errMsg, "%", "%%")));
+            warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(), substitute(errMsg, "%", "%%"));
 
          }
       }
@@ -881,7 +891,7 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
    while ((tok = doctokenizerYYlex()) && tok != TK_WHITESPACE && tok != TK_NEWPARA &&
           tok != TK_LISTITEM && tok != TK_ENDLIST) {
 
-      static QRegExp specialChar("[.,|()\\[\\]:;\\?]");
+      static QRegularExpression specialChar("[.,|()\\[\\]:;\\?]");
 
       if (tok == TK_WORD && g_token->name.length() == 1 && specialChar.indexIn(g_token->name) != -1) {
          // special character that ends the markup command
@@ -1053,39 +1063,51 @@ static int handleAHref(DocNode *parent, QList<DocNode *> &children, const HtmlAt
 
 QString DocStyleChange::styleString() const
 {
+   QString retval = "<invalid>";
+
    switch (m_style) {
       case DocStyleChange::Bold:
-         return "b";
+         retval = "b";
+         break;
 
       case DocStyleChange::Italic:
-         return "em";
+         retval = "em";
+         break;
 
       case DocStyleChange::Code:
-         return "code";
+         retval = "code";
+         break;
 
       case DocStyleChange::Center:
-         return "center";
+         retval = "center";
+         break;
 
       case DocStyleChange::Small:
-         return "small";
+         retval = "small";
+         break;
 
       case DocStyleChange::Subscript:
-         return "subscript";
+         retval = "subscript";
+         break;
 
       case DocStyleChange::Superscript:
-         return "superscript";
+         retval = "superscript";
+         break;
 
       case DocStyleChange::Preformatted:
-         return "pre";
+         retval = "pre";
+         break;
 
       case DocStyleChange::Div:
-         return "div";
+         retval = "div";
+         break;
 
       case DocStyleChange::Span:
-         return "span";
+         retval = "span";
+         break;
    }
 
-   return "<invalid>";
+   return retval;
 }
 
 static void handleUnclosedStyleCommands()
@@ -2037,7 +2059,6 @@ void DocInclude::parse()
          readTextFileByName(m_file, m_text);
          s_includeFileText   = m_text;
          s_includeFileOffset = 0;
-         s_includeFileLength = m_text.length();
          break;
 
       case VerbInclude:
@@ -2066,131 +2087,184 @@ void DocInclude::parse()
 
 void DocIncOperator::parse()
 {
-   const QChar *p = s_includeFileText.constData();
+   QString::const_iterator iter_offset = s_includeFileText.constBegin() + s_includeFileOffset;
+   QString::const_iterator iter_end    = s_includeFileText.constEnd();
 
-   uint l = s_includeFileLength;
-   uint o = s_includeFileOffset;
+   QString::const_iterator iter_so     = iter_offset;
+   QString::const_iterator iter_bo;
 
-   DBG(("DocIncOperator::parse() text=%s off=%d len=%d\n", csPrintable(p), o, l));
-
-   uint so = o;
-   uint bo;
    bool nonEmpty = false;
 
    switch (type()) {
-      case Line:
-         while (o < l) {
-            QChar c = p[o];
+
+      case Line:  {
+         while (iter_offset != iter_end) {
+            QChar c = *iter_offset;
 
             if (c == '\n') {
                if (nonEmpty) {
-                  break;   // we have a pattern to match
+                  // pattern to match
+                  break;
                }
 
-               so = o + 1; // no pattern, skip empty line
+               // no pattern, skip empty line
+               iter_so = iter_offset + 1;
 
-            } else if (! c.isSpace() ) { // no white space char
+            } else if (! c.isSpace() ) {
+               // no white space char
                nonEmpty = true;
             }
-            o++;
+
+            ++iter_offset;
          }
 
-         if (s_includeFileText.mid(so, o - so).indexOf(m_pattern) != -1) {
-            m_text = s_includeFileText.mid(so, o - so);
-            DBG(("DocIncOperator::parse() Line: %s\n", csPrintable(m_text)));
+         QStringView tmp = QStringView(iter_so, iter_offset);
+
+         if (tmp.contains(m_pattern)) {
+            m_text = tmp;
          }
 
-         s_includeFileOffset = qMin(l, o + 1); // set pointer to start of new line
+         // set pointer to start of new line
+         s_includeFileOffset = iter_offset - s_includeFileText.constBegin();
+
+         if (iter_offset != iter_end) {
+            s_includeFileOffset += 1;
+         }
+
          break;
+      }
 
-      case SkipLine:
-         while (o < l) {
-            so = o;
+      case SkipLine: {
+         while (iter_offset != iter_end) {
+            iter_so = iter_offset;
 
-            while (o < l) {
-               QChar c = p[o];
+            while (iter_offset != iter_end) {
+               QChar c = *iter_offset;
 
                if (c == '\n') {
                   if (nonEmpty) {
-                     break;   // we have a pattern to match
+                     // we have a pattern to match
+                     break;
                   }
 
-                  so = o + 1; // no pattern, skip empty line
+                  // no pattern, skip empty line
+                  iter_so = iter_offset + 1;
 
-               } else if (! c.isSpace() ) { // no white space char
+               } else if (! c.isSpace() ) {
+                   // no white space char
                   nonEmpty = true;
                }
-               o++;
+
+               ++iter_offset;
             }
 
-            if (s_includeFileText.mid(so, o - so).indexOf(m_pattern) != -1) {
-               m_text = s_includeFileText.mid(so, o - so);
-               DBG(("DocIncOperator::parse() SkipLine: %s\n", csPrintable(m_text)));
+            QStringView tmp = QStringView(iter_so, iter_offset);
+
+            if (tmp.contains(m_pattern)) {
+               m_text = tmp;
                break;
             }
-            o++; // skip new line
+
+            // skip new line
+            ++iter_offset;
          }
 
-         s_includeFileOffset = qMin(l, o + 1); // set pointer to start of new line
-         break;
+         // set pointer to start of new line
+         s_includeFileOffset = iter_offset - s_includeFileText.constBegin();
 
-      case Skip:
-         while (o < l) {
-            so = o;
-
-            while (o < l) {
-               QChar c = p[o];
-               if (c == '\n') {
-                  if (nonEmpty) {
-                     break;   // we have a pattern to match
-                  }
-
-                  so = o + 1; // no pattern, skip empty line
-
-               } else if (! c.isSpace() ) { // no white space char
-                  nonEmpty = true;
-               }
-               o++;
-            }
-            if (s_includeFileText.mid(so, o - so).indexOf(m_pattern) != -1) {
-               break;
-            }
-            o++; // skip new line
+         if (iter_offset != iter_end) {
+            s_includeFileOffset += 1;
          }
-         s_includeFileOffset = so; // set pointer to start of new line
-         break;
 
-      case Until:
-         bo = o;
-         while (o < l) {
-            so = o;
-            while (o < l) {
-               QChar c = p[o];
+         break;
+      }
+
+      case Skip: {
+         while (iter_offset != iter_end) {
+            iter_so = iter_offset;
+
+            while (iter_offset != iter_end) {
+               QChar c = *iter_offset;
 
                if (c == '\n') {
                   if (nonEmpty) {
-                     break;   // we have a pattern to match
+                     // we have a pattern to match
+                     break;
                   }
 
-                  so = o + 1; // no pattern, skip empty line
+                  // no pattern, skip empty line
+                  iter_so = iter_offset + 1;
 
-               } else if (! c.isSpace() ) { // no white space char
+               } else if (! c.isSpace() ) {
+                  // no white space char
                   nonEmpty = true;
                }
-               o++;
+
+               ++iter_offset;
             }
 
-            if (s_includeFileText.mid(so, o - so).indexOf(m_pattern) != -1) {
-               m_text = s_includeFileText.mid(bo, o - bo);
-               DBG(("DocIncOperator::parse() Until: %s\n", csPrintable(m_text)));
+            QStringView tmp = QStringView(iter_so, iter_offset);
+
+            if (tmp.contains(m_pattern)) {
                break;
             }
 
-            o++; // skip new line
+            // skip new line
+            ++iter_offset;
          }
 
-         s_includeFileOffset = qMin(l, o + 1);    // set pointer to start of new line
+         // set pointer to start of new line
+         s_includeFileOffset = iter_so - s_includeFileText.constBegin();
+
          break;
+      }
+
+      case Until: {
+         iter_bo = iter_offset;
+
+         while (iter_offset != iter_end) {
+            iter_so = iter_offset;
+
+            while (iter_offset != iter_end) {
+               QChar c = *iter_offset;
+
+               if (c == '\n') {
+                  if (nonEmpty) {
+                     // we have a pattern to match
+                     break;
+                  }
+
+                  // no pattern, skip empty line
+                  iter_so = iter_offset + 1;
+
+               } else if (! c.isSpace() ) {
+                  // no white space char
+                  nonEmpty = true;
+               }
+
+               ++iter_offset;
+            }
+
+            QStringView tmp = QStringView(iter_so, iter_offset);
+
+            if (tmp.contains(m_pattern)) {
+               m_text = QStringView(iter_bo, iter_offset);      // unusual to use iter_bo
+               break;
+            }
+
+            // skip new line
+            ++iter_offset;
+         }
+
+         // set pointer to start of new line
+         s_includeFileOffset = iter_offset - s_includeFileText.constBegin();
+
+         if (iter_offset != iter_end) {
+            s_includeFileOffset += 1;
+         }
+
+         break;
+      }
    }
 }
 
@@ -2331,13 +2405,13 @@ DocFormula::DocFormula(DocNode *parent, int id)
    m_parent = parent;
 
    QString formCmd;
-   formCmd = QString("\\form#%1").arg(id);
+   formCmd = QString("\\form#%1").formatArg(id);
 
    auto formula = Doxy_Globals::formulaNameDict.find(formCmd);
 
    if (formula != Doxy_Globals::formulaNameDict.end()) {
       m_id   = formula->getId();
-      m_name = QString("form_%1").arg(m_id);
+      m_name = QString("form_%1").formatArg(m_id);
 
       m_text = formula->getFormulaText();
 
@@ -3578,7 +3652,7 @@ int DocHtmlCell::rowSpan() const
    for (uint i = 0; i < attrs.count(); ++i) {
 
       if (attrs.at(i).name.toLower() == "rowspan") {
-         retval = attrs.at(i).value.toInt();
+         retval = attrs.at(i).value.toInteger<int>();
          break;
       }
 
@@ -3594,7 +3668,7 @@ int DocHtmlCell::colSpan() const
 
    for (uint i = 0; i < attrs.count(); ++i) {
       if (attrs.at(i).name.toLower() == "colspan") {
-         retval = qMax(1, attrs.at(i).value.toInt());
+         retval = qMax(1, attrs.at(i).value.toInteger<int>());
          break;
       }
    }
@@ -4917,61 +4991,79 @@ void DocSimpleSect::appendLinkWord(const QString &word)
 
 QString DocSimpleSect::typeString() const
 {
+   QString retval = "unknown";
+
    switch (m_type) {
       case Unknown:
          break;
 
       case See:
-         return "see";
+         retval = "see";
+         break;
 
       case Return:
-         return "return";
+         retval = "return";
+         break;
 
       case Author:
       case Authors:
-         return "author";
+         retval = "author";
+         break;
 
       case Version:
-         return "version";
+         retval = "version";
+         break;
 
       case Since:
-         return "since";
+         retval = "since";
+         break;
 
       case Date:
-         return "date";
+         retval = "date";
+         break;
 
       case Note:
-         return "note";
+         retval = "note";
+         break;
 
       case Warning:
-         return "warning";
+         retval = "warning";
+         break;
 
       case Pre:
-         return "pre";
+         retval = "pre";
+         break;
 
       case Post:
-         return "post";
+         retval = "post";
+         break;
 
       case Copyright:
-         return "copyright";
+         retval = "copyright";
+         break;
 
       case Invar:
-         return "invariant";
+         retval = "invariant";
+         break;
 
       case Remark:
-         return "remark";
+         retval = "remark";
+         break;
 
       case Attention:
-         return "attention";
+         retval = "attention";
+         break;
 
       case User:
-         return "user";
+         retval = "user";
+         break;
 
       case Rcs:
-         return "rcs";
+         retval = "rcs";
+         break;
    }
 
-   return "unknown";
+   return retval;
 }
 
 int DocParamList::parse(const QString &cmdName)
@@ -5283,7 +5375,7 @@ void DocPara::handleSortId()
 
    if (s_scope) {
       // save the sort id value
-      s_scope->setSortId(g_token->name.toInt());
+      s_scope->setSortId(g_token->name.toInteger<int>());
    }
 
    doctokenizerYYsetStatePara();
@@ -7829,13 +7921,12 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    s_insideHtmlLink    = false;
    s_includeFileText   = "";
    s_includeFileOffset = 0;
-   s_includeFileLength = 0;
 
-   s_isExample   = isExample;
-   s_exampleName = exampleName;
+   s_isExample         = isExample;
+   s_exampleName       = exampleName;
 
-   s_hasParamCommand  = false;
-   s_hasReturnCommand = false;
+   s_hasParamCommand   = false;
+   s_hasReturnCommand  = false;
 
    s_paramsFound.clear();
    s_sectionDict = 0;
@@ -7896,11 +7987,10 @@ DocText *validatingParseText(const QString &input)
    s_insideHtmlLink    = false;
    s_includeFileText   = "";
    s_includeFileOffset = 0;
-   s_includeFileLength = 0;
-   s_isExample   = false;
-   s_exampleName = "";
-   s_hasParamCommand = false;
-   s_hasReturnCommand = false;
+   s_isExample         = false;
+   s_exampleName       = "";
+   s_hasParamCommand   = false;
+   s_hasReturnCommand  = false;
 
    s_paramsFound.clear();
    s_searchUrl = "";

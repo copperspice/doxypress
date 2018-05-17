@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QCryptographicHash>
 
 #include <ctype.h>
@@ -149,18 +149,17 @@ static bool matchExcludedSymbols(const QString &name)
 
       if (pattern.indexOf('*') != -1) {
          // wildcard mode
-         QRegExp re(pattern.replace("*", ".*"), Qt::CaseSensitive);
+         QRegularExpression regExp(pattern.replace("*", ".*"));
+         QRegularExpressionMatch match = regExp.match(symName);
 
-         int i  = re.indexIn(symName, 0);
-         int pl = re.matchedLength();
-
-         if (i != -1) {
-            // wildcard match
+         if (match.hasMatch()) {
+            int i  = match.capturedStart() - symName.begin();
+            int pl = match.capturedLength();
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0 || pattern.at(0) == '*' || (! isId(symName.at(i - 1).unicode())  && ! forceStart)) &&
-                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl).unicode()) && ! forceEnd)) ) {
+            if ((i == 0 || pattern.at(0) == '*' || (! isId(symName.at(i - 1))  && ! forceStart)) &&
+                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl)) && ! forceEnd)) ) {
                return true;
             }
          }
@@ -1581,7 +1580,7 @@ QString abbreviate(const QString &brief, const QString &name)
 
       } else if (prefix.contains("<")) {
          // brief has no <T> where as className does
-         static QRegExp regexp("<.*>");
+         static QRegularExpression regexp("<.*>");
          prefix.replace(regexp, "");
 
          if (result.startsWith(prefix)) {

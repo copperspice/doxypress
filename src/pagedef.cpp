@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <pagedef.h>
 

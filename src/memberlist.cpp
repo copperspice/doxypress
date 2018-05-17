@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <memberlist.h>
 
@@ -504,7 +504,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
          if (! title.isEmpty()) {
             ol.writeInheritedSectionTitle(inheritId, cd->getReference(), cd->getOutputFileBase(),
-                                          cd->anchor(), title, csPrintable(cd->displayName()) );
+                                          cd->anchor(), title, cd->displayName() );
          }
 
          ol.popGeneratorState();
@@ -736,132 +736,189 @@ void MemberList::findSectionsInDocumentation()
 
 QString MemberList::listTypeAsString(MemberListType type)
 {
+   QString retval;
+
    switch (type) {
       case MemberListType_pubMethods:
-         return "pub-methods";
+         retval = "pub-methods";
+
       case MemberListType_proMethods:
-         return "pro-methods";
+         retval = "pro-methods";
+
       case MemberListType_pacMethods:
-         return "pac-methods";
+         retval = "pac-methods";
+
       case MemberListType_priMethods:
-         return "pri-methods";
+         retval = "pri-methods";
+
       case MemberListType_pubStaticMethods:
-         return "pub-static-methods";
+         retval = "pub-static-methods";
+
       case MemberListType_proStaticMethods:
-         return "pro-static-methods";
+         retval = "pro-static-methods";
+
       case MemberListType_pacStaticMethods:
-         return "pac-static-methods";
+         retval = "pac-static-methods";
+
       case MemberListType_priStaticMethods:
-         return "pri-static-methods";
+         retval = "pri-static-methods";
 
+      // *
       case MemberListType_pubSignals:
-         return "pub-signals";
+         retval = "pub-signals";
+
       case MemberListType_proSignals:
-         return "pro-signals";
+         retval = "pro-signals";
+
       case MemberListType_priSignals:
-         return "pri-signals";
+         retval = "pri-signals";
+
       case MemberListType_pubSlots:
-         return "pub-slots";
+         retval = "pub-slots";
+
       case MemberListType_proSlots:
-         return "pro-slots";
+         retval = "pro-slots";
+
       case MemberListType_priSlots:
-         return "pri-slots";
+         retval = "pri-slots";
 
+
+      // *
       case MemberListType_pubAttribs:
-         return "pub-attribs";
+         retval = "pub-attribs";
+
       case MemberListType_proAttribs:
-         return "pro-attribs";
+         retval = "pro-attribs";
+
       case MemberListType_pacAttribs:
-         return "pac-attribs";
+         retval = "pac-attribs";
+
       case MemberListType_priAttribs:
-         return "pri-attribs";
+         retval = "pri-attribs";
+
       case MemberListType_pubStaticAttribs:
-         return "pub-static-attribs";
+         retval = "pub-static-attribs";
+
       case MemberListType_proStaticAttribs:
-         return "pro-static-attribs";
+         retval = "pro-static-attribs";
+
       case MemberListType_pacStaticAttribs:
-         return "pac-static-attribs";
+         retval = "pac-static-attribs";
+
       case MemberListType_priStaticAttribs:
-         return "pri-static-attribs";
+         retval = "pri-static-attribs";
 
+      // *
       case MemberListType_pubTypes:
-         return "pub-types";
+         retval = "pub-types";
+
       case MemberListType_proTypes:
-         return "pro-types";
+         retval = "pro-types";
+
       case MemberListType_pacTypes:
-         return "pac-types";
+         retval = "pac-types";
+
       case MemberListType_priTypes:
-         return "pri-types";
+         retval = "pri-types";
 
+      // *
       case MemberListType_pubTypedefs:
-         return "typedefs";
-      case MemberListType_proTypedefs:
-         return "typedefs";
-      case MemberListType_pacTypedefs:
-         return "typedefs";
-      case MemberListType_priTypedefs:
-         return "typedefs";
+         retval = "typedefs";
 
+      case MemberListType_proTypedefs:
+         retval = "typedefs";
+
+      case MemberListType_pacTypedefs:
+         retval = "typedefs";
+
+      case MemberListType_priTypedefs:
+         retval = "typedefs";
+
+      // *
       case MemberListType_services:
-         return "services";
+         retval = "services";
+
       case MemberListType_interfaces:
-         return "interfaces";
+         retval = "interfaces";
 
       case MemberListType_related:
-         return "related";
+         retval = "related";
+
       case MemberListType_friends:
-         return "friends";
+         retval = "friends";
 
       case MemberListType_dcopMethods:
-         return "dcop-methods";
+         retval = "dcop-methods";
+
       case MemberListType_properties:
-         return "properties";
+         retval = "properties";
+
       case MemberListType_events:
-         return "events";
+         retval = "events";
 
+      // *
       case MemberListType_decDefineMembers:
-         return "define-members";
+         retval = "define-members";
+
       case MemberListType_decProtoMembers:
-         return "proto-members";
+         retval = "proto-members";
+
       case MemberListType_decTypedefMembers:
-         return "typedef-members";
+         retval = "typedef-members";
+
       case MemberListType_decEnumMembers:
-         return "enum-members";
+         retval = "enum-members";
+
       case MemberListType_decFuncMembers:
-         return "func-members";
+         retval = "func-members";
+
       case MemberListType_decVarMembers:
-         return "var-members";
+         retval = "var-members";
+
       case MemberListType_decEnumValMembers:
-         return "enumval-members";
+         retval = "enumval-members";
 
+      // *
       case MemberListType_decPubSignalMembers:
-         return "pub-signal-members";
-      case MemberListType_decProSignalMembers:
-         return "pro-signal-members";
-      case MemberListType_decPriSignalMembers:
-         return "pri-signal-members";
-      case MemberListType_decPubSlotMembers:
-         return "pub-slot-members";
-      case MemberListType_decProSlotMembers:
-         return "pro-slot-members";
-      case MemberListType_decPriSlotMembers:
-         return "pri-slot-members";
+         retval = "pub-signal-members";
 
+      case MemberListType_decProSignalMembers:
+         retval = "pro-signal-members";
+
+      case MemberListType_decPriSignalMembers:
+         retval = "pri-signal-members";
+
+      case MemberListType_decPubSlotMembers:
+         retval = "pub-slot-members";
+
+      case MemberListType_decProSlotMembers:
+         retval = "pro-slot-members";
+
+      case MemberListType_decPriSlotMembers:
+         retval = "pri-slot-members";
+
+
+      // *
       case MemberListType_decEventMembers:
-         return "event-members";
+         retval = "event-members";
+
       case MemberListType_decFriendMembers:
-         return "friend-members";
+         retval = "friend-members";
+
       case MemberListType_decPropMembers:
-         return "prop-members";
+         retval = "prop-members";
+
       case MemberListType_enumFields:
-         return "enum-fields";
+         retval = "enum-fields";
+
       case MemberListType_memberGroup:
-         return "member-group";
+         retval = "member-group";
+
       default:
          break;
    }
 
-   return "";
+   return retval;
 }
 
 void MemberList::writeTagFile(QTextStream &tagFile)

@@ -816,7 +816,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                }
 
                // remove single *
-               QRegExp reg("\n\\s*\\*");
+               QRegularExpression reg("\n\\s*\\*");
                comment.replace(reg, "\n");
 
                if (javadoc_auto_brief) {
@@ -902,7 +902,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                   if (isBrief && current->getData(EntryKey::Brief_Docs).isEmpty()) {
                      QString brief;
-                     QRegExp reg("([^.]*\\.)\\s(.*)");
+                     QRegularExpression reg("([^.]*\\.)\\s(.*)");
 
                      if (reg.exactMatch(comment)) {
                         brief   = reg.cap(1);

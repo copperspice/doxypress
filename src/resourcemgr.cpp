@@ -16,7 +16,7 @@
 *************************************************************************/
 
 #include <QFile>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextStream>
 
 #include <resourcemgr.h>
@@ -79,23 +79,21 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             // replace .lum with .png
 
             // convert file, throw out any line starting with #
+            QRegularExpression regExp_comment("#.*?\\n");
+
             QString data = resData;
+            data.replace(regExp_comment, "");
 
-            QRegExp comment("#.*\\n");
-            comment.setMinimal(true);
+            QRegularExpression regExp_blanks("\\s+");
+            QStringList dataList = data.split(regExp_blanks);
 
-            data.replace(comment, "");
-
-            QRegExp blanks("\\s+");
-            QStringList dataList = data.split(blanks);
-
-            int width  = dataList[0].toInt();
-            int height = dataList[1].toInt();
+            int width  = dataList[0].toInteger<int>();
+            int height = dataList[1].toInteger<int>();
 
             resData.clear();
 
             for (int k = 2; k < dataList.size(); ++k) {
-               resData.append(dataList[k].toInt());
+               resData.append(dataList[k].toInteger<int>());
             }
 
             //
@@ -118,22 +116,21 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             // replace .luma with .png
 
             // convert file, throw out any line starting with #
+            QRegularExpression regExp_comment("#.*?\\n");
+
             QString data = resData;
+            data.replace(regExp_comment, "");
 
-            QRegExp comment("#.*\\n");
-            comment.setMinimal(true);
-            data.replace(comment, "");
+            QRegularExpression regExp_blanks("\\s+");
+            QStringList dataList = data.split(regExp_blanks);
 
-            QRegExp blanks("\\s+");
-            QStringList dataList = data.split(blanks);
-
-            int width  = dataList[0].toInt();
-            int height = dataList[1].toInt();
+            int width  = dataList[0].toInteger<int>();
+            int height = dataList[1].toInteger<int>();
 
             resData.clear();
 
             for (int k = 2; k < dataList.size(); ++k) {
-               resData.append(dataList[k].toInt());
+               resData.append(dataList[k].toInteger<int>());
             }
 
             //

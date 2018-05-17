@@ -18,8 +18,8 @@
 #ifndef RTFSTYLE_H
 #define RTFSTYLE_H
 
-#include <QRegExp>
 #include <QHash>
+#include <QRegularExpression>
 #include <QString>
 
 // used for table column width calculation
@@ -77,8 +77,6 @@ struct StyleData {
    ~StyleData();
 
    bool setStyle(const QString &s, const QString &styleName);
-
-   static const QRegExp s_clause;
 };
 
 extern QHash<QString, StyleData> rtf_Style;

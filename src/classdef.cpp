@@ -16,7 +16,7 @@
 *************************************************************************/
 
 #include <QFile>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <stdio.h>
 
@@ -1004,7 +1004,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ol.startParagraph();
 
       QString inheritLine = theTranslator->trInheritsList(m_parents->count());
-      static QRegExp marker("@[0-9]+");
+      static QRegularExpression marker("@[0-9]+");
 
       int index = 0;
       int newIndex;

@@ -331,12 +331,12 @@ bool Config::verify()
    QStringList aliasList = iterList.value().value;
 
    for (auto alias: aliasList) {
-      static QRegExp re1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");               // alias without argument
-      static QRegExp re2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*=");   // alias with argument
+      static QRegularExpression reg1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");               // alias without argument
+      static QRegularExpression reg2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*=");   // alias with argument
 
       alias = alias.trimmed();
 
-      if (! (re1.indexIn(alias) == 0 || re2.indexIn(alias) == 0)) {
+      if (alias.indexOfFast(reg1) != alias.begin() && alias.indexOfFast(reg2) != alias.begin()) {
          err("Alias format: `%s' \n is invalid, use \"name=value\" or \"name{n}=value\", where n "
                   "is the number of arguments\n\n", csPrintable(alias));
       }
@@ -531,7 +531,7 @@ bool Config::verify()
    QString dotImage = dotImageFormat;
 
    if (dotImage.contains(":"))  {
-      static QRegExp regexp(":.*");
+      static QRegularExpression regexp(":.*");
       dotImage = dotImage.replace(regexp , "");
    }
 

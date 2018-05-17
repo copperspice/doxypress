@@ -17,7 +17,7 @@
 *************************************************************************/
 
 #include <QDir>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextCodec>
 #include <QTextStream>
 

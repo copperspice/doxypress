@@ -22,7 +22,6 @@
 #include <stdlib.h>
 
 #include <rtfstyle.h>
-
 #include <doxy_globals.h>
 #include <message.h>
 
@@ -409,20 +408,21 @@ Rtf_Style_Default rtf_Style_Default[] = {
    }
 };
 
-const QRegExp StyleData::s_clause("\\\\s([0-9]+)\\s*");
-
 StyleData::StyleData(const QString &reference, const QString &definition)
-{  
-   int start = s_clause.indexIn(reference);
-   assert(start >= 0);
+{
+   static const QRegularExpression regExp_clause("\\\\s([0-9]+)\\s*");
 
-   QString tmp = reference.mid(start);   
-   index = s_clause.cap(1).toLong();
+   QRegularExpressionMatch match = regExp_clause.match(reference);
+   assert(match.hasMatch());
 
-   assert(index > 0);
+   auto iter = match.capturedStart();
+   QStringView tmp = QStringView(iter, reference.end());
 
-   this->reference  = tmp;
-   this->definition = definition;
+   m_index = match.captured(1).toInteger<long>();
+   assert(m_index > 0);
+
+   m_reference  = tmp;
+   m_definition = definition;
 }
 
 StyleData::StyleData()
@@ -431,35 +431,31 @@ StyleData::StyleData()
 }
 
 StyleData::~StyleData()
-{  
+{
 }
 
 bool StyleData::setStyle(const QString &str, const QString &styleName)
 {
-   static const QRegExp subgroup("^\\{[^}]*\\}\\s*");
-   static const QRegExp any_clause("^\\\\[a-z][a-z0-9-]*\\s*");
+   static const QRegularExpression regExp_clause("\\\\s([0-9]+)\\s*");
+   static const QRegularExpression regExp_subgroup("^\\{[^}]*\\}\\s*");
+   static const QRegularExpression regExp_any("^\\\\[a-z][a-z0-9-]*\\s*");
 
-   int len = 0;     // length of a particular RTF formatting control
-   int ref_len = 0; // length of the whole formatting section of a style
+   QRegularExpressionMatch match_clause = regExp_clause.match(str);
 
-   QString s = str;
-
-   int start = s_clause.indexIn(s);
-   len = s_clause.matchedLength();   
-
-   if (start < 0) {
-      err("Style sheet '%s' contains no '\\s' clause.\n{%s}\n", csPrintable(styleName), csPrintable(s));
+   if (! match_clause.hasMatch()) {
+      err("Style sheet '%s' contains no '\\s' clause.\n{%s}\n", csPrintable(styleName), csPrintable(str));
       return false;
    }
 
-   s = s.mid(start);  
-   index = s.mid(2).toLong();
+   QStringView tmp = QStringView(match_clause.capturedStart(), str.constEnd());
 
-   assert(index > 0);
+   m_index = tmp.mid(2).toString().toInteger<long>();
+   assert(m_index > 0);
 
    // search for the end of pure formatting codes
-   QString end = s.mid(len);
-   ref_len = len;
+   QStringView end = QStringView(match_clause.capturedEnd(), str.constEnd());
+
+   int ref_len = match_clause.capturedLength();          // length of a particular RTF formatting control
 
    bool haveNewDefinition = true;
 
@@ -468,15 +464,14 @@ bool StyleData::setStyle(const QString &str, const QString &styleName)
       if (end.startsWith('{')) {
          // subgroups are used for \\additive
 
-         int startX = subgroup.indexIn(end);
-         len = subgroup.matchedLength();  
+         QRegularExpressionMatch match_subgroup = regExp_subgroup.match(end);
 
-         if (startX != 0) {
-            break;
+         if (match_subgroup.hasMatch() && match_subgroup.capturedStart() == end.begin() ) {
+            end = QStringView(match_subgroup.capturedEnd(), end.constEnd());
+            ref_len += match_subgroup.capturedLength();
 
          } else {
-            end = end.mid(len);
-            ref_len += len;
+            break;
          }
 
       } else if (end.startsWith('\\')) {
@@ -488,32 +483,32 @@ bool StyleData::setStyle(const QString &str, const QString &styleName)
             break;
          }
 
-         int startX = any_clause.indexIn(end);
-         len = any_clause.matchedLength();  
+         QRegularExpressionMatch match_any = regExp_any.match(end);
 
-         if (startX != 0) {
+         if (match_any.hasMatch() && match_any.capturedStart() == end.begin() ) {
+            end = QStringView(match_any.capturedEnd(), end.constEnd());
+            ref_len += match_any.capturedLength();
+
+         } else {
             break;
          }
-
-         end = end.mid(len);
-         ref_len += len;
 
       } else if (end.isEmpty()) {
          // no style-definition part, keep default value
          haveNewDefinition = false;
          break;
 
-      } else { 
+      } else {
          // plain name without leading \\snext
          break;
 
       }
-   } 
-   
-   reference = s.mid(ref_len);
+   }
+
+   m_reference = QStringView(tmp.constBegin() + ref_len, tmp.constEnd());
 
    if (haveNewDefinition) {
-      definition = end;
+      m_definition = end;
    }
 
    return true;
@@ -529,7 +524,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
    }
    msg("Loading RTF style sheet %s\n", csPrintable(name));
 
-   static const QRegExp seperator("[ \t]*=[ \t]*");
+   static const QRegularExpression seperator("[ \t]*=[ \t]*");
    uint lineNr = 1;
 
    QTextStream t(&file);
@@ -544,13 +539,13 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
 
       int sepStart;
       int sepLength;
-      
+
       sepStart  = seperator.indexIn(s);
-      sepLength = seperator.matchedLength();  
+      sepLength = seperator.matchedLength();
 
       if (sepStart <= 0) {
          // no valid assignment statement
-         warn(csPrintable(name), lineNr, "Assignment of style sheet name expected\n");
+         warn(name, lineNr, "Assignment of style sheet name expected\n");
          continue;
       }
 
@@ -584,7 +579,7 @@ void loadExtensions(const QString &name)
    }
    msg("Loading RTF extensions %s\n", csPrintable(name));
 
-   static const QRegExp separator("[ \t]*=[ \t]*");
+   static const QRegularExpression separator("[ \t]*=[ \t]*");
    uint lineNr = 1;
 
    QTextStream t(&file);
@@ -600,11 +595,11 @@ void loadExtensions(const QString &name)
       }
 
       int sepStart  = separator.indexIn(s);
-      int sepLength = separator.matchedLength();  
+      int sepLength = separator.matchedLength();
 
-      if (sepStart <= 0) { 
+      if (sepStart <= 0) {
          // no valid assignment statement
-         warn(csPrintable(name), lineNr, "Assignment of extension field expected\n");
+         warn(name, lineNr, "Assignment of extension field expected\n");
          continue;
       }
 

@@ -16,7 +16,7 @@
 *************************************************************************/
 
 #include <QList>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,7 +73,7 @@ void HtmlHelpIndex::addItem(const QString &level1, const QString &level2, const 
       key += "?" + level2;
    }
 
-   if (key.indexOf(QRegExp("@[0-9]+")) != -1) {
+   if (key.indexOf(QRegularExpression("@[0-9]+")) != -1) {
       // skip anonymous stuff
       return;
    }
@@ -373,7 +373,7 @@ static QString getLanguageString()
    QString retval = s_languageDict[outputLanguage];
 
    if (retval.isEmpty()) {
-      return "0x409 English";
+      return QString("0x409 English");
    } else {
       return retval;
    }
