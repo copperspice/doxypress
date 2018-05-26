@@ -3838,7 +3838,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
    s_condStack.clear();
    s_commentStack.clear();
 
-   printlex(commentcnvYY_flex_debug, true, __FILE__, csPrintable(fileName));
+   printlex(commentcnvYY_flex_debug, true, __FILE__, fileName);
    isFixedForm = false;
 
    if (s_lang == SrcLangExt_Fortran) {
@@ -3861,7 +3861,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
       QString sectionInfo = " ";
 
       if (ctx.sectionId != " ") {
-         sectionInfo = QString(" with label %1 ").arg(ctx.sectionId);
+         sectionInfo = QString(" with label %1 ").formatArg(ctx.sectionId);
       }
 
       warn(s_fileName, ctx.lineNr, "Conditional section %s does not have "

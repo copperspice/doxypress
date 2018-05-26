@@ -11102,6 +11102,7 @@ static int           g_memCallContext;
 static int           g_lastCContext;
 static int           g_skipInlineInitContext;
 
+static bool          g_insideCpp;
 static bool          g_insideObjC;
 static bool          g_insideJava;
 static bool          g_insideCS;
@@ -11410,7 +11411,7 @@ static void startCodeLine()
 
          g_bodyCurlyCount = 0;
 
-         QString lineAnchor = QString("l%1").arg(g_yyLineNr, 5, 10, QChar('0'));
+         QString lineAnchor = QString("l%1").formatArg(g_yyLineNr, 5, 10, QChar('0'));
 
          if (g_currentMemberDef) {
             g_code->writeLineNumber(g_currentMemberDef->getReference(),
@@ -11771,7 +11772,7 @@ static bool getLinkInScope(const QString &c, const QString &m, const QString  me
       if (md->isLinkable()) {
 
          if (g_exampleBlock) {
-            QString anchor = QString("a%1").arg(g_anchorCount);
+            QString anchor = QString("a%1").formatArg(g_anchorCount);
 
             if (md->addExample(anchor, g_exampleName, g_exampleFile)) {
                ol.writeCodeAnchor(anchor);
@@ -11928,7 +11929,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
       // is it a linkable class
 
       if (g_exampleBlock) {
-         QString anchor = QString("_a%1").arg(g_anchorCount);
+         QString anchor = QString("_a%1").formatArg(g_anchorCount);
 
          if (cd->addExample(anchor, g_exampleName, g_exampleFile)) {
             ol.writeCodeAnchor(anchor);
@@ -12025,7 +12026,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Memb
 
    if (g_exampleBlock) {
 
-      QString anchor = QString("a%1").arg(g_anchorCount);
+      QString anchor = QString("a%1").formatArg(g_anchorCount);
 
       if (xmd->addExample(anchor, g_exampleName, g_exampleFile)) {
          ol.writeCodeAnchor(anchor);
@@ -12429,7 +12430,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                }
 
                p--;
-               int refId = refIdStr.toInt();
+               int refId = refIdStr.toInteger<int>();
                QString *pName = g_nameDict.value(refId);
 
                if (pName) {
@@ -12456,7 +12457,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                }
 
                p--;
-               int refId = refIdStr.toInt();
+               int refId = refIdStr.toInteger<int>();
                QString *pObject = g_objectDict.value(refId);
 
                if (pObject) {
@@ -12548,7 +12549,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                }
 
                p--;
-               int refId = refIdStr.toInt();
+               int refId = refIdStr.toInteger<int>();
                ObjCCallCtx *ictx = g_ObjC_contextDict.value(refId);
 
                if (ictx) {
@@ -12590,7 +12591,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                }
 
                p--;
-               int refId = refIdStr.toInt();
+               int refId = refIdStr.toInteger<int>();
                QString *pWord = g_wordDict.value(refId);
 
                if (pWord) {
@@ -12608,7 +12609,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                   nc = *p++;
                }
                p--;
-               int refId = refIdStr.toInt();
+               int refId = refIdStr.toInteger<int>();
 
                QString *pComment = g_commentDict.value(refId);
 
@@ -12638,7 +12639,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 // fragment, from g_nameDict
 static QString escapeName(const QString &s)
 {
-   QString result = QString("$n%1").arg(g_currentNameId);
+   QString result = QString("$n%1").formatArg(g_currentNameId);
 
    g_nameDict.insert(g_currentNameId, new QString(s));
    g_currentNameId++;
@@ -12647,7 +12648,7 @@ static QString escapeName(const QString &s)
 
 static QString escapeObject(const QString &s)
 {
-   QString result = QString("$o%1").arg(g_currentObjId);
+   QString result = QString("$o%1").formatArg(g_currentObjId);
 
    g_objectDict.insert(g_currentObjId, new QString(s));
    g_currentObjId++;
@@ -12656,7 +12657,7 @@ static QString escapeObject(const QString &s)
 
 static QString escapeWord(const QString &s)
 {
-   QString result = QString("$w%d").arg(g_currentWordId);
+   QString result = QString("$w%d").formatArg(g_currentWordId);
 
    g_wordDict.insert(g_currentWordId, new QString(s));
    g_currentWordId++;
@@ -12665,7 +12666,7 @@ static QString escapeWord(const QString &s)
 
 static QString escapeComment(const QString &s)
 {
-  QString result = QString("$d%d").arg(g_currentCommentId);
+  QString result = QString("$d%d").formatArg(g_currentCommentId);
 
   g_commentDict.insert(g_currentCommentId, new QString(s));
   g_currentCommentId++;
@@ -13698,16 +13699,16 @@ YY_RULE_SETUP
             g_codeClassSDict.insert(g_curClassName, ncd);
 
             // insert base classes
-            for (auto s : g_curClassBases) {
+            for (auto str : g_curClassBases) {
                QSharedPointer<ClassDef> bcd;
-               bcd = g_codeClassSDict.find(s);
+               bcd = g_codeClassSDict.find(str);
 
                if (! bcd) {
-                  bcd = getResolvedClass(g_currentDefinition, g_sourceFileDef, csPrintable(s));
+                  bcd = getResolvedClass(g_currentDefinition, g_sourceFileDef, str);
                }
 
                if (bcd && bcd != ncd) {
-                  ncd->insertBaseClass(bcd, csPrintable(s), Public, Normal);
+                  ncd->insertBaseClass(bcd, str, Public, Normal);
                }
 
             }
@@ -13945,6 +13946,10 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
+      if (g_insideCpp && (text =="set" || text =="get")) {
+         REJECT;
+      }
+
       startFontClass("keyword");
       codifyLines(text);
 
@@ -13960,6 +13965,10 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
+      if (g_insideCpp && (text =="set" || text =="get")) {
+         REJECT;
+      }
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
@@ -13970,6 +13979,10 @@ case 73:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
+
+      if (g_insideCpp && (text =="set" || text =="get")) {
+         REJECT;
+      }
 
       startFontClass("keyword");
       codifyLines(text);
@@ -14990,6 +15003,10 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
+      if (g_insideCpp && (text =="set" || text =="get")) {
+         REJECT;
+      }
+
       startFontClass("keyword");
       g_code->codify(text);
       endFontClass();
@@ -15218,8 +15235,7 @@ YY_RULE_SETUP
       }
 
       if (! g_type.isEmpty()) {
-         DBG_CTX((stderr, "Add variable g_type = %s g_name = %s)\n",
-                  csPrintable(g_type), csPrintable(g_name)));
+         DBG_CTX((stderr, "Add variable g_type = %s g_name = %s)\n", csPrintable(g_type), csPrintable(g_name)));
          g_theVarContext.addVariable(g_type, g_name);
 
       }
@@ -15687,7 +15703,7 @@ YY_RULE_SETUP
 
       } else {
          startFontClass("comment");
-         codifyLines(code_cstyle_YYtext);
+         codifyLines(text);
          endFontClass();
       }
 
@@ -15794,7 +15810,7 @@ YY_RULE_SETUP
          }
 
          startFontClass("comment");
-         g_code->codify(code_cstyle_YYtext);
+         g_code->codify(text);
          BEGIN(SkipComment);
       }
    }
@@ -15836,7 +15852,7 @@ YY_RULE_SETUP
 
       } else {
          startFontClass("comment");
-         codifyLines(code_cstyle_YYtext);
+         codifyLines(text);
          endFontClass();
       }
    }
@@ -17070,7 +17086,7 @@ void code_cstyle_YYfree (void * ptr )
 static void saveObjCContext()
 {
    if (g_ObjC_currentCtx) {
-      g_ObjC_currentCtx->format += QString("$c%1").arg(g_currentCtxId);
+      g_ObjC_currentCtx->format += QString("$c%1").formatArg(g_currentCtxId);
 
       if (g_braceCount == 0 && YY_START == ObjCCall) {
          g_ObjC_currentCtx->objectTypeOrName = g_ObjC_currentCtx->format.mid(1);
@@ -17132,8 +17148,6 @@ void parseCCode(CodeOutputInterface &outputX, const QString &className, const QS
 
    s_stripCodeComments = Config::getBool("strip-code-comments");
 
-   printlex(code_cstyle_YY_flex_debug, true, __FILE__, fd ? csPrintable(fd->fileName()) : "");
-
    TooltipManager::instance()->clearTooltips();
 
    g_code               = &outputX;
@@ -17187,6 +17201,7 @@ void parseCCode(CodeOutputInterface &outputX, const QString &className, const QS
    g_insideJava = lang == SrcLangExt_Java;
    g_insideCS   = lang == SrcLangExt_CSharp;
    g_insidePHP  = lang == SrcLangExt_PHP;
+   g_insideCpp  = lang == SrcLangExt_Cpp;
 
    if (g_sourceFileDef) {
       setCurrentDoc("l00001");
@@ -17236,8 +17251,6 @@ void parseCCode(CodeOutputInterface &outputX, const QString &className, const QS
       // delete the temporary file definition used for this example
       g_sourceFileDef = QSharedPointer<FileDef>();
    }
-
-   printlex(code_cstyle_YY_flex_debug, false, __FILE__, fd ? csPrintable(fd->fileName()) : "");
 
    return;
 }

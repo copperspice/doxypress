@@ -92,7 +92,7 @@ static void startCodeLine()
          s_classScope = d->name();
 
 
-         QString lineAnchor = QString("l%1").arg(s_yyLineNr, 5, 10, QChar('0'));
+         QString lineAnchor = QString("l%1").formatArg(s_yyLineNr, 5, 10, QChar('0'));
 
          if (s_currentMemberDef) {
             s_code->writeLineNumber(s_currentMemberDef->getReference(),

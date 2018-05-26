@@ -1597,7 +1597,7 @@ static void startCodeLine()
          s_bodyCurlyCount = 0;
 
          QString lineAnchor;
-         lineAnchor = QString("l%1").arg(s_yyLineNr, 5, 10, QChar('0'));
+         lineAnchor = QString("l%1").formatArg(s_yyLineNr, 5, 10, QChar('0'));
 
          if (s_currentMemberDef) {
             s_code->writeLineNumber(s_currentMemberDef->getReference(),
@@ -2530,19 +2530,19 @@ YY_RULE_SETUP
 
       s_codeClassSDict.insert(s_curClassName, classDefToAdd);
 
-      for (auto s : s_curClassBases) {
+      for (auto str : s_curClassBases) {
 
          QSharedPointer<ClassDef> baseDefToAdd;
-         baseDefToAdd = s_codeClassSDict[s];
+         baseDefToAdd = s_codeClassSDict[str];
 
          // Try to find class in global scope
 
          if (baseDefToAdd == 0) {
-            baseDefToAdd = getResolvedClass(s_currentDefinition, s_sourceFileDef, csPrintable(s));
+            baseDefToAdd = getResolvedClass(s_currentDefinition, s_sourceFileDef, str);
          }
 
          if (baseDefToAdd && baseDefToAdd != classDefToAdd) {
-            classDefToAdd->insertBaseClass(baseDefToAdd, csPrintable(s), Public, Normal);
+            classDefToAdd->insertBaseClass(baseDefToAdd, str, Protection::Public, Specifier::Normal);
          }
       }
 
@@ -4216,7 +4216,7 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
       return;
    }
 
-   printlex(code_py_YY_flex_debug, true, __FILE__, fd ? fd->fileName() : NULL);
+   printlex(code_py_YY_flex_debug, true, __FILE__, fd ? fd->fileName() : "" );
 
    TooltipManager::instance()->clearTooltips();
    s_code             = &od;
@@ -4274,6 +4274,6 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
       s_sourceFileDef = QSharedPointer<FileDef>();
    }
 
-   printlex(code_py_YY_flex_debug, false, __FILE__, fd ? fd->fileName() : "");
+   printlex(code_py_YY_flex_debug, false, __FILE__, fd ? fd->fileName() : "" );
 }
 

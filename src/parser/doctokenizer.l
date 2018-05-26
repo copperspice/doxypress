@@ -10,12 +10,11 @@
 #include <QFile>
 #include <QString>
 #include <QStack>
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <ctype.h>
 
 #include <doctokenizer.h>
-
 #include <config.h>
 #include <cmdmapper.h>
 #include <definition.h>
@@ -104,44 +103,47 @@ bool doctokenizerYYpopContext()
 
 QString tokToString(int token)
 {
+   QString retval = "ERROR";
+
    switch (token) {
       case 0:
-         return "TK_EOF";
+         retval = "TK_EOF";
 
       case TK_WORD:
-         return "TK_WORD";
+         retval = "TK_WORD";
 
       case TK_LNKWORD:
-         return "TK_LNKWORD";
+         retval = "TK_LNKWORD";
 
       case TK_WHITESPACE:
-         return "TK_WHITESPACE";
+         retval = "TK_WHITESPACE";
 
       case TK_LISTITEM:
-         return "TK_LISTITEM";
+         retval = "TK_LISTITEM";
 
       case TK_ENDLIST:
-         return "TK_ENDLIST";
+         retval = "TK_ENDLIST";
 
       case TK_COMMAND:
-         return "TK_COMMAND";
+         retval = "TK_COMMAND";
 
       case TK_HTMLTAG:
-         return "TK_HTMLTAG";
+         retval = "TK_HTMLTAG";
 
       case TK_SYMBOL:
-         return "TK_SYMBOL";
+         retval = "TK_SYMBOL";
 
       case TK_NEWPARA:
-         return "TK_NEWPARA";
+         retval = "TK_NEWPARA";
 
       case TK_RCSTAG:
-         return "TK_RCSTAG";
+         retval = "TK_RCSTAG";
 
       case TK_URL:
-         return "TK_URL";
+         retval = "TK_URL";
    }
-   return "ERROR";
+
+   return retval;
 }
 
 static int computeIndent(const QString &str, int length)
@@ -645,7 +647,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       } else {
          QString text = QString::fromUtf8(yytext);
 
-         static QRegExp re("[*+]");
+         static QRegularExpression re("[*+]");
          int listPos = text.lastIndexOf(re);
 
          g_token->isEnumList = false;
@@ -663,12 +665,12 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       } else {
          QString text = QString::fromUtf8(yytext);
 
-         static QRegExp re("[1-9]");
+         static QRegularExpression re("[1-9]");
          int digitPos = text.indexOf(re);
          int dotPos   = text.indexOf('.',digitPos);
 
          g_token->isEnumList = true;
-         g_token->id         = text.mid(digitPos, dotPos - digitPos).toInt();
+         g_token->id         = text.mid(digitPos, dotPos - digitPos).toInteger<int>();
          g_token->indent     = computeIndent(text, digitPos);
          return TK_LISTITEM;
       }
@@ -695,9 +697,10 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       } else {
          QString text = QString::fromUtf8(yytext);
 
-         static QRegExp re("[*+]");
+         static QRegularExpression rexExp("[*+]");
          text = text.right(text.length() - text.indexOf('\n') - 1);
-         int markPos = re.lastIndexIn(text);
+
+         int markPos = rexExp.lastIndexIn(text);
 
          g_token->isEnumList = false;
          g_token->id         = -1;
@@ -716,14 +719,15 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
          int nl  = text.lastIndexOf('\n');
          int len = text.length();
-         text = text.right(len - nl - 1);
-         static QRegExp re("[1-9]");
+         text    = text.right(len - nl - 1);
 
-         int digitPos = re.indexIn(text);
-         int dotPos = text.indexOf('.', digitPos);
+         static QRegularExpression rexExp("[1-9]");
+
+         int digitPos = rexExp.indexIn(text);
+         int dotPos   = text.indexOf('.', digitPos);
 
          g_token->isEnumList = true;
-         g_token->id         = text.mid(digitPos,dotPos - digitPos).toInt();
+         g_token->id         = text.mid(digitPos,dotPos - digitPos).toInteger<int>();
          g_token->indent     = computeIndent(text,digitPos);
          return TK_LISTITEM;
       }
@@ -749,7 +753,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_ENDLIST;
    }
 
-<St_Para>"{"{BLANK}*"@link" {
+<St_Para>"{"{BLANK}*"@link"/{BLANK}+ {
       g_token->name = "javalink";
       return TK_COMMAND;
    }
@@ -769,7 +773,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       bool ok;
       QString text = QString::fromUtf8(yytext);
-      g_token->id  = text.right(yyleng - 6).toInt(&ok);
+      g_token->id  = text.right(yyleng - 6).toInteger<int>(&ok);
       assert(ok);
 
       return TK_COMMAND;
@@ -1514,7 +1518,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       QString text = QString::fromUtf8(yytext);
 
       text = text.left(yyleng - 1);
-      g_token->id = text.toInt();
+      g_token->id = text.toInteger<int>();
       return RetVal_OK;
    }
 

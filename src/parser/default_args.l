@@ -7,7 +7,7 @@
 
 %{
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <stdio.h>
 #include <assert.h>
@@ -727,7 +727,7 @@ ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList 
       return ArgumentList();
    }
 
-   printlex(yy_flex_debug, true, __FILE__, NULL);
+   printlex(yy_flex_debug, true, __FILE__, "");
 
    s_copyArgValue = 0;
    s_curArgDocs.resize(0);
@@ -755,7 +755,7 @@ ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList 
 
    extraTypeChars = s_extraTypeChars;
 
-   printlex(yy_flex_debug, false, __FILE__, NULL);
+   printlex(yy_flex_debug, false, __FILE__, "");
 
    return s_argList;
 }

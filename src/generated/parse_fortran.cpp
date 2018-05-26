@@ -56635,7 +56635,7 @@ char *parse_fortran_YYtext;
 #include <QFile>
 #include <QMap>
 #include <QStack>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QVector>
 
 #include <stdio.h>
@@ -56783,7 +56783,7 @@ static QChar            stringStartSymbol;            // single or double quote
 // accumulated modifiers of current statement, eg variable declaration.
 static SymbolModifiers  currentModifiers;
 
-// holds program scope->symbol name->symbol modifiers.
+// holds program scope->symbol name->symbol modifiers
 static QMap<QSharedPointer<Entry>, QMap<QString, SymbolModifiers>> modifiers;
 
 static ParserInterface        *g_thisParser;
@@ -58071,11 +58071,11 @@ YY_RULE_SETUP
          if (s_parameter) {
             v_type= V_PARAMETER;
 
-            if (! argType.isNull()) {
+            if (! argType.isEmpty()) {
                s_parameter->type = argType.trimmed();
             }
 
-            if (! docBlock.isNull()) {
+            if (! docBlock.isEmpty()) {
                subrHandleCommentBlock(docBlock, true);
             }
          }
@@ -58136,7 +58136,7 @@ YY_RULE_SETUP
 
                   tmpType += "function";
 
-                  if (! docBlock.isNull()) {
+                  if (! docBlock.isEmpty()) {
                      subrHandleCommentBlockResult(docBlock,true);
                   }
 
@@ -58386,7 +58386,7 @@ YY_RULE_SETUP
       modifiers[current_root][current->m_entryName.toLower()].returnName = current->m_entryName.toLower();
 
       if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
-         current_root->m_entryName.replace(QRegExp("\\$interface\\$"), text);
+         current_root->m_entryName.replace(QRegularExpression("\\$interface\\$"), text);
       }
 
       BEGIN(Parameterlist);
@@ -60255,7 +60255,7 @@ SymbolModifiers& SymbolModifiers::operator|=(const SymbolModifiers &mdfs)
 
    optional |= mdfs.optional;
 
-   if (! mdfs.dimension.isNull()) {
+   if (! mdfs.dimension.isEmpty()) {
       dimension = mdfs.dimension;
    }
 
@@ -60412,7 +60412,7 @@ static Entry *findFunction(Entry* entry, QString name)
 /*! Apply modifiers stored in \a mdfs to the \a typeName string. */
 static QString applyModifiers(QString typeName, SymbolModifiers &mdfs)
 {
-   if (!mdfs.dimension.isNull()) {
+   if (!mdfs.dimension.isEmpty()) {
       if (! typeName.isEmpty()) {
           typeName += ", ";
       }
@@ -60628,11 +60628,12 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
 
    if (scope->section == Entry::FUNCTION_SEC) {
       // iterate all symbol modifiers of the scope
-      for (QMap<QString, SymbolModifiers>::Iterator it = mdfsMap.begin(); it != mdfsMap.end(); it++) {
-         Argument *arg = findArgument(scope, it.key());
+
+      for (auto iter = mdfsMap.begin(); iter != mdfsMap.end(); iter++) {
+         Argument *arg = findArgument(scope, iter.key());
 
          if (arg) {
-            applyModifiers(arg, it.value());
+            applyModifiers(arg, iter.value());
          }
       }
 

@@ -196,13 +196,13 @@ static QString findPackageScopeFromPath(const QString &path)
       }
    }
 
-   return "";
+   return QString("");
 }
 
 static QString findPackageScope(const QString &fileName)
 {
    if (! fileName.isEmpty()) {
-      return "";
+      return QString("");
    }
 
    QFileInfo fi(fileName);
@@ -555,7 +555,7 @@ STARTDOCSYMS      "##"
 
       QString text = QString::fromUtf8(yytext);
 
-      s_indent = computeIndent(yytext);
+      s_indent = computeIndent(text);
       current->section   = Entry::VARIABLE_SEC;
       current->m_entryName      = text.trimmed();
 
@@ -1360,6 +1360,16 @@ STARTDOCSYMS      "##"
       BEGIN(TripleComment);
    }
 
+   {STARTDOCSYMS}[#]*         {
+         // start of a special comment
+         initSpecialBlock();
+         BEGIN(SpecialComment);
+      }
+
+   {POUNDCOMMENT}             {
+         // ignore comment with just one #
+      }
+
    ^{BB}             {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
@@ -1837,7 +1847,7 @@ STARTDOCSYMS      "##"
    "'"               {
       // end of the string
       QString text = QString::fromUtf8(yytext);
-      addToOutput(yytext);
+      addToOutput(text);
       BEGIN(s_stringContext);
    }
 

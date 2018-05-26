@@ -449,7 +449,7 @@ static void prependScope()
 
 static bool containsWord(const QString &str, const QString &word)
 {
-   QRegExp wordExp("\\b"+word+"\\b");
+   QRegularExpression wordExp("\\b"+word+"\\b");
    return str.contains(wordExp);
 }
 
@@ -485,7 +485,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
 
    if (oldStyleArgType.isEmpty()) {
       // new argument
-      static QRegExp re("\\([^)]*\\)");
+      static QRegularExpression re("\\([^)]*\\)");
 
       int bi1 = re.lastIndexIn(tmpArgs);
       int bi2 = bi1 != -1 ? re.lastIndexIn(tmpArgs, bi1 - 1) : -1;
@@ -897,6 +897,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 %x CopyHereDocEnd
 %x RawString
 %x RawGString
+%x    CSharpString
 %x IDLAttribute
 %x IDLProp
 %x IDLPropName
@@ -2591,8 +2592,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current  = QMakeShared<Entry>();
 
       if (insideCSharp) {
-         // in C# a using declaration and directive have the same syntax, so we
-         // also add it as a using directive here
+         // in C# a using declaration and directive have the same syntax
+         // so we also add it as a using directive here
 
          current->m_entryName        = text;
 
@@ -3739,11 +3740,11 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       /* line control directive */
       QString text = QString::fromUtf8(yytext);
 
-      static QRegExp intMatch("\\d+");
+      static QRegularExpression intMatch("\\d+");
       int startPos = intMatch.indexIn(text);
 
       QString tmp = intMatch.cap(0);
-      yyLineNr = tmp.toInt();
+      yyLineNr = tmp.toInteger<int>();
       lastPreLineCtrlContext = YY_START;
 
       if (YY_START == ReadBody || YY_START == ReadNSBody || YY_START == ReadBodyIntf) {
@@ -4695,7 +4696,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       int s = text.indexOf(' ');
       int e = text.indexOf('"',s);
-      yyLineNr = text.mid(s, e-s).toInt();
+      yyLineNr = text.mid(s, e-s).toInteger<int>();
 
       if (text[text.length() - 1] == '\n') {
          lineCount();
@@ -4796,7 +4797,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             // anonymous padding field, "int :7;"
 
             addType(current);
-            current->m_entryName = QString("__pad%1__").arg(padCount++);
+            current->m_entryName = QString("__pad%1__").formatArg(padCount++);
          }
 
          BEGIN(BitFields);
@@ -5038,8 +5039,8 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (odlProp) {
          // property type
-			idlProp = text;
-	   }
+         idlProp = text;
+      }
    }
 
 <IDLPropName>{ID}{BN}*"("     {
@@ -5051,15 +5052,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       BEGIN( IDLProp );
    }
 
-<IDLPropName>{BN}*"("{BN}*{ID}{BN}*")"{BN}*	{
+<IDLPropName>{BN}*"("{BN}*{ID}{BN}*")"{BN}*  {
       QString text = QString::fromUtf8(yytext);
 
-		if (odlProp) {
-		   idlProp += text;
-		}
+      if (odlProp) {
+         idlProp += text;
+      }
    }
 
-<IDLPropName>{ID}{BN}*/";"		{
+<IDLPropName>{ID}{BN}*/";"       {
       QString text = QString::fromUtf8(yytext);
       if (odlProp) {
          current->m_entryName = text;
@@ -5252,10 +5253,15 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
             current->startLine   = yyLineNr;
             current->startColumn = yyColNr;
 
-            current->m_entryName        = current->m_entryName.trimmed();
+            current->m_entryName = current->m_entryName.trimmed();
             current->section     = Entry::VARIABLE_SEC;
 
-            current->setData(EntryKey::Member_Type,  "@");          // enum marker
+            bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
+
+            if (! isEnum) {
+               current->setData(EntryKey::Member_Type,  "@");          // enum marker
+            }
+
             current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
 
             current_root->addSubEntry(current, current_root);
@@ -5513,7 +5519,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                   BEGIN( FindMembers ) ;
 
                } else {
-                  static QRegExp re("@[0-9]+$");
+                  static QRegularExpression re("@[0-9]+$");
 
                   if (! isTypedef && memspecEntry && re.indexIn(memspecEntry->m_entryName) == -1) {
                      // not typedef or anonymous type
@@ -5590,7 +5596,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <TypedefName>";"        {
       /* typedef of anonymous type */
-      current->m_entryName = QString("@%1").arg(anonCount++);
+      current->m_entryName = QString("@%1").formatArg(anonCount++);
 
       bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
 
@@ -5687,7 +5693,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                if (p->m_entryName.at(pi) == '@') {
                   // anonymous compound inside -> insert dummy variable name
 
-                  msName = QString("@%1").arg(anonCount++);
+                  msName = QString("@%1").formatArg(anonCount++);
                   break;
                }
             }
@@ -6982,7 +6988,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->startLine   = yyBegLineNr;
       current->startColumn = yyBegColNr;
 
-      static QRegExp re("\\([^)]*[*&][^)]*\\)");       // (...*...)
+      static QRegularExpression re("\\([^)]*[*&][^)]*\\)");       // (...*...)
 
       if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
          int tempArg = current->m_entryName.indexOf('<');
@@ -7152,7 +7158,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       }
    }
 
-SkipC11Attribute>"]]"                 {
+<SkipC11Attribute>"]]"                 {
       BEGIN(lastC11AttributeContext);
    }
 
@@ -8038,11 +8044,11 @@ SkipC11Attribute>"]]"                 {
 
             } else {
                // use invisible name
-               current->m_entryName = QString("@%1").arg(anonNSCount);
+               current->m_entryName = QString("@%1").formatArg(anonNSCount);
             }
 
          } else {
-            current->m_entryName = QString("@%1").arg(anonCount++);
+            current->m_entryName = QString("@%1").formatArg(anonCount++);
          }
       }
 
@@ -8696,11 +8702,37 @@ SkipC11Attribute>"]]"                 {
          current->m_traits.setTrait(Entry::Virtue::Raisable);
    }
 
-<CSAccessorDecl>.          {
+<CSAccessorDecl>"\""          {
+      BEGIN(CSharpString);
+   }
+
+<CSAccessorDecl>"."        {
    }
 
 <CSAccessorDecl>\n         {
       lineCount();
+   }
+
+<CSharpString>"\""           {
+      BEGIN(CSAccessorDecl);
+   }
+
+<CSharpString>"//"           {
+      // Otherwise the rule <*>"//" will kick in
+      // */ (editor syntax fix)
+
+   }
+
+<CSharpString>"/*"           {
+      // Otherwise the rule <*>"/*" will kick in
+      // */ (editor syntax fix)
+   }
+
+<CSharpString>\n             {
+      lineCount();
+   }
+
+<CSharpString>"."            {
    }
 
 
@@ -8728,14 +8760,14 @@ SkipC11Attribute>"]]"                 {
       BEGIN( s_docBlockContext );
    }
 
-<DocLine>[^\n]*/"\n"{B}*"//"[!/]{B}*{CMD}"}"	{
+<DocLine>[^\n]*/"\n"{B}*"//"[!/]{B}*{CMD}"}"    {
       // next line is an end group marker
       QString text = QString::fromUtf8(yytext);
 
-  		s_docBlock += text;
-		handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
+         s_docBlock += text;
+      handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
 
-	   BEGIN( s_docBlockContext );
+      BEGIN( s_docBlockContext );
    }
 
 <DocLine>[^\n]*/"\n"          {
@@ -9206,8 +9238,8 @@ SkipC11Attribute>"]]"                 {
       }
    }
 
-<*>"#"                    {
-      if (!insidePHP) {
+<*>"#"    {
+      if (! insidePHP) {
          REJECT;
       }
 
@@ -9215,17 +9247,31 @@ SkipC11Attribute>"]]"                 {
       BEGIN( SkipCxxComment ) ;
    }
 
-<*>\'                {
+<*>\'     {
       if (insidePHP) {
          lastStringContext=YY_START;
          BEGIN(SkipPHPString);
       }
    }
 
-<*>\"                {
+<*>\"     {
       if (insidePHP) {
          lastStringContext=YY_START;
          BEGIN(SkipString);
+      }
+   }
+
+<*>\?     {
+      if (insideCSharp) {
+         QString tmpType = current->getData(EntryKey::Member_Type);
+
+         if (tmpType.isEmpty()) {
+            current->m_entryName += "?";
+
+         } else {
+            current->appendData(EntryKey::Member_Type, "?");
+
+         }
       }
    }
 

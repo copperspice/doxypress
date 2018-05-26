@@ -9,7 +9,7 @@
 
 #include <QFile>
 #include <QHash>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStack>
 #include <QStringList>
 #include <QVector>
@@ -55,8 +55,6 @@
 #define tcl_inf \
   if (0) printf("--- %.4d %d@%d: ",__LINE__, yylineno,yy_start_stack_ptr) && printf
 
-#define CONST           const
-#define UCHAR           (unsigned char)
 #define TCL_ERROR       1
 #define TCL_OK          0
 #define ckalloc         malloc
@@ -3179,7 +3177,7 @@ void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scop
       return;
    }
 
-   printlex(yy_flex_debug, true, __FILE__, fileDef ? csPrintable(fileDef->fileName()) : "" );
+   printlex(yy_flex_debug, true, __FILE__, fileDef ? fileDef->fileName() : "" );
    tcl.s_inputString = input;
 
    QString myNs  = "";
@@ -3258,7 +3256,7 @@ void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scop
    tcl.fn.clear();
    tcl.entry.clear();
 
-   printlex(yy_flex_debug, false, __FILE__, fileDef ? csPrintable(fileDef->fileName()) : "");
+   printlex(yy_flex_debug, false, __FILE__, fileDef ? fileDef->fileName() : "");
 }
 bool Tcl_Parser::needsPreprocessing(const QString &)
 {

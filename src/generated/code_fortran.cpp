@@ -27555,7 +27555,7 @@ char *code_fortran_YYtext;
 *************************************************************************/
 
 #include <QDir>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
 
 #include <set>
@@ -27793,7 +27793,7 @@ static void startCodeLine()
          s_parmName.resize(0);
 
          QString lineAnchor;
-         lineAnchor = QString("l%1").arg(s_yyLineNr, 5, QChar('0'));
+         lineAnchor = QString("l%1").formatArg(s_yyLineNr, 5, 10, QChar('0'));
 
          if (s_currentMemberDef) {
 
@@ -28038,7 +28038,7 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
 
                   } else {
 
-                     for ( QStringList::Iterator it = only.begin(); it != only.end(); ++it) {
+                     for (auto it = only.begin(); it != only.end(); ++it) {
 
                         if (memberName == (*it)) {
                            return true; // found in ONLY-part of use list
@@ -28150,18 +28150,19 @@ static int countLines()
       return count;
    }
 
-   const QChar *p = s_inputString.constData();
-   QChar c;
+   QString::const_iterator iter = s_inputString.constBegin();
 
-   while ((c = *p) != 0) {
-      p++ ;
+   while (iter != s_inputString.constEnd()) {
+      QChar c = *iter;
 
       if (c == '\n') {
          count++;
       }
+
+      ++iter;
    }
 
-   if (*(p - 1) != '\n') {
+   if (iter[-1] != '\n') {
       // last line does not end with a \n, so we add an extra
       // line and explicitly terminate the line after parsing
       count++;
@@ -30524,7 +30525,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
       return;
    }
 
-  printlex(code_fortran_YY_flex_debug, true, __FILE__, fd ? csPrintable(fd->fileName()) : "");
+   printlex(code_fortran_YY_flex_debug, true, __FILE__, fd ? fd->fileName() : "" );
 
    TooltipManager::instance()->clearTooltips();
    s_code = &od;
@@ -30593,7 +30594,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
       s_sourceFileDef = QSharedPointer<FileDef>();
    }
 
-   printlex(code_fortran_YY_flex_debug, false, __FILE__, fd ? fd->fileName(): NULL);
+   printlex(code_fortran_YY_flex_debug, false, __FILE__, fd ? fd->fileName() : "" );
 
    return;
 }

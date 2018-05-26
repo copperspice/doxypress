@@ -2643,7 +2643,7 @@ char *preYYtext;
 #include <QFile>
 #include <QFileInfo>
 #include <QHash>
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QStringList>
 #include <QStack>
 #include <QVector>
@@ -3179,7 +3179,7 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
 static QString extractTrailingComment(const QString &s)
 {
    if (s.isEmpty()) {
-      return "";
+      return QString("");
    }
 
    int i = s.length() - 1;
@@ -3209,7 +3209,7 @@ static QString extractTrailingComment(const QString &s)
                return ((s[i + 1] == '*' || s[i + 1] == '!') && s[i + 2] == '<') ? s.mid(i - 1) : "";
 
             } else {
-               return "";
+               return QString("");
             }
          }
 
@@ -3224,13 +3224,13 @@ static QString extractTrailingComment(const QString &s)
             break;
 
          default:
-            return "";
+            return QString("");
       }
 
       i--;
    }
 
-   return "";
+   return QString("");
 }
 
 static int getNextChar(const QString &expr, QString *rest, uint &pos);
@@ -3311,7 +3311,7 @@ static QString stringize(const QString &s)
  */
 static void processConcatOperators(QString &expr)
 {
-   static QRegExp r("[ \\t\\n]*##[ \\t\\n]*");
+   static QRegularExpression r("[ \\t\\n]*##[ \\t\\n]*");
 
    int l;
    int n;
@@ -3460,7 +3460,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
             } else {
 
                QString argKey;
-               argKey = QString("@%1").arg(argCount++);    // key name
+               argKey = QString("@%1").formatArg(argCount++);    // key name
                arg    = arg.trimmed();
 
                // add argument to the lookup table
@@ -4286,7 +4286,7 @@ static void readIncludeFile(const QString &inc)
          // Deal with file changes due to
          // #include's within { .. } blocks
 
-         QString lineStr = QString("# 1 \"%1\" 1\n").arg(QString(s_yyFileName));
+         QString lineStr = QString("# 1 \"%1\" 1\n").formatArg(QString(s_yyFileName));
          outputArray(lineStr, lineStr.length());
 
          DBG_CTX((stderr, "Switching to include file %s\n", csPrintable(incFileName)));
@@ -6556,7 +6556,7 @@ YY_RULE_SETUP
 
             s_defText += '@';
 
-            QString numStr = QString("%1").arg(n);
+            QString numStr = QString("%1").formatArg(n);
             s_defText += numStr;
 
          } else {
@@ -6836,7 +6836,7 @@ case YY_STATE_EOF(SkipCond):
          // deal with file changes due to
          // #include's within { .. } blocks
 
-         QString lineStr = QString("# %1 \"%2\" 2").arg(s_yyLineNr).arg(QString(s_yyFileName));
+         QString lineStr = QString("# %1 \"%2\" 2").formatArg(s_yyLineNr).formatArg(QString(s_yyFileName));
          outputArray(lineStr, lineStr.length());
       }
    }
@@ -7972,7 +7972,7 @@ void removePreProcessor()
 
 QString preprocessFile(const QString &fileName, const QString &input)
 {
-   printlex(preYY_flex_debug, true, __FILE__, csPrintable(fileName) );
+   printlex(preYY_flex_debug, true, __FILE__, fileName);
 
    s_macroExpansion   = Config::getBool("macro-expansion");
    s_expandOnlyPredef = Config::getBool("expand-only-predefined");
@@ -8021,7 +8021,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
             // predefined function macro definition
 
             // regexp matching an id
-            static QRegExp reId("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
+            static QRegularExpression reId("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
             QHash<QString, int> argDict;
 
             int count = 0;
@@ -8061,7 +8061,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
                if (iter != argDict.end()) {
                   int argIndex = iter.value();
 
-                  QString marker = QString(" @%1 ").arg(argIndex);
+                  QString marker = QString(" @%1 ").formatArg(argIndex);
                   definition += marker;
 
                } else {
@@ -8145,7 +8145,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
       QString sectionInfo = " ";
 
       if (ctx->sectionId != " ") {
-         sectionInfo = QString(" with label %1 ").arg(QString(ctx->sectionId));
+         sectionInfo = QString(" with label %1 ").formatArg(QString(ctx->sectionId));
       }
 
       warn(fileName, ctx->lineNr, "Conditional section %s does not have "
@@ -8156,7 +8156,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
    forceEndCondSection();
 
    DefineManager::instance().endContext();
-   printlex(preYY_flex_debug, false, __FILE__, csPrintable(fileName));
+   printlex(preYY_flex_debug, false, __FILE__, fileName);
 
    return s_outputString;
 }

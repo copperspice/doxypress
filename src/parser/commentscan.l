@@ -118,9 +118,15 @@ using DocCmdFunc = bool (*)(const QString &name);
 
 struct DocCmdMap
 {
-  const char *cmdName;
-  DocCmdFunc handler;
-  bool endsBrief;
+   DocCmdMap(const char *x1, DocCmdFunc x2, bool x3) {
+      cmdName   = QString::fromUtf8(x1);
+      handler   = x2;
+      endsBrief = x3;
+   }
+
+   QString cmdName;
+   DocCmdFunc handler;
+   bool endsBrief;
 };
 
 // map of command to handler function
@@ -265,35 +271,36 @@ static DocCmdMap docCmdMap[] =
  */
 class DocCmdMapper
 {
- public:
-   struct Cmd {
+  public:
+    struct Cmd {
       DocCmdFunc func;
       bool endsBrief;
-   };
+    };
 
-   /** maps a command name to a handler function */
-   static Cmd *map(const QString &name) {
+    /** maps a command name to a handler function */
+    static Cmd *map(const QString &name) {
       return instance()->find(name);
-   }
+    }
 
-   /** release the singleton */
-   static void freeInstance() {
+    /** release the singleton */
+    static void freeInstance() {
       delete s_instance;
       s_instance = 0;
-   }
+    }
 
   private:
     static DocCmdMapper *instance() {
       if (s_instance == nullptr) {
          s_instance = new DocCmdMapper;
       }
+
       return s_instance;
    }
 
    DocCmdMapper() {
       DocCmdMap *p = docCmdMap;
 
-      while (p->cmdName) {
+      while (! p->cmdName.isEmpty()) {
          if (m_map.contains(p->cmdName)) {
             err("DocCmdMapper: command %s already added\n", p->cmdName);
             Doxy_Work::stopDoxyPress();
@@ -556,7 +563,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       // if we have already an item from the same list type (e.g. a second @todo)
       // in the same Entry (i.e. lii!=0) then we reuse its link anchor.
 
-      QString anchorLabel = QString("_%1%2").arg(listName).arg(itemId, 6, 10, QChar('0'));
+      QString anchorLabel = QString("_%1%2").formatArg(listName).formatArg(itemId, 6, 10, QChar('0'));
 
       RefItem *item = refList->getRefItem(itemId);
       assert(item != 0);
@@ -570,7 +577,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       item->listAnchor = anchorLabel;
       docEntry->addSpecialListItem(listName, itemId);
 
-      QString cmdString = QString("\\xrefitem %1 %2.").arg(listName).arg(itemId);
+      QString cmdString = QString("\\xrefitem %1 %2.").formatArg(listName).formatArg(itemId);
 
       if (inBody) {
          docEntry->appendData(EntryKey::Inbody_Docs, cmdString);
@@ -615,13 +622,13 @@ static QString addFormula()
       Doxy_Globals::formulaList.append(temp);
       Doxy_Globals::formulaDict.insert(fText, temp);
 
-      formLabel = QString("\\form#%1").arg(temp.getId());
+      formLabel = QString("\\form#%1").formatArg(temp.getId());
 
       Doxy_Globals::formulaNameDict.insert(formLabel, temp);
       f = Doxy_Globals::formulaDict.find(fText);
 
    } else {
-      formLabel = QString("\\form#%1").arg(f->getId());
+      formLabel = QString("\\form#%1").formatArg(f->getId());
 
    }
 
@@ -1778,13 +1785,17 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
-<GroupDocArg2>"\\"{B}*"\n"       {
+<GroupDocArg1>.				   {
+      // ignore other stuff
+   }
+
+<GroupDocArg2>"\\"{B}*"\n"    {
       // line continuation
       yyLineNr++;
       addToOutput('\n');
    }
 
-<GroupDocArg2>[^\n\\\*]+      {
+<GroupDocArg2>[^\n\*]+        {
       // title (stored in type)
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text.trimmed());
@@ -2308,13 +2319,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <FormatBlock><<EOF>>          {
-      QString endTag = "@end" + blockName;
+      QString endTag = "end" + blockName;
 
       if (blockName == "startuml") {
          endTag = "enduml";
       }
 
-      warn(yyFileName, yyLineNr, "Reached end of comment while inside a @%s block, check for missing @%s tag",
+      warn(yyFileName, yyLineNr, "Reached end of comment while inside a \\%s block, check for missing \\%s tag",
                  csPrintable(blockName), csPrintable(endTag) );
 
       yyterminate();
@@ -2424,7 +2435,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SkipGuardedSection>{CMD}"endif"/{NW}  {
       if (s_guards.isEmpty()) {
-         warn(yyFileName,yyLineNr, "Found @endif without matching start command");
+         warn(yyFileName,yyLineNr, "Found \\endif without matching start command");
 
        } else {
          GuardedSection s   = s_guards.pop();
@@ -2439,7 +2450,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SkipGuardedSection>{CMD}"else"/{NW}   {
       if (s_guards.isEmpty()) {
-         warn(yyFileName, yyLineNr, "Found @else without matching start command");
+         warn(yyFileName, yyLineNr, "Found \\else without matching start command");
 
       } else {
 
@@ -2455,7 +2466,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SkipGuardedSection>{CMD}"elseif"/{NW}  {
       if (s_guards.isEmpty()) {
-         warn(yyFileName,yyLineNr, "Found @elseif without matching start command");
+         warn(yyFileName,yyLineNr, "Found \\elseif without matching start command");
 
        } else {
 
