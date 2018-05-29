@@ -411,7 +411,7 @@ void DirDef::writeDocumentation(OutputList &ol)
    ol.pushGeneratorState();
 
    QString title = theTranslator->trDirReference(m_dispName);
-   startFile(ol, getOutputFileBase(), name(), title, HLI_None, !generateTreeView);
+   startFile(ol, getOutputFileBase(), name(), title, HLI_None, ! generateTreeView);
 
    if (! generateTreeView) {
       // write navigation path
@@ -873,7 +873,7 @@ void buildDirectories()
    for (auto &fn : Doxy_Globals::inputNameList) {
       for (auto fd : *fn) {
 
-         if (fd->getReference().isEmpty()) {
+         if (fd->getReference().isEmpty() && fd->isDocumentationFile() ) {
             QSharedPointer<DirDef> dir;
 
             if ((dir = Doxy_Globals::directories.find(fd->getPath())) == 0) {
@@ -881,7 +881,7 @@ void buildDirectories()
                dir = DirDef::mergeDirectoryInTree(fd->getPath());
             }
 
-            if (dir && ! fd->isDocumentationFile()) {
+            if (dir) {
                dir->addFile(fd);
             }
 

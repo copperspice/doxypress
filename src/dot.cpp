@@ -1397,12 +1397,12 @@ bool DotManager::run()
    return true;
 }
 
-// helper function that deletes all nodes in a connected graph, given one of the graph's nodes
-static void deleteNodes(DotNode *node, StringMap<QSharedPointer<DotNode>> *skipNodes = nullptr)
+// deletes all nodes in a connected graph, given one of the graph's nodes
+static void deleteNodes(DotNode *node)
 {
    static SortedList<DotNode *> deletedNodes;
 
-   node->deleteNode(deletedNodes, skipNodes);    // collect nodes to be deleted
+   node->deleteNode(deletedNodes);               // collect nodes to be deleted
    deletedNodes.clear();                         // actually remove the nodes
 }
 
@@ -1467,7 +1467,7 @@ void DotNode::removeParent(DotNode *n)
    }
 }
 
-void DotNode::deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes)
+void DotNode::deleteNode(SortedList<DotNode *> &deletedList)
 {
    if (m_deleted) {
       return;   // avoid recursive loops in case the graph has cycles
@@ -1479,7 +1479,7 @@ void DotNode::deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPo
       // delete all parent nodes of this node
 
       for (auto pn : *m_parents) {
-         pn->deleteNode(deletedList, skipNodes);
+         pn->deleteNode(deletedList);
       }
    }
 
@@ -1487,14 +1487,12 @@ void DotNode::deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPo
       // delete all child nodes of this node
 
       for (auto cn : *m_children) {
-         cn->deleteNode(deletedList, skipNodes);
+         cn->deleteNode(deletedList);
       }
    }
 
    // add this node to the list of deleted nodes
-   if (skipNodes == nullptr || skipNodes->find((char *)this) == 0) {            // BROOM - ????
-      deletedList.append(this);
-   }
+   deletedList.append(this);
 }
 
 void DotNode::setDistance(int distance)
@@ -1506,54 +1504,67 @@ void DotNode::setDistance(int distance)
 
 static QString convertLabel(const QString &label)
 {
-   QString result = "";
+   QString retval = "";
 
    if (label.isEmpty()) {
-      return result;
+      return retval;
    }
 
    QString bBefore("\\_/<({[: =-+@%#~?$"); // break before character set
    QString bAfter(">]),:;|");              // break after  character set
 
-   const QChar *p = label.constData();
+   QString::const_iterator iter = label.constBegin();
+   QChar prevChar = '\0';
 
-   QChar c;
-   QChar pc = 0;
-
-   int len = label.length();
-
+   int len       = label.length();
    int charsLeft = len;
    int sinceLast = 0;
-   int foldLen   = 17; // ideal text length
+   int foldLen   = 17;          // ideal text length
 
-   while ((c = *p++) != 0) {
+   for (QChar c : label) {
+
+      ++iter;
+      QChar nextChar = '\0';
+
+      if (iter != label.constEnd()) {
+         nextChar = *iter;
+      }
+
       QString replacement;
 
       switch (c.unicode()) {
          case '\\':
             replacement = "\\\\";
             break;
+
          case '\n':
             replacement = "\\n";
             break;
+
          case '<':
             replacement = "\\<";
             break;
+
          case '>':
             replacement = "\\>";
             break;
+
          case '|':
             replacement = "\\|";
             break;
+
          case '{':
             replacement = "\\{";
             break;
+
          case '}':
             replacement = "\\}";
             break;
+
          case '"':
             replacement = "\\\"";
             break;
+
          default:
             replacement = c;
             break;
@@ -1563,38 +1574,38 @@ static QString convertLabel(const QString &label)
       // boxes and at the same time prevent ugly breaks
 
       if (c == '\n') {
-         result += replacement;
-         foldLen = (3 * foldLen + sinceLast + 2) / 4;
+         retval    += replacement;
+         foldLen   = (3 * foldLen + sinceLast + 2) / 4;
          sinceLast = 1;
 
-      } else if ((pc != ':' || c != ':') && charsLeft > foldLen / 3 && sinceLast > foldLen && bBefore.contains(c)) {
-         result += "\\l";
-         result += replacement;
-         foldLen = (foldLen + sinceLast + 1) / 2;
+      } else if ((prevChar != ':' || c != ':') && charsLeft > foldLen / 3 && sinceLast > foldLen && bBefore.contains(c)) {
+         retval    += "\\l";
+         retval    += replacement;
+         foldLen   = (foldLen + sinceLast + 1) / 2;
          sinceLast = 1;
 
-      } else if (charsLeft > 1 + foldLen / 4 && sinceLast > foldLen + foldLen / 3 && ! c.isUpper() && p->isUpper()) {
-         result += replacement;
-         result += "\\l";
-         foldLen = (foldLen + sinceLast + 1) / 2;
+      } else if (charsLeft > 1 + foldLen / 4 && sinceLast > foldLen + foldLen / 3 && ! c.isUpper() && nextChar.isUpper()) {
+         retval    += replacement;
+         retval    += "\\l";
+         foldLen   = (foldLen + sinceLast + 1) / 2;
          sinceLast = 0;
 
-      } else if (charsLeft > foldLen / 3 && sinceLast > foldLen && bAfter.contains(c) && (c != ':' || *p != ':')) {
-         result += replacement;
-         result += "\\l";
-         foldLen = (foldLen + sinceLast + 1) / 2;
+      } else if (charsLeft > foldLen / 3 && sinceLast > foldLen && bAfter.contains(c) && (c != ':' || nextChar != ':')) {
+         retval    += replacement;
+         retval    += "\\l";
+         foldLen   = (foldLen + sinceLast + 1) / 2;
          sinceLast = 0;
 
       } else {
-         result += replacement;
-         sinceLast++;
+         retval   += replacement;
+         ++sinceLast;
       }
 
-      charsLeft--;
-      pc = c;
+      --charsLeft;
+      prevChar = c;
    }
 
-   return result;
+   return retval;
 }
 
 static QString escapeTooltip(const QString &tooltip)

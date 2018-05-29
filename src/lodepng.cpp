@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -2706,7 +2706,7 @@ unsigned LodePNG_InfoRaw_copy(LodePNG_InfoRaw *dest, const LodePNG_InfoRaw *sour
    *dest = *source;
    LodePNG_InfoColor_init(&dest->color);
    error = LodePNG_InfoColor_copy(&dest->color, &source->color);
-  
+
    return error;
 }
 
@@ -2869,7 +2869,7 @@ unsigned LodePNG_convert(unsigned char *out, const unsigned char *in, LodePNG_In
          }
       }
 
-   } else if (LodePNG_InfoColor_isGreyscaleType(infoOut) && infoOut->bitDepth == 8) { 
+   } else if (LodePNG_InfoColor_isGreyscaleType(infoOut) && infoOut->bitDepth == 8) {
       // conversion from grayscale to grayscale
 
       if (! LodePNG_InfoColor_isGreyscaleType(infoIn)) {
@@ -4538,12 +4538,15 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
    unsigned char *data = 0; /*uncompressed version of the IDAT chunk data*/
    size_t datasize = 0;
 
-   /*provide some proper output values if error will happen*/
-   *out = 0;
+   // provide some proper output values if error will happen
+   *out     = 0;
    *outsize = 0;
    encoder->error = 0;
 
-   info = encoder->infoPng; /*UNSAFE copy to avoid having to cleanup! but we will only change primitive parameters, and not invoke the cleanup function nor touch the palette's buffer so we use it safely*/
+   // UNSAFE copy to avoid having to cleanup, but we will only change primitive parameters, and not invoke the cleanup
+   //function nor touch the palette's buffer so we use it safely
+   info = encoder->infoPng;
+
    info.width = w;
    info.height = h;
 
@@ -4560,10 +4563,12 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
       encoder->error = 60;   /*error: windowsize larger than allowed*/
       return;
    }
+
    if (encoder->settings.zlibsettings.btype > 2) {
       encoder->error = 61;   /*error: unexisting btype*/
       return;
    }
+
    if (encoder->infoPng.interlaceMethod > 1) {
       encoder->error = 71;   /*error: unexisting interlace mode*/
       return;
@@ -4591,22 +4596,31 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
          encoder->error = LodePNG_convert(converted, image, &info.color, &encoder->infoRaw.color, w, h);
       }
       if (!encoder->error) {
-         preProcessScanlines(&data, &datasize, converted, &info);   /*filter(data.data, converted.data, w, h, LodePNG_InfoColor_getBpp(&info.color));*/
+         preProcessScanlines(&data, &datasize, converted, &info);
+         /*filter(data.data, converted.data, w, h, LodePNG_InfoColor_getBpp(&info.color));*/
       }
+
       free(converted);
+
    } else {
-      preProcessScanlines(&data, &datasize, image, &info);   /*filter(data.data, image, w, h, LodePNG_InfoColor_getBpp(&info.color));*/
+      preProcessScanlines(&data, &datasize, image, &info);
+      /*filter(data.data, image, w, h, LodePNG_InfoColor_getBpp(&info.color));*/
    }
 
    ucvector_init(&outv);
-   while (!encoder->error) { /*not really a while loop, this is only used to break out if an error happens to avoid goto's to do the ucvector cleanup*/
+   while (!encoder->error) {
+      /*not really a while loop, this is only used to break out if an error happens to avoid goto's to do the ucvector cleanup*/
+
 #ifdef LODEPNG_COMPILE_ANCILLARY_CHUNKS
       size_t i;
-#endif /*LODEPNG_COMPILE_ANCILLARY_CHUNKS*/
+#endif
+
       /*write signature and chunks*/
       writeSignature(&outv);
+
       /*IHDR*/
       addChunk_IHDR(&outv, w, h, info.color.bitDepth, info.color.colorType, info.interlaceMethod);
+
 #ifdef LODEPNG_COMPILE_UNKNOWN_CHUNKS
       /*unknown chunks between IHDR and PLTE*/
       if (info.unknown_chunks.data[0]) {
@@ -4615,7 +4629,8 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
             break;
          }
       }
-#endif /*LODEPNG_COMPILE_UNKNOWN_CHUNKS*/
+#endif
+
       /*PLTE*/
       if (info.color.colorType == 3) {
          if (info.color.palettesize == 0 || info.color.palettesize > 256) {
@@ -4624,6 +4639,7 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
          }
          addChunk_PLTE(&outv, &info.color);
       }
+
       if (encoder->settings.force_palette && (info.color.colorType == 2 || info.color.colorType == 6)) {
          if (info.color.palettesize == 0 || info.color.palettesize > 256) {
             encoder->error = 68;
@@ -4631,6 +4647,7 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
          }
          addChunk_PLTE(&outv, &info.color);
       }
+
       /*tRNS*/
       if (info.color.colorType == 3 && !isPaletteFullyOpaque(info.color.palette, info.color.palettesize)) {
          addChunk_tRNS(&outv, &info.color);
@@ -4802,7 +4819,7 @@ void LodePNG_Encoder_copy(LodePNG_Encoder *dest, const LodePNG_Encoder *source)
 
 #ifdef LODEPNG_COMPILE_DISK
 
-unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,const char *filename) 
+unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,const char *filename)
 {
    /*designed for loading files from hard disk in a dynamically allocated buffer*/
 

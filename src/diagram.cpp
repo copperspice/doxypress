@@ -206,13 +206,16 @@ static QString protToString(Protection p)
    switch (p) {
       case Public:
          retval = "solid";
+         break;
 
-      case Package: // package is not possible!
+      case Package:             // package is not possible
       case Protected:
          retval = "dashed";
+         break;
 
       case Private:
          retval = "dotted";
+         break;
    }
 
    return retval;

@@ -75,7 +75,7 @@ class DotNode
                  const QString &edgeLab = QString(), const QString &edgeURL = QString(), int edgeLabCol = -1);
 
    void addParent(DotNode *n);
-   void deleteNode(SortedList<DotNode *> &deletedList, StringMap<QSharedPointer<DotNode>> *skipNodes = 0);
+   void deleteNode(SortedList<DotNode *> &deletedList);
    void removeChild(DotNode *n);
    void removeParent(DotNode *n);
    int findParent( DotNode *n );

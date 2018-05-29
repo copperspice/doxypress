@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -300,7 +300,7 @@ void Image::writeString(int x, int y, const QString &text, uchar fg)
    if (! text.isEmpty()) {
 
       QByteArray tmp = text.toUtf8();
-      const char *s  = tmp.constData();    
+      const char *s  = tmp.constData();
 
       char c;
 
@@ -316,9 +316,9 @@ uint Image::stringLength(const QString &text)
    int w = 0;
 
    if (! text.isEmpty()) {
-      
+
       QByteArray tmp = text.toUtf8();
-      const char *s  = tmp.constData();  
+      const char *s  = tmp.constData();
 
       char c;
 
@@ -348,7 +348,7 @@ void Image::drawHorzLine(int y, int xs, int xe, uchar colIndex, uint mask)
 void Image::drawHorzArrow(int y, int xs, int xe, uchar colIndex, uint mask)
 {
    drawHorzLine(y, xs, xe, colIndex, mask);
-   
+
    for (int i = 0; i < 6; i++) {
       int h = i >> 1;
       drawVertLine(xe - i, y - h, y + h, colIndex, 0xffffffff);
@@ -369,7 +369,7 @@ void Image::drawVertLine(int x, int ys, int ye, uchar colIndex, uint mask)
 void Image::drawVertArrow(int x, int ys, int ye, uchar colIndex, uint mask)
 {
    drawVertLine(x, ys, ye, colIndex, mask);
-   
+
    for (int i = 0; i < 6; i++) {
       int h = i >> 1;
       drawHorzLine(ys + i, x - h, x + h, colIndex, 0xffffffff);
@@ -411,13 +411,13 @@ QByteArray Image::convert(int mode)
    int numCols;
 
    if (mode == 0) {
-      numCols = 8; 
+      numCols = 8;
    } else {
       numCols = 16;
    }
 
    Color *pPal = mode == 0  ? palette  : useTransparency ? palette2 : palette3 ;
- 
+
    for (int i = 0; i < numCols; i++, pPal++) {
       LodePNG_InfoColor_addPalette(&encoder.infoPng.color, pPal->red, pPal->green, pPal->blue, pPal->alpha);
    }
@@ -428,7 +428,7 @@ QByteArray Image::convert(int mode)
    LodePNG_encode(&encoder, &buffer, &bufferSize, data, width, height);
 
    QByteArray retval = QByteArray( (const char *)buffer, bufferSize);
-   
+
    free(buffer);
    LodePNG_Encoder_cleanup(&encoder);
 
@@ -504,10 +504,10 @@ ColoredImage::ColoredImage(int width, int height, const uchar *greyLevels, const
    m_width    = width;
    m_height   = height;
    m_data     = (uchar *)malloc(width * height * 4);
-    
+
    for (int i = 0; i < width * height; i++) {
       uchar r, g, b, a;
-      double red, green, blue;      
+      double red, green, blue;
 
       // hue, saturation, luma (gamma corrected)
       double temp = pow(greyLevels[i]/255.0, gamma/100.0);
@@ -531,23 +531,23 @@ ColoredImage::~ColoredImage()
 }
 
 QByteArray ColoredImage::convert()
-{ 
+{
    uchar *buffer;
    size_t bufferSize;
 
    LodePNG_Encoder encoder;
    LodePNG_Encoder_init(&encoder);
 
-   // 2=RGB 24 bit, 6=RGBA 32 bit
-   encoder.infoPng.color.colorType = m_hasAlpha ? 6 : 2; 
+   // 2 = RGB 24 bit, 6 = RGBA 32 bit
+   encoder.infoPng.color.colorType = m_hasAlpha ? 6 : 2;
 
-   // 6=RGBA 32 bit
-   encoder.infoRaw.color.colorType = 6; 
-   
+   // 6 = RGBA 32 bit
+   encoder.infoRaw.color.colorType = 6;
+
    LodePNG_encode(&encoder, &buffer, &bufferSize, m_data, m_width, m_height);
- 
+
    QByteArray retval = QByteArray((const char *)buffer, bufferSize);
-        
+
    LodePNG_Encoder_cleanup(&encoder);
    free(buffer);
 

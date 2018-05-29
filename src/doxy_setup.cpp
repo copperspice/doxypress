@@ -356,7 +356,7 @@ struct CommandLine parseCommandLine(QStringList argList)
             exit(0);
 
          case DVERSION:
-            printf("\nDoxyPress Version: %s\n", versionString);
+            printf("\nDoxyPress Version: %s\n", csPrintable(versionString));
             printf("email: info@copperspice.com\n");
             exit(0);
       }
@@ -371,7 +371,7 @@ struct CommandLine parseCommandLine(QStringList argList)
 void readConfiguration(struct CommandLine cmdArgs)
 {
    // parse project file
-   printf("\nDoxyPress Version: %s\n\n", versionString);
+   printf("\nDoxyPress Version: %s\n\n", csPrintable(versionString));
 
    if (cmdArgs.generateLayout) {
       writeDefaultLayoutFile(cmdArgs.layoutName);
