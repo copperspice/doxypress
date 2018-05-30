@@ -1189,7 +1189,7 @@ void generateOutput()
       QString qhpFileName = Qhp::getQhpFileName();
       QString qchFileName = getQchFileName();
 
-      QString args = QString("%1 -o \"%2\"").arg(qhpFileName).arg(qchFileName);
+      QString args = QString("%1 -o \"%2\"").formatArgs(qhpFileName, qchFileName);
 
       QString const oldDir = QDir::currentPath();
       QDir::setCurrent(htmlOutput);
@@ -1367,7 +1367,7 @@ void Doxy_Work::addSTLClasses(QSharedPointer<Entry> ptrEntry)
    STLInfo *info = g_stlinfo;
 
    while (info->className) {
-      QString fullName = info->className;
+      QString fullName = QString::fromLatin1(info->className);
       fullName.prepend("std::");
 
       // add fake Entry for the class
@@ -1408,11 +1408,11 @@ void Doxy_Work::addSTLClasses(QSharedPointer<Entry> ptrEntry)
 
       // add member variables
       if (info->templName1) {
-         addSTLMember(classEntry, info->templType1, info->templName1);
+         addSTLMember(classEntry, QString::fromLatin1(info->templType1), QString::fromLatin1(info->templName1));
       }
 
       if (info->templName2) {
-         addSTLMember(classEntry, info->templType2, info->templName2);
+         addSTLMember(classEntry, QString::fromLatin1(info->templType2), QString::fromLatin1(info->templName2));
       }
 
       if (fullName == "std::auto_ptr" || fullName == "std::smart_ptr" ||
@@ -1434,11 +1434,13 @@ void Doxy_Work::addSTLClasses(QSharedPointer<Entry> ptrEntry)
       }
 
       if (info->baseClass1) {
-         classEntry->extends.append(BaseInfo(info->baseClass1, Public, info->virtualInheritance ? Virtual : Normal));
+         classEntry->extends.append(BaseInfo(QString::fromLatin1(info->baseClass1), Public, info->virtualInheritance
+                  ? Specifier::Virtual : Specifier::Normal));
       }
 
       if (info->baseClass2) {
-         classEntry->extends.append(BaseInfo(info->baseClass2, Public, info->virtualInheritance ? Virtual : Normal));
+         classEntry->extends.append(BaseInfo(QString::fromLatin1(info->baseClass2), Public, info->virtualInheritance
+                  ? Specifier::Virtual : Specifier::Normal));
       }
 
       if (info->iterators) {
@@ -1689,7 +1691,7 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
          const QString fn = root->getData(EntryKey::File_Name);
 
          QString text;
-         text = QString("Name `%1' supplied as the second argument in the \\file statement ").arg(QString(root->m_entryName));
+         text = QString("Name `%1' supplied as the second argument in the \\file statement ").formatArg(root->m_entryName);
 
          if (ambig) {
             // name is ambiguous
@@ -1703,7 +1705,7 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
             text += "is not an input file";
          }
 
-         warn(fn, root->startLine, csPrintable(text));
+         warn(fn, root->startLine, text);
       }
    }
 
@@ -1741,8 +1743,8 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
       if (! includeFile.isEmpty() && (fd = findFileDef(&Doxy_Globals::inputNameDict, includeFile, ambig)) == nullptr) {
          // explicit request
 
-         QString text = QString("the name `%1' supplied as the argument of the \\class, \\struct, \\union, or \\include command ").
-                        arg( QString(includeFile) );
+         QString text = QString("the name `%1' supplied as the argument of the \\class, \\struct, \\union, or \\include command ")
+                        .formatArg(includeFile);
 
          if (ambig) {
             // name is ambiguous
@@ -1756,7 +1758,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
             text += "is not an input file\n";
          }
 
-         warn(root->getData(EntryKey::File_Name), root->startLine, csPrintable(text) );
+         warn(root->getData(EntryKey::File_Name), root->startLine, text);
 
       } else if (includeFile.isEmpty() && ifd && determineSection(ifd->name()) == Entry::HEADER_SEC) {
          fd = ifd;
@@ -1801,11 +1803,11 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
          if (fd->generateSourceFile()) {
             // generate code for header
-            cd->setIncludeFile(fd, csPrintable(iName), local_inc, ! root->getData(EntryKey::Include_Name).isEmpty());
+            cd->setIncludeFile(fd, iName, local_inc, ! root->getData(EntryKey::Include_Name).isEmpty());
 
          } else {
             // put #include in the class documentation without link
-            cd->setIncludeFile(QSharedPointer<FileDef>(), csPrintable(iName), local_inc, true);
+            cd->setIncludeFile(QSharedPointer<FileDef>(), iName, local_inc, true);
 
          }
       }
@@ -3361,7 +3363,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
    QSharedPointer<FileDef>    fd;
    QSharedPointer<Entry>      root = ptrEntry->entry();
 
-    int ti;
+   int ti;
    bool outerBreak = false;
 
    do {
@@ -3402,7 +3404,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
 
       if (typeIsClass) {
          // need to check if the arguments are types or values.
-         // Since we do not have complete type info, need on heuristics
+         // since we do not have complete type info, need on heuristics
 
          const ArgumentList &argList = root->argList;
 
@@ -6020,7 +6022,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
             for (const auto &md : *memberList) {
                warnMsg += "  '";
                warnMsg += substitute(md->declaration(), "%", "%%");
-               warnMsg += "' at line " + QString().setNum(md->getDefLine()) + " in file " + md->getDefFileName() + "\n";
+               warnMsg += "' at line " + QString::number(md->getDefLine()) + " in file " + md->getDefFileName() + "\n";
             }
          }
 
@@ -6857,8 +6859,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                            }
 
                            if (noMatchCount > 1) {
-                              warnMsg += "' at line " + QString().setNum(md->getDefLine()) +
-                                         " of file " + md->getDefFileName();
+                              warnMsg += "' at line " + QString::number(md->getDefLine()) +  " of file " + md->getDefFileName();
                            }
 
                            warnMsg += '\n';
@@ -9053,7 +9054,7 @@ void Doxy_Work::buildExampleList(QSharedPointer<Entry> ptrEntry)
                   root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Member_Args));
 
          pd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-         pd->setFileName(csPrintable(convertNameToFile_X(pd->name() + "-example", false, true)));
+         pd->setFileName(convertNameToFile_X(pd->name() + "-example", false, true));
          pd->addSectionsToDefinition(root->m_anchors);
          pd->setLanguage(root->m_srcLang);
 
@@ -9122,7 +9123,7 @@ void Doxy_Work::generateGroupDocs()
 //  writePackageIndex(*g_outputList);
 //
 //  if (Doxy_Globals::packageDict.count() > 0)  {
-//    PackageSDict::Iterator pdi(Doxy_Globals::packageDict);
+//    PackageSDict::iterator pdi(Doxy_Globals::packageDict);
 //    QSharedPointer<PackageDef pd;
 //
 //    for (pdi.toFirst();(pd=pdi.current());++pdi) //
@@ -9409,7 +9410,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root)
                }
 
                if (file != fName && ! processedFiles.contains(file)) {
-                  QSharedPointer<FileDef> ifd = findFileDef(&Doxy_Globals::inputNameDict, csPrintable(file), ambig);
+                  QSharedPointer<FileDef> ifd = findFileDef(&Doxy_Globals::inputNameDict, file, ambig);
 
                   if (ifd && ! ifd->isReference()) {
                      QStringList moreFiles;

@@ -1117,7 +1117,8 @@ QString ClangParser::lookup(uint line, const QString &symbol)
             CXCursor c   = p->cursors[p->curToken];
             CXString usr = clang_getCursorUSR(c);
 
-            retval = clang_getCString(usr);
+            retval = QString::fromLatin1(clang_getCString(usr));
+
             clang_disposeString(usr);
             found = true;
 
@@ -1208,12 +1209,12 @@ void ClangParser::linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef
       c = t;
    }
 
-   CXString usr = clang_getCursorUSR(c);
-   const char *usrStr = clang_getCString(usr);
+   CXString usr   = clang_getCursorUSR(c);
+   QString usrStr = QString::fromLatin1(clang_getCString(usr));
 
    QSharedPointer<Definition> d;
 
-   if (usrStr) {
+   if (! usrStr.isEmpty()) {
       d = Doxy_Globals::clangUsrMap.value(usrStr);
    }
 

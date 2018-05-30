@@ -55,7 +55,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
       return 1;
    }
 
-   if (fullCmd.at(0) != '"' && fullCmd.contains(' ')) {
+   if (! fullCmd.startsWith('"') && fullCmd.contains(' ')) {
       // add quotes around command as it contains spaces and is not quoted already
       fullCmd = "\"" + fullCmd + "\"";
    }
@@ -75,13 +75,11 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    }
 
    if (pid == 0) {
-      QByteArray tempCmd = fullCmd.toUtf8();
-
       const char *argv[4];
 
       argv[0] = "sh";
       argv[1] = "-c";
-      argv[2] = tempCmd.constData();
+      argv[2] = fullCmd.constData();
       argv[3] = 0;
 
       execve("/bin/sh", (char *const *)argv, environ);
@@ -107,7 +105,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    // Windows
 
    if (commandHasConsole) {
-      return system(fullCmd.toUtf8().constData());
+      return system(fullCmd.constData());
 
    } else {
       CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
@@ -118,19 +116,19 @@ int portable_system(const QString &command, const QString &args, bool commandHas
          // wait till the process is  done, do not display msg box if there is an error
          SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,
 
-         NULL,                       /* window handle */
-         NULL,                       /* action to perform: open */
-         (LPCWSTR)command.utf16(),   /* file to execute */
-         (LPCWSTR)args.utf16(),      /* argument list */
-         NULL,                       /* use current working dir */
-         SW_HIDE,                    /* minimize on start-up */
-         0,                          /* application instance handle */
-         NULL,                       /* ignored: id list */
-         NULL,                       /* ignored: class name */
-         NULL,                       /* ignored: key class */
-         0,                          /* ignored: hot key */
-         NULL,                       /* ignored: icon */
-         NULL                        /* resulting application handle */
+         NULL,                               /* window handle */
+         NULL,                               /* action to perform: open */
+         command.toStdWString().c_str(),     /* file to execute */
+         args.toStdWString().c_str(),        /* argument list */
+         NULL,                               /* use current working dir */
+         SW_HIDE,                            /* minimize on start-up */
+         0,                                  /* application instance handle */
+         NULL,                               /* ignored: id list */
+         NULL,                               /* ignored: class name */
+         NULL,                               /* ignored: key class */
+         0,                                  /* ignored: hot key */
+         NULL,                               /* ignored: icon */
+         NULL                                /* resulting application handle */
       };
 
       if (! ShellExecuteExW(&sInfo)) {
@@ -178,35 +176,26 @@ uint portable_pid()
 
 void portable_setenv(const QString &name_T, const QString &value_T)
 {
-
 #ifdef HAVE_WINDOWS_H
+   // windows only
 
-   std::vector<wchar_t> name;
-   name.resize(name_T.length() + 1);
-   name_T.toWCharArray(&name[0]);
-   name[name_T.length()] = 0;
-
-   std::vector<wchar_t> value;
-   value.resize(value_T.length() + 1);
-   value_T.toWCharArray(&value[0]);
-   value[value_T.length()] = 0;
+   std::wstring name  = name_T.toStdWString();
+   std::wstring value = value_T.toStdWString();
 
    SetEnvironmentVariableW(&name[0], &value[0]);
 
 #else
-   QByteArray name  = name_T.toUtf8();
-   QByteArray value = value_T.toUtf8();
-
    char **ep = 0;
    size_t size;
 
-   const size_t namelen = name.length();
-   const size_t vallen  = value.size() + 1;
+   const size_t namelen = name_T.size_storage();
+   const size_t vallen  = value_T.size_storage() + 1;
 
    size = 0;
    if (environ != 0) {
+
       for (ep = environ; *ep; ++ep) {
-         if (! qstrncmp (*ep, name.constData(), (uint)namelen) && (*ep)[namelen] == '=') {
+         if (! qstrncmp (*ep, name_T.constData(), namelen) && (*ep)[namelen] == '=') {
             break;
          } else {
             ++size;
@@ -214,11 +203,12 @@ void portable_setenv(const QString &name_T, const QString &value_T)
       }
    }
 
-   if (environ == 0 || *ep == 0) { /* add new string */
+   if (environ == 0 || *ep == 0) {
+      // add new string
       char **new_environ;
 
       if (environ == last_environ && environ != 0) {
-         // We allocated this space; we can extend it.
+         // allocated this space, can extend it
          new_environ = (char **) realloc (last_environ, (size + 2) * sizeof (char *));
 
       } else {
@@ -226,7 +216,8 @@ void portable_setenv(const QString &name_T, const QString &value_T)
 
       }
 
-      if (new_environ == 0) { // no more memory
+      if (new_environ == 0) {
+         // no more memory
          return;
       }
 
@@ -240,16 +231,15 @@ void portable_setenv(const QString &name_T, const QString &value_T)
          memcpy ((char *) new_environ, environ, size * sizeof (char *));
       }
 
-      memcpy(new_environ[size], name.constData(), namelen);
+      memcpy(new_environ[size], name_T.constData(), namelen);
       new_environ[size][namelen] = '=';
 
-      memcpy(&new_environ[size][namelen + 1], value.constData(), vallen);
+      memcpy(&new_environ[size][namelen + 1], value_T.constData(), vallen);
       new_environ[size + 1] = 0;
       last_environ = environ = new_environ;
 
    } else {
-      /* replace existing string */
-
+      // replace existing string
       size_t len = qstrlen (*ep);
 
       if (len + 1 < namelen + 1 + vallen) {
@@ -258,46 +248,44 @@ void portable_setenv(const QString &name_T, const QString &value_T)
          if (newString == 0) {
             return;
          }
+
          *ep = newString;
       }
 
-      memcpy(*ep, name.constData(), namelen);
+      memcpy(*ep, name_T.constData(), namelen);
       (*ep)[namelen] = '=';
 
-      memcpy(&(*ep)[namelen + 1], value.constData(), vallen);
+      memcpy(&(*ep)[namelen + 1], value_T.constData(), vallen);
    }
 
 #endif
 }
 
-void portable_unsetenv(const QString &variable)
+void portable_unsetenv(const QString &key)
 {
 
 #ifdef HAVE_WINDOWS_H
+   // windows only
 
-   std::vector<wchar_t> tmp;
-   tmp.resize(variable.length() + 1);
-   variable.toWCharArray(&tmp[0]);
-   tmp[variable.length()] = 0;
-
+   std::wstring tmp = key.toStdWString();
    SetEnvironmentVariableW(&tmp[0], 0);
 
 #else
-  if (! variable.isEmpty() || ! variable.contains('=')) {
-      return; // not properly formatted
+
+  if (key.isEmpty() || key.contains('=')) {
+      // not properly formatted
+      return;
    }
 
-   /* Some systems do not have unsetenv(), so we do it ourselves */
-   QByteArray tmp = variable.toUtf8();
-
-   size_t len = tmp.length();
+   // Some systems do not have unsetenv(), so do it ourselves
+   size_t len = key.size_storage();
 
    char **ep;
    ep  = environ;
 
    while (*ep != nullptr) {
-      if (! qstrncmp(*ep, tmp.constData(), len) && (*ep)[len] == '=') {
-         // found it, remove this pointer by moving later ones back.
+      if (! qstrncmp(*ep, key.constData(), len) && (*ep)[len] == '=') {
+         // found it, remove this pointer by moving later ones back
          char **dp = ep;
 
          do {
@@ -313,9 +301,9 @@ void portable_unsetenv(const QString &variable)
 #endif
 }
 
-QString portable_getenv(const QString &variable)
+QString portable_getenv(const QString &key)
 {
-   return getenv(variable.toUtf8().constData());
+   return QString::fromUtf8(getenv(key.constData()));
 }
 
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence)

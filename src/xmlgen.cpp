@@ -105,12 +105,13 @@ inline void writeXMLString(QTextStream &t, const QString &text)
 
 inline void writeXMLCodeString(QTextStream &t, const QString &text, int &col)
 {
+   static const int tabSize = Config::getInt("tab-size");
+
    for (auto c : text) {
 
       switch (c.unicode()) {
-         case '\t': {
-            static int tabSize = Config::getInt("tab-size");
 
+         case '\t': {
             int spacesToNextTabStop = tabSize - (col % tabSize);
             col += spacesToNextTabStop;
 
@@ -123,26 +124,32 @@ inline void writeXMLCodeString(QTextStream &t, const QString &text, int &col)
             t << "<sp/>";
             col++;
             break;
+
          case '<':
             t << "&lt;";
             col++;
             break;
+
          case '>':
             t << "&gt;";
             col++;
             break;
+
          case '&':
             t << "&amp;";
             col++;
             break;
+
          case '\'':
             t << "&apos;";
             col++;
             break;
+
          case '"':
             t << "&quot;";
             col++;
             break;
+
          case  1:
          case  2:
          case  3:
@@ -2100,32 +2107,36 @@ void generateXML_output()
    QByteArray tmp = ResourceMgr::instance().getAsString("xml/compound.xsd");
 
    QString xmlData = QString::fromUtf8(tmp);
-   const QChar *startLine = xmlData.constData();
+   QString::const_iterator iter = xmlData.constBegin();
 
-   while (*startLine != 0) {
+   while (iter != xmlData.end()) {
       // find end of the line
-      const QChar *endLine = startLine + 1;
+      QString::const_iterator iter_endA = iter + 1;
 
-      while (*endLine != 0 && *(endLine - 1) != '\n') {
-         endLine++;   // skip to end of the line including \n
+      while (iter_endA != xmlData.constEnd()) {
+         QChar c = iter_endA[-1];
+
+         if (c == '\n') {
+            break;
+         } else {
+            ++iter_endA;                        // skip to end of the line including \n
+         }
       }
 
-      int len = endLine - startLine;
-
-      if (len > 0) {
-         QString s;
-         s = QString(startLine, len);
+      if (iter != iter_endA) {
+         QString tmp(iter, iter_endA);
 
          QTextStream t(&f);
 
-         if (s.indexOf("<!-- Automatically insert here the HTML entities -->") != -1) {
+         if (tmp.indexOf("<!-- Automatically insert here the HTML entities -->") != -1) {
             HtmlEntityMapper::instance()->writeXMLSchema(t);
 
          } else {
-            t << s;
+            t << tmp;
          }
       }
-      startLine = endLine;
+
+      iter = iter_endA;
    }
    f.close();
 

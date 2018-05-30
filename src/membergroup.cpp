@@ -268,8 +268,8 @@ QString MemberGroup::anchor() const
       locHeader = "[NOHEADER]";
    }
 
-   QString sigStr;
-   sigStr = QCryptographicHash::hash(locHeader.toUtf8(), QCryptographicHash::Md5).toHex();
+   QByteArray data = QCryptographicHash::hash(locHeader.toUtf8(), QCryptographicHash::Md5).toHex();
+   QString sigStr  = QString::fromLatin1(data);
 
    return "amgrp" + sigStr;
 }
