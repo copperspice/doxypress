@@ -902,11 +902,13 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                   if (isBrief && current->getData(EntryKey::Brief_Docs).isEmpty()) {
                      QString brief;
-                     QRegularExpression reg("([^.]*\\.)\\s(.*)");
 
-                     if (reg.exactMatch(comment)) {
-                        brief   = reg.cap(1);
-                        comment = reg.cap(2);
+                     static QRegularExpression regExp("([^.]*\\.)\\s(.*)",  QPatternOption::ExactMatchOption);
+                     QRegularExpressionMatch match = regExp.match(comment);
+
+                     if (match.hasMatch()) {
+                        brief   = match.captured(1);
+                        comment = match.captured(2);
 
                      } else {
                         brief   = comment;

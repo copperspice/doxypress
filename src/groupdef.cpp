@@ -15,7 +15,7 @@
  *
 *************************************************************************/
 
-#include <QRegExp>
+#include <QRegularExpression>
 
 #include <ctype.h>
 
@@ -78,8 +78,9 @@ void GroupDef::setGroupTitle(const QString &t)
       titleSet = true;
 
    } else {
-      m_title    = name();
-      m_title[0] = m_title[0].toUpper();
+      m_title = name();
+      m_title = upperCaseFirstLetter(std::move(m_title));
+
       titleSet   = false;
    }
 }
@@ -1103,21 +1104,21 @@ void GroupDef::writeDocumentation(OutputList &ol)
    if (Doxy_Globals::searchIndexBase != nullptr) {
       Doxy_Globals::searchIndexBase->setCurrentDoc(self, anchor(), false);
 
-      static QRegExp re("[a-zA-Z_][-a-zA-Z_0-9]*");
-      int i = 0, p = 0, l = 0;
+      static QRegularExpression regExp("[a-zA-Z_][-a-zA-Z_0-9]*");
+      QRegularExpressionMatch match = regExp.match(m_title);
 
-      while ((i = re.indexIn(m_title, p)) != -1) {
-         // foreach word in the title
-         l = re.matchedLength();
+      while (match.hasMatch()) {
+         // for each word in the title
+         auto iter_end = match.capturedLength();
 
-         Doxy_Globals::searchIndexBase->addWord(m_title.mid(i, l), true);
-         p = i + l;
+         Doxy_Globals::searchIndexBase->addWord(match.captured(), true);
+         match = regExp.match(m_title, match.capturedEnd());
       }
    }
 
    Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>(), 0, m_title);
 
-   //---------------------------------------- start flexible part -------------------------------
+   // start flexible part
 
    SrcLangExt lang = getLanguage();
 

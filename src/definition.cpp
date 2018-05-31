@@ -1018,9 +1018,7 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
    ol.popGeneratorState();
 }
 
-/*! Write a reference to the source code fragments in which this
- *  definition is used.
- */
+// write a reference to the source code fragments in which this definition is used
 void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   const QString &text, const MemberSDict &members)
 {
@@ -1037,20 +1035,27 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
       ol.parseText(text);
       ol.docify(" ");
 
-      QString ldefLine = theTranslator->trWriteList(members.count());
-
-      static QRegularExpression marker("@[0-9]+");
-      int index = 0;
-      int newIndex;
-      int matchLen;
-
       auto iter = members.begin();
 
-      // now replace all markers in inheritLine with links to the classes
-      while ((newIndex = marker.indexIn(ldefLine, index)) != -1) {
+      //
+      QString ldefLine = theTranslator->trWriteList(members.count());
 
-         matchLen = marker.matchedLength();
-         ol.parseText(ldefLine.mid(index, newIndex - index));
+      static QRegularExpression regExp_marker("@[0-9]+");
+
+      QString::const_iterator current_iter = ldefLine.constBegin();
+      QString::const_iterator start_iter   = ldefLine.constBegin();
+
+      QRegularExpressionMatch match = regExp_marker.match(ldefLine);
+
+      int matchLen;
+
+      // now replace all markers in inheritLine with links to the classes
+      while (match.hasMatch()) {
+
+         start_iter = match.capturedStart();
+         matchLen   = match.capturedLength();
+
+         ol.parseText(QStringView(current_iter, start_iter));
 
          QSharedPointer<MemberDef> md = iter.value();
 
@@ -1062,11 +1067,11 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                name.prepend(scope + getLanguageSpecificSeparator(m_private->lang));
             }
 
-            if (!md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isPrototype() || md->isSignal() )) {
+            if (! md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isPrototype() || md->isSignal() )) {
                name += "()";
             }
 
-            if (sourceBrowser && !(md->isLinkable() && !refLinkSource) && md->getStartBodyLine() != -1 && md->getBodyDef()) {
+            if (sourceBrowser && ! (md->isLinkable() && !refLinkSource) && md->getStartBodyLine() != -1 && md->getBodyDef()) {
                // for HTML write a real link
 
                ol.pushGeneratorState();
@@ -1142,9 +1147,12 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
             }
          }
 
-         index = newIndex + matchLen;
+         current_iter = match.capturedEnd();
+         match = regExp_marker.match(ldefLine, current_iter);
       }
-      ol.parseText(ldefLine.right(ldefLine.length() - index));
+
+      ol.parseText(QStringView(current_iter, ldefLine.constEnd()));
+
       ol.writeString(".");
       ol.endParagraph();
    }
@@ -1589,9 +1597,8 @@ QString abbreviate(const QString &brief, const QString &name)
       }
    }
 
-   // capitalize first word
    if (! result.isEmpty()) {
-      result.replace(0, 1, result[0].toUpper());
+      result = upperCaseFirstLetter(std::move(result));
    }
 
    return result;

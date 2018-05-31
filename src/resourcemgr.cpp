@@ -79,12 +79,12 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             // replace .lum with .png
 
             // convert file, throw out any line starting with #
-            QRegularExpression regExp_comment("#.*?\\n");
+            QRegularExpression regExp_comment("#.*?\r?\n", QPatternOption::MultilineOption);
 
-            QString data = resData;
+            QString data = QString::fromUtf8(resData);
             data.replace(regExp_comment, "");
 
-            QRegularExpression regExp_blanks("\\s+");
+            QRegularExpression regExp_blanks("\\s+", QPatternOption::MultilineOption);
             QStringList dataList = data.split(regExp_blanks);
 
             int width  = dataList[0].toInteger<int>();
@@ -113,15 +113,15 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
          break;
 
          case ResourceMgr::LumAlpha: {
-            // replace .luma with .png
+            // convert .luma data to outputName.png
 
             // convert file, throw out any line starting with #
-            QRegularExpression regExp_comment("#.*?\\n");
+            QRegularExpression regExp_comment("#.*?\r?\n", QPatternOption::MultilineOption);
 
-            QString data = resData;
+            QString data = QString::fromUtf8(resData);
             data.replace(regExp_comment, "");
 
-            QRegularExpression regExp_blanks("\\s+");
+            QRegularExpression regExp_blanks("\\s+", QPatternOption::MultilineOption);
             QStringList dataList = data.split(regExp_blanks);
 
             int width  = dataList[0].toInteger<int>();
@@ -145,6 +145,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             images.alpha   = p + (width * height);
 
             writeColoredImgData(images);
+
             return true;
          }
          break;

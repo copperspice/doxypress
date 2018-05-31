@@ -394,16 +394,18 @@ static void checkArgumentName(const QString &name, bool isParam)
 
    SrcLangExt lang  = s_memberDef->getLanguage();
 
-   static QRegularExpression re("\\$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
-   int p = 0;
-   int i = 0;
-   int len;
+   static QRegularExpression regExp("\\$?[a-zA-Z0-9_\\x80-\\xFF]+\\.*");
+   QRegularExpressionMatch match = regExp.match(name);
 
-   while ((i = re.indexIn(name, p)) != -1) {
-      // to handle @param x,y
-      len = re.matchedLength();
+   QString::const_iterator current_iter = name.constBegin();
+   QString::const_iterator start_iter   = name.constBegin();
 
-      QString aName = name.mid(i, len);
+   while (match.hasMatch()) {
+      // to handle param x,y
+
+      start_iter = match.capturedStart();
+
+      QString aName = QStringView(current_iter, match.capturedEnd());
 
       if (lang == SrcLangExt_Fortran) {
          aName = aName.toLower();
@@ -464,7 +466,8 @@ static void checkArgumentName(const QString &name, bool isParam)
                         csPrintable(alStr), csPrintable(inheritedFrom));
       }
 
-      p = i + len;
+      current_iter = match.capturedEnd();
+      match = regExp.match(name, current_iter);
    }
 }
 
@@ -893,12 +896,12 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
 
       static QRegularExpression specialChar("[.,|()\\[\\]:;\\?]");
 
-      if (tok == TK_WORD && g_token->name.length() == 1 && specialChar.indexIn(g_token->name) != -1) {
+      if (tok == TK_WORD && g_token->name.length() == 1 && g_token->name.contains(specialChar)) {
          // special character that ends the markup command
          return tok;
       }
 
-      if (!defaultHandleToken(parent, tok, children)) {
+      if (! defaultHandleToken(parent, tok, children)) {
          switch (tok) {
             case TK_COMMAND:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command \\%s as the argument of a \\%s command",

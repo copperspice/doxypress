@@ -3117,15 +3117,12 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
          type = stripPrefix(type, "struct ");
          type = stripPrefix(type, "union ");
 
-         static QRegExp re("[a-z_A-Z][a-z_A-Z0-9]*");
-         int l;
-         int s;
+         static QRegularExpression regExp("[a-z_A-Z][a-z_A-Z0-9]*");
+         QRegularExpressionMatch match = regExp.match(type);
 
-         s = re.indexIn(type, 0);
-         l = re.matchedLength();
+         if (match.hasMatch()) {
+            QString typeValue = match.captured();
 
-         if (s >= 0) {
-            QString typeValue = type.mid(s, l);
             QSharedPointer<ClassDef> cd = getClass(typeValue);
 
             if (cd) {
@@ -3323,23 +3320,29 @@ int Doxy_Work::findFunctionPtr(const QString &type, int lang, int *pLength)
       return -1;   // Fortran does not have function pointers
    }
 
-   static const QRegExp re("\\([^)]*[\\*\\^][^)]*\\)");
+   static const QRegularExpression regExp("\\([^)]*[\\*\\^][^)]*\\)");
+   QRegularExpressionMatch match = regExp.match(type);
 
-   int i  = -1;
-   int len;
-   int bb = type.indexOf('<');
-   int be = type.lastIndexOf('>');
 
-   if (! type.isEmpty() && (i = re.indexIn(type, 0)) != -1 && type.indexOf("operator") == -1 &&
-                  (type.indexOf(")(") == -1 || type.indexOf("typedef ") != -1) && ! (bb < i && i < be) ) {
+   if (match.hasMatch() && ! type.contains("operator")) {
 
-      len = re.matchedLength();
-
-      if (pLength) {
-         *pLength = len;
+      if (type.contains(")(") &&  !type.contains("typedef ")) {
+         return -1;
       }
 
-      return i;
+      auto iter = match.capturedStart();
+      auto bb  = type.indexOfFast('<');
+      auto be  = type.lastIndexOfFast('>');
+
+      if (bb < iter && iter < be) {
+         return -1;
+      }
+
+      if (pLength) {
+         *pLength = match.capturedLength();
+      }
+
+      return match.capturedStart() - type.constBegin();
 
    } else {
       return -1;
@@ -3351,8 +3354,8 @@ int Doxy_Work::findFunctionPtr(const QString &type, int lang, int *pLength)
  */
 bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
 {
-   static QRegExp initChars("[0-9\"'&*!^]+");
-   static QRegExp idChars("[a-z_A-Z][a-z_A-Z0-9]*");
+   static QRegularExpression regExp_init("[0-9\"'&*!^]+");
+   static QRegularExpression regExp_id("[a-z_A-Z][a-z_A-Z0-9]*");
 
    bool result = false;
    bool typeIsClass;
@@ -3414,9 +3417,10 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
          }
 
          for (auto &a : argList) {
+
             if (! a.name.isEmpty() || ! a.defval.isEmpty()) {
 
-               if (initChars.indexIn(a.name) == 0) {
+               if (a.name.indexOf(regExp_init) == 0) {
                   result = true;
 
                } else {
@@ -3453,7 +3457,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
                break;
             }
 
-            if (initChars.indexIn(a.type) == 0) {
+            if (a.type.indexOf(regExp_init) == 0) {
                // argument type starts with typical initializer char
                result = true;
 
@@ -3462,19 +3466,19 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
             }
 
             QString resType = resolveTypeDef(ctx, a.type);
+
             if (resType.isEmpty()) {
                resType = a.type;
             }
 
-            int len;
-            if (idChars.indexIn(resType, 0) == 0) {
+            if (resType.indexOf(regExp_id) == 0) {
                // resType starts with identifier
-               len = idChars.matchedLength();
 
-               resType = resType.left(len);
+               QRegularExpressionMatch match = regExp_id.match(resType);
+               resType = resType.left(match.capturedLength());
 
-               if (resType == "int"    || resType == "long" || resType == "float" ||
-                   resType == "double" || resType == "char" || resType == "signed" ||
+               if (resType == "int"    || resType == "long"     || resType == "float" ||
+                   resType == "double" || resType == "char"     || resType == "signed" ||
                    resType == "const"  || resType == "unsigned" || resType == "void") {
 
                   result = false;
@@ -3516,17 +3520,18 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
       // like in "int *(var[10]);", which is parsed as -->  type="" name="int *" args="(var[10])"
 
       root->getData(EntryKey::Member_Type) = root->m_entryName;
-      static const QRegExp reName("[a-z_A-Z][a-z_A-Z0-9]*");
 
-      int len = 0;
-      int i   = root->getData(EntryKey::Member_Args).isEmpty() ? -1 : reName.indexIn(root->getData(EntryKey::Member_Args), 0);
-      len     = reName.matchedLength();
+      //
+      QString tmpArgs = root->getData(EntryKey::Member_Args);
 
-      if (i != -1) {
-         QString tmpArgs = root->getData(EntryKey::Member_Args);
+      static const QRegularExpression regExp_reName("[a-z_A-Z][a-z_A-Z0-9]*");
+      QRegularExpressionMatch match = regExp_reName.match(tmpArgs);
 
-         root->m_entryName = tmpArgs.mid(i, len);
-         root->setData(EntryKey::Member_Args, tmpArgs.mid(i + len, tmpArgs.indexOf(')', i + len) - i - len));
+      if (match.hasMatch()) {
+         root->m_entryName = match.captured();
+
+         auto iter = tmpArgs.indexOfFast(')', match.capturedEnd());
+         root->setData(EntryKey::Member_Args, QStringView(match.capturedEnd(), iter));
       }
 
    } else {
@@ -3978,15 +3983,23 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    static const bool hideScopeNames = Config::getBool("hide-scope-names");
 
    QSharedPointer<Entry> root = ptrEntry;
-
    QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
-   static QRegExp re("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
-   int ts = root->getData(EntryKey::Member_Type).indexOf('<');
-   int te = root->getData(EntryKey::Member_Type).lastIndexOf('>');
+   QString memberType = root->getData(EntryKey::Member_Type);
 
-   int i   = re.indexIn(root->getData(EntryKey::Member_Type), 0);
-   int len = re.matchedLength();
+   static QRegularExpression regExp("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
+   QRegularExpressionMatch match = regExp.match(memberType);
+
+   int ts  = memberType.indexOf('<');
+   int te  = memberType.lastIndexOf('>');
+
+   int i   = -1;
+   int len = 0;
+
+   if (match.hasMatch()) {
+      i   = match.capturedStart() - memberType.constBegin();
+      len = match.capturedLength();
+   }
 
    if (i != -1 && ts != -1 && ts < te && ts < i && i < te) {
       // avoid changing A<int(int*)>, see bug 677315
@@ -3995,12 +4008,11 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 
    bool isAlias = root->m_traits.hasTrait(Entry::Virtue::Alias);
 
-   if (cd->getLanguage() == SrcLangExt_Cpp && ! root->getData(EntryKey::Member_Type).isEmpty() && ! isAlias && i != -1) {
+   if (cd->getLanguage() == SrcLangExt_Cpp && ! memberType.isEmpty() && ! isAlias && i != -1) {
       // only C has pointers, function variable
-      QString tmpType = root->getData(EntryKey::Member_Type);
 
-      root->prependData(EntryKey::Member_Args,   tmpType.right(tmpType.length() - i - len));
-      root->setData(EntryKey::Member_Type,       tmpType.left(i + len));
+      root->prependData(EntryKey::Member_Args, memberType.right(memberType.length() - i - len));
+      root->setData(EntryKey::Member_Type,     memberType.left(i + len));
    }
 
    QString name = removeRedundantWhiteSpace(rname);
@@ -4207,7 +4219,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
             }
          }
 
-         static QRegExp re("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
+         static QRegularExpression regExp("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
 
          int ts = root->getData(EntryKey::Member_Type).indexOf('<');
          int te = root->getData(EntryKey::Member_Type).lastIndexOf('>');
@@ -4217,11 +4229,11 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
 
          if (! ptrEntry->parent()->m_entryName.isEmpty() && (ptrEntry->parent()->section & Entry::COMPOUND_MASK) && cd) {
 
-            ti = re.indexIn(root->getData(EntryKey::Member_Type), 0);
-            bool tempA = (ts != -1 && ts < te && ts < ti && ti < te);
-
             QString tmpType = root->getData(EntryKey::Member_Type);
             QString tmpArgs = root->getData(EntryKey::Member_Args);
+
+            ti = tmpType.indexOf(regExp);
+            bool tempA = (ts != -1 && ts < te && ts < ti && ti < te);
 
             if (tmpType.isEmpty() || (ti == -1 || tempA || tmpArgs.indexOf(")[") != -1) ||
                   tmpType.indexOf(")(") != -1  || tmpType.indexOf("operator") != -1 || cd->getLanguage() != SrcLangExt_Cpp) {
@@ -4742,31 +4754,26 @@ void Doxy_Work::transferRelatedFunctionDocumentation()
 QHash<QString, int> Doxy_Work::getTemplateArgumentsInName(const ArgumentList &templateArgumentList, const QString &name)
 {
    QHash<QString, int> templateNames;
-   static QRegExp re("[a-z_A-Z][a-z_A-Z0-9:]*");
+   static QRegularExpression regExp("[a-z_A-Z][a-z_A-Z0-9:]*");
 
    int count = 0;
 
    for (auto &item : templateArgumentList) {
+      QRegularExpressionMatch match = regExp.match(name);
 
-      int i;
-      int len;
-      int p = 0;
+      while (match.hasMatch()) {
+         QString tmp = match.captured();
 
-      while ((i = re.indexIn(name, p)) != -1) {
-         len = re.matchedLength();
-
-         QString n = name.mid(i, len);
-
-         if (n == item.name) {
-            if (! templateNames.contains(n)) {
-               templateNames.insert(n, count);
+         if (tmp == item.name) {
+            if (! templateNames.contains(tmp)) {
+               templateNames.insert(tmp, count);
             }
          }
 
-         p = i + len;
+         match = regExp.match(name, match.capturedEnd());
       }
 
-      count++;
+      ++count;
    }
 
    return templateNames;
@@ -6083,23 +6090,22 @@ QString Doxy_Work::substituteTemplatesInString(const QVector<ArgumentList> &srcT
                   const ArgumentList &funcTemplateArgList, const QString &src)
 {
    // can be used to match template specializations
+   QString dst;
 
-      QString dst;
-   static QRegExp re( "[A-Za-z_][A-Za-z_0-9]*");
+   static QRegularExpression regExp( "[A-Za-z_][A-Za-z_0-9]*");
+   QRegularExpressionMatch match = regExp.match(src);
 
-   int pos = 0;
-   int index;
-   int len;
+   QString::const_iterator current_iter = src.constBegin();
+   QString::const_iterator start_iter   = src.constBegin();
 
-   while ((index = re.indexIn(src, pos)) != -1) {
+   while (match.hasMatch()) {
       // for each word in srcType
-      len = re.matchedLength();
+      start_iter = match.capturedStart();
 
-      dst += src.mid(pos, index - pos);
-      QString name = src.mid(index, len);
+      dst += QStringView(current_iter, start_iter);
+      QString name = match.captured();
 
       bool found = false;
-
       auto dstList_iter = dstTempArgLists.begin();
 
       for (auto &srcList_arg : srcTempArgLists) {
@@ -6164,10 +6170,12 @@ QString Doxy_Work::substituteTemplatesInString(const QVector<ArgumentList> &srcT
       }
 
       dst += name;
-      pos  = index + len;
+
+      current_iter = match.capturedEnd();
+      match = regExp.match(src, current_iter);
    }
 
-   dst += src.right(src.length() - pos);
+   dst += QStringView(current_iter, src.constEnd());
 
    return dst;
 }

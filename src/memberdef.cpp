@@ -209,11 +209,11 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          }
       }
 
-      QRegularExpression re("\\)\\(");
-      QRegularExpression res("\\(.*\\*");
+      QRegularExpression regExp_A("\\)\\(");
+      QRegularExpression regExp_B("\\(.*\\*");
 
-      int vp = re.indexIn(arg.type);
-      int wp = res.indexIn(arg.type);
+      int vp = arg.type.indexOf(regExp_A);
+      int wp = arg.type.indexOf(regExp_B);
 
       if (! arg.attrib.isEmpty() && ! md->isObjCMethod()) {
          // argument has an IDL attribute
@@ -318,9 +318,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       if (hasFuncPtrType)  {
          // write the part of the argument type that comes after the name
-
-         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(),
-                     md, arg.type.right(arg.type.length() - vp));
+         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, arg.type.right(arg.type.length() - vp));
       }
 
       if (! arg.defval.isEmpty()) {
@@ -334,7 +332,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          ol.docify(" = ");
 
          ol.startTypewriter();
-         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, n, false, true, true);
+         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, n, false, true, true);   // different
          ol.endTypewriter();
       }
 
@@ -418,7 +416,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    }
 
    if (! defArgList.trailingReturnType.isEmpty()) {
-      linkifyText(TextGeneratorOLImpl(ol), scopeDef,  md->getBodyDef(), md, defArgList.trailingReturnType, false);
+      linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, defArgList.trailingReturnType);
    }
 
    return true;
@@ -1476,15 +1474,16 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    // strip `friend' keyword from ltype
    ltype = stripPrefix(ltype, "friend ");
 
-   static QRegularExpression r("@[0-9]+");
+   static QRegularExpression regExp("@[0-9]+");
+   QRegularExpressionMatch match = regExp.match(ltype);
 
    bool endAnonScopeNeeded = false;
-   int l;
-   int i = r.indexIn(ltype, 0);
-   l = r.matchedLength();
 
-   if (i != -1) {
+   if (match.hasMatch()) {
       // member has an anonymous type
+
+      int i = match.capturedStart() - ltype.constBegin();
+      int l = match.capturedLength();
 
       if (annoClassDef) {
          // type is an anonymous compound
@@ -1518,14 +1517,14 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          if (getAnonymousEnumType()) {
             // type is an anonymous enum
 
-            linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype.left(i), false);
+            linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype.left(i));
             getAnonymousEnumType()->writeEnumDeclaration(ol, cd, nd, fd, gd);
 
-            linkifyText(TextGeneratorOLImpl(ol), d, m_impl->fileDef, self, ltype.right(ltype.length() - i - l), true);
+            linkifyText(TextGeneratorOLImpl(ol), d, m_impl->fileDef, self, ltype.right(ltype.length() - i - l), true);  // different
 
          } else {
             ltype = ltype.left(i) + " { ... } " + removeAnonymousScopes(ltype.right(ltype.length() - i - l));
-            linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype, false);
+            linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype);
          }
       }
 
@@ -1539,7 +1538,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          ltype.append(")");
       }
 
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype, false);
+      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype);
    }
 
    bool htmlOn = ol.isEnabled(OutputGenerator::Html);
@@ -1548,7 +1547,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       ol.disable(OutputGenerator::Html);
    }
 
-   if (!ltype.isEmpty()) {
+   if (! ltype.isEmpty()) {
       ol.docify(" ");
    }
 
@@ -1649,7 +1648,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       }
 
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, param5, m_impl->annMemb, true, false, s_indentLevel);
+      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, param5, m_impl->annMemb, true, false, s_indentLevel); // different
    }
 
    // *** write exceptions
@@ -2334,7 +2333,6 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
       auto mli = bml->begin();
 
       if (count > 0) {
-
          // write the list of classes that overwrite this member
          ol.startParagraph();
 
@@ -2345,23 +2343,27 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
             reimplInLine = theTranslator->trReimplementedInList(count);
          }
 
-         static QRegularExpression marker("@[0-9]+");
-         int index = 0, newIndex, matchLen;
+         static QRegularExpression regExp_marker("@[0-9]+");
+         QRegularExpressionMatch match = regExp_marker.match(reimplInLine);
+
+         QString::const_iterator current_iter = reimplInLine.constBegin();
+         QString::const_iterator start_iter   = reimplInLine.constBegin();
 
          // now replace all markers in reimplInLine with links to the classes
-         while ((newIndex = marker.indexIn(reimplInLine, index)) != -1) {
+         while (match.hasMatch()) {
 
-            matchLen = marker.matchedLength();
+            start_iter = match.capturedStart();
 
-            ol.parseText(reimplInLine.mid(index, newIndex - index));
+            ol.parseText(QStringView(current_iter, start_iter));
 
             bool ok;
-            uint entryIndex = reimplInLine.mid(newIndex + 1, matchLen - 1).toInteger<uint>(&ok);
+            uint entryIndex = QString(current_iter + 1, match.capturedEnd()).toInteger<uint>(&ok);
 
             count = 0;
 
             // find the entryIndex-th documented entry in the inheritance list.
             for (mli = bml->end() - 1; (bmd = *mli) && (bcd = bmd->getClassDef()); --mli) {
+
                if ( bmd->isLinkable() && bcd->isLinkable()) {
                   if (count == entryIndex) {
                      break;
@@ -2381,10 +2383,12 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
             }
 
             ++mli;
-            index = newIndex + matchLen;
+
+            current_iter = match.capturedEnd();
+            match = regExp_marker.match(reimplInLine, current_iter);
          }
 
-         ol.parseText(reimplInLine.right(reimplInLine.length() - index));
+         ol.parseText(QStringView(current_iter, reimplInLine.constEnd()));
          ol.endParagraph();
       }
    }
@@ -2539,29 +2543,43 @@ QString MemberDef::displayDefinition() const
       }
 
    } else if (isEnumValue()) {
-      if (! ldef.isEmpty() &&  ldef.at(0) == '@') {
+      if (! ldef.isEmpty() && ldef.at(0) == '@') {
          ldef = ldef.mid(2);
       }
    }
 
-   static QRegularExpression r("@[0-9]+");
-   int l;
-   int i = r.indexIn(ldef, 0);
-   l = r.matchedLength();
+   static QRegularExpression regExp("@[0-9]+");
+   QRegularExpressionMatch match = regExp.match(ldef);
 
-   if (i != -1) {
+   int pos      = -1;
+   int matchLen = 0;
+
+   if (match.hasMatch()) {
+      pos      = match.capturedStart() - ldef.constBegin();
+      matchLen = match.capturedLength();
+   }
+
+   if (pos != -1) {
       // replace anonymous parts with { ... }
 
-      int si = ldef.indexOf(' '), pi, ei = i + l;
+      int si = ldef.indexOf(' ');
+      int ei = pos + matchLen;
+      int pi = -1;
+
       if (si == -1) {
          si = 0;
       }
 
-      while ((pi = r.indexIn(ldef, i + l)) != -1) {
-         l = r.matchedLength();
+      match = regExp.match(ldef, match.capturedEnd());
 
-         i = pi;
-         ei = i + l;
+      while (match.hasMatch()) {
+         pi       = match.capturedStart() - ldef.constBegin();
+         matchLen = match.capturedLength();
+
+         pos = pi;
+         ei  = pos + matchLen;
+
+         match = regExp.match(ldef, match.capturedEnd());
       }
 
       int ni = ldef.indexOf("::", si);
@@ -2581,6 +2599,7 @@ QString MemberDef::displayDefinition() const
 
       if (ep != -1) {
          int sp = ldef.lastIndexOf(' ', ep);
+
          if (sp != -1) {
             ldef = ldef.left(sp + 1) + ldef.mid(ep + 2);
          }
@@ -2588,24 +2607,25 @@ QString MemberDef::displayDefinition() const
 
       // strip keywords
       int dp = ldef.indexOf(':');
+
       if (dp != -1) {
          ldef = ldef.left(dp + 1);
       }
 
-      l = ldef.length();
+      matchLen = ldef.length();
+      pos      = matchLen - pos;
 
-      i = l - 1;
-      while (i >= 0 && (isId(ldef.at(i)) || ldef.at(i) == ':')) {
-         i--;
+      while (pos >= 0 && (isId(ldef.at(pos)) || ldef.at(pos) == ':')) {
+         --pos;
       }
 
-      while (i >= 0 &&  ldef.at(i).isSpace() ) {
-         i--;
+      while (pos >= 0 &&  ldef.at(pos).isSpace() ) {
+         --pos;
       }
 
-      if (i > 0) {
+      if (pos > 0) {
          // insert braches around the type
-         QString tmp("(" + ldef.left(i + 1) + ")" + ldef.mid(i + 1));
+         QString tmp("(" + ldef.left(pos + 1) + ")" + ldef.mid(pos + 1));
          ldef = tmp;
       }
 
@@ -2767,25 +2787,24 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    }
 
-   // added 01/2016
+   ol.pushGeneratorState();
+
+   //
    ldef = renameNS_Aliases(ldef);
 
-   int i = 0;
-   int l;
-   static QRegularExpression r("@[0-9]+");
+   static QRegularExpression regExp("@[0-9]+");
+   QRegularExpressionMatch match = regExp.match(ldef);
 
-   ol.pushGeneratorState();
+   int pos = 0;
+   int matchLen;
 
    bool htmlEndLabelTable = false;
 
    QStringList sl;
    getLabels(sl, scopedContainer);
 
-   if ((isVariable() || isTypedef()) && (i = r.indexIn(ldef, 0)) != -1) {
+   if (isVariable() || isTypedef() && match.hasMatch()) {
       // find enum type and insert it in the definition
-
-      l = r.matchedLength();
-
       bool found = false;
 
       for (auto vmd : *ml) {
@@ -2793,14 +2812,14 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
             break;
          }
 
-         if (vmd->isEnumerate() && ldef.mid(i, l) == vmd->name()) {
+         if (vmd->isEnumerate() && match.captured() == vmd->name()) {
             ol.startDoxyAnchor(cfname, cname, memAnchor, fullMemberName, memberArgs);
             ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
 
-            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, ldef.left(i));
+            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(ldef.constBegin(), match.capturedStart()));
 
             vmd->writeEnumDeclaration(ol, getClassDef(), getNamespaceDef(), getFileDef(), getGroupDef());
-            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, ldef.right(ldef.length() - i - l));
+            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView( match.capturedEnd(), ldef.constEnd()) );
 
             found = true;
          }
@@ -2813,32 +2832,33 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
 
          // search for the last anonymous compound name in the definition
+         auto iter_s = ldef.indexOfFast(' ');
 
-         int si = ldef.indexOf(' '), pi, ei = i + l;
-         if (si == -1) {
-            si = 0;
+         if (iter_s == ldef.constEnd()) {
+            iter_s = ldef.constBegin();
          }
 
-         while ((pi = r.indexIn(ldef, i + l)) != -1) {
-            l = r.matchedLength();
+         QString::const_iterator iter_e = match.capturedEnd();
+         match = regExp.match(ldef, iter_e);
 
-            i = pi;
-            ei = i + l;
+         while (match.hasMatch()) {
+            iter_e   = match.capturedEnd();
+            match    = regExp.match(ldef, iter_e);
          }
 
          // first si characters of ldef contain compound type name
          ol.startMemberDocName(isObjCMethod());
-         ol.docify(ldef.left(si));
+         ol.docify(QStringView(ldef.constBegin(), iter_s));
          ol.docify(" { ... } ");
 
          // last ei characters of ldef contain pointer/reference specifiers
-         int ni = ldef.indexOf("::", si);
+         auto iter_n = ldef.indexOfFast("::", iter_s);
 
-         if (ni >= ei) {
-            ei = ni + 2;
+         if (iter_n >= iter_e) {
+            iter_e = iter_n + 2;
          }
 
-         linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, ldef.right(ldef.length() - ei));
+         linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(iter_e, ldef.constEnd()));
       }
 
    } else {
@@ -3254,20 +3274,26 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 static QString simplifyTypeForTable(const QString &s)
 {
    QString ts = removeAnonymousScopes(s);
+
    if (ts.right(2) == "::") {
       ts = ts.left(ts.length() - 2);
    }
 
-   static QRegularExpression re("[A-Z_a-z0-9]+::");
-   int i, l;
+   static QRegularExpression regExp("[A-Z_a-z0-9]+::");
+   QRegularExpressionMatch match = regExp.match(ts);
 
-   while ((i = re.indexIn(ts, 0)) != -1) {
-      l = re.matchedLength();
-      ts = ts.left(i) + ts.mid(i + l);
+   int matchLen;
+
+   while (match.hasMatch()) {
+
+      QStringView a = QStringView(ts.constBegin(), match.capturedStart());
+      QStringView b = QStringView(match.capturedEnd(), ts.constEnd());
+
+      ts = a + b;
+      match = regExp.match(ts);
    }
 
-   i = ts.lastIndexOf('.');
-
+   int i = ts.lastIndexOf('.');
    if (i != -1) {
       ts = ts.left(i);
    }

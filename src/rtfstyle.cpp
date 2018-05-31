@@ -524,32 +524,28 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
    }
    msg("Loading RTF style sheet %s\n", csPrintable(name));
 
-   static const QRegularExpression seperator("[ \t]*=[ \t]*");
+   static const QRegularExpression regExp_seperator("[ \t]*=[ \t]*");
    uint lineNr = 1;
 
    QTextStream t(&file);
    t.setCodec("UTF-8");
 
    while (! t.atEnd()) {
-      QString s = t.readLine().trimmed();
+      QString tmp = t.readLine().trimmed();
 
-      if (s.isEmpty() || s.at(0) == '#') {
+      if (tmp.isEmpty() || tmp.at(0) == '#') {
          continue;   // skip blanks & comments
       }
 
-      int sepStart;
-      int sepLength;
+      QRegularExpressionMatch match = regExp_seperator.match(tmp);
 
-      sepStart  = seperator.indexIn(s);
-      sepLength = seperator.matchedLength();
-
-      if (sepStart <= 0) {
+      if (! match.hasMatch() || match.capturedStart() == tmp.constBegin() ) {
          // no valid assignment statement
          warn(name, lineNr, "Assignment of style sheet name expected\n");
          continue;
       }
 
-      QString key = s.left(sepStart);
+      QStringView key = QStringView(tmp.constBegin(), match.capturedStart());
 
       if (! dict.contains(key)) {
          // not a valid style sheet name
@@ -560,10 +556,10 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
       // add command separator
       StyleData &styleData = dict.find(key).value();
 
-      s += " ";
-      styleData.setStyle(s.mid(sepStart + sepLength), key);
+      tmp += " ";
+      styleData.setStyle( QStringView(match.capturedEnd(), tmp.constEnd()), key);
 
-      lineNr++;
+      ++lineNr;
    }
 }
 
@@ -579,7 +575,7 @@ void loadExtensions(const QString &name)
    }
    msg("Loading RTF extensions %s\n", csPrintable(name));
 
-   static const QRegularExpression separator("[ \t]*=[ \t]*");
+   static const QRegularExpression regExp_seperator("[ \t]*=[ \t]*");
    uint lineNr = 1;
 
    QTextStream t(&file);
@@ -587,54 +583,61 @@ void loadExtensions(const QString &name)
 
    while (! t.atEnd()) {
       // string buffer of max line length
+      QString tmp = t.readLine().trimmed();
 
-      QString s = t.readLine().trimmed();
-
-      if (s.length() == 0 || s.at(0) == '#') {
+      if (tmp.isEmpty() || tmp.at(0) == '#') {
          continue;   // skip blanks & comments
       }
 
-      int sepStart  = separator.indexIn(s);
-      int sepLength = separator.matchedLength();
+      QRegularExpressionMatch match = regExp_seperator.match(tmp);
 
-      if (sepStart <= 0) {
+      if (! match.hasMatch() || match.capturedStart() == tmp.constBegin() ) {
          // no valid assignment statement
          warn(name, lineNr, "Assignment of extension field expected\n");
          continue;
       }
 
-      QString key  = s.left(sepStart);
-      QString data = s.mid(sepStart + sepLength);
+      QStringView key  = QStringView(tmp.constBegin(), match.capturedStart());
+      QStringView data = QStringView(match.capturedEnd(), tmp.constEnd());
 
       if (key == "Title") {
-         rtf_title            = data;
+         rtf_title = data;
       }
+
       if (key == "Subject") {
-         rtf_subject          = data;
+         rtf_subject  = data;
       }
+
       if (key == "Comments") {
-         rtf_comments         = data;
+         rtf_comments = data;
       }
+
       if (key == "Company") {
-         rtf_company          = data;
+         rtf_company = data;
       }
+
       if (key == "LogoFilename") {
-         rtf_logoFilename     = data;
+         rtf_logoFilename = data;
       }
+
       if (key == "Author") {
-         rtf_author           = data;
+         rtf_author = data;
       }
+
       if (key == "Manager") {
-         rtf_manager          = data;
+         rtf_manager = data;
       }
+
       if (key == "DocumentType") {
-         rtf_documentType     = data;
+         rtf_documentType = data;
       }
+
       if (key == "DocumentId") {
-         rtf_documentId       = data;
+         rtf_documentId   = data;
       }
+
       if (key == "Keywords") {
-         rtf_keywords         = data;
+         rtf_keywords = data;
       }
 
       lineNr++;
