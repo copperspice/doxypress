@@ -21,6 +21,7 @@
 #include <QTextStream>
 
 #include <stdlib.h>
+#include <set>
 
 #include <index.h>
 
@@ -1752,7 +1753,7 @@ class AlphaIndexTableCell
 static void writeAlphabeticalClassList(OutputList &ol)
 {
    // letters which are used
-   QSet<QChar> lettersUsed;
+   std::set<QChar> lettersUsed;
 
    // list of classes for each letter
    LetterToIndexMap<PrefixIgnoreClassList> classesByLetter;
@@ -1764,7 +1765,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
    for (auto cd : Doxy_Globals::classSDict) {
       if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
          int index   = getPrefixIndex(cd->className());
-         startLetter = getUtf8CodeToLower(cd->className(), index);
+         startLetter = charToLower(cd->className(), index);
 
          lettersUsed.insert(startLetter);
          classesByLetter.insertElement(startLetter, cd);
@@ -1774,13 +1775,13 @@ static void writeAlphabeticalClassList(OutputList &ol)
    // write quick link index (row of letters)
    QString alphaLinks = "<div class=\"qindex\">";
 
-   for (auto c : lettersUsed) {
+   for (auto ch : lettersUsed) {
       if (headerItems) {
          alphaLinks += "&#160;|&#160;";
       }
 
       headerItems++;
-      alphaLinks += "<a class=\"qindex\" href=\"#letter_" + letterToLabel(c) + "\">" + c + "</a>";
+      alphaLinks += "<a class=\"qindex\" href=\"#letter_" + letterToLabel(ch) + "\">" + ch + "</a>";
    }
 
    alphaLinks += "</div>\n";
@@ -2283,7 +2284,7 @@ void addClassMemberNameToIndex(QSharedPointer<MemberDef> md)
       QString n = md->name();
 
       int index    = getPrefixIndex(n);
-      QChar letter = getUtf8CodeToLower(n, index);
+      QChar letter = charToLower(n, index);
 
       if (! n.isEmpty()) {
 
@@ -2349,7 +2350,7 @@ void addNamespaceMemberNameToIndex(QSharedPointer<MemberDef> md)
 
       QString n    = md->name();
       int index    = getPrefixIndex(n);
-      QChar letter = getUtf8CodeToLower(n, index);
+      QChar letter = charToLower(n, index);
 
       if (! n.isEmpty()) {
          if (! md->isEnumValue() || (md->getEnumScope() && ! md->getEnumScope()->isStrong())) {
@@ -2399,7 +2400,7 @@ void addFileMemberNameToIndex(QSharedPointer<MemberDef> md)
       QString n = md->name();
 
       int index    = getPrefixIndex(n);
-      QChar letter = getUtf8CodeToLower(n, index);
+      QChar letter = charToLower(n, index);
 
       if (! n.isEmpty()) {
 
