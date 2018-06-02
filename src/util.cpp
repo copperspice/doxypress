@@ -7805,22 +7805,22 @@ void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDe
    }
 }
 
-QChar getUtf8CodeToLower( const QString &s, int idx )
+QChar charToLower(const QString &s, int index)
 {
    if (s.isEmpty()) {
       return QChar();
    }
 
-   return s[idx].toLower()[0];
+   return s[index].toLower()[0];
 }
 
-QChar getUtf8CodeToUpper( const QString &s, int idx )
+QChar charToUpper(const QString &s, int index)
 {
    if (s.isEmpty()) {
       return QChar();
    }
 
-   return s[idx].toUpper()[0];
+   return s[index].toUpper()[0];
 }
 
 bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClasses)

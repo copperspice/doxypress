@@ -556,7 +556,7 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
       QString n = md->name();
 
       if (! n.isEmpty()) {
-         QChar letter = getUtf8CodeToLower(n, 0);
+         QChar letter = charToLower(n, 0);
          bool isFriendToHide = hideFriendCompounds && (md->typeString() == "friend class" ||
                                 md->typeString() == "friend struct" || md->typeString() == "friend union");
 
@@ -606,7 +606,7 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
       QString n = md->name();
 
       if (! n.isEmpty()) {
-         QChar letter = getUtf8CodeToLower(n, 0);
+         QChar letter = charToLower(n, 0);
          symbols[SEARCH_INDEX_ALL].insertElement(letter, md);
          symbolCount[SEARCH_INDEX_ALL]++;
 
@@ -717,7 +717,7 @@ void writeJavascriptSearchIndex()
    // index classes
    for (auto cd : Doxy_Globals::classSDict) {
 
-      QChar letter = getUtf8CodeToLower(cd->localName(), 0);
+      QChar letter = charToLower(cd->localName(), 0);
 
       if (cd->isLinkable() && isId(letter)) {
          g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, cd);
@@ -730,7 +730,7 @@ void writeJavascriptSearchIndex()
 
    // index namespaces
    for (auto &nd : Doxy_Globals::namespaceSDict) {
-      QChar letter = getUtf8CodeToLower(nd->name(), 0);
+      QChar letter = charToLower(nd->name(), 0);
 
       if (nd->isLinkable() && isId(letter)) {
          g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, nd);
@@ -745,7 +745,7 @@ void writeJavascriptSearchIndex()
    for (auto &fn : Doxy_Globals::inputNameList) {
 
       for (auto fd : *fn) {
-         QChar letter = getUtf8CodeToLower(fd->name(), 0);
+         QChar letter = charToLower(fd->name(), 0);
 
          if (fd->isLinkable() && isId(letter)) {
             g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, fd);

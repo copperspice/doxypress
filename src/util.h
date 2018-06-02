@@ -136,6 +136,9 @@ void    addRefItem(const QVector<ListItemInfo> &list, const QString &key, const 
 
 QString argListToString(const ArgumentList &al, bool useCanonicalType = false, bool showDefVals = true);
 
+QChar   charToLower(const QString &s, int index);
+QChar   charToUpper(const QString &s, int index);
+
 bool    classVisibleInIndex(QSharedPointer<ClassDef> cd);
 bool    classHasVisibleChildren(QSharedPointer<ClassDef> cd);
 int     computeQualifiedIndex(const QString &name);
@@ -174,8 +177,6 @@ bool    getDefs(const QString &scName, const QString &mbName, const QString &arg
                   QSharedPointer<GroupDef> &gd, bool forceEmptyScope = false, QSharedPointer<FileDef> currentFile = QSharedPointer<FileDef>(),
                   bool checkCV = false, const QString &forceTagFile = QString() );
 
-QChar   getUtf8CodeToLower( const QString &s, int idx );
-QChar   getUtf8CodeToUpper( const QString &s, int idx );
 QString getLanguageSpecificSeparator(SrcLangExt lang, bool classScope = false);
 QString getFileFilter(const QString &name, bool isSourceCode);
 int     getScopeFragment(const QString &s, int p, int *l);
