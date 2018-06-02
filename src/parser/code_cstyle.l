@@ -1294,31 +1294,24 @@ exit:
    return;
 }
 
-
 // counts the number of lines in the input
 static int countLines()
 {
-  int count = 1;
+   int count = 1;
 
    if (s_inputString.isEmpty() ) {
       return count;
    }
 
-   const QChar *p = s_inputString.constData();
-   QChar c;
-
-   while ((c = *p) != 0) {
-      p++ ;
-
+   for (QChar c : s_inputString) {
       if (c == '\n') {
-         count++;
+         ++count;
       }
    }
 
-   if (*(p - 1) != '\n') {
-      // last line does not end with a \n, so we add an extra
-      // line and explicitly terminate the line after parsing
-      count++;
+   if (s_inputString.last() != '\n') {
+      // last line does not end with a \n, add extra line and explicitly terminate the line after parsing
+      ++count;
       g_needsTermination = true;
    }
 
@@ -1347,8 +1340,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
       return;
    }
 
-   const QChar *p = ctx->format.constData();
-   QChar c;
+   QString::const_iterator iter = ctx->format.constBegin();
 
    if (! ctx->methodName.isEmpty()) {
 
@@ -1399,11 +1391,20 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
       }
    }
 
-   while ((c = *p++) != 0) {
+   while (iter != ctx->format.constEnd())  {
+
+      QChar c = *iter;
+      ++iter;
+
       // for each character in ctx->format
 
       if (c == '$') {
-         QChar nc = *p++;
+         QChar nc = '\0';
+
+         if (iter != ctx->format.constEnd()) {
+            nc = *iter;
+            ++iter;
+         }
 
          if (nc == '$') {
             // escaped $
@@ -1414,15 +1415,28 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             if (nc == 'n') {
                // name fragment
-               nc = *p++;
+               nc = '\0';
+
+               if (iter != ctx->format.constEnd()) {
+                  nc = *iter;
+                  ++iter;
+               }
+
                QString refIdStr;
 
                while (nc != 0 && nc.isNumber() ) {
                   refIdStr += nc;
-                  nc = *p++;
-               }
 
-               p--;
+                  nc = '\0';
+
+                  if (iter != ctx->format.constEnd()) {
+                     nc = *iter;
+                     ++iter;
+                  }
+
+               }
+               --iter;
+
                int refId = refIdStr.toInteger<int>();
                QString *pName = g_nameDict.value(refId);
 
@@ -1441,15 +1455,27 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             } else if (nc == 'o') {
                // reference to potential object name
-               nc = *p++;
+               nc = '\0';
+
+               if (iter != ctx->format.constEnd()) {
+                  nc = *iter;
+                  ++iter;
+               }
+
                QString refIdStr;
 
                while (nc != 0 && nc.isNumber()) {
                   refIdStr += nc;
-                  nc = *p++;
-               }
 
-               p--;
+                  nc = '\0';
+
+                  if (iter != ctx->format.constEnd()) {
+                     nc = *iter;
+                     ++iter;
+                  }
+               }
+               --iter;
+
                int refId = refIdStr.toInteger<int>();
                QString *pObject = g_objectDict.value(refId);
 
@@ -1503,7 +1529,8 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      codifyLines(*pObject);
                      endFontClass();
 
-                  } else if (ctx->objectVar && ctx->objectVar->isLinkable()) { // object is class variable
+                  } else if (ctx->objectVar && ctx->objectVar->isLinkable()) {
+                     // object is class variable
                      writeMultiLineCodeLink(*g_code, ctx->objectVar, *pObject);
 
                      if (g_currentMemberDef && g_collectXRefs) {
@@ -1532,16 +1559,30 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                   }
                }
 
-            } else if (nc == 'c') { // reference to nested call
-               nc = *p++;
+            } else if (nc == 'c') {
+               // reference to nested call
+
+               nc = '\0';
+
+               if (iter != ctx->format.constEnd()) {
+                  nc = *iter;
+                  ++iter;
+               }
+
                QString refIdStr;
 
                while (nc != 0 && nc.isNumber()) {
                   refIdStr += nc;
-                  nc = *p++;
-               }
 
-               p--;
+                  nc = '\0';
+
+                  if (iter != ctx->format.constEnd()) {
+                     nc = *iter;
+                     ++iter;
+                  }
+               }
+               --iter;
+
                int refId = refIdStr.toInteger<int>();
                ObjCCallCtx *ictx = g_ObjC_contextDict.value(refId);
 
@@ -1574,16 +1615,27 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             } else if (nc == 'w') {
                // some word
+               nc = '\0';
 
-               nc = *p++;
+               if (iter != ctx->format.constEnd()) {
+                  nc = *iter;
+                  ++iter;
+               }
+
                QString refIdStr;
 
                while (nc != 0 && nc.isNumber()) {
                   refIdStr += nc;
-                  nc = *p++;
-               }
 
-               p--;
+                  nc = '\0';
+
+                  if (iter != ctx->format.constEnd()) {
+                     nc = *iter;
+                     ++iter;
+                  }
+               }
+               --iter;
+
                int refId = refIdStr.toInteger<int>();
                QString *pWord = g_wordDict.value(refId);
 
@@ -1593,15 +1645,28 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
             } else if (nc == 'd')  {
                // comment block
+               nc = '\0';
 
-               nc = *p++;
+               if (iter != ctx->format.constEnd()) {
+                  nc = *iter;
+                  ++iter;
+               }
+
                QString refIdStr;
 
                while (nc != 0 && nc.isNumber()) {
                   refIdStr += nc;
-                  nc = *p++;
+
+                  nc = '\0';
+
+                  if (iter != ctx->format.constEnd()) {
+                     nc = *iter;
+                     ++iter;
+                  }
+
                }
-               p--;
+               --iter;
+
                int refId = refIdStr.toInteger<int>();
 
                QString *pComment = g_commentDict.value(refId);

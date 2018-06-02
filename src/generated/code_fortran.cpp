@@ -28150,22 +28150,15 @@ static int countLines()
       return count;
    }
 
-   QString::const_iterator iter = s_inputString.constBegin();
-
-   while (iter != s_inputString.constEnd()) {
-      QChar c = *iter;
-
+   for (QChar c : s_inputString) {
       if (c == '\n') {
-         count++;
+         ++count;
       }
-
-      ++iter;
    }
 
-   if (iter[-1] != '\n') {
-      // last line does not end with a \n, so we add an extra
-      // line and explicitly terminate the line after parsing
-      count++;
+   if (s_inputString.last() != '\n') {
+      // last line does not end with a \n, add extra line and explicitly terminate the line after parsing
+      ++count;
       s_needsTermination = true;
    }
 

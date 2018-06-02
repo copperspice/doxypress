@@ -85,29 +85,52 @@ void replaceComment(int offset);
 
 static void replaceCommentMarker(const QString &s, int len)
 {
-   const QChar *p   = s.constData();
-   const QChar *ptr = p;
+   QString::const_iterator iter     = s.constBegin();
+   QString::const_iterator iter_end = s.constEnd();
+
    QChar c;
 
    // copy leading blanks
-   while ((c = *p) != 0 && (c == ' ' || c == '\t' || c == '\n')) {
-      ADDCHAR(c);
-      s_lineNr += c == '\n';
-      p++;
+   while (iter != iter_end) {
+      c = *iter;
+
+      if (c == ' ' || c == '\t' || c == '\n') {
+         ADDCHAR(c);
+
+         if (c == '\n') {
+            ++s_lineNr;
+         }
+
+         ++iter;
+
+      } else {
+         break;
+      }
    }
 
    // replace start of comment marker by blanks and the last character by a *
    int blanks = 0;
 
-   while ((c = *p) != 0 && (c == '/' || c == '!' || c == '#')) {
-      blanks++;
-      p++;
+   while (iter != iter_end) {
+      c = *iter;
 
-      if (*p == '<') { // comment-after-item marker
+      if (c == '/' || c == '!' || c == '#') {
+
          blanks++;
-         p++;
-      }
-      if (c == '!') { // end after first !
+         ++iter;
+
+         if (iter != iter_end && *iter == '<') {
+            // comment-after-item marker
+            blanks++;
+            ++iter;
+         }
+
+         if (c == '!') {
+            // end after first !
+            break;
+         }
+
+      } else {
          break;
       }
    }
@@ -115,22 +138,25 @@ static void replaceCommentMarker(const QString &s, int len)
    if (blanks > 0) {
       while (blanks > 2) {
          ADDCHAR(' ');
-         blanks--;
+         --blanks;
       }
+
       if (blanks > 1) {
          ADDCHAR('*');
       }
+
       ADDCHAR(' ');
    }
 
    // copy comment line to output
-   s_outputString += QString(p, len - (p - ptr) );
+   s_outputString += QStringView(iter,  s.constBegin() + len);
 }
 
 static inline int computeIndent(const QString &str)
 {
+   static const int tabSize = Config::getInt("tab-size");
+
    int col = 0;
-   static int tabSize = Config::getInt("tab-size");
 
    for (auto c : str) {
 

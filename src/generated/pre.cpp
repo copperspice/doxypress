@@ -3304,46 +3304,43 @@ static QString stringize(const QString &s)
    return result;
 }
 
-/*! Execute all ## operators in expr.
- * If the macro name before or after the operator contains a no-rescan
- * marker (@-) then this is removed (before the concatenated macro name
- * may be expanded again.
- */
-static void processConcatOperators(QString &expr)
+static void processConcatOperators(QString &str)
 {
-   static QRegularExpression r("[ \\t\\n]*##[ \\t\\n]*");
-
-   int l;
-   int n;
-   int i = 0;
-
-   if (expr.isEmpty()) {
+   if (str.isEmpty()) {
       return;
    }
 
-   while ((n = r.indexIn(expr, i)) != -1) {
-      l = r.matchedLength();
+   static QRegularExpression regExp("[ \t\r\n]*##[ \t\r\n]*");
+   QRegularExpressionMatch match = regExp.match(str);
 
-      if (n + l + 1 < (int)expr.length() && expr.at(n + l) == '@' && expr.at(n + l + 1) == '-') {
+   int matchLen;
+   int pos;
+
+   while (match.hasMatch()) {
+
+      pos      = match.capturedStart() - str.constBegin();
+      matchLen = match.capturedLength();
+
+      if (pos + matchLen + 1 < str.length() && str.at(pos + matchLen) == '@' && str.at(pos + matchLen + 1) == '-') {
          // remove no-rescan marker after ID
-         l += 2;
+         matchLen += 2;
       }
 
       // remove the ## operator and the surrounding whitespace
-      expr  = expr.left(n) + expr.right(expr.length() - n - l);
-      int k = n - 1;
+      str   = str.left(pos) + str.right(str.length() - pos - matchLen);
+      int k = pos - 1;
 
-      while (k >= 0 && isId(expr.at(k))) {
-         k--;
+      while (k >= 0 && isId(str.at(k))) {
+         --k;
       }
 
-      if (k > 0 && expr.at(k) == '-' && expr.at(k - 1) == '@') {
+      if (k > 0 && str.at(k) == '-' && str.at(k - 1) == '@') {
          // remove no-rescan marker before ID
-         expr = expr.left(k - 1) + expr.right(expr.length() - k - 1);
-         n -= 2;
+         str  = str.left(k - 1) + str.right(str.length() - k - 1);
+         pos -= 2;
       }
 
-      i = n;
+      match = regExp.match(str, str.constBegin() + pos);
    }
 }
 
@@ -3822,123 +3819,163 @@ static void expandExpression(QString &expr, QString *rest, int pos)
  */
 QString removeIdsAndMarkers(const QString &s)
 {
-   const QChar *p = s.constData();
-   const QChar *ptr = p;
-   QChar c;
+   QString::const_iterator iter     = s.constBegin();
+   QString::const_iterator iter_end = s.constEnd();
 
-   bool inNum = false;
    QString result;
 
-   if (p) {
+   bool inNum = false;
 
-      while ((c = *p) != 0) {
-         // replace @@ with @ and remove @E
+   while (iter != iter_end) {
+      QChar c = *iter;
 
-         if (c == '@') {
+      // replace @@ with @ and remove @E
+      if (c == '@') {
 
-            if (*(p + 1) == '@') {
-               result += c;
-
-            } else if (*(p + 1) == 'E') {
-               // skip
-            }
-
-            p += 2;
-
-         } else if (c.isNumber()) {
-            // number
-
+         if (*(iter + 1) == '@') {
             result += c;
-            p++;
-            inNum = true;
 
-         } else if (c == 'd' && ! inNum) {
-            // identifier starting with a `d'
+         } else if (*(iter + 1) == 'E') {
+            // skip
+         }
 
-            if (s.mid(p - ptr, 8) == "defined " || s.mid(p - ptr, 8) == "defined(") {
-               // defined keyword, skip defined
-               p += 7;
+         iter += 2;
 
-            } else {
-               result += "0L";
-               p++;
+      } else if (c.isNumber()) {
+         // number
 
-               while ((c = *p) != 0 && isId(c)) {
-                  p++;
+         result += c;
+         inNum = true;
+
+         ++iter;
+
+      } else if (c == 'd' && ! inNum) {
+         // identifier starting with a `d'
+
+         QStringView tmp = QStringView(iter, iter_end);
+
+         if (tmp.startsWith("defined ") || tmp.startsWith("defined(")) {
+            // defined keyword, skip defined
+            iter += 7;
+
+         } else {
+            result += "0L";
+            ++iter;
+
+            while (iter != iter_end) {
+               c = *iter;
+
+               if (isId(c)) {
+                  ++iter;
+
+               } else {
+                  break;
                }
             }
+         }
 
-         } else if ((c.isLetter() || c == '_') && ! inNum) {
-            // replace identifier with 0L
-            result += "0L";
-            p++;
+      } else if ((c.isLetter() || c == '_') && ! inNum) {
+         // replace identifier with 0L
+         result += "0L";
+         ++iter;
 
-            while ((c = *p) != 0 && isId(c)) {
-               p++;
+         while (iter != iter_end) {
+            c = *iter;
+
+            if (isId(c)) {
+               ++iter;
+
+            } else {
+               break;
             }
+         }
 
-            if (*p == '(') { // undefined function macro
-               p++;
-               int count = 1;
+         if (*iter == '(') {
+            // undefined function macro
+            ++iter;
 
-               while ((c = *p++) != 0 ) {
-                  if (c == '(') {
-                     count++;
+            int count = 1;
 
-                  } else if (c == ')') {
-                     count--;
-                     if (count == 0) {
-                        break;
+            while (iter != iter_end) {
+               c = *iter;
+               ++iter;
+
+               if (c == '(') {
+                  count++;
+
+               } else if (c == ')') {
+                  count--;
+
+                  if (count == 0) {
+                     break;
+                  }
+
+               } else if (c == '/') {
+                  QChar pc = c;
+
+                  ++iter;
+                  c = *iter;
+
+                  if (c == '*') {
+                     // start of C comment
+
+                     while (iter != iter_end && ! (pc == '*' && c == '/')) {
+                        // search end of comment
+                        pc = c;
+
+                        ++iter;
+                        c = *iter;
                      }
 
-                  } else if (c == '/') {
-                     QChar pc = c;
-                     c = *++p;
-
-                     if (c == '*') { // start of C comment
-                        while (*p != 0 && ! (pc == '*' && c == '/')) {
-                           // search end of comment
-                           pc = c;
-                           c = *++p;
-                        }
-                        p++;
-                     }
+                     ++iter;
                   }
                }
             }
+         }
 
-         } else if (c == '/') {
-            // skip C comments
+      } else if (c == '/') {
+         // skip C comments
+         QChar pc = c;
 
-            QChar pc = c;
-            c = *++p;
+         ++iter;
+         c = *iter;
 
-            if (c == '*') {
-               // start of C comment
+         if (c == '*') {
+            // start of C comment
 
-               while (*p != 0 && ! (pc == '*' && c == '/')) {
-                  // search end of comment
-                  pc = c;
-                  c = *++p;
-               }
-               p++;
+            while (iter != iter_end && ! (pc == '*' && c == '/')) {
+               // search end of comment
+               pc = c;
 
-            } else { // not comment but division
-               result += pc;
-               goto nextChar;
+               ++iter;
+               c = *iter;
             }
 
-         } else {
+            ++iter;
 
-         nextChar:
+         } else {
+            // not comment but division
+            result += pc;
             result += c;
-            QChar lc = c.toLower();
+
+            QChar lc = c.toLower()[0];
 
             if (! isId(lc) && lc != '.' /*&& lc!='-' && lc!='+'*/) {
                inNum = false;
             }
-            p++;
+
+            ++iter;
          }
+
+      } else {
+         result += c;
+         QChar lc = c.toLower()[0];
+
+         if (! isId(lc) && lc != '.' /*&& lc!='-' && lc!='+'*/) {
+            inNum = false;
+         }
+
+         ++iter;
       }
    }
 
@@ -3951,86 +3988,126 @@ QString removeIdsAndMarkers(const QString &s)
  */
 QString removeMarkers(const QString &s)
 {
-   const QChar *p = s.constData();
-   QChar c;
-
+   QString::const_iterator iter = s.constBegin();
    QString result;
 
-   while ((c = *p) != 0) {
+   while (iter != s.constEnd()) {
+      QChar c = *iter;
+
       switch (c.unicode()) {
-         case '@': { // replace @@ with @
-            if (*(p + 1) == '@') {
+
+         case '@': {
+            // replace @@ with @
+
+            if (iter + 1 != s.constEnd() && iter[1] ==  '@') {
                result += c;
+               ++iter;
             }
-            p += 2;
+
+            ++iter;
          }
          break;
 
-         case '/': { // skip C comments
+         case '/': {
+            // skip C comments
             result  += c;
+
             QChar pc = c;
-            c = *++p;
+            ++iter;
 
-            if (c == '*') { // start of C comment
+            if (iter != s.constEnd()) {
+               c = *iter;
+            }
 
-               while (*p != 0  && !(pc == '*' && c == '/')) { // search end of comment
-                  if (*p == '@' && *(p + 1) == '@') {
+            if (c == '*') {
+               // start of C comment
+
+               while (iter != s.constEnd()  && ! (pc == '*' && c == '/')) {
+                  // search end of comment
+
+                  if (*iter == '@' &&  (iter + 1 != s.constEnd() && iter[1] == '@')) {
                      result += c;
-                     p++;
+                     ++iter;
 
                   } else {
                      result += c;
                   }
 
                   pc = c;
-                  c  = *++p;
+                  ++iter;
+
+                  if (iter != s.constEnd()) {
+                     c = *iter;
+                  }
                }
 
-               if (*p != 0) {
+               if (iter != s.constEnd()) {
                   result += c;
-                  p++;
+                  ++iter;
                }
             }
          }
          break;
 
-         case '"': { // skip string literals
+         case '"': {
+            // skip string literals
             result += c;
+
             QChar pc = c;
-            c = *++p;
+            ++iter;
 
-            while (*p != 0 && (c != '"' || pc == '\\')) { // no end quote
-               result += c;
-               c = *++p;
+            if (iter != s.constEnd()) {
+               c = *iter;
             }
-            if (*p != 0) {
-               result += c;
-               p++;
-            }
-         }
-         break;
 
-         case '\'': { // skip char literals
-            result += c;
-            QChar pc = c;
-            c = *++p;
-
-            while (*p != 0 && (c != '\'' || pc == '\\')) {
+            while (iter != s.constEnd() && (pc == '\\' && c != '"')) {
                // no end quote
                result += c;
-               c = *++p;
+               ++iter;
+
+               if (iter != s.constEnd()) {
+                  c = *iter;
+               }
             }
 
-            if (*p != 0) {
+            if (iter != s.constEnd()) {
                result += c;
-               p++;
+               ++iter;
+            }
+         }
+         break;
+
+         case '\'': {
+            // skip char literals
+            result += c;
+
+            QChar pc = c;
+            ++iter;
+
+            if (iter != s.constEnd()) {
+               c = *iter;
+            }
+
+            while (iter != s.constEnd() && (pc == '\\' && c != '\'')) {
+               // no end quote
+               result += c;
+               ++iter;
+
+               if (iter != s.constEnd()) {
+                  c = *iter;
+               }
+            }
+
+            if (iter != s.constEnd()) {
+               result += c;
+               ++iter;
             }
          }
          break;
 
          default: {
             result += c;
-            p++;
+            ++iter;
          }
          break;
       }
@@ -4114,24 +4191,34 @@ void addDefine()
       md->setArgumentList(argList);
    }
 
-   int l = s_defLitText.indexOf('\n');
+   int len = s_defLitText.indexOf('\n');
 
-   if (l > 0 && s_defLitText.left(l).trimmed() == "\\") {
+   if (len > 0 && s_defLitText.left(len).trimmed() == "\\") {
       // strip first line if it only contains a slash
-      s_defLitText = s_defLitText.right(s_defLitText.length() - l - 1);
+      s_defLitText = s_defLitText.right(s_defLitText.length() - len - 1);
 
-   } else if (l > 0) {
+   } else if (len > 0) {
       // align the items on the first line with the items on the second line
-      int k = l + 1;
+      int k = len + 1;
 
-      const QChar *p = s_defLitText.data() + k;
-      QChar c;
+      QString::const_iterator iter = s_defLitText.constBegin() + k;
 
-      while ((c = *p++) != 0 && (c == ' ' || c == '\t')) {
-         k++;
+//    while ((c = *p++) != 0 && (c == ' ' || c == '\t')) {
+
+      while (iter !=  s_defLitText.constEnd())  {
+         QChar c = *iter;
+         ++iter;
+
+         if (c == ' ' || c == '\t') {
+            ++k;
+
+         } else {
+            break;
+
+         }
       }
 
-      s_defLitText = s_defLitText.mid(l + 1, k - l - 1) + s_defLitText.trimmed();
+      s_defLitText = s_defLitText.mid(len + 1, k - len - 1) + s_defLitText.trimmed();
    }
    md->setInitializer(s_defLitText.trimmed());
 
@@ -8021,25 +8108,36 @@ QString preprocessFile(const QString &fileName, const QString &input)
             // predefined function macro definition
 
             // regexp matching an id
-            static QRegularExpression reId("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
+            static QRegularExpression regExp_id("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
             QHash<QString, int> argDict;
 
-            int count = 0;
             int index = posOpen + 1;
-            int pos;
+            int count = 0;
             int len;
 
-            // gather the formal arguments in a dictionary
-            while (index < posClose && (pos = reId.indexIn(definedMacro, index))) {
-               len = reId.matchedLength();
+            QRegularExpressionMatch match = regExp_id.match(definedMacro, definedMacro.constBegin() + index);
 
-               if (len > 0) {
-                  argDict.insert(definedMacro.mid(pos, len), count++);
-                  index = pos + len;
+            // gather the formal arguments in a dictionary
+            while (index < posClose) {
+
+               if (match.hasMatch()) {
+                  len = match.capturedLength();
+
+                  if (len > 0) {
+                     argDict.insert(match.captured(), count);
+                     index = match.capturedEnd() - definedMacro.begin();
+
+                     ++count;
+
+                  } else {
+                     ++index;
+                  }
 
                } else {
-                  index++;
+                  break;
                }
+
+               match = regExp_id.match(definedMacro, definedMacro.constBegin() + index);
             }
 
             // strip definition part
@@ -8047,16 +8145,17 @@ QString preprocessFile(const QString &fileName, const QString &input)
             QString definition;
 
             index = 0;
+            match = regExp_id.match(tmp);
 
             // substitute all occurrences of formal arguments with their corresponding markers
-            while ((pos = reId.indexIn(tmp, index)) != -1) {
-               len = reId.matchedLength();
+            while (match.hasMatch()) {
 
-               if (pos > index) {
-                  definition += tmp.mid(index, pos - index);
-               }
+               int p = match.capturedStart() - tmp.constBegin();
+               len   = match.capturedLength();
 
-               auto iter = argDict.find(tmp.mid(pos, len));
+               definition += tmp.mid(index, p - index);
+
+               auto iter = argDict.find(match.captured());
 
                if (iter != argDict.end()) {
                   int argIndex = iter.value();
@@ -8065,10 +8164,11 @@ QString preprocessFile(const QString &fileName, const QString &input)
                   definition += marker;
 
                } else {
-                  definition += tmp.mid(pos, len);
+                  definition += match.captured();
                }
 
-               index = pos + len;
+               index = p + len;
+               match = regExp_id.match(tmp, match.capturedEnd());
             }
 
             if (index < tmp.length()) {

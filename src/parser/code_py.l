@@ -245,7 +245,7 @@ class PyCallContext
 
 static PyCallContext s_theCallContext;
 
-/* counts the number of lines in the input */
+// counts the number of lines in the input
 static int countLines()
 {
    int count = 1;
@@ -254,21 +254,15 @@ static int countLines()
       return count;
    }
 
-   const QChar *p = s_inputString.constData();
-   QChar c;
-
-   while ((c = *p) != 0) {
-      p++ ;
-
+   for (QChar c : s_inputString) {
       if (c == '\n') {
-         count++;
+         ++count;
       }
    }
 
-   if (*(p - 1) != '\n') {
-      // last line does not end with a \n, so we add an extra
-      // line and explicitly terminate the line after parsing
-      count++;
+   if (s_inputString.last() != '\n') {
+      // last line does not end with a \n, add extra line and explicitly terminate the line after parsing
+      ++count;
       s_needsTermination = true;
    }
 

@@ -62,54 +62,51 @@
 
 int TclFindElement(const QString &list, int listLength, int &elementIndex, int &nextIndex, int *sizePtr, int *bracePtr)
 {
-   const QChar *p = list.constData();
-   const QChar *ptr = p;
+   QString::const_iterator iter     = list.constBegin();
+   QString::const_iterator iter_end = list.constEnd();
 
-   const QChar *elemStart;              /* Points to first byte of first element. */
-   const QChar *limit;                  /* Points just after list's last byte. */
+   QString::const_iterator elemStart;            /* Points to first byte of first element. */
+   QString::const_iterator limit;                /* Points just after list's last byte. */
 
-   int openBraces = 0;                  /* Brace nesting level during parse. */
+   int openBraces = 0;                           /* Brace nesting level during parse. */
    int inQuotes   = 0;
    int size       = 0;
 
-   /*
-   * Skim off leading white space and check for an opening brace or quote.
-   * We treat embedded NULLs in the list as bytes belonging to a list
-   * element.
-   */
+   // Skim off leading white space and check for an opening brace or quote.
+   // We treat embedded NULLs in the list as bytes belonging to a list element.
 
-   limit = ptr + listLength;
+   limit = iter + listLength;
 
-   while ((p < limit) && ( p->isSpace())) {
-      p++;
+   while ((iter != limit) && (iter->isSpace())) {
+      ++iter;
    }
 
-   if (p == limit) {
+   if (iter == limit) {
       // no element found
       elemStart = limit;
       goto done;
    }
 
-   if (*p == '{') {
+   if (*iter == '{') {
       openBraces = 1;
-      p++;
+      ++iter;
 
-   } else if (*p == '"') {
+   } else if (*iter == '"') {
       inQuotes = 1;
-      p++;
+      ++iter;
 
    }
 
-   elemStart = p;
+   elemStart = iter;
 
    if (bracePtr != 0) {
       *bracePtr = openBraces;
    }
 
    // Find element's end (a space, close brace, or the end of the string
-   while (p < limit) {
+   while (iter != limit) {
 
-      switch (p->unicode()) {
+      switch (iter->unicode()) {
          /*
           * Open brace: do not treat specially unless the element is in
           * braces. In this case, keep a nesting count.
@@ -131,10 +128,10 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
                openBraces--;
 
             } else if (openBraces == 1) {
-               size = p - elemStart;
-               p++;
+               size = iter - elemStart;
+               ++iter;
 
-               if ((p >= limit) || p->isSpace()) {
+               if ((iter >= limit) || iter->isSpace()) {
                   goto done;
                }
 
@@ -149,7 +146,7 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
           */
 
          case '\\':
-            p++;       //RZ
+            ++iter;
             break;
 
           /*
@@ -164,7 +161,7 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
          case '\t':
          case '\v':
             if ((openBraces == 0) && ! inQuotes) {
-               size = p - elemStart;
+               size = iter - elemStart;
                goto done;
             }
             break;
@@ -175,10 +172,10 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
 
          case '"':
             if (inQuotes) {
-               size = (p - elemStart);
-               p++;
+               size = (iter - elemStart);
+               ++iter;
 
-               if ((p >= limit) || p->isSpace()) {
+               if ((iter >= limit) || iter->isSpace()) {
                   goto done;
                }
 
@@ -189,11 +186,12 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
             }
             break;
       }
-      p++;
+
+      ++iter;
    }
 
    // End of list: terminate element
-   if (p == limit) {
+   if (iter == limit) {
       if (openBraces != 0) {
          return TCL_ERROR;
 
@@ -202,16 +200,16 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
 
       }
 
-      size = (int)(p - elemStart);
+      size = (iter - elemStart);
    }
 
 done:
-   while ((p < limit) && p->isSpace()) {
-      p++;
+   while ((iter != limit) && iter->isSpace()) {
+      ++iter;
    }
 
-   elementIndex = elemStart - ptr;
-   nextIndex    = p - ptr;
+   elementIndex = elemStart - list.constBegin();
+   nextIndex    = iter - list.constBegin();
 
    if (sizePtr != 0) {
       *sizePtr = size;

@@ -108,39 +108,51 @@ QString tokToString(int token)
    switch (token) {
       case 0:
          retval = "TK_EOF";
+         break;
 
       case TK_WORD:
          retval = "TK_WORD";
+         break;
 
       case TK_LNKWORD:
          retval = "TK_LNKWORD";
+         break;
 
       case TK_WHITESPACE:
          retval = "TK_WHITESPACE";
+         break;
 
       case TK_LISTITEM:
          retval = "TK_LISTITEM";
+         break;
 
       case TK_ENDLIST:
          retval = "TK_ENDLIST";
+         break;
 
       case TK_COMMAND:
          retval = "TK_COMMAND";
+         break;
 
       case TK_HTMLTAG:
          retval = "TK_HTMLTAG";
+         break;
 
       case TK_SYMBOL:
          retval = "TK_SYMBOL";
+         break;
 
       case TK_NEWPARA:
          retval = "TK_NEWPARA";
+         break;
 
       case TK_RCSTAG:
          retval = "TK_RCSTAG";
+         break;
 
       case TK_URL:
          retval = "TK_URL";
+         break;
    }
 
    return retval;
@@ -696,15 +708,14 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       } else {
          QString text = QString::fromUtf8(yytext);
-
-         static QRegularExpression rexExp("[*+]");
          text = text.right(text.length() - text.indexOf('\n') - 1);
 
-         int markPos = rexExp.lastIndexIn(text);
+         static QRegularExpression regExp("[*+]");
+         int markPos = text.lastIndexOf(regExp);
 
          g_token->isEnumList = false;
          g_token->id         = -1;
-         g_token->indent     = computeIndent(text,markPos);
+         g_token->indent     = computeIndent(text, markPos);
          return TK_LISTITEM;
       }
    }
@@ -721,9 +732,8 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
          int len = text.length();
          text    = text.right(len - nl - 1);
 
-         static QRegularExpression rexExp("[1-9]");
-
-         int digitPos = rexExp.indexIn(text);
+         static QRegularExpression regExp("[1-9]");
+         int digitPos = text.indexOf(regExp);
          int dotPos   = text.indexOf('.', digitPos);
 
          g_token->isEnumList = true;

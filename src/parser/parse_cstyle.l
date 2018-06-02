@@ -485,10 +485,15 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
 
    if (oldStyleArgType.isEmpty()) {
       // new argument
-      static QRegularExpression re("\\([^)]*\\)");
+      static QRegularExpression regExp("\\([^)]*\\)");
 
-      int bi1 = re.lastIndexIn(tmpArgs);
-      int bi2 = bi1 != -1 ? re.lastIndexIn(tmpArgs, bi1 - 1) : -1;
+      int bi1 = tmpArgs.lastIndexOf(regExp);
+      int bi2 = -1;
+
+      if (bi1 != -1) {
+         bi2 = tmpArgs.lastIndexOf(regExp, bi1 - 1);
+
+      }
 
       QChar c;
 
@@ -3740,11 +3745,19 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       /* line control directive */
       QString text = QString::fromUtf8(yytext);
 
-      static QRegularExpression intMatch("\\d+");
-      int startPos = intMatch.indexIn(text);
+      static QRegularExpression regExp("\\d+");
+      QRegularExpressionMatch match = regExp.match(text);
 
-      QString tmp = intMatch.cap(0);
-      yyLineNr = tmp.toInteger<int>();
+      QString tmp;
+
+      if (match.hasMatch()) {
+         tmp      = match.captured(0);
+         yyLineNr = tmp.toInteger<int>();
+
+      } else {
+         yyLineNr  = 0;
+      }
+
       lastPreLineCtrlContext = YY_START;
 
       if (YY_START == ReadBody || YY_START == ReadNSBody || YY_START == ReadBodyIntf) {
@@ -5519,9 +5532,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
                   BEGIN( FindMembers ) ;
 
                } else {
-                  static QRegularExpression re("@[0-9]+$");
+                  static QRegularExpression regExp("@[0-9]+$");
 
-                  if (! isTypedef && memspecEntry && re.indexIn(memspecEntry->m_entryName) == -1) {
+                  if (! isTypedef && memspecEntry && ! memspecEntry->m_entryName.contains(regExp)) {
                      // not typedef or anonymous type
                      // enabled the next two lines for
 
@@ -6988,7 +7001,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
       current->startLine   = yyBegLineNr;
       current->startColumn = yyBegColNr;
 
-      static QRegularExpression re("\\([^)]*[*&][^)]*\\)");       // (...*...)
+      static QRegularExpression regExp("\\([^)]*[*&][^)]*\\)");       // (...*...)
 
       if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
          int tempArg = current->m_entryName.indexOf('<');
@@ -6997,9 +7010,9 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
          int ts = tmpType.indexOf('<');
          int te = tmpType.lastIndexOf('>');
-         int ti = re.indexIn(tmpType, 0);
+         int ti = tmpType.indexOf(regExp);
 
-         // bug677315: A<int(void *, char *)> get(); is not a function pointer
+         // A<int(void *, char *)> get(); is not a function pointer
          // not a (...*...) pattern
          // (...*...) is part of a template argument list
 
@@ -7031,7 +7044,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          // a global function or function variable
          QString tmpType = current->getData(EntryKey::Member_Type);
 
-         if (! tmpType.isEmpty() && (re.indexIn(tmpType, 0) !=-1 || tmpType.startsWith("typedef ")) ) {
+         if (! tmpType.isEmpty() && (tmpType.contains(regExp) || tmpType.startsWith("typedef ")) ) {
 
             if (isTypedef && ! tmpType.startsWith("typedef ")) {
                current->prependData(EntryKey::Member_Type, "typedef ");
