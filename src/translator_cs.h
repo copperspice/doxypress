@@ -720,13 +720,10 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Static Private Member Functions");
    }
 
-   /*! this function is used to produce a comma-separated list of items.
-    *  use generateMarker(i) to indicate where item i should be put.
-    */
+   // returns a comma-separated list of items, use generateMarker(x) to indicate where item x should be put
    QString trWriteList(int numEntries) override {
       QString result;
 
-      // the inherits list contains `numEntries' classes
       for (int i = 0; i < numEntries; i++) {
 
          // generate placeholders for the class links, entry i in the list
@@ -749,30 +746,24 @@ class Translator_Cs : public Translator
       return result;
    }
 
-   /*! used in class documentation to produce a list of base classes,
-    *  if class diagrams are disabled.
-    */
+   // used in class docs to produce a list of base classes,  if class diagrams are disabled.
    QString trInheritsList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Inherits %1.").formatArg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Inherits %1.").formatArg(trWriteList(numEntries));
    }
 
-   /*! used in class documentation to produce a list of super classes,
+   /*! used in class docs to produce a list of super classes,
     *  if class diagrams are disabled.
     */
    QString trInheritedByList(int numEntries) override {
       return QCoreApplication::translate("doxy-text", "Inherited by %1.").formatArg( trWriteList(numEntries));
    }
 
-   /*! used in member documentation blocks to produce a list of
-    *  members that are hidden by this one.
-    */
+   // used in member docs to produce a list of members that are hidden by this one
    QString trReimplementedFromList(int numEntries) override {
       return QCoreApplication::translate("doxy-text", "Reimplemented from %1.").formatArg( trWriteList(numEntries));
    }
 
-   /*! used in member documentation blocks to produce a list of
-    *  all member that overwrite the implementation of this member.
-    */
+   // used in member docs to produce a list of all member that overwrite the implementation of this member
    QString trReimplementedInList(int numEntries)  override {
       return QCoreApplication::translate("doxy-text", "Reimplemented in %1.").formatArg( trWriteList(numEntries));
    }
@@ -1072,7 +1063,7 @@ class Translator_Cs : public Translator
    }
 
    /*! page explaining how the dot graph's should be interpreted
-    *  The %A in the text below are to prevent link to classes called "A". */
+    *  The %A in the translated text are to prevent link to classes called "A". */
    QString trLegendDocs(const QString &dotFormat) override {
       return QCoreApplication::translate("doxy-text", "Dot Graph legend source code").formatArg(dotFormat);
    }
@@ -1368,44 +1359,32 @@ class Translator_Cs : public Translator
       }
    }
 
-   /*! This text is put before the list of members referenced by a member
-    */
+   // this text is put before the list of members referenced by a member
    QString trReferences() override {
       return QCoreApplication::translate("doxy-text", "References");
    }
 
-   /*! used in member documentation blocks to produce a list of
-    *  members that are implemented by this one.
-    */
+   // used in member documentation to produce a list of members whcih are implemented by this one
    QString trImplementedFromList(int numEntries) override {
      return QCoreApplication::translate("doxy-text", "Implements %1.").formatArg(trWriteList(numEntries));
    }
 
-   /*! used in member documentation blocks to produce a list of
-    *  all members that implement this abstract member.
-    */
+   // used in member documentation to produce a list of all members which implement this abstract member
    QString trImplementedInList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Implemented %1.").formatArg(
-                  trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Implemented in %1.").formatArg(trWriteList(numEntries));
    }
 
-   /*! used in RTF documentation as a heading for the Table
-    *  of Contents.
-    */
+   // used in RTF documentation as a heading for the Table  of Contents
    QString trRTFTableOfContents() override {
       return QCoreApplication::translate("doxy-text", "Table of Contents");
    }
 
-   /*! Used as the header of the list of item that have been
-    *  flagged deprecated
-    */
+   // Used as the header of the list of item that have been flagged deprecated
    QString trDeprecatedList() override {
       return QCoreApplication::translate("doxy-text", "Deprecated List");
    }
 
-   /*! Used as a header for declaration section of the events found in
-    * a C# program
-    */
+   // Used as a header for declaration section of the events found in a C# program
    QString trEvents() override {
       return QCoreApplication::translate("doxy-text", "Events");
    }

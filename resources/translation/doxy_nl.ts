@@ -825,7 +825,7 @@
         <translation>Implementeert %1</translation>
     </message>
     <message>
-        <source>Implemented %1.</source>
+        <source>Implemented in %1.</source>
         <translation>Wordt geïmplementeerd door %1</translation>
     </message>
     <message>

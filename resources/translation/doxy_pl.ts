@@ -483,7 +483,7 @@
     </message>
     <message>
         <source>Reimplemented in %1.</source>
-        <translation>Reimplementowana w  %1</translation>
+        <translation>Reimplementowana w %1</translation>
     </message>
     <message>
         <source>Namespace Members</source>
@@ -803,31 +803,31 @@
     </message>
     <message>
         <source>Member</source>
-        <translation type="unfinished"></translation>
+        <translation>Składowe</translation>
     </message>
     <message>
         <source>Members</source>
-        <translation type="unfinished"></translation>
+        <translation>Składowych</translation>
     </message>
     <message>
         <source>member</source>
-        <translation type="unfinished"></translation>
+        <translation>składowe</translation>
     </message>
     <message>
         <source>members</source>
-        <translation type="unfinished"></translation>
+        <translation>składowych</translation>
     </message>
     <message>
         <source>References</source>
-        <translation type="unfinished"></translation>
+        <translation>Odwołuje się do</translation>
     </message>
     <message>
         <source>Implements %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Implementuje %1.</translation>
     </message>
     <message>
-        <source>Implemented %1.</source>
-        <translation type="unfinished"></translation>
+        <source>Implemented in %1.</source>
+        <translation>Implementowany w %1.</translation>
     </message>
     <message>
         <source>Table of Contents</source>

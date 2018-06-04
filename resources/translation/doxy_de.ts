@@ -1118,8 +1118,8 @@
         <translation>Implementiert %1.</translation>
     </message>
     <message>
-        <source>Implemented %1.</source>
-        <translation>Implementiert %1.</translation>
+        <source>Implemented in %1.</source>
+        <translation>Implementiert in %1.</translation>
     </message>
     <message>
         <source>Here is a list of all data types members with links to the data types they belong to:</source>

@@ -826,7 +826,7 @@
         <translation>Implémente %1.</translation>
     </message>
     <message>
-        <source>Implemented %1.</source>
+        <source>Implemented in %1.</source>
         <translation>Implémenté dans %1.</translation>
     </message>
     <message>

@@ -822,15 +822,15 @@
     </message>
     <message>
         <source>Implements %1.</source>
-        <translation type="unfinished"></translation>
+        <translation>Implementos %1</translation>
     </message>
     <message>
-        <source>Implemented %1.</source>
-        <translation type="unfinished"></translation>
+        <source>Implemented in %1.</source>
+        <translation>Implementado em %1</translation>
     </message>
     <message>
         <source>Table of Contents</source>
-        <translation type="unfinished"></translation>
+        <translation>Índice</translation>
     </message>
     <message>
         <source>Deprecated List</source>
@@ -838,7 +838,7 @@
     </message>
     <message>
         <source>Events</source>
-        <translation type="unfinished"></translation>
+        <translation>Eventos</translation>
     </message>
     <message>
         <source>Event Documentation</source>

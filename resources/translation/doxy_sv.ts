@@ -825,7 +825,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Implemented %1.</source>
+        <source>Implemented in %1.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
