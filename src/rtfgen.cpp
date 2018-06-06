@@ -188,7 +188,7 @@ void RTFGenerator::init()
       loadStylesheet(rtfStyleSheetFile, rtf_Style);
    }
 
-   // If user has defined an extension file, load its contents.
+   // if user has defined an extension file, load its content.
    QString rtfExtensionsFile = Config::getString("rtf-extension");
 
    if (! rtfExtensionsFile.isEmpty()) {
@@ -2023,13 +2023,14 @@ QString RTFGenerator::rtf_Code_DepthStyle()
 void RTFGenerator::startTextBlock(bool dense)
 {
    DBG_RTF(m_textStream << "{\\comment startTextBlock}" << endl)
+
    m_textStream << "{" << endl;
    m_textStream << rtf_Style_Reset;
 
-   if (dense) { // no spacing between "paragraphs"
+   if (dense) {   // no spacing between "paragraphs"
       m_textStream << rtf_Style["DenseText"].m_reference;
 
-   } else { // some spacing
+   } else {       // some spacing
       m_textStream << rtf_Style["BodyText"].m_reference;
    }
 }
@@ -2183,6 +2184,9 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
    // before the body, ALWAYS contains "{\comment begin body}"
 
    while (true) {
+      // retriev header from refman.rtf and copy to combined.rtf
+      // skip over the header for all other files
+
       lineBuf = f.readLine();
 
       if (f.error() != QFile::NoError) {
@@ -2211,8 +2215,8 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
 
       if (pos != -1) {
          int startNamePos = lineBuf.indexOf('"', pos) + 1;
-
          int endNamePos   = lineBuf.indexOf('"', startNamePos);
+
          QString fileName = lineBuf.mid(startNamePos, endNamePos - startNamePos);
 
          DBG_RTF(t_stream << "{\\comment begin include " << fileName << "}" << endl)
@@ -2455,8 +2459,6 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    }
 
    QTextStream outStream(&outf);
-
-   //
    QString mainRTFName = rtfDir + "/" + name;
 
    if (! preProcessFile_RTF(mainRTFName, outStream)) {

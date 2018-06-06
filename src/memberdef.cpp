@@ -738,21 +738,21 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
    hasDocumentedReturnType = false;
    docProvider = QSharedPointer<MemberDef>();
 
-   isDMember = def->getDefFileName().right(2).toLower() == ".d";
+   isDMember = def->getDefFileName().endsWith(".d", Qt::CaseInsensitive);
 }
 
 /*! Creates a new member definition.
  *
  * \param df  File containing the definition of this member.
  * \param dl  Line at which the member definition was found.
- * \param dc  Column at which the member definition was found.
- * \param t   A string representing the type of the member.
- * \param na  A string representing the name of the member.
- * \param a   A string representing the arguments of the member.
- * \param e   A string representing the throw clause of the members.
- * \param p   The protection context of the member
- * \param v   The degree of `virtualness' of the member, possible values are: Normal, Virtual, Pure
- * \param s   A boolean that is true if the member is static.
+ * \param dc  column at which the member definition was found.
+ * \param t   string representing the type of the member.
+ * \param na  string representing the name of the member.
+ * \param a   string representing the arguments of the member.
+ * \param e   string representing the throw clause of the members.
+ * \param p   protection context of the member
+ * \param v   degree of `virtualness' of the member, possible values are: Normal, Virtual, Pure
+ * \param s   boolean that is true if the member is static.
  * \param r   The relationship between the class and the member.
  * \param mt  The kind of member. See #MemberType for a list of all types.
  * \param tal The template arguments of this member.
@@ -1041,7 +1041,7 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (name().isEmpty() || name().at(0) == '@') {
+   if (name().isEmpty() || name().startsWith('@')) {
       // not a valid or a dummy name
       m_isLinkableCached = 1;
       return;
@@ -1213,8 +1213,8 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
    xType = stripPrefix(xType, "friend ");
 
    static QRegularExpression regExp("@[0-9]+");
-
    QRegularExpressionMatch match = regExp.match(xType);
+
    int len = match.capturedLength(0);
 
    if (match.hasMatch()) {
@@ -1329,7 +1329,8 @@ QString MemberDef::getDeclType() const
    // strip `friend' keyword from ltype
    ltype = stripPrefix(ltype, "friend ");
 
-   if (ltype == "@") { // rename type from enum values
+   if (ltype == "@") {
+      // rename type from enum values
       ltype = "";
 
    } else {
@@ -1503,10 +1504,10 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
          ol.docify("}");
 
-         if (varName.isEmpty() && (name().isEmpty() || name().at(0) == '@')) {
+         if (varName.isEmpty() && (name().isEmpty() || name().startsWith('@'))) {
             ol.docify(";");
 
-         } else if (! varName.isEmpty() && (varName.at(0) == '*' || varName.at(0) == '&')) {
+         } else if (! varName.isEmpty() && (varName.startsWith('*') || varName.startsWith('&'))) {
             ol.docify(" ");
             ol.docify(varName);
          }
@@ -3275,7 +3276,7 @@ static QString simplifyTypeForTable(const QString &s)
 {
    QString ts = removeAnonymousScopes(s);
 
-   if (ts.right(2) == "::") {
+   if (ts.endsWith("::")) {
       ts = ts.left(ts.length() - 2);
    }
 

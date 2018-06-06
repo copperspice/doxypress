@@ -212,7 +212,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.disable(OutputGenerator::RTF);
    ol.disable(OutputGenerator::Man);
 
-   if (! title().isEmpty() && !name().isEmpty() && si != 0) {
+   if (! title().isEmpty() && ! name().isEmpty() && si != nullptr) {
 
       startTitle(ol, getOutputFileBase(), self);
       ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);

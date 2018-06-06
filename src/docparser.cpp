@@ -240,6 +240,10 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
    static const bool generateDocbook = Config::getBool("generate-docbook");
    static const bool generateRtf     = Config::getBool("generate-rtf");
    static const bool generateXml     = Config::getBool("generate-xml");
+   static const bool latexPdf        = Config::getBool("latex-pdf");
+
+   static const QString outputHtmlDir  = Config::getString("html-output");
+   static const QString outputLatexDir = Config::getString("latex-output");
 
    QString result;
    bool ambig;
@@ -267,14 +271,14 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
                if (! generateHtml) {
                   return result;
                }
-               outputDir = Config::getString("html-output");
+               outputDir = outputHtmlDir;
                break;
 
             case DocImage::Latex:
                if (! generateLatex) {
                   return result;
                }
-               outputDir = Config::getString("latex-output");
+               outputDir = outputLatexDir;
                break;
 
             case DocImage::DocBook:
@@ -322,14 +326,14 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
                         csPrintable(fileName), inImage.error() );
       }
 
-      if (type == DocImage::Latex && Config::getBool("latex-pdf") && fd->name().right(4) == ".eps") {
+      if (type == DocImage::Latex && latexPdf && fd->name().contains(".eps")) {
          // we have an .eps image in pdflatex mode => convert it to a pdf
 
-         static const QString outputDir = Config::getString("latex-output");
          QString baseName  = fd->name().left(fd->name().length() - 4);
 
          QString epstopdfArgs;
-         epstopdfArgs = QString("\"%1/%2.eps\" --outfile=\"%3/%4.pdf\"").formatArg(outputDir).formatArg(baseName).formatArg(outputDir).formatArg(baseName);
+         epstopdfArgs = QString("\"%1/%2.eps\" --outfile=\"%3/%4.pdf\"")
+                  .formatArg(outputLatexDir).formatArg(baseName).formatArg(outputLatexDir).formatArg(baseName);
 
          portable_sysTimerStart();
 
@@ -2999,7 +3003,7 @@ void DocMscFile::parse()
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::mscFileNameDict, m_name, ambig);
 
-   if (fd == nullptr && m_name.right(4) != ".msc") {
+   if (fd == nullptr && ! m_name.contains(".msc")) {
       // try with .msc extension as well
       fd = findFileDef(&Doxy_Globals::mscFileNameDict, m_name + ".msc", ambig);
    }
@@ -3031,7 +3035,7 @@ void DocDiaFile::parse()
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name, ambig);
 
-   if (fd == 0 && m_name.right(4) != ".dia") {
+   if (fd == 0 && ! m_name.contains(".dia")) {
       // try with .dia extension as well
       fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name + ".dia", ambig);
    }
@@ -4765,18 +4769,18 @@ int DocAutoList::parse()
 
    // first item or sub list => create new list
    do {
-      if (g_token->id != -1) { // explicitly numbered list
-         num = g_token->id; // override num with real number given
+      if (g_token->id != -1) {                           // explicitly numbered list
+         num = g_token->id;                              // override num with real number given
       }
 
       DocAutoListItem *li = new DocAutoListItem(this, m_indent, num++);
       m_children.append(li);
       retval = li->parse();
 
-   } while (retval == TK_LISTITEM &&            // new list item
-            m_indent == g_token->indent &&        // at same indent level
-            m_isEnumList == g_token->isEnumList && // of the same kind
-            (g_token->id == -1 || g_token->id >= num) // increasing number (or no number)
+   } while (retval == TK_LISTITEM &&                     // new list item
+            m_indent == g_token->indent &&               // at same indent level
+            m_isEnumList == g_token->isEnumList &&       // of the same kind
+            (g_token->id == -1 || g_token->id >= num)    // increasing number (or no number)
            );
 
    doctokenizerYYendAutoList();
@@ -7084,8 +7088,8 @@ int DocPara::parse(bool skipParse, int token)
             while (n) {
                if (n->kind() == DocNode::Kind_AutoList && ((DocAutoList *)n)->isEnumList()) {
                   depth++;
-
                }
+
                n = n->parent();
             }
 
@@ -7097,8 +7101,8 @@ int DocPara::parse(bool skipParse, int token)
                m_children.append(al);
                retval = al->parse();
 
-            } while (retval == TK_LISTITEM &&        // new list
-                     al->indent() == g_token->indent // at same indent level
+            } while (retval == TK_LISTITEM &&           // new list
+                     al->indent() == g_token->indent    // at same indent level
                     );
 
             // check the return value
@@ -7109,7 +7113,7 @@ int DocPara::parse(bool skipParse, int token)
 
                g_token->name = g_token->simpleSectName;
 
-               if (g_token->name.left(4) == "rcs:") {
+               if (g_token->name.startsWith("rcs:")) {
                   // RCS section
                   g_token->name = g_token->name.mid(4);
                   g_token->text = g_token->simpleSectText;

@@ -1675,6 +1675,8 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
    // + title
    // + documentation
 
+   static const QString outputDocbook = Config::getString("docbook-output");
+
    if (pd->isReference()) {
       return;
    }
@@ -1689,8 +1691,7 @@ static void generateDocbookForPage(QSharedPointer<PageDef> pd, QTextStream &ti, 
       pageName = "mainpage"; // to prevent overwriting the generated index page
    }
 
-   QString outputDirectory = Config::getString("docbook-output");
-   QString fileName = outputDirectory + "/" + pageName + ".xml";
+   QString fileName = outputDocbook + "/" + pageName + ".xml";
 
    QFile f(fileName);
 

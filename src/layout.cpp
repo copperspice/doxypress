@@ -95,11 +95,11 @@ QString LayoutNavEntry::url() const
    QString url = baseFile().trimmed();
 
    if ((kind() != LayoutNavEntry::User && kind() != LayoutNavEntry::UserGroup) ||
-         (kind() == LayoutNavEntry::UserGroup && url.left(9) == "usergroup")) {
+         (kind() == LayoutNavEntry::UserGroup && url.startsWith("usergroup"))) {
 
       url += Doxy_Globals::htmlFileExtension;
 
-   } else if (url.left(5) == "@ref " || url.left(5) == "\\ref ") {
+   } else if (url.startsWith("@ref ") || url.startsWith("\\ref ")) {
       QSharedPointer<Definition> d;
 
       QString anchor;
@@ -119,8 +119,9 @@ QString LayoutNavEntry::url() const
       }
 
       if (! found) {
-         QString temp = Config::getString("layout-file");
-         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n", csPrintable(url.mid(5)), csPrintable(temp));
+         QString tmp = Config::getString("layout-file");
+         msg("Explicit link request to '%s' in layout file '%s' could not be resolved\n",
+                  csPrintable(url.mid(5)), csPrintable(tmp));
       }
    }
 

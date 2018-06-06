@@ -772,7 +772,7 @@ void HtmlDocVisitor::visitPost(DocAutoList *l)
       m_t << "</ul>";
    }
 
-   if (!l->isPreformatted()) {
+   if (! l->isPreformatted()) {
       m_t << "\n";
    }
 
@@ -793,7 +793,8 @@ void HtmlDocVisitor::visitPost(DocAutoListItem *li)
       return;
    }
    m_t << "</li>";
-   if (!li->isPreformatted()) {
+
+   if (! li->isPreformatted()) {
       m_t << "\n";
    }
 }
@@ -862,26 +863,29 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
             t = 0;
 
             if (isFirst) {
-               if (kind == DocNode::Kind_HtmlListItem ||
-                     kind == DocNode::Kind_SecRefItem) {
+               if (kind == DocNode::Kind_HtmlListItem || kind == DocNode::Kind_SecRefItem) {
                   t = 1;
+
                } else if (kind == DocNode::Kind_HtmlDescData ||
                           kind == DocNode::Kind_XRefItem ||
                           kind == DocNode::Kind_SimpleSect) {
                   t = 2;
+
                } else if (kind == DocNode::Kind_HtmlCell ||
                           kind == DocNode::Kind_ParamList) {
                   t = 5;
                }
             }
+
             if (isLast) {
-               if (kind == DocNode::Kind_HtmlListItem ||
-                     kind == DocNode::Kind_SecRefItem) {
+               if (kind == DocNode::Kind_HtmlListItem || kind == DocNode::Kind_SecRefItem) {
                   t = 3;
+
                } else if (kind == DocNode::Kind_HtmlDescData ||
                           kind == DocNode::Kind_XRefItem ||
                           kind == DocNode::Kind_SimpleSect) {
                   t = 4;
+
                } else if (kind == DocNode::Kind_HtmlCell ||
                           kind == DocNode::Kind_ParamList) {
                   t = 6;
@@ -892,7 +896,7 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 
          case DocNode::Kind_AutoListItem:
             isFirst = isFirstChildNode((DocAutoListItem *)p->parent(), p);
-            isLast = isLastChildNode ((DocAutoListItem *)p->parent(), p);
+            isLast  = isLastChildNode ((DocAutoListItem *)p->parent(), p);
             t = 1; // not used
             break;
 
@@ -2110,13 +2114,34 @@ void HtmlDocVisitor::filter(const QString &str)
    if (result.contains("$tr") )  {
       // used in the doxypress test build to show sample translations
 
-      result = result.replace("$trPublicTypedefs",           theTranslator->trPublicTypedefs());
-      result = result.replace("$trProtectedMembers",         theTranslator->trProtectedMembers());
-      result = result.replace("$trPrivateSlots",             theTranslator->trPrivateSlots());
-      result = result.replace("$trConstructorDocumentation", theTranslator->trConstructorDocumentation());
-      result = result.replace("$trModulesDescription",       theTranslator->trModulesDescription());
-      result = result.replace("$trDeprecatedList",           theTranslator->trDeprecatedList());
-      result = result.replace("$trLegendDocs",               theTranslator->trLegendDocs("png"));
+      if (result.contains("PublicTypedefs")) {
+         result = result.replace("$trPublicTypedefs",           theTranslator->trPublicTypedefs());
+      }
+
+      if (result.contains("ProtectedMembers")) {
+         result = result.replace("$trProtectedMembers",         theTranslator->trProtectedMembers());
+      }
+
+      if (result.contains("PrivateSlots")) {
+         result = result.replace("$trPrivateSlots",             theTranslator->trPrivateSlots());
+      }
+
+      if (result.contains("ConstructorDocumentation")) {
+         result = result.replace("$trConstructorDocumentation", theTranslator->trConstructorDocumentation());
+      }
+
+      if (result.contains("ModulesDescription")) {
+         result = result.replace("$trModulesDescription",       theTranslator->trModulesDescription());
+      }
+
+      if (result.contains("DeprecatedList")) {
+          result = result.replace("$trDeprecatedList",           theTranslator->trDeprecatedList());
+      }
+
+      if (result.contains("LegendDocs")) {
+         result = result.replace("$trLegendDocs",               theTranslator->trLegendDocs("png"));
+      }
+
    }
 
    for (auto c : result) {

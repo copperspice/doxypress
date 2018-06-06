@@ -706,7 +706,7 @@ static void reSortNodes(QList<FTVNode *> &nodeList)
    for (auto node : nodeList) {
 
 
-/*  broom (on hold, sort test)
+/* broom (on hold, sort test)
 if  (node->file.contains("getting-started")) {
 
 //    (node->file.contains("build-from-source") || node->file.contains("build-options") || node->file.contains("requirements-") ||

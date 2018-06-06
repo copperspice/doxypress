@@ -283,7 +283,7 @@ static QString replaceRef(const QString &buf, const QString relPath, bool urlOnl
       if (urlOnly) {
          // for user defined dot graphs
 
-         if (link.left(5) == "\\ref " || link.left(5) == "@ref ") {
+         if (link.startsWith("\\ref ") || link.startsWith("@ref ")) {
             // \ref url
             result = href + "=\"";
 
@@ -552,7 +552,7 @@ static bool readSVGSize(const QString &fileName, int *width, int *height)
 
 static void writeSVGNotSupported(QTextStream &out)
 {
-   out << "<p><b>This browser is not able to show SVG: try Firefox, Chrome, Safari, or Opera instead.</b></p>";
+   out << "<p><b>This browser is unable to display an SVG file.</b></p>";
 }
 
 // check if a reference to a SVG figure can be written and does so if possible.

@@ -71,7 +71,7 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
       QString bibFile = bibdata;
 
       // file can have multiple dots
-      if (! bibFile.isEmpty() && bibFile.right(4) != ".bib") {
+      if (! bibFile.isEmpty() && ! bibFile.endsWith(".bib")) {
          bibFile += ".bib";
       }
 
@@ -82,8 +82,9 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
                t << ",";
             }
 
-            i++;
             t << bibTmpFile << QString::number(i);
+            i++;
+
          }
       }
 
@@ -189,7 +190,7 @@ void CiteDict::generatePage() const
    int i = 0;
 
    for (auto bibFile : citeDataList) {
-      if (! bibFile.isEmpty() && bibFile.right(4) != ".bib") {
+      if (! bibFile.isEmpty() && ! bibFile.endsWith(".bib")) {
          bibFile += ".bib";
       }
 
@@ -197,10 +198,11 @@ void CiteDict::generatePage() const
 
       if (fi.exists()) {
          if (! bibFile.isEmpty()) {
-            copyFile(bibFile, bibOutputDir + bibTmpFile + QString::number(i) + ".bib");
-            ++i;
 
+            copyFile(bibFile, bibOutputDir + bibTmpFile + QString::number(i) + ".bib");
             bibOutputFiles = bibOutputFiles + " " + bibTmpDir + bibTmpFile + QString::number(i) + ".bib";
+
+            ++i;
          }
 
       } else if (! fi.exists()) {
@@ -219,10 +221,10 @@ void CiteDict::generatePage() const
    int exitCode  = portable_system("perl", args);
 
    if (exitCode == 1) {
-      err("Issue with Perl or BibTeX. Verify 'perl --version' works from a Windows or Shell command line.\n\n");
+      errAll("Issue with Perl or BibTeX. Verify 'perl --version' works from a Windows or Shell command line.\n\n");
 
    } else if (exitCode != 0) {
-      err("Issue with Perl or BibTeX. Verify messages appearing afer 'Generating citations page' in your "
+      errAll("Issue with Perl or BibTeX. \nVerify messages appearing afer 'Generating citations page' in your "
                   "DoxyPress UI output. Exit Code: %d\n\n", exitCode);
    }
 
@@ -293,7 +295,7 @@ void CiteDict::generatePage() const
       for (auto bibFile : citeDataList)  {
          // file can have multiple dots
 
-         if (! bibFile.isEmpty() && bibFile.right(4) != ".bib") {
+         if (! bibFile.isEmpty() && ! bibFile.endsWith(".bib")) {
             bibFile += ".bib";
          }
 
@@ -318,7 +320,7 @@ void CiteDict::generatePage() const
    thisDir.remove(doxy_BstFile);
    thisDir.remove(bib2xhtmlFile);
 
-   for (int j = 1; j <= citeDataList.count(); j++) {
+   for (int j = 0; j < citeDataList.count(); j++) {
       thisDir.remove(bibOutputDir + bibTmpFile + QString::number(j) + ".bib");
    }
 

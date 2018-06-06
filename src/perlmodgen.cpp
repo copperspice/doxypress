@@ -51,11 +51,7 @@ class PerlModOutputStream
    void add(char c);
    void add(QChar c);
    void add(const QString &s);
-
-//     void add(int n);               BROOM - do we need this?
-//     void add(unsigned int n);
 };
-
 
 void PerlModOutputStream::add(char c)
 {
@@ -86,28 +82,6 @@ void PerlModOutputStream::add(const QString &s)
       m_s += s;
    }
 }
-
-/*
-
-void PerlModOutputStream::add(int n)
-{
-   if (m_t != 0) {
-      (*m_t) << n;
-   } else {
-      m_s += n;
-   }
-}
-
-void PerlModOutputStream::add(unsigned int n)
-{
-   if (m_t != 0) {
-      (*m_t) << n;
-   } else {
-      m_s += n;
-   }
-}
-
-*/
 
 class PerlModOutput
 {
@@ -3235,13 +3209,13 @@ void PerlModGenerator::generate()
    pathDoxyRules          = perlModAbsPath + "/doxyrules.make";
 
    if (perlmodLatex) {
-      pathDoxyStructureTex = perlModAbsPath + "/doxystructure.tex";
-      pathDoxyFormatTex = perlModAbsPath    + "/doxyformat.tex";
-      pathDoxyLatexTex  = perlModAbsPath    + "/doxylatex.tex";
-      pathDoxyLatexDVI  = perlModAbsPath    + "/doxylatex.dvi";
-      pathDoxyLatexPDF  = perlModAbsPath    + "/doxylatex.pdf";
-      pathDoxyDocsTex   = perlModAbsPath    + "/doxydocs.tex";
-      pathDoxyLatexPL   = perlModAbsPath    + "/doxylatex.pl";
+      pathDoxyStructureTex     = perlModAbsPath + "/doxystructure.tex";
+      pathDoxyFormatTex        = perlModAbsPath + "/doxyformat.tex";
+      pathDoxyLatexTex         = perlModAbsPath + "/doxylatex.tex";
+      pathDoxyLatexDVI         = perlModAbsPath + "/doxylatex.dvi";
+      pathDoxyLatexPDF         = perlModAbsPath + "/doxylatex.pdf";
+      pathDoxyDocsTex          = perlModAbsPath + "/doxydocs.tex";
+      pathDoxyLatexPL          = perlModAbsPath + "/doxylatex.pl";
       pathDoxyLatexStructurePL = perlModAbsPath + "/doxylatex-structure.pl";
    }
 

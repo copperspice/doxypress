@@ -28,13 +28,15 @@ static const int maxCmdLine = 40960;
 
 void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, DiaOutputFormat format)
 {
+   static const QString diaPath = Config::getString("dia-path");
+
    QString absOutFile = outDir + QDir::separator() +outFile;
 
    // move to the output dir so dot can find the font file.
    QString oldDir = QDir::currentPath();
    QDir::setCurrent(outDir);
 
-   QString diaExe = Config::getString("dia-path") + "dia" + portable_commandExtension();
+   QString diaExe = diaPath + "dia" + portable_commandExtension();
 
    QString diaArgs;
    QString extension;

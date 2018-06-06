@@ -27,7 +27,7 @@ extern Translator *theTranslator;      // can be removed when theTranslator is c
 
 QString getLanguage();
 
-// place holder for a position in a list. Used for translators to be able to specify different elements order
+// place holder for a position in a list, used in translators
 inline QString generateMarker(int id)
 {
    QString retval = QString::number(id);

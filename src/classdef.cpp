@@ -83,7 +83,7 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
    }
 
    m_isGeneric   = (lang == SrcLangExt_CSharp || lang == SrcLangExt_Java) && tname.indexOf('<') != -1;
-   m_isAnonymous = tname.indexOf('@') != -1;
+   m_isAnonymous = tname.contains('@');
 }
 
 ClassDef::~ClassDef()
@@ -117,13 +117,13 @@ QString ClassDef::displayName(bool includeScope) const
       retval = substitute(retval, "::", sep);
    }
 
-   if (m_compType == CompoundType::Protocol && retval.right(2) == "-p") {
+   if (m_compType == CompoundType::Protocol && retval.endsWith("-p")) {
       retval = "<" + retval.left(retval.length() - 2) + ">";
    }
 
    retval = renameNS_Aliases(retval);
 
-   if (retval.indexOf('@') != -1) {
+   if (retval.contains('@')) {
       return removeAnonymousScopes(retval);
    } else {
       return retval;
@@ -1391,9 +1391,8 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
             {
                for (auto innerCd : m_innerClasses) {
 
-                  if (innerCd->isLinkableInProject() &&
-                          innerCd->templateMaster() == 0 && protectionLevelVisible(innerCd->protection()) &&
-                        ! innerCd->isEmbeddedInOuterScope() ) {
+                  if (innerCd->isLinkableInProject() && innerCd->templateMaster() == nullptr &&
+                        protectionLevelVisible(innerCd->protection()) && ! innerCd->isEmbeddedInOuterScope() ) {
 
                      tagFile << "    <class kind=\"" << innerCd->compoundTypeString() << "\">"
                              << convertToXML(innerCd->name()) << "</class>" << endl;
@@ -1605,10 +1604,9 @@ bool ClassDef::visibleInParentsDeclList() const
    static const bool extractLocalClasses = Config::getBool("extract-local-classes");
 
    bool linkable = isLinkable();
-   return (!isAnonymous() && !isExtension() &&
-           (protection() !=::Private || extractPrivate) &&
-           (linkable || (! hideUndocClasses && (!isLocal() || extractLocalClasses)))
-          );
+
+   return (! isAnonymous() && ! isExtension() && (protection() !=::Private || extractPrivate) &&
+           (linkable || (! hideUndocClasses && (!isLocal() || extractLocalClasses))));
 }
 
 void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames)
@@ -2008,8 +2006,8 @@ void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
    // write inner classes after the parent so the tag files contain the definition in proper order
 
    for (auto innerCd : m_innerClasses) {
-      if (innerCd->isLinkableInProject() && innerCd->templateMaster() == 0 &&
-            protectionLevelVisible(innerCd->protection()) && !innerCd->isEmbeddedInOuterScope() ) {
+      if (innerCd->isLinkableInProject() && innerCd->templateMaster() == nullptr &&
+            protectionLevelVisible(innerCd->protection()) && ! innerCd->isEmbeddedInOuterScope() ) {
 
          msg("Generating docs for nested compound %s\n", innerCd->name());
          innerCd->writeDocumentation(ol);
@@ -2074,7 +2072,7 @@ void ClassDef::writeMemberList(OutputList &ol)
          Protection prot = mi.prot;
          Specifier virt = md->virtualness();
 
-         if (cd && ! md->name().isEmpty() && md->name()[0] != '@') {
+         if (cd && ! md->name().isEmpty() && ! md->name().startsWith('@')) {
             bool memberWritten = false;
 
             if (cd->isLinkable() && md->isLinkable()) {
@@ -2371,7 +2369,7 @@ bool ClassDef::hasNonReferenceSuperClass()
 }
 
 /*! called from MemberDef::writeDeclaration() to (recusively) write the
- *  definition of an anonymous struct, union or class.
+ *  definition of an anonymous struct, union or class
  */
 void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup,
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
@@ -2413,7 +2411,7 @@ void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bo
    }
 }
 
-/*! a link to this class is possible within this project */
+// a link to this class is possible within this project
 bool ClassDef::isLinkableInProject() const
 {
    static const bool extractLocal   = Config::getBool("extract-local-classes");
@@ -2424,8 +2422,8 @@ bool ClassDef::isLinkableInProject() const
       return m_templateMaster->isLinkableInProject();
 
    } else {
-      return ! name().isEmpty() && ! isArtificial() && !isHidden() && ! isAnonymous() && protectionLevelVisible(m_prot) &&
-             (! m_isLocal || extractLocal)  && (hasDocumentation() || ! hideUndoc) &&
+      return ! name().isEmpty() && ! isArtificial() && ! isHidden() && ! isAnonymous() && protectionLevelVisible(m_prot) &&
+             (! m_isLocal  || extractLocal)  && (hasDocumentation() || ! hideUndoc) &&
              (! m_isStatic || extractStatic) && ! isReference();
    }
 }
@@ -2486,7 +2484,8 @@ bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, i
    bool found = false;
 
    if (level > 256) {
-      err("Possible recursive class relation while inside %s and looking for base class %s\n", csPrintable(name()), csPrintable(bcd->name()));
+      err("Possible recursive class relation while inside %s and looking for base class %s\n",
+                  csPrintable(name()), csPrintable(bcd->name()));
       return false;
    }
 
@@ -4124,7 +4123,7 @@ bool ClassDef::subGrouping() const
 
 void ClassDef::setName(const QString &name)
 {
-   m_isAnonymous = name.indexOf('@') != -1;
+   m_isAnonymous = name.contains('@');
    Definition::setName(name);
 }
 

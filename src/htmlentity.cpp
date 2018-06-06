@@ -979,7 +979,7 @@ void HtmlEntityMapper::writeXMLSchema(QTextStream &t)
    for (int i = 0; i < g_numHtmlEntities - g_numberHtmlMappedCmds; i++) {
       QString  bareName = g_htmlEntities[i].xml;
 
-      if (! bareName.isEmpty() && bareName.at(0) == '<' && bareName.right(2) == "/>") {
+      if (! bareName.isEmpty() && bareName.at(0) == '<' && bareName.endsWith("/>")) {
          bareName = bareName.mid(1, bareName.length() - 3); // strip < and />
          t << "      <xsd:element name=\"" << bareName << "\" type=\"docEmptyType\" />\n";
       }

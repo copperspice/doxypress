@@ -144,86 +144,66 @@ class ClassDef : public Definition
    /** Returns the type of compound as a string */
    QString compoundTypeString() const;
 
-   /** Returns the list of base classes from which this class directly
-    *  inherits.
-    */
+   // Returns the list of base classes from which this class directly inherits.
    SortedList<BaseClassDef *> *baseClasses() const;
 
-   /** Returns the list of sub classes that directly derive from this class
-    */
+   // Returns the list of sub classes that directly derive from this class
    SortedList<BaseClassDef *> *subClasses() const;
 
-   /** Returns a dictionary of all members. This includes any inherited
-    *  members. Members are sorted alphabetically.
-    */
+   // Returns a dictionary of all members. This includes any inherited
+   // members. Members are sorted alphabetically.
    const MemberNameInfoSDict &memberNameInfoSDict() const;
 
-   /** Return the protection level (Public,Protected,Private) in which
-    *  this compound was found.
-    */
+   // Return the protection level (Public,Protected,Private) in which this compound was found.
    Protection protection() const;
 
-   /** returns true iff a link is possible to this item within this project.
-    */
+   // returns true iff a link is possible to this item within this project.
    bool isLinkableInProject() const override;
 
-   /** return true iff a link to this class is possible (either within
-    *  this project, or as a cross-reference to another project).
-    */
+   // return true iff a link to this class is possible (either within
+   // this project, or as a cross-reference to another project).
    bool isLinkable() const override;
 
-   /** the class is visible in a class diagram, or class hierarchy */
+   // the class is visible in a class diagram, or class hierarchy
    bool isVisibleInHierarchy();
 
-   /** show this class in the declaration section of its parent? */
+   // show this class in the declaration section of its parent?
    bool visibleInParentsDeclList() const;
 
-   // Returns the template arguments of this class
+   // returns the template arguments of this class
    const ArgumentList &getTemplateArgumentList() const;
    ArgumentList &getTemplateArgumentList();
 
-   /** Returns the namespace this compound is in, or 0 if it has a global
-    *  scope.
-    */
+   // returns the namespace this compound is in, or 0 if it has a global scope.
    QSharedPointer<NamespaceDef> getNamespaceDef() const;
 
-   /** Returns the file in which this compound's definition can be found.
-    *  Should not return 0 (but it might be a good idea to check anyway).
-    */
+   // returns the file in which this compound's definition can be found.
+   // should not return 0 (but it might be a good idea to check anyway).
    QSharedPointer<FileDef> getFileDef() const;
 
-   /** Returns the Java package this class is in or 0 if not applicable.
-    */
-
+   // Returns the Java package this class is in or 0 if not applicable.
    QSharedPointer<MemberDef> getMemberByName(const QString &) const;
 
-   /** Returns true iff \a bcd is a direct or indirect base class of this
-    *  class. This function will recusively traverse all branches of the
-    *  inheritance tree.
-    */
    bool isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, int level = 0);
+   // returns true if  bcd is a direct or indirect base class of this class
+   // will recusively traverse all branches of the inheritance tree
 
-   /** Returns true iff \a bcd is a direct or indirect sub class of this
-    *  class.
-    */
+   // returns true iff \a bcd is a direct or indirect sub class of this class
    bool isSubClass(QSharedPointer<ClassDef> bcd, int level = 0);
 
-   /** returns true iff \a md is a member of this class or of the
-    *  the public/protected members of a base class
-    */
+   // returns true iff \a md is a member of this class or of the
+   // the public/protected members of a base class
    bool isAccessibleMember(QSharedPointer<MemberDef> md);
 
-   /** Returns a sorted dictionary with all template instances found for
-    *  this template class. Returns 0 if not a template or no instances.
-    */
+   // Returns a sorted dictionary with all template instances found for
+   // this template class. Returns 0 if not a template or no instances.
    const QHash<QString, QSharedPointer<ClassDef>> &getTemplateInstances() const;
 
-   /** Returns the template master of which this class is an instance.
-    *  Returns 0 if not applicable.
-    */
+   // Returns the template master of which this class is an instance.
+   // Returns 0 if not applicable.
    QSharedPointer<ClassDef> templateMaster() const;
 
-   /** Returns true if this class is a template */
+   // Returns true if this class is a template
    bool isTemplate() const;
 
    const IncludeInfo &includeInfo() const;

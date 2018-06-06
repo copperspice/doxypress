@@ -460,7 +460,7 @@ void Definition::setDocumentation(const QString &tDoc, const QString &docFile, i
    if (! _docsAlreadyAdded(doc, m_private->docSignatures)) {
 
       if (m_private->m_details.doc.isEmpty()) {
-         // fresh detailed description
+         // new detailed description
          m_private->m_details.doc = doc;
 
       } else if (atTop) {
@@ -1564,10 +1564,10 @@ QString abbreviate(const QString &brief, const QString &name)
    static const QStringList abbreviateBrief = Config::getList("abbreviate-brief");
 
    QString className = name;
-   int i = className.lastIndexOf("::");
+   QString::const_iterator iter = className.lastIndexOfFast("::");
 
-   if (i != -1) {
-      className = className.mid(i + 2);
+   if (iter != className.constEnd()) {
+      className =  QStringView(iter + 2, className.constEnd());
    }
 
    QString result = brief.trimmed();

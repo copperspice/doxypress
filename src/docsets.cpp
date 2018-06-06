@@ -301,11 +301,11 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          if (md && (md->isObjCMethod() || md->isObjCProperty())) {
             lang = "occ";   // Objective C/C++
 
-         } else if (fd && fd->name().right(2).toLower() == ".c") {
-            lang = "c";   // Plain C
+         } else if (fd && fd->name().endsWith(".c", Qt::CaseInsensitive)) {
+            lang = "c";     // Plain C
 
          } else if (cd == 0 && nd == 0) {
-            lang = "c";   // Plain C symbol outside any class or namespace
+            lang = "c";     // Plain C symbol outside any class or namespace
 
          } else {
             lang = "cpp";   // C++

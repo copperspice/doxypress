@@ -1593,7 +1593,8 @@ static void newVariable()
 
 static void newFunction()
 {
-   if (current->m_entryName.left(2) == "__" && current->m_entryName.right(2) == "__") {
+   if (current->m_entryName.startsWith("__") && current->m_entryName.endsWith("__")) {
+
       // special method name, refer to http://docs.python.org/ref/specialnames.html
       current->protection = Public;
 

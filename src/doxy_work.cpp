@@ -2286,7 +2286,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
 {
    QString fullName = removeAnonymousScopes(templ->name());
 
-   if (fullName.right(2) == "::") {
+   if (fullName.endsWith("::")) {
       fullName = fullName.left(fullName.length() - 2);
    }
 
@@ -3113,7 +3113,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
 
       type = stripPrefix(type, "typedef ");
 
-      if (type.left(7) == "struct " || type.left(6) == "union ") {
+      if (type.startsWith("struct ") || type.startsWith("union ")) {
          type = stripPrefix(type, "struct ");
          type = stripPrefix(type, "union ");
 
@@ -3178,7 +3178,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    } else {
 
       if (! root->getData(EntryKey::Member_Type).isEmpty() && ! root->m_entryName.isEmpty()) {
-         if (name.at(0) == '@') {
+
+         if (name.startsWith('@')) {
             // dummy variable representing anonymous union
             def = root->getData(EntryKey::Member_Type);
 
@@ -3398,10 +3399,9 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
       findAndRemoveWord(type, "static");
       findAndRemoveWord(type, "volatile");
 
-      //if (type.left(6)=="const ") type=type.right(type.length()-6);
       typeIsClass = getResolvedClass(ctx, fd, type) != 0;
 
-      if (!typeIsClass && (ti = type.indexOf('<')) != -1) {
+      if (! typeIsClass && (ti = type.indexOf('<')) != -1) {
          typeIsClass = getResolvedClass(ctx, fd, type.left(ti)) != 0;
       }
 
@@ -4016,7 +4016,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    }
 
    QString name = removeRedundantWhiteSpace(rname);
-   if (name.left(2) == "::") {
+   if (name.startsWith("::")) {
       name = name.right(name.length() - 2);
    }
 
@@ -4128,7 +4128,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
       }
    }
 
-   if (def.left(7) == "friend ") {
+   if (def.startsWith("friend ")) {
       def = def.right(def.length() - 7);
    }
 
@@ -5169,7 +5169,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
    QString biName = bi->name;
    bool isExplicitGlobalScope = false;
 
-   if (biName.left(2) == "::") {
+   if (biName.startsWith("::")) {
       // explicit global scope
       biName = biName.right(biName.length() - 2);
       isExplicitGlobalScope = true;
@@ -7693,10 +7693,11 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
       if ((i = root->m_entryName.lastIndexOf("::")) != -1) {
          // scope is specified
 
-         scope = root->m_entryName.left(i); // extract scope
+         scope = root->m_entryName.left(i);                                      // extract scope
          name  = root->m_entryName.right(root->m_entryName.length() - i - 2);    // extract name
+         cd    = getClass(scope);
 
-         if ((cd = getClass(scope)) == 0) {
+         if (cd == nullptr) {
             nd = getResolvedNamespace(scope);
          }
 
@@ -7706,8 +7707,9 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
          if (( ptrEntry->parent()->section & Entry::SCOPE_MASK ) && ! ptrEntry->parent()->m_entryName.isEmpty()) {
             // found enum docs inside a compound
             scope = ptrEntry->parent()->m_entryName;
+            cd    = getClass(scope);
 
-            if ((cd = getClass(scope)) == nullptr) {
+            if (cd == nullptr) {
                nd = getResolvedNamespace(scope);
             }
          }
@@ -9155,7 +9157,7 @@ void Doxy_Work::generateNamespaceDocs()
       // for each class in the namespace
       for (auto cd : nd->getClassSDict()) {
 
-         if ( ( cd->isLinkableInProject() && cd->templateMaster() == 0) && ! cd->isHidden() && !cd->isEmbeddedInOuterScope() ) {
+         if ( (cd->isLinkableInProject() && cd->templateMaster() == nullptr) && ! cd->isHidden() && ! cd->isEmbeddedInOuterScope() ) {
               // skip external references, anonymous compounds and
               // template instances and nested classes
 
@@ -9249,27 +9251,28 @@ void Doxy_Work::copyLatexStyleSheet()
 
 void Doxy_Work::copyLogo(const QString &outputType)
 {
-   static const QDir configDir = Config::getConfigDir();
+   static const QDir configDir      = Config::getConfigDir();
    static const QString projectLogo = Config::getString("project-logo");
 
    if (! projectLogo.isEmpty()) {
       QFileInfo fi(configDir, projectLogo);
 
-      if (! fi.exists()) {
-         err("Project logo file '%s' does not exist\n", csPrintable(projectLogo));
-
-      } else {
+      if (fi.exists()) {
          QString destFileName = outputType + "/" + fi.fileName();
          copyFile(fi.absoluteFilePath(), destFileName);
 
          Doxy_Globals::indexList.addImageFile(fi.fileName());
+
+      } else {
+         err("Project logo file '%s' does not exist\n", csPrintable(projectLogo));
+
       }
    }
 }
 
 void Doxy_Work::copyExtraFiles(const QString &outputType)
 {
-   const QDir configDir = Config::getConfigDir();
+   static const QDir configDir = Config::getConfigDir();
 
    QString outputDir;
    QStringList extraFiles;
@@ -9498,7 +9501,7 @@ QString  Doxy_Work::resolveSymlink(QString  path)
 #ifdef Q_OS_WIN
       // UNC path, skip server and share name
 
-      if (sepPos == 0 && (result.left(2) == "//" || result.left(2) == "\\\\")) {
+      if (sepPos == 0 && (result.startsWith("//") || result.startsWith("\\\\"))) {
          sepPos = result.indexOf('/', 2);
       }
 

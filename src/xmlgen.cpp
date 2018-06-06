@@ -331,15 +331,18 @@ class XMLCodeGenerator : public CodeOutputInterface
 
       if (m_lineNumber != -1) {
          m_t << " lineno=\"" << m_lineNumber << "\"";
-         if (!m_refId.isEmpty()) {
+
+         if (! m_refId.isEmpty()) {
             m_t << " refid=\"" << m_refId << "\"";
+
             if (m_isMemberRef) {
                m_t << " refkind=\"member\"";
             } else {
                m_t << " refkind=\"compound\"";
             }
          }
-         if (!m_external.isEmpty()) {
+
+         if (! m_external.isEmpty()) {
             m_t << " external=\"" << m_external << "\"";
          }
       }
@@ -350,11 +353,14 @@ class XMLCodeGenerator : public CodeOutputInterface
 
    void endCodeLine() override {
       XML_DB(("(endCodeLine)\n"));
-      if (!m_insideSpecialHL && !m_normalHLNeedStartTag) {
+
+      if (! m_insideSpecialHL && ! m_normalHLNeedStartTag) {
          m_t << "</highlight>";
          m_normalHLNeedStartTag = true;
       }
-      m_t << "</codeline>" << endl; // non DocBook
+
+      m_t << "</codeline>" << endl;    // non DocBook
+
       m_lineNumber = -1;
       m_refId.resize(0);
       m_external.resize(0);
@@ -363,10 +369,12 @@ class XMLCodeGenerator : public CodeOutputInterface
 
    void startFontClass(const QString &colorClass) override {
       XML_DB(("(startFontClass)\n"));
+
       if (m_insideCodeLine && !m_insideSpecialHL && !m_normalHLNeedStartTag) {
          m_t << "</highlight>";
          m_normalHLNeedStartTag = true;
       }
+
       m_t << "<highlight class=\"" << colorClass << "\">"; // non DocBook
       m_insideSpecialHL = true;
    }

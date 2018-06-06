@@ -390,7 +390,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
 
                   bool isDir = (enumList != 0 && md->isEnumerate());
-                  bool isAnonymous = md->name().indexOf('@') != -1;
+                  bool isAnonymous = md->name().contains('@');
 
                   static bool hideUndocMembers = Config::getBool("hide-undoc-members");
                   static bool extractStatic    = Config::getBool("extract-static");

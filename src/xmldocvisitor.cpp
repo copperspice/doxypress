@@ -387,7 +387,7 @@ void XmlDocVisitor::visit(DocIncOperator *op)
 {
 
    if (op->isFirst()) {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << "<programlisting>";
       }
       pushEnabled();
@@ -398,20 +398,22 @@ void XmlDocVisitor::visit(DocIncOperator *op)
 
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(),
                      op->text(), langExt, op->isExample(), op->exampleFile());
       }
       pushEnabled();
       m_hide = true;
    }
+
    if (op->isLast()) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << "</programlisting>";
       }
+
    } else {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << endl;
       }
    }

@@ -13484,9 +13484,7 @@ YY_RULE_SETUP
 
       if (g_sourceFileDef) {
          QSharedPointer<FileDef> fd = g_sourceFileDef;
-
-         g_insideObjC = fd->name().toLower().right(2) == ".m" ||
-                  fd->name().toLower().right(3) == ".mm";
+         g_insideObjC = fd->name().endsWith(".m", Qt::CaseInsensitive) || fd->name().endsWith(".mm", Qt::CaseInsensitive);
 
       } else {
          g_insideObjC = false;

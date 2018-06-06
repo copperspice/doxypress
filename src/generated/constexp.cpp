@@ -1974,15 +1974,15 @@ void constexpYYfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-bool parseconstexp(const QString &fileName, int lineNr, const QString &data)
+bool parseconstexp(const QString &fileName, int lineNr, const QString &input)
 {
    g_constExpFileName = fileName;
    g_constExpLineNr   = lineNr;
 
-   s_inputString      = data;
+   s_inputString      = input;
    s_inputPosition    = 0;
 
-   QString s = data.simplified();
+   QString s = input.simplified();
 
    if (s == "0L"|| s == "! 1L") {
       return false;
