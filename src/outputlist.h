@@ -590,6 +590,14 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endContents);
    }
 
+   void startPageDoc(const QString &pageTitle) {
+      forall(&OutputGenerator::startPageDoc, pageTitle);
+   }
+
+   void endPageDoc() {
+      forall(&OutputGenerator::endPageDoc);
+   }
+
    void writeNonBreakableSpace(int num) override {
       forall(&OutputGenerator::writeNonBreakableSpace, num);
    }
@@ -836,7 +844,7 @@ class OutputList : public OutputDocInterface
 
       for (auto item : m_outputs ) {
          if (item->isEnabled()) {
-            ((*item).*func)(vs...);           // BROOM - resolve when we update CS with operator->
+            ((*item).*func)(vs...);           // boom - resolve when we update CS with operator->
          }
       }
    }

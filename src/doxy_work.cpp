@@ -313,7 +313,7 @@ namespace Doxy_Work{
                   QSharedPointer<ClassDef> templateClass, const QString &templSpec, QHash<QString, int> templateNames,
                   bool isArtificial);
 
-   QSharedPointer<NamespaceDef> findUsedNamespace(NamespaceSDict *unl, const QString &name);
+   QSharedPointer<NamespaceDef> findUsedNamespace(const NamespaceSDict *unl, const QString &name);
 
    void findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
                   QSharedPointer<ClassDef> instanceCd, bool isArtificial, const ArgumentList &actualArgs = ArgumentList(),
@@ -564,7 +564,7 @@ void processFiles()
 
    for (const auto &s : tagFileList) {
       readTagFile(root, s);
-      root->createNavigationIndex(QSharedPointer<FileDef>());          // BROOM - fix (saving a nullptr which gets changed later on)
+      root->createNavigationIndex(QSharedPointer<FileDef>());          // broom - (saving a nullptr which gets changed later on)sss
    }
 
    // parse source files
@@ -1493,6 +1493,7 @@ void Doxy_Work::addRelatedPage_X(QSharedPointer<Entry> ptrEntry)
 
    if (tmpBriefDocs.isEmpty()) {
       doc = root->getData(EntryKey::Main_Docs) + root->getData(EntryKey::Inbody_Docs);
+
    } else {
       doc = tmpBriefDocs + "\n\n" + root->getData(EntryKey::Main_Docs) + root->getData(EntryKey::Inbody_Docs);
    }
@@ -1921,7 +1922,7 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
       resultScope = resultScope->findInnerCompound(nestedNameSpecifier);
 
       if (! resultScope) {
-         NamespaceSDict *usedNamespaces;
+         const NamespaceSDict *usedNamespaces;
 
          if (orgScope == Doxy_Globals::globalScope && fileScope && (usedNamespaces = fileScope->getUsedNamespaces()))  {
             // also search for used namespaces
@@ -2584,7 +2585,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
    RECURSE_ENTRYTREE(buildNamespaceList, ptrEntry);
 }
 
-QSharedPointer<NamespaceDef> Doxy_Work::findUsedNamespace(NamespaceSDict *unl, const QString &name)
+QSharedPointer<NamespaceDef> Doxy_Work::findUsedNamespace(const NamespaceSDict *unl, const QString &name)
 {
    QSharedPointer<NamespaceDef> usingNd;
 
@@ -5946,7 +5947,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
          QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
          QSharedPointer<FileDef> fd      = ptrEntry->fileDef();
 
-         NamespaceSDict *nl = fd ? fd->getUsedNamespaces() : nullptr;
+         const NamespaceSDict *nl = fd ? fd->getUsedNamespaces() : nullptr;
 
          // search in the list of namespaces that are imported via a using declaration
          bool viaUsingDirective = nl && nd && nl->find(nd->qualifiedName()) != nullptr;
@@ -6355,7 +6356,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
       QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
       if (fd) {
-         NamespaceSDict *fnl = fd->getUsedNamespaces();
+         const NamespaceSDict *fnl = fd->getUsedNamespaces();
 
          if (fnl) {
             QString joinedName;

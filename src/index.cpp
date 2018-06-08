@@ -3704,6 +3704,20 @@ static void writeIndex(OutputList &ol)
 
    bool headerWritten = false;
 
+   if (Doxy_Globals::mainPage) {
+      if (! Doxy_Globals::mainPage->title().isEmpty()) {
+
+         if (Doxy_Globals::mainPage->title().toLower() != "notitle") {
+            ol.startPageDoc(Doxy_Globals::mainPage->title());
+         } else {
+            ol.startPageDoc("");
+         }
+
+      } else {
+            ol.startPageDoc(projectName);
+      }
+   }
+
    if (Doxy_Globals::mainPage && ! Doxy_Globals::mainPage->title().isEmpty()) {
 
       if (Doxy_Globals::mainPage->title().toLower() != "notitle") {
@@ -3747,6 +3761,7 @@ static void writeIndex(OutputList &ol)
                      Doxy_Globals::mainPage->documentation(), true, false);
 
       ol.endTextBlock();
+      ol.endPageDoc();
 
       Doxy_Globals::insideMainPage = false;
    }

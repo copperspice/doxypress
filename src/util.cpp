@@ -64,19 +64,19 @@ struct FindFileCacheElem {
 
 const int MAX_STACK_SIZE = 1000;
 
-static QHash<QString, QSharedPointer<MemberDef>>   s_resolvedTypedefs;
-static QHash<QString, QSharedPointer<Definition>>  s_visitedNamespaces;
+static QHash<QString, QSharedPointer<MemberDef>>         s_resolvedTypedefs;
+static QHash<QString, QSharedPointer<const Definition>>  s_visitedNamespaces;
 
 static QSet<QString> s_aliasesProcessed;
 
 static QCache<QPair<const FileNameDict *, QString>, FindFileCacheElem> s_findFileDefCache;
 
 // forward declaration
-static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
+static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
                   const QString &n, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType);
 
-static int isAccessibleFromWithExpScope(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
-                  QSharedPointer<Definition> item, const QString &explicitScopePart);
+static int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<const Definition> item, const QString &explicitScopePart);
 
 #define HEXTONUM(x) (((x)>='0' && (x)<='9') ? ((x)-'0') :       \
                      ((x)>='a' && (x)<='f') ? ((x)-'a'+10) :    \
@@ -93,18 +93,14 @@ void TextGeneratorOLImpl::writeString(const QString &text, bool keepSpaces) cons
    }
 
    if (keepSpaces) {
-      const QChar *p  = text.constData();
-      QChar c;
+      for (QChar c : text) {
 
-      while ((c = *p++) != 0) {
          if (c == ' ') {
             m_od.writeNonBreakableSpace(1);
-
          } else {
             m_od.docify(c);
          }
       }
-
 
    } else {
       m_od.docify(text);
@@ -134,7 +130,7 @@ const int maxInheritanceDepth = 100000;
 /*!
   Removes all anonymous scopes from string s
   Possible examples:
-\verbatim
+
    "bla::@10::blep"      => "bla::blep"
    "bla::@10::@11::blep" => "bla::blep"
    "@10::blep"           => "blep"
@@ -143,54 +139,64 @@ const int maxInheritanceDepth = 100000;
    "bla::@1"             => "bla"
    "bla::@1::@2"         => "bla"
    "bla @1"              => "bla"
-\endverbatim
  */
-QString removeAnonymousScopes(const QString &s)
+QString removeAnonymousScopes(const QString &str)
 {
-   QString result;
+   QString retval;
 
-   if (s.isEmpty()) {
-      return result;
+   if (str.isEmpty()) {
+      return retval;
    }
 
-   static QRegularExpression re("[ :]*@[0-9]+[: ]*");
-   int i;
-   int len;
-   int sl = s.length();
-   int p  = 0;
+   static QRegularExpression regExp("[ :]*@[0-9]+[: ]*");
+   QRegularExpressionMatch match = regExp.match(str);
 
-   while ((i = re.indexIn(s, p)) != -1) {
-      len = re.matchedLength();
+   QString::const_iterator iter_i;
 
-      result += s.mid(p, i - p);
+   QString::const_iterator iter_p   = str.constBegin();
+   QString::const_iterator iter_end = str.constEnd();
 
-      int c   = i;
+   while (match.hasMatch()) {
+
+      iter_i = match.capturedStart();
+      retval.append(QStringView(iter_p, iter_i));
+
+      QString::const_iterator iter_c = iter_i;
+
       bool b1 = false;
       bool b2 = false;
 
-      while (c < i + len && s.at(c) != '@')  {
-         if (s.at(c++) == ':') {
+      while (iter_c < match.capturedEnd() && *iter_c != '@')  {
+
+         if (*iter_c == ':') {
             b1 = true;
          }
+
+         ++iter_c;
       }
 
-      c = i + len - 1;
-      while (c >= i && s.at(c) != '@')  {
-         if (s.at(c--) == ':') {
+      iter_c =  match.capturedEnd() - 1;
+
+      while (iter_c >= iter_i && *iter_c != '@')  {
+
+         if (*iter_c == ':') {
             b2 = true;
          }
+
+         --iter_c;
       }
 
       if (b1 && b2) {
-         result += "::";
+         retval.append("::");
       }
 
-      p = i + len;
+      iter_p = match.capturedEnd();
+      match  = regExp.match(str, iter_p);
    }
 
-   result += s.right(sl - p);
+   retval += QStringView(iter_p, str.constEnd() );
 
-   return result;
+   return retval;
 }
 
 // replace anonymous scopes with __anonymous__ or replacement if provided
@@ -202,27 +208,29 @@ QString replaceAnonymousScopes(const QString &s, const QString&replacement)
       return result;
    }
 
-   static QRegularExpression re("@[0-9]+");
-   int i;
-   int len;
-   int sl = s.length();
-   int p = 0;
+   static QRegularExpression regExp("@[0-9]+");
+   QRegularExpressionMatch match = regExp.match(s);
 
-   while ((i = re.indexIn(s, p)) != -1) {
-      len = re.matchedLength();
+   QString::const_iterator pos;
+   QString::const_iterator iter_last;
 
-      result += s.mid(p, i - p);
+   while (match.hasMatch()) {
+      pos = match.capturedStart();
+
+      result += QStringView(iter_last, pos);
 
       if (! replacement.isEmpty()) {
          result += replacement;
+
       } else {
          result += "__anonymous__";
       }
 
-      p = i + len;
+      iter_last = match.capturedEnd();
+      match     = regExp.match(s, iter_last);
    }
 
-   result += s.right(sl - p);
+   result += QStringView(iter_last, s.constEnd());
 
    return result;
 }
@@ -534,7 +542,7 @@ QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
  *
  *  Example: typedef int T; will return 0, since "int" is not a class.
  */
-QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QSharedPointer<MemberDef> md,
+QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileScope, QSharedPointer<MemberDef> md,
                   QSharedPointer<MemberDef> *pMemType, QString *pTemplSpec, QString *pResolvedType,
                   ArgumentList *actTemplParams)
 {
@@ -591,7 +599,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<FileDef> fileScope, QS
    }
 
    QSharedPointer<MemberDef> memTypeDef;
-   QSharedPointer<ClassDef> result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, 0, pResolvedType);
+   QSharedPointer<ClassDef>  result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, 0, pResolvedType);
 
    // if type is a typedef then return what it resolves to.
    if (memTypeDef && memTypeDef->isTypedef()) {
@@ -669,7 +677,7 @@ done:
 /*! Substitutes a simple unqualified name within a scope. Returns the
  *  value of the typedef or name if no typedef was found.
  */
-static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope,
+static QString substTypedef(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
                   const QString &phraseName, QSharedPointer<MemberDef> *pTypeDef = nullptr)
 {
    QString result = phraseName;
@@ -724,7 +732,7 @@ static QString substTypedef(QSharedPointer<Definition> scopeDef, QSharedPointer<
    return result;
 }
 
-static QSharedPointer<Definition> endOfPathIsUsedClass(StringMap<QSharedPointer<Definition>> &cl, const QString &localName)
+static QSharedPointer<Definition> endOfPathIsUsedClass(const StringMap<QSharedPointer<Definition>> &cl, const QString &localName)
 {
    for (auto cd : cl) {
       if (cd->localName() == localName) {
@@ -740,14 +748,14 @@ static QSharedPointer<Definition> endOfPathIsUsedClass(StringMap<QSharedPointer<
  *  searched. If found the scope definition is returned, otherwise 0
  *  is returned.
  */
-static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, QSharedPointer<FileDef> fileScope,
-                  const QString &path)
+static QSharedPointer< const Definition> followPath(QSharedPointer<const Definition> start,
+                  QSharedPointer<const FileDef> fileScope, const QString &path)
 {
    int is;
    int ps;
    int l;
 
-   QSharedPointer<Definition> current = start;
+   QSharedPointer<const Definition> current = start;
    ps = 0;
 
    // for each part of the explicit scope
@@ -766,21 +774,21 @@ static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, Q
          }
       }
 
-      QSharedPointer<Definition> next = current->findInnerCompound(qualScopePart);
+      QSharedPointer<const Definition> next = current->findInnerCompound(qualScopePart);
 
       if (next == 0) {
          // failed to follow the path
 
          if (current->definitionType() == Definition::TypeNamespace) {
 
-            QSharedPointer<NamespaceDef> nd = current.dynamicCast<NamespaceDef>();
+            QSharedPointer<const NamespaceDef> nd = current.dynamicCast<const NamespaceDef>();
             auto temp = nd->getUsedClasses();
 
             next = endOfPathIsUsedClass(temp, qualScopePart);
 
          } else if (current->definitionType() == Definition::TypeFile) {
 
-            QSharedPointer<FileDef> fd = current.dynamicCast<FileDef>();
+            QSharedPointer<const FileDef> fd = current.dynamicCast<const FileDef>();
             auto temp = fd->getUsedClasses();
 
             if (temp) {
@@ -807,8 +815,8 @@ static QSharedPointer<Definition> followPath(QSharedPointer<Definition> start, Q
    return current;
 }
 
-bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<FileDef> fileScope,
-                             QSharedPointer<Definition> item, const QString &explicitScopePart = QString(""))
+bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<const FileDef> fileScope,
+                             QSharedPointer<const Definition> item, const QString &explicitScopePart = QString(""))
 {
    if (cl) {
       // see if the class was imported via a using statement
@@ -816,7 +824,7 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
 
       for (auto ucd : *cl) {
 
-         QSharedPointer<Definition> sc;
+         QSharedPointer<const Definition> sc;
 
          if (explicitScopePartEmpty) {
             sc = ucd;
@@ -835,8 +843,8 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
    return false;
 }
 
-static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<FileDef> fileScope,
-                  QSharedPointer<Definition> item, const QString &explicitScopePart = QString(""))
+static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<const Definition> item, const QString &explicitScopePart = QString(""))
 {
    static QSet<QString> visitedDict;
 
@@ -844,7 +852,7 @@ static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer
       // check used namespaces for the class
 
       for (auto und : *nl) {
-         QSharedPointer<Definition> sc;
+         QSharedPointer<const Definition> sc;
 
          if (explicitScopePart.isEmpty()) {
             sc = und;
@@ -884,7 +892,9 @@ class AccessStack
    AccessStack() : m_index(0)
    {}
 
-   void push(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
+   void push(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<const Definition> item) {
+
       if (m_index < MAX_STACK_SIZE) {
          m_elements[m_index].scopeDef  = scopeDef;
          m_elements[m_index].fileScope = fileScope;
@@ -893,8 +903,8 @@ class AccessStack
       }
    }
 
-   void push(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item,
-            const QString &expScope) {
+   void push(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<const Definition> item, const QString &expScope) {
 
       if (m_index < MAX_STACK_SIZE) {
          m_elements[m_index].scopeDef  = scopeDef;
@@ -911,7 +921,8 @@ class AccessStack
       }
    }
 
-   bool find(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item) {
+   bool find(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<const Definition> item) {
 
       for (int i = 0; i < m_index; i++) {
          AccessElem *e = &m_elements[i];
@@ -924,8 +935,8 @@ class AccessStack
       return false;
    }
 
-   bool find(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item,
-             const QString &expScope) {
+   bool find(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+             QSharedPointer<const Definition> item, const QString &expScope) {
 
       for (int i = 0; i < m_index; i++) {
          AccessElem *e = &m_elements[i];
@@ -941,9 +952,9 @@ class AccessStack
  private:
    /** Element in the stack */
    struct AccessElem {
-      QSharedPointer<Definition>  scopeDef;
-      QSharedPointer<FileDef>     fileScope;
-      QSharedPointer<Definition>  item;
+      QSharedPointer<const Definition>  scopeDef;
+      QSharedPointer<const FileDef>     fileScope;
+      QSharedPointer<const Definition>  item;
 
       QString expScope;
    };
@@ -955,7 +966,8 @@ class AccessStack
 /* Returns the "distance" (=number of levels up) from item to scope, or -1
  * if item in not inside scope.
  */
-int isAccessibleFrom(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> item)
+int isAccessibleFrom(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<const Definition> item)
 {
    static AccessStack accessStack;
 
@@ -968,11 +980,10 @@ int isAccessibleFrom(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef
    int result = 0;
    int i;
 
-   QSharedPointer<Definition> itemScope     = item->getOuterScope();
-
-   QSharedPointer<ClassDef>   tempPtr       = scopeDef.dynamicCast<ClassDef>();
-   QSharedPointer<MemberDef>  tempItem      = item.dynamicCast<MemberDef>();
-   QSharedPointer<ClassDef>   tempItemScope = item.dynamicCast<ClassDef>();
+   QSharedPointer<Definition>       itemScope     = item->getOuterScope();
+   QSharedPointer<const ClassDef>   tempPtr       = scopeDef.dynamicCast<const ClassDef>();
+   QSharedPointer<const MemberDef>  tempItem      = item.dynamicCast<const MemberDef>();
+   QSharedPointer<const ClassDef>   tempItemScope = item.dynamicCast<const ClassDef>();
 
    bool memberAccessibleFromScope = (item->definitionType() == Definition::TypeMember &&
        itemScope && itemScope->definitionType() == Definition::TypeClass  &&
@@ -994,14 +1005,14 @@ int isAccessibleFrom(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef
    } else if (scopeDef == Doxy_Globals::globalScope) {
 
       if (fileScope) {
-         StringMap<QSharedPointer<Definition>> *cl = fileScope->getUsedClasses();
+         const StringMap<QSharedPointer<Definition>> *cl = fileScope->getUsedClasses();
 
          if (accessibleViaUsingClass(cl, fileScope, item)) {
             // found via used class
             goto done;
          }
 
-         NamespaceSDict *nl = fileScope->getUsedNamespaces();
+         const NamespaceSDict *nl = fileScope->getUsedNamespaces();
 
          if (accessibleViaUsingNamespace(nl, fileScope, item)) {
             // found via used namespace
@@ -1015,7 +1026,7 @@ int isAccessibleFrom(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef
       // keep searching, check if scope is a namespace, which is using other classes and namespaces
 
       if (scopeDef->definitionType() == Definition::TypeNamespace) {
-         QSharedPointer<NamespaceDef> nscope = scopeDef.dynamicCast<NamespaceDef>();
+         QSharedPointer<const NamespaceDef> nscope = scopeDef.dynamicCast<const NamespaceDef>();
 
          StringMap<QSharedPointer<Definition>> cl = nscope->getUsedClasses();
 
@@ -1057,8 +1068,8 @@ done:
  *   not found and then A::I is searched in the global scope, which matches and
  *   thus the result is 1.
  */
-int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPointer<FileDef> fileScope,
-                                 QSharedPointer<Definition> item, const QString &explicitScopePart)
+int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scopeDef, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<const Definition> item, const QString &explicitScopePart)
 {
    if (explicitScopePart.isEmpty()) {
       // handle degenerate case where there is no explicit scope
@@ -1075,7 +1086,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPoi
    // assume we found it
    int result = 0;
 
-   QSharedPointer<Definition> newScope = followPath(scopeDef, fileScope, explicitScopePart);
+   QSharedPointer<const Definition> newScope = followPath(scopeDef, fileScope, explicitScopePart);
 
    if (newScope) {
       // explicitScope is inside scope => newScope is the result
@@ -1086,7 +1097,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPoi
 
       } else if (itemScope && newScope && itemScope->definitionType() == Definition::TypeClass &&
                  newScope->definitionType() == Definition::TypeClass &&
-                 (newScope.dynamicCast<ClassDef>())->isBaseClass( (itemScope.dynamicCast<ClassDef>()), true, 0) )  {
+                 (newScope.dynamicCast<const ClassDef>())->isBaseClass( (itemScope.dynamicCast<const ClassDef>()), true, 0) )  {
 
          // inheritance is also ok. Example: looking for B::I, where
          // class A { public: class I {} };
@@ -1108,7 +1119,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPoi
             // A::B::C but is explicit referenced as A::C, where B is imported
             // in A via a using directive.
 
-            QSharedPointer<NamespaceDef> nscope = newScope.dynamicCast<NamespaceDef>();
+            QSharedPointer<const NamespaceDef> nscope = newScope.dynamicCast<const NamespaceDef>();
             StringMap<QSharedPointer<Definition>> cl = nscope->getUsedClasses();
 
             for (auto cd : cl) {
@@ -1141,7 +1152,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPoi
       // failed to resolve explicitScope
 
       if (scopeDef->definitionType() == Definition::TypeNamespace) {
-         QSharedPointer<NamespaceDef> nscope = scopeDef.dynamicCast<NamespaceDef>();
+         QSharedPointer<const NamespaceDef> nscope = scopeDef.dynamicCast<const NamespaceDef>();
          NamespaceSDict nl = nscope->getUsedNamespaces();
 
          if (accessibleViaUsingNamespace(&nl, fileScope, item, explicitScopePart)) {
@@ -1153,7 +1164,7 @@ int isAccessibleFromWithExpScope(QSharedPointer<Definition> scopeDef, QSharedPoi
       if (scopeDef == Doxy_Globals::globalScope) {
 
          if (fileScope) {
-            NamespaceSDict *nl = fileScope->getUsedNamespaces();
+            const NamespaceSDict *nl = fileScope->getUsedNamespaces();
 
             if (accessibleViaUsingNamespace(nl, fileScope, item, explicitScopePart)) {
                // found in used namespace
@@ -1188,8 +1199,9 @@ int computeQualifiedIndex(const QString &name)
    return name.lastIndexOf("::", i);
 }
 
-static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, QSharedPointer<Definition> def,
-                  const QString &explicitScopePart, ArgumentList *actTemplParams, int &minDistance,
+static void getResolvedSymbol(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
+                  QSharedPointer<Definition> def, const QString &explicitScopePart,
+                  ArgumentList *actTemplParams, int &minDistance,
                   QSharedPointer<ClassDef> &bestMatch, QSharedPointer<MemberDef> &bestTypedef,
                   QString &bestTemplSpec, QString &bestResolvedType)
 {
@@ -1335,8 +1347,9 @@ static void getResolvedSymbol(QSharedPointer<Definition> scope, QSharedPointer<F
  * Loops through scope and each of its parent scopes looking for a match with the input name
  * Can recursively call itself when resolving typedefs
  */
-static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
-                  const QString &nameType, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType )
+static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<const Definition> scope,
+                  QSharedPointer<const FileDef> fileScope, const QString &nameType,
+                  QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType )
 {
    QString name;
    QString explicitScopePart;
@@ -1483,7 +1496,7 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<Definition> s
 /* Find the fully qualified class name referred to by the input class or typedef name against the input scope.
  * Loops through scope and each of its parent scopes looking for a match against the input name.
  */
-QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
+QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
                   const QString &key, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, bool mayBeUnlinkable,
                   bool mayBeHidden, QString *pResolvedType)
 {
@@ -1860,9 +1873,9 @@ bool leftScopeMatch(const QString &scope, const QString &name)
             sl > nl + 1 && scope.at(nl) == ':' && scope.at(nl + 1) == ':') );
 }
 
-void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
-                  QSharedPointer<Definition> def, const QString &text, bool autoBreak, bool external,
-                  bool keepSpaces, int indentLevel)
+void linkifyText(const TextGeneratorIntf &out, QSharedPointer<const Definition> scope,
+                  QSharedPointer<const FileDef> fileScope, QSharedPointer<const Definition> def,
+                  const QString &text, bool autoBreak, bool external, bool keepSpaces, int indentLevel)
 {
    int strLen = text.length();
 
@@ -1870,45 +1883,55 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
       return;
    }
 
-   static QRegularExpression regExp("[a-z_A-Z\\x80-\\xFF][~!a-z_A-Z0-9$\\\\.:\\x80-\\xFF]*");
-   static QRegularExpression regExpSplit(",");
-
    int matchLen;
-   int index = 0;
-   int newIndex;
-   int skipIndex = 0;
    int floatingIndex = 0;
 
+   QString::const_iterator current_iter = text.constBegin();
+   QString::const_iterator start_iter   = text.constBegin();
+   QString::const_iterator skip_iter    = text.constBegin();
+
+   static QRegularExpression regExp("[a-z_A-Z\\x80-\\xFF][~!a-z_A-Z0-9$\\\\.:\\x80-\\xFF]*");
+   QRegularExpressionMatch match = regExp.match(text);
+
    // read a word from the text string
-   while ((newIndex = regExp.indexIn(text, index)) != -1 && (newIndex == 0 ||
-             ! (text.at(newIndex - 1) >= '0' && text.at(newIndex - 1) <= '9')) ) {
+   while (match.hasMatch()) {
+
+       start_iter = match.capturedStart();
+       matchLen   = match.capturedLength();
+
+      if (start_iter != text.constBegin()) {
+         QChar prevChar = start_iter[-1];
+
+         if (prevChar >= '0' && prevChar <= '9') {
+            break;
+         }
+      }
 
       // avoid matching part of hex numbers
       // add non-word part to the result
 
-      matchLen = regExp.matchedLength();
+      floatingIndex += (start_iter - skip_iter + matchLen);
 
-      floatingIndex += newIndex - skipIndex + matchLen;
       bool insideString = false;
-      int i;
 
-      for (i = index; i < newIndex; i++) {
-         if (text.at(i) == '"') {
+      for (auto iter = current_iter; iter != start_iter; ++iter) {
+         if (*iter == '"') {
             insideString = ! insideString;
          }
       }
 
       if (strLen > 35 && floatingIndex > 30 && autoBreak) {
          // try to insert a split point
-         QString splitText = text.mid(skipIndex, newIndex - skipIndex);
+         QString splitText = QStringView(skip_iter, start_iter);
 
          int splitLength = splitText.length();
-         int offset = 1;
 
-         i = regExpSplit.indexIn(splitText, 0);
+         int offset = 1;
+         int i = splitText.indexOf(',');
 
          if (i == -1) {
             i = splitText.indexOf('<');
+
             if (i != -1) {
                offset = 0;
             }
@@ -1926,8 +1949,8 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
             // add a link-break at i in case of Html output
             out.writeString(splitText.left(i + offset), keepSpaces);
             out.writeBreak(indentLevel == 0 ? 0 : indentLevel + 1);
-            out.writeString(splitText.right(splitLength - i - offset), keepSpaces);
 
+            out.writeString(splitText.right(splitLength - i - offset), keepSpaces);
             floatingIndex = splitLength - i - offset + matchLen;
 
          } else {
@@ -1935,12 +1958,15 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
          }
 
       } else {
-         out.writeString(text.mid(skipIndex, newIndex - skipIndex), keepSpaces);
+         out.writeString(QStringView(skip_iter, start_iter), keepSpaces);
       }
 
       // get word from string
-      QString word      = text.mid(newIndex, matchLen);
-      QString matchWord = substitute(substitute(word, "\\", "::"), ".", "::");
+      QString word = match.captured();
+
+      QString matchWord = word;
+      matchWord = substitute(matchWord, "\\", "::");
+      matchWord = substitute(matchWord, ".",  "::");
 
       bool found = false;
 
@@ -1992,17 +2018,16 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
             }
          }
 
-         int m = matchWord.lastIndexOf("::");
+         auto colonIter = matchWord.lastIndexOfFast("::");
          QString scopeName;
 
-         if (scope && (scope->definitionType() == Definition::TypeClass ||
-                  scope->definitionType() == Definition::TypeNamespace) ) {
-
+         if (scope && (scope->definitionType() == Definition::TypeClass || scope->definitionType() == Definition::TypeNamespace) ) {
             scopeName = scope->name();
 
-         } else if (m != -1) {
-            scopeName = matchWord.left(m);
-            matchWord = matchWord.mid(m + 2);
+         } else if (colonIter != matchWord.constEnd()) {
+            scopeName = QStringView(matchWord.constBegin(), colonIter);
+            matchWord = QStringView(colonIter + 2, matchWord.constEnd());
+
          }
 
          if (! found && getDefs(scopeName, matchWord, "", md, cd, fd, nd, gd)) {
@@ -2035,10 +2060,13 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<Definition> scope,
       }
 
       // set next start point in the string
-      skipIndex = index = newIndex + matchLen;
+      current_iter = match.capturedEnd();
+      skip_iter    = current_iter;
+
+      match = regExp.match(text, current_iter);
    }
 
-   out.writeString(text.right(text.length() - skipIndex), keepSpaces);
+   out.writeString(QStringView(skip_iter, text.constEnd()), keepSpaces);
 }
 
 void writeExample(OutputList &ol, const ExampleSDict &ed)
@@ -2049,19 +2077,20 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
    // bool manEnabled   = ol.isEnabled(OutputGenerator::Man);
    // bool htmlEnabled  = ol.isEnabled(OutputGenerator::Html);
 
-   static QRegularExpression marker("@[0-9]+");
+   static QRegularExpression regExp_marker("@[0-9]+");
 
-   int index = 0;
-   int newIndex;
-   int matchLen;
+   QString::const_iterator current_iter = exampleLine.constBegin();
+   QString::const_iterator start_iter   = exampleLine.constBegin();
+
+   QRegularExpressionMatch match = regExp_marker.match(exampleLine);
 
    // replace all markers with links to the classes
-   while ((newIndex = marker.indexIn(exampleLine, index)) != -1) {
-      matchLen = marker.matchedLength();
+   while (match.hasMatch()) {
 
-      ol.parseText(exampleLine.mid(index, newIndex - index));
+      start_iter = match.capturedStart();
+      ol.parseText(QStringView(current_iter, start_iter));
 
-      QString tmp    = exampleLine.mid(newIndex + 1, matchLen - 1);
+      QString tmp    = QStringView(start_iter + 1, match.capturedEnd() );
       int entryIndex = tmp.toInteger<int>();
 
       ExampleSDict::const_iterator iter = ed.begin();
@@ -2100,10 +2129,11 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
       ol.writeObjectLink(0, e->file, 0, e->name);
       ol.popGeneratorState();
 
-      index = newIndex + matchLen;
+      current_iter = match.capturedEnd();
+      match = regExp_marker.match(exampleLine, current_iter);
    }
 
-   ol.parseText(exampleLine.right(exampleLine.length() - index));
+   ol.parseText(QStringView(current_iter, exampleLine.constEnd()));
    ol.writeString(".");
 }
 
@@ -2288,9 +2318,16 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
       if (i_equals != -1) {
          QString filterPattern = fs.left(i_equals);
 
-         QRegularExpression regexp(filterPattern, portable_fileSystemIsCaseSensitive(), QPatternOption:WildCardOption);
+         QRegularExpression regExp;
 
-         if (regexp.indexIn(name) != -1) {
+         if (portable_fileSystemIsCaseSensitive()  == Qt::CaseInsensitive) {
+            regExp = QRegularExpression(filterPattern, QPatternOption::CaseInsensitiveOption | QPatternOption::WildcardOption);
+         } else {
+            regExp = QRegularExpression(filterPattern, QPatternOption::WildcardOption);
+         }
+
+         if (name.contains(regExp)) {
+
             // found a match
             QString filterName = fs.mid(i_equals + 1);
 
@@ -3235,21 +3272,22 @@ static QString extractCanonicalType(QSharedPointer<Definition> def, QSharedPoint
          // if we did not use up the templSpec already (i.e. type is not a template specialization)
          // then resolve any identifiers inside
 
-         static QRegularExpression re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
-         int tp = 0;
-         int tl;
-         int ti;
+         static QRegularExpression regExp("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
+         QRegularExpressionMatch match = regExp.match(templSpec);
+
+         QString::const_iterator iter_last = templSpec.constBegin();
 
          // for each identifier template specifier
-         while ((ti = re.indexIn(templSpec, tp)) != -1) {
-            tl = re.matchedLength();
+         while (match.hasMatch()) {
 
-            canType += templSpec.mid(tp, ti - tp);
-            canType += getCanonicalTypeForIdentifier(def, fs, templSpec.mid(ti, tl), 0);
-            tp = ti + tl;
+            canType += QStringView(iter_last, match.capturedStart());
+            canType += getCanonicalTypeForIdentifier(def, fs, match.captured(), 0);
+
+            iter_last = match.capturedEnd();
+            match = regExp.match(templSpec, iter_last);
          }
 
-         canType += templSpec.right(templSpec.length() - tp);
+         canType += QStringView(iter_last, templSpec.constEnd());
       }
 
       pp = p;
@@ -4711,12 +4749,6 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
    static const bool allowUpperCaseNames = Config::getBool("case-sensitive-fname");
    static const bool allowUnicodeNames   = Config::getBool("allow-unicode-names");
 
-   QString retval;
-
-   const QChar *p = name.constData();
-   QChar c;
-
-   bool isFirstUpper = true;
    static QHash<QString, QString> usedNames;         // name, modified name
    static QHash<QString, int> mangleCnt;             // modified name, cnt
 
@@ -4726,7 +4758,10 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
       return iter1.value();
    }
 
-   while ((c = *p++) != 0) {
+   QString retval;
+   bool isFirstUpper = true;
+
+   for (QChar c : name) {
 
       switch (c.unicode()) {
          case '_':
@@ -5035,7 +5070,7 @@ done:
       namespaceName.resize(0);
    }
 
-   if (/*className.right(2)=="-g" ||*/ className.right(2) == "-p") {
+   if (className.endsWith("-p")) {
       className = className.left(className.length() - 2);
    }
 
@@ -5229,16 +5264,20 @@ QString convertToXML(const QString &str)
 /*! Converts a string to a HTML-encoded string */
 QString convertToHtml(const QString &str, bool keepEntities)
 {
-   if (str.isEmpty()) {
-      return QString("");
-   }
-
    QString retval;
 
-   const QChar *p = str.constData();
-   QChar c;
+   if (str.isEmpty()) {
+      return retval;
+   }
 
-   while ((c = *p++) != 0) {
+   // rtl
+   // retval.append(getHtmlDirEmbedingChar(getTextDirByConfig(str)));
+
+   QString::const_iterator iter = str.constBegin();
+
+   while (iter != str.constEnd()) {
+      QChar c = *iter;
+      ++iter;
 
       switch (c.unicode()) {
          case '<':
@@ -5251,10 +5290,14 @@ QString convertToHtml(const QString &str, bool keepEntities)
 
          case '&':
             if (keepEntities) {
-               const QChar *e = p;
-               QChar ce;
 
-               while ((ce = *e++) != 0) {
+               QString::const_iterator iter_e = iter;
+               QChar ce = '\0';
+
+               while (iter_e != str.constEnd()) {
+                  ce = *iter_e;
+                  ++iter_e;
+
                   if (ce == ';' || (! (isId(ce) || ce == '#'))) {
                      break;
                   }
@@ -5264,8 +5307,9 @@ QString convertToHtml(const QString &str, bool keepEntities)
                   // found end of an entity, copy entry verbatim
                   retval += c;
 
-                  while (p < e) {
-                     retval += *p++;
+                  while (iter != iter_e) {
+                     retval += *iter;
+                     ++iter;
                   }
 
                } else {
@@ -5294,13 +5338,18 @@ QString convertToHtml(const QString &str, bool keepEntities)
    return retval;
 }
 
-QString convertToJSString(const QString &s)
+QString convertToJSString(const QString &s, bool applyTextDir)
 {
    if (s.isEmpty()) {
       return QString("");
    }
 
    QString retval = s;
+
+   if (applyTextDir) {
+      // rtl
+      // retval.prepend(getJsDirEmbedingChar(getTextDirByConfig(s)));
+   }
 
    retval.replace("\"", "\\\"");
    retval.replace("\'", "\\\'");
@@ -5326,42 +5375,42 @@ QString convertCharEntities(const QString &str)
       return retval;
    }
 
-   static QRegularExpression entityPat("&[a-zA-Z]+[0-9]*;");
+   static QRegularExpression regExp("&[a-zA-Z]+[0-9]*;");
+   QRegularExpressionMatch match = regExp.match(str);
 
-   int i = 0;
-   int p;
-   int k;
+   QString::const_iterator iter;
+   QString::const_iterator iter_last = str.constBegin();
 
-   while ((p = entityPat.indexIn(str, i)) != -1) {
-      k = entityPat.matchedLength();
+   while (match.hasMatch()) {
 
-      if (p > i) {
-         retval += str.mid(i, p - i);
-      }
+      iter = match.capturedStart();
 
-      QString entity = str.mid(p, k);
+      retval += QStringView(iter_last, iter);
+
+      QString entity = match.captured();
       DocSymbol::SymType symType = HtmlEntityMapper::instance()->name2sym(entity);
 
       QString code;
 
       if (symType == DocSymbol::Sym_Unknown) {
-         retval += str.mid(p, k);
+         retval += entity;
 
       } else {
-         code = HtmlEntityMapper::instance()->utf8(symType);
+         code = HtmlEntityMapper::instance()->rawString(symType);
 
          if (! code.isEmpty()) {
             retval += code;
 
          } else {
-            retval += str.mid(p, k);
+            retval += entity;
          }
       }
 
-      i = p + k;
+      iter_last = match.capturedEnd();
+      match = regExp.match(str, iter_last);
    }
 
-   retval += str.mid(i, str.length() - i);
+   retval += QStringView(iter_last, str.constEnd());
 
    return retval;
 }
@@ -5434,26 +5483,24 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict &me
    }
 }
 
-/*! Extracts a (sub-)string from \a type starting at \a pos that
- *  could form a class. The index of the match is returned and the found
- *  class \a name and a template argument list \a templSpec. If -1 is returned
- *  there are no more matches.
+/*  Extracts a (sub-)string from type starting at pos that could form a class.
+ *  The index of the match is returned and the found class name and a template argument
+ *  list \a templSpec. If -1 is returned there are no more matches.
  */
 int extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt lang)
 {
    static const QRegularExpression re_norm("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9:\\x80-\\xFF]*");
    static const QRegularExpression re_ftn("[a-z_A-Z\\x80-\\xFF][()=_a-z_A-Z0-9:\\x80-\\xFF]*");
-   QRegularExpression re;
+
+   QRegularExpression regExp;
+
+   QString::const_iterator iter_i;
+   int typeLen = type.length();
 
    name.resize(0);
    templSpec.resize(0);
 
-   int i;
-   int l;
-   int typeLen = type.length();
-
    if (typeLen > 0) {
-
       if (lang == SrcLangExt_Fortran) {
 
          if (typeLen <= pos) {
@@ -5465,68 +5512,74 @@ int extractClassNameFromType(const QString &type, int &pos, QString &name, QStri
          }
 
          if (type.left(4).toLower() == "type") {
-            re = re_norm;
+            regExp = re_norm;
 
          } else {
-            re = re_ftn;
+            regExp = re_ftn;
 
          }
 
       } else {
-         re = re_norm;
+         regExp = re_norm;
 
       }
 
-      if ((i = re.indexIn(type, pos)) != -1) {
+      QRegularExpressionMatch match = regExp.match(type, type.constBegin() + pos);
+
+      if (match.hasMatch()) {
          // for each class name in the type
-         l = re.matchedLength();
 
-         int ts = i + l;
-         int te = ts;
-         int tl = 0;
+         iter_i = match.capturedStart();
 
-         while (ts < typeLen && type.at(ts) == ' ') {
-            ts++, tl++;   // skip any whitespace
+         QString::const_iterator iter_ts = match.capturedEnd();
+         QString::const_iterator iter_te = iter_ts;
+         QString::const_iterator iter_tl = type.constBegin();
+
+         while (iter_ts != type.constEnd() && *iter_ts == ' ') {
+            ++iter_ts;
+            ++iter_tl;   // skip any whitespace
          }
 
-         if (ts < typeLen && type.at(ts) == '<') { // assume template instance
-            // locate end of template
-            te = ts + 1;
+         if (iter_ts != type.constEnd() && *iter_ts == '<') {
+            // assume template instance, locate end of template
+            iter_te = iter_ts + 1;
             int brCount = 1;
 
-            while (te < typeLen && brCount != 0) {
+            while (iter_te != type.constEnd() && brCount != 0) {
 
-               if (type.at(te) == '<') {
-                  if (te < typeLen - 1 && type.at(te + 1) == '<') {
-                     te++;
+               if (*iter_te == '<') {
+                  if (iter_te != type.constEnd() - 1 && iter_te[1] == '<') {
+                     ++iter_te;
                   } else {
-                     brCount++;
+                     ++brCount;
                   }
                }
 
-               if (type.at(te) == '>') {
-                  if (te < typeLen - 1 && type.at(te + 1) == '>') {
-                     te++;
+               if (*iter_te == '>') {
+                  if (iter_te != type.constEnd() - 1 && iter_te[1] == '>') {
+                     ++iter_te;
                   } else {
-                     brCount--;
+                     --brCount;
                   }
                }
-               te++;
+
+               ++iter_te;
             }
          }
 
-         name = type.mid(i, l);
+         name = match.captured();
 
-         if (te > ts) {
-            templSpec = type.mid(ts, te - ts), tl += te - ts;
-            pos = i + l + tl;
+         if (iter_te > iter_ts) {
+            templSpec = QStringView(iter_ts, iter_te);
+            iter_tl   += iter_te - iter_ts;
+            pos       = (match.capturedEnd() - type.constBegin()) + (iter_tl - type.constBegin());
 
-         } else { // no template part
-            pos = i + l;
+         } else {
+            // no template part
+            pos = match.capturedEnd() - type.constBegin();
          }
 
-
-         return i;
+         return iter_i - type.constBegin();
       }
    }
 
@@ -5539,25 +5592,28 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
                   const ArgumentList &formalArgList)
 {
    // skip until <
-   int p = name.indexOf('<');
+   QString::const_iterator iter_p = name.indexOfFast('<');
 
-   if (p == -1) {
+   if (iter_p == name.constEnd()) {
       return name;
    }
 
-   p++;
-   QString result = name.left(p);
+   ++iter_p;
 
-   static QRegularExpression re("[a-z:_A-Z\\x80-\\xFF][a-z:_A-Z0-9\\x80-\\xFF]*");
-   int len;
-   int index;
+   QString result = QStringView(name.constBegin(), iter_p);
+
+   static QRegularExpression regExp("[a-z:_A-Z\\x80-\\xFF][a-z:_A-Z0-9\\x80-\\xFF]*");
+   QRegularExpressionMatch match = regExp.match(name, iter_p);
+
+   QString::const_iterator iter_i;
 
    // for each identifier in the template part (e.g. B<T> -> T)
-   while ((index = re.indexIn(name, p)) != -1) {
-      len     = re.matchedLength();
-      result += name.mid(p, index - p);
+   while (match.hasMatch()) {
 
-      QString tmp = name.mid(index, len);
+      iter_i  = match.capturedStart();
+      result += QStringView(iter_p, iter_i);
+
+      QString tmp = match.captured();
       bool found  = false;
 
       // check that tmp is not a formal template argument
@@ -5583,10 +5639,11 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
          result += tmp;
       }
 
-      p = index + len;
+      iter_p = match.capturedEnd();
+      match  = regExp.match(name, iter_p);
    }
 
-   result += name.right(name.length() - p);
+   result += QStringView(iter_p, name.constEnd());
 
    return removeRedundantWhiteSpace(result);
 }
@@ -5607,19 +5664,21 @@ QString substituteTemplateArgumentsInString(const QString &name, const ArgumentL
 
    QString result;
 
-   static QRegularExpression re("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
-   int p = 0, l, i;
+   static QRegularExpression regExp("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
+   QRegularExpressionMatch match = regExp.match(name);
+
+   QString::const_iterator iter_last = name.constBegin();
+   QString::const_iterator iter_i;
 
    // for each identifier in the base class name (e.g. B<T> -> B and T)
+   while (match.hasMatch()) {
 
-   while ((i = re.indexIn(name, p)) != -1) {
-      l = re.matchedLength();
+      iter_i = match.capturedStart();
+      result += QStringView(iter_last, iter_i);
 
-      result    += name.mid(p, i - p);
-      QString n  = name.mid(i, l);
+      QString n = match.captured();
 
-      // if n is a template argument, then we substitute it
-      // for its template instance argument.
+      // if n is a template argument, then we substitute it for its template instance argument
       bool found = false;
 
       auto actual_iter = actualArgList.begin();
@@ -5633,12 +5692,12 @@ QString substituteTemplateArgumentsInString(const QString &name, const ArgumentL
          // local copy used to find the name
          Argument formalArg = arg;
 
-         if (formalArg.type.left(6) == "class " && formalArg.name.isEmpty()) {
+         if (formalArg.type.startsWith("class ") && formalArg.name.isEmpty()) {
             formalArg.name = formalArg.type.mid(6);
             formalArg.type = "class";
          }
 
-         if (formalArg.type.left(9) == "typename " && formalArg.name.isEmpty()) {
+         if (formalArg.type.startsWith("typename ") && formalArg.name.isEmpty()) {
             formalArg.name = formalArg.type.mid(9);
             formalArg.type = "typename";
          }
@@ -5695,10 +5754,11 @@ QString substituteTemplateArgumentsInString(const QString &name, const ArgumentL
          result += n;
       }
 
-      p = i + l;
+      iter_last = match.capturedEnd();
+      match = regExp.match(name, iter_last);
    }
 
-   result += name.right(name.length() - p);
+   result += QStringView(iter_last, name.constEnd());
 
    return result.trimmed();
 }
@@ -5920,7 +5980,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
       // new page
       QString baseName = name;
 
-      if (baseName.right(4) == ".tex") {
+      if (baseName.endsWith(".tex")) {
          baseName = baseName.left(baseName.length() - 4);
 
       } else if (baseName.right(Doxy_Globals::htmlFileExtension.length()) == Doxy_Globals::htmlFileExtension) {
@@ -6071,14 +6131,16 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
       return;
    }
 
-   const QChar *p  = text.constData();
+   QString::const_iterator iter = text.constBegin();
+
    int cnt;
 
+   QChar prev_c = '\0';
    QChar c;
-   QChar pc = '\0';
 
-   while (*p != 0) {
-      c = *p++;
+   while (iter != text.constEnd()) {
+      c = *iter;
+      ++iter;
 
       if (insidePre) {
          switch (c.unicode()) {
@@ -6130,35 +6192,44 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "$^\\wedge$";
                break;
 
-            case '&':
+            case '&':  {
                // might be a special symbol
 
-               const QChar *ptr2;
+               QString::const_iterator iter_2 = iter;
+               cnt = 2;
 
-               ptr2 = p;
-               cnt  = 2;
+               QChar next_c = '\0';
 
                // we have to count & and ; as well
-               while ((*ptr2 >= 'a' && *ptr2 <= 'z') || (*ptr2 >= 'A' && *ptr2 <= 'Z') || (*ptr2 >= '0' && *ptr2 <= '9')) {
-                  cnt++;
-                  ptr2++;
+               while (iter_2 != text.constEnd()) {
+
+                  next_c = *iter_2;
+
+                  if ((next_c >= 'a' && next_c <= 'z') || (next_c>= 'A' && next_c <= 'Z') || (next_c >= '0' && next_c <= '9')) {
+                     ++cnt;
+                     ++iter_2;
+
+                  } else {
+                     break;
+                  }
                }
 
-               if (*ptr2 == ';')  {
+               if (iter_2 != text.constEnd() && *iter_2 == ';') {
                   // we need & as well
-                  --p;
+                  --iter;
 
-                  QString tmp = QString(p, cnt);
+                  QString tmp = QString(iter, iter + cnt);
                   DocSymbol::SymType res = HtmlEntityMapper::instance()->name2sym(tmp);
 
                   if (res == DocSymbol::Sym_Unknown) {
-                     p++;
+                     ++iter;
                      t << "\\&";
 
                   } else {
                      t << HtmlEntityMapper::instance()->latex(res);
-                     ptr2++;
-                     p = ptr2;
+                     ++iter_2;
+
+                     iter = iter_2;
                   }
 
                } else {
@@ -6166,6 +6237,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
                }
                break;
+            }
 
             case '*':
                t << "$\\ast$";
@@ -6215,7 +6287,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                break;
 
             case ']':
-               if (pc == '[') {
+               if (prev_c == '[') {
                   t << "$\\,$";
                }
 
@@ -6259,8 +6331,8 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
             default:
                if (! insideTabbing) {
-                  if ( (c >= 'A' && c <= 'Z' && pc != ' ' && pc != '\0' && *p != 0) ||
-                       (c == ':' && pc != ':') || (pc == '.' && isId(c)) ) {
+                  if ( (c >= 'A' && c <= 'Z' && prev_c != ' ' && prev_c != '\0' && iter != text.constEnd()) ||
+                       (c == ':' && prev_c != ':') || (prev_c == '.' && isId(c)) ) {
                      t << "\\+";
                   }
                }
@@ -6269,7 +6341,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
          }
       }
 
-      pc = c;
+      prev_c = c;
    }
 }
 
@@ -6279,13 +6351,12 @@ QString latexEscapeLabelName(const QString &text, bool insideTabbing)
 
    QTextStream t(&result);
 
-   const QChar *p  = text.constData();
-
+   QString::const_iterator iter = text.constBegin();
    QChar c;
-   QString tmp;
 
-   while (*p != 0) {
-      c = *p++;
+   while (iter != text.constEnd()) {
+      c = *iter;
+      ++iter;
 
       switch (c.unicode()) {
 
@@ -6317,19 +6388,27 @@ QString latexEscapeLabelName(const QString &text, bool insideTabbing)
             t << "````~";
             break;
 
-         default:
+         default: {
             // collect as many chars as possible before handing it to docify
-            tmp = c;
+            QString tmp = c;
 
-            while ((c = *p) != 0 && c != '@' && c!='[' && c!=']'&& c != '|' && c != '!' && c != '{' && c != '}') {
-               tmp += c;
-               p++;
+            while (iter != text.constEnd()) {
+               c = *iter;
+
+               if (c != '@' && c!='[' && c!=']'&& c != '|' && c != '!' && c != '{' && c != '}') {
+                  tmp += c;
+                  ++iter;
+
+               } else {
+                  break;
+               }
+
             }
 
             filterLatexString(t, tmp, insideTabbing);
             break;
+         }
       }
-
    }
 
    return result;
@@ -6341,13 +6420,12 @@ QString latexEscapeIndexChars(const QString &text, bool insideTabbing)
 
    QTextStream t(&result);
 
-   const QChar *p  = text.constData();
-
+   QString::const_iterator iter = text.constBegin();
    QChar c;
-   QString tmp;
 
-   while (*p != 0) {
-      c = *p++;
+   while (iter != text.constEnd()) {
+      c = *iter;
+      ++iter;
 
       switch (c.unicode()) {
 
@@ -6383,17 +6461,25 @@ QString latexEscapeIndexChars(const QString &text, bool insideTabbing)
             t << "\\rcurly{}";
             break;
 
-         default:
-           // collect as long string as possible, before handing it to docify
-           tmp = c;
+         default: {
+            // collect as long string as possible, before handing it to docify
+            QString tmp = c;
 
-           while ((c = *p) != 0 && c != '"' && c != '@' && c != '[' && c != ']' && c != '!' && c != '{' && c != '}' && c != '|') {
-             tmp += c;
-             p++;
-           }
+            while (iter != text.constEnd()) {
+               QChar c2 = *iter;
 
-           filterLatexString(t, tmp, insideTabbing);
-           break;
+               if (c2 != '"' && c2 != '@' && c2 != '[' && c2 != ']' && c2 != '!' && c2 != '{' && c2 != '}' && c2 != '|') {
+                  tmp += c2;
+                  ++iter;
+               } else {
+                  break;
+               }
+
+            }
+
+            filterLatexString(t, tmp, insideTabbing);
+            break;
+         }
        }
    }
 
@@ -6614,31 +6700,29 @@ QString stripPath(const QString &s)
 
 bool findAndRemoveWord(QString &str, const QString &word)
 {
-   static QRegularExpression wordExp("[a-z_A-Z\\x80-\\xFF]+");
-   int p = 0;
-   int i;
-   int l;
+   QRegularExpression regExp_word("\\b" + word + "\\b");
+   QRegularExpressionMatch match = regExp_word.match(str);
 
-   while ((i = wordExp.indexIn(str, p)) != -1) {
-      l = wordExp.matchedLength();
+   if (match.hasMatch()) {
 
-      if (str.mid(i, l) == word) {
+      QString::const_iterator start_iter = match.capturedStart();
+      QString::const_iterator end_iter   = match.capturedEnd();
 
-         if (i > 0 && str.at(i - 1).isSpace() ) {
-            i--;
-            l++;
+      if (start_iter != str.constBegin() && start_iter[-1].isSpace()) {
+         // remove preceding space and word
+         str.erase(start_iter - 1, end_iter);
 
-         } else if (i + l < str.length() && str.at(i + l).isSpace() ) {
-            l++;
+      } else if (end_iter != str.constEnd() && end_iter->isSpace()) {
+         // remove word and space after word
+         str.erase(start_iter, end_iter + 1);
 
-         }
+      } else  {
+         // remove just the word
+         str.erase(start_iter, end_iter);
 
-         str = str.left(i) + str.mid(i + l); // remove word + spacing
-         return true;
       }
 
-      p = i + l;
-
+      return true;
    }
 
    return false;
@@ -6653,26 +6737,27 @@ bool findAndRemoveWord(QString &str, const QString &word)
 QString trimEmptyLines(const QString &str, int &docLine)
 {
    if (str.isEmpty()) {
-      return QString("");;
+      return str;
    }
 
-   const QChar *p = str.constData();
-   const QChar *ptr = p;
+   QString::const_iterator iter       = str.constBegin();
+
+   QString::const_iterator iter_start = str.constEnd();
+   QString::const_iterator iter_end   = str.constEnd();
 
    // search for leading empty lines
-   int start = -1;
-   int len   = str.length();
-
    QChar c;
 
-   while ((c = *p++) != 0) {
+   while (iter != iter_end) {
+      c = *iter;
+      ++iter;
 
       if (c == ' ' || c == '\t' || c == '\r') {
          // do nothing
 
       } else if (c == '\n') {
-         start = (p - ptr);
-         docLine++;
+         iter_start = iter;
+         ++docLine;
 
       } else {
          break;
@@ -6681,45 +6766,44 @@ QString trimEmptyLines(const QString &str, int &docLine)
    }
 
    // search for trailing empty lines
-   int end = -1;
+   iter = iter_end - 1;
 
-   p = ptr + len - 1;
-
-   while (p >= ptr) {
-      c = *p;
-      p--;
+   while (true) {
+      c = *iter;
 
       if (c == ' ' || c == '\t' || c == '\r') {
          // do nothing
 
       } else if (c == '\n') {
-         end = (p - ptr);
+         iter_end = iter;
 
       } else {
          break;
       }
+
+      if (iter == str.constBegin()) {
+         break;
+      }
+
+      --iter;
    }
 
    // return whole string if no leading or trailing lines where found
-   if (start == -1 && end == -1) {
+   if (iter_start == str.constEnd() && iter_end == str.constEnd()) {
       return str;
    }
 
    // return substring
-   if (end == -1) {
-      end = len;
+   if (iter_start == str.constEnd()) {
+      iter_start = str.constBegin();
    }
 
-   if (start == -1) {
-      start = 0;
-   }
-
-   if (end <= start) {
+   if (iter_end <= iter_start) {
       // only empty lines
       return QString("");
    }
 
-   return str.mid(start, end - start + 1);
+   return QStringView(iter_start, iter_end + 1);
 }
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &xName)
@@ -6871,24 +6955,30 @@ static int findEndOfCommand(const QString &str)
 {
    int retval = 0;
 
-   const QChar *data = str.constData();
-   const QChar *ptr  = data;
+   if (str.isEmpty()) {
+      return retval;
+   }
 
-   QChar c = *ptr;
+   QString::const_iterator iter = str.constBegin();
+   QChar c = '\0';
 
-   while (isId(c)) {
-      ptr++;
+   while (iter != str.constEnd()) {
+      c = *iter;
 
-      // next char
-      c = *ptr;
+      if (isId(c)) {
+         ++iter;
+
+      } else {
+         break;
+      }
    }
 
    if (c == '{') {
-      QString args = extractAliasArgs(str, ptr - data);
+      QString args = extractAliasArgs(str, iter - str.constBegin());
       retval += args.length();
    }
 
-   retval += ptr - data;
+   retval += iter - str.constBegin();
 
    return retval;
 }
@@ -6996,27 +7086,27 @@ static QString escapeCommas(const QString &s)
    return retval;
 }
 
-static QString expandAliasRec(const QString &s, bool allowRecursion)
+static QString expandAliasRec(const QString &str, bool allowRecursion)
 {
    QString result;
-   static QRegularExpression cmdPat("[\\\\@][a-z_A-Z][a-z_A-Z0-9]*");
 
-   QString value = s;
+   static QRegularExpression regExp("[\\\\@][a-z_A-Z][a-z_A-Z0-9]*");
+   QRegularExpressionMatch match = regExp.match(str);
 
-   int i;
-   int len;
-   int p = 0;
+   QString::const_iterator iter_i;
+   QString::const_iterator iter_last = str.constBegin();
 
-   while ((i = cmdPat.indexIn(value, p)) != -1) {
-      len = cmdPat.matchedLength();
-      result += value.mid(p, i - p);
+   while (match.hasMatch()) {
+      iter_i  = match.capturedStart();
 
-      QString args = extractAliasArgs(value, i + len);
+      result += QStringView(iter_last, iter_i);
 
-      bool hasArgs = ! args.isEmpty();            // found directly after command
+      QString args = extractAliasArgs(str, match.capturedEnd() - str.constBegin() );
+
+      bool hasArgs = ! args.isEmpty();                      // found directly after command
       int argsLen  =   args.length();
 
-      QString cmd = value.mid(i + 1, len - 1);
+      QString cmd       = QStringView(iter_i + 1, match.capturedEnd());
       QString cmdNoArgs = cmd;
 
       int numArgs = 0;
@@ -7058,19 +7148,21 @@ static QString expandAliasRec(const QString &s, bool allowRecursion)
             s_aliasesProcessed.remove(cmd);
          }
 
-         p = i + len;
+         iter_last = match.capturedEnd();
          if (hasArgs) {
-            p += argsLen + 2;
+            iter_last += argsLen + 2;
          }
 
       } else {
          // command is not an alias
-         result += value.mid(i, len);
-         p = i + len;
+         result    += match.captured();
+         iter_last = match.capturedEnd();
       }
+
+      match = regExp.match(str, iter_last);
    }
 
-   result += value.right(value.length() - p);
+   result += QStringView(iter_last, str.constEnd());
 
    return result;
 }
@@ -7299,23 +7391,25 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
 // Replace %word by word in title
 QString filterTitle(const QString &title)
 {
-   QString tf;
+   QString retval;
 
-   static QRegularExpression re("%[A-Z_a-z]");
-   int p = 0, i, l;
+   static QRegularExpression regExp("%[A-Z_a-z]");
+   QRegularExpressionMatch match = regExp.match(title);
 
-   while ((i = re.indexIn(title, p)) != -1) {
-      l = re.matchedLength();
+   QString::const_iterator iter_last = title.constBegin();
 
-      tf += title.mid(p, i - p);
-      tf += title.mid(i + 1, l - 1); // skip %
+   while (match.hasMatch()) {
 
-      p = i + l;
+      retval += QStringView(iter_last, match.capturedStart());
+      retval += QStringView(match.capturedStart() + 1, match.capturedEnd());         // skip  the %
+
+      iter_last = match.capturedEnd();
+      match     = regExp.match(title, iter_last);
    }
 
-   tf += title.right(title.length() - p);
+   retval += QStringView(iter_last, title.constEnd());
 
-   return tf;
+   return retval;
 }
 
 // returns true if the name of the file represented by `fi' matches
@@ -7323,11 +7417,11 @@ QString filterTitle(const QString &title)
 
 bool patternMatch(const QFileInfo &fi, const QStringList &patList)
 {
-   static Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
+   static Qt::CaseSensitivity ignoreCase = Config::getCase("case-sensitive-fname");
 
    // For Windows and Mac OS X always do the case insensitive match
 #if defined(_WIN32) || defined(__MACOSX__)
-   allowUpperCaseNames_enum = Qt::CaseInsensitive;
+   ignoreCase = Qt::CaseInsensitive;
 #endif
 
    bool found = false;
@@ -7335,6 +7429,8 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
    QString fn  = fi.fileName();
    QString fp  = fi.filePath();
    QString afp = fi.absoluteFilePath();
+
+   QRegularExpression regExp;
 
    for (auto pattern : patList) {
 
@@ -7345,13 +7441,20 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
             pattern = pattern.left(i);   // strip off the extension
          }
 
-         QRegularExpression re(pattern, allowUpperCaseNames_enum, QRegularExpression::Wildcard);
+         if (ignoreCase == Qt::CaseInsensitive) {
+            regExp = QRegularExpression(pattern, QPatternOption::CaseInsensitiveOption | QPatternOption::WildcardOption |
+                  QPatternOption::ExactMatchOption);
+
+         } else  {
+            regExp = QRegularExpression(pattern, QPatternOption::WildcardOption | QPatternOption::ExactMatchOption);
+
+         }
 
          // input-patterns
          // possilbe issue if the pattern has something other than a wildcard for the name
          // found = re.indexIn(fn) != -1 || re.indexIn(fp) != -1 || re.indexIn(afp) != -1;
 
-         found = re.exactMatch(fn) || re.exactMatch(fp) || re.exactMatch(afp);
+         found = fn.contains(regExp) || fp.contains(regExp) || afp.contains(regExp);
 
          if (found) {
             break;
@@ -7440,7 +7543,6 @@ void writeColoredImgData(ColoredImgDataItem data)
    }
 
    Doxy_Globals::indexList.addImageFile(data.name);
-
 }
 
 /** Replaces any markers of the form \#\#AA in input string \a str
@@ -7450,24 +7552,26 @@ void writeColoredImgData(ColoredImgDataItem data)
  */
 QString replaceColorMarkers(const QString &str)
 {
+   static int hue   = Config::getInt("html-colorstyle-hue");
+   static int sat   = Config::getInt("html-colorstyle-sat");
+   static int gamma = Config::getInt("html-colorstyle-gamma");
+
    QString result = str;
 
    if (result.isEmpty()) {
       return result;
    }
 
-   static QRegularExpression re("##([0-9A-Fa-f][0-9A-Fa-f])");
-
-   static int hue   = Config::getInt("html-colorstyle-hue");
-   static int sat   = Config::getInt("html-colorstyle-sat");
-   static int gamma = Config::getInt("html-colorstyle-gamma");
-
-   int startPos = 0;
    int len = result.length();
 
-   while (re.indexIn(result, startPos) != -1) {
+   static QRegularExpression regExp("##([0-9A-Fa-f][0-9A-Fa-f])");
+   QRegularExpressionMatch match = regExp.match(result);
 
-      QString tempColor = re.cap(1);
+   int startPos = 0;
+
+   while (match.hasMatch()) {
+
+      QString tempColor = match.captured(1);
       int level = tempColor.toInteger<int>(nullptr, 16);
 
       double r, g, b;
@@ -7481,10 +7585,13 @@ QString replaceColorMarkers(const QString &str)
 
       QString colorStr = "#%1%2%3";
       colorStr = colorStr.formatArg(red, 2, 16, QChar('0')).formatArg(green, 2, 16, QChar('0')).formatArg(blue, 2, 16, QChar('0'));
-      result.replace(re.pos(0), re.matchedLength(), colorStr);
 
-      //
-      startPos = re.pos(0) + colorStr.length();
+      startPos = (match.capturedStart() - result.constBegin()) + colorStr.length();
+
+      // update the original string - iterators are not invalid so be careful
+      result.replace(match.capturedStart(), match.capturedEnd(), colorStr);
+
+      match = regExp.match(result, result.constBegin() + startPos);
    }
 
    return result;
@@ -7805,6 +7912,26 @@ void addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDe
    }
 }
 
+QString lowerCaseFirstLetter(QString &&text)
+{
+   if (text.isEmpty()) {
+      return std::move(text);
+   }
+
+   text.replace(0, 1, text[0].toLower());
+   return std::move(text);
+}
+
+QString upperCaseFirstLetter(QString &&text)
+{
+   if (text.isEmpty()) {
+      return std::move(text);
+   }
+
+   text.replace(0, 1, text[0].toUpper());
+   return std::move(text);
+}
+
 QChar charToLower(const QString &s, int index)
 {
    if (s.isEmpty()) {
@@ -7851,37 +7978,40 @@ bool classVisibleInIndex(QSharedPointer<ClassDef> cd)
    return (allExternals && cd->isLinkable()) || cd->isLinkableInProject();
 }
 
-QByteArray extractDirection(QString docs)
+QString extractDirection(QString docs)
 {
-   static QRegularExpression re("\\[[^\\]]+\\]");
-   int len = 0;
+   QString retval;
 
-   if (re.indexIn(docs, 0) == 0) {
-      len = re.matchedLength();
+   static QRegularExpression regExp("\\[[^\\]]+\\]");
+   QRegularExpressionMatch match = regExp.match(docs);
 
-      int  inPos  = docs.indexOf("in", 1, Qt::CaseInsensitive);
+   if (match.hasMatch() && match.capturedStart() == docs.constBegin()) {
+      int len = match.capturedLength();
+
+      int  inPos  = docs.indexOf("in",  1, Qt::CaseInsensitive);
       int outPos  = docs.indexOf("out", 1, Qt::CaseInsensitive);
 
-      bool input  = inPos != -1 &&  inPos < len;
+      bool input  = inPos  != -1 &&  inPos < len;
       bool output = outPos != -1 && outPos < len;
 
       if (input || output) {
          // in,out attributes
-         docs = docs.mid(len); // strip attributes
+
+         docs = QStringView(match.capturedEnd(), docs.constEnd());
 
          if (input && output) {
-            return "[in,out]";
+            retval = "[in,out]";
 
          } else if (input) {
-            return "[in]";
+            retval = "[in]";
 
          } else if (output) {
-            return "[out]";
+            retval = "[out]";
          }
       }
    }
 
-   return QByteArray();
+   return retval;
 }
 
 // Computes for a given list type inListType, which are the the corresponding list type(s) in

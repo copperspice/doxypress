@@ -425,6 +425,8 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void writeSummaryLink(const QString &file, const QString &anchor, const QString &title, bool first) = 0;
    virtual void startContents() = 0;
    virtual void endContents() = 0;
+   virtual void startPageDoc(const QString &pageTitle) {};
+   virtual void endPageDoc() {};
    virtual void startTextBlock(bool) = 0;
    virtual void endTextBlock(bool) = 0;
    virtual void lastIndexPage() = 0;

@@ -1773,7 +1773,7 @@ bool Definition::isLinkableViaGroup() const
   return false;
 }
 
-QSharedPointer<Definition> Definition::findInnerCompound(const QString &)
+QSharedPointer<Definition> Definition::findInnerCompound(const QString &) const
 {
    return QSharedPointer<Definition>();
 }

@@ -245,7 +245,7 @@ class Definition : public DefinitionIntf
    SortedList<QSharedPointer<GroupDef>> *partOfGroups() const;
    bool isLinkableViaGroup() const;
 
-   virtual QSharedPointer<Definition> findInnerCompound(const QString &name);
+   virtual QSharedPointer<Definition> findInnerCompound(const QString &name) const;
    virtual QSharedPointer<Definition> getOuterScope() const;
 
    const MemberSDict &getReferencesMembers() const;

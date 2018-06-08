@@ -214,10 +214,15 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    if (! title().isEmpty() && ! name().isEmpty() && si != nullptr) {
 
+      ol.startPageDoc(si->title);
       startTitle(ol, getOutputFileBase(), self);
+
       ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);
 
       endTitle(ol, getOutputFileBase(), name());
+
+   } else {
+      ol.startPageDoc("");
    }
 
    ol.startContents();
@@ -228,6 +233,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    }
 
    writePageDocumentation(ol);
+   ol.endPageDoc();
 
    if (generateTreeView && getOuterScope() != Doxy_Globals::globalScope && ! Config::getBool("disable-index")) {
       ol.endContents();
@@ -252,6 +258,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
    }
 
    ol.startTextBlock();
+
    QString docStr = documentation() + inbodyDocumentation();
 
    if (hasBriefDescription() && ! Doxy_Globals::sectionDict.find(name())) {

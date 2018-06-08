@@ -1162,7 +1162,7 @@ void FileDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)
    }
 }
 
-NamespaceSDict *FileDef::getUsedNamespaces()
+const NamespaceSDict *FileDef::getUsedNamespaces() const
 {
    return &m_usingDirList;
 }

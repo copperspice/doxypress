@@ -7864,6 +7864,28 @@ static QString processCopyDoc(const QString &data, uint &len)
    return retval;
 }
 
+QString getDirHtmlClassOfPage(QString pageTitle)
+{
+   QString retval = " class=\"PageDoc";
+
+/* rtl
+   auto titleDir = getTextDirByConfig(pageTitle);
+
+   if (titleDir == QString::DirLTR) {
+      retval += " PageDocLTR-title";
+
+   } else if (titleDir == QString::DirRTL) {
+      retval += " PageDocRTL-title";
+
+   }
+*/
+
+   retval += "\"";
+
+   return retval;
+}
+
+
 // main entry point
 DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx,
                   QSharedPointer<MemberDef> md, const QString &input, bool indexWords, bool isExample,

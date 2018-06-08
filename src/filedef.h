@@ -147,19 +147,19 @@ class FileDef : public Definition
       return m_package;
    }
 
-   QSharedPointer<DirDef> getDirDef() const      {
+   QSharedPointer<DirDef> getDirDef() const {
       return m_dir;
    }
 
-   NamespaceSDict *getUsedNamespaces();
+   const NamespaceSDict *getUsedNamespaces() const;
 
-   StringMap<QSharedPointer<Definition>> *getUsedClasses()  {
+   const StringMap<QSharedPointer<Definition>> *getUsedClasses() const {
       return &m_usingDeclList;
    }
 
-   const QList<IncludeInfo> *includeFileList() const    {
+   const QList<IncludeInfo> *includeFileList() const  {
       if (m_includeList.isEmpty()) {
-         return 0;
+         return nullptr;
       }
 
       return &m_includeList;

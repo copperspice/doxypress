@@ -184,16 +184,16 @@ class ClassDef : public Definition
    // Returns the Java package this class is in or 0 if not applicable.
    QSharedPointer<MemberDef> getMemberByName(const QString &) const;
 
-   bool isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, int level = 0);
    // returns true if  bcd is a direct or indirect base class of this class
    // will recusively traverse all branches of the inheritance tree
+   bool isBaseClass(QSharedPointer<const ClassDef> bcd, bool followInstances, int level = 0) const;
 
    // returns true iff \a bcd is a direct or indirect sub class of this class
    bool isSubClass(QSharedPointer<ClassDef> bcd, int level = 0);
 
    // returns true iff \a md is a member of this class or of the
    // the public/protected members of a base class
-   bool isAccessibleMember(QSharedPointer<MemberDef> md);
+   bool isAccessibleMember(QSharedPointer<const MemberDef> md) const;
 
    // Returns a sorted dictionary with all template instances found for
    // this template class. Returns 0 if not a template or no instances.
@@ -220,7 +220,7 @@ class ClassDef : public Definition
     *  available, or 0 otherwise.
     *  @param name The name of the nested compound
     */
-   QSharedPointer<Definition> findInnerCompound(const QString &name) override;
+   QSharedPointer<Definition> findInnerCompound(const QString &name) const override;
 
    /** Returns the template parameter lists that form the template
     *  declaration of this class.

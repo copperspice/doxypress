@@ -27,6 +27,10 @@
 #include <htmlattrib.h>
 #include <membergroup.h>
 
+// add others, rtl
+QString getDirHtmlClassOfPage(QString pageTitle);
+
+
 /*! Main entry point for the documentation parser.
  *
  *  @param fileName     File in which the documentation block is found (or the
@@ -549,7 +553,7 @@ class DocSymbol : public DocNode
 
       PerlSymb(const char *x1, PerlType x2)  {
 
-         if (x1 == nullptr) {
+         if (x1 != nullptr) {
             symb = QString::fromUtf8(x1);
          }
 

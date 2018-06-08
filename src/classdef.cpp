@@ -2479,7 +2479,7 @@ bool ClassDef::hasDocumentation() const
 // returns true iff class definition `bcd' represents an (in)direct base
 // class of class definition `cd'.
 
-bool ClassDef::isBaseClass(QSharedPointer<ClassDef> bcd, bool followInstances, int level)
+bool ClassDef::isBaseClass(QSharedPointer<const ClassDef> bcd, bool followInstances, int level) const
 {
    bool found = false;
 
@@ -3167,7 +3167,7 @@ void ClassDef::addInnerCompound(QSharedPointer<Definition> d)
    }
 }
 
-QSharedPointer<Definition> ClassDef::findInnerCompound(const QString &name)
+QSharedPointer<Definition> ClassDef::findInnerCompound(const QString &name) const
 {
    QSharedPointer<Definition> result;
 
@@ -3435,7 +3435,7 @@ QSharedPointer<MemberDef> ClassDef::getMemberByName(const QString &name) const
    return xmd;
 }
 
-bool ClassDef::isAccessibleMember(QSharedPointer<MemberDef> md)
+bool ClassDef::isAccessibleMember(QSharedPointer<const MemberDef> md) const
 {
    return md->getClassDef() && isBaseClass(md->getClassDef(), true);
 }

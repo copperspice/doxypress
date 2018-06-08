@@ -780,7 +780,7 @@ QString NamespaceDef::getOutputFileBase() const
    }
 }
 
-QSharedPointer<Definition> NamespaceDef::findInnerCompound(const QString &n)
+QSharedPointer<Definition> NamespaceDef::findInnerCompound(const QString &n) const
 {
    if (n.isEmpty()) {
       return QSharedPointer<Definition>();

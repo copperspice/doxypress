@@ -166,6 +166,7 @@ static int computeIndent(const QString &str, int length)
    int indent = 0;
 
    for (i = 0; i < length; i++) {
+
       if (str[i] == '\t') {
          indent += tabSize - (indent % tabSize);
 
@@ -560,13 +561,15 @@ LNKWORD1  ("::"|"#")?{SCOPEMASK}
 CVSPEC    {BLANK}*("const"|"volatile")
 LNKWORD2  (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
 LNKWORD3  ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
-CHARWORDQ [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 
-ESCWORD   ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
-WORD1     {ESCWORD}|{CHARWORDQ}+|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
-WORD2     "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
+ /* watch names of CharWordQ */
+CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
+ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
+CHARWORDQ2  [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
+WORD1       {ESCWORD}|{CHARWORDQ2}+|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
+WORD2       "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
 
-WORD1NQ   {ESCWORD}|{CHARWORDQ}+|"{"|"}"
+WORD1NQ   {ESCWORD}|{CHARWORDQ1}+|"{"|"}"
 WORD2NQ   "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
 
 CAPTION   [cC][aA][pP][tT][iI][oO][nN]
@@ -649,6 +652,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->isEnumList = text.at(dashPos + 1) == '#';
       g_token->id         = -1;
       g_token->indent     = computeIndent(text, dashPos);
+
       return TK_LISTITEM;
    }
 
@@ -656,15 +660,20 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       /* list item */
       if (! Doxy_Globals::markdownSupport || s_insidePre) {
          REJECT;
+
       } else {
          QString text = QString::fromUtf8(yytext);
 
-         static QRegularExpression re("[*+]");
-         int listPos = text.lastIndexOf(re);
+         static QRegularExpression regExp("^.*[*+]");
+         QRegularExpressionMatch match = regExp.match(text);
+
+         // assume match.hasMatch() is always true
+         int listPos = match.capturedLength();
 
          g_token->isEnumList = false;
          g_token->id         = -1;
-         g_token->indent     = computeIndent(text,listPos);
+         g_token->indent     = computeIndent(text, listPos);
+
          return TK_LISTITEM;
       }
    }
@@ -710,8 +719,11 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
          QString text = QString::fromUtf8(yytext);
          text = text.right(text.length() - text.indexOf('\n') - 1);
 
-         static QRegularExpression regExp("[*+]");
-         int markPos = text.lastIndexOf(regExp);
+         static QRegularExpression regExp("^.*[*+]");
+         QRegularExpressionMatch match = regExp.match(text);
+
+         // assume match.hasMatch() is always true
+         int markPos = match.capturedLength();
 
          g_token->isEnumList = false;
          g_token->id         = -1;
@@ -959,7 +971,8 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
   /********* patterns for normal words ******************/
 
-<St_Para,St_Text>{WORD1}       |
+<St_Para,St_Text>[\-+0-9]     |
+<St_Para,St_Text>{WORD1}      |
 <St_Para,St_Text>{WORD2} {
       /* function call */
       QString text = QString::fromUtf8(yytext);
@@ -1276,7 +1289,8 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WORD;
    }
 
-<St_TitleN>{WORD1}     |
+<St_TitleN>[\-+0-9]       |
+<St_TitleN>{WORD1}        |
 <St_TitleN>{WORD2}     {
       /* word */
       QString text = QString::fromUtf8(yytext);

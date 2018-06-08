@@ -2404,6 +2404,16 @@ void HtmlGenerator::endContents()
    m_textStream << "</div><!-- contents -->" << endl;
 }
 
+void HtmlGenerator::startPageDoc(const QString &pageTitle)
+{
+   // RTL    m_textStream << "<div" << getDirHtmlClassOfPage(pageTitle) << ">";
+}
+
+void HtmlGenerator::endPageDoc()
+{
+   // RTL    m_textStream << "</div><!-- PageDoc -->" << endl;
+}
+
 void HtmlGenerator::writeQuickLinks(bool compact, HighlightedItem hli, const QString &file)
 {
    writeDefaultQuickLinks(m_textStream, compact, hli, file, m_relativePath);
