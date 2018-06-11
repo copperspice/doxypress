@@ -13047,7 +13047,7 @@ static bool containsWord(const QString &str, const QString &word)
 /*! Returns true if the current entry could be a K&R style C function */
 static bool checkForKnRstyleC()
 {
-   if (yyFileName.right(2).toLower() != ".c") {
+   if (! yyFileName.endsWith(".c", Qt::CaseInsensitive)) {
       // must be a C file
       return false;
    }
@@ -13076,22 +13076,28 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
 
    if (oldStyleArgType.isEmpty()) {
       // new argument
-      static QRegularExpression regExp("\\([^)]*\\)");
+      static QRegularExpression regExp(".*(\\([^)]*\\))");
+      QRegularExpressionMatch match = regExp.match(tmpArgs);
 
-      int bi1 = tmpArgs.lastIndexOf(regExp);
-      int bi2 = -1;
+      QString::const_iterator iter_bi1 = tmpArgs.constEnd();
+      QString::const_iterator iter_bi2 = tmpArgs.constEnd();
 
-      if (bi1 != -1) {
-         bi2 = tmpArgs.lastIndexOf(regExp, bi1 - 1);
+      if (match.hasMatch()) {
+         iter_bi1 = match.capturedStart(1);
 
+         match = regExp.match(QStringView(tmpArgs.constBegin(), iter_bi1));
+
+         if (match.hasMatch()) {
+            iter_bi2 = match.capturedStart(1);
+         }
       }
 
       QChar c;
 
-      if (bi1 != -1 && bi2 != -1) {
+      if (iter_bi1 != tmpArgs.constEnd() && iter_bi2 != tmpArgs.constEnd()) {
          // found something like "int (*func)(int arg)"
 
-         int pos = bi2 + 1;
+         int pos = (iter_bi2 - tmpArgs.constBegin()) + 1;
          oldStyleArgType = tmpArgs.left(pos);
 
          int i = pos;
@@ -13110,9 +13116,9 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
          oldStyleArgName = tmpArgs.mid(pos, i - pos);
          oldStyleArgType += tmpArgs.mid(i);
 
-      } else if (bi1 != -1) {
+      } else if (iter_bi1 != tmpArgs.constEnd()) {
          // redundant braces like in "int (*var)"
-         int pos = bi1;
+         int pos = iter_bi1 - tmpArgs.constBegin();
 
          oldStyleArgType = tmpArgs.left(pos);
          pos++;
@@ -19561,23 +19567,23 @@ case 463:
 /* rule 463 can match eol */
 YY_RULE_SETUP
 {
-      // the [] part could be improved.
+      // the [] part could be improved
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       lineCount();
-      int i = 0;
-      int l = text.length();
+      int i   = 0;
+      int len = text.length();
       int j;
 
-      while (i < l && (! isId(text[i])) ) {
+      while (i < len && (! isId(text[i])) ) {
         i++;
       }
 
-      msName = text.right(l-i).trimmed();
+      msName = text.right(len - i).trimmed();
       j = msName.indexOf("[");
 
       if (j != -1) {
-         msArgs=msName.right(msName.length()-j);
+         msArgs=msName.right(msName.length() - j);
          msName=msName.left(j);
       }
 

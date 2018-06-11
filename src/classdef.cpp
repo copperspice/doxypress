@@ -1004,21 +1004,21 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ol.startParagraph();
 
       QString inheritLine = theTranslator->trInheritsList(m_parents->count());
-      static QRegularExpression marker("@[0-9]+");
 
-      int index = 0;
-      int newIndex;
-      int matchLen;
+      static QRegularExpression regExp_marker("@[0-9]+");
+      QRegularExpressionMatch match = regExp_marker.match(inheritLine);
+
+      QString::const_iterator iter_i = inheritLine.constBegin();
+      QString::const_iterator iter_newIndex;
 
       // now replace all markers in inheritLine with links to the classes
-      while ((newIndex = marker.indexIn(inheritLine, index)) != -1) {
+      while (match.hasMatch()) {
+         iter_newIndex = match.capturedStart();
 
-         matchLen = marker.matchedLength();
-
-         ol.parseText(inheritLine.mid(index, newIndex - index));
+         ol.parseText(QStringView(iter_i, iter_newIndex));
          bool ok;
 
-         uint entryIndex = inheritLine.mid(newIndex + 1, matchLen - 1).toInteger<uint>(&ok);
+         uint entryIndex   = QString(iter_newIndex + 1, match.capturedEnd()).toInteger<uint>(&ok);
          BaseClassDef *bcd = m_parents->at(entryIndex);
 
          if (ok && bcd) {
@@ -1037,9 +1037,11 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
             err("Invalid marker %d in inherits list\n", entryIndex);
          }
 
-         index = newIndex + matchLen;
+         iter_i = match.capturedEnd();
+         match  = regExp_marker.match(inheritLine, iter_i);
       }
-      ol.parseText(inheritLine.right(inheritLine.length() - index));
+
+      ol.parseText(QStringView(iter_i, inheritLine.constEnd()));
       ol.endParagraph();
    }
 
@@ -1048,21 +1050,20 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       ol.startParagraph();
       QString inheritLine = theTranslator->trInheritedByList(m_inheritedBy->count());
 
-      static QRegularExpression marker("@[0-9]+");
+      static QRegularExpression regExp_marker("@[0-9]+");
+      QRegularExpressionMatch match = regExp_marker.match(inheritLine);
 
-      int index = 0;
-      int newIndex;
-      int matchLen;
+      QString::const_iterator iter_i  = inheritLine.constBegin();
+      QString::const_iterator iter_newIndex;
 
       // now replace all markers in inheritLine with links to the classes
-      while ((newIndex = marker.indexIn(inheritLine, index)) != -1) {
+      while (match.hasMatch()) {
+         iter_newIndex = match.capturedStart();
 
-         matchLen = marker.matchedLength();
-
-         ol.parseText(inheritLine.mid(index, newIndex - index));
+         ol.parseText(QStringView(iter_i, iter_newIndex));
 
          bool ok;
-         uint entryIndex = inheritLine.mid(newIndex + 1, matchLen - 1).toInteger<uint>(&ok);
+         uint entryIndex = QString(iter_newIndex + 1, match.capturedEnd()).toInteger<uint>(&ok);
 
          BaseClassDef *bcd = m_inheritedBy->at(entryIndex);
 
@@ -1078,9 +1079,11 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
             writeInheritanceSpecifier(ol, bcd);
          }
 
-         index = newIndex + matchLen;
+         iter_i = match.capturedEnd();
+         match  = regExp_marker.match(inheritLine, iter_i);
       }
-      ol.parseText(inheritLine.right(inheritLine.length() - index));
+
+      ol.parseText(QStringView(iter_i, inheritLine.constEnd()));
       ol.endParagraph();
    }
 
@@ -2009,7 +2012,7 @@ void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
       if (innerCd->isLinkableInProject() && innerCd->templateMaster() == nullptr &&
             protectionLevelVisible(innerCd->protection()) && ! innerCd->isEmbeddedInOuterScope() ) {
 
-         msg("Generating docs for nested compound %s\n", innerCd->name());
+         msg("Generating docs for nested compound %s\n", csPrintable(innerCd->name()));
          innerCd->writeDocumentation(ol);
          innerCd->writeMemberList(ol);
       }
