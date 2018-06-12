@@ -2972,7 +2972,7 @@ void DocDotFile::parse()
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::dotFileNameDict, m_name, ambig);
 
-   if (fd == 0 && m_name.right(4) != ".dot") { 	
+   if (fd == nullptr && ! m_name.contains(".dot")) {
       // try with .dot extension as well
       fd = findFileDef(&Doxy_Globals::dotFileNameDict, m_name + ".dot", ambig);
    }

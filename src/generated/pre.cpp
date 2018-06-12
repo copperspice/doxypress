@@ -2631,7 +2631,7 @@ char *preYYtext;
  *
  * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
-
+ *
 *************************************************************************/
 
 #include <stdio.h>
@@ -3364,14 +3364,14 @@ static inline void addTillEndOfString(const QString &expr, QString *rest, uint &
    }
 }
 
-/*! replaces the function macro \a def whose argument list starts at
- * \a pos in expression \a expr.
- * Notice that this routine may scan beyond the \a expr string if needed.
+/*! replaces the function macro def whose argument list starts at pos in expression \a expr.
+ * Notice that this routine may scan beyond the expr string if needed.
  * In that case the characters will be read from the input file.
  * The replacement string will be returned in \a result and the
  * length of the (unexpanded) argument list is stored in \a len.
  */
-static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, int &len, QSharedPointer<const A_Define> def, QString &result)
+static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, int &len,
+                  QSharedPointer<const A_Define> def, QString &result)
 {
    uint j = pos;
    len    = 0;
@@ -3593,7 +3593,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
 
                   // only if no ## operator is before or after the argument marker, then do macro expansion
                   if (! hash) {
-                     expandExpression(substArg, 0, 0);
+                     expandExpression(substArg, nullptr, 0);
                   }
 
                   if (inString) {
@@ -3711,11 +3711,9 @@ static int getNextId(const QString &expr, int p, int *l)
    return -1;
 }
 
-/*! preforms recursive macro expansion on the string \a expr
- *  starting at position \a pos.
- *  May read additional characters from the input while re-scanning!
- *  If \a expandAll is \c true then all macros in the expression are
- *  expanded, otherwise only the first is expanded.
+/*! preforms recursive macro expansion on the string expr starting at position pos.
+ *  May read additional characters from the input while re-scanning
+ *  If expandAll is true then all macros in the expression are expanded, otherwise only the first is expanded
  */
 static void expandExpression(QString &expr, QString *rest, int pos)
 {
@@ -3781,7 +3779,6 @@ static void expandExpression(QString &expr, QString *rest, int pos)
             if (replaced) {
                // expand the macro and rescan the expression
 
-               //printf("replacing `%s'->`%s'\n",expr.mid(p,len).data(),expMacro.data());
                QString resultExpr = expMacro;
                QString restExpr   = expr.right(expr.length() - len - p);
 
@@ -3801,7 +3798,8 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                i = p + l;
             }
 
-         } else { // move to the next macro name
+         } else {
+            // move to the next macro name
             expr = expr.left(p) + "@-" + expr.right(expr.length() - p);
             i = p + l + 2;
 
@@ -3813,8 +3811,8 @@ static void expandExpression(QString &expr, QString *rest, int pos)
    }
 }
 
-/*! replaces all occurrences of @@@@ in \a s by @@
- *  and removes all occurrences of @@E.
+/*! replaces all occurrences of @@@@ in s by @@
+ *  and removes all occurrences of @@E
  *  All identifiers found are replaced by 0L
  */
 QString removeIdsAndMarkers(const QString &s)
@@ -3960,7 +3958,7 @@ QString removeIdsAndMarkers(const QString &s)
 
             QChar lc = c.toLower()[0];
 
-            if (! isId(lc) && lc != '.' /*&& lc!='-' && lc!='+'*/) {
+            if (! isId(lc) && lc != '.') {
                inNum = false;
             }
 
@@ -3971,7 +3969,7 @@ QString removeIdsAndMarkers(const QString &s)
          result += c;
          QChar lc = c.toLower()[0];
 
-         if (! isId(lc) && lc != '.' /*&& lc!='-' && lc!='+'*/) {
+         if (! isId(lc) && lc != '.') {
             inNum = false;
          }
 
@@ -4116,14 +4114,14 @@ QString removeMarkers(const QString &s)
    return result;
 }
 
-/*! compute the value of the expression in string \a expr.
+/*! compute the value of the expression in string expr.
  *  If needed the function may read additional characters from the input.
  */
 bool computeExpression(const QString &expr)
 {
    QString e = expr;
 
-   expandExpression(e, 0, 0);
+   expandExpression(e, nullptr, 0);
    e = removeIdsAndMarkers(e);
 
    if (e.isEmpty()) {
@@ -4135,7 +4133,7 @@ bool computeExpression(const QString &expr)
    return retval;
 }
 
-/*! expands the macro definition in \a name
+/*! expands the macro definition in name
  *  If needed the function may read additional characters from the input
  */
 
@@ -4143,7 +4141,7 @@ QString expandMacro(const QString &name)
 {
    QString n = name;
 
-   expandExpression(n, 0, 0);
+   expandExpression(n, nullptr, 0);
    n = removeMarkers(n);
 
    return n;
@@ -4277,8 +4275,8 @@ static void readIncludeFile(const QString &inc)
 
       // extract include path+name
       QString incFileName = inc.mid(s, i - s).trimmed();
+      QString dosExt      = incFileName.right(4);
 
-      QString dosExt = incFileName.right(4);
       if (dosExt == ".exe" || dosExt == ".dll" || dosExt == ".tlb") {
          // skip imported binary files (e.g. M$ type libraries)
          return;
@@ -5669,8 +5667,6 @@ YY_RULE_SETUP
 case 84:
 YY_RULE_SETUP
 {
-      // printf("Else! s_ifcount=%d otherCaseDone=%d\n",s_ifcount,otherCaseDone());
-
       if (s_ifcount == 0 && ! otherCaseDone()) {
          setCaseDone(true);
          BEGIN(Start);
@@ -6958,7 +6954,7 @@ YY_RULE_SETUP
 case 191:
 YY_RULE_SETUP
 {
-      if (YY_START == SkipVerbatim || YY_START == SkipCond) {
+      if (YY_START == SkipVerbatim || YY_START == SkipCond || getLanguageFromFileName(s_yyFileName) == SrcLangExt_Fortran) {
          REJECT;
 
       } else {

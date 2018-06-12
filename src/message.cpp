@@ -111,7 +111,7 @@ void Debug::print(DebugMask mask, int data, const QString &fmt, ...)
       if (curPriority >= data) {
          va_list args;
          va_start(args, fmt);
-         vfprintf(stdout, fmt.toUtf8().constData(), args);
+         vfprintf(stdout, fmt.constData(), args);
          va_end(args);
       }
    }
@@ -172,7 +172,7 @@ static void format_warn(const QString &file, int line, const QString &text)
    msgText = substitute(msgText, "$version", versionSubst) + "\n";
 
    // message sent to warnFile
-   fwrite(msgText.toUtf8().constData(), 1, msgText.length(), warnFile);
+   fwrite(msgText.constData(), 1, msgText.length(), warnFile);
 }
 
 static void warn_internal(const QString &tag, const QString &file, int line, const QString &prefix,
@@ -185,16 +185,13 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
 
    const int bufSize = 40960;
 
-   QByteArray text;
-   int len = 0;
-
-   if (! prefix.isEmpty()) {
-      text = prefix.toUtf8();
-      len  = text.length();
-   }
+   QByteArray text = prefix.constData();
+   int len  = text.length();
 
    text.resize(bufSize);
-   vsnprintf(text.data() + len, bufSize - len, fmt.toUtf8().constData(), args);
+
+   int actual_len = vsnprintf(text.data() + len, bufSize - len, fmt.constData(), args);
+   text.resize(len + actual_len);
 
    format_warn(file, line, text);
 }
@@ -205,10 +202,10 @@ void err(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   const QString temp = "Error: " + fmt;
+   const QString tmp = "Error: " + fmt;
 
    // message sent to warnFile
-   vfprintf(warnFile, temp.toUtf8().constData(), args);
+   vfprintf(warnFile, tmp.constData(), args);
 
    va_end(args);
 }
@@ -218,14 +215,14 @@ void errAll(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   const QString temp = "Error: " + fmt;
+   const QString tmp = "Error: " + fmt;
 
    // message sent to warnFile
-   vfprintf(warnFile, temp.toUtf8().constData(), args);
+   vfprintf(warnFile, tmp.constData(), args);
 
    if (warnFile != stderr) {
       // message displayed on screen
-      vfprintf(stderr, temp.toUtf8().constData(), args);
+      vfprintf(stderr, tmp.constData(), args);
    }
 
    va_end(args);
@@ -237,7 +234,7 @@ void errNoPrefix(const QString &fmt, ...)
    va_start(args, fmt);
 
    // message sent to warnFile
-   vfprintf(warnFile, fmt.toUtf8().constData(), args);
+   vfprintf(warnFile, fmt.constData(), args);
 
    va_end(args);
 }
@@ -248,11 +245,11 @@ void errNoPrefixAll(const QString &fmt, ...)
    va_start(args, fmt);
 
    // message sent to warnFile
-   vfprintf(warnFile, fmt.toUtf8().constData(), args);
+   vfprintf(warnFile, fmt.constData(), args);
 
    if (warnFile != stderr) {
       // message displayed on screen
-      vfprintf(stderr, fmt.toUtf8().constData(), args);
+      vfprintf(stderr, fmt.constData(), args);
    }
 
    va_end(args);
@@ -263,10 +260,10 @@ void warnMsg(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   const QString temp = "Warning: " + fmt;
+   const QString tmp = "Warning: " + fmt;
 
    // message sent to warnFile
-   vfprintf(warnFile, temp.toUtf8().constData(), args);
+   vfprintf(warnFile, tmp.constData(), args);
 
    va_end(args);
 }
@@ -276,14 +273,14 @@ void warnAll(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   const QString temp = "Warning: " + fmt;
+   const QString tmp = "Warning: " + fmt;
 
    // message sent to warnFile
-   vfprintf(warnFile, temp.toUtf8().constData(), args);
+   vfprintf(warnFile, tmp.constData(), args);
 
    if (warnFile != stderr) {
       // message displayed on screen
-      vfprintf(stderr, temp.toUtf8().constData(), args);
+      vfprintf(stderr, tmp.constData(), args);
    }
 
    va_end(args);
@@ -298,7 +295,7 @@ void msg(const QString &fmt, ...)
       va_start(args, fmt);
 
       // message displayed on screen
-      vfprintf(stdout, fmt.toUtf8().constData(), args);
+      vfprintf(stdout, fmt.constData(), args);
 
       va_end(args);
    }
@@ -336,10 +333,10 @@ void warn_simple(const QString &file, int line, const QString &text)
       return;
    }
 
-   const QString temp = "Warning: " + text;
+   const QString tmp = "Warning: " + text;
 
    // message sent to warnFile
-   format_warn(file, line, temp);
+   format_warn(file, line, tmp);
 }
 
 void warn_undoc(const QString &file, int line, const QString &fmt, ...)
@@ -361,20 +358,20 @@ void warn_uncond(const QString &fmt, ...)
    va_list args;
    va_start(args, fmt);
 
-   const QString temp = "Warning: " + fmt;
+   const QString tmp = "Warning: " + fmt;
 
    // message sent to warnFile
-   vfprintf(warnFile, temp.toUtf8().constData(), args);
+   vfprintf(warnFile, tmp.constData(), args);
 
    va_end(args);
 }
 
 void va_warn(const QString &file, int line, const QString &fmt, va_list args)
 {
-   static const QString temp = "Warning: ";
+   static const QString tmp = "Warning: ";
 
    // message sent to warnFile
-   warn_internal("warnings", file, line, temp, fmt, args);
+   warn_internal("warnings", file, line, tmp, fmt, args);
 }
 
 // **
