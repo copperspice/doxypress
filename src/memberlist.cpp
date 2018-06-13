@@ -741,178 +741,233 @@ QString MemberList::listTypeAsString(MemberListType type)
    switch (type) {
       case MemberListType_pubMethods:
          retval = "pub-methods";
+         break;
 
       case MemberListType_proMethods:
          retval = "pro-methods";
+         break;
 
       case MemberListType_pacMethods:
          retval = "pac-methods";
+         break;
 
       case MemberListType_priMethods:
          retval = "pri-methods";
+         break;
 
       case MemberListType_pubStaticMethods:
          retval = "pub-static-methods";
+         break;
 
       case MemberListType_proStaticMethods:
          retval = "pro-static-methods";
+         break;
 
       case MemberListType_pacStaticMethods:
          retval = "pac-static-methods";
+         break;
 
       case MemberListType_priStaticMethods:
          retval = "pri-static-methods";
+         break;
 
       // *
       case MemberListType_pubSignals:
          retval = "pub-signals";
+         break;
 
       case MemberListType_proSignals:
          retval = "pro-signals";
+         break;
 
       case MemberListType_priSignals:
          retval = "pri-signals";
+         break;
 
       case MemberListType_pubSlots:
          retval = "pub-slots";
+         break;
 
       case MemberListType_proSlots:
          retval = "pro-slots";
+         break;
 
       case MemberListType_priSlots:
          retval = "pri-slots";
+         break;
 
 
       // *
       case MemberListType_pubAttribs:
          retval = "pub-attribs";
+         break;
 
       case MemberListType_proAttribs:
          retval = "pro-attribs";
+         break;
 
       case MemberListType_pacAttribs:
          retval = "pac-attribs";
+         break;
 
       case MemberListType_priAttribs:
          retval = "pri-attribs";
+         break;
 
       case MemberListType_pubStaticAttribs:
          retval = "pub-static-attribs";
+         break;
 
       case MemberListType_proStaticAttribs:
          retval = "pro-static-attribs";
+         break;
 
       case MemberListType_pacStaticAttribs:
          retval = "pac-static-attribs";
+         break;
 
       case MemberListType_priStaticAttribs:
          retval = "pri-static-attribs";
+         break;
 
       // *
       case MemberListType_pubTypes:
          retval = "pub-types";
+         break;
 
       case MemberListType_proTypes:
          retval = "pro-types";
+         break;
 
       case MemberListType_pacTypes:
          retval = "pac-types";
+         break;
 
       case MemberListType_priTypes:
          retval = "pri-types";
+         break;
 
       // *
       case MemberListType_pubTypedefs:
          retval = "typedefs";
+         break;
 
       case MemberListType_proTypedefs:
          retval = "typedefs";
+         break;
 
       case MemberListType_pacTypedefs:
          retval = "typedefs";
+         break;
 
       case MemberListType_priTypedefs:
          retval = "typedefs";
+         break;
 
       // *
       case MemberListType_services:
          retval = "services";
+         break;
 
       case MemberListType_interfaces:
          retval = "interfaces";
+         break;
 
       case MemberListType_related:
          retval = "related";
+         break;
 
       case MemberListType_friends:
          retval = "friends";
+         break;
 
       case MemberListType_dcopMethods:
          retval = "dcop-methods";
+         break;
 
       case MemberListType_properties:
          retval = "properties";
+         break;
 
       case MemberListType_events:
          retval = "events";
+         break;
 
       // *
       case MemberListType_decDefineMembers:
          retval = "define-members";
+         break;
 
       case MemberListType_decProtoMembers:
          retval = "proto-members";
+         break;
 
       case MemberListType_decTypedefMembers:
          retval = "typedef-members";
+         break;
 
       case MemberListType_decEnumMembers:
          retval = "enum-members";
+         break;
 
       case MemberListType_decFuncMembers:
          retval = "func-members";
+         break;
 
       case MemberListType_decVarMembers:
          retval = "var-members";
+         break;
 
       case MemberListType_decEnumValMembers:
          retval = "enumval-members";
+         break;
 
       // *
       case MemberListType_decPubSignalMembers:
          retval = "pub-signal-members";
+         break;
 
       case MemberListType_decProSignalMembers:
          retval = "pro-signal-members";
+         break;
 
       case MemberListType_decPriSignalMembers:
          retval = "pri-signal-members";
+         break;
 
       case MemberListType_decPubSlotMembers:
          retval = "pub-slot-members";
+         break;
 
       case MemberListType_decProSlotMembers:
          retval = "pro-slot-members";
+         break;
 
       case MemberListType_decPriSlotMembers:
          retval = "pri-slot-members";
+         break;
 
 
       // *
       case MemberListType_decEventMembers:
          retval = "event-members";
+         break;
 
       case MemberListType_decFriendMembers:
          retval = "friend-members";
+         break;
 
       case MemberListType_decPropMembers:
          retval = "prop-members";
+         break;
 
       case MemberListType_enumFields:
          retval = "enum-fields";
+         break;
 
       case MemberListType_memberGroup:
          retval = "member-group";
+         break;
 
       default:
          break;
