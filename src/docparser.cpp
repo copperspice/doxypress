@@ -7168,8 +7168,6 @@ int DocPara::parse(bool skipParse, int token)
 
          case TK_COMMAND: {
 
-
-
             // see if we have to start a simple section
             int cmd = Mappers::cmdMapper->map(g_token->name);
             DocNode *n = parent();
@@ -7710,110 +7708,144 @@ void DocRoot::parse()
    DBG(("DocRoot::parse() end\n"));
 }
 
-static QString extractCopyDocId(const QString &data, uint &j, uint len)
+static QString extractCopyDocId(const QString &data, QString::const_iterator &iter_j, QString::const_iterator iter_end)
 {
-   uint s = j;
-   uint e = j;
+   QString::const_iterator iter_s = iter_j;
+   QString::const_iterator iter_e = iter_j;
 
    int round = 0;
 
    bool insideDQuote = false;
    bool insideSQuote = false;
-   bool found = false;
+   bool found        = false;
 
-   while (j < len && !found) {
+   while (iter_j < iter_end && ! found) {
+      QChar c = *iter_j;
 
       if (! insideSQuote && !insideDQuote) {
-         switch (data[j].unicode() ) {
+
+         switch (c.unicode()) {
             case '(':
                round++;
                break;
+
             case ')':
                round--;
                break;
+
             case '"':
                insideDQuote = true;
                break;
+
             case '\'':
                insideSQuote = true;
                break;
-            case ' ':  // fall through
-            case '\t': // fall through
+
+            case ' ':     // fall through
+            case '\t':    // fall through
             case '\n':
                found = (round == 0);
                break;
          }
 
-      } else if (insideSQuote) { // look for single quote end
-         if (data[j] == '\'' && (j == 0 || data[j] != '\\')) {
+      } else if (insideSQuote) {
+         // look for single quote end
+
+printf("\n\n  BROOM  - docparser, did we get here?   7751 ");
+
+         if (c == '\'' && (iter_j == data.constBegin() || iter_j[-1] != '\\')) {
             insideSQuote = false;
          }
-      } else if (insideDQuote) { // look for double quote end
-         if (data[j] == '"' && (j == 0 || data[j] != '\\')) {
+
+      } else if (insideDQuote) {
+         // look for double quote end
+
+printf("\n\n  BROOM  - docparser, did we get here?   7759 ");
+
+         if (c == '"' && (iter_j == data.constBegin() || iter_j[-1] != '\\')) {
             insideDQuote = false;
          }
       }
 
-      if (!found) {
-         j++;
+      if (! found) {
+         ++iter_j;
       }
    }
 
-   if (data.mid(j).startsWith(" const") ) {
-      j += 6;
+   QStringView tmp = QStringView(iter_j, data.constEnd());
 
-   } else if ( data.mid(j).startsWith(" volatile") ) {
-      j += 9;
+   if (tmp.startsWith(" const") ) {
+      iter_j += 6;
+
+   } else if (tmp.startsWith(" volatile") ) {
+      iter_j += 9;
    }
 
-   e = j;
+   iter_e = iter_j;
 
    QString id;
 
-   if (e > s) {
-      id = data.mid(s, e - s);
+   if (iter_e > iter_s) {
+      id = QStringView(iter_s, iter_e);
    }
 
    return id;
 }
 
-static uint isCopyBriefOrDetailsCmd(const QString &data, uint i, uint len, bool &brief)
+static  QString::const_iterator isCopyBriefOrDetailsCmd(const QString &data, QString::const_iterator iter_i, bool &brief)
 {
-   int j = 0;
+   QString::const_iterator iter_retval = data.constBegin();
 
-   if (i == 0 || (data[i - 1] != '@' && data[i - 1] != '\\')) { // not an escaped command
-      if (i + 10 < len && data.mid(i + 1).startsWith("copybrief") ) { // @copybrief or \copybrief
-         j = i + 10;
+   if (iter_i == data.constBegin() || (iter_i[-1] != '@' && iter_i[-1] != '\\')) {
+      // not an escaped command
+      QStringView tmp = QStringView(iter_i + 1, data.constEnd());
+
+      if (tmp.startsWith("copybrief") ) {
+         // @copybrief or \copybrief
+
+         iter_retval = iter_i + 10;
          brief = true;
 
-      } else if (i + 12 < len && data.mid(i + 1).startsWith("copydetails") ) { // @copydetails or \copydetails
-         j = i + 12;
+      } else if (tmp.startsWith("copydetails") ) {
+         // @copydetails or \copydetails
+
+         iter_retval = iter_i + 12;
          brief = false;
       }
    }
-   return j;
+
+   return iter_retval;
 }
 
 static QString processCopyDoc(const QString &data, uint &len)
 {
    QString retval;
-   uint i = 0;
 
-   while (i < len) {
-      QChar c = data[i];
+   QString::const_iterator iter_i   = data.constBegin();
+   QString::const_iterator iter_end = data.constBegin() + len;
 
-      if (c == '@' || c == '\\') { // look for a command
+   while (iter_i < iter_end) {
+      QChar c = *iter_i;
+
+      if (c == '@' || c == '\\') {
+         // look for a command
          bool isBrief = true;
-         uint j = isCopyBriefOrDetailsCmd(data, i, len, isBrief);
 
-         if (j > 0) {
+         QString::const_iterator iter_j = isCopyBriefOrDetailsCmd(data, iter_i, isBrief);
+
+         if (iter_j > data.constBegin()) {
             // skip whitespace
-            while (j < len && (data[j] == ' ' || data[j] == '\t')) {
-               j++;
+            QChar ch = *iter_j;
+
+            while (iter_j < iter_end && (ch == ' ' || ch == '\t')) {
+               ++iter_j;
+
+               ch = *iter_j;
             }
 
             // extract the argument
-            QString id = extractCopyDocId(data, j, len);
+            QString id = extractCopyDocId(data, iter_j, iter_end);
+
             QString doc;
             QString brief;
 
@@ -7825,12 +7857,12 @@ static QString processCopyDoc(const QString &data, uint &len)
                   s_copyStack.append(def);
 
                   if (isBrief) {
-                     uint l = brief.length();
-                     retval += processCopyDoc(brief, l);
+                     uint briefLen = brief.length();
+                     retval += processCopyDoc(brief, briefLen);
 
                   } else {
-                     uint l = doc.length();
-                     retval += processCopyDoc(doc, l);
+                     uint docLen = doc.length();
+                     retval += processCopyDoc(doc, docLen);
                   }
 
                   s_copyStack.removeOne(def);
@@ -7840,22 +7872,24 @@ static QString processCopyDoc(const QString &data, uint &len)
                                  "Found recursive @copy%s or @copydoc relation for argument '%s'.\n",
                                  isBrief ? "brief" : "details", csPrintable(id) );
                }
+
             } else {
                warn_doc_error(s_fileName, doctokenizerYYlineno,
-                              "@copy%s or @copydoc target '%s' not found", isBrief ? "brief" : "details", csPrintable(id) );
+                  "@copy%s or @copydoc target '%s' not found", isBrief ? "brief" : "details", csPrintable(id) );
             }
 
             // skip over command
-            i = j;
+            iter_i = iter_j;
 
          } else {
             retval += c;
-            i++;
+            ++iter_i;
          }
 
-      } else { // not a command, just copy
+      } else {
+         // not a command, just copy
          retval += c;
-         i++;
+         ++iter_i;
       }
    }
 
