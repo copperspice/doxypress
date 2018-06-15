@@ -2310,7 +2310,6 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
    QSharedPointer<MemberList> bml = reimplementedBy();
 
    if (bml) {
-
       uint count = 0;
       QSharedPointer<ClassDef> bcd;
 
@@ -2331,15 +2330,17 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
       }
 
       QSharedPointer<MemberDef> bmd;
-      auto mli = bml->begin();
+      auto iter_bmd = bml->begin();
 
       if (count > 0) {
          // write the list of classes that overwrite this member
          ol.startParagraph();
 
          QString reimplInLine;
+
          if (m_impl->virt == Pure || (m_impl->classDef && m_impl->classDef->compoundType() == CompoundType::Interface)) {
             reimplInLine = theTranslator->trImplementedInList(count);
+
          } else {
             reimplInLine = theTranslator->trReimplementedInList(count);
          }
@@ -2347,49 +2348,50 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
          static QRegularExpression regExp_marker("@[0-9]+");
          QRegularExpressionMatch match = regExp_marker.match(reimplInLine);
 
-         QString::const_iterator current_iter = reimplInLine.constBegin();
-         QString::const_iterator start_iter   = reimplInLine.constBegin();
+         QString::const_iterator iter_i = reimplInLine.constBegin();
+         QString::const_iterator iter_new;
 
-         // now replace all markers in reimplInLine with links to the classes
+         // replace all markers in reimplInLine with links to the classes
          while (match.hasMatch()) {
+            iter_new = match.capturedStart();
 
-            start_iter = match.capturedStart();
-
-            ol.parseText(QStringView(current_iter, start_iter));
+            ol.parseText(QStringView(iter_i, iter_new));
 
             bool ok;
-            uint entryIndex = QString(current_iter + 1, match.capturedEnd()).toInteger<uint>(&ok);
+            uint entryIndex = QString(iter_new + 1, match.capturedEnd()).toInteger<uint>(&ok);
 
             count = 0;
 
-            // find the entryIndex-th documented entry in the inheritance list.
-            for (mli = bml->end() - 1; (bmd = *mli) && (bcd = bmd->getClassDef()); --mli) {
+            if (ok) {
+               // find the entryIndex-th documented entry in the inheritance list.
+               for (iter_bmd = bml->end() - 1; (bmd = *iter_bmd) && (bcd = bmd->getClassDef()); --iter_bmd) {
 
-               if ( bmd->isLinkable() && bcd->isLinkable()) {
-                  if (count == entryIndex) {
-                     break;
+                  if (bmd->isLinkable() && bcd->isLinkable()) {
+                     if (count == entryIndex) {
+                        break;
+                     }
+
+                     ++count;
                   }
-                  count++;
+               }
+
+               if (bcd && bmd) {
+                  // write link for marker
+                  ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName());
+
+                  if (bmd->isLinkableInProject() ) {
+                     writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());
+                  }
                }
             }
 
-            if (ok && bcd && bmd) {
-               // write link for marker
+            ++iter_bmd;
 
-               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName());
-
-               if (bmd->isLinkableInProject() ) {
-                  writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());
-               }
-            }
-
-            ++mli;
-
-            current_iter = match.capturedEnd();
-            match = regExp_marker.match(reimplInLine, current_iter);
+            iter_i = match.capturedEnd();
+            match = regExp_marker.match(reimplInLine, iter_i);
          }
 
-         ol.parseText(QStringView(current_iter, reimplInLine.constEnd()));
+         ol.parseText(QStringView(iter_i, reimplInLine.constEnd()));
          ol.endParagraph();
       }
    }
@@ -2796,15 +2798,13 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
    static QRegularExpression regExp("@[0-9]+");
    QRegularExpressionMatch match = regExp.match(ldef);
 
-   int pos = 0;
    int matchLen;
-
    bool htmlEndLabelTable = false;
 
    QStringList sl;
    getLabels(sl, scopedContainer);
 
-   if (isVariable() || isTypedef() && match.hasMatch()) {
+   if ((isVariable() || isTypedef()) && match.hasMatch()) {
       // find enum type and insert it in the definition
       bool found = false;
 
@@ -2820,7 +2820,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
             linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(ldef.constBegin(), match.capturedStart()));
 
             vmd->writeEnumDeclaration(ol, getClassDef(), getNamespaceDef(), getFileDef(), getGroupDef());
-            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView( match.capturedEnd(), ldef.constEnd()) );
+            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(match.capturedEnd(), ldef.constEnd()));
 
             found = true;
          }
@@ -2843,8 +2843,8 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          match = regExp.match(ldef, iter_e);
 
          while (match.hasMatch()) {
-            iter_e   = match.capturedEnd();
-            match    = regExp.match(ldef, iter_e);
+            iter_e  = match.capturedEnd();
+            match   = regExp.match(ldef, iter_e);
          }
 
          // first si characters of ldef contain compound type name
@@ -3477,10 +3477,6 @@ QString MemberDef::memberTypeName() const
 
 void MemberDef::warnIfUndocumented()
 {
-   if (m_impl->memberGroup) {
-      return;
-   }
-
    static const bool extractAll = Config::getBool("extract-all");
 
    QSharedPointer<ClassDef>     cd = getClassDef();
@@ -5190,7 +5186,6 @@ QString MemberDef::enumBaseType() const
 {
    return m_impl->enumBaseType;
 }
-
 
 void MemberDef::cacheTypedefVal(QSharedPointer<ClassDef> val, const QString &templSpec, const QString &resolvedType)
 {
