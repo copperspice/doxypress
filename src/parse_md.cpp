@@ -32,7 +32,10 @@
 #include <util.h>
 
 struct LinkRef {
-   LinkRef(const QString &l, const QString &t) : link(l), title(t) {}
+   LinkRef(const QString &l, const QString &t)
+      : link(l), title(t)
+   {}
+
    QString link;
    QString title;
 };
@@ -41,17 +44,17 @@ enum Alignment { AlignNone, AlignLeft, AlignCenter, AlignRight };
 
 static QHash<QString, LinkRef> g_linkRefs;
 static QSharedPointer<Entry>   g_current;
-static QString  g_fileName;
-static int      g_lineNr;
+static QString                 g_fileName;
+static int                     g_lineNr;
 
-// If a markdown page starts with a level1 header, that header is used as a title of the page.
+// If a markdown page starts with a level1 header, this header is used as a title of the page.
 // This makes it a level0 header. So the level of all other sections will need to be corrected.
 // This flag is true if corrections are needed.
 // static bool g_correctSectionLevel;
 
 const int codeBlockIndent = 4;
 
-static void processInline(QString &out, const QString &processText, int size);
+static void processInline(QString &out, QStringView processText, QString::const_iterator iter_size);
 
 // is character allowed before an emphasis section
 static bool isOpenEmphChar(const QChar &text)
@@ -59,7 +62,7 @@ static bool isOpenEmphChar(const QChar &text)
    bool retval = false;
 
    if (text == '\n' || text ==' ' || text =='\'' || text =='<' || text =='{'  ||text =='(' ||
-      text == '['  || text ==',' || text ==':'  || text ==';') {
+       text == '['  || text ==',' || text ==':'  || text ==';') {
 
       retval = true;
    }
@@ -110,15 +113,15 @@ static bool extraChar(const QChar &text)
 }
 
 // escape characters that have a special meaning later on
-static QString escapeSpecialChars(const QString &text)
+static QString escapeSpecialChars(QStringView text)
 {
+   QString retval;
+
    if (text.isEmpty()) {
-      return QString("");
+      return retval;
    }
 
-   QString retval;
    bool insideQuote = false;
-
    QChar prevChar;
 
    for (auto c : text) {
@@ -176,9 +179,7 @@ static QString escapeSpecialChars(const QString &text)
    return retval;
 }
 
-/** helper function to convert presence of left and/or right alignment markers
- *  to a alignment value
- */
+// convert presence of left and/or right alignment markers to a alignment value
 static Alignment markersToAlignment(bool leftMarker, bool rightMarker)
 {
    if (leftMarker && rightMarker) {
@@ -196,32 +197,32 @@ static Alignment markersToAlignment(bool leftMarker, bool rightMarker)
 }
 
 
-// Check if data contains a block command. If so returned the command which ends the block.
-// If not an empty string is returned. Note When offset>0 character position -1 will be inspected.
+// Check if data contains a block command, if so returned the command which ends the block.
+// If not an empty string is returned. Note When offset > 0 character position -1 will be inspected.
 //
 // Checks for and skip the following block commands:
 // {@code .. { .. } .. }
-// \dot .. \enddot
-// \code .. \endcode
-// \msc .. \endmsc
-// \f$..\f$
-// \f[..\f]
-// \f{..\f}
-// \verbatim..\endverbatim
-// \latexonly..\endlatexonly
-// \htmlonly..\endhtmlonly
-// \xmlonly..\endxmlonly
-// \rtfonly..\endrtfonly
-// \manonly..\endmanonly
+// \dot   .. \enddot
+// \code  .. \endcode
+// \msc   .. \endmsc
+// \f$    .. \f$
+// \f[    .. \f]
+// \f{    .. \f}
+// \verbatim  .. \endverbatim
+// \latexonly .. \endlatexonly
+// \htmlonly  .. \endhtmlonly
+// \xmlonly   .. \endxmlonly
+// \rtfonly   .. \endrtfonly
+// \manonly   .. \endmanonly
 
-static QString isBlockCommand(const QString &data, int offset, int size, const QString &pristineChars1)
+static QString isBlockCommand(QStringView data, QString::const_iterator size, QStringView pristineChars1)
 {
-   QString retval = "";
+   QString retval;
 
    bool openBracket = false;
    bool isEscaped   = false;
 
-   if (offset > 0 && ! pristineChars1.isEmpty())  {
+   if (! pristineChars1.isEmpty())  {
       QChar char1 = pristineChars1[0];
 
       openBracket = char1 == '{';
@@ -232,17 +233,17 @@ static QString isBlockCommand(const QString &data, int offset, int size, const Q
       return retval;
    }
 
-   int end = 1;
+   QString::const_iterator iter_end = data.constBegin() + 1;
 
-   while (end < size && (data[end] >= 'a' && data[end] <= 'z')) {
-      end++;
+   while (iter_end != data.constEnd() && (*iter_end >= 'a' && *iter_end <= 'z')) {
+      ++iter_end;
    }
 
-   if (end == 1) {
+   if (iter_end == data.constBegin() + 1) {
       return retval;
    }
 
-   QString blockName = data.mid(1, end - 1);
+   QString blockName = QStringView(data.constBegin() + 1, iter_end);
 
    if (blockName == "code" && openBracket) {
       retval = "}";
@@ -263,14 +264,16 @@ static QString isBlockCommand(const QString &data, int offset, int size, const Q
    } else if (blockName == "startuml") {
       retval = "enduml";
 
-   } else if (blockName == "f" && end < size) {
-      if (data[end] == '$') {
+   } else if (blockName == "f" && iter_end != data.constEnd()) {
+      QChar c = *iter_end;
+
+      if (c == '$') {
          retval = "f$";
 
-      } else if (data[end] == '[') {
+      } else if (c == '[') {
          retval = "f]";
 
-      } else if (data[end] == '}') {
+      } else if (c == '{') {
          retval = "f}";
 
       }
@@ -280,171 +283,181 @@ static QString isBlockCommand(const QString &data, int offset, int size, const Q
 }
 
 /** looks for the next emph char, skipping other constructs, and
- *  stopping when either it is found, or we are at the end of a paragraph.
+ *  stopping when either it is found, or we are at the end of a paragraph
  */
-static int findEmphasisChar(const QString &data, int size, QChar c, int c_size)
+static int findEmphasisChar(QStringView data, QChar c, int c_size)
 {
-   int i = 1;
+   QString::const_iterator iter_i    = data.constBegin() + 1;
+   QString::const_iterator iter_size = data.constEnd();
 
-   while (i < size) {
+   while (iter_i < iter_size) {
 
-      while (i < size && data[i] != c && data[i] != '`' &&
-             data[i] != '\\' && data[i] != '@' && data[i] != '\n') {
-         i++;
+      while (iter_i < iter_size) {
+         QChar ch = *iter_i;
+
+         if (ch == c || ch == '`' || ch == '\\' || ch == '@' || ch == '\n') {
+            break;
+         }
+
+         ++iter_i;
       }
 
       // not counting escaped chars or characters that are unlikely
       // to appear as the end of the emphasis char
+      QChar charA = '\0';
 
-      int len = data.length();
-
-      QChar charA = 0;
-      if (! i -1 > len) {
-         charA = data[i - 1];
+      if (iter_i != data.constBegin()) {
+         charA = iter_i[-1];
       }
 
-      if (i > 0 && ignoreCloseEmphChar(charA)) {
-         i++;
+      if (ignoreCloseEmphChar(charA)) {
+         ++iter_i;
          continue;
 
       } else {
          // get length of emphasis token
          int tokenLen = 0;
 
-         while (i + tokenLen < size && data[i + tokenLen] == c) {
-            tokenLen++;
+         while (iter_i + tokenLen < iter_size && iter_i[tokenLen] == c) {
+            ++tokenLen;
          }
 
          if (tokenLen > 0) {
 
-            QChar charB = 0;
-            if (! i + tokenLen > len) {
-               charB = data[i + tokenLen];
+            QChar charB = '\0';
+            if (iter_i + tokenLen != iter_size) {
+               charB = iter_i[tokenLen];
             }
 
-            if (tokenLen != c_size || (i < size - tokenLen && isIdChar(charB))) {
+            if (tokenLen != c_size || (iter_i < iter_size - tokenLen && isIdChar(charB))) {
                // to prevent touching some_underscore_identifier
-               i = i + tokenLen;
+               iter_i = iter_i + tokenLen;
                continue;
             }
 
-            return i; // found it
+            return iter_i - data.constBegin();       // found it
          }
       }
 
       // skipping a code span
-      if (i < len && data[i] == '`') {
+      if (iter_i < data.constEnd() && *iter_i == '`') {
          int snb = 0;
 
-         while (i < size && data[i] == '`') {
-            snb++;
-            i++;
+         while (iter_i < iter_size && *iter_i == '`') {
+            ++snb;
+            ++iter_i;
          }
 
          // find same pattern to end the span
          int enb = 0;
 
-         while (i < size && enb < snb) {
-            if (data[i] == '`') {
-               enb++;
+         while (iter_i < iter_size && enb < snb) {
+            if (*iter_i == '`') {
+               ++enb;
             }
 
-            if (snb == 1 && data[i] == '\'') {
+            if (snb == 1 && *iter_i == '\'') {
                break;   // ` ended by '
             }
 
-            i++;
+            ++iter_i;
          }
 
-      } else if (i < len && (data[i] == '@' || data[i] == '\\') ) {
+      } else if (iter_i < data.constEnd() && (*iter_i == '@' || *iter_i == '\\') ) {
          // skip over blocks that should not be processed, passing pristineChars1 as 4th
-         QString endBlockName = isBlockCommand(data.mid(i), i, size - i, data.mid(i - 1, 1) );
+         QString endBlockName = isBlockCommand(QStringView(iter_i, data.constEnd()), iter_size, QStringView(iter_i -1, iter_i));
 
-         QChar charC = 0;
-         if (! i + 1 > len) {
-            charC = data[i + 1];
+         QChar charC = '\0';
+
+         if (iter_i + 1 <= data.constEnd()) {
+            charC = iter_i[1];
          }
 
          if (! endBlockName.isEmpty()) {
-            i++;
-            int l = endBlockName.length();
+            ++iter_i;
 
-            while (i < size - l) {
-               if ((data[i] == '\\' || data[i] == '@') && data[i - 1] != '\\' && data[i - 1] != '@') {
+            while (iter_i < iter_size) {
+               QChar ch = *iter_i;
 
-                  if (data.mid(i + 1).startsWith(endBlockName)) {
+               if ((ch == '\\' || ch == '@') && iter_i[-1] != '\\' && iter_i[-1] != '@') {
+
+                  QStringView tmp = QStringView(iter_i +1, data.constEnd());
+
+                  if (tmp.startsWith(endBlockName)) {
                      break;
                   }
                }
-               i++;
+
+               ++iter_i;
             }
 
-         } else if (i < size - 1 && isIdChar(charC)) {
+         } else if (iter_i < iter_size - 1 && isIdChar(charC)) {
             // @cmd, stop processing, see bug 690385
             return 0;
 
          } else {
-            i++;
+            ++iter_i;
 
          }
 
-      } else if (i < len && data[i] == '\n') {
+      } else if (iter_i < data.constEnd() && *iter_i == '\n') {
          // end * or _ at paragraph boundary
+         ++iter_i;
 
-         i++;
-         while (i < size && data[i] == ' ') {
-            i++;
+         while (iter_i < iter_size && *iter_i == ' ') {
+            ++iter_i;
          }
 
-         if (i >= size || data[i] == '\n') {
+         if (iter_i >= iter_size || *iter_i == '\n') {
             return 0;   // empty line -> paragraph
          }
 
       } else {
          // should not get here
-         i++;
+         ++iter_i;
       }
-
    }
 
    return 0;
 }
 
-/** process single emphasis */
-static int processEmphasis1(QString &out, const QString &data, int size, QChar c)
+// process single emphasis
+static int processEmphasis1(QString &out, QStringView data, QChar c)
 {
-   int i = 0;
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
+
    int len;
 
-   /* skipping one symbol if coming from emph3 */
-   if (size > 1 && data[0] == c && data[1] == c) {
-      i = 1;
+   // skipping one symbol if coming from emph3
+   if (iter_i + 1 < iter_size && *iter_i == c && iter_i[1] == c) {
+      ++iter_i;
    }
 
-   while (i < size) {
-      len = findEmphasisChar(data.mid(i), size - i, c, 1);
+   while (iter_i != iter_size) {
+      len = findEmphasisChar(QStringView(iter_i, data.constEnd()), c, 1);
 
       if (len == 0) {
          return 0;
       }
 
-      i += len;
+      iter_i += len;
 
-      if (i >= size) {
+      if (iter_i == iter_size) {
          return 0;
       }
 
-      if (i + 1 < size && data[i + 1] == c) {
-         i++;
+      if (iter_i + 1 < iter_size && iter_i[1] == c) {
+         ++iter_i;
          continue;
       }
 
-      if (data[i] == c && data[i - 1] != ' ' && data[i - 1] != '\n') {
+      if (*iter_i == c && iter_i[-1] != ' ' && iter_i[-1] != '\n') {
          out += "<em>";
-         processInline(out, data, i);
+         processInline(out, data, iter_i);
          out += "</em>";
 
-         return i + 1;
+         return (iter_i - data.constBegin()) + 1;
       }
    }
 
@@ -452,29 +465,37 @@ static int processEmphasis1(QString &out, const QString &data, int size, QChar c
 }
 
 /** process double emphasis */
-static int processEmphasis2(QString &out, const QString &data, int size, QChar c)
+static int processEmphasis2(QString &out, QStringView data, QChar c)
 {
-   int i = 0;
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
+
    int len;
 
-   while (i < size) {
-      len = findEmphasisChar(data.mid(i), size - i, c, 2);
+   while (iter_i != iter_size) {
+      len = findEmphasisChar(QStringView(iter_i, data.constEnd()), c, 2);
 
       if (len == 0) {
          return 0;
       }
 
-      i += len;
+      iter_i += len;
 
-      if (i + 1 < size && data[i] == c && data[i + 1] == c && i && data[i - 1] != ' ' && data[i - 1] != '\n') {
-         out += "<strong>";
-         processInline(out, data, i);
-         out += "</strong>";
+      if (iter_i != data.constBegin() && iter_i + 1 < iter_size && *iter_i == c) {
 
-         return i + 2;
+         QChar ch_next = iter_i[1];
+         QChar ch_prev = iter_i[-1];
+
+         if (ch_next == c && ch_prev != ' ' && ch_prev != '\n') {
+            out += "<strong>";
+            processInline(out, data, iter_i);
+            out += "</strong>";
+
+            return (iter_i - data.constBegin()) + 2;
+         }
       }
 
-      i++;
+      ++iter_i;
    }
 
    return 0;
@@ -483,35 +504,39 @@ static int processEmphasis2(QString &out, const QString &data, int size, QChar c
 /** Parsing tripple emphasis
  *  Finds the first closing tag, and delegates to the other emph
  */
-static int processEmphasis3(QString &out, const QString &data, int size, QChar c, const QString pristineChars2)
+static int processEmphasis3(QString &out, QStringView data, QChar c, QStringView pristineChars2)
 {
-   int i = 0, len;
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
 
-   while (i < size) {
-      len = findEmphasisChar(data.mid(i), size - i, c, 3);
+   int len;
+
+   while (iter_i != iter_size) {
+      len = findEmphasisChar(QStringView(iter_i, data.constEnd()), c, 3);
 
       if (len == 0) {
          return 0;
       }
 
-      i += len;
+      iter_i += len;
 
       /* skip whitespace preceded symbols */
-      if (data[i] != c || data[i - 1] == ' ' || data[i - 1] == '\n') {
+      if (*iter_i != c || iter_i[-1] == ' ' || iter_i[-1] == '\n') {
          continue;
       }
 
-      if (i + 2 < size && data[i + 1] == c && data[i + 2] == c) {
+      if (iter_i + 2 != iter_size && iter_i[1] == c && iter_i[2] == c) {
          out += "<em><strong>";
-         processInline(out, data, i);
-
+         processInline(out, data, iter_i);
          out += "</strong></em>";
 
-         return i + 3;
+         return (iter_i - data.constBegin()) + 3;
 
-      } else if (i + 1 < size && data[i + 1] == c) {
+      } else if (iter_i + 1 != iter_size && iter_i[1] == c) {
          // double symbol found, handing over to emphasis1
-         len = processEmphasis1(out, pristineChars2 + data, size + 2, c);
+
+          QString tmp = pristineChars2 + data;
+          len = processEmphasis1(out, tmp, c);
 
          if (len == 0) {
             return 0;
@@ -521,7 +546,9 @@ static int processEmphasis3(QString &out, const QString &data, int size, QChar c
 
       } else {
          // single symbol found, handing over to emphasis2
-         len = processEmphasis2(out, pristineChars2.mid(1) + data, size + 1, c);
+
+         QString tmp = pristineChars2.mid(1) + data;
+         len = processEmphasis2(out, tmp, c);
 
          if (len == 0) {
             return 0;
@@ -536,26 +563,26 @@ static int processEmphasis3(QString &out, const QString &data, int size, QChar c
 }
 
 /** Process ndash and mdashes */
-static int processNmdash(QString &out, const QString &data, int off, int size, const QString &pristineChars8)
+static int processNmdash(QString &out, QStringView data, QString::const_iterator iter_size, QStringView pristineChars8)
 {
-   int i     = 1;
+   QString::const_iterator iter_i = data.constBegin() + 1;
    int count = 1;
 
-   if (i < size && data[i] == '-') { // found --
-      count++;
-      i++;
+   if (iter_i != iter_size && *iter_i == '-') { // found --
+      ++count;
+      ++iter_i;
    }
 
-   if (i < size && data[i] == '-') { // found ---
-      count++;
-      i++;
+   if (iter_i != iter_size && *iter_i == '-') { // found ---
+      ++count;
+      ++iter_i;
    }
 
-   if (i < size && data[i] == '-') { // found ----
-      count++;
+   if (iter_i != iter_size && *iter_i == '-') { // found ----
+      ++count;
    }
 
-   if (count == 2 && (off < 8 || pristineChars8 != "operator") ) {
+   if (count == 2 && (pristineChars8 != "operator") ) {
       // -- => ndash
       out += "&ndash;";
       return 2;
@@ -572,21 +599,23 @@ static int processNmdash(QString &out, const QString &data, int off, int size, c
 }
 
 /** Process quoted section "...", can contain one embedded newline */
-static int processQuoted(QString &out, const QString &data, int, int size)
+static int processQuoted(QString &out, QStringView &data, QString::const_iterator iter_size)
 {
-   int i  = 1;
+   QString::const_iterator iter_i = data.constBegin() + 1;
    int nl = 0;
 
-   while (i < size && data[i] != '"' && nl < 2) {
-      if (data[i] == '\n') {
+   while (iter_i < iter_size && *iter_i != '"' && nl < 2) {
+
+      if (*iter_i == '\n') {
          nl++;
       }
-      i++;
+
+      ++iter_i;
    }
 
-   if (i < size && data[i] == '"' && nl < 2) {
-      out += data.mid(0, i + 1);
-      return i + 1;
+   if (iter_i != iter_size && *iter_i == '"' && nl < 2) {
+      out += QStringView(data.constBegin(), iter_i + 1);
+      return (iter_i - data.constBegin()) + 1;
    }
 
    // not a quoted section
@@ -596,15 +625,15 @@ static int processQuoted(QString &out, const QString &data, int, int size)
 /** Process an HTML tag. Note that <pre>..</pre> are treated specially, in
  *  the sense that all code inside is written unprocessed
  */
-static int processHtmlTag(QString &out, const QString &data, int offset, int size, const QString &pristineChars1)
+static int processHtmlTag(QString &out, QStringView data, QString::const_iterator iter_size, QStringView pristineChars1)
 {
-   if (offset > 0 && pristineChars1 == "\\") {
+   if (pristineChars1 == "\\") {
       return 0;   // escaped <
    }
 
    // find the end of the html tag
-   QString::const_iterator iter     = data.begin();
-   QString::const_iterator iter_end = data.begin() + size;
+   QString::const_iterator iter     = data.constBegin();
+   QString::const_iterator iter_end = iter_size;
 
    if (iter != iter_end) {
       ++iter;
@@ -696,73 +725,76 @@ static int processHtmlTag(QString &out, const QString &data, int offset, int siz
    return 0;
 }
 
-static int processEmphasis(QString &out, const QString &data, int offset, int size, const QString &pristineChars1)
+static int processEmphasis(QString &out, QStringView data, QString::const_iterator iter_size, QStringView pristineChars1)
 {
    int len = data.length();
 
-   QChar charA = 0;
+   QChar charA = '\0';
    if (! pristineChars1.isEmpty()) {
       charA = pristineChars1[0];
    }
 
-   QChar data0 = 0;
+   QChar data0 = '\0';
    if (len > 0) {
       data0 = data[0];
    }
 
-   QChar data1 = 0;
+   QChar data1 = '\0';
    if (len > 1) {
       data1 = data[1];
    }
 
-   QChar data2 = 0;
+   QChar data2 = '\0';
    if (len > 2) {
       data2 = data[2];
    }
 
-   QChar data3 = 0;
+   QChar data3 = '\0';
    if (len > 3) {
       data3 = data[3];
    }
 
    // invalid char before * or _, invalid char after * or _, invalid char after ** or __
-   if ( (offset > 0 && ! isOpenEmphChar(charA)) ||
-        (size > 1 && data0 != data1 && ! (isIdChar(data1) || extraChar(data1) || data1 == '[')) ||
-        (size > 2 && data0 == data1 && ! (isIdChar(data2) || extraChar(data2) || data2 == '[')) ) {
+   if ( (! charA.isNull() && ! isOpenEmphChar(charA)) ||
+        (data.constBegin() + 1 < iter_size && data0 != data1 && ! (isIdChar(data1) || extraChar(data1) || data1 == '[')) ||
+        (data.constBegin() + 2 < iter_size && data0 == data1 && ! (isIdChar(data2) || extraChar(data2) || data2 == '[')) ) {
 
       return 0;
    }
 
    int ret;
 
-   if (size > 2 && data1 != data0) {
+   if (len >= 2 && data.constBegin() + 2 < iter_size && data1 != data0) {
       // _bla or *bla
       // whitespace can not follow an opening emphasis
+      QStringView s1 = QStringView(data.constBegin() + 1, data.constEnd());
 
-      if (data1 == ' ' || data1 == '\n' || (ret = processEmphasis1(out, data.mid(1), size - 1, data0)) == 0) {
+      if (data1 == ' ' || data1 == '\n' || (ret = processEmphasis1(out, s1, data0)) == 0) {
          return 0;
       }
 
       return ret + 1;
    }
 
-   if (size > 3 && data1 == data0 && data2 != data0) {
+   if (len >= 3 && data.constBegin() + 3 < iter_size && data1 == data0 && data2 != data0) {
       // __bla or **bla
+      QStringView s1 = QStringView(data.constBegin() + 2, data.constEnd());
 
-      if (data2 == ' ' || data2 == '\n' || (ret = processEmphasis2(out, data.mid(2), size - 2, data0)) == 0) {
+      if (data2 == ' ' || data2 == '\n' || (ret = processEmphasis2(out, s1, data0)) == 0) {
          return 0;
       }
 
       return ret + 2;
    }
 
-   if (size > 4 && data1 == data0 && data2 == data0 && data3 != data0) {
+   if (len >= 4 && data.constBegin() + 4 < iter_size && data1 == data0 && data2 == data0 && data3 != data0) {
       // ___bla or ***bla
       // passing pristineChars2 as 5th
 
-      if (data3 == ' ' || data3 == '\n' || (ret = processEmphasis3(out, data.mid(3), size - 3,
-                  data0, data.mid(1, 2) )) == 0) {
+      QStringView s1 = QStringView(data.constBegin() + 3, data.constEnd());
+      QStringView s2 = QStringView(data.constBegin() + 1, data.constBegin() + 3);
 
+      if (data3 == ' ' || data3 == '\n' || (ret = processEmphasis3(out, s1, data0, s2)) == 0) {
          return 0;
       }
 
@@ -772,98 +804,118 @@ static int processEmphasis(QString &out, const QString &data, int offset, int si
    return 0;
 }
 
-static int processLink(QString &out, const QString &data, int, int size)
+static int processLink(QString &out, QStringView data, QString::const_iterator iter_size)
 {
    QString content;
    QString link;
    QString title;
 
-   int contentStart, contentEnd, linkStart, titleStart, titleEnd;
+   QString::const_iterator iter_i = data.constBegin();
+
+   QString::const_iterator iter_contentStart;
+   QString::const_iterator iter_contentEnd;
+   QString::const_iterator iter_linkStart;
+   QString::const_iterator iter_titleStart;
+   QString::const_iterator iter_titleEnd;
+
    bool isImageLink = false;
    bool isToc = false;
-   int i = 1;
 
-   if (data[0] == '!') {
+   int level = 1;
+   int nl    = 0;
+
+   if (*iter_i == '!') {
       isImageLink = true;
-      if (size < 2 || data[1] != '[') {
+
+      ++iter_i;
+
+      if (iter_i == iter_size || *iter_i != '[') {
          return 0;
       }
-      i++;
    }
 
-   contentStart = i;
-   int level = 1;
-   int nl = 0;
+   ++iter_i;
+   iter_contentStart = iter_i;
 
    // find the matching ]
-   while (i < size) {
-      if (data[i - 1] == '\\') {
+   while (iter_i != iter_size) {
+      QChar c = *iter_i;
+
+      if (iter_i[-1] == '\\') {
          // skip escaped characters
 
-      } else if (data[i] == '[') {
+      } else if (c == '[') {
          level++;
 
-      } else if (data[i] == ']') {
+      } else if (c == ']') {
          level--;
+
          if (level <= 0) {
             break;
          }
 
-      } else if (data[i] == '\n') {
+      } else if (c == '\n') {
          nl++;
+
          if (nl > 1) {
             return 0;   // only allow one newline in the content
          }
       }
-      i++;
+
+      ++iter_i;
    }
 
-   if (i >= size) {
-      return 0;   // premature end of comment -> no link
+   if (iter_i == iter_size) {
+      // premature end of comment -> no link
+      return 0;
    }
 
-   contentEnd = i;
-   content = data.mid(contentStart, contentEnd - contentStart);
+   iter_contentEnd = iter_i;
+   content = QStringView(iter_contentStart, iter_contentEnd);
 
    if (! isImageLink && content.isEmpty()) {
       return 0;   // no link text
    }
-   i++; // skip over ]
+
+   ++iter_i;    // skip over ]
 
    // skip whitespace
-   while (i < size && data[i] == ' ') {
-      i++;
+   while (iter_i != iter_size && *iter_i == ' ') {
+      ++iter_i;
    }
 
-   if (i < size && data[i] == '\n') {
+   if (iter_i != iter_size && *iter_i == '\n') {
       // one newline allowed here
-      i++;
+      ++iter_i;
 
       // skip more whitespace
-      while (i < size && data[i] == ' ') {
-         i++;
+      while (iter_i != iter_size && *iter_i == ' ') {
+         ++iter_i;
       }
    }
 
    bool explicitTitle = false;
-   if (i < size && data[i] == '(') {
+   if (iter_i != iter_size && *iter_i == '(') {
       // inline link
-      i++;
+      ++iter_i;
 
-      while (i < size && data[i] == ' ') {
-         i++;
+      while (iter_i != iter_size && *iter_i == ' ') {
+         ++iter_i;
       }
 
-      if (i < size && data[i] == '<') {
-         i++;
+      if (iter_i != iter_size && *iter_i == '<') {
+         ++iter_i;
       }
 
-      linkStart = i;
+      iter_linkStart = iter_i;
       nl = 0;
+
       int braceCount = 1;
 
-      while (i < size && data[i] != '\'' && data[i] != '"' && braceCount > 0) {
-         if (data[i] == '\n') {
+      while (iter_i != iter_size && *iter_i != '\'' && *iter_i != '"' && braceCount > 0) {
+         QChar c = *iter_i;
+
+         if (c == '\n') {
             // unexpected EOL
             nl++;
 
@@ -871,96 +923,104 @@ static int processLink(QString &out, const QString &data, int, int size)
                return 0;
             }
 
-         } else if (data[i] == '(') {
+         } else if (c == '(') {
             braceCount++;
 
-         } else if (data[i] == ')') {
+         } else if (c == ')') {
             braceCount--;
 
          }
 
          if (braceCount > 0) {
-           i++;
+           ++iter_i;
          }
       }
 
-      if (i >= size || data[i] == '\n') {
+      if (iter_i == iter_size|| *iter_i == '\n') {
          return 0;
       }
 
-      link = data.mid(linkStart, i - linkStart);
-      link = link.trimmed();
+      link = QStringView(iter_linkStart, iter_i).trimmed();
 
       if (link.isEmpty()) {
          return 0;
       }
 
-      if (link.at(link.length() - 1) == '>') {
-         link = link.left(link.length() - 1);
+      if (link.last() == '>') {
+         link.chop(1);
       }
 
       // optional title
-      if (data[i] == '\'' || data[i] == '"') {
-         QChar c = data[i];
+      QChar c = *iter_i;
 
-         i++;
-         titleStart = i;
+      if (c == '\'' || c == '"') {
+         ++iter_i;
+
+         iter_titleStart = iter_i;
          nl = 0;
 
-         while (i < size && data[i] != ')') {
-            if (data[i] == '\n') {
+         while (iter_i != iter_size && *iter_i != ')') {
+
+            if (*iter_i == '\n') {
                if (nl > 1) {
                   return 0;
                }
+
                nl++;
             }
-            i++;
+
+            ++iter_i;
          }
 
-            if (i >= size) {
+         if (iter_i == iter_size) {
             return 0;
          }
 
-         titleEnd = i - 1;
+         iter_titleEnd = iter_i - 1;
+
          // search back for closing marker
-         while (titleEnd > titleStart && data[titleEnd] == ' ') {
-            titleEnd--;
+         while (iter_titleEnd != iter_titleStart && *iter_titleEnd == ' ') {
+            iter_titleEnd--;
          }
 
-         if (data[titleEnd] == c) {
+         if (*iter_titleEnd == c) {
             // found it
-            title = data.mid(titleStart, titleEnd - titleStart);
+            title = QStringView(iter_titleStart, iter_titleEnd);
 
          } else {
             return 0;
          }
       }
-      i++;
 
-   } else if (i < size && data[i] == '[') {
+      ++iter_i;
+
+   } else if (iter_i != iter_size && *iter_i == '[') {
       // reference link
-      i++;
-      linkStart = i;
+      ++iter_i;
+
+      iter_linkStart = iter_i;
       nl = 0;
 
       // find matching ]
-      while (i < size && data[i] != ']') {
-         if (data[i] == '\n') {
+      while (iter_i != iter_size && *iter_i != ']') {
+
+         if (*iter_i == '\n') {
             nl++;
+
             if (nl > 1) {
                return 0;
             }
          }
-         i++;
+
+         ++iter_i;
       }
 
-      if (i >= size) {
+      if (iter_i == iter_size) {
          return 0;
       }
 
       // extract link
-      link = data.mid(linkStart, i - linkStart);
-      link = link.trimmed();
+      link = QStringView(iter_linkStart, iter_i).trimmed();
 
       if (link.isEmpty()) {
          // shortcut link
@@ -979,9 +1039,10 @@ static int processLink(QString &out, const QString &data, int, int size)
          // reference not found
          return 0;
       }
-      i++;
 
-   } else if (i < size && data[i] != ':' && !content.isEmpty()) {
+      ++iter_i;
+
+   } else if (iter_i != iter_size && *iter_i != ':' && ! content.isEmpty()) {
       // minimal link ref notation [some id]
 
       auto lr = g_linkRefs.find(content.toLower());
@@ -990,17 +1051,20 @@ static int processLink(QString &out, const QString &data, int, int size)
          // found it
          link  = lr->link;
          title = lr->title;
+
          explicitTitle = true;
-         i = contentEnd;
+         iter_i = iter_contentEnd;
 
       } else if (content == "TOC") {
          isToc = true;
-         i = contentEnd;
+         iter_i = iter_contentEnd;
 
       } else {
          return 0;
       }
-      i++;
+
+      ++iter_i;
+
    } else {
       return 0;
    }
@@ -1015,18 +1079,18 @@ static int processLink(QString &out, const QString &data, int, int size)
       bool ambig;
       QSharedPointer<FileDef> fd;
 
-      if (link.indexOf("@ref ") != -1 || link.indexOf("\\ref ") != -1 || (fd = findFileDef(&Doxy_Globals::imageNameDict, link, ambig))) {
+      if (link.contains("@ref ") || link.contains("\\ref ") || (fd = findFileDef(&Doxy_Globals::imageNameDict, link, ambig))) {
          // assume DoxyPress symbol link or local image link
 
          out += "@image html ";
          out += link.mid(fd ? 0 : 5);
 
-         if (!explicitTitle && !content.isEmpty()) {
+         if (! explicitTitle && ! content.isEmpty()) {
             out += " \"";
             out += content;
             out += "\"";
 
-         } else if ((content.isEmpty() || explicitTitle) && !title.isEmpty()) {
+         } else if ((content.isEmpty() || explicitTitle) && ! title.isEmpty()) {
             out += " \"";
             out += title;
             out += "\"";
@@ -1055,14 +1119,15 @@ static int processLink(QString &out, const QString &data, int, int size)
       if ((lp = link.indexOf("@ref ")) != -1 || (lp = link.indexOf("\\ref ")) != -1 || lang == SrcLangExt_Markdown) {
          // assume DoxyPress symbol link
 
-         if (lp == -1) { // link to markdown page
+         if (lp == -1) {
+            // link to markdown page
             out += "@ref ";
          }
 
          out += link;
          out += " \"";
 
-         if (explicitTitle && !title.isEmpty()) {
+         if (explicitTitle && ! title.isEmpty()) {
             out += title;
 
          } else {
@@ -1071,7 +1136,7 @@ static int processLink(QString &out, const QString &data, int, int size)
 
          out += "\"";
 
-      } else if (link.indexOf('/') != -1 || link.indexOf('.') != -1 || link.indexOf('#') != -1) {
+      } else if (link.contains('/') || link.contains('.') || link.contains('#')) {
          // file/url link
          out += "<a href=\"";
          out += link;
@@ -1086,7 +1151,7 @@ static int processLink(QString &out, const QString &data, int, int size)
          out += ">";
 
          content = content.simplified();
-         processInline(out, content, content.length());
+         processInline(out, content, content.constEnd());
 
          out += "</a>";
 
@@ -1095,34 +1160,44 @@ static int processLink(QString &out, const QString &data, int, int size)
          return 0;
       }
    }
-   return i;
+
+   return iter_i - data.constBegin();
 }
 
 /** '`' parsing a code span (assuming codespan != 0) */
-static int processCodeSpan(QString &out, const QString &data, int /*offset*/, int size)
+static int processCodeSpan(QString &out, QStringView data, QString::const_iterator iter_size)
 {
-   int end, nb = 0, i, f_begin, f_end;
+   QString::const_iterator iter_end;
+
+   QString::const_iterator iter_i  = data.constBegin();
+   QString::const_iterator iter_nb = data.constBegin();
+
+   QString::const_iterator iter_f_begin;
+   QString::const_iterator iter_f_end;
+
+   int nl = 0;
 
    /* counting the number of backticks in the delimiter */
-   while (nb < size && data[nb] == '`') {
-      nb++;
+   while (iter_nb < iter_size && *iter_nb == '`') {
+      ++iter_nb;
    }
 
    /* finding the next delimiter */
-   i = 0;
-   int nl = 0;
-   for (end = nb; end < size && i < nb && nl < 2; end++) {
-      if (data[end] == '`') {
-         i++;
-      } else if (data[end] == '\n') {
-         i = 0;
+   for (iter_end = iter_nb; iter_end < iter_size && iter_i < iter_nb && nl < 2; ++iter_end) {
+
+      if (*iter_end == '`') {
+         ++iter_i;
+
+      } else if (*iter_end == '\n') {
+         iter_i  = data.constBegin();
          nl++;
+
       } else {
-         i = 0;
+         iter_i = data.constBegin();
       }
    }
 
-   if (i < nb && end >= size) {
+   if (iter_i < iter_nb && iter_end >= iter_size) {
       return 0;  // no matching delimiter
    }
 
@@ -1132,255 +1207,310 @@ static int processCodeSpan(QString &out, const QString &data, int /*offset*/, in
    }
 
    // trimming outside whitespaces
-   f_begin = nb;
-   while (f_begin < end && data[f_begin] == ' ') {
-      f_begin++;
+   iter_f_begin = iter_nb;
+   while (iter_f_begin < iter_end && *iter_f_begin == ' ') {
+      ++iter_f_begin;
    }
 
-   f_end = end - nb;
-   while (f_end > nb && data[f_end - 1] == ' ') {
-      f_end--;
+   iter_f_end = iter_end - (iter_nb - data.constBegin());
+
+   while (iter_f_end > iter_nb && iter_f_end[-1] == ' ') {
+      --iter_f_end;
    }
 
-   if (nb == 1) { // check for closing ' followed by space within f_begin..f_end
-      i = f_begin;
+   if (iter_nb == data.constBegin() + 1) {
+      // check for closing ' followed by space within f_begin..f_end
+      iter_i = iter_f_begin;
 
-      while (i < f_end - 1) {
+      while (iter_i < iter_f_end - 1) {
 
          QChar charA = 0;
-         if (! i + 1 > data.length()) {
-            charA = data[i + 1];
+         if (iter_i + 1 != data.constEnd()) {
+            charA = iter_i[1];
          }
 
-         if (data[i] == '\'' && ! isIdChar(charA)) {
+         if (*iter_i == '\'' && ! isIdChar(charA)) {
             // reject `some word' and not `it's cool`
             return 0;
          }
 
-         i++;
+         ++iter_i;
       }
    }
 
    /* real code span */
-   if (f_begin < f_end) {
+   if (iter_f_begin < iter_f_end) {
 
-      QString codeFragment = data.mid(f_begin, f_end - f_begin);
+      QStringView codeFragment = QStringView(iter_f_begin, iter_f_end);
       out += "<tt>";
       out += escapeSpecialChars(codeFragment);
       out += "</tt>";
    }
 
-   return end;
+   return iter_end - data.constBegin();
 }
 
-static int processSpecialCommand(QString &out, const QString &data, int offset, int size, const QString &pristineChars1)
+static int processSpecialCommand(QString &out, QStringView data, QString::const_iterator iter_size, QStringView pristineChars1)
 {
-   int i = 1;
+   QString::const_iterator iter_i = data.constBegin() + 1;
 
    // passing pristineChars1 as 4th
-   QString endBlockName = isBlockCommand(data, offset, size, pristineChars1);
+   QString endBlockName = isBlockCommand(data, iter_size, pristineChars1);
 
    if (! endBlockName.isEmpty()) {
-      int l = endBlockName.length();
+      int len = endBlockName.length();
+      QString::const_iterator iter_tmp = iter_size - len;
 
-      while (i < (size - l)) {
-         if ((data[i] == '\\' || data[i] == '@') && data[i - 1] != '\\' && data[i - 1] != '@') {
+      while (iter_i < iter_tmp) {
+         QChar ch     = *iter_i;
+         QChar prevCh = iter_i[-1];
+
+         if ((ch == '\\' || ch == '@') && prevCh != '\\' && prevCh != '@') {
             // not escaped
 
-            if (data.mid(i+1).startsWith(endBlockName)) {
-               out += data.mid(0, i + 1 + l);
-               return i + 1 + l;
+            if (QStringView(iter_i + 1, data.constEnd()).startsWith(endBlockName)) {
+               out += QStringView(data.constBegin(), iter_i + 1 + len);
+               return ( (iter_i - data.constBegin() ) + 1 + len);
             }
          }
 
-         i++;
+         ++iter_i;
       }
    }
 
-   if (size > 1 && data[0] == '\\') {
-      QChar c = data[1];
+   QString::const_iterator iter_tmp = data.constBegin();
+
+   if (iter_tmp != iter_size) {
+      QChar c = *iter_tmp;
+
+      if (c != '\\') {
+         return 0;
+      }
+
+      ++iter_tmp;
+
+      if (iter_tmp == iter_size) {
+         return 0;
+      }
+
+      c = *iter_tmp;
 
       if (c == '[' || c == ']' || c == '*' || c == '!' || c == '(' || c == ')' || c == '`' || c == '_') {
 
          out += c;
          return 2;
 
-      } else if (c == '-' && size > 3 && data[2] == '-' && data[3] == '-') {
-         // \---
+      } else if (c == '-') {
 
-         out += data.mid(1, 3);
-         return 4;
+         QChar ch_2 = '\0';
+         QChar ch_3 = '\0';
 
-      } else if (c == '-' && size > 2 && data[2] == '-') {
-         // \--
+         ++iter_tmp;
 
-         out += data.mid(1, 2);
-         return 3;
+         if (iter_tmp == iter_size) {
+            return 0;
+         }
+
+         ch_2 = *iter_tmp;
+
+
+         ++iter_tmp;
+
+         if (iter_tmp != iter_size) {
+            ch_3 = *iter_tmp;
+         }
+
+         if (ch_2 == '-' && ch_3 == '-') {
+            // \---
+
+            out += "---";
+            return 4;
+
+         } else if (ch_2 == '-') {
+            // \--
+
+            out += "--";
+            return 3;
+         }
       }
    }
 
    return 0;
 }
 
-static void processInline(QString &out, const QString &processText, int size)
+static void processInline(QString &out, const QStringView processText, QString::const_iterator iter_size)
 {
-   int i     = 0;
-   int index = 0;
+   QString::const_iterator iter_i      = processText.constBegin();
+   QString::const_iterator iter_index  = processText.constBegin();
 
-   QSet<QChar> keys;
-   keys.insert('_');   // processEmphasis
-   keys.insert('*');   // processEmphasis
-   keys.insert('`');   // processCodeSpan
-   keys.insert('\\');  // processSpecialCommand
-   keys.insert('@');   // processSpecialCommand
-   keys.insert('[');   // processLink
-   keys.insert('!');   // processLink
-   keys.insert('<');   // processHtmlTag
-   keys.insert('-');   // processNmdash
-   keys.insert('"');   // processQuoted
+   static QSet<QChar> keys;
 
-   while (i < size) {
+   if (keys.isEmpty()) {
+      keys.insert('_');   // processEmphasis
+      keys.insert('*');   // processEmphasis
+      keys.insert('`');   // processCodeSpan
+      keys.insert('\\');  // processSpecialCommand
+      keys.insert('@');   // processSpecialCommand
+      keys.insert('[');   // processLink
+      keys.insert('!');   // processLink
+      keys.insert('<');   // processHtmlTag
+      keys.insert('-');   // processNmdash
+      keys.insert('"');   // processQuoted
+   }
 
-      while (index < size)  {
-         if (keys.contains(processText[index])) {
+   while (iter_i < iter_size) {
+
+      while (iter_index < iter_size)  {
+
+         if (keys.contains(*iter_index)) {
             break;
          }
 
-         index++;
+         ++iter_index;
       }
 
-      out += processText.mid(i, index - i);
+      out += QStringView(iter_i, iter_index);
 
-      if (index >= size) {
+      if (iter_index >= iter_size || iter_index == processText.constEnd()) {
+         // done
          break;
       }
 
       int skipCount;
 
-      switch (processText[index].unicode()) {
+      QStringView s1 = QStringView(iter_index, processText.constEnd());
+
+      QStringView s2;
+      if (iter_index != processText.constBegin()) {
+         s2 = QStringView(iter_index - 1, iter_index);
+      }
+
+      switch (iter_index->unicode()) {
 
          case '_':
             // last one is passing pristineChars1
-            skipCount = processEmphasis(out, processText.mid(index), index, size - index, processText.mid(index - 1, 1));
+            skipCount = processEmphasis(out, s1, iter_size, s2);
             break;
 
          case '*':
             // last one is passing pristineChars1
-            skipCount = processEmphasis(out, processText.mid(index), index, size - index, processText.mid(index - 1, 1));
+            skipCount = processEmphasis(out, s1, iter_size, s2);
             break;
 
          case '`':
-            skipCount = processCodeSpan(out, processText.mid(index), index, size - index);
+            skipCount = processCodeSpan(out, s1, iter_size);
             break;
 
          case '\\':
             // last one is passing pristineChars1
-            skipCount = processSpecialCommand(out, processText.mid(index), index, size - index, processText.mid(index - 1, 1));
+            skipCount = processSpecialCommand(out, s1, iter_size, s2);
             break;
 
          case '@':
             // last one is passing pristineChars1
-            skipCount = processSpecialCommand(out, processText.mid(index), index, size - index, processText.mid(index - 1, 1));
+            skipCount = processSpecialCommand(out, s1, iter_size, s2);
             break;
 
          case '[':
-            skipCount = processLink(out, processText.mid(index), index, size - index);
+            skipCount = processLink(out, s1, iter_size);
             break;
 
          case '!':
-            skipCount = processLink(out,processText.mid(index), index, size - index);
+            skipCount = processLink(out, s1, iter_size);
             break;
 
          case '<':
             // last one is passing pristineChars1
-            skipCount = processHtmlTag(out, processText.mid(index), index, size - index, processText.mid(index - 1, 1));
+            skipCount = processHtmlTag(out, s1, iter_size, s2);
             break;
 
          case '-':
             // last one is  passing pristineChars8
-            skipCount = processNmdash(out, processText.mid(index), index, size - index, processText.mid(index - 8, 8));
+            skipCount = processNmdash(out, s1, iter_size, QStringView(iter_index - 8, iter_index));
             break;
 
          case '"':
-            skipCount = processQuoted(out, processText.mid(index), index, size - index);
+            skipCount = processQuoted(out, s1, iter_size);
             break;
-
       }
 
       if (skipCount == 0) {
-         i = index;
-         index++;
-
+         iter_i  = iter_index;
+         ++iter_index;
 
       } else {
-         i = index + skipCount;
-         index = i;
+         iter_i = iter_index + skipCount;
+         iter_index = iter_i;
       }
    }
 }
 
 /** returns whether the line is a text-style hdr underline */
-static int isHeaderline(const QString &data, int size)
+static int isHeaderline(QStringView data)
 {
-   int i = 0;
-   int c = 0;
+   QString::const_iterator iter = data.constBegin();
+   int cnt = 0;
 
-   while (i < size && data[i] == ' ') {
-      i++;
+   while (iter != data.constEnd() && *iter == ' ') {
+      ++iter;
    }
 
    // test of level 1 header
-   if (i < size && data[i] == '=') {
-      while (i < size && data[i] == '=') {
-         i++, c++;
+   if (iter != data.constEnd() && *iter == '=') {
+      while (iter != data.constEnd() && *iter == '=') {
+         ++iter;
+         ++cnt;
       }
 
-      while (i < size && data[i] == ' ') {
-         i++;
+      while (iter != data.constEnd() && *iter == ' ') {
+         ++iter;
       }
 
-      return (c > 1 && (i >= size || data[i] == '\n')) ? 1 : 0;
+      return (cnt > 1 && (iter == data.constEnd() || *iter == '\n')) ? 1 : 0;
    }
 
    // test of level 2 header
-   if (i < size && data[i] == '-') {
-      while (i < size && data[i] == '-') {
-         i++, c++;
+   if (iter != data.constEnd() && *iter == '-') {
+      while (iter != data.constEnd() && *iter == '-') {
+         ++iter;
+         ++cnt;
       }
 
-      while (i < size && data[i] == ' ') {
-         i++;
+      while (iter != data.constEnd() && *iter == ' ') {
+         ++iter;
       }
 
-      return (c > 1 && (i >= size || data[i] == '\n')) ? 2 : 0;
+      return (cnt > 1 && (iter == data.constEnd() || *iter == '\n')) ? 2 : 0;
    }
 
    return 0;
 }
 
 /** returns true if this line starts a block quote */
-static bool isBlockQuote(const QString &data, int size, int indent)
+static bool isBlockQuote(QStringView data, QString::const_iterator iter_size, int indent)
 {
-   int i = 0;
+   QString::const_iterator iter_i = data.constBegin();
+   int count = 0;
 
-   while (i < size && data[i] == ' ') {
-      i++;
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++iter_i;
+      ++count;
    }
 
-   if (i < indent + codeBlockIndent) { // could be a quotation
-      // count >'s and skip spaces
+   if (count < indent + codeBlockIndent) {
+      // could be a quotation, count >'s and skip spaces
       int level = 0;
 
-      while (i < size && (data[i] == '>' || data[i] == ' ')) {
-         if (data[i] == '>') {
+      while (iter_i < iter_size && (*iter_i == '>' || *iter_i == ' ')) {
+         if (*iter_i == '>') {
             level++;
          }
-         i++;
+
+         ++iter_i;
       }
 
-      // last characters should be a space or newline,
-      // so a line starting with >= does not match
-      return level > 0 && i < size && ((data[i - 1] == ' ') || data[i] == '\n');
+      // last characters should be a space or newline, so a line starting with >= does not match
+      return level > 0 && iter_i < iter_size && (iter_i[-1] == ' ' || *iter_i == '\n');
 
    } else {
       // too much indentation -> code block
@@ -1389,165 +1519,178 @@ static bool isBlockQuote(const QString &data, int size, int indent)
 }
 
 /** returns end of the link ref if this is indeed a link reference. */
-static int isLinkRef(const QString &data, int size, QString &refid, QString &link, QString &title)
+static int isLinkRef(QStringView data, QString &refid, QString &link, QString &title)
 {
    // format: start with [some text]:
 
-   int i = 0;
-   int refIdStart;
-   int len = data.length();
+   QString::const_iterator iter_size = data.constEnd();
+   QString::const_iterator iter_i    = data.constBegin();
 
-   while (i < size && i < len && data[i] == ' ') {
-      i++;
+   QString::const_iterator iter_refIdStart;
+
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++iter_i;
    }
 
-   if (i >= size || i >= len || data[i] != '[') {
+   if (iter_i >= iter_size || *iter_i != '[') {
       return 0;
    }
-   i++;
+   ++iter_i;
 
-   refIdStart = i;
+   iter_refIdStart = iter_i;
 
-
-   while (i < size && i < len && data[i] != '\n' && data[i] != ']') {
-      i++;
+   while (iter_i < iter_size && *iter_i != '\n' && *iter_i != ']') {
+      ++iter_i;
    }
 
-   if (i >= size || i >= len ||data[i] != ']') {
+   if (iter_i >= iter_size || *iter_i != ']') {
       return 0;
    }
 
-   refid = data.mid(refIdStart, i - refIdStart);
+   refid = QStringView(iter_refIdStart, iter_i);
 
    if (refid.isEmpty()) {
       return 0;
    }
-   i++;
 
-   if (i >= size || i >= len || data[i] != ':') {
+   ++iter_i;
+
+   if (iter_i >= iter_size || *iter_i != ':') {
       return 0;
    }
-   i++;
+
+   ++iter_i;
 
    // format: whitespace* \n? whitespace* (<url> | url)
-   while (i < size && data[i] == ' ') {
-      i++;
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++iter_i;
    }
 
-   if (i < size && data[i] == '\n') {
-      i++;
+   if (iter_i < iter_size && *iter_i == '\n') {
+      ++iter_i;
 
-      while (i < size && data[i] == ' ') {
-         i++;
+      while (iter_i < iter_size && *iter_i == ' ') {
+         ++iter_i;
       }
    }
 
-   if (i >= size) {
+   if (iter_i >= iter_size) {
       return 0;
    }
 
-   if (i < size && data[i] == '<') {
-      i++;
+   if (iter_i < iter_size && *iter_i == '<') {
+      ++iter_i;
    }
 
-   int linkStart = i;
-   while (i < size && data[i] != ' ' && data[i] != '\n') {
-      i++;
+   QString::const_iterator iter_linkStart = iter_i;
+
+   while (iter_i < iter_size && *iter_i != ' ' && *iter_i != '\n') {
+      ++iter_i;
    }
 
-   int linkEnd = i;
-   if (i < size && data[i] == '>') {
-      i++;
+   QString::const_iterator iter_linkEnd = iter_i;
+
+   if (iter_i < iter_size && *iter_i == '>') {
+       ++iter_i;
    }
 
-   if (linkStart == linkEnd) {
+   if (iter_linkStart == iter_linkEnd) {
       return 0;   // empty link
    }
 
-   link = data.mid(linkStart, linkEnd - linkStart);
+   link = QStringView(iter_linkStart, iter_linkEnd);
 
    if (link == "@ref" || link == "\\ref") {
-      int argStart = i;
-      while (i < size && data[i] != '\n' && data[i] != '"') {
-         i++;
+      QString::const_iterator argStart = iter_i;
+
+      while (iter_i < iter_size && *iter_i != '\n' && *iter_i != '"') {
+          ++iter_i;
       }
 
-      QString refArg = data.mid(argStart, i - argStart);
+      QString refArg = QStringView(argStart, iter_i);
       link += refArg;
    }
 
    title.resize(0);
 
    // format: (whitespace* \n? whitespace* ( 'title' | "title" | (title) ))?
-   int eol = 0;
-   while (i < size && data[i] == ' ') {
-      i++;
+   QString::const_iterator iter_eol = data.constBegin();
+
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++iter_i;
    }
-   if (i < size && data[i] == '\n') {
-      eol = i;
-      i++;
-      while (i < size && data[i] == ' ') {
-         i++;
+
+   if (iter_i < iter_size && *iter_i == '\n') {
+      iter_eol = iter_i;
+       ++iter_i;
+
+      while (iter_i < iter_size && *iter_i == ' ') {
+         ++iter_i;
       }
    }
 
-   if (i >= size) {
-      return i; // end of buffer while looking for the optional title
+   if (iter_i >= iter_size) {
+      // end of buffer while looking for the optional title
+      return iter_i - data.constBegin();
    }
 
-   QChar c = data[i];
+   QChar c = *iter_i;
 
    if (c == '\'' || c == '"' || c == '(') {
       // optional title present?
 
-      i++;
+      ++iter_i;
+
       if (c == '(') {
-         c = ')';   // replace c by end character
+         c = ')';                 // replace c by end character
       }
 
-      int titleStart = i;
+      QString::const_iterator iter_titleStart = iter_i;
 
       // search for end of the line
-      while (i < size && data[i] != '\n') {
-         i++;
+      while (iter_i < iter_size && *iter_i != '\n') {
+         ++iter_i;;
       }
-      eol = i;
+      iter_eol = iter_i;
 
       // search back to matching character
-      int end = i - 1;
-      while (end > titleStart && data[end] != c) {
-         end--;
+      QString::const_iterator iter_end = iter_i - 1;
+
+      while (iter_end > iter_titleStart && *iter_end != c) {
+         --iter_end;
       }
 
-      if (end > titleStart) {
-         title = data.mid(titleStart, end - titleStart);
+      if (iter_end > iter_titleStart) {
+         title = QStringView(iter_titleStart, iter_end);
       }
-
    }
 
-   while (i < size && data[i] == ' ') {
-      i++;
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++iter_i;
    }
 
-   if (i >= size) {
-      return i;   // end of buffer while ref id was found
-   } else if (eol) {
-      return eol;   // end of line while ref id was found
+   if (iter_i >= iter_size) {
+      return iter_i - data.constBegin();       // end of buffer while ref id was found
+
+   } else if (iter_eol != data.constBegin()) {
+      return iter_eol - data.constBegin();     // end of line while ref id was found
    }
 
-   return 0;                            // invalid link ref
+   return 0;          // invalid link ref
 }
 
-static int isHRuler(const QString &data, int size)
+static int isHRuler(QStringView data, int size)
 {
    int i = 0;
 
    if (size > 0 && data[size - 1] == '\n') {
       size--;   // ignore newline character
    }
+
    while (i < size && data[i] == ' ') {
       i++;
    }
+
    if (i >= size) {
       return 0;   // empty line
    }
@@ -1562,15 +1705,16 @@ static int isHRuler(const QString &data, int size)
 
    while (i < size) {
       if (data[i] == c) {
-         n++; // count rule character
+         n++;          // count rule character
+
       } else if (data[i] != ' ') {
-         return 0; // line contains non hruler characters
+         return 0;     // line contains non hruler characters
       }
 
       i++;
    }
 
-   return n >= 3; // at least 3 characters needed for a hruler
+   return n >= 3;     // at least 3 characters needed for a hruler
 }
 
 static QString extractTitleId(QString &title)
@@ -1596,26 +1740,30 @@ static QString extractTitleId(QString &title)
    return retval;
 }
 
-static int isAtxHeader(const QString &data, int size, QString &header, QString &id)
+static int isAtxHeader(QStringView data, int size, QString &header, QString &id)
 {
    int i = 0;
    int end;
-   int level = 0;
+   int level  = 0;
    int blanks = 0;
 
    // find start of header text and determine heading level
    while (i < size && data[i] == ' ') {
       i++;
    }
+
    if (i >= size || data[i] != '#') {
       return 0;
    }
+
    while (i < size && level < 6 && data[i] == '#') {
       i++, level++;
    }
+
    while (i < size && data[i] == ' ') {
       i++, blanks++;
    }
+
    if (level == 1 && blanks == 0) {
       return 0; // special case to prevent #someid seen as a header (see bug 671395)
    }
@@ -1625,6 +1773,7 @@ static int isAtxHeader(const QString &data, int size, QString &header, QString &
    while (end < size && data[end] != '\n') {
       end++;
    }
+
    while (end > i && (data[end - 1] == '#' || data[end - 1] == ' ')) {
       end--;
    }
@@ -1648,50 +1797,91 @@ static int isAtxHeader(const QString &data, int size, QString &header, QString &
    return level;
 }
 
-#define isLiTag(i) \
-   (data[(i)]=='<' && \
-   (data[(i)+1]=='l' || data[(i)+1]=='L') && \
-   (data[(i)+2]=='i' || data[(i)+2]=='I') && \
-   (data[(i)+3]=='>'))
-
 // compute the indent from the start of the input, excluding list markers
 // such as -, -#, *, +, 1., and <li>
-static int computeIndentExcludingListMarkers(const QString &data)
+static int computeIndentExcludingListMarkers(QStringView data)
 {
-   int i        = 0;
-   int indent   = 0;
-   bool isDigit = false;
-   bool isLi    = false;
-
-   bool listMarkerSkipped = false;
-   int size = data.length();
-
    if (data.trimmed().isEmpty()) {
       return -1;
    }
 
-   while (i < size && (data[i] == ' ' ||
-           (! listMarkerSkipped &&                                  // first list marker
-            (data[i] == '+' || data[i] == '-' || data[i] == '*' ||  // unordered list char
-             (data[i] == '#' && i > 0 && data[i - 1] == '-')    ||  // -# item
-             (isDigit = (data[i] >= '1' && data[i] <= '9'))     ||  // ordered list marker?
-             (isLi = (i < size - 3 && isLiTag(i)))                  // <li> tag
-            ) ) ) ) {
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
+   int indent = 0;
+
+   bool isDigit  = false;
+   bool isList   = false;
+   bool skipList = false;
+
+   while (iter_i < iter_size) {
+      QChar c = *iter_i;
+
+      QChar nextC_1 = '\0';
+      QChar nextC_2 = '\0';
+      QChar nextC_3 = '\0';
+
+      if (iter_i  + 1 < iter_size) {
+         nextC_1 = iter_i[1];
+
+         if (iter_i  + 2 < iter_size) {
+            nextC_2 = iter_i[2];
+
+            if (iter_i  + 3 < iter_size) {
+               nextC_3 = iter_i[3];
+            }
+         }
+      }
+
+      if (c != ' ') {
+
+         if (skipList) {
+             // first list marker
+            break;
+         }
+
+         if (c == '+' || c == '-' || c == '*' || (c == '#' && iter_i > data.constBegin() && iter_i[-1] == '-'))   {
+            // unordered list char or -# item
+
+         } else {
+            // ordered list marker?
+            isDigit = (c >= '1' && c <= '9');
+
+            // <li> tag
+            if (c =='<' && (nextC_1 == 'l' || nextC_1 == 'L') && (nextC_2 =='i' || nextC_2 == 'I') && (nextC_3 =='>')) {
+               isList = true;
+            } else {
+               isList = false;
+            }
+
+            if (! isDigit && ! isList) {
+               break;
+            }
+         }
+      }
 
       if (isDigit) {
          // skip over ordered list marker '10. '
-         int j = i + 1;
+         QString::const_iterator iter_j = iter_i + 1;
 
-         while (j < size && ((data[j] >= '0' && data[j] <= '9') || data[j] == '.')) {
+         while (iter_j < iter_size) {
+            QChar ch = *iter_j;
 
-            if (data[j] == '.') {
+            if ((ch >= '0' && ch <= '9') || ch == '.') {
+               // go on
+            } else {
+               break;
+            }
+
+            if (ch == '.') {
                // should be end of the list marker
 
-               if (j < size - 1 && data[j + 1] == ' ') {
+               if (iter_j + 1 < iter_size && iter_j[1] == ' ') {
                   // valid list marker
-                  listMarkerSkipped = true;
-                  indent += j + 1 - i;
-                  i = j + 1;
+
+                  indent  += iter_j + 1 - iter_i;
+                  iter_i   = iter_j + 1;
+                  skipList = true;
+
                   break;
 
                } else {
@@ -1699,118 +1889,134 @@ static int computeIndentExcludingListMarkers(const QString &data)
                   break;
                }
             }
-            j++;
+
+            ++iter_j;
          }
 
-      } else if (isLi) {
+      } else if (isList) {
          // skip over <li>
 
-         i += 3;
-         indent += 3;
-         listMarkerSkipped = true;
+         iter_i  += 3;
+         indent  += 3;
+         skipList = true;
 
-      } else if (data[i] == '-' && i < size - 2 && data[i + 1] == '#' && data[i + 2] == ' ') {
+      } else if (c == '-' && nextC_1 == '#' && nextC_2 == ' ') {
          // case "-# "
 
-         listMarkerSkipped = true; // only a single list marker is accepted
-         i++; // skip over #
-         indent++;
+         ++iter_i;                 // skip over #
+         ++indent;
+         skipList = true;          // only a single list marker is accepted
 
-      } else if (data[i] != ' ' && i < size - 1 && data[i + 1] == ' ') {
+      } else if (c != ' ' && nextC_1 == ' ') {
          // case "- " or "+ " or "* "
 
-         listMarkerSkipped = true; // only a single list marker is accepted
+         skipList = true;          // only a single list marker is accepted
       }
 
-      if (data[i] != ' ' && ! listMarkerSkipped) {
+      if (c != ' ' && ! skipList) {
          // end of indent
-
          break;
       }
 
-      indent++, i++;
+      ++iter_i;
+      ++indent;
    }
 
    return indent;
 }
 
-static bool isFencedCodeBlock(const QString &data, int size, int refIndent, QString &lang, int &start, int &end, int &offset)
+static bool isFencedCodeBlock(QStringView data, int refIndent, QString &lang,
+                  QString::const_iterator &iter_start, QString::const_iterator &iter_end, int &offset)
 {
    // rules: at least 3 ~~~, end of the block same amount of ~~~'s, otherwise return false
 
-   int i = 0;
-   int indent = 0;
-   int startTildes = 0;
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
+   QString::const_iterator iter_startLang;
 
-   while (i < size && data[i] == ' ') {
-      indent++, i++;
+   int  indent      = 0;
+   int  startTildes = 0;
+   char tildaChar   = '~';
+
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++indent;
+      ++iter_i;
    }
 
    if (indent >= refIndent + 4) {
       return false;   // part of code block
    }
 
-   char tildaChar = '~';
-
-   if (i < size && data[i] == '`') {
+   if (iter_i < iter_size && *iter_i == '`') {
       tildaChar = '`';
    }
 
-   while (i < size && data[i] == tildaChar) {
-      startTildes++;
-      i++;
+   while (iter_i < iter_size && *iter_i == tildaChar) {
+      ++startTildes;
+      ++iter_i;;
    }
 
    if (startTildes < 3) {
-      return false;   // not enough tildes
+      return false;        // not enough tildes
    }
 
-   if (i < size && data[i] == '{') {
-      i++;   // skip over optional {
+   if (iter_i < iter_size && *iter_i == '{') {
+      ++iter_i;            // skip over optional {
    }
 
-   int startLang = i;
-   while (i < size && (data[i] != '\n' && data[i] != '}' && data[i] != ' ')) {
-      i++;
+   iter_startLang = iter_i;
+
+   while (iter_i < iter_size && (*iter_i != '\n' && *iter_i != '}' && *iter_i!= ' ')) {
+      ++iter_i;
    }
 
-   lang = data.mid(startLang, i - startLang);
-   while (i < size && data[i] != '\n') {
-      i++;   // proceed to the end of the line
+   lang = QStringView(iter_startLang, iter_i);
+
+   while (iter_i < iter_size && *iter_i != '\n') {
+      ++iter_i;           // proceed to the end of the line
    }
 
-   start = i;
+   iter_start = iter_i;
 
-   while (i < size) {
-      if (data[i] == tildaChar) {
-         end = i - 1;
+   while (iter_i < iter_size) {
+
+      if (*iter_i == tildaChar) {
+
+         iter_end = iter_i - 1;
          int endTildes = 0;
 
-         while (i < size && data[i] == tildaChar) {
-            endTildes++;
-            i++;
+         while (iter_i < iter_size && *iter_i == tildaChar) {
+            ++endTildes;
+            ++iter_i;
          }
-         while (i < size && data[i] == ' ') {
-            i++;
+
+         while (iter_i < iter_size && *iter_i == ' ') {
+            ++iter_i;;
          }
-         if (i == size || data[i] == '\n') {
-            offset = i;
+
+         if (iter_i == iter_size || *iter_i == '\n') {
+            offset = iter_i - data.constBegin();
             return endTildes == startTildes;
          }
       }
-      i++;
+
+      ++iter_i;
    }
+
    return false;
 }
 
-static bool isCodeBlock(const QString &data, int &indent, int priorLine1_Indent, int priorLine2_Indent)
+static bool isCodeBlock(QStringView data, int &indent, int priorLine1_indent, int priorLine2_indent)
 {
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
+
    // determine the indent for the current line
    int count = 0;
-   int size  = data.length();
 
-   while (count < size && data[count] == ' ') {
-      count++;
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++iter_i;
+      ++count;
    }
 
    if (count < codeBlockIndent) {
@@ -1818,20 +2024,20 @@ static bool isCodeBlock(const QString &data, int &indent, int priorLine1_Indent,
       return false;
    }
 
-   if (count >= size || data[count] == '\n') {
+   if (iter_i >= iter_size || *iter_i == '\n') {
       // current line is empty
       return false;
    }
 
-   if (priorLine1_Indent == -1 && priorLine2_Indent != -1)   {
+   if (priorLine1_indent == -1 && priorLine2_indent != -1)   {
       // there are at least 2 preceding lines, priorLine1 is empty
 
-      indent = priorLine2_Indent;
+      indent = priorLine2_indent;
 
       // if the difference is > 4 spaces then this is a code block
       return count >= indent + codeBlockIndent;
 
-   } else if (priorLine1_Indent == -1 && priorLine2_Indent == -1)  {
+   } else if (priorLine1_indent == -1 && priorLine2_indent == -1)  {
       // priorLine1 is empty and priorLine2 is empty
 
       // if the difference is > 4 spaces then this is the start of a code block
@@ -1853,153 +2059,201 @@ static bool isCodeBlock(const QString &data, int &indent, int priorLine1_Indent,
  *  @param[out] columns number of table columns found
  *  @returns The offset until the next line in the buffer.
  */
-int findTableColumns(const QString &data, int size, int &start, int &end, int &columns)
+QString::const_iterator findTableColumns(QStringView data, QString::const_iterator &iter_start,
+                  QString::const_iterator &iter_end, int &columns)
 {
-   int i = 0, n = 0;
-   int eol;
+   QString::const_iterator iter_size = data.constEnd();
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_eol;
+
+   int n = 0;
+
    // find start character of the table line
-   while (i < size && data[i] == ' ') {
-      i++;
+   while (iter_i < iter_size && *iter_i == ' ') {
+      ++iter_i;
    }
-   if (i < size && data[i] == '|' && data[i] != '\n') {
-      i++, n++;   // leading | does not count
+
+   if (iter_i < iter_size && *iter_i == '|' && *iter_i != '\n') {
+      // leading | does not count
+      ++iter_i;
+      ++n;
    }
-   start = i;
+   iter_start = iter_i;
 
    // find end character of the table line
-   while (i < size && data[i] != '\n') {
-      i++;
+   while (iter_i < iter_size && *iter_i != '\n') {
+      ++iter_i;
    }
-   eol = i + 1;
-   i--;
-   while (i > 0 && data[i] == ' ') {
-      i--;
+
+   iter_eol = iter_i + 1;
+   --iter_i;
+
+   while (iter_i > data.constBegin() && *iter_i == ' ') {
+      --iter_i;
    }
-   if (i > 0 && data[i - 1] != '\\' && data[i] == '|') {
-      i--, n++;   // trailing or escaped | does not count
+
+   if (iter_i > data.constBegin() && iter_i[-1] != '\\' && *iter_i == '|') {
+      // trailing or escaped | does not count
+      --iter_i;
+      ++n;
    }
-   end = i;
+
+   iter_end = iter_i;
 
    // count columns between start and end
    columns = 0;
-   if (end > start) {
-      i = start;
-      while (i <= end) { // look for more column markers
-         if (data[i] == '|' && (i == 0 || data[i - 1] != '\\')) {
-            columns++;
+
+   if (iter_end > iter_start) {
+      iter_i = iter_start;
+
+      while (iter_i <= iter_end) {
+         // look for more column markers
+         if (*iter_i == '|' && (iter_i == data.constBegin() || iter_i[-1] != '\\')) {
+            ++columns;
          }
+
          if (columns == 1) {
-            columns++;   // first | make a non-table into a two column table
+            // first | make a non-table into a two column table
+            ++columns;
          }
-         i++;
+
+         ++iter_i;
       }
    }
-   if (n == 2 && columns == 0) { // table row has | ... |
-      columns++;
+
+   if (n == 2 && columns == 0) {
+      // table row has | ... |
+      ++columns;
    }
-   //printf("findTableColumns(start=%d,end=%d,columns=%d) eol=%d\n",
-   //    start,end,columns,eol);
-   return eol;
+
+   return iter_eol;
 }
 
 /** Returns true iff data points to the start of a table block */
-static bool isTableBlock(const QString &data, int size)
+static bool isTableBlock(QStringView data)
 {
-   int cc0, start, end;
+   QString::const_iterator iter_size = data.constEnd();
+   QString::const_iterator iter_i;
+   QString::const_iterator iter_j;
+   QString::const_iterator iter_start;
+   QString::const_iterator iter_end;
+   QString::const_iterator iter_ret;
+
+   int cc0;
+   int cc1;
+   int cc2;
 
    // the first line should have at least two columns separated by '|'
-   int i = findTableColumns(data, size, start, end, cc0);
-   if (i >= size || cc0 < 1) {
-      //printf("isTableBlock: no |'s in the header\n");
+   iter_i = findTableColumns(data, iter_start, iter_end, cc0);
+
+   if (iter_i >= iter_size || cc0 < 1) {
       return false;
    }
 
-   int cc1;
-   int ret = findTableColumns(data.mid(i), size - i, start, end, cc1);
-   int j = i + start;
+   iter_ret = findTableColumns(QStringView(iter_i, data.constEnd()), iter_start, iter_end, cc1);
+   iter_j   = iter_start;
 
    // separator line should consist of |, - and : and spaces only
-   while (j <= end + i) {
-      if (data[j] != ':' && data[j] != '-' && data[j] != '|' && data[j] != ' ') {
-         //printf("isTableBlock: invalid character '%c'\n",data[j]);
-         return false; // invalid characters in table separator
+   while (iter_j <= iter_end) {
+      QChar c = *iter_j;
+
+      if (c != ':' && c != '-' && c != '|' && c != ' ') {
+         // invalid characters in table separator
+         return false;
       }
-      j++;
+
+      ++iter_j;
    }
-   if (cc1 != cc0) { // number of columns should be same as previous line
+
+   if (cc1 != cc0) {
+      // number of columns should be same as previous line
       return false;
    }
 
-   i += ret; // goto next line
-   int cc2;
-   findTableColumns(data.mid(i), size - i, start, end, cc2);
+   findTableColumns(QStringView(iter_ret, data.constEnd()), iter_start, iter_end, cc2);
 
    return cc1 == cc2;
 }
 
-static int writeTableBlock(QString &out, const QString &data, int size)
+static int writeTableBlock(QString &out, QStringView data)
 {
-   int i = 0, j, k;
-   int columns, start, end, cc;
+   QString::const_iterator iter_size = data.constEnd();
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_j;
+   QString::const_iterator iter_start;
+   QString::const_iterator iter_end;
+   QString::const_iterator iter_ret;
 
-   i = findTableColumns(data, size, start, end, columns);
+   int k;
+   int columns;
+   int cc;
 
+   iter_i = findTableColumns(QStringView(data.constBegin(), data.constEnd()), iter_start, iter_end, columns);
    out += "<table>";
 
    // write table header, in range [start..end]
    out += "<tr>";
 
-   int headerStart = start;
-   int headerEnd = end;
+   QString::const_iterator headerStart = iter_start;
+   QString::const_iterator headerEnd   = iter_end;
 
    // read cell alignments
-   int ret = findTableColumns(data.mid(i), size - i, start, end, cc);
+   iter_ret = findTableColumns(QStringView(iter_i, data.constEnd()), iter_start, iter_end, cc);
    k = 0;
 
-   Alignment *columnAlignment = new Alignment[columns];
+   std::vector<Alignment> columnAlignment(columns);
 
-   bool leftMarker = false, rightMarker = false;
-   bool startFound = false;
-   j = start + i;
+   bool leftMarker  = false;
+   bool rightMarker = false;
+   bool startFound  = false;
 
-   while (j <= end + i) {
-      if (!startFound) {
-         if (data[j] == ':') {
+   iter_j = iter_start;
+
+   while (iter_j <= iter_end) {
+      QChar c = *iter_j;
+
+      if (! startFound) {
+
+         if (c == ':') {
             leftMarker = true;
             startFound = true;
          }
-         if (data[j] == '-') {
+
+         if (c == '-') {
             startFound = true;
          }
-         //printf("  data[%d]=%c startFound=%d\n",j,data[j],startFound);
       }
-      if      (data[j] == '-') {
+
+      if (c == '-') {
          rightMarker = false;
-      } else if (data[j] == ':') {
+
+      } else if (c == ':') {
          rightMarker = true;
       }
-      if (j <= end + i && (data[j] == '|' && (j == 0 || data[j - 1] != '\\'))) {
+
+      if (c == '|' && (iter_j == data.constBegin() || iter_j[-1] != '\\')) {
+
          if (k < columns) {
             columnAlignment[k] = markersToAlignment(leftMarker, rightMarker);
-            //printf("column[%d] alignment=%d\n",k,columnAlignment[k]);
-            leftMarker = false;
+            leftMarker  = false;
             rightMarker = false;
-            startFound = false;
+            startFound  = false;
          }
+
          k++;
       }
-      j++;
+
+      ++iter_j;
    }
 
    if (k < columns) {
       columnAlignment[k] = markersToAlignment(leftMarker, rightMarker);
-
    }
 
    // proceed to next line
-   i += ret;
+   iter_i = iter_ret;
+   QString::const_iterator iter_m  = headerStart;
 
-   int m = headerStart;
    for (k = 0; k < columns; k++) {
       out += "<th";
 
@@ -2022,31 +2276,32 @@ static int writeTableBlock(QString &out, const QString &data, int size)
 
       out += ">";
 
-      while (m <= headerEnd && (data[m] != '|' || (m > 0 && data[m - 1] == '\\'))) {
-         out += data[m++];
+      while (iter_m <= headerEnd && (*iter_m != '|' || (iter_m > data.constBegin() && iter_m[-1] == '\\'))) {
+         out += *iter_m;
+         ++iter_m;
       }
 
-      m++;
+      ++iter_m;
    }
 
    out += "\n</th>\n";
 
    // write table cells
-   while (i < size) {
-      int ret = findTableColumns(data.mid(i), size - i, start, end, cc);
+   while (iter_i < iter_size) {
+      iter_ret = findTableColumns(QStringView(iter_i, data.constEnd()), iter_start, iter_end, cc);
 
       if (cc != columns) {
          break;   // end of table
       }
 
       out += "<tr>";
-      j = start + i;
+      iter_j = iter_start;
 
-      int columnStart = j;
+      QString::const_iterator columnStart = iter_j;
       k = 0;
 
-      while (j <= end + i) {
-         if (j == columnStart) {
+      while (iter_j <= iter_end) {
+         if (iter_j == columnStart) {
             out += "<td";
 
             switch (columnAlignment[k]) {
@@ -2068,35 +2323,36 @@ static int writeTableBlock(QString &out, const QString &data, int size)
             out += ">";
          }
 
-         if (j <= end + i && (data[j] == '|' && (j == 0 || data[j - 1] != '\\'))) {
-            columnStart = j + 1;
+         if (iter_j <= iter_end && (*iter_j == '|' && (iter_j == data.constBegin() || iter_j[-1] != '\\'))) {
+            columnStart = iter_j + 1;
             k++;
 
          } else {
-            out += data[j];
+            out += *iter_j;
          }
-         j++;
+
+         ++iter_j;
       }
 
       out += '\n';
 
       // proceed to next line
-      i += ret;
+      iter_i = iter_ret;
    }
 
    out += "</table> ";
 
-   delete[] columnAlignment;
-
-   return i;
+   return iter_i - data.constBegin();
 }
 
-void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
+void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_iterator iter_size)
 {
    int level;
 
    QString header;
    QString id;
+
+   int size = iter_size - data.constBegin();
 
    if (isHRuler(data, size)) {
       out += "<hr>\n";
@@ -2171,108 +2427,129 @@ void writeOneLineHeaderOrRuler(QString &out, const QString &data, int size)
 
    } else {
       // nothing interesting, just output the line
-      out += data.mid(0, size);
+      out += QStringView(data.constBegin(), iter_size);
 
    }
 }
 
-static int writeBlockQuote(QString &out, const QString &data, int size)
+static QString::const_iterator writeBlockQuote(QString &out, QStringView data)
 {
-   int l;
-   int i = 0;
-   int curLevel = 0;
-   int end = 0;
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
+   QString::const_iterator iter_end  = data.constBegin();
 
-   while (i < size) {
+   QString::const_iterator iter_j;
+   QString::const_iterator iter_indent;
+
+   int curLevel = 0;
+   int level    = 0;
+
+   while (iter_i < iter_size) {
       // find end of this line
-      end = i + 1;
-      while (end <= size && data[end - 1] != '\n') {
-         end++;
+      iter_end = iter_i + 1;
+
+      while (iter_end <= iter_size && iter_end[-1] != '\n') {
+         ++iter_end;
       }
 
-      int j = i;
-      int level = 0;
-      int indent = i;
+      iter_j      = iter_i;
+      iter_indent = iter_i;
+
+      level = 0;
 
       // compute the quoting level
-      while (j < end && (data[j] == ' ' || data[j] == '>')) {
-         if (data[j] == '>') {
-            level++;
-            indent = j + 1;
+      while (iter_j < iter_end  && (*iter_j == ' ' || *iter_j == '>')) {
 
-         } else if (j > 0 && data[j - 1] == '>') {
-            indent = j + 1;
+         if (*iter_j == '>') {
+            level++;
+            iter_indent = iter_j + 1;
+
+         } else if (iter_j > data.constBegin() && iter_j[-1] == '>') {
+            iter_indent = iter_j + 1;
          }
-         j++;
+
+         ++iter_j;
       }
-      if (j > 0 && data[j - 1] == '>' &&
-            !(j == size || data[j] == '\n')) { // disqualify last > if not followed by space
-         indent--;
-         j--;
+
+      if (iter_j > data.constBegin() && iter_j[-1] == '>' && ! (iter_j == iter_size || *iter_j == '\n')) {
+         // disqualify last > if not followed by space
+         --iter_indent;
+         --iter_j;
       }
-      if (level > curLevel) { // quote level increased => add start markers
-         for (l = curLevel; l < level; l++) {
+
+      if (level > curLevel) {
+         // quote level increased => add start markers
+
+         for (int l = curLevel; l < level; l++) {
            out += "<blockquote>\n";
          }
 
-      } else if (level < curLevel) { // quote level descreased => add end markers
-         for (l = level; l < curLevel; l++) {
+      } else if (level < curLevel) {
+         // quote level descreased => add end markers
+
+         for (int l = level; l < curLevel; l++) {
             out += "</blockquote>\n";
          }
       }
+
       curLevel = level;
+
       if (level == 0) {
-         break;   // end of quote block
+         break;            // end of quote block
       }
 
       // copy line without quotation marks
-      out +=  data.mid(indent, end - indent);
+      out += QStringView(iter_indent, iter_end);
 
       // proceed with next line
-      i = end;
+      iter_i = iter_end;
    }
 
    // end of comment within blockquote => add end markers
-   for (l = 0; l < curLevel; l++) {
+   for (int l = 0; l < curLevel; l++) {
       out += "</blockquote>\n";
    }
 
-   return i;
+   return iter_i;
 }
 
-static int writeCodeBlock(QString &out, const QString &data, int size, int refIndent)
+static int writeCodeBlock(QString &out, QStringView data, int refIndent)
 {
-   int i = 0;
-   int end;
+   QString::const_iterator iter_i    = data.constBegin();
+   QString::const_iterator iter_size = data.constEnd();
+   QString::const_iterator iter_end;
+   QString::const_iterator iter_j;
+
+   int emptyLines = 0;
+   int indent     = 0;
 
    out += "@verbatim\n";
-   int emptyLines = 0;
 
-   while (i < size) {
+   while (iter_i < iter_size) {
       // find end of this line
-      end = i + 1;
+      iter_end = iter_i + 1;
 
-      while (end <= size && data[end - 1] != '\n') {
-         end++;
+      while (iter_end <= iter_size && iter_end[-1] != '\n') {
+         ++iter_end;
       }
 
-      if (end > size) {
-         end = size;
+      if (iter_end > iter_size) {
+         iter_end = iter_size;
       }
 
-      int j = i;
-      int indent = 0;
+      iter_j = iter_i;
+      indent = 0;
 
-      while (j < end && data[j] == ' ') {
-         j++;
-         indent++;
+      while (iter_j < iter_end && *iter_j == ' ') {
+         ++iter_j;
+         ++indent;
       }
 
-      if (j == end - 1) {
+      if (iter_j == iter_end - 1) {
          // found an empty line
 
-         emptyLines++;
-         i = end;
+         ++emptyLines;
+         iter_i = iter_end;
 
       } else if (indent >= refIndent + codeBlockIndent) {
          // there is enough indent to contine the code block
@@ -2280,12 +2557,12 @@ static int writeCodeBlock(QString &out, const QString &data, int size, int refIn
          while (emptyLines > 0) {
             // write skipped empty lines, add empty line
             out += "\n";
-            emptyLines--;
+            --emptyLines;
          }
 
          // add code line minus the indent
-         out += data.mid(i + refIndent + codeBlockIndent, end - i - refIndent - codeBlockIndent);
-         i = end;
+         out    += QStringView(iter_i + refIndent + codeBlockIndent, iter_end);
+         iter_i = iter_end;
 
       } else {
          // end of code block
@@ -2298,114 +2575,136 @@ static int writeCodeBlock(QString &out, const QString &data, int size, int refIn
    while (emptyLines > 0) {
       // write skipped empty lines, add empty line
       out += "\n";
-      emptyLines--;
+      --emptyLines;
    }
 
-   return i;
+   return iter_i - data.constBegin();
 }
 
-// start searching for the end of the line start at offset \a i
-// keeping track of possible blocks that need to to skipped.
-static void findEndOfLine(QString &out, const QString &data, int size, int &pi, int &i, int &end)
+// start searching for the end of the line start at offset iter_i
+// keeping track of possible blocks that need to to skipped
+static void findEndOfLine(QString &out, QStringView data, QString::const_iterator &iter_prev,
+                  QString::const_iterator &iter_i, QString::const_iterator &iter_end)
 {
    // find end of the line
-   int nb = 0;
-   end = i + 1;
 
-   while (end <= size && data[end - 1] != '\n') {
+   iter_end = iter_i + 1;
+   int nb   = 0;
+
+   while (iter_end != data.constEnd() && iter_end[-1] != '\n') {
       // while looking for the end of the line we might encounter a block
       // that needs to be passed unprocessed.
 
-      if ((data[end - 1] == '\\' || data[end - 1] == '@') &&
-            (end <= 1 || (data[end - 2] != '\\' && data[end - 2] != '@')) ) {
+      QChar prevCh_1 = iter_end[-1];
+      QChar prevCh_2 = '\0';
 
+      if (iter_end - 1 != data.constBegin()) {
+         prevCh_2 = iter_end[-2];
+      }
+
+      if ((prevCh_1 == '\\' || prevCh_1  == '@') && (prevCh_2 != '\\' && prevCh_2 != '@')) {
          // not escaped
 
          // 4th is passing pristineChars1
-         QString endBlockName = isBlockCommand(data.mid(end - 1), end - 1, size - (end - 1), data.mid(end - 2, 1));
-         end++;
+         QStringView s1 = QStringView(iter_end - 1, data.constEnd());
+         QStringView s2 = QStringView(iter_end - 2, iter_end - 1);
+
+         QString endBlockName = isBlockCommand(s1, s1.constEnd(), s2);
+         ++iter_end;
 
          if (! endBlockName.isEmpty()) {
-            int l = endBlockName.length();
+            int len = endBlockName.length();
 
-            for (; end < size - l - 1; end++) {
+            for (  ; iter_end != data.end(); ++iter_end) {
                // search for end of block marker
+               QChar ch       = *iter_end;
+               QChar prevCh_1 = iter_end[-1];
 
-               if ((data[end] == '\\' || data[end] == '@') && data[end - 1] != '\\' && data[end - 1] != '@') {
+               if ((ch == '\\' || ch  == '@') && prevCh_1 != '\\' && prevCh_1 != '@') {
 
-                  if (data.mid(end + 1).startsWith(endBlockName)){
+                  QStringView s3 = QStringView(iter_end + 1, data.constEnd());
 
-                     if (pi != -1) {
+                  if (s3.startsWith(endBlockName)){
+
+                     if (iter_prev != data.constEnd()) {
                         // output previous line if available
-                        out += data.mid(pi, i - pi);
+                        out += QStringView(iter_prev, iter_i);
                      }
 
                      // found end marker, skip over this block
+                     out += QStringView(iter_i, iter_end + len + 1);
 
-                     out += data.mid(i, end + l + 1 - i);
-                     pi = -1;
-                     i = end + l + 1; // continue after block
-                     end = i + 1;
+                     iter_prev = data.constEnd();
+                     iter_i    = iter_end + len + 1;             // continue after block
+                     iter_end  = iter_i + 1;
+
                      break;
                   }
                }
             }
          }
 
-      } else if (nb == 0 && data[end - 1] == '<' && end < size - 6 &&
-                 (end <= 1 || (data[end - 2] != '\\' && data[end - 2] != '@')) ) {
+      } else if (nb == 0 && prevCh_1 == '<' && (prevCh_2 != '\\' && prevCh_2 != '@')) {
 
-         if (data.midView(end, 4).toLower() == "pre>") {
+         if (QStringView(iter_end, iter_end + 4).toLower() == "pre>") {
             // <pre> tag
 
-            if (pi != -1) {
+            if (iter_prev != data.constEnd()) {
                // output previous line if available
-               out += data.mid(pi, i - pi);
+               out += QStringView(iter_prev, iter_i);
             }
 
             // output part until <pre>
-            out += data.mid(i, end - 1 - i);
+            out += QStringView(iter_i, iter_end - 1);
 
             // output part until </pre>, last one is passing pristineChars1
-            i = end - 1 + processHtmlTag(out, data.mid(end - 1), end - 1, size - end + 1, data.mid(end - 2));
+            QStringView s4 = QStringView(iter_end - 1, data.constEnd());
 
-            pi  = -1;
-            end = i + 1;
+            iter_i = iter_end - 1 + processHtmlTag(out, s4, s4.constEnd(), QStringView(iter_end - 2, data.constEnd()));
+
+            iter_prev = data.constEnd();
+            iter_end  = iter_i + 1;
             break;
 
          } else {
-            end++;
+            ++iter_end;
          }
 
-      } else if (nb == 0 && data[end - 1] == '`') {
+      } else if (nb == 0 && prevCh_1 == '`') {
 
-         while (end <= size && data[end - 1] == '`') {
-            end++, nb++;
+         while (iter_end != data.constEnd() && prevCh_1 == '`') {
+            prevCh_1 = *iter_end;
+
+            ++iter_end;
+            ++nb;
          }
 
-      } else if (nb > 0 && data[end - 1] == '`') {
-         int enb = 0;
+      } else if (nb > 0 && prevCh_1 == '`') {
+         int end_nb = 0;
 
-         while (end <= size && data[end - 1] == '`') {
-            end++;
-            enb++;
+         while (iter_end != data.constEnd() && prevCh_1 == '`') {
+            prevCh_1 = *iter_end;
+
+            ++iter_end;
+            ++end_nb;
          }
 
-         if (enb == nb) {
+         if (end_nb == nb) {
             nb = 0;
          }
 
       } else {
-         end++;
+         ++iter_end;
       }
    }
 }
 
-static void writeFencedCodeBlock(QString &out, const QString &data, const QString &lang_t, int blockStart, int blockEnd)
+static void writeFencedCodeBlock(QString &out, QStringView data, const QString &lang_t,
+                  QString::const_iterator iter_blockStart, QString::const_iterator iter_blockEnd)
 {
    QString lang = lang_t;
 
-   if (! lang.isEmpty() && lang.at(0) == '.') {
+   if (! lang.isEmpty() && lang.startsWith('.')) {
       lang = lang.mid(1);
    }
 
@@ -2415,101 +2714,107 @@ static void writeFencedCodeBlock(QString &out, const QString &data, const QStrin
       out += "{" + lang + "}";
    }
 
-   out += data.mid(blockStart, blockEnd - blockStart);
+   out += QStringView(iter_blockStart, iter_blockEnd);
    out += "\n";
    out += "@endcode";
 }
 
-static QString processQuotations(const QString &str, int refIndent)
+static QString processQuotations(QStringView str, int refIndent)
 {
-   QString out;
-
-   const QChar *data = str.constData();
-   const QChar *ptr  = data;
-   int size = str.length();
-
-   int i   = 0;
-   int end = 0;
-   int pi  = -1;
-   int blockStart;
-   int blockEnd;
-   int blockOffset;
-
+   QString retval;
    QString lang;
 
-   while (i < size) {
+   QString::const_iterator iter_i    = str.constBegin();
+   QString::const_iterator iter_prev = str.constEnd();
+   QString::const_iterator iter_end  = str.constBegin();
 
-      findEndOfLine(out, str.mid(data - ptr), size, pi, i, end);
+   QString::const_iterator iter_blockStart;
+   QString::const_iterator iter_blockEnd;
+
+   int blockOffset;
+
+   while (iter_i != str.constEnd()) {
+      findEndOfLine(retval, str, iter_prev, iter_i, iter_end);
 
       // line is now found at [i..end)
+      if (iter_prev != str.constEnd()) {
+         QStringView s1 = QStringView(iter_prev, str.constEnd());
 
-      if (pi != -1) {
+         if (isFencedCodeBlock(s1, refIndent, lang, iter_blockStart, iter_blockEnd, blockOffset)) {
 
-         if (isFencedCodeBlock(str.mid(data - ptr + pi), size - pi, refIndent, lang, blockStart, blockEnd, blockOffset)) {
-
-            writeFencedCodeBlock(out, str.mid(data - ptr + pi), lang, blockStart, blockEnd);
-            i   = pi + blockOffset;
-            pi  = -1;
-            end = i + 1;
+            writeFencedCodeBlock(retval, s1, lang, iter_blockStart, iter_blockEnd);
+            iter_i    = iter_prev + blockOffset;
+            iter_prev = str.constEnd();
+            iter_end  = iter_i + 1;
             continue;
 
-         } else if (isBlockQuote(str.mid(data - ptr + pi), i - pi, refIndent)) {
 
-            i   = pi + writeBlockQuote(out, str.mid(data - ptr + pi), size - pi);
-            pi  = -1;
-            end = i + 1;
+         } else if (isBlockQuote(s1, iter_i, refIndent)) {
+
+            iter_i    = writeBlockQuote(retval, s1);
+            iter_prev = str.constEnd();
+            iter_end  = iter_i + 1;
             continue;
 
          } else {
-            out += str.mid(data - ptr + pi, i - pi);
+            retval += QStringView(iter_prev, iter_i);
          }
       }
 
-      pi = i;
-      i = end;
+      iter_prev = iter_i;
+      iter_i    = iter_end;
    }
 
-   if (pi != -1 && pi < size) { // deal with the last line
-      if (isBlockQuote(str.mid(data - ptr + pi), size - pi, refIndent)) {
-         writeBlockQuote(out, str.mid(data - ptr + pi), size - pi);
+   if (iter_prev != str.constEnd()) {
+      // deal with the last line
+      QStringView s1 = QStringView(iter_prev, str.constEnd());
+
+      if (isBlockQuote(s1, s1.constEnd(), refIndent)) {
+         writeBlockQuote(retval, s1);
 
       } else {
-         out += str.mid(data - ptr + pi, size - pi);
+         retval += s1;
       }
    }
 
-   return out;
+   return retval;
 }
 
-static QString processBlocks(const QString &str, int indent)
+static QString processBlocks(QStringView str, int indent)
 {
-   QString out;
+   QString retval;
 
-   const QChar *data = str.constData();
-   int size = str.length();
+   QString::const_iterator iter_i    = str.constBegin();
+   QString::const_iterator iter_prev = str.constEnd();
+   QString::const_iterator iter_end  = str.constBegin();
 
-   int i  = 0;
-   int pi = -1;
-
-   int ref;
-   int level;
+   QString::const_iterator iter_blockStart;
+   QString::const_iterator iter_blockEnd;
 
    QString id;
    QString link;
    QString title;
 
+   int ref;
+   int level;
+
+   int blockOffset;
    int blockIndent = indent;
 
    // get number of spaces in the first line
-   int end = 1;
-   int sp  = 0;
+   int sp = 0;
 
-   while (end <= size && data[end - 1] != '\n') {
-      if (data[end - 1] == ' ') {
-         sp++;
+   QChar prevCh = *iter_end;
+   ++iter_end;
+
+   while (iter_end <= str.constEnd() && prevCh != '\n') {
+
+      if (prevCh == ' ') {
+         ++sp;
       }
 
-      end++;
+      prevCh = *iter_end;
+      ++iter_end;
    }
 
    int priorLine2_Indent  = -1;
@@ -2517,40 +2822,42 @@ static QString processBlocks(const QString &str, int indent)
    int currentLine_Indent = -1;
 
    // process each line
-   while (i < size) {
+   while (iter_i != str.constEnd()) {
+      findEndOfLine(retval, str, iter_prev, iter_i, iter_end);
 
-      findEndOfLine(out, str, size, pi, i, end);
       // line is now found at [i .. end - 1]
 
       priorLine2_Indent  = priorLine1_Indent;
       priorLine1_Indent  = currentLine_Indent;
-      currentLine_Indent = computeIndentExcludingListMarkers( str.mid(i, end - i) );
+      currentLine_Indent = computeIndentExcludingListMarkers(QStringView(iter_i, iter_end));
 
-      if (pi != -1) {
-         int blockStart;
-         int blockEnd;
-         int blockOffset;
+      if (iter_prev != str.constEnd()) {
 
          QString lang;
          blockIndent = indent;
 
-         if ((level = isHeaderline(str.mid(i), size - i)) > 0) {
+         QStringView s1 = QStringView(iter_prev, str.constEnd());
+         QStringView s2 = QStringView(iter_i,    str.constEnd());
 
-            while (pi < size && data[pi] == ' ') {
-               pi++;
+         level = isHeaderline(QStringView(iter_i, str.constEnd()));
+
+         if (level > 0) {
+
+            while (iter_prev != str.constEnd() && *iter_prev == ' ') {
+               ++iter_prev;
             }
 
-            QString header = str.mid(pi, i - pi - 1);
+            QString header = QStringView(iter_prev, iter_i - 1);
             QString id = extractTitleId(header);
 
             if (! header.isEmpty()) {
 
                if (! id.isEmpty()) {
-                  out += level == 1 ? "@section " : "@subsection ";
-                  out += id;
-                  out += " ";
-                  out += header;
-                  out += "\n\n";
+                  retval += level == 1 ? "@section " : "@subsection ";
+                  retval += id;
+                  retval += " ";
+                  retval += header;
+                  retval += "\n\n";
 
                   QSharedPointer<SectionInfo> si (Doxy_Globals::sectionDict.find(id));
 
@@ -2576,103 +2883,104 @@ static QString processBlocks(const QString &str, int indent)
                   }
 
                } else {
-                  out += level == 1 ? "<h1>" : "<h2>";
-                  out += header;
-                  out += level == 1 ? "\n</h1>\n" : "\n</h2>\n";
+                  retval += level == 1 ? "<h1>" : "<h2>";
+                  retval += header;
+                  retval += level == 1 ? "\n</h1>\n" : "\n</h2>\n";
                }
 
             } else {
-               out += "<hr>\n";
+               retval += "<hr>\n";
             }
 
-            pi = -1;
-            i  = end;
-
-            end = i + 1;
+            iter_prev = str.constEnd();
+            iter_i    = iter_end;
+            iter_end  = iter_i + 1;
 
             continue;
 
-         } else if ((ref = isLinkRef(str.mid(pi), size - pi, id, link, title))) {
+         } else if ((ref = isLinkRef(s1, id, link, title))) {
 
             g_linkRefs.insert(id.toLower(), LinkRef(link, title));
 
-            i   = ref + pi;
-            pi  = -1;
-            end = i + 1;
+            iter_i    = iter_prev + ref;
+            iter_prev = str.constEnd();
+            iter_end  = iter_i + 1;
 
-         } else if (isFencedCodeBlock(str.mid(pi), size - pi, indent, lang,
-                  blockStart, blockEnd, blockOffset)) {
+         } else if (isFencedCodeBlock(s1, indent, lang, iter_blockStart, iter_blockEnd, blockOffset)) {
 
-            writeFencedCodeBlock(out, str.mid(pi), lang, blockStart, blockEnd);
-            i   = pi + blockOffset;
-            pi  = -1;
-            end = i + 1;
+            writeFencedCodeBlock(retval, s1, lang, iter_blockStart, iter_blockEnd);
+            iter_i    = iter_prev + blockOffset;
+            iter_prev = str.constEnd();
+            iter_end  = iter_i + 1;
             continue;
 
-         } else  {
-            bool isCB = isCodeBlock(str.mid(i), blockIndent, priorLine1_Indent, priorLine2_Indent);
+         } else {
+            bool isCB = isCodeBlock(s2, blockIndent, priorLine1_Indent, priorLine2_Indent);
 
             if (isCB) {
                // skip previous line since it is empty
 
-               i   += writeCodeBlock(out, str.mid(i), size - i, blockIndent);
-               pi  = -1;
-               end = i + 1;
+               iter_i    += writeCodeBlock(retval, s2, blockIndent);
+               iter_prev = str.constEnd();
+               iter_end  = iter_i + 1;
                continue;
 
-            } else if (isTableBlock(str.mid(pi), size - pi)) {
+            } else if (isTableBlock(s1)) {
 
-               i   = pi + writeTableBlock(out, str.mid(pi), size - pi);
-               pi  = -1;
-               end = i + 1;
+               iter_i    = iter_prev + writeTableBlock(retval, s1);
+               iter_prev = str.constEnd();
+               iter_end  = iter_i + 1;
                continue;
 
             } else {
-               writeOneLineHeaderOrRuler(out, str.mid(pi), i - pi);
+               writeOneLineHeaderOrRuler(retval, s1, iter_i);
 
             }
          }
       }
-      pi = i;
-      i = end;
+
+      iter_prev = iter_i;
+      iter_i    = iter_end;
    }
 
-   if (pi != -1 && pi < size) {
+   if (iter_prev != str.constEnd()) {
       // deal with the last line
+      QStringView s1 = QStringView(iter_prev, str.constEnd());
 
-      if (isLinkRef(str.mid(pi), size - pi, id, link, title)) {
+      if (isLinkRef(s1, id, link, title)) {
          g_linkRefs.insert(id.toLower(), LinkRef(link, title));
 
       } else {
-         writeOneLineHeaderOrRuler(out, str.mid(pi), size - pi);
+         writeOneLineHeaderOrRuler(retval, s1, s1.constEnd());
 
       }
    }
 
-   return out;
+   return retval;
 }
 
 // returns TRUE if text starts with \@page or \@mainpage command
-static bool isExplicitPage(const QString &text)
+static bool isExplicitPage(QStringView text)
 {
    if (! text.isEmpty())  {
 
-      int i    = 0;
-      int size = text.length();
+      QString::const_iterator iter_i   = text.constBegin();
+      QString::const_iterator iter_end = text.constEnd();
 
-      while (i < size && (text[i] == ' ' || text[i] == '\n')) {
-         i++;
+      while (iter_i != iter_end && (*iter_i == ' ' || *iter_i == '\n')) {
+         ++iter_i;
       }
 
-      if (i < size - 1) {
+      if (iter_i == iter_end) {
          // no remaining chars in text
 
       } else {
-         if (text[i] == '\\' || text[i] == '@') {
+         QChar c = *iter_i;
 
-            QString tmp = text.mid(i + 1, 8);
+         if (c == '\\' || c == '@') {
+            QStringView tmp = QStringView(iter_i + 1, iter_end);
 
-            if (tmp.startsWith("page ") || (tmp == "mainpage") ) {
+            if (tmp.startsWith("page ") || tmp.startsWith("mainpage")) {
                return true;
             }
          }
@@ -2729,7 +3037,7 @@ static QString extractPageTitle(QString &docs, QString &id)
          ++iter_endB;
       }
 
-      int level = isHeaderline(QStringView(iter_endA, iter_end), (iter_end - iter_endA));
+      int level = isHeaderline(QStringView(iter_endA, iter_end));
 
       if (level != 0) {
          title = QStringView(iter, iter_end - 1);
@@ -2754,23 +3062,17 @@ static QString extractPageTitle(QString &docs, QString &id)
    return title;
 }
 
-static QString detab(const QString &s, int &refIndent)
+static QString detab(QStringView str, int &refIndent)
 {
-   static int tabSize = Config::getInt("tab-size");
+   static const int tabSize = Config::getInt("tab-size");
 
-   QString out;
-
-   const QChar *data = s.constData();
-   int size = s.length();
-
-   int i   = 0;
+   QString retval;
    int col = 0;
 
-   const int maxIndent = 1000000; // value representing infinity
-   int minIndent = maxIndent;
+   const int maxIndent = 1000000;          // value representing infinity
+   int minIndent       = maxIndent;
 
-   while (i < size) {
-      QChar c = data[i++];
+   for (QChar c : str) {
 
       switch (c.unicode()) {
          case '\t': {
@@ -2780,7 +3082,7 @@ static QString detab(const QString &s, int &refIndent)
             col += stop;
 
             while (stop--) {
-               out += ' ';
+               retval += ' ';
             }
          }
          break;
@@ -2788,20 +3090,20 @@ static QString detab(const QString &s, int &refIndent)
          case '\n':
             // reset colomn counter
 
-            out += c;
+            retval += c;
             col = 0;
             break;
 
          case ' ':
             // increment column counter
 
-            out += c;
+            retval += c;
             col++;
             break;
 
          default:
             // non-whitespace => update minIndent
-            out += c;
+            retval += c;
 
             if (col < minIndent) {
                minIndent = col;
@@ -2818,7 +3120,7 @@ static QString detab(const QString &s, int &refIndent)
 
    }
 
-   return out;
+   return retval;
 }
 
 QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointer<Entry> e, const QString &input)
@@ -2840,7 +3142,7 @@ QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointe
    QString s = detab(input, refIndent);
 
    if (s.trimmed().isEmpty()) {
-      return QString("");
+      return out;
    }
 
    // process quotation blocks (as these may contain other blocks)
@@ -2850,7 +3152,7 @@ QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointe
    s = processBlocks(s, refIndent);
 
    // process the inline markup (links, emphasis and code spans)
-   processInline(out, s, s.length());
+   processInline(out, s, s.constEnd());
 
    return out;
 }
