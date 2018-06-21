@@ -2591,7 +2591,7 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
    iter_end = iter_i + 1;
    int nb   = 0;
 
-   while (iter_end != data.constEnd() && iter_end[-1] != '\n') {
+   while (iter_end <= data.constEnd() && iter_end[-1] != '\n') {
       // while looking for the end of the line we might encounter a block
       // that needs to be passed unprocessed.
 
@@ -2733,7 +2733,7 @@ static QString processQuotations(QStringView str, int refIndent)
 
    int blockOffset;
 
-   while (iter_i != str.constEnd()) {
+   while (iter_i < str.constEnd()) {
       findEndOfLine(retval, str, iter_prev, iter_i, iter_end);
 
       // line is now found at [i..end)
@@ -2747,7 +2747,6 @@ static QString processQuotations(QStringView str, int refIndent)
             iter_prev = str.constEnd();
             iter_end  = iter_i + 1;
             continue;
-
 
          } else if (isBlockQuote(s1, iter_i, refIndent)) {
 
@@ -2807,7 +2806,7 @@ static QString processBlocks(QStringView str, int indent)
    QChar prevCh = *iter_end;
    ++iter_end;
 
-   while (iter_end <= str.constEnd() && prevCh != '\n') {
+   while (iter_end < str.constEnd() && prevCh != '\n') {
 
       if (prevCh == ' ') {
          ++sp;
@@ -2822,7 +2821,7 @@ static QString processBlocks(QStringView str, int indent)
    int currentLine_Indent = -1;
 
    // process each line
-   while (iter_i != str.constEnd()) {
+   while (iter_i < str.constEnd()) {
       findEndOfLine(retval, str, iter_prev, iter_i, iter_end);
 
       // line is now found at [i .. end - 1]
@@ -2843,7 +2842,7 @@ static QString processBlocks(QStringView str, int indent)
 
          if (level > 0) {
 
-            while (iter_prev != str.constEnd() && *iter_prev == ' ') {
+            while (iter_prev < str.constEnd() && *iter_prev == ' ') {
                ++iter_prev;
             }
 
@@ -2861,7 +2860,7 @@ static QString processBlocks(QStringView str, int indent)
 
                   QSharedPointer<SectionInfo> si (Doxy_Globals::sectionDict.find(id));
 
-                  if (si) {
+                  if (si != nullptr) {
                      if (si->lineNr != -1) {
                         warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)",
                              csPrintable(header), csPrintable(si->fileName), si->lineNr);
@@ -2943,7 +2942,7 @@ static QString processBlocks(QStringView str, int indent)
       iter_i    = iter_end;
    }
 
-   if (iter_prev != str.constEnd()) {
+   if (iter_prev < str.constEnd()) {
       // deal with the last line
       QStringView s1 = QStringView(iter_prev, str.constEnd());
 

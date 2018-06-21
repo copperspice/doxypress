@@ -499,9 +499,20 @@ QSharedPointer<ClassDef> getClass(const QString &name)
       return QSharedPointer<ClassDef>();
    }
 
-   QSharedPointer<ClassDef> result = Doxy_Globals::classSDict.find(name);
+   static QHash<QString, QSharedPointer<ClassDef>> cache;
+   auto iter = cache.find(name);
 
-   return result;
+   if (iter != cache.constEnd()) {
+      return iter.value();
+   }
+
+   QSharedPointer<ClassDef> retval = Doxy_Globals::classSDict.find(name);
+
+   if (retval != nullptr) {
+      cache.insert(name, retval);
+   }
+
+   return retval;
 }
 
 QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
@@ -6331,7 +6342,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
             default:
                if (! insideTabbing) {
-                  if ( (c >= 'A' && c <= 'Z' && prev_c != ' ' && prev_c != '\0' && iter != text.constEnd()) ||
+                  if ( (c >= 'A' && c <= 'Z' && prev_c != ' ' && prev_c != '\0') ||
                        (c == ':' && prev_c != ':') || (prev_c == '.' && isId(c)) ) {
                      t << "\\+";
                   }

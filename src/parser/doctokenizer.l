@@ -483,20 +483,16 @@ static int yyread(char *buf, int max_size)
 {
    int len = max_size;
 
-   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = s_inputString.constData() + s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (s_inputPosition + len >= s_inputString.size_storage()) {
+      len = s_inputString.size_storage() - s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 
 
@@ -977,7 +973,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       /* function call */
       QString text = QString::fromUtf8(yytext);
 
-      if (text[0] == '%') {
+      if (text.startsWith('%')) {
          // strip % if present
          g_token->name = text.mid(1);
 
@@ -1554,8 +1550,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Param>"\""[^\n\"]+"\"" {
       QString text  = QString::fromUtf8(yytext);
-      g_token->name = text.mid(1);
-      g_token->name = g_token->name.left(yyleng - 2);
+      g_token->name = QStringView(text.constBegin() + 1, text.constEnd() - 1);
       return TK_WORD;
    }
 
@@ -1597,7 +1592,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_File>"\""[^\n\"]+"\"" {
       QString text  = QString::fromUtf8(yytext);
-      g_token->name = text.mid(1, text.length()-2);
+      g_token->name = QStringView(text.constBegin() + 1, text.constEnd() - 1);
       return TK_WORD;
    }
 

@@ -7997,8 +7997,8 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    doctokenizerYYlineno = startLine;
    uint inpLen = input.length();
 
-   QString tmpData = processCopyDoc(input, inpLen);
-   if (tmpData.isEmpty() || tmpData.at(tmpData.length() - 1) != '\n') {
+   QString tmpData = processCopyDoc(input, inputLen);
+   if (tmpData.isEmpty() || ! tmpData.endsWith('\n')) {
       tmpData += '\n';
    }
 

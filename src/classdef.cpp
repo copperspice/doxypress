@@ -2551,9 +2551,8 @@ static bool isStandardFunc(QSharedPointer<MemberDef> md)
 }
 
 /*!
- * recusively merges the `all members' lists of a class base
- * with that of this class. Must only be called for classes without
- * subclasses!
+ * recusively merges the `all members' lists of a base class into this class
+ * must only be called for classes without subclasses
  */
 void ClassDef::mergeMembers()
 {
@@ -2565,8 +2564,8 @@ void ClassDef::mergeMembers()
    // static const bool optimizeJava        = Config::getBool("optimize-java");
 
    SrcLangExt lang = getLanguage();
-   QString sep = getLanguageSpecificSeparator(lang, true);
-   int sepLen  = sep.length();
+   QString sep     = getLanguageSpecificSeparator(lang, true);
+   int sepLen      = sep.length();
 
    m_membersMerged = true;
 
@@ -2582,7 +2581,6 @@ void ClassDef::mergeMembers()
          MemberNameInfoSDict &dstMnd       = m_allMemberNameInfoSDict;
 
          for (auto srcMni : srcMnd) {
-
             QSharedPointer<MemberNameInfo> dstMni;
 
             if (dstMni = dstMnd.find(srcMni->memberName())) {
@@ -2621,15 +2619,15 @@ void ClassDef::mergeMembers()
                            found = matchArguments2(srcMd->getOuterScope(), srcMd->getFileDef(), srcAl,
                                       dstMd->getOuterScope(), dstMd->getFileDef(), dstAl, true);
 
-                           hidden = hidden  || !found;
+                           hidden = hidden  || ! found;
 
                         } else  {
-                           // member is in a non base class => multiple inheritance
-                           // using the same base class
+                           // member is in a non base class => multiple inheritance using the same base class
 
-                           QString scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
+                           auto t_iter = dstMi.scopePath.indexOfFast(sep) + sepLen;
+                           QStringView scope = QStringView(dstMi.scopePath.constBegin(), t_iter);
 
-                           if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
+                           if (! dstMi.ambiguityResolutionScope.startsWith(scope)) {
                               dstMi.ambiguityResolutionScope.prepend(scope);
                            }
 
@@ -2648,9 +2646,10 @@ void ClassDef::mergeMembers()
                         } else  {
                            // member can be reached via multiple paths in the inheritance tree
 
-                           QString scope = dstMi.scopePath.left(dstMi.scopePath.indexOf(sep) + sepLen);
+                           auto t_iter = dstMi.scopePath.indexOfFast(sep) + sepLen;
+                           QStringView scope = QStringView(dstMi.scopePath.constBegin(), t_iter);
 
-                           if (scope != dstMi.ambiguityResolutionScope.left(scope.length())) {
+                           if (! dstMi.ambiguityResolutionScope.startsWith(scope)) {
                               dstMi.ambiguityResolutionScope.prepend(scope);
                            }
 
@@ -2691,9 +2690,9 @@ void ClassDef::mergeMembers()
                      newMi.scopePath = bClass->name() + sep + srcMi.scopePath;
 
                      if (ambigue) {
-
                         QString scope = bClass->name() + sep;
-                        if (scope != srcMi.ambiguityResolutionScope.left(scope.length())) {
+
+                        if (! srcMi.ambiguityResolutionScope.startsWith(scope)) {
                            newMi.ambiguityResolutionScope = scope + srcMi.ambiguityResolutionScope;
                         }
                      }
@@ -2759,6 +2758,7 @@ void ClassDef::mergeMembers()
 
                // add it to the dictionary
                dstMnd.insert(newMni->memberName(), newMni);
+
             }
          }
       }
