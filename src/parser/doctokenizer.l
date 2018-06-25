@@ -558,16 +558,15 @@ CVSPEC    {BLANK}*("const"|"volatile")
 LNKWORD2  (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
 LNKWORD3  ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
 
- /* watch names of CharWordQ */
 CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
 CHARWORDQ2  [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
+
 WORD1       {ESCWORD}|{CHARWORDQ2}+|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
 WORD2       "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
 
 WORD1NQ   {ESCWORD}|{CHARWORDQ1}+|"{"|"}"
 WORD2NQ   "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
-
 CAPTION   [cC][aA][pP][tT][iI][oO][nN]
 HTMLTAG   "<"(("/")?){ID}({WS}+{ATTRIB})*{WS}*(("/")?)">"
 
@@ -802,9 +801,9 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       QString text = QString::fromUtf8(yytext);
       yylineno++;
 
-      g_token->name   = text.mid(1).trimmed();
+      g_token->name     = text.mid(1).trimmed();
       g_token->paramDir = TokenInfo::Unspecified;
-     return TK_COMMAND;
+      return TK_COMMAND;
    }
 
 <St_Para>{SPCMD1}      |
@@ -1127,7 +1126,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_LatexOnly>[^\\@\n]+     |
 <St_LatexOnly>\n            |
 <St_LatexOnly>.                {
-         g_token->verb += QString::fromUtf8(yytext);
+      g_token->verb += QString::fromUtf8(yytext);
    }
 
 <St_XmlOnly>{CMD}"endxmlonly" {
@@ -1147,11 +1146,11 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_DbOnly>[^\\@\n]+  |
 <St_DbOnly>\n         |
 <St_DbOnly>.             {
-         g_token->verb += QString::fromUtf8(yytext);
+      g_token->verb += QString::fromUtf8(yytext);
    }
 
 <St_Verbatim>{CMD}"endverbatim" {
-         g_token->verb = stripEmptyLines(g_token->verb);
+      g_token->verb = stripEmptyLines(g_token->verb);
       return RetVal_OK;
    }
 
@@ -1159,7 +1158,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Verbatim>\n        |
 <St_Verbatim>.         {
       /* Verbatim text */
-         g_token->verb += QString::fromUtf8(yytext);
+      g_token->verb += QString::fromUtf8(yytext);
    }
 
 <St_Dot>{CMD}"enddot"  {
@@ -1181,7 +1180,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Msc>\n             |
 <St_Msc>.              {
       /* msc text */
-         g_token->verb += QString::fromUtf8(yytext);
+      g_token->verb += QString::fromUtf8(yytext);
    }
 
 <St_PlantUMLOpt>{BLANK}*"{"[^}]*"}" {
@@ -1294,8 +1293,10 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       if (text.startsWith('%') ) {
          // strip % if present
          g_token->name = text.mid(1);
+
       } else {
          g_token->name = text;
+
       }
 
       return TK_WORD;
@@ -1331,7 +1332,6 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_TitleQ>{WORD1NQ}   |
 <St_TitleQ>{WORD2NQ}      {
       /* word */
-
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
    }
@@ -1381,8 +1381,8 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Anchor>{LABELID}{WS}? {
       // anchor
-         g_token->name = QString::fromUtf8(yytext).trimmed();
-         return TK_WORD;
+      g_token->name = QString::fromUtf8(yytext).trimmed();
+      return TK_WORD;
    }
 
 <St_Anchor>.          {
@@ -1415,7 +1415,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_Ref>{REFWORD_NOCV}/{BLANK}("const")[a-z_A-Z0-9] {
-         g_token->name = QString::fromUtf8(yytext);
+      g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
    }
 
@@ -1450,7 +1450,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Ref>.          {
       // any other character
       unput(yytext[0]);
-         return 0;
+      return 0;
    }
 
 <St_IntRef>[A-Z_a-z0-9.:/#\-\+\(\)]+ {

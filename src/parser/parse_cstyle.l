@@ -2606,7 +2606,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          // in C# a using declaration and directive have the same syntax
          // so we also add it as a using directive here
 
-         current->m_entryName        = text;
+         current->m_entryName = text;
 
          current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
@@ -3673,7 +3673,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
 <FindMembers>"."        {
       if (insideJava || insideCSharp || insideD)  {
-         current->m_entryName+=".";
+         current->m_entryName += ".";
       }
    }
 
@@ -4927,7 +4927,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
       if (! insideCSharp && (current->m_entryName.isEmpty() ||  current->m_entryName == "typedef"))  {
          // IDL function property
-         squareCount=1;
+         squareCount = 1;
          lastSquareContext = YY_START;
          idlAttr.resize(0);
          idlProp.resize(0);
@@ -8236,7 +8236,7 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
 
          //if (insideCSharp) // generic
          //{
-         //  baseName+="-g";
+         //  baseName += "-g";
          //}
 
          s_template_args = text;

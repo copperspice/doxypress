@@ -3824,6 +3824,7 @@ static void groupAddDocs(QSharedPointer<Entry> e)
 {
    if (e->section == Entry::MEMBERGRP_SEC) {
       s_memberGroupDocs = e->getData(EntryKey::Brief_Docs).trimmed();
+
       e->setData(EntryKey::Main_Docs, trimEmptyLines(e->getData(EntryKey::Main_Docs), e->docLine));
 
       if (! s_memberGroupDocs.isEmpty() && ! e->getData(EntryKey::Main_Docs).isEmpty()) {

@@ -335,7 +335,6 @@ static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
    QString brief = def->briefDescription(true);
 
    if (! brief.isEmpty()) {
-
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
                   def, QSharedPointer<MemberDef>(), brief, false, false, "", true, true);
 

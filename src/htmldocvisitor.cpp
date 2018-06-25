@@ -995,6 +995,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
    }
 
    bool needsTag = false;
+
    if (p && p->parent()) {
       switch (p->parent()->kind()) {
          case DocNode::Kind_Section:
@@ -1011,9 +1012,11 @@ void HtmlDocVisitor::visitPre(DocPara *p)
          case DocNode::Kind_ParBlock:
             needsTag = true;
             break;
+
          case DocNode::Kind_Root:
             needsTag = !((DocRoot *)p->parent())->singleLine();
             break;
+
          default:
             needsTag = false;
       }
@@ -1025,10 +1028,10 @@ void HtmlDocVisitor::visitPre(DocPara *p)
    uint nodeIndex = 0;
 
    if (p && nodeIndex < p->children().count()) {
-      while (nodeIndex < p->children().count() &&
-             p->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
+      while (nodeIndex < p->children().count() && p->children().at(nodeIndex)->kind() == DocNode::Kind_WhiteSpace) {
          nodeIndex++;
       }
+
       if (nodeIndex < p->children().count()) {
          DocNode *n = p->children().at(nodeIndex);
 
@@ -2341,11 +2344,6 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
 
    if (imageExt == "svg") {
       generatePlantUMLOutput(fileName, outDir, PUML_SVG);
-
-      // m_t << "<iframe scrolling=\"no\" frameborder=\"0\" src=\"" << relPath << baseName
-      //     << ".svg" << "\" />" << endl;
-      // m_t << "<p><b>Yourbrowser is unable to show SVG: try Firefox, Chrome, Safari, or Opera instead</b></p>";
-      // m_t << "</iframe>" << endl;
 
       m_t << "<object type=\"image/svg+xml\" data=\"" << relPath << baseName << ".svg\"></object>" << endl;
 

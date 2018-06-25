@@ -490,8 +490,8 @@ QString resolveTypeDef(QSharedPointer<Definition> context, const QString &qualif
    return result;
 }
 
-/*! Get a class definition given its name.
- *  Returns 0 if the class is not found.
+/* Get a class definition given its name.
+ *  Returns nullptr if the class is not found
  */
 QSharedPointer<ClassDef> getClass(const QString &name)
 {
@@ -557,7 +557,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileSco
                   QSharedPointer<MemberDef> *pMemType, QString *pTemplSpec, QString *pResolvedType,
                   ArgumentList *actTemplParams)
 {
-   bool isCached = md->isTypedefValCached(); // value already cached
+   bool isCached = md->isTypedefValCached();       // value already cached
 
    if (isCached) {
 
@@ -674,7 +674,7 @@ done:
    // remember computed value for next time
    if (result && result->getDefFileName() != "<code>") {
       // this check is needed to prevent that temporary classes that are
-      // introduced while parsing code fragments are being cached here.
+      // introduced while parsing code fragments are being cached here
 
       md->cacheTypedefVal(result, pTemplSpec ? *pTemplSpec : QString(), pResolvedType ? *pResolvedType : QString() );
    }
@@ -4534,7 +4534,6 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
    cachedResult = new FindFileCacheElem(QSharedPointer<FileDef>(), false);
 
    QFileInfo fi(name);
-
    QString fName = fi.fileName();
 
    // this will cause an error in fileSystemEngine if the name starts with ::
@@ -6898,7 +6897,6 @@ QString parseCommentAsText(QSharedPointer<const Definition> scope, QSharedPointe
    {
       // need to remove the const, this should be reworked
       QSharedPointer<Definition> scope_unconst = scope.constCast<Definition>();
-
 
       // need to remove the const, this should be reworked
       QSharedPointer<MemberDef> md_unconst = md.constCast<MemberDef>();

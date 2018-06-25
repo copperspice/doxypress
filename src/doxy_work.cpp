@@ -595,7 +595,6 @@ void processFiles()
    Doxy_Globals::infoLog_Stat.end();
 
    Doxy_Globals::infoLog_Stat.begin("Building namespace list\n");
-
    buildNamespaceList(root);
 
    findUsingDirectives(root);
@@ -2150,8 +2149,8 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
 
       bool isEnum = root->m_traits.hasTrait(Entry::Virtue::Enum);
 
-      cd = QMakeShared<ClassDef>(! tagInfo.isEmpty() ? tagName : root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
-                        fullName, sec, tagName, refFileName, true, isEnum);
+      cd = QMakeShared<ClassDef>(! tagInfo.isEmpty() ? tagName : root->getData(EntryKey::File_Name),
+                  root->startLine, root->startColumn, fullName, sec, tagName, refFileName, true, isEnum);
 
       // copy docs to definition
       cd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
@@ -2480,7 +2479,6 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
 
          if ((nd = Doxy_Globals::namespaceSDict.find(fullName))) {
             // existing namespace
-
             nd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
 
             // change name to match docs
@@ -8199,7 +8197,7 @@ void Doxy_Work::buildCompleteMemberLists()
    // merge the member list of base classes into the inherited classes
    for (auto cd : Doxy_Globals::classSDict) {
 
-      if (cd->subClasses() == 0 && cd->baseClasses()) {
+      if (cd->subClasses() == nullptr && cd->baseClasses()) {
          cd->mergeMembers();
       }
    }
@@ -9357,7 +9355,6 @@ void Doxy_Work::parseFile(ParserInterface *parser, QSharedPointer<Entry> root,
       // no preprocessing, if clang processing this branch is forced
       msg("Reading %s\n", csPrintable(fileName));
       fileContents = readInputFile(fileName);
-
    }
 
    if (! fileContents.endsWith("\n")) {

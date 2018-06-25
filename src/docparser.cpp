@@ -1915,6 +1915,7 @@ static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &childre
 
       if (! par->isEmpty()) {
          children.append(par);
+
          if (lastPar) {
             lastPar->markLast(false);
          }
@@ -4986,7 +4987,7 @@ void DocSimpleSect::appendLinkWord(const QString &word)
    } else {
       p = (DocPara *)m_children.last();
 
-      // Comma-seperate <seealso> links.
+      // Comma-seperate <see also> links.
       p->injectToken(TK_WORD, ",");
       p->injectToken(TK_WHITESPACE, " ");
    }
@@ -6353,13 +6354,12 @@ int DocPara::handleCommand(const QString &cmdName)
          handleInheritDoc();
          break;
 
-      // added 03/2015
       case CMD_SORTID:
          handleSortId();
          break;
 
       default:
-         // we should not get here
+         // should not get here
          assert(0);
          break;
    }
@@ -7995,7 +7995,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    s_sectionDict = 0;
 
    doctokenizerYYlineno = startLine;
-   uint inpLen = input.length();
+   uint inputLen = input.length();
 
    QString tmpData = processCopyDoc(input, inputLen);
    if (tmpData.isEmpty() || ! tmpData.endsWith('\n')) {
@@ -8045,8 +8045,8 @@ DocText *validatingParseText(const QString &input)
    s_styleStack.clear();
    s_initialStyleStack.clear();
 
-   s_inSeeBlock = false;
-   s_xmlComment = false;
+   s_inSeeBlock        = false;
+   s_xmlComment        = false;
    s_insideHtmlLink    = false;
    s_includeFileText   = "";
    s_includeFileOffset = 0;
@@ -8061,6 +8061,7 @@ DocText *validatingParseText(const QString &input)
    DocText *txt = new DocText;
 
    if (! input.isEmpty()) {
+
       doctokenizerYYlineno = 1;
       doctokenizerYYinit(input, s_fileName);
 
