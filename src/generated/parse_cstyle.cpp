@@ -17034,9 +17034,6 @@ YY_RULE_SETUP
          } else if (javaLike && text == "protected") {
             current->protection = Protected;
 
-         } else if (javaLike && text == "internal") {
-            current->protection = Package;
-
          } else if (javaLike && text == "private") {
             current->protection = Private;
 

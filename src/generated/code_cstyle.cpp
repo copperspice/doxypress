@@ -14010,7 +14010,10 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
-      if (g_insideCpp && (text =="set" || text =="get")) {
+      if (g_insideJava && (text == "internal")) {
+         REJECT;
+
+      } else if (g_insideCpp && (text =="set" || text =="get")) {
          REJECT;
       }
 

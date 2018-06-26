@@ -2560,7 +2560,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{KEYWORD}/([^a-z_A-Z0-9])     {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_insideCpp && (text =="set" || text =="get")) {
+      if (g_insideJava && (text == "internal")) {
+         REJECT;
+
+      } else if (g_insideCpp && (text =="set" || text =="get")) {
          REJECT;
       }
 

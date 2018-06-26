@@ -6751,8 +6751,7 @@ QString trimEmptyLines(const QString &str, int &docLine)
    }
 
    QString::const_iterator iter       = str.constBegin();
-
-   QString::const_iterator iter_start = str.constEnd();
+   QString::const_iterator iter_start = str.constBegin();
    QString::const_iterator iter_end   = str.constEnd();
 
    // search for leading empty lines
@@ -6803,17 +6802,12 @@ QString trimEmptyLines(const QString &str, int &docLine)
       return str;
    }
 
-   // return substring
-   if (iter_start == str.constEnd()) {
-      iter_start = str.constBegin();
-   }
-
    if (iter_end <= iter_start) {
       // only empty lines
       return QString("");
    }
 
-   return QStringView(iter_start, iter_end + 1);
+   return QStringView(iter_start, iter_end);
 }
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope, const QString &xName)

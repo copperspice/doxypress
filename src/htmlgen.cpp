@@ -1036,6 +1036,13 @@ void HtmlGenerator::writeStyleInfo(int part)
             }
          }
       }
+
+      Doxy_Globals::indexList.addStyleSheetFile("jquery.js");
+      Doxy_Globals::indexList.addStyleSheetFile("dynsections.js");
+
+      if (Config::getBool("interactive-svg"))   {
+         Doxy_Globals::indexList.addStyleSheetFile("svgpan.js");
+      }
    }
 }
 

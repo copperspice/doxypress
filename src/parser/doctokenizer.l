@@ -966,7 +966,8 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
   /********* patterns for normal words ******************/
 
-<St_Para,St_Text>[\-+0-9]     |
+<St_Para,St_Text>[0-9]+       |
+<St_Para,St_Text>[\-+]        |
 <St_Para,St_Text>{WORD1}      |
 <St_Para,St_Text>{WORD2} {
       /* function call */

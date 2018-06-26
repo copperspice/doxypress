@@ -3560,9 +3560,6 @@ CS_MACRO     ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_I
          } else if (javaLike && text == "protected") {
             current->protection = Protected;
 
-         } else if (javaLike && text == "internal") {
-            current->protection = Package;
-
          } else if (javaLike && text == "private") {
             current->protection = Private;
 
