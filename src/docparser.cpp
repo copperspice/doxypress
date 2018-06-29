@@ -6699,13 +6699,26 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
                m_children.append(lnk);
 
                QString leftOver = lnk->parse(false, true);
-               if (!leftOver.isEmpty()) {
+               if (! leftOver.isEmpty()) {
                   m_children.append(new DocWord(this, leftOver));
                }
             }
 
+         } else if (findAttribute(tagHtmlAttribs, "langword", &cref)) {
+            // <see langword="..."/> or <see langword="..."></see>
+
+            bool inSeeBlock = s_inSeeBlock;
+            g_token->name   = cref;
+            s_inSeeBlock    = true;
+
+            m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Code, true));
+            handleLinkedWord(this, m_children,true);
+
+            m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Code, false));
+            s_inSeeBlock = inSeeBlock;
+
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'cref' attribute from <see> tag.");
+            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'cref' or 'langword' attribute from <see> tag.");
          }
       }
       break;
