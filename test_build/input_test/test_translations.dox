@@ -13,8 +13,7 @@
 This page contains samples of the DoxyPress translation phrases. In addition to English there are several translation files
 which have been added to DoxyPress. To view this sample document in another language you will need to generate it using
 DoxyPress. You can edit the project file by hand or use our DoxyPressApp to select a different language. From the
-DoxyPressApp go to the drop down for "Output Language" which is located on the Build Settings tab under Project
-Configuration.
+DoxyPressApp go to the drop down for "Output Language" which is located on the Build Settings tab under Project Configuration.
 
    \li Dutch
    \li French

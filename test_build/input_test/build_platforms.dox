@@ -34,19 +34,19 @@ has been tested on the indicated platforms and the results are listed in the las
 <TABLE>
    <tr><th width="145">Platform</th> <th width="145">Compilers</th> <th width="110">CopperSpice</th> <th width="300">Notes</th></tr>
    <tr>
-      <td>Debian (Wheezy)</td>     
+      <td>Debian (Wheezy)</td>
       <td>GCC 4.7.2</td>
       <td>CS built</td>
       <td></td>
    </tr>
    <tr>
-      <td>Fedora 20</td>      
+      <td>Fedora 20</td>
       <td>GCC 4.8.2</td>
       <td>CS built</td>
       <td></td>
-   </tr>   
+   </tr>
    <tr>
-      <td>Ubuntu 14.04</td>     
+      <td>Ubuntu 14.04</td>
       <td>GCC 4.8.2</td>
       <td>CS built</td>
       <td></td>
@@ -54,39 +54,39 @@ has been tested on the indicated platforms and the results are listed in the las
    <tr>
       <td>&nbsp;&nbsp; - - - - - - - - - - </td>
       <td>&nbsp;</td>
-      <td>&nbsp;</td>      
+      <td>&nbsp;</td>
       <td>&nbsp;</td>
    </tr>
    <tr>
-      <td>Windows XP (SP3)</td>      
+      <td>Windows XP (SP3)</td>
       <td>GCC 4.7.2 (MinGW)</td>
       <td>CS built</td>
        <td>CsWebKit built on Vista 64-bit for 32-bit</td>
    </tr>
    <tr>
-      <td>Windows Vista</td>      
+      <td>Windows Vista</td>
       <td>GCC 4.7.2 (MinGW)</td>
       <td>CS built</td>
       <td>Build configuration for 32-bit Windows</td>
-   </tr> 
+   </tr>
    <tr>
-      <td>Windows 7 64-bit</td>     
+      <td>Windows 7 64-bit</td>
       <td>GCC 4.7.2 (MinGW)</td>
       <td>CS built</td>
       <td></td>
    </tr>
    <tr>
-      <td>Windows 7 64-bit</td>     
+      <td>Windows 7 64-bit</td>
       <td>GCC 4.8.1 (MinGW)</td>
       <td>CS built</td>
       <td></td>
-   </tr>    
+   </tr>
    <tr>
-      <td>Windows 8 64-bit</td>     
+      <td>Windows 8 64-bit</td>
       <td>GCC 4.8.1 (MinGW)</td>
       <td>CS built</td>
       <td></td>
-   </tr>     
+   </tr>
    <tr>
       <td>&nbsp;&nbsp; - - - - - - - - - - </td>
       <td>&nbsp;</td>
@@ -98,13 +98,13 @@ has been tested on the indicated platforms and the results are listed in the las
       <td>Apple Clang 4.2</td>
       <td>CS built</td>
       <td></td>
-   </tr>  
+   </tr>
    <tr>
       <td>Mac OS X 10.9</td>
       <td>Apple Clang 5.1</td>
       <td>CS built</td>
       <td></td>
-   </tr>  
+   </tr>
 </TABLE>
 
 <br>
@@ -202,7 +202,6 @@ The class libraries include all the functionality needed to build advanced GUI a
 */
 
 
-
 /*!
 \page support-android Support for Android
 \sortid 11
@@ -211,8 +210,6 @@ We believe this platform is very important to the future of CopperSpice. Our des
 heavily on natively supporting Android.
 
 */
-
-
 
 
 /*!

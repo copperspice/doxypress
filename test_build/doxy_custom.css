@@ -12,6 +12,12 @@ h4 {
    font-size: 100%;
 }
 
+h6 {
+   font-size: 90%;
+   color: #6A737D;
+}
+
+
 /* table 1 */
 table.doxtable {
 	border-collapse:collapse;

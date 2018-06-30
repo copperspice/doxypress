@@ -13,10 +13,9 @@
 
 Ginger is a test class to review how documentation is generated in DoxyPress for CopperSpice specific syntax.
 
-The following should be valid links: Lemongrass::monthName and Lemongrass::monthName()
+  \li The following two should be valid links: Lemongrass::monthName and Lemongrass::monthName()
 
-These should not auto link: monthName, monthName()
-
+  \li These two should not auto link: monthName, monthName()
 
 */
 
