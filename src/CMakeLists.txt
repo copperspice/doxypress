@@ -1,4 +1,4 @@
-set(CS_VERSION 1.4)
+set(CS_VERSION 1.5)
 
 macro(cs_copy_dll APP DLL)
    get_target_property(CS_${DLL}_LIB  CopperSpice::Cs${DLL}${CS_VERSION} LOCATION)
