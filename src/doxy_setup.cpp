@@ -654,7 +654,7 @@ SrcLangExt getLanguageFromFileName(const QString &fileName)
 void Doxy_Setup::usage()
 {
    printf("\n");
-   printf("DoxyPress: Version %s\n", versionString);
+   printf("DoxyPress: Version %s\n", csPrintable(versionString));
    printf("email: info@copperspice.com\n");
 
    printf("\n");
