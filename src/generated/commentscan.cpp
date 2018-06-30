@@ -3512,7 +3512,7 @@ class DocCmdMapper
 
       while (! p->cmdName.isEmpty()) {
          if (m_map.contains(p->cmdName)) {
-            err("DocCmdMapper: command %s already added\n", p->cmdName);
+            err("DocCmdMapper: command %s already added\n", csPrintable(p->cmdName));
             Doxy_Work::stopDoxyPress();
          }
 

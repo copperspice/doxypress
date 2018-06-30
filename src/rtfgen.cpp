@@ -175,7 +175,7 @@ void RTFGenerator::init()
 
    while (def->style_reference != 0) {
       if (def->style_definition == 0) {
-         err("RTF Style Default [%s] has no definition\n", def->style_name);
+         err("RTF Style Default [%s] has no definition\n", csPrintable(def->style_name));
       }
 
       StyleData styleData = StyleData(def->style_reference, def->style_definition);
