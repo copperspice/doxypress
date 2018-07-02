@@ -7764,16 +7764,12 @@ static QString extractCopyDocId(const QString &data, QString::const_iterator &it
       } else if (insideSQuote) {
          // look for single quote end
 
-printf("\n\n  BROOM  - docparser, did we get here?   7751 ");
-
          if (c == '\'' && (iter_j == data.constBegin() || iter_j[-1] != '\\')) {
             insideSQuote = false;
          }
 
       } else if (insideDQuote) {
          // look for double quote end
-
-printf("\n\n  BROOM  - docparser, did we get here?   7759 ");
 
          if (c == '"' && (iter_j == data.constBegin() || iter_j[-1] != '\\')) {
             insideDQuote = false;
