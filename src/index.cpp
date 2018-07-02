@@ -2552,6 +2552,7 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
 
       if (! disableIndex) {
          ol.writeQuickLinks(true, HLI_Functions, QString());
+
          startQuickIndexList(ol);
 
          // index item for global member list
@@ -2829,7 +2830,7 @@ static void writeFileMemberIndex(OutputList &ol)
       Doxy_Globals::indexList.incContentsDepth();
    }
 
- // figure out the correct names for the links
+   // figure out the correct names for the links
    for (int k = 0; k < FMHL_Total; k++) {
 
       QString fName = getFmhlInfo(k)->fname;

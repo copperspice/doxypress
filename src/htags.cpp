@@ -32,10 +32,7 @@ bool Htags::useHtags = false;
 static QDir g_inputDir;
 static QHash<QString, QByteArray> g_symbolDict;
 
-/*! constructs command line of htags(1) and executes it.
- *  \retval true success
- *  \retval false an error has occurred.
- */
+// constructs command line of htags(1) and executes it
 bool Htags::execute(const QString &htmldir)
 {
    static const QStringList inputSource = Config::getList("input-source");
@@ -46,10 +43,8 @@ bool Htags::execute(const QString &htmldir)
 
    static QString htagsOptions  = "";     // Config::getString("htags-options");
 
-   QByteArray cwd = QDir::currentPath().toUtf8();
-
    if (inputSource.isEmpty()) {
-      g_inputDir.setPath(cwd);
+      g_inputDir.setPath(QDir::currentPath());
 
    } else if (inputSource.count() == 1) {
       g_inputDir.setPath(inputSource.first());
@@ -58,7 +53,7 @@ bool Htags::execute(const QString &htmldir)
          err("Unable to find directory %s, verify the value of the 'INPUT SOURCE' tag.\n", csPrintable(inputSource.first()) );
 
    } else {
-      err("When 'USE HTAGS' are used, 'INPUT SOURCE' must specify a single directory\n");
+      err("When 'USE HTAGS' are used 'INPUT SOURCE' must specify a single directory\n");
       return false;
    }
 
