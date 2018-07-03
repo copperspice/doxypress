@@ -206,6 +206,8 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    static QString mathJaxFormat  = Config::getEnum("mathjax-format");
    static bool disableIndex      = Config::getBool("disable-index");
 
+   static const QStringList extraCssFile = Config::getList("html-stylesheets");
+
    static bool hasProjectName    = ! projectName.isEmpty();
    static bool hasProjectVersion = ! projectVersion.isEmpty();
    static bool hasProjectBrief   = ! projectBrief.isEmpty();
@@ -215,9 +217,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 
    // always first
    QString cssFile = "doxypress.css";
-
    QString extraCssText = "";
-   static const QStringList extraCssFile = Config::getList("html-stylesheets");
 
    for (auto fileName : extraCssFile) {
 
@@ -259,16 +259,26 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
       }
       searchCssJs += "<script type=\"text/javascript\" src=\"$relpath^search/search.js\"></script>\n";
 
+
       if (! serverBasedSearch) {
-         searchCssJs += "<script type=\"text/javascript\">\n"
-                        "  $(document).ready(function() { init_search(); });\n"
-                        "</script>";
+
+         if (disableIndex) {
+
+            searchCssJs += "<script type=\"text/javascript\">\n"
+                           "  $(document).ready(function() { init_search(); });\n"
+                           "</script>";
+         }
+
       } else {
-         searchCssJs += "<script type=\"text/javascript\">\n"
-                        "  $(document).ready(function() {\n"
-                        "    if ($('.searchresults').length > 0) { searchBox.DOMSearchField().focus(); }\n"
-                        "  });\n"
-                        "</script>\n";
+
+         if (disableIndex) {
+
+            searchCssJs += "<script type=\"text/javascript\">\n"
+                           "  $(document).ready(function() {\n"
+                           "    if ($('.searchresults').length > 0) { searchBox.DOMSearchField().focus(); }\n"
+                           "  });\n"
+                           "</script>\n";
+         }
 
          // OPENSEARCH_PROVIDER
          searchCssJs += "<link rel=\"search\" href=\"" + relPath +
@@ -286,7 +296,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
          path += "/";
       }
 
-      if (path.isEmpty() || path.left(2) == "..") {
+      if (path.isEmpty() || path.startsWith("..")) {
          // relative path
          path.prepend(relPath);
       }
@@ -315,7 +325,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
       }
 
       mathJaxJs += "</script>";
-      mathJaxJs += "<script type=\"text/javascript\" async src=\"" + path + "MathJax.js\"></script>\n";
+      mathJaxJs += "<script type=\"text/javascript\" async=\"async\" src=\"" + path + "MathJax.js\"></script>\n";
    }
 
    QString result = output;
@@ -550,7 +560,7 @@ void HtmlCodeGenerator::_writeCodeLink(const QString &className, const QString &
    m_streamX << "\"";
 
    if (! tooltip.isEmpty()) {
-      m_streamX << " title=\"" << tooltip << "\"";
+      m_streamX << " title=\"" << convertToHtml(tooltip) << "\"";
    }
 
    m_streamX << ">";
@@ -684,9 +694,12 @@ HtmlGenerator::~HtmlGenerator()
 
 void HtmlGenerator::init()
 {
-   static const QString htmlDirName = Config::getString("html-output");
-   static const QString htmlHeader  = Config::getString("html-header");
-   static const QString htmlFooter  = Config::getString("html-footer");
+   static const QString htmlDirName   = Config::getString("html-output");
+   static const QString htmlHeader    = Config::getString("html-header");
+   static const QString htmlFooter    = Config::getString("html-footer");
+
+   static const bool disableIndex     = Config::getBool("disable-index");
+   static const bool interactiveSvg   = Config::getBool("interactive-svg");
 
    static bool useMathJax  = Config::getBool("use-mathjax");
 
@@ -720,11 +733,13 @@ void HtmlGenerator::init()
    }
    createSubDirs(d);
 
+   //
    ResourceMgr &mgr = ResourceMgr::instance();
-   mgr.copyResourceAs("html/tabs.css",  htmlDirName, "tabs.css");
+
+   mgr.copyResourceAs("html/tabs.css", htmlDirName, "tabs.css");
    mgr.copyResourceAs("html/jquery.js", htmlDirName, "jquery.js");
 
-   if (Config::getBool("interactive-svg")) {
+   if (interactiveSvg) {
       mgr.copyResourceAs("html/svgpan.js", htmlDirName, "svgpan.js");
    }
 
@@ -825,6 +840,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
 
       if (disableIndex) {
          data = mgr.getAsString("html/search_nomenu.css");
+
       } else {
          data = mgr.getAsString("html/search.css");
       }
@@ -1436,11 +1452,11 @@ void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname,
 
    m_textStream << " <div class=\"center\">" << endl;
    m_textStream << "  <img src=\"";
-   m_textStream << m_relativePath << fname << ".png\" usemap=\"#";
+   m_textStream << m_relativePath << fname << ".png\" usemap=\"#";  // << convertToId(name);
    docify(name);
 
    m_textStream << "_map\" alt=\"\"/>" << endl;
-   m_textStream << "  <map id=\"";
+   m_textStream << "  <map id=\"";   // << convertToId(name);
    docify(name);
 
    m_textStream << "_map\" name=\"";
@@ -1560,9 +1576,8 @@ void HtmlGenerator::startMemberSections()
    DBG_HTML(m_textStream << "<!-- startMemberSections -->" << endl)
    m_emptySection = true;
 
-   // we postpone writing <table> until we actually
-   // write a row to prevent empty tables, which
-   // are not valid XHTML!
+   // postpone writing <table> until we actually
+   // write a row to prevent empty tables, which are not valid XHTML
 }
 
 void HtmlGenerator::endMemberSections()
@@ -1597,19 +1612,16 @@ void HtmlGenerator::startMemberHeader(const QString &anchor)
 
 void HtmlGenerator::endMemberHeader()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberHeader -->" << endl)
    m_textStream << "</h2></td></tr>" << endl;
 }
 
 void HtmlGenerator::startMemberSubtitle()
 {
-   DBG_HTML( << "<!-- startMemberSubtitle -->" << endl)
    m_textStream << "<tr><td class=\"ititle\" colspan=\"2\">";
 }
 
 void HtmlGenerator::endMemberSubtitle()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberSubtitle -->" << endl)
    m_textStream << "</td></tr>" << endl;
 }
 
@@ -2224,6 +2236,10 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
 static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, HighlightedItem hli,
                   const QString &file, const QString &relPath)
 {
+   static const bool searchEngine      = Config::getBool("html-search");
+   static const bool serverBasedSearch = Config::getBool("search-server-based");
+   static const bool externalSearch    = Config::getBool("search-external");
+
    LayoutNavEntry *root = LayoutDocManager::instance().rootNavEntry();
    LayoutNavEntry::Kind kind = (LayoutNavEntry::Kind) - 1;
    LayoutNavEntry::Kind altKind = (LayoutNavEntry::Kind) - 1; // fall back for the old layout file
@@ -2245,6 +2261,7 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
          kind = LayoutNavEntry::NamespaceList;
          altKind = LayoutNavEntry::Namespaces;
          break;
+
       case HLI_Hierarchy:
          kind = LayoutNavEntry::ClassHierarchy;
          break;
@@ -2291,23 +2308,28 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
       case HLI_UserGroup:
          kind = LayoutNavEntry::UserGroup;
          break;
+
       case HLI_ClassVisible:
          kind = LayoutNavEntry::ClassList;
          altKind = LayoutNavEntry::Classes;
          highlightParent = true;
          break;
+
       case HLI_NamespaceVisible:
          kind = LayoutNavEntry::NamespaceList;
          altKind = LayoutNavEntry::Namespaces;
          highlightParent = true;
          break;
+
       case HLI_FileVisible:
          kind = LayoutNavEntry::FileList;
          altKind = LayoutNavEntry::Files;
          highlightParent = true;
          break;
+
       case HLI_None:
          break;
+
       case HLI_Search:
          break;
    }
@@ -2324,7 +2346,7 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
 
       if (! hlEntry && altKind != (LayoutNavEntry::Kind) - 1) {
          hlEntry = root->find(altKind);
-         kind = altKind;
+         kind    = altKind;
       }
 
       if (! hlEntry) {
@@ -2435,7 +2457,7 @@ void HtmlGenerator::writeSearchPage()
 
       QTextStream t_stream(&cf);
 
-      t_stream << "<script language=\"php\">\n\n";
+      t_stream << "<?php\n\n";
       t_stream << "$config = array(\n";
       t_stream << "  'PROJECT_NAME' => \"" << convertToHtml(projectName) << "\",\n";
       t_stream << "  'GENERATE_TREEVIEW' => " << (generateTreeView ? "true" : "false") << ",\n";
@@ -2453,9 +2475,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << "  'split_bar' => \"" << substitute(substitute(writeSplitBarAsString("search", ""), "\"", "\\\""), "\n", "\\n") << "\",\n";
       t_stream << "  'logo' => \"" << substitute(substitute(writeLogoAsString(""), "\"", "\\\""), "\n", "\\n") << "\",\n";
       t_stream << ");\n\n";
-      t_stream << "</script>\n";
-
-   } else {
+      t_stream << "?>\n";
       err("Unable to open file for writing %s, error: %d\n", csPrintable(configFileName), cf.error());
 
    }
@@ -2485,14 +2505,14 @@ void HtmlGenerator::writeSearchPage()
          t_stream << "</div>" << endl;
       }
 
-      t_stream << "<script language=\"php\">\n";
+      t_stream << "<?php\n";
       t_stream << "require_once \"search_functions.php\";\n";
       t_stream << "main();\n";
-      t_stream << "</script>\n";
+      t_stream << "?>\n";
 
       // Write empty navigation path, to make footer connect properly
       if (generateTreeView) {
-         t_stream << "</div><!-- doc-contents -->\n";
+         t_stream << "</div><!-- doc-content -->\n";
       }
 
       writePageFooter(t_stream, "Search", QString(), QString());
@@ -2559,7 +2579,7 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << "</div>" << endl;
 
       if (generateTreeView) {
-         t_stream << "</div><!-- doc-contents -->" << endl;
+         t_stream << "</div><!-- doc-content -->" << endl;
       }
 
       writePageFooter(t_stream, "Search", QString(), QString());
@@ -2728,20 +2748,17 @@ void HtmlGenerator::endInlineHeader()
 
 void HtmlGenerator::startMemberDocSimple()
 {
-   DBG_HTML(m_textStream << "<!-- startMemberDocSimple -->" << endl;)
    m_textStream << "<table class=\"fieldtable\">" << endl;
    m_textStream << "<tr><th colspan=\"3\">" << theTranslator->trCompoundMembers() << "</th></tr>" << endl;
 }
 
 void HtmlGenerator::endMemberDocSimple()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberDocSimple -->" << endl;)
    m_textStream << "</table>" << endl;
 }
 
 void HtmlGenerator::startInlineMemberType()
 {
-   DBG_HTML(m_textStream << "<!-- startInlineMemberType -->" << endl;)
    m_textStream << "<tr><td class=\"fieldtype\">" << endl;
 }
 
