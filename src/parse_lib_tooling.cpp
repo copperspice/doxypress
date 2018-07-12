@@ -79,7 +79,7 @@ static QString getName(const clang::NamedDecl *node)
 
    } else {
 
-      // BROOM  add something here - look at Reid's work
+      // broom - add something here, look at Reid's work
 
    }
 
@@ -119,7 +119,7 @@ static QString getUSR_PP(const clang::MacroDefinitionRecord *node)
    QString retval;
    llvm::SmallVector<char, 100> buffer;
 
-   bool ignore = false;      // BROOM  clang::index::generateUSRForMacro(node, buffer);
+   bool ignore = false;      // broom - clang::index::generateUSRForMacro(node, buffer);
 
    if (! ignore) {
       retval = QString::fromUtf8(buffer.data(), buffer.size());
@@ -213,11 +213,13 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                std::string tString;
                llvm::raw_string_ostream tStream(tString);
 
-               auto tmp = specialNode->getTemplateArgsAsWritten();
+               //  3.8.1 working code
+               // auto tmpArgs = specialNode->getTemplateArgsAsWritten();    //  ASTTemplateArgumentListInfo *
+               // clang::TemplateSpecializationType::PrintTemplateArgumentList(tStream, tmpArgs->getTemplateArgs(),
+               //         tmpArgs->NumTemplateArgs, m_policy);
 
-               clang::TemplateSpecializationType::PrintTemplateArgumentList(tStream,
-                  tmp->getTemplateArgs(), tmp->NumTemplateArgs, m_policy);
-
+               auto tmpArgs = specialNode->getTemplateArgsAsWritten();
+               clang::printTemplateArgumentList(tStream, tmpArgs->arguments(), m_policy);
                current->m_entryName += toQString(tStream.str());
 
             } else {
@@ -370,6 +372,14 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             returnType = toQString(node->getReturnType());
          }
 
+         // remove the scope from the return type
+         QString scopeName = parentEntry->m_entryName + "::";
+         int scopeLen = scopeName.length();
+
+         if (returnType.startsWith(scopeName))  {
+            returnType = returnType.midView(scopeLen);
+         }
+
          QString args = "(";
          ArgumentList argList;
 
@@ -415,6 +425,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                // adjust location of parameter pack
                tmpType += "... ";
                tmpAfter.replace("...", "");
+            }
+
+            // remove the scope from a parameter data type
+            if (tmpType.startsWith(scopeName))  {
+               tmpType = tmpType.midView(scopeLen);
             }
 
             args += tmpType + " " + tmpName + tmpAfter;
@@ -590,7 +605,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->argList     = argList;
             current->protection  = getAccessSpecifier(node);
 
-            current->m_srcLang        = SrcLangExt_Cpp;
+            current->m_srcLang   = SrcLangExt_Cpp;
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
@@ -636,6 +651,14 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          QString type = toQString(tQualType);
 
+         // remove the scope from the data type
+         QString scopeName = parentEntry->m_entryName + "::";
+         int scopeLen = scopeName.length();
+
+         if (type.startsWith(scopeName))  {
+            type = type.midView(scopeLen);
+         }
+
          current->section     = Entry::VARIABLE_SEC;
          current->m_entryName = name;
 
@@ -645,7 +668,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->protection  = getAccessSpecifier(node);
 
-         current->m_srcLang        = SrcLangExt_Cpp;
+         current->m_srcLang   = SrcLangExt_Cpp;
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -691,7 +714,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
          } else {
-            // printf("\n Broom enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
+            // printf("\n broom enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
          }
 
          QString currentUSR = getUSR_Decl(node);
@@ -767,7 +790,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current->protection  = getAccessSpecifier(node);
 
-         current->m_srcLang        = SrcLangExt_Cpp;
+         current->m_srcLang   = SrcLangExt_Cpp;
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -816,16 +839,21 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
          QString name         = toQString(node->getNameAsString());
+         QString type         = toQString(node->getType());
+
+         // remove the scope from the return type
+         QString scopeName = parentEntry->m_entryName + "::";
+         type = type.remove(scopeName);
 
          current->section     = Entry::VARIABLE_SEC;
          current->m_entryName = name;
 
-         current->setData(EntryKey::Member_Type,  toQString(node->getType()));
+         current->setData(EntryKey::Member_Type,  type);
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
          current->protection  = getAccessSpecifier(node);
 
-         current->m_srcLang        = SrcLangExt_Cpp;
+         current->m_srcLang   = SrcLangExt_Cpp;
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -833,6 +861,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          if (node->getStorageClass() == clang::SC_Static) {
             current->prependData(EntryKey::Member_Type,  "static ");
             current->stat     = true;
+         }
+
+         if (node->isInline())  {
+            current->prependData(EntryKey::Member_Type, "inline ");
+            current->m_traits.setTrait(Entry::Virtue::Inline);
          }
 
          if (parentEntry) {
@@ -946,7 +979,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->argList     = argList;
          current->protection  = getAccessSpecifier(node);
 
-         current->m_srcLang        = SrcLangExt_Cpp;
+         current->m_srcLang   = SrcLangExt_Cpp;
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
@@ -973,13 +1006,13 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->section     = Entry::DEFINE_SEC;
          current->m_entryName = name;
 
-         current->m_srcLang        = SrcLangExt_Cpp;
+         current->m_srcLang   = SrcLangExt_Cpp;
 //       current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 //       current->startLine   = location.getSpellingLineNumber();
 //       current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;
 
-         // printf("\n  BROOM - Macro Definition  name: %s   line: %d  col: %d \n",
+         // printf("\n  broom - Macro Definition  name: %s   line: %d  col: %d \n",
          //         csPrintable(name), current->startLine, current->startColumn );
 
          s_current_root->addSubEntry(current, s_current_root);
@@ -994,7 +1027,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          QString name = toQString(node->getName());
 
-         // printf("\n  BROOM - Macro Expansion  %s\n", csPrintable(name));
+         // printf("\n  broom - Macro Expansion  %s\n", csPrintable(name));
 
          if (name == "CS_OBJECT" || name == "Q_OBJECT") {
             // do nothing at this time
@@ -1137,7 +1170,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
          current->protection  = getAccessSpecifier(node);
-         current->m_srcLang        = SrcLangExt_Cpp;
+         current->m_srcLang  = SrcLangExt_Cpp;
          current->startLine   = location.getSpellingLineNumber();
          current->startColumn = location.getSpellingColumnNumber();
          current->bodyLine    = current->startLine;

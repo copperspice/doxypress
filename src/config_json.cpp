@@ -121,7 +121,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("optimize-fortran",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("optimize-python",           struc_CfgBool   { false,          DEFAULT } );
 
-   // tab 2 - general
+   // tab 2 - project configuration
    m_cfgEnum.insert("output-language",           struc_CfgEnum   { "ENGLISH",      DEFAULT } );
    m_cfgList.insert("aliases",                   struc_CfgList   { QStringList(),  DEFAULT } );
 
@@ -142,7 +142,7 @@ void Config::load_Defaults()
    m_cfgInt.insert("tab-size",                   struc_CfgInt    { 4,              DEFAULT } );
    m_cfgInt.insert("lookup-cache-size",          struc_CfgInt    { 0,              DEFAULT } );
 
-   // tab 2 - build confg
+   // tab 2 - build configuration
    m_cfgBool.insert("extract-all",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-private",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-package",           struc_CfgBool   { false,          DEFAULT } );
@@ -201,17 +201,18 @@ void Config::load_Defaults()
    m_cfgBool.insert("duplicate-docs",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("group-nested-compounds",    struc_CfgBool   { false,          DEFAULT } );
 
-   // tab 2 -output
+   // tab 2 -build options
    m_cfgList.insert("enabled-sections",          struc_CfgList   { QStringList(),  DEFAULT } );
-   m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );
    m_cfgString.insert("file-version-filter",     struc_CfgString { QString(),      DEFAULT } );
    m_cfgString.insert("main-page-name",          struc_CfgString { "",             DEFAULT } );
    m_cfgBool.insert("main-page-omit",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgString.insert("layout-file",             struc_CfgString { QString(),      DEFAULT } );
    m_cfgList.insert("ns-alias",                  struc_CfgList   { QStringList(),  DEFAULT } );
+   m_cfgInt.insert("max-init-lines",             struc_CfgInt    { 30,             DEFAULT } );
+   m_cfgInt.insert("toc-include-headers",        struc_CfgInt    { 0,              DEFAULT } );
    m_cfgBool.insert("bb-style",                  struc_CfgBool   { false,          DEFAULT } );
 
-   // tab 2 -programming
+   // tab 2 -programming languages
    m_cfgList.insert("tcl-subst",                 struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("language-mapping",          struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgBool.insert("built-in-stl-support",      struc_CfgBool   { false,          DEFAULT } );
@@ -228,7 +229,7 @@ void Config::load_Defaults()
    m_cfgString.insert("warn-format",             struc_CfgString { "$file:$line: $text", DEFAULT } );
    m_cfgString.insert("warn-logfile",            struc_CfgString { QString(),       DEFAULT } );
 
-   // tab 2 -input src
+   // tab 2 -input source files
    m_cfgList.insert("input-source",              struc_CfgList   { QStringList(),   DEFAULT } );
 
    QStringList tempList2 = Config::getFilePatterns();
@@ -242,7 +243,7 @@ void Config::load_Defaults()
    m_cfgList.insert("exclude-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgList.insert("exclude-symbols",           struc_CfgList   { QStringList(),   DEFAULT } );
 
-   // tab 2 - input other
+   // tab 2 - input other files
    m_cfgList.insert("example-source",            struc_CfgList   { QStringList(),   DEFAULT } );
 
    QStringList temp;
@@ -260,12 +261,33 @@ void Config::load_Defaults()
    m_cfgBool.insert("filter-source-files",       struc_CfgBool   { false,           DEFAULT } );
    m_cfgList.insert("filter-source-patterns",    struc_CfgList   { QStringList(),   DEFAULT } );
 
-   // tab 2 -index
+   // tab 2 -index page
    m_cfgBool.insert("alpha-index",               struc_CfgBool   { true,            DEFAULT } );
    m_cfgInt.insert("cols-in-index",              struc_CfgInt    { 5,               DEFAULT } );
    m_cfgList.insert("ignore-prefix",             struc_CfgList   { QStringList(),   DEFAULT } );
 
-   // tab 2 - source code
+   // tab 2 - preprocessor
+   m_cfgBool.insert("enable-preprocessing",      struc_CfgBool   { true,            DEFAULT } );
+   m_cfgBool.insert("search-includes",           struc_CfgBool   { true,            DEFAULT } );
+
+   m_cfgList.insert("include-path",              struc_CfgList   { QStringList(),   DEFAULT } );
+   m_cfgList.insert("include-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
+
+   m_cfgBool.insert("macro-expansion",           struc_CfgBool   { false,           DEFAULT } );
+   m_cfgBool.insert("expand-only-predefined",    struc_CfgBool   { false,           DEFAULT } );
+   m_cfgBool.insert("skip-function-macros",      struc_CfgBool   { true,            DEFAULT } );
+
+   m_cfgList.insert("predefined-macros",         struc_CfgList   { QStringList(),   DEFAULT } );
+   m_cfgList.insert("expand-as-defined",         struc_CfgList   { QStringList(),   DEFAULT } );
+
+   // tab 2 - clang
+   m_cfgBool.insert("clang-parsing",             struc_CfgBool   { false,           DEFAULT } );
+   m_cfgString.insert("clang-compilation-path",  struc_CfgString { QString(),       DEFAULT } );
+   m_cfgString.insert("clang-dialect",           struc_CfgString { "--std=c++14",   DEFAULT } );
+   m_cfgBool.insert("clang-use-headers",         struc_CfgBool   { true,            DEFAULT } );
+   m_cfgList.insert("clang-flags",               struc_CfgList   { QStringList(),   DEFAULT } );
+
+   // tab 2 - source listing
    m_cfgBool.insert("source-code",               struc_CfgBool   { false,           DEFAULT } );
    m_cfgBool.insert("inline-source",             struc_CfgBool   { false,           DEFAULT } );
    m_cfgBool.insert("verbatim-headers",          struc_CfgBool   { true,            DEFAULT } );
@@ -284,23 +306,6 @@ void Config::load_Defaults()
 
    QStringList tempList5 = Config::getSuffixExclude();
    m_cfgList.insert("suffix-exclude-navtree",    struc_CfgList   { tempList5,       DEFAULT } );
-
-   m_cfgBool.insert("clang-parsing",             struc_CfgBool   { false,           DEFAULT } );
-   m_cfgList.insert("clang-flags",               struc_CfgList   { QStringList(),   DEFAULT } );
-
-   // tab 2 - preprocessor
-   m_cfgBool.insert("enable-preprocessing",      struc_CfgBool   { true,            DEFAULT } );
-   m_cfgBool.insert("search-includes",           struc_CfgBool   { true,            DEFAULT } );
-
-   m_cfgList.insert("include-path",              struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgList.insert("include-patterns",          struc_CfgList   { QStringList(),   DEFAULT } );
-
-   m_cfgBool.insert("macro-expansion",           struc_CfgBool   { false,           DEFAULT } );
-   m_cfgBool.insert("expand-only-predefined",    struc_CfgBool   { false,           DEFAULT } );
-   m_cfgBool.insert("skip-function-macros",      struc_CfgBool   { true,            DEFAULT } );
-
-   m_cfgList.insert("predefined-macros",         struc_CfgList   { QStringList(),   DEFAULT } );
-   m_cfgList.insert("expand-as-defined",         struc_CfgList   { QStringList(),   DEFAULT } );
 
    // tab 2 - external
    m_cfgList.insert("tag-files",                 struc_CfgList   { QStringList(),   DEFAULT } );
@@ -372,6 +377,7 @@ void Config::load_Defaults()
    m_cfgInt.insert("html-colorstyle-sat",        struc_CfgInt    { 100,             DEFAULT } );
    m_cfgInt.insert("html-colorstyle-gamma",      struc_CfgInt    { 80,              DEFAULT } );
    m_cfgBool.insert("html-timestamp",            struc_CfgBool   { true,            DEFAULT } );
+   m_cfgBool.insert("html-dynamic-menus",        struc_CfgBool   { false,           DEFAULT } );
    m_cfgBool.insert("html-dynamic-sections",     struc_CfgBool   { false,           DEFAULT } );
    m_cfgInt.insert("html-index-num-entries",     struc_CfgInt    { 100,             DEFAULT } );
 

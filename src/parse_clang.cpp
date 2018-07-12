@@ -23,6 +23,7 @@
 #include <stdlib.h>
 
 #include <parse_clang.h>
+#include <parse_lib_tooling.h>
 
 #include <commentscan.h>
 #include <config.h>
@@ -30,7 +31,6 @@
 #include <entry.h>
 #include <message.h>
 #include <outputgen.h>
-#include <parse_lib_tooling.h>
 #include <qfileinfo.h>
 #include <stringmap.h>
 #include <tooltip.h>
@@ -328,28 +328,36 @@ static QString keywordToType(const QString &key)
       keyWords.insert("throws",   "keywordflow");
       keyWords.insert("try",      "keywordflow");
       keyWords.insert("while",    "keywordflow");
+
+      // objective-C
       keyWords.insert("@try",     "keywordflow");
       keyWords.insert("@catch",   "keywordflow");
       keyWords.insert("@finally", "keywordflow");
 
       keyWords.insert("bool",     "keywordtype");
+      keyWords.insert("boolean",  "keywordtype");
       keyWords.insert("char",     "keywordtype");
       keyWords.insert("double",   "keywordtype");
       keyWords.insert("float",    "keywordtype");
       keyWords.insert("int",      "keywordtype");
       keyWords.insert("long",     "keywordtype");
+      keyWords.insert("nullptr",  "keywordtype");
       keyWords.insert("object",   "keywordtype");
       keyWords.insert("short",    "keywordtype");
       keyWords.insert("signed",   "keywordtype");
       keyWords.insert("unsigned", "keywordtype");
       keyWords.insert("void",     "keywordtype");
-      keyWords.insert("wchar_t",  "keywordtype");
+
+      keyWords.insert("char16_t", "keywordtype");
+      keyWords.insert("char32_t", "keywordtype");
+      keyWords.insert("ssize_t",  "keywordtype");
       keyWords.insert("size_t",   "keywordtype");
-      keyWords.insert("boolean",  "keywordtype");
+      keyWords.insert("wchar_t",  "keywordtype");
+
+      // objective-C
       keyWords.insert("id",       "keywordtype");
       keyWords.insert("SEL",      "keywordtype");
       keyWords.insert("string",   "keywordtype");
-      keyWords.insert("nullptr",  "keywordtype");
 
       init = false;
    }
@@ -463,27 +471,33 @@ static bool documentKind(CXCursor cursor)
 {
    CXCursorKind kind = clang_getCursorKind(cursor);
 
-   if (kind == CXCursor_FunctionDecl       ||
-       kind == CXCursor_FunctionTemplate   ||
-       kind == CXCursor_ClassDecl          ||
-       kind == CXCursor_ClassTemplate      ||
-       kind == CXCursor_StructDecl         ||
-       kind == CXCursor_Constructor        ||
-       kind == CXCursor_Destructor         ||
-       kind == CXCursor_ConversionFunction ||
-       kind == CXCursor_UnionDecl          ||
-       kind == CXCursor_EnumDecl           ||
-       kind == CXCursor_EnumConstantDecl   ||
-       kind == CXCursor_FieldDecl          ||
-       kind == CXCursor_ParmDecl           ||
-       kind == CXCursor_VarDecl            ||
-       kind == CXCursor_CXXMethod          ||
-       kind == CXCursor_TypedefDecl        ||
-       kind == CXCursor_TypeAliasDecl      ||
-       kind == CXCursor_UnexposedDecl      ||
-       kind == CXCursor_MacroDefinition    ||
-       kind == CXCursor_Namespace    )  {
+   if (kind == CXCursor_UnexposedDecl             ||            // 1
+       kind == CXCursor_StructDecl                ||            // 2
+       kind == CXCursor_UnionDecl                 ||            // 3
+       kind == CXCursor_ClassDecl                 ||            // 4
+       kind == CXCursor_EnumDecl                  ||            // 5
+       kind == CXCursor_FieldDecl                 ||            // 6
+       kind == CXCursor_EnumConstantDecl          ||            // 7
+       kind == CXCursor_FunctionDecl              ||            // 8
+       kind == CXCursor_VarDecl                   ||            // 9
+       kind == CXCursor_ParmDecl                  ||            // 10
 
+       kind == CXCursor_TypedefDecl               ||            // 20
+       kind == CXCursor_CXXMethod                 ||            // 21
+
+       kind == CXCursor_Namespace                 ||            // 22
+       kind == CXCursor_Constructor               ||            // 24
+       kind == CXCursor_Destructor                ||            // 25
+       kind == CXCursor_ConversionFunction        ||            // 26
+       kind == CXCursor_TemplateTypeParameter     ||            // 27
+       kind == CXCursor_NonTypeTemplateParameter  ||            // 28
+       kind == CXCursor_TemplateTemplateParameter ||            // 29
+       kind == CXCursor_FunctionTemplate          ||            // 30
+       kind == CXCursor_ClassTemplate             ||            // 31
+       kind == CXCursor_ClassTemplatePartialSpecialization ||   // 32
+       kind == CXCursor_TypeAliasDecl             ||            // 36
+       kind == CXCursor_MacroDefinition   )                     // 501
+   {
       return true;
    }
 
@@ -493,48 +507,158 @@ static bool documentKind(CXCursor cursor)
 // ** entry point
 void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStringList &includeFiles, QSharedPointer<Entry> root)
 {
-   static QStringList const includePath      = Config::getList("include-path");
-   static QStringList const clangFlags       = Config::getList("clang-flags");
-   static QStringList const preDefinedMacros = Config::getList("predefined-macros");
+   static QStringList const includePath          = Config::getList("include-path");
+   static QStringList const preDefinedMacros     = Config::getList("predefined-macros");
 
-   static std::vector<std::string> clangCmdArgs;
-   std::vector<std::string> argList;
+   static QString     const clangCompilationPath = Config::getString("clang-compilation-path");
+   static QString     const clangDialect         = Config::getString("clang-dialect");
+   static bool        const clangUseHeaders      = Config::getBool("clang-use-headers");
+   static QStringList const clangFlags           = Config::getList("clang-flags");
 
-   if (clangCmdArgs.empty()) {
+   static const Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
 
-      // add include paths for input files
-      for (auto &item : Doxy_Globals::inputPaths) {
-         std::string inc = std::string("-I") + item.toUtf8().constData();
-         argList.push_back(std::move(inc));
+   static std::vector<QString> clangCmdArgs;
+   std::vector<QString> argList;
+
+   static std::unique_ptr<clang::tooling::CompilationDatabase> db_json;
+   static std::vector<clang::tooling::CompileCommand> db_commands;
+
+   bool useFallBack = true;
+
+   if (db_commands.empty() && ! clangCompilationPath.isEmpty()) {
+
+      if (! QFile(clangCompilationPath).exists()) {
+         errAll("Compilation database '%s' does not exist", csPrintable(clangCompilationPath));
       }
 
-      // add external include paths
-      for (auto &item : includePath) {
-         std::string inc = std::string("-I") + item.toUtf8().constData();
-         argList.push_back(std::move(inc));
+      std::string error;
+      db_json = clang::tooling::CompilationDatabase::loadFromDirectory(clangCompilationPath.constData(), error);
+
+      if (db_json == nullptr) {
+            errAll("Using compilation path '%s' failed.\nClang error: %s\n", csPrintable(clangCompilationPath), error.c_str());
       }
 
-      // add predefinded macros
-      for (const auto &item : preDefinedMacros) {
-         std::string macro = std::string("-D") + item.toUtf8().constData();
-         argList.push_back(std::move(macro));
+      db_commands = db_json->getAllCompileCommands();
+   }
+
+   if (! db_commands.empty())  {
+      // find the current file in the json compilation database
+      QString tFname = fileName;
+      QString tFakeHeader;
+
+#ifdef Q_OS_WIN
+      tFname = tFname.toLower();
+#endif
+
+      if (tFname.endsWith(".h")) {
+         tFakeHeader = tFname;
+         tFakeHeader.chop(2);
+         tFakeHeader.append(".cpp");
       }
 
-      // user specified flags
-      for (auto &item : clangFlags) {
-         argList.push_back(item.toUtf8().constData());
+      std::vector<std::string> options;
+
+      for (auto &cmd : db_commands)  {
+         QString lookup = QString::fromStdString(cmd.Filename);
+
+         if (lookup == tFname) {
+            // exact match
+            options = cmd.CommandLine;
+            break;
+
+         } else if (lookup == tFakeHeader)  {
+            // .h would be fine
+            options = cmd.CommandLine;
+            break;
+
+         }
       }
 
-      argList.push_back("-ferror-limit=0");
-      argList.push_back("-x");
+      if (! options.empty()) {
+         for (auto iter = options.begin() + 1; iter != options.end(); ++iter) {
+            QString item =  QString::fromStdString(*iter);
 
-      // save for the next pass
-      clangCmdArgs = argList;
+            if (item == "-isystem") {
+               // take this one and the next one
+               // argList.push_back(item);
 
-   } else {
-      // just copy the first x args since they do not change
-      argList = clangCmdArgs;
+               ++iter;
+               argList.push_back("-I" + QString::fromStdString(*iter));
 
+            } else if (item.startsWith("-D") || item.startsWith("-I") || item.startsWith("-c") || item.startsWith("-std")) {
+               // take this one
+               argList.push_back(item);
+            }
+         }
+
+         argList.push_back("--no-warnings");
+         argList.push_back("-ferror-limit=20");
+
+         // user specified flags, last
+         for (auto &item : clangFlags) {
+            argList.push_back(item);
+         }
+
+         // keep last, next arg is the language id
+         argList.push_back("-x");
+
+         useFallBack = false;
+      }
+   }
+
+   if (useFallBack)  {
+      // not using the compilation database
+
+      if (clangCmdArgs.empty()) {
+
+         // user provided clang headers
+         if (clangUseHeaders) {
+            QString inc = "-I" + QCoreApplication::applicationDirPath() + "/include/6.0.1/include";
+            argList.push_back(std::move(inc));
+         }
+
+         // add include paths for input files
+         for (auto &item : Doxy_Globals::inputPaths) {
+            argList.push_back("-I" + item);
+         }
+
+         // add external include paths
+         for (auto &item : includePath) {
+            argList.push_back("-I" + item);
+         }
+
+         // add predefinded macros
+         for (const auto &item : preDefinedMacros) {
+            argList.push_back("-D" + item);
+         }
+
+         // compile only
+         argList.push_back("-c");
+
+         // add dialect
+         if (! clangDialect.isEmpty()) {
+            argList.push_back(clangDialect);
+         }
+
+         argList.push_back("--no-warnings");
+         argList.push_back("-ferror-limit=20");
+
+         // user specified flags, last
+         for (auto &item : clangFlags) {
+            argList.push_back(item);
+         }
+
+         // keep last, next arg is the language id
+         argList.push_back("-x");
+
+         // save for the next pass
+         clangCmdArgs = argList;
+
+      } else {
+         // just copy the first x args since they do not change
+         argList = clangCmdArgs;
+
+      }
    }
 
    // if the file is an .h file it can contain C, C++, or Objective C  (review)
@@ -576,7 +700,8 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
          break;
    }
 
-   argList.push_back(fileName.toUtf8().constData());
+   // file name added
+   argList.push_back(fileName);
 
    // exclude PCH files, disable diagnostics
    p->index    = clang_createIndex(false, false);
@@ -595,7 +720,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
    p->ufs      = new CXUnsavedFile[numUnsavedFiles];
 
    // load main file
-
    if (fileBuffer.isEmpty()) {
       p->sources[0]   = detab(fileToString(fileName, filterSourceFiles, true)).toUtf8();
    } else  {
@@ -609,7 +733,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
    //
    uint i = 1;
    for (const auto &item : includeFiles) {
-
       p->fileMapping.insert(item, i);
 
       // load include files
@@ -621,26 +744,26 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       i++;
    }
 
-   // what is in argList ( check this one more time )
-   // data structure, source filename (in argv), cmd line args, num of cmd line args
-   // pass include files, num of unsaved files, clang flag, trans unit (file name)
-
+   // copy data to a usable vector for clang
    std::vector<const char *> argv;
    for (auto &item : argList) {
-      argv.push_back(item.c_str());
+      argv.push_back(item.constData());
    }
 
    int argc = argList.size();
+
+   // passed data - index, 0, command line args, number of args, included files
+   // num of unsaved files, clang flag indicating full preprocessing, translation unit structure
 
    // libClang - used to set up the tokens for comments
    CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, &argv[0], argc, p->ufs, numUnsavedFiles,
                   CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
 
-   if (p->tu && errorCode == CXError_Success) {
+   if (p->tu) {
       // filter out any includes not found by the clang parser
       determineInputFiles(includeFiles);
 
-      // show any warnings the compiler produced
+      // show warnings the compiler found
       uint diagCnt = clang_getNumDiagnostics(p->tu);
 
       for (uint i = 0; i != diagCnt; i++) {
@@ -656,37 +779,75 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       if (diagCnt > 0) {
          msg("\n");
       }
+   }
+
+   if (errorCode == CXError_Success) {
 
       if (root == nullptr)  {
-         // called from writeSouce in fileDef
+         // called from writeSouce() in fileDef
 
       } else {
          // libTooling - used to parse the source
+         const std::string stdFName = fileName.constData();
 
-         // start adding to entry
+         // start adding to our entry container
          s_current_root = root;
          s_entryMap.insert("TranslationUnit", root);
 
-         // strip out the fileName
-         argList.erase(argList.end() - 1);
+         if (false) {
+/*
+         if (! useFallBack)  {
+            // hold for now
 
-         // pass all arguments except the file name, which was just removed
-         clang::tooling::FixedCompilationDatabase options(".", argList);
+            QString tmp;
+            for (auto item : argList) {
+               tmp += item + "  ";
+            }
+            printf("\n Args: %s\n", csPrintable(tmp) );
 
-         const std::string tmpFName = fileName.toUtf8().constData();
+            llvm::cl::OptionCategory category("doxypress");
+            clang::tooling::CommonOptionsParser options(argc, &argv[0], category);
 
-         // pass the main file to parse
-         std::vector<std::string> sourceList;
-         sourceList.push_back(tmpFName);
+            // pass the main file name seperately
+            std::vector<std::string> sourceList;
+            sourceList.push_back(stdFName);
 
-         // create a new clang tooling instance
-         clang::tooling::ClangTool tool(options, sourceList);
+            // create a new clang tooling instance
+            clang::tooling::ClangTool tool(options.getCompilations(), sourceList);
 
-         // use the file in memory
-         tool.mapVirtualFile(tmpFName, p->sources[0].constData());
+            // use the file in memory
+            tool.mapVirtualFile(stdFName, p->sources[0].constData());
 
-         // run the clang tooling to create a new FrontendAction
-         int result = tool.run(clang::tooling::newFrontendActionFactory<DoxyFrontEnd>().get());
+            // run the clang tooling to create a new FrontendAction
+            int result = tool.run(clang::tooling::newFrontendActionFactory<DoxyFrontEnd>().get());
+*/
+
+         } else {
+            // save argList in a different vector for libTooling
+            std::vector<std::string> argTmp;
+
+            for (auto &item : argList) {
+               argTmp.push_back(item.constData());
+            }
+
+            // file name needed for libClang, but removed for libTooling
+            argTmp.erase(argTmp.end() - 1);
+
+            clang::tooling::FixedCompilationDatabase options(".", argTmp);
+
+            // pass the main file name seperately
+            std::vector<std::string> sourceList;
+            sourceList.push_back(stdFName);
+
+            // create a new clang tooling instance
+            clang::tooling::ClangTool tool(options, sourceList);
+
+            // use the file in memory
+            tool.mapVirtualFile(stdFName, p->sources[0].constData());
+
+            // run the clang tooling to create a new FrontendAction
+            int result = tool.run(clang::tooling::newFrontendActionFactory<DoxyFrontEnd>().get());
+         }
       }
 
       // create a source range for the file
@@ -705,7 +866,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       clang_annotateTokens(p->tu, p->tokens, p->numTokens, p->cursors);
 
       if (root == nullptr)  {
-         // called from writeSouce in fileDef
+         // called from writeSouce() in fileDef
          return;
       }
 
@@ -824,7 +985,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                }
 
             } else if (comment.startsWith("/*!")) {
-               // */ (editor syntax fix),   qt comment
+               // */ (editor syntax fix), qt comment
 
                int len = comment.length() - 5;
                comment = comment.mid(3, len);
@@ -842,7 +1003,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      QString extra = getTokenSpelling(p->tu, p->tokens[index]).trimmed();
 
                      int len = extra.length() - 5;
-                     extra = extra.mid(3, len);
+                     extra   = extra.mid(3, len);
 
                      comment += "\n\n" + extra;
 
@@ -871,7 +1032,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                int tmpIndex = index + 1;
 
                while (tmpIndex < p->numTokens)  {
-                  // is this next cursor a comment?
+                  // is the next cursor a comment?
                   CXTokenKind tokenKind = clang_getTokenKind(p->tokens[tmpIndex]);
 
                   if (tokenKind == CXToken_Comment) {
@@ -879,7 +1040,12 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                   }  else {
                      cursor = p->cursors[tmpIndex];
-                     break;
+
+                     if (getCursorUSR(cursor).isEmpty()) {
+                        tmpIndex++;
+                     } else {
+                        break;
+                     }
                   }
                }
 
@@ -890,7 +1056,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
             // test if the cursor is related to documentation
             if (documentKind(cursor)) {
-
                // add the comment to cursor
                QString name = getCursorSpelling(cursor);
                QString key  = getCursorUSR(cursor);
@@ -927,7 +1092,20 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       p->numTokens = 0;
       p->cursors   = 0;
 
-      err("Clang failed to parse file %s\n", csPrintable(fileName));
+
+printf("\n   Heads Up - libClang is NOT happy  %d\n\n", errorCode);
+
+
+      if (errorCode == CXError_InvalidArguments ) {
+         err("libClang failed to parse file %s, invalid arguments", csPrintable(fileName));
+
+      } else if (errorCode == CXError_ASTReadError ) {
+         err("libClang failed to parse file %s, problem in the AST\n", csPrintable(fileName));
+
+      } else {
+         err("libClang failed to parse file %s, terminated with error code %d \n", csPrintable(fileName), errorCode);
+
+      }
    }
 }
 
@@ -1334,17 +1512,16 @@ void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> 
                linkIdentifier(ol, fd, line, column, text, i);
 
             } else {
-               QString temp;
+               QString cssClass;
 
                if (cursorKind == CXCursor_PreprocessingDirective) {
-                  temp = "preprocessor";
+                  cssClass = "preprocessor";
 
                } else {
-                  temp = keywordToType(text);
-
+                  cssClass = keywordToType(text);
                }
 
-               codifyLines(ol, fd, text, line, column, temp);
+               codifyLines(ol, fd, text, line, column, cssClass);
             }
             break;
 
@@ -1362,7 +1539,6 @@ void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> 
             break;
 
          case CXToken_Comment:
-
             {
                bool omit = text.startsWith("/**") || text.startsWith("///") ||
                            text.startsWith("/*!") || text.startsWith("//!");

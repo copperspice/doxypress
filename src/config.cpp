@@ -889,7 +889,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("html-search") && Config::getBool("generate-chm")) {
-      warnMsg("When enabling 'Generate CHM', HTML Search' must be disabled\n");
+      warnMsg("When enabling 'GENERATE CHM', HTML SEARCH' must be disabled\n");
 
       auto iterBool = m_cfgBool.find("html-search");
       bool data = iterBool.value().value;
