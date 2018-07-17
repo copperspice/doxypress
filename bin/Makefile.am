@@ -16,29 +16,21 @@ csver=1.5
 # location of includes
 AM_CXXFLAGS+=-I../src
 
-if OSTYPE_LINUX
-endif
-
 if OSTYPE_BSD
-endif
-
-if OSTYPE_DARWIN
-endif
-
-if OSTYPE_WIN
    # path to clang
-   clang_path=../clang_lib
+   clang_path=`llvm-config --prefix`
 
-   clang_dll=$(clang_path)/bin/libclang.dll
+   clang_so=$(clang_path)/lib/libclang.so.*
    clang_hdr=$(clang_path)/include
 
-   clang_link=-L$(clang_path)/lib  -Wl,--start-group  \
+   clang_link=$(shell llvm-config --ldflags) -Wl,--start-group \
         -lLLVMSupport \
         -lclangAST \
         -lclangBasic \
         -lclangTooling \
         -lclangStaticAnalyzerFrontend \
         -lclangFrontend \
+        -lLLVMProfileData \
         -lclangDriver \
         -lclangParse \
         -lclangIndex \
@@ -56,6 +48,136 @@ if OSTYPE_WIN
         -lclangLex \
         -lclangBasic \
         -lLLVMCore \
+        -lLLVMBinaryFormat \
+        -lLLVMMC \
+        -lLLVMSupport \
+        -Wl,--end-group \
+        -lclang \
+        $(shell llvm-config --system-libs) \
+        '-Wl,-rpath,$$ORIGIN'
+
+   AM_CXXFLAGS+=`llvm-config --cxxflags`
+endif
+
+if OSTYPE_DARWIN
+   # path to clang
+   clang_path=`llvm-config --prefix`
+
+   clang_so=$(clang_path)/lib/libclang.so.*
+   clang_hdr=$(clang_path)/include
+
+   clang_link=$(shell llvm-config --ldflags) \
+        -lLLVMSupport \
+        -lclangAST \
+        -lclangBasic \
+        -lclangTooling \
+        -lclangStaticAnalyzerFrontend \
+        -lclangFrontend \
+        -lLLVMProfileData \
+        -lclangDriver \
+        -lclangParse \
+        -lclangIndex \
+        -lLLVMMCParser \
+        -lclangSerialization \
+        -lclangSema \
+        -lclangEdit  \
+        -lLLVMBitReader \
+        -lLLVMOption \
+        -lclangStaticAnalyzerCheckers \
+        -lclangStaticAnalyzerCore \
+        -lclangAnalysis \
+        -lclangAST \
+        -lclangToolingCore \
+        -lclangLex \
+        -lclangBasic \
+        -lLLVMCore \
+        -lLLVMBinaryFormat \
+        -lLLVMMC \
+        -lLLVMSupport \
+        -lLLVMDemangle \
+        -lclang \
+        $(shell llvm-config --system-libs) \
+        '-Wl,-rpath,$$ORIGIN'
+
+   AM_CXXFLAGS+=`llvm-config --cxxflags`
+endif
+
+if OSTYPE_LINUX
+   # path to clang
+   clang_path=`llvm-config --prefix`
+
+   clang_so=$(clang_path)/lib/libclang.so.*
+   clang_hdr=$(clang_path)/include
+
+   clang_link=$(shell llvm-config --ldflags) -Wl,--start-group \
+        -lLLVMSupport \
+        -lclangAST \
+        -lclangBasic \
+        -lclangTooling \
+        -lclangStaticAnalyzerFrontend \
+        -lclangFrontend \
+        -lLLVMProfileData \
+        -lclangDriver \
+        -lclangParse \
+        -lclangIndex \
+        -lLLVMMCParser \
+        -lclangSerialization \
+        -lclangSema \
+        -lclangEdit  \
+        -lLLVMBitReader \
+        -lLLVMOption \
+        -lclangStaticAnalyzerCheckers \
+        -lclangStaticAnalyzerCore \
+        -lclangAnalysis \
+        -lclangAST \
+        -lclangToolingCore \
+        -lclangLex \
+        -lclangBasic \
+        -lLLVMCore \
+        -lLLVMBinaryFormat \
+        -lLLVMMC \
+        -lLLVMSupport \
+        -Wl,--end-group \
+        -lclang \
+        $(shell llvm-config --system-libs) \
+        '-Wl,-rpath,$$ORIGIN'
+
+   AM_CXXFLAGS+=`llvm-config --cxxflags`
+endif
+
+if OSTYPE_WIN
+   # path to clang
+   clang_path=../clang_lib
+
+   clang_dll=$(clang_path)/bin/libclang.dll
+   clang_hdr=$(clang_path)/include
+
+   clang_link=-L$(clang_path)/lib  -Wl,--start-group  \
+        -lLLVMSupport \
+        -lclangAST \
+        -lclangBasic \
+        -lclangTooling \
+        -lclangStaticAnalyzerFrontend \
+        -lclangFrontend \
+        -lLLVMProfileData \
+        -lclangDriver \
+        -lclangParse \
+        -lclangIndex \
+        -lLLVMMCParser \
+        -lclangSerialization \
+        -lclangSema \
+        -lclangEdit  \
+        -lLLVMBitReader \
+        -lLLVMOption \
+        -lclangStaticAnalyzerCheckers \
+        -lclangStaticAnalyzerCore \
+        -lclangAnalysis \
+        -lclangAST \
+        -lclangToolingCore \
+        -lclangLex \
+        -lclangBasic \
+        -lLLVMCore \
+        -lLLVMBinaryFormat \
         -lLLVMMC \
         -lLLVMSupport \
         -Wl,--end-group \
@@ -67,46 +189,8 @@ if OSTYPE_WIN
    installdir=$(abs_top_builddir)/install
 endif
 
-# target app name
+# target name
 bin_PROGRAMS = doxypress
-
-# copy required CopperSpice and gcc files for deployment
-.PHONY: deploy
-
-if OSTYPE_LINUX
-deploy : all
-	mkdir -p $(deploydir)
-
-	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
-
-	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%$(csver).so*,$(cslibs)) $(deploydir)
-endif
-
-if OSTYPE_BSD
-deploy : all
-	mkdir -p $(deploydir)
-
-	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
-
-	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%$(csver).so*,$(cslibs)) $(deploydir)
-endif
-
-if OSTYPE_DARWIN
-endif
-
-if OSTYPE_WIN
-deploy : all
-	mkdir -p $(deploydir)
-	mkdir -p $(deploydir)/include/
-
-	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
-
-	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)%.dll,$(gcclibs))  $(deploydir)
-	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%$(csver).dll,$(cslibs))  $(deploydir)
-
-	rsync -W -a --modify-window=2  $(clang_dll)        $(deploydir)
-	rsync -W -a --modify-window=2  $(clang_hdr)/3.8.1  $(deploydir)/include/
-endif
 
 # search path for source
 VPATH = ../
@@ -114,8 +198,20 @@ VPATH = ../
 # linking
 doxypress_LDFLAGS=$(AM_LDFLAGS) $(patsubst %,-lCs%$(csver),$(cslibs)) $(clang_link)
 
+if OSTYPE_BSD
+   doxypress_LDFLAGS+= -lz
+endif
+
+if OSTYPE_DARWIN
+   doxypress_LDFLAGS+= -lz
+endif
+
+if OSTYPE_LINUX
+   doxypress_LDFLAGS+= -lz
+endif
+
 if OSTYPE_WIN
-   doxypress_LDFLAGS+= -lole32 -luuid
+   doxypress_LDFLAGS+= -lole32 -luuid -lversion -lz -ladvapi32
 endif
 
 doxypress_SOURCES = \
@@ -214,7 +310,6 @@ doxypress_SOURCES = \
    src/generated/parse_py.cpp \
    src/generated/parse_tcl.cpp \
    src/generated/pre.cpp
-
 
 noinst_HEADERS = \
    src/a_define.h \
@@ -323,7 +418,6 @@ noinst_HEADERS = \
    src/xmldocvisitor.h \
    src/xmlgen.h
 
-
 TRANSLATIONS =  \
     resources/translation/doxy_en.ts \
     resources/translation/doxy_af.ts \
@@ -370,13 +464,70 @@ TRANSLATIONS =  \
 
 RESOURCES = doxypress.qrc
 
-# use wilcard to obtain just the dependency list
+# use wilcard to obtain the dependency list
 qrc_doxypress.cpp: doxypress.qrc   $(shell find ../resources -type f)
 
 # required to compile qrc
 nodist_doxypress_SOURCES=qrc_doxypress.cpp
 
-# distribution
+
+# deployment rules
+.PHONY: deploy
+
+if OSTYPE_BSD
+deploy : all
+	mkdir -p $(deploydir)
+	mkdir -p $(deploydir)/include/
+
+	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
+
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%$(csver).so*,$(cslibs)) $(deploydir)
+
+	rsync -W -a --modify-window=2  $(clang_so)         $(deploydir)
+	rsync -W -a --modify-window=2  $(clang_hdr)/6.0.1  $(deploydir)/include/
+endif
+
+if OSTYPE_DARWIN
+	mkdir -p $(deploydir)
+	mkdir -p $(deploydir)/include/
+
+	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
+
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%$(csver).so*,$(cslibs)) $(deploydir)
+
+	rsync -W -a --modify-window=2  $(clang_so)         $(deploydir)
+	rsync -W -a --modify-window=2  $(clang_hdr)/6.0.1  $(deploydir)/include/
+endif
+
+if OSTYPE_LINUX
+deploy : all
+	mkdir -p $(deploydir)
+	mkdir -p $(deploydir)/include/
+
+	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
+
+	rsync -W -a $(patsubst %,$(CS_HOME)/lib/libCs%$(csver).so*,$(cslibs)) $(deploydir)
+
+	rsync -W -a --modify-window=2  $(clang_so)         $(deploydir)
+	rsync -W -a --modify-window=2  $(clang_hdr)/6.0.1  $(deploydir)/include/
+endif
+
+if OSTYPE_WIN
+deploy : all
+	mkdir -p $(deploydir)
+	mkdir -p $(deploydir)/include/
+
+	$(LIBTOOL) --mode=install cp $(bin_PROGRAMS) $(deploydir)
+
+	rsync -W -a --modify-window=2  $(patsubst %,$(gccpath)%.dll,$(gcclibs))  $(deploydir)
+	rsync -W -a --modify-window=2  $(patsubst %,$(CS_HOME)/bin/libCs%$(csver).dll,$(cslibs))  $(deploydir)
+
+	rsync -W -a --modify-window=2  $(clang_dll)        $(deploydir)
+	rsync -W -a --modify-window=2  $(clang_hdr)/6.0.1  $(deploydir)/include/
+endif
+
+
+# soruce distribution rules
 distdir: $(DISTFILES)
 	cd .. ; \
 	test -d "$(distdir_custom)" || mkdir -p "$(distdir_custom)" ; \
@@ -401,9 +552,9 @@ dist-hook:
 	cp -r bin/$(distdir)/../*   $(distdir_custom) ; \
 	cd $(distdir_custom)/..                       ; \
 \
-	rm  -f   ../DoxyPress-$(VERSION).zip         ; \
-	zip -r   ../DoxyPress-$(VERSION).zip .       ; \
-	rm  -f   ../DoxyPress-$(VERSION).tar.bz2     ; \
+	rm  -f   ../DoxyPress-$(VERSION).zip          ; \
+	zip -r   ../DoxyPress-$(VERSION).zip .        ; \
+	rm  -f   ../DoxyPress-$(VERSION).tar.bz2      ; \
 	tar -cjf ../DoxyPress-$(VERSION).tar.bz2 .
 
 

@@ -224,16 +224,15 @@ COPPERSPICE_RESOURCES(
 
 add_executable(doxypress ${DOXYPRESS_SOURCES})
 
-if(WIN32)
-   set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
-   set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
+set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
+set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
 
-   target_include_directories(doxypress PRIVATE
-      ${CMAKE_SOURCE_DIR}/src
-      ${CLANG_INCLUDE_DIR}
-   )
-endif ()
+target_include_directories(doxypress PRIVATE
+   ${CMAKE_SOURCE_DIR}/src
+   ${CLANG_INCLUDE_DIR}
+)
 
+if(APPLE)
 target_link_libraries(doxypress
    CopperSpice::CsCore${CS_VERSION}
    CopperSpice::CsXml${CS_VERSION}
@@ -246,6 +245,7 @@ target_link_libraries(doxypress
    -lclangTooling
    -lclangStaticAnalyzerFrontend
    -lclangFrontend
+   -lLLVMProfileData
    -lclangDriver
    -lclangParse
    -lclangIndex
@@ -263,22 +263,99 @@ target_link_libraries(doxypress
    -lclangLex
    -lclangBasic
    -lLLVMCore
+   -lLLVMBinaryFormat
+   -lLLVMMC
+   -lLLVMSupport
+   -Wl,--end-group
+   -lclang
+   '-Wl,-rpath,$ORIGIN'
+)
+endif()
+
+if(UNIX)
+
+target_link_libraries(doxypress
+   CopperSpice::CsCore${CS_VERSION}
+   CopperSpice::CsXml${CS_VERSION}
+
+   -L${CLANG_LIB_DIR}
+   -Wl,--start-group
+   -lLLVMSupport
+   -lclangAST
+   -lclangBasic
+   -lclangTooling
+   -lclangStaticAnalyzerFrontend
+   -lclangFrontend
+   -lLLVMProfileData
+   -lclangDriver
+   -lclangParse
+   -lclangIndex
+   -lLLVMMCParser
+   -lclangSerialization
+   -lclangSema
+   -lclangEdit
+   -lLLVMBitReader
+   -lLLVMOption
+   -lclangStaticAnalyzerCheckers
+   -lclangStaticAnalyzerCore
+   -lclangAnalysis
+   -lclangAST
+   -lclangToolingCore
+   -lclangLex
+   -lclangBasic
+   -lLLVMCore
+   -lLLVMBinaryFormat
+   -lLLVMMC
+   -lLLVMSupport
+   -Wl,--end-group
+   -lclang
+   '-Wl,-rpath,$ORIGIN'
+)
+endif()
+
+if(WIN32)
+target_link_libraries(doxypress
+   CopperSpice::CsCore${CS_VERSION}
+   CopperSpice::CsXml${CS_VERSION}
+
+   -L${CLANG_LIB_DIR}
+   -Wl,--start-group
+   -lLLVMSupport
+   -lclangAST
+   -lclangBasic
+   -lclangTooling
+   -lclangStaticAnalyzerFrontend
+   -lclangFrontend
+   -lLLVMProfileData
+   -lclangDriver
+   -lclangParse
+   -lclangIndex
+   -lLLVMMCParser
+   -lclangSerialization
+   -lclangSema
+   -lclangEdit
+   -lLLVMBitReader
+   -lLLVMOption
+   -lclangStaticAnalyzerCheckers
+   -lclangStaticAnalyzerCore
+   -lclangAnalysis
+   -lclangAST
+   -lclangToolingCore
+   -lclangLex
+   -lclangBasic
+   -lLLVMCore
+   -lLLVMBinaryFormat
    -lLLVMMC
    -lLLVMSupport
    -Wl,--end-group
    -llibclang
 )
+endif()
 
 install(TARGETS doxypress DESTINATION .)
 
-if(WIN32)
-   install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
-   install(FILES     ${CLANG_LIBS}  DESTINATION .)
+install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
+install(FILES     ${CLANG_LIBS}  DESTINATION .)
 
-   cs_copy_dll(doxypress Core)
-   cs_copy_dll(doxypress Xml)
-
-else()
-   # other platforms
-
-endif()
+cs_copy_dll(doxypress Core)
+cs_copy_dll(doxypress Xml)

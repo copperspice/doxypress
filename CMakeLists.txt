@@ -10,22 +10,22 @@ include(CheckTypeSize)
 find_package(CopperSpice REQUIRED)
 
 if(WIN32)
-   set(CLANG_PATH "../clang_lib")
-
-   # lib clang dll
-   set(CLANG_LIBS ${CLANG_PATH}/bin/libclang.dll)
-
-   # lib clang hdr
-   set(CLANG_INC ${CLANG_PATH}/include/3.8.1)
-
    set(CMAKE_INSTALL_SYSTEM_RUNTIME_DESTINATION .)
    include(${CopperSpice_DIR}/InstallMinGW.cmake)
-
-else()
-   # find_package(LibClang REQUIRED)
-   # find_package(LibTooling REQUIRED)
-
 endif()
+
+# locate the files for libClang and libTooling
+set(CLANG_PATH "../clang_lib")
+
+# lib clang dll
+set(CLANG_LIBS ${CLANG_PATH}/bin/libclang.dll)
+
+# lib clang hdr
+set(CLANG_INC ${CLANG_PATH}/include/6.0.1)
+
+# find_package(LibClang REQUIRED)
+# find_package(LibTooling REQUIRED)
+
 
 # file locations for installing
 if(WIN32)

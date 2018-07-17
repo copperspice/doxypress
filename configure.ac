@@ -32,20 +32,21 @@ case "$target" in
    prefix=`pwd`/install
    OSTYPE=WIN ;;
 
-*-*-linux-*)
-   OSTYPE=LINUX ;;
-
 *-*-*bsd*)
    OSTYPE=BSD ;;
 
 *-*-darwin*)
    OSTYPE=DARWIN ;;
+
+*-*-linux-*)
+   OSTYPE=LINUX ;;
+
 esac
 
-AM_CONDITIONAL(OSTYPE_WIN, test "$OSTYPE" == WIN)
-AM_CONDITIONAL(OSTYPE_LINUX, test "$OSTYPE" == LINUX)
-AM_CONDITIONAL(OSTYPE_BSD, test "$OSTYPE" == BSD)
+AM_CONDITIONAL(OSTYPE_WIN,    test "$OSTYPE" == WIN)
+AM_CONDITIONAL(OSTYPE_BSD,    test "$OSTYPE" == BSD)
 AM_CONDITIONAL(OSTYPE_DARWIN, test "$OSTYPE" == DARWIN)
+AM_CONDITIONAL(OSTYPE_LINUX,  test "$OSTYPE" == LINUX)
 
 echo
 echo "Checking System headers"
