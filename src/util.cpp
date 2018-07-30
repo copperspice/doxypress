@@ -2056,9 +2056,20 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<const Definition> 
 
                   if (word.contains("(")) {
                      // ensure word refers to a method name, (added 01/2016)
+                     bool ok = true;
 
-                     out.writeLink(md->getReference(), md->getOutputFileBase(), md->anchor(), word);
-                     found = true;
+                     if (scope != nullptr && scope->getLanguage() == SrcLangExt_Fortran) {
+                        // if Fortran scope and the variable is a non Fortran variable, do not link
+
+                       if (md->isVariable() && (md->getLanguage() != SrcLangExt_Fortran)) {
+                          ok = false;
+                       }
+                     }
+
+                     if (ok) {
+                        out.writeLink(md->getReference(), md->getOutputFileBase(), md->anchor(), word);
+                        found = true;
+                     }
                   }
                }
             }
@@ -6132,6 +6143,24 @@ void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d)
    recursivelyAddGroupListToTitle(ol, d, true);
 }
 
+// latex only
+static int s_usedTableLevels = 0;
+
+void incUsedTableLevels()
+{
+   ++s_usedTableLevels;
+}
+
+void decUsedTableLevels()
+{
+   --s_usedTableLevels;
+}
+
+int usedTableLevels()
+{
+   return s_usedTableLevels;
+}
+
 void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, bool insidePre,
                   bool insideItem, bool keepSpaces)
 {
@@ -6168,6 +6197,30 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
             case '_':
                t << "\\_";
+               break;
+
+            case '&':
+               t << "\\&";
+               break;
+
+            case '%':
+               t << "\\%";
+               break;
+
+            case '#':
+               t << "\\#";
+               break;
+
+            case '$':
+               t << "\\$";
+               break;
+
+            case '^':
+               (usedTableLevels() > 0) ? t << "\\string^" : t << c;
+               break;
+
+            case '~':
+               (usedTableLevels() > 0) ? t << "\\string~" : t << c;
                break;
 
             case ' ':
@@ -6318,6 +6371,10 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
             case '"':
                t << "\\char`\\\"{}";
+               break;
+
+            case '`':
+               t << "\\`{}";
                break;
 
             case '\'':
@@ -7374,7 +7431,7 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
 
    } else if (size >= 3 && (uchar)buffer.at(0) == 0xEF && (uchar)buffer.at(1) == 0xBB && (uchar)buffer.at(2) == 0xBF) {
 
-      // UTF-8 encoded file, remove UTF-8 BOM: no translation needed
+      // UTF-8 encoded file, remove UTF-8 BOM, no translation needed
       buffer = buffer.mid(3);
       fileContents  = QString::fromUtf8(buffer);
 
@@ -7517,8 +7574,8 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
    return result;
 }
 
-/** Writes the intensity only bitmap representated by \a data as an image to
- *  directory \a dir using the colors defined by html_colorstyle.
+/** Writes the intensity only bitmap represented by \a data as an image to
+ *  directory using the colors defined by html_colorstyle.
  */
 void writeColoredImgData(ColoredImgDataItem data)
 {

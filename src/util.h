@@ -140,9 +140,15 @@ QChar   charToUpper(const QString &s, int index);
 
 bool    classVisibleInIndex(QSharedPointer<ClassDef> cd);
 bool    classHasVisibleChildren(QSharedPointer<ClassDef> cd);
+bool    copyFile(const QString &src, const QString &dest);
+bool    checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,const QString &name);
 int     computeQualifiedIndex(const QString &name);
-void    createSubDirs(QDir &d);
+int     countAliasArguments(const QString &argList);
 
+void    createSubDirs(QDir &d);
+void    convertProtectionLevel(MemberListType inListType,Protection inProt, int *outListType1, int *outListType2);
+
+QString correctURL(const QString &url, const QString &relPath);
 QString convertNameToFile_X(const QString &name, bool allowDots = false, bool allowUnderscore = false);
 QString convertToHtml(const QString &s,  bool keepEntities  = true);
 QString convertToLatex(const QString &s, bool insideTabbing = false, bool keepSpaces = false);
@@ -196,7 +202,6 @@ QString latexEscapeLabelName(const QString &data,  bool insideTabbing);
 QString latexEscapeIndexChars(const QString &data, bool insideTabbing);
 QString latexEscapePDFString(const QString &data);
 QString linkToText(SrcLangExt lang, const QString &link, bool isFileName);
-
 QString lowerCaseFirstLetter(QString &&text);
 
 bool    leftScopeMatch(const QString &scope, const QString &name);
@@ -205,11 +210,20 @@ void    linkifyText(const TextGeneratorIntf &ol, QSharedPointer<const Definition
                   QSharedPointer<const Definition> self, const QString &text,
                   bool autoBreak = false, bool external = true, bool keepSpaces = false, int indentLevel = 0);
 
+QString mergeScopes(const QString &leftScope, const QString &rightScope);
+
+bool    mainPageHasTitle();
 bool    matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef> srcFileScope,
                   const ArgumentList &srcArgList, QSharedPointer<Definition> dstScope, QSharedPointer<FileDef> dstFileScope,
                   const ArgumentList &dstArgList, bool checkCV);
 
 void    mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool forceNameOverwrite = false);
+int     minClassDistance(QSharedPointer<const ClassDef> cd, QSharedPointer<const ClassDef> bcd, int level = 0);
+
+QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointer<Definition> context,
+                  const ArgumentList &formalArgList);
+
+bool    namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClasses);
 
 QString parseCommentAsText(QSharedPointer<const Definition> scope, QSharedPointer<const MemberDef> member,
                   const QString &doc, const QString &fileName, int lineNr);
@@ -220,6 +234,7 @@ bool    readInputFile(const QString &fileName, QString &fileContents, bool filte
 QString resolveAliasCmd(const QString &aliasCmd);
 QString removeRedundantWhiteSpace(const QString &s, bool makePretty = true);
 QString removeAnonymousScopes(const QString &s);
+QString replaceColorMarkers(const QString &str);
 QString replaceAnonymousScopes(const QString &s, const QString &replacement = QString() );
 QString resolveTypeDef(QSharedPointer<Definition> d, const QString &name, QSharedPointer<Definition> *typedefContext = nullptr);
 QString rtfFormatBmkStr(const QString &name);
@@ -302,29 +317,23 @@ Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPoi
 // method located in doxy_setup.cpp
 SrcLangExt getLanguageFromFileName(const QString &fileName);
 
+// latex support
+int  usedTableLevels();
+void incUsedTableLevels();
+void decUsedTableLevels();
+
 
 //  *******
-bool    namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClasses);
-int     minClassDistance(QSharedPointer<const ClassDef> cd, QSharedPointer<const ClassDef> bcd, int level = 0);
 QString insertTemplateSpecifierInScope(const QString &scope, const QString &templ);
-QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointer<Definition> context, const ArgumentList &formalArgList);
-QString mergeScopes(const QString &leftScope, const QString &rightScope);
 QString trimEmptyLines(const QString &s, int &docLine);
-bool    checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,const QString &name);
-int     countAliasArguments(const QString &argList);
 QString expandAlias(const QString &aliasName, const QString &aliasValue);
 QString convertCharEntities(const QString &s);
 bool    patternMatch(const QFileInfo &fi, const QStringList &patList);
 void    writeColoredImgData(ColoredImgDataItem data);
-QString replaceColorMarkers(const QString &str);
-bool    copyFile(const QString &src, const QString &dest);
 QString extractBlock(const QString &text, const QString &marker);
-QString correctURL(const QString &url, const QString &relPath);
 bool    protectionLevelVisible(Protection prot);
 bool    docFileVisibleInIndex(QSharedPointer<FileDef> fd);
 void    addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst);
-void    convertProtectionLevel(MemberListType inListType,Protection inProt, int *outListType1, int *outListType2);
-bool    mainPageHasTitle();
 
 #endif
 

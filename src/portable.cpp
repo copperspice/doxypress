@@ -55,6 +55,10 @@ int portable_system(const QString &command, const QString &args, bool commandHas
       return 1;
    }
 
+#if defined(Q_OS_WIN)
+   fullCmd = fullCmd.replace('/', '\\' );
+#endif
+
    if (! fullCmd.startsWith('"') && fullCmd.contains(' ')) {
       // add quotes around command as it contains spaces and is not quoted already
       fullCmd = "\"" + fullCmd + "\"";
@@ -113,7 +117,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
       SHELLEXECUTEINFOW sInfo = {
          sizeof(SHELLEXECUTEINFOW),
 
-         // wait till the process is  done, do not display msg box if there is an error
+         // wait till the process is done, do not display msg box if there is an error
          SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,
 
          NULL,                               /* window handle */

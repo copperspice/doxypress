@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -42,12 +42,13 @@ void TextDocVisitor::filter(const QString &str)
       return;
    }
 
-   for (auto c : str) { 
+   for (auto c : str) {
       switch (c.unicode()) {
          case '\n':
             m_t << " ";
             break;
 
+/*
          case '\'':
             m_t << "&#39;";
             break;
@@ -67,6 +68,7 @@ void TextDocVisitor::filter(const QString &str)
          case '&':
             m_t << "&amp;";
             break;
+*/
 
          default:
             m_t << c;
