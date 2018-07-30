@@ -1,8 +1,8 @@
 /*************************************************************************
  *
- * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim 
+ * Copyright (C) 2014-2018 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * All rights reserved.    
+ * All rights reserved.
  *
  * Permission to use, copy, modify, and distribute this software and its
  * documentation under the terms of the GNU General Public License version 2
@@ -26,7 +26,7 @@
 enum class DirType {
    None,
    File,
-   FileSource,   
+   FileSource,
 };
 
 class Definition;
@@ -43,10 +43,10 @@ class IndexIntf
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
 
-   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
+   virtual void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file,
             const QString &anchor, bool addToNavIndex, QSharedPointer<Definition> def, DirType category) = 0;
 
-   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
+   virtual void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
             const QString &sectionAnchor, const QString &title) = 0;
 
    virtual void addIndexFile(const QString &name) = 0;
@@ -67,19 +67,19 @@ class IndexList : public IndexIntf
    void call_forEach(void (IndexIntf::*methodPtr)()) {
       for (auto item : m_intfs) {
          ((*item).*methodPtr)();
-      }  
+      }
    }
 
    template<typename A1>
    void call_forEach(void (IndexIntf::*methodPtr)(A1), A1 a1) {
-       for (auto item : m_intfs) {      
+       for (auto item : m_intfs) {
          ((*item).*methodPtr)(a1);
       }
    }
-  
+
  public:
    /** Creates a list of indexes */
-   IndexList() {     
+   IndexList() {
       m_enabled = true;
    }
 
@@ -121,8 +121,8 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
-                  bool addToNavIndex = false, QSharedPointer<Definition> def = QSharedPointer<Definition>(), 
+   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
+                  bool addToNavIndex = false, QSharedPointer<Definition> def = QSharedPointer<Definition>(),
                   DirType category = DirType::None) override {
 
       if (m_enabled)  {
@@ -132,11 +132,11 @@ class IndexList : public IndexIntf
       }
    }
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, 
-                  const QString &sectionAnchor = QString(), const QString &title = QString()) override {   
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
+                  const QString &sectionAnchor = QString(), const QString &title = QString()) override {
       if (m_enabled) {
          for (auto item : m_intfs) {
-            item->addIndexItem(context, md, sectionAnchor, title);    
+            item->addIndexItem(context, md, sectionAnchor, title);
          }
       }
    }
@@ -273,7 +273,7 @@ extern int documentedDirs;
 void startTitle(OutputList &ol, const QString &fileName, QSharedPointer<Definition> def = QSharedPointer<Definition>() );
 void endTitle(OutputList &ol, const QString &fileName, const QString &name);
 
-void startFile(OutputList &ol, const QString &name, const QString &manName, const QString &title, 
+void startFile(OutputList &ol, const QString &name, const QString &manName, const QString &title,
                   HighlightedItem hli = HLI_None, bool additionalIndices = false, const QString &altSidebarName = QString() );
 
 void endFile(OutputList &ol, bool skipNavIndex = false, bool skipEndContents = false, const QString &navPath = QString() );

@@ -23,7 +23,6 @@
 #include <stdlib.h>
 
 #include <formula.h>
-
 #include <config.h>
 #include <doxy_globals.h>
 #include <image.h>

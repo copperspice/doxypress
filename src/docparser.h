@@ -273,7 +273,7 @@ class DocLinkedWord : public DocNode
    QString  m_tooltip;
 };
 
-/** Node representing an URL (or email address) */
+/** Node representing a URL or email address */
 class DocURL : public DocNode
 {
  public:
@@ -322,7 +322,7 @@ class DocLineBreak : public DocNode
  private:
 };
 
-/** Node representing a horizonal ruler */
+/** Node representing a horizontal ruler */
 class DocHorRuler : public DocNode
 {
  public:

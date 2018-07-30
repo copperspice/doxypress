@@ -224,7 +224,7 @@ void CiteDict::generatePage() const
       errAll("Issue with Perl or BibTeX. Verify 'perl --version' works from a Windows or Shell command line.\n\n");
 
    } else if (exitCode != 0) {
-      errAll("Issue with Perl or BibTeX. \nVerify messages appearing afer 'Generating citations page' in your "
+      errAll("Issue with Perl or BibTeX. \n       Verify messages appearing afer 'Generating citations page' in your "
                   "DoxyPress UI output. Exit Code: %d\n\n", exitCode);
    }
 

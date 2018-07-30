@@ -121,15 +121,15 @@ FTVHelp::~FTVHelp()
    delete[] m_indentNodes;
 }
 
-/*! This will create a folder tree view table of contents file (tree.js).
- *  \sa finalize()
+/* This will create a folder tree view table of contents file (tree.js).
+ *
  */
 void FTVHelp::initialize()
 {
 }
 
-/*! Finalizes the FTV help. This will finish and close the contents file (index.js).
- *  \sa initialize()
+/* Finalizes the FTV help. This will finish and close the contents file (index.js).
+ *
  */
 void FTVHelp::finalize()
 {

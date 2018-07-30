@@ -1246,7 +1246,7 @@ void RTFDocVisitor::visitPost(DocHtmlHeader *)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlHeader)}\n");
 
-   // close open table of contens entry
+   // close open table of contents entry
    m_t << "} \\par";
 
    // end section

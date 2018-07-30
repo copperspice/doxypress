@@ -442,7 +442,7 @@ void processFiles()
 
    uint pid = portable_pid();
 
-   // Check/create output directorties
+   // Check/create output directories
    QString htmlOutput;
    static const bool generateHtml = Config::getBool("generate-html");
 
@@ -9622,7 +9622,7 @@ QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QStri
 }
 
 // read all files matching at least one pattern in `patList' in the directory represented by `fi'
-// directory is read if the recusiveFlag is set, contents of all files is append to the input string
+// directory is read if the recursiveFlag is set, contents of all files is append to the input string
 
 void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 {
@@ -9636,7 +9636,7 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
       dirName = resolveSymlink(dirName);
 
       if (dirName.isEmpty()) {
-         return;     // recusive symlink
+         return;     // recursive symlink
       }
 
       if (Doxy_Globals::g_pathsVisited.contains(dirName)) {

@@ -847,7 +847,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> cu
    ol.writeString("      </div>\n");
 }
 
-/*! Write a source listing of this file to the output */
+// write source listing of this file to the output
 void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFiles)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
@@ -944,7 +944,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
       ol.endCodeFragment();
 
    } else  {
-      // use lex
+      // use lex parsing
 
       ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();

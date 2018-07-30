@@ -6169,7 +6169,7 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_ENDDOT:
       case CMD_ENDMSC:
       case CMD_ENDUML:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s", csPrintable(g_token->name));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s inside paragraph", csPrintable(g_token->name));
          break;
 
       case CMD_PARAM:
@@ -6321,11 +6321,11 @@ int DocPara::handleCommand(const QString &cmdName)
       break;
 
       case CMD_SECREFITEM:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s", csPrintable(g_token->name));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s inside paragraph", csPrintable(g_token->name));
          break;
 
       case CMD_ENDSECREFLIST:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s", csPrintable(g_token->name));
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s inside paragraph", csPrintable(g_token->name));
          break;
 
       case CMD_FORMULA: {

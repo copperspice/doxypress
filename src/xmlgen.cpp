@@ -222,7 +222,7 @@ static void writeCombineScript()
      "  <xsl:output method=\"xml\" version=\"1.0\" indent=\"no\" standalone=\"yes\" />\n"
      "  <xsl:template match=\"/\">\n"
      "    <doxypress version=\"{doxypressindex/@version}\">\n"
-     "      <!-- Load all doxgen generated xml files -->\n"
+     "      <!-- Load all doxypress generated xml files -->\n"
      "      <xsl:for-each select=\"doxypressindex/compound\">\n"
      "        <xsl:copy-of select=\"document( concat( @refid, '.xml' ) )/doxypress/*\" />\n"
      "      </xsl:for-each>\n"
