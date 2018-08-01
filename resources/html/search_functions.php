@@ -1,4 +1,4 @@
-<script language="PHP">
+<?php
 require_once "search_config.php";
 
 function end_form($value)
@@ -113,14 +113,14 @@ function search($file,$word,&$statsList)
         $multiplier = 1;
         // whole word matches have a double weight
         if ($statInfo["full"]) $multiplier=2;
-        fseek($file,$statInfo["index"]); 
+        fseek($file,$statInfo["index"]);
         $numDocs = readInt($file);
         $docInfo = array();
         // read docs info + occurrence frequency of the word
         for ($i=0;$i<$numDocs;$i++)
         {
-          $idx=readInt($file); 
-          $freq=readInt($file); 
+          $idx=readInt($file);
+          $freq=readInt($file);
           $docInfo[$i]=array("idx"  => $idx,
                              "freq" => $freq>>1,
                              "rank" => 0.0,
@@ -207,7 +207,7 @@ function combine_results($results,&$docs)
 function filter_results($docs,&$requiredWords,&$forbiddenWords)
 {
   $filteredDocs=array();
-  while (list ($key, $val) = each ($docs)) 
+  while (list ($key, $val) = each ($docs))
   {
     $words = &$docs[$key]["words"];
     $copy=1; // copy entry by default
@@ -217,11 +217,11 @@ function filter_results($docs,&$requiredWords,&$forbiddenWords)
       {
         $found=0;
         foreach ($words as $wordInfo)
-        { 
+        {
           $found = $wordInfo["word"]==$reqWord;
           if ($found) break;
         }
-        if (!$found) 
+        if (!$found)
         {
           $copy=0; // document contains none of the required words
           break;
@@ -246,11 +246,11 @@ function filter_results($docs,&$requiredWords,&$forbiddenWords)
 
 function compare_rank($a,$b)
 {
-  if ($a["rank"] == $b["rank"]) 
+  if ($a["rank"] == $b["rank"])
   {
     return 0;
   }
-  return ($a["rank"]>$b["rank"]) ? -1 : 1; 
+  return ($a["rank"]>$b["rank"]) ? -1 : 1;
 }
 
 function sort_results($docs,&$sorted)
@@ -308,11 +308,11 @@ function report_results(&$docs)
 
 function run_query($query)
 {
-  if(strcmp('4.1.0', phpversion()) > 0) 
+  if(strcmp('4.1.0', phpversion()) > 0)
   {
     die("Error: PHP version 4.1.0 or above required!");
   }
-  if (!($file=fopen("search/search.idx","rb"))) 
+  if (!($file=fopen("search/search.idx","rb")))
   {
     die("Error: Search index file could NOT be opened!");
   }
@@ -363,4 +363,5 @@ function main()
   report_results($sorted);
   end_page();
 }
-</script>
+?>
+

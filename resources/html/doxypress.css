@@ -118,7 +118,8 @@ div.navtab {
    margin-right: 15px;
 }
 
-/* @group Link Styling */
+/* group Link Styling */
+
 a {
    color: ##50;
    font-weight: normal;
@@ -163,20 +164,26 @@ a.codeRef, a.codeRef:visited, a.lineRef, a.lineRef:visited {
    color: #4665A2;
 }
 
-/* @end */
-
 dl.el {
    margin-left: -1cm;
 }
 
 ul {
-  overflow: hidden;    /* Fix: list item bullets overlap floating elements */
+  overflow: hidden;
+}
+
+#side-nav ul {
+  overflow: visible;         /* reset ul rule for scroll bar in GENERATE_TREEVIEW window */
+}
+
+#main-nav ul {
+  overflow: visible;         /* reset ul rule for the navigation bar drop down lists */
 }
 
 .fragment {
   text-align: left;
   direction: ltr;
-  overflow-x: auto;    /* Fix: fragment lines overlap floating elements */
+  overflow-x: auto;
   overflow-y: hidden;
 }
 
@@ -378,22 +385,23 @@ img.footer {
    vertical-align: middle;
 }
 
-/* @group Code Colorization */
+
+/* soruce code colorization */
 
 span.keyword {
-   color: #008000
+   color: #0000FF            /* blue  */
 }
 
 span.keywordtype {
-   color: #604020
+   color: #a500a5            /* purple */
 }
 
 span.keywordflow {
-   color: #e08000
+   color: #E08000            /* orange */
 }
 
 span.comment {
-   color: #800000
+   color: #008000            /* green */
 }
 
 span.preprocessor {
@@ -401,12 +409,13 @@ span.preprocessor {
 }
 
 span.stringliteral {
-   color: #002080
+   color: #002080            /* dark blue */
 }
 
 span.charliteral {
-   color: #008080
+   color: #008080            /* teal */
 }
+
 
 blockquote {
    background-color: ##F8;
@@ -415,7 +424,6 @@ blockquote {
    padding: 0 12px 0 16px;
 }
 
-/* @end */
 
 /*
 .search {
@@ -461,7 +469,7 @@ hr.footer {
    height: 1px;
 }
 
-/* @group Member Descriptions */
+/* member descriptions */
 
 table.memberdecls {
    border-spacing: 0px;
@@ -523,9 +531,6 @@ table.memberdecls {
    font-size: 80%;
 }
 
-/* @end */
-
-/* @group Member Details */
 
 /* Styles for detailed member documentation */
 
@@ -732,9 +737,7 @@ span.mlabel {
 }
 
 
-/* @end */
-
-/* these are for a tree view inside a (index) page */
+/* tree view inside an index page */
 
 div.directory {
    margin: 10px 0px;
@@ -895,9 +898,6 @@ table.directory tr.even {
    padding-left: 6px;
    background-color: ##F8;
 }
-
-
-/* @end */
 
 div.dynheader {
     margin-top: 8px;
