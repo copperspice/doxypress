@@ -9626,6 +9626,8 @@ QString Doxy_Work::createOutputDirectory(const QString &baseDirName, const QStri
 
 void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
 {
+   static const bool excludeSymlink = Config::getBool("exclude-symlinks");
+
    QString dirName = fi.absoluteFilePath();
 
    if (data.isPathSet && ! data.pathSet.contains(dirName)) {
@@ -9667,8 +9669,6 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
             }
 
          } else {
-            bool excludeSymlink = Config::getBool("exclude-symlinks");
-
             if (excludeSymlink && cfi.isSymLink())  {
                continue;
             }

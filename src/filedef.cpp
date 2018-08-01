@@ -474,7 +474,9 @@ void FileDef::writeSourceLink(OutputList &ol)
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
       ol.startTextLink(includeName(), 0);
+
       ol.parseText(theTranslator->trGotoSourceCode());
+
       ol.endTextLink();
       ol.endParagraph();
       ol.enableAll();
@@ -856,6 +858,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
    static const bool filterSourceFiles = Config::getBool("filter-source-files");
    static const bool latexSourceCode   = Config::getBool("latex-source-code");
    static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
+   static const bool clangParsing      = Config::getBool("clang-parsing");
 
    DevNullCodeDocInterface devNullIntf;
    QString title = m_docname;
@@ -926,18 +929,17 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
    }
 
    // user specified
-   static const bool clangParsing = Config::getBool("clang-parsing");
    auto srcLang = getLanguage();
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
-
       ol.startCodeFragment();
 
-      if (! sameTu) {
-         ClangParser::instance()->start(getFilePath(), QByteArray(), includedFiles, QSharedPointer<Entry>());
+      if (sameTu) {
+         ClangParser::instance()->switchToFile(getFilePath());
 
       } else {
-         ClangParser::instance()->switchToFile(getFilePath());
+         ClangParser::instance()->start(getFilePath(), QString(), includedFiles, QSharedPointer<Entry>());
+
       }
 
       ClangParser::instance()->writeSources(ol, self);
@@ -977,20 +979,18 @@ void FileDef::parseSource(bool sameTu, QStringList &includedFiles)
 {
    QSharedPointer<FileDef> self  = sharedFrom(this);
    static bool filterSourceFiles = Config::getBool("filter-source-files");
+   static bool clangParsing = Config::getBool("clang-parsing");
 
    DevNullCodeDocInterface devNullIntf;
-
-   static bool clangParsing = Config::getBool("clang-parsing");
    auto srcLang = getLanguage();
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
       // use clang parser
 
-      if (! sameTu) {
-         ClangParser::instance()->start(getFilePath(), QByteArray(), includedFiles, QSharedPointer<Entry>());
-
-      } else {
+      if (sameTu) {
          ClangParser::instance()->switchToFile(getFilePath());
+      } else {
+         ClangParser::instance()->start(getFilePath(), QString(), includedFiles, QSharedPointer<Entry>());
       }
 
       ClangParser::instance()->writeSources(devNullIntf, self);

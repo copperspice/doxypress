@@ -185,7 +185,7 @@ class ClassDef : public Definition
    QSharedPointer<MemberDef> getMemberByName(const QString &) const;
 
    // returns true if  bcd is a direct or indirect base class of this class
-   // will recusively traverse all branches of the inheritance tree
+   // will recursively traverse all branches of the inheritance tree
    bool isBaseClass(QSharedPointer<const ClassDef> bcd, bool followInstances, int level = 0) const;
 
    // returns true iff \a bcd is a direct or indirect sub class of this class

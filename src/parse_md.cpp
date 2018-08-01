@@ -568,17 +568,17 @@ static int processNmdash(QString &out, QStringView data, QString::const_iterator
    QString::const_iterator iter_i = data.constBegin() + 1;
    int count = 1;
 
-   if (iter_i != iter_size && *iter_i == '-') { // found --
+   if (iter_i != iter_size && *iter_i == '-') {    // found --
       ++count;
       ++iter_i;
    }
 
-   if (iter_i != iter_size && *iter_i == '-') { // found ---
+   if (iter_i != iter_size && *iter_i == '-') {    // found ---
       ++count;
       ++iter_i;
    }
 
-   if (iter_i != iter_size && *iter_i == '-') { // found ----
+   if (iter_i != iter_size && *iter_i == '-') {    // found ----
       ++count;
    }
 
@@ -1177,12 +1177,12 @@ static int processCodeSpan(QString &out, QStringView data, QString::const_iterat
 
    int nl = 0;
 
-   /* counting the number of backticks in the delimiter */
+   // counting the number of backticks in the delimiter
    while (iter_nb < iter_size && *iter_nb == '`') {
       ++iter_nb;
    }
 
-   /* finding the next delimiter */
+   // finding the next delimiter
    for (iter_end = iter_nb; iter_end < iter_size && iter_i < iter_nb && nl < 2; ++iter_end) {
 
       if (*iter_end == '`') {
@@ -1742,8 +1742,9 @@ static QString extractTitleId(QString &title)
 
 static int isAtxHeader(QStringView data, int size, QString &header, QString &id)
 {
-   int i = 0;
+   int i      = 0;
    int end;
+
    int level  = 0;
    int blanks = 0;
 
@@ -1757,11 +1758,13 @@ static int isAtxHeader(QStringView data, int size, QString &header, QString &id)
    }
 
    while (i < size && level < 6 && data[i] == '#') {
-      i++, level++;
+      ++i;
+      ++level;
    }
 
    while (i < size && data[i] == ' ') {
-      i++, blanks++;
+      ++i;
+      ++blanks;
    }
 
    if (level == 1 && blanks == 0) {
@@ -2189,13 +2192,14 @@ static int writeTableBlock(QString &out, QStringView data)
    int cc;
 
    iter_i = findTableColumns(QStringView(data.constBegin(), data.constEnd()), iter_start, iter_end, columns);
+
+   QString::const_iterator headerStart = iter_start;
+   QString::const_iterator headerEnd   = iter_end;
+
    out += "<table>";
 
    // write table header, in range [start..end]
    out += "<tr>";
-
-   QString::const_iterator headerStart = iter_start;
-   QString::const_iterator headerEnd   = iter_end;
 
    // read cell alignments
    iter_ret = findTableColumns(QStringView(iter_i, data.constEnd()), iter_start, iter_end, cc);
