@@ -1322,20 +1322,16 @@ static int yyread(char *buf, int max_size)
 {
    int len = max_size;
 
-   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = s_inputString.constData() + s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (s_inputPosition + len >= s_inputString.size_storage()) {
+      len = s_inputString.size_storage() - s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 
 #define INITIAL 0
@@ -1723,7 +1719,7 @@ YY_RULE_SETUP
          REJECT;
 
       } else {
-         /* check for fixed format; we might have some conditional as part of multilene if like C<5 .and. & */
+         /* check for fixed format; we might have some conditional as part of multi-line if like C<5 .and. & */
 
          if (isFixedForm && (s_col == 0)) {
             QString text = QString::fromUtf8(commentcnvYYtext);
@@ -3887,7 +3883,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
       QString sectionInfo = " ";
 
       if (ctx.sectionId != " ") {
-         sectionInfo = QString(" with label %1 ").formatArg(ctx.sectionId);
+         sectionInfo = QString(" with label '%1' ").formatArg(ctx.sectionId);
       }
 
       warn(s_fileName, ctx.lineNr, "Conditional section %s does not have "

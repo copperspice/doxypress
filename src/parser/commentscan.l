@@ -548,12 +548,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       assert(item != 0);
 
       item->text += " <p>";
-
-      if (Doxy_Globals::markdownSupport) {
-         item->text += processMarkdown(yyFileName, yyLineNr, current, s_outputXRef);
-      } else {
-         item->text += s_outputXRef;
-      }
+      item->text += s_outputXRef;
 
    } else {
       // new item
@@ -568,13 +563,9 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       RefItem *item = refList->getRefItem(itemId);
       assert(item != 0);
 
-      if (Doxy_Globals::markdownSupport) {
-         item->text = processMarkdown(yyFileName, yyLineNr, current, s_outputXRef);
-      } else {
-         item->text = s_outputXRef;
-      }
-
+      item->text       = s_outputXRef;
       item->listAnchor = anchorLabel;
+
       docEntry->addSpecialListItem(listName, itemId);
 
       QString cmdString = QString("\\xrefitem %1 %2.").formatArg(listName).formatArg(itemId);
@@ -879,7 +870,7 @@ static void endBrief(bool isOutput = true)
 static void handleGuard(const QString &expr);
 
 #undef   YY_INPUT
-#define  YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
+#define  YY_INPUT(buf,result,max_size) result = yyread(buf, max_size);
 
 static int yyread(char *buf, int max_size)
 {
@@ -889,20 +880,16 @@ static int yyread(char *buf, int max_size)
    //
    int len = max_size;
 
-   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = s_inputString.constData() + s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (s_inputPosition + len >= s_inputString.size_storage()) {
+      len = s_inputString.size_storage() - s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 
 %}
@@ -2560,7 +2547,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <SkipInternal>[@\\]"endinternal"[ \t]*  {
-      addToOutput("\\endinternal ");
       BEGIN(Comment);
    }
 
@@ -3574,25 +3560,47 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       return false;
    }
 
-   langParser     = parser;
-   current        = curEntry;
-   s_inputString    = comment;
-   yyFileName     = fileName;
-   yyLineNr       = lineNr;
-   briefEndsAtDot = isAutoBrief;
-   inBody         = isInbody;
+   if (Doxy_Globals::markdownSupport) {
+      s_inputString = processMarkdown(fileName, lineNr, QSharedPointer<Entry>(), comment);
 
-   protection     = r_protection;
-   s_inputPosition  = r_position;
+      QStringView tmp(s_inputString);
 
-   xrefKind       = XRef_None;
-   xrefAppendFlag = false;
-   insidePre      = false;
-   s_needNewEntry = false;
-   s_parseMore    = false;
+      while (tmp.startsWith(" ")) {
+         tmp = tmp.mid(1);
+      }
 
-   s_outputXRef   = "";
+      while (tmp.startsWith("\n")) {
+         tmp = tmp.mid(1);
+      }
+
+      if (tmp.startsWith("<br>")) {
+         tmp = tmp.mid(4);
+      }
+
+      s_inputString = QString(tmp);
+
+   } else {
+      s_inputString  = comment;
+   }
+
    s_inputString.append(" ");
+
+   yyFileName       = fileName;
+   yyLineNr         = lineNr;
+   langParser       = parser;
+   current          = curEntry;
+
+   briefEndsAtDot   = isAutoBrief;
+   inBody           = isInbody;
+   protection       = r_protection;
+   s_inputPosition  = r_position;
+   s_outputXRef     = "";
+   xrefKind         = XRef_None;
+
+   xrefAppendFlag   = false;
+   insidePre        = false;
+   s_needNewEntry   = false;
+   s_parseMore      = false;
 
    if (isBrief || isAutoBrief) {
       setOutput(OutputBrief);
@@ -3647,12 +3655,6 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    if (current->section == Entry::MEMBERGRP_SEC && s_memberGroupId == DOX_NOGROUP) {
       // @name section but no group started yet
       openGroup(current, yyFileName, yyLineNr);
-   }
-
-   if (Doxy_Globals::markdownSupport) {
-      current->setData(EntryKey::Brief_Docs,  processMarkdown(fileName, lineNr, current, current->getData(EntryKey::Brief_Docs)  ));
-      current->setData(EntryKey::Main_Docs,   processMarkdown(fileName, lineNr, current, current->getData(EntryKey::Main_Docs)   ));
-      current->setData(EntryKey::Inbody_Docs, processMarkdown(fileName, lineNr, current, current->getData(EntryKey::Inbody_Docs) ));
    }
 
    checkFormula();

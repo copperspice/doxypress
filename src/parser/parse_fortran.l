@@ -135,27 +135,27 @@ static bool             gstat;
 
 static MethodTypes      mtype;
 static Specifier        virt;
-static Argument         *s_parameter;            // element of parameter list
+static Argument         *s_parameter;                    // element of parameter list
 
-static ScanVar          v_type  = V_IGNORE;      // type of parsed variable
+static ScanVar          v_type  = V_IGNORE;              // type of parsed variable
 static InterfaceType    ifType  = IF_NONE;
 
 static QString          debugStr;
-static QString          result;                  // function result
+static QString          result;                          // function result
 
-static QString          argType;                 // fortran type of an argument of a parameter list
-static QString          argName;                 // last identifier name in variable list
-static QString          initializer;             // initial value of a variable
-static int              initializerArrayScope;   // number if nested array scopes in initializer
-static int              initializerScope;        // number if nested function calls in initializer
-static QString          useModuleName;           // name of module in the use statement
+static QString          argType;                         // fortran type of an argument of a parameter list
+static QString          argName;                         // last identifier name in variable list
+static QString          initializer;                     // initial value of a variable
+static int              initializerArrayScope;           // number if nested array scopes in initializer
+static int              initializerScope;                // number if nested function calls in initializer
+static QString          useModuleName;                   // name of module in the use statement
 static Protection       defaultProtection;
 static Protection       typeProtection;
 
 static int              typeMode          = false;
 static bool             functionLine      = false;
-static bool             parsingPrototype  = false;    // see parsePrototype()
-static QChar            stringStartSymbol;            // single or double quote
+static bool             parsingPrototype  = false;       // see parsePrototype()
+static QChar            stringStartSymbol;               // single or double quote
 
 // accumulated modifiers of current statement, eg variable declaration.
 static SymbolModifiers  currentModifiers;
@@ -163,7 +163,10 @@ static SymbolModifiers  currentModifiers;
 // holds program scope->symbol name->symbol modifiers
 static QMap<QSharedPointer<Entry>, QMap<QString, SymbolModifiers>> modifiers;
 
-static ParserInterface        *g_thisParser;
+static ParserInterface        *s_thisParser;
+
+static QSharedPointer<Entry>  s_global_scope;
+static bool s_fake_entry = false;
 
 static QSharedPointer<Entry>	current_root;
 static QSharedPointer<Entry>	global_root;
@@ -171,7 +174,7 @@ static QSharedPointer<Entry>	file_root;
 static QSharedPointer<Entry>	current;
 static QSharedPointer<Entry>	last_entry;
 
-static QList<QSharedPointer<Entry>>  moduleProcedures;    // list of all interfaces which contain unresolved
+static QList<QSharedPointer<Entry>>  moduleProcedures;   // list of all interfaces which contain unresolved
 static QList<QSharedPointer<Entry>>  subrCurrent;
 static QList<CommentInPrepass *>     comments;
 
@@ -191,10 +194,7 @@ static void scanner_abort();
 
 static void startScope(QSharedPointer<Entry> scope);
 static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot = false);
-
-static void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures,
-                  QSharedPointer<Entry> current_root);
-
+static void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures, QSharedPointer<Entry> current_root);
 static int getAmpersandAtTheStart(const  QString &buf, int length);
 static int getAmpOrExclAtTheEnd(const QString &buf, int length, QChar ch);
 static void truncatePrepass(int index);
@@ -224,6 +224,7 @@ SUBPROG   (subroutine|function)
 B         [ \t]
 BS        [ \t]*
 BS_       [ \t]+
+BT_       ([ \t]+|[ \t]*"(")
 COMMA     {BS},{BS}
 ARGS_L0   ("("[^)]*")")
 ARGS_L1a  [^()]*"("[^)]*")"[^)]*
@@ -236,6 +237,7 @@ NUM_TYPE  (complex|integer|logical|real)
 LOG_OPER  (\.and\.|\.eq\.|\.eqv\.|\.ge\.|\.gt\.|\.le\.|\.lt\.|\.ne\.|\.neqv\.|\.or\.|\.not\.)
 KIND      {ARGS}
 CHAR      (CHARACTER{ARGS}?|CHARACTER{BS}"*"({BS}[0-9]+|{ARGS}))
+
 TYPE_SPEC (({NUM_TYPE}({BS}"*"{BS}[0-9]+)?)|({NUM_TYPE}{KIND})|DOUBLE{BS}COMPLEX|DOUBLE{BS}PRECISION|{CHAR}|TYPE{ARGS}|CLASS{ARGS}|PROCEDURE{ARGS}?)
 
 INTENT_SPEC  intent{BS}"("{BS}(in|out|in{BS}out){BS}")"
@@ -245,12 +247,12 @@ ACCESS_SPEC         (PRIVATE|PUBLIC)
 LANGUAGE_BIND_SPEC  BIND{BS}"("{BS}C{BS}(,{BS}NAME{BS}"="{BS}"\""(.*)"\""{BS})?")"
 
 /* Assume that attribute statements are almost the same as attributes. */
-ATTR_STMT     {ATTR_SPEC}|DIMENSION|{ACCESS_SPEC}
-EXTERNAL_STMT (EXTERNAL)
+ATTR_STMT           {ATTR_SPEC}|DIMENSION|{ACCESS_SPEC}
+EXTERNAL_STMT       (EXTERNAL)
+CONTAINS            CONTAINS
+SCOPENAME           ({ID}{BS}"::"{BS})*
 
-CONTAINS  CONTAINS
-PREFIX    (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIVE|IMPURE|PURE|ELEMENTAL)?
-SCOPENAME ({ID}{BS}"::"{BS})*
+PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((NON_)?RECURSIVE|IMPURE|PURE|ELEMENTAL)?
 
 %option case-insensitive
 %option noyywrap
@@ -641,7 +643,17 @@ SCOPENAME ({ID}{BS}"::"{BS})*
       }
 
       defaultProtection = Public;
-      yy_pop_state();
+
+      if (s_global_scope != nullptr && ! s_fake_entry) {
+         yy_push_state(Start);
+
+      } else if (s_fake_entry) {
+         yy_pop_state();                   // do not pop fake entry
+
+      } else {
+         yy_push_state(Start);
+         s_fake_entry = true;              // indicates the global_scope has already been used
+      }
    }
 
 <Module>{ID}                           {
@@ -699,7 +711,7 @@ abstract                                {
 extends{ARGS}                           {
       QString text = QString::fromUtf8(yytext);
 
-      QString basename = extractFromParens(text);
+      QString basename = extractFromParens(text).toLower();
       current->extends.append(BaseInfo(basename, Public, Normal));
    }
 
@@ -786,7 +798,7 @@ private                                 {
 {BS}"=>"[^(\n|\!)]*                     {
       /* Specific bindings come after the ID. */
       QString text = QString::fromUtf8(yytext);
-      last_entry->setData(EntryKey::Member_Args, text);
+      last_entry->setData(EntryKey::Member_Args, text.toLower());
    }
 
 "\n"                                    {
@@ -920,7 +932,7 @@ private                                 {
       // no code
    }
 
-^{BS}"type"{BS_}"is"/{BS_}             {
+^{BS}"type"{BS_}"is"/{BT_}             {
       // no code
    }
 
@@ -928,6 +940,13 @@ private                                 {
       // no code
    }
 
+^{BS}"class"{BS_}"is"/{BT_}            {
+      // no code
+   }
+
+^{BS}"class"{BS_}"default"             {
+      // no code
+   }
 }
 
 <AttributeList>{
@@ -1374,7 +1393,6 @@ private                                 {
             yy_push_state(YY_START);
             BEGIN(StrIgnore);
             debugStr = "*!";
-
          }
       }
    }
@@ -1683,8 +1701,7 @@ void truncatePrepass(int index)
 }
 
 // simplified way to know if this is fixed form
-// duplicate in fortrancode.l
-static bool recognizeFixedForm(const QString &contents, FortranFormat format)
+bool recognizeFixedForm(const QString &contents, FortranFormat format)
 {
    int column    = 0;
    bool skipLine = false;
@@ -1752,7 +1769,7 @@ static bool recognizeFixedForm(const QString &contents, FortranFormat format)
   return false;
 }
 
-/* This function assumes that contents has at least size=length+1 */
+/* function assumes that contents has at least size=length+1 */
 static void insertCharacter(QString &contents, int length, int pos, QChar c)
 {
    // shift tail by one character
@@ -1765,14 +1782,16 @@ static void insertCharacter(QString &contents, int length, int pos, QChar c)
 }
 
 /* change comments and bring line continuation character to previous line */
-static QString prepassFixedForm(const QString &contents)
+QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 {
    int column                 = 0;
    int prevLineLength         = 0;
    int prevLineAmpOrExclIndex = -1;
 
-   QChar prevQuote            = '\0';
-   QChar thisQuote            = '\0';
+   int curLine = 1;
+
+   QChar prevQuote      = '\0';
+   QChar thisQuote      = '\0';
 
    bool emptyLabel      = true;
    bool commented       = false;
@@ -1802,14 +1821,21 @@ static QString prepassFixedForm(const QString &contents)
             } else {
                prevLineLength += column;
 
+               // Even though a full comment line is not really a comment line it can be seen as one
+               // An empty line is also seen as a comment line (small bonus)
+               if (! hasContLine.empty()) {
+                  hasContLine[curLine - 1] = 1;
+               }
             }
 
             fullCommentLine  = true;
             column           = 0;
             emptyLabel       = true;
             commented        = false;
-            newContents      += c;
             prevQuote        = thisQuote;
+
+            newContents += c;
+            curLine++;
             break;
 
          case ' ':
@@ -1818,6 +1844,14 @@ static QString prepassFixedForm(const QString &contents)
             break;
 
          case '\000':
+            if (! hasContLine.empty()) {
+               return "";
+            }
+
+            if (! newContents.endsWith('\n')) {
+               newContents.append('\n');
+            }
+
             return newContents;
 
          case '"':
@@ -1829,7 +1863,7 @@ static QString prepassFixedForm(const QString &contents)
                newContents    += c;
 
                if (c == '\\') {
-                  inBackslash = !inBackslash;
+                  inBackslash = ! inBackslash;
                   break;
 
                } else if (c == '\'') {
@@ -1896,7 +1930,12 @@ static QString prepassFixedForm(const QString &contents)
             // fall through to next case
 
          default:
-            if (column == 6 && emptyLabel) {
+
+            if ((column < 6) && c.isDigit()) {
+               // remove numbers from the first 5 positions
+               newContents[j] = ' ';
+
+            } else if (column == 6 && emptyLabel) {
                // continuation
 
                if (! commented) {
@@ -1909,13 +1948,25 @@ static QString prepassFixedForm(const QString &contents)
 
                   if (prevLineAmpOrExclIndex == -1) {
                      // add & just before end of previous line
-                     insertCharacter(newContents, j+1, (j+1)-6-1, '&');
+
+                     // first line is not a continuation line in code, just in snippets etc.
+                     if (curLine != 1) {
+                        insertCharacter(newContents, j+1, (j+1)-6-1, '&');
+                     }
                      j++;
 
                   } else {
                      // add & just before end of previous line comment
-                     insertCharacter(newContents, j+1, (j+1)-6-prevLineLength+prevLineAmpOrExclIndex, '&');
+
+                     // first line is not a continuation line in code, just in snippets etc
+                     if (curLine != 1) {
+                        insertCharacter(newContents, j+1, (j+1)-6-prevLineLength+prevLineAmpOrExclIndex, '&');
+                     }
                      j++;
+                  }
+
+                  if (! hasContLine.empty()) {
+                     hasContLine[curLine - 1] = 1;
                   }
 
                } else {
@@ -1941,7 +1992,7 @@ static QString prepassFixedForm(const QString &contents)
                commented    = true;
 
             } else {
-               if (!commented) {
+               if (! commented) {
                   fullCommentLine = false;
                }
 
@@ -1951,6 +2002,14 @@ static QString prepassFixedForm(const QString &contents)
 
             break;
          }
+   }
+
+   if (! hasContLine.isEmpty()) {
+      return "";
+   }
+
+   if (! newContents.endsWith('\n')) {
+      newContents.append('\n');
    }
 
    return newContents;
@@ -2393,9 +2452,8 @@ static void applyModifiers(QSharedPointer<Entry> xEntry, SymbolModifiers &mdfs)
    }
 }
 
-/*! Starts the new scope in fortran program. Consider using this function when
+/* Starts the new scope in fortran program. Consider using this function when
  * starting module, interface, function or other program block.
- * \see endScope()
  */
 static void startScope(QSharedPointer<Entry> scope)
 {
@@ -2405,16 +2463,24 @@ static void startScope(QSharedPointer<Entry> scope)
   modifiers.insert(scope, mdfMap);
 }
 
-/*! Ends scope in fortran program: may update subprogram arguments or module variable attributes.
- * \see startScope()
- */
+// Ends scope in fortran program: may update subprogram arguments or module variable attributes
 static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
 {
+   if (s_global_scope == scope) {
+      s_global_scope = QSharedPointer<Entry>();
+      s_fake_entry   = false;
+      return true;
+   }
+
+   if (s_fake_entry) {
+      return true;
+   }
+
    if (current_root->parent() || isGlobalRoot) {
       current_root = current_root->parent();          // end substructure
 
    } else {
-      fprintf(stderr, "Parse error in end <scopename>");
+      fprintf(stderr, "Parse error in end <scopename>\n");
       scanner_abort();
       return false;
    }
@@ -2522,22 +2588,18 @@ static QString getFullName(Entry *e)
 
 static int yyread(char *buf, int max_size)
 {
-  int len = max_size;
+   int len = max_size;
 
-   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = s_inputString.constData() + s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (s_inputPosition + len >= s_inputString.size_storage()) {
+      len = s_inputString.size_storage() - s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 
 static void initParser()
@@ -2725,11 +2787,8 @@ static void handleCommentBlock(const QString &doc, bool brief)
    DBG_CTX((stderr, "call parseCommentBlock [%s]\n", csPrintable(doc)));
    int lineNr = brief ? current->briefLine : current->docLine;
 
-   while (parseCommentBlock(
-         g_thisParser, docBlockInBody ? subrCurrent.first() : current,
-         doc,        // text
-         yyFileName, // file
-         lineNr,
+   while (parseCommentBlock(s_thisParser, docBlockInBody ? subrCurrent.first() : current,
+         doc, yyFileName, lineNr,
          docBlockInBody ? false : brief,
          docBlockInBody ? false : docBlockJavaStyle,
          docBlockInBody, defaultProtection, position, needsEntry)) {
@@ -2924,17 +2983,17 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 {
    initParser();
 
-   defaultProtection    = Public;
+   defaultProtection      = Public;
    s_inputString          = fileBuf;
    s_inputPosition        = 0;
    s_inputStringPrepass   = "";
    s_inputPositionPrepass = 0;
 
-   mtype         = Method;
-   gstat         = FALSE;
-   virt          = Normal;
-   current_root  = rt;
-   global_root   = rt;
+   mtype                  = Method;
+   gstat                  = false;
+   virt                   = Normal;
+   current_root           = rt;
+   global_root            = rt;
 
    inputFile.setFileName(fileName);
 
@@ -2943,18 +3002,23 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       if (s_isFixedForm) {
          msg("Prepassing fixed form of %s\n", csPrintable(fileName));
-         s_inputString = prepassFixedForm(fileBuf);
+
+         QVector<int> tmp;
+         s_inputString = prepassFixedForm(fileBuf, tmp);
 
       } else if (! s_inputString.endsWith('\n') ) {
          s_inputString += '\n';
 
       }
 
-      yyLineNr = 1 ;
-      yyFileName = fileName;
+      yyLineNr       = 1;
+      yyFileName     = fileName;
+      s_global_scope = rt;
+      s_fake_entry   = false;
+
       msg("Parsing %s\n", csPrintable(yyFileName));
 
-      startScope(rt); // implies current_root = rt
+      startScope(rt);                                      // implies current_root = rt
       initParser();
       groupEnterFile(yyFileName, yyLineNr);
 
@@ -2965,16 +3029,19 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
       current_root->addSubEntry(current, current_root);
 
-      file_root           = current;
-      current             = QMakeShared<Entry>();
-      current->m_srcLang  = SrcLangExt_Fortran;
+      file_root            = current;
+      current              = QMakeShared<Entry>();
+      current->m_srcLang   = SrcLangExt_Fortran;
 
       yyrestart( yyin );
       BEGIN( Start );
       yylex();
 
       groupLeaveFile(yyFileName, yyLineNr);
-      endScope(current_root, true);          // global root
+
+      if (s_global_scope != nullptr && ! s_fake_entry) {
+         endScope(current_root, true);                     // global root
+      }
 
       rt->setData(EntryKey::Source_Text, "");
       current = QSharedPointer<Entry>();
@@ -2992,7 +3059,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 void Fortran_Parser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
-   g_thisParser = this;
+   s_thisParser = this;
 
    printlex(yy_flex_debug, true, __FILE__, fileName);
    ::parseMain(fileName, fileBuf, root, m_format);

@@ -43,7 +43,7 @@
  * For fixed formatted code position 6 is of importance (continuation character).
  * The following variables and macros keep track of the column number
  * YY_USER_ACTION is always called for each scan action
- * YY_FTN_REST    is used to handle end of lines and reset the column counter
+ * YY_FTN_RESET   is used to handle end of lines and reset the column counter
  * YY_FTN_REJECT  resets the column counters when a pattern is rejected and thus rescanned.
  */
 int yy_old_start = 0;
@@ -101,7 +101,10 @@ static QString     s_inputString;                // the code fragment as text
 static int         s_inputPosition;              // read offset during parsing
 static int         s_inputLines;                 // number of line in the code fragment
 static int         s_yyLineNr;                   // current line number
-static bool        s_needsTermination;
+
+static int          s_contLineNr;                // current, local, line number for continuation determination
+static QVector<int> s_hasContLine;              // does a line have a continuation line (fixed source)
+static bool         s_needsTermination;
 
 static bool        s_collectXRefs;
 static bool        s_isFixedForm;
@@ -114,9 +117,10 @@ static QString     s_exampleName;
 static QString     s_exampleFile;
 
 static bool        s_includeCodeFragment;
-static QChar       stringStartSymbol;            // single or double quote
+static QChar       s_stringStartSymbol;          // single or double quote
 
-static int         bracketCount = 0;             // count in var declaration to filter out declared from referenced names
+static int         s_bracketCount = 0;           // count in var declaration to filter out declared from referenced names
+static int         s_inTypeDecl   = 0;           // signal when in type / class /procedure declaration
 static bool        s_endComment;
 
 static QSharedPointer<Definition> s_searchCtx;
@@ -124,72 +128,11 @@ static QSharedPointer<FileDef>    s_sourceFileDef;
 static QSharedPointer<Definition> s_currentDefinition;
 static QSharedPointer<MemberDef>  s_currentMemberDef;
 
-static QList<Scope *>               scopeStack;
+static QList<Scope *>             s_scopeStack;
 
-// simplified way to know if this is fixed form duplicate in parse_fortran.l
-static bool recognizeFixedForm(const QString &contents, FortranFormat format)
-{
-   int column = 0;
-   bool skipLine = false;
-
-   if (format == FortranFormat_Fixed) {
-      return true;
-   }
-
-   if (format == FortranFormat_Free) {
-      return false;
-   }
-
-   for (int i = 0; true; i++) {
-      column++;
-
-      switch (contents[i].unicode()) {
-         case '\n':
-            column = 0;
-            skipLine = false;
-            break;
-
-         case ' ':
-            break;
-
-         case '#':
-            skipLine = true;
-            break;
-
-         case '\000':
-            return false;
-
-         case 'C':
-         case 'c':
-         case '*':
-            if (column == 1) {
-               return true;
-            }
-            if (skipLine) {
-               break;
-            }
-            return false;
-
-         case '!':
-            if (column > 1 && column < 7) {
-               return false;
-            }
-            skipLine = true;
-            break;
-
-         default:
-            if (skipLine) {
-               break;
-            }
-            if (column == 7) {
-               return true;
-            }
-            return false;
-      }
-   }
-
-   return false;
-}
+// simplified way to know if this is fixed form
+bool recognizeFixedForm(const QString &contents, FortranFormat format);
+QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine);
 
 static void endFontClass()
 {
@@ -435,11 +378,11 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
                   QSharedPointer<MemberDef> &md, UseSDict *usedict = nullptr)
 {
    if (memberName.isEmpty()) {
-      return FALSE;
+      return false;
    }
 
    // look in local variables
-   for (auto scope : scopeStack) {
+   for (auto scope : s_scopeStack) {
       if (scope->localVars.count(memberName) != 0) {
          return false;
       }
@@ -527,6 +470,12 @@ static bool getLink(UseSDict *usedict, const QString &memberText,
    QString memberName = removeRedundantWhiteSpace(memberText);
 
    if (getFortranDefs(memberName, currentModule, md, usedict) && md->isLinkable())  {
+
+      if (md->isVariable() && (md->getLanguage() != SrcLangExt_Fortran)) {
+         // Non Fortran variables are not handled at this time
+         return false;
+      }
+
       QSharedPointer<Definition> d;
 
       if (md->getOuterScope() == Doxy_Globals::globalScope) {
@@ -626,21 +575,20 @@ static void startScope()
   DBG_CTX((stderr, "===> startScope %s", yytext));
 
   Scope *scope = new Scope;
-  scopeStack.append(scope);
+  s_scopeStack.append(scope);
 }
-
 
 static void endScope()
 {
   DBG_CTX((stderr,"===> endScope %s", yytext));
 
-  if (scopeStack.isEmpty()) {
-          DBG_CTX((stderr, "WARNING: (Fortran) Stack is empty\n"));
+  if (s_scopeStack.isEmpty()) {
+    DBG_CTX((stderr, "WARNING: (Fortran) Stack is empty\n"));
     return;
   }
 
-  Scope *scope = scopeStack.last();
-  scopeStack.removeLast();
+  Scope *scope = s_scopeStack.last();
+  s_scopeStack.removeLast();
 
   for (auto it : scope->useNames ) {
     useMembers->remove(it);
@@ -651,39 +599,35 @@ static void endScope()
 
 static void addUse(const QString &moduleName)
 {
-   if (! scopeStack.isEmpty()) {
-      scopeStack.last()->useNames.append(moduleName);
+   if (! s_scopeStack.isEmpty()) {
+      s_scopeStack.last()->useNames.append(moduleName);
    }
 }
 
 static void addLocalVar(const QString &varName)
 {
-   if (! scopeStack.isEmpty()) {
-      scopeStack.last()->localVars.insert(varName);
+   if (! s_scopeStack.isEmpty()) {
+      s_scopeStack.last()->localVars.insert(varName);
    }
 }
 
 #undef   YY_INPUT
-#define  YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
+#define  YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
 {
    int len = max_size;
 
-   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = s_inputString.constData() + s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (s_inputPosition + len >= s_inputString.size_storage()) {
+      len = s_inputString.size_storage() - s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 
 %}
@@ -710,7 +654,7 @@ TYPE_SPEC    (({NUM_TYPE}({BS}"*"{BS}[0-9]+)?)|({NUM_TYPE}{KIND})|DOUBLE{BS}COMP
 
 INTENT_SPEC  intent{BS}"("{BS}(in|out|in{BS}out){BS}")"
 
-ATTR_SPEC    (IMPLICIT|ALLOCATABLE|DIMENSION{ARGS}|EXTERNAL|{INTENT_SPEC}|INTRINSIC|OPTIONAL|PARAMETER|POINTER|PROTECTED|PRIVATE|PUBLIC|SAVE|TARGET|RECURSIVE|PURE|IMPURE|ELEMENTAL|VALUE|NOPASS|DEFERRED|CONTIGUOUS|VOLATILE)
+ATTR_SPEC (IMPLICIT|ALLOCATABLE|DIMENSION{ARGS}|EXTERNAL|{INTENT_SPEC}|INTRINSIC|OPTIONAL|PARAMETER|POINTER|PROTECTED|PRIVATE|PUBLIC|SAVE|TARGET|(NON_)?RECURSIVE|PURE|IMPURE|ELEMENTAL|VALUE|NOPASS|DEFERRED|CONTIGUOUS|VOLATILE)
 
 ACCESS_SPEC  (PROTECTED|PRIVATE|PUBLIC)
 
@@ -721,7 +665,8 @@ FLOW         (DO|SELECT|CASE|SELECT{BS}(CASE|TYPE)|WHERE|IF|THEN|ELSE|WHILE|FORA
 COMMANDS     (FORMAT|CONTAINS|MODULE{BS_}PROCEDURE|WRITE|READ|ALLOCATE|ALLOCATED|ASSOCIATED|PRESENT|DEALLOCATE|NULLIFY|SIZE|INQUIRE|OPEN|CLOSE|FLUSH|DATA|COMMON)
 
 IGNORE       (CALL)
-PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIVE|IMPURE|PURE|ELEMENTAL)?
+PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((NON_)?RECURSIVE|IMPURE|PURE|ELEMENTAL)?
+
 
 %option case-insensitive
 %option noyywrap
@@ -826,7 +771,18 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 
       yy_push_state(YY_START);
       BEGIN(Use);
+   }
 
+<Use>"ONLY"                             {
+      // TODO: rename
+      QString text = QString::fromUtf8(yytext);
+
+      startFontClass("keywordtype");
+      codifyLines(text);
+      endFontClass();
+
+      yy_push_state(YY_START);
+      BEGIN(UseOnly);
    }
 
 <Use>{ID}                               {
@@ -837,7 +793,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       generateLink(*s_code, text);
       s_insideBody = false;
 
-      /* append module name to use dict */
+      // append module name to use dict
       useEntry = new UseEntry();
 
       // useEntry->module = text;
@@ -849,18 +805,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       addUse(tmp);
    }
 
-<Use>,{BS}"ONLY"                        {
-      // TODO: rename
-      QString text = QString::fromUtf8(yytext);
-
-      startFontClass("keywordtype");
-      codifyLines(text);
-      endFontClass();
-      yy_push_state(YY_START);
-      BEGIN(UseOnly);
-   }
-
-<UseOnly,Import>{BS},{BS}               {
+<Use,UseOnly,Import>{BS},{BS}               {
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
@@ -868,6 +813,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 <UseOnly,Import>{BS}&{BS}"\n"           {
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
+      s_contLineNr++;
       YY_FTN_RESET
    }
 
@@ -886,7 +832,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       YY_FTN_RESET
    }
 
-<Start>"import"{BS_}                    {
+<*>"import"{BS}/"\n"   |
+<*>"import"{BS_}                        {
       QString text = QString::fromUtf8(yytext);
 
       startFontClass("keywordtype");
@@ -901,6 +848,13 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       s_insideBody=  true;
       generateLink(*s_code, text);
       s_insideBody = false;
+   }
+
+<Import>("ONLY"|"NONE"|"ALL")          {
+      QString text = QString::fromUtf8(yytext);
+      startFontClass("keywordtype");
+      codifyLines(text);
+      endFontClass();
    }
 
  /*-------- fortran module  -----------------------------------------*/
@@ -1016,6 +970,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 <Subprog,Subprogend>"\n"                {
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
+      s_contLineNr++;
       yy_pop_state();
       YY_FTN_RESET
    }
@@ -1032,7 +987,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       BEGIN(Subprogend);
    }
 
-<Subprogend>{ID}/{BS}(\n|!)             {
+<Subprogend>{ID}/{BS}(\n|!)            {
       QString text = QString::fromUtf8(yytext);
       generateLink(*s_code, text);
       yy_pop_state();
@@ -1048,8 +1003,29 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
    }
 
  /*-------- variable declaration ----------------------------------*/
-<Start>{TYPE_SPEC}/[,:( ]               {
+
+<Start>^{BS}"real"/[,:( ]              {
+      // real is a bit tricky as it is a data type but also a function
       QString text = QString::fromUtf8(yytext);
+
+      yy_push_state(YY_START);
+		BEGIN(Declaration);
+   	startFontClass("keywordtype");
+		s_code->codify(text);
+		endFontClass();
+   }
+
+<Start>{TYPE_SPEC}/[,:( ]              {
+      QString text = QString::fromUtf8(yytext);
+      text = removeRedundantWhiteSpace(text.toLower());
+
+      if (text.startsWith("real")) {
+         YY_FTN_REJECT;
+      }
+
+      if (text == "type" || text == "class" || text == "procedure") {
+         s_inTypeDecl = 1;
+      }
 
       yy_push_state(YY_START);
       BEGIN(Declaration);
@@ -1058,7 +1034,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       endFontClass();
    }
 
-<Start>{ATTR_SPEC}             {
+<Start>{ATTR_SPEC}                     {
       QString text = QString::fromUtf8(yytext);
       startFontClass("keywordtype");
       s_code->codify(text);
@@ -1073,61 +1049,77 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       endFontClass();
     }
 
-<Declaration>{ID}                       {
+<Declaration>{ID}                      {
       // local var
       QString text = QString::fromUtf8(yytext);
 
-      if (s_currentMemberDef && s_currentMemberDef->isFunction() && bracketCount == 0) {
+      if (s_isFixedForm && yy_my_start == 1) {
+         startFontClass("comment");
          s_code->codify(text);
-         addLocalVar(text);
+         endFontClass();
+
+      }  else if (s_currentMemberDef != nullptr && ((s_currentMemberDef->isFunction() &&
+                 (s_currentMemberDef->typeString() != "subroutine" || s_inTypeDecl)) || s_currentMemberDef->isVariable())) {
+
+         generateLink(*s_code, text);
 
       } else {
-         generateLink(*s_code, text);
+         s_code->codify(text);
+         addLocalVar(text);
       }
    }
 
-<Declaration>{BS}("=>"|"="){BS}                        {
+<Declaration>{BS}("=>"|"="){BS}        {
       // Procedure binding
       QString text = QString::fromUtf8(yytext);
       BEGIN(DeclarationBinding);
       s_code->codify(text);
    }
 
-<DeclarationBinding>{ID}                       {
+<DeclarationBinding>{ID}               {
       // Type bound procedure link
       QString text = QString::fromUtf8(yytext);
       generateLink(*s_code, text);
       yy_pop_state();
    }
 
-<Declaration>[(]        {
-      // start of array specification
+<Declaration>[(]                       {
+      // start of array specification or class specification
       QString text = QString::fromUtf8(yytext);
-      bracketCount++;
+      s_bracketCount++;
       s_code->codify(text);
    }
 
-<Declaration>[)]        {
+<Declaration>[)]                       {
       // end array specification
       QString text = QString::fromUtf8(yytext);
-      bracketCount--;
+      s_bracketCount--;
+
+      if (! s_bracketCount) {
+         s_inTypeDecl = 0;
+      }
+
       s_code->codify(text);
    }
 
-<Declaration,DeclarationBinding>"&"                        {
+<Declaration,DeclarationBinding>"&"    {
       // continuation line
       QString text = QString::fromUtf8(yytext);
       s_code->codify(text);
-      yy_push_state(YY_START);
-      BEGIN(DeclContLine);
+
+      if (! s_isFixedForm) {
+         yy_push_state(YY_START);
+         BEGIN(DeclContLine);
+      }
    }
 
 <DeclContLine>"\n"                      {
       // declaration not yet finished
       QString text = QString::fromUtf8(yytext);
 
+      s_contLineNr++;
       codifyLines(text);
-      bracketCount = 0;
+      s_bracketCount = 0;
       yy_pop_state();
       YY_FTN_RESET
    }
@@ -1144,8 +1136,12 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 
       }
 
-      bracketCount = 0;
-      yy_pop_state();
+      s_bracketCount = 0;
+      s_contLineNr++;
+
+      if (! (! s_hasContLine.empty() && s_hasContLine[s_contLineNr - 1])) {
+         yy_pop_state();
+      }
       YY_FTN_RESET
    }
 
@@ -1191,6 +1187,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '\n') {
+         s_contLineNr++;
+
          yy_old_start = 0;
          yy_my_start  = 1;
          yy_end = yyleng;
@@ -1222,6 +1220,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // comment block (next line is also comment line)
       QString text = QString::fromUtf8(yytext);
 
+      s_contLineNr++;
+
       yy_old_start = 0;
       yy_my_start  = 1;
       yy_end = yyleng;
@@ -1236,6 +1236,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // remove special comment (default config)
 
       static const bool stripCodeComments = Config::getBool("strip-code-comments");
+
+      s_contLineNr++;
 
       if (stripCodeComments) {
          s_yyLineNr += docBlock.count('\n');
@@ -1257,6 +1259,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       }
 
       unput(*yytext);
+      s_contLineNr--;
+
       yy_pop_state();
       YY_FTN_RESET
    }
@@ -1314,6 +1318,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
          YY_FTN_REJECT;
       }
 
+      s_contLineNr++;
+
       startFontClass("preprocessor");
       codifyLines(text);
       endFontClass();
@@ -1351,6 +1357,7 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       QString text = QString::fromUtf8(yytext);
 
       // string with \n inside
+      s_contLineNr++;
       str += text;
 
       startFontClass("stringliteral");
@@ -1365,8 +1372,8 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       // string ends with next quote without previous backspace
       QString text = QString::fromUtf8(yytext);
 
-      if(text[0] != stringStartSymbol) {
-         YY_FTN_REJECT; // single vs double quote
+      if(text[0] != s_stringStartSymbol) {
+         YY_FTN_REJECT;                      // single vs double quote
       }
 
       str += text;
@@ -1391,29 +1398,35 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
       }
 
       yy_push_state(YY_START);
-      stringStartSymbol = text[0];    // single or double quote
+      s_stringStartSymbol = text[0];    // single or double quote
       BEGIN(String);
       str = text;
    }
 
-<*>\n                {
+<*>\n                        {
       QString text = QString::fromUtf8(yytext);
 
       if (s_endComment) {
          s_endComment = false;
       } else {
          codifyLines(text);
+
+         // comment cannot extend over the end of a line, it should always be terminatd at the end of the line
+         if (s_currentFontClass == "comment") {
+            endFontClass();
+         }
       }
 
+      s_contLineNr++;
       YY_FTN_RESET
    }
 
-<*>^{BS}"type"{BS}"="          {
+<*>^{BS}"type"{BS}"="        {
       QString text = QString::fromUtf8(yytext);
       s_code->codify(text);
    }
 
-<*>[\xC0-\xFF][\x80-\xBF]+     {
+<*>[\xC0-\xFF][\x80-\xBF]+   {
       // utf-8 code point
       QString text = QString::fromUtf8(yytext);
 
@@ -1461,6 +1474,26 @@ PREFIX       (RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,3}(RECURSIV
 
 %%
 
+static void checkContLines(const QString &str)
+{
+   int numLines = 2;          // one for element 0, one in case no \n at end
+
+   for (auto c : str) {
+      if (c == '\n') {
+        numLines++;
+      }
+   }
+
+   s_hasContLine.resize(numLines);
+
+   for (int i = 0; i < numLines; i++) {
+      s_hasContLine[i] = 0;
+   }
+
+   prepassFixedForm(str, s_hasContLine);
+   s_hasContLine[0] = 0;
+}
+
 void resetFortranCodeParserState() {}
 
 void parseFortranCode(CodeOutputInterface &od, const QString &className, const QString &s,
@@ -1481,15 +1514,23 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    s_inputPosition    = 0;
    s_isFixedForm      = recognizeFixedForm(s, format);
    s_currentFontClass = "";
+
+   s_contLineNr       = 1;
+
+   s_hasContLine.clear();
    s_needsTermination = false;
 
-  s_searchCtx         = searchCtx;
-  s_collectXRefs      = collectXRefs;
+   if (s_isFixedForm) {
+      checkContLines(s_inputString);
+   }
 
-  if (startLine != -1) {
-      s_yyLineNr    = startLine;
+   s_searchCtx        = searchCtx;
+   s_collectXRefs     = collectXRefs;
+
+   if (startLine != -1) {
+      s_yyLineNr = startLine;
    } else {
-      s_yyLineNr    = 1;
+      s_yyLineNr = 1;
    }
 
    if (endLine != -1) {
@@ -1540,6 +1581,8 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
       // delete the temporary file definition used for this example
       s_sourceFileDef = QSharedPointer<FileDef>();
    }
+
+   s_hasContLine.clear();
 
    printlex(yy_flex_debug, false, __FILE__, fd ? fd->fileName() : "" );
 

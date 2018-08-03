@@ -829,8 +829,10 @@ SHORTSTRINGITEM   ({SHORTSTRINGCHAR}|{ESCAPESEQ})
 SHORTSTRINGCHAR   [^\\\n"]
 STRINGLITERAL     {STRINGPREFIX}?( {SHORTSTRING} | {LONGSTRING})
 STRINGPREFIX      ("r"|"u"|"ur"|"R"|"U"|"UR"|"Ur"|"uR")
-KEYWORD           ("lambda"|"import"|"class"|"assert"|"as"|"from"|"global"|"def"|"True"|"False")
+
+KEYWORD           ("lambda"|"import"|"class"|"assert"|"with"|"as"|"from"|"global"|"def"|"True"|"False")
 FLOWKW            ("or"|"and"|"is"|"not"|"print"|"for"|"in"|"if"|"try"|"except"|"yield"|"raise"|"break"|"continue"|"pass"|"if"|"return"|"while"|"elif"|"else"|"finally")
+
 QUOTES            ("\""[^"]*"\"")
 SINGLEQUOTES      ("'"[^']*"'")
 
@@ -1333,7 +1335,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    \\.               {
-      // espaced char
+      // escpaced char
       QString text = QString::fromUtf8(yytext);
       codify(text);
    }
@@ -1406,9 +1408,27 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
   */
 
-<*>{STRINGPREFIX}?{TRISINGLEQUOTE} |
+<*>{STRINGPREFIX}?{TRISINGLEQUOTE} {
+      QString text = QString::fromUtf8(yytext);
+
+      if (YY_START == SingleQuoteString) {
+         REJECT;
+      }
+
+		startFontClass("stringliteral");
+		s_stringContext = YY_START;
+		s_doubleQuote   = text[yyleng-1] == '"';
+      codify(text);
+
+		BEGIN(TripleString);
+   }
+
 <*>{STRINGPREFIX}?{TRIDOUBLEQUOTE} {
       QString text = QString::fromUtf8(yytext);
+
+      if (YY_START == DoubleQuoteString) {
+         REJECT;
+      }
 
       startFontClass("stringliteral");
       s_stringContext = YY_START;
@@ -1422,6 +1442,10 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       // single quoted string
       QString text = QString::fromUtf8(yytext);
 
+      if (YY_START == SingleQuoteString || YY_START == DoubleQuoteString || YY_START == TripleString) {
+         REJECT;
+      }
+
       startFontClass("stringliteral");
       s_stringContext = YY_START;
       codify(text);
@@ -1432,6 +1456,10 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 <*>{STRINGPREFIX}?"\""         {
       // double quoted string
       QString text = QString::fromUtf8(yytext);
+
+      if (YY_START == SingleQuoteString || YY_START == DoubleQuoteString || YY_START == TripleString) {
+         REJECT;
+      }
 
       startFontClass("stringliteral");
       s_stringContext = YY_START;

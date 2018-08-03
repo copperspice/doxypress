@@ -41,6 +41,8 @@ static QSharedPointer<Entry> bodyEntry;
 static QSharedPointer<Entry>  s_docsEntry;    // which entry
 static EntryKey               s_docsEnum;     // which enum in EntryKey (Source_Text, Initial_Value)
 
+static bool s_defVal_active = false;
+
 static ParserInterface  *s_thisParser;
 static QString           s_inputString;
 static int		          s_inputPosition;
@@ -282,7 +284,10 @@ static void endOfDef(int correction = 0)
 
 static void addToOutput(const QString &str)
 {
-   if (s_docsEntry != nullptr) {
+   if (s_defVal_active) {
+      s_defVal += str;
+
+   } else if (s_docsEntry != nullptr) {
       s_docsEntry->appendData(s_docsEnum, str);
    }
 }
@@ -368,20 +373,16 @@ static int yyread(char *buf, int max_size)
 {
    int len = max_size;
 
-   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = s_inputString.constData() + s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (s_inputPosition + len >= s_inputString.size_storage()) {
+      len = s_inputString.size_storage() - s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 
 %}
@@ -425,8 +426,9 @@ SHORTSTRINGITEM   ({SHORTSTRINGCHAR}|{ESCAPESEQ})
 SHORTSTRINGCHAR   [^\\\n"]
 STRINGLITERAL     {STRINGPREFIX}?( {SHORTSTRING} | {LONGSTRING})
 STRINGPREFIX      ("r"|"u"|"ur"|"R"|"U"|"UR"|"Ur"|"uR")
-KEYWORD           ("lambda"|"import"|"class"|"assert"|"as"|"from"|"global"|"def"|"True"|"False")
+
 FLOWKW            ("or"|"and"|"is"|"not"|"print"|"for"|"in"|"if"|"try"|"except"|"yield"|"raise"|"break"|"continue"|"pass"|"if"|"return"|"while"|"elif"|"else"|"finally")
+
 POUNDCOMMENT      "#"[^#\n][^\n]*
 SCRIPTCOMMENT     "#!".*
 
@@ -594,6 +596,7 @@ STARTDOCSYMS      "##"
    "'"          {
       // start of a single quoted string
       s_stringContext = YY_START;
+      s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
 
       s_packageCommentAllowed = false;
@@ -604,6 +607,7 @@ STARTDOCSYMS      "##"
    "\""         {
       // start of a double quoted string
       s_stringContext = YY_START;
+      s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
 
       s_packageCommentAllowed = false;
@@ -868,6 +872,7 @@ STARTDOCSYMS      "##"
    "'"                {
       // start of a single quoted string
       s_stringContext = YY_START;
+      s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
 
       BEGIN( SingleQuoteString );
@@ -876,6 +881,7 @@ STARTDOCSYMS      "##"
    "\""              {
       // start of a double quoted string
       s_stringContext = YY_START;
+      s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
       BEGIN( DoubleQuoteString );
    }
@@ -966,11 +972,12 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
 
-      s_stringContext    = YY_START;
-      s_specialBlock     = false;
+      s_stringContext = YY_START;
+      s_specialBlock  = false;
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Source_Text;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Source_Text;
 
       BEGIN( SingleQuoteString );
    }
@@ -983,8 +990,9 @@ STARTDOCSYMS      "##"
       s_stringContext = YY_START;
       s_specialBlock  = false;
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Source_Text;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Source_Text;
 
       BEGIN( DoubleQuoteString );
    }
@@ -1104,43 +1112,47 @@ STARTDOCSYMS      "##"
       current->setData(EntryKey::Member_Args, argListToString(current->argList));
    }
 
-   ":"{B}             {
-      s_specialBlock    = true; // expecting a docstring
+   ":"{B}                    {
+      // expecting a docstring
+
+      s_specialBlock    = true;
       bodyEntry         = current;
       current->bodyLine = yyLineNr;
       BEGIN( FunctionBody );
    }
 
-   {POUNDCOMMENT}   {
+   {POUNDCOMMENT}            {
       // a comment
    }
 
-   {PARAMNONEMPTY}     {
+   {PARAMNONEMPTY}           {
       // default rule inside arguments
    }
 
 }
 
 <FunctionParamDefVal>{
-   "("       {
-      // internal opening brace
+   "["      |
+   "("                       {
+      // internal opening brace, assumme code is correct and braces match
       QString text = QString::fromUtf8(yytext);
       s_braceCount++;
       s_defVal += text[0];
    }
 
    ","       |
-   ")"             {
+   "]"       |
+   ")"                       {
       QString text = QString::fromUtf8(yytext);
 
-      if (s_braceCount == 0)   {
+      if (s_braceCount == 0){
          // end of default argument
 
          if (current->argList.listEmpty()) {
             current->argList.last().defval = s_defVal.trimmed();
          }
 
-          if (text[0] == ')') {
+          if (text[0] != ',') {
              current->setData(EntryKey::Member_Args,  argListToString(current->argList));
           }
 
@@ -1149,7 +1161,7 @@ STARTDOCSYMS      "##"
       }  else  {
          // continue
 
-         if (text[0] == ')') {
+         if (text[0] != ',') {
             s_braceCount--;
          }
 
@@ -1157,15 +1169,37 @@ STARTDOCSYMS      "##"
       }
    }
 
-   .         {
+   "'"                       {
       QString text = QString::fromUtf8(yytext);
-      s_defVal += text[0];
+      s_defVal   += text[0];
+
+      s_defVal_active = true;
+      s_docsEntry     = QSharedPointer<Entry>();
+
+      s_stringContext  = FunctionParamDefVal;
+      BEGIN( SingleQuoteString );
    }
 
-   \n                 {
+   "\""                      {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal   += text[0];
+
+      s_defVal_active = true;
+      s_docsEntry     = QSharedPointer<Entry>();;
+
+      s_stringContext = FunctionParamDefVal;
+      BEGIN( DoubleQuoteString );
+   }
+
+   \n                        {
       QString text = QString::fromUtf8(yytext);
       s_defVal += text[0];
       incLineNr();
+   }
+
+   .                         {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
    }
 }
 
@@ -1223,8 +1257,9 @@ STARTDOCSYMS      "##"
       s_stringContext = YY_START;
       s_specialBlock  = false;
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Source_Text;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Source_Text;
 
       BEGIN( SingleQuoteString );
    }
@@ -1237,8 +1272,9 @@ STARTDOCSYMS      "##"
       s_stringContext = YY_START;
       s_specialBlock  = false;
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Source_Text;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Source_Text;
 
       BEGIN( DoubleQuoteString );
    }
@@ -1452,8 +1488,9 @@ STARTDOCSYMS      "##"
 
       current->appendData(EntryKey::Initial_Value, text);
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Initial_Value;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Initial_Value;
 
       s_stringContext = VariableDec;
 
@@ -1470,8 +1507,9 @@ STARTDOCSYMS      "##"
 
       current->appendData(EntryKey::Initial_Value, text);
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Initial_Value;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Initial_Value;
 
       s_stringContext = VariableDec;
       BEGIN( DoubleQuoteString );
@@ -1489,8 +1527,9 @@ STARTDOCSYMS      "##"
 
       s_doubleQuote = true;
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Initial_Value;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Initial_Value;
 
       s_stringContext = VariableDec;
 
@@ -1509,8 +1548,9 @@ STARTDOCSYMS      "##"
 
       s_doubleQuote = false;
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Initial_Value;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Initial_Value;
 
       s_stringContext = VariableDec;
 
@@ -1645,8 +1685,9 @@ STARTDOCSYMS      "##"
       s_stringContext = YY_START;
       current->appendData(EntryKey::Initial_Value, "'");
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Initial_Value;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Initial_Value;
 
       BEGIN( SingleQuoteString );
    }
@@ -1655,8 +1696,9 @@ STARTDOCSYMS      "##"
       s_stringContext = YY_START;
       current->appendData(EntryKey::Initial_Value, "\"");
 
-      s_docsEntry = current;
-      s_docsEnum  = EntryKey::Initial_Value;
+      s_defVal_active = false;
+      s_docsEntry     = current;
+      s_docsEnum      = EntryKey::Initial_Value;
 
       BEGIN( DoubleQuoteString );
    }
@@ -1878,13 +1920,13 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
                                }
-    "'''"             {
+   "'''"             {
       // tripple single quotes
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
    }
 
-    "\""              {
+   "\""              {
       // end of the string
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);

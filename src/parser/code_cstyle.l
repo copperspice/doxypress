@@ -1732,26 +1732,22 @@ static QString escapeComment(const QString &s)
 }
 
 #undef   YY_INPUT
-#define  YY_INPUT(buf,result,max_size) result=yyread(buf,max_size);
+#define  YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
 {
    int len = max_size;
 
-   QString tmp1    = s_inputString.mid(s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = s_inputString.constData() + s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (s_inputPosition + len >= s_inputString.size_storage()) {
+      len = s_inputString.size_storage() - s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 
 %}
@@ -4208,6 +4204,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          g_code->codify(text);
          endFontClass();
       }
+   }
+
+<SkipComment>[^\*\n]+      {
+      g_code->codify(QString::fromUtf8(yytext));
    }
 
 <*>"/*"              {

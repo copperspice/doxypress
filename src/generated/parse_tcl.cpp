@@ -1301,7 +1301,6 @@ static void tcl_codify(const QString &s, const QString &str)
 
       if (c == '\n') {
          tcl.code_line++;
-
          tcl.code->codify(tmp);
 
          if (! tcl.code_font.isEmpty()) {
@@ -1327,7 +1326,12 @@ static void tcl_codify(const QString &s, const QString &str)
       }
    }
 
-   if ( ! tmp.isEmpty() ) {
+   if (tmp.endsWith('\x1A')) {
+      // remove ^Z
+      tmp.chop(1);
+   }
+
+   if (! tmp.isEmpty()) {
       tcl.code->codify(tmp);
    }
 
@@ -5381,11 +5385,6 @@ void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scop
       myStr += fileDef->fileName();
    }
 
-   if (isExampleBlock) {
-      tcl_codify("", input);
-      return;
-   }
-
    tcl_init();
 
    tcl.collectXRefs = collectXRefs;
@@ -5408,8 +5407,13 @@ void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scop
    tcl.file_name   = "";
    tcl.this_parser = nullptr;
 
-   tcl.entry_main = tcl_entry_new();
-   tcl_parse(myNs, myCls);
+   if (isExampleBlock) {
+      tcl_codify("", input);
+
+   } else {
+      tcl.entry_main = tcl_entry_new();
+      tcl_parse(myNs, myCls);
+   }
 
    tcl.code->endCodeLine();
 
@@ -5440,19 +5444,15 @@ static int yyread(char *buf, int max_size)
 {
    int len = max_size;
 
-   QString tmp1    = tcl.s_inputString.mid(tcl.s_inputPosition, max_size);
-   QByteArray tmp2 = tmp1.toUtf8();
+   const char *src = tcl.s_inputString.constData() + tcl.s_inputPosition;
 
-   while(len > 0 && tmp2.size() > len) {
-     len = len / 2;
+   if (tcl.s_inputPosition + len >= tcl.s_inputString.size_storage()) {
+      len = tcl.s_inputString.size_storage() - tcl.s_inputPosition;
+   }
 
-     tmp1.truncate(len);
-     tmp2 = tmp1.toUtf8();
-   };
-
+   memcpy(buf, src, len);
    tcl.s_inputPosition += len;
-   memcpy(buf, tmp2.constData(), tmp2.size());
 
-   return tmp2.size();
+   return len;
 }
 

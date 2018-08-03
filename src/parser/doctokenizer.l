@@ -28,7 +28,7 @@
 #define YY_NEVER_INTERACTIVE 1
 
 // global
-TokenInfo          *g_token = 0;
+TokenInfo          *g_token = nullptr;
 
 // context for tokenizer phase
 static int          s_commentState;
@@ -49,8 +49,8 @@ static int          s_sharpCount = 0;
 static SectionInfo::SectionType    s_secType;
 
 // context for section finding phase
-static QSharedPointer<MemberGroup> s_memberGroup;
 static QSharedPointer<Definition>  s_definition;
+static QSharedPointer<MemberGroup> s_memberGroup;
 
 struct DocLexerContext {
    TokenInfo *token;
@@ -528,7 +528,7 @@ SPCMD1    {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
 SPCMD2    {CMD}[\\@<>&$#%~".+|-]
 SPCMD3    {CMD}form#[0-9]+
 SPCMD4    {CMD}"::"
-INOUT      "inout"|"in"|"out"|("in"{BLANK}*","{BLANK}*"out")|("out"{BLANK}*","{BLANK}*"in")
+INOUT     "inout"|"in"|"out"|("in"{BLANK}*","{BLANK}*"out")|("out"{BLANK}*","{BLANK}*"in")
 PARAMIO   {CMD}param{BLANK}*"["{BLANK}*{INOUT}{BLANK}*"]"
 VARARGS   "..."
 TEMPCHAR  [a-z_A-Z0-9.,: \t\*\&\(\)\[\]]
@@ -539,9 +539,11 @@ TEMPLPART "<"{TEMPCHAR}*">"
 ANONNS    "anonymous_namespace{"[^}]*"}"
 SCOPEPRE  (({ID}{TEMPLPART}?)|{ANONNS}){SCOPESEP}
 SCOPEKEYS ":"({ID}":")*
+
 SCOPECPP  {SCOPEPRE}*(~)?{ID}{TEMPLPART}?
 SCOPEOBJC {SCOPEPRE}?{ID}{SCOPEKEYS}?
 SCOPEMASK {SCOPECPP}|{SCOPEOBJC}
+
 FUNCARG   "("{FUNCPART}")"({BLANK}*("volatile"|"const"){BLANK})?
 FUNCARG2  "("{FUNCPART}")"({BLANK}*("volatile"|"const"))?
 OPNEW     {BLANK}+"new"({BLANK}*"[]")?
@@ -549,26 +551,28 @@ OPDEL     {BLANK}+"delete"({BLANK}*"[]")?
 
 OPNORM    {OPNEW}|{OPDEL}|"+"|"-"|"*"|"/"|"%"|"^"|"&"|"|"|"~"|"!"|"="|"<"|">"|"+="|"-="|"*="|"/="|"%="|"^="|"&="|"|="|"<<"|">>"|"<<="|">>="|"=="|"!="|"<="|">="|"&&"|"||"|"++"|"--"|","|"->*"|"->"|"[]"|"()"
 
-OPCAST    {BLANK}+[^<(\r\n.,][^(\r\n.,]*
-OPMASK    ({BLANK}*{OPNORM}{FUNCARG})
-OPMASKOPT ({BLANK}*{OPNORM}{FUNCARG}?)|({OPCAST}{FUNCARG})
-OPMASKOP2 ({BLANK}*{OPNORM}{FUNCARG2}?)|({OPCAST}{FUNCARG2})
-LNKWORD1  ("::"|"#")?{SCOPEMASK}
-CVSPEC    {BLANK}*("const"|"volatile")
-LNKWORD2  (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
-LNKWORD3  ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
+OPCAST      {BLANK}+[^<(\r\n.,][^(\r\n.,]*
+OPMASK      ({BLANK}*{OPNORM}{FUNCARG})
+OPMASKOPT   ({BLANK}*{OPNORM}{FUNCARG}?)|({OPCAST}{FUNCARG})
+OPMASKOP2   ({BLANK}*{OPNORM}{FUNCARG2}?)|({OPCAST}{FUNCARG2})
+
+CVSPEC      {BLANK}*("const"|"volatile")
+LNKWORD1    ("::"|"#")?{SCOPEMASK}
+LNKWORD2    (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
+LNKWORD3    ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
 
 CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
 CHARWORDQ2  [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 
-WORD1       {ESCWORD}|{CHARWORDQ2}+|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
+  /* charwordq1 might need to be charwordw2 */
+WORD1       {ESCWORD}|{CHARWORDQ1}+|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
 WORD2       "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
 
-WORD1NQ   {ESCWORD}|{CHARWORDQ1}+|"{"|"}"
-WORD2NQ   "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
-CAPTION   [cC][aA][pP][tT][iI][oO][nN]
-HTMLTAG   "<"(("/")?){ID}({WS}+{ATTRIB})*{WS}*(("/")?)">"
+WORD1NQ     {ESCWORD}|{CHARWORDQ1}+|"{"|"}"
+WORD2NQ     "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
+CAPTION     [cC][aA][pP][tT][iI][oO][nN]
+HTMLTAG     "<"(("/")?){ID}({WS}+{ATTRIB})*{WS}*(("/")?)">"
 
 HTMLKEYL  "strong"|"center"|"table"|"caption"|"small"|"code"|"dfn"|"var"|"img"|"pre"|"sub"|"sup"|"tr"|"td"|"th"|"ol"|"ul"|"li"|"tt"|"kbd"|"em"|"hr"|"dl"|"dt"|"dd"|"br"|"i"|"a"|"b"|"p"
 
@@ -790,7 +794,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       bool ok;
       QString text = QString::fromUtf8(yytext);
-      g_token->id  = text.right(yyleng - 6).toInteger<int>(&ok);
+      g_token->id  = text.right(doctokenizerYYleng - 6).toInteger<int>(&ok);
       assert(ok);
 
       return TK_COMMAND;
@@ -814,7 +818,6 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       g_token->name     = text.mid(1).trimmed();
       g_token->paramDir = TokenInfo::Unspecified;
-
       return TK_COMMAND;
    }
 
@@ -872,6 +875,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       // Mail address
       g_token->name = QString::fromUtf8(yytext);
       g_token->name = stripPrefix(g_token->name, "mailto:");
+
       g_token->isEMailAddr = true;
       return TK_URL;
    }
@@ -914,10 +918,10 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       /* environment variable */
       QString text = QString::fromUtf8(yytext);
 
-      QString name = text.mid(2);
-      name = name.left(name.length() - 1);
+      text = text.mid(2);
+      text.chop(1);
 
-      QString value = portable_getenv(name);
+      QString value = portable_getenv(text);
 
       for (int i = value.length() - 1; i >= 0; i--) {
          unput(value.at(i));
@@ -939,7 +943,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
   /********* patterns for linkable words ******************/
 
-<St_Para>{ID}/"<"{HTMLKEYW}">" {
+<St_Para>{ID}/"<"{HTMLKEYW}">"         {
       // this rule is to prevent opening html
       // tag to be recognized as a templated classes
 
@@ -947,20 +951,20 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_LNKWORD;
    }
 
-<St_Para>{LNKWORD1}/"<br>"           | // prevent <br> html tag to be parsed as template arguments
-<St_Para>{LNKWORD1}                  |
-<St_Para>{LNKWORD1}{FUNCARG}         |
-<St_Para>{LNKWORD2}                  |
-<St_Para>{LNKWORD3}    {
+<St_Para>{LNKWORD1}/"<br>"    | // prevent <br> html tag to be parsed as template arguments
+<St_Para>{LNKWORD1}           |
+<St_Para>{LNKWORD1}{FUNCARG}  |
+<St_Para>{LNKWORD2}           |
+<St_Para>{LNKWORD3}                    {
       g_token->name = QString::fromUtf8(yytext);
       return TK_LNKWORD;
    }
 
 <St_Para>{LNKWORD1}{FUNCARG}{CVSPEC}[^a-z_A-Z0-9] {
       g_token->name = QString::fromUtf8(yytext);
-      g_token->name = g_token->name.left(g_token->name.length() - 1);
+      g_token->name.chop(1);
 
-      unput(yytext[yyleng - 1]);
+      unput(yytext[doctokenizerYYleng - 1]);
       return TK_LNKWORD;
    }
 
@@ -969,7 +973,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para,St_Text>[0-9]+       |
 <St_Para,St_Text>[\-+]        |
 <St_Para,St_Text>{WORD1}      |
-<St_Para,St_Text>{WORD2} {
+<St_Para,St_Text>{WORD2}               {
       /* function call */
       QString text = QString::fromUtf8(yytext);
 
@@ -984,7 +988,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WORD;
    }
 
-<St_Text>({ID}".")+{ID} {
+<St_Text>({ID}".")+{ID}                {
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
    }
@@ -1054,8 +1058,10 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_CodeOpt>{BLANK}*"{"(".")?{LABELID}"}" {
       g_token->name = QString::fromUtf8(yytext);
+
       int i = g_token->name.indexOf('{');
       g_token->name = g_token->name.mid(i + 1, g_token->name.length() - i - 2);
+
       BEGIN(St_Code);
     }
 
@@ -1256,16 +1262,16 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_TitleN>"&"{ID}";"  {
       /* symbol */
       g_token->name = QString::fromUtf8(yytext);
-         return TK_SYMBOL;
+      return TK_SYMBOL;
    }
 
-<St_TitleN>{HTMLTAG}   {
+<St_TitleN>{HTMLTAG}                   {
    }
 
 <St_TitleN>{SPCMD1}    |
-<St_TitleN>{SPCMD2}    {
+<St_TitleN>{SPCMD2}                    {
       /* special command */
-      QString text = QString::fromUtf8(yytext);
+      QString text      = QString::fromUtf8(yytext);
       g_token->name     = text.mid(1);
       g_token->paramDir = TokenInfo::Unspecified;
       return TK_COMMAND;
@@ -1311,7 +1317,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_TitleN>\n         {
       /* new line => end of title */
       unput(yytext[0]);
-         return 0;
+      return 0;
    }
 
 <St_TitleQ>"&"{ID}";"  {
@@ -1321,7 +1327,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_TitleQ>{SPCMD1}    |
-<St_TitleQ>{SPCMD2}    {
+<St_TitleQ>{SPCMD2}                    {
       /* special command */
       QString text = QString::fromUtf8(yytext);
 
@@ -1331,7 +1337,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_TitleQ>{WORD1NQ}   |
-<St_TitleQ>{WORD2NQ}      {
+<St_TitleQ>{WORD2NQ}                   {
       /* word */
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
@@ -1502,7 +1508,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_Ref2>{SPCMD1}      |
-<St_Ref2>{SPCMD2}      {
+<St_Ref2>{SPCMD2}                      {
       /* special command */
       QString text = QString::fromUtf8(yytext);
       g_token->name     = text.mid(1);
