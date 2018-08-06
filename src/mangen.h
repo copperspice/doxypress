@@ -297,7 +297,6 @@ class ManGenerator : public OutputGenerator
    void endContents() override {}
 
    void writeNonBreakableSpace(int n) override {
-
       for (int i = 0; i < n; i++) {
          m_textStream << " ";
       }
@@ -312,6 +311,19 @@ class ManGenerator : public OutputGenerator
       endDescForItem();
       endSimpleSect();
    }
+
+   void startDescTable(const QString &title) override {
+      startSimpleSect(EnumValues, 0, 0, title);
+      startDescForItem();
+   }
+
+   void endDescTable() override {
+      endDescForItem();
+      endSimpleSect();
+   }
+
+   void startDescTableRow() override {};
+   void endDescTableRow() override {};
 
    void startDescTableTitle() override {
       startItemListItem();
@@ -372,8 +384,8 @@ class ManGenerator : public OutputGenerator
    void endConstraintDocs() override;
    void endConstraintList() override;
 
-   void startMemberDocSimple() override;
-   void endMemberDocSimple() override;
+   void startMemberDocSimple(bool isEnum) override;
+   void endMemberDocSimple(bool isEnum) override;
    void startInlineMemberType() override;
    void endInlineMemberType() override;
    void startInlineMemberName() override;

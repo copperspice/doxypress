@@ -854,22 +854,30 @@ void ManGenerator::endInlineHeader()
    firstCol = false;
 }
 
-void ManGenerator::startMemberDocSimple()
+void ManGenerator::startMemberDocSimple(bool isEnum)
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl << ".PP" << endl;
    }
+
    m_textStream << "\\fB";
-   docify(theTranslator->trCompoundMembers());
+
+   if (isEnum) {
+      docify(theTranslator->trEnumerationValues());
+   } else {
+      docify(theTranslator->trCompoundMembers());
+   }
+
    m_textStream << ":\\fP" << endl;
    m_textStream << ".RS 4" << endl;
 }
 
-void ManGenerator::endMemberDocSimple()
+void ManGenerator::endMemberDocSimple(bool isEnum)
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".RE" << endl;
    m_textStream << ".PP" << endl;
    firstCol = true;

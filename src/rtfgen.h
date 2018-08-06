@@ -285,6 +285,11 @@ class RTFGenerator : public OutputGenerator
 
    void startEnumTable() override;
    void endEnumTable() override;
+
+   void startDescTable(const QString &title) override;
+   void endDescTable() override;
+   void startDescTableRow() override;
+   void endDescTableRow() override;
    void startDescTableTitle() override;
    void endDescTableTitle() override;
    void startDescTableData() override;
@@ -334,8 +339,9 @@ class RTFGenerator : public OutputGenerator
    void endConstraintDocs() override;
    void endConstraintList() override;
 
-   void startMemberDocSimple() override;
-   void endMemberDocSimple() override;
+   void startMemberDocSimple(bool isEnum) override;
+   void endMemberDocSimple(bool isEnum) override;
+
    void startInlineMemberType() override;
    void endInlineMemberType() override;
    void startInlineMemberName() override;

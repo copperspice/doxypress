@@ -385,21 +385,14 @@ class HtmlGenerator : public OutputGenerator
       m_textStream << "</table>" << endl;
    }
 
-   void startDescTableTitle() override {
-      m_textStream << "<tr><td class=\"fieldname\">";
-   }
-
-   void endDescTableTitle() override {
-      m_textStream << "&#160;</td>";
-   }
-
-   void startDescTableData() override {
-      m_textStream << "<td class=\"fielddoc\">" << endl;
-   }
-
-   void endDescTableData() override {
-      m_textStream << "</td></tr>" << endl;
-   }
+   void startDescTable(const QString &title) override;
+   void endDescTable() override;
+   void startDescTableRow() override;
+   void endDescTableRow() override;
+   void startDescTableTitle();
+   void endDescTableTitle();
+   void startDescTableData();
+   void endDescTableData();
 
    void startTextBlock(bool) override {
       m_textStream << "<div class=\"textblock\">";
@@ -489,8 +482,8 @@ class HtmlGenerator : public OutputGenerator
    void endConstraintDocs() override;
    void endConstraintList() override;
 
-   void startMemberDocSimple() override;
-   void endMemberDocSimple() override;
+   void startMemberDocSimple(bool isEnum) override;
+   void endMemberDocSimple(bool isEnum) override;
    void startInlineMemberType() override;
    void endInlineMemberType() override;
    void startInlineMemberName() override;

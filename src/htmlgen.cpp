@@ -1979,6 +1979,47 @@ void HtmlGenerator::writeNonBreakableSpace(int n)
    }
 }
 
+void HtmlGenerator::startDescTable(const QString &title)
+{
+   m_textStream << "<table class=\"fieldtable\">" << endl
+                << "<tr><th colspan=\"2\">" << title << "</th></tr>";
+}
+
+void HtmlGenerator::endDescTable()
+{
+   m_textStream << "</table>" << endl;
+}
+
+void HtmlGenerator::startDescTableRow()
+{
+   m_textStream << "<tr>";
+}
+
+void HtmlGenerator::endDescTableRow()
+{
+   m_textStream << "</tr>" << endl;
+}
+
+void HtmlGenerator::startDescTableTitle()
+{
+   m_textStream << "<td class=\"fieldname\">";
+}
+
+void HtmlGenerator::endDescTableTitle()
+{
+   m_textStream << "&#160;</td>";
+}
+
+void HtmlGenerator::startDescTableData()
+{
+   m_textStream << "<td class=\"fielddoc\">";
+}
+
+void HtmlGenerator::endDescTableData()
+{
+   m_textStream << "</td>";
+}
+
 void HtmlGenerator::startSimpleSect(SectionTypes, const QString &filename, const QString &anchor, const QString &title)
 {
    m_textStream << "<dl><dt><b>";
@@ -2446,10 +2487,10 @@ void HtmlGenerator::writeSearchPage()
    static bool generateTreeView  = Config::getBool("generate-treeview");
    static bool disableIndex      = Config::getBool("disable-index");
 
-   static QString projectName = Config::getString("project-name");
-   static QString htmlOutput  = Config::getString("html-output");
+   static QString projectName    = Config::getString("project-name");
+   static QString htmlOutput     = Config::getString("html-output");
 
-   // OPENSEARCH_PROVIDER {
+   //
    QString configFileName = htmlOutput + "/search_config.php";
    QFile cf(configFileName);
 
@@ -2746,13 +2787,15 @@ void HtmlGenerator::endInlineHeader()
    m_textStream << "</h3></td></tr>" << endl;
 }
 
-void HtmlGenerator::startMemberDocSimple()
+void HtmlGenerator::startMemberDocSimple(bool isEnum)
 {
    m_textStream << "<table class=\"fieldtable\">" << endl;
-   m_textStream << "<tr><th colspan=\"3\">" << theTranslator->trCompoundMembers() << "</th></tr>" << endl;
+   m_textStream << "<tr><th colspan=\"" << (isEnum ? "2" : "3") << "\">";
+   m_textStream << (isEnum ? theTranslator->trEnumerationValues() : theTranslator->trCompoundMembers())
+                << "</th></tr>" << endl;
 }
 
-void HtmlGenerator::endMemberDocSimple()
+void HtmlGenerator::endMemberDocSimple(bool isEnum)
 {
    m_textStream << "</table>" << endl;
 }

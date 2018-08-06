@@ -179,7 +179,10 @@ inline void writeXMLCodeString(QTextStream &t, const QString &text, int &col)
          case 29:
          case 30:
          case 31:
-            break; // skip invalid XML characters (see http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
+            // encode invalid XML characters (see http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
+
+            t << "<sp value=\"" << int(c.unicode()) << "\"/>";
+            break;
 
          default:
             t << c;

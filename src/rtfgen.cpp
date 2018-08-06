@@ -613,7 +613,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          break;
 
       case isTitlePageAuthor: {
-         m_textStream << "DoxyPress. }\n";
+         m_textStream << " DoxyPress. }\n";
          m_textStream << "{\\creatim " << dateToRTFDateString() << "}\n}";
 
          DBG_RTF(m_textStream << "{\\comment end of infoblock}\n");
@@ -642,7 +642,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          if (! rtf_title.isEmpty()) {
             // User has overridden document title in extensions file
-            m_textStream << "{\\field\\fldedit {\\*\\fldinst " << rtf_title << " \\\\*MERGEFORMAT}{\\fldrslt "
+            m_textStream << "{\\field\\fldedit {\\*\\fldinst TITLE \\\\*MERGEFORMAT}{\\fldrslt "
                          << rtf_title << "}}\\par" << endl;
 
          } else {
@@ -1574,12 +1574,13 @@ void RTFGenerator::endMemberDescription()
 {
    DBG_RTF(m_textStream << "{\\comment (endMemberDescription)}"    << endl)
    endEmphasis();
-   newParagraph();
+
    decrementIndentLevel();
 
+   m_textStream << "\\par";
    m_textStream << "}" << endl;
 
-   //m_omitParagraph = true;
+   m_omitParagraph = true;
 }
 
 void RTFGenerator::startDescList(SectionTypes)
@@ -1930,33 +1931,77 @@ void RTFGenerator::endEnumTable()
    endSimpleSect();
 }
 
+void RTFGenerator::startDescTable(const QString &title)
+ {
+   DBG_RTF(t << "{\\comment (startDescTable) }"    << endl)
+
+   m_textStream << "{\\par" << endl;
+   m_textStream << "{" << rtf_Style["Heading5"].m_reference << endl;
+
+   docify(title);
+
+   m_textStream << ":\\par}" << endl;
+   m_textStream << rtf_Style_Reset << rtf_DList_DepthStyle();
+
+   m_textStream << "\\trowd \\trgaph108\\trleft426\\tblind426"
+       "\\trbrdrt\\brdrs\\brdrw10\\brdrcf15 "
+       "\\trbrdrl\\brdrs\\brdrw10\\brdrcf15 "
+       "\\trbrdrb\\brdrs\\brdrw10\\brdrcf15 "
+       "\\trbrdrr\\brdrs\\brdrw10\\brdrcf15 "
+       "\\trbrdrh\\brdrs\\brdrw10\\brdrcf15 "
+       "\\trbrdrv\\brdrs\\brdrw10\\brdrcf15 "<< endl;
+
+   int i;
+   int columnPos[2] = { 25, 100 };
+
+   for (i = 0; i < 2; i++) {
+      m_textStream << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10\\brdrcf15 "
+           "\\clbrdrl\\brdrs\\brdrw10\\brdrcf15 "
+           "\\clbrdrb\\brdrs\\brdrw10\\brdrcf15 "
+           "\\clbrdrr \\brdrs\\brdrw10\\brdrcf15 "
+           "\\cltxlrtb "
+           "\\cellx" << (rtf_pageWidth*columnPos[i]/100) << endl;
+   }
+
+   m_textStream << "\\pard \\widctlpar\\intbl\\adjustright" << endl;
+ }
+
+void RTFGenerator::endDescTable()
+{
+   DBG_RTF(t << "{\\comment (endDescTable)}"      << endl)
+   m_textStream << "}" << endl;
+}
+
+void RTFGenerator::startDescTableRow()
+{
+}
+
+void RTFGenerator::endDescTableRow()
+{
+}
+
 void RTFGenerator::startDescTableTitle()
 {
-   //m_textStream << rtf_BList_DepthStyle() << endl;
    DBG_RTF(m_textStream << "{\\comment (startDescTableTitle) }"    << endl)
-   startBold();
-   startEmphasis();
+   m_textStream << "{\\qr ";
 }
 
 void RTFGenerator::endDescTableTitle()
 {
    DBG_RTF(m_textStream << "{\\comment (endDescTableTitle) }"    << endl)
-   endEmphasis();
-   endBold();
-   m_textStream << "  ";
+   m_textStream << "\\cell }";
 }
 
 void RTFGenerator::startDescTableData()
 {
    DBG_RTF(m_textStream << "{\\comment (startDescTableData) }"    << endl)
-   m_omitParagraph = false;
+   m_textStream << "{";
 }
 
 void RTFGenerator::endDescTableData()
 {
    DBG_RTF(m_textStream << "{\\comment (endDescTableData) }"    << endl)
-   newParagraph();
-   m_omitParagraph = true;
+   m_textStream << "\\cell }{\\row }" << endl;
 }
 
 // a style for list formatted as a "bulleted list"
@@ -2738,12 +2783,21 @@ void RTFGenerator::endInlineHeader()
    m_textStream << "}" << endl;
 }
 
-void RTFGenerator::startMemberDocSimple()
+void RTFGenerator::startMemberDocSimple(bool isEnum)
 {
    DBG_RTF(m_textStream << "{\\comment (startMemberDocSimple)}" << endl)
+
    m_textStream << "{\\par" << endl;
    m_textStream << "{" << rtf_Style["Heading5"].m_reference << endl;
-   m_textStream << theTranslator->trCompoundMembers() << ":\\par}" << endl;
+
+   if (isEnum) {
+      m_textStream << theTranslator->trEnumerationValues();
+
+   } else {
+      m_textStream << theTranslator->trCompoundMembers();
+   }
+
+   m_textStream << ":\\par}" << endl;
    m_textStream << rtf_Style_Reset << rtf_DList_DepthStyle();
 
    m_textStream << "\\trowd \\trgaph108\\trleft426\\tblind426"
@@ -2754,9 +2808,17 @@ void RTFGenerator::startMemberDocSimple()
      "\\trbrdrh\\brdrs\\brdrw10\\brdrcf15 "
      "\\trbrdrv\\brdrs\\brdrw10\\brdrcf15 " << endl;
 
-   int i, columnPos[3] = { 25, 50, 100 };
+   int i;
+   int n = 3;
+   int columnPos[3] = { 25, 50, 100 };
 
-   for (i = 0; i < 3; i++) {
+   if (isEnum) {
+      columnPos[0] = 30;
+      columnPos[1] = 100;
+      n = 2;
+   }
+
+   for (i = 0; i < n; i++) {
       m_textStream << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10\\brdrcf15 "
         "\\clbrdrl\\brdrs\\brdrw10\\brdrcf15 "
         "\\clbrdrb\\brdrs\\brdrw10\\brdrcf15 "
@@ -2764,10 +2826,11 @@ void RTFGenerator::startMemberDocSimple()
         "\\cltxlrtb "
         "\\cellx" << (rtf_pageWidth * columnPos[i] / 100) << endl;
    }
+
    m_textStream << "\\pard \\widctlpar\\intbl\\adjustright" << endl;
 }
 
-void RTFGenerator::endMemberDocSimple()
+void RTFGenerator::endMemberDocSimple(bool isEnum)
 {
    DBG_RTF(m_textStream << "{\\comment (endMemberDocSimple)}" << endl)
    m_textStream << "}" << endl;

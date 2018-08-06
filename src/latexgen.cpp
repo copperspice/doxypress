@@ -84,8 +84,9 @@ void LatexCodeGenerator::codify(const QString &str)
          }
 
          case '\n':
-            m_t << '\n';
+            (usedTableLevels() > 0) ? m_t << "\\newline\n" : m_t << '\n';
             m_col = 0;
+
             ++iter;
 
             break;
@@ -1672,7 +1673,8 @@ void LatexGenerator::startMemberDoc(const QString &clname, const QString &memnam
    }
 
    m_textStream << "}";
-   m_textStream << "\n{\\ttfamily ";
+   m_textStream << "\n{\\footnotesize\\ttfamily ";
+
    // disableLinks = true;
 }
 
@@ -1941,6 +1943,53 @@ void LatexGenerator::writeNonBreakableSpace(int)
    }
 }
 
+void LatexGenerator::startDescTable(const QString &title)
+ {
+   incUsedTableLevels();
+   m_textStream << "\\begin{DoxyEnumFields}{" << title << "}" << endl;
+ }
+
+void LatexGenerator::endDescTable()
+{
+   decUsedTableLevels();
+   m_textStream << "\\end{DoxyEnumFields}" << endl;
+}
+
+void LatexGenerator::startDescTableRow()
+{
+   // this is needed to prevent the \hypertarget, \label, and \index commands from messing up
+   // the row height
+
+   m_textStream << "\\raisebox{\\heightof{T}}[0pt][0pt]{";
+}
+
+void LatexGenerator::endDescTableRow()
+{
+}
+
+void LatexGenerator::startDescTableTitle()
+{
+   m_textStream << "}";
+}
+
+void LatexGenerator::endDescTableTitle()
+{
+}
+
+void LatexGenerator::startDescTableData()
+{
+   m_textStream << "&";
+}
+
+void LatexGenerator::endDescTableData()
+{
+   m_textStream << "\\\\\n\\hline\n" << endl;
+}
+
+void LatexGenerator::lastIndexPage()
+{
+}
+
 void LatexGenerator::startMemberList()
 {
    if (!insideTabbing) {
@@ -2114,7 +2163,7 @@ void LatexGenerator::startParameterType(bool first, const QString &key)
    m_textStream << "\\item[{";
 
    if (! first && ! key.isEmpty()) {
-      m_textStream << key;
+      docify(key);
    }
 }
 
@@ -2238,16 +2287,31 @@ void LatexGenerator::lineBreak(const QString &style)
    }
 }
 
-void LatexGenerator::startMemberDocSimple()
+void LatexGenerator::startMemberDocSimple(bool isEnum)
 {
-   m_textStream << "\\begin{DoxyFields}{";
-   docify(theTranslator->trCompoundMembers());
+   incUsedTableLevels();
+
+   if (isEnum) {
+      m_textStream << "\\begin{DoxyEnumFields}{";
+      docify(theTranslator->trEnumerationValues());
+
+   } else {
+      m_textStream << "\\begin{DoxyFields}{";
+      docify(theTranslator->trCompoundMembers());
+   }
+
    m_textStream << "}" << endl;
 }
 
-void LatexGenerator::endMemberDocSimple()
+void LatexGenerator::endMemberDocSimple(bool isEnum)
 {
-   m_textStream << "\\end{DoxyFields}" << endl;
+   decUsedTableLevels();
+
+   if (isEnum) {
+      m_textStream << "\\end{DoxyEnumFields}" << endl;
+   } else {
+      m_textStream << "\\end{DoxyFields}" << endl;
+   }
 }
 
 void LatexGenerator::startInlineMemberType()

@@ -610,6 +610,22 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endEnumTable);
    }
 
+   void startDescTable(const QString &title) override {
+      forall(&OutputGenerator::startDescTable, title);
+   }
+
+   void endDescTable() override {
+      forall(&OutputGenerator::endDescTable);
+   }
+
+   void startDescTableRow() override {
+      forall(&OutputGenerator::startDescTableRow);
+   }
+
+   void endDescTableRow() override {
+      forall(&OutputGenerator::endDescTableRow);
+   }
+
    void startDescTableTitle() override {
       forall(&OutputGenerator::startDescTableTitle);
    }
@@ -758,12 +774,12 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endConstraintList);
    }
 
-   void startMemberDocSimple() {
-      forall(&OutputGenerator::startMemberDocSimple);
+   void startMemberDocSimple(bool isEnum) {
+      forall(&OutputGenerator::startMemberDocSimple, isEnum);
    }
 
-   void endMemberDocSimple() {
-      forall(&OutputGenerator::endMemberDocSimple);
+   void endMemberDocSimple(bool isEnum) {
+      forall(&OutputGenerator::endMemberDocSimple, isEnum);
    }
 
    void startInlineMemberType() {
