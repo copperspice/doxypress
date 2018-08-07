@@ -629,13 +629,19 @@ void MemberList::writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definit
       return;
    }
 
-   ol.startMemberDocSimple();
+   QSharedPointer<ClassDef> cd;
+
+   if (container && container->definitionType() == Definition::TypeClass) {
+      cd = container.dynamicCast<ClassDef>();
+   }
+
+   ol.startMemberDocSimple(cd && cd->isJavaEnum());
 
    for (auto md : *this) {
       md->writeMemberDocSimple(ol, container);
    }
 
-   ol.endMemberDocSimple();
+   ol.endMemberDocSimple(cd && cd->isJavaEnum());
 }
 
 // separate member pages

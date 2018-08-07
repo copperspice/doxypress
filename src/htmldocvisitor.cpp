@@ -122,9 +122,10 @@ static bool mustBeOutsideParagraph(DocNode *n)
    return false;
 }
 
-static QString htmlAttribsToString(const HtmlAttribList &attribs)
+static QString htmlAttribsToString(const HtmlAttribList &attribs, const bool img_tag = false)
 {
    QString result;
+   bool isAlt = false;
 
    for (auto att : attribs) {
       if (! att.value.isEmpty())  {
@@ -133,8 +134,17 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs)
          result += " ";
          result += att.name;
          result += "=\"" + convertToXML(att.value) + "\"";
+
+         if (att.name == "alt") {
+            isAlt = true;
+         }
       }
    }
+
+   if (! isAlt && img_tag) {
+      result += " alt=\"\"";
+   }
+
    return result;
 }
 
@@ -1632,7 +1642,7 @@ void HtmlDocVisitor::visitPre(DocImage *img)
 
          } else {
             m_t << "<img src=\"" << correctURL(url, img->relPath()) << "\" "
-                << sizeAttribs << htmlAttribsToString(img->attribs())
+                << sizeAttribs << htmlAttribsToString(img->attribs(), true)
                 << "/>" << endl;
          }
       }

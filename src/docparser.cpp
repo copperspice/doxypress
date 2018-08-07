@@ -7826,6 +7826,89 @@ static  QString::const_iterator isCopyBriefOrDetailsCmd(const QString &data, QSt
    return iter_retval;
 }
 
+static QString::const_iterator isVerbatimSection(const QString &data, QString::const_iterator iter_i, QString &endMarker)
+{
+   QString::const_iterator iter_retval = data.constEnd();
+
+   if (iter_i == data.constBegin() || (iter_i[-1] != '@' && iter_i[-1] != '\\')) {
+      // not an escaped command
+      QStringView tmp = QStringView(iter_i + 1, data.constEnd());
+
+      if (tmp.startsWith("dot") ) {
+         iter_retval = iter_i + 4;
+         endMarker   = "enddot";
+
+      } else if (tmp.startsWith("code") ) {
+         iter_retval = iter_i + 5;
+         endMarker   = "endcode";
+
+      } else if (tmp.startsWith("msc") ) {
+         iter_retval = iter_i + 4;
+         endMarker   = "endmsc";
+
+      } else if (tmp.startsWith("startuml") ) {
+         iter_retval = iter_i + 9;
+         endMarker   = "enduml";
+
+      } else if (tmp.startsWith("verbatim") ) {
+         iter_retval = iter_i + 9;
+         endMarker   = "endverbatim";
+
+      } else if (tmp.startsWith("htmlonly") ) {
+         iter_retval = iter_i + 9;
+         endMarker   = "endhtmlonly";
+
+      } else if (tmp.startsWith("latexonly") ) {
+         iter_retval = iter_i + 10;
+         endMarker   = "endlatexonly";
+
+      } else if (tmp.startsWith("xmlonly") ) {
+         iter_retval = iter_i + 8;
+         endMarker   = "endxmlonly";
+
+      } else if (tmp.startsWith("rtfonly") ) {
+         iter_retval = iter_i + 8;
+         endMarker   = "endrtlonly";
+
+      } else if (tmp.startsWith("manonly") ) {
+         iter_retval = iter_i + 8;
+         endMarker   = "endmanonly";
+
+      } else if (tmp.startsWith("docbookonly") ) {
+         iter_retval = iter_i + 12;
+         endMarker   = "enddocbookonly";
+
+      }
+   }
+
+   return iter_retval;
+}
+
+
+static QString::const_iterator skipToEndMarker(QStringView data, QString::const_iterator iter_begin,
+                  QString::const_iterator iter_end, const QString &endMarker)
+{
+   QString::const_iterator iter = iter_begin;
+   QChar c_prev = '\0';
+
+   while (iter != iter_end) {
+      QChar c = *iter;
+
+      if ((c == '@' || c == '\\') && (iter == data.begin() || (c_prev !='@' && c_prev != '\\')))  {
+
+         if (QStringView(iter + 1, iter_end).startsWith(endMarker)) {
+            return iter + endMarker.length() + 1;
+         }
+      }
+
+      c_prev = c;
+      ++iter;
+   }
+
+   // no endmarker found
+   return iter != iter_end ? iter + 1 : iter_end;
+}
+
 static QString processCopyDoc(const QString &data, uint &len)
 {
    QString retval;
@@ -7891,8 +7974,18 @@ static QString processCopyDoc(const QString &data, uint &len)
             iter_i = iter_j;
 
          } else {
-            retval += c;
-            ++iter_i;
+            QString endMarker;
+            QString::const_iterator it_b = isVerbatimSection(data, iter_i, endMarker);
+
+            if (it_b != iter_end) {
+               auto iter_tmp = skipToEndMarker(data, it_b, iter_end, endMarker);
+               retval += QStringView(iter_i, iter_tmp);
+               iter_i = iter_tmp;
+
+            } else {
+               retval += c;
+               ++iter_i;
+            }
          }
 
       } else {

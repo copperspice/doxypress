@@ -1552,6 +1552,8 @@ void LatexDocVisitor::visitPre(DocParamSect *s)
    bool hasInOutSpecs = s->hasInOutSpecifier();
    bool hasTypeSpecs  = s->hasTypeSpecifier();
 
+   incUsedTableLevels();
+
    switch (s->type()) {
       case DocParamSect::Param:
          m_t << "\n\\begin{DoxyParams}";
@@ -1563,14 +1565,17 @@ void LatexDocVisitor::visitPre(DocParamSect *s)
          m_t << "{";
          filter(theTranslator->trParameters());
          break;
+
       case DocParamSect::RetVal:
          m_t << "\n\\begin{DoxyRetVals}{";
          filter(theTranslator->trReturnValues());
          break;
+
       case DocParamSect::Exception:
          m_t << "\n\\begin{DoxyExceptions}{";
          filter(theTranslator->trExceptions());
          break;
+
       case DocParamSect::TemplateParam:
          /* TODO: add this
          filter(theTranslator->trTemplateParam()); break;
@@ -1578,9 +1583,11 @@ void LatexDocVisitor::visitPre(DocParamSect *s)
          m_t << "\n\\begin{DoxyTemplParams}{";
          filter("Template Parameters");
          break;
+
       default:
          assert(0);
    }
+
    m_t << "}\n";
 }
 
@@ -1589,19 +1596,26 @@ void LatexDocVisitor::visitPost(DocParamSect *s)
    if (m_hide) {
       return;
    }
+
+   decUsedTableLevels();
+
    switch (s->type()) {
       case DocParamSect::Param:
          m_t << "\\end{DoxyParams}\n";
          break;
+
       case DocParamSect::RetVal:
          m_t << "\\end{DoxyRetVals}\n";
          break;
+
       case DocParamSect::Exception:
          m_t << "\\end{DoxyExceptions}\n";
          break;
+
       case DocParamSect::TemplateParam:
          m_t << "\\end{DoxyTemplParams}\n";
          break;
+
       default:
          assert(0);
    }

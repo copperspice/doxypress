@@ -629,7 +629,7 @@ class MemberDefImpl
    bool stat;                // is it a static function?
    bool proto;               // is it a prototype;
    bool docEnumValues;       // is an enum with documented enum values
-   bool annScope;            // member is part of an annoymous scope
+   bool annScope;            // member is part of an anonymous scope
    bool annUsed;
    bool hasCallGraph;
    bool hasCallerGraph;
@@ -2485,6 +2485,7 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
                   first = false;
                }
 
+               ol.startDescTableRow();
                ol.addIndexItem(fmd->name(), ciname);
                ol.addIndexItem(ciname, fmd->name());
 
@@ -2516,7 +2517,9 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
                   ol.generateDoc(fmd->docFile(), fmd->docLine(), getOuterScope() ? getOuterScope() : container,
                                  fmd, fmd->documentation() + "\n", true, false);
                }
+
                ol.endDescTableData();
+               ol.endDescTableRow();
             }
          }
       }
@@ -2747,7 +2750,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
       ciname = container.dynamicCast<GroupDef>()->groupTitle();
 
-   } else if (container->definitionType() == TypeFile && getNamespaceDef()) {
+   } else if (container->definitionType() == TypeFile && getNamespaceDef() && lang != SrcLangExt_Python) {
       // member is in a namespace but is written as part of the file documentation as well
       // make sure its label is unique
       memAnchor.prepend("file_");
@@ -3342,37 +3345,41 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
 
    QSharedPointer<ClassDef> cd = m_impl->accessorClass;
 
-   ol.startInlineMemberType();
-   ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
+   if (container && container->definitionType()==Definition::TypeClass &&
+         ! container.dynamicCast<ClassDef>()->isJavaEnum()) {
 
-   QString ts = fieldType();
+      ol.startInlineMemberType();
+      ol.startDoxyAnchor(cfname, cname, memAnchor, doxyName, doxyArgs);
 
-   if (cd)  {
-      // cd points to an anonymous struct pointed to by this member, add a link to it from the type column
-      int i = 0;
+      QString ts = fieldType();
 
-      if (ts.startsWith("struct ")) {
-         ol.writeString(ts);
-         i = 7;
+      if (cd)  {
+         // cd points to an anonymous struct pointed to by this member, add a link to it from the type column
+         int i = 0;
 
-      } else if (ts.startsWith("union ")) {
-         ol.writeString(ts);
-         i = 6;
+         if (ts.startsWith("struct ")) {
+            ol.writeString(ts);
+            i = 7;
 
-      } else if (ts.startsWith("class ")) {
-         ol.writeString(ts);
-         i = 6;
+         } else if (ts.startsWith("union ")) {
+            ol.writeString(ts);
+            i = 6;
+
+         } else if (ts.startsWith("class ")) {
+            ol.writeString(ts);
+            i = 6;
+         }
+
+         ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), ts.mid(i));
+
+      } else {
+         // use standard auto linking
+         linkifyText(TextGeneratorOLImpl(ol), scopeDef, getBodyDef(), self, ts);
       }
 
-      ol.writeObjectLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), ts.mid(i));
-
-   } else {
-      // use standard auto linking
-      linkifyText(TextGeneratorOLImpl(ol), scopeDef, getBodyDef(), self, ts);
+      ol.endDoxyAnchor(cfname, memAnchor);
+      ol.endInlineMemberType();
    }
-
-   ol.endDoxyAnchor(cfname, memAnchor);
-   ol.endInlineMemberType();
 
    ol.startInlineMemberName();
    ol.docify(doxyName);

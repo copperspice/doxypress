@@ -1672,20 +1672,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
 
          if (rootNode && ! rootNode->isEmpty()) {
             ol.startMemberDescription(anchor());
-
-            ol.pushGeneratorState();
-            ol.disableAll();
-            ol.enable(OutputGenerator::RTF);
-            ol.writeString("{");
-            ol.popGeneratorState();
-
             ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
-
-            ol.pushGeneratorState();
-            ol.disableAll();
-            ol.enable(OutputGenerator::RTF);
-            ol.writeString("\\par}");
-            ol.popGeneratorState();
 
             if (isLinkableInProject()) {
                writeMoreLink(ol, anchor());
@@ -1695,6 +1682,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
          }
          delete rootNode;
       }
+
       ol.endMemberDeclaration(anchor(), 0);
    }
 }
@@ -2371,7 +2359,7 @@ bool ClassDef::hasNonReferenceSuperClass()
    return found;
 }
 
-/*! called from MemberDef::writeDeclaration() to (recusively) write the
+/*! called from MemberDef::writeDeclaration() to (recursively) write the
  *  definition of an anonymous struct, union or class
  */
 void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bool inGroup,
@@ -2551,7 +2539,7 @@ static bool isStandardFunc(QSharedPointer<MemberDef> md)
 }
 
 /*!
- * recusively merges the `all members' lists of a base class into this class
+ * recursively merges the `all members' lists of a base class into this class
  * must only be called for classes without subclasses
  */
 void ClassDef::mergeMembers()
