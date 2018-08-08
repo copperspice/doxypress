@@ -125,7 +125,7 @@ Documenting a method with an rvalue reference parameter.
 
 
 /*!
-\fn QString Ginger::getTitle()
+\fn QString Ginger::getTitle() const
 
 This method is documentation for getTitle which is used in a property.
 
@@ -133,7 +133,7 @@ This method is documentation for getTitle which is used in a property.
 
 
 /*!
-\fn void Ginger::setTitle()
+\fn void Ginger::setTitle(QString data)
 
 This method is documentation for setTitle which is used in a property.
 

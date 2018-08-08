@@ -1,4 +1,13 @@
 {
+    "clang": {
+        "clang-compilation-path": "",
+        "clang-dialect": "",
+        "clang-flags": [
+            ""
+        ],
+        "clang-parsing": false,
+        "clang-use-headers": false
+    },
     "configuration": {
         "allow-sub-grouping": true,
         "allow-unicode-names": false,
@@ -75,6 +84,7 @@
         "tcl-subst": [
             ""
         ],
+        "toc-include-headers": 0,
         "use-typedef-name": false
     },
     "dot": {
@@ -124,7 +134,7 @@
         "uml-look": false
     },
     "doxypress-format": 1,
-    "doxypress-updated": "2015-Oct-15",
+    "doxypress-updated": "2018-Jun-30",
     "external": {
         "all-externals": false,
         "external-groups": true,
@@ -187,7 +197,7 @@
             "input_test"
         ],
         "exclude-files": [
-            ""
+            "input_clang/index.dox"
         ],
         "exclude-patterns": [
             ""
@@ -220,7 +230,8 @@
         ],
         "input-recursive": true,
         "input-source": [
-            "input_test"
+            "input_test",
+            "input_clang"
         ],
         "mdfile-mainpage": ""
     },
@@ -228,7 +239,7 @@
         "quiet": false,
         "warn-doc-error": true,
         "warn-format": "$file:$line: $text",
-        "warn-logfile": "doxy_error.log",
+        "warn-logfile": "error_log.txt",
         "warn-undoc": true,
         "warn-undoc-param": false,
         "warnings": true
@@ -238,7 +249,7 @@
         "chm-file": "",
         "chm-index-encoding": "",
         "generate-chi": false,
-        "generate-chm": true,
+        "generate-chm": false,
         "hhc-location": "",
         "toc-expanded": false
     },
@@ -403,10 +414,6 @@
         "project-version": "1.3.0"
     },
     "source": {
-        "clang-flags": [
-            ""
-        ],
-        "clang-parsing": false,
         "inline-source": false,
         "ref-by-relation": false,
         "ref-link-source": true,

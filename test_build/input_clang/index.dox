@@ -10,9 +10,8 @@
 /*!
 \mainpage LibClang Test
 
-The pages in the test suite are designed to test libClang parsing for C++. If there
-are items which should be added, please email the development team and provide sample
-code.
+The pages in the test suite are designed to test libClang parsing for C++11, C++14 and C++17. If there are items which
+should be added, please email the development team and provide sample code.
 
 info@copperspice.com
 
