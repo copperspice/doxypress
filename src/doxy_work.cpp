@@ -2600,13 +2600,12 @@ QSharedPointer<NamespaceDef> Doxy_Work::findUsedNamespace(const NamespaceSDict *
 void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
 {
    if (ptrEntry->section == Entry::USINGDIR_SEC) {
-
       QSharedPointer<Entry> root = ptrEntry->entry();
 
       QString name = substitute(root->m_entryName, ".", "::");
 
-      if (name.right(2) == "::") {
-         name = name.left(name.length() - 2);
+      if (name.endsWith("::")) {
+         name.chop(2);
       }
 
       if (! name.isEmpty()) {
@@ -3376,7 +3375,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
          result = false;
          break;
 
-      } else if ((fd = ptrEntry->fileDef()) && (fd->name().right(2) == ".c" || fd->name().right(2) == ".h") ) {
+      } else if ((fd = ptrEntry->fileDef()) && (fd->name().endsWith(".c") || fd->name().endsWith(".h")) ) {
          // inside a .c file
          result = false;
          break;
@@ -4929,7 +4928,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
                QSharedPointer<ClassDef> usedCd = Doxy_Globals::hiddenClasses.find(type);
 
                if (usedCd == 0 && ! Config::getBool("hide-undoc-relations")) {
-                  if (type.right(2) == "(*" || type.right(2) == "(^") {
+                  if (type.endsWith("(*") || type.endsWith("(^")) {
                      // type is a function pointer
                      type += md->argsString();
                   }
@@ -5448,7 +5447,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                   }
                }
 
-               if (biName.right(2) == "-p") {
+               if (biName.endsWith("-p")) {
                   biName = "<" + biName.left(biName.length() - 2) + ">";
                }
 
@@ -5462,7 +5461,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                baseClass->insertUsedFile(ptrEntry->fileDef());
                baseClass->setOuterScope(Doxy_Globals::globalScope);
 
-               if (baseClassName.right(2) == "-p") {
+               if (baseClassName.endsWith("-p")) {
                   baseClass->setCompoundType(CompoundType::Protocol);
                }
 
@@ -5627,7 +5626,7 @@ void Doxy_Work::computeClassRelations()
          numMembers = cd->memberNameInfoSDict().count();
       }
 
-      if ((cd == 0 || (! cd->hasDocumentation() && ! cd->isReference())) && numMembers > 0 && bName.right(2) != "::") {
+      if ((cd == 0 || (! cd->hasDocumentation() && ! cd->isReference())) && numMembers > 0 && ! bName.endsWith("::")) {
 
          if (! ptrEntry->m_entryName.isEmpty() && ptrEntry->m_entryName.indexOf('@') == -1 &&
                (determineSection(ptrEntry->getData(EntryKey::File_Name)) == Entry::HEADER_SEC || extractLocalClass) &&

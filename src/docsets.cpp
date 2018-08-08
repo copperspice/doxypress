@@ -510,8 +510,9 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
          } else if (cd->compoundType() == CompoundType::Protocol) {
             type = "intf";
-            if (scope.right(2) == "-p") {
-               scope = scope.left(scope.length() - 2);
+
+            if (scope.endsWith("-p")) {
+               scope.chop(2);
             }
 
          } else if (cd->compoundType() == CompoundType::Interface) {
@@ -530,7 +531,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
       } else if (nd) {
          scope = nd->name();
-         type = "ns";
+         type  = "ns";
       }
 
       if (! m_scopes.contains(context->getOutputFileBase())) {
@@ -548,8 +549,8 @@ void DocSets::writeToken(QTextStream &t, QSharedPointer<Definition> d, const QSt
 
    QString name = d->name();
 
-   if (name.right(2) == "-p") {
-      name = name.left(name.length() - 2);
+   if (name.endsWith("-p")) {
+      name.chop(2);
    }
 
    t << "      <Name>" << convertToXML(name) << "</Name>" << endl;

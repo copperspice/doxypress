@@ -103,9 +103,14 @@ QString clearBlock(const QString &output, const QString &begin, const QString &e
 
    while (true) {
       int beginPos = retval.indexOf(begin);
-      int endPos   = retval.indexOf(end, beginPos);
 
-      if (beginPos == -1 || endPos == -1 ) {
+      if (beginPos == -1) {
+         break;
+      }
+
+      int endPos = retval.indexOf(end, beginPos);
+
+      if (endPos == -1) {
          break;
       }
 

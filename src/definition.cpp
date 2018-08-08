@@ -1404,8 +1404,8 @@ QString Definition::navigationPathAsString() const
       } else if (definitionType() == Definition::TypeClass) {
          // class
 
-         if (tName.right(2) == "-p") {
-            tName = tName.left(tName.length() - 2);
+         if (tName.endsWith("-p")) {
+            tName.chop(2);
          }
 
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension;

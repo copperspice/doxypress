@@ -357,9 +357,10 @@ QString DiagramItem::label() const
       // to get the name used in the inheritance relation.
 
       QString n = classDef->name();
-      if (/*n.right(2)=="-g" ||*/ n.right(2) == "-p") {
-         n = n.left(n.length() - 2);
+      if (n.endsWith("-p")) {
+         n.chop(2);
       }
+
       result = insertTemplateSpecifierInScope(n, templSpec);
 
    } else {

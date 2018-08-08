@@ -638,8 +638,8 @@ static void searchTemplateSpecs(QSharedPointer<Definition> d, QVector<ArgumentLi
 
       QString clName = d->localName();
 
-      if (clName.right(2) == "-p") {
-         clName = clName.left(clName.length() - 2);
+      if (clName.endsWith("-p")) {
+         clName.chop(2);
       }
 
       name += clName;
