@@ -33,13 +33,14 @@ class Definition;
 class MemberDef;
 class OutputList;
 
-/** \brief Abstract interface for index generators. */
+// Abstract interface for index generators
 class IndexIntf
 {
  public:
    virtual ~IndexIntf() {}
+
    virtual void initialize() = 0;
-   virtual void finalize() = 0;
+   virtual void finalize()   = 0;
    virtual void incContentsDepth() = 0;
    virtual void decContentsDepth() = 0;
 
@@ -54,38 +55,20 @@ class IndexIntf
    virtual void addStyleSheetFile(const QString &name) = 0;
 };
 
-/** \brief A list of index interfaces.
- *
- *  This class itself implements all methods of IndexIntf and
- *  just forwards the calls to all items in the list.
- */
+//  implements all methods of IndexIntf and forwards the calls to all items in the list
 class IndexList : public IndexIntf
 {
- private:
-   QList<QSharedPointer<IndexIntf>> m_intfs;
-
-   void call_forEach(void (IndexIntf::*methodPtr)()) {
-      for (auto item : m_intfs) {
-         ((*item).*methodPtr)();
-      }
-   }
-
-   template<typename A1>
-   void call_forEach(void (IndexIntf::*methodPtr)(A1), A1 a1) {
-       for (auto item : m_intfs) {
-         ((*item).*methodPtr)(a1);
-      }
-   }
-
  public:
-   /** Creates a list of indexes */
    IndexList() {
       m_enabled = true;
    }
 
-   /** Add an index generator to the list */
    void addIndex(QSharedPointer<IndexIntf> intf) {
       m_intfs.append(intf);
+   }
+
+   void clear() {
+      m_intfs.clear();
    }
 
    void disable() {
@@ -100,7 +83,6 @@ class IndexList : public IndexIntf
       return m_enabled;
    }
 
-   // IndexIntf implementation
    void initialize() override  {
       call_forEach(&IndexIntf::initialize);
    }
@@ -160,6 +142,20 @@ class IndexList : public IndexIntf
    }
 
  private:
+   void call_forEach(void (IndexIntf::*methodPtr)()) {
+      for (auto item : m_intfs) {
+         ((*item).*methodPtr)();
+      }
+   }
+
+   template<typename A1>
+   void call_forEach(void (IndexIntf::*methodPtr)(A1), A1 a1) {
+       for (auto item : m_intfs) {
+         ((*item).*methodPtr)(a1);
+      }
+   }
+
+   QList<QSharedPointer<IndexIntf>> m_intfs;
    bool m_enabled;
 };
 

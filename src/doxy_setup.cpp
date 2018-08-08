@@ -134,6 +134,8 @@ void initDoxyPress()
 void shutDownDoxyPress()
 {
    removePreProcessor();
+   Doxy_Globals::indexList.clear();
+
    Mappers::freeMappers();
    codeFreeScanner();
 }
