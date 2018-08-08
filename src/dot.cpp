@@ -269,6 +269,8 @@ static QString replaceRef(const QString &buf, const QString relPath, bool urlOnl
    int len = 6;
    int indexS = buf.indexOf("href=\""), indexE;
 
+   bool setTarget = false;
+
    if (indexS > 5 && buf.indexOf("xlink:href=\"") != -1) {
       // XLink href (for SVG)
       indexS -= 6;
@@ -316,7 +318,13 @@ static QString replaceRef(const QString &buf, const QString relPath, bool urlOnl
             QString url = link.mid(marker + 1);
 
             if (! ref.isEmpty()) {
-               result = externalLinkTarget() + externalRef(relPath, ref, false);
+               result = externalLinkTarget();
+
+               if (! result.isEmpty()) {
+                  setTarget = true;
+               }
+
+               result += externalRef(relPath, ref, false);
             }
 
             result += href + "=\"";
@@ -327,7 +335,8 @@ static QString replaceRef(const QString &buf, const QString relPath, bool urlOnl
             result = href + "=\"" + link + "\"";
          }
       }
-      if (!target.isEmpty()) {
+
+      if (! target.isEmpty() & ! setTarget) {
          result += " target=\"" + target + "\"";
       }
 
@@ -1803,10 +1812,13 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
               << m_url.right(m_url.length() - anchorPos) << "\"";
          }
       }
+   }
 
-      if (!m_tooltip.isEmpty()) {
-         t << ",tooltip=\"" << escapeTooltip(m_tooltip) << "\"";
-      }
+   if (! m_tooltip.isEmpty()) {
+      t << ",tooltip=\"" << escapeTooltip(m_tooltip) << "\"";
+
+   } else {
+      t << ",tooltip=\" \"";        // space in tooltip is required otherwise still something like 'Node0' is used
    }
 
    t << "];" << endl;
@@ -3408,26 +3420,26 @@ void DotInclDepGraph::resetNumbering()
 
 DotInclDepGraph::DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse)
 {
+   static int nodes = Config::getInt("dot-graph-max-nodes");
+
    m_inverse = inverse;
    assert(fd != 0);
 
-   m_diskName  = fd->getFileBase();
-
+   m_diskName      = fd->getFileBase();
    QString tmp_url = fd->getReference() + "$" + fd->getFileBase();
+   QString tooltip = fd->briefDescriptionAsTooltip();
 
    // root node
-   m_startNode = new DotNode(m_curNodeNumber++, fd->docName(), "", tmp_url,  true );
+   m_startNode = new DotNode(m_curNodeNumber++, fd->docName(), tooltip, tmp_url,  true );
    m_startNode->setDistance(0);
 
    m_usedNodes = new QHash<QString, DotNode *>;
    m_usedNodes->insert(fd->getFilePath(), m_startNode);
    buildGraph(m_startNode, fd, 1);
 
-   static int nodes = Config::getInt("dot-graph-max-nodes");
    int maxNodes = nodes;
 
    QList<DotNode *> openNodeQueue;
-
    openNodeQueue.append(m_startNode);
 
    determineVisibleNodes(openNodeQueue, maxNodes);
@@ -3704,6 +3716,8 @@ void DotCallGraph::resetNumbering()
 
 DotCallGraph::DotCallGraph(QSharedPointer<MemberDef> md, bool inverse)
 {
+   static int nodes = Config::getInt("dot-graph-max-nodes");
+
    m_inverse = inverse;
    m_diskName = md->getOutputFileBase() + "_" + md->anchor();
    m_scope    = md->getOuterScope();
@@ -3719,14 +3733,15 @@ DotCallGraph::DotCallGraph(QSharedPointer<MemberDef> md, bool inverse)
       name = md->qualifiedName();
    }
 
-   m_startNode = new DotNode(m_curNodeNumber++, linkToText(md->getLanguage(), name, false), "", uniqueId, true);
+   QString tooltip = md->briefDescriptionAsTooltip();
+
+   m_startNode = new DotNode(m_curNodeNumber++, linkToText(md->getLanguage(), name, false), tooltip, uniqueId, true);
 
    m_startNode->setDistance(0);
    m_usedNodes = new QHash<QString, DotNode *>;
    m_usedNodes->insert(uniqueId, m_startNode);
    buildGraph(m_startNode, md, 1);
 
-   static int nodes = Config::getInt("dot-graph-max-nodes");
    int maxNodes = nodes;
 
    QList<DotNode *> openNodeQueue;
@@ -4276,11 +4291,13 @@ void DotGroupCollaboration::resetNumbering()
 DotGroupCollaboration::DotGroupCollaboration(QSharedPointer<GroupDef> gd)
 {
    QString tmp_url = gd->getReference() + "$" + gd->getOutputFileBase();
+   QString tooltip = gd->briefDescriptionAsTooltip();
 
    m_usedNodes = new QHash<QString, DotNode *>;
 
-   m_rootNode = new DotNode(m_curNodeNumber++, gd->groupTitle(), "", tmp_url, true);
+   m_rootNode = new DotNode(m_curNodeNumber++, gd->groupTitle(), tooltip, tmp_url, true);
    m_rootNode->markAsVisible();
+
    m_usedNodes->insert(gd->name(), m_rootNode );
    m_diskName = gd->getOutputFileBase();
 

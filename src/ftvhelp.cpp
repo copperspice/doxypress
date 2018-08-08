@@ -294,6 +294,8 @@ void FTVHelp::generateIndent(QTextStream &t, FTVNode *n, bool opened)
 
 void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
 {
+   bool setTarget = false;
+
    if (n->file.isEmpty()) {
       // no link
       t << "<b>" << convertToHtml(n->name) << "</b>";
@@ -301,10 +303,17 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
    } else {
       // link into other frame
 
-      if (!n->ref.isEmpty()) {
+      if (! n->ref.isEmpty()) {
          // link to entity imported via tag file
          t << "<a class=\"elRef\" ";
-         t << externalLinkTarget() << externalRef("", n->ref, false);
+
+         QString result = externalLinkTarget();
+
+         if (! result.isEmpty()) {
+            setTarget = true;
+         }
+
+         t << result << externalRef("", n->ref, false);
 
       } else {
          // local link
@@ -315,10 +324,15 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
       t << externalRef("", n->ref, true);
       t << node2URL(n);
 
-      if (m_topLevelIndex) {
-         t << "\" target=\"basefrm\">";
-      } else {
-         t << "\" target=\"_self\">";
+      if (setTarget) {
+         t << ">";
+
+      } else  {
+         if (m_topLevelIndex) {
+            t << "\" target=\"basefrm\">";
+         } else {
+            t << "\" target=\"_self\">";
+         }
       }
 
       t << convertToHtml(n->name);

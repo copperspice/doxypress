@@ -582,6 +582,16 @@ static int processNmdash(QString &out, QStringView data, QString::const_iterator
       ++count;
    }
 
+   if (count == 2 && pristineChars8.endsWith("<!")) {
+      // start HTML comment
+      return 0;
+   }
+
+   if (count == 2 && (*iter_i == '>')) {
+      // end HTML comment
+      return 0;
+   }
+
    if (count == 2 && (pristineChars8 != "operator") ) {
       // -- => ndash
       out += "&ndash;";
@@ -1071,9 +1081,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
 
    if (isToc) {
       // special case for [TOC]
-      if (g_current) {
-         g_current->stat = true;
-      }
+      out += "@tableofcontents";
 
    } else if (isImageLink) {
       bool ambig;
@@ -1192,6 +1200,18 @@ static int processCodeSpan(QString &out, QStringView data, QString::const_iterat
          iter_i  = data.constBegin();
          nl++;
 
+      } else if (*iter_end == '\'' && iter_nb == data.constBegin() + 1 &&
+                  ( iter_end == iter_size - 1 || (iter_end < iter_size - 1 && ! isIdChar(iter_end[1]))))    {
+
+         // look for quoted strings like `some word', but skip strings like `it's cool`
+         QStringView textFragment = QStringView(iter_nb, iter_end);
+
+         out += "&lsquo;";
+         out += textFragment;
+         out += "&rsquo;";
+
+         return (iter_end + 1) - data.constBegin();
+
       } else {
          iter_i = data.constBegin();
       }
@@ -1218,27 +1238,7 @@ static int processCodeSpan(QString &out, QStringView data, QString::const_iterat
       --iter_f_end;
    }
 
-   if (iter_nb == data.constBegin() + 1) {
-      // check for closing ' followed by space within f_begin..f_end
-      iter_i = iter_f_begin;
-
-      while (iter_i < iter_f_end - 1) {
-
-         QChar charA = 0;
-         if (iter_i + 1 != data.constEnd()) {
-            charA = iter_i[1];
-         }
-
-         if (*iter_i == '\'' && ! isIdChar(charA)) {
-            // reject `some word' and not `it's cool`
-            return 0;
-         }
-
-         ++iter_i;
-      }
-   }
-
-   /* real code span */
+   // real code span
    if (iter_f_begin < iter_f_end) {
 
       QStringView codeFragment = QStringView(iter_f_begin, iter_f_end);
@@ -1717,8 +1717,10 @@ static int isHRuler(QStringView data, int size)
    return n >= 3;     // at least 3 characters needed for a hruler
 }
 
-static QString extractTitleId(QString &title)
+static QString extractTitleId(QString &title, int level)
 {
+   static const int tocIncHeaders = Config::getInt("toc-include-headers");
+
    static QRegularExpression regExp("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
    QRegularExpressionMatch match = regExp.match(title);
 
@@ -1736,6 +1738,15 @@ static QString extractTitleId(QString &title)
          return retval;
       }
    }
+
+   if ((level > 0) && (level <= tocIncHeaders)) {
+      static int autoId = 0;
+
+      QString id = QString("autotoc_md%1").formatArg(autoId);
+      ++autoId;
+
+      return id;
+  }
 
    return retval;
 }
@@ -1783,7 +1794,7 @@ static int isAtxHeader(QStringView data, int size, QString &header, QString &id)
 
    // store result
    header = data.mid(i, end - i);
-   id = extractTitleId(header);
+   id = extractTitleId(header, level);
 
    if (! id.isEmpty()) {
       // strip #'s between title and id
@@ -2851,7 +2862,7 @@ static QString processBlocks(QStringView str, int indent)
             }
 
             QString header = QStringView(iter_prev, iter_i - 1);
-            QString id = extractTitleId(header);
+            QString id     = extractTitleId(header, level);
 
             if (! header.isEmpty()) {
 
@@ -3048,7 +3059,7 @@ static QString extractPageTitle(QString &docs, QString &id)
          QString lns(maxLen, '\n');
 
          docs = lns + QStringView(iter_endB, iter_end);      // modify passed values
-         id   = extractTitleId(title);
+         id   = extractTitleId(title, 0);
 
          return title;
       }
