@@ -2100,7 +2100,10 @@ QString::const_iterator findTableColumns(QStringView data, QString::const_iterat
    }
 
    iter_eol = iter_i + 1;
-   --iter_i;
+
+   if (iter_i != data.constBegin()) {
+      --iter_i;
+   }
 
    while (iter_i > data.constBegin() && *iter_i == ' ') {
       --iter_i;
@@ -2621,8 +2624,14 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
          // not escaped
 
          // 4th is passing pristineChars1
-         QStringView s1 = QStringView(iter_end - 1, data.constEnd());
-         QStringView s2 = QStringView(iter_end - 2, iter_end - 1);
+         auto iter_prev1 = iter_end - 1;
+
+         QStringView s1 = QStringView(iter_prev1, data.constEnd());
+         QStringView s2;
+
+         if (iter_prev1 != data.constBegin()) {
+            s2 = QStringView(iter_end - 2, iter_prev1);
+         }
 
          QString endBlockName = isBlockCommand(s1, s1.constEnd(), s2);
          ++iter_end;

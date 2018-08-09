@@ -58,8 +58,8 @@ class ClangParser::Private
    enum DetectedLang { Detected_Cpp, Detected_ObjC, Detected_ObjCpp };
 
    Private()
-      : tu(0), tokens(0), numTokens(0), cursors(0), ufs(0), sources(0), numFiles(0),
-        fileMapping(), detectedLang(Detected_Cpp)
+      : sources(nullptr), numFiles(0), numTokens(0), curLine(0), curToken(0),
+        tu(0), tokens(nullptr), cursors(nullptr), ufs(nullptr), detectedLang(Detected_Cpp)
    {
    }
 
@@ -1238,18 +1238,18 @@ QString ClangParser::lookup(uint line, const QString &symbol)
       if (tokenLine == line) {
          // already at the right line
 
-         p->curToken--;                   // linear search to start of the line
+         p->curToken--;                         // linear search find the beginning of the line
          tokenLine = p->getCurrentTokenLine();
 
       } else {
-         p->curToken /= 2;                // binary search backward
+         p->curToken /= 2;                      // binary search backwards
          tokenLine = p->getCurrentTokenLine();
       }
    }
 
    bool found = false;
 
-   while (tokenLine <= line && p->curToken < p->numTokens && !found) {
+   while (tokenLine <= line && p->curToken < p->numTokens && ! found) {
       CXString tokenString = clang_getTokenSpelling(p->tu, p->tokens[p->curToken]);
 
       const char *ts = clang_getCString(tokenString);
