@@ -53,7 +53,7 @@ if OSTYPE_BSD
         -lLLVMSupport \
         -Wl,--end-group \
         -lclang \
-        $(shell llvm-config --system-libs) \
+        $(shell llvm-config --system-libs core) \
         '-Wl,-rpath,$$ORIGIN'
 
    AM_CXXFLAGS+=`llvm-config --cxxflags`
@@ -96,7 +96,7 @@ if OSTYPE_DARWIN
         -lLLVMSupport \
         -lLLVMDemangle \
         -lclang \
-        $(shell llvm-config --system-libs) \
+        $(shell llvm-config --system-libs core) \
         '-Wl,-rpath,$$ORIGIN'
 
    AM_CXXFLAGS+=`llvm-config --cxxflags`
@@ -139,7 +139,7 @@ if OSTYPE_LINUX
         -lLLVMSupport \
         -Wl,--end-group \
         -lclang \
-        $(shell llvm-config --system-libs) \
+        $(shell llvm-config --system-libs core) \
         '-Wl,-rpath,$$ORIGIN'
 
    AM_CXXFLAGS+=`llvm-config --cxxflags`
