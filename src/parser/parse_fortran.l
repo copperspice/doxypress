@@ -1845,7 +1845,7 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 
          case '\000':
             if (! hasContLine.empty()) {
-               return "";
+               return QString();
             }
 
             if (! newContents.endsWith('\n')) {
@@ -2005,7 +2005,7 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
    }
 
    if (! hasContLine.isEmpty()) {
-      return "";
+      return QString();
    }
 
    if (! newContents.endsWith('\n')) {
