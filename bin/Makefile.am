@@ -51,6 +51,7 @@ if OSTYPE_BSD
         -lLLVMBinaryFormat \
         -lLLVMMC \
         -lLLVMSupport \
+        -lLLVMDemangle \
         -Wl,--end-group \
         -lclang \
         $(shell llvm-config --system-libs core) \
