@@ -1096,6 +1096,7 @@ void tcl_protection(QSharedPointer<Entry> entry)
    if (entry->protection != Public && entry->protection != Protected && entry->protection != Private) {
       entry->protection = tcl.protection;
    }
+
    if (entry->protection != Protected && entry->protection != Private) {
       entry->protection = Public;
    }
@@ -3389,8 +3390,9 @@ static void tcl_scan_end()
    parse_tcl_YY_delete_buffer(myScan->buffer_state);
    yy_pop_state();
    tcl.entry_inside = myScan1->entry_scan;
+
    parse_tcl_YY_switch_to_buffer(myScan1->buffer_state);
-   parse_tcl_YYlineno = myScan1->line1;
+   parse_tcl_YYlineno       = myScan1->line1;
    tcl.protection = myScan1->protection;
 
    if (myStart >= 0) {
@@ -3821,9 +3823,10 @@ static void tcl_comment(int what, const QString  &text)
          }
 
          if (tcl.protection != myProt && tcl.listScan.length() > 0) {
-            tcl.listScan.at(0)->protection = tcl.protection = myProt;
+            tcl.listScan.at(0)->protection = (tcl.protection = myProt);
          }
       }
+
    } else {
       tcl_err("what %d\n", what);
       return;
