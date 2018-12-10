@@ -1664,7 +1664,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"virtual"{BN}+     {
-
       current->appendData(EntryKey::Member_Type, " virtual ");
       current->virt = Virtual;
       lineCount();

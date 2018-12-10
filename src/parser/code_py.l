@@ -1296,7 +1296,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    {STRINGPREFIX}?{TRIDOUBLEQUOTE} {
-      // tripple double quotes
+      // triple double quotes
       QString text = QString::fromUtf8(yytext);
       codify(text);
    }
@@ -1341,7 +1341,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    {STRINGPREFIX}?{TRISINGLEQUOTE} {
-      // tripple single quotes
+      // triple single quotes
       QString text = QString::fromUtf8(yytext);
       codify(text);
    }

@@ -1041,7 +1041,7 @@ static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
 
    for (auto &nd : nl) {
       if (! nd->isHidden() && nd->name().indexOf('@') == -1) {
-         // skip anonymouse scopes
+         // skip anonymous scopes
 
          t << "            <para>" << endl;
          t << "                <itemizedlist>" << endl;

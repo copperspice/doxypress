@@ -1370,7 +1370,7 @@ static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
 {
    for (auto &nd : nl) {
       if (! nd->isHidden() && nd->name().indexOf('@') == -1) {
-         // skip anonymouse scopes
+         // skip anonymous scopes
          t << "    <innernamespace refid=\"" << nd->getOutputFileBase()
            << "\">" << convertToXML(nd->name()) << "</innernamespace>" << endl;
       }

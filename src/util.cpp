@@ -7437,7 +7437,7 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
 
    } else {
       // transcode according to the INPUT_ENCODING setting
-      // do character transcoding if needed.
+      // do character transcoding if needed
 
       fileContents = transcodeToQString(buffer);
    }

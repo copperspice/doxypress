@@ -1882,7 +1882,7 @@ STARTDOCSYMS      "##"
    }
 
    "\"\"\""             {
-      // tripple double quotes
+      // triple double quotes
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
    }
@@ -1921,7 +1921,7 @@ STARTDOCSYMS      "##"
       addToOutput(text);
                                }
    "'''"             {
-      // tripple single quotes
+      // triple single quotes
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
    }

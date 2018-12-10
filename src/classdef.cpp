@@ -982,7 +982,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       }
 
    } else if (classDiagrams && count > 0) {
-      // write class diagram using build-in generator
+      // write class diagram using built-in generator
 
       ClassDiagram diagram(self); // create a diagram of this class
       ol.startClassDiagram();
@@ -1292,7 +1292,6 @@ void ClassDef::writeAuthorSection(OutputList &ol)
    ol.parseText(theTranslator->trGeneratedAutomatically(projectName));
    ol.popGeneratorState();
 }
-
 
 void ClassDef::writeSummaryLinks(OutputList &ol)
 {

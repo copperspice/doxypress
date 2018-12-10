@@ -501,7 +501,7 @@ static int processEmphasis2(QString &out, QStringView data, QChar c)
    return 0;
 }
 
-/** Parsing tripple emphasis
+/** Parsing triple emphasis
  *  Finds the first closing tag, and delegates to the other emph
  */
 static int processEmphasis3(QString &out, QStringView data, QChar c, QStringView pristineChars2)
