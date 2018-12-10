@@ -1670,6 +1670,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
+<FindMembers>{B}*"constexpr"{BN}+     {
+      current->appendData(EntryKey::Member_Type, " constexpr ");
+      current->m_traits.setTrait(Entry::Virtue::ConstExpr);
+      lineCount();
+   }
+
 <FindMembers>{B}*"published"{BN}+   {
       // UNO IDL published keyword
       if (insideIDL) {

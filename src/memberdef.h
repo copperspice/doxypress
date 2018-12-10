@@ -172,6 +172,7 @@ class MemberDef : public Definition
    bool isImplementation() const;
    bool isExternal() const;
    bool isAlias() const;
+   bool isConstExpr() const;
    bool isDefault() const;
    bool isDelete() const;
    bool isNoExcept() const;

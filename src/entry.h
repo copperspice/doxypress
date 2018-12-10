@@ -227,7 +227,7 @@ class Entry : public EnableSharedFromThis
       Unretained,
 
       Alias,
-      ConstExp,
+      ConstExpr,
       Default,
       Delete,
       NoExcept,

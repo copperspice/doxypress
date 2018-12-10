@@ -461,6 +461,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          if (node->isConstexpr())  {
             returnType.prepend("constexpr ");
+            current->m_traits.setTrait(Entry::Virtue::ConstExpr);
          }
 
          if ( (declA != nullptr && declA->isExplicit()) || (declC != nullptr && declC->isExplicit()) )   {
@@ -674,7 +675,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->bodyLine    = current->startLine;
 
          if (node->isMutable()) {
-            current->prependData(EntryKey::Member_Type,  "mutable ");
+            current->prependData(EntryKey::Member_Type, "mutable ");
             current->m_traits.setTrait(Entry::Virtue::Mutable);
          }
 
@@ -866,6 +867,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          if (node->isInline())  {
             current->prependData(EntryKey::Member_Type, "inline ");
             current->m_traits.setTrait(Entry::Virtue::Inline);
+         }
+
+         if (node->isConstexpr())  {
+            current->prependData(EntryKey::Member_Type, "constexpr ");
+            current->m_traits.setTrait(Entry::Virtue::ConstExpr);
          }
 
          if (parentEntry) {

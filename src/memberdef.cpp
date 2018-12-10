@@ -2103,6 +2103,10 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
 
             }
 
+            if (isConstExpr()) {
+               sl.append("constexpr");
+            }
+
             if (lvirt == Virtual) {
                sl.append("virtual");
 
@@ -4708,6 +4712,11 @@ bool MemberDef::isUnretained() const
 bool MemberDef::isAlias() const
 {
    return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Alias);
+}
+
+bool MemberDef::isConstExpr() const
+{
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::ConstExpr);
 }
 
 bool MemberDef::isDefault() const
