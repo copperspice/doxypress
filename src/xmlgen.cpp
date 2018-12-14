@@ -736,6 +736,10 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    }
    t << "\"";
 
+   if (md->isConstExpr()) {
+      t << " constexpr=\"yes\"";
+   }
+
    if (isFunc) {
       const ArgumentList &al = md->getArgumentList();
 
@@ -790,6 +794,10 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
       if (md->isRequired()) {
          t << " required=\"yes\"";
+      }
+
+      if (md->isNoExcept()) {
+         t << " noexcept=\"yes\"";
       }
 
       if (al.volatileSpecifier) {

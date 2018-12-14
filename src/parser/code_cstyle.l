@@ -891,7 +891,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
       QSharedPointer<NamespaceDef> nd = getResolvedNamespace(className);
 
-      if (nd) {
+      if (nd && nd->isLinkableInProject()) {
          setScopeCallContext(nd);
          addToSearchIndex(className);
          writeMultiLineCodeLink(*g_code, nd, tmpClassName);
@@ -1202,6 +1202,11 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
 
    QString locScope = g_classScope;
    QString locFunc = removeRedundantWhiteSpace(funcName);
+
+   if (g_insidePHP && locFunc.startsWith("self::")) {
+      locFunc = locFunc.mid(4);
+   }
+
    QString funcScope;
    QString funcWithScope = locFunc;
    QString funcWithFullScope = locFunc;
@@ -1220,7 +1225,6 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
       // g_currentMemberDef, which is not only faster, but
       // in case of overloaded methods, this will make sure that we link to
       // the correct method, and thereby get the correct reimplemented relations.
-      // See also bug 549022.
       goto exit;
    }
 
@@ -2562,7 +2566,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       if (g_insideJava && (text == "internal")) {
          REJECT;
 
-      } else if (g_insideCpp && (text =="set" || text =="get")) {
+      } else if (g_insideCpp && (text == "set" || text == "get" || text == "remove")) {
          REJECT;
       }
 
@@ -2579,7 +2583,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{KEYWORD}/{B}*          {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_insideCpp && (text =="set" || text =="get")) {
+      if (g_insideCpp && (text == "set" || text == "get" || text == "remove")) {
          REJECT;
       }
 
@@ -2591,7 +2595,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{KEYWORD}/{BN}*"("      {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_insideCpp && (text =="set" || text =="get")) {
+      if (g_insideCpp && (text == "set" || text == "get" || text == "remove")) {
          REJECT;
       }
 
@@ -2828,7 +2832,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_name += text.mid(7);
    }
 
-<Body,TemplCast>{SCOPENAME}{B}*"<"[^\n\/\-\.\{\"\>]*">"("::"{ID})*/{B}* {
+<Body,TemplCast>{SCOPENAME}{B}*"<"[^\n\/\-\.\{\"\>\(]*">"("::"{ID})*/{B}* {
       // A<T> *pt;
       QString text = QString::fromUtf8(yytext);
 
@@ -3413,7 +3417,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <MemberCall2,FuncCall>{KEYWORD}/([^a-z_A-Z0-9]) {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_insideCpp && (text =="set" || text =="get")) {
+      if (g_insideCpp && (text == "set" || text == "get"  || text == "remove")) {
          REJECT;
       }
 

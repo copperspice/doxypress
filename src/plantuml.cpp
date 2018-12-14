@@ -55,7 +55,7 @@ QString writePlantUMLSource(const QString &outDir, const QString &fileName, cons
 
    QString text = "@startuml\n";
    text += content;
-   text += "@enduml\n";
+   text += "\n@enduml\n";
 
    file.write(text.toUtf8());
    file.close();

@@ -66,7 +66,7 @@ static bool isAlpha(const QChar c)
 
 static bool isAlphaNum(const QChar c)
 {
-   return isAlpha(c) || (c >= '0' && c <= '9');
+   return isAlpha(c) || (c >= '0' && c <= '9') || c == '-' || c == '.' || c > char32_t(0x80);
 }
 
 /**

@@ -762,7 +762,7 @@ void HtmlGenerator::init()
             t << endl <<
               "$(document).ready(function() {\n"
               "  $('.code,.codeRef').each(function() {\n"
-              "    $(this).data('powertip',$('#'+$(this).attr('href').replace(/.*\\//,'').replace(/[^a-z_A-Z0-9]/g,'_')).html());\n"
+              "    $(this).data('powertip',$('#a'+$(this).attr('href').replace(/.*\\//,'').replace(/[^a-z_A-Z0-9]/g,'_')).html());\n"
               "    $(this).powerTip({ placement: 's', smartPlacement: true, mouseOnToPopup: true });\n"
               "  });\n"
               "});\n";
@@ -1127,8 +1127,10 @@ void HtmlGenerator::startIndexItem(const QString &ref, const QString &f)
       m_textStream << externalRef(m_relativePath, ref, true);
 
       if (! f.isEmpty()) {
-         m_textStream << f << Doxy_Globals::htmlFileExtension << "\">";
+         m_textStream << f << Doxy_Globals::htmlFileExtension;
       }
+
+      m_textStream << "\">";
 
    } else {
       m_textStream << "<b>";
@@ -2868,11 +2870,15 @@ void HtmlGenerator::writeInheritedSectionTitle(const QString &id, const QString 
       a.prepend("#");
    }
 
-   QString classLink = "<a class=\"el\" href=\"";
+   QString classLink = "<a class=\"el\" ";
 
    if (! ref.isEmpty()) {
-      classLink += externalLinkTarget() + externalRef(m_relativePath, ref, true);
+      classLink += externalLinkTarget();
+      classLink += " href=\"";
+      classLink += externalRef(m_relativePath, ref, true);
+
    } else {
+      classLink += "href=\"";
       classLink += m_relativePath;
    }
 

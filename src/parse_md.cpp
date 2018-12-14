@@ -76,8 +76,7 @@ static bool ignoreCloseEmphChar(const QChar &text)
 {
    bool retval = false;
 
-   if ( text =='(' || text =='{' || text =='['  || text =='<' || text =='=' ||
-        text =='+' || text =='-' || text =='\\' || text =='@') {
+   if ( text =='(' || text =='{' || text =='['  || text =='<' || text =='\\' || text =='@') {
 
       retval = true;
    }

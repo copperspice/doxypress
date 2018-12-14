@@ -139,11 +139,6 @@ void LatexCodeGenerator::writeCodeLink(const QString &ref, const QString &f, con
 
    int len = name.length();
 
-   if (m_col + len > 80) {
-      m_t << "\n      ";
-      m_col = 0;
-   }
-
    if (ref.isEmpty() && usePDFLatex && pdfHyperlinks) {
       m_t << "\\hyperlink{";
 
@@ -2192,7 +2187,7 @@ void LatexGenerator::endParameterName(bool last, bool, bool closeBracket)
 void LatexGenerator::exceptionEntry(const QString &prefix, bool closeBracket)
 {
    if (! prefix.isEmpty()) {
-      m_textStream << " " << prefix;
+      m_textStream << " " << prefix << "(";
 
    } else if (closeBracket) {
       m_textStream << ")";
@@ -2257,6 +2252,7 @@ void LatexGenerator::startCodeFragment()
 
 void LatexGenerator::endCodeFragment()
 {
+   endCodeLine();
    m_textStream << "\\end{DoxyCode}\n";
 }
 

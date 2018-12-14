@@ -1225,7 +1225,7 @@ void RTFDocVisitor::visitPre(DocHtmlHeader *header)
        << rtf_Style_Reset;
 
    QString heading;
-   int level = qMin(header->level() + 2, 4);
+   int level = qMin(header->level(), 5);
    heading = QString("Heading%1").formatArg(level);
 
    // set style

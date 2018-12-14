@@ -1469,7 +1469,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       BEGIN(St_Ref2);
    }
 
-<St_SetScope>({SCOPEMASK}|{ANONNS}){BLANK} {
+<St_SetScope>({SCOPEMASK}|{ANONNS}){BLANK}|{FILEMASK} {
       g_token->name = QString::fromUtf8(yytext).trimmed();
       return TK_WORD;
    }

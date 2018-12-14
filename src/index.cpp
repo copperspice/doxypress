@@ -1630,7 +1630,9 @@ static int countAnnotatedClasses()
 
 static void writeAnnotatedClassList(OutputList &ol)
 {
-   ol.startIndexList();
+   if (! Doxy_Globals::classSDict.isEmpty()) {
+      ol.startIndexList();
+   }
 
    for (auto cd : Doxy_Globals::classSDict) {
       ol.pushGeneratorState();
@@ -1660,7 +1662,9 @@ static void writeAnnotatedClassList(OutputList &ol)
       ol.popGeneratorState();
    }
 
-   ol.endIndexList();
+   if (! Doxy_Globals::classSDict.isEmpty()) {
+      ol.endIndexList();
+   }
 }
 
 static QString letterToLabel(QChar startLetter)
@@ -1948,19 +1952,19 @@ static void writeAlphabeticalClassList(OutputList &ol)
                   }
 
                   ol.writeNonBreakableSpace(3);
+
+               } else {
+                  ol.writeString("<td>");
+
                }
 
-
-               if (cell->letter() != 0 || cell->classDef() != dummyContext) {
-                  ol.writeString("</td>");
-               }
+               ol.writeString("</td>");
             }
 
          } else {
             ol.writeString("<td></td>");
 
          }
-
       }
 
       ol.writeString("</tr>\n");

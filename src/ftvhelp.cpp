@@ -325,7 +325,7 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
       t << node2URL(n);
 
       if (setTarget) {
-         t << ">";
+         t << "\">";
 
       } else  {
          if (m_topLevelIndex) {
@@ -965,11 +965,14 @@ void FTVHelp::generateTreeViewInline(QTextStream &t, enum PageType outputType)
       }
    }
 
-   t << "<table class=\"directory\">\n";
+   if (! m_indentNodes[0].isEmpty()) {
+      t << "<table class=\"directory\">\n";
 
-   int index = 0;
-   generateTree(t, m_indentNodes[0], 0, preferredDepth, index, outputType);
+      int index = 0;
+      generateTree(t, m_indentNodes[0], 0, preferredDepth, index, outputType);
 
-   t << "</table>\n";
+      t << "</table>\n";
+   }
+
    t << "</div><!-- directory -->\n" << endl;
 }

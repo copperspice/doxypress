@@ -68,6 +68,7 @@ static QString escapeId(const QString &file)
 void TooltipManager::addTooltip(QSharedPointer<Definition> d)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
+
    if (! sourceTooltips) {
       return;
    }
@@ -85,6 +86,8 @@ void TooltipManager::addTooltip(QSharedPointer<Definition> d)
    if (! anc.isEmpty()) {
       id += "_" + anc;
    }
+
+   id.prepend("a");
 
    if (! m_tooltipInfo.contains(id)) {
       m_tooltipInfo.insert(id, d);

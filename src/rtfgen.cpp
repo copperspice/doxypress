@@ -2102,6 +2102,10 @@ void RTFGenerator::startParagraph(const QString &className)
    DBG_RTF(m_textStream << "{\\comment startParagraph}" << endl)
    newParagraph();
    m_textStream << "{" << endl;
+
+   if (className == "reference") {
+      m_textStream << "\\ql" << endl;
+   }
 }
 
 void RTFGenerator::endParagraph()
@@ -2653,7 +2657,7 @@ void RTFGenerator::exceptionEntry(const QString &prefix, bool closeBracket)
    DBG_RTF(m_textStream << "{\\comment (exceptionEntry)}"    << endl)
 
    if (! prefix.isEmpty()) {
-      m_textStream << " " << prefix;
+      m_textStream << " " << prefix << "(";
 
    } else if (closeBracket) {
       m_textStream << ")";

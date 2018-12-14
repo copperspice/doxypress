@@ -1454,6 +1454,8 @@ void PerlModDocVisitor::visitPre(DocParamSect *s)
          break;
    }
 
+   m_output.openHash();
+
    openOther();
    openSubBlock(type);
 }
@@ -1462,6 +1464,8 @@ void PerlModDocVisitor::visitPost(DocParamSect *)
 {
    closeSubBlock();
    closeOther();
+
+   m_output.closeHash();
 }
 
 void PerlModDocVisitor::visitPre(DocParamList *pl)

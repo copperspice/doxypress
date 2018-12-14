@@ -2731,7 +2731,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    QString scopeName = scName;
    QString memAnchor = anchor();
-   QString ciname    = container->name();
+   QString ciname    = container->displayName();
 
    QSharedPointer<Definition> scopedContainer = container;
 
