@@ -317,8 +317,8 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
             }
 
          } else {
-            printf("Source and Destination directories are the same name\n");
-
+            warn(s_fileName, doctokenizerYYlineno, "Source and destination directories are the same, unable to copy %s\n",
+                        csPrintable(inputFile));
          }
 
       } else {
@@ -539,7 +539,7 @@ static void checkUndocumentedParams()
 
             if (count > 1) {
                warn_doc_error(s_memberDef->getDefFileName(), s_memberDef->getDefLine(), "Argument '" + tmpName +
-                  "' from the argument list of " + s_memberDef->qualifiedName() + " has muliple \\param documentation sections");
+                  "' from the argument list of " + s_memberDef->qualifiedName() + " has multiple \\param documentation sections");
             }
 
          }

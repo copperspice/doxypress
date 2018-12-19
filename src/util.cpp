@@ -5867,7 +5867,7 @@ QString mergeScopes(const QString &leftScope, const QString &rightScope)
    // case leftScope == "A::B" rightScope == "B::C" => result = "A::B::C"
    // case leftScope == "A::B" rightScop e== "B"    => result = "A::B"
 
-   while ((index = leftScope.lastIndexOf("::", pos)) != -1) {
+   while ((index = leftScope.lastIndexOf("::", pos)) > 0) {
 
       if (leftScopeMatch(rightScope, leftScope.right(leftScope.length() - index - 2))) {
          result = leftScope.left(index + 2) + rightScope;
@@ -5996,6 +5996,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
    if ((pd = Doxy_Globals::pageSDict.find(name)) && tagInfo.isEmpty()) {
       // append documentation block to the page
       pd->setDocumentation(doc, fileName, startLine);
+      pd->setRefItems(list);
 
    } else {
       // new page
@@ -7425,13 +7426,26 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
       }
    }
 
-   if (size >= 2 && ((buffer.at(0) == -1 && buffer.at(1) == -2) || (buffer.at(0) == -2 && buffer.at(1) == -1) )) {
+   uchar tmp0 = 0;
+   uchar tmp1 = 0;
+   uchar tmp2 = 0;
+
+   if (size >= 2) {
+      tmp0 = buffer.at(0);
+      tmp1 = buffer.at(1);
+   }
+
+   if (size >= 3) {
+      tmp2 = buffer.at(2);
+   }
+
+   if ((tmp0 == 0xFF && tmp1 == 0xFE) || (tmp0 == 0xFE && tmp1 == 0xFF)) {
       // UCS-2 encoded file
       fileContents = QTextCodec::codecForMib(1015)->toUnicode(buffer);
 
-   } else if (size >= 3 && (uchar)buffer.at(0) == 0xEF && (uchar)buffer.at(1) == 0xBB && (uchar)buffer.at(2) == 0xBF) {
-
+   } else if (tmp0 == 0xEF && tmp1 == 0xBB && tmp2 == 0xBF) {
       // UTF-8 encoded file, remove UTF-8 BOM, no translation needed
+
       buffer = buffer.mid(3);
       fileContents  = QString::fromUtf8(buffer);
 
