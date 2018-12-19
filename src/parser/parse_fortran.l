@@ -1931,7 +1931,7 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 
          default:
 
-            if ((column < 6) && c.isDigit()) {
+            if (! commented && (column < 6) && c.isDigit()) {
                // remove numbers from the first 5 positions
                newContents[j] = ' ';
 

@@ -4496,6 +4496,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( lastStringContext );
    }
 
+<CopyGString,CopyPHPGString>"<?php"       {
+     QString text = QString::fromUtf8(yytext);
+     addToOutput(s_quotedGEntry, s_quotedGEnum, text);
+     BEGIN( lastStringContext );
+   }
+
 <CopyGString,CopyPHPGString>"/*"|"*/"|"//" {
       QString text = QString::fromUtf8(yytext);
       addToOutput(s_quotedGEntry, s_quotedGEnum, text);

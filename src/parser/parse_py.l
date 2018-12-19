@@ -85,6 +85,7 @@ static bool              s_packageCommentAllowed;
 
 static bool              s_start_init = false;
 static int               s_search_count = 0;
+static QString           s_argType = "";
 
 static void initParser()
 {
@@ -1086,6 +1087,10 @@ STARTDOCSYMS      "##"
    ({BB}|",")          {
    }
 
+   [\*]+               {
+      s_argType = QString::fromUtf8(yytext);
+   }
+
    {IDENTIFIER}        {
       // Name of parameter
       QString text = QString::fromUtf8(yytext);
@@ -1093,7 +1098,8 @@ STARTDOCSYMS      "##"
 
       current->argList.append( Argument() );
       current->argList.last().name = text.trimmed();
-      current->argList.last().type = "";
+      current->argList.last().type = s_argType;
+      s_argType = "";
    }
 
    "="             {
@@ -1771,7 +1777,7 @@ STARTDOCSYMS      "##"
                actualDoc.append("\\endverbatim ");
             }
 
-            actualDoc.prepend("\\namespace " + s_moduleScope + "\\_linebr ");
+            actualDoc.prepend("\\namespace " + s_moduleScope + " ");
             handleCommentBlock(actualDoc, false);
          }
 
