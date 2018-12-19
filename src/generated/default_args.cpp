@@ -864,6 +864,7 @@ char *default_argsYYtext;
 *************************************************************************/
 
 #include <QRegularExpression>
+#include <QStringList>
 
 #include <stdio.h>
 #include <assert.h>
@@ -919,6 +920,37 @@ static int yyread(char *buf, int max_size)
    s_inputPosition += len;
 
    return len;
+}
+
+static bool checkSpecialType(QString &name)
+{
+   static QSet<QString> keywords;
+
+   if (keywords.isEmpty()) {
+
+      keywords.insert("unsigned");
+      keywords.insert("signed");
+      keywords.insert("bool");
+      keywords.insert("char");
+      keywords.insert("char8_t");
+      keywords.insert("char16_t");
+      keywords.insert("char32_t");
+      keywords.insert("int");
+      keywords.insert("short");
+      keywords.insert("long");
+      keywords.insert("float");
+      keywords.insert("double");
+      keywords.insert("int8_t");
+      keywords.insert("uint8_t");
+      keywords.insert("int16_t");
+      keywords.insert("uint16_t");
+      keywords.insert("int32_t");
+      keywords.insert("uint32_t");
+      keywords.insert("const");
+      keywords.insert("volatile");
+   }
+
+   return ! name.isEmpty() && keywords.contains(name);
 }
 
 #define INITIAL 0
@@ -1692,7 +1724,7 @@ YY_RULE_SETUP
 
                if (arg.type.mid(sv) == "struct"   || arg.type.mid(sv) == "union" ||
                      arg.type.mid(sv) == "class"  || arg.type.mid(sv) == "typename" ||
-                     arg.type == "const" || arg.type == "volatile") {
+                     checkSpecialType(arg.name)) {
 
                   arg.type = arg.type + " " + arg.name;
                   arg.name = "";

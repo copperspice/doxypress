@@ -2835,7 +2835,7 @@ YY_RULE_SETUP
 case 45:
 YY_RULE_SETUP
 {
-      // tripple double quotes
+      // triple double quotes
       QString text = QString::fromUtf8(code_py_YYtext);
       codify(text);
    }
@@ -2891,7 +2891,7 @@ YY_RULE_SETUP
 case 51:
 YY_RULE_SETUP
 {
-      // tripple single quotes
+      // triple single quotes
       QString text = QString::fromUtf8(code_py_YYtext);
       codify(text);
    }
