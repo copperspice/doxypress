@@ -9694,7 +9694,7 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
                         fn->append(fd);
 
                         if (data.isFnList) {
-                           data.fnList.inSort(fn);
+                           data.fnList.append(fn);
                         }
 
                         data.fnDict.insert(name, fn);
@@ -9779,7 +9779,7 @@ void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
                      fn->append(fd);
 
                      if (data.isFnList) {
-                        data.fnList.inSort(fn);
+                        data.fnList.append(fn);
                      }
 
                      // can be Doxy_Globals::inputNameDict->insert(), Doxy_Globals::exampleNameDict, etc
@@ -10247,6 +10247,9 @@ void searchInputFiles()
       Doxy_Globals::g_inputFiles   = data.resultList;
       Doxy_Globals::inputPaths     = data.pathSet;
    }
+
+   // sort now
+   Doxy_Globals::inputNameList.sort();
 
    Doxy_Globals::infoLog_Stat.end();
 }
