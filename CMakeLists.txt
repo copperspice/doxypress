@@ -1,6 +1,14 @@
 cmake_minimum_required(VERSION 3.4.3 FATAL_ERROR)
 project(doxypress)
 
+if (POLICY CMP0063)
+  cmake_policy(SET CMP0063 NEW)
+endif()
+
+set (CMAKE_C_VISIBILITY_PRESET hidden)
+set (CMAKE_CXX_VISIBILITY_PRESET hidden)
+set (CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
 include(CheckCXXCompilerFlag)
 include(CheckCXXSourceCompiles)
 include(CheckIncludeFile)
