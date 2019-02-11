@@ -3528,12 +3528,32 @@ void MemberDef::warnIfUndocumented()
                   def != nullptr && def->name().indexOf('@') == -1 &&
                   protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 
-      warn_undoc(getDefFileName(),getDefLine(), "Member %s%s (%s) of %s %s is undocumented.",
-                 csPrintable(name()), csPrintable(argsString()), csPrintable(memberTypeName()),
+      QString returnType = typeString();
+      QString memberType = memberTypeName();
+
+      if (returnType.isEmpty() && memberType == "function" && type == "class") {
+         // constructor or destructor
+
+         warn_undoc(getDefFileName(),getDefLine(), "Member %s::%s%s is undocumented.",
+                 csPrintable(def->name()), csPrintable(name()), csPrintable(argsString()));
+
+     } else if (! returnType.isEmpty() && (memberType == "function" || memberType == "signal" || memberType == "slot")
+               && type == "class") {
+         // class method
+
+         warn_undoc(getDefFileName(),getDefLine(), "Member %s %s::%s%s (%s) is undocumented.",
+                 csPrintable(returnType), csPrintable(def->name()), csPrintable(name()), csPrintable(argsString()),
+                 csPrintable(memberType));
+
+      } else {
+        warn_undoc(getDefFileName(),getDefLine(), "Member %s %s%s (%s) in %s %s is undocumented.",
+                 csPrintable(returnType), csPrintable(name()), csPrintable(argsString()), csPrintable(memberType),
                  csPrintable(type), csPrintable(def->name()));
+      }
 
    } else if (! isDetailedSectionLinkable()) {
       warnIfUndocumentedParams();
+
   }
 }
 
@@ -5452,3 +5472,6 @@ bool MemberDef::isReference() const
 {
   return Definition::isReference() || (m_impl->templateMaster && m_impl->templateMaster->isReference());
 }
+
+
+// end of the file

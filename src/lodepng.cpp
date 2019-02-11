@@ -2516,7 +2516,7 @@ unsigned LodePNG_Text_add(LodePNG_Text *text, const char *key, const char *str)
    return 0;
 }
 
-/******************************************************************************/
+// *****
 
 void LodePNG_IText_init(LodePNG_IText *text)
 {
