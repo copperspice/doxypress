@@ -3467,6 +3467,8 @@ static DocCmdMap docCmdMap[] =
   { "sa",              0,                       true  },
   { "see",             0,                       true  },
   { "since",           0,                       true  },
+  { "snippet",         0,                       true  },
+  { "snippetlineno",   0,                       true  },
   { "throw",           0,                       true  },
   { "throws",          0,                       true  },
   { "until",           0,                       true  },
@@ -4709,6 +4711,9 @@ YY_RULE_SETUP
       // start of a formula with custom environment
       QString text = QString::fromUtf8(commentscanYYtext);
 
+      // this command forces the end of brief description
+      setOutput(OutputMainDoc);
+
       formulaText = "\\begin";
       formulaEnv = text.trimmed().mid(2);
 
@@ -4735,6 +4740,10 @@ case 23:
 YY_RULE_SETUP
 {
       // start of a block formula
+
+      // this command forces the end of brief description
+      setOutput(OutputMainDoc);
+
       formulaText      = "\\[";
       formulaNewLines  = 0;
       BEGIN(ReadFormulaLong);
@@ -4873,6 +4882,12 @@ YY_RULE_SETUP
 {
       // numbered item
       QString text = QString::fromUtf8(commentscanYYtext);
+
+      if (inContext != OutputXRef) {
+         // this command forces the end of brief description
+         setOutput(OutputMainDoc);
+      }
+
       addToOutput(text);
    }
 	YY_BREAK
@@ -5099,7 +5114,7 @@ YY_RULE_SETUP
 case 57:
 YY_RULE_SETUP
 {
-      // any othe character
+      // any other character
       QString text = QString::fromUtf8(commentscanYYtext);
       formulaText += text[0];
    }
@@ -5505,6 +5520,9 @@ YY_RULE_SETUP
 {
       // second argument; page title
       QString text = QString::fromUtf8(commentscanYYtext);
+
+      text = substitute(substitute(text, "@<","&lt;"),  "@>", "&gt;");
+      text = substitute(substitute(text, "\\<","&lt;"), "\\>","&gt;");
 
       yyLineNr++;
       current->setData(EntryKey::Member_Args, text);

@@ -256,6 +256,8 @@ static DocCmdMap docCmdMap[] =
   { "sa",              0,                       true  },
   { "see",             0,                       true  },
   { "since",           0,                       true  },
+  { "snippet",         0,                       true  },
+  { "snippetlineno",   0,                       true  },
   { "throw",           0,                       true  },
   { "throws",          0,                       true  },
   { "until",           0,                       true  },
@@ -1210,6 +1212,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // start of a formula with custom environment
       QString text = QString::fromUtf8(yytext);
 
+      // this command forces the end of brief description
+      setOutput(OutputMainDoc);
+
       formulaText = "\\begin";
       formulaEnv = text.trimmed().mid(2);
 
@@ -1232,6 +1237,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <Comment>{B}*{CMD}"f["        {
       // start of a block formula
+
+      // this command forces the end of brief description
+      setOutput(OutputMainDoc);
+
       formulaText      = "\\[";
       formulaNewLines  = 0;
       BEGIN(ReadFormulaLong);
@@ -1336,6 +1345,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <Comment>"-#"{B}+                       {
       // numbered item
       QString text = QString::fromUtf8(yytext);
+
+      if (inContext != OutputXRef) {
+         // this command forces the end of brief description
+         setOutput(OutputMainDoc);
+      }
+
       addToOutput(text);
    }
 
@@ -1521,7 +1536,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <ReadFormulaLong,ReadFormulaShort>.     {
-      // any othe character
+      // any other character
       QString text = QString::fromUtf8(yytext);
       formulaText += text[0];
    }
@@ -1839,6 +1854,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <PageDocArg2>.*"\n"        {
       // second argument; page title
       QString text = QString::fromUtf8(yytext);
+
+      text = substitute(substitute(text, "@<","&lt;"),  "@>", "&gt;");
+      text = substitute(substitute(text, "\\<","&lt;"), "\\>","&gt;");
 
       yyLineNr++;
       current->setData(EntryKey::Member_Args, text);
