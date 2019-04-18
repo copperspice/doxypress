@@ -166,7 +166,7 @@ class ClassDef : public Definition
    bool isLinkable() const override;
 
    // the class is visible in a class diagram, or class hierarchy
-   bool isVisibleInHierarchy();
+   bool isVisibleInHierarchy() const;
 
    // show this class in the declaration section of its parent?
    bool visibleInParentsDeclList() const;
@@ -190,7 +190,7 @@ class ClassDef : public Definition
    bool isBaseClass(QSharedPointer<const ClassDef> bcd, bool followInstances, int level = 0) const;
 
    // returns true iff \a bcd is a direct or indirect sub class of this class
-   bool isSubClass(QSharedPointer<ClassDef> bcd, int level = 0);
+   bool isSubClass(QSharedPointer<ClassDef> bcd, int level = 0) const;
 
    // returns true iff \a md is a member of this class or of the
    // the public/protected members of a base class
@@ -270,7 +270,7 @@ class ClassDef : public Definition
    QString className() const;
 
    /** Returns the members in the list identified by \a lt */
-   QSharedPointer<MemberList> getMemberList(MemberListType lt);
+   QSharedPointer<MemberList> getMemberList(MemberListType lt) const;
 
    /** Returns the list containing the list of members sorted per type */
    const QList<QSharedPointer<MemberList>> &getMemberLists() const;
@@ -381,7 +381,7 @@ class ClassDef : public Definition
 
  protected:
    void addUsedInterfaceClasses(QSharedPointer<MemberDef> md, const QString &typeStr);
-   bool hasNonReferenceSuperClass();
+   bool hasNonReferenceSuperClass() const;
    void showUsedFiles(OutputList &ol);
 
  private:

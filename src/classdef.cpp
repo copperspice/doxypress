@@ -2315,7 +2315,7 @@ void ClassDef::setTemplateArguments(const ArgumentList &al)
 /*! Returns \c true if this class or a class inheriting from this class
  *  is \e not defined in an external tag file.
  */
-bool ClassDef::hasNonReferenceSuperClass()
+bool ClassDef::hasNonReferenceSuperClass() const
 {
    bool found = (! isReference() && isLinkableInProject() && ! isHidden());
 
@@ -2429,7 +2429,7 @@ bool ClassDef::isLinkable() const
 }
 
 /*! the class is visible in a class diagram, or class hierarchy */
-bool ClassDef::isVisibleInHierarchy()
+bool ClassDef::isVisibleInHierarchy() const
 {
    static const bool allExternals     = Config::getBool("all-externals");
    static const bool hideUndocClasses = Config::getBool("hide-undoc-classes");
@@ -2501,7 +2501,7 @@ bool ClassDef::isBaseClass(QSharedPointer<const ClassDef> bcd, bool followInstan
    return found;
 }
 
-bool ClassDef::isSubClass(QSharedPointer<ClassDef> cd, int level)
+bool ClassDef::isSubClass(QSharedPointer<ClassDef> cd, int level) const
 {
    bool found = false;
 
@@ -3446,7 +3446,7 @@ QSharedPointer<MemberList> ClassDef::createMemberList(MemberListType lt)
    return ml;
 }
 
-QSharedPointer<MemberList> ClassDef::getMemberList(MemberListType lt)
+QSharedPointer<MemberList> ClassDef::getMemberList(MemberListType lt) const
 {
    for (auto ml : m_memberLists) {
       if (ml->listType() == lt) {

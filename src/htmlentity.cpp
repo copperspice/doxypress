@@ -878,7 +878,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
 };
 
 static const int g_numHtmlEntities = (int)(sizeof(g_htmlEntities) / sizeof(*g_htmlEntities));
-HtmlEntityMapper *HtmlEntityMapper::s_instance = 0;
+HtmlEntityMapper *HtmlEntityMapper::s_instance = nullptr;
 
 HtmlEntityMapper::HtmlEntityMapper()
 {
@@ -896,7 +896,7 @@ HtmlEntityMapper::~HtmlEntityMapper()
 /** Returns the one and only instance of the HTML entity mapper */
 HtmlEntityMapper *HtmlEntityMapper::instance()
 {
-   if (s_instance == 0) {
+   if (s_instance == nullptr) {
       s_instance = new HtmlEntityMapper;
    }
 
@@ -907,7 +907,7 @@ HtmlEntityMapper *HtmlEntityMapper::instance()
 void HtmlEntityMapper::deleteInstance()
 {
    delete s_instance;
-   s_instance = 0;
+   s_instance = nullptr;
 }
 
 QString HtmlEntityMapper::rawString(DocSymbol::SymType symb, bool useInPrintf) const
@@ -964,13 +964,13 @@ const DocSymbol::PerlSymb *HtmlEntityMapper::perl(DocSymbol::SymType symb) const
 
 DocSymbol::SymType HtmlEntityMapper::name2sym(const QString &symName) const
 {
-   auto item = m_name2sym.find(symName);
+   auto iter = m_name2sym.find(symName);
 
-   if (item == m_name2sym.end()) {
+   if (iter == m_name2sym.end()) {
       return DocSymbol::Sym_Unknown;
 
    } else {
-      return ((DocSymbol::SymType) item.value());
+      return ((DocSymbol::SymType) iter.value());
 
    }
 }
