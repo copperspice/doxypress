@@ -94,6 +94,8 @@ CommandMap cmdMap[] = {
    { "secreflist",    CMD_SECREFLIST },
    { "section",       CMD_SECTION },
    { "snippet",       CMD_SNIPPET },
+   { "snippetdoc",    CMD_SNIPPETDOC },
+   { "snippetlineno", CMD_SNIPWITHLINES },
    { "sortid",        CMD_SORTID },
    { "subpage",       CMD_SUBPAGE },
    { "subsection",    CMD_SUBSECTION },
@@ -115,6 +117,7 @@ CommandMap cmdMap[] = {
    { "\\",            CMD_BSLASH },
    { "@",             CMD_AT },
    { "<",             CMD_LESS },
+   { "=",             CMD_EQUAL },
    { ">",             CMD_GREATER },
    { "&",             CMD_AMP },
    { "$",             CMD_DOLLAR },
@@ -136,12 +139,13 @@ CommandMap cmdMap[] = {
    { "manonly",       CMD_MANONLY },
    { "endmanonly",    CMD_ENDMANONLY },
    { "includelineno", CMD_INCWITHLINES },
+   { "includedoc",    CMD_INCLUDEDOC },
    { "inheritdoc",    CMD_INHERITDOC },
    { "mscfile",       CMD_MSCFILE },
    { "rtfonly",       CMD_RTFONLY },
    { "endrtfonly",    CMD_ENDRTFONLY },
    { "docbookonly",   CMD_DBONLY },
-   { "enddocbookonly", CMD_ENDDBONLY },
+   { "enddocbookonly",CMD_ENDDBONLY },
    { "endinternal",   CMD_ENDINTERNAL },
    { "parblock",      CMD_PARBLOCK },
    { "endparblock",   CMD_ENDPARBLOCK },
@@ -149,6 +153,7 @@ CommandMap cmdMap[] = {
    { "--",            CMD_NDASH },
    { "---",           CMD_MDASH },
    { "_setscope",     CMD_SETSCOPE },
+   { "emoji",         CMD_EMOJI },
    { 0,               0 },
 };
 
@@ -192,6 +197,8 @@ CommandMap htmlTagMap[] = {
    { "span",       HTML_SPAN },
    { "div",        HTML_DIV },
    { "blockquote", HTML_BLOCKQUOTE },
+   { "strike",     HTML_STRIKE },
+   { "u",          HTML_UNDERLINE },
 
    { "c",            XML_C },
 // { "code",         XML_CODE },  <= ambiguous <code> is also a HTML tag

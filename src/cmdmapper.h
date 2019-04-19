@@ -116,7 +116,7 @@ enum CommandType {
    CMD_SNIPPET      = 87,
    CMD_RTFONLY      = 88,
    CMD_ENDRTFONLY   = 89,
-   CMD_PIPE         = 90,   
+   CMD_PIPE         = 90,
    CMD_DBONLY       = 92,
    CMD_ENDDBONLY    = 93,
    CMD_ENDINTERNAL  = 94,
@@ -129,11 +129,18 @@ enum CommandType {
    CMD_STARTUML     = 101,
    CMD_ENDUML       = 102,
    CMD_SETSCOPE     = 103,
+
    CMD_ANCHORNAME   = 104,
    CMD_SORTID       = 105,
+
    CMD_PUNT         = 106,
    CMD_PLUS         = 107,
-   CMD_MINUS        = 108
+   CMD_MINUS        = 108,
+   CMD_INCLUDEDOC   = 109,
+   CMD_SNIPPETDOC   = 110,
+   CMD_SNIPWITHLINES= 111,
+   CMD_EMOJI        = 112,
+   CMD_EQUAL        = 113
 };
 
 enum HtmlTagType {
@@ -171,8 +178,10 @@ enum HtmlTagType {
    HTML_SPAN      = 31,
    HTML_DIV       = 32,
    HTML_BLOCKQUOTE = 33,
+   HTML_STRIKE     = 34,
+   HTML_UNDERLINE  = 35,
 
-   XML_CmdMask    = 0x100,
+   XML_CmdMask     = 0x100,
 
    XML_C            = XML_CmdMask + 0,
    XML_CODE         = XML_CmdMask + 1,
@@ -202,7 +211,7 @@ enum HtmlTagType {
 /** Class representing a mapping from command names to command IDs. */
 class Mapper
 {
- public:   
+ public:
    Mapper(const CommandMap *cm, bool caseSensitive);
 
    int map(const QString &n);
