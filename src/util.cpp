@@ -4774,13 +4774,18 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
    static QHash<QString, QString> usedNames;         // name, modified name
    static QHash<QString, int> mangleCnt;             // modified name, cnt
 
+   QString retval;
+
+   if (name.isEmpty()) {
+      return retval;
+   }
+
    auto iter1 = usedNames.find(name);
 
    if (iter1 != usedNames.end()) {
       return iter1.value();
    }
 
-   QString retval;
    bool isFirstUpper = true;
 
    for (QChar c : name) {
