@@ -33,7 +33,7 @@ class TextDocVisitor : public DocVisitor
  public:
    TextDocVisitor(QTextStream &t) : DocVisitor(DocVisitor_Text), m_t(t) {}
 
-   // visitor functions for leaf nodes   
+   // visitor functions for leaf nodes
    void visit(DocWord *w) override {
       filter(w->word());
    }
@@ -70,8 +70,8 @@ class TextDocVisitor : public DocVisitor
    void visit(DocIndexEntry *) override  {}
    void visit(DocSimpleSectSep *) override {}
    void visit(DocCite *) override {}
-   
-   // visitor functions for compound nodes  
+
+   // visitor functions for compound nodes
    void visitPre(DocAutoList *) override {}
    void visitPost(DocAutoList *) override {}
    void visitPre(DocAutoListItem *) override {}
@@ -144,7 +144,7 @@ class TextDocVisitor : public DocVisitor
    void visitPre(DocText *) override {}
    void visitPost(DocText *) override {}
    void visitPre(DocHtmlBlockQuote *) override {}
-   void visitPost(DocHtmlBlockQuote *) override {}  
+   void visitPost(DocHtmlBlockQuote *) override {}
    void visitPre(DocParBlock *) override {}
    void visitPost(DocParBlock *) override {}
 

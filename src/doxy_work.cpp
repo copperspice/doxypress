@@ -2264,13 +2264,13 @@ void Doxy_Work::resolveClassNestingRelations()
       if (! cd->visited) {
          QString name = stripAnonymousNamespaceScope(cd->name());
 
-         /// create the scope artificially so we can at least relate scopes properly
+         // create the scope artificially so we can at least relate scopes properly
 
          QSharedPointer<Definition> d = buildScopeFromQualifiedName(name, name.count("::"), cd->getLanguage(), TagInfo());
 
          if (d != cd && ! cd->getDefFileName().isEmpty())  {
             // avoid recursion in case of redundant scopes, i.e: namespace N { class N::C {}; }
-            // for this case DoxyPress assumes the exitance of a namespace N::N in which C is to be found!
+            // for this case DoxyPress assumes the exitance of a namespace N::N in which C is to be found
             // also avoid warning for stuff imported via a tagfile.
 
             d->addInnerCompound(cd);
@@ -2688,7 +2688,8 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
          } else {
             // unknown namespace, but add it anyway
 
-            QSharedPointer<NamespaceDef> nd = QMakeShared<NamespaceDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn, name);
+            QSharedPointer<NamespaceDef> nd = QMakeShared<NamespaceDef>(root->getData(EntryKey::File_Name),
+                     root->startLine, root->startColumn, name);
 
             nd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
             nd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);

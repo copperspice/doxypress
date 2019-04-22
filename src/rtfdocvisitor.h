@@ -31,7 +31,7 @@ class RTFDocVisitor : public DocVisitor
 {
  public:
    RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt);
-  
+
    // visitor functions for leaf nodes
 
    void visit(DocWord *) override;
@@ -52,7 +52,7 @@ class RTFDocVisitor : public DocVisitor
    void visit(DocCite *) override;
 
    // visitor functions for compound nodes
- 
+
    void visitPre(DocAutoList *) override;
    void visitPost(DocAutoList *) override;
    void visitPre(DocAutoListItem *) override;

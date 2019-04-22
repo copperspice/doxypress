@@ -132,7 +132,7 @@ class DocbookDocVisitor : public DocVisitor
    void visitPre(DocText *) override;
    void visitPost(DocText *) override;
    void visitPre(DocHtmlBlockQuote *) override;
-   void visitPost(DocHtmlBlockQuote *) override; 
+   void visitPost(DocHtmlBlockQuote *) override;
    void visitPre(DocParBlock *) override;
    void visitPost(DocParBlock *) override;
 
@@ -144,10 +144,10 @@ class DocbookDocVisitor : public DocVisitor
    void popEnabled();
    void startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endMscFile(bool hasCaption);
-  
+
    void startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
-  
+
    void startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDotFile(bool hasCaption);
 

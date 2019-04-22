@@ -1699,6 +1699,7 @@ void HtmlDocVisitor::visitPost(DocDotFile *df)
    if (m_hide) {
       return;
    }
+
    if (df->hasCaption()) {
       m_t << "</div>" << endl;
    }

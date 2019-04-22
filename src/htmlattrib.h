@@ -22,16 +22,11 @@
 #include <QString>
 #include <QList>
 
-/*! A Html option. A name, value pair */
 struct HtmlAttrib {
    QString name;
    QString value;
 };
 
-/*! @brief A list of Html attributes.
- *
- * The Html attributes are deeply copied into the list.
- */
 class HtmlAttribList : public QList<HtmlAttrib>
 {
  public:
@@ -74,6 +69,7 @@ class HtmlAttribList : public QList<HtmlAttrib>
    HtmlAttrib *newValue( HtmlAttrib *v ) const {
       return new HtmlAttrib(*v);
    }
+
    void deleteValue(HtmlAttrib *v) const {
       delete v;
    }

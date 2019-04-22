@@ -100,7 +100,7 @@ class DocVisitor
    }
 
    // @name Visitor functions for leaf nodes
-   
+
    virtual void visit(DocWord *) = 0;
    virtual void visit(DocWhiteSpace *) = 0;
    virtual void visit(DocSymbol *) = 0;
@@ -119,7 +119,7 @@ class DocVisitor
    virtual void visit(DocCite *) = 0;
 
 
-   //  @name Visitor functions for internal nodes   
+   //  @name Visitor functions for internal nodes
    virtual void visitPre(DocAutoList *) = 0;
    virtual void visitPost(DocAutoList *) = 0;
    virtual void visitPre(DocAutoListItem *) = 0;
@@ -191,9 +191,9 @@ class DocVisitor
    virtual void visitPre(DocText *) = 0;
    virtual void visitPost(DocText *) = 0;
    virtual void visitPre(DocHtmlBlockQuote *) = 0;
-   virtual void visitPost(DocHtmlBlockQuote *) = 0;   
+   virtual void visitPost(DocHtmlBlockQuote *) = 0;
    virtual void visitPre(DocParBlock *) = 0;
-   virtual void visitPost(DocParBlock *) = 0;   
+   virtual void visitPost(DocParBlock *) = 0;
 };
 
 #endif

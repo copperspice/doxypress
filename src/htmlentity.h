@@ -16,8 +16,8 @@
 *
 *************************************************************************/
 
-#ifndef HTMLENTITY_H
-#define HTMLENTITY_H
+#ifndef HTML_ENTITY_H
+#define HTML_ENTITY_H
 
 #include <QByteArray>
 #include <QHash>
@@ -26,7 +26,6 @@
 
 #include <docparser.h>
 
-/** @brief Singleton helper class to map html entities to other formats */
 class HtmlEntityMapper
 {
  public:

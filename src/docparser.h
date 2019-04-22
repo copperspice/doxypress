@@ -68,7 +68,7 @@ void docFindSections(const QString &input, QSharedPointer<Definition> def,
 class DocNode
 {
  public:
-   /*! Available node types. */
+   /* Available node types. */
    enum Kind { Kind_Root           = 0,
                Kind_Word           = 1,
                Kind_WhiteSpace     = 2,
@@ -610,7 +610,7 @@ class DocWhiteSpace : public DocNode
    }
 
  private:
-   QString  m_chars;
+   QString m_chars;
 };
 
 /** Node representing a verbatim, unparsed text fragment */
@@ -801,25 +801,26 @@ class DocIncOperator : public DocNode
    Kind kind() const  override  {
       return Kind_IncOperator;
    }
-   Type type() const           {
+
+   Type type() const {
       return m_type;
    }
-   QString text() const        {
+   QString text() const {
       return m_text;
    }
-   QString pattern() const     {
+   QString pattern() const {
       return m_pattern;
    }
-   QString context() const     {
+   QString context() const {
       return m_context;
    }
    void accept(DocVisitor *v) override  {
       v->visit(this);
    }
-   bool isFirst() const        {
+   bool isFirst() const {
       return m_isFirst;
    }
-   bool isLast() const         {
+   bool isLast() const  {
       return m_isLast;
    }
    void markFirst(bool v = true) {
@@ -865,11 +866,11 @@ class DocFormula : public DocNode
       return m_text;
    }
 
-   QString relPath() const    {
+   QString relPath() const {
       return m_relPath;
    }
 
-   int id() const             {
+   int id() const {
       return m_id;
    }
 
@@ -877,7 +878,7 @@ class DocFormula : public DocNode
       v->visit(this);
    }
 
-   bool isInline()            {
+   bool isInline() {
       return m_text.length() > 0 ? m_text.at(0) != '\\' : true;
    }
 
@@ -938,11 +939,11 @@ class DocCopy : public DocNode
       return Kind_Copy;
    }
 
-   QString link() const       {
+   QString link() const {
       return m_link;
    }
 
-   void accept(DocVisitor * /*v*/)  override  {
+   void accept(DocVisitor *v)  override  {
       /*CompAccept<DocCopy>::accept(this,v);*/
    }
 
@@ -1830,7 +1831,7 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
       return Kind_ParamSect;
    }
 
-   Type type() const          {
+   Type type() const {
       return m_type;
    }
 
