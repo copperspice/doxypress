@@ -1437,7 +1437,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
 {
    bool isSimple = m_isSimple;
 
-   ol.addIndexItem(name(), 0);
+   ol.addIndexItemName(name(), QString());
 
    // part 1: anchor and title
    QString s = compoundTypeString() + " " + name();

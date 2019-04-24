@@ -2491,8 +2491,8 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
                }
 
                ol.startDescTableRow();
-               ol.addIndexItem(fmd->name(), ciname);
-               ol.addIndexItem(ciname, fmd->name());
+               ol.addIndexItemName(fmd->name(), ciname);
+               ol.addIndexItemName(ciname, fmd->name());
 
                Doxy_Globals::indexList.addIndexItem(container, fmd);
 

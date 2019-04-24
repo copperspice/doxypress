@@ -274,7 +274,7 @@ class BaseOutputDocInterface : public CodeOutputInterface
    virtual void endSection(const QString &, SectionInfo::SectionType) = 0;
 
    virtual void lineBreak(const QString &style) = 0;
-   virtual void addIndexItem(const QString &s1, const QString &s2) = 0;
+   virtual void addIndexItemName(const QString &s1, const QString &s2) = 0;
 
    virtual void writeNonBreakableSpace(int) = 0;
    virtual void startEnumTable() = 0;

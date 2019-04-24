@@ -532,8 +532,8 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endSection, lab, t);
    }
 
-   void addIndexItem(const QString &s1, const QString &s2) override {
-      forall(&OutputGenerator::addIndexItem, s1, s2);
+   void addIndexItemName(const QString &s1, const QString &s2) override {
+      forall(&OutputGenerator::addIndexItemName, s1, s2);
    }
 
    void writeSynopsis() {

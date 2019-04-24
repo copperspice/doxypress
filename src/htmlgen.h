@@ -426,7 +426,7 @@ class HtmlGenerator : public OutputGenerator
 
    void startSection(const QString &, const QString &, SectionInfo::SectionType) override;
    void endSection(const QString &, SectionInfo::SectionType) override;
-   void addIndexItem(const QString &, const QString &) override;
+   void addIndexItemName(const QString &, const QString &) override;
    void startIndent() override;
    void endIndent() override;
    void writeSynopsis() override { }

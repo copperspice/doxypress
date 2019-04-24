@@ -1402,7 +1402,7 @@ void RTFGenerator::endTitleHead(const QString &fileName, const QString &name)
       m_textStream << "}" << endl;
 
       // make an index entry
-      addIndexItem(name, 0);
+      addIndexItemName(name, QString());
       writeAnchor(fileName, 0);
    }
 }
@@ -1451,8 +1451,8 @@ void RTFGenerator::startMemberDoc(const QString &clname, const QString &memname,
    DBG_RTF(m_textStream << "{\\comment startMemberDoc}" << endl)
 
    if (! memname.isEmpty() && ! memname.startsWith('@')) {
-      addIndexItem(memname, clname);
-      addIndexItem(clname, memname);
+      addIndexItemName(memname, clname);
+      addIndexItemName(clname, memname);
    }
 
    m_textStream << rtf_Style_Reset << rtf_Style[showInline ? "Heading5" : "Heading4"].m_reference;
@@ -1502,7 +1502,7 @@ void RTFGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 //  writeDoxyAnchor(0,clName,anchor,0);
 //}
 
-void RTFGenerator::addIndexItem(const QString &s1, const QString &s2)
+void RTFGenerator::addIndexItemName(const QString &s1, const QString &s2)
 {
    if (! s1.isEmpty()) {
       m_textStream << "{\\xe \\v ";

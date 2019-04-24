@@ -1976,7 +1976,7 @@ void HtmlGenerator::endIndent()
    m_textStream << endl << "</div>" << endl << "</div>" << endl;
 }
 
-void HtmlGenerator::addIndexItem(const QString &, const QString &)
+void HtmlGenerator::addIndexItemName(const QString &, const QString &)
 {
 }
 

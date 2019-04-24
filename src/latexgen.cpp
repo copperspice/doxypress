@@ -1765,7 +1765,7 @@ void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
 //  writeDoxyAnchor(0,clName,anchor,0);
 //}
 
-void LatexGenerator::addIndexItem(const QString &s1, const QString &s2)
+void LatexGenerator::addIndexItemName(const QString &s1, const QString &s2)
 {
    if (! s1.isEmpty()) {
       m_textStream << "\\index{";
