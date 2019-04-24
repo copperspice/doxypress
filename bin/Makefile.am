@@ -239,6 +239,7 @@ doxypress_SOURCES = \
    src/docsets.cpp \
    src/dot.cpp \
    src/eclipsehelp.cpp \
+   src/emoji_entity.cpp \
    src/entry.cpp \
    src/filedef.cpp \
    src/filenamelist.cpp \
@@ -347,6 +348,7 @@ noinst_HEADERS = \
    src/doxy_setup.h \
    src/doxy_shared.h \
    src/eclipsehelp.h \
+   src/emoji_entity.h \
    src/entry.h \
    src/example.h \
    src/filedef.h \
