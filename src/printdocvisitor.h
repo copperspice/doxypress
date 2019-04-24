@@ -20,6 +20,7 @@
 #define PRINTDOCVISITOR_H
 
 #include <docvisitor.h>
+#include <emoji_entity.h>
 #include <htmlentity.h>
 
 /*! Concrete visitor implementation for pretty printing */
@@ -58,6 +59,18 @@ class PrintDocVisitor : public DocVisitor
       } else {
          printf("Print: Unsupported HTML entity found: %s\n", csPrintable(
                   HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+      }
+   }
+
+   void visit(DocEmoji *s) override {
+      indent_leaf();
+      QString result = EmojiEntityMapper::instance()->name(s->index());
+
+      if (! result.isEmpty()) {
+        printf("%s", csPrintable(result));
+
+      } else {
+        printf("Print: Unsupported emoji found: %s\n", csPrintable(s->name()));
       }
    }
 

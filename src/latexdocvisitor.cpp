@@ -26,6 +26,7 @@
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
+#include <emoji_entity.h>
 #include <htmlattrib.h>
 #include <htmlentity.h>
 #include <language.h>
@@ -230,6 +231,27 @@ void LatexDocVisitor::visit(DocSymbol *s)
 
    } else {
       err("LaTeX unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+   }
+}
+
+void LatexDocVisitor::visit(DocEmoji *s)
+{
+   if (m_hide) {
+      return;
+   }
+
+   QString result = EmojiEntityMapper::instance()->name(s->index());
+
+   if (! result.isEmpty()) {
+      // stip the :
+      QString imageName = result.mid(1, result.length() - 2);
+
+      m_t << "\\doxyemoji{";
+      filter(result);
+      m_t << "}{" << imageName << "}";
+
+   } else {
+      m_t << s->name();
    }
 }
 

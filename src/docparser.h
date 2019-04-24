@@ -121,7 +121,8 @@ class DocNode
                Kind_HtmlBlockQuote = 49,
 
                Kind_ParBlock       = 51,
-               Kind_DiaFile        = 52
+               Kind_DiaFile        = 52,
+               Kind_Emoji          = 53
              };
 
    /*! Creates a new node */
@@ -587,6 +588,34 @@ class DocSymbol : public DocNode
  private:
    SymType  m_symbol;
 };
+
+/** Node representing a n emoji */
+class DocEmoji : public DocNode
+{
+  public:
+    DocEmoji(DocNode *parent, const QString &symName);
+
+    QString name() const  {
+      return m_symName;
+    }
+
+    int index() const {
+      return m_index;
+    }
+
+    Kind kind() const override  {
+      return Kind_Emoji;
+    }
+
+    void accept(DocVisitor *v) override  {
+      v->visit(this);
+    }
+
+  private:
+    QString m_symName;
+    int m_index;
+};
+
 
 /** Node representing some amount of white space */
 class DocWhiteSpace : public DocNode
@@ -1906,6 +1935,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    void handleInclude(const QString &cmdName, DocInclude::Type t);
    void handleLink(const QString &cmdName, bool isJavaLink);
    void handleCite();
+   void handleEmoji();
    void handleRef(const QString &cmdName);
    void handleSection(const QString &cmdName);
    void handleSortId();

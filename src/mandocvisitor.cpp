@@ -24,6 +24,7 @@
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
+#include <emoji_entity.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
@@ -88,6 +89,23 @@ void ManDocVisitor::visit(DocSymbol *s)
    } else {
       // no error or warning is supplied
       // non supported HTML-entity found
+   }
+
+   m_firstCol = false;
+}
+
+void ManDocVisitor::visit(DocEmoji *s)
+{
+   if (m_hide) {
+      return;
+   }
+
+   QString result = EmojiEntityMapper::instance()->name(s->index());
+
+   if (! result.isEmpty()) {
+      m_t << result;
+   } else {
+      m_t << s->name();
    }
 
    m_firstCol = false;

@@ -20,6 +20,7 @@
 
 #include <textdocvisitor.h>
 
+#include <emoji_entity.h>
 #include <htmlentity.h>
 #include <message.h>
 #include <util.h>
@@ -35,6 +36,17 @@ void TextDocVisitor::visit(DocSymbol *s)
       err("Text, Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
 
    }
+}
+
+void TextDocVisitor::visit(DocEmoji *s)
+{
+  const QString result = EmojiEntityMapper::instance()->name(s->index());
+
+  if (! result.isEmpty()) {
+    filter(result);
+  } else {
+    filter(s->name());
+  }
 }
 
 void TextDocVisitor::filter(const QString &str)

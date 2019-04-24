@@ -542,6 +542,28 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\newcommand{\\+}{\\discretionary{\\mbox{\\scriptsize$\\hookleftarrow$}}{}{}}\n"
      "\n";
 
+   // QString emojiDir = Config_getString(latex-emoji-directory);
+   // emerald - add later
+
+   QString emojiDir = Config::getString("latex-output");
+
+   if (emojiDir.isEmpty()) {
+      emojiDir = ".";
+   }
+
+   emojiDir = substitute(emojiDir, "\\", "/");
+
+   t_stream << "% Arguments of doxyemoji:\n"
+      "% 1) ':<text>:' form of the emoji, already \"LaTeX\"-escaped\n"
+      "% 2) file with the name of the emoji without the .png extension\n"
+      "% in case image exist use this otherwise use the ':<text>:' form\n";
+
+   t_stream << "\\newcommand{\\doxyemoji}[2]{%\n"
+      "  \\IfFileExists{" << emojiDir << "/#2.png}{\\raisebox{-0.1em}{\\includegraphics[height=0.9em]{"
+      << emojiDir << "/#2.png}}}{#1}%\n"
+      "}\n";
+
+
    // Define page & text layout
 
    t_stream << "% Page & text layout\n"

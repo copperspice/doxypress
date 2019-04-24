@@ -30,6 +30,7 @@
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
+#include <emoji_entity.h>
 #include <htmlentity.h>
 #include <message.h>
 #include <membergroup.h>
@@ -353,6 +354,7 @@ class PerlModDocVisitor : public DocVisitor
    void visit(DocLinkedWord *) override;
    void visit(DocWhiteSpace *) override;
    void visit(DocSymbol *) override;
+   void visit(DocEmoji *) override;
    void visit(DocURL *) override;
    void visit(DocLineBreak *) override;
    void visit(DocHorRuler *) override;
@@ -664,6 +666,19 @@ void PerlModDocVisitor::visit(DocSymbol *sy)
    }
 }
 
+void PerlModDocVisitor::visit(DocEmoji *s)
+{
+   enterText();
+
+   QString result = EmojiEntityMapper::instance()->name(s->index());
+
+   if (! result.isEmpty()) {
+      m_output.add(result);
+   } else {
+      m_output.add(s->name());
+  }
+}
+
 void PerlModDocVisitor::visit(DocURL *u)
 {
    openItem("url");
@@ -675,6 +690,7 @@ void PerlModDocVisitor::visit(DocLineBreak *)
 {
    singleItem("linebreak");
 }
+
 void PerlModDocVisitor::visit(DocHorRuler *)
 {
    singleItem("hruler");

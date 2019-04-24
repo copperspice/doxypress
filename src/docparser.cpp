@@ -34,6 +34,7 @@
 #include <cmdmapper.h>
 #include <doctokenizer.h>
 #include <doxy_globals.h>
+#include <emoji_entity.h>
 #include <formula.h>
 #include <htmlentity.h>
 #include <language.h>
@@ -1884,6 +1885,32 @@ DocSymbol::SymType DocSymbol::decodeSymbol(const QString &symName)
    return HtmlEntityMapper::instance()->name2sym(symName);
 }
 
+
+DocEmoji::DocEmoji(DocNode *parent, const QString &symName)
+   : m_symName(symName), m_index(-1)
+{
+   m_parent = parent;
+
+   QString locSymName = symName;
+   int len = locSymName.length();
+
+   if (len > 0) {
+      if (! locSymName.endsWith(":")) {
+         locSymName.append(":");
+      }
+
+      if (! locSymName.startsWith(":")) {
+         locSymName.prepend(":");
+      }
+   }
+
+   m_symName = locSymName;
+   m_index   = EmojiEntityMapper::instance()->symbol2index(m_symName);
+
+   if (m_index == -1) {
+      warn_doc_error(s_fileName, doctokenizerYYlineno," Found unsupported emoji symbol '%s'\n", csPrintable(m_symName));
+   }
+}
 static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &children, const QString &doc)
 {
    int retval = RetVal_OK;
@@ -5390,6 +5417,35 @@ void DocPara::handleSortId()
    doctokenizerYYsetStatePara();
 }
 
+void DocPara::handleEmoji()
+{
+  // get the argument of the emoji command
+  int tok = doctokenizerYYlex();
+
+  if (tok != TK_WHITESPACE) {
+    warn_doc_error(s_fileName,doctokenizerYYlineno,"Expected whitespace after %s command", csPrintable("emoji"));
+    return;
+  }
+
+  doctokenizerYYsetStateEmoji();
+  tok = doctokenizerYYlex();
+
+  if (tok == 0) {
+    warn_doc_error(s_fileName, doctokenizerYYlineno, "Unnexpected end of comment block while parsing the "
+        "argument of command %s\n", csPrintable("emoji"));
+    return;
+
+  } else if (tok != TK_WORD) {
+    warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+        tokToString(tok), csPrintable("emoji"));
+    return;
+  }
+
+  DocEmoji *emoji = new DocEmoji(this, g_token->name);
+  m_children.append(emoji);
+  doctokenizerYYsetStatePara();
+}
+
 int DocPara::handleXRefItem()
 {
    int retval = doctokenizerYYlex();
@@ -6307,6 +6363,10 @@ int DocPara::handleCommand(const QString &cmdName)
 
       case CMD_CITE:
          handleCite();
+         break;
+
+      case CMD_EMOJI:
+         handleEmoji();
          break;
 
       case CMD_REF: // fall through

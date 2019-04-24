@@ -24,6 +24,7 @@
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
+#include <emoji_entity.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
@@ -142,6 +143,28 @@ void XmlDocVisitor::visit(DocSymbol *s)
    } else {
       err("XML, Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
+}
+
+void XmlDocVisitor::visit(DocEmoji *s)
+{
+   if (m_hide) {
+      return;
+   }
+
+   QString result = EmojiEntityMapper::instance()->name(s->index());
+
+   if (! result.isEmpty()) {
+
+      result = result.mid(1, result.length() - 2);
+      m_t << "<emoji name=\"" << result << "\" unicode=\"";
+
+      filter(EmojiEntityMapper::instance()->unicode(s->index()));
+      m_t << "\"/>";
+
+   } else {
+      m_t << s->name();
+   }
+
 }
 
 void XmlDocVisitor::visit(DocURL *u)

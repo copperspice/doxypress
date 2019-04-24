@@ -630,6 +630,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 %x St_Snippet
 %x St_SetScope
 %x St_SetScopeEnd
+%x St_Emoji
 
 %x St_Sections
 %s St_SecLabel1
@@ -1592,6 +1593,15 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WHITESPACE;
    }
 
+<St_Emoji>[:0-9_a-z+-]+  {
+      g_token->name = QString::fromUtf8(yytext);
+      return TK_WORD;
+   }
+
+<St_Emoji>.    {
+      return 0;
+   }
+
 <St_File>{FILEMASK}    {
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
@@ -2046,6 +2056,11 @@ void doctokenizerYYsetStateSetScope()
    BEGIN(St_SetScope);
 }
 
+void doctokenizerYYsetStateEmoji()
+{
+  g_token->name = "";
+  BEGIN(St_Emoji);
+}
 void doctokenizerYYcleanup()
 {
    yy_delete_buffer( YY_CURRENT_BUFFER );

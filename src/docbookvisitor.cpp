@@ -27,6 +27,7 @@
 #include <docbookgen.h>
 #include <doxy_globals.h>
 #include <dot.h>
+#include <emoji_entity.h>
 #include <htmlentity.h>
 #include <language.h>
 #include <message.h>
@@ -137,17 +138,35 @@ void DocbookDocVisitor::visit(DocSymbol *s)
    }
 }
 
+void DocbookDocVisitor::visit(DocEmoji *s)
+{
+   if (m_hide) {
+      return;
+   }
+
+   QString result = EmojiEntityMapper::instance()->unicode(s->index());
+
+   if (! result.isEmpty()) {
+      m_t << result;
+   } else {
+      m_t << s->name();
+   }
+}
+
 void DocbookDocVisitor::visit(DocURL *u)
 {
    if (m_hide) {
       return;
    }
+
    m_t << "<link xlink:href=\"";
    if (u->isEmail()) {
       m_t << "mailto:";
    }
+
    filter(u->url());
    m_t << "\">";
+
    filter(u->url());
    m_t << "</link>";
 }

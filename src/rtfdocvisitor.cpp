@@ -26,6 +26,7 @@
 #include <dot.h>
 #include <doxy_globals.h>
 #include <htmlentity.h>
+#include <emoji_entity.h>
 #include <language.h>
 #include <msc.h>
 #include <msc.h>
@@ -158,6 +159,62 @@ void RTFDocVisitor::visit(DocSymbol *s)
 
    } else {
       err("RTF, Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
+   }
+
+   m_lastIsPara = false;
+}
+
+void RTFDocVisitor::visit(DocEmoji *s)
+{
+   if (m_hide) {
+      return;
+   }
+
+   const QString result = EmojiEntityMapper::instance()->unicode(s->index());
+
+   if (! result.isEmpty()) {
+
+      int valA = 0;
+      int valB = 0;
+
+      for (auto ch : result) {
+
+         switch(ch.unicode()) {
+            case '&':
+            case '#':
+            case 'x':
+               break;
+
+            case ';':
+               valB = valA;
+               valA = 0xd800 + ( ( valB - 0x10000 ) & 0xffc00 ) / 0x400 - 0x10000;
+               m_t << "\\u" << valA << "?";
+
+               valA = 0xdC00 + ( ( valB - 0x10000 ) & 0x3ff ) - 0x10000 ;
+               m_t << "\\u" << valA << "?";
+
+               valA = 0;
+
+               break;
+
+            case '0': case '1': case '2': case '3': case '4':
+            case '5': case '6': case '7': case '8': case '9':
+               valA = valA * 16 + ch.unicode() - '0';
+               break;
+
+            case 'a':
+            case 'b':
+            case 'c':
+            case 'd':
+            case 'e':
+            case 'f':
+               valA = valA * 16 + ch.unicode() - 'a' + 10;
+               break;
+         }
+      }
+
+   } else {
+      m_t << s->name();
    }
 
    m_lastIsPara = false;

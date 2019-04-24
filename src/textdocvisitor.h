@@ -48,6 +48,8 @@ class TextDocVisitor : public DocVisitor
 
    void visit(DocSymbol *) override;
 
+   void visit(DocEmoji *) override;
+
    void visit(DocURL *u) override {
       filter(u->url());
    }

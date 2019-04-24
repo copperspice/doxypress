@@ -41,6 +41,7 @@ class HtmlDocVisitor : public DocVisitor
    void visit(DocLinkedWord *) override;
    void visit(DocWhiteSpace *) override;
    void visit(DocSymbol *) override;
+   void visit(DocEmoji *) override;
    void visit(DocURL *) override;
    void visit(DocLineBreak *) override;
    void visit(DocHorRuler *) override;

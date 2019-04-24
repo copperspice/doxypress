@@ -25,6 +25,7 @@
 #include <dia.h>
 #include <doxy_globals.h>
 #include <dot.h>
+#include <emoji_entity.h>
 #include <htmlgen.h>
 #include <htmlentity.h>
 #include <language.h>
@@ -205,6 +206,22 @@ void HtmlDocVisitor::visit(DocSymbol *s)
    } else {
       err("Unsupported HTML entity found: %s\n", csPrintable(HtmlEntityMapper::instance()->html(s->symbol(), true)) );
    }
+}
+
+void HtmlDocVisitor::visit(DocEmoji *s)
+{
+   if (m_hide) {
+      return;
+   }
+
+   QString result = EmojiEntityMapper::instance()->unicode(s->index());
+
+   if (! result.isEmpty()) {
+      m_t << result;
+   } else {
+      m_t << s->name();
+   }
+
 }
 
 void HtmlDocVisitor::visit(DocURL *u)
