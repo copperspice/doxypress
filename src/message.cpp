@@ -184,6 +184,9 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
       return;
    }
 
+   va_list argsCopy;
+   va_copy(argsCopy, args);
+
    const int bufSize = 40960;
 
    QByteArray text = prefix.constData();
@@ -191,8 +194,14 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
 
    text.resize(bufSize);
 
-   int actual_len = vsnprintf(text.data() + len, bufSize - len, fmt.constData(), args);
+   int actual_len = vsnprintf(text.data() + len, bufSize - len, fmt.constData(), argsCopy);
    text.resize(len + actual_len);
+
+   va_end(argsCopy);
+   if (len + actual_len >= bufSize) {
+      // buffer was too small
+      vsnprintf(text.data() + len, text.size() - len, fmt.constData(), args);
+   }
 
    format_warn(file, line, text);
 }
