@@ -19,7 +19,6 @@
 #ifndef HTML_ENTITY_H
 #define HTML_ENTITY_H
 
-#include <QByteArray>
 #include <QHash>
 #include <QString>
 #include <QTextStream>

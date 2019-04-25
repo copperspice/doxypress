@@ -400,6 +400,7 @@ void DirDef::writeTagFile(QTextStream &tagFile)
             break;
       }
    }
+
    writeDocAnchorsToTagFile(tagFile);
    tagFile << "  </compound>" << endl;
 }
@@ -465,6 +466,7 @@ void DirDef::writeDocumentation(OutputList &ol)
             writeDetailedDescription(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::ClassIncludes:
          case LayoutDocEntry::ClassInlineClasses:
          case LayoutDocEntry::ClassInheritanceGraph:
@@ -933,12 +935,14 @@ void generateDirDocs(OutputList &ol)
    for (auto dir : Doxy_Globals::directories) {
       ol.pushGeneratorState();
 
+      // not of value for man pages
+      ol.disable(OutputGenerator::Man);
+
       if (! dir->hasDocumentation()) {
          ol.disableAllBut(OutputGenerator::Html);
-       }
+      }
 
       dir->writeDocumentation(ol);
-
       ol.popGeneratorState();
    }
 

@@ -246,7 +246,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    ol.popGeneratorState();
 
-   Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>(), 0, filterTitle(title()));
+   Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>(), QString(), filterTitle(title()));
 }
 
 void PageDef::writePageDocumentation(OutputList &ol)

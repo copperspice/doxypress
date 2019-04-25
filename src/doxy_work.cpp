@@ -110,6 +110,7 @@ static STLInfo g_stlinfo[] = {
    { "auto_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "smart_ptr",            0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "unique_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
+   { "shared_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "weak_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "ios_base",             0,                              0,                     0,             0,             0,     0,             false,   false },
    { "error_code",           0,                              0,                     0,             0,             0,     0,             false,   false },
@@ -1415,7 +1416,7 @@ void Doxy_Work::addSTLClasses(QSharedPointer<Entry> ptrEntry)
          addSTLMember(classEntry, QString::fromLatin1(info->templType2), QString::fromLatin1(info->templName2));
       }
 
-      if (fullName == "std::auto_ptr" || fullName == "std::smart_ptr" ||
+      if (fullName == "std::auto_ptr" || fullName == "std::smart_ptr" || fullName=="std::shared_ptr" ||
             fullName == "std::unique_ptr" || fullName == "std::weak_ptr") {
 
          QSharedPointer<Entry> memEntry = QMakeShared<Entry>();

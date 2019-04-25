@@ -607,7 +607,7 @@ void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<M
          }
       }
 
-      if (context == 0) {
+      if (context == nullptr) {
          return;   // should not happen
       }
 

@@ -1117,7 +1117,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
       }
    }
 
-   Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>(), 0, m_title);
+   Doxy_Globals::indexList.addIndexItem(self, QSharedPointer<MemberDef>(), QString(), m_title);
 
    // start flexible part
 

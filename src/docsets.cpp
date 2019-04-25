@@ -262,7 +262,7 @@ void DocSets::addContentsItem(bool isDir, const QString &name, const QString &re
 
 void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &, const QString &)
 {
-   if (md == 0 && context == 0) {
+   if (context == nullptr && md == nullptr) {
       return;
    }
 
@@ -305,7 +305,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          } else if (fd && fd->name().endsWith(".c", Qt::CaseInsensitive)) {
             lang = "c";     // Plain C
 
-         } else if (cd == 0 && nd == 0) {
+         } else if (cd == nullptr && nd == nullptr) {
             lang = "c";     // Plain C symbol outside any class or namespace
 
          } else {
@@ -367,14 +367,15 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
    }
 
    if (md) {
-      if (context == 0) {
+      if (context == nullptr) {
          if (md->getGroupDef()) {
             context = md->getGroupDef();
          } else if (md->getFileDef()) {
             context = md->getFileDef();
          }
       }
-      if (context == 0) {
+
+      if (context == nullptr) {
          return;   // should not happen
       }
 
@@ -488,15 +489,15 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
    } else if (context && context->isLinkable()) {
 
-      if (fd == 0 && context->definitionType() == Definition::TypeFile) {
+      if (fd == nullptr && context->definitionType() == Definition::TypeFile) {
          fd = context.dynamicCast<FileDef>();
       }
 
-      if (cd == 0 && context->definitionType() == Definition::TypeClass) {
+      if (cd == nullptr && context->definitionType() == Definition::TypeClass) {
          cd = context.dynamicCast<ClassDef>();
       }
 
-      if (nd == 0 && context->definitionType() == Definition::TypeNamespace) {
+      if (nd == nullptr && context->definitionType() == Definition::TypeNamespace) {
          nd = context.dynamicCast<NamespaceDef>();
       }
 
