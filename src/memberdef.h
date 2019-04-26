@@ -200,9 +200,7 @@ class MemberDef : public Definition
    bool showInCallGraph() const;
    bool isStrongEnumValue() const;
 
-
    // derived get methods
-   int numberOfFlowKeyWords() const;
    bool isFriendToHide() const;
    bool isNotFriend() const;
    bool isFunctionOrSignalSlot() const;
@@ -295,9 +293,6 @@ class MemberDef : public Definition
    QString briefDescription(bool abbr = false) const override;
    QString fieldType() const;
    bool isReference() const override;
-
-   // set functions
-   void addFlowKeyWord();
 
    void setMemberType(MemberType t);
    void setDefinition(const QString &d);
@@ -466,7 +461,6 @@ class MemberDef : public Definition
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool onlyText = false);
 
    static int s_indentLevel;
-   int m_flow_count;
 
    // unsure if this is needed
    MemberDef &operator=(const MemberDef &);

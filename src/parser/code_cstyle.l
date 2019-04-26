@@ -2640,10 +2640,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{FLOWCONDITION}/{BN}*"("          {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
-
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -2674,10 +2670,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{FLOWCONDITION}/([^a-z_A-Z0-9]) 	{
       QString text = QString::fromUtf8(yytext);
 
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
-
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -2697,10 +2689,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>{FLOWCONDITION}/{B}*              {
       QString text = QString::fromUtf8(yytext);
-
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
 
       startFontClass("keywordflow");
       codifyLines(text);
@@ -3447,10 +3435,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <MemberCall2,FuncCall>{FLOWCONDITION}/([^a-z_A-Z0-9]) {
       QString text = QString::fromUtf8(yytext);
-
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
 
       addParmType();
       g_parmName = text;

@@ -155,14 +155,6 @@ class GroupDef : public Definition
 
    bool hasDetailedDescription() const;
 
-   QString getHint()  override {
-      return m_hint;
-   }
-
-   void setHint(QString data) {
-      m_hint = data;
-   }
-
  protected:
    void addMemberListToGroup(QSharedPointer<MemberList>, bool (MemberDef::*)() const);
    QString pathFragment_Internal() const override;
@@ -217,7 +209,6 @@ class GroupDef : public Definition
    MemberGroupSDict m_memberGroupSDict;
 
    bool m_subGrouping;
-   QString m_hint;
 };
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd);

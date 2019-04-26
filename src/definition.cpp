@@ -36,8 +36,6 @@
 #include <parse_base.h>
 #include <util.h>
 
-#define START_MARKER 0x4445465B    // DEF[
-#define END_MARKER   0x4445465D    // DEF]
 
 class Definition_Private
 {

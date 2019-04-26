@@ -14178,10 +14178,6 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
-
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -14224,10 +14220,6 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
 
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
-
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -14250,10 +14242,6 @@ case 80:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
-
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
 
       startFontClass("keywordflow");
       codifyLines(text);
@@ -15192,10 +15180,6 @@ YY_DO_BEFORE_ACTION; /* set up code_cstyle_YYtext again */
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(code_cstyle_YYtext);
-
-      if (g_currentMemberDef && g_currentMemberDef->isFunction()) {
-         g_currentMemberDef->addFlowKeyWord();
-      }
 
       addParmType();
       g_parmName = text;
