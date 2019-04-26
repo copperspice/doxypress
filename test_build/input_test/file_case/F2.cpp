@@ -1,7 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2018 Barbara Geller & Ansel Sermersheim
-* All rights reserved.
+* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
