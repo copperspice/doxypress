@@ -27,8 +27,9 @@
 #include <stdexcept>
 
 #include <config.h>
-#include <definition.h>
 #include <types.h>
+
+class Definition;
 
 class ClassDef;
 class DirDef;
