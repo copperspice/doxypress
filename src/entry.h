@@ -402,6 +402,8 @@ class Entry : public EnableSharedFromThis
    int  startLine;                 // start line of entry in the source
    int  startColumn;               // start column of entry in the source
 
+   LocalToc localToc;
+
    bool stat;                      // static ?
    bool explicitExternal;          // explicitly defined as external ?
    bool proto;                     // prototype ?

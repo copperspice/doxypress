@@ -54,6 +54,8 @@ Entry::Entry(const Entry &e)
    startLine        = e.startLine;
    startColumn      = e.startColumn;
 
+   localToc         = e.localToc;
+
    // bool
    stat             = e.stat;
    explicitExternal = e.explicitExternal;
@@ -131,6 +133,8 @@ void Entry::reset()
    callerGraph      = dotCalledBy;
    hidden           = false;
    artificial       = false;
+
+   localToc         = LocalToc();
 
    // string
    m_entryName      = "";

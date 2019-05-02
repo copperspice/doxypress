@@ -19,6 +19,8 @@
 #ifndef TYPES_H
 #define TYPES_H
 
+#include <QString>
+
 /** Protection level of members */
 enum Protection   { Public, Protected, Private, Package };
 
@@ -244,4 +246,81 @@ enum FortranFormat {
    FortranFormat_Fixed
 };
 
+class LocalToc
+{
+ public:
+   enum Type {
+      None           = 0,      // initial value
+      Html           = 0,      // index / also to be used as bit position in mask (1 << Html)
+      Latex          = 1,
+      Xml            = 2,
+      Docbook        = 3,
+      numTocTypes    = 4       // number of enum values
+   };
+   LocalToc() : m_mask(None) { memset(m_level, 0, sizeof(m_level)); }
+
+   void enableHtml(int level) {
+      m_mask |= (1 << Html);
+      m_level[Html] = level;
+   }
+
+   void enableLatex(int level) {
+      m_mask |= (1 << Latex);
+      m_level[Latex] = level;
+   }
+
+   void enableXml(int level) {
+      m_mask |= (1 << Xml);
+      m_level[Xml] = level;
+   }
+
+   void enableDocbook(int level) {
+      m_mask |= (1 << Docbook);
+      m_level[Docbook] = level;
+   }
+
+   bool isHtmlEnabled() const {
+      return (m_mask & (1 << Html)) != 0;
+   }
+
+   bool isLatexEnabled() const {
+      return (m_mask & (1 << Latex)) != 0;
+   }
+
+   bool isXmlEnabled() const {
+      return (m_mask & (1 << Xml)) != 0;
+   }
+
+   bool isDocbookEnabled() const {
+      return (m_mask & (1 << Docbook)) != 0;
+   }
+
+   bool nothingEnabled() const {
+      return m_mask == None;
+   }
+
+   int htmlLevel() const {
+      return m_level[Html];
+   }
+
+   int latexLevel() const {
+      return m_level[Latex];
+   }
+
+   int xmlLevel() const {
+      return m_level[Xml];
+   }
+
+   int docbookLevel() const {
+      return m_level[Docbook];
+   }
+
+   int mask() const {
+      return m_mask;
+   }
+
+  private:
+    int m_mask;
+    int m_level[numTocTypes];
+};
 #endif
