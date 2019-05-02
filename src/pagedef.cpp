@@ -37,7 +37,6 @@ PageDef::PageDef(const QString &f, int l, const QString &name, const QString &d,
 
    m_subPageDict  = new PageSDict();
    m_nestingLevel = 0;
-   m_showToc      = false;
    m_fileName     = convertNameToFile_X(name, false, true);
 }
 
@@ -229,8 +228,8 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.startContents();
    ol.popGeneratorState();
 
-   if (m_showToc && hasSections()) {
-      writeToc(ol);
+   if ((m_localToc.isHtmlEnabled() || m_localToc.isLatexEnabled() || m_localToc.isDocbookEnabled()) && hasSections()) {
+      writeToc(ol, m_localToc);
    }
 
    writePageDocumentation(ol);
@@ -345,8 +344,13 @@ void PageDef::setNestingLevel(int l)
    m_nestingLevel = l;
 }
 
-void PageDef::setShowToc(bool b)
+void PageDef::setLocalToc(const LocalToc &localToc)
 {
-   m_showToc |= b;
+  m_localToc = localToc;
+}
+
+bool PageDef::hasTitle() const
+{
+  return ! m_title.isEmpty() && m_title.toLower() != "notitle";
 }
 

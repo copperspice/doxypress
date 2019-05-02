@@ -3758,8 +3758,8 @@ static void writeIndex(OutputList &ol)
    if (Doxy_Globals::mainPage) {
       Doxy_Globals::insideMainPage = true;
 
-      if (Doxy_Globals::mainPage->showToc() && Doxy_Globals::mainPage->hasSections()) {
-         Doxy_Globals::mainPage->writeToc(ol);
+      if (Doxy_Globals::mainPage->localToc().isHtmlEnabled() && Doxy_Globals::mainPage->hasSections()) {
+         Doxy_Globals::mainPage->writeToc(ol, Doxy_Globals::mainPage->localToc());
       }
 
       ol.startTextBlock();

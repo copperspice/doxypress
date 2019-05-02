@@ -35,7 +35,8 @@ class PageDef : public Definition
 
    // setters
    void setFileName(const QString &name);
-   void setShowToc(bool b);
+   void setLocalToc(const LocalToc &tl);
+   // emerald, not ready yet void setShowLineNo(bool);
 
    // getters
    DefType definitionType() const override {
@@ -74,9 +75,10 @@ class PageDef : public Definition
    bool documentedPage() const;
    bool hasSubPages() const;
    bool hasParentPage() const;
+   bool hasTitle() const;
 
-   bool showToc() const {
-      return m_showToc;
+   LocalToc localToc() const {
+      return m_localToc;
    }
 
    void setPageScope(QSharedPointer<Definition> d) {
@@ -107,7 +109,8 @@ class PageDef : public Definition
    PageSDict *m_subPageDict;                 // list of pages in the group
    QSharedPointer<Definition> m_pageScope;
    int m_nestingLevel;
-   bool m_showToc;
+
+   LocalToc m_localToc;
 };
 
 #endif

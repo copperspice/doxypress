@@ -2040,7 +2040,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    }
 
    QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
+   // t.setEncoding(QTextStream::UnicodeUTF8);
 
    writeXMLHeader(t);
    t << "  <compounddef id=\"" << pageName;
@@ -2072,20 +2072,91 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    }
 
    writeInnerPages(pd->getSubPages(), t);
+   SectionDict &sectionDict = pd->getSectionDict();
 
-   if (pd->showToc()) {
-      t << "    <tableofcontents/>" << endl;
+   if (pd->localToc().isXmlEnabled()) {
+      t << "    <tableofcontents>" << endl;
+
+      int level = 1;
+      int l;
+
+      bool inLi[5] = { false, false, false, false, false };
+      int maxLevel = pd->localToc().xmlLevel();
+
+      for (auto si : sectionDict) {
+         if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection ||
+                  si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
+
+            int nextLevel = (int)si->type;
+
+            if (nextLevel > level) {
+
+               for (l = level; l < nextLevel; l++) {
+                  if (l < maxLevel) {
+                     t << "    <tableofcontents>" << endl;
+                  }
+               }
+
+            } else if (nextLevel < level) {
+
+               for (l = level; l > nextLevel; l--) {
+                  if (l <= maxLevel && inLi[l]) {
+                     t << "    </tocsect>" << endl;
+                  }
+
+                  inLi[l] = false;
+
+                  if (l <= maxLevel) {
+                     t << "    </tableofcontents>" << endl;
+                  }
+               }
+            }
+
+            if (nextLevel <= maxLevel) {
+
+               if (inLi[nextLevel]) {
+                  t << "    </tocsect>" << endl;
+               }
+
+               QString titleDoc = convertToXML(si->title);
+
+               t << "      <tocsect>" << endl;
+               t << "        <name>" << (si->title.isEmpty() ? si->label : titleDoc) << "</name>" << endl;
+               t << "        <reference>"  <<  convertToXML(pageName) << "_1" << convertToXML(si->label) << "</reference>" << endl;
+            }
+
+            inLi[nextLevel] = true;
+            level = nextLevel;
+         }
+      }
+
+      while (level > 1 && level <= maxLevel) {
+         if (inLi[level]) {
+            t << "    </tocsect>" << endl;
+         }
+
+         inLi[level] = false;
+         t << "    </tableofcontents>" << endl;
+         level--;
+      }
+
+      if (level <= maxLevel && inLi[level]) {
+         t << "    </tocsect>" << endl;
+      }
+
+      inLi[level] = false;
+      t << "    </tableofcontents>" << endl;
    }
 
    t << "    <briefdescription>" << endl;
-   writeXMLDocBlock(t,pd->briefFile(), pd->briefLine(),pd, QSharedPointer<MemberDef>(), pd->briefDescription());
+   writeXMLDocBlock(t, pd->briefFile(), pd->briefLine(), pd, QSharedPointer<MemberDef>(), pd->briefDescription());
    t << "    </briefdescription>" << endl;
 
    t << "    <detaileddescription>" << endl;
 
    if (isExample) {
       writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(),
-                       pd->documentation() + "\n\\include " + pd->name());
+                  pd->documentation() + "\n\\include " + pd->name());
 
    } else {
       writeXMLDocBlock(t, pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(), pd->documentation());

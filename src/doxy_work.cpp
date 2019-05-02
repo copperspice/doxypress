@@ -1506,7 +1506,7 @@ void Doxy_Work::addRelatedPage_X(QSharedPointer<Entry> ptrEntry)
    if (pd) {
       pd->setBriefDescription(tmpBriefDocs, root->getData(EntryKey::Brief_File), root->briefLine);
       pd->addSectionsToDefinition(root->m_anchors);
-      pd->setShowToc(root->stat);
+      pd->setLocalToc(root->localToc);
 
       addPageToContext(pd, ptrEntry);
    }
@@ -8876,7 +8876,7 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
 
          Doxy_Globals::mainPage->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
          Doxy_Globals::mainPage->setFileName(indexName);
-         Doxy_Globals::mainPage->setShowToc(root->stat);
+         Doxy_Globals::mainPage->setLocalToc(root->localToc);
 
          addPageToContext(Doxy_Globals::mainPage, ptrEntry);
 
