@@ -45,7 +45,7 @@ class Definition_Private
 
    void init(const QString &df, const QString &n);
 
-   SectionDict m_sectionDict;                              // dictionary of all sections
+   SectionDict m_sectionDict;                             // dictionary of all sections
    QVector<QSharedPointer <SectionInfo>> m_sectionList;   // list of sections, definiton order
 
    MemberSDict m_sourceRefByDict;
@@ -58,7 +58,7 @@ class Definition_Private
    DocInfo    m_inbodyDocs;    // not exported
    BriefInfo  m_brief;         // not exported
 
-   // data associated with description found in the body.
+   // data associated with description found in the body
    int m_body_startLine;                      // line number of the start of the definition
    int m_body_endLine;                        // line number of the end of the definition
    QSharedPointer<FileDef> m_body_fileDef;    // file definition containing the function body
@@ -144,7 +144,8 @@ static bool matchExcludedSymbols(const QString &name)
       }
 
       if (pattern.at(pattern.length() - 1) == '$') {
-         pattern = pattern.left(pattern.length() - 1), forceEnd = true;
+         pattern = pattern.left(pattern.length() - 1);
+         forceEnd = true;
       }
 
       if (pattern.indexOf('*') != -1) {
@@ -271,7 +272,7 @@ Definition::~Definition()
 {
    if (m_private) {
       delete m_private;
-      m_private = 0;
+      m_private = nullptr;
    }
 
    if (! Doxy_Globals::programExit)  {
@@ -328,7 +329,8 @@ void Definition::addSectionsToDefinition(const QVector<SectionInfo> &anchorList)
          Doxy_Globals::sectionDict.insert(si.label, gsi);
       }
 
-      if (m_private->m_sectionDict.find(gsi->label) == 0) {
+      if (m_private->m_sectionDict.find(gsi->label) == nullptr) {
+
          m_private->m_sectionDict.insert(gsi->label, gsi);
          gsi->definition = self;
 
@@ -401,9 +403,9 @@ void Definition::addSectionsToIndex(bool addToNavIndex)
    }
 }
 
-void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
+void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile) const
 {
-    // by definition order
+   // by definition order
    for (auto si : m_private->m_sectionList) {
 
       if (! si->generated && si->ref.isEmpty()) {
@@ -414,7 +416,7 @@ void Definition::writeDocAnchorsToTagFile(QTextStream &tagFile)
 
          tagFile << "    <docanchor file=\"" << si->fileName << "\"";
 
-         if (!si->title.isEmpty()) {
+         if (! si->title.isEmpty()) {
             tagFile << " title=\"" << convertToXML(si->title) << "\"";
          }
 
@@ -526,7 +528,6 @@ void Definition::setBriefDescription(const QString &b, const QString &briefFile,
          setDocumentation(brief, briefFile, briefLine, false, true);
 
       } else {
-
          m_private->m_brief.doc = brief;
 
          if (briefLine != -1) {
@@ -586,7 +587,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
    QString tmpResult;
    QString filter = getFileFilter(fileName, true);
 
-   FILE *f = 0;
+   FILE *f = nullptr;
    bool usePipe = ! filter.isEmpty() && filterSourceFiles;
 
    SrcLangExt lang = getLanguageFromFileName(fileName);
@@ -796,6 +797,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
 {
    static const bool latexSourceCode = Config::getBool("latex-source-code");
    static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
+   // static const bool docbookSourceCode = Config::getBool("docbook-programlisting");
 
    ol.pushGeneratorState();
 
@@ -825,6 +827,11 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
+
             if (! rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
             }
@@ -838,6 +845,11 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             if (latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
+
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
 
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -858,6 +870,11 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
+
             if (! rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
             }
@@ -871,6 +888,10 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
             }
@@ -882,8 +903,8 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             // write text right from file marker
             ol.parseText(refText.right(refText.length() - fileMarkerPos - 2));
 
-         } else { // file marker before line marker
-            // write text left from file marker
+         } else {
+            // file marker before line marker, write text left from file marker
 
             ol.parseText(refText.left(fileMarkerPos));
             ol.pushGeneratorState();
@@ -894,6 +915,10 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
             if (! rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
             }
@@ -908,6 +933,11 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             if (latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
+
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
 
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -928,6 +958,11 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.enable(OutputGenerator::Latex);
             }
 
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
+
             if (rtfSourceCode) {
                ol.enable(OutputGenerator::RTF);
             }
@@ -941,6 +976,11 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             if (latexSourceCode) {
                ol.disable(OutputGenerator::Latex);
             }
+
+/*          if (! docbookSourceCode) {
+               ol.disable(OutputGenerator::Docbook);
+            }
+*/
 
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -982,7 +1022,7 @@ bool Definition::hasSources() const
           m_private->m_body_fileDef;
 }
 
-/*! Write code of this definition into the documentation */
+// Write code of this definition into the documentation
 void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
 {
    static const bool inlineSources = Config::getBool("inline-source");
@@ -1026,6 +1066,8 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
    static const bool refLinkSource   = Config::getBool("ref-link-source");
    static const bool latexSourceCode = Config::getBool("latex-source-code");
    static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
+// static const bool docbookSourceCode = Config::getBool("docbook-programlisting");
+
 
    ol.pushGeneratorState();
 
@@ -1075,14 +1117,17 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                // for HTML write a real link
 
                ol.pushGeneratorState();
-               //ol.disableAllBut(OutputGenerator::Html);
+               // ol.disableAllBut(OutputGenerator::Html);
 
-               ol.disable(OutputGenerator::RTF);
                ol.disable(OutputGenerator::Man);
 
                if (! latexSourceCode) {
                   ol.disable(OutputGenerator::Latex);
                }
+/*            if (! docbookSourceCode) {
+                 ol.disable(OutputGenerator::Docbook);
+               }
+*/
 
                if (! rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);
@@ -1102,6 +1147,11 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   ol.disable(OutputGenerator::Latex);
                }
 
+/*            if (docbookSourceCode) {
+                 ol.disable(OutputGenerator::Docbook);
+               }
+*/
+
                if (rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);
                }
@@ -1109,7 +1159,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                ol.docify(name);
                ol.popGeneratorState();
 
-            } else if (md->isLinkable() /*&& d && d->isLinkable()*/) {
+            } else if (md->isLinkable()) {
                // for HTML write a real link
                ol.pushGeneratorState();
 
@@ -1120,6 +1170,10 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   ol.disable(OutputGenerator::Latex);
                }
 
+/*            if (! docbookSourceCode) {
+                 ol.disable(OutputGenerator::Docbook);
+               }
+*/
                if (! rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);
                }
@@ -1134,6 +1188,11 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                if (latexSourceCode) {
                   ol.disable(OutputGenerator::Latex);
                }
+
+/*            if (docbookSourceCode) {
+                 ol.disable(OutputGenerator::Docbook);
+               }
+*/
 
                if (rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);
@@ -1163,6 +1222,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 {
    static const bool referencedByRelation = Config::getBool("ref-by-relation");
+   // emerald - remove the global test
 
    if (referencedByRelation) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_private->m_sourceRefByDict);
@@ -1172,6 +1232,7 @@ void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 void Definition::writeSourceRefs(OutputList &ol, const QString &scopeName)
 {
    static const bool referencesRelation = Config::getBool("ref-relation");
+   // emerald - remove the global test
 
    if (referencesRelation) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferences(), m_private->m_sourceRefsDict);
@@ -1181,7 +1242,6 @@ void Definition::writeSourceRefs(OutputList &ol, const QString &scopeName)
 bool Definition::hasDocumentation() const
 {
    static const bool extractAll = Config::getBool("extract-all");
-   // static bool sourceBrowser = Config::getBool("source-code");
 
    bool hasDocs = (! m_private->m_details.doc.isEmpty()    || ! m_private->m_brief.doc.isEmpty() ||
                    ! m_private->m_inbodyDocs.doc.isEmpty() || extractAll);
@@ -1215,9 +1275,6 @@ void Definition::addSourceReferencedBy(QSharedPointer<MemberDef> md)
 
 void Definition::addSourceReferences(QSharedPointer<MemberDef> md)
 {
-   QString name  = md->name();
-   QString scope = md->getScopeString();
-
    if (md) {
       QString name  = md->name();
       QString scope = md->getScopeString();
@@ -1399,7 +1456,7 @@ QString Definition::navigationPathAsString() const
       } else if (definitionType() == Definition::TypePage && ! pd->title().isEmpty() ) {
 
          result += "<a class=\"el\" href=\"$relpath^" + getOutputFileBase() + Doxy_Globals::htmlFileExtension + "\">" +
-                   convertToHtml(pd->title()) + "</a>";
+                  convertToHtml(pd->title()) + "</a>";
 
       } else if (definitionType() == Definition::TypeClass) {
          // class
@@ -1455,81 +1512,174 @@ void Definition::writeNavigationPath(OutputList &ol) const
 }
 
 // TODO: move to htmlgen
-void Definition::writeToc(OutputList &ol)
+void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
 {
    if (m_private->m_sectionList.isEmpty()) {
       return;
    }
 
-   ol.pushGeneratorState();
-   ol.disableAllBut(OutputGenerator::Html);
-   ol.writeString("<div class=\"toc\">");
-   ol.writeString("<h3>");
-   ol.writeString(theTranslator->trRTFTableOfContents());
-   ol.writeString("</h3>\n");
-   ol.writeString("<ul>");
+   if (localToc.isHtmlEnabled()) {
 
-   int level = 1;
-   QString cs;
+      ol.pushGeneratorState();
+      ol.disableAllBut(OutputGenerator::Html);
+      ol.writeString("<div class=\"toc\">");
+      ol.writeString("<h3>");
+      ol.writeString(theTranslator->trRTFTableOfContents());
+      ol.writeString("</h3>\n");
+      ol.writeString("<ul>");
 
-   bool inLi[5] = { false, false, false, false };
+      int maxLevel = localToc.htmlLevel();
+      int level    = 1;
+      bool inLi[5] = { false, false, false, false, false };
 
-   // by definition order
-   for (auto si : m_private->m_sectionList) {
+      QString cs;
 
-      if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection    ||
-            si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
+      // by definition order
+      for (auto si : m_private->m_sectionList) {
 
-         int nextLevel = si->type;
+         if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection    ||
+               si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
 
-         if (nextLevel > level) {
-            for (int l = level; l < nextLevel; l++) {
-               ol.writeString("<ul>");
-            }
+            int nextLevel = si->type;
 
-         } else if (nextLevel < level) {
-            for (int l = level; l > nextLevel; l--) {
-               if (inLi[l]) {
-                  ol.writeString("</li>\n");
+            if (nextLevel > level) {
+               for (int l = level; l < nextLevel; l++) {
+                  if (l < maxLevel) {
+                     ol.writeString("<ul>");
+                  }
                }
 
-               inLi[l] = false;
-               ol.writeString("</ul>\n");
+            } else if (nextLevel < level) {
+               for (int l = level; l > nextLevel; l--) {
+                  if (l <= maxLevel && inLi[l]) {
+                     ol.writeString("</li>\n");
+                  }
+
+                  inLi[l] = false;
+                  if (l <= maxLevel) {
+                     ol.writeString("</ul>\n");
+                  }
+               }
             }
+
+            cs = QString::number(nextLevel);
+
+            if (nextLevel <= maxLevel && inLi[nextLevel]) {
+               ol.writeString("</li>\n");
+            }
+
+            QString titleDoc = convertToHtml(si->title);
+            if (nextLevel <= maxLevel) {
+               ol.writeString("<li class=\"level" + cs + "\"><a href=\"#" + si->label + "\">" + (si->title.isEmpty() ? si->label : titleDoc) + "</a>");
+            }
+
+            inLi[nextLevel] = true;
+            level = nextLevel;
          }
+      }
 
-         cs = QString::number(nextLevel);
+      if (level > maxLevel) {
+         level = maxLevel;
+      }
 
-         if (inLi[nextLevel]) {
+      while (level > 1 && level <= maxLevel) {
+         if (inLi[level]) {
             ol.writeString("</li>\n");
          }
 
-         QString titleDoc = convertToHtml(si->title);
-         ol.writeString("<li class=\"level" + cs + "\"><a href=\"#" + si->label + "\">" + (si->title.isEmpty() ? si->label : titleDoc) + "</a>");
-
-         inLi[nextLevel] = true;
-         level = nextLevel;
+         inLi[level] = false;
+         ol.writeString("</ul>\n");
+         level--;
       }
-   }
 
-   while (level > 1) {
-      if (inLi[level]) {
+      if (level <= maxLevel && inLi[level])  {
          ol.writeString("</li>\n");
       }
 
       inLi[level] = false;
       ol.writeString("</ul>\n");
-      level--;
+      ol.writeString("</div>\n");
+      ol.popGeneratorState();
    }
 
-   if (inLi[level]) {
-      ol.writeString("</li>\n");
-   }
+   // emerald
+/*
+   if (localToc.isDocbookEnabled()) {
+      ol.pushGeneratorState();
+      ol.disableAllBut(OutputGenerator::Docbook);
 
-   inLi[level] = false;
-   ol.writeString("</ul>\n");
-   ol.writeString("</div>\n");
-   ol.popGeneratorState();
+      ol.writeString("    <toc>\n");
+      ol.writeString("    <title>" + theTranslator->trRTFTableOfContents() + "</title>\n");
+
+      int maxLevel = localToc.docbookLevel();
+      int level    = 1;
+      bool inLi[5] = { false, false, false, false, false };
+
+      for (auto si : m_private->m_sectionList) {
+         if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection    ||
+               si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
+
+            int nextLevel = si->type;
+
+            if (nextLevel > level) {
+               for (int l = level; l < nextLevel; l++) {
+
+                  if (l < maxLevel) {
+                     ol.writeString("    <tocdiv>\n");
+                  }
+               }
+
+            } else if (nextLevel < level) {
+               for (int l = level; l > nextLevel; l--) {
+                  inLi[l] = false;
+
+                  if (l <= maxLevel) {
+                    ol.writeString("    </tocdiv>\n");
+                  }
+               }
+            }
+
+            if (nextLevel <= maxLevel) {
+               QString titleDoc = convertToDocBook(si->title);
+               ol.writeString("      <tocentry>" + (si->title.isEmpty() ? si->label:titleDoc) + "</tocentry>\n");
+            }
+
+            inLi[nextLevel] = true;
+            level = nextLevel;
+         }
+      }
+
+      if (level > maxLevel) {
+         level = maxLevel;
+      }
+
+      while (level>1 && level <= maxLevel) {
+         inLi[level] = false;
+         ol.writeString("</tocdiv>\n");
+         --level;
+       }
+
+       inLi[level] = false;
+       ol.writeString("    </toc>\n");
+       ol.popGeneratorState();
+   }
+*/
+
+   if (localToc.isLatexEnabled()) {
+      ol.pushGeneratorState();
+      ol.disableAllBut(OutputGenerator::Latex);
+      int maxLevel = localToc.latexLevel();
+
+      ol.writeString("\\etocsetnexttocdepth{" + QString::number(maxLevel) + "}\n");
+
+      ol.writeString("\\localtableofcontents\n");
+      ol.popGeneratorState();
+   }
+}
+
+SectionDict &Definition::getSectionDict() const
+{
+  return m_private->m_sectionDict;
 }
 
 QString Definition::phraseName() const

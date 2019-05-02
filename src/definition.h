@@ -26,6 +26,7 @@
 
 #include <doxy_shared.h>
 #include <sortedlist.h>
+#include <stringmap.h>
 #include <types.h>
 
 class Definition_Private;
@@ -38,33 +39,38 @@ class OutputList;
 struct ListItemInfo;
 struct SectionInfo;
 
-/** Data associated with a detailed description. */
+// Data associated with a detailed description
 struct DocInfo {
-   QString doc;
-   int line;
-   QString file;
 
    DocInfo() : line(1) {};
-};
 
-/** Data associated with a brief description. */
-struct BriefInfo {
-   QString doc;
-   QString tooltip;
    int line;
+   QString doc;
    QString file;
 
-   BriefInfo() : line(1) {};
+
 };
 
-/** Abstract interface for a Definition or DefinitionList */
+// Data associated with a brief description
+struct BriefInfo {
+
+   BriefInfo() : line(1) {};
+
+   int line;
+   QString doc;
+   QString tooltip;
+   QString file;
+
+};
+
+// Abstract interface for a Definition or DefinitionList
 class DefinitionIntf : public EnableSharedFromThis
 {
  public:
    DefinitionIntf() { }
    virtual ~DefinitionIntf() { }
 
-   /*! Types of derived classes */
+   // Types of derived classes
    enum DefType {
       TypeClass      = 0,
       TypeFile       = 1,
@@ -77,7 +83,7 @@ class DefinitionIntf : public EnableSharedFromThis
       TypeSymbolList = 8
    };
 
-   /*! Use this for dynamic inspection of the type of the derived class */
+   // Use this for dynamic inspection of the type of the derived class
    virtual DefType definitionType() const = 0;
 };
 
@@ -95,28 +101,26 @@ class Definition : public DefinitionIntf
 
    virtual ~Definition();
 
-   /*! Returns the name of the definition */
+   // Returns the name of the definition
    const QString &name() const {
       return m_name;
    }
 
-   /*! Returns the name of the definition as it appears in the output */
+   // Returns the name of the definition as it appears in the output
    virtual QString displayName(bool includeScope = true) const = 0;
 
-   /*! Returns the local name without any scope qualifiers. */
+   // Returns the local name without any scope qualifiers
    QString localName() const;
 
-   /*! Returns the fully qualified name of this definition
-    */
+   // Returns the fully qualified name of this definition
    virtual QString qualifiedName() const;
 
-   /*! Returns the name of this definition as it appears in the glossary map
-    */
+   // Returns the name of this definition as it appears in the glossary map
    QString phraseName() const;
 
-   /*! Returns the base file name (without extension) of this definition.
-    *  as it is referenced to/written to disk.
-    */
+   // Returns the base file name (without extension) of this definition,
+   // as it is referenced to/written to disk.
+
    virtual QString getOutputFileBase() const = 0;
 
    /*! Returns the anchor within a page where this item can be found */
@@ -134,23 +138,23 @@ class Definition : public DefinitionIntf
    /*! Returns the line number at which the detailed documentation was found. */
    int docLine() const;
 
-   /*! Returns the file in which the detailed documentation block was found.
-    *  This can differ from getDefFileName().
-    */
+   // Returns the file in which the detailed documentation block was found.
+   //  This can differ from getDefFileName().
+
    QString docFile() const;
 
    /*! Returns the brief description of this definition. This can include commands. */
    virtual QString briefDescription(bool abbreviate = false) const;
 
-   /*! Returns a plain text version of the brief description suitable for use
-    *  as a tool tip.
-    */
+   // Returns a plain text version of the brief description suitable for use
+   //  as a tool tip.
+
    QString briefDescriptionAsTooltip()  const;
 
-   /*! Returns the line number at which the brief description was found. */
+   // Returns the line number at which the brief description was found.
    int briefLine() const;
 
-   /*! Returns the documentation found inside the body of a member */
+   // Returns the documentation found inside the body of a member
    QString inbodyDocumentation() const;
 
    /*! Returns the file in which the in body documentation was found */
@@ -181,18 +185,13 @@ class Definition : public DefinitionIntf
       return m_defColumn;
    }
 
-   /*! Returns true if the definition is documented
-    *  (which could be generated documentation)
-    *  @see hasUserDocumentation()
-    */
+   // Returns true if the definition is documented  (which could be generated documentation)
    virtual bool hasDocumentation() const;
 
-   /*! Returns true iff the definition is documented by the user. */
+   // Returns true iff the definition is documented by the user.
    virtual bool hasUserDocumentation() const;
 
-   /*! Returns true iff it is possible to link to this item within this
-    *  project.
-    */
+   // Returns true iff it is possible to link to this item within this   project.
    virtual bool isLinkableInProject() const = 0;
 
    /*! Returns true iff it is possible to link to this item. This can
@@ -225,9 +224,10 @@ class Definition : public DefinitionIntf
    /*! Returns true if this definition is imported via a tag file. */
    virtual bool isReference() const;
 
-   /*! Returns the first line of the body of this item (applicable to classes and
-    *  functions).
-    */
+   // Convenience method to return a resolved external link
+   QString externalReference(const QString &relPath) const;
+   // Returns the first line of the body of this item (applicable to classes and  functions).
+
    int getStartBodyLine() const;
 
    /*! Returns the last line of the body of this item (applicable to classes and
@@ -252,6 +252,9 @@ class Definition : public DefinitionIntf
    const MemberSDict &getReferencesMembers() const;
    const MemberSDict &getReferencedByMembers() const;
 
+   // returns the section dictionary, only of importance for pagedef
+   SectionDict &getSectionDict() const;
+
    bool hasSections() const;
    bool hasSources() const;
 
@@ -268,46 +271,48 @@ class Definition : public DefinitionIntf
       return m_sortId;
    }
 
-   /*! Sets a new \a name for the definition */
+   // Sets a new name for the definition
    virtual void setName(const QString &name);
 
-   /*! Sets a unique id for the definition. Used for libclang integration. */
+   // Sets a unique id for the definition. Used for libclang integration.
    void setId(const QString &name);
 
-   /*! Sets the documentation of this definition to \a d. */
+   // Set a new file name and position
+   void setDefFile(const QString & defFile, int defLine, int defColumn);
+
+   // Sets the documentation of this definition to \a d.
    virtual void setDocumentation(const QString &d, const QString &docFile, int docLine,
                   bool stripWhiteSpace = true, bool atTop = false);
 
-   /*! Sets the brief description of this definition to \a b.
-    *  A dot is added to the sentence if not available.
-    */
+   // Sets the brief description of this definition to \a b.
+   // A dot is added to the sentence if not available.
    virtual void setBriefDescription(const QString &b, const QString &briefFile, int briefLine);
 
-   /*! Set the documentation that was found inside the body of an item.
-    *  If there was already some documentation set, the new documentation
-    *  will be appended.
-    */
+   // Set the documentation that was found inside the body of an item.
+   // If there was already some documentation set, the new documentation will be appended.
    virtual void setInbodyDocumentation(const QString &d, const QString &docFile, int docLine);
 
-   /*! Sets the tag file id via which this definition was imported. */
+   // Sets the tag file id via which this definition was imported.
    void setReference(const QString &r);
 
-   /*! Add the list of anchors that mark the sections that are found in the documentation.
-    */
+   // Add the list of anchors that mark the sections that are found in the documentation.
    void addSectionsToDefinition(const QVector<SectionInfo> &anchorList);
+   void addSourceReferencedBy(QSharedPointer<MemberDef>d);
+   void addSourceReferences(QSharedPointer<MemberDef>d);
+
+   void addSectionsToIndex(bool addToNavIndex);
+   virtual void addInnerCompound(QSharedPointer<Definition> d) {};
+
+   void mergeRefItems(QSharedPointer<Definition> d);
+
+   const QVector<ListItemInfo> &getRefItems() const;
+   QVector<ListItemInfo> &getRefItems();
 
    // source references
    void setBodySegment(int bls, int ble);
    void setBodyDef(QSharedPointer<FileDef> fd);
-   void addSourceReferencedBy(QSharedPointer<MemberDef>d);
-   void addSourceReferences(QSharedPointer<MemberDef>d);
-
    void setRefItems(const QVector<ListItemInfo> &list);
-   void mergeRefItems(QSharedPointer<Definition> d);
-   const QVector<ListItemInfo> &getRefItems() const;
-   QVector<ListItemInfo> &getRefItems();
 
-   virtual void addInnerCompound(QSharedPointer<Definition> d) {};
    virtual void setOuterScope(QSharedPointer<Definition> d);
    virtual void setHidden(bool b);
 
@@ -322,36 +327,26 @@ class Definition : public DefinitionIntf
       m_sortId = id;
    }
 
+   // broom - should this move to util.cpp ?
    QString convertNameToFile(const QString &name, bool allowDots = false) const;
+
+   QString navigationPathAsString() const;
+   QString pathFragment() const;
+   void setLocalName(const QString &name);
+
+   void makePartOfGroup(QSharedPointer<GroupDef> gd);
 
    void writeSourceDef(OutputList &ol, const QString &scopeName);
    void writeInlineCode(OutputList &ol, const QString &scopeName);
    void writeSourceRefs(OutputList &ol, const QString &scopeName);
    void writeSourceReffedBy(OutputList &ol, const QString &scopeName);
-   void makePartOfGroup(QSharedPointer<GroupDef> gd);
-
    void writeNavigationPath(OutputList &ol) const;
-   QString navigationPathAsString() const;
+   void writeDocAnchorsToTagFile(QTextStream &) const;
+   void writeToc(OutputList &ol, const LocalToc &localToc) const;
 
-   virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const
-   {}
+   virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const {}
+   virtual void writeSummaryLinks(OutputList &) {}
 
-   virtual void writeSummaryLinks(OutputList &)
-   {}
-
-   QString pathFragment() const;
-
-   /*! Writes the documentation anchors of the definition to yhe Doxy_Globals::tagFile stream.
-    */
-   void writeDocAnchorsToTagFile(QTextStream &);
-   void setLocalName(const QString &name);
-
-   void addSectionsToIndex(bool addToNavIndex);
-   void writeToc(OutputList &ol);
-
-   virtual QString getHint() {
-      return QString("");
-   }
 
  protected:
    Definition(const Definition &d);
