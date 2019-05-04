@@ -302,7 +302,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>( cfi.path(), cfi.fileName());
 
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(), 
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), inc->text(),
                   langExt, inc->isExample(), inc->exampleFile(), fd,
                   -1, -1, false, QSharedPointer<MemberDef>(), true);
 
@@ -385,7 +385,7 @@ void ManDocVisitor::visit(DocInclude *inc)
 
 void ManDocVisitor::visit(DocIncOperator *op)
 {
-   SrcLangExt langExt = getLanguageFromFileName(m_langExt);   
+   SrcLangExt langExt = getLanguageFromFileName(m_langExt);
 
    if (op->isFirst()) {
       if (!m_hide) {
@@ -518,7 +518,7 @@ void ManDocVisitor::visitPost(DocPara *p)
       return;
    }
 
-   if (! p->isLast() &&            // omit <p> for last paragraph
+   if (! p->isLast() &&             // omit <p> for last paragraph
          !(p->parent() &&           // and for parameter sections
            p->parent()->kind() == DocNode::Kind_ParamSect
           )
@@ -1111,10 +1111,10 @@ void ManDocVisitor::visitPre(DocParamList *pl)
    }
 
    m_t << "\\fI";
-   
+
    bool first = true;
 
-   for (auto param : pl->parameters()) {   
+   for (auto param : pl->parameters()) {
       if (!first) {
          m_t << ",";
 
@@ -1261,8 +1261,8 @@ void ManDocVisitor::filter(const QString &str)
 {
    if (! str.isEmpty()) {
 
-     for (auto c : str) {  
-  
+     for (auto c : str) {
+
          switch (c.unicode()) {
             case '.':
                m_t << "\\&.";
@@ -1291,6 +1291,6 @@ void ManDocVisitor::pushEnabled()
 void ManDocVisitor::popEnabled()
 {
    bool v = m_enabled.pop();
-   m_hide = v;  
+   m_hide = v;
 }
 

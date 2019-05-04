@@ -23,7 +23,6 @@
 #include <string.h>
 
 #include <mangen.h>
-
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
@@ -198,7 +197,7 @@ void ManGenerator::endTitleHead(const QString &, const QString &name)
 
 void ManGenerator::newParagraph()
 {
-   if (!paragraph) {
+   if (! paragraph) {
       if (! firstCol) {
          m_textStream << endl;
       }
@@ -213,7 +212,7 @@ void ManGenerator::newParagraph()
 void ManGenerator::startParagraph(const QString &className)
 {
    if (! paragraph) {
-      if (!firstCol) {
+      if (! firstCol) {
          m_textStream << endl;
       }
 
@@ -279,29 +278,30 @@ void ManGenerator::startGroupHeader(int)
 
    m_textStream << ".SH \"";
    upperCase = true;
-   firstCol = false;
+   firstCol  = false;
 }
 
 void ManGenerator::endGroupHeader(int)
 {
    m_textStream << "\"\n.PP " << endl;
-   firstCol = true;
+   firstCol  = true;
    paragraph = true;
    upperCase = false;
 }
 
 void ManGenerator::startMemberHeader(const QString &)
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".SS \"";
 }
 
 void ManGenerator::endMemberHeader()
 {
    m_textStream << "\"\n";
-   firstCol = true;
+   firstCol  = true;
    paragraph = false;
 }
 
@@ -398,11 +398,13 @@ void ManGenerator::codify(const QString &str)
 void ManGenerator::writeChar(char c)
 {
    firstCol = (c == '\n');
+
    if (firstCol) {
       col = 0;
    } else {
       col++;
    }
+
    switch (c) {
       case '\\':
          m_textStream << "\\\\";
@@ -419,9 +421,9 @@ void ManGenerator::writeChar(char c)
 
 void ManGenerator::startDescList(SectionTypes)
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl << ".PP" << endl;
-      firstCol = true;
+      firstCol  = true;
       paragraph = true;
       col = 0;
    }
@@ -432,11 +434,12 @@ void ManGenerator::startDescList(SectionTypes)
 
 void ManGenerator::startTitle()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".SH \"";
-   firstCol = false;
+   firstCol  = false;
    paragraph = false;
 }
 
@@ -447,11 +450,12 @@ void ManGenerator::endTitle()
 
 void ManGenerator::startItemListItem()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".TP" << endl;
-   firstCol = true;
+   firstCol  = true;
    paragraph = false;
    col = 0;
 }
@@ -464,7 +468,7 @@ void ManGenerator::startCodeFragment()
 {
    newParagraph();
    m_textStream << ".nf" << endl;
-   firstCol = true;
+   firstCol  = true;
    paragraph = false;
 }
 
@@ -481,9 +485,10 @@ void ManGenerator::endCodeFragment()
 
 void ManGenerator::startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool)
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".SS \"";
    firstCol  = false;
    paragraph = false;
@@ -491,13 +496,12 @@ void ManGenerator::startMemberDoc(const QString &, const QString &, const QStrin
 
 void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, const QString &, const QString &name, const QString &)
 {
-   // something to be done?
    if ( ! Config::getBool("man-links") ) {
       return;
    }
 
-   // the name of the link file is derived from the name of the anchor:
-   // - truncate after an (optional) ::
+   // name of the link file is derived from the name of the anchor
+   // truncate after an (optional) ::
 
    QString baseName = name;
    int i = baseName.lastIndexOf("::");
@@ -506,7 +510,7 @@ void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, cons
       baseName = baseName.right(baseName.length() - i - 2);
    }
 
-   // - remove dangerous characters and append suffix, then add dir prefix
+   // remove dangerous characters and append suffix, then add dir prefix
    QString fname = m_dir + "/" + buildFileName(baseName);
    QFile linkfile(fname);
 
@@ -519,6 +523,7 @@ void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, cons
          linkstream << ".so " << getSubdir() << "/" << buildFileName(manName) << endl;
       }
    }
+
    linkfile.close();
 }
 
@@ -532,6 +537,7 @@ void ManGenerator::startSubsection()
    if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".SS \"";
    firstCol = false;
    paragraph = false;
@@ -542,12 +548,12 @@ void ManGenerator::endSubsection()
    m_textStream << "\"";
 }
 
-
 void ManGenerator::startSubsubsection()
 {
    if (!firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << "\n.SS \"";
    firstCol = false;
    paragraph = false;
@@ -560,19 +566,21 @@ void ManGenerator::endSubsubsection()
 
 void ManGenerator::writeSynopsis()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".SH SYNOPSIS\n.br\n.PP\n";
-   firstCol = true;
+   firstCol  = true;
    paragraph = false;
 }
 
 void ManGenerator::startDescItem()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".IP \"";
    firstCol = false;
 }
@@ -585,12 +593,14 @@ void ManGenerator::startDescItem()
 
 void ManGenerator::startDescForItem()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
-   if (!paragraph) {
+
+   if (! paragraph) {
       m_textStream << ".in -1c" << endl;
    }
+
    m_textStream << ".in +1c" << endl;
    firstCol = true;
    paragraph = false;
@@ -684,23 +694,28 @@ void ManGenerator::endMemberGroup(bool)
 
 void ManGenerator::startSection(const QString &, const QString &, SectionInfo::SectionType type)
 {
-   if ( !inHeader ) {
+   if (! inHeader) {
       switch (type) {
          case SectionInfo::Page:
             startGroupHeader(false);
             break;
+
          case SectionInfo::Section:
             startGroupHeader(false);
             break;
+
          case SectionInfo::Subsection:
             startMemberHeader(0);
             break;
+
          case SectionInfo::Subsubsection:
             startMemberHeader(0);
             break;
+
          case SectionInfo::Paragraph:
             startMemberHeader(0);
             break;
+
          default:
             assert(0);
             break;
@@ -734,9 +749,9 @@ void ManGenerator::endSection(const QString &, SectionInfo::SectionType type)
 
    } else {
       m_textStream << "\n";
-      firstCol = true;
+      firstCol  = true;
       paragraph = false;
-      inHeader = false;
+      inHeader  = false;
    }
 }
 
@@ -744,7 +759,7 @@ void ManGenerator::startSimpleSect(SectionTypes, const QString &, const QString 
 {
    if (! firstCol) {
       m_textStream << endl << ".PP" << endl;
-      firstCol = true;
+      firstCol  = true;
       paragraph = true;
       col = 0;
    }
@@ -768,6 +783,7 @@ void ManGenerator::startParamList(ParamListTypes, const QString &title)
       paragraph = true;
       col = 0;
    }
+
    paragraph = false;
    startBold();
    docify(title);
@@ -784,18 +800,20 @@ void ManGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedP
    ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString(""));
    n->accept(visitor);
    delete visitor;
-   firstCol = false;
+
+   firstCol  = false;
    paragraph = false;
 }
 
 void ManGenerator::startConstraintList(const QString &header)
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl << ".PP" << endl;
       firstCol = true;
       paragraph = true;
       col = 0;
    }
+
    paragraph = false;
    startBold();
    docify(header);
@@ -839,7 +857,6 @@ void ManGenerator::endConstraintDocs()
 void ManGenerator::endConstraintList()
 {
 }
-
 
 void ManGenerator::startInlineHeader()
 {
@@ -909,7 +926,7 @@ void ManGenerator::startInlineMemberDoc()
 
 void ManGenerator::endInlineMemberDoc()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
    m_textStream << ".br" << endl;
@@ -924,7 +941,7 @@ void ManGenerator::startLabels()
 void ManGenerator::writeLabel(const QString &l, bool isLast)
 {
    m_textStream << "\\fC [" << l << "]\\fP";
-   if (!isLast) {
+   if (! isLast) {
       m_textStream << ", ";
    }
 }

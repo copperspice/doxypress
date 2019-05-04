@@ -313,6 +313,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          }
       }
       break;
+
       case SrcLangExt_IDL:
          lang = "idl";
          break;
@@ -323,7 +324,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
       case SrcLangExt_PHP:
          lang = "php";
-         break;        // PHP4/5
+         break;        // PHP 4/5
 
       case SrcLangExt_D:
          lang = "d";
@@ -370,6 +371,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
       if (context == nullptr) {
          if (md->getGroupDef()) {
             context = md->getGroupDef();
+
          } else if (md->getFileDef()) {
             context = md->getFileDef();
          }
@@ -478,11 +480,10 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          declMd = md;
       }
 
-      {
-         fd = md->getFileDef();
-         if (fd) {
-            decl = fd->name();
-         }
+
+      fd = md->getFileDef();
+      if (fd) {
+         decl = fd->name();
       }
 
       writeToken(m_tts, md, type, lang, scope, md->anchor(), decl);
@@ -539,6 +540,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
       if (! m_scopes.contains(context->getOutputFileBase())) {
          writeToken(m_tts, context, type, lang, scope, "", decl);
          m_scopes.insert(context->getOutputFileBase());
+
       }
    }
 }

@@ -119,6 +119,7 @@ bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPoin
       return true;   // no output formats enabled
    }
 
+
    DocRoot *root = nullptr;
    root = validatingParseDoc(fileName, startLine, ctx, md, docStr, indexWords, isExample,
                   exampleName, singleLine, linkFromIndex);
@@ -134,7 +135,6 @@ bool OutputList::generateDoc(const QString &fileName, int startLine, QSharedPoin
 void OutputList::writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
    for (auto item : m_outputs) {
-
       if (item->isEnabled()) {
          item->writeDoc(root, ctx, md);
       }

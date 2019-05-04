@@ -1610,8 +1610,6 @@ void HtmlDocVisitor::visitPost(DocHtmlHeader *header)
 void HtmlDocVisitor::visitPre(DocImage *img)
 {
    if (img->type() == DocImage::Html) {
-      // CopperSpice: do not force    04/19/2015
-      // forceEndParagraph(img);
 
       if (m_hide) {
          return;
@@ -1670,7 +1668,7 @@ void HtmlDocVisitor::visitPre(DocImage *img)
       }
 
    } else {
-      // other format -> skip
+      // some other format -> skip
       pushEnabled();
       m_hide = true;
    }
@@ -1689,10 +1687,9 @@ void HtmlDocVisitor::visitPost(DocImage *img)
 
       m_t << "</div>" << endl;
 
-      // CopperSpice: do not force    04/19/2015
-      // forceStartParagraph(img);
 
-   } else { // other format
+   } else {
+      // other format
       popEnabled();
    }
 }

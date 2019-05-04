@@ -117,10 +117,12 @@ class IndexList : public IndexIntf
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md,
                   const QString &sectionAnchor = QString(), const QString &title = QString()) override {
+
       if (m_enabled) {
          for (auto item : m_intfs) {
             item->addIndexItem(context, md, sectionAnchor, title);
          }
+
       }
    }
 

@@ -122,7 +122,7 @@ class XmlDocVisitor : public DocVisitor
    void visitPost(DocSecRefList *) override;
 
    //void visitPre(DocLanguage *);
-   //void visitPost(DocLanguage *); 
+   //void visitPost(DocLanguage *);
 
    void visitPre(DocParamSect *) override;
    void visitPost(DocParamSect *) override;
@@ -137,7 +137,7 @@ class XmlDocVisitor : public DocVisitor
    void visitPre(DocText *) override;
    void visitPost(DocText *) override;
    void visitPre(DocHtmlBlockQuote *) override;
-   void visitPost(DocHtmlBlockQuote *) override; 
+   void visitPost(DocHtmlBlockQuote *) override;
    void visitPre(DocParBlock *) override;
    void visitPost(DocParBlock *) override;
 
@@ -148,7 +148,7 @@ class XmlDocVisitor : public DocVisitor
 
    void pushEnabled();
    void popEnabled();
-  
+
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
 

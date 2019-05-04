@@ -108,20 +108,7 @@ bool Htags::execute(const QString &htmldir)
 bool Htags::loadFilemap(const QString &htmlDir)
 {
    QString fileMapName = htmlDir + "/HTML/FILEMAP";
-
    QFileInfo fi(fileMapName);
-
-   /*
-    * Construct FILEMAP dictionary using QHash.
-    *
-    * In FILEMAP, URL includes 'html' suffix but we cut it off according
-    * to the method of FileDef class.
-    *
-    * FILEMAP format:
-    * <NAME>\t<HREF>.html\n
-    * QDICT:
-    * dict[<NAME>] = <HREF>
-    */
 
    if (fi.exists() && fi.isReadable()) {
       QFile f(fileMapName);
@@ -131,7 +118,6 @@ bool Htags::loadFilemap(const QString &htmlDir)
       if (f.open(QIODevice::ReadOnly)) {
 
          while (! (line = f.readLine()).isEmpty()) {
-
             int sep = line.indexOf('\t');
 
             if (sep != -1) {

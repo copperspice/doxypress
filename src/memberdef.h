@@ -245,10 +245,13 @@ class MemberDef : public Definition
    void setTemplateParameterLists(const QVector<ArgumentList> &lists);
 
    const ArgumentList &getArgumentList() const;
-         ArgumentList &getArgumentList();
+   ArgumentList &getArgumentList();
+
    const ArgumentList &getDeclArgumentList() const;
+
    const ArgumentList &getTemplateArgumentList() const;
-         ArgumentList &getTemplateArgumentList();
+   ArgumentList &getTemplateArgumentList();
+
    const ArgumentList &getTypeConstraints() const;
 
    const QVector<ArgumentList> &getTemplateParameterLists() const;
@@ -400,6 +403,7 @@ class MemberDef : public Definition
    void setInbodyDocumentation(const QString &d, const QString &inbodyFile, int inbodyLine) override;
 
    void setHidden(bool b) override;
+   void findSectionsInDocumentation();
 
    // output generation
    void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
@@ -417,12 +421,11 @@ class MemberDef : public Definition
                   QSharedPointer<NamespaceDef> nd, QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd);
 
    void writeTagFile(QTextStream &);
+
    void warnIfUndocumented();
    void warnIfUndocumentedParams();
 
    QSharedPointer<MemberDef> createTemplateInstanceMember(const ArgumentList &formalArgs, const ArgumentList &actualArgs);
-
-   void findSectionsInDocumentation();
 
    bool visited;
 

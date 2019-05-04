@@ -249,9 +249,9 @@ class Entry : public EnableSharedFromThis
 
    // group types for docs
    enum GroupDocType {
-      GROUPDOC_NORMAL,        // def group
-      GROUPDOC_ADD,           // add group
-      GROUPDOC_WEAK           // weak group
+      GROUPDOC_NORMAL,        // defgroup
+      GROUPDOC_ADD,           // addtogroup
+      GROUPDOC_WEAK           // weakgroup
    };
 
    class Traits {

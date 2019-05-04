@@ -620,7 +620,7 @@ class MemberDefImpl
    QString explicitOutputFileBase;
 
    // objective-c
-   bool implOnly; // function found in implementation but not in the interface
+   bool implOnly;            // function found in implementation but not in the interface
    bool hasDocumentedParams;
    bool hasDocumentedReturnType;
    bool isDMember;

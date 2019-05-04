@@ -60,17 +60,18 @@ enum SrcLangExt {
    SrcLangExt_Docs     = 0x40000,
 };
 
-/** The various compound types */
-enum class CompoundType { Class,     // Entry::CLASS_SEC,
-                          Struct,    // Entry::STRUCT_SEC,
-                          Union,     // Entry::UNION_SEC,
-                          Interface, // Entry::INTERFACE_SEC,
-                          Protocol,  // Entry::PROTOCOL_SEC,
-                          Category,  // Entry::CATEGORY_SEC,
-                          Exception, // Entry::EXCEPTION_SEC
-                          Service,   // Entry::CLASS_SEC
-                          Singleton, // Entry::CLASS_SEC
-                  };
+// various compound types
+enum class CompoundType {
+   Class,     // Entry::CLASS_SEC,
+   Struct,    // Entry::STRUCT_SEC,
+   Union,     // Entry::UNION_SEC,
+   Interface, // Entry::INTERFACE_SEC,
+   Protocol,  // Entry::PROTOCOL_SEC,
+   Category,  // Entry::CATEGORY_SEC,
+   Exception, // Entry::EXCEPTION_SEC
+   Service,   // Entry::CLASS_SEC
+   Singleton, // Entry::CLASS_SEC
+};
 
 /** Grouping info */
 struct Grouping {
@@ -78,11 +79,11 @@ struct Grouping {
    /** Grouping priority */
    enum GroupPri_t {
       GROUPING_LOWEST,
-      GROUPING_AUTO_WEAK = GROUPING_LOWEST,     //!< membership in group was defined via \@weakgroup
-      GROUPING_AUTO_ADD,     //!< membership in group was defined via \@add[to]group
-      GROUPING_AUTO_DEF,     //!< membership in group was defined via \@defgroup
+      GROUPING_AUTO_WEAK = GROUPING_LOWEST,       // membership in group was defined via \@weakgroup
+      GROUPING_AUTO_ADD,                          // membership in group was defined via \@add[to]group
+      GROUPING_AUTO_DEF,                          // membership in group was defined via \@defgroup
       GROUPING_AUTO_HIGHEST = GROUPING_AUTO_DEF,
-      GROUPING_INGROUP,      //!< membership in group was defined by \@ingroup
+      GROUPING_INGROUP,                           // membership in group was defined by \@ingroup
       GROUPING_HIGHEST = GROUPING_INGROUP
    };
 
@@ -219,7 +220,7 @@ enum MemberListType {
    MemberListType_enumFields              = 80,
    MemberListType_memberGroup             = 81,
 
-   // this one is for the detailed section on the class page
+   // or the detailed section on the class page
    MemberListType_interfaceMembers        = 82 + MemberListType_detailedLists,
    MemberListType_serviceMembers          = 83 + MemberListType_detailedLists,
 };

@@ -27,11 +27,11 @@
 
 OutputGenerator::OutputGenerator()
 {
-   active = true;   
+   active = true;
 }
 
 OutputGenerator::~OutputGenerator()
-{ 
+{
 }
 
 void OutputGenerator::startPlainFile(const QString &name)
@@ -39,7 +39,7 @@ void OutputGenerator::startPlainFile(const QString &name)
    m_fileName = m_dir + "/" + name;
    m_file.setFileName(m_fileName);
 
-   if (! m_file.open(QIODevice::WriteOnly)) {   
+   if (! m_file.open(QIODevice::WriteOnly)) {
       err("Unable to open file for writing %s, error: %d\n", csPrintable(m_fileName), m_file.error());
       Doxy_Work::stopDoxyPress();
    }
@@ -59,19 +59,19 @@ void OutputGenerator::endPlainFile()
 
 void OutputGenerator::pushGeneratorState()
 {
-   genStack.push( isEnabled() );   
+   genStack.push( isEnabled() );
 }
 
 void OutputGenerator::popGeneratorState()
-{   
-   bool lb = genStack.pop();    
- 
+{
+   bool lb = genStack.pop();
+
    if (lb) {
       enable();
 
    } else {
       disable();
 
-   }  
+   }
 }
 
