@@ -223,7 +223,7 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
          break;
 
       default:
-         err("NamespaceDef::insertMembers(): member %s with class scope %s inserted in namespace scope `%s'\n",
+         err("NamespaceDef::insertMembers(): Member %s with class scope %s inserted in namespace scope `%s'\n",
              csPrintable(md->name()), md->getClassDef() ? csPrintable(md->getClassDef()->name()) : "", csPrintable(name()) );
    }
 }

@@ -86,7 +86,7 @@ void ManGenerator::init()
    QDir d(manOutput);
 
    if (! d.exists() && ! QDir::current().mkpath(manOutput)) {
-      err("Unable to create output directory %s\n", csPrintable(manOutput));
+      err("Unable to create Man output directory %s\n", csPrintable(manOutput));
       Doxy_Work::stopDoxyPress();
    }
 

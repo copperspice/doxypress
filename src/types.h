@@ -101,7 +101,7 @@ struct Grouping {
          case GROUPING_INGROUP:
             return QString("@ingroup");
       }
-      return QString("???");
+      return QString("Unknown Group Command");
    }
 
    Grouping( const QString &gn, GroupPri_t p ) : groupname(gn), pri(p) {}
