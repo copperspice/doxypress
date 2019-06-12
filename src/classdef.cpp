@@ -983,7 +983,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
       }
 
    } else if (classDiagrams && count > 0) {
-      // write class diagram using built-in generator
+      // write class diagram using built in generator
 
       ClassDiagram diagram(self); // create a diagram of this class
       ol.startClassDiagram();

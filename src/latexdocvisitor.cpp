@@ -558,6 +558,7 @@ void LatexDocVisitor::visit(DocIncOperator *op)
       pushEnabled();
       m_hide = true;
    }
+
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
@@ -568,13 +569,15 @@ void LatexDocVisitor::visit(DocIncOperator *op)
       pushEnabled();
       m_hide = true;
    }
+
    if (op->isLast()) {
       popEnabled();
       if (!m_hide) {
          m_t << "\n\\end{DoxyCodeInclude}\n";
       }
+
    } else {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << endl;
       }
    }

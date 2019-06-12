@@ -2091,6 +2091,7 @@ class DocHtmlDescData : public CompAccept<DocHtmlDescData>, public DocNode
    explicit DocHtmlDescData(DocNode *parent) {
       m_parent = parent;
    }
+
    Kind kind() const override {
       return Kind_HtmlDescData;
    }

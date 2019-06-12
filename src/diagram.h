@@ -25,7 +25,7 @@
 class ClassDef;
 class TreeDiagram;
 
-/** Class representing a built-in class diagram. */
+// Class representing a built in class diagram
 class ClassDiagram
 {
  public:

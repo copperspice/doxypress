@@ -821,7 +821,7 @@ int yydebug;
 #endif
 
 /* YYMAXDEPTH -- maximum size the stacks can grow to (effective only
-   if the built-in stack extension method is used).
+   if the built in stack extension method is used).
 
    Do not make this value too large; the results are undefined if
    YYSTACK_ALLOC_MAXIMUM < YYSTACK_BYTES (YYMAXDEPTH)
@@ -1382,7 +1382,7 @@ yyreduce:
       case 8:
 
          {
-            (yyval) = CPPValue( (long)((long)(yyvsp[(1) - (3)]) && (long)(yyvsp[(3) - (3)])) );            
+            (yyval) = CPPValue( (long)((long)(yyvsp[(1) - (3)]) && (long)(yyvsp[(3) - (3)])) );
          }
          break;
 
@@ -1396,7 +1396,7 @@ yyreduce:
       case 10:
 
          {
-            (yyval) = CPPValue( (long)(yyvsp[(1) - (3)]) | (long)(yyvsp[(3) - (3)]) ); 
+            (yyval) = CPPValue( (long)(yyvsp[(1) - (3)]) | (long)(yyvsp[(3) - (3)]) );
          }
          break;
 
@@ -1432,7 +1432,7 @@ yyreduce:
       case 15:
 
          {
-            (yyval) = (yyvsp[(1) - (1)]); 
+            (yyval) = (yyvsp[(1) - (1)]);
          }
          break;
 
@@ -1474,7 +1474,7 @@ yyreduce:
       case 21:
 
          {
-            (yyval) = CPPValue( (long)((double)(yyvsp[(1) - (3)]) <= (double)(yyvsp[(3) - (3)])) );          
+            (yyval) = CPPValue( (long)((double)(yyvsp[(1) - (3)]) <= (double)(yyvsp[(3) - (3)])) );
          }
          break;
 
@@ -1510,7 +1510,7 @@ yyreduce:
       case 26:
 
          {
-            (yyval) = (yyvsp[(1) - (1)]); 
+            (yyval) = (yyvsp[(1) - (1)]);
          }
          break;
 
@@ -1541,7 +1541,7 @@ yyreduce:
       case 29:
 
          {
-            (yyval) = (yyvsp[(1) - (1)]); 
+            (yyval) = (yyvsp[(1) - (1)]);
          }
          break;
 
@@ -1552,7 +1552,7 @@ yyreduce:
                (yyval) = CPPValue( (double)(yyvsp[(1) - (3)]) * (double)(yyvsp[(3) - (3)]) );
             } else {
                (yyval) = CPPValue( (long)(yyvsp[(1) - (3)]) * (long)(yyvsp[(3) - (3)]) );
-            }            
+            }
          }
          break;
 

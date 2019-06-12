@@ -2057,7 +2057,6 @@ enum CompoundType Doxy_Work::convertToCompoundType(int section, Entry::Traits da
 void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
 {
    QSharedPointer<Entry> root = ptrEntry;
-
    QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
    QString scName;

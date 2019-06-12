@@ -26,19 +26,20 @@
 
 class Definition;
 
-/** This struct represents an item in the list of references. */
+// struct represents an item in the list of references.
 struct RefItem {
-   RefItem() : scope(0) 
+   RefItem() : scope(0)
    {}
 
    QString text;           //!< text of the item.
    QString listAnchor;     //!< anchor in the list
-   QString prefix;         //!< type prefix for the name  
+   QString prefix;         //!< type prefix for the name
    QString name;           //!< name of the entity containing the reference
    QString title;          //!< display name of the entity
    QString args;           //!< optional arguments for the entity (if function)
 
-   QSharedPointer<Definition> scope;         //!< scope to use for references.  
+   QSharedPointer<Definition> scope;         // scope to use for references
+
 };
 
 
@@ -70,7 +71,7 @@ class RefList
    RefList() : m_dictIterator(m_dict)
    {};
 
-   ~RefList();  
+   ~RefList();
 
    void insertIntoList(const QString &key, RefItem *item);
    void generatePage();
@@ -81,10 +82,10 @@ class RefList
    QString m_listName;
    QString m_fileName;
    QString m_pageTitle;
-   QString m_secTitle;  
+   QString m_secTitle;
 
    QMap<QString, QList<RefItem>> m_itemMap;
-  
+
    QHash<long, RefItem *> m_dict;
    QHashIterator<long, RefItem *> m_dictIterator;
 };

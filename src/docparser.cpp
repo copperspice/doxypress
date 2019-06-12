@@ -912,11 +912,14 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
             case TK_COMMAND:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command \\%s as the argument of a \\%s command",
                               csPrintable(g_token->name), csPrintable(cmdName));
+
                break;
+
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found while handling command %s",
                               csPrintable(g_token->name), csPrintable(cmdName));
                break;
+
             case TK_HTMLTAG:
                if (insideLI(parent) && Mappers::htmlTagMapper->map(g_token->name) && g_token->endTag) {
                   // ignore </li> as the end of a style command
@@ -1403,6 +1406,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
                warn_doc_error(s_fileName, doctokenizerYYlineno," Illegal command %s as part of a \\%s",
                csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)) );
                break;
+            }
 
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno," Unsupported symbol %s found", csPrintable(g_token->name));
@@ -3208,10 +3212,12 @@ int DocHRef::parse()
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <a>..</a> block",
                               csPrintable(g_token->name));
                break;
+
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
+
             case TK_HTMLTAG:
 
             {
@@ -4836,10 +4842,12 @@ void DocTitle::parse()
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a title section",
                               csPrintable(g_token->name));
                break;
+
             case TK_SYMBOL:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
+
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
                               csPrintable(tokToString(tok)));
@@ -5177,7 +5185,6 @@ int DocParamList::parse(const QString &cmdName)
 
    par->markFirst();
    par->markLast();
-
 
 endparamlist:
    DocNode *n = s_nodeStack.pop();

@@ -105,7 +105,6 @@ enum class EntryKey {
 // store information about an entity found in the source code
 class Entry : public EnableSharedFromThis
 {
-
   public:
 
    // supported entry types

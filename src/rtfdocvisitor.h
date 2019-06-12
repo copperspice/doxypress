@@ -129,7 +129,7 @@ class RTFDocVisitor : public DocVisitor
    void visitPre(DocText *) override;
    void visitPost(DocText *) override;
    void visitPre(DocHtmlBlockQuote *) override;
-   void visitPost(DocHtmlBlockQuote *)  override; 
+   void visitPost(DocHtmlBlockQuote *)  override;
    void visitPre(DocParBlock *) override;
    void visitPost(DocParBlock *) override;
 

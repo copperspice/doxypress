@@ -268,9 +268,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
       ol.popGeneratorState();
    }
 
-   ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(),
-                  docStr, true, false);
-
+   ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), docStr, true, false);
    ol.endTextBlock();
 
    Doxy_Globals::markdownSupport = markdownEnabled;
@@ -290,15 +288,19 @@ void PageDef::writePageDocumentation(OutputList &ol)
             case  0:
                sectionType = SectionInfo::Page;
                break;
+
             case  1:
                sectionType = SectionInfo::Section;
                break;
+
             case  2:
                sectionType = SectionInfo::Subsection;
                break;
+
             case  3:
                sectionType = SectionInfo::Subsubsection;
                break;
+
             default:
                sectionType = SectionInfo::Paragraph;
                break;
