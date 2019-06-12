@@ -9050,7 +9050,8 @@ void Doxy_Work::generatePageDocs()
 // create a (sorted) list & dictionary of example pages
 void Doxy_Work::buildExampleList(QSharedPointer<Entry> ptrEntry)
 {
-   if (ptrEntry->section == Entry::EXAMPLE_SEC && ! ptrEntry->m_entryName.isEmpty()) {
+   if ((ptrEntry->section == Entry::EXAMPLE_SEC || ptrEntry->section == Entry::EXAMPLE_LINENO_SEC) &&
+               ! ptrEntry->m_entryName.isEmpty()) {
 
       QSharedPointer<Entry> root = ptrEntry->entry();
 

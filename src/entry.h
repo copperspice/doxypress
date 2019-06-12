@@ -158,7 +158,8 @@ class Entry : public EnableSharedFromThis
       DIRDOC_SEC       = 0x18000000,
 
       EXPORTED_INTERFACE_SEC = 0x19000000,
-      INCLUDED_SERVICE_SEC   = 0x1A000000
+      INCLUDED_SERVICE_SEC   = 0x1A000000,
+      EXAMPLE_LINENO_SEC     = 0x1B000000,
    };
 
    enum Virtue {
@@ -392,6 +393,10 @@ class Entry : public EnableSharedFromThis
 
    int  section;                   // entry type (see Sections);
    int  initLines;                 // define/variable initializer lines to show
+
+   bool referencedByRelation;      //  do we need to show the referenced by relation?
+   bool referencesRelation;        //  do we need to show the references relation?
+
    int  docLine;                   // line number at which the documentation was found
    int  briefLine;                 // line number at which the brief desc. was found
    int  inbodyLine;                // line number at which the body doc was found
@@ -428,7 +433,7 @@ class Entry : public EnableSharedFromThis
             return QString("\\defgroup");
 
          case GROUPDOC_ADD:
-            return QString("\\addgroup");
+            return QString("\\addtogroup");
 
          case GROUPDOC_WEAK:
             return QString("\\weakgroup");

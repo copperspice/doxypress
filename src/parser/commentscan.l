@@ -37,84 +37,88 @@
 #define YY_NEVER_INTERACTIVE 1
 
 // forward declarations
-static bool handleBrief(const QString &);
-static bool handleFn(const QString &);
-static bool handleDef(const QString &);
-static bool handleOverload(const QString &);
-static bool handleEnum(const QString &);
-static bool handleDefGroup(const QString &);
-static bool handleAddToGroup(const QString &);
-static bool handleWeakGroup(const QString &);
-static bool handleNamespace(const QString &);
-static bool handlePackage(const QString &);
-static bool handleClass(const QString &);
-static bool handleHeaderFile(const QString &);
-static bool handleProtocol(const QString &);
-static bool handleCategory(const QString &);
-static bool handleUnion(const QString &);
-static bool handleStruct(const QString &);
-static bool handleInterface(const QString &);
-static bool handleIdlException(const QString &);
-static bool handlePage(const QString &);
-static bool handleMainpage(const QString &);
-static bool handleFile(const QString &);
-static bool handleDir(const QString &);
-static bool handleExample(const QString &);
-static bool handleDetails(const QString &);
-static bool handleName(const QString &);
-static bool handleTodo(const QString &);
-static bool handleTest(const QString &);
-static bool handleBug(const QString &);
-static bool handleSubpage(const QString &s);
-static bool handleDeprecated(const QString &);
-static bool handleXRefItem(const QString &);
-static bool handleRelated(const QString &);
-static bool handleRelatedAlso(const QString &);
-static bool handleMemberOf(const QString &);
-static bool handleRefItem(const QString &);
-static bool handleSection(const QString &);
-static bool handleAnchor(const QString &);
-static bool handleCite(const QString &);
-static bool handleFormatBlock(const QString &);
-static bool handleAddIndex(const QString &);
-static bool handleIf(const QString &);
-static bool handleIfNot(const QString &);
-static bool handleElseIf(const QString &);
-static bool handleElse(const QString &);
-static bool handleEndIf(const QString &);
-static bool handleIngroup(const QString &);
-static bool handleNoSubGrouping(const QString &);
-static bool handleShowInitializer(const QString &);
-static bool handleHideInitializer(const QString &);
-static bool handleCallgraph(const QString &);
-static bool handleHideCallgraph(const QString &);
-static bool handleCallergraph(const QString &);
-static bool handleHideCallergraph(const QString &);
-static bool handleInternal(const QString &);
-static bool handleLineBr(const QString &);
-static bool handleStatic(const QString &);
-static bool handlePure(const QString &);
-static bool handlePrivate(const QString &);
-static bool handlePrivateSection(const QString &);
-static bool handleProtected(const QString &);
-static bool handleProtectedSection(const QString &);
-static bool handlePublic(const QString &s);
-static bool handlePublicSection(const QString &s);
-static bool handleToc(const QString &s);
-static bool handleInherit(const QString &);
-static bool handleExtends(const QString &);
-static bool handleCopyDoc(const QString &);
-static bool handleCopyBrief(const QString &);
-static bool handleCopyDetails(const QString &);
-static bool handleParBlock(const QString &);
-static bool handleEndParBlock(const QString &);
-static void handleGuard(const QString &expr);
-static bool handleParam(const QString &);
-static bool handleRetval(const QString &);
+static bool handleBrief(const QString &str, const QStringList &list);
+static bool handleFn(const QString &str, const QStringList &list);
+static bool handleDef(const QString &str, const QStringList &list);
+static bool handleOverload(const QString &str, const QStringList &list);
+static bool handleEnum(const QString &str, const QStringList &list);
+static bool handleDefGroup(const QString &str, const QStringList &list);
+static bool handleAddToGroup(const QString &str, const QStringList &list);
+static bool handleWeakGroup(const QString &str, const QStringList &list);
+static bool handleNamespace(const QString &str, const QStringList &list);
+static bool handlePackage(const QString &str, const QStringList &list);
+static bool handleClass(const QString &str, const QStringList &list);
+static bool handleHeaderFile(const QString &str, const QStringList &list);
+static bool handleProtocol(const QString &str, const QStringList &list);
+static bool handleCategory(const QString &str, const QStringList &list);
+static bool handleUnion(const QString &str, const QStringList &list);
+static bool handleStruct(const QString &str, const QStringList &list);;
+static bool handleInterface(const QString &str, const QStringList &list);
+static bool handleIdlException(const QString &str, const QStringList &list);
+static bool handlePage(const QString &str, const QStringList &list);
+static bool handleMainpage(const QString &str, const QStringList &list);
+static bool handleFile(const QString &str, const QStringList &list);
+static bool handleDir(const QString &str, const QStringList &list);
+static bool handleExample(const QString &str, const QStringList &list);
+static bool handleDetails(const QString &str, const QStringList &list);
+static bool handleName(const QString &str, const QStringList &list);
+static bool handleTodo(const QString &str, const QStringList &list);
+static bool handleTest(const QString &str, const QStringList &list);
+static bool handleBug(const QString &str, const QStringList &list);
+static bool handleSubpage(const QString &str, const QStringList &list);
+static bool handleDeprecated(const QString &str, const QStringList &list);
+static bool handleXRefItem(const QString &str, const QStringList &list);
+static bool handleRelated(const QString &str, const QStringList &list);
+static bool handleRelatedAlso(const QString &str, const QStringList &list);
+static bool handleMemberOf(const QString &str, const QStringList &list);
+static bool handleRefItem(const QString &str, const QStringList &list);
+static bool handleSection(const QString &str, const QStringList &list);
+static bool handleAnchor(const QString &str, const QStringList &list);
+static bool handleCite(const QString &str, const QStringList &list);
+static bool handleFormatBlock(const QString &str, const QStringList &list);
+static bool handleAddIndex(const QString &str, const QStringList &list);;
+static bool handleIf(const QString &str, const QStringList &list);
+static bool handleIfNot(const QString &str, const QStringList &list);
+static bool handleElseIf(const QString &str, const QStringList &list);
+static bool handleElse(const QString &str, const QStringList &list);
+static bool handleEndIf(const QString &str, const QStringList &list);
+static bool handleIngroup(const QString &str, const QStringList &list);
+static bool handleNoSubGrouping(const QString &str, const QStringList &list);
+static bool handleShowInitializer(const QString &str, const QStringList &list);
+static bool handleHideInitializer(const QString &str, const QStringList &list);
+static bool handleCallgraph(const QString &str, const QStringList &list);
+static bool handleHideCallgraph(const QString &str, const QStringList &list);
+static bool handleCallergraph(const QString &str, const QStringList &list);
+static bool handleHideCallergraph(const QString &str, const QStringList &list);
+static bool handleReferencedByRelation(const QString &str, const QStringList &list);
+static bool handleHideReferencedByRelation(const QString &str, const QStringList &list);
+static bool handleReferencesRelation(const QString &str, const QStringList &list);
+static bool handleHideReferencesRelation(const QString &str, const QStringList &list);
+static bool handleInternal(const QString &str, const QStringList &list);
+static bool handleLineBr(const QString &str, const QStringList &list);
+static bool handleStatic(const QString &str, const QStringList &list);
+static bool handlePure(const QString &str, const QStringList &list);
+static bool handlePrivate(const QString &str, const QStringList &list);
+static bool handlePrivateSection(const QString &str, const QStringList &list);
+static bool handleProtected(const QString &str, const QStringList &list);
+static bool handleProtectedSection(const QString &str, const QStringList &list);
+static bool handlePublic(const QString &str, const QStringList &list);
+static bool handlePublicSection(const QString &str, const QStringList &list);
+static bool handleToc(const QString &str, const QStringList &list);
+static bool handleInherit(const QString &str, const QStringList &list);
+static bool handleExtends(const QString &str, const QStringList &list);
+static bool handleCopyDoc(const QString &str, const QStringList &list);
+static bool handleCopyBrief(const QString &str, const QStringList &list);
+static bool handleCopyDetails(const QString &str, const QStringList &list);
+static bool handleParBlock(const QString &str, const QStringList &list);
+static bool handleEndParBlock(const QString &str, const QStringList &list);
+static void handleGuard(const QString &str, const QStringList &list);
+static bool handleParam(const QString &str, const QStringList &list);
+static bool handleRetval(const QString &str, const QStringList &list);
 
 static void checkFormula();
 
-using DocCmdFunc = bool (*)(const QString &name);
+using DocCmdFunc = bool (*)(const QString &str, const QStringList &list);
 
 struct DocCmdMap
 {
@@ -207,6 +211,10 @@ static DocCmdMap docCmdMap[] =
   { "hidecallgraph",   &handleHideCallgraph,    false },
   { "callergraph",     &handleCallergraph,      false },
   { "hidecallergraph", &handleHideCallergraph,  false },
+  { "showrefby",       &handleReferencedByRelation,     false },
+  { "hiderefby",       &handleHideReferencedByRelation, false },
+  { "showrefs",        &handleReferencesRelation,       false },
+  { "hiderefs",        &handleHideReferencesRelation,   false },
   { "internal",        &handleInternal,         true  },
   { "_linebr",         &handleLineBr,           false },
   { "static",          &handleStatic,           false },
@@ -267,10 +275,8 @@ static DocCmdMap docCmdMap[] =
   { 0, 0, false }
 };
 
-/** @brief Command mapper.
- *
- *  Maps a command name (as found in a comment block) onto a specific handler function
- */
+
+//  Maps a command name (as found in a comment block) onto a specific handler function
 class DocCmdMapper
 {
   public:
@@ -356,9 +362,11 @@ class GuardedSection
  public:
    GuardedSection(bool enabled, bool parentVisible)
       : m_enabled(enabled), m_parentVisible(parentVisible) {}
+
    bool isEnabled() const {
       return m_enabled;
    }
+
    bool parentVisible() const {
       return m_parentVisible;
    }
@@ -432,7 +440,7 @@ static bool             s_internalDocs;
 static bool             s_processInternalDocs = false;
 
 
-static ParserInterface        *langParser;        // the language parser that is calling us
+static ParserInterface        *langParser;        // the language parser calling us
 
 static QSharedPointer<Entry>  s_docsEntry;        // which entry
 static EntryKey               s_docsEnum;         // which enum in EntryKey (brief, main, inbody)
@@ -570,7 +578,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
 
       docEntry->addSpecialListItem(listName, itemId);
 
-      QString cmdString = QString("\\xrefitem %1 %2.").formatArg(listName).formatArg(itemId);
+      QString cmdString = QString(" \\xrefitem %1 %2.").formatArg(listName).formatArg(itemId);
 
       if (inBody) {
          docEntry->appendData(EntryKey::Inbody_Docs, cmdString);
@@ -633,7 +641,6 @@ static QString addFormula()
    return formLabel;
 }
 
-static void checkFormula();
 
 static SectionInfo::SectionType sectionLevelToType(int level)
 {
@@ -788,7 +795,7 @@ static inline void setOutput(OutputContext ctx)
          }
 
          if (current->getData(EntryKey::Brief_Docs).trimmed().isEmpty())  {
-            // we only want one brief description even if multiple are given
+            // only want one brief description even if multiple are given
             s_docsEntry = current;
             s_docsEnum  = EntryKey::Brief_Docs;
 
@@ -1006,7 +1013,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    *   words and whitespace and other characters (#,?!, etc).
    *   grouping commands (e.g. @{ and @})
    *   language switch (e.g. \~english or \~).
-   *   mail address (e.g. dimitri@stack.nl).
+   *   mail address
    *   quoted text, such as "foo@bar"
    *   XML commands, <summary></summary><remarks></remarks>
    */
@@ -1143,13 +1150,39 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       s_processInternalDocs = false;
    }
 
+<Comment>{B}*{CMD}[a-z_A-Z]+"{"[a-zA-Z_,:0-9\. ]*"}"{B}*  |
 <Comment>{B}*{CMD}[a-z_A-Z]+{B}*    {
       // might be a valid command
-      // the {B}* in the front was added for bug620924
-
       QString text = QString::fromUtf8(yytext);
 
-      QString cmdName = text.trimmed().mid(1);
+      QStringView view = QStringView(text).trimmed();
+
+      QString cmdName;
+      QStringList optList;
+
+      if (view.contains('{')) {
+         // cmd { options }
+
+         QString tmp = view.mid(1, 2).toLower();
+
+         if (tmp == "f{")  {
+            // handle "\f{" and "@f{" elsewhere
+            REJECT;
+         }
+
+         static QRegularExpression regexp("[\\\\@](\\w+)\\s*{([^}]+)}");
+         QRegularExpressionMatch match = regexp.match(view);
+
+         // remove {CMD}
+         cmdName = match.captured(1);
+         optList = match.captured(2).split(',');
+
+      } else {
+         // no options
+         cmdName = view.mid(1);
+
+      }
+
       DocCmdMapper::Cmd *cmdPtr = DocCmdMapper::map(cmdName);
 
       if (cmdPtr) {
@@ -1160,7 +1193,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
             i++;
          }
 
-         s_spaceBeforeCmd = QString(text).left(i);
+         s_spaceBeforeCmd = text.left(i);
 
          if (cmdPtr->endsBrief && ! (inContext == OutputXRef && cmdName == "parblock")) {
             briefEndsAtDot = false;
@@ -1169,7 +1202,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
             setOutput(OutputMainDoc);
          }
 
-         if (cmdPtr->func && cmdPtr->func(cmdName)) {
+         if (cmdPtr->func && cmdPtr->func(cmdName, optList)) {
             // implicit split of the comment block into two entries
             // restart the next block at the start of this command
 
@@ -1184,7 +1217,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          }
 
       } else {
-         // command not relevant
+         // some command was found, just pass it on
+
          addToOutput(text);
       }
    }
@@ -2890,13 +2924,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 %%
 
-static bool handleBrief(const QString &)
+static bool handleBrief(const QString &str, const QStringList &list)
 {
    setOutput(OutputBrief);
    return false;
 }
 
-static bool handleFn(const QString &)
+static bool handleFn(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
    functionProto.resize(0);
@@ -2906,7 +2940,7 @@ static bool handleFn(const QString &)
    return stop;
 }
 
-static bool handleDef(const QString &)
+static bool handleDef(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::DEFINEDOC_SEC);
    functionProto.resize(0);
@@ -2914,21 +2948,21 @@ static bool handleDef(const QString &)
    return stop;
 }
 
-static bool handleOverload(const QString &)
+static bool handleOverload(const QString &str, const QStringList &list)
 {
    functionProto.resize(0);
    BEGIN(OverloadParam);
    return false;
 }
 
-static bool handleEnum(const QString &)
+static bool handleEnum(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::ENUMDOC_SEC);
    BEGIN(EnumDocArg1);
    return stop;
 }
 
-static bool handleDefGroup(const QString &)
+static bool handleDefGroup(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_NORMAL;
@@ -2937,7 +2971,7 @@ static bool handleDefGroup(const QString &)
    return stop;
 }
 
-static bool handleAddToGroup(const QString &)
+static bool handleAddToGroup(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_ADD;
@@ -2946,7 +2980,7 @@ static bool handleAddToGroup(const QString &)
    return stop;
 }
 
-static bool handleWeakGroup(const QString &)
+static bool handleWeakGroup(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::GROUPDOC_SEC);
    current->groupDocType = Entry::GROUPDOC_WEAK;
@@ -2954,34 +2988,34 @@ static bool handleWeakGroup(const QString &)
    return stop;
 }
 
-static bool handleNamespace(const QString &)
+static bool handleNamespace(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::NAMESPACEDOC_SEC);
    BEGIN( NameSpaceDocArg1 );
    return stop;
 }
 
-static bool handlePackage(const QString &)
+static bool handlePackage(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::PACKAGEDOC_SEC);
    BEGIN( PackageDocArg1 );
    return stop;
 }
 
-static bool handleClass(const QString &)
+static bool handleClass(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::CLASSDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
 }
 
-static bool handleHeaderFile(const QString &)
+static bool handleHeaderFile(const QString &str, const QStringList &list)
 {
    BEGIN( ClassDocArg2 );
    return false;
 }
 
-static bool handleProtocol(const QString &)
+static bool handleProtocol(const QString &str, const QStringList &list)
 {
    // Obj-C protocol
    bool stop = makeStructuralIndicator(Entry::PROTOCOLDOC_SEC);
@@ -2989,7 +3023,7 @@ static bool handleProtocol(const QString &)
    return stop;
 }
 
-static bool handleCategory(const QString &)
+static bool handleCategory(const QString &str, const QStringList &list)
 {
    // Obj-C category
    bool stop = makeStructuralIndicator(Entry::CATEGORYDOC_SEC);
@@ -2997,42 +3031,42 @@ static bool handleCategory(const QString &)
    return stop;
 }
 
-static bool handleUnion(const QString &)
+static bool handleUnion(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::UNIONDOC_SEC);
    BEGIN( ClassDocArg1 );
    return stop;
 }
 
-static bool handleStruct(const QString &)
+static bool handleStruct(const QString &str, const QStringList &list)
 {
   bool stop=makeStructuralIndicator(Entry::STRUCTDOC_SEC);
   BEGIN( ClassDocArg1 );
   return stop;
 }
 
-static bool handleInterface(const QString &)
+static bool handleInterface(const QString &str, const QStringList &list)
 {
   bool stop = makeStructuralIndicator(Entry::INTERFACEDOC_SEC);
   BEGIN( ClassDocArg1 );
   return stop;
 }
 
-static bool handleIdlException(const QString &)
+static bool handleIdlException(const QString &str, const QStringList &list)
 {
   bool stop = makeStructuralIndicator(Entry::EXCEPTIONDOC_SEC);
   BEGIN( ClassDocArg1 );
   return stop;
 }
 
-static bool handlePage(const QString &)
+static bool handlePage(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::PAGEDOC_SEC);
    BEGIN( PageDocArg1 );
    return stop;
 }
 
-static bool handleMainpage(const QString &)
+static bool handleMainpage(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
 
@@ -3044,7 +3078,7 @@ static bool handleMainpage(const QString &)
    return stop;
 }
 
-static bool handleFile(const QString &)
+static bool handleFile(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::FILEDOC_SEC);
 
@@ -3056,7 +3090,7 @@ static bool handleFile(const QString &)
    return stop;
 }
 
-static bool handleParam(const QString &)
+static bool handleParam(const QString &str, const QStringList &list)
 {
   // process param and retval arguments to escape leading underscores
   // in case of markdown processing
@@ -3067,7 +3101,7 @@ static bool handleParam(const QString &)
   return false;
 }
 
-static bool handleRetval(const QString &)
+static bool handleRetval(const QString &str, const QStringList &list)
 {
   addToOutput("@retval ");
   BEGIN( ParamArg1 );
@@ -3075,7 +3109,7 @@ static bool handleRetval(const QString &)
   return false;
 }
 
-static bool handleDir(const QString &)
+static bool handleDir(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::DIRDOC_SEC);
 
@@ -3087,9 +3121,21 @@ static bool handleDir(const QString &)
    return stop;
 }
 
-static bool handleExample(const QString &)
+static bool handleExample(const QString &str, const QStringList &list)
 {
-   bool stop = makeStructuralIndicator(Entry::EXAMPLE_SEC);
+  Entry::Sections section = Entry::EXAMPLE_SEC;
+
+  for (auto item : list) {
+    QString opt = item.trimmed().toLower();
+
+    if (opt == "lineno") {
+      section = Entry::EXAMPLE_LINENO_SEC;
+
+    } else {
+      warn(yyFileName, yyLineNr, "Unsupported option '%s' for command '\\%s'", csPrintable(opt), csPrintable(str));
+    }
+  }
+   bool stop = makeStructuralIndicator(section);
 
    if (! stop) {
       current->m_entryName = yyFileName;
@@ -3099,7 +3145,7 @@ static bool handleExample(const QString &)
    return stop;
 }
 
-static bool handleDetails(const QString &)
+static bool handleDetails(const QString &str, const QStringList &list)
 {
    if (inContext != OutputBrief) {
       // treat @details outside brief description as a new paragraph
@@ -3110,7 +3156,7 @@ static bool handleDetails(const QString &)
    return false;
 }
 
-static bool handleName(const QString &)
+static bool handleName(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::MEMBERGRP_SEC);
 
@@ -3128,7 +3174,7 @@ static bool handleName(const QString &)
   return stop;
 }
 
-static bool handleTodo(const QString &)
+static bool handleTodo(const QString &str, const QStringList &list)
 {
    newXRefKind = XRef_Todo;
    setOutput(OutputXRef);
@@ -3136,7 +3182,7 @@ static bool handleTodo(const QString &)
    return false;
 }
 
-static bool handleTest(const QString &)
+static bool handleTest(const QString &str, const QStringList &list)
 {
    newXRefKind = XRef_Test;
    setOutput(OutputXRef);
@@ -3144,7 +3190,7 @@ static bool handleTest(const QString &)
    return false;
 }
 
-static bool handleBug(const QString &)
+static bool handleBug(const QString &str, const QStringList &list)
 {
    newXRefKind = XRef_Bug;
    setOutput(OutputXRef);
@@ -3152,7 +3198,7 @@ static bool handleBug(const QString &)
    return false;
 }
 
-static bool handleDeprecated(const QString &)
+static bool handleDeprecated(const QString &str, const QStringList &list)
 {
    newXRefKind = XRef_Deprecated;
    setOutput(OutputXRef);
@@ -3160,14 +3206,14 @@ static bool handleDeprecated(const QString &)
    return false;
 }
 
-static bool handleXRefItem(const QString &)
+static bool handleXRefItem(const QString &str, const QStringList &list)
 {
    newXRefKind = XRef_Item;
    BEGIN(XRefItemParam1);
    return false;
 }
 
-static bool handleParBlock(const QString &)
+static bool handleParBlock(const QString &str, const QStringList &list)
 {
    if (s_insideParBlock)   {
       warn(yyFileName,yyLineNr, "Found \\parblock command while already in a parblock");
@@ -3184,7 +3230,7 @@ static bool handleParBlock(const QString &)
    return false;
 }
 
-static bool handleEndParBlock(const QString &)
+static bool handleEndParBlock(const QString &str, const QStringList &list)
 {
    if (! s_insideParBlock) {
      warn(yyFileName,yyLineNr, "Found \\endparblock command without matching \\parblock");
@@ -3197,49 +3243,49 @@ static bool handleEndParBlock(const QString &)
    return false;
 }
 
-static bool handleRelated(const QString &)
+static bool handleRelated(const QString &str, const QStringList &list)
 {
    BEGIN(RelatesParam1);
    return false;
 }
 
-static bool handleRelatedAlso(const QString &)
+static bool handleRelatedAlso(const QString &str, const QStringList &list)
 {
    current->relatesType = Duplicate;
    BEGIN(RelatesParam1);
    return false;
 }
 
-static bool handleMemberOf(const QString &)
+static bool handleMemberOf(const QString &str, const QStringList &list)
 {
    current->relatesType = MemberOf;
    BEGIN(RelatesParam1);
    return false;
 }
 
-static bool handleRefItem(const QString &)
+static bool handleRefItem(const QString &str, const QStringList &list)
 {
    addToOutput("@refitem ");
    BEGIN(LineParam);
    return false;
 }
 
-static bool handleSection(const QString &s)
+static bool handleSection(const QString &str, const QStringList &list)
 {
    setOutput(OutputMainDoc);
-   addToOutput("@"+s+" ");
+   addToOutput("@"+str+" ");
    BEGIN(SectionLabel);
 
-   if (s == "section") {
+   if (str == "section") {
       s_sectionLevel = 1;
 
-   } else if (s == "subsection") {
+   } else if (str == "subsection") {
       s_sectionLevel = 2;
 
-   } else if (s == "subsubsection") {
+   } else if (str == "subsubsection") {
       s_sectionLevel = 3;
 
-   } else if (s == "paragraph") {
+   } else if (str == "paragraph") {
       s_sectionLevel = 4;
 
    }
@@ -3247,7 +3293,7 @@ static bool handleSection(const QString &s)
    return false;
 }
 
-static bool handleSubpage(const QString &s)
+static bool handleSubpage(const QString &str, const QStringList &list)
 {
    if (current->section != Entry::EMPTY_SEC && current->section != Entry::PAGEDOC_SEC &&
          current->section != Entry::MAINPAGEDOC_SEC) {
@@ -3260,59 +3306,65 @@ static bool handleSubpage(const QString &s)
       s_spaceBeforeCmd.resize(0);
   }
 
-   addToOutput("@"+s+" ");
+   addToOutput("@" + str + " ");
    BEGIN(SubpageLabel);
 
    return false;
 }
 
-static bool handleAnchor(const QString &s)
+static bool handleAnchor(const QString &str, const QStringList &list)
 {
-   addToOutput("@"+s+" ");
+   addToOutput("@" + str + " ");
    BEGIN(AnchorLabel);
    return false;
 }
 
-static bool handleCite(const QString &s)
+static bool handleCite(const QString &str, const QStringList &list)
 {
    if (! s_spaceBeforeCmd.isEmpty()) {
      addToOutput(s_spaceBeforeCmd);
      s_spaceBeforeCmd.resize(0);
    }
 
-   addToOutput("@" + s + " ");
+   addToOutput("@" + str + " ");
    BEGIN(CiteLabel);
    return false;
 }
 
-static bool handleFormatBlock(const QString &s)
+static bool handleFormatBlock(const QString &str, const QStringList &list)
 {
-   addToOutput("@" + s + " ");
+   if (list.isEmpty()) {
+      addToOutput("@" + str + " ");
 
-   blockName      = s;
+   } else {
+      addToOutput("@" + str + "{" + list.join(",") + "} ");
+   }
+
+   blockName      = str;
    s_commentCount = 0;
    BEGIN(FormatBlock);
 
    return false;
 }
 
-static bool handleAddIndex(const QString &)
+static bool handleAddIndex(const QString &str, const QStringList &list)
 {
    addToOutput("@addindex ");
    BEGIN(LineParam);
    return false;
 }
 
-static bool handleIf(const QString &)
+static bool handleIf(const QString &str, const QStringList &list)
 {
    enabledSectionFound = false;
    guardType = Guard_If;
    s_spaceBeforeIf = s_spaceBeforeCmd;
    BEGIN(GuardParam);
+
    return false;
 }
 
-static bool handleIfNot(const QString &)
+static bool handleIfNot(const QString &str, const QStringList &list)
 {
    enabledSectionFound = false;
    guardType = Guard_IfNot;
@@ -3321,7 +3373,7 @@ static bool handleIfNot(const QString &)
    return false;
 }
 
-static bool handleElseIf(const QString &)
+static bool handleElseIf(const QString &str, const QStringList &list)
 {
    if (s_guards.isEmpty()) {
       warn(yyFileName,yyLineNr, "Found \\else without matching start command");
@@ -3334,7 +3386,7 @@ static bool handleElseIf(const QString &)
    return false;
 }
 
-static bool handleElse(const QString &)
+static bool handleElse(const QString &str, const QStringList &list)
 {
    if (s_guards.isEmpty()) {
       warn(yyFileName,yyLineNr, "Found \\else without matching start command");
@@ -3346,7 +3398,7 @@ static bool handleElse(const QString &)
    return false;
 }
 
-static bool handleEndIf(const QString &)
+static bool handleEndIf(const QString &str, const QStringList &list)
 {
    if (s_guards.isEmpty())   {
       warn(yyFileName,yyLineNr, "Found \\endif without matching start command");
@@ -3365,56 +3417,80 @@ static bool handleEndIf(const QString &)
    return false;
 }
 
-static bool handleIngroup(const QString &)
+static bool handleIngroup(const QString &str, const QStringList &list)
 {
    inGroupParamFound = false;
    BEGIN( InGroupParam );
    return false;
 }
 
-static bool handleNoSubGrouping(const QString &)
+static bool handleNoSubGrouping(const QString &str, const QStringList &list)
 {
    current->subGrouping = false;
    return false;
 }
 
-static bool handleShowInitializer(const QString &)
+static bool handleShowInitializer(const QString &str, const QStringList &list)
 {
    current->initLines = 100000;  // ON
    return false;
 }
 
-static bool handleHideInitializer(const QString &)
+static bool handleHideInitializer(const QString &str, const QStringList &list)
 {
    current->initLines = 0;
    return false;
 }
 
-static bool handleCallgraph(const QString &)
+static bool handleCallgraph(const QString &str, const QStringList &list)
 {
    current->callGraph = true;
    return false;
 }
 
-static bool handleHideCallgraph(const QString &)
+static bool handleHideCallgraph(const QString &str, const QStringList &list)
 {
    current->callGraph = false;
    return false;
 }
 
-static bool handleCallergraph(const QString &)
+static bool handleCallergraph(const QString &str, const QStringList &list)
 {
    current->callerGraph = true;
    return false;
 }
 
-static bool handleHideCallergraph(const QString &)
+static bool handleHideCallergraph(const QString &str, const QStringList &list)
 {
    current->callerGraph = false;
    return false;
 }
 
-static bool handleInternal(const QString &)
+static bool handleReferencedByRelation(const QString &str, const QStringList &list)
+{
+   current->referencedByRelation = true;
+   return false;
+}
+
+static bool handleHideReferencedByRelation(const QString &str, const QStringList &list)
+{
+   current->referencedByRelation = false;
+   return false;
+}
+
+static bool handleReferencesRelation(const QString &str, const QStringList &list)
+{
+   current->referencesRelation = true;
+   return false;
+}
+
+static bool handleHideReferencesRelation(const QString &str, const QStringList &list)
+{
+   current->referencesRelation = false;
+   return false;
+}
+
+static bool handleInternal(const QString &str, const QStringList &list)
 {
    if (s_internalDocs) {
       addToOutput("\\internal ");
@@ -3435,63 +3511,63 @@ static bool handleInternal(const QString &)
   return false;
 }
 
-static bool handleLineBr(const QString &)
+static bool handleLineBr(const QString &str, const QStringList &list)
 {
    addToOutput('\n');
    return false;
 }
 
-static bool handleStatic(const QString &)
+static bool handleStatic(const QString &str, const QStringList &list)
 {
    endBrief();
    current->stat = true;
    return false;
 }
 
-static bool handlePure(const QString &)
+static bool handlePure(const QString &str, const QStringList &list)
 {
    endBrief();
    current->virt = Pure;
    return false;
 }
 
-static bool handlePrivate(const QString &)
+static bool handlePrivate(const QString &str, const QStringList &list)
 {
   current->protection = Private;
   return false;
 }
 
-static bool handlePrivateSection(const QString &)
+static bool handlePrivateSection(const QString &str, const QStringList &list)
 {
    current->protection = protection = Private;
    return false;
 }
 
-static bool handleProtected(const QString &)
+static bool handleProtected(const QString &str, const QStringList &list)
 {
    current->protection = Protected;
    return false;
 }
 
-static bool handleProtectedSection(const QString &)
+static bool handleProtectedSection(const QString &str, const QStringList &list)
 {
    current->protection = protection = Protected ;
    return false;
 }
 
-static bool handlePublic(const QString &)
+static bool handlePublic(const QString &str, const QStringList &list)
 {
    current->protection = Public;
    return false;
 }
 
-static bool handlePublicSection(const QString &)
+static bool handlePublicSection(const QString &str, const QStringList &list)
 {
    current->protection = protection = Public;
    return false;
 }
 
-static bool handleToc(const QString &)
+static bool handleToc(const QString &str, const QStringList &list)
 {
    if (current->section == Entry::PAGEDOC_SEC || current->section==Entry::MAINPAGEDOC_SEC) {
       current->stat = true;  // we 'abuse' stat to pass whether or the TOC is enabled
@@ -3499,19 +3575,19 @@ static bool handleToc(const QString &)
    return false;
 }
 
-static bool handleInherit(const QString &)
+static bool handleInherit(const QString &str, const QStringList &list)
 {
    BEGIN(InheritParam);
    return false;
 }
 
-static bool handleExtends(const QString &)
+static bool handleExtends(const QString &str, const QStringList &list)
 {
    BEGIN(ExtendsParam);
    return false;
 }
 
-static bool handleCopyBrief(const QString &)
+static bool handleCopyBrief(const QString &str, const QStringList &list)
 {
    if (current->getData(EntryKey::Brief_Docs).isEmpty() && current->getData(EntryKey::Main_Docs).isEmpty()) {
 
@@ -3531,7 +3607,7 @@ static bool handleCopyBrief(const QString &)
    return false;
 }
 
-static bool handleCopyDetails(const QString &)
+static bool handleCopyDetails(const QString &str, const QStringList &list)
 {
    setOutput(OutputMainDoc);
    if (! s_spaceBeforeCmd.isEmpty()) {
@@ -3543,7 +3619,7 @@ static bool handleCopyDetails(const QString &)
    return false;
 }
 
-static bool handleCopyDoc(const QString &)
+static bool handleCopyDoc(const QString &str, const QStringList &list)
 {
    setOutput(OutputBrief);
    if (! s_spaceBeforeCmd.isEmpty()) {
