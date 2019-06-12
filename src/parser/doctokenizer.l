@@ -27,6 +27,8 @@
 #define YY_NO_INPUT 1
 #define YY_NEVER_INTERACTIVE 1
 
+#define TK_COMMAND_SEL() (yytext[0] == '@' ? TK_COMMAND_AT : TK_COMMAND_BS)
+
 // global
 TokenInfo          *g_token = nullptr;
 
@@ -130,9 +132,13 @@ QString tokToString(int token)
          retval = "TK_ENDLIST";
          break;
 
-      case TK_COMMAND:
-         retval = "TK_COMMAND";
+      case TK_COMMAND_AT:
+         retval = "TK_COMMAND_AT";
          break;
+
+      case TK_COMMAND_BS:
+         return "TK_COMMAND_BS";
+   break;
 
       case TK_HTMLTAG:
          retval = "TK_HTMLTAG";
@@ -777,12 +783,12 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Para>"{"{BLANK}*"@link"/{BLANK}+ {
       g_token->name = "javalink";
-      return TK_COMMAND;
+      return TK_COMMAND_AT;
    }
 
 <St_Para>"{"{BLANK}*"@inheritDoc"{BLANK}*"}" {
       g_token->name = "inheritdoc";
-      return TK_COMMAND;
+      return TK_COMMAND_AT;
    }
 
 <St_Para>"@_fakenl"     {
@@ -798,7 +804,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->id  = text.right(doctokenizerYYleng - 6).toInteger<int>(&ok);
       assert(ok);
 
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_Para>{CMD}"n"\n    {
@@ -808,7 +814,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       g_token->name     = text.mid(1).trimmed();
       g_token->paramDir = TokenInfo::Unspecified;
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_Para>{SPCMD1}      |
@@ -819,7 +825,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       g_token->name     = text.mid(1).trimmed();
       g_token->paramDir = TokenInfo::Unspecified;
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_Para>{PARAMIO}     {
@@ -845,7 +851,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
          g_token->paramDir = TokenInfo::Unspecified;
       }
 
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_Para>("http:"|"https:"|"ftp:"|"file:"|"news:"){URLMASK}/\. {
@@ -1015,7 +1021,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Text>[\\@<>&$#%~]  {
       g_token->name = QString::fromUtf8(yytext);
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_Para>({BLANK}*\n)+{BLANK}*\n/{LISTITEM} {
@@ -1275,7 +1281,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       QString text      = QString::fromUtf8(yytext);
       g_token->name     = text.mid(1);
       g_token->paramDir = TokenInfo::Unspecified;
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_TitleN>{ID}"="     {
@@ -1334,7 +1340,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       g_token->name     = text.mid(1);
       g_token->paramDir = TokenInfo::Unspecified;
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_TitleQ>{WORD1NQ}   |
@@ -1514,7 +1520,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       QString text = QString::fromUtf8(yytext);
       g_token->name     = text.mid(1);
       g_token->paramDir = TokenInfo::Unspecified;
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <St_Ref2>{WORD1NQ}     |
@@ -1834,7 +1840,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       // warn(s_fileName,yylineno,"Unexpected character `%s', assuming command \\%s was meant.", yytext, yytext);
 
       g_token->name = QString::fromUtf8(yytext);
-      return TK_COMMAND;
+      return TK_COMMAND_SEL();
    }
 
 <*>[\xC0-\xFF][\x80-\xBF]+    {

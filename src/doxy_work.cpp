@@ -8947,7 +8947,14 @@ void Doxy_Work::computePageRelations(QSharedPointer<Entry> ptrEntry)
          for (auto bi : root->extends) {
             QSharedPointer<PageDef> subPd = Doxy_Globals::pageSDict.find(bi.name);
 
-            if (subPd) {
+            if (pd == subPd) {
+               err("Page defined at line %d of file %s with label %s is a direct "
+                     "subpage of itself. You will need to remove this cyclic dependency.\n",
+                     pd->docLine(), csPrintable(pd->docFile()), csPrintable(pd->name()));
+
+               stopDoxyPress();
+
+            } else if (subPd) {
                pd->addInnerCompound(subPd);
             }
          }

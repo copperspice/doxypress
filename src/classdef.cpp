@@ -2549,6 +2549,7 @@ void ClassDef::mergeMembers()
    }
 
    static const bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
+   static const bool extractPrivate         = Config::getBool("extract-private");
    // static const bool optimizeJava        = Config::getBool("optimize-java");
 
    SrcLangExt lang = getLanguage();
@@ -2722,7 +2723,7 @@ void ClassDef::mergeMembers()
                         prot = Private;
                      }
 
-                     if (mi.prot != Private) {
+                     if (prot != Private || extractPrivate) {
                         Specifier virt = mi.virt;
 
                         if (mi.virt == Normal && bcd->virt != Normal) {

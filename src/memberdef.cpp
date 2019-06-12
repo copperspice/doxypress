@@ -5242,6 +5242,7 @@ void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
       }
 
       iter->name = argSrc.name;
+      iter->docs = argSrc.docs;
       ++iter;
    }
 
@@ -5255,6 +5256,7 @@ void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
       }
 
       iter->name = argSrc.name;
+      iter->docs = argSrc.docs;
       ++iter;
    }
 }

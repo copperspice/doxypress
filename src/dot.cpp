@@ -391,7 +391,27 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
       QByteArray buf = f.readLine();
 
       if (buf.startsWith("<area")) {
-         t << replaceRef(buf, relPath, urlOnly, context);
+         QString replaceBuffer = replaceRef(buf, relPath, urlOnly, context);
+
+         QString::const_iterator iter_s = replaceBuffer.indexOfFast("id=\"");
+         QString::const_iterator iter_e;
+
+         if (iter_s != replaceBuffer.end()) {
+
+            iter_e = replaceBuffer.indexOfFast('"', iter_s + 4);
+
+            if (iter_e != replaceBuffer.end()) {
+               t << QStringView(replaceBuffer.begin(), iter_s);
+               t << QStringView(iter_e + 1, replaceBuffer.end());
+
+            }  else {
+               t << replaceBuffer;
+            }
+
+         } else {
+            t << replaceBuffer;
+
+         }
       }
    }
 

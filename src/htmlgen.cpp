@@ -253,7 +253,6 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
                       "<script type=\"text/javascript\" src=\"$relpath^navtree.js\"></script>\n"
                       "<script type=\"text/javascript\">\n"
                       "  $(document).ready(initResizable);\n"
-                      "  $(window).load(resizeHeight);\n"
                       "</script>";
    }
 
