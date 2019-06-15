@@ -2248,7 +2248,6 @@ void Doxy_Work::resolveClassNestingRelations()
 
             if (def) {
                def->addInnerCompound(cd);
-
                cd->setOuterScope(def);
                cd->visited = true;
 
@@ -2558,24 +2557,24 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
             Doxy_Globals::namespaceSDict.insert(fullName, nd);
 
             // also add namespace to the correct structural context
-            QSharedPointer<Definition> d = findScopeFromQualifiedName(Doxy_Globals::globalScope, fullName,
+            QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope, fullName,
                   QSharedPointer<FileDef>(), tagInfo);
 
-            if (d == nullptr)  {
+            if (def == nullptr)  {
                // did not find anything, create the scope artificially
                // so we can at least relate scopes properly
 
-               d = buildScopeFromQualifiedName(fullName, fullName.count("::"), nd->getLanguage(), tagInfo);
+               def = buildScopeFromQualifiedName(fullName, fullName.count("::"), nd->getLanguage(), tagInfo);
 
-               d->addInnerCompound(nd);
-               nd->setOuterScope(d);
+               def->addInnerCompound(nd);
+               nd->setOuterScope(def);
 
                // TODO: Due to the order in which the tag file is written
                // a nested class can be found before its parent
 
             } else {
-               d->addInnerCompound(nd);
-               nd->setOuterScope(d);
+               def->addInnerCompound(nd);
+               nd->setOuterScope(def);
             }
          }
       }
@@ -8871,9 +8870,11 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
 
          QString indexName = "index";
          Doxy_Globals::mainPage = QMakeShared<PageDef>(root->getData(EntryKey::MainDocs_File), root->docLine, indexName,
-                  root->getData(EntryKey::Brief_Docs) + root->getData(EntryKey::Main_Docs) + root->getData(EntryKey::Inbody_Docs), title);
+                  root->getData(EntryKey::Brief_Docs) + root->getData(EntryKey::Main_Docs) +
+                  root->getData(EntryKey::Inbody_Docs), title);
 
-         Doxy_Globals::mainPage->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+         Doxy_Globals::mainPage->setBriefDescription(root->getData(EntryKey::Brief_Docs),
+                  root->getData(EntryKey::Brief_File), root->briefLine);
          Doxy_Globals::mainPage->setFileName(indexName);
          Doxy_Globals::mainPage->setLocalToc(root->localToc);
 
@@ -8888,7 +8889,8 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
                    csPrintable(si->fileName), si->lineNr);
 
             } else {
-               warn(root->getData(EntryKey::File_Name), root->startLine, "multiple use of section label '%s' for main page, (first occurrence: %s)",
+               warn(root->getData(EntryKey::File_Name), root->startLine,
+                    "Multiple use of section label '%s' for main page, (first occurrence: %s)",
                     csPrintable(Doxy_Globals::mainPage->name()), csPrintable(si->fileName));
             }
 
@@ -8972,8 +8974,8 @@ void Doxy_Work::checkPageRelations()
       while (ppd) {
          if (ppd == pd) {
             err("Page defined at line %d of file %s with label %s is a subpage "
-                "of itself Remove this cyclic dependency.\n", pd->docLine(),
-                csPrintable(pd->docFile()), csPrintable(pd->name()));
+                "of itself. You will need to remove this cyclic dependency.\n",
+                pd->docLine(), csPrintable(pd->docFile()), csPrintable(pd->name()));
 
             stopDoxyPress();
          }

@@ -2957,11 +2957,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>"Q_PROPERTY"  {
       // Q_property
-    current->protection = Public;
-    current->mtype      = MethodTypes::Property;
-    current->setData(EntryKey::Member_Type, "");
+      current->protection = Public;
+      current->mtype      = MethodTypes::Property;
+      current->setData(EntryKey::Member_Type, "");
 
-    BEGIN(QtPropType);
+      BEGIN(QtPropType);
    }
 
 <QtPropType>"("            {
@@ -3130,7 +3130,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>"CS_PROPERTY_WRITE"          {
       current->protection = Public;
-      current->mtype       = MethodTypes::Property;
+      current->mtype      = MethodTypes::Property;
       current->m_traits.setTrait(Entry::Virtue::Writable);
       current->setData(EntryKey::Member_Type, "");
 

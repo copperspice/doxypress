@@ -868,16 +868,18 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
             arg += c;
             bool found = false;
 
-            while (!found && (cc = getNextChar(expr, rest, j)) != EOF && cc != 0) {
+            while (! found && (cc = getNextChar(expr, rest, j)) != EOF && cc != 0) {
                found = cc == '\'';
 
                if (cc == '\\') {
                   c = (char)cc;
                   arg += c;
+
                   if ((cc = getNextChar(expr, rest, j)) == EOF || cc == 0) {
                      break;
                   }
                }
+
                c = (char)cc;
                arg += c;
             }
@@ -2414,7 +2416,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <Guard>\\[\r]?\n        {
       outputChar('\n');
       s_guardExpr += ' ';
-      s_yyLineNr++;
+      ++s_yyLineNr;
    }
 
 <Guard>"defined"/{B}*"("      {
@@ -2426,8 +2428,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <Guard>{ID}      {
-      QString text = QString::fromUtf8(yytext);
-      s_guardExpr += text;
+      s_guardExpr += QString::fromUtf8(yytext);
    }
 
 <Guard>.         {

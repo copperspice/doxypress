@@ -189,7 +189,6 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
    }
 
    allMemberList->append(md);
-
    m_allMembersDict.insert(md->localName(), md);
 
    switch (md->memberType()) {

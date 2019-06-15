@@ -766,7 +766,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       QString text = QString::fromUtf8(yytext);
 
       int dotPos = text.lastIndexOf('.');
-      g_token->indent = computeIndent(text,dotPos);
+      g_token->indent = computeIndent(text, dotPos);
       return TK_ENDLIST;
    }
 
@@ -801,7 +801,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       bool ok;
       QString text = QString::fromUtf8(yytext);
-      g_token->id  = text.right(doctokenizerYYleng - 6).toInteger<int>(&ok);
+      g_token->id  = text.right(text.length() - 6).toInteger<int>(&ok);
       assert(ok);
 
       return TK_COMMAND_SEL();
@@ -1040,14 +1040,14 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Para>({BLANK}*\n)+{BLANK}*\n/{OLISTITEM} {
       /* skip trailing paragraph followed by new list item */
-      if (! Doxy_Globals::markdownSupport || s_insidePre || s_autoListLevel==0) {
+      if (! Doxy_Globals::markdownSupport || s_insidePre || s_autoListLevel == 0) {
          REJECT;
       }
    }
 
 <St_Para>({BLANK}*\n)+{BLANK}*\n{BLANK}* {
       QString text = QString::fromUtf8(yytext);
-      g_token->indent = computeIndent(text, doctokenizerYYleng);
+      g_token->indent = computeIndent(text, text.length());
 
       int i;
       // put back the indentation (needed for list items)
@@ -1593,8 +1593,9 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WORD;
    }
 
-<St_Param>{WS}*","{WS}*  /* param separator */
+<St_Param>{WS}*","{WS}*
 <St_Param>{WS}           {
+      // param separator
       g_token->chars = QString::fromUtf8(yytext);
       return TK_WHITESPACE;
    }
@@ -1620,8 +1621,7 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_Pattern>[^\r\n]+   {
-      g_token->name = QString::fromUtf8(yytext);
-      g_token->name = g_token->name.trimmed();
+      g_token->name = QString::fromUtf8(yytext).trimmed();
       return TK_WORD;
    }
 

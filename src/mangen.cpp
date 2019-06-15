@@ -150,7 +150,7 @@ static QString buildFileName(const QString &name)
    return fname;
 }
 
-void ManGenerator::startFile(const QString &, const QString &manName, const QString &)
+void ManGenerator::startFile(const QString &, const QString &manName, const QString &title)
 {
    startPlainFile(buildFileName(manName));
    firstCol = true;

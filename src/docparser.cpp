@@ -5826,15 +5826,18 @@ int DocPara::handleStartCode()
    }
 
    doctokenizerYYsetStatePara();
+
    return retval;
 }
 
 void DocPara::handleInheritDoc()
 {
-   if (s_memberDef) { // inheriting docs from a member
+   if (s_memberDef) {
+      // inheriting docs from a member
       QSharedPointer<MemberDef> reMd = s_memberDef->reimplements();
 
-      if (reMd) { // member from which was inherited.
+      if (reMd) {
+         // member from which was inherited
          QSharedPointer<MemberDef> thisMd = s_memberDef;
 
          docParserPushContext();
@@ -7579,6 +7582,7 @@ int DocSection::parse()
    DBG(("DocSection::parse() end: retval=%x\n", retval));
    DocNode *n = s_nodeStack.pop();
    assert(n == this);
+
    return retval;
 }
 
@@ -7749,11 +7753,10 @@ void DocRoot::parse()
 
          // test for a <div>
          if (! par->isEmpty()) {
-
             m_children.append(par);
             lastPar = par;
 
-            if (retval == RetVal_EndDiv ) {
+            if (retval == RetVal_EndDiv) {
                // time to add the closing div
 
                DocStyleChange *sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, false);
@@ -8202,7 +8205,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    doctokenizerYYinit(tmpData, s_fileName);
 
    // build abstract syntax tree
-   DocRoot *root = new DocRoot(md != 0, singleLine);
+   DocRoot *root = new DocRoot(md != nullptr, singleLine);
    root->parse();
 
    if (Debug::isFlagSet(Debug::PrintTree)) {

@@ -293,7 +293,7 @@ class DocCmdMapper
     /** release the singleton */
     static void freeInstance() {
       delete s_instance;
-      s_instance = 0;
+      s_instance = nullptr;
     }
 
   private:
@@ -605,7 +605,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       }
    }
 
-   s_outputXRef = "";
+   s_outputXRef.clear();
 }
 
 // Adds a formula text to the list/dictionary of formulas if it was
@@ -1081,7 +1081,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <Comment>"</summary>"          {
-      // start of a .NET XML style detailed description
+      // end of a .NET XML style detailed description
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
       setOutput(OutputMainDoc);
@@ -1434,14 +1434,14 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          for (int i = 0; i < text.length();  ) {
             if (text[i] == '\n') {
                addToOutput('\n');
-               i++;
+               ++i;
 
             } else if (text.mid(i) == "\\_linebr")  {
                addToOutput('\n');
                i += 8;
 
             } else  {
-               i++;
+               ++i;
             }
          }
 
@@ -1821,7 +1821,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
-<GroupDocArg1>.				   {
+<GroupDocArg1>.               {
       // ignore other stuff
    }
 
@@ -1965,9 +1965,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <XRefItemParam1>{LABELID}     {
       // first argument
-      QString text = QString::fromUtf8(yytext);
-
-      newXRefItemKey = text;
+      newXRefItemKey = QString::fromUtf8(yytext);
       setOutput(OutputXRef);
 
       BEGIN(XRefItemParam2);
@@ -2126,12 +2124,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ----- handle arguments of the section/subsection/.. commands ------- */
 
 <SectionLabel>{LABELID}          {
-      // first argyment
+      // first argument
       QString text = QString::fromUtf8(yytext);
 
       s_sectionLabel = text;
       addToOutput(text);
-      s_sectionTitle.resize(0);
+      s_sectionTitle.clear();
 
       BEGIN(SectionTitle);
    }
@@ -2374,26 +2372,22 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ----- handle arguments of if/ifnot commands ------- */
 
 <GuardParam>{B}*"("                     {
-      QString text = QString::fromUtf8(yytext);
-      s_guardExpr  = text;
+      s_guardExpr  = QString::fromUtf8(yytext);
       s_roundCount = 1;
       BEGIN(GuardExpr);
    }
 
 <GuardExpr>[^()]*                       {
-      QString text = QString::fromUtf8(yytext);
-      s_guardExpr += text;
+      s_guardExpr += QString::fromUtf8(yytext);
    }
 
 <GuardExpr>"("                          {
-      QString text = QString::fromUtf8(yytext);
-      s_guardExpr += text;
+      s_guardExpr += QString::fromUtf8(yytext);
       s_roundCount++;
    }
 
 <GuardExpr>")"                          {
-      QString text = QString::fromUtf8(yytext);
-      s_guardExpr += text;
+      s_guardExpr += QString::fromUtf8(yytext);
       s_roundCount--;
 
       if (s_roundCount == 0) {
@@ -2440,18 +2434,16 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <GuardParamEnd>{B}*{DOCNL}       {
-      s_spaceBeforeIf.resize(0);
+      s_spaceBeforeIf.clear();
       BEGIN(Comment);
    }
 
 <GuardParamEnd>{B}*        {
       if (! s_spaceBeforeIf.isEmpty()) {
-         // needed for 665313 in combation with bug620924
-
          addToOutput(s_spaceBeforeIf);
       }
 
-      s_spaceBeforeIf.resize(0);
+      s_spaceBeforeIf.clear();
       BEGIN(Comment);
    }
 
@@ -2708,19 +2700,16 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <FnParam>[^@\\\n()]+          {
       // non-special characters
-      QString text = QString::fromUtf8(yytext);
-      functionProto += text;
+      functionProto += QString::fromUtf8(yytext);
    }
 
 <FnParam>"("            {
-      QString text = QString::fromUtf8(yytext);
-      functionProto += text;
+      functionProto += QString::fromUtf8(yytext);
       braceCount++;
    }
 
 <FnParam>")"            {
-      QString text = QString::fromUtf8(yytext);
-      functionProto += text;
+      functionProto += QString::fromUtf8(yytext);
       braceCount--;
    }
 
@@ -2736,6 +2725,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <OverloadParam>{DOCNL}        {
       // end of overload declaration, pass to langParser as a "prototype"
       QString text = QString::fromUtf8(yytext);
+
       if (text[0] == '\n')  {
          yyLineNr++;
       }
@@ -2828,10 +2818,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // ignore other stuff
    }
 
+
   /* ----- handle language specific sections ------- */
 
 <SkipLang>[\\@]"~"[a-zA-Z-]*        {
-      /* language switch */
+      // language switch
       QString text = QString::fromUtf8(yytext);
       QString langId = text.mid(2);
 
@@ -2846,7 +2837,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <SkipLang>{DOCNL}          {
-      /* new line in verbatim block */
+      // new line in verbatim block
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '\n') {
@@ -2855,7 +2846,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <SkipLang>.             {
-      /* any other character */
+      // any other character
    }
 
 
@@ -2933,7 +2924,7 @@ static bool handleBrief(const QString &str, const QStringList &list)
 static bool handleFn(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
-   functionProto.resize(0);
+   functionProto.clear();
    braceCount = 0;
    BEGIN(FnParam);
 
@@ -2943,14 +2934,14 @@ static bool handleFn(const QString &str, const QStringList &list)
 static bool handleDef(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::DEFINEDOC_SEC);
-   functionProto.resize(0);
+   functionProto.clear();
    BEGIN(FnParam);
    return stop;
 }
 
 static bool handleOverload(const QString &str, const QStringList &list)
 {
-   functionProto.resize(0);
+   functionProto.clear();
    BEGIN(OverloadParam);
    return false;
 }
@@ -3233,7 +3224,7 @@ static bool handleParBlock(const QString &str, const QStringList &list)
 static bool handleEndParBlock(const QString &str, const QStringList &list)
 {
    if (! s_insideParBlock) {
-     warn(yyFileName,yyLineNr, "Found \\endparblock command without matching \\parblock");
+      warn(yyFileName,yyLineNr, "Found \\endparblock command without matching \\parblock");
    }
 
    addToOutput("@endparblock");
@@ -3298,12 +3289,12 @@ static bool handleSubpage(const QString &str, const QStringList &list)
    if (current->section != Entry::EMPTY_SEC && current->section != Entry::PAGEDOC_SEC &&
          current->section != Entry::MAINPAGEDOC_SEC) {
 
-      warn(yyFileName,yyLineNr, "Found \\subpage command in a comment block that is not marked as a page");
+      warn(yyFileName, yyLineNr, "Found \\subpage command in a comment block that is not marked as a page");
   }
 
   if (! s_spaceBeforeCmd.isEmpty()) {
      addToOutput(s_spaceBeforeCmd);
-      s_spaceBeforeCmd.resize(0);
+      s_spaceBeforeCmd.clear();
   }
 
    addToOutput("@" + str + " ");
@@ -3370,6 +3361,7 @@ static bool handleIfNot(const QString &str, const QStringList &list)
    guardType = Guard_IfNot;
    s_spaceBeforeIf = s_spaceBeforeCmd;
    BEGIN(GuardParam);
+
    return false;
 }
 
@@ -3501,7 +3493,7 @@ static bool handleInternal(const QString &str, const QStringList &list)
       // is not treated as "documentation"
 
       if (current->getData(EntryKey::Main_Docs).trimmed().isEmpty()) {
-         current->setData(EntryKey::Main_Docs,   "");
+         current->setData(EntryKey::Main_Docs, "");
       }
 
       s_condCount = 0;
@@ -3551,7 +3543,7 @@ static bool handleProtected(const QString &str, const QStringList &list)
 
 static bool handleProtectedSection(const QString &str, const QStringList &list)
 {
-   current->protection = protection = Protected ;
+   current->protection = protection = Protected;
    return false;
 }
 
