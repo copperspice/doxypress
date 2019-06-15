@@ -30,6 +30,7 @@
 #include <htmlattrib.h>
 #include <htmlentity.h>
 #include <language.h>
+#include <latexgen.h>
 #include <message.h>
 #include <msc.h>
 #include <outputgen.h>
@@ -381,11 +382,13 @@ void LatexDocVisitor::visit(DocVerbatim *s)
 
    switch (s->type()) {
       case DocVerbatim::Code: {
-         m_t << "\n\\begin{DoxyCode}\n";
+         m_t << "\n\\begin{DoxyCode}{" << usedTableLevels() << "}\n";
+         LatexCodeGenerator::setDoxyCodeOpen(true);
 
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                   langExt, s->isExample(), s->exampleFile());
 
+         LatexCodeGenerator::setDoxyCodeOpen(false);
          m_t << "\\end{DoxyCode}\n";
       }
       break;
@@ -500,7 +503,8 @@ void LatexDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines: {
-         m_t << "\n\\begin{DoxyCodeInclude}\n";
+         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
+         LatexCodeGenerator::setDoxyCodeOpen(true);
 
          QFileInfo cfi(inc->file());
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
@@ -509,16 +513,20 @@ void LatexDocVisitor::visit(DocInclude *inc)
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd,
                      -1, -1, false, QSharedPointer<MemberDef>(), true);
 
+         LatexCodeGenerator::setDoxyCodeOpen(false);
          m_t << "\\end{DoxyCodeInclude}" << endl;
       }
       break;
 
       case DocInclude::Include:
-         m_t << "\n\\begin{DoxyCodeInclude}\n";
+         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
+         LatexCodeGenerator::setDoxyCodeOpen(true);
+
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(),inc->exampleFile(), QSharedPointer<FileDef>(),
                      -1, -1, true, QSharedPointer<MemberDef>(), false);
 
+         LatexCodeGenerator::setDoxyCodeOpen(false);
          m_t << "\\end{DoxyCodeInclude}\n";
          break;
 
@@ -539,10 +547,13 @@ void LatexDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::Snippet: {
-         m_t << "\n\\begin{DoxyCodeInclude}\n";
+         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
+         LatexCodeGenerator::setDoxyCodeOpen(true);
+
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci,
                      inc->context(), extractBlock(inc->text(), inc->blockId()),
                      langExt, inc->isExample(), inc->exampleFile());
+         LatexCodeGenerator::setDoxyCodeOpen(false);
          m_t << "\\end{DoxyCodeInclude}" << endl;
       }
       break;
@@ -552,9 +563,11 @@ void LatexDocVisitor::visit(DocInclude *inc)
 void LatexDocVisitor::visit(DocIncOperator *op)
 {
    if (op->isFirst()) {
-      if (!m_hide) {
-         m_t << "\n\\begin{DoxyCodeInclude}\n";
+      if (! m_hide) {
+         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
       }
+
+      LatexCodeGenerator::setDoxyCodeOpen(true);
       pushEnabled();
       m_hide = true;
    }
@@ -572,7 +585,9 @@ void LatexDocVisitor::visit(DocIncOperator *op)
 
    if (op->isLast()) {
       popEnabled();
-      if (!m_hide) {
+      LatexCodeGenerator::setDoxyCodeOpen(false);
+
+      if (! m_hide) {
          m_t << "\n\\end{DoxyCodeInclude}\n";
       }
 
@@ -588,7 +603,17 @@ void LatexDocVisitor::visit(DocFormula *f)
    if (m_hide) {
       return;
    }
-   m_t << f->text();
+
+   for (QChar ch : f->text()) {
+
+      if (ch == '\'') {
+         m_t << "\\text{'}";
+
+      } else {
+         m_t << ch;
+
+      }
+   }
 }
 
 void LatexDocVisitor::visit(DocIndexEntry *i)
@@ -1026,7 +1051,7 @@ static void writeStartTableCommand(QTextStream &t, const DocNode *n, int cols)
       t << "\\begin{tabularx}{\\linewidth}{|*{" << cols << "}{>{\\raggedright\\arraybackslash}X|}}";
 
    } else {
-      t << "\\tabulinesep=1mm\n\\begin{longtabu} spread 0pt [c]{*{" << cols << "}{|X[-1]}|}\n";
+      t << "\\tabulinesep=1mm\n\\begin{longtabu}spread 0pt [c]{*{" << cols << "}{|X[-1]}|}\n";
    }
 
    // return isNested ? "TabularNC" : "TabularC";

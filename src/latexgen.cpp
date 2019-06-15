@@ -35,6 +35,9 @@
 #include <resourcemgr.h>
 #include <util.h>
 
+static bool DoxyCodeOpen     = false;
+static bool DoxyCodeLineOpen = false;
+
 LatexCodeGenerator::LatexCodeGenerator(QTextStream &t, const QString &relPath, const QString &sourceFileName)
    : m_relPath(relPath), m_sourceFileName(sourceFileName), m_col(0), m_t(t)
 {
@@ -85,9 +88,8 @@ void LatexCodeGenerator::codify(const QString &str)
          }
 
          case '\n':
-            (usedTableLevels() > 0) ? m_t << "\\newline\n" : m_t << '\n';
+            (usedTableLevels() > 0 && ! DoxyCodeOpen) ? m_t << "\\newline\n" : m_t << '\n';
             m_col = 0;
-
             ++iter;
 
             break;
@@ -171,6 +173,11 @@ void LatexCodeGenerator::writeLineNumber(const QString &ref, const QString &file
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
 
+   if (! DoxyCodeLineOpen) {
+      m_t << "\\DoxyCodeLine{";
+      DoxyCodeLineOpen = true;
+   }
+
    if (m_prettyCode) {
       QString lineNumber = QString("%1").formatArg(len, 5, 10, QChar('0'));
 
@@ -198,10 +205,20 @@ void LatexCodeGenerator::writeLineNumber(const QString &ref, const QString &file
 void LatexCodeGenerator::startCodeLine(bool)
 {
    m_col = 0;
+
+   if (! DoxyCodeLineOpen) {
+      m_t << "\\DoxyCodeLine{";
+      DoxyCodeLineOpen = true;
+   }
 }
 
 void LatexCodeGenerator::endCodeLine()
 {
+  if (DoxyCodeLineOpen) {
+      m_t << "}";
+      DoxyCodeLineOpen = false;
+   }
+
    codify("\n");
 }
 
@@ -213,6 +230,11 @@ void LatexCodeGenerator::startFontClass(const QString &name)
 void LatexCodeGenerator::endFontClass()
 {
    m_t << "}";
+}
+
+void LatexCodeGenerator::setDoxyCodeOpen(bool value)
+{
+  DoxyCodeOpen = value;
 }
 
 // **
@@ -2275,13 +2297,15 @@ void LatexGenerator::endConstraintList()
 
 void LatexGenerator::startCodeFragment()
 {
-   m_textStream << "\n\\begin{DoxyCode}\n";
+   m_textStream << "\n\\begin{DoxyCode}{" << usedTableLevels() << "}\n";
+   DoxyCodeOpen = true;
 }
 
 void LatexGenerator::endCodeFragment()
 {
    endCodeLine();
    m_textStream << "\\end{DoxyCode}\n";
+   DoxyCodeOpen = false;
 }
 
 void LatexGenerator::startInlineHeader()

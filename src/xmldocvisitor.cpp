@@ -288,7 +288,14 @@ void XmlDocVisitor::visit(DocVerbatim *s)
 
    switch (s->type()) {
       case DocVerbatim::Code:
-         m_t << "<programlisting language=\"" << langToString(langExt) << "\">";
+         m_t << "<programlisting";
+
+         if (! s->language().isEmpty()) {
+            m_t << " filename=\"" << lang << "\">";
+         } else {
+          m_t << ">";
+         }
+
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                    langExt, s->isExample(), s->exampleFile());
 
@@ -354,7 +361,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines: {
-         m_t << "<programlisting>";
+         m_t << "<programlisting filename=\"" << inc->file() << "\">";
 
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
@@ -368,7 +375,7 @@ void XmlDocVisitor::visit(DocInclude *inc)
       break;
 
       case DocInclude::Include:
-         m_t << "<programlisting>";
+         m_t << "<programlisting filename=\"" << inc->file() << "\">";
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
@@ -399,7 +406,8 @@ void XmlDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::Snippet:
-         m_t << "<programlisting>";
+         m_t << "<programlisting filename=\"" << inc->file() << "\">";
+
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
                      langExt, inc->isExample(), inc->exampleFile() );
          m_t << "</programlisting>";
@@ -412,8 +420,9 @@ void XmlDocVisitor::visit(DocIncOperator *op)
 
    if (op->isFirst()) {
       if (! m_hide) {
-         m_t << "<programlisting>";
+          m_t << "<programlisting filename=\"" << op->includeFileName() << "\">";
       }
+
       pushEnabled();
       m_hide = true;
    }

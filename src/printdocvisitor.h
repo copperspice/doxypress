@@ -684,7 +684,9 @@ class PrintDocVisitor : public DocVisitor
             break;
       }
 
-      printf("\" width=%s height=%s>\n", csPrintable(img->width()), csPrintable(img->height()));
+
+      printf("\" %s %s inline=\"%s\">\n", csPrintable(img->width()), csPrintable(img->height()), img->isInlineImage() ? "yes" : "no");
+
    }
 
    void visitPost(DocImage *) override {
@@ -827,13 +829,13 @@ class PrintDocVisitor : public DocVisitor
 
    void visitPre(DocXRefItem *x) override {
       indent_pre();
-      printf("<xrefitem file=\"%s\" anchor=\"%s\" title=\"%s\"/>\n",
+      printf("<xrefitem file=\"%s\" anchor=\"%s\" title=\"%s\">\n",
              csPrintable(x->file()), csPrintable(x->anchor()), csPrintable(x->title()));
    }
 
    void visitPost(DocXRefItem *) override {
       indent_post();
-      printf("<xrefitem/>\n");
+      printf("</xrefitem>\n");
    }
 
    void visitPre(DocInternalRef *r) override {

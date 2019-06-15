@@ -85,7 +85,6 @@ static bool mustBeOutsideParagraph(DocNode *n)
 
       /* <div> */
       case DocNode::Kind_Include:
-      case DocNode::Kind_Image:
       case DocNode::Kind_SecRefList:
 
       /* <hr> */
@@ -116,6 +115,9 @@ static bool mustBeOutsideParagraph(DocNode *n)
 
       case DocNode::Kind_Formula:
          return !((DocFormula *)n)->isInline();
+
+      case DocNode::Kind_Image:
+         return !((DocImage*)n)->isInlineImage();
 
       default:
          break;
@@ -651,8 +653,8 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
 
       if (! m_hide) {
          Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
-            langExt, op->isExample(), op->exampleFile(),
-            QSharedPointer<FileDef>(), -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
+            langExt, op->isExample(), op->exampleFile(), QSharedPointer<FileDef>(), -1, -1,
+            false, QSharedPointer<MemberDef>(), true, m_ctx);
       }
 
       pushEnabled();
@@ -1611,6 +1613,19 @@ void HtmlDocVisitor::visitPre(DocImage *img)
 {
    if (img->type() == DocImage::Html) {
 
+      QString url      = img->url();
+      bool inlineImage = img->isInlineImage();
+      bool isImageSvg  = false;
+
+      if (url.isEmpty()) {
+         if (img->name().endsWith(".svg")) {
+            isImageSvg = true;
+         }
+
+      } else if (url.endsWith(".svg"))  {
+         isImageSvg = true;
+      }
+
       if (m_hide) {
          return;
       }
@@ -1622,7 +1637,9 @@ void HtmlDocVisitor::visitPre(DocImage *img)
          baseName = baseName.right(baseName.length() - i - 1);
       }
 
-      m_t << "<div class=\"image\">" << endl;
+      if (! inlineImage) {
+         m_t << "<div class=\"image\">" << endl;
+      }
 
       QString sizeAttribs;
 
@@ -1634,37 +1651,60 @@ void HtmlDocVisitor::visitPre(DocImage *img)
          sizeAttribs += " height=\"" + img->height() + "\"";
       }
 
-      QString url = img->url();
+      HtmlAttribList extraAttribs;
+
+      if (isImageSvg) {
+         HtmlAttrib opt;
+         opt.name  = "style";
+         opt.value = "pointer-events: none;";
+
+         extraAttribs.append(opt);
+      }
+
+      QString alt;
+      QString src;
+      QString attrs;
 
       if (url.isEmpty()) {
+         src = img->relPath() + img->name();
 
-         if (img->name().endsWith(".svg"))  {
-            m_t << "<object type=\"image/svg+xml\" data=\"" << img->relPath() << img->name()
-                  << "\"" << sizeAttribs << htmlAttribsToString(img->attribs()) << ">" << baseName
-                  << "</object>" << endl;
+      } else {
+         src = correctURL(url, img->relPath());
+      }
 
+      if (isImageSvg) {
+         m_t << "<object type=\"image/svg+xml\" data=\"" << src
+             << "\"" << sizeAttribs << attrs;
+
+         if (inlineImage) {
+            // skip closing tag
          } else {
-            m_t << "<img src=\"" << img->relPath() << img->name() << "\" alt=\""
-                << baseName << "\"" << sizeAttribs << htmlAttribsToString(img->attribs())
-                << "/>" << endl;
+            m_t << ">" << alt << "</object>" << endl;
          }
 
       } else {
+         m_t << "<img src=\"" << convertToHtml(src) << "\" alt=\"" << alt << "\"" << sizeAttribs << attrs;
 
-         if (img->name().endsWith(".svg"))  {
-
-            m_t << "<object type=\"image/svg+xml\" data=\"" << correctURL(url,img->relPath())
-                << "\"" << sizeAttribs << htmlAttribsToString(img->attribs()) << "></object>" << endl;
-
+         if (inlineImage) {
+            m_t << " class=\"inline\"";
          } else {
-            m_t << "<img src=\"" << correctURL(url, img->relPath()) << "\" "
-                << sizeAttribs << htmlAttribsToString(img->attribs(), true)
-                << "/>" << endl;
+            m_t << "/>\n";
          }
       }
 
       if (img->hasCaption()) {
-         m_t << "<div class=\"caption\">" << endl;
+         if (inlineImage) {
+            m_t << " title=\"";
+
+         } else {
+            m_t << "<div class=\"caption\">" << endl;
+         }
+      } else if (inlineImage) {
+         if (isImageSvg) {
+            m_t << ">" << alt << "</object>";
+         } else  {
+            m_t << "/>";
+         }
       }
 
    } else {
@@ -1681,11 +1721,41 @@ void HtmlDocVisitor::visitPost(DocImage *img)
          return;
       }
 
-      if (img->hasCaption()) {
-         m_t << "</div>";
+      bool inlineImage = img->isInlineImage();
+      bool isImageSvg  = false;
+
+      if (img->url().isEmpty()) {
+         if (img->name().endsWith(".svg")) {
+            isImageSvg = true;
+         }
+
+      } else if (img->url().endsWith(".svg"))  {
+         isImageSvg = true;
       }
 
-      m_t << "</div>" << endl;
+      if (img->hasCaption()) {
+         if (inlineImage) {
+
+           if (isImageSvg) {
+             QString alt;
+             QString attrs = htmlAttribsToString(img->attribs(),&alt);
+             m_t << "\">" << alt << "</object>";
+
+           } else {
+             m_t << "\"/>";
+           }
+
+         } else {
+            // end <div class="caption">
+
+            m_t << "</div>";
+         }
+      }
+
+      if (! inlineImage) {
+         // end <div class="image">
+         m_t << "</div>" << endl;
+      }
 
 
    } else {

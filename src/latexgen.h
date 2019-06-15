@@ -48,6 +48,8 @@ class LatexCodeGenerator : public CodeOutputInterface
       void setCurrentDoc(QSharedPointer<Definition>, const QString &, bool) override {}
       void addWord(const QString &, bool) override {}
 
+      static void setDoxyCodeOpen(bool value);
+
    private:
       void _writeCodeLink(const QString &className, const QString &ref, const QString &file,
                   const QString &anchor, const QString &name, const QString &tooltip);

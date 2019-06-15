@@ -3104,8 +3104,9 @@ void DocDiaFile::parse()
    }
 }
 
-DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t, const QString &url)
-   : m_attribs(attribs), m_name(name), m_type(t), m_relPath(s_relPath), m_url(url)
+DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t,
+   const QString &url, bool inlineImage)
+   : m_attribs(attribs), m_name(name), m_type(t), m_relPath(s_relPath), m_url(url), m_inlineImage(inlineImage)
 {
    m_parent = parent;
 }

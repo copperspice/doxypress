@@ -1114,7 +1114,8 @@ class DocImage : public CompAccept<DocImage>, public DocNode
  public:
    enum Type { None, Html, Latex, Rtf, DocBook };
 
-   DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t, const QString &url = QString());
+   DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t,
+   const QString &url = QString(), bool inlineImage = true);
 
    Kind kind() const  override {
       return Kind_Image;
@@ -1148,6 +1149,10 @@ class DocImage : public CompAccept<DocImage>, public DocNode
       return m_url;
    }
 
+   bool isInlineImage() const  {
+      return m_inlineImage;
+   }
+
    const HtmlAttribList &attribs() const {
       return m_attribs;
    }
@@ -1160,12 +1165,15 @@ class DocImage : public CompAccept<DocImage>, public DocNode
 
  private:
    HtmlAttribList m_attribs;
+   Type m_type;
+
    QString  m_name;
-   Type     m_type;
    QString  m_width;
    QString  m_height;
    QString  m_relPath;
    QString  m_url;
+
+   bool m_inlineImage;
 };
 
 /** Node representing a dot file */
