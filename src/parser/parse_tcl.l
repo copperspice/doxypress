@@ -3013,14 +3013,17 @@ static void tcl_init()
       }
    }
 
-   if (tcl.s_inputString.at(tcl.s_inputString.length() - 1) == 0x1A) {
+   QChar tmp = tcl.s_inputString.at(tcl.s_inputString.length() - 1);
+
+   if (tmp == 0x1A) {
       // no code
 
-   } else if (tcl.s_inputString.at(tcl.s_inputString.length() - 1) == '\n') {
-      tcl.s_inputString[tcl.s_inputString.length() - 1] = 0x1A;
+   } else if (tmp == '\n') {
+      tcl.s_inputString.chop(1);
+      tcl.s_inputString.append(0x1A);
 
    } else {
-      tcl.s_inputString += 0x1A;
+      tcl.s_inputString.append(0x1A);
 
    }
 

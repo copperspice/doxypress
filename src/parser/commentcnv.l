@@ -565,10 +565,10 @@ static int yyread(char *buf, int max_size)
       s_blockName = text.mid(1);
 
       if (s_blockName.at(1) == '[') {
-         s_blockName[1] = ']';
+         s_blockName.replace(1, 1, ']');
 
       } else if (s_blockName.at(1) == '{')  {
-         s_blockName[1] = '}';
+         s_blockName.replace(1, 1, '}');
       }
 
       s_lastCommentContext = YY_START;

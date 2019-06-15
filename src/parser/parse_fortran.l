@@ -1772,13 +1772,8 @@ bool recognizeFixedForm(const QString &contents, FortranFormat format)
 /* function assumes that contents has at least size=length+1 */
 static void insertCharacter(QString &contents, int length, int pos, QChar c)
 {
-   // shift tail by one character
-   for (int i = length; i > pos; i--) {
-      contents[i] = contents[i - 1];
-   }
-
-   // set the character
-   contents[pos] = c;
+   contents.erase(length, 1);
+   contents.insert(pos, c);
 }
 
 /* change comments and bring line continuation character to previous line */
@@ -1933,7 +1928,7 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 
             if (! commented && (column < 6) && c.isDigit()) {
                // remove numbers from the first 5 positions
-               newContents[j] = ' ';
+               newContents.replace(j, 1, ' ');
 
             } else if (column == 6 && emptyLabel) {
                // continuation

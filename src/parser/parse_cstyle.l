@@ -6462,11 +6462,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlockName = text.mid(1);
 
       if (s_docBlockName.at(1) == '[') {
-       s_docBlockName[1] ='}';
+        s_docBlockName.replace(1, 1, ']');
       }
 
       if (s_docBlockName.at(1) == '{') {
-       s_docBlockName[1] ='}';
+         s_docBlockName.replace(1, 1, '}');
       }
 
       fullArgString += text;
@@ -8956,7 +8956,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlockName = text.mid(1);
 
       if (s_docBlockName.at(1) == '{') {
-         s_docBlockName[1] = '}';
+         s_docBlockName.replace(1, 1, '}');
       }
 
       s_fencedSize=0;
