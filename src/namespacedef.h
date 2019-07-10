@@ -80,6 +80,14 @@ class NamespaceDef : public Definition
    QString displayName(bool = true) const override;
    QString localName() const;
 
+   void setInlineNS(bool isInlineNS) {
+      m_inlineNS = isInlineNS;
+   }
+
+   bool isInlineNS() const {
+      return m_inlineNS;
+   }
+
    bool isConstantGroup() const {
       return CONSTANT_GROUP == m_type;
    }
@@ -159,6 +167,7 @@ class NamespaceDef : public Definition
 
    bool m_subGrouping;
    bool m_isPublished;
+   bool m_inlineNS;
 
    QString  fileName;
    FileList files;

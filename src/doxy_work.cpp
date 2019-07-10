@@ -2249,8 +2249,32 @@ void Doxy_Work::resolveClassNestingRelations()
             if (def) {
                def->addInnerCompound(cd);
                cd->setOuterScope(def);
-               cd->visited = true;
 
+               // for inline namespace add cd to the outer scope
+               while (def->definitionType() == Definition::TypeNamespace) {
+                  QSharedPointer<NamespaceDef> nd = def.dynamicCast<NamespaceDef>();
+
+                  if (nd->isInlineNS()) {
+                     def = def->getOuterScope();
+
+                     if (def) {
+                        // emerald, may need to set a flag to mark this inlineNS
+
+                        QSharedPointer<ClassDef> aliasCd = cd;
+
+                        def->addInnerCompound(aliasCd);
+                        QString inLineNS_FullName = def->qualifiedName() + "::" + aliasCd->localName();
+
+                        Doxy_Globals::classSDict.insert(inLineNS_FullName, aliasCd);
+                        aliasCd->visited = true;
+                     }
+
+                  } else {
+                     break;
+                  }
+               }
+
+               cd->visited = true;
                done = false;
             }
          }
@@ -2536,6 +2560,8 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
             nd->setLanguage(root->m_srcLang);
             nd->setId(root->getData(EntryKey::Clang_Id));
 
+            nd->setInlineNS(root->m_traits.hasTrait(Entry::Virtue::Inline));
+
             addNamespaceToGroups(root, nd);
             nd->setRefItems(root->m_specialLists);
 
@@ -2575,6 +2601,25 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
             } else {
                def->addInnerCompound(nd);
                nd->setOuterScope(def);
+
+               while (def->definitionType() == Definition::TypeNamespace) {
+                  QSharedPointer<NamespaceDef> pnd = def.dynamicCast<NamespaceDef>();
+
+                  // for inline namespace add nd to the outer scope
+                  if (pnd->isInlineNS()) {
+                     def = def->getOuterScope();
+
+                     if (def) {
+                        // emerald, may need to set a flag to mark this inlineNS
+
+                        QSharedPointer<NamespaceDef> aliasNd = nd;
+                        def->addInnerCompound(aliasNd);
+                     }
+
+                  } else {
+                     break;
+                  }
+               }
             }
          }
       }
@@ -2698,6 +2743,8 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
             nd->setArtificial(true);
             nd->setLanguage(root->m_srcLang);
             nd->setId(root->getData(EntryKey::Clang_Id));
+
+            nd->setInlineNS(root->m_traits.hasTrait(Entry::Virtue::Inline));
 
             for (auto &g : root->m_groups) {
                QSharedPointer<GroupDef> gd;

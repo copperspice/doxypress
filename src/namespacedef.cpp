@@ -46,7 +46,8 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
 
    setReference(lref);
 
-   visited = false;
+   visited    = false;
+   m_inlineNS = false;
 
    if (type == "module") {
       m_type = MODULE;
@@ -224,6 +225,27 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
       default:
          err("NamespaceDef::insertMembers(): Member %s with class scope %s inserted in namespace scope `%s'\n",
              csPrintable(md->name()), md->getClassDef() ? csPrintable(md->getClassDef()->name()) : "", csPrintable(name()) );
+   }
+
+   // inline namespace - insert current member in the outer scope as a duplicate
+   if (isInlineNS()) {
+      QSharedPointer<Definition> outerScope = getOuterScope();
+
+      if (outerScope != nullptr)  {
+
+         if (outerScope->definitionType() == Definition::TypeNamespace) {
+            outerScope.dynamicCast<NamespaceDef>()->insertMember(md);
+
+            // emerald, may need to set a flag to mark this inlineNS
+
+         } else if (outerScope->definitionType() == Definition::TypeFile) {
+            outerScope.dynamicCast<FileDef>()->insertMember(md);
+
+            // emerald, may need to set a flag to mark this inlineNS
+         }
+
+
+      }
    }
 }
 
