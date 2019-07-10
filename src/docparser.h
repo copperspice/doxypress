@@ -864,6 +864,11 @@ class DocIncOperator : public DocNode
    QString exampleFile() const {
       return m_exampleFile;
    }
+
+   QString includeFileName() const {
+      return m_includeFileName;
+   }
+
    void parse();
 
  private:
@@ -875,6 +880,7 @@ class DocIncOperator : public DocNode
    bool     m_isLast;
    bool     m_isExample;
    QString  m_exampleFile;
+   QString  m_includeFileName;
 };
 
 /** Node representing an item of a cross-referenced list */

@@ -129,6 +129,7 @@ static QString                 s_exampleName;
 static SectionDict            *s_sectionDict;
 static QString                 s_searchUrl;
 
+static QString                 s_includeFileName;
 static QString                 s_includeFileText;
 static uint                    s_includeFileOffset;
 
@@ -433,7 +434,7 @@ static void checkArgumentName(const QString &name, bool isParam)
             argName = argName.left(argName.length() - 3);
          }
 
-         if (aName == argName) {
+         if (aName == argName && isParam) {
             s_paramsFound.insert(aName);
             found = true;
             break;
@@ -2102,6 +2103,7 @@ void DocInclude::parse()
       case Include:
       case DontInclude:
          readTextFileByName(m_file, m_text);
+         s_includeFileName   = m_file;
          s_includeFileText   = m_text;
          s_includeFileOffset = 0;
          break;
@@ -2132,6 +2134,33 @@ void DocInclude::parse()
 
 void DocIncOperator::parse()
 {
+   if (s_includeFileName.isEmpty()) {
+      QString cmd;
+
+      switch(type()) {
+         case Line:
+            cmd = "\\line";
+            break;
+
+         case SkipLine:
+            cmd = "\\skipLine";
+            break;
+
+         case Skip:
+            cmd = "\\skip";
+            break;
+
+         case Until:
+            cmd = "\\until";
+            break;
+      }
+
+      warn_doc_error(s_fileName, doctokenizerYYlineno,
+          "No previous '\\include' or \\dontinclude' command for '%s' present", csPrintable(cmd));
+   }
+
+   m_includeFileName = s_includeFileName;
+
    QString::const_iterator iter_offset = s_includeFileText.constBegin() + s_includeFileOffset;
    QString::const_iterator iter_end    = s_includeFileText.constEnd();
 
