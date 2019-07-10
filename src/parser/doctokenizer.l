@@ -636,6 +636,8 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 %x St_Snippet
 %x St_SetScope
 %x St_SetScopeEnd
+%x St_Options
+%x St_Block
 %x St_Emoji
 
 %x St_Sections
@@ -1600,6 +1602,28 @@ REFWORD_NOCV   {LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WHITESPACE;
    }
 
+<St_Options>{ID}       {
+      g_token->name += QString::fromUtf8(yytext);
+   }
+
+<St_Options>{WS}*","{WS}*
+<St_Options>{WS}       {
+      // option separator
+      g_token->name += ",";
+   }
+
+<St_Options>"}"        {
+      return TK_WORD;
+   }
+
+<St_Block>{ID}         {
+      g_token->name += QString::fromUtf8(yytext);
+   }
+
+<St_Block>"]"          {
+      return TK_WORD;
+   }
+
 <St_Emoji>[:0-9_a-z+-]+  {
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
@@ -2062,6 +2086,17 @@ void doctokenizerYYsetStateSetScope()
    BEGIN(St_SetScope);
 }
 
+void doctokenizerYYsetStateOptions()
+{
+  g_token->name = "";
+  BEGIN(St_Options);
+}
+
+void doctokenizerYYsetStateBlock()
+{
+  g_token->name = "";
+  BEGIN(St_Block);
+}
 void doctokenizerYYsetStateEmoji()
 {
   g_token->name = "";

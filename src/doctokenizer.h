@@ -162,6 +162,8 @@ void doctokenizerYYendAutoList();
 void doctokenizerYYsetStatePlantUML();
 void doctokenizerYYsetStateSetScope();
 void doctokenizerYYsetStatePlantUMLOpt();
+void doctokenizerYYsetStateOptions();
+void doctokenizerYYsetStateBlock();
 void doctokenizerYYsetStateEmoji();
 
 #endif
