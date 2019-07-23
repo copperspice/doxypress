@@ -429,6 +429,8 @@ class DocStyleChange : public DocNode
                 Preformatted  = 0x0080,
                 Span          = 0x0100,
                 Div           = 0x0200,
+                Strike        = 0x0400,
+                Underline     = 0x0800
    };
 
    DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = nullptr)

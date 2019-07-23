@@ -128,6 +128,8 @@ void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<Clas
 
          MemberList ml(lt);
          ml.append(md);
+         ml.countDecMembers();
+
          ml.writePlainDeclarations(ol, cd, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
                                    QSharedPointer<GroupDef>(), inheritedFrom, inheritId);
       }

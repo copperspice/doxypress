@@ -124,12 +124,17 @@ QString RefList::sectionTitle() const
 }
 
 void RefList::insertIntoList(const QString &key, RefItem *item)
-{     
-   bool found = m_itemMap.contains(key);
+{
+   auto iter = m_itemMap.find(key);
 
-   if (found) {         
-      m_itemMap[key].append(*item);
-     
+   if (iter != m_itemMap.end()) {
+      // check if the item is not already in the list
+      bool foundItem = iter.value().contains(*item);
+
+      if (! foundItem) {
+         iter.value().append(*item);
+      }
+
    } else {
       QList<RefItem> xList;
       xList.append(*item);
@@ -160,8 +165,6 @@ void RefList::generatePage()
       RefItem &item = list.first();
 
       doc += " <dt>";
-      doc +=  "\\anchor ";
-      doc += item.listAnchor;
       doc += "\n";
 
       if (item.scope && item.scope->name() != "<globalScope>") {
@@ -173,20 +176,39 @@ void RefList::generatePage()
       doc += item.prefix;
       doc += " \\_internalref ";
       doc += item.name;
-      doc += " \"";
-      doc += item.title;
-      doc += "\" ";
+
+      QString escapedTitle = substitute(item.title,"\\","\\\\");
+
+      if (item.scope && (item.scope->definitionType() == Definition::TypeClass ||
+                         item.scope->definitionType() == Definition::TypeNamespace ||
+                         item.scope->definitionType() == Definition::TypeMember ||
+                         item.scope->definitionType() == Definition::TypePackage) ) {
+
+         // prevent Obj-C names from being treated as an emoji
+         escapedTitle = substitute(escapedTitle,":","&Colon;");
+      }
+      doc += " \"" + escapedTitle + "\" ";
 
       // write declaration in case a function with arguments
       if (! item.args.isEmpty()) {
-         doc += item.args;
+         QString tmp = item.args;
+
+         tmp = substitute(tmp, "@", "@@");
+         tmp = substitute(tmp, "\\","\\\\");
+
+         doc.append(tmp);
       }
 
-      doc += "</dt><dd> ";
+      doc += "</dt><dd> \\anchor ";
+      doc += item.listAnchor;
+      doc += " ";
       doc += item.text;
-      
-      for (auto xx = list.begin() + 1; xx != list.end(); ++xx) {
-         doc += "<p>" + xx->text;
+
+      for (auto iter = list.begin() + 1; iter != list.end(); ++iter) {
+         doc += "<p> \\anchor ";
+         doc += iter->listAnchor;
+         doc += " ";
+         doc += iter->text;
       }
 
       doc += "</dd>";

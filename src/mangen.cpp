@@ -105,11 +105,13 @@ static QString buildFileName(const QString &name)
 {
    static const QString manExtension = "." + Config::getString("man-extension");
 
+   QString fname;
+
    if (name.isEmpty()) {
-      return QString("noname");
+      fname = "noname";
+      return fname;
    }
 
-   QString fname;
    QString::const_iterator iter = name.constBegin();
 
    while (iter != name.constEnd()) {
@@ -117,6 +119,9 @@ static QString buildFileName(const QString &name)
       ++iter;
 
       switch (c.unicode()) {
+         case ' ':
+            break;
+
          case ':':
             fname += "_";
 
@@ -141,6 +146,10 @@ static QString buildFileName(const QString &name)
          default:
             fname += c;
       }
+   }
+
+   while (fname.endsWith("_")) {
+      fname.chop(1);
    }
 
    if (fname.right(manExtension.length()) != manExtension) {

@@ -31,6 +31,11 @@ struct RefItem {
    RefItem() : scope(0)
    {}
 
+   bool operator==(const RefItem &other) const {
+      return (text == other.text && listAnchor == other.listAnchor && prefix == other.prefix &&
+              name == other.name && title == other.title && args == other.args && scope == other.scope);
+   }
+
    QString text;           //!< text of the item.
    QString listAnchor;     //!< anchor in the list
    QString prefix;         //!< type prefix for the name

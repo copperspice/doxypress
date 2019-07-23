@@ -56,8 +56,7 @@ void LatexCodeGenerator::setSourceFileName(const QString &name)
 
 void LatexCodeGenerator::codify(const QString &str)
 {
-   static int tabSize   = Config::getInt("tab-size");
-   const int maxLineLen = 108;
+   static int tabSize  = Config::getInt("tab-size");
 
    if (str.isEmpty()) {
       return;
@@ -76,6 +75,20 @@ void LatexCodeGenerator::codify(const QString &str)
          case 0x0c:
             // remove ^L
             ++iter;
+            break;
+
+        case ' ':
+            m_t << " ";
+            m_col++;
+            ++iter;
+
+            break;
+
+        case '^':
+            m_t << "\\string^";
+            m_col++;
+            ++iter;
+
             break;
 
          case '\t':  {
@@ -99,37 +112,21 @@ void LatexCodeGenerator::codify(const QString &str)
             result = c;
             ++iter;
 
-            if (m_col >= maxLineLen) {
-               // force line break
+            // copy more characters
+            while (iter != iter_end) {
+               c = *iter;
 
-               m_t << "\n      ";
-               m_col = 0;
-
-            } else  {
-               // copy more characters
-
-               while (m_col < maxLineLen && iter != iter_end) {
-                  c = *iter;
-
-                  if (c != 0x0c && c != '\t' && c != '\n' && c != ' ')  {
-                     result += c;
-                     ++iter;
-                  } else {
-                     break;
-                  }
-               }
-
-               if (m_col >= maxLineLen) {
-                  // force line break
-
-                  m_t << "\n      ";
-                  m_col = 0;
+               if (c != 0x0c && c != '\t' && c != '\n' && c != ' ')  {
+                  result += c;
+                  ++iter;
+               } else {
+                  break;
                }
             }
 
             filterLatexString(m_t, result, false, true);
             break;
-    }
+     }
   }
 
 }
