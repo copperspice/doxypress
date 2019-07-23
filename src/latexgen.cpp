@@ -501,8 +501,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    t_stream << "% Packages required by DoxyPress\n"
       "\\usepackage{fixltx2e}\n" // for \textsubscript
       "\\usepackage{calc}\n"
-      "\\usepackage{doxypress}\n"
-      "\\usepackage[export]{adjustbox} % also loads graphicx\n";
+      "\\usepackage{doxypress}\n";
 
    for (auto fileName : latexStyleSheet) {
 
@@ -676,7 +675,6 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    // Hyperlinks
    if (pdfHyperlinks) {
       t_stream << "% Hyperlinks (required, but should be loaded last)\n"
-        "\\usepackage{ifpdf}\n"
         "\\ifpdf\n"
         "  \\usepackage[pdftex,pagebackref=true]{hyperref}\n"
         "\\else\n"

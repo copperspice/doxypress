@@ -195,8 +195,8 @@
     <xsd:sequence>
       <xsd:element name="title" type="xsd:string" minOccurs="0"/>
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
+      <xsd:element name="internal" type="docInternalType" minOccurs="0" maxOccurs="unbounded"/>
       <xsd:element name="sect1" type="docSect1Type" minOccurs="0" maxOccurs="unbounded" />
-      <xsd:element name="internal" type="docInternalType" minOccurs="0" />
     </xsd:sequence>
   </xsd:complexType>
 
@@ -267,7 +267,7 @@
     <xsd:sequence>
       <xsd:element name="codeline" type="codelineType" minOccurs="0" maxOccurs="unbounded" />
     </xsd:sequence>
-    <xsd:attribute name="language" type="DoxLanguage" use="optional"/>
+    <xsd:attribute name="filename" type="xsd:string" use="optional"/>
   </xsd:complexType>
 
   <xsd:complexType name="codelineType">
@@ -310,10 +310,10 @@
 
   <xsd:complexType name="docSect1Type" mixed="true">
     <xsd:sequence>
-      <xsd:element name="title" type="xsd:string" />
+      <xsd:element name="title" type="xsd:string" minOccurs="0" />
       <xsd:element name="para" type="docParaType" minOccurs="0" maxOccurs="unbounded" />
-      <xsd:element name="sect2" type="docSect2Type" minOccurs="0" maxOccurs="unbounded" />
-      <xsd:element name="internal" type="docInternalS1Type" minOccurs="0" />
+      <xsd:element name="internal" type="docInternalS1Type" minOccurs="0"  maxOccurs="unbounded" />
+      <xsd:element name="sect2" type="docSect2Type" minOccurs="0" maxOccurs="unbounded" />     
     </xsd:sequence>
     <xsd:attribute name="id" type="xsd:string" />
   </xsd:complexType>
@@ -517,8 +517,8 @@
 
   <xsd:complexType name="docTableType">
     <xsd:sequence>
+      <xsd:element name="caption" type="docCaptionType" minOccurs="0" maxOccurs="1" />
       <xsd:element name="row" type="docRowType" minOccurs="0" maxOccurs="unbounded" />
-      <xsd:element name="caption" type="docCaptionType" minOccurs="0" />
     </xsd:sequence>
     <xsd:attribute name="rows" type="xsd:integer" />
     <xsd:attribute name="cols" type="xsd:integer" />
@@ -711,7 +711,6 @@
       <xsd:enumeration value="Javascript" />
       <xsd:enumeration value="Python" />
       <xsd:enumeration value="Fortran" />
-      <xsd:enumeration value="VHDL" />
       <xsd:enumeration value="XML" />
       <xsd:enumeration value="Tcl" />
       <xsd:enumeration value="Markdown" />
@@ -834,6 +833,7 @@
     <xsd:restriction base="xsd:string">
       <xsd:enumeration value="html" />
       <xsd:enumeration value="latex" />
+      <xsd:enumeration value="docbook" />
       <xsd:enumeration value="rtf" />
     </xsd:restriction>
   </xsd:simpleType>
