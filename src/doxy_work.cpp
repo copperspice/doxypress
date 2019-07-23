@@ -8180,25 +8180,31 @@ void Doxy_Work::computeMemberRelations()
             if (mcd && mcd->baseClasses()) {
                QSharedPointer<ClassDef> bmcd = bmd->getClassDef();
 
-               if (md != bmd && bmcd && mcd && bmcd != mcd &&
-                     (bmd->virtualness() != Normal || bmcd->compoundType() == CompoundType::Interface ||
-                      bmcd->compoundType() == CompoundType::Protocol) &&
-                      md->isFunction() && mcd->isLinkable() && bmcd->isLinkable() && mcd->isBaseClass(bmcd, true)) {
+               if (md != bmd && bmcd && mcd && bmcd != mcd) {
+                  auto lang = bmd->getLanguage();
 
-                  const ArgumentList &bmdAl = bmd->getArgumentList();
-                  const ArgumentList &mdAl  = md->getArgumentList();
+                  if (bmd->virtualness() != Normal || lang == SrcLangExt_Python || lang == SrcLangExt_Java ||
+                      lang == SrcLangExt_PHP || bmcd->compoundType() == CompoundType::Interface ||
+                      bmcd->compoundType() == CompoundType::Protocol) {
 
-                  if (matchArguments2(bmd->getOuterScope(), bmd->getFileDef(), bmdAl,
-                                     md->getOuterScope(), md->getFileDef(), mdAl,true)) {
+                      if (md->isFunction() && mcd->isLinkable() && bmcd->isLinkable() && mcd->isBaseClass(bmcd, true)) {
 
-                     QSharedPointer<MemberDef> rmd;
-                     if ((rmd = md->reimplements()) == 0 ||
-                          minClassDistance(mcd, bmcd) < minClassDistance(mcd, rmd->getClassDef())) {
+                        const ArgumentList &bmdAl = bmd->getArgumentList();
+                        const ArgumentList &mdAl  = md->getArgumentList();
 
-                        md->setReimplements(bmd);
+                        if (matchArguments2(bmd->getOuterScope(), bmd->getFileDef(), bmdAl,
+                                           md->getOuterScope(), md->getFileDef(), mdAl,true)) {
+
+                           QSharedPointer<MemberDef> rmd;
+                           if ((rmd = md->reimplements()) == 0 ||
+                                minClassDistance(mcd, bmcd) < minClassDistance(mcd, rmd->getClassDef())) {
+
+                              md->setReimplements(bmd);
+                           }
+
+                           bmd->insertReimplementedBy(md);
+                        }
                      }
-
-                     bmd->insertReimplementedBy(md);
                   }
                }
             }
