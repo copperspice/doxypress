@@ -686,6 +686,11 @@ static void addSection()
 static void addCite()
 {
    QString text = QString::fromUtf8(yytext);
+   if (text.startsWith('"')) {
+      text.chop(1);
+      text = text.mid(1);
+   }
+
    Doxy_Globals::citeDict.insert(text);
 }
 
@@ -929,7 +934,9 @@ HR              [hH][rR]
 PARA            [pP][aA][rR][aA]
 CODE            [cC][oO][dD][eE]
 CAPTION         [cC][aA][pP][tT][iI][oO][nN]
-DETAILEDHTML    {PRE}|{UL}|{TABLE}|{OL}|{DL}|{P}|[Hh][1-6]|{IMG}|{HR}|{PARA}
+CENTER          [cC][eE][nN][tT][eE][rR]
+DIV             [dD][iI][vV]
+DETAILEDHTML    {CENTER}|{DIV}|{PRE}|{UL}|{TABLE}|{OL}|{DL}|{P}|[Hh][1-6]|{IMG}|{HR}|{PARA}
 DETAILEDHTMLOPT {CODE}
 BN              [ \t\n\r]
 BL              [ \t\r]*"\n"
@@ -944,9 +951,9 @@ FILEECHAR       [a-z_A-Z0-9\x80-\xFF\-\+@&#]
 FILE            ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|("\""[^\n\"]*"\"")
 ID              "$"?[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*
 LABELID         [a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF\-]*
-CITESCHAR       [a-z_A-Z0-9\x80-\xFF]
-CITEECHAR       [a-z_A-Z0-9\x80-\xFF\-\+:\/]*
-CITEID          {CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*
+CITESCHAR       [a-z_A-Z0-9\x80-\xFF\-\?]
+CITEECHAR       [a-z_A-Z0-9\x80-\xFF\-\+:\/\?]*
+CITEID          {CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*|"\""{CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*"\""
 SCOPEID         {ID}({ID}*{BN}*"::"{BN}*)*({ID}?)
 SCOPENAME       "$"?(({ID}?{BN}*("::"|"."){BN}*)*)((~{BN}*)?{ID})
 TMPLSPEC        "<"{BN}*[^>]+{BN}*">"
@@ -998,6 +1005,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 %x CiteLabel
 %x CopyDoc
 %x GuardExpr
+%x CdataSection
 
 %%
 
@@ -1069,20 +1077,22 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <Comment>"<summary>"          {
       // start of a .NET XML style brief description
       QString text = QString::fromUtf8(yytext);
-      addToOutput(text);
       setOutput(OutputBrief);
+      addToOutput(text);
    }
 
 <Comment>"<remarks>"          {
       // start of a .NET XML style detailed description
       QString text = QString::fromUtf8(yytext);
+      setOutput(OutputMainDoc);
       addToOutput(text);
-      setOutput(OutputBrief);
    }
 
 <Comment>"</summary>"          {
       // end of a .NET XML style detailed description
       QString text = QString::fromUtf8(yytext);
+
+      setOutput(OutputBrief);
       addToOutput(text);
       setOutput(OutputMainDoc);
    }
@@ -1090,6 +1100,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <Comment>"</remarks>"         {
       // end of a brief or detailed description
       QString text = QString::fromUtf8(yytext);
+
+      setOutput(OutputMainDoc);
       addToOutput(text);
    }
 
@@ -1140,14 +1152,25 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN(HtmlComment);
    }
 
+<Comment>"<!\[CDATA\["        {
+      BEGIN(CdataSection);
+   }
+
 <Comment>{B}*{CMD}"endinternal"{B}*    {
-      addToOutput("\\endinternal ");
+      addToOutput(" \\endinternal ");
 
       if (! s_processInternalDocs) {
          warn(yyFileName, yyLineNr, "Found \\endinternal without matching \\internal");
       }
 
       s_processInternalDocs = false;
+   }
+
+<Comment>{B}*{CMD}"sortid"{B}+[0-9]+    {
+      // simulate calling addToOutPut()
+      QString text = QString::fromUtf8(yytext);
+      s_docsEntry->appendData(EntryKey::Main_Docs, text);
+
    }
 
 <Comment>{B}*{CMD}[a-z_A-Z]+"{"[a-zA-Z_,:0-9\. ]*"}"{B}*  |
@@ -1223,7 +1246,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       }
    }
 
-<Comment>{B}*("\\\\"|"@@")"f"[$\[{]    {
+<Comment>{B}*({CMD}{CMD})"f"[$\[{]  {
       // escaped formula command
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
@@ -1527,6 +1550,37 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <HtmlComment>.             {
       // ignore every else
+   }
+
+<CdataSection>"\]\]>"      {
+      BEGIN( Comment );
+   }
+
+<CdataSection>{DOCNL}      {
+      QString text = QString::fromUtf8(yytext);
+
+      addToOutput('\n');
+
+      if (text[0] == '\n') {
+         yyLineNr++;
+      }
+   }
+
+<CdataSection>[<>&]        {
+      // the special XML characters for iwhich the CDATA section is especially used
+      QString text = QString::fromUtf8(yytext);
+      addToOutput('\\');
+      addToOutput(text[0]);
+   }
+
+<CdataSection>[^\\\n\]<>&]+  {
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(text);
+   }
+
+<CdataSection>.    {
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(text[0]);
    }
 
 
@@ -2182,7 +2236,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput(text);
    }
 
-<SectionTitle>("\\\\"|"@@"){ID}     {
+<SectionTitle>({CMD}{CMD}){ID}    {
       // unescape escaped command
       QString text = QString::fromUtf8(yytext);
 
@@ -3236,21 +3290,40 @@ static bool handleEndParBlock(const QString &str, const QStringList &list)
 
 static bool handleRelated(const QString &str, const QStringList &list)
 {
+   if (! current->getData(EntryKey::Related_Class).isEmpty()) {
+      warn(yyFileName,yyLineNr,
+                  "Found multiple \\relates, \\relatesalso or \\memberof commands in a comment block, using last definition");
+   }
+
+   current->relatesType = Simple;
    BEGIN(RelatesParam1);
+
    return false;
 }
 
 static bool handleRelatedAlso(const QString &str, const QStringList &list)
 {
+   if (! current->getData(EntryKey::Related_Class).isEmpty()) {
+      warn(yyFileName, yyLineNr,
+                  "Found multiple \\relates, \\relatesalso or \\memberof commands in a comment block, using last definition");
+   }
+
    current->relatesType = Duplicate;
    BEGIN(RelatesParam1);
+
    return false;
 }
 
 static bool handleMemberOf(const QString &str, const QStringList &list)
 {
+   if (! current->getData(EntryKey::Related_Class).isEmpty()) {
+      warn(yyFileName, yyLineNr,
+                  "Found multiple \\relates, \\relatesalso or \\memberof commands in a comment block, using last definition");
+   }
+
    current->relatesType = MemberOf;
    BEGIN(RelatesParam1);
+
    return false;
 }
 
@@ -3485,7 +3558,7 @@ static bool handleHideReferencesRelation(const QString &str, const QStringList &
 static bool handleInternal(const QString &str, const QStringList &list)
 {
    if (s_internalDocs) {
-      addToOutput("\\internal ");
+      addToOutput(" \\internal ");
       s_processInternalDocs = true;
 
    } else {
@@ -3561,9 +3634,56 @@ static bool handlePublicSection(const QString &str, const QStringList &list)
 
 static bool handleToc(const QString &str, const QStringList &list)
 {
-   if (current->section == Entry::PAGEDOC_SEC || current->section==Entry::MAINPAGEDOC_SEC) {
-      current->stat = true;  // we 'abuse' stat to pass whether or the TOC is enabled
+   if (current->section == Entry::PAGEDOC_SEC || current->section == Entry::MAINPAGEDOC_SEC) {
+
+      for (auto &item : list) {
+         QString option = item.trimmed().toLower();
+
+         int level = 5;
+         int i     = option.find(':');
+
+         if (i > 0) {
+            // found something like "html:4"
+            bool ok = false;
+            level = option.mid(i + 1).toInteger<int>(&ok);
+
+            if (ok) {
+               level  = (level >  5 ? 5 : level);
+               level  = (level <= 0 ? 5 : level);
+               option = option.left(i).trimmed();
+
+            } else {
+               warn(yyFileName, yyLineNr, "Unknown option level specified with \\tableofcontents: `%s'", csPrintable(option));
+               option = "";
+            }
+         }
+
+         if (! option.isEmpty()) {
+            if (option == "html") {
+               current->localToc.enableHtml(level);
+
+            } else if (option == "latex") {
+               current->localToc.enableLatex(level);
+
+            } else if (option == "xml") {
+               current->localToc.enableXml(level);
+
+            } else if (option == "docbook") {
+               current->localToc.enableDocbook(level);
+
+            } else {
+               warn(yyFileName, yyLineNr, "Unknown option specified with \\tableofcontents: `%s'", csPrintable(option));
+            }
+         }
+      }
+
+      if (current->localToc.nothingEnabled()) {
+         // for backward compatibility
+         current->localToc.enableHtml(5);
+         current->localToc.enableXml(5);
+      }
    }
+
    return false;
 }
 

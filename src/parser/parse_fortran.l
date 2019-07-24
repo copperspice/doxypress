@@ -811,7 +811,7 @@ private                                 {
    /* start group  */
 <TypedefBody,TypedefBodyContains>{
 
-^{BS}"end"{BS}"type"({BS_}{ID})?{BS}/(\n|!) {
+^{BS}"end"{BS}"type"({BS_}{ID})?{BS}/(\n|!|;) {
       // end type definition
       last_entry->parent()->endBodyLine = yyLineNr;
 
@@ -823,6 +823,20 @@ private                                 {
       yy_pop_state();
    }
 }
+
+^{BS}"end"{BS}/(\n|!|;) {
+      // incorrect end type definition
+      warn(yyFileName, yyLineNr, "Found 'END' instead of 'END TYPE'");
+      last_entry->parent()->endBodyLine = yyLineNr;
+
+      if (! endScope(current_root)) {
+         yyterminate();
+      }
+
+      typeMode = false;
+      yy_pop_state();
+   }
+
 
  /*------- module/global/typedef variable -------------- */
 

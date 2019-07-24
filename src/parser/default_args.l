@@ -310,31 +310,6 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
    }
 
-<CopyArgSharp>">>)"                     {
-      // combined token
-      QString text = QString::fromUtf8(yytext);
-      *s_copyArgValue += text;
-
-		if (s_argSharpCount > 0) {
-         s_argSharpCount--;
-
-      } else {
-         BEGIN(s_readArgContext);
-
-      }
-
-		if (s_argSharpCount > 0) {
-         s_argSharpCount--;
-
-      } else {
-         BEGIN(s_readArgContext);
-
-      }
-
-      s_argRoundCount--;
-   }
-
-
 <CopyArgSharp>">>"                      {
       QString text = QString::fromUtf8(yytext);
 
@@ -348,7 +323,12 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <CopyArgSharp>"<"          {
       QString text = QString::fromUtf8(yytext);
-      s_argSharpCount++;
+
+      // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
+      if (s_argRoundCount == 0) {
+         s_argSharpCount++;
+      }
+
       *s_copyArgValue += text[0];
    }
 
@@ -356,7 +336,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
 
-      if (s_argSharpCount > 0) {
+      // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
+      if (s_argSharpCount > 0 && s_argRoundCount == 0) {
          s_argSharpCount--;
 
       } else  {

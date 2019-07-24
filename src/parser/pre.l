@@ -883,7 +883,33 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                c = (char)cc;
                arg += c;
             }
-         } else { // append other characters
+
+         } else if (c == '/') {
+            // possible start of a comment
+
+            char prevChar = '\0';
+            arg += c;
+
+            cc = getCurrentChar(expr, rest, j);
+
+            if (cc == '*') {
+               // we have a comment
+
+               while ((cc = getNextChar(expr,rest,j)) != EOF && cc != 0) {
+                  c    = (char)cc;
+                  arg += c;
+
+                  if (c == '/' && prevChar == '*')  {
+                     // found an end of comment
+                     break;
+                  }
+
+                  prevChar = c;
+               }
+            }
+
+         } else {
+            // append other characters
             arg += c;
          }
       }
@@ -1187,6 +1213,64 @@ static void expandExpression(QString &expr, QString *rest, int pos)
    }
 }
 
+//  inputStr should point to the start of a string or character literal.
+// the routine will return a pointer to just after the end of the literal
+// the character making up the literal will be added to \a result.
+
+QString::const_iterator processUntilMatch(QString::const_iterator iter_start, QString::const_iterator iter_end,
+                  QString &result)
+{
+   if (iter_start == iter_end) {
+      return iter_start;
+   }
+
+   // capture start character
+   QChar term = *iter_start;
+
+   if (term != '\'' && term != '"') {
+      // not a valid literal
+      return iter_start;
+   }
+
+   QChar ch = term;
+
+   // output start character
+   result += ch;
+   ++iter_start;
+
+   while (iter_start != iter_end) {
+      ch = *iter_start;
+
+      if (ch == term) {
+         // found end marker of the literal, output end character and stop
+
+         result += ch;
+         ++iter_start;
+         break;
+
+      } else if (ch == '\\')  {
+         // escaped character, process next character
+         // as well without checking for end marker
+
+         result += ch;
+         ++iter_start;
+
+         if (iter_start == iter_end) {
+            // unexpected end of string after escape character
+            break;
+         }
+
+         ch = *iter_start;
+      }
+
+      result += ch;
+      ++iter_start;
+   }
+
+   return iter_start;
+}
+
+
 /*! replaces all occurrences of @@@@ in s by @@
  *  and removes all occurrences of @@E
  *  All identifiers found are replaced by 0L
@@ -1223,6 +1307,9 @@ QString removeIdsAndMarkers(const QString &s)
 
          ++iter;
 
+      } else if (c == '\'') {
+         iter = processUntilMatch(iter, iter_end, result);
+
       } else if (c == 'd' && ! inNum) {
          // identifier starting with a `d'
 
@@ -1257,6 +1344,17 @@ QString removeIdsAndMarkers(const QString &s)
             c = *iter;
 
             if (isId(c)) {
+               ++iter;
+
+            } else {
+               break;
+            }
+         }
+
+         while (iter != iter_end) {
+            c = *iter;
+
+            if (c.isSpace()) {
                ++iter;
 
             } else {
@@ -1362,10 +1460,11 @@ QString removeIdsAndMarkers(const QString &s)
  */
 QString removeMarkers(const QString &s)
 {
-   QString::const_iterator iter = s.constBegin();
+   QString::const_iterator iter     = s.constBegin();
+   QString::const_iterator iter_end = s.constEnd();
    QString result;
 
-   while (iter != s.constEnd()) {
+   while (iter != iter_end) {
       QChar c = *iter;
 
       switch (c.unicode()) {
@@ -1373,7 +1472,7 @@ QString removeMarkers(const QString &s)
          case '@': {
             // replace @@ with @
 
-            if (iter + 1 != s.constEnd() && iter[1] ==  '@') {
+            if (iter + 1 != iter_end && iter[1] ==  '@') {
                result += c;
                ++iter;
             }
@@ -1396,10 +1495,10 @@ QString removeMarkers(const QString &s)
             if (c == '*') {
                // start of C comment
 
-               while (iter != s.constEnd()  && ! (pc == '*' && c == '/')) {
+               while (iter != iter_end  && ! (pc == '*' && c == '/')) {
                   // search end of comment
 
-                  if (*iter == '@' &&  (iter + 1 != s.constEnd() && iter[1] == '@')) {
+                  if (*iter == '@' &&  (iter + 1 != iter_end && iter[1] == '@')) {
                      result += c;
                      ++iter;
 
@@ -1410,12 +1509,12 @@ QString removeMarkers(const QString &s)
                   pc = c;
                   ++iter;
 
-                  if (iter != s.constEnd()) {
+                  if (iter != iter_end) {
                      c = *iter;
                   }
                }
 
-               if (iter != s.constEnd()) {
+               if (iter != iter_end) {
                   result += c;
                   ++iter;
                }
@@ -1423,61 +1522,12 @@ QString removeMarkers(const QString &s)
          }
          break;
 
-         case '"': {
-            // skip string literals
-            result += c;
+         case '"':
+         case '\'':
+            // skip string literals and char literals
 
-            QChar pc = c;
-            ++iter;
-
-            if (iter != s.constEnd()) {
-               c = *iter;
-            }
-
-            while (iter != s.constEnd() && (pc == '\\' && c != '"')) {
-               // no end quote
-               result += c;
-               ++iter;
-
-               if (iter != s.constEnd()) {
-                  c = *iter;
-               }
-            }
-
-            if (iter != s.constEnd()) {
-               result += c;
-               ++iter;
-            }
-         }
-         break;
-
-         case '\'': {
-            // skip char literals
-            result += c;
-
-            QChar pc = c;
-            ++iter;
-
-            if (iter != s.constEnd()) {
-               c = *iter;
-            }
-
-            while (iter != s.constEnd() && (pc == '\\' && c != '\'')) {
-               // no end quote
-               result += c;
-               ++iter;
-
-               if (iter != s.constEnd()) {
-                  c = *iter;
-               }
-            }
-
-            if (iter != s.constEnd()) {
-               result += c;
-               ++iter;
-            }
-         }
-         break;
+            iter = processUntilMatch(iter, iter_end, result);
+            break;
 
          default: {
             result += c;
@@ -2429,6 +2479,10 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <Guard>{ID}      {
       s_guardExpr += QString::fromUtf8(yytext);
+   }
+
+<Guard>"@" {
+      s_guardExpr += "@@";
    }
 
 <Guard>.         {

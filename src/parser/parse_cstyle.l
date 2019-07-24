@@ -715,16 +715,11 @@ static int yyread(char *buf, int max_size)
 
 /* start command character */
 CMD           ("\\"|"@")
-SECTIONCMD    {CMD}("image"|"author"|"internal"|"version"|"date"|"deprecated"|"param"|"exception"|"return"[s]?|"retval"|"bug"|"warning"|"par"|"sa"|"see"|"pre"|"post"|"invariant"|"note"|"remark"[s]?|"todo"|"test"|"xrefitem"|"ingroup"|"callgraph"|"callergraph"|"latexonly"|"htmlonly"|"xmlonly"|"docbookonly"|"manonly"|"{"|"verbatim"|"dotfile"|"dot"|"defgroup"|"addtogroup"|"weakgroup"|"class"|"namespace"|"union"|"struct"|"fn"|"var"|"details"|"typedef"|"def"|"overload")|("<"{PRE}">")
-
 BN            [ \t\n\r]
 BL            [ \t\r]*"\n"
 B             [ \t]
-BS            ^(({B}*"//")?)(({B}*"*"+)?){B}*
 ID            "$"?[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*
-SCOPEID       {ID}({ID}*{BN}*"::"{BN}*)*({ID}?)
 SCOPENAME     "$"?(({ID}?{BN}*"::"{BN}*)*)(((~|!){BN}*)?{ID})
-PHPSCOPENAME  ({ID}"\\")+{ID}
 TSCOPE        {ID}("<"[a-z_A-Z0-9 \t\*\&,:]*">")?
 CSSCOPENAME   (({ID}?{BN}*"."{BN}*)*)((~{BN}*)?{ID})
 PRE           [pP][rR][eE]
@@ -6446,8 +6441,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( lastCommentInArgContext );
    }
 
-<CopyArgCommentLine>{CMD}("verbatim"|"latexonly"|"htmlonly"|"xmlonly"|"manonly"|"dot"|"code")/[^a-z_A-Z0-9]    {
-      // verbatim command (which could contain nested comments!)
+<CopyArgCommentLine>{CMD}("verbatim"|"latexonly"|"htmlonly"|"xmlonly"|"manonly"|"dot"|"code")/[^a-z_A-Z0-9\-]    {
+      // verbatim command (which could contain nested comments)
       QString text = QString::fromUtf8(yytext);
 
       s_docBlockName = text.mid(1);
@@ -6473,7 +6468,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(CopyArgVerbatim);
    }
 
-<CopyArgVerbatim>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endmanonly"|"enddot"|"endcode"|"f$"|"f]"|"f}")/[^a-z_A-Z0-9] {
+<CopyArgVerbatim>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endmanonly"|"enddot"|"endcode"|"f$"|"f]"|"f}")/[^a-z_A-Z0-9\-] {
       // end of verbatim block
       QString text = QString::fromUtf8(yytext);
       fullArgString += text;
@@ -8977,7 +8972,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(DocCopyBlock);
    }
 
-<DocBlock>{CMD}("verbatim"|"latexonly"|"htmlonly"|"xmlonly"|"manonly"|"dot"|"code")/[^a-z_A-Z0-9]  {
+<DocBlock>{CMD}("verbatim"|"latexonly"|"htmlonly"|"xmlonly"|"manonly"|"dot"|"code")/[^a-z_A-Z0-9\-]  {
       // verbatim command (which could contain nested comments)
       QString text = QString::fromUtf8(yytext);
 
@@ -9106,7 +9101,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<DocCopyBlock>^{B}*"*"+/{BN}+"*"{BN}*  {
+<DocCopyBlock>^{B}*"*"+/{B}+"*"{BN}*  {
       // start of a comment line with two *'s
       QString text = QString::fromUtf8(yytext);
 
