@@ -415,7 +415,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("toc-expanded",              struc_CfgBool   { false,           DEFAULT } );
 
    // tab 3 - docbook
-   m_cfgString.insert("docbook-output",          struc_CfgString { "docbooc",       DEFAULT } );
+   m_cfgString.insert("docbook-output",          struc_CfgString { "docbook",        DEFAULT } );
    m_cfgBool.insert("docbook-program-listing",   struc_CfgBool   { false,           DEFAULT } );
 
    // tab 3 - docset
