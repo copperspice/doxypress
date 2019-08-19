@@ -867,6 +867,8 @@ void generateOutput()
 
    const QString htmlOutput       = Config::getString("html-output");
    const QString latexOutput      = Config::getString("latex-output");
+   const QString rtfOutput        = Config::getString("rtf-output");
+   const QString dookbookOutput   = Config::getString("docbook-output");
 
    // only used when HTML is enabled
    const bool generateHtmlHelp    = Config::getBool("generate-chm");
@@ -930,7 +932,6 @@ void generateOutput()
    if (generateRtf) {
       Doxy_Globals::infoLog_Stat.begin("Enable RTF output\n");
 
-      static QString rtfOutput = Config::getString("rtf-output");
       Doxy_Globals::outputList.add(QMakeShared<RTFGenerator>());
       RTFGenerator::init();
 
@@ -958,11 +959,11 @@ void generateOutput()
    }
 
    if (generateLatex) {
-      writeDoxFont(Config::getString("latex-output"));
+      writeDoxFont(latexOutput);
    }
 
    if (generateRtf) {
-      writeDoxFont(Config::getString("rtf-output"));
+      writeDoxFont(rtfOutput);
    }
 
    Doxy_Globals::infoLog_Stat.begin("Generating style sheet\n");
@@ -1045,6 +1046,12 @@ void generateOutput()
       Doxy_Globals::infoLog_Stat.end();
    }
 
+   if (Doxy_Globals::formulaList.count() > 0 && generateRtf) {
+      Doxy_Globals::infoLog_Stat.begin("Generating bitmaps for formulas in RTF\n");
+      Doxy_Globals::formulaList.generateBitmaps(rtfOutput);
+      Doxy_Globals::infoLog_Stat.end();
+  }
+
    if (Config::getBool("sort-group-names")) {
       // groupSDict -- always sorted
       // sort the sub groups
@@ -1068,11 +1075,11 @@ void generateOutput()
       }
 
       if (generateRtf) {
-         removeDoxFont(Config::getString("rtf-output"));
+         removeDoxFont(rtfOutput);
       }
 
       if (generateLatex) {
-         removeDoxFont(Config::getString("latex-output"));
+         removeDoxFont(latexOutput);
       }
    }
 
@@ -1131,7 +1138,7 @@ void generateOutput()
    if (generateRtf) {
       Doxy_Globals::infoLog_Stat.begin("Post process RTF output\n");
 
-      if (! RTFGenerator::preProcessFileInplace(Config::getString("rtf-output"), "refman.rtf")) {
+      if (! RTFGenerator::preProcessFileInplace(rtfOutput, "refman.rtf")) {
          err("Error occurred during post processing of RTF files\n");
       }
 
