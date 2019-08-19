@@ -1420,12 +1420,12 @@ void LatexGenerator::startHtmlLink(const QString &url)
       m_textStream << "}";
    }
 
-   m_textStream << "{\\tt ";
+   m_textStream << "{\\texttt{ ";
 }
 
 void LatexGenerator::endHtmlLink()
 {
-   m_textStream << "}";
+   m_textStream << "}}";
 }
 
 //void LatexGenerator::writeMailLink(const char *url)
@@ -1435,14 +1435,14 @@ void LatexGenerator::endHtmlLink()
 //    m_textStream << url;
 //    m_textStream << "}";
 //  }
-//  m_textStream << "{\\tt ";
+//  m_textStream << "\\texttt{ ";
 //  docify(url);
 //  m_textStream << "}";
 //}
 
 void LatexGenerator::writeStartAnnoItem(const QString &, const QString &, const QString &path, const QString &name)
 {
-   m_textStream << "\\item\\contentsline{section}{\\bf ";
+   m_textStream << "\\item\\contentsline{section}\\textbf{ ";
 
    if (! path.isEmpty()) {
       docify(path);

@@ -274,9 +274,9 @@ void LatexDocVisitor::visit(DocURL *u)
       m_t << u->url() << "}";
    }
 
-   m_t << "{\\tt ";
+   m_t << "{\\texttt{ ";
    filter(u->url());
-   m_t << "}";
+   m_t << "}}";
 }
 
 void LatexDocVisitor::visit(DocLineBreak *)
@@ -745,14 +745,17 @@ void LatexDocVisitor::visitPre(DocSimpleSect *s)
          m_t << "\\begin{DoxyAuthor}{";
          filter(theTranslator->trAuthor(true, false));
          break;
+
       case DocSimpleSect::Version:
          m_t << "\\begin{DoxyVersion}{";
          filter(theTranslator->trVersion());
          break;
+
       case DocSimpleSect::Since:
          m_t << "\\begin{DoxySince}{";
          filter(theTranslator->trSince());
          break;
+
       case DocSimpleSect::Date:
          m_t << "\\begin{DoxyDate}{";
          filter(theTranslator->trDate());
@@ -1375,7 +1378,7 @@ void LatexDocVisitor::visitPre(DocHRef *href)
       m_t << "}";
    }
 
-   m_t << "{\\tt ";
+   m_t << "{\\texttt{ ";
 }
 
 void LatexDocVisitor::visitPost(DocHRef *)
@@ -1383,7 +1386,7 @@ void LatexDocVisitor::visitPost(DocHRef *)
    if (m_hide) {
       return;
    }
-   m_t << "}";
+   m_t << "}}";
 }
 
 void LatexDocVisitor::visitPre(DocHtmlHeader *header)
