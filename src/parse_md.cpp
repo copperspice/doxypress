@@ -2363,6 +2363,19 @@ static int writeTableBlock(QString &out, QStringView data)
    return iter_i - data.constBegin();
 }
 
+static bool hasLineBreak(QStringView tmp)
+{
+   if (tmp.trimmed().isEmpty()) {
+      return false;
+   }
+
+   if (tmp.endsWith("  ")) {
+      return true;
+   }
+
+   return false;
+}
+
 void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_iterator iter_size)
 {
    int level;
@@ -2445,8 +2458,12 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
 
    } else {
       // nothing interesting, just output the line
-      out += QStringView(data.constBegin(), iter_size);
+      QStringView tmp = QStringView(data.constBegin(), iter_size);
+      out += tmp;
 
+      if (hasLineBreak(tmp)) {
+         out += "<br>\n";
+      }
    }
 }
 
