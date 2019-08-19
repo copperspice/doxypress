@@ -627,9 +627,23 @@ void RTFDocVisitor::visit(DocFormula *f)
    if (m_hide) {
       return;
    }
-   // TODO: do something sensible here, like including a bitmap
+
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocFormula)}\n");
-   m_t << f->text();
+   bool bDisplay = ! f->isInline();
+
+   if (bDisplay)  {
+      m_t << "\\par";
+      m_t << "{";
+      m_t << "\\pard\\plain";
+      m_t << "\\pard";
+      m_t << "\\qc";
+   }
+
+   m_t << "{ \\field\\flddirty {\\*\\fldinst  INCLUDEPICTURE \"" << f->relPath() << f->name() << ".png\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt Image}}";
+   if (bDisplay)  {
+      m_t << "\\par}";
+   }
+
    m_lastIsPara = false;
 }
 
@@ -640,6 +654,7 @@ void RTFDocVisitor::visit(DocIndexEntry *i)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocIndexEntry)}\n");
+
    m_t << "{\\xe \\v " << i->entry() << "}" << endl;
    m_lastIsPara = false;
 }
