@@ -430,7 +430,9 @@ class DocStyleChange : public DocNode
                 Span          = 0x0100,
                 Div           = 0x0200,
                 Strike        = 0x0400,
-                Underline     = 0x0800
+                Underline     = 0x0800,
+                Del           = 0x1000,
+                Ins           = 0x2000
    };
 
    DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = nullptr)

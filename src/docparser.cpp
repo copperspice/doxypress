@@ -1121,6 +1121,22 @@ QString DocStyleChange::styleString() const
       case DocStyleChange::Span:
          retval = "span";
          break;
+
+      case DocStyleChange::Strike:
+         return "strike";
+         break;
+
+       case DocStyleChange::Underline:
+         return "u";
+         break;
+
+       case DocStyleChange::Del:
+         return "del";
+         break;
+
+       case DocStyleChange::Ins:
+         return "ins";
+         break;
    }
 
    return retval;
