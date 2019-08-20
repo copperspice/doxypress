@@ -783,6 +783,7 @@ static int yyread(char *buf, int max_size)
          REJECT;
 
       } else {
+         --s_nestingCount;
          s_pythonDocString = false;
 
          QString text = QString::fromUtf8(yytext);
