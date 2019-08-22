@@ -2010,10 +2010,10 @@ YY_RULE_SETUP
       s_blockName = text.mid(1);
 
       if (s_blockName.at(1) == '[') {
-         s_blockName[1] = ']';
+         s_blockName.replace(1, 1, ']');
 
       } else if (s_blockName.at(1) == '{')  {
-         s_blockName[1] = '}';
+         s_blockName.replace(1, 1, '}');
       }
 
       s_lastCommentContext = YY_START;
@@ -2279,6 +2279,7 @@ YY_RULE_SETUP
          REJECT;
 
       } else {
+         --s_nestingCount;
          s_pythonDocString = false;
 
          QString text = QString::fromUtf8(commentcnvYYtext);
