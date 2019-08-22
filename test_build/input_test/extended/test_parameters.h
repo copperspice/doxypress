@@ -16,7 +16,7 @@ class test_Parameters
 {
 public:
     /**
-     * Returns TRUE if blah     
+     * Returns TRUE if blah
      * @param param1 the date to check
      * @param param2 the param2 string
      * @param param3 the param3 object
@@ -27,7 +27,7 @@ public:
      *
      * Pure-virtual method used to blah
      */
-    virtual RWBoolean doWork(const RWDate &param1, const RWCString &param2, const RWCString *param3, 
+    virtual RWBoolean doWork(const RWDate &param1, const RWCString &param2, const RWCString *param3,
             const RWBoolean param4, const RWBoolean param5, const RWBoolean param6) const = 0;
 
 };

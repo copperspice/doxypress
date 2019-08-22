@@ -15,11 +15,11 @@ class QTextCodec;
 class test_Bucket
 {
 
- public:     
+ public:
    static QString escape(const QString &plain);
-     
+
    CORE_CS_ENUM(BGMode)
-   CORE_CS_ENUM(CursorShape) 
+   CORE_CS_ENUM(CursorShape)
    CORE_CS_ENUM(DateFormat)
    CORE_CS_ENUM(DayOfWeek)
    CORE_CS_ENUM(LayoutDirection)
@@ -28,12 +28,12 @@ class test_Bucket
    CORE_CS_ENUM(TextFormat)
    CORE_CS_ENUM(TextElideMode)
    CORE_CS_ENUM(TimeSpec)
-       
+
    CORE_CS_ENUM(Orientation)
    CORE_CS_FLAG(Orientation, Orientations)
 
    CORE_CS_ENUM(AlignmentFlag)
-   CORE_CS_FLAG(AlignmentFlag, Alignment)  
+   CORE_CS_FLAG(AlignmentFlag, Alignment)
 
    CORE_CS_ENUM(WindowType)
    CORE_CS_FLAG(WindowType, WindowFlags)
@@ -83,7 +83,7 @@ class test_Bucket
       KeyboardModifierMask = 0xfe000000
    };
    using KeyboardModifiers = QFlags<KeyboardModifier>;
-  
+
    enum Modifier {
       META          = Qt::MetaModifier,
       SHIFT         = Qt::ShiftModifier,
@@ -91,7 +91,7 @@ class test_Bucket
       ALT           = Qt::AltModifier,
       MODIFIER_MASK = KeyboardModifierMask,
       UNICODE_ACCEL = 0x00000000
-   }; 
+   };
 
    enum Orientation {
       Horizontal = 0x1,
@@ -99,7 +99,7 @@ class test_Bucket
    };
 
    using Orientations = QFlags<Orientation>;
- 
+
    enum SortOrder {
       AscendingOrder,
       DescendingOrder
@@ -141,7 +141,7 @@ class test_Bucket
       TextLongestVariant = 0x80000,
       TextBypassShaping = 0x100000
    };
- 
+
    enum WindowType {
       Widget = 0x00000000,
       Window = 0x00000001,
@@ -153,7 +153,7 @@ class test_Bucket
       ToolTip = 0x0000000c | Window,
       SplashScreen = 0x0000000e | Window,
       Desktop = 0x00000010 | Window,
-      SubWindow =  0x00000012     
+      SubWindow =  0x00000012
    };
 
    using WindowFlags = QFlags<WindowType>;
@@ -166,8 +166,8 @@ class test_Bucket
       WindowActive     = 0x00000008
    };
 
-   using WindowStates = QFlags<WindowState>;  
-     
+   using WindowStates = QFlags<WindowState>;
+
    enum ArrowType {
       NoArrow,
       UpArrow,
@@ -176,7 +176,7 @@ class test_Bucket
       RightArrow
    };
 
-   enum PenStyle { 
+   enum PenStyle {
       NoPen,
       SolidLine,
       DashLine,
@@ -185,8 +185,8 @@ class test_Bucket
       DashDotDotLine,
       CustomDashLine,
       MPenStyle = 0x0f
-   }; 
-  
+   };
+
    enum DateFormat {
       TextDate,                     // default
       ISODate,                      // ISO 8601
@@ -219,8 +219,8 @@ class test_Bucket
       LeftToRight,
       RightToLeft,
       LayoutDirectionAuto
-   };     
-  
+   };
+
 #if defined(Q_OS_MAC)
    typedef void *HANDLE;
 
@@ -243,7 +243,7 @@ class test_Bucket
       MaximumSize,
       MinimumDescent,
       NSizeHints
-   };   
+   };
 
    enum HitTestAccuracy { ExactHit, FuzzyHit };
    enum WhiteSpaceMode {

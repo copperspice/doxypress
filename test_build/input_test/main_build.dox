@@ -14,14 +14,14 @@ This page provides a sample test of the new sortid command added in DoxyPress.
 <br>
 
 The build process for CopperSpice is slightly different depending on the platform it will be hosted on,
-or platform your CopperSpice application will be run on. 
+or platform your CopperSpice application will be run on.
 
 The following sections detail the required build tools and the necessary steps to build for the currently
 supported platforms.
-  
+
   \li \subpage build-overview
   \li \subpage build-from-source
   \li \subpage build-options
-  \li \subpage supported-platforms   
+  \li \subpage supported-platforms
 
 */

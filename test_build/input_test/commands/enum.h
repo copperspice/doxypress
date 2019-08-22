@@ -13,8 +13,8 @@ class test_Enum
     enum fruit { pear, orange };
 
     /*! Another enum, with inline docs */
-    enum veggies 
-    { 
+    enum veggies
+    {
       celery,   /*!< docs for value one */
       carrot    /*!< docs for value two */
     };
@@ -22,8 +22,8 @@ class test_Enum
    /// Documentation for the Cajun Spices enum
    enum class CajunSpices {
       hungarian_paprika,
-      hot_paprika,  
-      oregano,   
+      hot_paprika,
+      oregano,
       thyme
    };
 
@@ -44,7 +44,7 @@ class test_Enum
 
 
 /*! \enum test_Enum::fruit
- * A description of the fruit enum. 
+ * A description of the fruit enum.
  */
 
 

@@ -44,10 +44,10 @@ This is a level 2 header
 <div class="md">Numbered List</div>
 
    1. Apples - Green apples are nice for cooking. You can uses apples in a pie or simply cook them with a bit of brown sugar
-and raisins. Red apples are good for eating but they are too soft for cooking. 
+and raisins. Red apples are good for eating but they are too soft for cooking.
 
    2. Peaches - Excellent for pies and cobblers. A great topping for cooked peaches is a mixture of flour, white and brown sugar,
-butter, and a good amount of vanilla. 
+butter, and a good amount of vanilla.
 
 
 <div class="md">Code Blocks</div>
@@ -68,19 +68,19 @@ ______
 
 <div class="md">Emphasis</div>
 
-  This is italics using asterisks: *single asterisks*    
+  This is italics using asterisks: *single asterisks*
 
-  _single underscores_  
+  _single underscores_
 
-  This is bold using asterisks: **double asterisks**  
+  This is bold using asterisks: **double asterisks**
 
-  __double underscores__ 
- 
+  __double underscores__
+
 
 <div class="md">Code Spans</div>
 
    Use the `printf()` function.
-   
+
 
 <div class="md">Inline Links</div>
 
@@ -88,9 +88,9 @@ ______
 
    [Link text B](http://www.copperspice.com/ "Hover Link Title B")
 
-   [Link text C](/relative/path/to/index.html "Hover Link Title C") 
+   [Link text C](/relative/path/to/index.html "Hover Link Title C")
 
-   [Link text D](somefile.html) 
+   [Link text D](somefile.html)
 
 
 

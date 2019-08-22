@@ -14,7 +14,7 @@ To customize the CopperSpice library build refer to the following selections.
 
    \li \subpage options-all
    \li \subpage options-bundled
-  
+
 */
 
 /**
@@ -62,7 +62,7 @@ To customize the CopperSpice library build refer to the following selections.
      <td>&ndash;&nbsp;&ndash;host=&lt;spec&gt;</td>
      <td>&lt;spec&gt; is the operating system your application will be compiled on</td>
      <td>Defaults to your current architecture</td>
-   </tr>   
+   </tr>
    <tr>
       <td>&ndash;&nbsp;&ndash;disable-webkit</td>
       <td>Do not compile the WebKit library</td>
@@ -109,7 +109,7 @@ The following SQL driver is built directly into the CopperSpice <b>CsSql</b> lib
 <h4>Additional SQL Drivers</h4>
 
 The CopperSpice Makefiles will automatically detect client libraries installed on your computer. If
-configure detects a DBMS, the appropriate SQL drivers will be built. Refer to sql_drivers 
+configure detects a DBMS, the appropriate SQL drivers will be built. Refer to sql_drivers
 "Building SQL Drivers" for more information.
 
 

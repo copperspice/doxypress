@@ -32,9 +32,9 @@ class test_Group1
 
    groupTest1(bool);             ///< constructor comment with three slashes
 
-   groupTest1(int);              //!< constructor comment two slashes and one exclamation 
+   groupTest1(int);              //!< constructor comment two slashes and one exclamation
 
-/** @} */ 
+/** @} */
 
 };
 

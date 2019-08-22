@@ -7,13 +7,13 @@
 *************************************************************************/
 
 /*!
-\page build-overview Build Overview  
+\page build-overview Build Overview
 \sortid 2
 
 <h3>CopperSpice Build Objectives</h3>
 
-A key objective for CopperSpice was to create a C++ library which used a standard build process. 
-CopperSpice uses Autoconf and Automake, which are part of the GNU Autotools system. 
+A key objective for CopperSpice was to create a C++ library which used a standard build process.
+CopperSpice uses Autoconf and Automake, which are part of the GNU Autotools system.
 
 There are configuration options available when building CopperSpice. These options can be set
 by passing arguments to the configure script file.
@@ -36,7 +36,7 @@ to assist the user in the configuration and build process.
 software. This tool makes your packages portable by performing tests to discover system
 characteristics, before the package is compiled. Your source code can be modified to leverage platform
 specifics.
- 
+
 The system on which you build, does not need to have Autoconf installed. Autoconf is needed only to generate
 the configure script, which is usually shipped with the software. We provide the configuration script with
 the CopperSpice source.
@@ -79,7 +79,7 @@ The build process consists of three basic steps.
 
 <b>Step 1</b>&nbsp; Run \c autoreconf to generate the \c configure file and the \c Makefile.in file.
 
-This step is normally not required as the CopperSpice source distribution includes the generated files. 
+This step is normally not required as the CopperSpice source distribution includes the generated files.
 This step must be done if you modify the \c configure.ac file or the \c Makefile.am file.
 
    \li Autoreconf uses \c configure.ac to generate \c configure
@@ -101,7 +101,7 @@ This step must be done if you modify the \c configure.ac file or the \c Makefile
 
 When running GNU make there is a "-j N" parameter which can be passed to specify the number of cores make should use.
 Make will start multiple parallel jobs, which can speed up compiling considerably. There is no clear recommend value for N.
-We found the best value is the numbers of processor cores plus 1. 
+We found the best value is the numbers of processor cores plus 1.
 
 It is worth noting that using this parameter will alter the order source files are compiled. This may look a bit strange
 but it is normal and expected since multiple processes are running.
@@ -117,14 +117,14 @@ but it is normal and expected since multiple processes are running.
 \sortid 3
 
 
-In order to build the CopperSpice libraries from source, it may be necessary to install additional utilities. 
+In order to build the CopperSpice libraries from source, it may be necessary to install additional utilities.
 The exact requirements depend on the platform your application will be run on.
 
-   \li Download and install the source code 
+   \li Download and install the source code
        <a class="www-link" href="http://sourceforge.net/projects/copperspice/files/copperspice/source">CopperSpice Source</a>
 
-   \li Refer to the \ref supported-platforms for information about the compilers and utilities required to build CopperSpice     
-         
+   \li Refer to the \ref supported-platforms for information about the compilers and utilities required to build CopperSpice
+
 <br>
 The following table details what is included in the CS source download.
 
@@ -159,7 +159,7 @@ The following table details what is included in the CS source download.
       <td>configure.ac</td>
       <td>Autoconf</td>
       <td>See Note B</td>
-   </tr>   
+   </tr>
   <tr>
       <td>Makefile.in</td>
       <td>Autoconf, intermediate file</td>
@@ -169,12 +169,12 @@ The following table details what is included in the CS source download.
       <td>Makefile.am</td>
       <td>Automake</td>
       <td>Used by Automake to generate Makefile.in</td>
-   </tr>    
+   </tr>
 </TABLE>
 
 <br>
 <b>Note A:</b>  &nbsp;&nbsp;The \c configure file is a shell script and must be run in a Bourne shell interpreter. BASH is the
-most common shell for Windows development and is part of the MSYS utility. 
+most common shell for Windows development and is part of the MSYS utility.
 
 
 <br>
@@ -187,7 +187,7 @@ The file \c configure.ac will not need to be modified unless you are changing th
 <h3>CS Build Settings</h3>
 
    \li All CopperSpice libraries are built with debug off by default.
- 
+
    \li The build process for the Webkit library was divided into multiple parts. This was required because of
    Makefile limitations on Windows. The libCsWebKit library was made by linking together the individual parts.
 

@@ -18,21 +18,21 @@ The following is a test of the \\ref command when the physical page name is not 
 
    <dt>\ref cppblock</dt>
       <dd>This example is a \\ref in a dl.</dd>
-  
+
 </dl>
 
 <h3>Test Two</h3>
 
-<a class="el" href="topic-source.html#cppblock">Comments in C Source Code</a> 
+<a class="el" href="topic-source.html#cppblock">Comments in C Source Code</a>
 <br>This example is using the href tag with hard coded HTML.
 
 
 
 \section cppblock Comments in C Source Code
 
-For each entity (class, method, function, etc) in the code there are two categories of documentation, 
-brief documentation and detailed documentation. If both are supplied the brief will come first. 
-You can specify either of these or both as needed. 
+For each entity (class, method, function, etc) in the code there are two categories of documentation,
+brief documentation and detailed documentation. If both are supplied the brief will come first.
+You can specify either of these or both as needed.
 
 
 */

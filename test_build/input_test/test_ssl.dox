@@ -8,7 +8,7 @@
 
 /*!
 \namespace QSsl
-\brief The QSsl namespace declares enums common to all SSL classes in %CsNetwork. 
+\brief The QSsl namespace declares enums common to all SSL classes in %CsNetwork.
 
 The QSsl namespace declares enums common to all SSL classes in %CsNetwork.
 

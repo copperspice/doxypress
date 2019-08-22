@@ -21,7 +21,7 @@ This same behavior will happen for a documented entity such as "\\class" or "\\f
 /**
 \page brief-2-test Brief Description - Test 2
 
-There is no brief description on this page. The tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO-BRIEF" is <b>on</b>. This entire text will appear in the body of the page since the opening marker for this \\page" is \c /&zwnj;** 
+There is no brief description on this page. The tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO-BRIEF" is <b>on</b>. This entire text will appear in the body of the page since the opening marker for this \\page" is \c /&zwnj;**
 
 This same behavior will happen for a documented entity such as "\\class" or "\\file".
 
@@ -29,11 +29,11 @@ This same behavior will happen for a documented entity such as "\\class" or "\\f
 
 
 /*!
-\class test_Brief 
+\class test_Brief
 
-There is a test class to show how what happens with the brief description and the detailed section text. For this example the tag for "QT-AUTO-BRIEF" is <b>on</b>. 
+There is a test class to show how what happens with the brief description and the detailed section text. For this example the tag for "QT-AUTO-BRIEF" is <b>on</b>.
 
-For myMethod1() there is only one line of text and it will be treated as the brief description. There is no detailed text. With the tag, "Always show detailed section" set <b>on</b>, the brief will be displayed. If this tag is set <b>off</b>, the method will be omitted from the documentation. 
+For myMethod1() there is only one line of text and it will be treated as the brief description. There is no detailed text. With the tag, "Always show detailed section" set <b>on</b>, the brief will be displayed. If this tag is set <b>off</b>, the method will be omitted from the documentation.
 
 */
 
@@ -43,7 +43,7 @@ For myMethod1() there is only one line of text and it will be treated as the bri
 \fn test_Brief::test_Brief ()
 \brief  This is an explict brief notation.
 
-Constructs an empty class. 
+Constructs an empty class.
 
 */
 
@@ -51,7 +51,7 @@ Constructs an empty class.
 /*!
 \fn void test_Brief::myMethod1 ()
 
-Simple text for a method. 
+Simple text for a method.
 
 */
 
@@ -59,7 +59,7 @@ Simple text for a method.
 /*!
 \fn void test_Brief::myMethod2 ()
 
-Line one of text, the brief. 
+Line one of text, the brief.
 Line two of text.
 Line three of text will be included in the line two paragraph.
 

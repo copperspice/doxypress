@@ -12,10 +12,10 @@
 /// Documentation for test_inculde
 template <class T>
 class test_Include
-{        
+{
    /// docs for a member variable
    bool isOk;
-   
+
 };
 
 #endif

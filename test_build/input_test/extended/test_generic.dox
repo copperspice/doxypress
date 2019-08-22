@@ -6,7 +6,6 @@
 *
 *************************************************************************/
 
-
 /*!
 \fn inline const QMap<QString, bool> &test_Slot::serviceOwner ( const QString & name ) const
 

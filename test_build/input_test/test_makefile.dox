@@ -9,8 +9,8 @@
 /**
 \page makefile-test Makefile Test
 
-The following test shows a new option in DoxPress for displaying a Makefile in a code block. The \\code command is followed by a new parameter to 
-indicate the source is a Makefile. There is currently no syntax highlighting since Makefiles seldom require this. 
+The following test shows a new option in DoxPress for displaying a Makefile in a code block. The \\code command is followed by a new parameter to
+indicate the source is a Makefile. There is currently no syntax highlighting since Makefiles seldom require this.
 
 The source code is placed inside a block structured like the following:
 

@@ -9,7 +9,7 @@
 #ifndef TEST_RETURN_H
 #define TEST_RETURN_H
 
-class test_ReturnType 
+class test_ReturnType
 {
    using iterator        = void *;
    using const_iterator  = const void *;
