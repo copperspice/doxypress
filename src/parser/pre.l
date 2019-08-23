@@ -2330,6 +2330,10 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_defArgsStr += QString::fromUtf8(yytext);
    }
 
+<ReadString>\\/\r?\n {
+      // continue line
+   }
+
 <ReadString>\\.            {
       s_defArgsStr += QString::fromUtf8(yytext);
    }
