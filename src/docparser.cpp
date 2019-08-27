@@ -935,7 +935,7 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
 
             default:
                warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s while handling command %s",
-                              csPrintable(tokToString(tok)), csPrintable(cmdName));
+                  csPrintable(tokToString(tok)), csPrintable(cmdName));
                break;
          }
          break;
@@ -1303,7 +1303,7 @@ static DocInternalRef *handleInternalRef(DocNode *parent)
 
    if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     csPrintable(tokToString(tok)), csPrintable(tokenName));
+                  csPrintable(tokToString(tok)), csPrintable(tokenName));
       return 0;
    }
 
@@ -1330,7 +1330,7 @@ static DocAnchor *handleAnchor(DocNode *parent)
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     csPrintable(tokToString(tok)), csPrintable(g_token->name));
+                  csPrintable(tokToString(tok)), csPrintable(g_token->name));
       return 0;
    }
 
@@ -1359,7 +1359,7 @@ static void handleAnchorName(DocNode *parent)
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-                     csPrintable(tokToString(tok)), csPrintable(g_token->name));
+                  csPrintable(tokToString(tok)), csPrintable(g_token->name));
       return;
    }
 
@@ -5514,7 +5514,7 @@ void DocPara::handleEmoji()
 
   } else if (tok != TK_WORD) {
     warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
-        tokToString(tok), csPrintable("emoji"));
+        csPrintable(tokToString(tok)), csPrintable("emoji"));
     return;
   }
 
