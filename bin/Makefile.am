@@ -11,7 +11,7 @@ gcclibs=libgcc_s_*-1  libstdc++-6  libwinpthread-1
 
 # list of CopperSpice libraries
 cslibs=Core Xml
-csver=1.5
+csver=1.6
 
 # location of includes
 AM_CXXFLAGS+=-I../src
