@@ -137,8 +137,8 @@ QString tokToString(int token)
          break;
 
       case TK_COMMAND_BS:
-         return "TK_COMMAND_BS";
-   break;
+         retval = "TK_COMMAND_BS";
+         break;
 
       case TK_HTMLTAG:
          retval = "TK_HTMLTAG";

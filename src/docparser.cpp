@@ -1123,19 +1123,19 @@ QString DocStyleChange::styleString() const
          break;
 
       case DocStyleChange::Strike:
-         return "strike";
+         retval = "strike";
          break;
 
        case DocStyleChange::Underline:
-         return "u";
+         retval = "u";
          break;
 
        case DocStyleChange::Del:
-         return "del";
+         retval = "del";
          break;
 
        case DocStyleChange::Ins:
-         return "ins";
+         retval = "ins";
          break;
    }
 
