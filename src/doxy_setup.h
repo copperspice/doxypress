@@ -49,7 +49,7 @@ struct CommandLine {
 
 void initDoxyPress();
 
-struct CommandLine parseCommandLine(QStringList argList);
+CommandLine parseCommandLine(QStringList argList);
 void readConfiguration(struct CommandLine cmdArgs);
 
 void checkConfiguration();

@@ -38,7 +38,10 @@ int main(int argc, char **argv)
       argList.append(value);
    }
 
-   struct CommandLine cmdArgs;
+   // loads the project default values
+   Config::load_Defaults();
+
+   CommandLine cmdArgs;
    cmdArgs = parseCommandLine(argList);
 
    // read project file

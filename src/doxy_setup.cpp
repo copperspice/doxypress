@@ -142,7 +142,7 @@ void shutDownDoxyPress()
 }
 
 // **
-struct CommandLine parseCommandLine(QStringList argList)
+CommandLine parseCommandLine(QStringList argList)
 {
    CommandLine cmdArgs;
 

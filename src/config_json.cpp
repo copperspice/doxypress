@@ -83,7 +83,6 @@ QByteArray Config::json_ReadFile(const QString &fName)
 bool Config::parseConfig(const QString &fName)
 {
    printf("**  Read Project Configuration\n");
-   load_Defaults();
 
    if (! read_ProjectFile(fName)) {
       return false;
