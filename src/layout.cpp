@@ -1966,7 +1966,7 @@ void writeDefaultLayoutFile(const QString &fileName)
    QTextStream t(&f);
    t << layoutData;
 
-   printf("DoxyPress layout file generated: %s", csPrintable( f.fileName() ));
+   printf("DoxyPress layout file generated: %s\n\n", csPrintable( f.fileName() ));
 }
 
 // Convert input to a title

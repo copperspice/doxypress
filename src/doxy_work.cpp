@@ -9977,7 +9977,7 @@ void Doxy_Work::stopDoxyPress(int unused)
    killpg(0, SIGINT);
 #endif
 
-   msg("DoxyPress aborted\n");
+   msg("DoxyPress aborted\n\n");
 
    Doxy_Globals::programExit = true;
    exit(1);

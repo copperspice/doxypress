@@ -146,30 +146,27 @@ CommandLine parseCommandLine(QStringList argList)
 {
    CommandLine cmdArgs;
 
-   QMap<QString, Options> argMap;
-   argMap.insert( "--b",       OUTPUT_APP      );
-   argMap.insert( "--d",       DEBUG_DUMP      );
-   argMap.insert( "--h",       HELP            );
-   argMap.insert( "--l",       BLANK_LAYOUT    );
-   argMap.insert( "--m",       DEBUG_SYMBOLS   );
-   argMap.insert( "--w",       BLANK_STYLE     );
-   argMap.insert( "--v",       DVERSION        );
-   argMap.insert( "--dt",      DATETIME        );
-   argMap.insert( "--help",    HELP            );
-   argMap.insert( "--version", DVERSION        );
+   QFlatMap<QString, Options> argMap;
+   argMap.insert( "-b",         OUTPUT_APP      );
+   argMap.insert( "-d",         DEBUG_DUMP      );
+   argMap.insert( "-h",         HELP            );
+   argMap.insert( "-l",         BLANK_LAYOUT    );
+   argMap.insert( "-m",         DEBUG_SYMBOLS   );
+   argMap.insert( "-w",         BLANK_STYLE     );
+   argMap.insert( "-v",         DVERSION        );
+
+   argMap.insert( "--dt",       DATETIME        );
+   argMap.insert( "--help",     HELP            );
+   argMap.insert( "--version",  DVERSION        );
 
    QStringList dashList;
-
-   for (auto item : argList)   {
-      if (item.startsWith("--")) {
-         dashList.append(item);
-      }
+   for (auto item : argList) {
+      dashList.append(item);
    }
 
    auto iter = argList.begin();
 
-   for (auto item : dashList)   {
-
+   for (auto item : dashList) {
       Options value = INVALID;
 
       if (argMap.contains(item)) {
@@ -660,41 +657,44 @@ void Doxy_Setup::usage()
    printf("DoxyPress: Version %s\n", csPrintable(versionString));
    printf("email: info@copperspice.com\n");
 
-   printf("\n");
-   printf("Usage: doxypess [OPTIONS] [project file name]\n");
-
    printf("\n\n");
-   printf("Generate default layout file to configure documentation:\n");
-   printf("   --l  [layout file name]   Default is `doxy_layout.xml'\n");
+   printf("Usage: doxypess [OPTIONS] [project file name]\n");
 
    printf("\n");
    printf("Generate a style sheet file for RTF, HTML or Latex:\n");
-   printf("   RTF:    --w  rtf-ext     [extensions file name]   Default is 'doxy_ext.rtf'\n");
-   printf("   RTF:    --w  rtf-style   [stylesheet file name]   Default is 'doxy_style.rtf'\n");
+   printf("   RTF:   -w  rtf-ext     [extensions file name]   Default is 'doxy_ext.rtf'\n");
+   printf("   RTF:   -w  rtf-style   [stylesheet file name]   Default is 'doxy_style.rtf'\n");
 
    printf("\n");
-   printf("   HTML:   --w  html-head   [header file name]       Default is 'doxy_header.html'\n");
-   printf("   HTML:   --w  html-foot   [footer file name]       Default is 'doxy_footer.html'\n");
-   printf("   HTML:   --w  html-style  [styleSheet file name]   Default is 'doxypress.css'\n");
+   printf("   HTML:  -w  html-head   [header file name]       Default is 'doxy_header.html'\n");
+   printf("   HTML:  -w  html-foot   [footer file name]       Default is 'doxy_footer.html'\n");
+   printf("   HTML:  -w  html-style  [styleSheet file name]   Default is 'doxypress.css'\n");
 
    printf("\n");
-   printf("   LaTeX:  --w  latex-head  [header file name]       Default is 'doxy_header.latex'\n");
-   printf("   LaTeX:  --w  latex-foot  [footer file name]       Default is 'doxy_footer.latex'\n");
-   printf("   LaTeX:  --w  latex-style [styleSheet file name]   Default is 'doxypress.sty'\n");
+   printf("   LaTeX: -w  latex-head  [header file name]       Default is 'doxy_header.latex'\n");
+   printf("   LaTeX: -w  latex-foot  [footer file name]       Default is 'doxy_footer.latex'\n");
+   printf("   LaTeX: -w  latex-style [styleSheet file name]   Default is 'doxypress.sty'\n");
 
    printf("\n\n");
-   printf("Use the passed date/time value in the documentation:\n");
-   printf("   --dt  [date_time]   Default is current date and time\n");
+   printf("Generate layout file which can be configured for documentation output:\n");
+   printf("   -l   [layout file name]   Default is `doxy_layout.xml'\n");
+
+   printf("\n");
+   printf("Use passed date/time value in the output footer (yyyy/MM/dd HH:mm:ss):\n");
+   printf("   --dt <date_time>          Default is the current system date and time\n");
 
    printf("\n");
    printf("Other Options:\n");
-   printf("   --h  display usage\n");
-   printf("   --v  display version\n");
-   printf("   --b  output for DoxyPressApp\n");
-   printf("   --m  dump symbol map\n");
+   printf("   -b      turns off output buffering of displayed messages\n");
+   printf("   -h      display this help message\n");
+   printf("   -m      dump symbol map\n");
+   printf("   -v      display DoxyPress version\n");
 
    printf("\n");
-   printf("   --d  <level> enable one or more of the following debug levels\n");
+   printf("Enable debug level by listing one or more flags:\n");
+   printf("   -d   <level>\n");
 
+   printf("\n");
    Debug::printFlags();
+   printf("\n");
 }
