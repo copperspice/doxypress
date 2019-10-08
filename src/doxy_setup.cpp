@@ -658,7 +658,7 @@ void Doxy_Setup::usage()
    printf("email: info@copperspice.com\n");
 
    printf("\n\n");
-   printf("Usage: doxypess [OPTIONS] [project file name]\n");
+   printf("Usage: doxypress [OPTIONS] [project file name]\n");
 
    printf("\n");
    printf("Generate a style sheet file for RTF, HTML or Latex:\n");
