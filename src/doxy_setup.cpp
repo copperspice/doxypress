@@ -161,7 +161,10 @@ CommandLine parseCommandLine(QStringList argList)
 
    QStringList dashList;
    for (auto item : argList) {
-      dashList.append(item);
+
+      if (item.startsWith("-")) {
+         dashList.append(item);
+      }
    }
 
    auto iter = argList.begin();
