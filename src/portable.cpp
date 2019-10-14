@@ -110,30 +110,32 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    // Windows
 
    if (commandHasConsole) {
-      return system(fullCmd.constData());
+	   return system(fullCmd.constData());
 
    } else {
-      CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
+	   CoInitializeEx(NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE);
 
-      SHELLEXECUTEINFOW sInfo = {
+      auto commandW = command.toStdWString();
+	  auto argsW = args.toStdWString();
+	  SHELLEXECUTEINFOW sInfo = {
          sizeof(SHELLEXECUTEINFOW),
 
          // wait till the process is done, do not display msg box if there is an error
          SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,
 
-         NULL,                               /* window handle */
-         NULL,                               /* action to perform: open */
-         command.toStdWString().c_str(),     /* file to execute */
-         args.toStdWString().c_str(),        /* argument list */
-         NULL,                               /* use current working dir */
-         SW_HIDE,                            /* minimize on start-up */
-         0,                                  /* application instance handle */
-         NULL,                               /* ignored: id list */
-         NULL,                               /* ignored: class name */
-         NULL,                               /* ignored: key class */
-         0,                                  /* ignored: hot key */
-         NULL,                               /* ignored: icon */
-         NULL                                /* resulting application handle */
+         NULL,             /* window handle */
+         NULL,             /* action to perform: open */
+		 commandW.c_str(), /* file to execute */
+		 argsW.c_str(),    /* argument list */
+         NULL,             /* use current working dir */
+         SW_HIDE,          /* minimize on start-up */
+         0,                /* application instance handle */
+         NULL,             /* ignored: id list */
+         NULL,             /* ignored: class name */
+         NULL,             /* ignored: key class */
+         0,                /* ignored: hot key */
+         NULL,             /* ignored: icon */
+         NULL              /* resulting application handle */
       };
 
       if (! ShellExecuteExW(&sInfo)) {
