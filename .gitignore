@@ -1,6 +1,5 @@
 .dirstamp
 
-autom4te.cache/*
 autotools/build-aux/*
 autotools/m4/lt*.m4
 autotools/m4/libtool.m4
@@ -23,13 +22,6 @@ autotools/m4/pkg.m4
 /src/parser/do-*
 /src/parser/license.txt
 
-config.status
-libtool
-Makefile
-Makefile.in
-aclocal.m4
-configure
-config.log
 error.log
 /do-*
 
