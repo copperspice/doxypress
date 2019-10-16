@@ -1721,22 +1721,18 @@ static QString extractTitleId(QString &title, int level)
 {
    static const int tocIncHeaders = Config::getInt("toc-include-headers");
 
-   static QRegularExpression regExp("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
+   static QRegularExpression regExp("^(.*?)\\{#([a-z_A-Z][a-z_A-Z0-9\\-]*)\\}\\s*$", QPatternOption::MultilineOption);
    QRegularExpressionMatch match = regExp.match(title);
 
    QString retval;
 
    if (match.hasMatch()) {
-      QStringView tmp1 = QStringView(match.capturedEnd(), title.constEnd()).trimmed();
+      // found {#id} style id
 
-      if (tmp1.isEmpty()) {
-         // found {#id} style id
+      retval = match.captured(2);
+      title  = match.captured(1);
 
-         retval = QStringView(match.capturedStart() + 2, match.capturedEnd() - 1);
-         title  = QStringView(title.constBegin(), match.capturedStart());
-
-         return retval;
-      }
+      return retval;
    }
 
    if ((level > 0) && (level <= tocIncHeaders)) {
@@ -2930,7 +2926,7 @@ static QString processBlocks(QStringView str, int indent)
 
             } else {
                retval += "<hr>\n";
-            }
+			}
 
             iter_prev = str.constEnd();
             iter_i    = iter_end;
@@ -3087,7 +3083,7 @@ static QString extractPageTitle(QString &docs, QString &id)
          docs = lns + QStringView(iter_endB, iter_end);      // modify passed values
          id   = extractTitleId(title, 0);
 
-         return title;
+		 return title;
       }
    }
 
