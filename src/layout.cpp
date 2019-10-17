@@ -1886,6 +1886,9 @@ const QList<LayoutDocEntry *> &LayoutDocManager::docEntries(LayoutDocManager::La
 
       case LayoutPart::Directory:
          return m_docDirectory;
+
+      default:
+         return m_docClass;
    }
 }
 
@@ -1901,16 +1904,19 @@ void LayoutDocManager::addEntry(LayoutDocManager::LayoutPart part, LayoutDocEntr
          m_docClass.append(e);
 
       case LayoutPart::Namespace:
-         return m_docNamespace.append(e);
+         m_docNamespace.append(e);
 
       case LayoutPart::File:
-         return m_docFile.append(e);
+         m_docFile.append(e);
 
       case LayoutPart::Group:
-         return m_docGroup.append(e);
+         m_docGroup.append(e);
 
       case LayoutPart::Directory:
-         return m_docDirectory.append(e);
+         m_docDirectory.append(e);
+
+      default:
+         m_docClass.append(e);
    }
 }
 
@@ -1931,6 +1937,9 @@ void LayoutDocManager::clear(LayoutDocManager::LayoutPart part)
 
       case LayoutPart::Directory:
          m_docDirectory.clear();
+
+      default:
+         m_docClass.clear();
    }
 }
 
