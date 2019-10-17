@@ -1,17 +1,22 @@
-set(CS_VERSION 1.6)
+include(CheckSymbolExists)
 
-macro(cs_copy_dll APP DLL)
-   get_target_property(CS_${DLL}_LIB  CopperSpice::Cs${DLL}${CS_VERSION} LOCATION)
-   install(FILES  ${CS_${DLL}_LIB}  DESTINATION .)
-endmacro()
+check_symbol_exists(fork  unistd.h  HAVE_FORK)
+check_symbol_exists(getpid unistd.h HAVE_GETPID)
+check_include_file(windows.h        HAVE_WINDOWS_H)
 
-check_include_file(windows.h HAVE_WINDOWS_H)
+if(HAVE_FORK)
+   add_definitions(-DHAVE_FORK)
+endif()
+
+if(HAVE_GETPID)
+   add_definitions(-DHAVE_GETPID)
+endif()
 
 if (HAVE_WINDOWS_H)
    add_definitions(-DHAVE_WINDOWS_H)
 endif()
 
-set(DOXYPRESS_INCLUDES
+list(APPEND DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/a_define.h
    ${CMAKE_CURRENT_SOURCE_DIR}/arguments.h
    ${CMAKE_CURRENT_SOURCE_DIR}/ce_parse.h
@@ -45,6 +50,7 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/doxy_setup.h
    ${CMAKE_CURRENT_SOURCE_DIR}/doxy_shared.h
    ${CMAKE_CURRENT_SOURCE_DIR}/eclipsehelp.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/emoji_entity.h
    ${CMAKE_CURRENT_SOURCE_DIR}/entry.h
    ${CMAKE_CURRENT_SOURCE_DIR}/example.h
    ${CMAKE_CURRENT_SOURCE_DIR}/filedef.h
@@ -118,7 +124,7 @@ set(DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/xmlgen.h
 )
 
-set(DOXYPRESS_SOURCES
+list(APPEND DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/doxy_work.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/doxy_globals.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/doxy_setup.cpp
@@ -142,6 +148,7 @@ set(DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/docsets.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dot.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/eclipsehelp.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/emoji_entity.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/entry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/filedef.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/filenamelist.cpp
@@ -222,140 +229,147 @@ COPPERSPICE_RESOURCES(
    ${CMAKE_CURRENT_SOURCE_DIR}/../doxypress.qrc
 )
 
-add_executable(doxypress ${DOXYPRESS_SOURCES})
+add_executable(DoxyPress ${DOXYPRESS_SOURCES})
 
 set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
 set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
 
-target_include_directories(doxypress PRIVATE
+target_include_directories(DoxyPress
+   PRIVATE
    ${CMAKE_SOURCE_DIR}/src
    ${CLANG_INCLUDE_DIR}
 )
 
-if(APPLE)
-target_link_libraries(doxypress
-   CopperSpice::CsCore${CS_VERSION}
-   CopperSpice::CsXml${CS_VERSION}
+if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+   set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
 
-   -L${CLANG_LIB_DIR}
-   -Wl,--start-group
-   -lLLVMSupport
-   -lclangAST
-   -lclangBasic
-   -lclangTooling
-   -lclangStaticAnalyzerFrontend
-   -lclangFrontend
-   -lLLVMProfileData
-   -lclangDriver
-   -lclangParse
-   -lclangIndex
-   -lLLVMMCParser
-   -lclangSerialization
-   -lclangSema
-   -lclangEdit
-   -lLLVMBitReader
-   -lLLVMOption
-   -lclangStaticAnalyzerCheckers
-   -lclangStaticAnalyzerCore
-   -lclangAnalysis
-   -lclangAST
-   -lclangToolingCore
-   -lclangLex
-   -lclangBasic
-   -lLLVMCore
-   -lLLVMBinaryFormat
-   -lLLVMMC
-   -lLLVMSupport
-   -Wl,--end-group
-   -lclang
-   '-Wl,-rpath,$ORIGIN'
+   target_link_libraries(DoxyPress
+      CopperSpice::CsCore
+      CopperSpice::CsXml
+
+      -L${CLANG_LIB_DIR}
+      -Wl,--start-group
+      -lLLVMSupport
+      -lclangAST
+      -lclangBasic
+      -lclangTooling
+      -lclangStaticAnalyzerFrontend
+      -lclangFrontend
+      -lLLVMProfileData
+      -lclangDriver
+      -lclangParse
+      -lclangIndex
+      -lLLVMMCParser
+      -lclangSerialization
+      -lclangSema
+      -lclangEdit
+      -lLLVMBitReader
+      -lLLVMOption
+      -lclangStaticAnalyzerCheckers
+      -lclangStaticAnalyzerCore
+      -lclangAnalysis
+      -lclangAST
+      -lclangToolingCore
+      -lclangLex
+      -lclangBasic
+      -lLLVMCore
+      -lLLVMBinaryFormat
+      -lLLVMMC
+      -lLLVMSupport
+      -Wl,--end-group
+      -lclang
+   )
+
+elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
+   set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
+
+   target_link_libraries(DoxyPress
+      CopperSpice::CsCore
+      CopperSpice::CsXml
+
+      -L${CLANG_LIB_DIR}
+      -Wl,--start-group
+      -lLLVMSupport
+      -lclangAST
+      -lclangBasic
+      -lclangTooling
+      -lclangStaticAnalyzerFrontend
+      -lclangFrontend
+      -lLLVMProfileData
+      -lclangDriver
+      -lclangParse
+      -lclangIndex
+      -lLLVMMCParser
+      -lclangSerialization
+      -lclangSema
+      -lclangEdit
+      -lLLVMBitReader
+      -lLLVMOption
+      -lclangStaticAnalyzerCheckers
+      -lclangStaticAnalyzerCore
+      -lclangAnalysis
+      -lclangAST
+      -lclangToolingCore
+      -lclangLex
+      -lclangBasic
+      -lLLVMCore
+      -lLLVMBinaryFormat
+      -lLLVMMC
+      -lLLVMSupport
+      -Wl,--end-group
+      -lclang
+   )
+
+elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
+
+   target_link_libraries(DoxyPress
+      CopperSpice::CsCore
+      CopperSpice::CsXml
+
+      -L${CLANG_LIB_DIR}
+      -Wl,--start-group
+      -lLLVMSupport
+      -lclangAST
+      -lclangBasic
+      -lclangTooling
+      -lclangStaticAnalyzerFrontend
+      -lclangFrontend
+      -lLLVMProfileData
+      -lclangDriver
+      -lclangParse
+      -lclangIndex
+      -lLLVMMCParser
+      -lclangSerialization
+      -lclangSema
+      -lclangEdit
+      -lLLVMBitReader
+      -lLLVMOption
+      -lclangStaticAnalyzerCheckers
+      -lclangStaticAnalyzerCore
+      -lclangAnalysis
+      -lclangAST
+      -lclangToolingCore
+      -lclangLex
+      -lclangBasic
+      -lLLVMCore
+      -lLLVMBinaryFormat
+      -lLLVMMC
+      -lLLVMSupport
+      -Wl,--end-group
+      -llibclang
+
+      ole32
+      uuid
+      version
+      z
+      advapi32
 )
 endif()
 
-if(UNIX)
-
-target_link_libraries(doxypress
-   CopperSpice::CsCore${CS_VERSION}
-   CopperSpice::CsXml${CS_VERSION}
-
-   -L${CLANG_LIB_DIR}
-   -Wl,--start-group
-   -lLLVMSupport
-   -lclangAST
-   -lclangBasic
-   -lclangTooling
-   -lclangStaticAnalyzerFrontend
-   -lclangFrontend
-   -lLLVMProfileData
-   -lclangDriver
-   -lclangParse
-   -lclangIndex
-   -lLLVMMCParser
-   -lclangSerialization
-   -lclangSema
-   -lclangEdit
-   -lLLVMBitReader
-   -lLLVMOption
-   -lclangStaticAnalyzerCheckers
-   -lclangStaticAnalyzerCore
-   -lclangAnalysis
-   -lclangAST
-   -lclangToolingCore
-   -lclangLex
-   -lclangBasic
-   -lLLVMCore
-   -lLLVMBinaryFormat
-   -lLLVMMC
-   -lLLVMSupport
-   -Wl,--end-group
-   -lclang
-   '-Wl,-rpath,$ORIGIN'
-)
-endif()
-
-if(WIN32)
-target_link_libraries(doxypress
-   CopperSpice::CsCore${CS_VERSION}
-   CopperSpice::CsXml${CS_VERSION}
-
-   -L${CLANG_LIB_DIR}
-   -Wl,--start-group
-   -lLLVMSupport
-   -lclangAST
-   -lclangBasic
-   -lclangTooling
-   -lclangStaticAnalyzerFrontend
-   -lclangFrontend
-   -lLLVMProfileData
-   -lclangDriver
-   -lclangParse
-   -lclangIndex
-   -lLLVMMCParser
-   -lclangSerialization
-   -lclangSema
-   -lclangEdit
-   -lLLVMBitReader
-   -lLLVMOption
-   -lclangStaticAnalyzerCheckers
-   -lclangStaticAnalyzerCore
-   -lclangAnalysis
-   -lclangAST
-   -lclangToolingCore
-   -lclangLex
-   -lclangBasic
-   -lLLVMCore
-   -lLLVMBinaryFormat
-   -lLLVMMC
-   -lLLVMSupport
-   -Wl,--end-group
-   -llibclang
-)
-endif()
-
-install(TARGETS doxypress DESTINATION .)
+install(TARGETS DoxyPress DESTINATION .)
 
 install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
 install(FILES     ${CLANG_LIBS}  DESTINATION .)
 
-cs_copy_dll(doxypress Core)
-cs_copy_dll(doxypress Xml)
+cs_copy_library(CsCore)
+cs_copy_library(CsXml)
