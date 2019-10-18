@@ -2417,29 +2417,6 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
          out += " ";
          out += header;
          out += "\n";
-
-         QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(id);
-
-         if (si) {
-            if (si->lineNr != -1) {
-               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s, line %d)",
-                   csPrintable(header), csPrintable(si->fileName), si->lineNr);
-
-            } else {
-               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s)",
-                    csPrintable(header), csPrintable(si->fileName));
-            }
-
-         } else {
-            si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header, type, level));
-
-            if (g_current) {
-               g_current->m_anchors.append(*si);
-            }
-
-            Doxy_Globals::sectionDict.insert(id, si);
-         }
-
       } else {
          if (! id.isEmpty()) {
             out += "\\anchor " + id + "\n";
@@ -2926,7 +2903,7 @@ static QString processBlocks(QStringView str, int indent)
 
             } else {
                retval += "<hr>\n";
-			}
+            }
 
             iter_prev = str.constEnd();
             iter_i    = iter_end;
@@ -3083,7 +3060,7 @@ static QString extractPageTitle(QString &docs, QString &id)
          docs = lns + QStringView(iter_endB, iter_end);      // modify passed values
          id   = extractTitleId(title, 0);
 
-		 return title;
+         return title;
       }
    }
 
