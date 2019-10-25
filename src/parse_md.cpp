@@ -1425,9 +1425,12 @@ static void processInline(QString &out, const QStringView processText, QString::
             break;
 
          case '-':
-            // last one is  passing pristineChars8
-            skipCount = processNmdash(out, s1, iter_size, QStringView(iter_index - 8, iter_index));
-            break;
+         {
+            QStringView pristineChars8(
+               iter_index - processText.constBegin() < 8 ? processText.constBegin() : iter_index - 8,
+               iter_index);
+            skipCount = processNmdash(out, s1, iter_size, pristineChars8);
+         }  break;
 
          case '"':
             skipCount = processQuoted(out, s1, iter_size);

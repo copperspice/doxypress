@@ -190,7 +190,8 @@ static const QStringList umlArrowStyleMap = {
    "onormal",         // Private
    "odiamond",        // "use" relation
    0,                 // Undocumented
-   0                  // template relation
+   0,                 // template relation
+   0                  // type constraint
 };
 
 static const QStringList normalArrowStyleMap = {
@@ -199,7 +200,8 @@ static const QStringList normalArrowStyleMap = {
    "empty",         // Private
    "open",          // "use" relation
    0,               // Undocumented
-   0                // template relation
+   0,               // template relation
+   0                // type constraint
 };
 
 static QString getDotFontName()
@@ -1876,12 +1878,12 @@ void DotNode::writeArrow(QTextStream &t, GraphType gt, GraphOutputFormat format,
    if (umlLook) {
       arrowStyle = umlArrowStyleMap[ei->m_color];
       edgeColor  = umlEdgeColorMap[ei->m_color];
-      edgeStyle  = umlEdgeStyleMap[ei->m_color];
+      edgeStyle  = umlEdgeStyleMap[ei->m_style];
 
    } else {
       arrowStyle = normalArrowStyleMap[ei->m_color];
       edgeColor  = normalEdgeColorMap[ei->m_color];
-      edgeStyle  = normalEdgeStyleMap[ei->m_color];
+      edgeStyle  = normalEdgeStyleMap[ei->m_style];
    }
 
    bool umlUseArrow = (arrowStyle == "odiamond");

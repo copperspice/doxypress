@@ -244,7 +244,7 @@ class Entry : public EnableSharedFromThis
       MaybeAmbiguous,          // on UNO IDL property
       Published,               // UNO IDL keyword
 
-      LastVirtue = Published
+      VirtueSize               // The size of the virtue enum
    };
 
    // group types for docs
@@ -269,7 +269,7 @@ class Entry : public EnableSharedFromThis
 
          static Traits fromQByteArray(const QByteArray &data)  {
             Traits retval;
-            retval.m_flags = std::bitset<Virtue::LastVirtue> { data.constData() };
+            retval.m_flags = std::bitset<Virtue::VirtueSize> { data.constData() };
 
             return retval;
          }
@@ -291,7 +291,7 @@ class Entry : public EnableSharedFromThis
          }
 
       private:
-         std::bitset<Virtue::LastVirtue> m_flags;
+         std::bitset<Virtue::VirtueSize> m_flags;
    };
 
    Entry();
