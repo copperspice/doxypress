@@ -106,7 +106,7 @@ void Debug::printFlags()
    printf("\n");
 }
 
-void Debug::print(DebugMask mask, int data, const QString &fmt, ...)
+void Debug::print(DebugMask mask, int data, const QString fmt, ...)
 {
    if (curMask & mask) {
       if (curPriority >= data) {
@@ -207,7 +207,7 @@ static void warn_internal(const QString &tag, const QString &file, int line, con
 }
 
 // **
-void err(const QString &fmt, ...)
+void err(const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -220,7 +220,7 @@ void err(const QString &fmt, ...)
    va_end(args);
 }
 
-void errAll(const QString &fmt, ...)
+void errAll(const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -238,7 +238,7 @@ void errAll(const QString &fmt, ...)
    va_end(args);
 }
 
-void errNoPrefix(const QString &fmt, ...)
+void errNoPrefix(const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -249,7 +249,7 @@ void errNoPrefix(const QString &fmt, ...)
    va_end(args);
 }
 
-void errNoPrefixAll(const QString &fmt, ...)
+void errNoPrefixAll(const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -265,7 +265,7 @@ void errNoPrefixAll(const QString &fmt, ...)
    va_end(args);
 }
 
-void warnMsg(const QString &fmt, ...)
+void warnMsg(const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -278,7 +278,7 @@ void warnMsg(const QString &fmt, ...)
    va_end(args);
 }
 
-void warnAll(const QString &fmt, ...)
+void warnAll(const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -298,7 +298,7 @@ void warnAll(const QString &fmt, ...)
 
 
 // **
-void msg(const QString &fmt, ...)
+void msg(const QString fmt, ...)
 {
    if (! Config::getBool("quiet")) {
       va_list args;
@@ -311,7 +311,7 @@ void msg(const QString &fmt, ...)
    }
 }
 
-void warn(const QString &file, int line, const QString &fmt, ...)
+void warn(const QString &file, int line, const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -324,7 +324,7 @@ void warn(const QString &file, int line, const QString &fmt, ...)
    va_end(args);
 }
 
-void warn_doc_error(const QString &file, int line, const QString &fmt, ...)
+void warn_doc_error(const QString &file, int line, const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -349,7 +349,7 @@ void warn_simple(const QString &file, int line, const QString &text)
    format_warn(file, line, tmp);
 }
 
-void warn_undoc(const QString &file, int line, const QString &fmt, ...)
+void warn_undoc(const QString &file, int line, const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
@@ -363,7 +363,7 @@ void warn_undoc(const QString &file, int line, const QString &fmt, ...)
 }
 
 // **
-void warn_uncond(const QString &fmt, ...)
+void warn_uncond(const QString fmt, ...)
 {
    va_list args;
    va_start(args, fmt);
