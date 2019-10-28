@@ -2687,7 +2687,7 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
 
       } else if (nb == 0 && prevCh_1 == '<' && (prevCh_2 != '\\' && prevCh_2 != '@')) {
 
-         if (QStringView(iter_end, iter_end + 4).toLower() == "pre>") {
+         if (4 <= data.constEnd() - iter_end && QStringView(iter_end, iter_end + 4).toLower() == "pre>") {
             // <pre> tag
 
             if (iter_prev != data.constEnd()) {
