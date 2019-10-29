@@ -2502,7 +2502,6 @@ void HtmlGenerator::writeSearchPage()
    QFile cf(configFileName);
 
    if (cf.open(QIODevice::WriteOnly)) {
-
       QTextStream t_stream(&cf);
 
       t_stream << "<?php\n\n";
@@ -2524,8 +2523,8 @@ void HtmlGenerator::writeSearchPage()
       t_stream << "  'logo' => \"" << substitute(substitute(writeLogoAsString(""), "\"", "\\\""), "\n", "\\n") << "\",\n";
       t_stream << ");\n\n";
       t_stream << "?>\n";
+   } else {
       err("Unable to open file for writing %s, error: %d\n", csPrintable(configFileName), cf.error());
-
    }
 
    ResourceMgr::instance().copyResourceAs("html/search_functions.php",  htmlOutput, "search_functions.php");
