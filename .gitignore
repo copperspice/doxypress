@@ -1,29 +1,16 @@
-.dirstamp
+CMakeCache.txt
+Doxypress.*
+Doxypress*.tar.bz2
+Doxypress*.zip
 
-autotools/build-aux/*
-autotools/m4/lt*.m4
-autotools/m4/libtool.m4
-autotools/m4/pkg.m4
-
-/bin/Makefile
-/bin/src
-/bin/*.cpp
-/bin/.deps
-/bin/.libs
-/bin/*.o
-/bin/*.exe
-
-/build
-/deploy
-/install
-
+/do-*
+/build/
+/deploy/
 /src/doxy_build_info.h
+
 /src/parser/read_me_important.txt
 /src/parser/do-*
 /src/parser/license.txt
-
-error.log
-/do-*
 
 test_build/do-gdb
 test_build/do-run
@@ -34,6 +21,7 @@ test_build/output_test
 test_build/output_clang
 test_build/output_clang_lex
 test_build/output_py
+test_build/x_hold
 
 test_doxy/output_clang
 test_doxy/output_test
