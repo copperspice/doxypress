@@ -1,75 +1,78 @@
-## CopperSpice
+## DoxyPress
 
 ### Introduction
-CopperSpice is of a set of C++ libraries used to develop cross-platform software applications. This is an open source project
-released under the LGPL V2.1 license. CopperSpice was derived from the Qt framework. Our motivation for developing CopperSpice was to
-change the core design and leverage modern C++ functionality.
 
-The libraies provided in CopperSpice include:
-
- * CsCore
- * CsGui
- * CsMultimedia
- * CsNetwork
- * CsOpenGL
- * CsPhonon
- * CsScript
- * CsSql
- * CsSvg
- * CsWebKit
- * CsXml
- * CsXmlPatterns
-
-There are also three open source BSD licensed libraries which are used by CopperSpice and available as stand alone libraries
-for anyone developing a C++ application.
-
- * CsSignal
- * CsString
- * libGuarded
+DoxyPress is a modern C++ application for generating documentation from annotated sources and API documentation.
+DoxyPress and DoxyPressApp were initially derived from Doxygen and DoxyWizard.
 
 
-### Major enhancements
+###### Major enhancements
 
-Reflection
- * No Meta-Object Compiler is required for generating meta data, all references were removed
- * The functionality provided by moc was replaced with compile time templates
- * CopperSpice automatically generates meta data for processing Signals/ Slots and Introspection
- * A template class can now inherit from QObject with no restrictions on types
- * Complex data types such as **%QMap&lt;%QString, int&gt;** can be used without restriction
+Parsing
 
-Enhanced Functionality
- * CopperSpice makes extensive use of modern C++ features like variadic templates, constexpr, SFINAE, lambdas, atomics,
-   tuple, etc
- * Reimplemented container classes in CsCore using the C++ standard library containers, iterators, and algorithms
- * CopperSpice includes several of the Qt 5 classes
- * Integration of CsSignal
-   * Improved thread aware Signal/Slot delivery
-   * Increased efficiency while maintaining the full Signal/Slot API
- * Integration of CsString
-   * Improved storage of Unicode strings
-   * %QString8 (UTF-8) and QString16 (UTF-16)
+* User selection for full parsing of C and C++ with clang in lieu of the legacy lex parser
+* Clang parser allows complicated modern C++ to be parsed accurately, especially as C++ is updated
+* Added a new parser for makefiles
+* Documents the following computer languages: C, C++, Objective-C, C#, Fortran, Java, IDL, Python, PHP, and TCL
 
-Using the Libraries
- * Any application using CopperSpice can be built with CMake, GNU Autotools, or any other build system
- * CopperSpice can be linked directly into any standard C++ application
+Classes and Containers
 
+* DoxyPress links with the CopperSpice libraries
+* Removed all Qt 2 classes and containers
+* Refactored to use value based containers instead of pointer based containers
+* For improved memory management variadic templates and shared pointers are used
+* Source code reformatted for improved readability
+* Modified source code to use modern C++ functionality, features, and syntax
 
-### System Requirements
+Output
 
-To use the CopperSpice libraries you will need a C++14 compiler and a C++14 standard library.
+* Project file format enhanced to use a JSON format for improved functionality
+* Command line option to convert Doxygen project files to the DoxyPress JSON format
+* Enhanced layout file to include new sections
+* Major improvements to the html output for correctness
 
 
 ### Building
 
-The CopperSpice libraries can be built using CMake or GNU Autotools.
+DoxyPress prebuilt binaries are available for Linux, Mac OS X, and Windows.
+
+https://download.copperspice.com/doxypress/binary/
+
+To build DoxyPress from source a current copy of the CopperSpice libraries, a C++17 compiler, and a C++17 standard
+library are required. DoxyPress links with CsCore and CsXml which are part of the CopperSpice libraries.
+
+CMake build files are provided with the DoxyPress source distribution.
 
 
-### Presentations
+### Documentation
 
-Our YouTube channel videos are about modern C++, build systems, CopperSpice, DoxyPress, and other topics related to our
-open source work.
+Full documentation for DoxyPress is available on the website or from our download page.
 
-https://www.youtube.com/copperspice
 
-<br>
+|URL      |Description|
+|---------|-----------|
+|https://www.copperspice.com/docs/doxypress/index.html| Online
+|https://download.copperspice.com/doxypress/documentation| Download (tar and zip formats)|
 
+
+For documentation on how to build the DoxyPress application refer to the following page:
+www.copperspice.com/docs/doxypress/build-doxypress.html
+
+
+
+### Authors / Contributors
+
+* **Ansel Sermersheim**
+* **Barbara Geller**
+
+
+### License
+
+This program is released under the GPL 2 license. For more information refer to the LICENSE file provided with this
+project.
+
+
+### References
+
+* Website: www.copperspice.com
+* Email:   info@copperspice.com
