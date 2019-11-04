@@ -541,7 +541,7 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
       refList = Doxy_Globals::xrefLists.find(listName);
    }
 
-   ListItemInfo *listItem;
+   ListItemInfo *listItem = nullptr;
 
    for (auto &item : docEntry->m_specialLists) {
       listItem = &item;
