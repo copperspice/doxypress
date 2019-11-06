@@ -248,7 +248,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
       CopperSpice::CsXml
 
       -L${CLANG_LIB_DIR}
-      -Wl,--start-group
       -lLLVMSupport
       -lclangAST
       -lclangBasic
@@ -265,6 +264,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
       -lclangEdit
       -lLLVMBitReader
       -lLLVMOption
+      -lLLVMDemangle
+      -lncurses
       -lclangStaticAnalyzerCheckers
       -lclangStaticAnalyzerCore
       -lclangAnalysis
@@ -276,7 +277,6 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
       -lLLVMBinaryFormat
       -lLLVMMC
       -lLLVMSupport
-      -Wl,--end-group
       -lclang
    )
 

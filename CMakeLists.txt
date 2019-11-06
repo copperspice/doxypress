@@ -24,12 +24,10 @@ find_package(CopperSpice REQUIRED)
 # file locations for installing
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
    include(GNUInstallDirs)
-
    set(CMAKE_INSTALL_RPATH "@executable_path")
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
    include(GNUInstallDirs)
-
    set(CMAKE_INSTALL_RPATH "\$ORIGIN")
 
 elseif(MSVC)
@@ -51,8 +49,8 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
    # lib clang dll
    list(APPEND CLANG_LIBS
-      ${CLANG_PATH}/lib/libclang.dylib.6
-      ${CLANG_PATH}/lib/libclang.dylib.6.0
+      ${CLANG_PATH}/lib/libclang.dylib
+      ${CLANG_PATH}/lib/libclang.dylib
    )
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
