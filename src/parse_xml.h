@@ -17,7 +17,7 @@
 *************************************************************************/
 
 #ifndef PARSE_XML_H
-#define PARSEXM_H
+#define PARSE_XML_H
 
 #include <parse_base.h>
 #include <code_xml.h>
