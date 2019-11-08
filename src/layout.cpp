@@ -1916,7 +1916,8 @@ void LayoutDocManager::addEntry(LayoutDocManager::LayoutPart part, LayoutDocEntr
          m_docDirectory.append(e);
 
       default:
-         m_docClass.append(e);
+        // ignore entry
+        return;
    }
 }
 
@@ -1939,7 +1940,8 @@ void LayoutDocManager::clear(LayoutDocManager::LayoutPart part)
          m_docDirectory.clear();
 
       default:
-         m_docClass.clear();
+         // ignore entry
+        return;
    }
 }
 
