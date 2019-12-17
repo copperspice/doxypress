@@ -2730,12 +2730,16 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
             ++end_nb;
          }
 
-         if (end_nb == nb) {
+         if (end_nb == nb || iter_end == data.constEnd()) {
             nb = 0;
          }
 
       } else {
          ++iter_end;
+      }
+
+      if (iter_end == data.constEnd()) {
+         break;
       }
    }
 }
