@@ -511,30 +511,34 @@ BLANK     [ \t\r]
 ID        "$"?[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*
 LABELID   [a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF\-]*
 PHPTYPE   [\\:a-z_A-Z0-9\x80-\xFF\-]+
-CITESCHAR [a-z_A-Z0-9\x80-\xFF]
-CITEECHAR [a-z_A-Z0-9\x80-\xFF\-\+:\/]*
-CITEID    {CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*
+CITESCHAR [a-z_A-Z0-9\x80-\xFF\-\?]
+CITEECHAR [a-z_A-Z0-9\x80-\xFF\-\+:\/\?]
+CITEID    {CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*|"\""{CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*"\""
 MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z_A-Z0-9\-]+
+MAILWS    [\t a-z_A-Z0-9+-]
+MAILADDR2 {MAILWS}+{BLANK}+("at"|"AT"|"_at_"|"_AT_"){BLANK}+{MAILWS}+("dot"|"DOT"|"_dot_"|"_DOT_"){BLANK}+{MAILWS}+
 OPTSTARS  ("//"{BLANK}*)?"*"*{BLANK}*
 LISTITEM  {BLANK}*[-]("#")?{WS}
 MLISTITEM {BLANK}*[+*]{WS}
 OLISTITEM {BLANK}*[1-9][0-9]*"."{BLANK}
 ENDLIST   {BLANK}*"."{BLANK}*\n
-ATTRNAME  [a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF\-]*
+ATTRNAME  [a-z_A-Z\x80-\xFF][:a-z_A-Z0-9\x80-\xFF\-]*
 ATTRIB    {ATTRNAME}{WS}*("="{WS}*(("\""[^\"]*"\"")|("'"[^\']*"'")|[^ \t\r\n'"><]+))?
 URLCHAR   [a-z_A-Z0-9\!\~\,\:\;\'\$\?\@\&\%\#\.\-\+\/\=]
 URLMASK   ({URLCHAR}+([({]{URLCHAR}*[)}])?)+
-FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+@&#]
-FILEECHAR [a-z_A-Z0-9\-\+@&#]
-HFILEMASK ("."{FILESCHAR}*{FILEECHAR}+)*
+URLPROTOCOL ("http:"|"https:"|"ftp:"|"file:"|"news:"|"irc")
+FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+&#]
+FILEECHAR [a-z_A-Z0-9\-\+&#]
+HFILEMASK ("."{FILESCHAR}*{FILEECHAR}+)+
 FILEMASK  ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|{HFILEMASK}
-LINKMASK  [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)?
+LINKMASK  [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)? 
 VERBATIM  "verbatim"{BLANK}*
 SPCMD1    {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
-SPCMD2    {CMD}[\\@<>&$#%~".+|-]
+SPCMD2    {CMD}[\\@<>&$#%~".+=|-]
 SPCMD3    {CMD}form#[0-9]+
 SPCMD4    {CMD}"::"
-INOUT     "inout"|"in"|"out"|("in"{BLANK}*","{BLANK}*"out")|("out"{BLANK}*","{BLANK}*"in")
+SPCMD5    {CMD}":"
+INOUT	  "inout"|"in"|"out"|("in"{BLANK}*","{BLANK}*"out")|("out"{BLANK}*","{BLANK}*"in")
 PARAMIO   {CMD}param{BLANK}*"["{BLANK}*{INOUT}{BLANK}*"]"
 VARARGS   "..."
 TEMPCHAR  [a-z_A-Z0-9.,: \t\*\&\(\)\[\]]
@@ -571,12 +575,11 @@ CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
 CHARWORDQ2  [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 
-  /* charwordq1 might need to be charwordw2 */
-WORD1       {ESCWORD}|{CHARWORDQ1}+|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
-WORD2       "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
+WORD1       {ESCWORD}|{CHARWORDQ2}{CHARWORDQ1}*|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
+WORD2     "."|","|"("|")"|"["|"]"|"::"|":"|";"|"\?"|"="|"'"
 
 WORD1NQ     {ESCWORD}|{CHARWORDQ1}+|"{"|"}"
-WORD2NQ     "."|","|"("|")"|"["|"]"|":"|";"|"\?"|"="|"'"
+WORD2NQ   "."|","|"("|")"|"["|"]"|"::"|":"|";"|"\?"|"="|"'"
 CAPTION     [cC][aA][pP][tT][iI][oO][nN]
 HTMLTAG     "<"(("/")?){ID}({WS}+{ATTRIB})*{WS}*(("/")?)">"
 
@@ -819,9 +822,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_COMMAND_SEL();
    }
 
-<St_Para>{SPCMD1}      |
-<St_Para>{SPCMD2}      |
-<St_Para>{SPCMD4}      {
+<St_Para>{SPCMD1}   |
+<St_Para>{SPCMD2}   |
+<St_Para>{SPCMD4}   |
+<St_Para>{SPCMD5}     {
       /* special command */
       QString text  = QString::fromUtf8(yytext);
 
@@ -856,7 +860,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_COMMAND_SEL();
    }
 
-<St_Para>("http:"|"https:"|"ftp:"|"file:"|"news:"){URLMASK}/\. {
+<St_Para>{URLPROTOCOL}{URLMASK}/\. { 
       // URL.
       QString text  = QString::fromUtf8(yytext);
       g_token->name = text;
@@ -865,14 +869,14 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_URL;
    }
 
-<St_Para>("http:"|"https:"|"ftp:"|"file:"|"news:"){URLMASK} {
+<St_Para>{URLPROTOCOL}{URLMASK}  {
       // URL
       g_token->name = QString::fromUtf8(yytext);
       g_token->isEMailAddr = false;
       return TK_URL;
    }
 
-<St_Para>"<"("http:"|"https:"|"ftp:"|"file:"|"news:"){URLMASK}">" {
+<St_Para>"<"{URLPROTOCOL}{URLMASK}">"  {
       // URL
       g_token->name = QString::fromUtf8(yytext);
       g_token->name = g_token->name.mid(1, g_token->name.length() - 2);
@@ -899,7 +903,13 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_URL;
    }
 
-<St_Para>"$"{ID}":"[^\n$]+"$" {
+<St_Para>"<"{MAILADDR2}">"  { 
+      // anti spam mail address
+      g_token->name = QString::fromUtf8(yytext);
+      return TK_WORD;
+   }
+
+<St_Para>"$"{ID}":"[^:\n$][^\n$]*"$" {
       /* RCS tag */
       QString text = QString::fromUtf8(yytext);
 
@@ -983,7 +993,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para,St_Text>[\-+]        |
 <St_Para,St_Text>{WORD1}      |
 <St_Para,St_Text>{WORD2}               {
-      /* function call */
+      // function call, rule resolves multiple digit numbers 
+      
       QString text = QString::fromUtf8(yytext);
 
       if (text.startsWith('%')) {
@@ -1161,7 +1172,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_DbOnly>[^\\@\n]+  |
 <St_DbOnly>\n         |
-<St_DbOnly>.             {
+<St_DbOnly>.              {
       g_token->verb += QString::fromUtf8(yytext);
    }
 
@@ -1172,7 +1183,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Verbatim>[^\\@\n]+ |
 <St_Verbatim>\n        |
-<St_Verbatim>.         {
+<St_Verbatim>.            {
       /* Verbatim text */
       g_token->verb += QString::fromUtf8(yytext);
    }
@@ -1183,7 +1194,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Dot>[^\\@\n]+      |
 <St_Dot>\n             |
-<St_Dot>.              {
+<St_Dot>.                 {
       /* dot text */;
       g_token->verb += QString::fromUtf8(yytext);
    }
@@ -1194,7 +1205,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Msc>[^\\@\n]+      |
 <St_Msc>\n             |
-<St_Msc>.              {
+<St_Msc>.                 {
       /* msc text */
       g_token->verb += QString::fromUtf8(yytext);
    }
@@ -1229,8 +1240,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->sectionId = text.trimmed();
       return RetVal_OK;
    }
-
-<St_PlantUMLOpt>.      {
+<St_PlantUMLOpt>"\n"   |
+<St_PlantUMLOpt>.        {
        g_token->sectionId = "";
        unput(yytext[0]);
        return RetVal_OK;
@@ -1242,7 +1253,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_PlantUML>[^\\@\n]+ |
 <St_PlantUML>\n        |
-<St_PlantUML>.         {
+<St_PlantUML>.           {
       /* plantuml text */
       g_token->verb += QString::fromUtf8(yytext);
    }
@@ -1409,6 +1420,14 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Cite>{CITEID}      {
       // label to cite
       g_token->name = QString::fromUtf8(yytext);
+      
+      if (g_token->name.startsWith('"')) {
+            
+         g_token->name = g_token->name.mid(1);	 
+         g_token->name.chop(1);
+	 
+      }       	 
+      
       return TK_WORD;
    }
 
@@ -1431,7 +1450,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_Ref>{REFWORD_NOCV}/{BLANK}("const")[a-z_A-Z0-9] {
-      g_token->name = QString::fromUtf8(yytext);
+      g_token->name = QString::fromUtf8(yytext);         
       return TK_WORD;
    }
 
