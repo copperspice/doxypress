@@ -596,10 +596,9 @@ bool Config::verify()
          if (! dp.exists() || ! dp.isFile()) {
 
             if (Config::getBool("have-dot")) {
+               // dot may be in the system search path yet
                warnMsg("Unable to locate the dot program in %s\n", csPrintable(dotPath));
             }
-
-            dotPath = "";
 
          } else {
             dotPath = dp.absoluteFilePath();

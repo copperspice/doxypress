@@ -93,7 +93,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    if (haveDot && ! dotPath.isEmpty())   {
       pumlArgs += "-graphvizdot \"";
       pumlArgs += dotPath;
-      pumlArgs += "dot\" ";
+      pumlArgs += "\" ";
    }
 
    pumlArgs += "-o \"";
