@@ -1242,9 +1242,9 @@ static int processCodeSpan(QString &out, QStringView data, QString::const_iterat
    if (iter_f_begin < iter_f_end) {
 
       QStringView codeFragment = QStringView(iter_f_begin, iter_f_end);
-      out += "<tt>";
+      out += "<code>";
       out += escapeSpecialChars(codeFragment);
-      out += "</tt>";
+      out += "</code>";
    }
 
    return iter_end - data.constBegin();
