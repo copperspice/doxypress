@@ -2689,8 +2689,8 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
 
       } else if (nb == 0 && prevCh_1 == '`') {
 
-         while (iter_end != data.constEnd() && prevCh_1 == '`') {
-            prevCh_1 = *iter_end;
+         while (iter_end <= data.constEnd() && prevCh_1 == '`') {
+			 prevCh_1 = iter_end != data.constEnd() ? *iter_end : '\0';
 
             ++iter_end;
             ++nb;
@@ -2699,8 +2699,8 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
       } else if (nb > 0 && prevCh_1 == '`') {
          int end_nb = 0;
 
-         while (iter_end != data.constEnd() && prevCh_1 == '`') {
-            prevCh_1 = *iter_end;
+         while (iter_end <= data.constEnd() && prevCh_1 == '`') {
+            prevCh_1 = iter_end != data.constEnd() ? *iter_end : '\0';
 
             ++iter_end;
             ++end_nb;
