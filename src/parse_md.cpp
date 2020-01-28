@@ -1425,9 +1425,12 @@ static void processInline(QString &out, const QStringView processText, QString::
             break;
 
          case '-':
-            // last one is  passing pristineChars8
-            skipCount = processNmdash(out, s1, iter_size, QStringView(iter_index - 8, iter_index));
-            break;
+         {
+            QStringView pristineChars8(
+               iter_index - processText.constBegin() < 8 ? processText.constBegin() : iter_index - 8,
+               iter_index);
+            skipCount = processNmdash(out, s1, iter_size, pristineChars8);
+         }  break;
 
          case '"':
             skipCount = processQuoted(out, s1, iter_size);
@@ -1721,22 +1724,18 @@ static QString extractTitleId(QString &title, int level)
 {
    static const int tocIncHeaders = Config::getInt("toc-include-headers");
 
-   static QRegularExpression regExp("\\{#[a-z_A-Z][a-z_A-Z0-9\\-]*\\}");
+   static QRegularExpression regExp("^(.*?)\\{#([a-z_A-Z][a-z_A-Z0-9\\-]*)\\}\\s*$", QPatternOption::MultilineOption);
    QRegularExpressionMatch match = regExp.match(title);
 
    QString retval;
 
    if (match.hasMatch()) {
-      QStringView tmp1 = QStringView(match.capturedEnd(), title.constEnd()).trimmed();
+      // found {#id} style id
 
-      if (tmp1.isEmpty()) {
-         // found {#id} style id
+      retval = match.captured(2);
+      title  = match.captured(1);
 
-         retval = QStringView(match.capturedStart() + 2, match.capturedEnd() - 1);
-         title  = QStringView(title.constBegin(), match.capturedStart());
-
-         return retval;
-      }
+      return retval;
    }
 
    if ((level > 0) && (level <= tocIncHeaders)) {
@@ -2421,29 +2420,6 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
          out += " ";
          out += header;
          out += "\n";
-
-         QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(id);
-
-         if (si) {
-            if (si->lineNr != -1) {
-               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s, line %d)",
-                   csPrintable(header), csPrintable(si->fileName), si->lineNr);
-
-            } else {
-               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s)",
-                    csPrintable(header), csPrintable(si->fileName));
-            }
-
-         } else {
-            si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header, type, level));
-
-            if (g_current) {
-               g_current->m_anchors.append(*si);
-            }
-
-            Doxy_Globals::sectionDict.insert(id, si);
-         }
-
       } else {
          if (! id.isEmpty()) {
             out += "\\anchor " + id + "\n";
@@ -2713,8 +2689,8 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
 
       } else if (nb == 0 && prevCh_1 == '`') {
 
-         while (iter_end != data.constEnd() && prevCh_1 == '`') {
-            prevCh_1 = *iter_end;
+         while (iter_end <= data.constEnd() && prevCh_1 == '`') {
+			 prevCh_1 = iter_end != data.constEnd() ? *iter_end : '\0';
 
             ++iter_end;
             ++nb;
@@ -2723,8 +2699,8 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
       } else if (nb > 0 && prevCh_1 == '`') {
          int end_nb = 0;
 
-         while (iter_end != data.constEnd() && prevCh_1 == '`') {
-            prevCh_1 = *iter_end;
+         while (iter_end <= data.constEnd() && prevCh_1 == '`') {
+            prevCh_1 = iter_end != data.constEnd() ? *iter_end : '\0';
 
             ++iter_end;
             ++end_nb;
