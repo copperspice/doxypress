@@ -4213,9 +4213,9 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
    static const QString imageFormat = Config::getEnum("dot-image-format");
    static const QString imageExt    = Config::getEnum("dot-image-extension");
 
-   static const QString imageName   = outFile + "." + imageExt;
-   static const QString absImgName  = d.absolutePath() + "/" + imageName;
-   static const QString absOutFile  = d.absolutePath() + "/" + outFile;
+   const QString imageName   = outFile + "." + imageExt;
+   const QString absImgName  = d.absolutePath() + "/" + imageName;
+   const QString absOutFile  = d.absolutePath() + "/" + outFile;
 
    DotRunner dotRun(inFile, d.absolutePath(), false, absImgName);
 
