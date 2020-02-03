@@ -424,6 +424,7 @@ class MemberDef : public Definition
 
    void warnIfUndocumented();
    void warnIfUndocumentedParams();
+   QString removeReturnKeywords();
 
    QSharedPointer<MemberDef> createTemplateInstanceMember(const ArgumentList &formalArgs, const ArgumentList &actualArgs);
 

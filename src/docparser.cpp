@@ -604,14 +604,21 @@ static void detectNoDocumentedParams()
       const ArgumentList &argList = s_memberDef->getArgumentList();
       const ArgumentList &declAl  = s_memberDef->getDeclArgumentList();
 
-      QString returnType = s_memberDef->typeString();
-      bool isPython      = s_memberDef->getLanguage() == SrcLangExt_Python;
+      QString returnType = s_memberDef->removeReturnKeywords();
+
+      SrcLangExt lang = s_memberDef->getLanguage();
+      bool isPython   = (lang == SrcLangExt_Python);
+      bool isFortran  = (lang == SrcLangExt_Fortran);
+
+      bool isFortranSubroutine = isFortran && returnType.find("subroutine") != -1;
+      bool isVoidReturn = (returnType == "void");
 
       if (! s_memberDef->hasDocumentedParams() && s_hasParamCommand) {
          s_memberDef->setHasDocumentedParams(true);
 
       } else if (! s_memberDef->hasDocumentedParams()) {
-         bool allDoc = true; // no parameter => all parameters are documented
+         // no parameter => all parameters are documented
+         bool allDoc = true;
 
          if (! argList.listEmpty() ) {
             // member has parameters but the member has a parameter list
@@ -623,7 +630,8 @@ static void detectNoDocumentedParams()
                   break;
                }
 
-               if (! arg.name.isEmpty() && arg.type != "void" && ! (isPython && (arg.name == "self" || arg.name == "cls"))) {
+               if (! arg.name.isEmpty() && arg.type != "void" &&
+                     ! (isPython && (arg.name == "self" || arg.name == "cls"))) {
                   allDoc = ! arg.docs.isEmpty();
                }
             }
@@ -638,7 +646,8 @@ static void detectNoDocumentedParams()
                      break;
                   }
 
-                  if (! arg.name.isEmpty() && arg.type != "void" && ! (isPython && (arg.name == "self"|| arg.name == "cls"))) {
+                  if (! arg.name.isEmpty() && arg.type != "void" &&
+                        ! (isPython && (arg.name == "self"|| arg.name == "cls"))) {
                      allDoc = ! arg.docs.isEmpty();
                   }
                }
@@ -654,21 +663,21 @@ static void detectNoDocumentedParams()
          // docs not yet found
          s_memberDef->setHasDocumentedReturnType(true);
 
-      } else if ( s_memberDef->hasDocumentedReturnType() || returnType.isEmpty() ||
-               returnType.indexOf("void") != -1 || returnType.indexOf("subroutine") != -1 ||
-               s_memberDef->isConstructor() || s_memberDef->isDestructor() ) {
 
-         // see if return should to documented
-         s_memberDef->setHasDocumentedReturnType(true);
-
-
-      } else if ( s_memberDef->hasDocumentedReturnType() &&
-                (returnType.isEmpty() || returnType.indexOf("void") != -1 ||
-                returnType.indexOf("subroutine") != -1 ||
-                s_memberDef->isConstructor() || s_memberDef->isDestructor()) )  {
+      } else if ( s_hasReturnCommand &&
+           (isVoidReturn || isFortranSubroutine ||
+           s_memberDef->isConstructor() || s_memberDef->isDestructor()) )  {
 
          // return type is documented in a function without a return type
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Documented empty return type");
+
+
+      } else if ( s_memberDef->hasDocumentedReturnType() ||
+           isVoidReturn || isFortranSubroutine ||
+           s_memberDef->isConstructor() || s_memberDef->isDestructor() ) {
+
+         // return type should be documented
+         s_memberDef->setHasDocumentedReturnType(true);
 
       }
    }
@@ -2848,6 +2857,7 @@ void DocRef::parse()
    int tok;
 
    while ((tok = doctokenizerYYlex())) {
+
       if (! defaultHandleToken(this, tok, m_children)) {
 
          switch (tok) {

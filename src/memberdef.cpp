@@ -3485,6 +3485,7 @@ QString MemberDef::memberTypeName() const
    return retval;
 }
 
+
 void MemberDef::warnIfUndocumented()
 {
    static const bool extractAll = Config::getBool("extract-all");
@@ -3563,16 +3564,53 @@ void MemberDef::warnIfUndocumentedParams()
 
    if (! extractAll && warnUndoc &&  warnUndocParam && ! isReference() && ! Doxy_Globals::suppressDocWarnings) {
 
-      if (!hasDocumentedParams()) {
+      if (! hasDocumentedParams()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Parameters for member %s are not fully documented",
                      csPrintable(qualifiedName()));
       }
 
-      if (!hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
+      if (! hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Return type of member %s is not documented",
                      csPrintable(qualifiedName()));
       }
    }
+}
+
+QString MemberDef::removeReturnKeywords()
+{
+   const QString &str = typeString();
+
+   if (str.isEmpty()) {
+      return str;
+   }
+
+   QStringView retval = str;
+
+   while (true) {
+
+    if (retval.startsWith("constexpr ")) {
+      retval = retval.mid(10);
+
+    } else if (retval.startsWith("consteval ")) {
+      retval = retval.mid(10);
+
+    } else if (retval.startsWith("static ")) {
+      retval = retval.mid(7);
+
+    } else if (retval.startsWith("virtual ")) {
+      retval = retval.mid(7);
+
+    } else if (retval.startsWith("volatile ")) {
+      retval = retval.mid(9);
+
+    } else {
+      break;
+
+    }
+
+  }
+
+  return QString(retval);
 }
 
 bool MemberDef::isFriendClass() const
