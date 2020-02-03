@@ -88,7 +88,7 @@ bool Config::parseConfig(const QString &fName)
       return false;
    }
 
-   printf("**  Verify Project Configuration\n");
+   printf("**  Verify Project Configuration\n\n");
    msgVerify();
 
    if (! preVerify()) {

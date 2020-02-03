@@ -160,7 +160,7 @@ bool Config::preVerify()
           Config::getBool("generate-perl") || Config::getBool("generate-rtf")   || Config::getBool("generate-xml") ||
           Config::getBool("generate-docbook")) && Config::getString("generate-tagfile").isEmpty() ) {
 
-      err("No output format was indicated, at least one output format must be selected\n");
+      errAll("No output format was indicated, at least one output format must be selected\n");
       isOk = false;
    }
 
@@ -172,7 +172,7 @@ bool Config::preVerify()
       QFileInfo fi(headerFile);
 
       if (! fi.exists()) {
-         err("HTML Header file `%s' does not exist\n", csPrintable(headerFile));
+         errAll("HTML Header file `%s' does not exist\n", csPrintable(headerFile));
          isOk = false;
       }
    }
@@ -185,7 +185,7 @@ bool Config::preVerify()
       QFileInfo fi(footerFile);
 
       if (! fi.exists()) {
-         err("HTML Footer file `%s' does not exist\n", csPrintable(footerFile));
+         errAll("HTML Footer file `%s' does not exist\n", csPrintable(footerFile));
          isOk = false;
       }
    }
@@ -198,7 +198,7 @@ bool Config::preVerify()
       QFileInfo fi(latexHeaderFile);
 
       if (! fi.exists()) {
-         err("LaTeX Header file `%s' does not exist\n", csPrintable(latexHeaderFile));
+         errAll("LaTeX Header file `%s' does not exist\n", csPrintable(latexHeaderFile));
          isOk = false;
       }
    }
@@ -211,7 +211,7 @@ bool Config::preVerify()
       QFileInfo fi(latexFooterFile);
 
       if (! fi.exists()) {
-         err("LaTeX Footer file `%s' does not exist\n", csPrintable(latexFooterFile));
+         errAll("LaTeX Footer file `%s' does not exist\n", csPrintable(latexFooterFile));
          isOk = false;
       }
    }
@@ -225,7 +225,7 @@ bool Config::preVerify()
          QFileInfo fi(mathJaxCodefile);
 
          if (! fi.exists()) {
-            err("MathJax Codefile file `%s' does not exist\n", csPrintable(mathJaxCodefile));
+            errAll("MathJax Codefile file `%s' does not exist\n", csPrintable(mathJaxCodefile));
             isOk = false;
          }
       }
@@ -261,8 +261,8 @@ bool Config::verify()
       if (! dir.exists()) {
          dir.setPath(QDir::currentPath());
 
-         if (! dir.mkdir(outputDirectory)) {
-            err("Output directory `%s' does not exist and can not be created\n", csPrintable(outputDirectory));
+         if (! dir.mkpath(outputDirectory)) {
+            errAll("Output directory `%s' does not exist, unable to create\n", csPrintable(outputDirectory));
             isOk = false;
 
          } else {
@@ -338,7 +338,7 @@ bool Config::verify()
       alias = alias.trimmed();
 
       if (alias.indexOfFast(reg1) != alias.begin() && alias.indexOfFast(reg2) != alias.begin()) {
-         err("Alias format: `%s' \n is invalid, use \"name=value\" or \"name{n}=value\", where n "
+         errAll("Alias format: `%s' \n is invalid, use \"name=value\" or \"name{n}=value\", where n "
                   "is the number of arguments\n\n", csPrintable(alias));
       }
    }
@@ -354,7 +354,7 @@ bool Config::verify()
          QString language  = mapStr.mid(i + 1).trimmed().toLower();
 
          if (! updateLanguageMapping(extension, language, true)) {
-            err("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n",
+            errAll("Unable to map file extension '%s' to '%s', verify the Extension Mapping tag\n",
                   csPrintable(extension), csPrintable(language));
 
          } else {
@@ -375,7 +375,7 @@ bool Config::verify()
       QFileInfo fi(layoutFileName);
 
       if (! fi.exists()) {
-         err("Layout file `%s' does not exist\n", csPrintable(layoutFileName));
+         errAll("Layout file `%s' does not exist\n", csPrintable(layoutFileName));
          isOk = false;
       }
    }
@@ -521,7 +521,7 @@ bool Config::verify()
       dotImageFormat = "png";
 
    } else if (! s_dotImageFormat.contains(dotImageFormat)) {
-      err("Invalid value of %s for Dot Image Format, using the the default of png\n", csPrintable(dotImageFormat));
+      errAll("Invalid value of %s for Dot Image Format, using the the default of png\n", csPrintable(dotImageFormat));
 
       dotImageFormat = "png";
    }
@@ -630,7 +630,7 @@ bool Config::verify()
             plantumlJarPath = jar.absolutePath() + QDir::separator();
 
          } else {
-            err("PlantUml Jar File 'plantuml.jar' was not found at the path specified by "
+            errAll("PlantUml Jar File 'plantuml.jar' was not found at the path specified by "
                    "PlantUml Jar Path '%s'\n", csPrintable(plantumlJarPath));
 
             iterString.value().value = QString();
@@ -643,7 +643,7 @@ bool Config::verify()
          iterString.value().value = plantumlJarPath;
 
       } else {
-         err("PlantUml Jar Path does not exist and is not a directory: %s\n", csPrintable(plantumlJarPath));
+         errAll("PlantUml Jar Path does not exist and is not a directory: %s\n", csPrintable(plantumlJarPath));
          iterString.value().value = QString();
       }
    }
@@ -721,10 +721,10 @@ bool Config::verify()
    if (! s_mathJaxFormat.contains(mathJaxFormat)) {
 
       if (mathJaxFormat.isEmpty()) {
-         err("MathJax Format can not be empty, setting to the default value of HTML-CSS\n");
+         errAll("MathJax Format can not be empty, setting to the default value of HTML-CSS\n");
 
       } else  {
-         err("Invalid value of %s for MathJax Format, setting to the default value of HTML-CSS\n", csPrintable(mathJaxFormat));
+         errAll("Invalid value of %s for MathJax Format, setting to the default value of HTML-CSS\n", csPrintable(mathJaxFormat));
 
       }
 
@@ -801,7 +801,7 @@ bool Config::verify()
       paperType = "a4";
 
    } else if (! s_latexPaperType.contains(paperType)) {
-      err("Invalid value of %s for LaTeX Paper Type, using the the default of a4\n", csPrintable(paperType));
+      errAll("Invalid value of %s for LaTeX Paper Type, using the the default of a4\n", csPrintable(paperType));
 
       paperType = "a4";
    }
@@ -843,7 +843,7 @@ bool Config::verify()
       QString temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When Generate QtHelp is set, QHP Namespace can not be empty. Setting to the default value of 'org.doxypress.doc'\n");
+         errAll("When Generate QtHelp is set, QHP Namespace can not be empty. Setting to the default value of 'org.doxypress.doc'\n");
 
          iterString.value().value = "org.doxypress.doc";
       }
@@ -852,7 +852,7 @@ bool Config::verify()
       temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         err("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of 'doc'\n");
+         errAll("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of 'doc'\n");
 
          iterString.value().value = "doc";
       }
@@ -867,7 +867,7 @@ bool Config::verify()
       paperType = "a4";
 
    } else if (! s_rtfPaperType.contains(paperType)) {
-      err("Invalid value of %s for RTF Paper Type, using the the default of a4\n", csPrintable(paperType));
+      errAll("Invalid value of %s for RTF Paper Type, using the the default of a4\n", csPrintable(paperType));
 
       paperType = "a4";
    }
@@ -899,7 +899,7 @@ bool Config::verify()
 
    // **
    if (Config::getBool("inline-grouped-classes") && Config::getBool("separate-member-pages")) {
-      err("Error when enabling 'INLINE GROUPED CLASSES', 'SEPARATE MEMBER PAGES' tags must be disabled\n");
+      errAll("Error when enabling 'INLINE GROUPED CLASSES', 'SEPARATE MEMBER PAGES' tags must be disabled\n");
 
       auto iterBool = m_cfgBool.find("separate-member-pages");
       bool data = iterBool.value().value;
