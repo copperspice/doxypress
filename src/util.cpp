@@ -8272,12 +8272,12 @@ bool mainPageHasTitle()
    return true;
 }
 
-QString stripPrefix(QString input, const QByteArray &prefix)
+QString stripPrefix(QString input, const QString &prefix)
 {
    QString retval = input;
 
    if (input.startsWith(prefix)) {
-      retval = retval.remove(0, strlen(prefix.constData()));
+      retval = retval.remove(0, prefix.length());
    }
 
    return retval;

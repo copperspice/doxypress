@@ -260,15 +260,15 @@ QString stripAnonymousNamespaceScope(const QString &s);
 QString stripFromPath(const QString &path);
 QString stripFromIncludePath(const QString &path);
 QString stripIndentation(const QString &s);
-QString stripPrefix(QString input, const QByteArray &prefix);
 QString stripPath(const QString &s);
+
+QString stripPrefix(QString input, const QString &prefix);
+QByteArray stripPrefix(QByteArray input, const QByteArray &prefix);
 
 QString substituteTemplateArgumentsInString(const QString &name, const ArgumentList &formalArgs, const ArgumentList &actualArgs);
 QString substitute(const QString &origString, const QString &oldWord, const QString &newWord);
 QString substituteOne(const QString &origString, QChar oldChar, const QString &newWord);
 QString showFileDefMatches(const FileNameDict &fnDict, const QString &xName);
-
-QByteArray stripPrefix(QByteArray input, const QByteArray &prefix);
 
 bool    srcFileVisibleInIndex(QSharedPointer<FileDef> fd);
 void    stackTrace();
