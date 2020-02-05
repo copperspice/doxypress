@@ -861,7 +861,7 @@ class OutputList : public OutputDocInterface
 
       for (auto item : m_outputs ) {
          if (item->isEnabled()) {
-            ((*item).*func)(vs...);           // broom - resolve when we update CS with operator->
+            ((*item).*func)(std::forward<Args>(vs)...);           // broom - resolve when we update CS with operator->
          }
       }
    }

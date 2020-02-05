@@ -34,9 +34,9 @@ About these tools (vector, uivector, ucvector and string):
 
 typedef struct vector { /*this one is used only by the deflate compressor*/
    void *data;
-   size_t size; /*in groups of bytes depending on type*/
-   size_t allocsize; /*in bytes*/
-   unsigned typesize; /*sizeof the type you store in data*/
+   size_t size;          /*in groups of bytes depending on type*/
+   size_t allocsize;     /*in bytes*/
+   unsigned typesize;    /*sizeof the type you store in data*/
 } vector;
 
 static unsigned vector_resize(vector *p, size_t size) /*returns 1 if success, 0 if failure ==> nothing done*/
@@ -949,13 +949,13 @@ static unsigned getTreeInflateDynamic(HuffmanTree *codetree, HuffmanTree *codetr
                i++;
             }
          } else {
-            error = 16;   /*error: somehow an unexisting code appeared. This can never happen.*/
+            error = 16;   // error: nonexistent code appeared, should never happen
             break;
          }
       }
 
    if (!error && bitlen.data[256] == 0) {
-      error = 64;   /*the length of the end code 256 must be larger than 0*/
+      error = 64;         // the length of the end code 256 must be larger than 0
    }
 
    /*now we've finally got HLIT and HDIST, so generate the code trees, and the function is done*/
@@ -2321,25 +2321,24 @@ static unsigned getNumColorChannels(unsigned colorType)
 {
    switch (colorType) {
       case 0:
-         return 1; /*grey*/
+         return 1;    /*grey*/
       case 2:
-         return 3; /*RGB*/
+         return 3;    /*RGB*/
       case 3:
-         return 1; /*palette*/
+         return 1;    /*palette*/
       case 4:
-         return 2; /*grey + alpha*/
+         return 2;    /*grey + alpha*/
       case 6:
-         return 4; /*RGBA*/
+         return 4;    /*RGBA*/
    }
-   return 0; /*unexisting color type*/
+
+   return 0;          /*nonexistent color type*/
 }
 
 static unsigned getBpp(unsigned colorType, unsigned bitDepth)
 {
    return getNumColorChannels(colorType) * bitDepth; /*bits per pixel is amount of channels * bits per channel*/
 }
-
-/* ////////////////////////////////////////////////////////////////////////// */
 
 void LodePNG_InfoColor_init(LodePNG_InfoColor *info)
 {
@@ -3127,6 +3126,7 @@ static unsigned unfilterScanline(unsigned char *recon, const unsigned char *scan
             for (i = bytewidth; i <    length; i++) {
                recon[i] = (unsigned char)(scanline[i] + paethPredictor(recon[i - bytewidth], precon[i], precon[i - bytewidth]));
             }
+
          } else {
             for (i =         0; i < bytewidth; i++) {
                recon[i] = scanline[i];
@@ -3136,9 +3136,11 @@ static unsigned unfilterScanline(unsigned char *recon, const unsigned char *scan
             }
          }
          break;
+
       default:
-         return 36; /*error: unexisting filter type given*/
+         return 36;       // error: nonexistent filter type given
    }
+
    return 0;
 }
 
@@ -4193,8 +4195,9 @@ static void filterScanline(unsigned char *out, const unsigned char *scanline, co
             }
          }
          break;
+
       default:
-         return; /*unexisting filter type given*/
+         return;       // nonexistent filter type given
    }
 }
 
@@ -4579,24 +4582,24 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
    }
 
    if (encoder->settings.zlibsettings.windowSize > 32768) {
-      encoder->error = 60;   /*error: windowsize larger than allowed*/
+      encoder->error = 60;   // error: windowsize larger than allowed
       return;
    }
 
    if (encoder->settings.zlibsettings.btype > 2) {
-      encoder->error = 61;   /*error: unexisting btype*/
+      encoder->error = 61;   // error: nonexistent btype
       return;
    }
 
    if (encoder->infoPng.interlaceMethod > 1) {
-      encoder->error = 71;   /*error: unexisting interlace mode*/
+      encoder->error = 71;   // error: nonexistent interlace mode
       return;
    }
    if ((encoder->error = checkColorValidity(info.color.colorType, info.color.bitDepth))) {
-      return;   /*error: unexisting color type given*/
+      return;               // error: nonexistent color type given
    }
    if ((encoder->error = checkColorValidity(encoder->infoRaw.color.colorType, encoder->infoRaw.color.bitDepth))) {
-      return;   /*error: unexisting color type given*/
+      return;               // error: nonexistent color type given
    }
 
    if (!LodePNG_InfoColor_equal(&encoder->infoRaw.color, &info.color)) {

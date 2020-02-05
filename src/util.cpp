@@ -5298,7 +5298,7 @@ QString convertToHtml(const QString &str, bool keepEntities)
    }
 
    // rtl
-   // retval.append(getHtmlDirEmbedingChar(getTextDirByConfig(str)));
+   // retval.append(getHtmlDirEmbeddingChar(getTextDirByConfig(str)));
 
    QString::const_iterator iter = str.constBegin();
 
@@ -5375,7 +5375,7 @@ QString convertToJSString(const QString &s, bool applyTextDir)
 
    if (applyTextDir) {
       // rtl
-      // retval.prepend(getJsDirEmbedingChar(getTextDirByConfig(s)));
+      // retval.prepend(getJsDirEmbeddingChar(getTextDirByConfig(s)));
    }
 
    retval.replace("\"", "\\\"");
