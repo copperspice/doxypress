@@ -106,18 +106,29 @@ static STLInfo g_stlinfo[] = {
    // className              baseClass1                      baseClass2             templType1     templName1     templType2, templName2, virtInheritance, iterators
 
    { "allocator",            0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "array",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
    { "auto_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "smart_ptr",            0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "unique_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "shared_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
    { "weak_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
+   { "atomic",               0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
+   { "atomic_ref",           0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
+   { "lock_guard",           0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
+   { "unique_lock",          0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
+   { "shared_lock",          0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
    { "ios_base",             0,                              0,                     0,             0,             0,     0,             false,   false },
    { "error_code",           0,                              0,                     0,             0,             0,     0,             false,   false },
    { "error_category",       0,                              0,                     0,             0,             0,     0,             false,   false },
    { "system_error",         0,                              0,                     0,             0,             0,     0,             false,   false },
    { "error_condition",      0,                              0,                     0,             0,             0,     0,             false,   false },
    { "thread",               0,                              0,                     0,             0,             0,     0,             false,   false },
+   { "jthread",              0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
+   { "mutex",                0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
+   { "timed_mutex",          0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
+   { "recursive_mutex",      0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
+   { "recursive_timed_mutex",0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
+   { "shared_mutex",         0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
+   { "shared_timed_mutex",   0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
    { "basic_ios",            "ios_base",                     0,                     "Char",        0,             0,     0,             false,   false },
    { "basic_istream",        "basic_ios<Char>",              0,                     "Char",        0,             0,     0,             true,    false },
    { "basic_ostream",        "basic_ios<Char>",              0,                     "Char",        0,             0,     0,             true,    false },
@@ -149,6 +160,15 @@ static STLInfo g_stlinfo[] = {
    { "basic_string",         0,                              0,                     "Char",        0,             0,     0,             false,   true  },
    { "string",               "basic_string<char>",           0,                     0,             0,             0,     0,             false,   true  },
    { "wstring",              "basic_string<wchar_t>",        0,                     0,             0,             0,     0,             false,   true  },
+   { "u8string",             "basic_string<char8_t>",        0,                     0,             0,             0,            0,      FALSE,   TRUE  },
+   { "u16string",            "basic_string<char16_t>",       0,                     0,             0,             0,            0,      FALSE,   TRUE  },
+   { "u32string",            "basic_string<char32_t>",       0,                     0,             0,             0,            0,      FALSE,   TRUE  },
+   { "basic_string_view",    0,                              0,                     "Char",        0,             0,            0,      FALSE,   TRUE  },
+   { "string_view",          "basic_string_view<char>",      0,                     0,             0,             0,            0,      FALSE,   TRUE  },
+   { "wstring_view",         "basic_string_view<wchar_t>",   0,                     0,             0,             0,            0,      FALSE,   TRUE  },
+   { "u8string_view",        "basic_string_view<char8_t>",   0,                     0,             0,             0,            0,      FALSE,   TRUE  },
+   { "u16string_view",       "basic_string_view<char16_t>",  0,                     0,             0,             0,            0,      FALSE,   TRUE  },
+   { "u32string_view",       "basic_string_view<char32_t>",  0,                     0,             0,             0,            0,      FALSE,   TRUE  },
    { "complex",              0,                              0,                     0,             0,             0,     0,             false,   false },
    { "bitset",               0,                              0,                     "Bits",        0,             0,     0,             false,   false },
    { "deque",                0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
@@ -162,7 +182,9 @@ static STLInfo g_stlinfo[] = {
    { "unordered_set",        0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
    { "multiset",             0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
    { "unordered_multiset",   0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
+   { "array",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
    { "vector",               0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
+   { "span",                 0,                              0,                     "T",           "elements",    0,     0,             FALSE,   TRUE  },
    { "queue",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
    { "priority_queue",       0,                              0,                     "T",           "elements",    0,     0,             false,   false },
    { "stack",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
@@ -566,7 +588,7 @@ void processFiles()
 
    for (const auto &s : tagFileList) {
       readTagFile(root, s);
-      root->createNavigationIndex(QSharedPointer<FileDef>());          // broom - (saving a nullptr which gets changed later on)sss
+      root->createNavigationIndex(QSharedPointer<FileDef>());      // broom - (saving a nullptr which gets changed later on)
    }
 
    // parse source files
@@ -2300,7 +2322,7 @@ void Doxy_Work::resolveClassNestingRelations()
 
          if (d != cd && ! cd->getDefFileName().isEmpty())  {
             // avoid recursion in case of redundant scopes, i.e: namespace N { class N::C {}; }
-            // for this case DoxyPress assumes the exitance of a namespace N::N in which C is to be found
+            // for this case DoxyPress assumes the existence of a namespace N::N in which C is to be found
             // also avoid warning for stuff imported via a tagfile.
 
             d->addInnerCompound(cd);
@@ -5299,8 +5321,8 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
             if (baseClass == 0 && i != -1) {
                // base class has template specifiers
 
-               // TODO: here we should try to find the correct template specialization
-               // but for now, we only look for the unspecializated base class.
+               // TODO: try to find the correct template specialization
+               // for now, only look for the unspecialized base class
 
                int e = findEndOfTemplate(baseClassName, i + 1);
 
