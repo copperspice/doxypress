@@ -211,34 +211,13 @@ static inline void copyToOutput(const QString &s, int len)
    }
 }
 
-static void startCondSection(const QString &sectId)
-{
-   CondParser prs;
-   bool expResult = prs.parse(s_fileName, s_lineNr, sectId);
 
-   s_condStack.push(CondCtx(s_lineNr, sectId, s_skip));
+static void startCondSection(const QString &sectId);
+static void endCondSection();
+static void handleCondSectionId(const QString &expression);
 
-   if (! expResult) {
-      // not enabled
-      s_skip = true;
-   }
-}
-
-static void endCondSection()
-{
-   if (s_condStack.isEmpty()) {
-      warn(s_fileName, s_lineNr, "Found \\endcond command without matching \\cond");
-      s_skip = false;
-
-   } else {
-      CondCtx ctx = s_condStack.pop();
-      s_skip = ctx.skip;
-   }
-}
-
-/** copies string \a s with length \a len to the output, while
- *  replacing any alias commands found in the string.
- */
+//  copies string s with length len to the output
+//  while replacing any alias commands found in the string
 static void replaceAliases(const QString &s)
 {
    QString result = resolveAliasCmd(s);
@@ -999,56 +978,21 @@ static int yyread(char *buf, int max_size)
 
 <CondLine>[!()&| \ta-z_A-Z0-9.\-]+ {
       QString text = QString::fromUtf8(yytext);
-
-      bool oldSkip = s_skip;
-      startCondSection(text);
-
-      if ((s_condCtx == CComment || s_readLineCtx == SComment) && ! oldSkip && s_skip) {
-
-         if (s_lang != SrcLangExt_Python && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran)   {
-
-            ADDCHAR('*');
-            ADDCHAR('/');
-         }
-      }
-
-      if (s_readLineCtx == SComment) {
-         BEGIN(SComment);
-
-      } else {
-         BEGIN(s_condCtx);
-      }
+      handleCondSectionId(text);
    }
 
-<CondLine>[ \t]*
-<CComment,ReadLine>[\\@]"cond"[ \t\r]*/\n |
-<CondLine>.             {
+<CComment,ReadLine>[\\@]"cond"[ \t\r]*/\n {
+      s_condCtx = YY_START;
+      handleCondSectionId(" ");
+   }
+
+<CondLine>. {
       // forgot section id?
       QString text = QString::fromUtf8(yytext);
-
-      if (YY_START != CondLine) {
-         s_condCtx = YY_START;
-      }
-
-      bool oldSkip = s_skip;
-      startCondSection(" ");    // fake section id causing the section to be hidden unconditionally
-
-      if ((s_condCtx == CComment || s_readLineCtx == SComment) && ! oldSkip && s_skip) {
-         if (s_lang != SrcLangExt_Python) {
-            ADDCHAR('*');
-            ADDCHAR('/');
-         }
-      }
+      handleCondSectionId(" ");
 
       if (text[0] == '\n') {
          s_lineNr++;
-      }
-
-      if (s_readLineCtx == SComment) {
-         BEGIN(SComment);
-
-      } else {
-         BEGIN(s_condCtx);
       }
    }
 
@@ -1151,6 +1095,51 @@ static int yyread(char *buf, int max_size)
    }
 
 %%
+
+void startCondSection(const QString &sectId)
+{
+   CondParser prs;
+   bool expResult = prs.parse(s_fileName, s_lineNr, sectId);
+
+   s_condStack.push(CondCtx(s_lineNr, sectId, s_skip));
+
+   if (! expResult) {
+      // not enabled
+      s_skip = true;
+   }
+}
+
+void endCondSection()
+{
+   if (s_condStack.isEmpty()) {
+      warn(s_fileName, s_lineNr, "Found \\endcond command without matching \\cond");
+      s_skip = false;
+
+   } else {
+      CondCtx ctx = s_condStack.pop();
+      s_skip = ctx.skip;
+   }
+}
+
+void handleCondSectionId(const QString &expression)
+{
+  bool oldSkip = s_skip;
+  startCondSection(expression);
+
+  if ((s_condCtx == CComment || s_readLineCtx == SComment) && ! oldSkip && s_skip) {
+    if (s_lang != SrcLangExt_Python && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran) {
+      ADDCHAR('*');
+      ADDCHAR('/');
+    }
+  }
+
+  if (s_readLineCtx == SComment) {
+    BEGIN(SComment);
+
+  } else {
+    BEGIN(s_condCtx);
+  }
+}
 
 void replaceComment(int offset)
 {

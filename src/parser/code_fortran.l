@@ -1411,7 +1411,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       } else {
          codifyLines(text);
 
-         // comment cannot extend over the end of a line, it should always be terminatd at the end of the line
+         // comment can not extend over the end of a line, should always be terminated at the end of the line
          if (s_currentFontClass == "comment") {
             endFontClass();
          }

@@ -531,7 +531,7 @@ FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+&#]
 FILEECHAR [a-z_A-Z0-9\-\+&#]
 HFILEMASK ("."{FILESCHAR}*{FILEECHAR}+)+
 FILEMASK  ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|{HFILEMASK}
-LINKMASK  [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)? 
+LINKMASK  [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)?
 VERBATIM  "verbatim"{BLANK}*
 SPCMD1    {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
 SPCMD2    {CMD}[\\@<>&$#%~".+=|-]
@@ -860,7 +860,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_COMMAND_SEL();
    }
 
-<St_Para>{URLPROTOCOL}{URLMASK}/\. { 
+<St_Para>{URLPROTOCOL}{URLMASK}/\. {
       // URL.
       QString text  = QString::fromUtf8(yytext);
       g_token->name = text;
@@ -903,7 +903,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_URL;
    }
 
-<St_Para>"<"{MAILADDR2}">"  { 
+<St_Para>"<"{MAILADDR2}">"  {
       // anti spam mail address
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
@@ -993,8 +993,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para,St_Text>[\-+]        |
 <St_Para,St_Text>{WORD1}      |
 <St_Para,St_Text>{WORD2}               {
-      // function call, rule resolves multiple digit numbers 
-      
+      // function call, rule resolves multiple digit numbers
+
       QString text = QString::fromUtf8(yytext);
 
       if (text.startsWith('%')) {
@@ -1420,14 +1420,12 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Cite>{CITEID}      {
       // label to cite
       g_token->name = QString::fromUtf8(yytext);
-      
+
       if (g_token->name.startsWith('"')) {
-            
-         g_token->name = g_token->name.mid(1);	 
+         g_token->name = g_token->name.mid(1);
          g_token->name.chop(1);
-	 
-      }       	 
-      
+      }
+
       return TK_WORD;
    }
 
@@ -1450,7 +1448,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_Ref>{REFWORD_NOCV}/{BLANK}("const")[a-z_A-Z0-9] {
-      g_token->name = QString::fromUtf8(yytext);         
+      g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
    }
 

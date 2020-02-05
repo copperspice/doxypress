@@ -82,6 +82,7 @@ struct SymbolModifiers {
    bool volat;       /* volatile is a reserved name */
    bool value;       /* volatile is a reserved name */
    QString passVar;
+   QString bindVar;
 
    SymbolModifiers() : type(), returnName(), protection(NONE_P), direction(NONE_D),
       optional(false), protect(false), dimension(), allocatable(false),
@@ -202,6 +203,8 @@ static void pushBuffer(QString &buffer);
 static void popBuffer();
 
 static QString extractFromParens(const QString &name);
+static QString extractBind(const QString &name);
+
 static CommentInPrepass *locatePrepassComment(int from, int to);
 static void updateVariablePrepassComment(int from, int to);
 static void newLine();
@@ -244,7 +247,7 @@ INTENT_SPEC  intent{BS}"("{BS}(in|out|in{BS}out){BS}")"
 ATTR_SPEC   (EXTERNAL|ALLOCATABLE|DIMENSION{ARGS}|{INTENT_SPEC}|INTRINSIC|OPTIONAL|PARAMETER|POINTER|PROTECTED|PRIVATE|PUBLIC|SAVE|TARGET|NOPASS|PASS{ARGS}?|DEFERRED|NON_OVERRIDABLE|CONTIGUOUS|VOLATILE|VALUE)
 
 ACCESS_SPEC         (PRIVATE|PUBLIC)
-LANGUAGE_BIND_SPEC  BIND{BS}"("{BS}C{BS}(,{BS}NAME{BS}"="{BS}"\""(.*)"\""{BS})?")"
+LANGUAGE_BIND_SPEC BIND{BS}"("{BS}C{BS}((,{BS}NAME{BS}"="{BS}"\""(.*)"\""{BS})|(,{BS}NAME{BS}"="{BS}"'"(.*)"'"{BS}))?")"
 
 /* Assume that attribute statements are almost the same as attributes. */
 ATTR_STMT           {ATTR_SPEC}|DIMENSION|{ACCESS_SPEC}
@@ -971,6 +974,11 @@ private                                 {
 {BS}                 {
       // no code
    }
+
+{LANGUAGE_BIND_SPEC}  {
+      currentModifiers |= QString::fromUtf8(yytext);
+   }
+
 
 {ATTR_SPEC}.         {
       // update current modifiers when it is an ATTR_SPEC and not a variable name
@@ -2106,7 +2114,32 @@ static QString extractFromParens(const QString &name)
    return extracted;;
 }
 
-/*! Adds passed modifiers to these modifiers.*/
+// remove useless spaces from bind statement
+static QString extractBind(const QString &name)
+{
+  QString parensPart = extractFromParens(name);
+
+  if (parensPart.length() == 1) {
+    return "bind(C)";
+
+  } else {
+    // strip 'c'
+    parensPart = parensPart.mid(1).trimmed();
+
+    // strip ','
+    parensPart = parensPart.mid(1).trimmed();
+
+    // name part
+    parensPart = parensPart.mid(4).trimmed();
+
+    // = part
+    parensPart = parensPart.mid(1).trimmed();
+
+    return "bind(C, name=" + parensPart + ")";
+  }
+}
+
+// Adds passed modifiers to these modifiers
 SymbolModifiers& SymbolModifiers::operator|=(const SymbolModifiers &mdfs)
 {
   if (mdfs.protection != NONE_P) {
@@ -2138,6 +2171,8 @@ SymbolModifiers& SymbolModifiers::operator|=(const SymbolModifiers &mdfs)
    nopass     |= mdfs.nopass;
    pass       |= mdfs.pass;
    passVar     = mdfs.passVar;
+   bindVar     = mdfs.bindVar;
+
    contiguous |= mdfs.contiguous;
    volat      |= mdfs.volat;
    value      |= mdfs.value;
@@ -2145,17 +2180,17 @@ SymbolModifiers& SymbolModifiers::operator|=(const SymbolModifiers &mdfs)
    return *this;
 }
 
-/*! Extracts  and adds passed modifier to these modifiers.*/
+// Extracts  and adds passed modifier to these modifiers
 SymbolModifiers& SymbolModifiers::operator|=(QString mdfString)
 {
-   mdfString = mdfString.toLower();
+   QString mdfStringLower = mdfString.toLower();
    SymbolModifiers newMdf;
 
-   if (mdfString.indexOf("dimension") == 0) {
-      newMdf.dimension = mdfString;
+   if (mdfStringLower.indexOf("dimension") == 0) {
+      newMdf.dimension = mdfStringLower;
 
-   } else if (mdfString.contains("intent")) {
-      QString tmp = extractFromParens(mdfString);
+   } else if (mdfStringLower.contains("intent")) {
+      QString tmp = extractFromParens(mdfStringLower);
 
       bool isin  = tmp.contains("in");
       bool isout = tmp.contains("out");
@@ -2170,69 +2205,75 @@ SymbolModifiers& SymbolModifiers::operator|=(QString mdfString)
          newMdf.direction = SymbolModifiers::OUT;
       }
 
-   } else if (mdfString=="public")  {
+   } else if (mdfStringLower == "public")  {
       newMdf.protection = SymbolModifiers::PUBLIC;
 
-   } else if (mdfString=="private")  {
+   } else if (mdfStringLower == "private")  {
       newMdf.protection = SymbolModifiers::PRIVATE;
 
-   } else if (mdfString=="protected")  {
+   } else if (mdfStringLower == "protected")  {
       newMdf.protect = true;
 
-   } else if (mdfString=="optional")  {
+   } else if (mdfStringLower == "optional")  {
       newMdf.optional = true;
 
-   } else if (mdfString=="allocatable") {
+   } else if (mdfStringLower == "allocatable") {
       newMdf.allocatable = true;
 
-   } else if (mdfString=="external") {
+   } else if (mdfStringLower == "external") {
       newMdf.external = true;
 
-   } else if (mdfString=="intrinsic") {
+   } else if (mdfStringLower == "intrinsic") {
       newMdf.intrinsic = true;
 
-   } else if (mdfString=="parameter") {
+   } else if (mdfStringLower == "parameter") {
       newMdf.parameter = true;
 
-   } else if (mdfString=="pointer")  {
+   } else if (mdfStringLower == "pointer")  {
       newMdf.pointer = true;
 
-   } else if (mdfString=="target") {
+   } else if (mdfStringLower == "target") {
       newMdf.target = true;
 
-   } else if (mdfString=="save") {
+   } else if (mdfStringLower == "save") {
       newMdf.save = true;
 
-   } else if (mdfString=="nopass") {
+   } else if (mdfStringLower == "nopass") {
       newMdf.nopass = true;
 
-   } else if (mdfString=="deferred")    {
+   } else if (mdfStringLower == "deferred")    {
       newMdf.deferred = true;
 
-   } else if (mdfString=="non_overridable") {
+   } else if (mdfStringLower == "non_overridable") {
       newMdf.nonoverridable = true;
 
-   } else if (mdfString=="contiguous") {
+   } else if (mdfStringLower == "contiguous") {
       newMdf.contiguous = true;
 
-   } else if (mdfString=="volatile") {
+   } else if (mdfStringLower == "volatile") {
       newMdf.volat = true;
 
-   } else if (mdfString=="value") {
+   } else if (mdfStringLower == "value") {
       newMdf.value = true;
 
-   } else if (mdfString.contains("pass")) {
+   } else if (mdfStringLower.contains("pass")) {
       newMdf.pass = true;
 
-      if (mdfString.contains("(")) {
-         newMdf.passVar = extractFromParens(mdfString);
+      if (mdfStringLower.contains("(")) {
+         newMdf.passVar = extractFromParens(mdfStringLower);
+	
       } else {
          newMdf.passVar = "";
       }
 
+   }  else if (mdfStringLower.startsWith("bind")) {
+    // use the original string
+    newMdf.bindVar = extractBind(mdfString);
+
    }
 
    (*this) |= newMdf;
+
    return *this;
 }
 
@@ -2273,7 +2314,7 @@ static Entry *findFunction(Entry* entry, QString name)
 }
 #endif
 
-/*! Apply modifiers stored in \a mdfs to the \a typeName string. */
+// Apply modifiers stored in \a mdfs to the \a typeName string.
 static QString applyModifiers(QString typeName, SymbolModifiers &mdfs)
 {
    if (!mdfs.dimension.isEmpty()) {
@@ -2388,6 +2429,14 @@ static QString applyModifiers(QString typeName, SymbolModifiers &mdfs)
       if (! mdfs.passVar.isEmpty()) {
          typeName += "(" + mdfs.passVar + ")";
       }
+   }
+
+   if (! mdfs.bindVar.isEmpty()) {
+    if (! typeName.isEmpty()) {
+       typeName += ", ";
+    }
+
+    typeName += mdfs.bindVar;
    }
 
    if (mdfs.protection == SymbolModifiers::PUBLIC) {

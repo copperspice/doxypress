@@ -2947,7 +2947,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput('\n');
 
       setOutput(OutputMainDoc);
-      addToOutput("\\copydetails ");
+      addToOutput(" \\copydetails ");
       addToOutput(s_copyDocArg);
 
       addToOutput("\n");

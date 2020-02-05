@@ -53,10 +53,12 @@ struct CondCtx
 };
 
 struct FileState {
-   FileState(int size) : lineNr(1), fileBuf(size),
+   FileState(int size) : lineNr(1), curlyCount(0), fileBuf(size),
       oldFileBuf(""), oldFileBufPos(0), bufState(0) {}
 
    int       lineNr;
+   int       curlyCount;
+
    QString   fileBuf;
    QString   oldFileBuf;
    int       oldFileBufPos;
@@ -1785,9 +1787,12 @@ static void readIncludeFile(const QString &inc)
 
          }
 
-         fs->bufState = YY_CURRENT_BUFFER;
-         fs->lineNr   = oldLineNr;
-         fs->fileName = oldFileName;
+         fs->bufState   = YY_CURRENT_BUFFER;
+         fs->lineNr     = oldLineNr;
+         fs->fileName   = oldFileName;
+         fs->curlyCount = s_curlyCount;
+
+         s_curlyCount   = 0;
 
          // push the state on the stack
          s_includeStack.push(fs);
@@ -3507,8 +3512,9 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
          preYY_delete_buffer(oldBuf );
 
          s_yyLineNr    = fs->lineNr;
-         s_inputString    = fs->oldFileBuf;
+         s_inputString   = fs->oldFileBuf;
          s_inputPosition = fs->oldFileBufPos;
+	 s_curlyCount    = fs->curlyCount;
          setFileName(fs->fileName);
 
          DBG_CTX((stderr, "######## FileName %s\n", csPrintable(s_yyFileName)));
