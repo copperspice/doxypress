@@ -66,7 +66,7 @@ class ParserInterface
     *  be run before feed the result to the input parser.
     *  @see parseInput()
     */
-   virtual bool needsPreprocessing(const QString &extension) = 0;
+   virtual bool needsPreprocessing(const QString &extension) const = 0;
 
    /** Parses a source file or fragment and produces highlighted and cross-referenced output.
     *  @param[in] codeOutIntf Abstract interface for writing the result.

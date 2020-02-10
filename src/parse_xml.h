@@ -33,7 +33,7 @@ class XML_Parser : public ParserInterface
     void parseInput(const QString &fileName, const QString &fileBuffer, QSharedPointer<Entry> root,
                    enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {} ;
 
-    bool needsPreprocessing(const QString &extension) override {
+    bool needsPreprocessing(const QString &extension) const override {
       return false;
     }
 

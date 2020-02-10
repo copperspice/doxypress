@@ -2178,7 +2178,7 @@ void Python_Parser::parseInput(const QString &fileName, const QString &fileBuf,
    printlex(yy_flex_debug, false, __FILE__, fileName);
 }
 
-bool Python_Parser::needsPreprocessing(const QString &)
+bool Python_Parser::needsPreprocessing(const QString &) const
 {
   return false;
 }

@@ -83,7 +83,7 @@ void MakeFileParser::endFontClass()
    }
 }
 
-bool MakeFileParser::needsPreprocessing(const QString &)
+bool MakeFileParser::needsPreprocessing(const QString &) const
 {
    return false;
 }

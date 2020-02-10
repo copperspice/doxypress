@@ -9802,7 +9802,7 @@ static void parsePrototype(const QString &text)
 
 // **
 
-bool CPP_Parser::needsPreprocessing(const QString &extension)
+bool CPP_Parser::needsPreprocessing(const QString &extension) const
 {
    QString fe = extension.toLower();
    SrcLangExt lang = getLanguageFromFileName(extension);

@@ -3135,7 +3135,7 @@ void Fortran_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &
                   collectXRefs, m_format);
 }
 
-bool Fortran_Parser::needsPreprocessing(const QString &extension)
+bool Fortran_Parser::needsPreprocessing(const QString &extension) const
 {
    // use preprocessor only for upper case extensions
    return extension != extension.toLower();

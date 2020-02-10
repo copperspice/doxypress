@@ -3245,7 +3245,7 @@ void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scop
    printlex(yy_flex_debug, false, __FILE__, fileDef ? fileDef->fileName() : "");
 }
 
-bool Tcl_Parser::needsPreprocessing(const QString &)
+bool Tcl_Parser::needsPreprocessing(const QString &) const
 {
    return false;
 }

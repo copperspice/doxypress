@@ -31,7 +31,7 @@ class FileParser : public ParserInterface
    void parseInput(const QString &, const QString &, QSharedPointer<Entry>, 
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {};
 
-   bool needsPreprocessing(const QString &) override {
+   bool needsPreprocessing(const QString &) const override {
       return false;
    }
 

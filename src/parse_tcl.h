@@ -34,7 +34,7 @@ class Tcl_Parser : public ParserInterface
    void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
-   bool needsPreprocessing(const QString &extension) override;
+   bool needsPreprocessing(const QString &extension) const override;
 
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                   bool isExampleBlock, const QString &exampleName = QString(),

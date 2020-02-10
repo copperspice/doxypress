@@ -37,7 +37,7 @@ class MarkdownFileParser : public ParserInterface
    void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry>root, 
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
-   bool needsPreprocessing(const QString &) override {
+   bool needsPreprocessing(const QString &) const override {
       return false;
    }
   
