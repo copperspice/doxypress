@@ -6564,9 +6564,9 @@ QString latexEscapePDFString(const QString &data)
 {
    QString result;
 
-   for (QChar c : data) {
+   for (QChar ch : data) {
 
-      switch (c.unicode()) {
+      switch (ch.unicode()) {
 
          case '\\':
             result += "\\textbackslash{}";
@@ -6593,12 +6593,44 @@ QString latexEscapePDFString(const QString &data)
             break;
 
          default:
-            result += c;
+            result += ch;
             break;
       }
    }
 
    return result;
+}
+
+QString latexFilterURL(const QString &str)
+{
+   if (str.isEmpty())  {
+      return str;
+   }
+
+   QString retval;
+
+   for (QChar ch : str) {
+
+      switch (ch.unicode()) {
+         case '#':
+            retval.append("\\#");
+            break;
+
+         case '%':
+            retval.append("\\%");
+            break;
+
+         case '\\':
+            retval.append("\\\\");
+            break;
+
+         default:
+            retval.append(ch);
+            break;
+      }
+   }
+
+   return retval;
 }
 
 QString rtfFormatBmkStr(const QString &key)

@@ -292,7 +292,12 @@ void LatexDocVisitor::visit(DocHorRuler *)
    if (m_hide) {
       return;
    }
-   m_t << "\n\n";
+
+   if (insideTable()) {
+      m_t << "\\DoxyHorRuler{1}\n";
+   } else {
+      m_t << "\\DoxyHorRuler{0}\n";
+   }
 }
 
 void LatexDocVisitor::visit(DocStyleChange *s)
@@ -300,6 +305,7 @@ void LatexDocVisitor::visit(DocStyleChange *s)
    if (m_hide) {
       return;
    }
+
    switch (s->style()) {
       case DocStyleChange::Bold:
          if (s->enable()) {

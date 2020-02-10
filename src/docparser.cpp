@@ -6280,7 +6280,9 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStatePlantUML();
          retval = doctokenizerYYlex();
 
-         dv->setText(g_token->verb);
+         int line = 0;
+
+         dv->setText(trimEmptyLines(g_token->verb, line));
          dv->setWidth(width);
          dv->setHeight(height);
 

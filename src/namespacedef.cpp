@@ -300,6 +300,7 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
                }
             }
          }
+         break;
 
          case LayoutDocEntry::MemberDecl:
          {

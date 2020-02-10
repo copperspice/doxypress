@@ -2906,7 +2906,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
             QString memName = ptrEntry->m_entryName.right(ptrEntry->m_entryName.length() - i - 2);
             QSharedPointer<ClassDef> bcd = getResolvedClass(cd, QSharedPointer<FileDef>(), scope); // todo: file in fileScope parameter
 
-            if (bcd) {
+            if (bcd && bcd != cd) {
                const MemberNameInfoSDict &mndict  = bcd->memberNameInfoSDict();
                QSharedPointer<MemberNameInfo> mni = mndict.find(memName);
 

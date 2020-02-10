@@ -619,6 +619,11 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\\makeatother\n"
      "\n";
 
+   t_stream << "\\makeatletter\n"
+     "\\newcommand\\hrulefilll{\\leavevmode\\leaders\\hrule\\hskip 0pt plus 1filll\\kern\\z@}\n"
+     "\\makeatother\n"
+     "\n";
+
    // Headers & footers
    QString genString;
    QString generatedBy;
@@ -1416,7 +1421,7 @@ void LatexGenerator::startHtmlLink(const QString &url)
 {
    if (Config::getBool("latex-hyper-pdf")) {
       m_textStream << "\\href{";
-      m_textStream << url;
+      m_textStream << latexFilterURL(url);
       m_textStream << "}";
    }
 

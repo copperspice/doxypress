@@ -669,6 +669,10 @@ void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
 
 void HtmlCodeGenerator::endCodeLine()
 {
+   if (m_col == 0) {
+      m_streamX << " ";
+      ++m_col;
+   }
    m_streamX << "</div>";
 }
 

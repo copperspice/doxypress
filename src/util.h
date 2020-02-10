@@ -202,6 +202,8 @@ QString langToString(SrcLangExt lang);
 QString latexEscapeLabelName(const QString &data,  bool insideTabbing);
 QString latexEscapeIndexChars(const QString &data, bool insideTabbing);
 QString latexEscapePDFString(const QString &data);
+QString latexFilterURL(const QString &str);
+
 QString linkToText(SrcLangExt lang, const QString &link, bool isFileName);
 QString lowerCaseFirstLetter(QString &&text);
 
