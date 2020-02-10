@@ -25,10 +25,10 @@
 class FileParser : public ParserInterface
 {
  public:
-   virtual ~FileParser() {} 
+   virtual ~FileParser() {}
    void finishTranslationUnit() override {}
 
-   void parseInput(const QString &, const QString &, QSharedPointer<Entry>, 
+   void parseInput(const QString &, const QString &, QSharedPointer<Entry>,
                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {};
 
    bool needsPreprocessing(const QString &) const override {
@@ -36,7 +36,7 @@ class FileParser : public ParserInterface
    }
 
    void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
-                  bool isExampleBlock, const QString &exampleName = QString(), 
+                  bool isExampleBlock, const QString &exampleName = QString(),
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                   int startLine = -1, int endLine = -1, bool inlineFragment = false,
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,

@@ -26,33 +26,33 @@ static QString                 g_currentFontClass;
 static QSharedPointer<FileDef> g_sourceFileDef;
 static int                     g_yyLineNr;
 
-void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, 
-         SrcLangExt xx, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine, int endLine, 
-         bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers, 
+void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+         SrcLangExt xx, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine, int endLine,
+         bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
          QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
- 
+
    if (input.isEmpty()) {
       return;
    }
 
-   g_code = &codeOutIntf;  
+   g_code = &codeOutIntf;
    g_sourceFileDef = fileDef;
 
    g_currentFontClass = "";
    g_yyLineNr = 1;
 
    QStringList lines = QString(input).split("\n");
-     
-   for (auto s : lines ) { 
+
+   for (auto s : lines ) {
       this->startCodeLine();
       g_code->codify(s);
       this->endCodeLine();
-   } 
+   }
 }
 
 void MakeFileParser::startCodeLine()
-{    
+{
    g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
 
    if (! g_currentFontClass.isEmpty()) {
@@ -89,11 +89,11 @@ bool MakeFileParser::needsPreprocessing(const QString &) const
 }
 
 void MakeFileParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
-                                enum ParserMode mode, QStringList &includedFiles, bool useClang) 
+                                enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
 }
 
-void MakeFileParser::parsePrototype(const QString &text) 
+void MakeFileParser::parsePrototype(const QString &text)
 {
 }
 
