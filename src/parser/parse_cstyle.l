@@ -1013,6 +1013,15 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( FindMembers );
    }
 
+<FindMembers>"?>"|"</script>"  {
+      // PHP code end
+      if (insidePHP) {
+         BEGIN( FindMembersPHP );
+      } else {
+         REJECT;
+      }
+   }
+
 <FindMembersPHP>[^\n<]+      {
       // Non-PHP code text, ignore
    }
@@ -1024,14 +1033,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembersPHP>.                      {
       // Non-PHP code text, ignore
-   }
-
-<FindMembers>"?>"|"</script>"          {
-      // PHP code end
-      if (insidePHP)
-         BEGIN( FindMembersPHP );
-      else
-         REJECT;
    }
 
 <FindMembers>{PHPKW}           {
@@ -4105,6 +4106,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             (YY_START == ReadInitializer && lastInitializerContext == FindFields);
 
       closeGroup(current, yyFileName, yyLineNr, insideEnum);
+      lineCount();
    }
 
 <FindMembers>"="                                {
@@ -9380,13 +9382,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <*>\"       {
       if (insidePHP) {
-         lastStringContext=YY_START;
+         lastStringContext = YY_START;
          BEGIN(SkipString);
       }
    }
 
 <*>\?       {
-      if (insideCSharp) {
+      if (insideCSharp && (YY_START != SkipRound)) {
          QString tmpType = current->getData(EntryKey::Member_Type);
 
          if (tmpType.isEmpty()) {

@@ -1121,6 +1121,9 @@ static int getNextId(const QString &expr, int p, int *l)
  */
 static void expandExpression(QString &expr, QString *rest, int pos)
 {
+  if (expr.isEmpty()) {
+    return;
+  }
    QString macroName;
    QString expMacro;
 
@@ -3207,7 +3210,6 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       s_defLitText += text;
 
-      outputChar('\n');
       s_defText += " ";
       s_yyLineNr++;
       s_yyMLines++;
@@ -3225,7 +3227,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
 
       s_yyLineNr++;
-      outputChar('\n');
+
       s_defLitText += text;
       s_defText+=' ';
    }

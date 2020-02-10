@@ -2413,7 +2413,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       endFontClass();
    }
 
-<Bases>{SEP}?({ID}{SEP})*{ID}           {
+<Bases>{SEP}?({ID}{SEP})*{ID}   {
       QString text = QString::fromUtf8(yytext);
 
       DBG_CTX((stderr, "%s:addBase(%s)\n", csPrintable(g_curClassName), csPrintable(text) ));
@@ -2422,7 +2422,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       generateClassOrGlobalLink(*g_code, text);
    }
 
-<Bases>"<"                              {
+<Bases>"<"                      {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
@@ -2450,8 +2450,26 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <SkipSharp>">"       {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
-      if (--g_sharpCount <= 0)
-      BEGIN ( Bases );
+
+      if (--g_sharpCount <= 0) {
+         BEGIN ( Bases );
+      }
+   }
+
+<SkipSharp>"\""      {
+      QString text = QString::fromUtf8(yytext);
+      g_code->codify(text);
+      g_lastStringContext = YY_START;
+
+      BEGIN(SkipString);
+   }
+
+<SkipSharp>"\'"      {
+      QString text = QString::fromUtf8(yytext);
+      g_code->codify(text);
+      g_lastStringContext = YY_START;
+
+      BEGIN(SkipStringS);
    }
 
 <Bases>"("           {
@@ -2470,8 +2488,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <SkipSharp>")"   {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
-      if (--g_sharpCount <= 0)
-      BEGIN ( Bases );
+      if (--g_sharpCount <= 0) {
+         BEGIN ( Bases );
+      }
    }
 
 <Bases>","       {

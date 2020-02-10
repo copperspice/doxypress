@@ -417,6 +417,13 @@ static void tcl_name(const QString &ns0, const QString &name0, QString &ns, QStr
       ns = "";
       name = myNm;
 
+   } else if (myNm.length() - myStart == 2) {
+      // ending with :: so get name equal to last component
+
+      ns      = myNm.mid(0, myStart);
+      myStart = ns.lastIndexOf("::");
+      name    = myNm.mid(myStart + 2);
+
    } else {
       ns = myNm.mid(0, myStart);
       name = myNm.mid(myStart + 2);

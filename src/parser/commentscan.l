@@ -3115,7 +3115,10 @@ static bool handleMainpage(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
 
-   if (! stop) {
+   if (stop) {
+      current->m_entryName = "";
+
+   } else {
       current->m_entryName = "mainpage";
    }
 
