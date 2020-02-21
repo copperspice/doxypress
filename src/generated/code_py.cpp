@@ -1265,7 +1265,7 @@ goto find_rule; \
 char *code_py_YYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2019 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
 *************************************************************************/

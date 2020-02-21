@@ -1473,7 +1473,7 @@ goto find_rule; \
 char *parse_py_YYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2019 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
 *************************************************************************/
@@ -5251,7 +5251,7 @@ void Python_Parser::parseInput(const QString &fileName, const QString &fileBuf,
    printlex(parse_py_YY_flex_debug, false, __FILE__, fileName);
 }
 
-bool Python_Parser::needsPreprocessing(const QString &)
+bool Python_Parser::needsPreprocessing(const QString &) const
 {
   return false;
 }

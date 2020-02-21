@@ -34101,7 +34101,7 @@ goto find_rule; \
 char *code_fortran_YYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2019 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
  * Copyright (C) by Anke Visser
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
@@ -35977,7 +35977,7 @@ YY_RULE_SETUP
       } else {
          codifyLines(text);
 
-         // comment cannot extend over the end of a line, it should always be terminatd at the end of the line
+         // comment can not extend over the end of a line, should always be terminated at the end of the line
          if (s_currentFontClass == "comment") {
             endFontClass();
          }

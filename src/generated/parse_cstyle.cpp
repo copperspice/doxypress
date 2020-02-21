@@ -499,10 +499,10 @@ static yyconst flex_int16_t yy_acclist[6614] =
       826,  266,  821,  826,  266,  821,  826,  266,  821,  826,
       266,  821,  826,  266,  821,  826,  266,  821,  826,  266,
       821,  826,  266,  821,  826,  266,  821,  826,  737,  821,
-      826,   16,   18,  821,  826,   17,  815,  826,   16,   18,
-      816,  819,  821,  826,   16,   18,  817,  821,  826,   16,
-       18,  818,  821,  826,   16,   18,  821,  826,   18,  821,
-      826,   16,   18,  820,  821,  826,   16,   18,  821,  826,
+      826,   17,   19,  821,  826,   18,  815,  826,   17,   19,
+      816,  819,  821,  826,   17,   19,  817,  821,  826,   17,
+       19,  818,  821,  826,   17,   19,  821,  826,   19,  821,
+      826,   17,   19,  820,  821,  826,   17,   19,  821,  826,
 
       821,  826,  815,  826,  821,  826,  821,  826,  821,  826,
       266,  821,  826,  821,  826,  815,  826,  821,  826,  289,
@@ -897,13 +897,13 @@ static yyconst flex_int16_t yy_acclist[6614] =
       701,  701,  701,  704,  699,  700,  701,  699,  700,  701,
       698,  699,  700,  718,  698,  699,  700,  698,  719,   62,
        62,  289,  266,  266,   21,   22,  308,  484,   47,  823,
-      825,  274,  276,   19,   76,   76,   76,   76,   76,   76,
+      825,  274,  276,   16,   76,   76,   76,   76,   76,   76,
       266,  158,  266,  266,  266,  266,  814,  266,  266,  266,
 
       266,  266,  266,  266,  266,  266,  266,  266,  266,  266,
       266,  266,  266,  266,  266,  266,  266,  266,  266,  266,
-      266,  266,  266,  266,  266,  266,  266,  266,  266,   16,
-       16,  823,   16,  825,   14,   16,  814,  266,  266,  266,
+      266,  266,  266,  266,  266,  266,  266,  266,  266,   17,
+       17,  823,   17,  825,   14,   17,  814,  266,  266,  266,
       159,  289,  449,  823,  825,  449,  572,  571,  571,  572,
       562,  586,  563,  567,  823,  825,  564,  586,  586,  586,
       586,  586,  586,  586,  586,  586,  586,  586,  586,  131,
@@ -12806,7 +12806,7 @@ goto find_rule; \
 char *parse_cstyle_YYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2019 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
 *************************************************************************/
@@ -14114,31 +14114,32 @@ YY_RULE_SETUP
 case 16:
 YY_RULE_SETUP
 {
-      // Non-PHP code text, ignore
+      // PHP code end
+      if (insidePHP) {
+         BEGIN( FindMembersPHP );
+      } else {
+         REJECT;
+      }
    }
 	YY_BREAK
 case 17:
-/* rule 17 can match eol */
+YY_RULE_SETUP
+{
+      // Non-PHP code text, ignore
+   }
+	YY_BREAK
+case 18:
+/* rule 18 can match eol */
 YY_RULE_SETUP
 {
       // Non-PHP code text, ignore
       lineCount();
    }
 	YY_BREAK
-case 18:
-YY_RULE_SETUP
-{
-      // Non-PHP code text, ignore
-   }
-	YY_BREAK
 case 19:
 YY_RULE_SETUP
 {
-      // PHP code end
-      if (insidePHP)
-         BEGIN( FindMembersPHP );
-      else
-         REJECT;
+      // Non-PHP code text, ignore
    }
 	YY_BREAK
 case 20:
@@ -17916,6 +17917,7 @@ YY_RULE_SETUP
             (YY_START == ReadInitializer && lastInitializerContext == FindFields);
 
       closeGroup(current, yyFileName, yyLineNr, insideEnum);
+      lineCount();
    }
 	YY_BREAK
 case 314:
@@ -24432,7 +24434,7 @@ case 819:
 YY_RULE_SETUP
 {
       if (insidePHP) {
-         lastStringContext=YY_START;
+         lastStringContext = YY_START;
          BEGIN(SkipString);
       }
    }
@@ -24440,7 +24442,7 @@ YY_RULE_SETUP
 case 820:
 YY_RULE_SETUP
 {
-      if (insideCSharp) {
+      if (insideCSharp && (YY_START != SkipRound)) {
          QString tmpType = current->getData(EntryKey::Member_Type);
 
          if (tmpType.isEmpty()) {
@@ -26009,7 +26011,7 @@ static void parsePrototype(const QString &text)
 
 // **
 
-bool CPP_Parser::needsPreprocessing(const QString &extension)
+bool CPP_Parser::needsPreprocessing(const QString &extension) const
 {
    QString fe = extension.toLower();
    SrcLangExt lang = getLanguageFromFileName(extension);

@@ -2633,7 +2633,7 @@ goto find_rule; \
 char *preYYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2019 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  *
 *************************************************************************/
@@ -2684,10 +2684,12 @@ struct CondCtx
 };
 
 struct FileState {
-   FileState(int size) : lineNr(1), fileBuf(size),
+   FileState(int size) : lineNr(1), curlyCount(0), fileBuf(size),
       oldFileBuf(""), oldFileBufPos(0), bufState(0) {}
 
    int       lineNr;
+   int       curlyCount;
+
    QString   fileBuf;
    QString   oldFileBuf;
    int       oldFileBufPos;
@@ -3749,6 +3751,9 @@ static int getNextId(const QString &expr, int p, int *l)
  */
 static void expandExpression(QString &expr, QString *rest, int pos)
 {
+  if (expr.isEmpty()) {
+    return;
+  }
    QString macroName;
    QString expMacro;
 
@@ -4414,9 +4419,12 @@ static void readIncludeFile(const QString &inc)
 
          }
 
-         fs->bufState = YY_CURRENT_BUFFER;
-         fs->lineNr   = oldLineNr;
-         fs->fileName = oldFileName;
+         fs->bufState   = YY_CURRENT_BUFFER;
+         fs->lineNr     = oldLineNr;
+         fs->fileName   = oldFileName;
+         fs->curlyCount = s_curlyCount;
+
+         s_curlyCount   = 0;
 
          // push the state on the stack
          s_includeStack.push(fs);
@@ -6547,7 +6555,6 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(preYYtext);
       s_defLitText += text;
 
-      outputChar('\n');
       s_defText += " ";
       s_yyLineNr++;
       s_yyMLines++;
@@ -6570,7 +6577,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(preYYtext);
 
       s_yyLineNr++;
-      outputChar('\n');
+
       s_defLitText += text;
       s_defText+=' ';
    }
@@ -6976,8 +6983,9 @@ case YY_STATE_EOF(SkipCond):
          preYY_delete_buffer(oldBuf );
 
          s_yyLineNr    = fs->lineNr;
-         s_inputString    = fs->oldFileBuf;
+         s_inputString   = fs->oldFileBuf;
          s_inputPosition = fs->oldFileBufPos;
+	 s_curlyCount    = fs->curlyCount;
          setFileName(fs->fileName);
 
          DBG_CTX((stderr, "######## FileName %s\n", csPrintable(s_yyFileName)));

@@ -709,7 +709,7 @@ static int yy_more_len = 0;
 char *parse_tcl_YYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2019 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
  * Copyright (C) 2010      by Rene Zaumseil
 
@@ -1124,6 +1124,13 @@ static void tcl_name(const QString &ns0, const QString &name0, QString &ns, QStr
    if (myStart == -1) {
       ns = "";
       name = myNm;
+
+   } else if (myNm.length() - myStart == 2) {
+      // ending with :: so get name equal to last component
+
+      ns      = myNm.mid(0, myStart);
+      myStart = ns.lastIndexOf("::");
+      name    = myNm.mid(myStart + 2);
 
    } else {
       ns = myNm.mid(0, myStart);
@@ -3645,7 +3652,7 @@ static void tcl_word(int what, const QString &text)
          }
 
          if (myList.size() != 1 || myList[0] != '.') {
-            tcl_warn("level=%d expected=%c\n", myList.size(), myList.top());
+            tcl_warn("level = %d expected = %c\n", myList.size(), myList.top().unicode());
          }
 
          myWord = ' ';
@@ -5433,7 +5440,7 @@ void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scop
    printlex(parse_tcl_YY_flex_debug, false, __FILE__, fileDef ? fileDef->fileName() : "");
 }
 
-bool Tcl_Parser::needsPreprocessing(const QString &)
+bool Tcl_Parser::needsPreprocessing(const QString &) const
 {
    return false;
 }

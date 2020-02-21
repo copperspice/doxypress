@@ -3462,7 +3462,7 @@ goto find_rule; \
 char *commentscanYYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2019 Barbara Geller & Ansel Sermersheim
+ * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
  * Copyright (C) 1997-2014 by Dimitri van Heesch.
 
 *************************************************************************/
@@ -7155,7 +7155,7 @@ YY_RULE_SETUP
       addToOutput('\n');
 
       setOutput(OutputMainDoc);
-      addToOutput("\\copydetails ");
+      addToOutput(" \\copydetails ");
       addToOutput(s_copyDocArg);
 
       addToOutput("\n");
@@ -8344,7 +8344,10 @@ static bool handleMainpage(const QString &str, const QStringList &list)
 {
    bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
 
-   if (! stop) {
+   if (stop) {
+      current->m_entryName = "";
+
+   } else {
       current->m_entryName = "mainpage";
    }
 
