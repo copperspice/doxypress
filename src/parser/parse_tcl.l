@@ -1464,7 +1464,7 @@ static void tcl_word(int what, const QString &text)
          }
 
          if (myList.size() != 1 || myList[0] != '.') {
-            tcl_warn("level=%d expected=%c\n", myList.size(), myList.top());
+            tcl_warn("level = %d expected = %c\n", myList.size(), myList.top().unicode());
          }
 
          myWord = ' ';
