@@ -194,10 +194,9 @@ pre.fragment {
    margin: 4px 8px 4px 2px;
    overflow: auto;
    word-wrap: break-word;
-   font-size:  9pt;
    line-height: 125%;
    font-family: monospace, fixed;
-   font-size: 105%;
+   font-size: 13px;
 }
 
 div.fragment {
@@ -231,6 +230,15 @@ div.line {
    -o-transition-duration: 0.5s;
    transition-property: background-color, box-shadow;
    transition-duration: 0.5s;
+}
+
+/* adjust spacing between lines in blocks of code */
+div.line:not(:last-of-type) {
+   padding-bottom: 3px;
+}
+
+div.line:first-of-type {
+   padding-top: 2px;
 }
 
 div.line:after {
