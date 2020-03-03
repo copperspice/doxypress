@@ -657,7 +657,6 @@ void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docIn
    m_streamX << "</div>" << endl;
 }
 
-
 void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
 {
    if (! hasLineNumbers) {

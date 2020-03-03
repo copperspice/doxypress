@@ -156,7 +156,7 @@ static void codifyLines(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
          line++;
 
          int len = pos - posStart - 1;
-         column = len + 1;
+         column  = len + 1;
 
          ol.codify(text.mid(posStart, len));
 
@@ -165,6 +165,7 @@ static void codifyLines(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
          }
 
          ol.endCodeLine();
+
          ol.startCodeLine(true);
          writeLineNumber(ol, fd, line);
 
@@ -178,7 +179,7 @@ static void codifyLines(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
       }
    }
 
-  if (! fontClass.isEmpty()) {
+   if (! fontClass.isEmpty()) {
       ol.endFontClass();
    }
 }
@@ -1368,9 +1369,9 @@ void ClangParser::linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
 
       }
    }
+
    codifyLines(ol, fd, text, line, column, "");
 }
-
 
 void ClangParser::linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
                                  uint &line, uint &column, const QString &text, int tokenIndex)
@@ -1490,7 +1491,8 @@ void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> 
       }
 
       while (line < t_line) {
-         line++;
+         ++line;
+
          ol.endCodeLine();
 
          ol.startCodeLine(true);
@@ -1549,16 +1551,26 @@ void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> 
                if (stripCodeComments && omit && ! text.startsWith("/**********") ) {
                   // */ (editor syntax fix)
 
+                  int cnt = 1;
+
+                  // consume the comment
                   for (QChar c : text) {
                      ++column;
 
                      if (c == '\n')  {
                         ++line;
                         column = 0;
+
+                        ++cnt;
                      }
                   }
 
+                  ol.startFontClass("comment");
+                  ol.codify("// " + QString::number(cnt) + " comment line(s) omitted");
+                  ol.endFontClass();
+
                } else {
+                  // output comments like the file license
                   codifyLines(ol, fd, text, line, column, "comment");
 
                }
