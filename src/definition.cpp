@@ -1089,13 +1089,10 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 
       QRegularExpressionMatch match = regExp_marker.match(ldefLine);
 
-      int matchLen;
-
       // now replace all markers in inheritLine with links to the classes
       while (match.hasMatch()) {
 
          start_iter = match.capturedStart();
-         matchLen   = match.capturedLength();
 
          ol.parseText(QStringView(current_iter, start_iter));
 

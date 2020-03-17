@@ -50,9 +50,17 @@ class DocSets  : public IndexIntf
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
                   const QString &title) override;
 
-   void addIndexFile(const QString &name) override {}
-   void addImageFile(const QString &name) override {}
-   void addStyleSheetFile(const QString &name) override {}
+   void addIndexFile(const QString &name) override {
+      (void) name;
+   }
+
+   void addImageFile(const QString &name) override {
+      (void) name;
+   }
+
+   void addStyleSheetFile(const QString &name) override {
+      (void) name;
+   }
 
  private:
    void writeToken(QTextStream &t, QSharedPointer<Definition> d, const QString &type, const QString &lang,

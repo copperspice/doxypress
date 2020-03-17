@@ -539,10 +539,14 @@ QString HtmlHelp::recode(const QString &s)
 void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                   bool unused, QSharedPointer<Definition> def, DirType category)
 {
+   (void) ref;
+   (void) unused;
+   (void) def;
+   (void) category;
+
    // If we are using a binary toc then folders cannot have links.
    // Tried this and I did not see any problems, when not using the
    // resetting of file and anchor the TOC works better // (prev / next button)
-
 
    for (int i = 0; i < dc; i++) {
       cts << "  ";

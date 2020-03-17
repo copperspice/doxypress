@@ -415,7 +415,10 @@ class XMLCodeGenerator : public CodeOutputInterface
       }
    }
 
-   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool)  override {}
+   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool)  override {
+      (void) def;
+   }
+
    void addWord(const QString &, bool) override {}
 
    void finish() {
@@ -1803,10 +1806,9 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
      << "\" kind=\"file\" language=\""
      << langToString(fd->getLanguage()) << "\">" << endl;
    t << "    <compoundname>";
+
    writeXMLString(t, fd->name());
    t << "</compoundname>" << endl;
-
-   IncludeInfo *inc;
 
    if (fd->includeFileList()) {
 

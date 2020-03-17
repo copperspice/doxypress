@@ -217,6 +217,8 @@ static Alignment markersToAlignment(bool leftMarker, bool rightMarker)
 
 static QString isBlockCommand(QStringView data, QString::const_iterator size, QStringView pristineChars1)
 {
+   (void) size;
+
    QString retval;
 
    bool openBracket = false;
@@ -1376,7 +1378,7 @@ static void processInline(QString &out, const QStringView processText, QString::
          break;
       }
 
-      int skipCount;
+      int skipCount = 0;
 
       QStringView s1 = QStringView(iter_index, processText.constEnd());
 
@@ -2747,6 +2749,8 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
 static void writeFencedCodeBlock(QString &out, QStringView data, const QString &lang_t,
                   QString::const_iterator iter_blockStart, QString::const_iterator iter_blockEnd)
 {
+   (void) data;
+
    QString lang = lang_t;
 
    if (! lang.isEmpty() && lang.startsWith('.')) {
@@ -3218,6 +3222,10 @@ QString markdownFileNameToId(const QString &fileName)
 void MarkdownFileParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                   enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
+   (void) mode;
+   (void) includedFiles;
+   (void) useClang;
+
    static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
    QSharedPointer<Entry> current = QMakeShared<Entry>();
 

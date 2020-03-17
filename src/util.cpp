@@ -4354,6 +4354,8 @@ QString linkToText(SrcLangExt lang, const QString &link, bool isFileName)
 
 bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QSharedPointer<Definition> *resContext, QString &resAnchor)
 {
+   (void) xx;
+
    *resContext = QSharedPointer<Definition>();
 
    QString linkRefWithoutTemplates = stripTemplateSpecifiersFromScope(linkRef, false);
@@ -7674,8 +7676,6 @@ QString replaceColorMarkers(const QString &str)
       return result;
    }
 
-   int len = result.length();
-
    static QRegularExpression regExp("##([0-9A-Fa-f][0-9A-Fa-f])");
    QRegularExpressionMatch match = regExp.match(result);
 
@@ -8328,7 +8328,7 @@ QByteArray stripPrefix(QByteArray input, const QByteArray &prefix)
 
 Protection getProtection(const QString &data)
 {
-   Protection retval;
+   Protection retval = Public;
 
    QString visibility = data.toLower();
 

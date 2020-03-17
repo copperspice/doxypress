@@ -1150,6 +1150,8 @@ class LayoutParser : public QXmlDefaultHandler
    void startMemberDefEntry(const QXmlAttributes &attrib, MemberListType type, const QString &title, const QString &unused) {
       QString userTitle = attrib.value("title");
 
+      (void) unused;
+
       if (userTitle.isEmpty()) {
          userTitle = title;
       }

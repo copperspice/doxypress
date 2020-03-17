@@ -694,6 +694,7 @@ HtmlGenerator::HtmlGenerator() : OutputGenerator()
 {
    m_dir = Config::getString("html-output");
    m_emptySection = false;
+   m_sectionCount = 0;
 }
 
 HtmlGenerator::~HtmlGenerator()
@@ -1680,6 +1681,12 @@ void HtmlGenerator::endMemberDocList()
 void HtmlGenerator::startMemberDoc(const QString &clName, const QString &memName,
                   const QString &anchor, const QString &title, bool showInline)
 {
+   (void) clName;
+   (void) memName;
+   (void) anchor;
+   (void) title;
+   (void) showInline;
+
    DBG_HTML(m_textStream << "<!-- startMemberDoc -->" << endl;)
 
    m_textStream << "\n<div class=\"memitem\">" << endl;
@@ -2064,6 +2071,7 @@ void HtmlGenerator::endParamList()
 
 void HtmlGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
+   (void) md;
    assert(m_codeGen);
 
    HtmlDocVisitor *visitor = new HtmlDocVisitor(m_textStream, *m_codeGen, ctx);
@@ -2103,6 +2111,8 @@ static void endQuickIndexList(QTextStream &t_stream, bool compact)
 
 static void startQuickIndexItem(QTextStream &t_stream, const QString &l, bool hl, bool x, const QString &relPath)
 {
+   (void) x;
+
    t_stream << "      <li";
 
    if (hl) {
@@ -2479,6 +2489,7 @@ void HtmlGenerator::endContents()
 void HtmlGenerator::startPageDoc(const QString &pageTitle)
 {
    // RTL    m_textStream << "<div" << getDirHtmlClassOfPage(pageTitle) << ">";
+   (void) pageTitle;
 }
 
 void HtmlGenerator::endPageDoc()
@@ -2806,6 +2817,7 @@ void HtmlGenerator::startMemberDocSimple(bool isEnum)
 
 void HtmlGenerator::endMemberDocSimple(bool isEnum)
 {
+   (void) isEnum;
    m_textStream << "</table>" << endl;
 }
 

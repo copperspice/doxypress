@@ -30,6 +30,8 @@
 // BaseClassList --> SortedList<BaseClassDef *>
 int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2, bool flag)
 {
+   (void) flag;
+
    QSharedPointer<const ClassDef> c1 = item1->classDef;
    QSharedPointer<const ClassDef> c2 = item2->classDef;
 
@@ -45,6 +47,7 @@ int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2, bool
 // ClassList --> SortedList<ClassDef *>
 int compareListValues(const QSharedPointer<ClassDef> item1, const QSharedPointer<ClassDef> item2, bool flag)
 {
+   (void) flag;
    static bool b = Config::getBool("sort-by-scope-name");
 
    if (b) {
@@ -60,13 +63,15 @@ int compareListValues(const QSharedPointer<ClassDef> item1, const QSharedPointer
 // DirList ->  SortedList<DirDef *>
 int compareListValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2, bool flag)
 {
-    return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
+   (void) flag;
+   return item1->shortName().compare(item2->shortName(), Qt::CaseInsensitive);
 }
 
 
 // DotNodeList --> SortedList<DotNode *>
 int compareListValues(const DotNode *item1, const DotNode *item2, bool flag)
 {
+   (void) flag;
    return item1->label().compare(item2->label(), Qt::CaseInsensitive);
 }
 
@@ -86,6 +91,7 @@ int compareListValues(const QSharedPointer<FileDef> &item1, const QSharedPointer
 // Doxy_Globals::inputNameList --> SortedList<FileNameList *>
 int compareListValues(const QSharedPointer<FileNameList> &item1, const QSharedPointer<FileNameList> &item2, bool flag)
 {
+   (void) flag;
    int retval;
 
    if (Config::getBool("full-path-names")) {
@@ -103,6 +109,7 @@ int compareListValues(const QSharedPointer<FileNameList> &item1, const QSharedPo
 // GroupList --> SortedList<GroupDef *>
 int compareListValues(const QSharedPointer<GroupDef> &item1, const QSharedPointer<GroupDef> &item2, bool flag)
 {
+   (void) flag;
    return item1->groupTitle().compare(item2->groupTitle());
 }
 
@@ -110,6 +117,7 @@ int compareListValues(const QSharedPointer<GroupDef> &item1, const QSharedPointe
 // MemberList --> SortedList<MemberDef *>
 int compareListValues(const QSharedPointer<MemberDef> &c1, const QSharedPointer<MemberDef> &c2, bool flag)
 {
+   (void) flag;
    static bool sortConstructorsFirst = Config::getBool("sort-constructors-first");
 
    if (sortConstructorsFirst) {
@@ -138,6 +146,8 @@ int compareListValues(const QSharedPointer<MemberDef> &c1, const QSharedPointer<
 // NavIndexEntryList --> SortedList<NavIndexEntry *>
 int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2, bool flag)
 {
+   (void) flag;
+
    // sort list based on url
    return item1->m_url.compare(item2->m_url);
 }

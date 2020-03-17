@@ -501,8 +501,6 @@ bool Config::read_ProjectFile(const QString &fName)
    QJsonDocument doc  = QJsonDocument::fromJson(data);
    QJsonObject object = doc.object();
 
-   int index;
-
    // test json format
    int format;
    QJsonValue temp = object.value("doxypress-format");

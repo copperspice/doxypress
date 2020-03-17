@@ -52,7 +52,11 @@ class DevNullCodeDocInterface : public CodeOutputInterface
    void endFontClass() override {}
    void writeCodeAnchor(const QString &) override {}
    void linkableSymbol(int, QString &, QSharedPointer<Definition>(), QSharedPointer<Definition>()) {}
-   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
+
+   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
+      (void) def;
+   }
+
    void addWord(const QString &, bool) override {}
 };
 

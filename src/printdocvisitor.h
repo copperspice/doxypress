@@ -380,7 +380,7 @@ class PrintDocVisitor : public DocVisitor
    void visitPre(DocPara *node) override {
       // print the address of the paragraph
       indent_pre();
-      printf("<para> %08x \n", node);
+      printf("<para> %p \n", node);
    }
 
    void visitPost(DocPara *) override {
@@ -670,6 +670,9 @@ class PrintDocVisitor : public DocVisitor
       printf("<image src=\"%s\" type=\"", csPrintable(img->name()));
 
       switch (img->type()) {
+         case DocImage::None:
+            break;
+
          case DocImage::Html:
             printf("html");
             break;
@@ -773,9 +776,6 @@ class PrintDocVisitor : public DocVisitor
 
    void visitPre(DocParamList *pl) override {
       indent_pre();
-
-      DocNode *param;
-
       printf("<parameters>");
 
       for (auto param : pl->parameters()) {

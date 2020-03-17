@@ -1135,6 +1135,9 @@ bool MemberDef::isLinkable() const
 void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                           QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool onlyText)
 {
+   (void) cd;
+   (void) nd;
+
    static bool hideScopeNames = Config::getBool("hide-scope-names");
 
    SrcLangExt lang = getLanguage();
@@ -1213,8 +1216,6 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
 
    static QRegularExpression regExp("@[0-9]+");
    QRegularExpressionMatch match = regExp.match(xType);
-
-   int len = match.capturedLength(0);
 
    if (match.hasMatch()) {
       // found anonymous scope in type
@@ -2804,7 +2805,6 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
    static QRegularExpression regExp("@[0-9]+");
    QRegularExpressionMatch match = regExp.match(ldef);
 
-   int matchLen;
    bool htmlEndLabelTable = false;
 
    QStringList sl;
@@ -3288,8 +3288,6 @@ static QString simplifyTypeForTable(const QString &s)
 
    static QRegularExpression regExp("[A-Z_a-z0-9]+::");
    QRegularExpressionMatch match = regExp.match(ts);
-
-   int matchLen;
 
    while (match.hasMatch()) {
 
@@ -3802,8 +3800,10 @@ void MemberDef::setInitializer(const QString &initializer)
    m_impl->initLines   = m_impl->initializer.count('\n');
 }
 
-void MemberDef::addListReference(QSharedPointer<Definition> d)
+void MemberDef::addListReference(QSharedPointer<Definition> def)
 {
+   (void) def;
+
    static bool optimizeOutputForC = Config::getBool("optimize-c");
 
    // static bool hideScopeNames     = Config::getBool("hide-scope-names");
@@ -5314,6 +5314,7 @@ void MemberDef::invalidateCachedArgumentTypes()
 
 QString MemberDef::displayName(bool unused) const
 {
+   (void) unused;
    return Definition::name();
 }
 

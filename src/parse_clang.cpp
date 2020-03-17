@@ -466,6 +466,7 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<FileD
 // call back, called for each include in a translation unit
 static void inclusionVisitor(CXFile file, CXSourceLocation *, uint, CXClientData clientData)
 {
+   (void) clientData;
    s_includedFiles.insert(getFileName(file));
 }
 
@@ -1321,8 +1322,11 @@ QString ClangParser::lookup(uint line, const QString &symbol)
    return retval;
 }
 
-void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text)
+void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fileDef, uint &line,
+            uint &column, const QString &text)
 {
+   (void) fileDef;
+
    QString incName = text;
    incName = incName.mid(1, incName.length() - 2); // strip ".." or  <..>
 

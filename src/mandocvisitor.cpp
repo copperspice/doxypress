@@ -1273,7 +1273,8 @@ void ManDocVisitor::filter(const QString &str)
                break;
 
             case '"':
-               c = '\''; // fall through
+               c = '\'';
+               [[fallthrough]];
 
             default:
                m_t << c;

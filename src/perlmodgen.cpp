@@ -1794,6 +1794,8 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    // - template arguments
    //     (templateArguments(), definitionTemplateParameterLists())
 
+   (void) def;
+
    QString memType;
    bool isFunc = false;
 
@@ -2281,8 +2283,6 @@ void PerlModGenerator::generatePerlModForFile(QSharedPointer<FileDef> fd)
    }
 
    m_output.openHash().addFieldQuotedString("name", fd->name());
-
-   IncludeInfo *inc;
    m_output.openList("includes");
 
    if (fd->includeFileList()) {

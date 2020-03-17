@@ -301,7 +301,9 @@ class Definition : public DefinitionIntf
    void addSourceReferences(QSharedPointer<MemberDef>d);
 
    void addSectionsToIndex(bool addToNavIndex);
-   virtual void addInnerCompound(QSharedPointer<Definition> d) {};
+   virtual void addInnerCompound(QSharedPointer<Definition> d) {
+      (void) d;
+   };
 
    void mergeRefItems(QSharedPointer<Definition> d);
 
@@ -344,9 +346,11 @@ class Definition : public DefinitionIntf
    void writeDocAnchorsToTagFile(QTextStream &) const;
    void writeToc(OutputList &ol, const LocalToc &localToc) const;
 
-   virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const {}
-   virtual void writeSummaryLinks(OutputList &) {}
+   virtual void writeQuickMemberLinks(OutputList &, QSharedPointer<MemberDef> md) const {
+      (void) md;
+   }
 
+   virtual void writeSummaryLinks(OutputList &) { }
 
  protected:
    Definition(const Definition &d);

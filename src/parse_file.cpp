@@ -21,9 +21,12 @@
 #include <outputgen.h>
 
 void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &, const QString &input,
-                  SrcLangExt, bool, const QString &,  QSharedPointer<FileDef> fd, int startLine, int endLine,
-                  bool, QSharedPointer<MemberDef> md, bool showLineNumbers, QSharedPointer<Definition> context, bool)
+            SrcLangExt, bool, const QString &,  QSharedPointer<FileDef> fd, int startLine, int endLine,
+            bool, QSharedPointer<MemberDef> md, bool showLineNumbers, QSharedPointer<Definition> context, bool)
 {
+   (void) md;
+   (void) context;
+
    int lineNr = startLine != -1 ? startLine : 1;
    int length = input.length();
    int i = 0;

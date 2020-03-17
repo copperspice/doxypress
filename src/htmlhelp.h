@@ -95,7 +95,9 @@ class HtmlHelp : public IndexIntf
 
    void addIndexFile(const QString &name) override;
    void addImageFile(const QString &name) override;
-   void addStyleSheetFile(const QString &name) override {}
+   void addStyleSheetFile(const QString &name) override {
+      (void) name;
+   }
 
  private:
    friend class HtmlHelpIndex;

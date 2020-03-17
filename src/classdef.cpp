@@ -1724,6 +1724,8 @@ void ClassDef::addClassAttributes(OutputList &ol)
 
 void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTitle)
 {
+   (void) pageTitle;
+
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    ol.startContents();

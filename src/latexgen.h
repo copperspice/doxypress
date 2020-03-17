@@ -461,8 +461,14 @@ class LatexGenerator : public OutputGenerator
    void writeLabel(const QString &l, bool isLast) override;
    void endLabels() override;
 
-   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
-   void addWord(const QString &word, bool hiPriority) override {}
+   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {
+      (void) d;
+   }
+
+   void addWord(const QString &word, bool hiPriority) override {
+      (void) word;
+      (void) hiPriority;
+   }
 
  private:
    LatexGenerator(const LatexGenerator &);

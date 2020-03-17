@@ -882,8 +882,6 @@ bool Config::verify()
       warnMsg("When enabling 'GENERATE CHM', 'GENERATE NAVIGATION TREEVIEW' tag must be disabled\n");
 
       auto iterBool = m_cfgBool.find("generate-treeview");
-      bool data = iterBool.value().value;
-
       iterBool.value().value = false;
    }
 
@@ -892,8 +890,6 @@ bool Config::verify()
       warnMsg("When enabling 'GENERATE CHM', HTML SEARCH' must be disabled\n");
 
       auto iterBool = m_cfgBool.find("html-search");
-      bool data = iterBool.value().value;
-
       iterBool.value().value = false;
    }
 
@@ -902,8 +898,6 @@ bool Config::verify()
       errAll("Error when enabling 'INLINE GROUPED CLASSES', 'SEPARATE MEMBER PAGES' tags must be disabled\n");
 
       auto iterBool = m_cfgBool.find("separate-member-pages");
-      bool data = iterBool.value().value;
-
       iterBool.value().value = false;
    }
 
@@ -917,8 +911,6 @@ bool Config::verify()
       warnMsg("Java does not have an inline concept, setting 'INLINE INFO' off\n");
 
       auto iterBool = m_cfgBool.find("inline-info");
-      bool data = iterBool.value().value;
-
       iterBool.value().value = false;
    }
 

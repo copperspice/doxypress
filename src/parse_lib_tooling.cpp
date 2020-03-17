@@ -27,9 +27,13 @@ static int anonNSCount  = 0;
 
 static Protection getAccessSpecifier(const clang::Decl *node)
 {
-   Protection retval;
+   Protection retval = Public;
 
    switch (node->getAccess()) {
+
+      case clang::AS_none:
+         retval = Public;
+         break;
 
       case clang::AS_public:
          retval = Public;
@@ -49,9 +53,13 @@ static Protection getAccessSpecifier(const clang::Decl *node)
 
 static Protection getAccessSpecifier(const clang::CXXBaseSpecifier *node)
 {
-   Protection retval;
+   Protection retval = Public;
 
    switch (node->getAccessSpecifier()) {
+
+      case clang::AS_none:
+         retval = Public;
+         break;
 
       case clang::AS_public:
          retval = Public;
@@ -79,7 +87,6 @@ static QString getName(const clang::NamedDecl *node)
       retval = QString::fromUtf8(tmp.data(), tmp.size());
 
    } else {
-
       // broom - add something here, look at Reid's work
 
    }
@@ -117,6 +124,8 @@ static QString getUSR_DeclContext(const clang::DeclContext *node)
 
 static QString getUSR_PP(const clang::MacroDefinitionRecord *node)
 {
+   (void) node;
+
    QString retval;
    llvm::SmallVector<char, 100> buffer;
 
@@ -311,7 +320,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->setData(EntryKey::Member_Type,  " union");
             current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
-            current->m_srcLang        = SrcLangExt_Cpp;
+            current->m_srcLang   = SrcLangExt_Cpp;
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
             current->bodyLine    = current->startLine;
@@ -497,6 +506,12 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          clang::FunctionProtoType::NoexceptResult noExceptValue = protoType->getNoexceptSpec(*m_context);
 
          switch (noExceptValue) {
+
+           case clang::FunctionProtoType::NR_BadNoexcept:
+           case clang::FunctionProtoType::NR_NoNoexcept:
+           case clang::FunctionProtoType::NR_Throw:
+               // do nothing
+               break;
 
            case clang::FunctionProtoType::NR_Nothrow:
                args += " noexcept ";
@@ -1234,5 +1249,7 @@ class DoxyASTConsumer : public clang::ASTConsumer {
 };
 
 std::unique_ptr<clang::ASTConsumer> DoxyFrontEnd::CreateASTConsumer(clang::CompilerInstance &compiler, llvm::StringRef file) {
+   (void) file;
+
    return std::unique_ptr<clang::ASTConsumer>(new DoxyASTConsumer(&compiler.getASTContext()));
 }

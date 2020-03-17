@@ -205,7 +205,6 @@ void SearchIndex::addWord(const QString &word, bool hiPriority, bool recurse)
 
    w->addUrlIndex(m_urlIndex, hiPriority);
 
-   int i;
    bool found = false;
 
    if (! recurse) {

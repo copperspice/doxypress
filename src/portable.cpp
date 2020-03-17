@@ -159,6 +159,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    }
 #endif
 
+   return -1;
 }
 
 uint portable_pid()

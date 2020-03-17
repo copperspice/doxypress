@@ -161,6 +161,8 @@ static QString buildFileName(const QString &name)
 
 void ManGenerator::startFile(const QString &, const QString &manName, const QString &title)
 {
+   (void) title;
+
    startPlainFile(buildFileName(manName));
    firstCol = true;
 }
@@ -220,6 +222,8 @@ void ManGenerator::newParagraph()
 
 void ManGenerator::startParagraph(const QString &className)
 {
+   (void) className;
+
    if (! paragraph) {
       if (! firstCol) {
          m_textStream << endl;
@@ -343,7 +347,7 @@ void ManGenerator::docify(const QString &text)
 
          case '\"':
             c = '\'';
-            // no break is correct
+            [[fallthrough]];
 
          default:
             m_textStream << c;
@@ -391,7 +395,8 @@ void ManGenerator::codify(const QString &str)
             col++;
             break;
 
-         case '\"':  // no break is correct
+         case '\"':
+            [[fallthrough]];
 
          default:
             m_textStream << c;
@@ -418,8 +423,11 @@ void ManGenerator::writeChar(char c)
       case '\\':
          m_textStream << "\\\\";
          break;
+
       case '\"':
-         c = '\''; // no break!
+         c = '\'';
+         [[fallthrough]];
+
       default:
          m_textStream << c;
          break;
@@ -642,9 +650,12 @@ void ManGenerator::endAnonTypeScope(int indentLevel)
 
 void ManGenerator::startMemberItem(const QString &, int, const QString &, bool deprecated)
 {
-   if (firstCol && !insideTabbing) {
+   (void) deprecated;
+
+   if (firstCol && ! insideTabbing) {
       m_textStream << ".in +1c\n";
    }
+
    m_textStream << "\n.ti -1c\n.RI \"";
    firstCol = false;
 }
@@ -806,6 +817,8 @@ void ManGenerator::endParamList()
 
 void ManGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
+   (void) md;
+
    ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString(""));
    n->accept(visitor);
    delete visitor;
@@ -901,6 +914,8 @@ void ManGenerator::startMemberDocSimple(bool isEnum)
 
 void ManGenerator::endMemberDocSimple(bool isEnum)
 {
+   (void) isEnum;
+
    if (! firstCol) {
       m_textStream << endl;
    }

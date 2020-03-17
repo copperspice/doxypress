@@ -474,6 +474,8 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, const QString &title, const QString &subtitle,
                   bool showEnumValues, bool showInline, QSharedPointer<ClassDef> inheritedFrom, MemberListType lt)
 {
+   (void) showEnumValues;
+
    QString inheritId;
 
    // count members shown in this section

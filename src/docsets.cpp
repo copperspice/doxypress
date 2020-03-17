@@ -223,6 +223,10 @@ void DocSets::decContentsDepth()
 void DocSets::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                               bool unused, QSharedPointer<Definition>, DirType category)
 {
+   (void) isDir;
+   (void) unused;
+   (void) category;
+
    if (! ref.isEmpty()) {
 
       if (! m_firstNode.at(m_dc - 1)) {

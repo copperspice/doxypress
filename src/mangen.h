@@ -398,10 +398,16 @@ class ManGenerator : public OutputGenerator
    void writeLabel(const QString &l, bool isLast) override;
    void endLabels() override;
 
-   void writeCodeAnchor(const QString &) override {}
+   void writeCodeAnchor(const QString &) override { }
 
-   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
-   void addWord(const QString &word, bool hiPriority) override {}
+   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
+      (void) def;
+   }
+
+   void addWord(const QString &word, bool hiPriority) override {
+      (void) word;
+      (void) hiPriority;
+   }
 
  private:
    bool firstCol;

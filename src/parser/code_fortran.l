@@ -458,8 +458,12 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
  todo: implementation
 */
 static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
-                  const QString &memberText, CodeOutputInterface &ol)
+            const QString &memberText, CodeOutputInterface &ol)
 {
+   (void) cd;
+   (void) memberText;
+   (void) ol;
+
    return false;
 }
 
@@ -1501,6 +1505,9 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool,
                   QSharedPointer<Definition> searchCtx, bool collectXRefs, FortranFormat format)
 {
+   (void) className;
+   (void) memberDef;
+
    if (s.isEmpty()) {
       return;
    }

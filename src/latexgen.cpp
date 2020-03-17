@@ -1388,6 +1388,7 @@ void LatexGenerator::newParagraph()
 
 void LatexGenerator::startParagraph(const QString &className)
 {
+   (void) className;
    m_textStream << endl << endl;
 }
 
@@ -1766,6 +1767,8 @@ void LatexGenerator::startDoxyAnchor(const QString &fName, const QString &, cons
 
 void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 {
+   (void) fName;
+   (void) anchor;
 }
 
 void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
@@ -1942,6 +1945,8 @@ void LatexGenerator::endMemberTemplateParams(const QString &, const QString &)
 
 void LatexGenerator::startMemberItem(const QString &, int annoType, const QString &, bool deprecated)
 {
+   (void) deprecated;
+
    if (! insideTabbing) {
       m_textStream << "\\item " << endl;
       templateMemberItem = (annoType == 3);
@@ -2326,6 +2331,8 @@ void LatexGenerator::endInlineHeader()
 
 void LatexGenerator::lineBreak(const QString &style)
 {
+   (void) style;
+
    if (insideTabbing) {
       m_textStream << "\\\\\n";
 

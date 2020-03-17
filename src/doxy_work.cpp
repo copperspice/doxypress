@@ -464,8 +464,6 @@ void processFiles()
    signal(SIGINT, stopDoxyPress);
 #endif
 
-   uint pid = portable_pid();
-
    // Check/create output directories
    QString htmlOutput;
    static const bool generateHtml = Config::getBool("generate-html");
@@ -4951,8 +4949,6 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
 
                BaseInfo bi(usedName, Public, Normal);
                findClassRelation(ptrEntry, context, instanceCd, &bi, templateNames, TemplateInstances, isArtificial);
-
-               int count = 0;
 
                const ArgumentList &masterList = masterCd->getTemplateArgumentList();
 
@@ -9993,6 +9989,8 @@ int Doxy_Work::computeIdealCacheParam(uint v)
 
 void Doxy_Work::stopDoxyPress(int unused)
 {
+   (void) unused;
+
    msg("Cleaning up\n");
 
 #ifdef HAS_SIGNALS

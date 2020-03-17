@@ -173,6 +173,9 @@ void EclipseHelp::decContentsDepth()
 void EclipseHelp::addContentsItem(bool, const QString &name, const QString &, const QString &file, const QString &anchor,
                   bool unused, QSharedPointer<Definition>, DirType category)
 {
+   (void) unused;
+   (void) category;
+
    // -- write the topic tag
    closedTag();
 
@@ -212,19 +215,24 @@ void EclipseHelp::addContentsItem(bool, const QString &name, const QString &, co
    }
 }
 
-void EclipseHelp::addIndexItem(QSharedPointer<Definition> d, QSharedPointer<MemberDef> md, const QString &, const QString &)
+void EclipseHelp::addIndexItem(QSharedPointer<Definition> def, QSharedPointer<MemberDef> md, const QString &, const QString &)
 {
+   (void) def;
+   (void) md;
 }
 
 void EclipseHelp::addIndexFile(const QString &name)
 {
+   (void) name;
 }
 
 void EclipseHelp::addImageFile(const QString &name)
 {
+   (void) name;
 }
 
 void EclipseHelp::addStyleSheetFile(const QString &name)
 {
+   (void) name;
 }
 

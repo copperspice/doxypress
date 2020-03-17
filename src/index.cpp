@@ -209,6 +209,8 @@ static void startQuickIndexItem(OutputList &ol, const QString &link, bool hl, bo
    ol.writeString("<span>");
 
 
+   (void) compact;
+
 /*
    bool fancyTabs = true;
 

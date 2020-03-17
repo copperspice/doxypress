@@ -1786,6 +1786,8 @@ void RTFGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname, 
 
 void RTFGenerator::startMemberItem(const QString &, int, const QString &, bool deprecated)
 {
+   (void) deprecated;
+
    DBG_RTF(m_textStream << "{\\comment startMemberItem }" << endl)
    m_textStream << rtf_Style_Reset << rtf_BList_DepthStyle() << endl;    // set style to appropriate depth
 }
@@ -2668,6 +2670,8 @@ void RTFGenerator::exceptionEntry(const QString &prefix, bool closeBracket)
 
 void RTFGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md)
 {
+   (void) md;
+
    RTFDocVisitor *visitor = new RTFDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString(""));
    n->accept(visitor);
    delete visitor;
@@ -2836,6 +2840,8 @@ void RTFGenerator::startMemberDocSimple(bool isEnum)
 
 void RTFGenerator::endMemberDocSimple(bool isEnum)
 {
+   (void) isEnum;
+
    DBG_RTF(m_textStream << "{\\comment (endMemberDocSimple)}" << endl)
    m_textStream << "}" << endl;
 }

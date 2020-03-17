@@ -27,10 +27,21 @@ static QSharedPointer<FileDef> g_sourceFileDef;
 static int                     g_yyLineNr;
 
 void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
-         SrcLangExt xx, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine, int endLine,
-         bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
+         SrcLangExt xx, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
+         int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
          QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
+   (void) scopeName;
+   (void) xx;
+   (void) isExampleBlock;
+   (void) exampleName;
+   (void) startLine;
+   (void) endLine;
+   (void) inlineFragment;
+   (void) memberDef;
+   (void) showLineNumbers;
+   (void) searchCtx;
+   (void) collectXRefs;
 
    if (input.isEmpty()) {
       return;
@@ -91,10 +102,17 @@ bool MakeFileParser::needsPreprocessing(const QString &) const
 void MakeFileParser::parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry> root,
                                 enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
+   (void) fileName;
+   (void) fileBuf;
+   (void) root;
+   (void) mode;
+   (void) includedFiles;
+   (void) useClang;
 }
 
 void MakeFileParser::parsePrototype(const QString &text)
 {
+   (void) text;
 }
 
 void MakeFileParser::resetCodeParserState()

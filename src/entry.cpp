@@ -153,6 +153,8 @@ void Entry::reset()
 
 void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> dummy)
 {
+   (void) dummy;
+
    QSharedPointer<Entry> self = sharedFrom(this);
 
    child->m_parent = self;

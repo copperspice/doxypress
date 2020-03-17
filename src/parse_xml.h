@@ -31,9 +31,17 @@ class XML_Parser : public ParserInterface
     void finishTranslationUnit() override {};
 
     void parseInput(const QString &fileName, const QString &fileBuffer, QSharedPointer<Entry> root,
-                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {} ;
+                   enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {
+      (void) fileName;
+      (void) fileBuffer;
+      (void) root;
+      (void) mode;
+      (void) includeFiles;
+      (void) useClang;
+    }
 
     bool needsPreprocessing(const QString &extension) const override {
+      (void) extension;
       return false;
     }
 
@@ -54,7 +62,9 @@ class XML_Parser : public ParserInterface
       resetXmlCodeParserState();
    }
 
-   void parsePrototype(const QString &text) override { } ;
+   void parsePrototype(const QString &text) override {
+      (void) text;
+   }
 };
 
 #endif

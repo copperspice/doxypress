@@ -404,7 +404,6 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
       addMemberToList(MemberListType_docFriendMembers, md);
    }
-
 */
 
    return true;
@@ -512,7 +511,6 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
          removeMemberFromList(MemberListType_decFriendMembers, md);
          removeMemberFromList(MemberListType_docFriendMembers, md);
       }
-
 */
 
    }
@@ -1110,7 +1108,6 @@ void GroupDef::writeDocumentation(OutputList &ol)
 
       while (match.hasMatch()) {
          // for each word in the title
-         auto iter_end = match.capturedLength();
 
          Doxy_Globals::searchIndexBase->addWord(match.captured(), true);
          match = regExp.match(m_title, match.capturedEnd());

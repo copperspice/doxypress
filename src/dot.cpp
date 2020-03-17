@@ -1343,7 +1343,6 @@ bool DotManager::run()
    portable_sysTimerStart();
 
    // fill work queue with dot operations
-   DotRunner *dr;
    int prev = 1;
 
    if (m_workers.count() == 0) {

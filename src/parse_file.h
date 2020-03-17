@@ -29,7 +29,11 @@ class FileParser : public ParserInterface
    void finishTranslationUnit() override {}
 
    void parseInput(const QString &, const QString &, QSharedPointer<Entry>,
-                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {};
+                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override {
+      (void) mode;
+      (void) includeFiles;
+      (void) useClang;
+   };
 
    bool needsPreprocessing(const QString &) const override {
       return false;

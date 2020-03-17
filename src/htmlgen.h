@@ -51,8 +51,13 @@ class HtmlCodeGenerator : public CodeOutputInterface
    void endFontClass() override;
    void writeCodeAnchor(const QString &anchor) override;
 
-   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {}
-   void addWord(const QString &name, bool) override {}
+   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
+      (void) def;
+   }
+
+   void addWord(const QString &name, bool) override {
+      (void) name;
+   }
 
  private:
    void _writeCodeLink(const QString &className, const QString &ref, const QString &file,

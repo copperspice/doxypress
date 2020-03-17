@@ -178,6 +178,8 @@ class TextGeneratorDocbookImpl : public TextGeneratorIntf
    void writeBreak(int) const override {}
 
    void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const override  {
+      (void) extRef;
+
       writeDocbookLink(m_t, file, anchor, text);
    }
 
@@ -199,6 +201,9 @@ class DocbookCodeGenerator : public CodeOutputInterface
 
    void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
                   const QString &name, const QString &tooltip) override {
+
+      (void) ref;
+      (void) tooltip;
 
       writeDocbookLink(m_t, file, anchor, name);
       m_col += name.length();
@@ -264,6 +269,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
    }
 
    void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
+      (void) def;
    }
 
    void addWord(const QString &, bool) override {
@@ -853,8 +859,10 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
 }
 
 static void generateDocbookSection(QSharedPointer<Definition> d, QTextStream &t, QSharedPointer<MemberList> ml, const QString &kind,
-                                   bool detailed = false, const QString &header = QString(), const QString &documentation = QString())
+            bool detailed = false, const QString &header = QString(), const QString &documentation = QString())
 {
+   (void) kind;
+
    if (ml == 0) {
       return;
    }
