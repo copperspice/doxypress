@@ -709,6 +709,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 static void yyunput(QChar c, char *yy_bp)
 {
+   (void) yy_bp;
+
    QString tmp1    = c;
    QByteArray tmp2 = tmp1.toUtf8();
 

@@ -1915,7 +1915,7 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
             }
 
             inBackslash = false;
-            // fall through to next case
+            [[fallthrough]];
 
          case 'C':
          case 'c':
@@ -1943,11 +1943,9 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 
                break;
             }
-
-            // fall through to next case
+            [[fallthrough]];
 
          default:
-
             if (! commented && (column < 6) && c.isDigit()) {
                // remove numbers from the first 5 positions
                newContents.replace(j, 1, ' ');
@@ -3117,6 +3115,10 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 void Fortran_Parser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
+   (void) mode;
+   (void) includedFiles;
+   (void) useClang;
+
    s_thisParser = this;
 
    printlex(yy_flex_debug, true, __FILE__, fileName);

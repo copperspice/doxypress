@@ -59,7 +59,7 @@
 int TclFindElement(const QString &list, int listLength, int &elementIndex, int &nextIndex, int *sizePtr, int *bracePtr)
 {
    QString::const_iterator iter     = list.constBegin();
-   QString::const_iterator iter_end = list.constEnd();
+// QString::const_iterator iter_end = list.constEnd();
 
    QString::const_iterator elemStart;            /* Points to first byte of first element. */
    QString::const_iterator limit;                /* Points just after list's last byte. */
@@ -224,7 +224,6 @@ int tcl_split_internal(const QString &str, QStringList &list)
 
    int elementIdx;
    int nextIdx;
-   int size;
    int brace;
 
    int length;
@@ -3128,6 +3127,10 @@ static void tcl_parse(const QString ns, const QString cls)
 void Tcl_Parser::parseInput(const QString &fileName, const QString &input, QSharedPointer<Entry> root,
                   enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
+   (void) mode;
+   (void) includedFiles;
+   (void) useClang;
+
    QFile  myFile;
 
    myFile.setFileName(fileName);

@@ -336,6 +336,12 @@ void parseXmlCode(CodeOutputInterface &outputX, const QString &className, const 
                 QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
                 QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
+   (void) className;
+   (void) lang;
+   (void) memberDef;
+   (void) showLineNumbers;
+   (void) collectXRefs;
+
    if (s.isEmpty()) {
       return;
    }

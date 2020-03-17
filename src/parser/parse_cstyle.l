@@ -212,6 +212,8 @@ static void yyunput (int c, char *buf_ptr);
 
 static void yyunput (QChar c, char *yy_bp )
 {
+   (void) yy_bp;
+
    QString tmp1    = c;
    QByteArray tmp2 = tmp1.toUtf8();
 
@@ -9689,6 +9691,8 @@ void cstyleFreeParser()
 static void parseMain(const QString &fileName, const QString &fileBuf, QStringList &includedFiles,
                   QSharedPointer<Entry> rt)
 {
+   (void) includedFiles;
+
    s_inputFile.setFileName(fileName);
 
    if (s_inputFile.open(QIODevice::ReadOnly)) {

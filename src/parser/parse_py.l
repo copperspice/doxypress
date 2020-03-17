@@ -2171,6 +2171,10 @@ void pyFreeParser()
 void Python_Parser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
+   (void) mode;
+   (void) includedFiles;
+   (void) useClang;
+
    s_thisParser = this;
 
    printlex(yy_flex_debug, true, __FILE__, fileName);
