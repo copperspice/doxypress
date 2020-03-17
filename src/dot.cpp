@@ -1439,8 +1439,9 @@ static void deleteNodes(DotNode *node)
 
 DotNode::DotNode(int n, const QString &label, const QString &tip, const QString &url, bool isRoot, QSharedPointer<ClassDef> cd)
    : m_subgraphId(-1), m_number(n), m_label(label), m_tooltip(tip), m_url(url), m_parents(0), m_children(0),
-     m_edgeInfo(0), m_deleted(false), m_written(false), m_hasDoc(false), m_isRoot(isRoot), m_classDef(cd),
-     m_visible(false), m_truncated(Unknown), m_distance(1000)
+     m_edgeInfo(0),  m_classDef(cd),
+     m_deleted(false), m_written(false), m_hasDoc(false), m_isRoot(isRoot), m_visible(false),
+     m_truncated(Unknown), m_distance(1000)
 {
 }
 

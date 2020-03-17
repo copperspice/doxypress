@@ -43,8 +43,8 @@ static int folderId = 1;
 struct FTVNode {
    FTVNode(bool dir, const QString &r, const QString &f, const QString &a, const QString &n,
                   bool navIndex, QSharedPointer<Definition> df, DirType cat)
-      : isLast(true), isDir(dir), ref(r), file(f), anchor(a), name(n), index(0), parent(0),
-        addToNavIndex(navIndex), def(df), category(cat)
+      : index(0), isLast(true), isDir(dir), addToNavIndex(navIndex), ref(r), file(f), anchor(a), name(n),
+        parent(0), def(df), category(cat)
    { }
 
    int computeTreeDepth(int level) const;

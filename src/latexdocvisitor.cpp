@@ -1139,6 +1139,8 @@ void LatexDocVisitor::visitPost(DocHtmlTable *t)
 
 void LatexDocVisitor::visitPre(DocHtmlCaption *c)
 {
+   (void) c;
+
    m_hideCaption = m_hide;
    m_hide        = true;
 }

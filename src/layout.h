@@ -203,7 +203,9 @@ struct LayoutNavEntry {
    LayoutNavEntry *find(LayoutNavEntry::Kind k, const QString &file = QString()) const;
 
  private:
-   LayoutNavEntry() : m_parent(0) {}
+   LayoutNavEntry()
+      : m_parent(0), m_kind(Kind::None), m_visible(false)
+   {}
 
    LayoutNavEntry *m_parent;
    Kind m_kind;

@@ -1776,7 +1776,9 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
  private:
-   LayoutParser() :  m_invalidEntry(false) { }
+   LayoutParser()
+      :  m_part(0), m_rootNav(nullptr), m_invalidEntry(false)
+   { }
 
    QHash<QString, QSharedPointer<StartElement>> m_sHandler;
    QHash<QString, QSharedPointer<EndElement>>   m_eHandler;

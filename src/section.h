@@ -33,10 +33,11 @@ struct SectionInfo {
                       Table         = 6
                     };
 
-   SectionInfo(const QString &f, const int line, const QString &anchor, const QString &t, SectionType secT, 
-      int lev, const QString &r = QString()) 
-      : label(anchor), title(t), type(secT), ref(r), fileName(f), lineNr(line), generated(false), level(lev), dupAnchor_cnt(0) 
-   { }  
+   SectionInfo(const QString &f, const int line, const QString &anchor, const QString &t, SectionType secT,
+      int lev, const QString &r = QString())
+      : label(anchor), title(t), ref(r), fileName(f), lineNr(line), level(lev), generated(false),
+        type(secT), dupAnchor_cnt(0)
+   { }
 
    QString label;
    QString title;   

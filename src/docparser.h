@@ -753,9 +753,9 @@ class DocInclude : public DocNode
    enum Type { Include, DontInclude, VerbInclude, HtmlInclude, LatexInclude, IncWithLines, Snippet };
 
    DocInclude(DocNode *parent, const QString &file, const QString context, Type t,
-              bool isExample, const QString exampleFile, const QString blockId)
-      : m_file(file), m_context(context), m_type(t), m_isExample(isExample), m_exampleFile(exampleFile), m_blockId(blockId) {
-
+              bool isExample, const QString exampleFile, const QString blockId, bool isBlock)
+      : m_file(file), m_context(context), m_exampleFile(exampleFile), m_blockId(blockId),
+        m_type(t), m_isExample(isExample), m_isBlock(isBlock)  {
       m_parent = parent;
    }
 
@@ -811,10 +811,10 @@ class DocInclude : public DocNode
    QString  m_file;
    QString  m_context;
    QString  m_text;
-   Type     m_type;
-   bool     m_isExample;
    QString  m_exampleFile;
    QString  m_blockId;
+   Type     m_type;
+   bool     m_isExample;
 };
 
 /** Node representing a include/dontinclude operator block */

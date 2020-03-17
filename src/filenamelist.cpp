@@ -21,9 +21,9 @@
 #include <config.h>
 #include <util.h>
 
-FileNameList::FileNameList(const QString &fn, const QString &n) 
-      : fName(fn), name(n)
-{      
+FileNameList::FileNameList(const QString &fn, const QString &n)
+   :  name(n), fName(fn)
+{
 }
 
 FileNameList::~FileNameList()

@@ -1352,6 +1352,8 @@ static DocAnchor *handleAnchor(DocNode *parent)
 
 static void handleAnchorName(DocNode *parent)
 {
+   (void) parent;
+
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
@@ -3159,9 +3161,9 @@ void DocDiaFile::parse()
    }
 }
 
-DocImage::DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t,
+DocImage::DocImage(DocNode *parent, HtmlAttribList attribs, const QString &name, Type t,
    const QString &url, bool inlineImage)
-   : m_attribs(attribs), m_name(name), m_type(t), m_relPath(s_relPath), m_url(url), m_inlineImage(inlineImage)
+   : m_attribs(std::move(attribs)), m_type(t), m_name(name), m_relPath(s_relPath), m_url(url), m_inlineImage(inlineImage)
 {
    m_parent = parent;
 }
@@ -4230,7 +4232,7 @@ int DocHtmlDescTitle::parse()
 
                   case CMD_JAVALINK:
                      isJavaLink = true;
-                     // fall through
+                     [[fallthrough]];
 
                   case CMD_LINK: {
                      int tok = doctokenizerYYlex();
@@ -6720,7 +6722,8 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
       case XML_REMARKS:
       case XML_EXAMPLE:
          s_xmlComment = true;
-      // fall through
+         [[fallthrough]];
+
       case XML_VALUE:
       case XML_PARA:
          if (!m_children.isEmpty()) {
@@ -7871,6 +7874,8 @@ void DocRoot::parse()
    handleUnclosedStyleCommands();
 
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
 
    DBG(("DocRoot::parse() end\n"));
