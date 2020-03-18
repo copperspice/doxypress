@@ -82,7 +82,7 @@ struct LayoutDocEntrySimple : LayoutDocEntry {
 };
 
 struct LayoutDocEntrySection: public LayoutDocEntrySimple {
-   LayoutDocEntrySection(Kind k, const QString &tl) 
+   LayoutDocEntrySection(Kind k, const QString &tl)
       : LayoutDocEntrySimple(k), m_title(tl) {}
 
    QString title(SrcLangExt lang) const;
@@ -95,7 +95,7 @@ struct LayoutDocEntrySection: public LayoutDocEntrySimple {
 struct LayoutDocEntryMemberDecl: public LayoutDocEntry {
 
    LayoutDocEntryMemberDecl(MemberListType tp, const QString &tl, const QString &ss)
-      : type(tp), m_title(tl), m_subscript(ss) 
+      : type(tp), m_title(tl), m_subscript(ss)
    {}
 
    Kind kind() const  override {
@@ -114,7 +114,7 @@ struct LayoutDocEntryMemberDecl: public LayoutDocEntry {
 /** @brief Represents of a member definition list with configurable title. */
 struct LayoutDocEntryMemberDef: public LayoutDocEntry {
    LayoutDocEntryMemberDef(MemberListType tp, const QString &tl)
-      : type(tp), m_title(tl) 
+      : type(tp), m_title(tl)
    {}
 
    Kind kind() const  override {
@@ -146,7 +146,7 @@ struct LayoutNavEntry {
       Files,
       FileList,
       FileGlobals,
-      FileSource,      
+      FileSource,
       Examples,
       User,
       UserGroup,
@@ -156,7 +156,7 @@ struct LayoutNavEntry {
    LayoutNavEntry(LayoutNavEntry *parent, Kind k, bool vs, const QString &bf,
                   const QString &tl, const QString &intro)
       : m_parent(parent), m_kind(k), m_visible(vs), m_baseFile(bf), m_title(tl), m_intro(intro) {
-     
+
    }
 
    LayoutNavEntry *parent() const   {
@@ -224,32 +224,32 @@ struct LayoutNavEntry {
 class LayoutDocManager
 {
    public:
-   
+
       enum LayoutPart {
          Class, Namespace, File, Group, Directory
       };
-      
+
       // returns a reference to this singleton.
       static LayoutDocManager &instance();
-      
+
       // returns the list of LayoutDocEntry's in representation order for a
-      // given page identified by @a part. 
+      // given page identified by @a part.
       const QList<LayoutDocEntry *> &docEntries(LayoutPart part) const;
-      
+
       // returns the (invisible) root of the navigation tree.
       LayoutNavEntry *rootNavEntry() const;
-      
+
       // parses a user provided layout
       void parse(QTextStream &t, const QString &fileName);
       void init();
-      
+
    private:
       LayoutDocManager();
       ~LayoutDocManager();
 
       void addEntry(LayoutPart p, LayoutDocEntry *e);
       void clear(LayoutPart p);
-                 
+
       QList<LayoutDocEntry *> m_docClass;
       QList<LayoutDocEntry *> m_docNamespace;
       QList<LayoutDocEntry *> m_docFile;

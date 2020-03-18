@@ -317,10 +317,11 @@ void LatexDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "{\\itshape ";
-         }     else {
+         } else {
             m_t << "}";
          }
          break;
+
       case DocStyleChange::Code:
          if (s->enable()) {
             m_t << "{\\ttfamily ";
@@ -335,6 +336,7 @@ void LatexDocVisitor::visit(DocStyleChange *s)
             m_t << "}";
          }
          break;
+
       case DocStyleChange::Superscript:
          if (s->enable()) {
             m_t << "\\textsuperscript{";
@@ -349,6 +351,7 @@ void LatexDocVisitor::visit(DocStyleChange *s)
             m_t << "\\end{center} ";
          }
          break;
+
       case DocStyleChange::Small:
          if (s->enable()) {
             m_t << "\n\\footnotesize ";
@@ -356,6 +359,7 @@ void LatexDocVisitor::visit(DocStyleChange *s)
             m_t << "\n\\normalsize ";
          }
          break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             m_t << "\n\\begin{DoxyPre}";

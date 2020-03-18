@@ -195,7 +195,7 @@ QString removeAnonymousScopes(const QString &str)
       match  = regExp.match(str, iter_p);
    }
 
-   retval += QStringView(iter_p, str.constEnd() );
+   retval += QStringView(iter_p, iter_end );
 
    return retval;
 }
@@ -2474,8 +2474,6 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
       isFileOpened = readInputFile(fi.absoluteFilePath(), fileContents, filter, isSourceCode);
 
       if (isFileOpened) {
-         int s = fileContents.size();
-
          if (! fileContents.endsWith('\n')) {
             fileContents += '\n';
          }
@@ -4293,7 +4291,6 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
    // strip template specifier and try again
    // will need to use clang to check if this is a template
    int posBegin = nameStr.indexOf('<');
-   bool tryBaseTemplate = false;
 
    if (posBegin != -1 && nameStr.indexOf("operator") == -1) {
       int posEnd = nameStr.lastIndexOf('>');
@@ -6144,6 +6141,7 @@ bool recursivelyAddGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d
 
       return true;
    }
+
    return false;
 }
 
@@ -6674,7 +6672,7 @@ QString stripExtensionGeneral(const QString &fName, const QString &ext)
    }
 
    return result;
- }
+}
 
 QString stripExtension(const QString &fName)
 {

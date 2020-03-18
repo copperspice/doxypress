@@ -81,7 +81,7 @@ class HtmlHelp : public IndexIntf
    //static HtmlHelp *getInstance();
    HtmlHelp();
    ~HtmlHelp();
-  
+
    void initialize() override;
    void finalize() override;
    void incContentsDepth() override;
@@ -90,7 +90,7 @@ class HtmlHelp : public IndexIntf
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                   bool unused, QSharedPointer<Definition> def, DirType category) override;
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor,
                   const QString &title) override;
 
    void addIndexFile(const QString &name) override;
@@ -112,12 +112,12 @@ class HtmlHelp : public IndexIntf
    int dc;
 
    QTextStream cts;
-   QTextStream kts;   
+   QTextStream kts;
 
    QStringList indexFiles;
    QStringList imageFiles;
    QSet<QString> indexFileDict;
-   
+
    QString recode(const QString &s);
 
    QTextCodec *m_toNewCodec;

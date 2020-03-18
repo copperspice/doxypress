@@ -1842,7 +1842,7 @@ bool MemberDef::isDetailedSectionLinkable() const
    static const bool hideUndocMembers   = Config::getBool("hide-undoc-members");
    static const bool hideFriendCompound = Config::getBool("hide-friend-compounds");
 
-   // the member has details documentation for any of the following reasons
+   // member has details documentation for any of the following reasons
 
    bool docFilter = ( extractAll || ! documentation().isEmpty() || ! inbodyDocumentation().isEmpty() );
 
@@ -1863,7 +1863,7 @@ bool MemberDef::isDetailedSectionLinkable() const
 
 
    // not a global static or global statics should be extracted
-   bool staticFilter = getClassDef() != 0 || ! isStatic() || extractStatic;
+   bool staticFilter = getClassDef() != nullptr || ! isStatic() || extractStatic;
 
    // only include members which are non-private unless extract_private is set or the member is part of a group
    bool privateFilter = protectionLevelVisible(protection()) || isFriend();
@@ -1873,8 +1873,8 @@ bool MemberDef::isDetailedSectionLinkable() const
    // bool inAnonymousScope = ! briefDescription().isEmpty() && annUsed;
 
 
-   // Step E: hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set
-   bool temp_e = (m_impl->type == "friend class" || m_impl->type == "friend struct" || m_impl->type == "friend union");
+   // hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set
+   // bool temp_e = (m_impl->type == "friend class" || m_impl->type == "friend struct" || m_impl->type == "friend union");
    bool friendCompoundFilter = ( ! hideFriendCompound || ! isFriend() || ! (isAttribute || isProperty) );
 
    bool result = ( docFilter && staticFilter && privateFilter && friendCompoundFilter && ! isHidden() );
@@ -2855,6 +2855,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
          // first si characters of ldef contain compound type name
          ol.startMemberDocName(isObjCMethod());
+
          ol.docify(QStringView(ldef.constBegin(), iter_s));
          ol.docify(" { ... } ");
 
@@ -4195,8 +4196,10 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
                   typeDecl.endBold();
                }
 
-               if (fmd->hasOneLineInitializer()) { // enum value has initializer
-                  //typeDecl.writeString(" = ");
+               if (fmd->hasOneLineInitializer()) {
+                  // enum value has initializer
+                  // typeDecl.writeString(" = ");
+
                   typeDecl.writeString(" ");
                   typeDecl.parseText(fmd->initializer());
                }
@@ -4208,16 +4211,16 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
 
             if (mli != fmdl->end()) {
                fmd = *mli;
+               fmdVisible = fmd->isBriefSectionVisible();
 
-               if (fmdVisible = fmd->isBriefSectionVisible()) {
+               if (fmdVisible) {
                   typeDecl.writeString(", ");
                }
-
             }
 
             if (prevVisible) {
                typeDecl.disable(OutputGenerator::Man);
-               typeDecl.writeString("\n"); // to prevent too long lines in LaTeX
+               typeDecl.writeString("\n");              // to prevent too long lines in LaTeX
                typeDecl.enable(OutputGenerator::Man);
                enumMemCount++;
             }

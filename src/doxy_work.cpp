@@ -4039,10 +4039,11 @@ void Doxy_Work::buildInterfaceAndServiceList(QSharedPointer<Entry> ptrEntry)
 
    // can only have these in IDL anyway
    switch (ptrEntry->m_srcLang) {
-      case SrcLangExt_Unknown: // fall through (root node always is Unknown)
+      case SrcLangExt_Unknown: // (root node always is Unknown)
       case SrcLangExt_IDL:
          RECURSE_ENTRYTREE(buildInterfaceAndServiceList, ptrEntry);
          break;
+
       default:
          return; // nothing to do here
    }
@@ -4695,7 +4696,7 @@ void Doxy_Work::transferFunctionDocumentation()
    // find matching function declaration and definitions
    for (auto mn : Doxy_Globals::functionNameSDict) {
 
-      /* find a matching function declaration and definition for this function */
+      // find a matching function declaration and definition for this function
       for (auto mdec : *mn ) {
 
          if (mdec->isPrototype() || (mdec->isVariable() && mdec->isExternal()) ) {
@@ -9279,6 +9280,7 @@ static QString fixSlashes(QString &s)
             result += s.at(i);
       }
    }
+
    return result;
 }
 #endif

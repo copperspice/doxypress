@@ -201,7 +201,7 @@ CommandMap htmlTagMap[] = {
    { "u",          HTML_UNDERLINE },
 
    { "c",            XML_C },
-// { "code",         XML_CODE },  <= ambiguous <code> is also a HTML tag
+// { "code",         XML_CODE },          // ambiguous <code> is also a HTML tag
    { "description",  XML_DESCRIPTION },
    { "example",      XML_EXAMPLE },
    { "exception",    XML_EXCEPTION },

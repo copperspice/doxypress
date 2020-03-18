@@ -40,13 +40,12 @@ struct SectionInfo {
    { }
 
    QString label;
-   QString title;   
+   QString title;
    QString ref;
    QString fileName;
-      
-   int lineNr;   
-   int level;
 
+   int lineNr;
+   int level;
    bool generated;
 
    SectionType type;

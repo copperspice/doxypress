@@ -92,8 +92,8 @@ struct DocParserContext {
    QSharedPointer<MemberDef> memberDef;
    QSet<QString> paramsFound;
 
-   bool isExample;
-   QString   exampleName;
+   bool     isExample;
+   QString  exampleName;
    SectionDict *sectionDict;
    QString  searchUrl;
 
@@ -956,10 +956,9 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
    return (tok == TK_NEWPARA || tok == TK_LISTITEM || tok == TK_ENDLIST) ? tok : RetVal_OK;
 }
 
-/*! Called when a style change starts. For instance a \<b\> command is
- *  encountered.
- */
-static void handleStyleEnter(DocNode *parent, QList<DocNode *> &children, DocStyleChange::Style s, const HtmlAttribList *attribs)
+// Called when a style change starts. For instance a \<b\> command is encountered
+static void handleStyleEnter(DocNode *parent, QList<DocNode *> &children, DocStyleChange::Style s,
+            const HtmlAttribList *attribs)
 {
    DBG(("HandleStyleEnter\n"));
 
@@ -968,9 +967,7 @@ static void handleStyleEnter(DocNode *parent, QList<DocNode *> &children, DocSty
    s_styleStack.push(*sc);
 }
 
-/*! Called when a style change ends. For instance a \</b\> command is
- *  encountered.
- */
+// Called when a style change ends. For instance a \</b\> command is encountered
 static void handleStyleLeave(DocNode *parent, QList<DocNode *> &children, DocStyleChange::Style s, const QString &tagName)
 {
    DBG(("HandleStyleLeave\n"));
@@ -1810,6 +1807,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                      handleStyleLeave(parent, children, DocStyleChange::Subscript, tokenName);
                   }
                   break;
+
                case HTML_SUP:
                   if (!g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Superscript, &g_token->attribs);
@@ -1817,6 +1815,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                      handleStyleLeave(parent, children, DocStyleChange::Superscript, tokenName);
                   }
                   break;
+
                case HTML_CENTER:
                   if (!g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Center, &g_token->attribs);
@@ -1824,6 +1823,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                      handleStyleLeave(parent, children, DocStyleChange::Center, tokenName);
                   }
                   break;
+
                case HTML_SMALL:
                   if (!g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Small, &g_token->attribs);
@@ -6015,15 +6015,15 @@ int DocPara::handleCommand(const QString &cmdName)
          break;
 
       case CMD_PUNT:
-         m_children.append(new DocSymbol(this,DocSymbol::Sym_Dot));
+         m_children.append(new DocSymbol(this, DocSymbol::Sym_Dot));
          break;
 
       case CMD_PLUS:
-         m_children.append(new DocSymbol(this,DocSymbol::Sym_Plus));
+         m_children.append(new DocSymbol(this, DocSymbol::Sym_Plus));
          break;
 
       case CMD_MINUS:
-         m_children.append(new DocSymbol(this,DocSymbol::Sym_Minus));
+         m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
          break;
 
       case CMD_SA:
@@ -6384,6 +6384,7 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_ENDINTERNAL:
          retval = RetVal_EndInternal;
          break;
+
       case CMD_PARBLOCK: {
          DocParBlock *block = new DocParBlock(this);
          m_children.append(block);
@@ -6391,42 +6392,52 @@ int DocPara::handleCommand(const QString &cmdName)
       }
       break;
 
-      case CMD_COPYDOC:   // fall through
-      case CMD_COPYBRIEF: // fall through
+      case CMD_COPYDOC:
+      case CMD_COPYBRIEF:
       case CMD_COPYDETAILS:
          //retval = RetVal_CopyDoc;
          // these commands should already be resolved by processCopyDoc()
          break;
+
       case CMD_INCLUDE:
          handleInclude(cmdName, DocInclude::Include);
          break;
+
       case CMD_INCWITHLINES:
          handleInclude(cmdName, DocInclude::IncWithLines);
          break;
+
       case CMD_DONTINCLUDE:
          handleInclude(cmdName, DocInclude::DontInclude);
          break;
+
       case CMD_HTMLINCLUDE:
          handleInclude(cmdName, DocInclude::HtmlInclude);
          break;
+
       case CMD_LATEXINCLUDE:
          handleInclude(cmdName, DocInclude::LatexInclude);
          break;
       case CMD_VERBINCLUDE:
          handleInclude(cmdName, DocInclude::VerbInclude);
          break;
+
       case CMD_SNIPPET:
          handleInclude(cmdName, DocInclude::Snippet);
          break;
+
       case CMD_SKIP:
          handleIncludeOperator(cmdName, DocIncOperator::Skip);
          break;
+
       case CMD_UNTIL:
          handleIncludeOperator(cmdName, DocIncOperator::Until);
          break;
+
       case CMD_SKIPLINE:
          handleIncludeOperator(cmdName, DocIncOperator::SkipLine);
          break;
+
       case CMD_LINE:
          handleIncludeOperator(cmdName, DocIncOperator::Line);
          break;
@@ -6463,7 +6474,7 @@ int DocPara::handleCommand(const QString &cmdName)
          handleEmoji();
          break;
 
-      case CMD_REF: // fall through
+      case CMD_REF:
       case CMD_SUBPAGE:
          handleRef(cmdName);
          break;
@@ -6548,7 +6559,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
    DBG(("handleHtmlStartTag(%s,%d)\n", csPrintable(tagName), tagHtmlAttribs.count()));
 
    int retval = RetVal_OK;
-   int tagId = Mappers::htmlTagMapper->map(tagName);
+   int tagId  = Mappers::htmlTagMapper->map(tagName);
 
    if (g_token->emptyTag && !(tagId & XML_CmdMask) &&
          tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR) {
@@ -6726,7 +6737,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
       case XML_VALUE:
       case XML_PARA:
-         if (!m_children.isEmpty()) {
+         if (! m_children.isEmpty()) {
             retval = TK_NEWPARA;
          }
          break;
@@ -6760,6 +6771,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
                retval = handleParamSection(paramName,
                         tagId == XML_PARAM ? DocParamSect::Param : DocParamSect::TemplateParam, true);
             }
+
          } else {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param%s> tag.",
                         tagId == XML_PARAM ? "" : "type");
@@ -6888,7 +6900,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             // Look for an existing "see" section
             unescapeCRef(cref);
 
-            DocSimpleSect *ss = 0;
+            DocSimpleSect *ss = nullptr;
 
             for (auto n : m_children) {
                if (n->kind() == Kind_SimpleSect && ((DocSimpleSect *)n)->type() == DocSimpleSect::See) {
@@ -6917,10 +6929,12 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          if (type == "number") {
             listType = DocHtmlList::Ordered;
          }
+
          if (type == "table") {
             DocHtmlTable *table = new DocHtmlTable(this, emptyList);
             m_children.append(table);
             retval = table->parseXml();
+
          } else {
             DocHtmlList *list = new DocHtmlList(this, emptyList, listType);
             m_children.append(list);
@@ -6963,7 +6977,7 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
    switch (tagId) {
 
       case HTML_UL:
-         if (!insideUL(this)) {
+         if (! insideUL(this)) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "found </ul> tag without matching <ul>");
          } else {
             retval = RetVal_EndList;
@@ -6979,7 +6993,7 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
          break;
 
       case HTML_LI:
-         if (!insideLI(this)) {
+         if (! insideLI(this)) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </li> tag without matching <li>");
          } else {
             // ignore </li> tags
@@ -7914,8 +7928,8 @@ static QString extractCopyDocId(const QString &data, QString::const_iterator &it
                insideSQuote = true;
                break;
 
-            case ' ':     // fall through
-            case '\t':    // fall through
+            case ' ':
+            case '\t':
             case '\n':
                found = (round == 0);
                break;

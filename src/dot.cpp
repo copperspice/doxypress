@@ -1311,8 +1311,8 @@ int DotManager::addSVGObject(const QString &file, const QString &baseName, const
 
 bool DotManager::run()
 {
-   uint numDotRuns = m_dotRuns.count();
-   uint numDotMaps = m_dotMaps.count();
+   int numDotRuns = m_dotRuns.count();
+   int numDotMaps = m_dotMaps.count();
 
    if (numDotRuns + numDotMaps > 1) {
       if (m_workers.count() == 0) {

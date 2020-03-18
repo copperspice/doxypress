@@ -112,7 +112,7 @@ ClangParser *ClangParser::instance()
 
 ClangParser::ClangParser()
 {
-   p = new Private;
+   p = new ClangParser::Private;
 }
 
 ClangParser::~ClangParser()

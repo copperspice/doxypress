@@ -36,7 +36,8 @@ struct ListItemInfo;
 // stores information about an inheritance relationship
 struct BaseInfo {
    BaseInfo(const QString &n, Protection p, Specifier v)
-      : name(n), prot(p), virt(v) {}
+      : name(n), prot(p), virt(v)
+   { }
 
    QString    name;      // name of the base class
    Protection prot;      // inheritance type

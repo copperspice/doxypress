@@ -2063,7 +2063,7 @@ void ClassDef::writeMemberList(OutputList &ol)
          QSharedPointer<ClassDef>  cd = md->getClassDef();
 
          Protection prot = mi.prot;
-         Specifier virt = md->virtualness();
+         Specifier virt  = md->virtualness();
 
          if (cd && ! md->name().isEmpty() && ! md->name().startsWith('@')) {
             bool memberWritten = false;

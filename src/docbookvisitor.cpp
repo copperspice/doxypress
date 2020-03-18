@@ -201,6 +201,7 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
             m_t << "</emphasis>";
          }
          break;
+
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "<emphasis>";
@@ -208,6 +209,7 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
             m_t << "</emphasis>";
          }
          break;
+
       case DocStyleChange::Code:
          if (s->enable()) {
             m_t << "<computeroutput>";
@@ -215,6 +217,7 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
             m_t << "</computeroutput>";
          }
          break;
+
       case DocStyleChange::Subscript:
          if (s->enable()) {
             m_t << "<subscript>";
@@ -222,6 +225,7 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
             m_t << "</subscript>";
          }
          break;
+
       case DocStyleChange::Superscript:
          if (s->enable()) {
             m_t << "<superscript>";
@@ -229,6 +233,7 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
             m_t << "</superscript>";
          }
          break;
+
       case DocStyleChange::Center:
          if (s->enable()) {
             m_t << "<informaltable frame='none'><tgroup cols='1'><colspec align='center'/><tbody><row><entry align='center'>";
@@ -236,6 +241,7 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
             m_t << "</entry></row></tbody></tgroup></informaltable>";
          }
          break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             m_t << "<literallayout>";
@@ -282,17 +288,12 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          break;
 
       case DocVerbatim::HtmlOnly:
-         break;
-
       case DocVerbatim::RtfOnly:
-         break;
-
       case DocVerbatim::ManOnly:
-         break;
       case DocVerbatim::LatexOnly:
-         break;
       case DocVerbatim::XmlOnly:
          break;
+
       case DocVerbatim::DocbookOnly:
          break;
          m_t << s->text();
@@ -457,11 +458,11 @@ void DocbookDocVisitor::visit(DocIncOperator *op)
    }
    if (op->isLast()) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << "</programlisting>";
       }
    } else {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << endl;
       }
    }
@@ -482,6 +483,7 @@ void DocbookDocVisitor::visit(DocIndexEntry *ie)
    if (m_hide) {
       return;
    }
+
    m_t << "<indexentry><primaryie>" << endl;
    filter(ie->entry());
    m_t << "</primaryie><secondaryie></secondaryie></indexentry>" << endl;
@@ -500,6 +502,7 @@ void DocbookDocVisitor::visit(DocCite *cite)
    if (! cite->file().isEmpty()) {
       startLink(cite->file(), cite->anchor());
    }
+
    filter(cite->text());
    if (!cite->file().isEmpty()) {
       endLink();
@@ -515,6 +518,7 @@ void DocbookDocVisitor::visitPre(DocAutoList *l)
    if (m_hide) {
       return;
    }
+
    if (l->isEnumList()) {
       m_t << "<orderedlist>\n";
    } else {
@@ -527,6 +531,7 @@ void DocbookDocVisitor::visitPost(DocAutoList *l)
    if (m_hide) {
       return;
    }
+
    if (l->isEnumList()) {
       m_t << "</orderedlist>\n";
    } else {
@@ -689,12 +694,15 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trAttention()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::User:
          m_t << "<formalpara><title></title>" << endl;
          break;
+
       case DocSimpleSect::Rcs:
          m_t << "<formalpara><title></title>" << endl;
          break;
+
       case DocSimpleSect::Unknown:
          m_t << "<formalpara><title></title>" << endl;
          break;
@@ -870,6 +878,7 @@ void DocbookDocVisitor::visitPre(DocHtmlTable *t)
    if (m_hide) {
       return;
    }
+
    m_t << "<table frame=\"all\">" << endl;
    m_t << "    <title></title>" << endl;
    m_t << "    <tgroup cols=\"" << t->numColumns() << "\" align=\"left\" colsep=\"1\" rowsep=\"1\">" << endl;
@@ -881,6 +890,7 @@ void DocbookDocVisitor::visitPost(DocHtmlTable *)
    if (m_hide) {
       return;
    }
+
    m_t << "    </tbody>" << endl;
    m_t << "    </tgroup>" << endl;
    m_t << "</table>" << endl;

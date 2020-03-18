@@ -122,37 +122,26 @@ FTVHelp::~FTVHelp()
    delete[] m_indentNodes;
 }
 
-/* This will create a folder tree view table of contents file (tree.js).
- *
- */
+// This will create a folder tree view table of contents file (tree.js).
 void FTVHelp::initialize()
 {
 }
 
-/* Finalizes the FTV help. This will finish and close the contents file (index.js).
- *
- */
+// Finalizes the FTV help. This will finish and close the contents file (index.js).
 void FTVHelp::finalize()
 {
    generateTreeViewImages();
    generateTreeViewScripts();
 }
 
-/*! Increase the level of the contents hierarchy.
- *  This will start a new sublist in contents file.
- *  \sa decContentsDepth()
- */
+// Increase the level of the contents hierarchy. This will start a new sublist in contents file.
 void FTVHelp::incContentsDepth()
 {
-   QList<FTVNode *> &nl = m_indentNodes[m_indent];
-
    m_indent++;
    assert(m_indent < MAX_INDENT);
 }
 
-/*! Decrease the level of the contents hierarchy. This will end the current sublist.
- *  \sa incContentsDepth()
- */
+// Decrease the level of the contents hierarchy. This will end the current sublist.
 void FTVHelp::decContentsDepth()
 {
    assert(m_indent > 0);

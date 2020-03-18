@@ -114,10 +114,10 @@ static bool mustBeOutsideParagraph(DocNode *n)
                 ((DocStyleChange *)n)->style() == DocStyleChange::Center;
 
       case DocNode::Kind_Formula:
-         return !((DocFormula *)n)->isInline();
+         return ! ((DocFormula *)n)->isInline();
 
       case DocNode::Kind_Image:
-         return !((DocImage*)n)->isInlineImage();
+         return ! ((DocImage*)n)->isInlineImage();
 
       default:
          break;
@@ -279,7 +279,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Bold:
          if (s->enable()) {
             m_t << "<b" << htmlAttribsToString(s->attribs()) << ">";
-         }      else {
+         } else {
             m_t << "</b>";
          }
          break;
@@ -453,7 +453,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::XmlOnly:
       case DocVerbatim::RtfOnly:
       case DocVerbatim::DocbookOnly:
-         /* nothing */
+         // do nothing
          break;
 
       case DocVerbatim::Dot: {
@@ -490,7 +490,6 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          }
 
          forceStartParagraph(s);
-
       }
       break;
 
@@ -708,11 +707,9 @@ void HtmlDocVisitor::visit(DocFormula *f)
       filterQuotedCdataAttr(f->text());
 
       m_t << "\"";
-
-      // TODO: cache image dimensions on formula generation and give height/width
-      // for faster preloading and better rendering of the page
-
+      // emerald
       m_t << " src=\"" << f->relPath() << f->name() << ".png\"/>";
+
 
    }
 
@@ -874,7 +871,7 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 {
    int t   = 0;
    isFirst = false;
-   isLast   = false;
+   isLast  = false;
 
    if (p && p->parent()) {
 
@@ -1301,10 +1298,13 @@ void HtmlDocVisitor::visitPost(DocSimpleList *sl)
    if (m_hide) {
       return;
    }
+
    m_t << "</ul>";
+
    if (!sl->isPreformatted()) {
       m_t << "\n";
    }
+
    forceStartParagraph(sl);
 }
 
@@ -1313,6 +1313,7 @@ void HtmlDocVisitor::visitPre(DocSimpleListItem *)
    if (m_hide) {
       return;
    }
+
    m_t << "<li>";
 }
 
@@ -1321,7 +1322,9 @@ void HtmlDocVisitor::visitPost(DocSimpleListItem *li)
    if (m_hide) {
       return;
    }
+
    m_t << "</li>";
+
    if (!li->isPreformatted()) {
       m_t << "\n";
    }
@@ -1380,6 +1383,7 @@ void HtmlDocVisitor::visitPost(DocHtmlList *s)
    if (! s->isPreformatted()) {
       m_t << "\n";
    }
+
    forceStartParagraph(s);
 }
 
@@ -1454,6 +1458,7 @@ void HtmlDocVisitor::visitPost(DocHtmlDescData *)
    if (m_hide) {
       return;
    }
+
    m_t << "</dd>\n";
 }
 
@@ -1524,6 +1529,7 @@ void HtmlDocVisitor::visitPost(DocHtmlCell *c)
    if (m_hide) {
       return;
    }
+
    if (c->isHeading()) {
       m_t << "</th>";
    } else {
@@ -1738,7 +1744,8 @@ void HtmlDocVisitor::visitPost(DocImage *img)
 
            if (isImageSvg) {
              QString alt;
-             QString attrs = htmlAttribsToString(img->attribs(),&alt);
+             QString attrs = htmlAttribsToString(img->attribs(), &alt);
+
              m_t << "\">" << alt << "</object>";
 
            } else {
@@ -1795,8 +1802,10 @@ void HtmlDocVisitor::visitPre(DocMscFile *df)
    if (m_hide) {
       return;
    }
+
    m_t << "<div class=\"mscgraph\">" << endl;
    writeMscFile(df->file(), df->relPath(), df->context());
+
    if (df->hasCaption()) {
       m_t << "<div class=\"caption\">" << endl;
    }
@@ -1886,6 +1895,7 @@ void HtmlDocVisitor::visitPre(DocSecRefItem *ref)
    if (m_hide) {
       return;
    }
+
    QString refName = ref->file();
 
    if (refName.right(Doxy_Globals::htmlFileExtension.length()) != QString(Doxy_Globals::htmlFileExtension)) {
@@ -2035,7 +2045,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
       bool first = true;
 
       for (auto type : pl->paramTypes()) {
-         if (!first) {
+         if (! first) {
             m_t << "&#160;|&#160;";
 
          } else {
@@ -2060,6 +2070,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
    for (auto param : pl->parameters()) {
       if (! first) {
          m_t << ",";
+
       } else {
          first = false;
       }
@@ -2089,6 +2100,7 @@ void HtmlDocVisitor::visitPre(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
@@ -2108,7 +2120,7 @@ void HtmlDocVisitor::visitPre(DocXRefItem *x)
    filter(x->title());
    m_t << ":";
 
-   if (!anonymousEnum) {
+   if (! anonymousEnum) {
       m_t << "</a>";
    }
 
@@ -2120,9 +2132,11 @@ void HtmlDocVisitor::visitPost(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
+
    m_t << "</dd></dl>" << endl;
    forceStartParagraph(x);
 }
@@ -2211,7 +2225,7 @@ void HtmlDocVisitor::filter(const QString &str)
    QString result = str;
 
    if (result.contains("$tr") )  {
-      // used in the doxypress test build to show sample translations
+      // used in doxypress test build to show sample translations
 
       if (result.contains("PublicTypedefs")) {
          result = result.replace("$trPublicTypedefs",           theTranslator->trPublicTypedefs());

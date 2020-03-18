@@ -81,8 +81,8 @@ void EclipseHelp::initialize()
 
    // initialize text stream
    m_tocstream.setDevice(&m_tocfile);
-   
-   // write the opening tag 
+
+   // write the opening tag
    if (title.isEmpty()) {
       title = "DoxyPress generated documentation";
    }
@@ -104,7 +104,7 @@ void EclipseHelp::finalize()
    static const QString name = Config::getString("html-output") + "/plugin.xml";
 
    // close previous tag
-   closedTag(); 
+   closedTag();
 
    // write ending tag
    --m_depth;
@@ -113,9 +113,9 @@ void EclipseHelp::finalize()
    // close the content file
    m_tocstream.setDevice(0);
 
-   m_tocfile.close();  
+   m_tocfile.close();
    m_tocfile.setFileName("");
- 
+
    QFile pluginFile(name);
 
    if (pluginFile.open(QIODevice::WriteOnly)) {

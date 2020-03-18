@@ -17,10 +17,10 @@
 *************************************************************************/
 
 /*
- * ftvhelp.h,v 1.0 2000/09/06 16:09:00 
- * Kenney Wong <kwong@ea.com> 
+ * ftvhelp.h,v 1.0 2000/09/06 16:09:00
+ * Kenney Wong <kwong@ea.com>
  * Folder Tree View for offline help on browsers that do not support HTML Help
-*/ 
+*/
 
 #ifndef FTVHELP_H
 #define FTVHELP_H
@@ -34,15 +34,14 @@
 
 struct FTVNode;
 
-/** A class that generates a dynamic tree view side panel
- */
+// generates a dynamic tree view side panel
 class FTVHelp : public IndexIntf
 {
  public:
    FTVHelp(bool lti);
    ~FTVHelp();
 
-   enum PageType{ 
+   enum PageType{
       Default,
       Modules
    };
@@ -63,18 +62,18 @@ class FTVHelp : public IndexIntf
    void addIndexFile(const QString &) override {}
    void addImageFile(const QString &) override {}
    void addStyleSheetFile(const QString &) override {}
-  
+
    void generateTreeViewInline(QTextStream &t, enum PageType outputType = Default);
    static void generateTreeViewImages();
    void generateTreeViewScripts();
 
- private:   
+ private:
    void generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level, int maxLevel, int &index, enum PageType outputType = Default);
-  
+
    QString generateIndentLabel(FTVNode *n, int level);
    void generateIndent(QTextStream &t, FTVNode *n, bool opened);
    void generateLink(QTextStream &t, FTVNode *n);
-   
+
    QList<FTVNode *> *m_indentNodes;
 
    int m_indent;
@@ -82,7 +81,7 @@ class FTVHelp : public IndexIntf
 };
 
 struct NavIndexEntry {
-   NavIndexEntry(const QString &url, const QString &id) 
+   NavIndexEntry(const QString &url, const QString &id)
       : m_url(url), m_indexId(id)
    {}
 

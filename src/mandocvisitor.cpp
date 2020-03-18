@@ -162,8 +162,10 @@ void ManDocVisitor::visit(DocStyleChange *s)
          }     else {
             m_t << "\\fP";
          }
+
          m_firstCol = false;
          break;
+
       case DocStyleChange::Code:
          if (s->enable()) {
             m_t << "\\fC";
@@ -172,6 +174,7 @@ void ManDocVisitor::visit(DocStyleChange *s)
          }
          m_firstCol = false;
          break;
+
       case DocStyleChange::Subscript:
          if (s->enable()) {
             m_t << "\\*<";
@@ -180,6 +183,7 @@ void ManDocVisitor::visit(DocStyleChange *s)
          }
          m_firstCol = false;
          break;
+
       case DocStyleChange::Superscript:
          if (s->enable()) {
             m_t << "\\*{";
@@ -227,45 +231,49 @@ void ManDocVisitor::visit(DocVerbatim *s)
 
    QString lang = m_langExt;
 
-   if (!s->language().isEmpty()) { // explicit language setting
+   if (! s->language().isEmpty()) { // explicit language setting
       lang = s->language();
    }
    SrcLangExt langExt = getLanguageFromFileName(lang);
    switch (s->type()) {
-      case DocVerbatim::Code: // fall though
-         if (!m_firstCol) {
+      case DocVerbatim::Code:
+         if (! m_firstCol) {
             m_t << endl;
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
-         Doxy_Globals::parserManager.getParser(lang)
-         ->parseCode(m_ci, s->context(), s->text(),
-                     langExt,
-                     s->isExample(), s->exampleFile());
+         Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
+               langExt, s->isExample(), s->exampleFile());
          if (!m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".fi" << endl;
          m_t << ".PP" << endl;
          m_firstCol = true;
+
          break;
+
       case DocVerbatim::Verbatim:
-         if (!m_firstCol) {
+         if (! m_firstCol) {
             m_t << endl;
          }
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
          m_t << s->text();
-         if (!m_firstCol) {
+
+         if (! m_firstCol) {
             m_t << endl;
          }
          m_t << ".fi" << endl;
          m_t << ".PP" << endl;
          m_firstCol = true;
          break;
+
       case DocVerbatim::ManOnly:
          m_t << s->text();
          break;
+
       case DocVerbatim::HtmlOnly:
       case DocVerbatim::XmlOnly:
       case DocVerbatim::LatexOnly:
@@ -316,6 +324,7 @@ void ManDocVisitor::visit(DocInclude *inc)
       }
 
       break;
+
       case DocInclude::Include:
          if (! m_firstCol) {
             m_t << endl;
@@ -350,6 +359,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          if (! m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
          m_t << inc->text();
@@ -372,7 +382,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
                      langExt, inc->isExample(), inc->exampleFile() );
 
-         if (!m_firstCol) {
+         if (! m_firstCol) {
             m_t << endl;
          }
 

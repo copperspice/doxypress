@@ -36,7 +36,6 @@
 #include <parse_base.h>
 #include <util.h>
 
-
 class Definition_Private
 {
  public:
@@ -233,8 +232,9 @@ Definition::Definition(const QString &df, int dl, int dc, const QString &name, c
 Definition::Definition(const Definition &d)
    : DefinitionIntf()
 {
-   m_name    = d.m_name;
-   m_defLine = d.m_defLine;
+   m_name      = d.m_name;
+   m_defLine   = d.m_defLine;
+   m_defColumn = d.m_defColumn;
 
    m_private  = new Definition_Private;
    *m_private = *d.m_private;
@@ -1160,7 +1160,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                // for HTML write a real link
                ol.pushGeneratorState();
 
-               //ol.disableAllBut(OutputGenerator::Html);
+               // ol.disableAllBut(OutputGenerator::Html);
                ol.disable(OutputGenerator::Man);
 
                if (! latexSourceCode) {

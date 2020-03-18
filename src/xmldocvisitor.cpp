@@ -210,7 +210,7 @@ void XmlDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Bold:
          if (s->enable()) {
             m_t << "<bold>";
-         }      else {
+         } else {
             m_t << "</bold>";
          }
          break;
@@ -221,6 +221,7 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</emphasis>";
          }
          break;
+
       case DocStyleChange::Code:
          if (s->enable()) {
             m_t << "<computeroutput>";
@@ -228,6 +229,7 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</computeroutput>";
          }
          break;
+
       case DocStyleChange::Subscript:
          if (s->enable()) {
             m_t << "<subscript>";
@@ -235,6 +237,7 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</subscript>";
          }
          break;
+
       case DocStyleChange::Superscript:
          if (s->enable()) {
             m_t << "<superscript>";
@@ -242,6 +245,7 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</superscript>";
          }
          break;
+
       case DocStyleChange::Center:
          if (s->enable()) {
             m_t << "<center>";
@@ -249,6 +253,7 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</center>";
          }
          break;
+
       case DocStyleChange::Small:
          if (s->enable()) {
             m_t << "<small>";
@@ -256,6 +261,7 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</small>";
          }
          break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             m_t << "<preformatted>";
@@ -265,9 +271,10 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_insidePre = false;
          }
          break;
-      case DocStyleChange::Div:  /* HTML only */
-         break;
-      case DocStyleChange::Span: /* HTML only */
+
+      case DocStyleChange::Div:
+      case DocStyleChange::Span:
+         /// HTML only
          break;
    }
 }

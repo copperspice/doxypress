@@ -432,7 +432,7 @@ class DocStyleChange : public DocNode
                 Strike        = 0x0400,
                 Underline     = 0x0800,
                 Del           = 0x1000,
-                Ins           = 0x2000
+                Ins           = 0x2000,
    };
 
    DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = nullptr)
@@ -789,11 +789,11 @@ class DocInclude : public DocNode
       return m_context;
    }
 
-   QString blockId() const     {
+   QString blockId() const {
       return m_blockId;
    }
 
-   bool isExample() const       {
+   bool isExample() const {
       return m_isExample;
    }
 
@@ -983,6 +983,7 @@ class DocCopy : public DocNode
    }
 
    void accept(DocVisitor *v)  override  {
+      (void) v;
       /*CompAccept<DocCopy>::accept(this,v);*/
    }
 
@@ -1965,7 +1966,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    bool injectToken(int tok, const QString &tokText);
 
  private:
-   QString  m_sectionId;
+   QString m_sectionId;
    bool m_isFirst;
    bool m_isLast;
 };
@@ -2099,7 +2100,7 @@ class DocHtmlListItem : public CompAccept<DocHtmlListItem>, public DocNode
 
  private:
    HtmlAttribList m_attribs;
-   int            m_itemNum;
+   int m_itemNum;
 };
 
 /** Node representing a HTML description data */
@@ -2131,8 +2132,6 @@ class DocHtmlDescData : public CompAccept<DocHtmlDescData>, public DocNode
 /** Node representing a HTML table cell */
 class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
 {
-   friend class DocHtmlTable;
-
  public:
    enum Alignment { Left, Right, Center };
 
@@ -2205,6 +2204,8 @@ class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
    HtmlAttribList m_attribs;
    int            m_rowIdx;
    int            m_colIdx;
+
+   friend class DocHtmlTable;
 };
 
 /** Node representing an HTML table caption */
@@ -2249,8 +2250,6 @@ class DocHtmlCaption : public CompAccept<DocHtmlCaption>, public DocNode
 /** Node representing a HTML table row */
 class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
 {
-   friend class DocHtmlTable;
-
  public:
    DocHtmlRow(DocNode *parent, const HtmlAttribList &attribs) :
       m_attribs(attribs), m_visibleCells(-1), m_rowIdx(-1) {
@@ -2323,6 +2322,8 @@ class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
    HtmlAttribList m_attribs;
    int m_visibleCells;
    int m_rowIdx;
+
+   friend class DocHtmlTable;
 };
 
 /** Node representing a HTML table */

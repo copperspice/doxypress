@@ -44,10 +44,10 @@ class DocSets  : public IndexIntf
    void finalize() override;
    void incContentsDepth() override;
    void decContentsDepth() override;
-   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor, 
+   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                   bool unused, QSharedPointer<Definition> def, DirType category) override;
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor,
                   const QString &title) override;
 
    void addIndexFile(const QString &name) override {
@@ -64,7 +64,7 @@ class DocSets  : public IndexIntf
 
  private:
    void writeToken(QTextStream &t, QSharedPointer<Definition> d, const QString &type, const QString &lang,
-                   const QString &scope = QString(), const QString &anchor = QString(), const QString &decl = QString() ); 
+                   const QString &scope = QString(), const QString &anchor = QString(), const QString &decl = QString() );
 
    struct NodeDef {
       NodeDef(bool d, const QString &n, const QString &r, const QString &f, const QString &a, int i) :
@@ -96,5 +96,5 @@ class DocSets  : public IndexIntf
    QSet<QString> m_scopes;
 };
 
-#endif 
+#endif
 

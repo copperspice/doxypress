@@ -31,57 +31,57 @@ FileNameList::~FileNameList()
 }
 
 void FileNameList::generateDiskNames()
-{  
-   int count = 0; 
+{
+   int count = 0;
 
-   for ( auto item : *this) {   
+   for ( auto item : *this) {
       if (! item->isReference()) {
          count++;
       }
    }
-   
+
    if (count == 1) {
-          
-      for ( auto item : *this) {   
+
+      for ( auto item : *this) {
          if (item->isReference()) {
-            // name if unique, so diskname is simply the name    
+            // name if unique, so diskname is simply the name
             item->m_diskName = name;
             break;
          }
       }
-  
-   } else if (count > 1) { 
+
+   } else if (count > 1) {
       // multiple occurrences of the same file name
-     
+
       int i = 0;
       int j = 0;
 
-      bool found = false;     
+      bool found = false;
 
-      while (! found) { 
+      while (! found) {
          // search for the common prefix of all paths
          QSharedPointer<FileDef> fd;
 
          QList<QSharedPointer<FileDef>>::iterator it;
 
-         for (it = this->begin(); it != this->end(); ++it) {   
-         
+         for (it = this->begin(); it != this->end(); ++it) {
+
             if (! (*it)->isReference()) {
-               fd = *it;               
+               fd = *it;
                break;
             }
          }
-       
-         if (fd) {     
+
+         if (fd) {
             // init for safety
             QChar letter = '\0';
 
             if ( fd->m_path.length() > i) {
                letter = fd->m_path.at(i);
-           
+
                if (letter == '/') {
                   // remember last position of dirname
-                  j = i;   
+                  j = i;
                }
             }
 
@@ -91,9 +91,9 @@ void FileNameList::generateDiskNames()
 
             while ( it != this->end() && (fd = *it) && ! found) {
 
-               if (! fd->isReference()) {                 
+               if (! fd->isReference()) {
 
-                  if (i == fd->m_path.length()) {                     
+                  if (i == fd->m_path.length()) {
                      found = true;
 
                   } else if (fd->m_path[i] != letter) {
@@ -101,21 +101,21 @@ void FileNameList::generateDiskNames()
 
                   }
                }
-              
-               ++it;               
+
+               ++it;
             }
 
             i++;
          }
 
-      }     
+      }
 
-      for (auto item : *this) {   
-        
+      for (auto item : *this) {
+
          if (! item->isReference()) {
             QString prefix = item->m_path.right(item->m_path.length() - j - 1);
             item->setName(prefix + name);
-           
+
             item->m_diskName = prefix + name;
          }
       }

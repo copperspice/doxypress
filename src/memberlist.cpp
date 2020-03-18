@@ -137,19 +137,19 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
          }
 
          switch (md->memberType()) {
-            case MemberType_Variable:    // fall through
-            case MemberType_Event:       // fall through
+            case MemberType_Variable:
+            case MemberType_Event:
             case MemberType_Property:
                m_varCnt++;
                m_numDecMembers++;
                break;
 
             // necessary to get this to show up in declarations section?
-            case MemberType_Interface:   // fall through
-            case MemberType_Service:     // fall through
-            case MemberType_Function:    // fall through
-            case MemberType_Signal:      // fall through
-            case MemberType_DCOP:        // fall through
+            case MemberType_Interface:
+            case MemberType_Service:
+            case MemberType_Function:
+            case MemberType_Signal:
+            case MemberType_DCOP:
             case MemberType_Slot:
                if (! md->isRelated() || md->getClassDef()) {
                   m_funcCnt++;
@@ -273,16 +273,16 @@ bool MemberList::declVisible() const
 
          switch (md->memberType()) {
 
-            case MemberType_Define:    // fall through
-            case MemberType_Typedef:   // fall through
-            case MemberType_Variable:  // fall through
-            case MemberType_Function:  // fall through
-            case MemberType_Signal:    // fall through
-            case MemberType_Slot:      // fall through
-            case MemberType_DCOP:      // fall through
-            case MemberType_Property:  // fall through
-            case MemberType_Interface: // fall through
-            case MemberType_Service:   // fall through
+            case MemberType_Define:
+            case MemberType_Typedef:
+            case MemberType_Variable:
+            case MemberType_Function:
+            case MemberType_Signal:
+            case MemberType_Slot:
+            case MemberType_DCOP:
+            case MemberType_Property:
+            case MemberType_Interface:
+            case MemberType_Service:
             case MemberType_Event:
                return true;
 
@@ -310,7 +310,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, QSharedPointer<ClassDef> inheritedFrom,
                   const QString &inheritId )
 {
-   static const bool briefMemberDesc = Config::getBool("brief-member-desc");
+   static const bool briefMemberDesc  = Config::getBool("brief-member-desc");
    static const bool hideUndocMembers = Config::getBool("hide-undoc-members");
 
    countDecMembers();
