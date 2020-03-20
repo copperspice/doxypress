@@ -713,7 +713,6 @@ void writeJavascriptSearchIndex()
       return;
    }
 
-
    // index classes
    for (auto cd : Doxy_Globals::classSDict) {
 
@@ -937,7 +936,8 @@ void writeJavascriptSearchIndex()
                   QString anchor = d->anchor();
 
                   ti << "'" << externalRef("../", d->getReference(), true)
-                     << d->getOutputFileBase() << Doxy_Globals::htmlFileExtension;
+                     << addHtmlExtensionIfMissing(d->getOutputFileBase());
+
                   if (!anchor.isEmpty()) {
                      ti << "#" << anchor;
                   }
@@ -1012,8 +1012,9 @@ void writeJavascriptSearchIndex()
                      if (childCount > 0) {
                         ti << "],[";
                      }
+
                      ti << "'" << externalRef("../", d->getReference(), true)
-                        << d->getOutputFileBase() << Doxy_Globals::htmlFileExtension;
+                        << addHtmlExtensionIfMissing(d->getOutputFileBase());
 
                      if (!anchor.isEmpty()) {
                         ti << "#" << anchor;
