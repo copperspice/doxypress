@@ -128,6 +128,7 @@ struct ColoredImgDataItem {
 };
 
 void    addDirPrefix(QByteArray &fileName);
+QString addHtmlExtensionIfMissing(const QString & fName);
 void    addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict &memberGroupSDict, QSharedPointer<Definition> context);
 void    addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d);
 

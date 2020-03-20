@@ -1407,21 +1407,7 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<const Definit
 
    // it is often the case that the same name is searched in the same scope
    // use a cache to collect previous results
-   // the key is the concatenated scope, the name to search for and the explicit scope prefix
-
-   int scopeNameLen    = scope->name().length() + 1;
-   int nameLen         = name.length() + 1;
-   int explicitPartLen = explicitScopePart.length();
-
-   int fileScopeLen;
-
-   if (hasUsingStatements) {
-       fileScopeLen = 1 + fileScope->getFilePath().length();
-
-   } else {
-      fileScopeLen = 0;
-
-   }
+   // key is the concatenated scope, the name to search for and the explicit scope prefix
 
    QString key = scope->name( ) + "+" + name + "+" + explicitScopePart;
 
@@ -6121,14 +6107,14 @@ bool recursivelyAddGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d
 
       for (auto gd : *groups) {
 
-         if (recursivelyAddGroupListToTitle(ol, gd, false)) {
-            ol.writeString(" &raquo; ");
-         }
-
          if (! first) {
             ol.writeString(" &#124; ");
          } else {
             first = false;
+         }
+
+         if (recursivelyAddGroupListToTitle(ol, gd, false)) {
+            ol.writeString(" &raquo; ");
          }
 
          ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
@@ -6661,6 +6647,15 @@ QString rtfFormatBmkStr(const QString &key)
 bool checkExtension(const QString &fName, const QString &ext)
 {
    return (fName.endsWith(ext));
+}
+
+QString addHtmlExtensionIfMissing(const QString &fName)
+{
+   if (QFileInfo(fName).suffix().isEmpty()) {
+      return fName + Doxy_Globals::htmlFileExtension;
+   }
+
+   return fName;
 }
 
 QString stripExtensionGeneral(const QString &fName, const QString &ext)
