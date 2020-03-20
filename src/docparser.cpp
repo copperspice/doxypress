@@ -330,7 +330,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
                         csPrintable(fileName), inImage.error() );
       }
 
-      if (type == DocImage::Latex && latexPdf && fd->name().contains(".eps")) {
+      if (type == DocImage::Latex && latexPdf && fd->name().endsWith(".eps")) {
          // we have an .eps image in pdflatex mode => convert it to a pdf
 
          QString baseName  = fd->name().left(fd->name().length() - 4);
@@ -3079,7 +3079,7 @@ void DocDotFile::parse()
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::dotFileNameDict, m_name, ambig);
 
-   if (fd == nullptr && ! m_name.contains(".dot")) {
+   if (fd == nullptr && ! m_name.endsWith(".dot")) {
       // try with .dot extension as well
       fd = findFileDef(&Doxy_Globals::dotFileNameDict, m_name + ".dot", ambig);
    }
@@ -3110,7 +3110,7 @@ void DocMscFile::parse()
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::mscFileNameDict, m_name, ambig);
 
-   if (fd == nullptr && ! m_name.contains(".msc")) {
+   if (fd == nullptr && ! m_name.endsWith(".msc")) {
       // try with .msc extension as well
       fd = findFileDef(&Doxy_Globals::mscFileNameDict, m_name + ".msc", ambig);
    }
@@ -3142,7 +3142,7 @@ void DocDiaFile::parse()
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name, ambig);
 
-   if (fd == 0 && ! m_name.contains(".dia")) {
+   if (fd == 0 && ! m_name.endsWith(".dia")) {
       // try with .dia extension as well
       fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name + ".dia", ambig);
    }
