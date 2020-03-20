@@ -132,6 +132,7 @@ struct LayoutDocEntryMemberDef: public LayoutDocEntry {
 struct LayoutNavEntry {
  public:
    enum Kind {
+      None = -1,
       MainPage,
       Pages,
       Modules,

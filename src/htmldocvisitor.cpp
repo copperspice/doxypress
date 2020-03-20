@@ -39,6 +39,33 @@
 static const int NUM_HTML_LIST_TYPES = 4;
 static const char types[][NUM_HTML_LIST_TYPES] = {"1", "a", "i", "A"};
 
+enum ContextState
+{
+    None,
+    StartLi,
+    InterLi,
+    EndLi,
+    StartDd,
+    InterDd,
+    EndDd,
+    StartTd,
+    InterTd,
+    EndTd,
+};
+
+static const QString contexts[10] =
+{  "",
+   "startli",
+   "interli",
+   "endli",
+   "startdd",
+   "interdd",
+   "enddd",
+   "starttd",
+   "intertd",
+   "endtd",
+};
+
 static QString convertIndexWordToAnchor(const QString &word)
 {
    QString result = "a";

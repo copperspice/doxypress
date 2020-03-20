@@ -30,6 +30,17 @@
 
 // add others, rtl
 QString getDirHtmlClassOfPage(QString pageTitle);
+// rtl
+namespace Text {
+
+enum Direction {
+   DirLTR,
+   DirRTL,
+   DirNeutral,
+   DirMixed,
+};
+
+}
 
 
 /*! Main entry point for the documentation parser.
@@ -750,7 +761,23 @@ class DocVerbatim : public DocNode
 class DocInclude : public DocNode
 {
  public:
-   enum Type { Include, DontInclude, VerbInclude, HtmlInclude, LatexInclude, IncWithLines, Snippet };
+   enum Type {
+      Include,
+      DontInclude,
+      VerbInclude,
+      HtmlInclude,
+      LatexInclude,
+      IncWithLines,
+      Snippet,
+//    IncludeDoc,      // emerald
+//    SnippetDoc,
+//    SnipWithLines,
+      DontIncWithLines,
+      RtfInclude,
+      ManInclude,
+      DocbookInclude,
+      XmlInclude
+   };
 
    DocInclude(DocNode *parent, const QString &file, const QString context, Type t,
               bool isExample, const QString exampleFile, const QString blockId, bool isBlock)

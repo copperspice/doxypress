@@ -106,7 +106,19 @@ class TagMemberInfo
 class TagClassInfo
 {
  public:
-   enum Kind { Class, Struct, Union, Interface, Exception, Protocol, Category, Enum, Service, Singleton };
+   enum Kind {
+      None = -1,
+      Class,
+      Struct,
+      Union,
+      Interface,
+      Exception,
+      Protocol,
+      Category,
+      Enum,
+      Service,
+      Singleton
+   };
 
    TagClassInfo() {
       isObjC = false;

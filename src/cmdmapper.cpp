@@ -154,6 +154,10 @@ CommandMap cmdMap[] = {
    { "---",           CMD_MDASH },
    { "_setscope",     CMD_SETSCOPE },
    { "emoji",         CMD_EMOJI },
+   { "rtfinclude",    CMD_RTFINCLUDE },
+   { "docbookinclude",CMD_DOCBOOKINCLUDE },
+   { "maninclude",    CMD_MANINCLUDE },
+   { "xmlinclude",    CMD_XMLINCLUDE },
    { 0,               0 },
 };
 
@@ -199,6 +203,8 @@ CommandMap htmlTagMap[] = {
    { "blockquote", HTML_BLOCKQUOTE },
    { "strike",     HTML_STRIKE },
    { "u",          HTML_UNDERLINE },
+   { "ins",        HTML_INS },
+   { "del",        HTML_DEL },
 
    { "c",            XML_C },
 // { "code",         XML_CODE },          // ambiguous <code> is also a HTML tag
