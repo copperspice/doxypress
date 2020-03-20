@@ -324,6 +324,11 @@ class DocLineBreak : public DocNode
       m_parent = parent;
    }
 
+   DocLineBreak(DocNode *parent, HtmlAttribList attribs)
+      : m_attribs(std::move(attribs)) {
+      m_parent = parent;
+   }
+
    Kind kind() const  override {
       return Kind_LineBreak;
    }
@@ -332,14 +337,20 @@ class DocLineBreak : public DocNode
       v->visit(this);
    }
 
+   const HtmlAttribList &attribs() const {
+      return m_attribs;
+   }
+
  private:
+   HtmlAttribList m_attribs;
 };
 
 /** Node representing a horizontal ruler */
 class DocHorRuler : public DocNode
 {
  public:
-   explicit DocHorRuler(DocNode *parent) {
+   explicit DocHorRuler(DocNode *parent, HtmlAttribList attribs = HtmlAttribList())
+      : m_attribs(std::move(attribs)) {
       m_parent = parent;
    }
 
@@ -351,7 +362,12 @@ class DocHorRuler : public DocNode
       v->visit(this);
    }
 
+   const HtmlAttribList &attribs() const {
+      return m_attribs;
+   }
+
  private:
+   HtmlAttribList m_attribs;
 };
 
 /** Node representing an anchor */
@@ -446,14 +462,12 @@ class DocStyleChange : public DocNode
                 Ins           = 0x2000,
    };
 
-   DocStyleChange(DocNode *parent, uint position, Style s, bool enable, const HtmlAttribList *attribs = nullptr)
-      : m_position(position), m_style(s), m_enable(enable)
+
+   DocStyleChange(DocNode *parent, uint position, Style s, bool enable, HtmlAttribList attribs = HtmlAttribList())
+      : m_position(position), m_style(s), m_enable(enable), m_attribs(std::move(attribs))
    {
       m_parent = parent;
 
-      if (attribs) {
-         m_attribs = *attribs;
-      }
    }
 
    DocStyleChange()
@@ -828,6 +842,10 @@ class DocInclude : public DocNode
       return m_exampleFile;
    }
 
+   bool isBlock() const {
+      return m_isBlock;
+   }
+
    void accept(DocVisitor *v) override {
       v->visit(this);
    }
@@ -842,6 +860,7 @@ class DocInclude : public DocNode
    QString  m_blockId;
    Type     m_type;
    bool     m_isExample;
+   bool     m_isBlock;
 };
 
 /** Node representing a include/dontinclude operator block */
@@ -865,15 +884,27 @@ class DocIncOperator : public DocNode
    Type type() const {
       return m_type;
    }
+
+   int line() const  {
+      return m_line;
+   }
+
+   bool showLineNo() const {
+      return m_showLineNo;
+   }
+
    QString text() const {
       return m_text;
    }
+
    QString pattern() const {
       return m_pattern;
    }
+
    QString context() const {
       return m_context;
    }
+
    void accept(DocVisitor *v) override  {
       v->visit(this);
    }
@@ -904,6 +935,9 @@ class DocIncOperator : public DocNode
 
  private:
    Type     m_type;
+   int      m_line;
+   bool     m_showLineNo;
+
    QString  m_text;
    QString  m_pattern;
    QString  m_context;
@@ -1096,6 +1130,10 @@ class DocTitle : public CompAccept<DocTitle>, public DocNode
       return Kind_Title;
    }
 
+   bool hasTitle() const {
+      return ! m_children.isEmpty();
+   }
+
    void accept(DocVisitor *v) override {
       CompAccept<DocTitle>::accept(this, v);
    }
@@ -1152,8 +1190,8 @@ class DocImage : public CompAccept<DocImage>, public DocNode
  public:
    enum Type { None, Html, Latex, Rtf, DocBook };
 
-   DocImage(DocNode *parent, const HtmlAttribList &attribs, const QString &name, Type t,
-   const QString &url = QString(), bool inlineImage = true);
+   DocImage(DocNode *parent, HtmlAttribList attribs, const QString &name, Type t,
+         const QString &url = QString(), bool inlineImage = true);
 
    Kind kind() const  override {
       return Kind_Image;
@@ -1517,8 +1555,8 @@ class DocInternalRef : public CompAccept<DocInternalRef>, public DocNode
 class DocHRef : public CompAccept<DocHRef>, public DocNode
 {
  public:
-   DocHRef(DocNode *parent, const HtmlAttribList &attribs, const QString &url, const QString &relPath)
-      : m_attribs(attribs), m_url(url), m_relPath(relPath) {
+   DocHRef(DocNode *parent, HtmlAttribList attribs, const QString &url, const QString &relPath)
+      : m_attribs(std::move(attribs)), m_url(url), m_relPath(relPath) {
       m_parent = parent;
    }
 
@@ -1554,8 +1592,8 @@ class DocHRef : public CompAccept<DocHRef>, public DocNode
 class DocHtmlHeader : public CompAccept<DocHtmlHeader>, public DocNode
 {
  public:
-   DocHtmlHeader(DocNode *parent, const HtmlAttribList &attribs, int level) :
-      m_level(level), m_attribs(attribs) {
+   DocHtmlHeader(DocNode *parent, HtmlAttribList attribs, int level)
+      : m_level(level), m_attribs(std::move(attribs)) {
       m_parent = parent;
    }
 
@@ -1586,8 +1624,8 @@ class DocHtmlHeader : public CompAccept<DocHtmlHeader>, public DocNode
 class DocHtmlDescTitle : public CompAccept<DocHtmlDescTitle>, public DocNode
 {
  public:
-   DocHtmlDescTitle(DocNode *parent, const HtmlAttribList &attribs) :
-      m_attribs(attribs) {
+   DocHtmlDescTitle(DocNode *parent, HtmlAttribList attribs)
+      : m_attribs(std::move(attribs)) {
       m_parent = parent;
    }
 
@@ -1803,8 +1841,8 @@ class DocHtmlList : public CompAccept<DocHtmlList>, public DocNode
  public:
    enum Type { Unordered, Ordered };
 
-   DocHtmlList(DocNode *parent, const HtmlAttribList &attribs, Type t)
-      : m_type(t), m_attribs(attribs) {
+   DocHtmlList(DocNode *parent, HtmlAttribList attribs, Type t)
+      : m_type(t), m_attribs(std::move(attribs)) {
       m_parent = parent;
    }
 
@@ -1858,6 +1896,10 @@ class DocSimpleSect : public CompAccept<DocSimpleSect>, public DocNode
    int parseRcs();
    int parseXml();
    void appendLinkWord(const QString &word);
+
+   bool hasTitle() const {
+      return m_docTitle->hasTitle();
+   }
 
  private:
    Type m_type;
@@ -1991,11 +2033,17 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    int handleHtmlHeader(const HtmlAttribList &tagHtmlAttribs, int level);
 
    bool injectToken(int tok, const QString &tokText);
+   const HtmlAttribList &attribs() const { return m_attribs; }
+
+   void setAttribs(HtmlAttribList attribs) {
+      m_attribs = std::move(attribs);
+   }
 
  private:
    QString m_sectionId;
    bool m_isFirst;
    bool m_isLast;
+   HtmlAttribList m_attribs;
 };
 
 /** Node representing a parameter list. */
@@ -2101,8 +2149,8 @@ class DocSimpleListItem : public DocNode
 class DocHtmlListItem : public CompAccept<DocHtmlListItem>, public DocNode
 {
  public:
-   DocHtmlListItem(DocNode *parent, const HtmlAttribList &attribs, int num)
-      : m_attribs(attribs), m_itemNum(num) {
+   DocHtmlListItem(DocNode *parent, HtmlAttribList attribs, int num)
+      : m_attribs(std::move(attribs)), m_itemNum(num) {
       m_parent = parent;
    }
 
@@ -2162,10 +2210,9 @@ class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
  public:
    enum Alignment { Left, Right, Center };
 
-   DocHtmlCell(DocNode *parent, const HtmlAttribList &attribs, bool isHeading) :
-      m_isHeading(isHeading),
-      m_isFirst(false), m_isLast(false), m_attribs(attribs),
-      m_rowIdx(-1), m_colIdx(-1) {
+   DocHtmlCell(DocNode *parent, HtmlAttribList attribs, bool isHeading)
+      : m_isHeading(isHeading), m_isFirst(false), m_isLast(false), m_attribs(std::move(attribs)),
+        m_rowIdx(-1), m_colIdx(-1) {
       m_parent = parent;
    }
 
@@ -2239,7 +2286,7 @@ class DocHtmlCell : public CompAccept<DocHtmlCell>, public DocNode
 class DocHtmlCaption : public CompAccept<DocHtmlCaption>, public DocNode
 {
  public:
-   DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs);
+   DocHtmlCaption(DocNode *parent, HtmlAttribList attribs);
 
    Kind kind() const override {
       return Kind_HtmlCaption;
@@ -2278,8 +2325,8 @@ class DocHtmlCaption : public CompAccept<DocHtmlCaption>, public DocNode
 class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
 {
  public:
-   DocHtmlRow(DocNode *parent, const HtmlAttribList &attribs) :
-      m_attribs(attribs), m_visibleCells(-1), m_rowIdx(-1) {
+   DocHtmlRow(DocNode *parent, HtmlAttribList attribs) :
+      m_attribs(std::move(attribs)), m_visibleCells(-1), m_rowIdx(-1) {
       m_parent = parent;
    }
 
@@ -2357,9 +2404,8 @@ class DocHtmlRow : public CompAccept<DocHtmlRow>, public DocNode
 class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
 {
  public:
-   DocHtmlTable(DocNode *parent, const HtmlAttribList &attribs)
-      : m_attribs(attribs) {
-      m_caption = nullptr;
+   DocHtmlTable(DocNode *parent, HtmlAttribList attribs)
+      : m_caption(nullptr), m_attribs(std::move(attribs)), m_numCols(0) {
       m_parent  = parent;
    }
 
@@ -2421,8 +2467,8 @@ class DocHtmlTable : public CompAccept<DocHtmlTable>, public DocNode
 class DocHtmlBlockQuote : public CompAccept<DocHtmlBlockQuote>, public DocNode
 {
  public:
-   DocHtmlBlockQuote(DocNode *parent, const HtmlAttribList &attribs)
-      : m_attribs(attribs) {
+   DocHtmlBlockQuote(DocNode *parent, HtmlAttribList attribs)
+      : m_attribs(std::move(attribs)) {
 
       m_parent = parent;
    }

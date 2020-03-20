@@ -962,7 +962,7 @@ static void handleStyleEnter(DocNode *parent, QList<DocNode *> &children, DocSty
 {
    DBG(("HandleStyleEnter\n"));
 
-   DocStyleChange *sc = new DocStyleChange(parent, s_nodeStack.count(), s, true, attribs);
+   DocStyleChange *sc = new DocStyleChange(parent, s_nodeStack.count(), s, true, *attribs);
    children.append(sc);
    s_styleStack.push(*sc);
 }
@@ -3564,7 +3564,7 @@ endindexentry:
    return retval;
 }
 
-DocHtmlCaption::DocHtmlCaption(DocNode *parent, const HtmlAttribList &attribs)
+DocHtmlCaption::DocHtmlCaption(DocNode *parent, HtmlAttribList attribs)
 {
    m_hasCaptionId = false;
 
@@ -5754,6 +5754,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
 {
    DBG(("handleInclude(%s)\n", csPrintable(cmdName)));
    int tok = doctokenizerYYlex();
+   bool isBlock = false;
 
    if (tok != TK_WHITESPACE) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
@@ -5797,7 +5798,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
       blockId = "[" + g_token->name + "]";
    }
 
-   DocInclude *inc = new DocInclude(this, fileName, s_context, t, s_isExample, s_exampleName, blockId);
+   DocInclude *inc = new DocInclude(this, fileName, s_context, t, s_isExample, s_exampleName, blockId, isBlock);
    m_children.append(inc);
    inc->parse();
 }
@@ -7806,7 +7807,7 @@ void DocRoot::parse()
             DocStyleChange *sc;
 
             if (! g_token->endTag) {
-               sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, true, &g_token->attribs);
+               sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, true, g_token->attribs);
             } else {
                sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, false);
             }
