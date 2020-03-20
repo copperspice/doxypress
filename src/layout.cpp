@@ -1906,18 +1906,23 @@ void LayoutDocManager::addEntry(LayoutDocManager::LayoutPart part, LayoutDocEntr
    switch (part)  {
       case LayoutPart::Class:
          m_docClass.append(e);
+         break;
 
       case LayoutPart::Namespace:
          m_docNamespace.append(e);
+         break;
 
       case LayoutPart::File:
          m_docFile.append(e);
+         break;
 
       case LayoutPart::Group:
          m_docGroup.append(e);
+         break;
 
       case LayoutPart::Directory:
          m_docDirectory.append(e);
+         break;
 
       default:
         // ignore entry
@@ -1930,18 +1935,23 @@ void LayoutDocManager::clear(LayoutDocManager::LayoutPart part)
    switch (part)  {
       case LayoutPart::Class:
          m_docClass.clear();
+         break;
 
       case LayoutPart::Namespace:
          m_docNamespace.clear();
+         break;
 
       case LayoutPart::File:
          m_docFile.clear();
+         break;
 
       case LayoutPart::Group:
          m_docGroup.clear();
+         break;
 
       case LayoutPart::Directory:
          m_docDirectory.clear();
+         break;
 
       default:
          // ignore entry

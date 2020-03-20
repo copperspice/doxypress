@@ -369,9 +369,10 @@ void LatexDocVisitor::visit(DocStyleChange *s)
             m_t << "\\end{DoxyPre}\n";
          }
          break;
-      case DocStyleChange::Div:  /* HTML only */
-         break;
-      case DocStyleChange::Span: /* HTML only */
+
+      case DocStyleChange::Div:
+      case DocStyleChange::Span:
+         // HTML only
          break;
    }
 }

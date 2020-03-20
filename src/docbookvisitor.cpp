@@ -295,7 +295,6 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          break;
 
       case DocVerbatim::DocbookOnly:
-         break;
          m_t << s->text();
          break;
 

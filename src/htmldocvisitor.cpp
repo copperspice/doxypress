@@ -66,41 +66,49 @@ static bool mustBeOutsideParagraph(DocNode *n)
       case DocNode::Kind_HtmlList:
       case DocNode::Kind_SimpleList:
       case DocNode::Kind_AutoList:
+         return true;
 
       /* <dl> */
       case DocNode::Kind_SimpleSect:
       case DocNode::Kind_ParamSect:
       case DocNode::Kind_HtmlDescList:
       case DocNode::Kind_XRefItem:
+         return true;
 
       /* <table> */
       case DocNode::Kind_HtmlTable:
+         return true;
 
       /* <h?> */
       case DocNode::Kind_Section:
       case DocNode::Kind_HtmlHeader:
+         return true;
 
       /* \internal */
       case DocNode::Kind_Internal:
+         return true;
 
       /* <div> */
       case DocNode::Kind_Include:
       case DocNode::Kind_SecRefList:
+         return true;
 
       /* <hr> */
       case DocNode::Kind_HorRuler:
-      /* CopyDoc gets paragraph markers from the wrapping DocPara node,
-       * but needs to insert them for all documentation being copied to
-       * preserve formatting.
-       */
+         // CopyDoc gets paragraph markers from the wrapping DocPara node,
+         // but needs to insert them for all documentation being copied to preserve formatting
+         return true;
 
       case DocNode::Kind_Copy:
-      /* <blockquote> */
+         // <blockquote>
+         return true;
 
       case DocNode::Kind_HtmlBlockQuote:
-      /* \parblock */
+         // \parblock
+         return true;
 
       case DocNode::Kind_ParBlock:
+      case DocNode::Kind_IncOperator:
          return true;
 
       case DocNode::Kind_Verbatim: {

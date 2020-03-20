@@ -182,6 +182,7 @@ CommandLine parseCommandLine(QStringList argList)
          case INVALID:
             err("Option %s is invalid\n", csPrintable(item));
             Doxy_Work::stopDoxyPress();
+            break;
 
          case BLANK_LAYOUT:
             cmdArgs.generateLayout = true;
