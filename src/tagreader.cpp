@@ -122,6 +122,7 @@ class TagClassInfo
 
    TagClassInfo() {
       isObjC = false;
+      kind   = Kind::None;
    }
 
    QString name;
@@ -1356,6 +1357,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ce->section = Entry::CLASS_SEC;
 
       switch (tci.kind) {
+         case TagClassInfo::None:
          case TagClassInfo::Class:
             break;
 

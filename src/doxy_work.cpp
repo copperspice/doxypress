@@ -4701,7 +4701,9 @@ void Doxy_Work::transferFunctionDocumentation()
 
          if (mdec->isPrototype() || (mdec->isVariable() && mdec->isExternal()) ) {
             for (auto mdef : *mn ) {
-               combineDeclarationAndDefinition(mdec, mdef);
+               if (mdec != mdef && mdec->getNamespaceDef()== mdef->getNamespaceDef() && ! mdec->isAlias() && ! mdef->isAlias()) {
+                  combineDeclarationAndDefinition(mdec, mdef);
+               }
             }
          }
       }

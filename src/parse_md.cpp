@@ -3251,6 +3251,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
                   QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) )  {
 
          // tag option set to use md file as mainpage
+         docs.prepend("@anchor " + id + "\n");
          docs.prepend("@mainpage " + title + "\n");
 
       } else if (id == "mainpage" || id == "index") {
@@ -3259,6 +3260,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
             title = titleFn;
          }
 
+         docs.prepend("@anchor " + id + "\n");
          docs.prepend("@mainpage " + title + "\n");
 
       } else {

@@ -454,6 +454,11 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
                      addMemberToList(MemberListType_variableMembers, md, false);
                      break;
 
+                  case MemberType_Define:
+                     warn(md->getDefFileName(),md->getDefLine()-1,"Define for (%s) can not be a member of %s",
+                           csPrintable(md->name()), csPrintable(this->name()));
+                     break;
+
                   default:
                      err("Unexpected member type %d found\n", md->memberType());
                }

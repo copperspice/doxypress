@@ -71,7 +71,9 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
          // obtain the url and the coordinates in the order used by graphviz-1.5
          sscanf(buf, "rect %s %d,%d %d,%d", url, &x1, &y1, &x2, &y2);
 
-         if (url == "\\ref" || url == "@ref") {
+         QString tUrl = QString::fromUtf8(url);
+
+         if (tUrl == "\\ref" || tUrl == "@ref") {
             isRef = true;
             sscanf(buf, "rect %s %s %d,%d %d,%d", ref, url, &x1, &y1, &x2, &y2);
          }
