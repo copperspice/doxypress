@@ -28,8 +28,9 @@
 #include <htmlattrib.h>
 #include <membergroup.h>
 
-// add others, rtl
-QString getDirHtmlClassOfPage(QString pageTitle);
+class DocNode;
+class MemberDef;
+
 // rtl
 namespace Text {
 
@@ -42,6 +43,13 @@ enum Direction {
 
 }
 
+Text::Direction textDirection(const QString &text);
+Text::Direction textDirection(const DocNode *node);
+Text::Direction textDirection(const DocPara *para, int nodeIndex);
+
+QString getDirHtmlClassOfNode(Text::Direction textDir, const QString &initValue = QString());
+QString getDirHtmlClassOfPage(QString pageTitle);
+QString getHtmlDirEmbeddingChar(Text::Direction textDir);
 
 /*! Main entry point for the documentation parser.
  *

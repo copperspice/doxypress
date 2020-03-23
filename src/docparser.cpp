@@ -98,7 +98,10 @@ struct DocParserContext {
    QString  searchUrl;
 
    QString  includeFileText;
-   uint includeFileOffset;
+   uint     includeFileOffset;
+   uint     includeFileLength;
+   uint     includeFileLine;
+   bool     includeFileUseLN;
 
    TokenInfo *token;
 };
@@ -132,6 +135,9 @@ static QString                 s_searchUrl;
 static QString                 s_includeFileName;
 static QString                 s_includeFileText;
 static uint                    s_includeFileOffset;
+static uint                    s_includeFileLength;
+static uint                    s_includeFileLine;
+static bool                    s_includeFileUseLN;
 
 static QStack<DocParserContext> s_parserStack;
 
@@ -167,6 +173,9 @@ static void docParserPushContext(bool saveParamInfo = true)
 
    ctx.includeFileText    = s_includeFileText;
    ctx.includeFileOffset  = s_includeFileOffset;
+   ctx.includeFileLength  = s_includeFileLength;
+   ctx.includeFileLine    = s_includeFileLine;
+   ctx.includeFileUseLN   = s_includeFileUseLN;
 
    ctx.token              = g_token;
    g_token = new TokenInfo;
@@ -204,6 +213,9 @@ static void docParserPopContext(bool keepParamInfo = false)
 
    s_includeFileText     = ctx.includeFileText;
    s_includeFileOffset   = ctx.includeFileOffset;
+   s_includeFileLength   = ctx.includeFileLength;
+   s_includeFileLine     = ctx.includeFileLine;
+   s_includeFileUseLN    = ctx.includeFileUseLN;
 
    delete g_token;
    g_token               = ctx.token;
@@ -237,7 +249,7 @@ static void unescapeCRef(QString &value)
  * copies the image to the output directory (which depends on the \a type
  * parameter).
  */
-static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
+static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bool dowarn = true)
 {
    static const bool generateHtml    = Config::getBool("generate-html");
    static const bool generateLatex   = Config::getBool("generate-latex");
@@ -252,9 +264,16 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
    QString result;
    bool ambig;
 
-   QSharedPointer<FileDef> fd;
+   QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::imageNameDict, fileName, ambig);
 
-   if ((fd = findFileDef(&Doxy_Globals::imageNameDict, fileName, ambig))) {
+
+   if (fd) {
+      if (ambig & dowarn) {
+         QString text = QString("Image file %1 is ambiguous.\n").formatArg(fileName);
+         text += "Possible candidates:\n" + showFileDefMatches(Doxy_Globals::imageNameDict, fileName);
+
+         warn_doc_error(s_fileName, doctokenizerYYlineno, text);
+      }
       QString inputFile = fd->getFilePath();
       QFile inImage(inputFile);
 
@@ -350,19 +369,12 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type)
          return baseName;
       }
 
-   } else if (ambig) {
-      QString text;
-      text = QString("Image file name %1 is ambiguous.\n").formatArg(fileName);
 
-      text += "Possible candidates:\n";
-      text += showFileDefMatches(Doxy_Globals::imageNameDict, fileName);
-
-      warn_doc_error(s_fileName, doctokenizerYYlineno, text);
 
    } else {
       result = fileName;
 
-      if (! result.startsWith("http:") && ! result.startsWith("https:"))  {
+      if (! result.startsWith("http:") && ! result.startsWith("https:") && dowarn)  {
          warn_doc_error(s_fileName, doctokenizerYYlineno, "Image file %s was not found in 'IMAGE PATH': "
                         "assuming it is an external image", csPrintable(fileName) );
       }
@@ -1045,7 +1057,8 @@ static int handleAHref(DocNode *parent, QList<DocNode *> &children, const HtmlAt
 
    for (auto opt : tagHtmlAttribs) {
 
-      if (opt.name == "name") { // <a name=label> tag
+      if (opt.name == "name" || opt.name == "id") {
+         // <a name=label> tag
 
          if (! opt.value.isEmpty()) {
             DocAnchor *anc = new DocAnchor(parent, opt.value, true);
@@ -1581,6 +1594,10 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   children.append(new DocSymbol(parent, DocSymbol::Sym_Minus));
                   break;
 
+               case CMD_EQUAL:
+                  children.append(new DocSymbol(parent,DocSymbol::Sym_Equal));
+                  break;
+
                case CMD_EMPHASIS: {
                   children.append(new DocStyleChange(parent, s_nodeStack.count(), DocStyleChange::Italic, true));
                   tok = handleStyleArgument(parent, children, tokenName);
@@ -1785,6 +1802,41 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   }
                   break;
 
+               case HTML_STRIKE:
+                  if (! g_token->endTag) {
+                     handleStyleEnter(parent,children, DocStyleChange::Strike, &g_token->attribs);
+                  } else {
+                     handleStyleLeave(parent,children,DocStyleChange::Strike, tokenName);
+                  }
+
+                  break;
+
+                case HTML_DEL:
+                  if (! g_token->endTag) {
+                     handleStyleEnter(parent,children, DocStyleChange::Del, &g_token->attribs);
+                  } else {
+                     handleStyleLeave(parent,children, DocStyleChange::Del, tokenName);
+                  }
+
+                  break;
+
+               case HTML_UNDERLINE:
+                  if (! g_token->endTag) {
+                     handleStyleEnter(parent,children, DocStyleChange::Underline, &g_token->attribs);
+                  } else {
+                     handleStyleLeave(parent,children, DocStyleChange::Underline, tokenName);
+                  }
+
+                  break;
+
+               case HTML_INS:
+                  if (! g_token->endTag) {
+                     handleStyleEnter(parent,children, DocStyleChange::Ins, &g_token->attribs);
+                  } else {
+                     handleStyleLeave(parent,children, DocStyleChange::Ins,tokenName);
+                  }
+                  break;
+
                case HTML_CODE:
                case XML_C:
                   if (! g_token->endTag) {
@@ -1793,6 +1845,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                      handleStyleLeave(parent, children, DocStyleChange::Code, tokenName);
                   }
                   break;
+
                case HTML_EMPHASIS:
                   if (!g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Italic, &g_token->attribs);
@@ -1903,7 +1956,7 @@ static void handleImg(DocNode *parent, QList<DocNode *> &children, const HtmlAtt
          // and remove the src attribute
          attrList.removeAt(index);
 
-         DocImage *img = new DocImage(parent, attrList, opt.value, DocImage::Html, opt.value);
+         DocImage *img = new DocImage(parent, attrList, findAndCopyImage(opt.value, DocImage::Html, false), DocImage::Html, opt.value);
          children.append(img);
          found = true;
       }
@@ -2126,6 +2179,7 @@ void DocInclude::parse()
    DBG(("DocInclude::parse(file=%s,text=%s)\n", csPrintable(m_file), csPrintable(m_text)));
 
    switch (m_type) {
+      case DontIncWithLines:
       case IncWithLines:
       case Include:
       case DontInclude:
@@ -2133,14 +2187,18 @@ void DocInclude::parse()
          s_includeFileName   = m_file;
          s_includeFileText   = m_text;
          s_includeFileOffset = 0;
+         s_includeFileLength = m_text.length();
+         s_includeFileLine   = 0;
+         s_includeFileUseLN  = (m_type == DontIncWithLines || m_type == IncWithLines);
          break;
 
       case VerbInclude:
       case HtmlInclude:
-         readTextFileByName(m_file, m_text);
-         break;
-
       case LatexInclude:
+      case RtfInclude:
+      case ManInclude:
+      case XmlInclude:
+      case DocbookInclude:
          readTextFileByName(m_file, m_text);
          break;
 
@@ -2188,6 +2246,8 @@ void DocIncOperator::parse()
 
    m_includeFileName = s_includeFileName;
 
+   uint lineNo = s_includeFileLine;
+
    QString::const_iterator iter_offset = s_includeFileText.constBegin() + s_includeFileOffset;
    QString::const_iterator iter_end    = s_includeFileText.constEnd();
 
@@ -2203,6 +2263,8 @@ void DocIncOperator::parse()
             QChar c = *iter_offset;
 
             if (c == '\n') {
+               ++s_includeFileLine;
+
                if (nonEmpty) {
                   // pattern to match
                   break;
@@ -2222,6 +2284,7 @@ void DocIncOperator::parse()
          QStringView tmp = QStringView(iter_so, iter_offset);
 
          if (tmp.contains(m_pattern)) {
+            m_line = lineNo;
             m_text = tmp;
          }
 
@@ -2231,6 +2294,8 @@ void DocIncOperator::parse()
          if (iter_offset != iter_end) {
             s_includeFileOffset += 1;
          }
+
+         m_showLineNo = s_includeFileUseLN;
 
          break;
       }
@@ -2243,6 +2308,7 @@ void DocIncOperator::parse()
                QChar c = *iter_offset;
 
                if (c == '\n') {
+                  ++s_includeFileLine;
                   if (nonEmpty) {
                      // we have a pattern to match
                      break;
@@ -2262,6 +2328,7 @@ void DocIncOperator::parse()
             QStringView tmp = QStringView(iter_so, iter_offset);
 
             if (tmp.contains(m_pattern)) {
+               m_line = lineNo;
                m_text = tmp;
                break;
             }
@@ -2277,6 +2344,8 @@ void DocIncOperator::parse()
             s_includeFileOffset += 1;
          }
 
+         m_showLineNo = s_includeFileUseLN;
+
          break;
       }
 
@@ -2288,6 +2357,8 @@ void DocIncOperator::parse()
                QChar c = *iter_offset;
 
                if (c == '\n') {
+                  ++s_includeFileLine;
+
                   if (nonEmpty) {
                      // we have a pattern to match
                      break;
@@ -2316,6 +2387,7 @@ void DocIncOperator::parse()
 
          // set pointer to start of new line
          s_includeFileOffset = iter_so - s_includeFileText.constBegin();
+         m_showLineNo = s_includeFileUseLN;
 
          break;
       }
@@ -2330,6 +2402,7 @@ void DocIncOperator::parse()
                QChar c = *iter_offset;
 
                if (c == '\n') {
+                  ++s_includeFileLine;
                   if (nonEmpty) {
                      // we have a pattern to match
                      break;
@@ -2349,6 +2422,7 @@ void DocIncOperator::parse()
             QStringView tmp = QStringView(iter_so, iter_offset);
 
             if (tmp.contains(m_pattern)) {
+               m_line = lineNo;
                m_text = QStringView(iter_bo, iter_offset);      // unusual to use iter_bo
                break;
             }
@@ -2363,6 +2437,8 @@ void DocIncOperator::parse()
          if (iter_offset != iter_end) {
             s_includeFileOffset += 1;
          }
+
+         m_showLineNo = s_includeFileUseLN;
 
          break;
       }
@@ -3537,6 +3613,10 @@ int DocIndexEntry::parse()
 
                case CMD_MINUS:
                   m_entry += '-';
+                  break;
+
+               case CMD_EQUAL:
+                  m_entry+='=';
                   break;
 
                default:
@@ -5756,7 +5836,41 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
    int tok = doctokenizerYYlex();
    bool isBlock = false;
 
-   if (tok != TK_WHITESPACE) {
+   if (tok == TK_WORD && g_token->name == "{") {
+      doctokenizerYYsetStateOptions();
+      tok = doctokenizerYYlex();
+      doctokenizerYYsetStatePara();
+
+      QStringList optList = g_token->name.split(",");
+
+      if (t == DocInclude::Include && optList.contains("lineno")) {
+         t = DocInclude::IncWithLines;
+
+      } else if (t == DocInclude::Snippet && optList.contains("lineno")) {
+//       t = DocInclude::SnipWithLines;
+
+      } else if (t == DocInclude::DontInclude && optList.contains("lineno")) {
+         t = DocInclude::DontIncWithLines;
+
+      } else if (t == DocInclude::Include && optList.contains("doc")) {
+//       t = DocInclude::IncludeDoc;
+
+      } else if (t == DocInclude::Snippet && optList.contains("doc")) {
+//       t = DocInclude::SnippetDoc;
+      }
+
+      tok = doctokenizerYYlex();
+
+   } else if (tok == TK_WORD && g_token->name == "[") {
+      doctokenizerYYsetStateBlock();
+      tok = doctokenizerYYlex();
+
+      isBlock = (g_token->name.trimmed() == "block");
+
+      doctokenizerYYsetStatePara();
+      tok = doctokenizerYYlex();
+
+   } else if (tok != TK_WHITESPACE) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
@@ -5795,6 +5909,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
 
          return;
       }
+
       blockId = "[" + g_token->name + "]";
    }
 
@@ -5937,6 +6052,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Italic, true));
          retval = handleStyleArgument(this, m_children, cmdName);
          m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Italic, false));
+
          if (retval != TK_WORD) {
             m_children.append(new DocWhiteSpace(this, " "));
          }
@@ -6025,6 +6141,10 @@ int DocPara::handleCommand(const QString &cmdName)
 
       case CMD_MINUS:
          m_children.append(new DocSymbol(this, DocSymbol::Sym_Minus));
+         break;
+
+      case CMD_EQUAL:
+         m_children.append(new DocSymbol(this, DocSymbol::Sym_Equal));
          break;
 
       case CMD_SA:
@@ -6419,6 +6539,23 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_LATEXINCLUDE:
          handleInclude(cmdName, DocInclude::LatexInclude);
          break;
+
+      case CMD_RTFINCLUDE:
+         handleInclude(cmdName,DocInclude::RtfInclude);
+         break;
+
+      case CMD_MANINCLUDE:
+         handleInclude(cmdName,DocInclude::ManInclude);
+         break;
+
+      case CMD_XMLINCLUDE:
+         handleInclude(cmdName,DocInclude::XmlInclude);
+         break;
+
+      case CMD_DOCBOOKINCLUDE:
+         handleInclude(cmdName,DocInclude::DocbookInclude);
+         break;
+
       case CMD_VERBINCLUDE:
          handleInclude(cmdName, DocInclude::VerbInclude);
          break;
@@ -6527,6 +6664,8 @@ int DocPara::handleCommand(const QString &cmdName)
 
       default:
          // should not get here
+         warn(s_fileName, doctokenizerYYlineno, "Invalid state, command = %d\n", cmdId);
+
          assert(0);
          break;
    }
@@ -6562,27 +6701,34 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
    int retval = RetVal_OK;
    int tagId  = Mappers::htmlTagMapper->map(tagName);
 
-   if (g_token->emptyTag && !(tagId & XML_CmdMask) &&
-         tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR) {
+   if (g_token->emptyTag && ! (tagId & XML_CmdMask) &&
+         tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR && tagId != HTML_HR && tagId != HTML_P) {
       warn_doc_error(s_fileName, doctokenizerYYlineno, "HTML tags may not use the 'empty tag' XHTML syntax");
    }
 
    switch (tagId) {
-      case HTML_UL: {
-         DocHtmlList *list = new DocHtmlList(this, tagHtmlAttribs, DocHtmlList::Unordered);
-         m_children.append(list);
-         retval = list->parse();
-      }
-      break;
 
-      case HTML_OL: {
-         DocHtmlList *list = new DocHtmlList(this, tagHtmlAttribs, DocHtmlList::Ordered);
-         m_children.append(list);
-         retval = list->parse();
-      }
-      break;
+      case HTML_UL:
+          if (! g_token->emptyTag) {
+            DocHtmlList *list = new DocHtmlList(this, tagHtmlAttribs, DocHtmlList::Unordered);
+            m_children.append(list);
+            retval = list->parse();
+         }
+         break;
+
+      case HTML_OL:
+         if (! g_token->emptyTag) {
+            DocHtmlList *list = new DocHtmlList(this, tagHtmlAttribs, DocHtmlList::Ordered);
+            m_children.append(list);
+            retval = list->parse();
+         }
+         break;
 
       case HTML_LI:
+         if (g_token->emptyTag) {
+            break;
+         }
+
          if (! insideUL(this) && ! insideOL(this)) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Lonely <li> tag found");
          } else {
@@ -6591,11 +6737,42 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       case HTML_BOLD:
-         handleStyleEnter(this, m_children, DocStyleChange::Bold, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Bold, &g_token->attribs);
+         }
+         break;
+
+      case HTML_STRIKE:
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children,DocStyleChange::Strike, &g_token->attribs);
+         }
+         break;
+
+      case HTML_DEL:
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children,DocStyleChange::Del, &g_token->attribs);
+         }
+         break;
+
+      case HTML_UNDERLINE:
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children,DocStyleChange::Underline, &g_token->attribs);
+         }
+         break;
+
+      case HTML_INS:
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children,DocStyleChange::Ins, &g_token->attribs);
+         }
          break;
 
       case HTML_CODE:
-         if (/*getLanguageFromFileName(s_fileName)==SrcLangExt_CSharp ||*/ s_xmlComment)  {
+         if (g_token->emptyTag) {
+            break;
+         }
+
+         // getLanguageFromFileName(s_fileName) == SrcLangExt_CSharp ||
+         if (s_xmlComment)  {
             // for C# source or inside a <summary> or <remark> section we
             // treat <code> as an XML tag (so similar to @code)
 
@@ -6605,39 +6782,56 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          } else {
             // normal HTML markup
             handleStyleEnter(this, m_children, DocStyleChange::Code, &g_token->attribs);
-
          }
          break;
 
       case HTML_EMPHASIS:
-         handleStyleEnter(this, m_children, DocStyleChange::Italic, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Italic, &g_token->attribs);
+         }
          break;
 
       case HTML_DIV:
-         handleStyleEnter(this, m_children, DocStyleChange::Div, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Div, &g_token->attribs);
+         }
          break;
 
       case HTML_SPAN:
-         handleStyleEnter(this, m_children, DocStyleChange::Span, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Span, &g_token->attribs);
+         }
          break;
 
       case HTML_SUB:
-         handleStyleEnter(this, m_children, DocStyleChange::Subscript, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Subscript, &g_token->attribs);
+         }
          break;
 
       case HTML_SUP:
-         handleStyleEnter(this, m_children, DocStyleChange::Superscript, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Superscript, &g_token->attribs);
+         }
          break;
 
       case HTML_CENTER:
-         handleStyleEnter(this, m_children, DocStyleChange::Center, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Center, &g_token->attribs);
+         }
          break;
 
       case HTML_SMALL:
-         handleStyleEnter(this, m_children, DocStyleChange::Small, &g_token->attribs);
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Small, &g_token->attribs);
+         }
          break;
 
       case HTML_PRE:
+         if (g_token->emptyTag) {
+            break;
+         }
+
          handleStyleEnter(this, m_children, DocStyleChange::Preformatted, &g_token->attribs);
          setInsidePreformatted(true);
          doctokenizerYYsetInsidePre(true);
@@ -6647,12 +6841,13 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          retval = TK_NEWPARA;
          break;
 
-      case HTML_DL: {
-         DocHtmlDescList *list = new DocHtmlDescList(this, tagHtmlAttribs);
-         m_children.append(list);
-         retval = list->parse();
-      }
-      break;
+      case HTML_DL:
+         if (! g_token->emptyTag) {
+            DocHtmlDescList *list = new DocHtmlDescList(this, tagHtmlAttribs);
+            m_children.append(list);
+            retval = list->parse();
+         }
+         break;
 
       case HTML_DT:
          retval = RetVal_DescTitle;
@@ -6662,12 +6857,13 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          retval = RetVal_DescData;
          break;
 
-      case HTML_TABLE: {
-         DocHtmlTable *table = new DocHtmlTable(this, tagHtmlAttribs);
-         m_children.append(table);
-         retval = table->parse();
-      }
-      break;
+      case HTML_TABLE:
+         if (! g_token->emptyTag) {
+            DocHtmlTable *table = new DocHtmlTable(this, tagHtmlAttribs);
+            m_children.append(table);
+            retval = table->parse();
+         }
+         break;
 
       case HTML_TR:
          retval = RetVal_TableRow;
@@ -6700,35 +6896,54 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
       case HTML_A:
          retval = handleAHref(this, m_children, tagHtmlAttribs);
          break;
-      case HTML_H1:
-         retval = handleHtmlHeader(tagHtmlAttribs, 1);
-         break;
-      case HTML_H2:
-         retval = handleHtmlHeader(tagHtmlAttribs, 2);
-         break;
-      case HTML_H3:
-         retval = handleHtmlHeader(tagHtmlAttribs, 3);
-         break;
-      case HTML_H4:
-         retval = handleHtmlHeader(tagHtmlAttribs, 4);
-         break;
-      case HTML_H5:
-         retval = handleHtmlHeader(tagHtmlAttribs, 5);
-         break;
-      case HTML_H6:
-         retval = handleHtmlHeader(tagHtmlAttribs, 6);
-         break;
-      case HTML_IMG: {
-         handleImg(this, m_children, tagHtmlAttribs);
-      }
-      break;
 
-      case HTML_BLOCKQUOTE: {
-         DocHtmlBlockQuote *block = new DocHtmlBlockQuote(this, tagHtmlAttribs);
-         m_children.append(block);
-         retval = block->parse();
-      }
-      break;
+      case HTML_H1:
+         if (! g_token->emptyTag) {
+            retval = handleHtmlHeader(tagHtmlAttribs, 1);
+         }
+         break;
+
+      case HTML_H2:
+         if (! g_token->emptyTag) {
+            retval = handleHtmlHeader(tagHtmlAttribs, 2);
+         }
+         break;
+
+      case HTML_H3:
+         if (! g_token->emptyTag) {
+            retval = handleHtmlHeader(tagHtmlAttribs, 3);
+         }
+         break;
+
+      case HTML_H4:
+         if (! g_token->emptyTag) {
+            retval = handleHtmlHeader(tagHtmlAttribs, 4);
+         }
+         break;
+
+      case HTML_H5:
+         if (! g_token->emptyTag) {
+            retval = handleHtmlHeader(tagHtmlAttribs, 5);
+         }
+         break;
+
+      case HTML_H6:
+         if (! g_token->emptyTag) {
+            retval = handleHtmlHeader(tagHtmlAttribs, 6);
+         }
+         break;
+
+      case HTML_IMG:
+         handleImg(this, m_children, tagHtmlAttribs);
+         break;
+
+      case HTML_BLOCKQUOTE:
+         if (! g_token->emptyTag) {
+            DocHtmlBlockQuote *block = new DocHtmlBlockQuote(this, tagHtmlAttribs);
+            m_children.append(block);
+            retval = block->parse();
+         }
+         break;
 
       case XML_SUMMARY:
       case XML_REMARKS:
@@ -7018,6 +7233,22 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
 
       case HTML_BOLD:
          handleStyleLeave(this, m_children, DocStyleChange::Bold, "b");
+         break;
+
+      case HTML_STRIKE:
+         handleStyleLeave(this, m_children,DocStyleChange::Strike, "strike");
+         break;
+
+      case HTML_DEL:
+         handleStyleLeave(this, m_children, DocStyleChange::Del, "del");
+         break;
+
+      case HTML_UNDERLINE:
+         handleStyleLeave(this, m_children,DocStyleChange::Underline, "u");
+         break;
+
+      case HTML_INS:
+         handleStyleLeave(this, m_children,DocStyleChange::Ins, "ins");
          break;
 
       case HTML_CODE:
@@ -7760,6 +7991,10 @@ void DocText::parse()
                   m_children.append(new DocSymbol(this,DocSymbol::Sym_Minus));
                   break;
 
+               case CMD_EQUAL:
+                  m_children.append(new DocSymbol(this,DocSymbol::Sym_Equal));
+                  break;
+
                default:
                   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command '%s' found", csPrintable(g_token->name));
                   break;
@@ -8175,27 +8410,190 @@ static QString processCopyDoc(const QString &data, uint &len)
    return retval;
 }
 
+Text::Direction textDirection(const QString &text)
+{
+   (void) text;
+   // static const QString configDir = Config_getEnum("text_direction");
+
+   // emerald, rtl
+   static const QString configDir = "None";
+
+   if (configDir == "None") {
+      return Text::Direction::DirNeutral;
+   }
+
+   if (configDir == "Context") {
+      // return text.basicDirection();
+      return Text::Direction::DirNeutral;
+   }
+
+   if (configDir == "LTR") {
+      // Text::Direction textDir = text.direction();
+      Text::Direction textDir = Text::Direction::DirNeutral;
+
+      if (textDir == Text::Direction::DirMixed) {
+         return Text::Direction::DirLTR;
+      }
+
+      return textDir;
+   }
+
+   if (configDir == "RTL") {
+      // Text::Direction textDir = text.direction();
+      Text::Direction textDir = Text::Direction::DirNeutral;
+
+      if (textDir == Text::Direction::DirMixed) {
+         return Text::Direction::DirRTL;
+      }
+
+      return textDir;
+   }
+
+   return Text::Direction::DirNeutral;
+}
+
+Text::Direction textDirection(const DocNode *node)
+{
+   (void) node;
+   // static const QString configDir = Config_getEnum("text_direction");
+
+   // emerald, rtl
+   static const QString configDir = "None";
+
+   if (configDir == "None") {
+      return Text::Direction::DirNeutral;
+   }
+
+   if (configDir == "Context") {
+      // return node->getTextBasicDir();
+      return Text::Direction::DirNeutral;
+   }
+
+   if (configDir == "LTR") {
+      // Text::Direction::Direction textDir = node->getTextDir();
+      Text::Direction textDir = Text::Direction::DirNeutral;
+
+      if (textDir == Text::Direction::DirMixed) {
+         return Text::Direction::DirLTR;
+      }
+
+      return textDir;
+   }
+
+   if (configDir == "RTL") {
+      // Text::Direction::Direction textDir = node->getTextDir();
+      Text::Direction textDir = Text::Direction::DirNeutral;
+
+      if (textDir == Text::Direction::DirMixed) {
+         return Text::Direction::DirRTL;
+      }
+
+      return textDir;
+   }
+
+   return Text::Direction::DirNeutral;
+}
+
+Text::Direction textDirection(const DocPara *para, int nodeIndex)
+{
+   (void) para;
+   (void) nodeIndex;
+   // static const QString configDir = Config_getEnum("text_direction");
+
+   // emerald, rtl
+   static const QString configDir = "None";
+
+   if (configDir == "None") {
+      return Text::Direction::DirNeutral;
+   }
+
+   if (configDir == "Context") {
+      // return para->getTextBasicDir(nodeIndex);
+      return Text::Direction::DirNeutral;
+   }
+
+   if (configDir == "LTR") {
+      // Text::Direction textDir = para->getTextDir(nodeIndex);
+      Text::Direction textDir = Text::Direction::DirNeutral;
+
+      if (textDir == Text::Direction::DirMixed) {
+         return Text::Direction::DirLTR;
+      }
+
+      return textDir;
+   }
+
+   if (configDir == "RTL") {
+      // Text::Direction textDir = para->getTextDir(nodeIndex);
+      Text::Direction textDir = Text::Direction::DirNeutral;
+
+      if (textDir == Text::Direction::DirMixed) {
+         return Text::Direction::DirRTL;
+      }
+
+      return textDir;
+   }
+
+   return Text::Direction::DirNeutral;
+}
+
+QString getDirHtmlClassOfNode(Text::Direction textDir, const QString &initValue)
+{
+   QString retval;
+
+   if (textDir == Text::Direction::DirLTR) {
+      retval = "DocNodeLTR";
+
+   } else if (textDir == Text::Direction::DirRTL) {
+      retval = "DocNodeRTL";
+
+   }
+
+   if (! initValue.isEmpty() && ! retval.isEmpty()) {
+      retval = " class=\"" + initValue + " " + retval + "\"";
+
+   } else  if (! initValue.isEmpty()) {
+      retval = " class=\"" + initValue + "\"";
+
+   } else if (! retval.isEmpty()) {
+      retval = " class=\"" + retval + "\"";
+   }
+
+   return retval;
+}
+
 QString getDirHtmlClassOfPage(QString pageTitle)
 {
    QString retval = " class=\"PageDoc";
 
-/* rtl
-   auto titleDir = getTextDirByConfig(pageTitle);
+   auto titleDir = textDirection(pageTitle);
 
-   if (titleDir == QString::DirLTR) {
+   if (titleDir == Text::Direction::DirLTR) {
       retval += " PageDocLTR-title";
 
-   } else if (titleDir == QString::DirRTL) {
+   } else if (titleDir == Text::Direction::DirRTL) {
       retval += " PageDocRTL-title";
 
    }
-*/
 
    retval += "\"";
 
    return retval;
 }
 
+QString getHtmlDirEmbeddingChar(Text::Direction textDir)
+{
+   QString retval;
+
+   if (textDir == Text::DirLTR) {
+      retval = "&#x202A;";
+
+   } else if (textDir == Text::DirRTL) {
+      retval = "&#x202B;";
+   }
+
+   return retval;
+}
 
 // main entry point
 DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx,
@@ -8261,7 +8659,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    s_insideHtmlLink    = false;
    s_includeFileText   = "";
    s_includeFileOffset = 0;
-
+   s_includeFileLength = 0;
    s_isExample         = isExample;
    s_exampleName       = exampleName;
 
@@ -8327,6 +8725,7 @@ DocText *validatingParseText(const QString &input)
    s_insideHtmlLink    = false;
    s_includeFileText   = "";
    s_includeFileOffset = 0;
+   s_includeFileLength = 0;
    s_isExample         = false;
    s_exampleName       = "";
    s_hasParamCommand   = false;
