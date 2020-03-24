@@ -156,6 +156,24 @@ void ManDocVisitor::visit(DocStyleChange *s)
          }
          m_firstCol = false;
          break;
+
+      case DocStyleChange::Strike:
+      case DocStyleChange::Del:
+      /* not supported */
+      break;
+
+      case DocStyleChange::Underline:
+      case DocStyleChange::Ins:
+         //underline is shown as emphasis
+         if (s->enable()) {
+            m_t << "\\fI";
+         } else {
+            m_t << "\\fP";
+         }
+
+         m_firstCol = false;
+         break;
+
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "\\fI";
@@ -347,12 +365,16 @@ void ManDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::DontInclude:
-         break;
-
+      case DocInclude::DontIncWithLines:
       case DocInclude::HtmlInclude:
+      case DocInclude::LatexInclude:
+      case DocInclude::RtfInclude:
+      case DocInclude::XmlInclude:
+      case DocInclude::DocbookInclude:
          break;
 
-      case DocInclude::LatexInclude:
+      case DocInclude::ManInclude:
+         m_t << inc->text();
          break;
 
       case DocInclude::VerbInclude:

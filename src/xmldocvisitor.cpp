@@ -214,6 +214,39 @@ void XmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</bold>";
          }
          break;
+
+      case DocStyleChange::Strike:
+         if (s->enable()) {
+            m_t << "<strike>";
+         } else {
+            m_t << "</strike>";
+         }
+         break;
+
+      case DocStyleChange::Del:
+         if (s->enable()) {
+            m_t << "<del>";
+         } else {
+            m_t << "</del>";
+         }
+         break;
+
+      case DocStyleChange::Underline:
+         if (s->enable())  {
+            m_t << "<underline>";
+         } else {
+            m_t << "</underline>";
+         }
+         break;
+
+      case DocStyleChange::Ins:
+         if (s->enable()) {
+            m_t << "<ins>";
+         } else  {
+            m_t << "</ins>";
+         }
+         break;
+
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "<emphasis>";
@@ -392,10 +425,16 @@ void XmlDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::DontInclude:
+      case DocInclude::DontIncWithLines:
          break;
 
       case DocInclude::HtmlInclude:
-         m_t << "<htmlonly>";
+         if (inc->isBlock()) {
+           m_t << "<htmlonly block=\"yes\">";
+         } else {
+            m_t << "<htmlonly>";
+         }
+
          filter(inc->text());
          m_t << "</htmlonly>";
          break;
@@ -404,6 +443,28 @@ void XmlDocVisitor::visit(DocInclude *inc)
          m_t << "<latexonly>";
          filter(inc->text());
          m_t << "</latexonly>";
+         break;
+
+      case DocInclude::RtfInclude:
+         m_t << "<rtfonly>";
+         filter(inc->text());
+         m_t << "</rtfonly>";
+         break;
+
+      case DocInclude::ManInclude:
+         m_t << "<manonly>";
+         filter(inc->text());
+         m_t << "</manonly>";
+         break;
+
+      case DocInclude::XmlInclude:
+         filter(inc->text());
+         break;
+
+      case DocInclude::DocbookInclude:
+         m_t << "<docbookonly>";
+         filter(inc->text());
+         m_t << "</docbookonly>";
          break;
 
       case DocInclude::VerbInclude:

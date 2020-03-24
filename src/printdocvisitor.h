@@ -101,6 +101,37 @@ class PrintDocVisitor : public DocVisitor
             }
             break;
 
+         case DocStyleChange::Strike:
+            if (s->enable()) {
+               printf("<strike>");
+            } else {
+               printf("</strike>");
+            }
+            break;
+
+         case DocStyleChange::Del:
+            if (s->enable()) {
+               printf("<del>");
+            } else {
+               printf("</del>");
+            }
+            break;
+
+         case DocStyleChange::Underline:
+            if (s->enable()) {
+               printf("<underline>");
+            } else {
+               printf("</underline>");
+            }
+            break;
+
+         case DocStyleChange::Ins:
+            if (s->enable()) {
+               printf("<ins>");
+            } else {
+               printf("</ins>");
+            }
+            break;
          case DocStyleChange::Italic:
             if (s->enable()) {
                printf("<italic>");
@@ -285,21 +316,52 @@ class PrintDocVisitor : public DocVisitor
          case DocInclude::Include:
             printf("include");
             break;
+
          case DocInclude::IncWithLines:
             printf("incwithlines");
             break;
+
          case DocInclude::DontInclude:
             printf("dontinclude");
             break;
+
+         case DocInclude::DontIncWithLines:
+            printf("dontinwithlines");
+            break;
+
          case DocInclude::HtmlInclude:
             printf("htmlinclude");
+
+            if (inc->isBlock()) {
+               printf(" block=\"yes\"");
+            }
+
             break;
+
          case DocInclude::LatexInclude:
             printf("latexinclude");
             break;
+
+          case DocInclude::RtfInclude:
+             printf("rtfinclude");
+             break;
+
+          case DocInclude::DocbookInclude:
+             printf("docbookinclude");
+             break;
+
+          case DocInclude::ManInclude:
+             printf("maninclude");
+             break;
+
+          case DocInclude::XmlInclude:
+             printf("xmlinclude");
+             break;
+
          case DocInclude::VerbInclude:
             printf("verbinclude");
             break;
+
          case DocInclude::Snippet:
             printf("snippet");
             break;
@@ -315,16 +377,20 @@ class PrintDocVisitor : public DocVisitor
          case DocIncOperator::Line:
             printf("line");
             break;
+
          case DocIncOperator::Skip:
             printf("skip");
             break;
+
          case DocIncOperator::SkipLine:
             printf("skipline");
             break;
+
          case DocIncOperator::Until:
             printf("until");
             break;
       }
+
       printf("\"/>");
    }
 
@@ -676,20 +742,21 @@ class PrintDocVisitor : public DocVisitor
          case DocImage::Html:
             printf("html");
             break;
+
          case DocImage::Latex:
             printf("latex");
             break;
+
          case DocImage::Rtf:
             printf("rtf");
             break;
+
          case DocImage::DocBook:
             printf("docbook");
             break;
       }
 
-
       printf("\" %s %s inline=\"%s\">\n", csPrintable(img->width()), csPrintable(img->height()), img->isInlineImage() ? "yes" : "no");
-
    }
 
    void visitPost(DocImage *) override {

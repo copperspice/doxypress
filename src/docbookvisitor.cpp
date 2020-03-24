@@ -251,13 +251,19 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
             m_insidePre = false;
          }
          break;
-      /* There is no equivalent Docbook tag for rendering Small text */
-      case DocStyleChange::Small: /* XSLT Stylesheets can be used */
+
+      case DocStyleChange::Small:
+         // no equivalent Docbook tag for rendering Small text
+         // XSLT Stylesheets can be used
          break;
-      /* HTML only */
-      case DocStyleChange::Div:  /* HTML only */
-         break;
-      case DocStyleChange::Span: /* HTML only */
+
+      // following six are HTML only
+      case DocStyleChange::Strike:
+      case DocStyleChange::Del:
+      case DocStyleChange::Underline:
+      case DocStyleChange::Ins:
+      case DocStyleChange::Div:
+      case DocStyleChange::Span:
          break;
    }
 }
@@ -411,11 +417,18 @@ void DocbookDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::DontInclude:
-         break;
+      case DocInclude::DontIncWithLines:
       case DocInclude::HtmlInclude:
-         break;
       case DocInclude::LatexInclude:
+      case DocInclude::RtfInclude:
+      case DocInclude::ManInclude:
+      case DocInclude::XmlInclude:
          break;
+
+      case DocInclude::DocbookInclude:
+         m_t << inc->text();
+         break;
+
       case DocInclude::VerbInclude:
          m_t << "<verbatim>";
          filter(inc->text());
@@ -716,20 +729,27 @@ void DocbookDocVisitor::visitPost(DocSimpleSect *)
    m_t << "</formalpara>" << endl;
 }
 
-void DocbookDocVisitor::visitPre(DocTitle *)
+void DocbookDocVisitor::visitPre(DocTitle *t)
 {
    if (m_hide) {
       return;
    }
-   m_t << "<title>";
+
+   if (t->hasTitle()) {
+
+      m_t << "<title>";
+   }
 }
 
-void DocbookDocVisitor::visitPost(DocTitle *)
+void DocbookDocVisitor::visitPost(DocTitle *t)
 {
    if (m_hide) {
       return;
    }
-   m_t << "</title>";
+
+   if (t->hasTitle()) {
+      m_t << "</title>";
+   }
 }
 
 void DocbookDocVisitor::visitPre(DocSimpleList *)

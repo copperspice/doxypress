@@ -704,30 +704,55 @@ void PerlModDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Bold:
          style = "bold";
          break;
+
+      case DocStyleChange::Strike:
+         style = "strike";
+         break;
+
+      case DocStyleChange::Del:
+         style = "del";
+         break;
+
+      case DocStyleChange::Underline:
+         style = "underline";
+         break;
+
+      case DocStyleChange::Ins:
+         style = "ins";
+         break;
+
       case DocStyleChange::Italic:
          style = "italic";
          break;
+
       case DocStyleChange::Code:
          style = "code";
          break;
+
       case DocStyleChange::Subscript:
          style = "subscript";
          break;
+
       case DocStyleChange::Superscript:
          style = "superscript";
          break;
+
       case DocStyleChange::Center:
          style = "center";
          break;
+
       case DocStyleChange::Small:
          style = "small";
          break;
+
       case DocStyleChange::Preformatted:
          style = "preformatted";
          break;
+
       case DocStyleChange::Div:
          style = "div";
          break;
+
       case DocStyleChange::Span:
          style = "span";
          break;
@@ -835,6 +860,7 @@ void PerlModDocVisitor::visit(DocInclude *inc)
       }
       break;
 #endif
+
       return;
 
       case DocInclude::Include:
@@ -844,17 +870,39 @@ void PerlModDocVisitor::visit(DocInclude *inc)
          m_output.add("</programlisting>");
 #endif
          return;
+
       case DocInclude::DontInclude:
+      case DocInclude::DontIncWithLines:
          return;
+
       case DocInclude::HtmlInclude:
          type = "htmlonly";
          break;
+
       case DocInclude::LatexInclude:
          type = "latexonly";
          break;
+
+      case DocInclude::RtfInclude:
+         type = "rtfonly";
+         break;
+
+      case DocInclude::ManInclude:
+         type = "manonly";
+         break;
+
+      case DocInclude::XmlInclude:
+         type = "xmlonly";
+         break;
+
+      case DocInclude::DocbookInclude:
+         type = "docbookonly";
+         break;
+
       case DocInclude::VerbInclude:
          type = "preformatted";
          break;
+
       case DocInclude::Snippet:
          return;
    }

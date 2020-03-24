@@ -294,6 +294,26 @@ void RTFDocVisitor::visit(DocStyleChange *s)
             m_t << "} ";
          }
          break;
+
+      case DocStyleChange::Strike:
+      case DocStyleChange::Del:
+         if (s->enable()) {
+            m_t << "{\\strike ";
+         } else {
+            m_t << "} ";
+         }
+
+         break;
+
+      case DocStyleChange::Underline:
+      case DocStyleChange::Ins:
+         if (s->enable()) {
+            m_t << "{\\ul ";
+         } else {
+            m_t << "} ";
+         }
+         break;
+
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "{\\i ";
@@ -301,6 +321,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
             m_t << "} ";
          }
          break;
+
       case DocStyleChange::Code:
          if (s->enable()) {
             m_t << "{\\f2 ";
@@ -308,6 +329,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
             m_t << "} ";
          }
          break;
+
       case DocStyleChange::Subscript:
          if (s->enable()) {
             m_t << "{\\sub ";
@@ -315,6 +337,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
             m_t << "} ";
          }
          break;
+
       case DocStyleChange::Superscript:
          if (s->enable()) {
             m_t << "{\\super ";
@@ -322,6 +345,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
             m_t << "} ";
          }
          break;
+
       case DocStyleChange::Center:
          if (s->enable()) {
             m_t << "{\\qc ";
@@ -329,6 +353,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
             m_t << "} ";
          }
          break;
+
       case DocStyleChange::Small:
          if (s->enable()) {
             m_t << "{\\sub ";
@@ -550,11 +575,18 @@ void RTFDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::DontInclude:
-         break;
+      case DocInclude::DontIncWithLines:
       case DocInclude::HtmlInclude:
-         break;
       case DocInclude::LatexInclude:
+      case DocInclude::ManInclude:
+      case DocInclude::XmlInclude:
+      case DocInclude::DocbookInclude:
          break;
+
+      case DocInclude::RtfInclude:
+         m_t << inc->text();
+        break;
+
       case DocInclude::VerbInclude:
          m_t << "{" << endl;
          m_t << "\\par" << endl;
@@ -563,6 +595,7 @@ void RTFDocVisitor::visit(DocInclude *inc)
          m_t << "\\par";
          m_t << "}" << endl;
          break;
+
       case DocInclude::Snippet:
          m_t << "{" << endl;
          if (!m_lastIsPara) {

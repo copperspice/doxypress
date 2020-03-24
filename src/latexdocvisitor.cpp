@@ -309,11 +309,30 @@ void LatexDocVisitor::visit(DocStyleChange *s)
    switch (s->style()) {
       case DocStyleChange::Bold:
          if (s->enable()) {
-            m_t << "{\\bfseries ";
-         }      else {
+            m_t << "{\\bfseries{";
+         } else {
+            m_t << "}}";
+         }
+         break;
+
+      case DocStyleChange::Strike:
+      case DocStyleChange::Del:
+         if (s->enable()) {
+            m_t << "\\sout{";
+         } else {
             m_t << "}";
          }
          break;
+
+      case DocStyleChange::Underline:
+      case DocStyleChange::Ins:
+         if (s->enable()) {
+            m_t << "\\uline{";
+         } else {
+            m_t << "}";
+         }
+         break;
+
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "{\\itshape ";
@@ -542,9 +561,12 @@ void LatexDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::DontInclude:
-         break;
-
+      case DocInclude::DontIncWithLines:
       case DocInclude::HtmlInclude:
+      case DocInclude::RtfInclude:
+      case DocInclude::ManInclude:
+      case DocInclude::XmlInclude:
+      case DocInclude::DocbookInclude:
          break;
 
       case DocInclude::LatexInclude:
@@ -1260,7 +1282,6 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
    setCurrentColumn(currentColumn() + 1);
 
    // Skip columns that span from above
-
    for (int i = 0; i < rowSpans().count(); i++) {
       const ActiveRowSpan &span = rowSpans()[i];
 
@@ -1274,10 +1295,8 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
                m_t << "|";
             }
 
-            m_t << "p{(\\linewidth-\\tabcolsep*"
-                << numCols() << "-\\arrayrulewidth*"
-                << row->visibleCells() << ")*"
-                << span.colSpan << "/" << numCols() << "}|}{}";
+            // alignment not relevant, empty column
+            m_t << "l|}{" << (c->isHeading() ? "\\columncolor{\\tableheadbgcolor}" : "") << "}";
 
             setCurrentColumn(currentColumn() + span.colSpan);
 
@@ -1289,25 +1308,32 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
       }
    }
 
-   int cs = c->colSpan();
+   int cs    = c->colSpan();
+   int align = c->alignment();
 
    if (cs > 1 && row) {
       setInColSpan(true);
 
       m_t << "\\multicolumn{" << cs << "}{";
 
-      if (c->columnIndex() == 1) { // add extra | for first column
+      if (c->columnIndex() == 1) {
+         // add extra | for first column
          m_t << "|";
       }
+      switch (align) {
+         case DocHtmlCell::Right:
+          m_t << "r|}{";
+            break;
 
-      m_t << "p{(\\linewidth-\\tabcolsep*"
-          << numCols() << "-\\arrayrulewidth*"
-          << row->visibleCells() << ")*"
-          << cs << "/" << numCols() << "}|}{";
+         case DocHtmlCell::Center:
+            m_t << "c|}{";
+            break;
 
-      if (c->isHeading()) {
-         m_t << "\\cellcolor{\\tableheadbgcolor}";
+         default:
+            m_t << "l|}{";
+            break;
       }
+
    }
 
    int rs = c->rowSpan();
@@ -1316,21 +1342,19 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
       setInRowSpan(true);
       addRowSpan(ActiveRowSpan(c, rs, cs, currentColumn()));
 
-      m_t << "\\multirow{" << rs << "}{\\linewidth}{";
+      m_t << "\\multirow{" << rs << "}{*}{";
    }
 
-   int a = c->alignment();
-
-   if (a == DocHtmlCell::Center) {
+   if (align == DocHtmlCell::Center) {
       m_t << "\\PBS\\centering ";
 
-   } else if (a == DocHtmlCell::Right) {
+   } else if (align == DocHtmlCell::Right) {
       m_t << "\\PBS\\raggedleft ";
 
    }
 
    if (c->isHeading()) {
-      m_t << "{\\textbf ";
+      m_t << "\\cellcolor{\\tableheadbgcolor}\\textbf{ ";
    }
 
    if (cs > 1) {
