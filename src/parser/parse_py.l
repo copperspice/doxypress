@@ -1742,7 +1742,6 @@ STARTDOCSYMS      "##"
 
    <<EOF>>           {
       yyterminate();
-      newEntry();
    }
 }
 

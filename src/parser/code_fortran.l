@@ -310,12 +310,7 @@ static void writeMultiLineCodeLink(CodeOutputInterface &ol,
    }
 }
 
-/**
-  searches for definition of a module (Namespace)
-  @param mname the name of the module
-  @param cd the entry, if found or null
-  @returns true, if module is found
-*/
+//   searches for definition of a module (Namespace)
 static bool getFortranNamespaceDefs(const QString &moduleName, QSharedPointer<NamespaceDef> &cd)
 {
    if (moduleName.isEmpty()) {
@@ -330,14 +325,7 @@ static bool getFortranNamespaceDefs(const QString &moduleName, QSharedPointer<Na
    return false;
 }
 
-/**
-  searches for definition of a type
-  @param tname the name of the type
-  @param moduleName name of enclosing module or null, if global entry
-  @param cd the entry, if found or null
-  @param useDict dictionary of data of USE-statement
-  @returns true, if type is found
-*/
+// searches for definition of a type
 static bool getFortranTypeDefs(const QString &tname, const QString &moduleName,
                                QSharedPointer<ClassDef> &cd, UseSDict *usedict = nullptr)
 {
@@ -468,7 +456,7 @@ static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
 }
 
 static bool getLink(UseSDict *usedict, const QString &memberText,
-                  CodeOutputInterface &ol, const QString &text)
+            CodeOutputInterface &ol, const QString &text)
 {
    QSharedPointer<MemberDef> md;
    QString memberName = removeRedundantWhiteSpace(memberText);

@@ -273,6 +273,10 @@ static DocCmdMap docCmdMap[] =
   { "verbinclude",     0,                       false },
   { "version",         0,                       true  },
   { "warning",         0,                       true  },
+  { "rtfinclude",      0,                       false },
+  { "docbookinclude",  0,                       false },
+  { "maninclude",      0,                       false },
+  { "xmlinclude",      0,                       false },
   { 0, 0, false }
 };
 
@@ -397,12 +401,12 @@ static QString          formulaEnv;            // environment name
 static int              formulaNewLines;       // amount of new lines in the formula
 
 static QString          s_outputXRef;          // tmp argument of todo/test/../xrefitem commands
-static QString          blockName;             // preformatted block name (e.g. verbatim, latexonly,...)
+static QString          s_blockName;           // preformatted block name (e.g. verbatim, latexonly,...)
 static XRefKind         xrefKind;              // kind of cross-reference command
 static XRefKind         newXRefKind;
-static GuardType        guardType;             // kind of guard for conditional section
-static bool             enabledSectionFound;
-static QString          functionProto;         // function prototype
+static GuardType        s_guardType;           // kind of guard for conditional section
+static bool             s_isEnabledSection;
+static QString          s_functionProto;       // function prototype
 
 static bool             s_needNewEntry;
 static int              s_docBlockContext;
@@ -911,18 +915,6 @@ static int yyread(char *buf, int max_size)
 
 /* start command character */
 CMD             ("\\"|"@")
-DCMD1           ("arg"|"attention"|"author"|"cite"|"code")
-DCMD2           ("date"|"dot"|"msc"|"dotfile"|"example"|"startuml")
-DCMD3           ("htmlinclude"|"htmlonly"|"image"|"include")
-DCMD4           ("includelineno"|"internal"|"invariant")
-DCMD5           ("latexinclude"|"latexonly"|"li"|"line"|"manonly"|"name")
-DCMD6           ("note"|"par"|"paragraph"|"param"|"post")
-DCMD7           ("pre"|"remarks"|(("relate"[sd])("also")?))
-DCMD8           ("remarks"|("return"[s]?)|"retval"|"sa"|"section")
-DCMD9           ("see"|"since"|"subsection"|"subsubsection")
-DCMD10          ("throw"|"until"|"verbatim")
-DCMD11          ("verbinclude"|"version"|"warning")
-DETAILEDCMD     {CMD}({DCMD1}|{DCMD2}|{DCMD3}|{DCMD4}|{DCMD5}|{DCMD6}|{DCMD7}|{DCMD8}|{DCMD9}|{DCMD10}|{DCMD11})
 XREFCMD         {CMD}("bug"|"deprecated"|"test"|"todo"|"xrefitem")
 PRE             [pP][rR][eE]
 TABLE           [tT][aA][bB][lL][eE]
@@ -2348,7 +2340,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
 
-      if (text.mid(4) == blockName)  {
+      if (text.mid(4) == s_blockName)  {
          // found end of the block
          BEGIN(Comment);
       }
@@ -2358,7 +2350,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
 
-      if (blockName == "startuml")   {
+      if (s_blockName == "startuml")   {
          // found end of the block
          BEGIN(Comment);
       }
@@ -2387,7 +2379,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // start of a C-comment
       QString text = QString::fromUtf8(yytext);
 
-      s_commentCount++;
+      if (! (s_blockName == "code" || s_blockName == "verbatim")) {
+         ++s_commentCount;
+      }
       addToOutput(text);
    }
 
@@ -2396,11 +2390,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
 
-      s_commentCount--;
+      if (! (s_blockName == "code" || s_blockName == "verbatim")) {
+         s_commentCount--;
 
-      if (s_commentCount < 0 && blockName != "verbatim") {
-         warn(yyFileName, yyLineNr, "Found */ without matching /* while inside a \\%s block. "
-            "Perhaps there is a missing \\end%s?\n", csPrintable(blockName), csPrintable(blockName));
+         if (s_commentCount < 0) {
+            warn(yyFileName, yyLineNr, "Found */ without matching /* while inside a \\%s block. "
+               "Perhaps there is a missing \\end%s?\n", csPrintable(s_blockName), csPrintable(s_blockName));
+         }
       }
    }
 
@@ -2411,14 +2407,14 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <FormatBlock><<EOF>>          {
-      QString endTag = "end" + blockName;
+      QString endTag = "end" + s_blockName;
 
-      if (blockName == "startuml") {
+      if (s_blockName == "startuml") {
          endTag = "enduml";
       }
 
       warn(yyFileName, yyLineNr, "Reached end of comment while inside a \\%s block, check for missing \\%s tag",
-                 csPrintable(blockName), csPrintable(endTag) );
+                 csPrintable(s_blockName), csPrintable(endTag) );
 
       yyterminate();
    }
@@ -2510,12 +2506,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
   /* ----- handle skipping of conditional sections ------- */
 
 <SkipGuardedSection>{CMD}"ifnot"/{NW}  {
-      guardType = Guard_IfNot;
+      s_guardType = Guard_IfNot;
       BEGIN( GuardParam );
    }
 
 <SkipGuardedSection>{CMD}"if"/{NW}  {
-      guardType = Guard_If;
+      s_guardType = Guard_If;
       BEGIN( GuardParam );
    }
 
@@ -2528,7 +2524,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          bool parentVisible = s.parentVisible();
 
          if (parentVisible) {
-            enabledSectionFound = true;
+            s_isEnabledSection = true;
             BEGIN( GuardParamEnd );
          }
       }
@@ -2540,11 +2536,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       } else {
 
-         if (! enabledSectionFound && s_guards.top().parentVisible()) {
+         if (! s_isEnabledSection && s_guards.top().parentVisible()) {
             s_guards.pop();
             s_guards.push(GuardedSection(true,true));
 
-            enabledSectionFound = true;
+            s_isEnabledSection = true;
             BEGIN( GuardParamEnd );
          }
       }
@@ -2556,8 +2552,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
        } else {
 
-         if (! enabledSectionFound && s_guards.top().parentVisible()) {
-            guardType = Guard_If;
+         if (! s_isEnabledSection && s_guards.top().parentVisible()) {
+            s_guardType = Guard_If;
             s_guards.pop();
 
             BEGIN( GuardParam );
@@ -2740,7 +2736,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
          if (langParser != nullptr) {
             // not used for clang parsing
-            langParser->parsePrototype(functionProto);
+            langParser->parsePrototype(s_functionProto);
          }
 
          BEGIN( Comment );
@@ -2750,28 +2746,28 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <FnParam>{LC}           {
       // line continuation
       yyLineNr++;
-      functionProto += ' ';
+      s_functionProto += ' ';
    }
 
 <FnParam>[^@\\\n()]+          {
       // non-special characters
-      functionProto += QString::fromUtf8(yytext);
+      s_functionProto += QString::fromUtf8(yytext);
    }
 
 <FnParam>"("            {
-      functionProto += QString::fromUtf8(yytext);
+      s_functionProto += QString::fromUtf8(yytext);
       braceCount++;
    }
 
 <FnParam>")"            {
-      functionProto += QString::fromUtf8(yytext);
+      s_functionProto += QString::fromUtf8(yytext);
       braceCount--;
    }
 
 <FnParam>.           {
       // add other stuff
       QString text = QString::fromUtf8(yytext);
-      functionProto += text[0];
+      s_functionProto += text[0];
    }
 
 
@@ -2785,7 +2781,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          yyLineNr++;
       }
 
-      if (functionProto.trimmed().isEmpty()) {
+      if (s_functionProto.trimmed().isEmpty()) {
          // plain overload command
          addToOutput(theTranslator->trOverloadText());
          addToOutput('\n');
@@ -2796,7 +2792,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
          if (langParser != nullptr) {
             // not used for clang parsing
-            langParser->parsePrototype(functionProto);
+            langParser->parsePrototype(s_functionProto);
          }
       }
 
@@ -2806,13 +2802,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <OverloadParam>{LC}        {
       // line continuation
       yyLineNr++;
-      functionProto += ' ';
+      s_functionProto += ' ';
    }
 
 <OverloadParam>.        {
       // add other stuff
       QString text = QString::fromUtf8(yytext);
-      functionProto += text[0];
+      s_functionProto += text[0];
    }
 
 
@@ -2985,7 +2981,7 @@ static bool handleFn(const QString &str, const QStringList &list)
    (void) list;
 
    bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
-   functionProto.clear();
+   s_functionProto.clear();
    braceCount = 0;
    BEGIN(FnParam);
 
@@ -2998,7 +2994,7 @@ static bool handleDef(const QString &str, const QStringList &list)
    (void) list;
 
    bool stop = makeStructuralIndicator(Entry::DEFINEDOC_SEC);
-   functionProto.clear();
+   s_functionProto.clear();
    BEGIN(FnParam);
 
    return stop;
@@ -3009,7 +3005,7 @@ static bool handleOverload(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   functionProto.clear();
+   s_functionProto.clear();
    BEGIN(OverloadParam);
 
    return false;
@@ -3554,7 +3550,7 @@ static bool handleFormatBlock(const QString &str, const QStringList &list)
       addToOutput("@" + str + "{" + list.join(",") + "} ");
    }
 
-   blockName      = str;
+   s_blockName    = str;
    s_commentCount = 0;
    BEGIN(FormatBlock);
 
@@ -3577,8 +3573,8 @@ static bool handleIf(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   enabledSectionFound = false;
-   guardType = Guard_If;
+   s_isEnabledSection = false;
+   s_guardType = Guard_If;
    s_spaceBeforeIf = s_spaceBeforeCmd;
    BEGIN(GuardParam);
 
@@ -3590,8 +3586,8 @@ static bool handleIfNot(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   enabledSectionFound = false;
-   guardType = Guard_IfNot;
+   s_isEnabledSection = false;
+   s_guardType = Guard_IfNot;
    s_spaceBeforeIf = s_spaceBeforeCmd;
    BEGIN(GuardParam);
 
@@ -3607,7 +3603,7 @@ static bool handleElseIf(const QString &str, const QStringList &list)
       warn(yyFileName,yyLineNr, "Found \\else without matching start command");
 
    } else {
-      guardType       = enabledSectionFound ? Guard_Skip : Guard_If;
+      s_guardType     = s_isEnabledSection ? Guard_Skip : Guard_If;
       s_spaceBeforeIf = s_spaceBeforeCmd;
       BEGIN(GuardParam);
    }
@@ -3643,7 +3639,7 @@ static bool handleEndIf(const QString &str, const QStringList &list)
       s_guards.pop();
    }
 
-   enabledSectionFound = false;
+   s_isEnabledSection = false;
    if (! s_spaceBeforeCmd.isEmpty()) {
       addToOutput(s_spaceBeforeCmd);
       s_spaceBeforeCmd.resize(0);
@@ -4321,15 +4317,15 @@ static void handleGuard(const QString &expr)
    }
 
    if (parentEnabled) {
-      if ( (sectionEnabled && guardType == Guard_If) || (! sectionEnabled && guardType == Guard_IfNot)) {
+      if ( (sectionEnabled && s_guardType == Guard_If) || (! sectionEnabled && s_guardType == Guard_IfNot)) {
          // section is visible
          s_guards.push(GuardedSection(true, true));
-         enabledSectionFound = true;
+         s_isEnabledSection = true;
          BEGIN( GuardParamEnd );
 
       } else {
          // section is invisible
-         if (guardType != Guard_Skip) {
+         if (s_guardType != Guard_Skip) {
             s_guards.push(GuardedSection(false, true));
          }
 

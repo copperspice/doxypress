@@ -9846,8 +9846,8 @@ void CPP_Parser::parseCode(CodeOutputInterface &outputX, const QString &scopeNam
                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
-   ::parseCCode(outputX, scopeName, input,lang,isExampleBlock,exampleName, fileDef,startLine, endLine,
-                  inlineFragment,memberDef, showLineNumbers,searchCtx,collectXRefs);
+   ::parseCCode(outputX, scopeName, input,lang, isExampleBlock, exampleName, fileDef, startLine, endLine,
+                  inlineFragment,memberDef, showLineNumbers, searchCtx, collectXRefs);
 }
 
 
