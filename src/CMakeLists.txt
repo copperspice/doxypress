@@ -237,6 +237,10 @@ set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
 target_include_directories(DoxyPress
    PRIVATE
    ${CMAKE_SOURCE_DIR}/src
+)
+
+target_include_directories(DoxyPress
+   SYSTEM PRIVATE
    ${CLANG_INCLUDE_DIR}
 )
 
