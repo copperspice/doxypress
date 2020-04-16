@@ -2862,7 +2862,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
          // last ei characters of ldef contain pointer/reference specifiers
          auto iter_n = ldef.indexOfFast("::", iter_s);
 
-         if (iter_n >= iter_e) {
+         if (iter_n != ldef.constEnd() && iter_n >= iter_e) {
             iter_e = iter_n + 2;
          }
 
