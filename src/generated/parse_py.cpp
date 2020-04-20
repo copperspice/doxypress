@@ -3758,7 +3758,6 @@ YY_RULE_SETUP
 case YY_STATE_EOF(VariableEnd):
 {
       yyterminate();
-      newEntry();
    }
 	YY_BREAK
 
@@ -5244,6 +5243,10 @@ void pyFreeParser()
 void Python_Parser::parseInput(const QString &fileName, const QString &fileBuf,
                   QSharedPointer<Entry> root, enum ParserMode mode, QStringList &includedFiles, bool useClang)
 {
+   (void) mode;
+   (void) includedFiles;
+   (void) useClang;
+
    s_thisParser = this;
 
    printlex(parse_py_YY_flex_debug, true, __FILE__, fileName);

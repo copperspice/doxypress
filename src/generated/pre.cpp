@@ -2968,6 +2968,7 @@ static QString      s_defLitText;
 static QString      s_defArgsStr;
 static QString      s_defExtraSpacing;
 static bool         s_defVarArgs;
+
 static int          s_lastCContext;
 static int          s_lastCPPContext;
 static QStack<int>  s_levelGuard;
@@ -3003,6 +3004,11 @@ static bool         s_isSource;
 static bool         s_lexInit   = false;
 static int          s_fenceSize = 0;
 static bool         s_ccomment;
+
+static QSet<QString> s_allIncludes;
+static QSet<QString> s_expansionDict;
+
+#define MAX_EXPANSION_DEPTH 50
 
 static void setFileName(const QString &name)
 {
@@ -3057,8 +3063,6 @@ static void setCaseDone(bool value)
 {
    s_levelGuard.top() = value;
 }
-
-static QSet<QString> s_allIncludes;
 
 static QSharedPointer<FileState> checkAndOpenFile(const QString &fileName, bool &alreadyIncluded)
 {
@@ -3242,7 +3246,7 @@ static QString extractTrailingComment(const QString &s)
 static int getNextChar(const QString &expr, QString *rest, uint &pos);
 static int getCurrentChar(const QString &expr, QString *rest, uint pos);
 static void unputChar(const QString &expr, QString *rest, uint &pos, char c);
-static void expandExpression(QString &expr, QString *rest, int pos);
+static bool expandExpression(QString &expr, QString *rest, int pos, int level);
 
 static QString stringize(const QString &s)
 {
@@ -3377,7 +3381,7 @@ static inline void addTillEndOfString(const QString &expr, QString *rest, uint &
  * length of the (unexpanded) argument list is stored in \a len.
  */
 static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, int &len,
-                  QSharedPointer<const A_Define> def, QString &result)
+                  QSharedPointer<const A_Define> def, QString &result, int level)
 {
    uint j = pos;
    len    = 0;
@@ -3391,7 +3395,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
    }
 
    if (cc != '(') {
-      unputChar(expr, rest, j, ' ');
+      unputChar(expr, rest, j, cc);
       return false;
    }
 
@@ -3627,7 +3631,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
 
                   // only if no ## operator is before or after the argument marker, then do macro expansion
                   if (! hash) {
-                     expandExpression(substArg, nullptr, 0);
+                     expandExpression(substArg, nullptr, 0, level + 1);
                   }
 
                   if (inString) {
@@ -3749,25 +3753,37 @@ static int getNextId(const QString &expr, int p, int *l)
  *  May read additional characters from the input while re-scanning
  *  If expandAll is true then all macros in the expression are expanded, otherwise only the first is expanded
  */
-static void expandExpression(QString &expr, QString *rest, int pos)
+static bool expandExpression(QString &expr, QString *rest, int pos, int level)
 {
-  if (expr.isEmpty()) {
-    return;
-  }
+   if (expr.isEmpty()) {
+     return true;
+   }
+
+   if (s_expansionDict.contains(expr) && level > MAX_EXPANSION_DEPTH) {
+      // check for too deep recursive expansions
+      return false;
+
+   } else {
+      s_expansionDict.insert(expr);
+   }
+
    QString macroName;
    QString expMacro;
 
    bool definedTest = false;
    int i = pos;
-   int l;
+   int tmpLen;
    int p;
    int len;
 
-   while ((p = getNextId(expr, i, &l)) != -1) {
+   int startPos     = pos;
+   int samePosCount = 0;
+
+   while ((p = getNextId(expr, i, &tmpLen)) != -1) {
       // search for an macro name
 
       bool replaced = false;
-      macroName = expr.mid(p, l);
+      macroName = expr.mid(p, tmpLen);
 
       if (p < 2 || ! (expr.at(p - 2) == '@' && expr.at(p - 1) == '-')) {
          // no-rescan marker?
@@ -3777,7 +3793,10 @@ static void expandExpression(QString &expr, QString *rest, int pos)
             // expand macro
             QSharedPointer<A_Define> def = DefineManager::instance().isDefined(macroName);
 
-            if (definedTest) {
+            if (macroName == "defined") {
+               definedTest = true;
+
+            } else if (definedTest) {
                // macro name was found after defined
 
                if (def) {
@@ -3786,8 +3805,8 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                   expMacro = " 0 ";
                }
 
-               replaced = true;
-               len = l;
+               replaced    = true;
+               len         = tmpLen;
                definedTest = false;
 
             } else if (def && def->nargs == -1) {
@@ -3801,16 +3820,12 @@ static void expandExpression(QString &expr, QString *rest, int pos)
                }
 
                replaced = true;
-               len = l;
+               len = tmpLen;
 
             } else if (def && def->nargs >= 0) {
                // function macro
-               replaced = replaceFunctionMacro(expr, rest, p + l, len, def, expMacro);
-               len += l;
-
-            } else if (macroName == "defined") {
-               definedTest = true;
-
+               replaced = replaceFunctionMacro(expr, rest, p + tmpLen, len, def, expMacro, level);
+               len += tmpLen;
             }
 
             if (replaced) {
@@ -3821,31 +3836,53 @@ static void expandExpression(QString &expr, QString *rest, int pos)
 
                processConcatOperators(resultExpr);
 
-               if (def && !def->nonRecursive) {
+               bool isExpanded = false;
+
+               if (def && ! def->nonRecursive) {
                   s_expandedDict->insert(macroName, def);
-                  expandExpression(resultExpr, &restExpr, 0);
+                  isExpanded = expandExpression(resultExpr, &restExpr, 0, level + 1);
                   s_expandedDict->remove(macroName);
                }
+               if (isExpanded) {
+                  expr = expr.left(p) + resultExpr + restExpr;
+                  i    = p;
 
-               expr = expr.left(p) + resultExpr + restExpr;
-               i    = p;
+                } else {
+                   expr = expr.left(p) + "@-" + expr.right(expr.length()-p);
+                   i    = p + tmpLen + 2;
+                }
 
             } else {
                // move to the next macro name
-               i = p + l;
+               i = p + tmpLen;
             }
 
          } else {
             // move to the next macro name
             expr = expr.left(p) + "@-" + expr.right(expr.length() - p);
-            i = p + l + 2;
+            i = p + tmpLen + 2;
 
          }
 
-      } else { // no re-scan marker found, skip the macro name
-         i = p + l;
+         // check for too many inplace expansions without making progress
+         if (i == startPos) {
+           samePosCount++;
+
+         } else {
+           startPos     = i;
+           samePosCount = 0;
+         }
+
+         if (samePosCount > MAX_EXPANSION_DEPTH) {
+           break;
+         }
+
+      } else {
+         // no re-scan marker found, skip the macro name
+         i = p + tmpLen;
       }
    }
+  return true;
 }
 
 //  inputStr should point to the start of a string or character literal.
@@ -4181,7 +4218,9 @@ bool computeExpression(const QString &expr)
 {
    QString e = expr;
 
-   expandExpression(e, nullptr, 0);
+   s_expansionDict.clear();
+   expandExpression(e, nullptr, 0, 0);
+
    e = removeIdsAndMarkers(e);
 
    if (e.isEmpty()) {
@@ -4201,7 +4240,9 @@ QString expandMacro(const QString &name)
 {
    QString n = name;
 
-   expandExpression(n, nullptr, 0);
+   s_expansionDict.clear();
+   expandExpression(n, nullptr, 0, 0);
+
    n = removeMarkers(n);
 
    return n;
@@ -6982,10 +7023,10 @@ case YY_STATE_EOF(SkipCond):
          preYY_switch_to_buffer(fs->bufState );
          preYY_delete_buffer(oldBuf );
 
-         s_yyLineNr    = fs->lineNr;
+         s_yyLineNr      = fs->lineNr;
          s_inputString   = fs->oldFileBuf;
          s_inputPosition = fs->oldFileBufPos;
-	 s_curlyCount    = fs->curlyCount;
+         s_curlyCount    = fs->curlyCount;
          setFileName(fs->fileName);
 
          DBG_CTX((stderr, "######## FileName %s\n", csPrintable(s_yyFileName)));
@@ -8138,7 +8179,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
    s_curlyCount  = 0;
    s_nospaces    = false;
 
-   s_inputPosition = 0;
+   s_inputPosition  = 0;
    s_inputString    = input;
    s_outputString   = "";
 

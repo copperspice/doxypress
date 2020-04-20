@@ -1655,7 +1655,7 @@ YY_RULE_SETUP
          QString text = QString::fromUtf8(commentcnvYYtext);
 
          s_pythonDocString = true;
-         s_nestingCount    = 0;
+         s_nestingCount    = 1;
          s_commentStack.clear();
 
          copyToOutput(text, text.length());
@@ -1888,9 +1888,9 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentcnvYYtext);
 
       s_specialComment = (commentcnvYYleng == 3);
-      s_nestingCount   = 0;
-      s_commentStack.clear();
+      s_nestingCount   = 1;
 
+      s_commentStack.clear();
       copyToOutput(text, text.length());
 
       BEGIN(CComment);
@@ -2302,12 +2302,12 @@ YY_RULE_SETUP
       } else {
          QString text = QString::fromUtf8(commentcnvYYtext);
          copyToOutput(text, text.length());
+	 --s_nestingCount;
 
          if (s_nestingCount <= 0) {
             BEGIN(Scan);
 
          } else {
-            s_nestingCount--;
             s_commentStack.pop();
          }
       }
@@ -3896,7 +3896,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
 
       tmp += ")";
       warn(s_fileName, s_lineNr, "Reached end of file while still inside a (nested) comment. "
-           "Nesting level %d %s", s_nestingCount + 1, csPrintable(tmp) );
+           "Nesting level %d %s", s_nestingCount, csPrintable(tmp) );
 
       // add one for "normal" expected end of comment
    }

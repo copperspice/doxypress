@@ -13016,6 +13016,8 @@ static void yyunput (int c, char *buf_ptr);
 
 static void yyunput (QChar c, char *yy_bp )
 {
+   (void) yy_bp;
+
    QString tmp1    = c;
    QByteArray tmp2 = tmp1.toUtf8();
 
@@ -25897,6 +25899,8 @@ void cstyleFreeParser()
 static void parseMain(const QString &fileName, const QString &fileBuf, QStringList &includedFiles,
                   QSharedPointer<Entry> rt)
 {
+   (void) includedFiles;
+
    s_inputFile.setFileName(fileName);
 
    if (s_inputFile.open(QIODevice::ReadOnly)) {
@@ -26049,8 +26053,8 @@ void CPP_Parser::parseCode(CodeOutputInterface &outputX, const QString &scopeNam
                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
-   ::parseCCode(outputX, scopeName, input,lang,isExampleBlock,exampleName, fileDef,startLine, endLine,
-                  inlineFragment,memberDef, showLineNumbers,searchCtx,collectXRefs);
+   ::parseCCode(outputX, scopeName, input,lang, isExampleBlock, exampleName, fileDef, startLine, endLine,
+                  inlineFragment,memberDef, showLineNumbers, searchCtx, collectXRefs);
 }
 
 void CPP_Parser::parsePrototype(const QString &text)
