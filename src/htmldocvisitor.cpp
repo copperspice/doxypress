@@ -1868,8 +1868,8 @@ void HtmlDocVisitor::visitPre(DocHtmlHeader *header)
    }
 
    forceEndParagraph(header);
-   m_t << "<h" << header->level()
-        << getDirHtmlClassOfNode(textDirection(header)) << ">";
+   m_t << "<h" << header->level() << htmlAttribsToString(header->attribs())
+       << getDirHtmlClassOfNode(textDirection(header)) << ">";
 }
 
 void HtmlDocVisitor::visitPost(DocHtmlHeader *header)
