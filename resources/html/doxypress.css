@@ -284,17 +284,6 @@ div.line
    transition-duration: 0.5s;
 }
 
-/* adjust spacing between lines in blocks of code */
-div.line:not(:last-of-type)
-{
-   padding-bottom: 3px;
-}
-
-div.line:first-of-type
-{
-   padding-top: 2px;
-}
-
 div.line:after
 {
    content:"\000A";
@@ -320,6 +309,12 @@ span.lineno
    border-right: 2px solid #0F0;
    background-color: #E8E8E8;
    white-space: pre;
+
+   /* adjust spacing between lines in blocks of code */
+   display:inline-block;
+   width: 4em;
+   padding-top: 3px;
+   padding-bottom: 2px;
 }
 
 span.lineno a
@@ -344,10 +339,12 @@ div.classindex span.ai
 }
 
 .lineno {
-   user-select: none;
-   -webkit-user-select: none;
-   -moz-user-select: none;
    -webkit-touch-callout: none;
+   -webkit-user-select: none;
+   -khtml-user-select: none;
+   -moz-user-select: none;
+   -ms-user-select: none;
+   user-select: none;
 }
 
 div.ah, span.ah {
