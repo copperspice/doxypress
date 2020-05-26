@@ -419,7 +419,7 @@ static QString          xrefItemKey;
 static QString          newXRefItemKey;
 static QString          xrefItemTitle;
 static QString          xrefListTitle;
-static Protection       protection;
+static Protection       s_protection;
 
 static bool             xrefAppendFlag;
 static bool             inGroupParamFound;
@@ -3842,7 +3842,8 @@ static bool handlePrivateSection(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   current->protection = protection = Private;
+   current->protection = (s_protection = Protection::Private);
+
    return false;
 }
 
@@ -3860,7 +3861,8 @@ static bool handleProtectedSection(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   current->protection = protection = Protected;
+   current->protection = (s_protection = Protection::Protected);
+
    return false;
 }
 
@@ -3878,7 +3880,7 @@ static bool handlePublicSection(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   current->protection = protection = Public;
+   current->protection = (s_protection = Protection::Public);
    return false;
 }
 
@@ -4066,7 +4068,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    briefEndsAtDot   = isAutoBrief;
    inBody           = isInbody;
-   protection       = r_protection;
+   s_protection     = r_protection;
    s_inputPosition  = r_position;
    s_outputXRef     = "";
    xrefKind         = XRef_None;
@@ -4132,7 +4134,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    checkFormula();
-   r_protection = protection;
+   r_protection = s_protection;
 
    groupAddDocs(curEntry);
    r_newEntryNeeded = s_needNewEntry;
