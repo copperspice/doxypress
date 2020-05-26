@@ -515,17 +515,14 @@ void HtmlCodeGenerator::docify(const QString &text)
 
 void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filename, const QString &anchor, int len)
 {
-   QString lineNumber;
-   QString lineAnchor;
-
-   lineNumber = QString("%1").formatArg(len, 5, 10);
-   lineAnchor = QString("l%1").formatArg(len, 5, 10,  QChar('0'));
+   const QString lineNumber = QString("%1").formatArg(len, 5, 10);
+   const QString lineAnchor = QString("l%1").formatArg(len, 5, 10, QChar('0'));
 
    m_streamX << "<div class=\"line\">";
    m_streamX << "<a name=\"" << lineAnchor << "\"></a><span class=\"lineno\">";
 
    if (! filename.isEmpty()) {
-      _writeCodeLink("line", ref, filename, anchor, lineNumber, 0);
+      _writeCodeLink("line", ref, filename, anchor, lineNumber, "");
    } else {
       codify(lineNumber);
    }

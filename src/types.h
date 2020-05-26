@@ -27,7 +27,7 @@ enum Protection   { Public, Protected, Private, Package };
 /** Virtualness of a member */
 enum Specifier    { Normal, Virtual, Pure };
 
-/** Reference qualifier for a mehtod */
+/** Reference qualifier for a method */
 enum RefType      { NoRef, LValueRef, RValueRef };
 
 /** Kind of method */

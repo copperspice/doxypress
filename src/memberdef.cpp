@@ -239,9 +239,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
             argType = addTemplateNames(argType, scopeDef->name(), cName);
          }
 
-         // added 01/2016
          argType = renameNS_Aliases(argType);
-
          linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, argType);
 
       } else {
@@ -258,7 +256,6 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
                argType = addTemplateNames(argType, scopeDef->name(), cName);
             }
 
-            // added 01/2016
             argType = renameNS_Aliases(argType);
 
             linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, argType);
@@ -446,8 +443,8 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
       int close = exception.indexOf(')', index);
       if (close != -1) {
-         QString type = removeRedundantWhiteSpace(exception.mid(index, close - index));
-         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, type);
+         QString tmpType = removeRedundantWhiteSpace(exception.mid(index, close - index));
+         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, tmpType);
          ol.exceptionEntry(0, true);
 
       } else {
@@ -546,7 +543,7 @@ class MemberDefImpl
    ExampleSDict exampleSDict;                     // a dictionary of all examples for quick access
 
    QString type;             // return actual type
-   QString accessorType;     // return type that tell how to get to this member
+   QString accessorType;     // return type which indicates how to get to this member
 
    QSharedPointer<ClassDef> accessorClass;        // class that this member accesses (for anonymous types)
 
@@ -645,12 +642,10 @@ class MemberDefImpl
 
 MemberDefImpl::MemberDefImpl() :
    enumFields(0), redefinedBy(0), category(0), categoryRelation(0)
-{
-}
+{ }
 
 MemberDefImpl::~MemberDefImpl()
-{
-}
+{ }
 
 void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, const QString &e, Protection p,
                   Specifier v, bool s,  Relationship r, MemberType mt,
@@ -741,24 +736,6 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
 
    isDMember = def->getDefFileName().endsWith(".d", Qt::CaseInsensitive);
 }
-
-/*! Creates a new member definition.
- *
- * \param df  File containing the definition of this member.
- * \param dl  Line at which the member definition was found.
- * \param dc  column at which the member definition was found.
- * \param t   string representing the type of the member.
- * \param na  string representing the name of the member.
- * \param a   string representing the arguments of the member.
- * \param e   string representing the throw clause of the members.
- * \param p   protection context of the member
- * \param v   degree of `virtualness' of the member, possible values are: Normal, Virtual, Pure
- * \param s   boolean that is true if the member is static.
- * \param r   The relationship between the class and the member.
- * \param mt  The kind of member. See #MemberType for a list of all types.
- * \param tal The template arguments of this member.
- * \param al  The arguments of this member. This is a structured form of the string past as argument a.
- */
 
 MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &t, const QString &na,
                      const QString &a, const QString &e, Protection p, Specifier v, bool s,
@@ -1228,6 +1205,7 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
 
          if (isId(c) || c == ':' || c == '@') {
             --xLeft;
+
          } else {
             ++xLeft;
             break;
@@ -1278,7 +1256,7 @@ bool MemberDef::isBriefSectionVisible() const
 
    QSharedPointer<MemberGroupInfo> info = Doxy_Globals::memGrpInfoDict[m_impl->grpId];
 
-   bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && !(info->doc.isEmpty() && info->header.isEmpty()));
+   bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && ! (info->doc.isEmpty() && info->header.isEmpty()));
 
    // only include static members with file/namespace scope if enabled in the project file
    bool visibleIfStatic = ! (getClassDef() == 0 && isStatic() && ! extractStatic );
@@ -1906,7 +1884,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
    static const bool extractPrivate = Config::getBool("extract-private");
 
    Specifier lvirt = virtualness();
-   SrcLangExt lang = getLanguage();
 
    if (true) {
 
@@ -3064,51 +3041,53 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
       auto nextItem  = sl.begin();
 
-      for (auto s : sl) {
+      for (const auto &key : sl) {
          bool isProperty = false;
 
-         QPair<QString, QString> temp;
-         temp.first  = s;
-         temp.second = "";
+         QPair<QString, QString> tmp;
+         tmp.first  = key;
+         tmp.second = "";
 
-         if (s == "read")  {
-            temp.second = getPropertyRead();
-            isProperty  = true;
+         if (key == "read")  {
+            tmp.second = getPropertyRead();
+            isProperty = true;
 
-         } else if (s == "write") {
-            temp.second = getPropertyWrite();
-            isProperty  = true;
+         } else if (key == "write") {
+            tmp.second = getPropertyWrite();
+            isProperty = true;
 
-         } else if (s == "reset") {
-            temp.second = getPropertyReset();
-            isProperty  = true;
+         } else if (key == "reset") {
+            tmp.second = getPropertyReset();
+            isProperty = true;
 
-         } else if (s == "notify") {
-            temp.second = getPropertyNotify();
-            isProperty  = true;
+         } else if (key == "notify") {
+            tmp.second = getPropertyNotify();
+            isProperty = true;
 
-         } else if (s == "revision") {
-            isProperty  = true;
+         } else if (key == "revision") {
+            isProperty = true;
 
-         } else if (s == "designable" || s == "scriptable" || s == "stored" || s == "user") {
-            isProperty  = true;
+         } else if (key == "designable" || key == "scriptable" || key == "stored" || key == "user") {
+            tmp.second = "true";
+            isProperty = true;
 
-         } else if (s == "constant") {
-            isProperty  = true;
+         } else if (key == "constant") {
+            tmp.second = "true";
+            isProperty = true;
 
-         } else if (s == "final_property") {
-            temp.first  = "final";
-            isProperty  = true;
+         } else if (key == "final_property") {
+            tmp.first  = "final";
+            isProperty = true;
 
          }
 
          ++nextItem;
 
          if (isProperty) {
-            showProperties.append(temp);
+            showProperties.append(tmp);
 
          } else {
-            ol.writeLabel(s, nextItem != sl.end());
+            ol.writeLabel(key, nextItem != sl.end());
 
          }
       }
@@ -3223,16 +3202,13 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       ol.writeString("<table class=\"fieldtable\">\n");
       ol.writeString("  <tr><th>" + theTranslator->trProperties() + "</th><th>" + theTranslator->trClassMethods() + "</th></tr>\n");
 
-      for (auto iter = showProperties.begin(); iter != showProperties.end(); ++iter) {
-
-         QPair<QString, QString> temp = *iter;
-
+      for (const auto &item : showProperties) {
          ol.writeString("  <tr><td class=\"fieldname\">");
 
-         ol.writeString(temp.first);
+         ol.writeString(item.first);
          ol.writeString("  </td><td class=\"fielddoc\">");
 
-         ol.writeString(temp.second);
+         ol.writeString(item.second);
          ol.writeString("  </td></tr>\n");
       }
 
@@ -3960,10 +3936,13 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
 
    if (m_impl->prot != Public) {
       tagFile << "\" protection=\"";
+
       if (m_impl->prot == Protected) {
          tagFile << "protected";
+
       } else if (m_impl->prot == Package) {
          tagFile << "package";
+
       } else { /* Private */
          tagFile << "private";
       }
@@ -4114,7 +4093,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
    int enumMemCount = 0;
 
    QSharedPointer<MemberList> fmdl = m_impl->enumFields;
-   uint numVisibleEnumValues = 0;
+   int numVisibleEnumValues = 0;
 
    if (fmdl) {
       for (auto fmd : *fmdl) {
@@ -4124,7 +4103,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
       }
    }
 
-   if (numVisibleEnumValues == 0 && !isBriefSectionVisible()) {
+   if (numVisibleEnumValues == 0 && ! isBriefSectionVisible()) {
       return;
    }
 
@@ -4172,7 +4151,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
          while (mli != fmdl->end()) {
 
             if (fmdVisible) {
-               /* in html we start a new line after a number of items */
+               // in html we start a new line after a number of items
 
                if (numVisibleEnumValues > enumValuesPerLine && (enumMemCount % enumValuesPerLine) == 0 ) {
                   typeDecl.pushGeneratorState();
@@ -4185,7 +4164,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
                }
 
                if (fmd->hasDocumentation()) { // enum value has docs
-                  //fmd->_writeTagData(compoundType);
+                  // fmd->_writeTagData(compoundType);
                   fmd->_addToSearchIndex();
                   fmd->writeLink(typeDecl, cd, nd, fd, gd);
 
@@ -5202,10 +5181,10 @@ QSharedPointer<MemberDef> MemberDef::fromAnonymousMember() const
    return m_impl->annMemb;
 }
 
-void MemberDef::setTemplateMaster(QSharedPointer<MemberDef> mt)
+void MemberDef::setTemplateMaster(QSharedPointer<MemberDef> md)
 {
-   m_impl->templateMaster = mt;
-   m_isLinkableCached = 0;
+   m_impl->templateMaster = md;
+   m_isLinkableCached     = 0;
 }
 
 void MemberDef::setDocsForDefinition(bool b)
@@ -5505,5 +5484,3 @@ bool MemberDef::isReference() const
   return Definition::isReference() || (m_impl->templateMaster && m_impl->templateMaster->isReference());
 }
 
-
-// end of the file

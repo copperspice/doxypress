@@ -409,7 +409,7 @@ static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
 
    } else {
       // no link
-      ol.writeLineNumber(0, 0, 0, line);
+      ol.writeLineNumber("", "", "", line);
    }
 
    // set search page target

@@ -3579,6 +3579,7 @@ static bool handleAddIndex(const QString &str, const QStringList &list)
    (void) list;
 
    addToOutput("@addindex ");
+
    BEGIN(LineParam);
 
    return false;
@@ -3590,8 +3591,8 @@ static bool handleIf(const QString &str, const QStringList &list)
    (void) list;
 
    s_isEnabledSection = false;
-   s_guardType = Guard_If;
-   s_spaceBeforeIf = s_spaceBeforeCmd;
+   s_guardType        = Guard_If;
+   s_spaceBeforeIf    = s_spaceBeforeCmd;
    BEGIN(GuardParam);
 
    return false;
@@ -3603,8 +3604,9 @@ static bool handleIfNot(const QString &str, const QStringList &list)
    (void) list;
 
    s_isEnabledSection = false;
-   s_guardType = Guard_IfNot;
-   s_spaceBeforeIf = s_spaceBeforeCmd;
+   s_guardType        = Guard_IfNot;
+   s_spaceBeforeIf    = s_spaceBeforeCmd;
+
    BEGIN(GuardParam);
 
    return false;
@@ -3673,6 +3675,7 @@ static bool handleIngroup(const QString &str, const QStringList &list)
 
    inGroupParamFound = false;
    BEGIN( InGroupParam );
+
    return false;
 }
 
@@ -3682,6 +3685,7 @@ static bool handleNoSubGrouping(const QString &str, const QStringList &list)
    (void) list;
 
    current->subGrouping = false;
+
    return false;
 }
 
@@ -3700,6 +3704,7 @@ static bool handleHideInitializer(const QString &str, const QStringList &list)
    (void) list;
 
    current->initLines = 0;
+
    return false;
 }
 
@@ -3709,6 +3714,7 @@ static bool handleCallgraph(const QString &str, const QStringList &list)
    (void) list;
 
    current->callGraph = true;
+
    return false;
 }
 
@@ -3736,6 +3742,7 @@ static bool handleHideCallergraph(const QString &str, const QStringList &list)
    (void) list;
 
    current->callerGraph = false;
+
    return false;
 }
 
@@ -3745,6 +3752,7 @@ static bool handleReferencedByRelation(const QString &str, const QStringList &li
    (void) list;
 
    current->referencedByRelation = true;
+
    return false;
 }
 
@@ -3754,6 +3762,7 @@ static bool handleHideReferencedByRelation(const QString &str, const QStringList
    (void) list;
 
    current->referencedByRelation = false;
+
    return false;
 }
 
@@ -3763,6 +3772,7 @@ static bool handleReferencesRelation(const QString &str, const QStringList &list
    (void) list;
 
    current->referencesRelation = true;
+
    return false;
 }
 
@@ -3772,6 +3782,7 @@ static bool handleHideReferencesRelation(const QString &str, const QStringList &
    (void) list;
 
    current->referencesRelation = false;
+
    return false;
 }
 
@@ -3805,6 +3816,7 @@ static bool handleLineBr(const QString &str, const QStringList &list)
    (void) list;
 
    addToOutput('\n');
+
    return false;
 }
 
@@ -3815,6 +3827,7 @@ static bool handleStatic(const QString &str, const QStringList &list)
 
    endBrief();
    current->stat = true;
+
    return false;
 }
 
@@ -3824,7 +3837,8 @@ static bool handlePure(const QString &str, const QStringList &list)
    (void) list;
 
    endBrief();
-   current->virt = Pure;
+   current->virt = Specifier::Pure;
+
    return false;
 }
 
@@ -3833,7 +3847,8 @@ static bool handlePrivate(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   current->protection = Private;
+   current->protection = Protection::Private;
+
    return false;
 }
 
@@ -3852,7 +3867,8 @@ static bool handleProtected(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   current->protection = Protected;
+   current->protection = Protection::Protected;
+
    return false;
 }
 
@@ -3871,7 +3887,8 @@ static bool handlePublic(const QString &str, const QStringList &list)
    (void) str;
    (void) list;
 
-   current->protection = Public;
+   current->protection = Protection::Public;
+
    return false;
 }
 

@@ -3830,9 +3830,9 @@ void Doxy_Work::buildTypedefList(QSharedPointer<Entry> ptrEntry)
       addVariable(ptrEntry);
    }
 
-   for (auto e : ptrEntry->children() ) {
-      if (e->section != Entry::ENUM_SEC) {
-         buildTypedefList(e);
+   for (auto item : ptrEntry->children() ) {
+      if (item->section != Entry::ENUM_SEC) {
+         buildTypedefList(item);
       }
    }
 }
@@ -6314,11 +6314,12 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
    QString scopeName;
    QString className;
    QString namespaceName;
+   QString exceptions;
+
    QString funcType;
    QString funcName;
    QString funcArgs;
    QString funcTemplateArgs;
-   QString exceptions;
    QString funcSpec;
 
    bool isRelated  = false;
@@ -6389,15 +6390,15 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
       funcName = funcDecl;
 
    } else {
-      // extract information from the declarations
+      // extract information from the declaration in the documentation
 
       parseFuncDecl(funcDecl, root->m_srcLang == SrcLangExt_ObjC, scopeName, funcType, funcName,
                     funcArgs, funcTemplateArgs, exceptions);
    }
 
-   // the class name can also be a namespace name, we decide this later.
-   // if a related class name is specified and the class name could
-   // not be derived from the function declaration then use the related field
+   // class name can also be a namespace, decide later
+   // if a related class name is specified and the class name could not
+   // be derived from the function declaration then use the related field
 
    if (! root->getData(EntryKey::Related_Class).isEmpty()) {
       // related member, prefix user specified scope
@@ -6500,7 +6501,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
    }
 
    // rebuild the function declaration (needed to get the scope right)
-   if (! scopeName.isEmpty() && !isRelated && ! isFriend && ! hideScopeNames) {
+   if (! scopeName.isEmpty() && ! isRelated && ! isFriend && ! hideScopeNames) {
       if (! funcType.isEmpty()) {
          if (isFunc) {
             // a function -> we use argList for the arguments
@@ -6581,7 +6582,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
          mn = Doxy_Globals::memberNameSDict.find(funcName);
       }
 
-      if (! isRelated && mn) {
+      if (! isRelated && mn != nullptr) {
          // function name already found
 
          Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [2] member name exists "
@@ -6613,9 +6614,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      break;
                   }
 
-                  QSharedPointer<ClassDef> cd = md->getClassDef();
-
-                  // reset tcd
+                  QSharedPointer<ClassDef> cd  = md->getClassDef();
                   QSharedPointer<ClassDef> tcd = tcd_hold;
 
                   if (tcd == nullptr && cd && stripAnonymousNamespaceScope(cd->name()) == scopeName) {
@@ -6661,7 +6660,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      } else {
                         // no template arguments, compare argument lists directly
                         argList = mdAl;
-
                      }
 
                      Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [5] matching %s with %s   className = %s "
@@ -6715,7 +6713,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      } else if (matching && ! (md->isVariable() || md->isTypedef() || md->isEnumValue()) ) {
                         // compare the return types
 
-                        // value from source code
+                        // return type from the source
                         QString memType = md->typeString();
 
                         memType  = stripPrefix(memType, "virtual ");
@@ -6813,6 +6811,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                   }
 
+                  // end of main for loop
                }
 
                if (count == 0 && ptrEntry->parent() && ptrEntry->parent()->section == Entry::OBJCIMPL_SEC) {
@@ -6829,6 +6828,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   QSharedPointer<MemberDef> maybe_md;
 
                   if (mn->count() > 0) {
+                     // compare this method to every other one with the same name
 
                      for (auto md : *mn) {
                         QSharedPointer<ClassDef> ccd  = md->getClassDef();
@@ -6900,7 +6900,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      warnMsg = "documentation found, for a class member which was not found: \n";
 
                   } else {
-
                      if (root->m_templateArgLists.isEmpty()) {
                         warnMsg = "documentation found, for a class member which was not found: \n";
                      } else {
@@ -6918,7 +6917,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   }
 
                   QString fullFuncDecl = funcDecl;
-
 
                   if (isFunc) {
                      fullFuncDecl += argListToString(root->argList, false);
@@ -7126,7 +7124,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
          QSharedPointer<ClassDef> cd;
 
          if ((cd = getClass(scopeName))) {
-            bool newMember = true; // assume we have a new member
+            bool newMember = true;          // assume we have a new member
             bool newMemberName = false;
 
             QSharedPointer<MemberDef> mdDefine;
@@ -7159,14 +7157,14 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
             if ((mn = Doxy_Globals::memberNameSDict.find(funcName)) == 0) {
                mn = QMakeShared<MemberName>(funcName);
-               newMemberName = true; // create a new member name
+               newMemberName = true;        // create a new member name
 
             } else {
                auto iter = mn->begin();
                QSharedPointer<MemberDef> rmd;
 
                while ((rmd = *iter) && newMember) {
-                  // see if we got another member with matching arguments
+                  // see if we have another member with matching arguments
                   const ArgumentList &rmdAl = rmd->getArgumentList();
 
                   newMember = className != rmd->getOuterScope()->name() ||
