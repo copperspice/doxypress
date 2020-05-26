@@ -2999,8 +2999,6 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
 {
    static const bool hideScopeNames = Config::getBool("hide-scope-names");
 
-   QSharedPointer<Entry> e = ptrEntry->entry();
-
    QString qualScope = cd->qualifiedNameWithTemplateParameters();
    QString scopeSeparator = "::";
 
@@ -3013,42 +3011,44 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
 
    Debug::print(Debug::Variables, 0, "  class variable:\n"
                 "    `%s' `%s'::`%s' `%s' protection=`%d  ann=%d  initial value=`%s'\n",
-                csPrintable(e->getData(EntryKey::Member_Type)), csPrintable(qualScope), csPrintable(name), csPrintable(e->getData(EntryKey::Member_Args)),
-                e->protection, fromAnnScope, csPrintable(e->getData(EntryKey::Initial_Value)) );
+                csPrintable(ptrEntry->getData(EntryKey::Member_Type)), csPrintable(qualScope), csPrintable(name),
+                csPrintable(ptrEntry->getData(EntryKey::Member_Args)), ptrEntry->protection, fromAnnScope,
+                csPrintable(ptrEntry->getData(EntryKey::Initial_Value)) );
 
    QString def;
 
-   if (! e->getData(EntryKey::Member_Type).isEmpty()) {
+   if (! ptrEntry->getData(EntryKey::Member_Type).isEmpty()) {
 
-      bool isAlias = e->m_traits.hasTrait(Entry::Virtue::Alias);
+      bool isAlias = ptrEntry->m_traits.hasTrait(Entry::Virtue::Alias);
 
       if (related || hideScopeNames) {
 
          if (isAlias) {
             // turn 'typedef B A' into 'using A = B'
-            def = "using " + name + " = " + e->getData(EntryKey::Member_Type).mid(7);
+            def = "using " + name + " = " + ptrEntry->getData(EntryKey::Member_Type).mid(7);
 
          } else {
-            def = e->getData(EntryKey::Member_Type) + " " + name + e->getData(EntryKey::Member_Args);
+            def = ptrEntry->getData(EntryKey::Member_Type) + " " + name + ptrEntry->getData(EntryKey::Member_Args);
 
          }
 
       } else {
          if (isAlias) {
             // turn 'typedef B C::A' into 'using C::A = B'
-            def = "using " + qualScope + scopeSeparator + name + " = " + e->getData(EntryKey::Member_Type).mid(7);
+            def = "using " + qualScope + scopeSeparator + name + " = " + ptrEntry->getData(EntryKey::Member_Type).mid(7);
 
          } else {
-            def = e->getData(EntryKey::Member_Type) + " " + qualScope + scopeSeparator + name + e->getData(EntryKey::Member_Args);
+            def = ptrEntry->getData(EntryKey::Member_Type) + " " + qualScope +
+                     scopeSeparator + name + ptrEntry->getData(EntryKey::Member_Args);
 
          }
       }
 
    } else if (hideScopeNames) {
-      def = name + e->getData(EntryKey::Member_Args);
+      def = name + ptrEntry->getData(EntryKey::Member_Args);
 
    } else {
-      def = qualScope + scopeSeparator + name + e->getData(EntryKey::Member_Args);
+      def = qualScope + scopeSeparator + name + ptrEntry->getData(EntryKey::Member_Args);
 
    }
 
@@ -3062,14 +3062,16 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
 
       for (auto md : *mn) {
 
-         if (md->getClassDef() == cd && removeRedundantWhiteSpace(e->getData(EntryKey::Member_Type)) == md->typeString()) {
+         if (md->getClassDef() == cd && removeRedundantWhiteSpace(ptrEntry->getData(EntryKey::Member_Type)) == md->typeString()) {
             // member already in the scope
 
-            if (e->m_srcLang == SrcLangExt_ObjC && e->mtype == Property && md->memberType() == MemberType_Variable) {
-               // Objective-C 2.0 property, turn variable into a property
+            if (ptrEntry->m_srcLang == SrcLangExt_ObjC && ptrEntry->mtype == MethodType::Property &&
+                     md->memberType() == MemberDefType::Variable) {
 
-               md->setProtection(e->protection);
-               cd->reclassifyMember(md, MemberType_Property);
+               // Objective-C 2.0 property, turn variable into a property
+               md->setProtection(ptrEntry->protection);
+               cd->reclassifyMember(md, MemberDefType::Property);
+
 
             } else if (e->mtype == Property) {
                // copperspice properties
@@ -3087,7 +3089,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
       }
    }
 
-   QString fileName = e->getData(EntryKey::File_Name);
+   QString fileName = ptrEntry->getData(EntryKey::File_Name);
 
    if (fileName.isEmpty() && ! ptrEntry->m_tagInfo.isEmpty() ) {
       fileName = ptrEntry->m_tagInfo.tag_Name;
@@ -3095,36 +3097,37 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
 
    ArgumentList tmpList;
 
-   if (! e->m_templateArgLists.isEmpty()) {
-      tmpList = e->m_templateArgLists.last();
+   if (! ptrEntry->m_templateArgLists.isEmpty()) {
+      tmpList = ptrEntry->m_templateArgLists.last();
    }
 
    // new member variable, typedef, enum value, or property
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, e->startLine, e->startColumn, e->getData(EntryKey::Member_Type),
-            name, e->getData(EntryKey::Member_Args), e->getData(EntryKey::Exception_Spec), prot, Normal, e->stat,
-            related, memberType, tmpList, ArgumentList() );
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, ptrEntry->startLine, ptrEntry->startColumn,
+            ptrEntry->getData(EntryKey::Member_Type), name, ptrEntry->getData(EntryKey::Member_Args),
+            ptrEntry->getData(EntryKey::Exception_Spec), prot, Normal, ptrEntry->stat, related, memberType,
+            tmpList, ArgumentList() );
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);                         // also sets outer scope (i.e. getOuterScope())
 
-   // md->setDefFile(e->fileName);
-   // md->setDefLine(e->startLine);
+   // md->setDefFile(ptrEntry->fileName);
+   // md->setDefLine(ptrEntry->startLine);
 
-   md->setDocumentation(e->getData(EntryKey::Main_Docs), e->getData(EntryKey::MainDocs_File), e->docLine);
-   md->setBriefDescription(e->getData(EntryKey::Brief_Docs), e->getData(EntryKey::Brief_File), e->briefLine);
-   md->setInbodyDocumentation(e->getData(EntryKey::Inbody_Docs), e->getData(EntryKey::Inbody_File), e->inbodyLine);
+   md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
+   md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
+   md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs), ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
    md->setDefinition(def);
-   md->setBitfields(e->getData(EntryKey::Member_Bitfields));
-   md->addSectionsToDefinition(e->m_anchors);
+   md->setBitfields(ptrEntry->getData(EntryKey::Member_Bitfields));
+   md->addSectionsToDefinition(ptrEntry->m_anchors);
    md->setFromAnonymousScope(fromAnnScope);
    md->setFromAnonymousMember(fromAnnMemb);
 
    // md->setIndentDepth(indentDepth);
-   md->setBodySegment(e->bodyLine, e->endBodyLine);
-   md->setInitializer(e->getData(EntryKey::Initial_Value));
-   md->setMaxInitLines(e->initLines);
-   md->setMemberGroupId(e->mGrpId);
-   md->setMemberTraits(e->m_traits);
+   md->setBodySegment(ptrEntry->bodyLine, ptrEntry->endBodyLine);
+   md->setInitializer(ptrEntry->getData(EntryKey::Initial_Value));
+   md->setMaxInitLines(ptrEntry->initLines);
+   md->setMemberGroupId(ptrEntry->mGrpId);
+   md->setMemberTraits(ptrEntry->m_traits);
 
    // copperspice properties
    md->setPropertyRead(e->getData(EntryKey::Read_Property));
@@ -3132,13 +3135,13 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    md->setPropertyReset(e->getData(EntryKey::Reset_Property));
    md->setPropertyNotify(e->getData(EntryKey::Notify_Property));
 
-   md->enableCallGraph(e->callGraph);
-   md->enableCallerGraph(e->callerGraph);
-   md->setHidden(e->hidden);
-   md->setArtificial(e->artificial);
-   md->setLanguage(e->m_srcLang);
-   md->setId(e->getData(EntryKey::Clang_Id));
-   addMemberToGroups(e, md);
+   md->enableCallGraph(ptrEntry->callGraph);
+   md->enableCallerGraph(ptrEntry->callerGraph);
+   md->setHidden(ptrEntry->hidden);
+   md->setArtificial(ptrEntry->artificial);
+   md->setLanguage(ptrEntry->m_srcLang);
+   md->setId(ptrEntry->getData(EntryKey::Clang_Id));
+   addMemberToGroups(ptrEntry, md);
 
    md->setBodyDef(ptrEntry->fileDef());
 
@@ -3155,7 +3158,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    }
 
    cd->insertMember(md);
-   md->setRefItems(e->m_specialLists);
+   md->setRefItems(ptrEntry->m_specialLists);
 
    // TODO: insert FileDef instead of filename strings
    cd->insertUsedFile(ptrEntry->fileDef());
