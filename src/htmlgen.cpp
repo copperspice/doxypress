@@ -2143,6 +2143,10 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
    static bool showNamespaces = Config::getBool("show-namespace-page");
 
    switch (kind) {
+      case LayoutNavEntry::None:
+      case LayoutNavEntry::FileSource:
+         return false;
+
       case LayoutNavEntry::MainPage:
          return true;
 
@@ -2194,6 +2198,7 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
       case LayoutNavEntry::Examples:
          return Doxy_Globals::exampleSDict.count() > 0;
    }
+
    return false;
 }
 
