@@ -6668,9 +6668,22 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                      bool matching = md->isVariable() || md->isTypedef();
 
-                     if (! matching && matchArguments2(md->getClassDef(), md->getFileDef(), argList,
-                            cd, fd, root->argList, true)) {
-                        matching = true;
+                     if (! matching ) {
+
+                        if (md->isProperty() && root->mtype == MethodType::Property)  {
+                           // current source is for a property and docs are for a property
+
+                           matching = true;
+
+                        } else if (md->isProperty() || root->mtype == MethodType::Property)  {
+                           // either current source or the docs are for a property
+
+                           // matching remains false
+
+                        } else if (matchArguments2(md->getClassDef(), md->getFileDef(), argList,
+                              cd, fd, root->argList, true)) {
+                           matching = true;
+                        }
                      }
 
                      if (md->getLanguage() == SrcLangExt_ObjC && md->isVariable() && (root->section & Entry::FUNCTION_SEC)) {
@@ -6732,9 +6745,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         }
 
                         if (memType != funcType && memType != "auto" && funcType != "auto") {
-                           warn(root->getData(EntryKey::File_Name), root->startLine, "Return types do not agree for member: %s\n"
-                                "   return type: %s   return type: %s\n",
-                                csPrintable(funcName), csPrintable(memType), csPrintable(funcType) );
+
+                           warn(root->getData(EntryKey::File_Name), root->startLine,
+                              "Return types do not agree for member: %s\n"
+                              "   return type (source): %s   return type (docs): %s\n",
+                              csPrintable(funcName + funcArgs), csPrintable(memType), csPrintable(funcType));
                         }
                      }
 

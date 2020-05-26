@@ -39,6 +39,7 @@
 // forward declarations
 static bool handleBrief(const QString &str, const QStringList &list);
 static bool handleFn(const QString &str, const QStringList &list);
+static bool handleProperty(const QString &str, const QStringList &list);
 static bool handleDef(const QString &str, const QStringList &list);
 static bool handleOverload(const QString &str, const QStringList &list);
 static bool handleEnum(const QString &str, const QStringList &list);
@@ -143,7 +144,7 @@ static DocCmdMap docCmdMap[] =
   { "fn",              &handleFn,               false },
   { "var",             &handleFn,               false },
   { "typedef",         &handleFn,               false },
-  { "property",        &handleFn,               false },
+  { "property",        &handleProperty,         false },
   { "def",             &handleDef,              false },
   { "overload",        &handleOverload,         false },
   { "enum",            &handleEnum,             false },
@@ -2973,6 +2974,21 @@ static bool handleBrief(const QString &str, const QStringList &list)
 
    setOutput(OutputBrief);
    return false;
+}
+
+static bool handleProperty(const QString &str, const QStringList &list)
+{
+   (void) str;
+   (void) list;
+
+   bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
+   s_functionProto.clear();
+   braceCount = 0;
+   BEGIN(FnParam);
+
+   current->mtype = MethodType::Property;
+
+   return stop;
 }
 
 static bool handleFn(const QString &str, const QStringList &list)
