@@ -1552,17 +1552,17 @@ void Doxy_Work::buildGroupListFiltered(QSharedPointer<Entry> ptrEntry, bool addi
          QSharedPointer<GroupDef> gd = Doxy_Globals::groupSDict.find(root->m_entryName);
 
          if (gd) {
-            QString tmpMemberType = root->getData(EntryKey::Member_Type);
+            QString entryMemberType = root->getData(EntryKey::Member_Type);
 
             if (! gd->hasGroupTitle() ) {
-               gd->setGroupTitle(tmpMemberType);
+               gd->setGroupTitle(entryMemberType);
 
-            } else if (tmpMemberType.length() > 0 && root->m_entryName != tmpMemberType &&
-                     gd->groupTitle() != tmpMemberType ) {
+            } else if (entryMemberType.length() > 0 && root->m_entryName != entryMemberType &&
+                     gd->groupTitle() != entryMemberType ) {
 
                warn( root->getData(EntryKey::File_Name), root->startLine,
                      "Group %s: ignoring title \"%s\" which does not match old title \"%s\"\n",
-                     csPrintable(root->m_entryName), csPrintable(tmpMemberType), csPrintable(gd->groupTitle()) );
+                     csPrintable(root->m_entryName), csPrintable(entryMemberType), csPrintable(gd->groupTitle()) );
             }
 
             gd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
