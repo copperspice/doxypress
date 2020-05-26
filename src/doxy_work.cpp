@@ -9281,30 +9281,6 @@ void Doxy_Work::generateNamespaceDocs()
    }
 }
 
-#if defined(_WIN32)
-static QString fixSlashes(QString &s)
-{
-   QString result;
-   uint i;
-
-   for (i = 0; i < s.length(); i++) {
-
-      switch (s.at(i).unicode()) {
-
-         case '/':
-         case '\\':
-            result += "\\\\";
-            break;
-
-         default:
-            result += s.at(i);
-      }
-   }
-
-   return result;
-}
-#endif
-
 void Doxy_Work::copyStyleSheet()
 {
    static const QDir configDir    = Config::getConfigDir();

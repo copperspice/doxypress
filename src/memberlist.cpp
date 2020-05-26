@@ -311,7 +311,6 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   const QString &inheritId )
 {
    static const bool briefMemberDesc  = Config::getBool("brief-member-desc");
-   static const bool hideUndocMembers = Config::getBool("hide-undoc-members");
 
    countDecMembers();
 
