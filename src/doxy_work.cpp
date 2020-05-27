@@ -3072,13 +3072,24 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
                md->setProtection(ptrEntry->protection);
                cd->reclassifyMember(md, MemberDefType::Property);
 
+            } else if (ptrEntry->mtype == MethodType::Property) {
+               // set correct property
 
-            } else if (e->mtype == Property) {
-               // copperspice properties
-               md->setPropertyRead(e->getData(EntryKey::Read_Property));
-               md->setPropertyWrite(e->getData(EntryKey::Write_Property));
-               md->setPropertyReset(e->getData(EntryKey::Reset_Property));
-               md->setPropertyNotify(e->getData(EntryKey::Notify_Property));
+               if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Readable))  {
+                  md->setPropertyRead(ptrEntry->getData(EntryKey::Read_Property));
+               }
+
+               if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Writable))  {
+                  md->setPropertyWrite(ptrEntry->getData(EntryKey::Write_Property));
+               }
+
+               if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Reset))  {
+                  md->setPropertyReset(ptrEntry->getData(EntryKey::Reset_Property));
+               }
+
+               if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Notify))  {
+                  md->setPropertyNotify(ptrEntry->getData(EntryKey::Notify_Property));
+               }
             }
 
             ArgumentList tmp;
@@ -3129,11 +3140,25 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    md->setMemberGroupId(ptrEntry->mGrpId);
    md->setMemberTraits(ptrEntry->m_traits);
 
-   // copperspice properties
-   md->setPropertyRead(e->getData(EntryKey::Read_Property));
-   md->setPropertyWrite(e->getData(EntryKey::Write_Property));
-   md->setPropertyReset(e->getData(EntryKey::Reset_Property));
-   md->setPropertyNotify(e->getData(EntryKey::Notify_Property));
+   if (ptrEntry->mtype == MethodType::Property) {
+      // set correct property
+
+      if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Readable))  {
+         md->setPropertyRead(ptrEntry->getData(EntryKey::Read_Property));
+      }
+
+      if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Writable))  {
+         md->setPropertyWrite(ptrEntry->getData(EntryKey::Write_Property));
+      }
+
+      if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Reset))  {
+         md->setPropertyReset(ptrEntry->getData(EntryKey::Reset_Property));
+      }
+
+      if (ptrEntry->m_traits.hasTrait(Entry::Virtue::Notify))  {
+         md->setPropertyNotify(ptrEntry->getData(EntryKey::Notify_Property));
+      }
+   }
 
    md->enableCallGraph(ptrEntry->callGraph);
    md->enableCallerGraph(ptrEntry->callerGraph);
