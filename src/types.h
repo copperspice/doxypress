@@ -225,20 +225,20 @@ enum MemberListType {
    MemberListType_serviceMembers          = 83 + MemberListType_detailedLists,
 };
 
-enum MemberType {
-   MemberType_Define,
-   MemberType_Function,
-   MemberType_Variable,
-   MemberType_Typedef,
-   MemberType_Enumeration,
-   MemberType_EnumValue,
-   MemberType_Signal,
-   MemberType_Slot,
-   MemberType_DCOP,
-   MemberType_Property,
-   MemberType_Event,
-   MemberType_Interface,
-   MemberType_Service,
+enum MemberDefType {
+   Define,
+   Function,
+   Variable,
+   Typedef,
+   Enumeration,
+   EnumValue,
+   Interface,
+   Service,
+   Signal,
+   Slot,
+   DCOP,
+   Property,
+   Event
 };
 
 enum FortranFormat {

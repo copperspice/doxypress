@@ -362,7 +362,7 @@ class ClassDef : public Definition
 
    void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> md) const override;
    void writeSummaryLinks(OutputList &ol) override;
-   void reclassifyMember(QSharedPointer<MemberDef> md, MemberType t);
+   void reclassifyMember(QSharedPointer<MemberDef> md, MemberDefType t);
    void writeInlineDocumentation(OutputList &ol);
    void writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames);
    void removeMemberFromLists(QSharedPointer<MemberDef> md);

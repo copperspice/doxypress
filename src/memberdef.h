@@ -51,7 +51,7 @@ class MemberDef : public Definition
  public:
    MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &name,
              const QString &args, const QString &excp, Protection prot, Specifier virt, bool stat,
-             Relationship related, MemberType t, const ArgumentList &tal, const ArgumentList &al);
+             Relationship related, MemberDefType memberType, const ArgumentList &tal, const ArgumentList &al);
 
    ~MemberDef();
 
@@ -109,7 +109,7 @@ class MemberDef : public Definition
    // direct kind info
    Protection protection() const;
    Specifier virtualness(int count = 0) const;
-   MemberType memberType() const;
+   MemberDefType memberType() const;
    QString memberTypeName() const;
 
    // get methods
@@ -297,7 +297,7 @@ class MemberDef : public Definition
    QString fieldType() const;
    bool isReference() const override;
 
-   void setMemberType(MemberType t);
+   void setMemberType(MemberDefType t);
    void setDefinition(const QString &d);
    void setFileDef(QSharedPointer<FileDef> fd);
    void setAnchor();

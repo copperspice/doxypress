@@ -235,10 +235,10 @@ namespace Doxy_Work{
    void addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr = -1);
 
    QSharedPointer<MemberDef> addVariableToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd,
-                  MemberType memberType, const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb,
+                  MemberDefType memberType, const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb,
                   Protection prot, Relationship related);
 
-   QSharedPointer<MemberDef> addVariableToFile(QSharedPointer<Entry> ptrEntry, MemberType mtype, const QString &scope,
+   QSharedPointer<MemberDef> addVariableToFile(QSharedPointer<Entry> ptrEntry, MemberDefType memberType, const QString &scope,
                   const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb);
 
    void buildClassDocList(QSharedPointer<Entry> ptrEntry);
@@ -2994,7 +2994,7 @@ void Doxy_Work::findIncludedUsingDirectives()
 }
 
 QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd,
-         MemberType memberType, const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb,
+         MemberDefType memberType, const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb,
          Protection prot, Relationship related)
 {
    static const bool hideScopeNames = Config::getBool("hide-scope-names");
@@ -3168,7 +3168,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    return md;
 }
 
-QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptrEntry, MemberType mtype,
+QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptrEntry, MemberDefType memberType,
          const QString &scope, const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb)
 {
    static const bool hideScopeNames = Config::getBool("hide-scope-names");
@@ -3177,14 +3177,14 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    QSharedPointer<Entry> root = ptrEntry->entry();
 
    Debug::print(Debug::Variables, 0, "  global variable:\n"
-                "    type=`%s' scope=`%s' name=`%s' args=`%s' prot=`%d  mtype=%d  lang=%d\n",
+                "    type=`%s' scope=`%s' name=`%s' args=`%s' prot=`%d  memberType = %d  lang = %d\n",
                 csPrintable(root->getData(EntryKey::Member_Type)), csPrintable(scope), csPrintable(name),
-                csPrintable(root->getData(EntryKey::Member_Args)), root->protection, mtype, root->m_srcLang);
+                csPrintable(root->getData(EntryKey::Member_Args)), root->protection, memberType, root->m_srcLang);
 
    QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
    // see if we have a typedef that should hide a struct or union
-   if (mtype == MemberType_Typedef && useTypedefName) {
+   if (memberType == MemberDefType::Typedef && useTypedefName) {
       QString type = root->getData(EntryKey::Member_Type);
 
       type = stripPrefix(type, "typedef ");
@@ -3333,7 +3333,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    // new global variable, enum value, or typedef
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, root->getData(EntryKey::Member_Type),
                   name, root->getData(EntryKey::Member_Args), nullptr, root->protection, Normal, root->stat, Relationship::Member,
-                  mtype, tmpList, ArgumentList());
+                  memberType, tmpList, ArgumentList());
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberTraits(root->m_traits);
@@ -3665,22 +3665,22 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
    QString type = root->getData(EntryKey::Member_Type).trimmed();
 
-   MemberType mtype;
+   MemberDefType memberType;
 
    if (type == "@") {
-      mtype = MemberType_EnumValue;
+      memberType = MemberDefType::EnumValue;
 
    } else if (type.startsWith("typedef ")) {
-      mtype = MemberType_Typedef;
+      memberType = MemberDefType::Typedef;
 
-   } else if (root->mtype == Property) {
-      mtype = MemberType_Property;
+   } else if (root->mtype == MethodType::Property) {
+      memberType = MemberDefType::Property;
 
-   } else if (root->mtype == Event) {
-      mtype = MemberType_Event;
+   } else if (root->mtype == MethodType::Event) {
+      memberType = MemberDefType::Event;
 
    } else {
-      mtype = MemberType_Variable;
+      memberType = MemberDefType::Variable;
    }
 
    bool isFriend = false;
@@ -3702,7 +3702,7 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
          if (cd) {
             // cd  is the class to add member to
-            addVariableToClass(ptrEntry, cd, mtype, name, false, QSharedPointer<MemberDef>(), Protection::Public,
+            addVariableToClass(ptrEntry, cd, memberType, name, false, QSharedPointer<MemberDef>(), Protection::Public,
                      Relationship::Friend);
          }
       }
@@ -3779,13 +3779,13 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
                }
 
-               md = addVariableToClass(ptrEntry, pcd, mtype, name, true, QSharedPointer<MemberDef>(), root->protection, tRelation);
+               md = addVariableToClass(ptrEntry, pcd, memberType, name, true, QSharedPointer<MemberDef>(), root->protection, tRelation);
 
             } else {
                // anonymous scope inside namespace or file => put variable in the global scope
 
-               if (mtype == MemberType_Variable) {
-                  md = addVariableToFile(ptrEntry, mtype, pScope, name, true, QSharedPointer<MemberDef>());
+               if (memberType == MemberDefType::Variable) {
+                  md = addVariableToFile(ptrEntry, memberType, pScope, name, true, QSharedPointer<MemberDef>());
                   md->setFriend(isFriend);
                }
 
@@ -3810,12 +3810,12 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
       }
 
-      addVariableToClass(ptrEntry, cd,  mtype, name, false, md, root->protection, tRelation);
+      addVariableToClass(ptrEntry, cd,  memberType, name, false, md, root->protection, tRelation);
 
    } else if (! name.isEmpty()) {
       // global variable, there is no classDef at this point
 
-      addVariableToFile(ptrEntry, mtype, scope, name, false, QSharedPointer<MemberDef>() );
+      addVariableToFile(ptrEntry, memberType, scope, name, false, QSharedPointer<MemberDef>() );
    }
 }
 
@@ -3927,8 +3927,7 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    QSharedPointer<Entry> root = ptrEntry;
    QSharedPointer<FileDef> const fd = ptrEntry->fileDef();
 
-   enum MemberType const type = (ptrEntry->section == Entry::EXPORTED_INTERFACE_SEC)
-                                ? MemberType_Interface : MemberType_Service;
+   const MemberDefType type = (ptrEntry->section == Entry::EXPORTED_INTERFACE_SEC) ? MemberDefType::Interface : MemberDefType::Service;
 
    QString fileName = root->getData(EntryKey::File_Name);
 
@@ -4062,19 +4061,19 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    QSharedPointer<Entry> root = ptrEntry;
    QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
-   QString memberType = root->getData(EntryKey::Member_Type);
+   QString entryMemberType = root->getData(EntryKey::Member_Type);
 
    static QRegularExpression regExp("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
-   QRegularExpressionMatch match = regExp.match(memberType);
+   QRegularExpressionMatch match = regExp.match(entryMemberType);
 
-   int ts  = memberType.indexOf('<');
-   int te  = memberType.lastIndexOf('>');
+   int ts  = entryMemberType.indexOf('<');
+   int te  = entryMemberType.lastIndexOf('>');
 
    int i   = -1;
    int len = 0;
 
    if (match.hasMatch()) {
-      i   = match.capturedStart() - memberType.constBegin();
+      i   = match.capturedStart() - entryMemberType.constBegin();
       len = match.capturedLength();
    }
 
@@ -4085,11 +4084,11 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 
    bool isAlias = root->m_traits.hasTrait(Entry::Virtue::Alias);
 
-   if (cd->getLanguage() == SrcLangExt_Cpp && ! memberType.isEmpty() && ! isAlias && i != -1) {
+   if (cd->getLanguage() == SrcLangExt_Cpp && ! entryMemberType.isEmpty() && ! isAlias && i != -1) {
       // only C has pointers, function variable
 
-      root->prependData(EntryKey::Member_Args, memberType.right(memberType.length() - i - len));
-      root->setData(EntryKey::Member_Type,     memberType.left(i + len));
+      root->prependData(EntryKey::Member_Args, entryMemberType.right(entryMemberType.length() - i - len));
+      root->setData(EntryKey::Member_Type,     entryMemberType.left(i + len));
    }
 
    QString name = removeRedundantWhiteSpace(rname);
@@ -4097,23 +4096,23 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
       name = name.right(name.length() - 2);
    }
 
-   MemberType mtype;
+   MemberDefType memberType;
 
    if (root->mtype == MethodType::Signal) {
-      mtype = MemberType::MemberType_Signal;
+      memberType = MemberDefType::Signal;
 
    } else if (root->mtype == MethodType::Slot) {
-      mtype = MemberType::MemberType_Slot;
+      memberType = MemberDefType::Slot;
 
    } else if (root->mtype == MethodType::DCOP) {
-      mtype = MemberType::MemberType_DCOP;
+      memberType = MemberDefType::DCOP;
 
    } else {
-      mtype = MemberType::MemberType_Function;
+      memberType = MemberDefType::Function;
    }
 
    // strip redundant template specifier for constructors
-   if ((fd == 0 || fd->getLanguage() == SrcLangExt_Cpp) && name.left(9) != "operator " &&
+   if ((fd == nullptr || fd->getLanguage() == SrcLangExt_Cpp) && name.left(9) != "operator " &&
          (i = name.indexOf('<')) != -1 && name.indexOf('>') != -1) {
 
       name = name.left(i);
@@ -4151,7 +4150,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
                root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args),
                root->getData(EntryKey::Exception_Spec), root->protection, root->virt,
-               (root->stat && root->relatesType != MemberOf), tRelation, mtype, tmpList, root->argList);
+               (root->stat && root->relatesType != MemberOf), tRelation, memberType, tmpList, root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
@@ -4499,7 +4498,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                   root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args),
                   root->getData(EntryKey::Exception_Spec), root->protection, root->virt, root->stat, Member,
-                  MemberType_Function, tArgList, root->argList);
+                  MemberDefType::Function, tArgList, root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
                md->setLanguage(root->m_srcLang);
@@ -6981,11 +6980,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   }
                }
 
-               MemberType mtype = MemberType_Function;
+               MemberDefType memberType = MemberDefType::Function;
 
                md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn, funcType, funcName,
                                   funcArgs, exceptions, declMd ? declMd->protection() : root->protection,
-                                  root->virt, root->stat, Member, mtype, ArgumentList(), root->argList);
+                                  root->virt, root->stat, Member, memberType, ArgumentList(), root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
                md->setLanguage(root->m_srcLang);
@@ -7043,19 +7042,19 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             }
 
             if (unique) {
-               MemberType mtype;
+               MemberDefType memberType;
 
-               if (root->mtype == Signal) {
-                  mtype = MemberType_Signal;
+               if (root->mtype == MethodType::Signal) {
+                  memberType = MemberDefType::Signal;
 
-               } else if (root->mtype == Slot) {
-                  mtype = MemberType_Slot;
+               } else if (root->mtype == MethodType::Slot) {
+                  memberType = MemberDefType::Slot;
 
-               } else if (root->mtype == DCOP) {
-                  mtype = MemberType_DCOP;
+               } else if (root->mtype == MethodType::DCOP) {
+                  memberType = MemberDefType::DCOP;
 
                } else {
-                  mtype = MemberType_Function;
+                  memberType = MemberDefType::Function;
 
                }
 
@@ -7065,7 +7064,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                      funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat,
-                     Relationship::Related, mtype, tArgList, root->argList);
+                     Relationship::Related, memberType, tArgList, root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
                md->setLanguage(root->m_srcLang);
@@ -7189,22 +7188,22 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
             if (newMember) {
                // need to create a new member
-               MemberType mtype;
+               MemberDefType memberType;
 
                if (isDefine) {
-                  mtype = MemberType_Define;
+                  memberType = MemberDefType::Define;
 
-               } else if (root->mtype == Signal) {
-                  mtype = MemberType_Signal;
+               } else if (root->mtype == MethodType::Signal) {
+                  memberType = MemberDefType::Signal;
 
-               } else if (root->mtype == Slot) {
-                  mtype = MemberType_Slot;
+               } else if (root->mtype == MethodType::Slot) {
+                  memberType = MemberDefType::Slot;
 
-               } else if (root->mtype == DCOP) {
-                  mtype = MemberType_DCOP;
+               } else if (root->mtype == MethodType::DCOP) {
+                  memberType = MemberDefType::DCOP;
 
                } else {
-                  mtype = MemberType_Function;
+                  memberType = MemberDefType::Function;
                }
 
                if (isDefine && mdDefine) {
@@ -7213,7 +7212,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   funcArgs = mdDefine->argsString();
                   funcDecl = funcType + " " + funcName;
                }
-
 
                //   (root->m_templateArgLists ? root->m_templateArgLists->last() : ArgumentList<QList>() )
                // for the template arguments for the new "member."
@@ -7247,7 +7245,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine,
                      root->startColumn, funcType, funcName, funcArgs, exceptions, root->protection, root->virt,
-                     root->stat && ! isMemberOf, tRelation, mtype, tmpArgList1, tmpArgList2);
+                     root->stat && ! isMemberOf, tRelation, memberType, tmpArgList1, tmpArgList2);
 
                if (isDefine && mdDefine) {
                   md->setInitializer(mdDefine->initializer());
@@ -7370,7 +7368,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
             QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine,
                root->startColumn, funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat, Member,
-               MemberType_Function, ArgumentList(), root->argList);
+               MemberDefType::Function, ArgumentList(), root->argList);
 
             md->setTagInfo(ptrEntry->m_tagInfo);
             md->setLanguage(root->m_srcLang);
@@ -7658,7 +7656,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                         "", name, "", "", root->protection, Normal, false,
                         isMemberOf ? Foreign : isRelated ? Related : Member,
-                        MemberType_Enumeration, ArgumentList(), ArgumentList());
+                        MemberDefType::Enumeration, ArgumentList(), ArgumentList());
 
          md->setTagInfo(ptrEntry->m_tagInfo);
          md->setLanguage(root->m_srcLang);
@@ -7890,7 +7888,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                            QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, root->startLine,
                               root->startColumn, root->getData(EntryKey::Member_Type), root->m_entryName,
                               root->getData(EntryKey::Member_Args), "", root->protection, Normal, root->stat, Member,
-                              MemberType_EnumValue, ArgumentList(), ArgumentList());
+                              MemberDefType::EnumValue, ArgumentList(), ArgumentList());
 
                            if (md->getClassDef()) {
                               fmd->setMemberClass(md->getClassDef());
@@ -8756,7 +8754,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
          // define read from a tag file
          QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(ptrEntry->m_tagInfo.tag_Name,
                   1, 1, "#define", root->m_entryName, root->getData(EntryKey::Member_Args), "",
-                  Public, Normal, false, Member, MemberType_Define, ArgumentList(), ArgumentList());
+                  Public, Normal, false, Member, MemberDefType::Define, ArgumentList(), ArgumentList());
 
          md->setTagInfo(ptrEntry->m_tagInfo);
          md->setLanguage(root->m_srcLang);
@@ -8781,14 +8779,14 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
          int count = 0;
 
          for (auto md : *mn) {
-            if (md->memberType() == MemberType_Define) {
+            if (md->memberType() == MemberDefType::Define) {
                count++;
             }
          }
 
          if (count == 1) {
             for (auto md : *mn) {
-               if (md->memberType() == MemberType_Define) {
+               if (md->memberType() == MemberDefType::Define) {
                   md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                   md->setDocsForDefinition(! root->proto);
                   md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
@@ -8819,7 +8817,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
 
             for (auto md : *mn) {
 
-               if (md->memberType() == MemberType_Define) {
+               if (md->memberType() == MemberDefType::Define) {
                   QSharedPointer<FileDef> fd = md->getFileDef();
 
                   if (fd && fd->getFilePath() == root->getData(EntryKey::File_Name)) {

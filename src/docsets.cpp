@@ -386,11 +386,11 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
       }
 
       switch (md->memberType()) {
-         case MemberType_Define:
+         case MemberDefType::Define:
             type = "macro";
             break;
 
-         case MemberType_Function:
+         case MemberDefType::Function:
             if (cd && (cd->compoundType() == CompoundType::Interface ||
                        cd->compoundType() == CompoundType::Class)) {
 
@@ -412,19 +412,19 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
             }
             break;
 
-         case MemberType_Variable:
+         case MemberDefType::Variable:
             type = "data";
             break;
 
-         case MemberType_Typedef:
+         case MemberDefType::Typedef:
             type = "tdef";
             break;
 
-         case MemberType_Enumeration:
+         case MemberDefType::Enumeration:
             type = "enum";
             break;
 
-         case MemberType_EnumValue:
+         case MemberDefType::EnumValue:
             type = "econst";
             break;
 
@@ -432,19 +432,19 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          //   type = "prototype";
          //   break;
 
-         case MemberType_Signal:
+         case MemberDefType::Signal:
             type = "signal";
             break;
 
-         case MemberType_Slot:
+         case MemberDefType::Slot:
             type = "slot";
             break;
 
-         case MemberType_DCOP:
+         case MemberDefType::DCOP:
             type = "dcop";
             break;
 
-         case MemberType_Property:
+         case MemberDefType::Property:
             if (cd && cd->compoundType() == CompoundType::Protocol) {
                type = "intfp";   // interface property
             } else {
@@ -452,15 +452,15 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
             }
             break;
 
-         case MemberType_Event:
+         case MemberDefType::Event:
             type = "event";
             break;
 
-         case MemberType_Interface:
+         case MemberDefType::Interface:
             type = "ifc";
             break;
 
-         case MemberType_Service:
+         case MemberDefType::Service:
             type = "svc";
             break;
       }

@@ -281,7 +281,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
    switch (md->memberType()) {
 
-      case MemberType_Variable:
+      case MemberDefType::Variable:
          if (! docOnly) {
             addMemberToList(MemberListType_decVarMembers, md);
          }
@@ -289,7 +289,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          addMemberToList(MemberListType_docVarMembers, md);
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          if (! docOnly) {
             addMemberToList(MemberListType_decFuncMembers, md);
          }
@@ -297,7 +297,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          addMemberToList(MemberListType_docFuncMembers, md);
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          if (! docOnly) {
             addMemberToList(MemberListType_decTypedefMembers, md);
          }
@@ -305,7 +305,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          addMemberToList(MemberListType_docTypedefMembers, md);
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          if (! docOnly) {
             addMemberToList(MemberListType_decEnumMembers, md);
          }
@@ -313,7 +313,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          addMemberToList(MemberListType_docEnumMembers, md);
          break;
 
-      case MemberType_EnumValue:
+      case MemberDefType::EnumValue:
          if (! docOnly) {
             addMemberToList(MemberListType_decEnumValMembers, md);
          }
@@ -321,7 +321,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          addMemberToList(MemberListType_docEnumValMembers, md);
          break;
 
-      case MemberType_Define:
+      case MemberDefType::Define:
          if (! docOnly) {
             addMemberToList(MemberListType_decDefineMembers, md);
          }
@@ -329,7 +329,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          addMemberToList(MemberListType_docDefineMembers, md);
          break;
 
-      case MemberType_Signal:
+      case MemberDefType::Signal:
          if (md->protection() == Public) {
             if (! docOnly) {
                addMemberToList(MemberListType_decPubSignalMembers, md);
@@ -351,7 +351,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          }
          break;
 
-      case MemberType_Slot:
+      case MemberDefType::Slot:
          if (md->protection() == Public) {
             if (! docOnly) {
                addMemberToList(MemberListType_decPubSlotMembers, md);
@@ -372,7 +372,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          }
          break;
 
-      case MemberType_Event:
+      case MemberDefType::Event:
          if (! docOnly) {
             addMemberToList(MemberListType_decEventMembers, md);
          }
@@ -380,7 +380,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
          addMemberToList(MemberListType_docEventMembers, md);
          break;
 
-      case MemberType_Property:
+      case MemberDefType::Property:
          if (! docOnly) {
             addMemberToList(MemberListType_decPropMembers, md);
          }
@@ -430,37 +430,37 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
       removeMemberFromList(MemberListType_allMembersList, md);
 
       switch (md->memberType()) {
-         case MemberType_Variable:
+         case MemberDefType::Variable:
             removeMemberFromList(MemberListType_decVarMembers, md);
             removeMemberFromList(MemberListType_docVarMembers, md);
             break;
 
-         case MemberType_Function:
+         case MemberDefType::Function:
             removeMemberFromList(MemberListType_decFuncMembers, md);
             removeMemberFromList(MemberListType_docFuncMembers, md);
             break;
 
-         case MemberType_Typedef:
+         case MemberDefType::Typedef:
             removeMemberFromList(MemberListType_decTypedefMembers, md);
             removeMemberFromList(MemberListType_docTypedefMembers, md);
             break;
 
-         case MemberType_Enumeration:
+         case MemberDefType::Enumeration:
             removeMemberFromList(MemberListType_decEnumMembers, md);
             removeMemberFromList(MemberListType_docEnumMembers, md);
             break;
 
-         case MemberType_EnumValue:
+         case MemberDefType::EnumValue:
             removeMemberFromList(MemberListType_decEnumValMembers, md);
             removeMemberFromList(MemberListType_docEnumValMembers, md);
             break;
 
-         case MemberType_Define:
+         case MemberDefType::Define:
             removeMemberFromList(MemberListType_decDefineMembers, md);
             removeMemberFromList(MemberListType_docDefineMembers, md);
             break;
 
-         case MemberType_Signal:
+         case MemberDefType::Signal:
             if (md->protection() == Public) {
                removeMemberFromList(MemberListType_decPubSignalMembers, md);
                removeMemberFromList(MemberListType_docPubSignalMembers, md);
@@ -476,7 +476,7 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
             break;
 
 
-         case MemberType_Slot:
+         case MemberDefType::Slot:
             if (md->protection() == Public) {
                removeMemberFromList(MemberListType_decPubSlotMembers, md);
                removeMemberFromList(MemberListType_docPubSlotMembers, md);
@@ -491,12 +491,12 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
             }
             break;
 
-         case MemberType_Event:
+         case MemberDefType::Event:
             removeMemberFromList(MemberListType_decEventMembers, md);
             removeMemberFromList(MemberListType_docEventMembers, md);
             break;
 
-         case MemberType_Property:
+         case MemberDefType::Property:
             removeMemberFromList(MemberListType_decPropMembers, md);
             removeMemberFromList(MemberListType_docPropMembers, md);
             break;

@@ -614,7 +614,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    // - call graph
 
    // enum values are written as part of the enum
-   if (md->memberType() == MemberType_EnumValue) {
+   if (md->memberType() == MemberDefType::EnumValue) {
       return;
    }
 
@@ -629,59 +629,59 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    bool isFunc = false;
 
    switch (md->memberType()) {
-      case MemberType_Define:
+      case MemberDefType::Define:
          memType = "define";
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          memType = "function";
          isFunc = true;
          break;
 
-      case MemberType_Variable:
+      case MemberDefType::Variable:
          memType = "variable";
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          memType = "typedef";
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          memType = "enum";
          break;
 
-      case MemberType_EnumValue:
+      case MemberDefType::EnumValue:
          assert(0);
          break;
 
-      case MemberType_Signal:
+      case MemberDefType::Signal:
          memType = "signal";
          isFunc = true;
          break;
 
-      case MemberType_Slot:
+      case MemberDefType::Slot:
          memType = "slot";
          isFunc = true;
          break;
 
-      case MemberType_DCOP:
+      case MemberDefType::DCOP:
          memType = "dcop";
          isFunc = true;
          break;
 
-      case MemberType_Property:
+      case MemberDefType::Property:
          memType = "property";
          break;
 
-      case MemberType_Event:
+      case MemberDefType::Event:
          memType = "event";
          break;
 
-      case MemberType_Interface:
+      case MemberDefType::Interface:
          memType = "interface";
          break;
 
-      case MemberType_Service:
+      case MemberDefType::Service:
          memType = "service";
          break;
    }
@@ -833,7 +833,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "\"";
    }
 
-   if (md->memberType() == MemberType_Enumeration) {
+   if (md->memberType() == MemberDefType::Enumeration) {
       t << " strong=\"";
 
       if (md->isStrong()) {
@@ -846,7 +846,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "\"";
    }
 
-   if (md->memberType() == MemberType_Variable) {
+   if (md->memberType() == MemberDefType::Variable) {
 
       t << " mutable=\"";
       if (md->isMutable()) {
@@ -890,7 +890,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << " maybeambiguous=\"yes\"";
       }
 
-   } else if (md->memberType() == MemberType_Property) {
+   } else if (md->memberType() == MemberDefType::Property) {
       t << " readable=\"";
       if (md->isReadable()) {
          t << "yes";
@@ -971,7 +971,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << "\"";
       }
 
-   } else if (md->memberType() == MemberType_Event) {
+   } else if (md->memberType() == MemberDefType::Event) {
       t << " add=\"";
 
       if (md->isAddable()) {
@@ -1001,7 +1001,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    t << ">" << endl;
 
-   if (md->memberType() != MemberType_Define && md->memberType() != MemberType_Enumeration) {
+   if (md->memberType() != MemberDefType::Define && md->memberType() != MemberDefType::Enumeration) {
       writeMemberTemplateLists(md, t);
 
       QString typeStr = md->typeString();    // replaceAnonymousScopes(md->typeString());
@@ -1015,7 +1015,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "        <argsstring>" << convertToXML(md->argsString()) << "</argsstring>" << endl;
    }
 
-   if (md->memberType() == MemberType_Enumeration)  {
+   if (md->memberType() == MemberDefType::Enumeration)  {
       t << "        <type>";
       linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, md->enumBaseType());
       t << "</type>" << endl;
@@ -1023,7 +1023,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    t << "        <name>" << convertToXML(md->name()) << "</name>" << endl;
 
-   if (md->memberType() == MemberType_Property) {
+   if (md->memberType() == MemberDefType::Property) {
       if (md->isReadable()) {
          t << "        <read>" << convertToXML(md->getPropertyRead()) << "</read>" << endl;
       }
@@ -1033,7 +1033,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       }
    }
 
-   if (md->memberType() == MemberType_Variable && ! md->bitfieldString().isEmpty() ) {
+   if (md->memberType() == MemberDefType::Variable && ! md->bitfieldString().isEmpty() ) {
       QString bitfield = md->bitfieldString();
 
       if (bitfield.size() > 0 &&  bitfield.at(0) == ':') {
@@ -1059,6 +1059,8 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
            << convertToXML(rmd->name()) << "</reimplementedby>" << endl;
       }
    }
+
+   auto mdType = md->memberType();
 
    if (isFunc) {
       // function
@@ -1122,9 +1124,8 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          }
       }
 
-   } else if (md->memberType() == MemberType_Define && ! md->argsString().isEmpty() ) {
+   } else if (mdType == MemberDefType::Define && ! md->argsString().isEmpty() ) {
       // define
-
       const ArgumentList &argList = md->getArgumentList();
 
       if (argList.listEmpty())  {
@@ -1151,7 +1152,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "</exceptions>" << endl;
    }
 
-   if (md->memberType() == MemberType_Enumeration) {
+   if (mdType == MemberDefType::Enumeration) {
       // enum
       QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
@@ -1205,12 +1206,15 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    t << "        <briefdescription>" << endl;
    writeXMLDocBlock(t, md->briefFile(), md->briefLine(), md->getOuterScope(), md, md->briefDescription());
+
    t << "        </briefdescription>" << endl;
    t << "        <detaileddescription>" << endl;
    writeXMLDocBlock(t, md->docFile(), md->docLine(), md->getOuterScope(), md, md->documentation());
+
    t << "        </detaileddescription>" << endl;
    t << "        <inbodydescription>" << endl;
    writeXMLDocBlock(t, md->docFile(), md->inbodyLine(), md->getOuterScope(), md, md->inbodyDocumentation());
+
    t << "        </inbodydescription>" << endl;
 
    if (md->getDefLine() != -1) {

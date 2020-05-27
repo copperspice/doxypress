@@ -405,7 +405,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
    static const bool repeatBrief = Config::getBool("repeat-brief");
 
    // enum values are written as part of the enum
-   if (md->memberType() == MemberType_EnumValue) {
+   if (md->memberType() == MemberDefType::EnumValue) {
       return;
    }
 
@@ -420,55 +420,55 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
    QString memType;
 
    switch (md->memberType()) {
-      case MemberType_Define:
+      case MemberDefType::Define:
          memType = "define";
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          memType = "function";
          break;
 
-      case MemberType_Variable:
+      case MemberDefType::Variable:
          memType = "variable";
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          memType = "typedef";
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          memType = "enum";
          break;
 
-      case MemberType_EnumValue:
+      case MemberDefType::EnumValue:
          assert(0);
          break;
 
-      case MemberType_Signal:
+      case MemberDefType::Signal:
          memType = "signal";
          break;
 
-      case MemberType_Slot:
+      case MemberDefType::Slot:
          memType = "slot";
          break;
 
-      case MemberType_DCOP:
+      case MemberDefType::DCOP:
          memType = "dcop";
          break;
 
-      case MemberType_Property:
+      case MemberDefType::Property:
          memType = "property";
          break;
 
-      case MemberType_Event:
+      case MemberDefType::Event:
          memType = "event";
          break;
 
-      case MemberType_Interface:
+      case MemberDefType::Interface:
          memType = "interface";
          break;
 
-      case MemberType_Service:
+      case MemberDefType::Service:
          memType = "service";
          break;
    }
@@ -494,7 +494,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
       //enum
       bool closePara = true;
 
-      if (md->memberType() == MemberType_Enumeration) {
+      if (md->memberType() == MemberDefType::Enumeration) {
          QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
          t << "                            <para><literallayout>" << memType << " <link linkend=\"";
@@ -539,7 +539,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             t << "</emphasis></para>" << endl;
          }
 
-      } else if (md->memberType() == MemberType_Define) {
+      } else if (md->memberType() == MemberDefType::Define) {
          t << "                            <para>" << "#" << memType << " <link linkend=\"";
 
          if (md->getGroupDef() && def->definitionType() == Definition::TypeGroup) {
@@ -561,7 +561,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             t << "</emphasis></para>" << endl;
          }
 
-      } else if (md->memberType() == MemberType_Variable) {
+      } else if (md->memberType() == MemberDefType::Variable) {
          if (md->getClassDef()) {
             t << "                        <para>" << convertToXML(md->declaration());
 
@@ -593,7 +593,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             }
          }
 
-      } else if (md->memberType() == MemberType_Typedef) {
+      } else if (md->memberType() == MemberDefType::Typedef) {
          t << "                            <para>" << memType;
          t << " ";
          linkifyText(TextGeneratorDocbookImpl(t), def, md->getBodyDef(), md, md->typeString());
@@ -614,7 +614,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             t << "</emphasis></para>" << endl;
          }
 
-      } else if (md->memberType() == MemberType_Function) {
+      } else if (md->memberType() == MemberDefType::Function) {
          t << "                        <para>";
          linkifyText(TextGeneratorDocbookImpl(t), def, md->getBodyDef(), md, md->typeString());
          t << " <link linkend=\"";
@@ -670,7 +670,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
 
    } else {
 
-      if (md->memberType() == MemberType_Enumeration) {
+      if (md->memberType() == MemberDefType::Enumeration) {
          QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
          t << "            <section xml:id=\"";
@@ -731,13 +731,14 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
                t << ", " << endl;
 
             }
+
             t << "}" << convertToXML(md->name()) << ";" << endl;
             t << "                    </literallayout></computeroutput>" << endl;
             t << "                </para>" << endl;
             t << "            </section>" << endl;
          }
 
-      } else if (md->memberType() == MemberType_Typedef) {
+      } else if (md->memberType() == MemberDefType::Typedef) {
          t << "            <section xml:id=\"";
 
          if (md->getGroupDef() && def->definitionType() == Definition::TypeGroup) {
@@ -761,7 +762,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          t << endl;
          t << "            </section>" << endl;
 
-      } else if (md->memberType() == MemberType_Function) {
+      } else if (md->memberType() == MemberDefType::Function) {
          t << "            <section xml:id=\"";
 
          if (md->getGroupDef() && def->definitionType() == Definition::TypeGroup) {
@@ -785,7 +786,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
          t << endl;
          t << "            </section>" << endl;
 
-      } else if (md->memberType() == MemberType_Define) {
+      } else if (md->memberType() == MemberDefType::Define) {
          if (! md->documentation().isEmpty()) {
             t << "            <section xml:id=\"";
 
@@ -810,7 +811,7 @@ static void generateDocbookForMember(QSharedPointer<MemberDef> md, QTextStream &
             t << "            </section>" << endl;
          }
 
-      } else if (md->memberType() == MemberType_Variable) {
+      } else if (md->memberType() == MemberDefType::Variable) {
 
          if (md->getClassDef()) {
             if (! md->documentation().isEmpty()) {

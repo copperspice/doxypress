@@ -1058,31 +1058,31 @@ void FileDef::insertMember(QSharedPointer<MemberDef> md)
    allMemberList->append(md);
 
    switch (md->memberType()) {
-      case MemberType_Variable:
-      case MemberType_Property:
+      case MemberDefType::Variable:
+      case MemberDefType::Property:
          addMemberToList(MemberListType_decVarMembers, md);
          addMemberToList(MemberListType_docVarMembers, md);
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          addMemberToList(MemberListType_decFuncMembers, md);
          addMemberToList(MemberListType_docFuncMembers, md);
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          addMemberToList(MemberListType_decTypedefMembers, md);
          addMemberToList(MemberListType_docTypedefMembers, md);
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          addMemberToList(MemberListType_decEnumMembers, md);
          addMemberToList(MemberListType_docEnumMembers, md);
          break;
 
-      case MemberType_EnumValue:    // enum values are shown inside their enums
+      case MemberDefType::EnumValue:    // enum values are shown inside their enums
          break;
 
-      case MemberType_Define:
+      case MemberDefType::Define:
          addMemberToList(MemberListType_decDefineMembers, md);
          addMemberToList(MemberListType_docDefineMembers, md);
          break;

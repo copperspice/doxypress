@@ -196,27 +196,27 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
 
    } else {
       switch (md->memberType()) {
-         case MemberType_Service:      // UNO IDL
+         case MemberDefType::Service:      // UNO IDL
             addMemberToList(MemberListType_services, md, true);
             break;
 
-         case MemberType_Interface:    // UNO IDL
+         case MemberDefType::Interface:    // UNO IDL
             addMemberToList(MemberListType_interfaces, md, true);
             break;
 
-         case MemberType_DCOP:         // KDE2 specific
+         case MemberDefType::DCOP:         // KDE2 specific
             addMemberToList(MemberListType_dcopMethods, md, true);
             break;
 
-         case MemberType_Property:
+         case MemberDefType::Property:
             addMemberToList(MemberListType_properties, md, true);
             break;
 
-         case MemberType_Event:
+         case MemberDefType::Event:
             addMemberToList(MemberListType_events, md, true);
             break;
 
-         case MemberType_Signal:       // Qt and CS specific
+         case MemberDefType::Signal:       // Qt and CS specific
             switch (prot) {
                case Public:
                   addMemberToList(MemberListType_pubSignals, md, true);
@@ -233,7 +233,7 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
             }
             break;
 
-         case MemberType_Slot:         // Qt and CS specific
+         case MemberDefType::Slot:         // Qt and CS specific
             switch (prot) {
                case Public:
                   addMemberToList(MemberListType_pubSlots, md, true);
@@ -390,33 +390,33 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
 
    } else {
       switch (md->memberType()) {
-         case MemberType_Service:      // UNO IDL
+         case MemberDefType::Service:      // UNO IDL
             addMemberToList(MemberListType_serviceMembers, md, false);
             break;
 
-         case MemberType_Interface:    // UNO IDL
+         case MemberDefType::Interface:    // UNO IDL
             addMemberToList(MemberListType_interfaceMembers, md, false);
             break;
 
-         case MemberType_Property:
+         case MemberDefType::Property:
             addMemberToList(MemberListType_propertyMembers, md, false);
             break;
 
-         case MemberType_Event:
+         case MemberDefType::Event:
             addMemberToList(MemberListType_eventMembers, md, false);
             break;
 
-         case MemberType_DCOP:
+         case MemberDefType::DCOP:
             addMemberToList(MemberListType_functionMembers, md, false);
             break;
 
-         case MemberType_Signal:
+         case MemberDefType::Signal:
             if (protectionLevelVisible(prot)) {
                addMemberToList(MemberListType_functionMembers, md, false);
             }
             break;
 
-         case MemberType_Slot:
+         case MemberDefType::Slot:
             if (protectionLevelVisible(prot)) {
                addMemberToList(MemberListType_functionMembers, md, false);
             }
@@ -427,19 +427,19 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
 
             if (protectionLevelVisible(prot)) {
                switch (md->memberType()) {
-                  case MemberType_Typedef:
+                  case MemberDefType::Typedef:
                      addMemberToList(MemberListType_typedefMembers, md, false);
                      break;
 
-                  case MemberType_Enumeration:
+                  case MemberDefType::Enumeration:
                      addMemberToList(MemberListType_enumMembers, md, false);
                      break;
 
-                  case MemberType_EnumValue:
+                  case MemberDefType::EnumValue:
                      addMemberToList(MemberListType_enumValMembers, md, false);
                      break;
 
-                  case MemberType_Function:
+                  case MemberDefType::Function:
                      if (md->isConstructor() || md->isDestructor()) {
                         QSharedPointer<MemberList> ml = createMemberList(MemberListType_constructors);
                         ml->append(md);
@@ -450,11 +450,11 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
 
                      break;
 
-                  case MemberType_Variable:
+                  case MemberDefType::Variable:
                      addMemberToList(MemberListType_variableMembers, md, false);
                      break;
 
-                  case MemberType_Define:
+                  case MemberDefType::Define:
                      warn(md->getDefFileName(),md->getDefLine()-1,"Define for (%s) can not be a member of %s",
                            csPrintable(md->name()), csPrintable(this->name()));
                      break;
@@ -3992,7 +3992,7 @@ QSharedPointer<MemberDef> ClassDef::isSmartPointer() const
    return m_arrowOperator;
 }
 
-void ClassDef::reclassifyMember(QSharedPointer<MemberDef> md, MemberType t)
+void ClassDef::reclassifyMember(QSharedPointer<MemberDef> md, MemberDefType t)
 {
    md->setMemberType(t);
 

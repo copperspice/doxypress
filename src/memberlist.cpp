@@ -92,9 +92,9 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
    for ( auto md : *this ) {
       if (md->isBriefSectionVisible()) {
 
-         if (! md->isFriend() && md->memberType() != MemberType_EnumValue) {
+         if (! md->isFriend() && md->memberType() != MemberDefType::EnumValue) {
 
-            if (md->memberType() == MemberType_Function) {
+            if (md->memberType() == MemberDefType::Function) {
                if (! md->isReimplementedBy(inheritedFrom)) {
                   count++;
                }
@@ -137,46 +137,46 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
          }
 
          switch (md->memberType()) {
-            case MemberType_Variable:
-            case MemberType_Event:
-            case MemberType_Property:
+            case MemberDefType::Variable:
+            case MemberDefType::Event:
+            case MemberDefType::Property:
                m_varCnt++;
                m_numDecMembers++;
                break;
 
             // necessary to get this to show up in declarations section?
-            case MemberType_Interface:
-            case MemberType_Service:
-            case MemberType_Function:
-            case MemberType_Signal:
-            case MemberType_DCOP:
-            case MemberType_Slot:
+            case MemberDefType::Interface:
+            case MemberDefType::Service:
+            case MemberDefType::Function:
+            case MemberDefType::Signal:
+            case MemberDefType::DCOP:
+            case MemberDefType::Slot:
                if (! md->isRelated() || md->getClassDef()) {
                   m_funcCnt++;
                   m_numDecMembers++;
                }
                break;
 
-            case MemberType_Enumeration:
+            case MemberDefType::Enumeration:
                m_enumCnt++;
                m_numDecMembers++;
                break;
 
-            case MemberType_EnumValue:
+            case MemberDefType::EnumValue:
                if (countEnumValues) {
                   m_enumValCnt++;
                   m_numDecMembers++;
                }
                break;
 
-            case MemberType_Typedef:
+            case MemberDefType::Typedef:
                m_typeCnt++;
                m_numDecMembers++;
                break;
 
-            // case MemberType_Prototype:   m_protoCnt++,m_numDecMembers++; break;
+            // case MemberDefType::Prototype:   m_protoCnt++,m_numDecMembers++; break;
 
-            case MemberType_Define:
+            case MemberDefType::Define:
                if (Config::getBool("extract-all") || ! md->argsString().isEmpty() ||
                       ! md->initializer().isEmpty() || md->hasDocumentation()) {
                   m_defCnt++;
@@ -221,7 +221,7 @@ void MemberList::countDocMembers(bool countEnumValues)
       if (md->isDetailedSectionVisible(m_inGroup, m_inFile)) {
          // do not count enum values, since they do not produce entries of their own
 
-         if (countEnumValues || md->memberType() != MemberType_EnumValue) {
+         if (countEnumValues || md->memberType() != MemberDefType::EnumValue) {
             m_numDocMembers++;
          }
       }
@@ -273,20 +273,20 @@ bool MemberList::declVisible() const
 
          switch (md->memberType()) {
 
-            case MemberType_Define:
-            case MemberType_Typedef:
-            case MemberType_Variable:
-            case MemberType_Function:
-            case MemberType_Signal:
-            case MemberType_Slot:
-            case MemberType_DCOP:
-            case MemberType_Property:
-            case MemberType_Interface:
-            case MemberType_Service:
-            case MemberType_Event:
+            case MemberDefType::Define:
+            case MemberDefType::Typedef:
+            case MemberDefType::Variable:
+            case MemberDefType::Function:
+            case MemberDefType::Signal:
+            case MemberDefType::Slot:
+            case MemberDefType::DCOP:
+            case MemberDefType::Property:
+            case MemberDefType::Interface:
+            case MemberDefType::Service:
+            case MemberDefType::Event:
                return true;
 
-            case MemberType_Enumeration:
+            case MemberDefType::Enumeration:
 
                if (countEnumValues(md, false) == 0) {
                   // show enum here
@@ -294,7 +294,7 @@ bool MemberList::declVisible() const
                }
                break;
 
-            case MemberType_EnumValue:
+            case MemberDefType::EnumValue:
 
                if (m_inGroup) {
                   return true;
@@ -327,19 +327,19 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
       if ((inheritedFrom == nullptr || ! md->isReimplementedBy(inheritedFrom)) && md->isBriefSectionVisible()) {
 
          switch (md->memberType()) {
-            //  case MemberType_Prototype:
+            //  case MemberDefType::Prototype:
 
-            case MemberType_Define:
-            case MemberType_Typedef:
-            case MemberType_Variable:
-            case MemberType_Function:
-            case MemberType_Signal:
-            case MemberType_Slot:
-            case MemberType_DCOP:
-            case MemberType_Property:
-            case MemberType_Interface:
-            case MemberType_Service:
-            case MemberType_Event: {
+            case MemberDefType::Define:
+            case MemberDefType::Typedef:
+            case MemberDefType::Variable:
+            case MemberDefType::Function:
+            case MemberDefType::Signal:
+            case MemberDefType::Slot:
+            case MemberDefType::DCOP:
+            case MemberDefType::Property:
+            case MemberDefType::Interface:
+            case MemberDefType::Service:
+            case MemberDefType::Event: {
 
                if (first) {
                   ol.startMemberList();
@@ -350,7 +350,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                break;
             }
 
-            case MemberType_Enumeration: {
+            case MemberDefType::Enumeration: {
 
                // if this is an anonymous enum and there are variables of this enum then
                // enumVars = 0, do not show the enum here
@@ -410,7 +410,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                break;
             }
 
-            case MemberType_EnumValue: {
+            case MemberDefType::EnumValue: {
                if (m_inGroup) {
                   if (first) {
                      ol.startMemberList(), first = false;
@@ -714,7 +714,7 @@ void MemberList::addListReferences(QSharedPointer<Definition> def)
          md->addListReference(def);
          QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
-         if (md->memberType() == MemberType_Enumeration && enumFields) {
+         if (md->memberType() == MemberDefType::Enumeration && enumFields) {
             for (auto vmd : *enumFields) {
                vmd->addListReference(def);
             }
@@ -989,7 +989,7 @@ void MemberList::writeTagFile(QTextStream &tagFile)
    for (auto md : *this) {
       md->writeTagFile(tagFile);
 
-      if (md->memberType() == MemberType_Enumeration && md->enumFieldList() && ! md->isStrong()) {
+      if (md->memberType() == MemberDefType::Enumeration && md->enumFieldList() && ! md->isStrong()) {
 
          for (auto vmd : *md->enumFieldList()) {
             vmd->writeTagFile(tagFile);

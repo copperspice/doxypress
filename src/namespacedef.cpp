@@ -194,30 +194,30 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
 
    switch (md->memberType()) {
 
-      case MemberType_Variable:
+      case MemberDefType::Variable:
          addMemberToList(MemberListType_decVarMembers, md);
          addMemberToList(MemberListType_docVarMembers, md);
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          addMemberToList(MemberListType_decFuncMembers, md);
          addMemberToList(MemberListType_docFuncMembers, md);
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          addMemberToList(MemberListType_decTypedefMembers, md);
          addMemberToList(MemberListType_docTypedefMembers, md);
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          addMemberToList(MemberListType_decEnumMembers, md);
          addMemberToList(MemberListType_docEnumMembers, md);
          break;
 
-      case MemberType_EnumValue:
+      case MemberDefType::EnumValue:
          break;
 
-      case MemberType_Define:
+      case MemberDefType::Define:
          addMemberToList(MemberListType_decDefineMembers, md);
          addMemberToList(MemberListType_docDefineMembers, md);
          break;

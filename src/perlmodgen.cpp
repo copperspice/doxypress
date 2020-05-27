@@ -1848,64 +1848,64 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    bool isFunc = false;
 
    switch (md->memberType()) {
-      case MemberType_Define:
+      case MemberDefType::Define:
          memType = "define";
          break;
 
-      case MemberType_EnumValue:
+      case MemberDefType::EnumValue:
          memType = "enumvalue";
          break;
 
-      case MemberType_Property:
+      case MemberDefType::Property:
          memType = "property";
          break;
 
-      case MemberType_Variable:
+      case MemberDefType::Variable:
          memType = "variable";
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          memType = "typedef";
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          memType = "enum";
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          memType = "function";
          isFunc = true;
          break;
 
-      case MemberType_Signal:
+      case MemberDefType::Signal:
          memType = "signal";
          isFunc = true;
          break;
 
-      // case MemberType_Prototype:
+      // case MemberDefType::Prototype:
       //   memType="prototype";
       //   isFunc=true;
       //   break;
 
-      case MemberType_DCOP:
+      case MemberDefType::DCOP:
          memType = "dcop";
          isFunc = true;
          break;
 
-      case MemberType_Slot:
+      case MemberDefType::Slot:
          memType = "slot";
          isFunc = true;
          break;
 
-      case MemberType_Event:
+      case MemberDefType::Event:
          memType = "event";
          break;
 
-      case MemberType_Interface:
+      case MemberDefType::Interface:
          memType = "interface";
          break;
 
-      case MemberType_Service:
+      case MemberDefType::Service:
          memType = "service";
          break;
    }
@@ -1924,7 +1924,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    addPerlModDocBlock(m_output, "brief",    md->getDefFileName(), md->getDefLine(), md->getOuterScope(), md, md->briefDescription());
    addPerlModDocBlock(m_output, "detailed", md->getDefFileName(), md->getDefLine(), md->getOuterScope(), md, md->documentation());
 
-   if (md->memberType() != MemberType_Define && md->memberType() != MemberType_Enumeration) {
+   if (md->memberType() != MemberDefType::Define && md->memberType() != MemberDefType::Enumeration) {
       m_output.addFieldQuotedString("type", md->typeString());
    }
 
@@ -1979,7 +1979,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
 
       m_output.closeList();
 
-   } else if (md->memberType() == MemberType_Define && md->argsString() != 0) {
+   } else if (md->memberType() == MemberDefType::Define && md->argsString() != 0) {
       // define
       m_output.openList("parameters");
 
@@ -2001,7 +2001,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       m_output.addFieldQuotedString("exceptions", md->excpString());
    }
 
-   if (md->memberType() == MemberType_Enumeration) { // enum
+   if (md->memberType() == MemberDefType::Enumeration) {
       QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
       if (enumFields) {

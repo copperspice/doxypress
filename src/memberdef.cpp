@@ -519,9 +519,8 @@ class MemberDefImpl
    ~MemberDefImpl();
 
    // def must be a raw pointer
-
-   void init(Definition *def, const QString &t, const QString &a, const QString &e, Protection p,
-              Specifier v, bool s, Relationship r, MemberType mt,
+   void init(Definition *def, const QString &type, const QString &a, const QString &e, Protection p,
+              Specifier v, bool s, Relationship r, MemberDefType memberType,
               const ArgumentList &templateArgList, const ArgumentList &defArgList);
 
    QSharedPointer<ClassDef>     classDef;         // member of or related to
@@ -570,8 +569,8 @@ class MemberDefImpl
    int initLines;                    // number of lines in the initializer
 
    Entry::Traits m_memberTraits;     // specifiers for this member
+   MemberDefType m_memberType;       // specifies this member type
 
-   MemberType mtype;                 // returns the kind of member
    int maxInitLines;                 // when the initializer will be displayed
    int userInitLines;                // result of explicit \hideinitializer or \showinitializer
 
@@ -647,8 +646,8 @@ MemberDefImpl::MemberDefImpl() :
 MemberDefImpl::~MemberDefImpl()
 { }
 
-void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, const QString &e, Protection p,
-                  Specifier v, bool s,  Relationship r, MemberType mt,
+void MemberDefImpl::init(Definition *def, const QString &type, const QString &a, const QString &e, Protection p,
+                  Specifier v, bool s,  Relationship r, MemberDefType memberType,
                   const ArgumentList &templateArgList, const ArgumentList &defArgList)
 {
    redefines     = QSharedPointer<MemberDef>();
@@ -667,7 +666,7 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
    initLines       = 0;
    type            = t;
 
-   if (mt == MemberType_Typedef) {
+   if (memberType == MemberDefType::Typedef) {
       type = stripPrefix(type, "typedef ");
    }
 
@@ -685,11 +684,11 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
    prot        = p;
    m_related   = r;
    stat        = s;
-   mtype       = mt;
    exception   = e;
    proto       = false;
    annScope    = false;
    annUsed     = false;
+   m_memberType = memberType;
 
    m_memberTraits = Entry::Traits{};
 
@@ -737,12 +736,12 @@ void MemberDefImpl::init(Definition *def, const QString &t, const QString &a, co
    isDMember = def->getDefFileName().endsWith(".d", Qt::CaseInsensitive);
 }
 
-MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &t, const QString &na,
+MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &type, const QString &na,
                      const QString &a, const QString &e, Protection p, Specifier v, bool s,
-                     Relationship r, MemberType mt, const ArgumentList &tal, const ArgumentList &al)
+                     Relationship r, MemberDefType memberType, const ArgumentList &tal, const ArgumentList &al)
    : Definition(df, dl, dc, removeRedundantWhiteSpace(na)), visited(false), m_impl(new MemberDefImpl)
 {
-   m_impl->init(this, t, a, e, p, v, s, r, mt, tal, al);
+   m_impl->init(this, type, a, e, p, v, s, r, memberType, tal, al);
 
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
@@ -1146,7 +1145,7 @@ void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPo
    if (! onlyText && isLinkable()) {
       // write link
 
-      if (m_impl->mtype == MemberType_EnumValue && getGroupDef() == 0 &&      // enum value is not grouped
+      if (m_impl->m_memberType == MemberDefType::EnumValue && getGroupDef() == 0 &&      // enum value is not grouped
             getEnumScope() && getEnumScope()->getGroupDef()) {
 
          // but its container is
@@ -1296,7 +1295,7 @@ QString MemberDef::getDeclType() const
 {
    QString ltype(m_impl->type);
 
-   if (m_impl->mtype == MemberType_Typedef) {
+   if (m_impl->m_memberType == MemberDefType::Typedef) {
       ltype.prepend("typedef ");
    }
 
@@ -1325,7 +1324,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {
    // hide enum value since they appear already as part of the enum, unless they are explicitly grouped
-   if (! inGroup && m_impl->mtype == MemberType_EnumValue) {
+   if (! inGroup && m_impl->m_memberType == MemberDefType::EnumValue) {
       return;
    }
 
@@ -1442,7 +1441,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    // *** write type
    QString ltype(m_impl->type);
 
-   if (m_impl->mtype == MemberType_Typedef) {
+   if (m_impl->m_memberType == MemberDefType::Typedef) {
       ltype.prepend("typedef ");
    }
 
@@ -1824,8 +1823,8 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    bool docFilter = ( extractAll || ! documentation().isEmpty() || ! inbodyDocumentation().isEmpty() );
 
-   docFilter = ( docFilter || (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) );
-   docFilter = ( docFilter || (m_impl->mtype == MemberType_EnumValue && ! briefDescription().isEmpty() ) );
+   docFilter = ( docFilter || (m_impl->m_memberType == MemberDefType::Enumeration && m_impl->docEnumValues) );
+   docFilter = ( docFilter || (m_impl->m_memberType == MemberDefType::EnumValue && ! briefDescription().isEmpty() ) );
 
    // has brief docs, visible in detailed section or they are explicitly not shown in brief section
    bool temp_a = (! briefDescription().isEmpty() && (alwaysDetailedSec && (repeatBrief || ! briefMemberDesc) ) );
@@ -3110,7 +3109,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
    if (hasMultiLineInitializer()) {
       ol.startBold();
 
-      if (m_impl->mtype == MemberType_Define) {
+      if (m_impl->m_memberType == MemberDefType::Define) {
          ol.parseText(theTranslator->trDefineValue());
       } else {
          ol.parseText(theTranslator->trInitialValue());
@@ -3396,56 +3395,56 @@ QString MemberDef::memberTypeName() const
 {
    QString retval;
 
-   switch (m_impl->mtype) {
-      case MemberType_Define:
+   switch (m_impl->m_memberType) {
+      case MemberDefType::Define:
          retval = "macro definition";
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          retval = "function";
          break;
 
-      case MemberType_Variable:
+      case MemberDefType::Variable:
          retval = "variable";
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          retval = "typedef";
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          retval = "enumeration";
          break;
 
-      case MemberType_EnumValue:
+      case MemberDefType::EnumValue:
          retval = "enumvalue";
          break;
 
-      case MemberType_Signal:
+      case MemberDefType::Signal:
          retval = "signal";
          break;
 
-      case MemberType_Slot:
+      case MemberDefType::Slot:
          retval = "slot";
          break;
 
-      case MemberType_DCOP:
+      case MemberDefType::DCOP:
          retval = "dcop";
          break;
 
-      case MemberType_Property:
+      case MemberDefType::Property:
          retval = "property";
          break;
 
-      case MemberType_Event:
+      case MemberDefType::Event:
          retval = "event";
          break;
 
-      case MemberType_Interface:
+      case MemberDefType::Interface:
          retval = "interface";
          break;
 
-      case MemberType_Service:
+      case MemberDefType::Service:
          retval = "service";
          break;
 
@@ -3616,8 +3615,8 @@ bool MemberDef::isDeleted() const
 bool MemberDef::hasDocumentation() const
 {
    return Definition::hasDocumentation() ||
-          (m_impl->mtype == MemberType_Enumeration && m_impl->docEnumValues) ||    // has enum values
-          m_impl->m_defArgList.hasDocumentation();                                 // has doc arguments
+          (m_impl->m_memberType == MemberDefType::Enumeration && m_impl->docEnumValues) ||   // has enum values
+          m_impl->m_defArgList.hasDocumentation();                                    // has doc arguments
 }
 
 void MemberDef::setMemberGroup(QSharedPointer<MemberGroup> grp)
@@ -3739,7 +3738,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
    QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(getDefFileName(), getDefLine(), getDefColumn(),
          substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs), methodName,
          substituteTemplateArgumentsInString(m_impl->m_args, formalArgs, actualArgs),
-         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->m_related, m_impl->mtype,
+         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->m_related, m_impl->m_memberType,
          ArgumentList(), ArgumentList());
 
    imd->setArgumentList(actualArgList);
@@ -3880,56 +3879,56 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
       tagFile << "friend";
    }
 
-   switch (m_impl->mtype) {
-      case MemberType_Define:
+   switch (m_impl->m_memberType) {
+      case MemberDefType::Define:
          tagFile << "define";
          break;
 
-      case MemberType_EnumValue:
+      case MemberDefType::EnumValue:
          tagFile << "enumvalue";
          break;
 
-      case MemberType_Property:
+      case MemberDefType::Property:
          tagFile << "property";
          break;
 
-      case MemberType_Event:
+      case MemberDefType::Event:
          tagFile << "event";
          break;
 
-      case MemberType_Variable:
+      case MemberDefType::Variable:
          tagFile << "variable";
          break;
 
-      case MemberType_Typedef:
+      case MemberDefType::Typedef:
          tagFile << "typedef";
          break;
 
-      case MemberType_Enumeration:
+      case MemberDefType::Enumeration:
          tagFile << "enumeration";
          break;
 
-      case MemberType_Function:
+      case MemberDefType::Function:
          tagFile << "function";
          break;
 
-      case MemberType_Signal:
+      case MemberDefType::Signal:
          tagFile << "signal";
          break;
 
-      case MemberType_DCOP:
+      case MemberDefType::DCOP:
          tagFile << "dcop";
          break;
 
-      case MemberType_Slot:
+      case MemberDefType::Slot:
          tagFile << "slot";
          break;
 
-      case MemberType_Interface:
+      case MemberDefType::Interface:
          tagFile << "interface";
          break;
 
-      case MemberType_Service:
+      case MemberDefType::Service:
          tagFile << "service";
          break;
    }
@@ -4463,54 +4462,54 @@ Protection MemberDef::protection() const
    return m_impl->prot;
 }
 
-MemberType MemberDef::memberType() const
+MemberDefType MemberDef::memberType() const
 {
-   return m_impl->mtype;
+   return m_impl->m_memberType;
 }
 
 bool MemberDef::isSignal() const
 {
-   return m_impl->mtype == MemberType_Signal;
+   return m_impl->m_memberType == MemberDefType::Signal;
 }
 
 bool MemberDef::isSlot() const
 {
-   return m_impl->mtype == MemberType_Slot;
+   return m_impl->m_memberType == MemberDefType::Slot;
 }
 
 bool MemberDef::isVariable() const
 {
-   return m_impl->mtype == MemberType_Variable;
+   return m_impl->m_memberType == MemberDefType::Variable;
 }
 
 bool MemberDef::isEnumerate() const
 {
-   return m_impl->mtype == MemberType_Enumeration;
+   return m_impl->m_memberType == MemberDefType::Enumeration;
 }
 
 bool MemberDef::isEnumValue() const
 {
-   return m_impl->mtype == MemberType_EnumValue;
+   return m_impl->m_memberType == MemberDefType::EnumValue;
 }
 
 bool MemberDef::isTypedef() const
 {
-   return m_impl->mtype == MemberType_Typedef;
+   return m_impl->m_memberType == MemberDefType::Typedef;
 }
 
 bool MemberDef::isFunction() const
 {
-   return m_impl->mtype == MemberType_Function;
+   return m_impl->m_memberType == MemberDefType::Function;
 }
 
 bool MemberDef::isFunctionPtr() const
 {
-   return m_impl->mtype == MemberType_Variable && argsString().indexOf(")(") != -1;
+   return m_impl->m_memberType == MemberDefType::Variable && argsString().indexOf(")(") != -1;
 }
 
 bool MemberDef::isDefine() const
 {
-   return m_impl->mtype == MemberType_Define;
+   return m_impl->m_memberType == MemberDefType::Define;
 }
 
 bool MemberDef::isFriend() const
@@ -4520,17 +4519,17 @@ bool MemberDef::isFriend() const
 
 bool MemberDef::isDCOP() const
 {
-   return m_impl->mtype == MemberType_DCOP;
+   return m_impl->m_memberType == MemberDefType::DCOP;
 }
 
 bool MemberDef::isProperty() const
 {
-   return m_impl->mtype == MemberType_Property;
+   return m_impl->m_memberType == MemberDefType::Property;
 }
 
 bool MemberDef::isEvent() const
 {
-   return m_impl->mtype == MemberType_Event;
+   return m_impl->m_memberType == MemberDefType::Event;
 }
 
 bool MemberDef::isRelated() const
@@ -4740,7 +4739,7 @@ bool MemberDef::isStrong() const
 
 bool MemberDef::isStrongEnumValue() const
 {
-   return m_impl->mtype == MemberType_EnumValue && m_impl->enumScope && m_impl->enumScope->isStrong();
+   return m_impl->m_memberType == MemberDefType::EnumValue && m_impl->enumScope && m_impl->enumScope->isStrong();
 }
 
 bool MemberDef::isUnretained() const
@@ -5007,10 +5006,10 @@ QSharedPointer<MemberDef> MemberDef::getGroupAlias() const
    return m_impl->groupAlias;
 }
 
-void MemberDef::setMemberType(MemberType t)
+void MemberDef::setMemberType(MemberDefType t)
 {
-   m_impl->mtype      = t;
-   m_isLinkableCached = 0;
+   m_impl->m_memberType = t;
+   m_isLinkableCached   = 0;
 }
 
 void MemberDef::setDefinition(const QString &d)
