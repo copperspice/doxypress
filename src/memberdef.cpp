@@ -541,7 +541,7 @@ class MemberDefImpl
 
    ExampleSDict exampleSDict;                     // a dictionary of all examples for quick access
 
-   QString type;             // return actual type
+   QString m_type;           // correct return type for this member
    QString accessorType;     // return type which indicates how to get to this member
 
    QSharedPointer<ClassDef> accessorClass;        // class that this member accesses (for anonymous types)
@@ -664,31 +664,31 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
    hasCallGraph    = false;
    hasCallerGraph  = false;
    initLines       = 0;
-   type            = t;
+   m_type          = type;
 
    if (memberType == MemberDefType::Typedef) {
-      type = stripPrefix(type, "typedef ");
+      m_type = stripPrefix(m_type, "typedef ");
    }
 
-   type   = removeRedundantWhiteSpace(type);
+   m_type = removeRedundantWhiteSpace(m_type);
    m_args = removeRedundantWhiteSpace(a);
 
-   if (type.isEmpty()) {
+   if (m_type.isEmpty()) {
       decl = def->name() + m_args;
    } else {
-      decl = type + " " + def->name() + m_args;
+      decl = m_type + " " + def->name() + m_args;
    }
 
    memberGroup = QSharedPointer<MemberGroup>();
-   virt        = v;
-   prot        = p;
-   m_related   = r;
-   stat        = s;
-   exception   = e;
-   proto       = false;
-   annScope    = false;
-   annUsed     = false;
+   virt         = v;
+   prot         = p;
+   m_related    = r;
+   stat         = s;
    m_memberType = memberType;
+   exception    = e;
+   proto        = false;
+   annScope     = false;
+   annUsed      = false;
 
    m_memberTraits = Entry::Traits{};
 
@@ -721,17 +721,15 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
 
    classSectionSDict.clear();
 
-   docsForDefinition  = true;
-   isTypedefValCached = false;
-   cachedTypedefValue = QSharedPointer<ClassDef>();
-
-   implOnly = false;
-
-   groupMember = QSharedPointer<MemberDef>();
-
-   hasDocumentedParams = false;
+   docsForDefinition       = true;
+   isTypedefValCached      = false;
+   implOnly                = false;
+   hasDocumentedParams     = false;
    hasDocumentedReturnType = false;
-   docProvider = QSharedPointer<MemberDef>();
+
+   cachedTypedefValue = QSharedPointer<ClassDef>();
+   groupMember        = QSharedPointer<MemberDef>();
+   docProvider        = QSharedPointer<MemberDef>();
 
    isDMember = def->getDefFileName().endsWith(".d", Qt::CaseInsensitive);
 }
@@ -1187,11 +1185,11 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
    // search for the last anonymous scope in the member type
    QSharedPointer<ClassDef> annoClassDef;
 
-   QString xType(m_impl->type);
-   xType = stripPrefix(xType, "friend ");
+   QString tmpType(m_impl->m_type);
+   tmpType = stripPrefix(tmpType, "friend ");
 
    static QRegularExpression regExp("@[0-9]+");
-   QRegularExpressionMatch match = regExp.match(xType);
+   QRegularExpressionMatch match = regExp.match(tmpType);
 
    if (match.hasMatch()) {
       // found anonymous scope in type
@@ -1199,7 +1197,7 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
       auto xRight = match.capturedEnd();
 
       // extract anonymous scope
-      while (xLeft != xType.begin()) {
+      while (xLeft != tmpType.begin()) {
          QChar c = *xLeft;
 
          if (isId(c) || c == ':' || c == '@') {
@@ -1211,7 +1209,7 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
          }
       }
 
-      while (xRight != xType.end()) {
+      while (xRight != tmpType.end()) {
          QChar c = *xRight;
 
          if (isId(c) || c == ':' || c == '@') {
@@ -1271,8 +1269,8 @@ bool MemberDef::isBriefSectionVisible() const
    bool visibleIfEnabled = ! (fnTest1 && fnTest2 && fnTest3);
 
    // Hide friend (class|struct|union) declarations if HIDE_FRIEND_COMPOUNDS is true
-   bool visibleIfFriendCompound = ! (hideFriendCompounds && isFriend() && (m_impl->type == "friend class" ||
-                  m_impl->type == "friend struct" || m_impl->type == "friend union" ) );
+   bool visibleIfFriendCompound = ! (hideFriendCompounds && isFriend() && (m_impl->m_type == "friend class" ||
+                  m_impl->m_type == "friend struct" || m_impl->m_type == "friend union" ) );
 
    // only include members that are non-private unless extract_private is
    // set to YES or the member is part of a group
@@ -1293,30 +1291,31 @@ bool MemberDef::isBriefSectionVisible() const
 
 QString MemberDef::getDeclType() const
 {
-   QString ltype(m_impl->type);
+   QString retval(m_impl->m_type);
 
    if (m_impl->m_memberType == MemberDefType::Typedef) {
-      ltype.prepend("typedef ");
+      retval.prepend("typedef ");
    }
 
    if (isAlias()) {
-      ltype = "using";
+      retval = "using";
    }
 
    // strip `friend' keyword from ltype
-   ltype = stripPrefix(ltype, "friend ");
+   retval = stripPrefix(retval, "friend ");
 
-   if (ltype == "@") {
+   if (retval == "@") {
       // rename type from enum values
-      ltype = "";
+      retval = "";
 
    } else {
       if (isObjCMethod()) {
-         ltype.prepend("(");
-         ltype.append(")");
+         retval.prepend("(");
+         retval.append(")");
       }
    }
-   return ltype;
+
+   return retval;
 }
 
 void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
@@ -1439,7 +1438,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // *** write type
-   QString ltype(m_impl->type);
+   QString ltype(m_impl->m_type);
 
    if (m_impl->m_memberType == MemberDefType::Typedef) {
       ltype.prepend("typedef ");
@@ -1655,7 +1654,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    } else if (isAlias()) {
       // using template alias
       ol.writeString(" = ");
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->type);
+      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->m_type);
    }
 
    if ((isObjCMethod() || isObjCProperty()) && isImplementation()) {
@@ -1851,7 +1850,7 @@ bool MemberDef::isDetailedSectionLinkable() const
 
 
    // hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set
-   // bool temp_e = (m_impl->type == "friend class" || m_impl->type == "friend struct" || m_impl->type == "friend union");
+   // bool temp_e = (m_impl->m_type == "friend class" || m_impl->m_type == "friend struct" || m_impl->m_type == "friend union");
    bool friendCompoundFilter = ( ! hideFriendCompound || ! isFriend() || ! (isAttribute || isProperty) );
 
    bool result = ( docFilter && staticFilter && privateFilter && friendCompoundFilter && ! isHidden() );
@@ -3292,7 +3291,7 @@ QString MemberDef::fieldType() const
    QString type = m_impl->accessorType;
 
    if (type.isEmpty()) {
-      type = m_impl->type;
+      type = m_impl->m_type;
    }
 
    if (isTypedef()) {
@@ -3589,8 +3588,8 @@ QString MemberDef::removeReturnKeywords()
 
 bool MemberDef::isFriendClass() const
 {
-   return (isFriend() &&  (m_impl->type == "friend class" || m_impl->type == "friend struct" ||
-                  m_impl->type == "friend union"));
+   return (isFriend() &&  (m_impl->m_type == "friend class" || m_impl->m_type == "friend struct" ||
+                  m_impl->m_type == "friend union"));
 }
 
 bool MemberDef::isDocumentedFriendClass() const
@@ -3736,7 +3735,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
    }
 
    QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(getDefFileName(), getDefLine(), getDefColumn(),
-         substituteTemplateArgumentsInString(m_impl->type, formalArgs, actualArgs), methodName,
+         substituteTemplateArgumentsInString(m_impl->m_type, formalArgs, actualArgs), methodName,
          substituteTemplateArgumentsInString(m_impl->m_args, formalArgs, actualArgs),
          m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->m_related, m_impl->m_memberType,
          ArgumentList(), ArgumentList());
@@ -4237,7 +4236,7 @@ void MemberDef::setTemplateParameterLists(const QVector<ArgumentList> &lists)
 
 void MemberDef::setType(const QString &t)
 {
-   m_impl->type = t;
+   m_impl->m_type = t;
 }
 
 void MemberDef::setAccessorType(QSharedPointer<ClassDef> cd, const QString &t)
@@ -4364,7 +4363,7 @@ QString MemberDef::extraTypeChars() const
 
 QString MemberDef::typeString() const
 {
-   return m_impl->type;
+   return m_impl->m_type;
 }
 
 QString MemberDef::argsString() const
@@ -5457,8 +5456,8 @@ bool MemberDef::isFriendToHide() const
 {
    static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
 
-   bool isFriendToHide = hideFriendCompounds && (m_impl->type == "friend class"  ||
-                  m_impl->type == "friend struct" || m_impl->type == "friend union");
+   bool isFriendToHide = hideFriendCompounds && (m_impl->m_type == "friend class"  ||
+                  m_impl->m_type == "friend struct" || m_impl->m_type == "friend union");
 
    return isFriendToHide;
 }
