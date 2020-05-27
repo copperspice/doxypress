@@ -1279,53 +1279,53 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
 
       } else if (tmi.kind == "enumvalue") {
          me->section = Entry::VARIABLE_SEC;
-         me->mtype = Method;
+         me->mtype = MethodType::Method;
 
       } else if (tmi.kind == "property") {
          me->section = Entry::VARIABLE_SEC;
-         me->mtype = Property;
+         me->mtype = MethodType::Property;
 
       } else if (tmi.kind == "event") {
          me->section = Entry::VARIABLE_SEC;
-         me->mtype = Event;
+         me->mtype = MethodType::Event;
 
       } else if (tmi.kind == "variable") {
          me->section = Entry::VARIABLE_SEC;
-         me->mtype = Method;
+         me->mtype = MethodType::Method;
 
       } else if (tmi.kind == "typedef") {
          me->section = Entry::VARIABLE_SEC;       // Entry::TYPEDEF_SEC;
          me->prependData(EntryKey::Member_Type, "typedef ");
-         me->mtype = Method;
+         me->mtype = MethodType::Method;
 
       } else if (tmi.kind == "enumeration") {
          me->section = Entry::ENUM_SEC;
-         me->mtype = Method;
+         me->mtype = MethodType::Method;
 
       } else if (tmi.kind == "function") {
          me->section = Entry::FUNCTION_SEC;
-         me->mtype = Method;
+         me->mtype = MethodType::Method;
 
       } else if (tmi.kind == "signal") {
          me->section = Entry::FUNCTION_SEC;
-         me->mtype = Signal;
+         me->mtype = MethodType::Signal;
 
       } else if (tmi.kind == "prototype") {
          me->section = Entry::FUNCTION_SEC;
-         me->mtype = Method;
+         me->mtype = MethodType::Method;
 
       } else if (tmi.kind == "friend") {
          me->section = Entry::FUNCTION_SEC;
          me->prependData(EntryKey::Member_Type, "friend ");
-         me->mtype = Method;
+         me->mtype = MethodType::Method;
 
       } else if (tmi.kind == "dcop") {
          me->section = Entry::FUNCTION_SEC;
-         me->mtype = DCOP;
+         me->mtype = MethodType::DCOP;
 
       } else if (tmi.kind == "slot") {
          me->section = Entry::FUNCTION_SEC;
-         me->mtype = Slot;
+         me->mtype = MethodType::Slot;
       }
 
       ce->addSubEntry(me, ce);

@@ -30,8 +30,8 @@ enum Specifier    { Normal, Virtual, Pure };
 /** Reference qualifier for a method */
 enum RefType      { NoRef, LValueRef, RValueRef };
 
-/** Kind of method */
-enum MethodTypes  { Method, Signal, Slot, DCOP, Property, Event };
+/** Kind of member */
+enum class MethodType  { Method, Signal, Slot, DCOP, Property, Event };
 
 /** Type of member relation */
 enum RelatesType  { Simple, Duplicate, MemberOf };

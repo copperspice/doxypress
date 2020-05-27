@@ -106,7 +106,7 @@ void Entry::reset()
    relatesType  = Simple;
    virt         = Normal;
    protection   = Public;
-   mtype        = Method;
+   mtype        = MethodType::Method;
    groupDocType = GROUPDOC_NORMAL;
    m_srcLang    = SrcLangExt_Unknown;
 

@@ -4099,13 +4099,13 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 
    MemberType mtype;
 
-   if (root->mtype == MethodTypes::Signal) {
+   if (root->mtype == MethodType::Signal) {
       mtype = MemberType::MemberType_Signal;
 
-   } else if (root->mtype == MethodTypes::Slot) {
+   } else if (root->mtype == MethodType::Slot) {
       mtype = MemberType::MemberType_Slot;
 
-   } else if (root->mtype == MethodTypes::DCOP) {
+   } else if (root->mtype == MethodType::DCOP) {
       mtype = MemberType::MemberType_DCOP;
 
    } else {

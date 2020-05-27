@@ -134,7 +134,7 @@ static bool             docBlockJavaStyle;
 
 static bool             gstat;
 
-static MethodTypes      mtype;
+static MethodType       mtype;
 static Specifier        virt;
 static Argument         *s_parameter;                    // element of parameter list
 
@@ -3045,7 +3045,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    s_inputStringPrepass   = "";
    s_inputPositionPrepass = 0;
 
-   mtype                  = Method;
+   mtype                  = MethodType::Method;
    gstat                  = false;
    virt                   = Normal;
    current_root           = rt;

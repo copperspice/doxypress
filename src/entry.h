@@ -387,7 +387,7 @@ class Entry : public EnableSharedFromThis
    RelatesType   relatesType;      // how relates is handled
    Specifier     virt;             // virtualness of the entry
    Protection    protection;       // class protection
-   MethodTypes   mtype;            // signal, slot, (dcop) method, or property
+   MethodType    mtype;            // signal, slot, (dcop) method, or property
    GroupDocType  groupDocType;
    SrcLangExt    m_srcLang;        // programming language in which this entry was found
    Traits        m_traits;

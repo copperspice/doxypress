@@ -51,8 +51,8 @@ static QFile             s_inputFile;
 static int               yyLineNr = 1;
 static QString           yyFileName;
 
-static MethodTypes    	 mtype;
 static Protection        protection;
+static MethodType        mtype;
 static Specifier         virt;
 
 static bool              gstat;
@@ -90,7 +90,7 @@ static QString           s_argType = "";
 static void initParser()
 {
    protection = Public;
-   mtype = Method;
+   mtype = MethodType::Method;
    gstat = false;
    virt  = Normal;
 
@@ -342,7 +342,7 @@ static void searchFoundDef()
    current->m_srcLang = SrcLangExt_Python;
    current->virt      = Normal;
    current->stat      = gstat;
-   current->mtype     = (mtype = Method);
+   current->mtype     = (mtype = MethodType::Method);
 
    current->m_entryName.resize(0);
    current->setData(EntryKey::Member_Type, "");
@@ -539,7 +539,7 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
 
       current->section     = Entry::VARIABLE_SEC;
-      current->mtype     = Property;
+      current->mtype       = MethodType::Property;
       current->m_entryName = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
@@ -1566,7 +1566,7 @@ STARTDOCSYMS      "##"
    "("            {
       // tuple, only when direct after =
 
-      if (current->mtype != Property && s_start_init) {
+      if (current->mtype != MethodType::Property && s_start_init) {
          current->setData(EntryKey::Member_Type, "tuple");
       }
 
@@ -2048,7 +2048,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    s_inputPosition = 0;
 
    protection      = Public;
-   mtype           = Method;
+   mtype           = MethodType::Method;
    gstat           = false;
    virt            = Normal;
 
