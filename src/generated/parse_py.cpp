@@ -1516,17 +1516,17 @@ static bool s_defVal_active = false;
 
 static ParserInterface  *s_thisParser;
 static QString           s_inputString;
-static int		          s_inputPosition;
+static int               s_inputPosition;
 static QFile             s_inputFile;
 
-static int		          yyLineNr = 1;
-static QString 		    yyFileName;
+static int               yyLineNr = 1;
+static QString           yyFileName;
 
-static Protection	       protection;
-static MethodTypes    	 mtype;
-static Specifier       	 virt;
+static Protection        protection;
+static MethodType        mtype;
+static Specifier         virt;
 
-static bool       		 gstat;
+static bool              gstat;
 
 static int               docBlockContext;
 static QString           docBlock;
@@ -1561,7 +1561,7 @@ static QString           s_argType = "";
 static void initParser()
 {
    protection = Public;
-   mtype = Method;
+   mtype = MethodType::Method;
    gstat = false;
    virt  = Normal;
 
@@ -1571,7 +1571,7 @@ static void initParser()
 
 static void initEntry()
 {
-   current->protection = protection ;
+   current->protection = protection;
    current->mtype      = mtype;
    current->virt       = virt;
    current->stat       = gstat;
@@ -1813,7 +1813,7 @@ static void searchFoundDef()
    current->m_srcLang = SrcLangExt_Python;
    current->virt      = Normal;
    current->stat      = gstat;
-   current->mtype     = (mtype = Method);
+   current->mtype     = (mtype = MethodType::Method);
 
    current->m_entryName.resize(0);
    current->setData(EntryKey::Member_Type, "");
@@ -1838,8 +1838,8 @@ static void searchFoundClass()
    s_packageCommentAllowed = false;
 }
 
-#undef	YY_INPUT
-#define	YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
+#undef   YY_INPUT
+#define  YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
 
 static int yyread(char *buf, int max_size)
 {
@@ -2267,9 +2267,9 @@ YY_RULE_SETUP
       // property
       QString text = QString::fromUtf8(parse_py_YYtext);
 
-      current->section   = Entry::VARIABLE_SEC;
-      current->mtype     = Property;
-      current->m_entryName      = text.trimmed();
+      current->section     = Entry::VARIABLE_SEC;
+      current->mtype       = MethodType::Property;
+      current->m_entryName = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
@@ -3546,7 +3546,7 @@ YY_RULE_SETUP
 {
       // tuple, only when direct after =
 
-      if (current->mtype != Property && s_start_init) {
+      if (current->mtype != MethodType::Property && s_start_init) {
          current->setData(EntryKey::Member_Type, "tuple");
       }
 
@@ -5121,7 +5121,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    s_inputPosition = 0;
 
    protection      = Public;
-   mtype           = Method;
+   mtype           = MethodType::Method;
    gstat           = false;
    virt            = Normal;
 

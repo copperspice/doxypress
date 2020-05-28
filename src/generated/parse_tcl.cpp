@@ -3950,7 +3950,7 @@ static void tcl_codify_link(const QString &name)
          for (i = 0; i < tcl.listScan.length(); i++) {
             callerEntry = tcl.listScan.at(i)->entry_scan;
 
-            if (callerEntry->mtype == Method && ! callerEntry->m_entryName.isEmpty()) {
+            if (callerEntry->mtype == MethodType::Method && ! callerEntry->m_entryName.isEmpty()) {
                break;
             }
          }
@@ -4376,7 +4376,7 @@ static void tcl_command_PROC()
    // why not needed here? tcl.fn.remove(myName);
 
    tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = Method;
+   tcl.entry_current->mtype       = MethodType::Method;
    tcl.entry_current->m_entryName = myName;
    tcl.entry_current->startLine   = tcl.line_command;
    tcl.entry_current->bodyLine    = tcl.line_body0;
@@ -4425,7 +4425,7 @@ static void tcl_command_Method()
    // see also bug #
    tcl.fn.remove(myName);
    tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = Method;
+   tcl.entry_current->mtype       = MethodType::Method;
    tcl.entry_current->m_entryName = myName;
    tcl.entry_current->startLine   = tcl.line_command;
    tcl.entry_current->bodyLine    = tcl.line_body0;
@@ -4468,7 +4468,7 @@ static void tcl_command_Constructor()
    }
 
    tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = Method;
+   tcl.entry_current->mtype       = MethodType::Method;
    tcl.entry_current->m_entryName = myName;
    tcl.entry_current->startLine   = tcl.line_command;
    tcl.entry_current->bodyLine    = tcl.line_body0;
@@ -4513,7 +4513,7 @@ static void tcl_command_DESTRUCTOR()
    }
 
    tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = Method;
+   tcl.entry_current->mtype       = MethodType::Method;
    tcl.entry_current->m_entryName = myName;
    tcl.entry_current->startLine   = tcl.line_command;
    tcl.entry_current->bodyLine    = tcl.line_body0;
@@ -4698,7 +4698,7 @@ static void tcl_command_OO_DEFINE()
       tcl.fn.remove(myMethod);
 
       tcl.entry_current->section     = Entry::FUNCTION_SEC;
-      tcl.entry_current->mtype       = Method;
+      tcl.entry_current->mtype       = MethodType::Method;
       tcl.entry_current->m_entryName = myMethod;
       tcl.entry_current->startLine   = tcl.line_command;
       tcl.entry_current->bodyLine    = tcl.line_body0;

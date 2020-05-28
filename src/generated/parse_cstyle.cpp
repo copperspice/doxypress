@@ -12889,7 +12889,7 @@ static int anonCount    = 0;
 static int anonNSCount  = 0;
 
 static QString          yyFileName;
-static MethodTypes      mtype;
+static MethodType       mtype;
 static bool             gstat;
 static bool             removeSlashes;
 static Specifier        virt;
@@ -13038,7 +13038,7 @@ static void initParser()
    sharpCount  = 0;
    roundCount  = 0;
    curlyCount  = 0;
-   mtype       = MethodTypes::Method;
+   mtype       = MethodType::Method;
    gstat       = false;
    virt        = Normal;
    baseVirt    = Normal;
@@ -14177,7 +14177,7 @@ YY_RULE_SETUP
 {
       // IDL or Borland C++ builder property
 
-      current->mtype       = mtype = MethodTypes::Property;
+      current->mtype       = mtype = MethodType::Property;
       current->protection  = protection = Public;
 
       current->m_entryName = "";
@@ -14192,7 +14192,7 @@ case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
 {
-      current->mtype       = mtype = MethodTypes::DCOP;
+      current->mtype       = mtype = MethodType::DCOP;
       current->protection  = protection = Public;
 
       current->m_entryName = "";
@@ -14207,7 +14207,7 @@ case 25:
 /* rule 25 can match eol */
 YY_RULE_SETUP
 {
-      current->mtype       = mtype = MethodTypes::Signal;
+      current->mtype       = mtype = MethodType::Signal;
       current->protection  = protection = Public ;
 
       current->m_entryName = "";
@@ -14222,7 +14222,7 @@ case 26:
 /* rule 26 can match eol */
 YY_RULE_SETUP
 {
-      current->mtype       = mtype = MethodTypes::Slot;
+      current->mtype       = mtype = MethodType::Slot;
       current->protection  = protection = Public ;
 
       current->m_entryName = "";
@@ -14238,7 +14238,7 @@ case 27:
 YY_RULE_SETUP
 {
       current->protection  = protection = Protected ;
-      current->mtype       = mtype = MethodTypes::Slot;
+      current->mtype       = mtype = MethodType::Slot;
 
       current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14253,7 +14253,7 @@ case 28:
 YY_RULE_SETUP
 {
       current->protection  = protection = Private ;
-      current->mtype       = mtype = MethodTypes::Slot;
+      current->mtype       = mtype = MethodType::Slot;
 
       current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14268,7 +14268,7 @@ case 29:
 YY_RULE_SETUP
 {
       current->protection  = protection = Public ;
-      current->mtype       = mtype = MethodTypes::Method;
+      current->mtype       = mtype = MethodType::Method;
 
       current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14285,7 +14285,7 @@ YY_RULE_SETUP
       // for now treat C++/CLI's internal as package...
       if (insideCli) {
          current->protection  = protection = Package ;
-         current->mtype       = mtype = MethodTypes::Method;
+         current->mtype       = mtype = MethodType::Method;
 
          current->m_entryName = "";
          current->setData(EntryKey::Member_Type, "");
@@ -14304,7 +14304,7 @@ case 31:
 YY_RULE_SETUP
 {
       current->protection  = protection = Protected ;
-      current->mtype       = mtype = MethodTypes::Method;
+      current->mtype       = mtype = MethodType::Method;
 
       current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14319,7 +14319,7 @@ case 32:
 YY_RULE_SETUP
 {
       current->protection  = protection = Private ;
-      current->mtype       = mtype = MethodTypes::Method;
+      current->mtype       = mtype = MethodType::Method;
 
       current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14337,7 +14337,7 @@ YY_RULE_SETUP
          // C++/CLI event
          lineCount();
 
-         current->mtype    = mtype = MethodTypes::Event;
+         current->mtype    = mtype = MethodType::Event;
          current->bodyLine = yyLineNr;
          curlyCount        = 0;
 
@@ -14346,7 +14346,7 @@ YY_RULE_SETUP
       } else if (insideCSharp) {
          lineCount();
 
-         current->mtype    = MethodTypes::Event;
+         current->mtype    = MethodType::Event;
          current->bodyLine = yyLineNr;
 
       } else {
@@ -14361,7 +14361,7 @@ YY_RULE_SETUP
       if (insideCli) {
          // C++/CLI property
          lineCount();
-         current->mtype    = mtype = MethodTypes::Property;
+         current->mtype    = mtype = MethodType::Property;
          current->bodyLine = yyLineNr;
          curlyCount        = 0;
 
@@ -14442,7 +14442,7 @@ YY_RULE_SETUP
       if (! current->getData(EntryKey::Member_Type).isEmpty()) {
          REJECT;
     } else {
-         current->mtype = mtype = MethodTypes::Property;
+         current->mtype = mtype = MethodType::Property;
          lineCount();
     }
    }
@@ -14452,7 +14452,7 @@ case 44:
 YY_RULE_SETUP
 {
       current->protection  = protection = Private ;
-      current->mtype       = mtype = MethodTypes::Method;
+      current->mtype       = mtype = MethodType::Method;
 
       current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14466,8 +14466,8 @@ case 45:
 /* rule 45 can match eol */
 YY_RULE_SETUP
 {
-      current->protection = protection = Protected ;
-      current->mtype        = mtype = MethodTypes::Method;
+      current->protection = protection = Protected;
+      current->mtype        = mtype = MethodType::Method;
 
       current->m_entryName  = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14481,8 +14481,8 @@ case 46:
 /* rule 46 can match eol */
 YY_RULE_SETUP
 {
-      current->protection  = protection = Public ;
-      current->mtype       = mtype = MethodTypes::Method;
+      current->protection  = protection = Public;
+      current->mtype       = mtype = MethodType::Method;
 
       current->m_entryName = "";
       current->setData(EntryKey::Member_Type, "");
@@ -14518,7 +14518,7 @@ YY_RULE_SETUP
 
          current->virt  = Specifier::Virtual;
          current->stat  = (text[0]=='+');
-         current->mtype = mtype = MethodTypes::Method;
+         current->mtype = mtype = MethodType::Method;
 
          current->m_entryName = "";
          current->setData(EntryKey::Member_Type, "");
@@ -14726,7 +14726,7 @@ YY_RULE_SETUP
       } else if (text.startsWith("@property")) {
          // ObjC 2.0 property
 
-         current->mtype      = mtype = MethodTypes::Property;
+         current->mtype      = mtype = MethodType::Property;
          current->protection = Public;
 
          current->m_traits.setTrait(Entry::Virtue::Readable);
@@ -14832,8 +14832,8 @@ YY_RULE_SETUP
       }  else if (text == "@property") {
          // ObjC 2.0 property
 
-         current->mtype = mtype = MethodTypes::Property;
-         current->protection   = Public;
+         current->mtype = mtype = MethodType::Property;
+         current->protection    = Public;
          current->m_traits.setTrait(Entry::Virtue::Readable);
          current->m_traits.setTrait(Entry::Virtue::Writable);
 
@@ -16479,7 +16479,7 @@ YY_RULE_SETUP
 {
       // Q_property
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->setData(EntryKey::Member_Type, "");
 
       BEGIN(QtPropType);
@@ -16669,7 +16669,7 @@ case 206:
 YY_RULE_SETUP
 {
     current->protection = Public;
-    current->mtype      = MethodTypes::Property;
+    current->mtype      = MethodType::Property;
     current->m_traits.setTrait(Entry::Virtue::Readable);
     current->setData(EntryKey::Member_Type, "");
 
@@ -16708,7 +16708,7 @@ case 211:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Writable);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16748,7 +16748,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Reset);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16785,7 +16785,7 @@ case 221:
 YY_RULE_SETUP
 {
       current->protection  = Public;
-      current->mtype        = MethodTypes::Property;
+      current->mtype        = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Notify);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16822,7 +16822,7 @@ case 226:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Revision);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16833,7 +16833,7 @@ case 227:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Designable);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16844,7 +16844,7 @@ case 228:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Scriptable);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16855,7 +16855,7 @@ case 229:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Stored);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16866,7 +16866,7 @@ case 230:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::User);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16877,7 +16877,7 @@ case 231:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Constant);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16888,7 +16888,7 @@ case 232:
 YY_RULE_SETUP
 {
       current->protection = Public;
-      current->mtype      = MethodTypes::Property;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Final_Property);
       current->setData(EntryKey::Member_Type, "");
 
@@ -16962,7 +16962,7 @@ YY_RULE_SETUP
 case 241:
 YY_RULE_SETUP
 {
-      current->mtype = MethodTypes::Signal;
+      current->mtype = MethodType::Signal;
       current->setData(EntryKey::Member_Type, "");
       BEGIN(CsSignal);
    }
@@ -16990,7 +16990,7 @@ YY_RULE_SETUP
 case 245:
 YY_RULE_SETUP
 {
-      current->mtype = MethodTypes::Slot;
+      current->mtype = MethodType::Slot;
       current->setData(EntryKey::Member_Type, "");
       BEGIN(CsSlot);
    }
@@ -19031,7 +19031,7 @@ YY_RULE_SETUP
          current->setData(EntryKey::Member_Type, oldType.left(i));
 
       } else {
-         mtype = MethodTypes::Method;
+         mtype = MethodType::Method;
          virt  = Normal;
 
          if (needNewCurrent) {
@@ -19059,7 +19059,7 @@ YY_RULE_SETUP
          idlProp.resize(0);
          current->mtype = mtype;
 
-         if (Config::getBool("idl-support") && current->mtype == Property) {
+         if (Config::getBool("idl-support") && current->mtype == MethodType::Property) {
             // inside the properties section of a dispinterface
             odlProp = true;
 
@@ -19093,7 +19093,7 @@ YY_RULE_SETUP
       if (--squareCount <= 0) {
          lineCount();
 
-         if (current->mtype == MethodTypes::Property)
+         if (current->mtype == MethodType::Property)
             BEGIN( IDLPropName );
          else
             BEGIN( lastSquareContext );
@@ -19104,7 +19104,7 @@ case 412:
 YY_RULE_SETUP
 {
       if (Config::getBool("idl-support")) {
-         current->mtype = MethodTypes::Property;
+         current->mtype = MethodType::Property;
       }
 
       current->m_traits.setTrait(Entry::Virtue::Settable);
@@ -19114,7 +19114,7 @@ case 413:
 YY_RULE_SETUP
 {
       if (Config::getBool("idl-support")) {
-         current->mtype = MethodTypes::Property;
+         current->mtype = MethodType::Property;
       }
 
       current->m_traits.setTrait(Entry::Virtue::Gettable);
@@ -23549,11 +23549,11 @@ YY_RULE_SETUP
 
          if (containsWord(tmpType, "event")) {
             // event
-            current->mtype = mtype = MethodTypes::Event;
+            current->mtype = mtype = MethodType::Event;
 
          } else {
             // property
-            current->mtype = mtype = MethodTypes::Property;
+            current->mtype = mtype = MethodType::Property;
          }
 
          current->bodyLine = yyLineNr;
@@ -23611,7 +23611,7 @@ YY_RULE_SETUP
 
       } else {
 
-         mtype = MethodTypes::Method;
+         mtype = MethodType::Method;
          virt  = Normal;
 
          // default value
@@ -23628,7 +23628,7 @@ YY_RULE_SETUP
          curlyCount--;
 
       } else {
-         mtype = MethodTypes::Method;
+         mtype = MethodType::Method;
          virt  = Normal;
          unput(';');
          BEGIN(FindMembers);
@@ -25869,8 +25869,8 @@ static void parseCompounds(QSharedPointer<Entry> rt)
             current->protection = protection = Public;
          }
 
-         mtype = Method;
-         virt = Normal;
+         mtype = MethodType::Method;
+         virt  = Normal;
 
          groupEnterCompound(yyFileName, yyLineNr, ce->m_entryName);
 

@@ -4281,7 +4281,7 @@ void addDefine()
 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(s_yyFileName, s_yyLineNr - s_yyMLines, s_yyColNr,
                "#define", s_defName, s_defArgsStr, "", Public, Normal, false, Member,
-               MemberType_Define, ArgumentList(), ArgumentList());
+               MemberDefType::Define, ArgumentList(), ArgumentList());
 
    if (! s_defArgsStr.isEmpty()) {
       ArgumentList argList;
