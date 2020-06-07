@@ -241,6 +241,7 @@ target_include_directories(DoxyPress
 
 target_include_directories(DoxyPress
    SYSTEM PRIVATE
+   ${LLVM_INCLUDE_DIRS}
    ${CLANG_INCLUDE_DIR}
 )
 
@@ -286,42 +287,13 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
    set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
-
    target_link_libraries(DoxyPress
+      PRIVATE
       CopperSpice::CsCore
       CopperSpice::CsXml
-
-      -L${CLANG_LIB_DIR}
-      -Wl,--start-group
-      -lLLVMSupport
-      -lclangAST
-      -lclangBasic
-      -lclangTooling
-      -lclangStaticAnalyzerFrontend
-      -lclangFrontend
-      -lLLVMProfileData
-      -lclangDriver
-      -lclangParse
-      -lclangIndex
-      -lLLVMMCParser
-      -lclangSerialization
-      -lclangSema
-      -lclangEdit
-      -lLLVMBitReader
-      -lLLVMOption
-      -lclangStaticAnalyzerCheckers
-      -lclangStaticAnalyzerCore
-      -lclangAnalysis
-      -lclangAST
-      -lclangToolingCore
-      -lclangLex
-      -lclangBasic
-      -lLLVMCore
-      -lLLVMBinaryFormat
-      -lLLVMMC
-      -lLLVMSupport
-      -Wl,--end-group
-      -lclang
+      libclang
+      clangTooling
+      clangIndex
    )
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")

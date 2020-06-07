@@ -38,10 +38,13 @@ DoxyPress prebuilt binaries are available for Linux, Mac OS X, and Windows.
 
 https://download.copperspice.com/doxypress/binary/
 
-To build DoxyPress from source a current copy of the CopperSpice libraries, a C++17 compiler, and a C++17 standard
-library are required. DoxyPress links with CsCore and CsXml which are part of the CopperSpice libraries.
-
 CMake build files are provided with the DoxyPress source distribution.
+
+#### Dependencies
+ * [CopperSpice](https://github.com/copperspice/copperspice). `CsCore` and `CsXml` are linked.
+ * [LLVM](https://llvm.org/docs/GettingStarted.html#getting-the-source-code-and-building-llvm) Version 9+. For parsing using Clang.
+   LLVM must be built with RTTI enabled (`-DLLVM_ENABLE_RTTI=ON`)
+ * A C++17 compiler and standard library  
 
 
 ### Documentation

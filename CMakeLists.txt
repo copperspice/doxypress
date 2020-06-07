@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
 
 cmake_policy(VERSION 3.8..3.13)
+cmake_policy(SET CMP0074 NEW)
 
 # support using rpath on Mac OS X
 cmake_policy(SET CMP0042 NEW)
@@ -20,6 +21,8 @@ include(CheckIncludeFiles)
 include(CheckTypeSize)
 
 find_package(CopperSpice REQUIRED)
+find_package(Clang REQUIRED CONFIG)
+message(STATUS "Found LLVM ${LLVM_PACKAGE_VERSION}")
 
 # file locations for installing
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -69,9 +72,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
    )
 
 endif()
-
-# find_package(LibClang   REQUIRED)
-# find_package(LibTooling REQUIRED)
 
 set(PACKAGE           "doxypress")
 set(PACKAGE_NAME      "DoxyPress")

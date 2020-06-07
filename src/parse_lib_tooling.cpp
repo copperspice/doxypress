@@ -99,7 +99,7 @@ static QString getUSR_Decl(const clang::Decl *node)
    QString retval;
    llvm::SmallVector<char, 100> buffer;
 
-   if (node->getLocStart().isInvalid() && (std::string(node->getDeclKindName()) == "TranslationUnit") ) {
+   if (node->getLocation().isInvalid() && (std::string(node->getDeclKindName()) == "TranslationUnit") ) {
       return QString("TranslationUnit");
    }
 
@@ -187,7 +187,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString currentUSR = getUSR_Decl(node);
          s_entryMap.insert(currentUSR, current);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString name = getName(node);
 
@@ -367,7 +367,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          s_entryMap.insert(currentUSR, current);
 
-         clang::FullSourceLoc location    = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location    = m_context->getFullLoc(node->getLocation());
          clang::CXXMethodDecl *methodDecl = llvm::dyn_cast<clang::CXXMethodDecl>(node);
 
          QString name = toQString(node->getNameInfo().getName());
@@ -503,32 +503,37 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          // noexcept
          const clang::FunctionProtoType *protoType = node->getType()->getAs<clang::FunctionProtoType>();
-         clang::FunctionProtoType::NoexceptResult noExceptValue = protoType->getNoexceptSpec(*m_context);
+         clang::ExceptionSpecificationType noExceptValue = protoType->getExceptionSpecType();
 
          switch (noExceptValue) {
-
-           case clang::FunctionProtoType::NR_BadNoexcept:
-           case clang::FunctionProtoType::NR_NoNoexcept:
-           case clang::FunctionProtoType::NR_Throw:
-               // do nothing
-               break;
-
-           case clang::FunctionProtoType::NR_Nothrow:
+           case clang::ExceptionSpecificationType::EST_NoThrow:
                args += " noexcept ";
                current->m_traits.setTrait(Entry::Virtue::NoExcept);
                break;
 
-            case clang::FunctionProtoType::NR_Dependent:
-               const clang::Expr *tExpr = protoType->getNoexceptExpr();
+           case clang::ExceptionSpecificationType::EST_DependentNoexcept:
+               {
+                 const clang::Expr *tExpr = protoType->getNoexceptExpr();
+                 std::string tString;
+                 llvm::raw_string_ostream tStream(tString);
+                 tExpr->printPretty(tStream, 0, m_policy);
 
-               std::string tString;
-               llvm::raw_string_ostream tStream(tString);
-               tExpr->printPretty(tStream, 0, m_policy);
-
-               args += " noexcept(" + toQString(tStream.str()) + ")";
-               current->m_traits.setTrait(Entry::Virtue::NoExcept);
+                 args += " noexcept(" + toQString(tStream.str()) + ")";
+                 current->m_traits.setTrait(Entry::Virtue::NoExcept);
+               }
                break;
-         }
+           case clang::EST_None:
+           case clang::EST_DynamicNone:
+           case clang::EST_Dynamic:
+           case clang::EST_MSAny:
+           case clang::EST_BasicNoexcept:
+           case clang::EST_NoexceptFalse:
+           case clang::EST_NoexceptTrue:
+           case clang::EST_Unevaluated:
+           case clang::EST_Uninstantiated:
+           case clang::EST_Unparsed:
+             break;
+           }
 
          returnType.remove("(anonymous namespace)::");
 
@@ -600,14 +605,14 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                current->m_traits.setTrait(Entry::Virtue::Override);
             }
 
-            unsigned int qualifiers = methodDecl->getTypeQualifiers();
+            clang::Qualifiers qualifiers = methodDecl->getMethodQualifiers();
 
-            if (qualifiers & clang::Qualifiers::Restrict)  {
+            if (qualifiers.hasRestrict()) {
                args += " restrict ";
                // not used - argList.restrictSpecifier = true;
             }
 
-            if (qualifiers & clang::Qualifiers::Volatile)  {
+            if (qualifiers.hasVolatile()) {
                args += " volatile ";
                argList.volatileSpecifier = true;
             }
@@ -649,7 +654,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR = getUSR_Decl(node->getParent());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          auto tQualType = node->getType();
          QString name   = getName(node);
@@ -712,7 +717,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getParent());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString name = toQString(node->getNameAsString());
          QString className;
@@ -773,7 +778,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString name = toQString(node->getNameAsString());
          QString className;
@@ -853,7 +858,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString name         = toQString(node->getNameAsString());
          QString type         = toQString(node->getType());
@@ -911,7 +916,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString name;
          QString returnType;
@@ -1065,7 +1070,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QSharedPointer<Entry> parentEntry;
          QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString parentUSR    = getUSR_DeclContext(node->getParent());
          parentEntry          = s_entryMap.value(parentUSR);
@@ -1114,7 +1119,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QSharedPointer<Entry> parentEntry;
          QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
@@ -1181,7 +1186,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString currentUSR = getUSR_Decl(node);
          s_entryMap.insert(currentUSR, current);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocation());
 
          QString name = getName(node);
 
