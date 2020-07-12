@@ -231,63 +231,13 @@ COPPERSPICE_RESOURCES(
 
 add_executable(DoxyPress ${DOXYPRESS_SOURCES})
 
-set(CLANG_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/clang_lib/include)
-set(CLANG_LIB_DIR     ${CMAKE_SOURCE_DIR}/clang_lib/lib)
 
 target_include_directories(DoxyPress
    PRIVATE
    ${CMAKE_SOURCE_DIR}/src
 )
 
-target_include_directories(DoxyPress
-   SYSTEM PRIVATE
-   ${LLVM_INCLUDE_DIRS}
-   ${CLANG_INCLUDE_DIR}
-)
-
-if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-   set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
-
-   target_link_libraries(DoxyPress
-      CopperSpice::CsCore
-      CopperSpice::CsXml
-
-      -L${CLANG_LIB_DIR}
-      -lLLVMSupport
-      -lclangAST
-      -lclangBasic
-      -lclangTooling
-      -lclangStaticAnalyzerFrontend
-      -lclangFrontend
-      -lLLVMProfileData
-      -lclangDriver
-      -lclangParse
-      -lclangIndex
-      -lLLVMMCParser
-      -lclangSerialization
-      -lclangSema
-      -lclangEdit
-      -lLLVMBitReader
-      -lLLVMOption
-      -lLLVMDemangle
-      -lncurses
-      -lclangStaticAnalyzerCheckers
-      -lclangStaticAnalyzerCore
-      -lclangAnalysis
-      -lclangAST
-      -lclangToolingCore
-      -lclangLex
-      -lclangBasic
-      -lLLVMCore
-      -lLLVMBinaryFormat
-      -lLLVMMC
-      -lLLVMSupport
-      -lclang
-   )
-
-elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
-   set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
-   target_link_libraries(DoxyPress
+target_link_libraries(DoxyPress
       PRIVATE
       CopperSpice::CsCore
       CopperSpice::CsXml
@@ -296,56 +246,23 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
       clangIndex
    )
 
-elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
-
+if(CMAKE_SYSTEM_NAME MATCHES "Windows")
    target_link_libraries(DoxyPress
+      PRIVATE
       CopperSpice::CsCore
       CopperSpice::CsXml
-
-      -L${CLANG_LIB_DIR}
-      -Wl,--start-group
-      -lLLVMSupport
-      -lclangAST
-      -lclangBasic
-      -lclangTooling
-      -lclangStaticAnalyzerFrontend
-      -lclangFrontend
-      -lLLVMProfileData
-      -lclangDriver
-      -lclangParse
-      -lclangIndex
-      -lLLVMMCParser
-      -lclangSerialization
-      -lclangSema
-      -lclangEdit
-      -lLLVMBitReader
-      -lLLVMOption
-      -lclangStaticAnalyzerCheckers
-      -lclangStaticAnalyzerCore
-      -lclangAnalysis
-      -lclangAST
-      -lclangToolingCore
-      -lclangLex
-      -lclangBasic
-      -lLLVMCore
-      -lLLVMBinaryFormat
-      -lLLVMMC
-      -lLLVMSupport
-      -Wl,--end-group
-      -llibclang
-
       ole32
       uuid
       version
       z
       advapi32
-)
+    )
+else()
+   set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
 endif()
 
 install(TARGETS DoxyPress DESTINATION .)
 
-install(DIRECTORY ${CLANG_INC}   DESTINATION ./include/)
-install(FILES     ${CLANG_LIBS}  DESTINATION .)
 
 cs_copy_library(CsCore)
 cs_copy_library(CsXml)
