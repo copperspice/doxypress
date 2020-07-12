@@ -268,11 +268,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Windows")
         $<TARGET_FILE:CopperSpice::CsXml>
         $<TARGET_FILE:libclang>
         $<TARGET_FILE_DIR:DoxyPress>)
+
+    install(FILES $<TARGET_FILE:libclang> DESTINATION .)
 else()
    set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
 endif()
-
-
 
 install(TARGETS DoxyPress DESTINATION .)
 

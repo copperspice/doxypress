@@ -42,37 +42,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
 
 endif()
 
-# locate the files for libClang and libTooling
-set(CLANG_PATH "../clang_lib")
-
-# lib clang hdr
-set(CLANG_INC ${CLANG_PATH}/include/6.0.1)
-
-if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-
-   # lib clang dll
-   list(APPEND CLANG_LIBS
-      ${CLANG_PATH}/lib/libclang.dylib
-      ${CLANG_PATH}/lib/libclang.dylib
-   )
-
-elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
-
-   # lib clang dll
-   list(APPEND CLANG_LIBS
-      ${CLANG_PATH}/lib/libclang.so.6
-      ${CLANG_PATH}/lib/libclang.so.6.0
-   )
-
-elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
-
-   # lib clang dll
-   list(APPEND CLANG_LIBS
-      ${CLANG_PATH}/bin/libclang.dll
-   )
-
-endif()
-
 set(PACKAGE           "doxypress")
 set(PACKAGE_NAME      "DoxyPress")
 set(PACKAGE_VERSION   "${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_MICRO}")
