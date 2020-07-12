@@ -1486,7 +1486,6 @@ char *parse_py_YYtext;
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include <unistd.h>
 
 #include <arguments.h>
 #include <commentscan.h>

@@ -1,0 +1,31 @@
+#ifndef DOXYPRESS_CONFIGURE_H
+#define DOXYPRESS_CONFIGURE_H
+
+#ifdef _MSC_VER
+#cmakedefine HAVE_POPEN
+#cmakedefine HAVE_ISATTY
+#ifndef HAVE_POPEN
+#include <stdio.h>
+inline FILE *popen(const char *command, const char *type) {
+    return _popen(command, type);
+}
+
+inline int pclose(FILE *stream) {
+    return _pclose(stream);
+}
+#endif
+
+#ifndef HAVE_ISATTY
+#include <io.h>
+inline int isatty( int fd ) {
+    return _isatty(fd);
+}
+#endif
+
+#endif // _MSC_VER
+
+
+#endif // DOXYPRESS_CONFIGURE_H
+
+
+

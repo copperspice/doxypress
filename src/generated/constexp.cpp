@@ -49,6 +49,8 @@
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
 
+#include <configure.h>
+
 /* begin standard C headers. */
 #include <stdio.h>
 #include <string.h>

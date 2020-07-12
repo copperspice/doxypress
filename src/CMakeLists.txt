@@ -229,7 +229,14 @@ COPPERSPICE_RESOURCES(
    ${CMAKE_CURRENT_SOURCE_DIR}/../doxypress.qrc
 )
 
+check_include_file(unistd.h HAVE_UNISTD_H)
+check_symbol_exists(popen stdio.h HAVE_POPEN)
+check_symbol_exists(isatty unistd.h HAVE_ISATTY)
+configure_file(${CMAKE_SOURCE_DIR}/configure.h.in ${CMAKE_CURRENT_SOURCE_DIR}/configure.h)
 add_executable(DoxyPress ${DOXYPRESS_SOURCES})
+if (NOT HAVE_UNISTD_H)
+    target_compile_definitions(DoxyPress PRIVATE YY_NO_UNISTD_H)
+endif()
 
 
 target_include_directories(DoxyPress
@@ -249,20 +256,25 @@ target_link_libraries(DoxyPress
 if(CMAKE_SYSTEM_NAME MATCHES "Windows")
    target_link_libraries(DoxyPress
       PRIVATE
-      CopperSpice::CsCore
-      CopperSpice::CsXml
       ole32
       uuid
       version
-      z
       advapi32
     )
+
+    add_custom_command(TARGET DoxyPress POST_BUILD  
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_FILE:CopperSpice::CsCore>
+        $<TARGET_FILE:CopperSpice::CsXml>
+        $<TARGET_FILE:libclang>
+        $<TARGET_FILE_DIR:DoxyPress>)
 else()
    set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
 endif()
 
-install(TARGETS DoxyPress DESTINATION .)
 
+
+install(TARGETS DoxyPress DESTINATION .)
 
 cs_copy_library(CsCore)
 cs_copy_library(CsXml)

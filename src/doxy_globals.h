@@ -30,6 +30,7 @@
 
 #include <classlist.h>
 #include <cite.h>
+#include <configure.h>
 #include <dirdef.h>
 #include <entry.h>
 #include <filenamelist.h>

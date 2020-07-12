@@ -1454,8 +1454,8 @@ void RTFGenerator::startMemberDoc(const QString &clname, const QString &memname,
       addIndexItemName(memname, clname);
       addIndexItemName(clname, memname);
    }
-
-   m_textStream << rtf_Style_Reset << rtf_Style[showInline ? "Heading5" : "Heading4"].m_reference;
+   
+   m_textStream << rtf_Style_Reset << rtf_Style[showInline ? QString{"Heading5"} : QString{"Heading4"}].m_reference;
    m_textStream << "{" << endl;
 
    startBold();
