@@ -329,7 +329,6 @@ class Definition : public DefinitionIntf
       m_sortId = id;
    }
 
-   // broom - should this move to util.cpp ?
    QString convertNameToFile(const QString &name, bool allowDots = false) const;
 
    QString navigationPathAsString() const;

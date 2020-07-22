@@ -2602,29 +2602,30 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->section     = Entry::USINGDECL_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
-
       current->startLine = yyLineNr;
-      current_root->addSubEntry(current, current_root);
 
+      current_root->addSubEntry(current, current_root);
       previous = current;
       current  = QMakeShared<Entry>();
+
+      initEntry();
 
       if (insideCSharp) {
          // in C# a using declaration and directive have the same syntax
          // so we also add it as a using directive here
 
          current->m_entryName = text;
+         current->section     = Entry::USINGDIR_SEC;
 
          current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
-         current->section     = Entry::USINGDIR_SEC;
 
          current_root->addSubEntry(current, current_root);
          current = QMakeShared<Entry>();
+         initEntry();
       }
 
-      initEntry();
       BEGIN(Using);
    }
 

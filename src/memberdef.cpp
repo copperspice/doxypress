@@ -2142,15 +2142,15 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
             }
 
             if (isMaybeVoid()) {
-               sl.append("maybevoid");
+               sl.append("maybe void");
             }
 
             if (isMaybeDefault()) {
-               sl.append("maybedefault");
+               sl.append("maybe default");
             }
 
             if (isMaybeAmbiguous()) {
-               sl.append("maybeambiguous");
+               sl.append("maybe ambiguous");
             }
 
             if (isPublished()) {

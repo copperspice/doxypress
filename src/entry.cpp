@@ -103,9 +103,9 @@ void Entry::reset()
    argList.clear();
    typeConstr.clear();
 
-   relatesType  = Simple;
-   virt         = Normal;
-   protection   = Public;
+   relatesType  = RelatesType::Simple;
+   virt         = Specifier::Normal;
+   protection   = Protection::Public;
    mtype        = MethodType::Method;
    groupDocType = GROUPDOC_NORMAL;
    m_srcLang    = SrcLangExt_Unknown;

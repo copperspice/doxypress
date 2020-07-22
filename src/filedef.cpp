@@ -1433,6 +1433,7 @@ static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> roo
    }
 }
 
+#if 0
 static void mergeFileDef(QSharedPointer<DirEntryTree> root, QSharedPointer<FileDef> fd)
 {
    QString filePath = fd->getFilePath();
@@ -1446,6 +1447,7 @@ static void mergeFileDef(QSharedPointer<DirEntryTree> root, QSharedPointer<FileD
    QSharedPointer<DirEntry> e = QMakeShared<DirEntry>(dirNode, fd);
    dirNode->addChild(e);
 }
+#endif
 
 static void addDirsAsGroups(QSharedPointer<DirEntryTree> root, QSharedPointer<GroupDef> parent, int level)
 {

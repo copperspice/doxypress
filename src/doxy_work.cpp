@@ -2811,7 +2811,7 @@ void Doxy_Work::buildListOfUsingDecls(QSharedPointer<Entry> ptrEntry)
       QString name = substitute(root->m_entryName, ".", "::");
 
       if (! Doxy_Globals::g_usingDeclarations.contains(name)) {
-          QSharedPointer<FileDef> fd = ptrEntry->fileDef();
+         QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
          if (fd) {
             Doxy_Globals::g_usingDeclarations.insert(name, *fd);
@@ -2889,6 +2889,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<Entry> ptrEntry)
 void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
 {
    if (ptrEntry->section == Entry::USINGDECL_SEC && (ptrEntry->parent()->section & Entry::COMPOUND_MASK) )  {
+      // in a class/struct
 
       QString fullName = removeRedundantWhiteSpace(ptrEntry->parent()->m_entryName);
       fullName = stripAnonymousNamespaceScope(fullName);
@@ -2939,7 +2940,8 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
                         if (! root->getData(EntryKey::Main_Docs).isEmpty() || ! root->getData(EntryKey::Brief_Docs).isEmpty()) {
                            newMd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                            newMd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-                           newMd->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
+                           newMd->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs),
+                                    root->getData(EntryKey::Inbody_File), root->inbodyLine);
 
                         } else {
                            newMd->setDocumentation(md->documentation(), md->docFile(), md->docLine());
