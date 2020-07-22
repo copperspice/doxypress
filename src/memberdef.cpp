@@ -744,6 +744,8 @@ MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &type, con
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
    m_isDestructorCached  = 0;
+
+   m_usingDeclaration = false;
 }
 
 MemberDef::MemberDef(const MemberDef &md)
@@ -752,6 +754,8 @@ MemberDef::MemberDef(const MemberDef &md)
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
    m_isDestructorCached  = 0;
+
+   m_usingDeclaration = false;
 }
 
 MemberDef &MemberDef::operator=(const MemberDef &)
@@ -2162,6 +2166,11 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
       if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && ! isRelated()) {
          sl.append("inherited");
       }
+
+      if (isUsingDeclaration()) {
+         sl.append("using");
+      }
+
 
    } else if (isObjCMethod() && isImplementation()) {
       sl.append("implementation");
@@ -5480,5 +5489,15 @@ bool MemberDef::isRelatedOrFriend() const
 bool MemberDef::isReference() const
 {
   return Definition::isReference() || (m_impl->templateMaster && m_impl->templateMaster->isReference());
+}
+
+void MemberDef::setUsingDeclaration(bool enable)
+{
+   m_usingDeclaration = enable;
+}
+
+bool MemberDef::isUsingDeclaration() const
+{
+   return m_usingDeclaration;
 }
 

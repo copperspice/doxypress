@@ -2947,6 +2947,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
                            newMd->setInbodyDocumentation(md->inbodyDocumentation(), md->inbodyFile(), md->inbodyLine());
                         }
 
+                        newMd->setUsingDeclaration(true);
                         newMd->setDefinition(md->definition());
                         newMd->enableCallGraph(root->callGraph);
                         newMd->enableCallerGraph(root->callerGraph);

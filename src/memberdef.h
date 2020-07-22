@@ -206,6 +206,10 @@ class MemberDef : public Definition
    bool isFunctionOrSignalSlot() const;
    bool isRelatedOrFriend() const;
 
+   //
+   void setUsingDeclaration(bool enable);
+   bool isUsingDeclaration() const;
+
    // output info
    bool isLinkableInProject() const override;
    bool isLinkable() const override;
@@ -474,6 +478,8 @@ class MemberDef : public Definition
    mutable uchar m_isLinkableCached;       // 0 = not cached, 1 = false, 2 = true
    mutable uchar m_isConstructorCached;    // 0 = not cached, 1 = false, 2 = true
    mutable uchar m_isDestructorCached;     // 0 = not cached, 1 = false, 2 = true
+
+   bool m_usingDeclaration;
 };
 
 void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPointer<MemberDef> mdef);
