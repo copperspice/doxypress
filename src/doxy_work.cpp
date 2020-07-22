@@ -2925,12 +2925,12 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
                               fileName = ptrEntry->m_tagInfo.tag_Name;
                            }
 
-                           const ArgumentList &templAl = md->getTemplateArgumentList();
-                           const ArgumentList &al      = md->getTemplateArgumentList();
+                           const ArgumentList &templateArgList = md->getTemplateArgumentList();
+                           const ArgumentList &arglist = md->getArgumentList();
 
                            newMd = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, md->typeString(),
                               memName, md->argsString(), md->excpString(), root->protection, root->virt, md->isStatic(),
-                              Member, md->memberType(), templAl, al);
+                              Member, md->memberType(), templateArgList, arglist);
                         }
 
                         newMd->setMemberClass(cd);
