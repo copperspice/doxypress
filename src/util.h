@@ -274,7 +274,6 @@ QString substituteOne(const QString &origString, QChar oldChar, const QString &n
 QString showFileDefMatches(const FileNameDict &fnDict, const QString &xName);
 
 bool    srcFileVisibleInIndex(QSharedPointer<FileDef> fd);
-void    stackTrace();
 void    setAnchors(QSharedPointer<MemberList> ml);
 
 QString transcodeToQString(const QByteArray &input);

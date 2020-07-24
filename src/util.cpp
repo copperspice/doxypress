@@ -52,17 +52,6 @@ struct FindFileCacheElem {
    bool isAmbig;
 };
 
-#define ENABLE_TRACINGSUPPORT 0
-
-#if defined(_OS_MAC_) && ENABLE_TRACINGSUPPORT
-#define TRACINGSUPPORT
-#endif
-
-#ifdef TRACINGSUPPORT
-#include <execinfo.h>
-#include <unistd.h>
-#endif
-
 const int MAX_STACK_SIZE = 1000;
 
 static QHash<QString, QSharedPointer<MemberDef>>         s_resolvedTypedefs;
@@ -7365,36 +7354,6 @@ void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, Argument
    }
 
    ol.endConstraintList();
-}
-
-void stackTrace()
-{
-
-#ifdef TRACINGSUPPORT
-   void *backtraceFrames[128];
-   int frameCount = backtrace(backtraceFrames, 128);
-   static char cmd[40960];
-
-   char *p = cmd;
-   p += sprintf(p, "/usr/bin/atos -p %d ", (int)getpid());
-
-   for (int x = 0; x < frameCount; x++) {
-      p += sprintf(p, "%p ", backtraceFrames[x]);
-   }
-
-   fprintf(stderr, "========== STACKTRACE START ==============\n");
-   if (FILE *fp = popen(cmd, "r")) {
-      char resBuf[512];
-
-      while (size_t len = fread(resBuf, 1, sizeof(resBuf), fp)) {
-         fwrite(resBuf, 1, len, stderr);
-      }
-
-      pclose(fp);
-   }
-
-   fprintf(stderr, "============ STACKTRACE END ==============\n");
-#endif
 }
 
 // read a file name
