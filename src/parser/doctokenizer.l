@@ -598,6 +598,8 @@ REFWORD4       {REFWORD4_NOCV}{CVSPEC}?
 REFWORD        {FILEMASK}|{LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
+%option never-interactive
+%option nounistd
 %option noyywrap
 %option yylineno
 

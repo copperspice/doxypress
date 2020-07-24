@@ -659,12 +659,12 @@ COMMANDS     (FORMAT|CONTAINS|MODULE{BS_}PROCEDURE|WRITE|READ|ALLOCATE|ALLOCATED
 IGNORE       (CALL)
 PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((NON_)?RECURSIVE|IMPURE|PURE|ELEMENTAL)?
 
-
+%option caseless
 %option case-insensitive
+%option never-interactive
+%option nounistd
 %option noyywrap
 %option stack
-%option caseless
-
 
 %x Start
 %x SubCall

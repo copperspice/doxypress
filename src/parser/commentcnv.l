@@ -246,6 +246,8 @@ static int yyread(char *buf, int max_size)
 
 %}
 
+%option never-interactive
+%option nounistd
 %option noyywrap
 
 %x Scan

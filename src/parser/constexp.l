@@ -44,6 +44,8 @@ static int yyread(char *buf, int max_size)
 
 %}
 
+%option never-interactive
+%option nounistd
 %option nounput
 
 CONSTSUFFIX ([uU][lL]?[lL]?)|([lL][lL]?[uU]?)

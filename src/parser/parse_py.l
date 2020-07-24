@@ -15,7 +15,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include <unistd.h>
 
 #include <arguments.h>
 #include <commentscan.h>
@@ -435,6 +434,8 @@ SCRIPTCOMMENT     "#!".*
 
 STARTDOCSYMS      "##"
 
+%option never-interactive
+%option nounistd
 %option noyywrap
 
   /* Main start state */

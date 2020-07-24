@@ -23,9 +23,6 @@
 #include <tooltip.h>
 #include <util.h>
 
-#define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
-
 static CodeOutputInterface *s_code;
 
 static QString       s_curClassName;
@@ -234,6 +231,8 @@ comment     {open}"!--"([^-]|"-"[^-])*"--"{close}
 data        "random string"
 string      \"([^"&]|{esc})*\"|\'([^'&]|{esc})*\'
 
+%option never-interactive
+%option nounistd
 %option noyywrap
 %option nounput
 

@@ -1782,6 +1782,8 @@ OPERATOR  {ARITHOP}|{ASSIGNOP}|{LOGICOP}|{BITOP}
 RAWBEGIN  (u|U|L|u8)?R\"[^ \t\(\)\\]{0,16}"("
 RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
+%option never-interactive
+%option nounistd
 %option noyywrap
 
 %x    SkipString

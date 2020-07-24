@@ -954,6 +954,8 @@ TMPLSPEC        "<"{BN}*[^>]+{BN}*">"
 MAILADDR         [a-z_A-Z0-9.+\-]+"@"[a-z_A-Z0-9\-]+("."[a-z_A-Z0-9\-]+)+[a-z_A-Z0-9\-]+
 RCSTAG          "$"{ID}":"[^\n$]+"$"
 
+%option never-interactive
+%option nounistd
 %option noyywrap
 
 /* comment parsing states */

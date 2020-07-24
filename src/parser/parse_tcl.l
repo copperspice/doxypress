@@ -18,7 +18,6 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include <unistd.h>
 
 #include <arguments.h>
 #include <config.h>
@@ -679,9 +678,12 @@ static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QString type, const QS
 %}
 ws              ([ \t]|\\\n)
 
-%option yylineno
+
+%option never-interactive
+%option nounistd
 %option noyywrap
 %option stack
+%option yylineno
 
 %x ERROR
 %x TOP

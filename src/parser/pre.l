@@ -2000,6 +2000,9 @@ B        [ \t]
 BN       [ \t\r\n]
 CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
+%option never-interactive
+%option caseless
+%option nounistd
 %option noyywrap
 
 %x    Start

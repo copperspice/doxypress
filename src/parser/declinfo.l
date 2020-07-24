@@ -89,6 +89,8 @@ static int yyread(char *buf, int max_size)
 B     [ \t]
 ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
 
+%option never-interactive
+%option nounistd
 %option nounput
 %option noyywrap
 
