@@ -16,6 +16,8 @@
 *
 *************************************************************************/
 
+#include <QProcess>
+
 #include <filedef.h>
 
 #include <config.h>
@@ -1523,36 +1525,36 @@ void FileDef::acquireFileVersion()
 
    if (! vercmd.isEmpty() && ! m_filePath.isEmpty() && m_filePath != "generated" && m_filePath != "graph_legend") {
 
-      msg("Version of %s : ", csPrintable(m_filePath));
+      msg("File Version for %s", csPrintable(m_filePath));
 
-      QString cmd = vercmd + " \"" + m_filePath + "\"";
-      FILE *f = popen(csPrintable(cmd), "r");
+      QStringList cmdList = vercmd.split(" ");
+      cmdList.append(m_filePath);
 
-      if (! f) {
-         err("Unable to execute %s\n", csPrintable(vercmd));
+      QString execmd = cmdList.takeFirst();
+
+      QProcess task;
+      task.start(execmd, cmdList);
+
+      task.waitForFinished(-1);
+
+      if (task.exitStatus() != QProcess::NormalExit) {
+         err(", unnable to execute %s\n", csPrintable(vercmd));
          return;
       }
 
       // get the file version
-      const int bufSize = 1024;
+      QByteArray buffer = task.readAllStandardOutput();
 
-      QByteArray buffer;
-      buffer.resize(bufSize);
-
-      int numRead = fread(buffer.data(), 1, bufSize - 1, f);
-      pclose(f);
-
-      if (numRead > 0 && numRead < bufSize) {
-         buffer.resize(numRead);
+      if (! buffer.isEmpty()) {
          m_fileVersion = QString::fromUtf8(buffer.trimmed());
 
          if (! m_fileVersion.isEmpty()) {
-            msg("%s\n", csPrintable(m_fileVersion));
+            msg(" -> %s\n", csPrintable(m_fileVersion));
             return;
          }
       }
 
-      msg("No file version available\n");
+      msg(", version was not found\n");
    }
 }
 
