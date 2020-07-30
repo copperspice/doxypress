@@ -68,10 +68,10 @@ struct TagInfo {
 
 // used in m_entryMap
 enum class EntryKey {
-   File_Name,                      // file name this entry was extracted from            filename
+   File_Name,                      // file name this entry was extracted from
 
-   Brief_Docs,                     // brief description (doc block)                      brief
-   Brief_File,                     // file in which the brief desc. was found            briefFile
+   Brief_Docs,                     // brief description (doc block)
+   Brief_File,                     // file in which the brief desc. was found
    Main_Docs,                      // documentation block (partly parsed)                doc
    MainDocs_File,                  // file in which the documentation was found          docFile
    Inbody_Docs,                    // documentation inside the body of a function        inbodyDocs

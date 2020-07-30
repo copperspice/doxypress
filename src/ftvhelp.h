@@ -54,9 +54,7 @@ class FTVHelp : public IndexIntf
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
                         bool addToNavIndex, QSharedPointer<Definition> def, DirType category = DirType::None) override;
 
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &, const QString &) override {
-      (void) context;
-      (void) md;
+   void addIndexItem(QSharedPointer<Definition>, QSharedPointer<MemberDef>, const QString &, const QString &) override {
    }
 
    void addIndexFile(const QString &) override {}

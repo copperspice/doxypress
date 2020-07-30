@@ -26,31 +26,29 @@
 #include <stdio.h>
 
 #if defined(_WIN32)
-typedef __int64 portable_off_t;
+   using portable_off_t = __int64;
 #else
-typedef off_t portable_off_t;
+   using portable_off_t = off_t;
 #endif
 
-/** @file
- *  @brief Portable versions of functions that are platform dependent.
- */
-
+QString        portable_commandExtension();
 int            portable_system(const QString &command, const QString &args, bool commandHasConsole = true);
+void           portable_sleep(int ms);
 uint           portable_pid();
+char           portable_pathListSeparator();
+
 QString        portable_getenv(const QString &variable);
 void           portable_setenv(const QString &variable, const QString &value);
 void           portable_unsetenv(const QString &variable);
+
 portable_off_t portable_fseek(FILE *f, portable_off_t offset, int whence);
 portable_off_t portable_ftell(FILE *f);
-char           portable_pathListSeparator();
-QString        portable_commandExtension();
-
-Qt::CaseSensitivity  portable_fileSystemIsCaseSensitive();
 
 void           portable_sysTimerStart();
 void           portable_sysTimerStop();
 double         portable_getSysElapsedTime();
-void           portable_sleep(int ms);
+
+Qt::CaseSensitivity  portable_fileSystemIsCaseSensitive();
 
 #endif
 

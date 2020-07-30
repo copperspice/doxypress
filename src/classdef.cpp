@@ -740,6 +740,7 @@ void ClassDef::writeBriefDescription(OutputList &ol, bool exampleFlag)
 
       ol.endParagraph();
    }
+
    ol.writeSynopsis();
 }
 
@@ -819,7 +820,7 @@ void ClassDef::writeDetailedDescription(OutputList &ol, const QString &, bool ex
 
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
-      ol.writeAnchor(0, anchor.isEmpty() ? QString("details") : anchor);
+      ol.writeAnchor("", anchor.isEmpty() ? QString("details") : anchor);
       ol.popGeneratorState();
 
       if (! anchor.isEmpty()) {
@@ -837,7 +838,7 @@ void ClassDef::writeDetailedDescription(OutputList &ol, const QString &, bool ex
       writeDetailedDocumentationBody(ol);
 
    } else {
-      //writeTemplateSpec(ol,this,pageType);
+      // writeTemplateSpec(ol,this,pageType);
    }
 
 }
@@ -1433,6 +1434,7 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
             break;
       }
    }
+
    writeDocAnchorsToTagFile(tagFile);
    tagFile << "  </compound>" << endl;
 }
@@ -1452,7 +1454,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    ol.disableAllBut(OutputGenerator::Html);
    {
       // only HTML only
-      ol.writeAnchor(0, anchor());
+      ol.writeAnchor("", anchor());
       ol.startMemberDoc(0, 0, 0, 0, false);
       ol.startMemberDocName(false);
       ol.parseText(s);
@@ -1491,13 +1493,9 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class)) {
 
       switch (lde->kind()) {
-         case LayoutDocEntry::BriefDesc: {
-            // since we already shown the brief description in the
-            // declaration part of the container, so we use this to
-            // show the details on top.
+         case LayoutDocEntry::BriefDesc:
             writeDetailedDocumentationBody(ol);
-         }
-         break;
+            break;
 
          case LayoutDocEntry::ClassInheritanceGraph:
             writeInheritanceGraph(ol);
@@ -1508,7 +1506,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
             break;
 
          case LayoutDocEntry::MemberDeclStart:
-            if (!isSimple) {
+            if (! isSimple) {
                startMemberDeclarations(ol);
             }
             break;
@@ -1521,21 +1519,25 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
             }
          }
          break;
+
          case LayoutDocEntry::MemberGroups:
             if (! isSimple) {
                writeMemberGroups(ol, true);
             }
             break;
+
          case LayoutDocEntry::MemberDeclEnd:
             if (!isSimple) {
                endMemberDeclarations(ol);
             }
             break;
+
          case LayoutDocEntry::MemberDefStart:
             if (!isSimple) {
                startMemberDocumentation(ol);
             }
             break;
+
          case LayoutDocEntry::MemberDef: {
             LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
             if (isSimple) {
@@ -1545,11 +1547,13 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
             }
          }
          break;
+
          case LayoutDocEntry::MemberDefEnd:
             if (!isSimple) {
                endMemberDocumentation(ol);
             }
             break;
+
          default:
             break;
       }
@@ -1558,10 +1562,10 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    // part 3: close the block
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
-   {
-      // HTML only
-      ol.endIndent();
-   }
+
+   // HTML only
+   ol.endIndent();
+
    ol.popGeneratorState();
 }
 
@@ -1695,15 +1699,19 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
 void ClassDef::addClassAttributes(OutputList &ol)
 {
    QStringList sl;
+
    if (isFinal()) {
       sl.append("final");
    }
+
    if (isSealed()) {
       sl.append("sealed");
    }
+
    if (isAbstract()) {
       sl.append("abstract");
    }
+
    if (getLanguage() == SrcLangExt_IDL && isPublished()) {
       sl.append("published");
    }
@@ -1895,8 +1903,7 @@ QString ClassDef::title() const
 
          }
 
-         pageTitle = theTranslator->trCompoundReference(displayName(), compType,
-                  ! m_tempArgs.listEmpty() );
+         pageTitle = theTranslator->trCompoundReference(displayName(), compType, ! m_tempArgs.listEmpty() );
       }
    }
 
@@ -3612,7 +3619,7 @@ void ClassDef::writeAdditionalInheritedMembers(OutputList &ol)
 {
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-  for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class)) {
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class)) {
 
       if (lde->kind() == LayoutDocEntry::MemberDecl) {
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;

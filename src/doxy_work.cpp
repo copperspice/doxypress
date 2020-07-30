@@ -24,15 +24,12 @@
 #include <set>
 
 #include <arguments.h>
-#include <cite.h>
 #include <cmdmapper.h>
 #include <code_cstyle.h>
-#include <config.h>
 #include <commentcnv.h>
 #include <config.h>
 #include <declinfo.h>
 #include <default_args.h>
-#include <dirdef.h>
 #include <docbookgen.h>
 #include <docparser.h>
 #include <docsets.h>
@@ -40,10 +37,7 @@
 #include <doxy_setup.h>
 #include <doxy_globals.h>
 #include <eclipsehelp.h>
-#include <entry.h>
-#include <formula.h>
 #include <ftvhelp.h>
-#include <groupdef.h>
 #include <htags.h>
 #include <htmlgen.h>
 #include <htmlhelp.h>
@@ -56,7 +50,6 @@
 #include <msc.h>
 #include <objcache.h>
 #include <outputlist.h>
-#include <parse_base.h>
 #include <parse_clang.h>
 #include <parse_cstyle.h>
 #include <parse_py.h>
@@ -1794,7 +1787,7 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
       }
 
       // if a file is found, mark it as a source file
-      if (fd) {
+      if (fd != nullptr) {
          QString iName = root->getData(EntryKey::Include_Name);
 
          if (iName.isEmpty()) {
@@ -2091,7 +2084,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       scName = ptrEntry->parent()->m_entryName;
    }
 
-   // name without parent's scope
+   // name without parent scope
    QString fullName = root->m_entryName;
 
    // strip off any template parameters (but not those for specializations)
@@ -2104,7 +2097,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       qualifiedName.prepend(scName + "::");
    }
 
-   // see if we already found the class before
+   // check if this class has been seen before
    QSharedPointer<ClassDef> cd = getClass(qualifiedName);
 
    Debug::print(Debug::Classes, 0, "  Found class with name %s (qualifiedName=%s -> cd=%p)\n",
@@ -7111,7 +7104,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
 
-               md->setDocsForDefinition(!root->proto);
+               md->setDocsForDefinition(! root->proto);
                md->setPrototype(root->proto);
                md->addSectionsToDefinition(root->m_anchors);
                md->setBodySegment(root->bodyLine, root->endBodyLine);
@@ -7613,7 +7606,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
       if ((i = root->m_entryName.lastIndexOf("::")) != -1) {
          // scope is specified
 
-         scope = root->m_entryName.left(i);                             // extract scope
+         scope = root->m_entryName.left(i);                                    // extract scope
          name  = root->m_entryName.right(root->m_entryName.length() - i - 2);  // extract name
 
          cd = getClass(scope);
@@ -7682,8 +7675,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          // new enum type
 
          md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
-                        "", name, "", "", root->protection, Normal, false,
-                        isMemberOf ? Foreign : isRelated ? Related : Member,
+                        "", name, "", "", root->protection, Normal, false, isMemberOf ? Foreign : isRelated ? Related : Member,
                         MemberDefType::Enumeration, ArgumentList(), ArgumentList());
 
          md->setTagInfo(ptrEntry->m_tagInfo);
@@ -7889,7 +7881,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                      if ( (sle = ptrEntry->m_srcLang) == SrcLangExt_CSharp || sle == SrcLangExt_Java ||
                               sle == SrcLangExt_XML || isStrong) {
 
-                        // Unlike classic C/C++ enums, C++11, C# & Java enum values are only
+                        // Unlike C/C++ enums, C++11, C# & Java enum values are only
                         // visible inside the enum scope, must create them here and only add them to the enum
 
                         QSharedPointer<Entry> root = e->entry();
@@ -7959,7 +7951,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                         }
 
                      } else {
-                        // c++
+                        // C++
 
                         QSharedPointer<MemberName> fmn;
                         MemberNameSDict *enumDict = nullptr;
@@ -8047,7 +8039,9 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
       QString name;
       QString scope;
 
-      if ((i = root->m_entryName.lastIndexOf("::")) != -1) { // scope is specified as part of the name
+      if ((i = root->m_entryName.lastIndexOf("::")) != -1) {
+         // scope is specified as part of the name
+
          name  = root->m_entryName.right(root->m_entryName.length() - i - 2); // extract name
          scope = root->m_entryName.left(i); // extract scope
 
@@ -8112,8 +8106,6 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
                      found = true;
                   }
                }
-            } else {
-
             }
 
          } else {
@@ -9018,7 +9010,7 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
             }
 
          } else {
-            // a page name is a label as well, but should not be double either
+            // page name is a label as well, but should not be double either
             si = QMakeShared<SectionInfo>(indexName, root->startLine, Doxy_Globals::mainPage->name(),
                               Doxy_Globals::mainPage->title(), SectionInfo::Page, 0);
 

@@ -1773,10 +1773,10 @@ void LatexGenerator::endDoxyAnchor(const QString &fName, const QString &anchor)
 
 void LatexGenerator::writeAnchor(const QString &fName, const QString &name)
 {
-   m_textStream << "\\label{" << stripPath(name) << "}" << endl;
-
    static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
    static bool usePDFLatex   = Config::getBool("latex-pdf");
+
+   m_textStream << "\\label{" << stripPath(name) << "}" << endl;
 
    if (usePDFLatex && pdfHyperlinks) {
 

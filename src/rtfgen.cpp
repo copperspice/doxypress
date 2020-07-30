@@ -1402,8 +1402,8 @@ void RTFGenerator::endTitleHead(const QString &fileName, const QString &name)
       m_textStream << "}" << endl;
 
       // make an index entry
-      addIndexItemName(name, QString());
-      writeAnchor(fileName, 0);
+      addIndexItemName(name, "");
+      writeAnchor(fileName, "");
    }
 }
 
@@ -1673,7 +1673,7 @@ void RTFGenerator::endSection(const QString &label, SectionInfo::SectionType)
    m_omitParagraph = false;
    newParagraph();
 
-   writeAnchor(0, label);
+   writeAnchor("", label);
    m_textStream << "}";
 }
 
@@ -2178,10 +2178,9 @@ static void encodeForOutput(QTextStream &t_stream, const QString &text)
    QString temp = text;
    enc = outCodec->fromUnicode(temp);
 
-   uint i;
    bool multiByte = false;
 
-   for (i = 0; i < enc.size(); i++) {
+   for (int i = 0; i < enc.size(); i++) {
       uchar c = (uchar)enc.at(i);
 
       if (c >= 0x80 || multiByte) {

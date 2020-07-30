@@ -152,10 +152,10 @@ class ClassDef : public Definition
    // Return the protection level (Public,Protected,Private) in which this compound was found.
    Protection protection() const;
 
-   // returns true iff a link is possible to this item within this project.
+   // returns true if a link is possible to this item within this project.
    bool isLinkableInProject() const override;
 
-   // return true iff a link to this class is possible (either within
+   // return true if a link to this class is possible (either within
    // this project, or as a cross-reference to another project).
    bool isLinkable() const override;
 

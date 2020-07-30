@@ -95,7 +95,7 @@ class ArgumentList : public QVector<Argument>
 
    RefType refSpecifier;
 
-   // C++11 style Trailing return type
+   // trailing return type
    QString trailingReturnType;
 
    // parsing a method with = delete

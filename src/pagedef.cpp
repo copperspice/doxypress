@@ -16,8 +16,6 @@
 *
 *************************************************************************/
 
-#include <QRegularExpression>
-
 #include <pagedef.h>
 
 #include <config.h>
@@ -31,8 +29,6 @@
 PageDef::PageDef(const QString &f, int l, const QString &name, const QString &d, const QString &t)
    : Definition(f, l, 1, name), m_title(t)
 {
-   static const bool shortNames = Config::getBool("short-names");
-
    setDocumentation(d, f, l);
 
    m_subPageDict  = new PageSDict();

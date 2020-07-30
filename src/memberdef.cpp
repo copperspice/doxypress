@@ -1905,6 +1905,9 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
 
       } else {
 
+         if (isUsingDeclaration()) {
+            sl.append("using");
+         }
          if (isInlineInfo && isInline()) {
             sl.append("inline");
          }
@@ -2154,7 +2157,7 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
             }
 
             if (isPublished()) {
-               sl.append("published");   // enum
+               sl.append("published");
             }
          }
 
@@ -2166,11 +2169,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
       if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && ! isRelated()) {
          sl.append("inherited");
       }
-
-      if (isUsingDeclaration()) {
-         sl.append("using");
-      }
-
 
    } else if (isObjCMethod() && isImplementation()) {
       sl.append("implementation");
@@ -2464,7 +2462,7 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
          for (auto fmd : *fmdl) {
 
             if (fmd->isLinkable()) {
-               // for enums which have documentation, show the enum value name & the documentation
+               // for enums which have documentation, show the enum value name and the documentation
                // enum value is documented as a "\var"
 
                if (first) {
@@ -3034,7 +3032,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       ol.endMemberDoc(false);
    }
 
-   // for HTML write the labels here
+   // for HTML only, write the labels
    ol.pushGeneratorState();
    ol.disableAll();
    ol.enable(OutputGenerator::Html);
@@ -3149,7 +3147,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       docArgList = &m_impl->templateMaster->getArgumentList();
    }
 
-   /* write brief description */
+   // write brief description
    if (! brief.isEmpty() && (repeatBrief || ! briefMemberDesc) ) {
       ol.startParagraph();
 

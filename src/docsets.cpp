@@ -366,6 +366,10 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
          lang = "make";
          break;
 
+      case SrcLangExt_Docs:
+         lang = "docs";
+         break;
+
       case SrcLangExt_Unknown:
          lang = "unknown";
          break;

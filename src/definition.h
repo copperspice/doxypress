@@ -47,8 +47,6 @@ struct DocInfo {
    int line;
    QString doc;
    QString file;
-
-
 };
 
 // Data associated with a brief description
@@ -95,7 +93,6 @@ class DefinitionIntf : public EnableSharedFromThis
 class Definition : public DefinitionIntf
 {
  public:
-
    Definition(const QString &defFileName, int defLine, int defColumn, const QString &name,
       const QString &b = QString(), const QString &d = QString(), bool isPhrase = true);
 
@@ -301,9 +298,8 @@ class Definition : public DefinitionIntf
    void addSourceReferences(QSharedPointer<MemberDef>d);
 
    void addSectionsToIndex(bool addToNavIndex);
-   virtual void addInnerCompound(QSharedPointer<Definition> d) {
-      (void) d;
-   };
+   virtual void addInnerCompound(QSharedPointer<Definition>) {
+   }
 
    void mergeRefItems(QSharedPointer<Definition> d);
 
@@ -375,7 +371,6 @@ class Definition : public DefinitionIntf
    QString m_phraseName;
    int m_defLine;
    int m_defColumn;
-
    int m_inputOrderId;
    int m_sortId;
 };

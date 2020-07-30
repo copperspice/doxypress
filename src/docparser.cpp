@@ -255,8 +255,9 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
    static const bool generateLatex   = Config::getBool("generate-latex");
    static const bool generateDocbook = Config::getBool("generate-docbook");
    static const bool generateRtf     = Config::getBool("generate-rtf");
-   static const bool generateXml     = Config::getBool("generate-xml");
    static const bool latexPdf        = Config::getBool("latex-pdf");
+
+   // static const bool generateXml   = Config::getBool("generate-xml");
 
    static const QString outputHtmlDir  = Config::getString("html-output");
    static const QString outputLatexDir = Config::getString("latex-output");

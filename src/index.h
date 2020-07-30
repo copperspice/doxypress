@@ -162,7 +162,6 @@ class IndexList : public IndexIntf
    bool m_enabled;
 };
 
-
 enum IndexSections {
    isTitlePageStart,
    isTitlePageAuthor,
@@ -189,13 +188,13 @@ enum HighlightedItem {
    HLI_None = 0,
    HLI_Main,
    HLI_Modules,
-   // HLI_Directories,
    HLI_Namespaces,
+   HLI_NamespaceMembers,
    HLI_Hierarchy,
    HLI_Classes,
    HLI_Annotated,
+   HLI_Concepts,
    HLI_Files,
-   HLI_NamespaceMembers,
    HLI_Functions,
    HLI_Globals,
    HLI_Pages,
@@ -206,7 +205,7 @@ enum HighlightedItem {
 
    HLI_ClassVisible,
    HLI_NamespaceVisible,
-   HLI_FileVisible
+   HLI_FileVisible,
 };
 
 enum ClassMemberHighlight {

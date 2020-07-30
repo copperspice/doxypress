@@ -530,6 +530,8 @@ static QString pathToNode(FTVNode *node)
    return result;
 }
 
+/* unused
+
 static bool dupOfParent(const FTVNode *n)
 {
    if (n->parent == 0) {
@@ -542,6 +544,8 @@ static bool dupOfParent(const FTVNode *n)
 
    return false;
 }
+
+*/
 
 static void generateJSLink(QTextStream &t, FTVNode *n)
 {
@@ -560,6 +564,9 @@ static void generateJSLink(QTextStream &t, FTVNode *n)
    }
 }
 
+
+/* unused
+
 static QString convertFileId2Var(const QString  &fileId)
 {
    QString  varId = fileId;
@@ -571,6 +578,8 @@ static QString convertFileId2Var(const QString  &fileId)
 
    return substitute(varId, "-", "_");
 }
+
+*/
 
 static bool generateJSTree(SortedList<NavIndexEntry *> &navIndex, QTextStream &t, const QList<FTVNode *> &nl,
                   int level, bool &omitComma)

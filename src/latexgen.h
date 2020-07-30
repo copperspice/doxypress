@@ -364,26 +364,26 @@ class LatexGenerator : public OutputGenerator
       m_textStream << "\\par" << endl;
    }
 
-   void endDescForItem()  override {}
+   void endDescForItem()  override { }
    void startSection(const QString &, const QString &, SectionInfo::SectionType) override;
    void endSection(const QString &, SectionInfo::SectionType) override;
    void addIndexItemName(const QString &, const QString &) override;
-   void startIndent() override {}
-   void endIndent() override {}
-   void writeSynopsis() override {}
+   void startIndent() override { }
+   void endIndent() override { }
+   void writeSynopsis() override { }
    void startClassDiagram() override;
    void endClassDiagram(const ClassDiagram &, const QString &, const QString &) override;
    void startPageRef() override;
    void endPageRef(const QString &, const QString &) override ;
-   void startQuickIndices() override {}
-   void endQuickIndices() override {}
-   void writeSplitBar(const QString &) override {}
-   void writeNavigationPath(const QString &) override {}
-   void writeLogo() override {}
-   void writeQuickLinks(bool, HighlightedItem, const QString &) override {}
-   void writeSummaryLink(const QString &, const QString &, const QString &, bool) override {}
-   void startContents() override {}
-   void endContents() override {}
+   void startQuickIndices() override { }
+   void endQuickIndices() override { }
+   void writeSplitBar(const QString &) override { }
+   void writeNavigationPath(const QString &) override { }
+   void writeLogo() override { }
+   void writeQuickLinks(bool, HighlightedItem, const QString &) override { }
+   void writeSummaryLink(const QString &, const QString &, const QString &, bool) override { }
+   void startContents() override { }
+   void endContents() override { }
    void writeNonBreakableSpace(int) override;
 
    void startEnumTable()  override{

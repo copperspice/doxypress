@@ -264,6 +264,7 @@ Definition::Definition(const Definition &d)
    m_private->m_body_fileDef   = d.m_private->m_body_fileDef;
 
    m_isPhrase = d.m_isPhrase;
+
    if (m_isPhrase) {
       addToMap(m_name);
    }
@@ -567,9 +568,8 @@ void Definition::setInbodyDocumentation(const QString &d, const QString &inbodyF
 }
 
 
-/*! Reads a fragment of code from file \a fileName starting at
- * line \a startLine and ending at line \a endLine (inclusive). The fragment is
- * stored in \a result. If false is returned the code fragment could not be found
+/*! Reads a fragment of code from file fileName from startLine to  endLine (inclusive).
+ * The fragment is stored in result. Return false if the code fragment could not be found
  *
  * The file is scanned for a opening bracket ('{') from \a startLine onward
  * The line actually containing the bracket is returned via startLine.
@@ -967,9 +967,8 @@ void Definition::setBodyDef(QSharedPointer<FileDef> fd)
 
 bool Definition::hasSources() const
 {
-   return m_private->m_body_startLine != -1 &&
-          m_private->m_body_endLine >= m_private->m_body_startLine &&
-          m_private->m_body_fileDef;
+   return m_private->m_body_fileDef &&
+         m_private->m_body_startLine != -1 && m_private->m_body_endLine >= m_private->m_body_startLine;
 }
 
 // Write code of this definition into the documentation
@@ -1005,6 +1004,7 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
          ol.endCodeFragment();
       }
    }
+
    ol.popGeneratorState();
 }
 

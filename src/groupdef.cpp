@@ -685,7 +685,7 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
-         ol.writeAnchor(0, "details");
+         ol.writeAnchor("", "details");
          ol.popGeneratorState();
 
       } else {
@@ -1422,7 +1422,8 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
             QSharedPointer<ClassDef> cd = md->getClassDefOfAnonymousType();
 
             if (cd) {
-               cd->setGroupDefForAllMembers(fgd, pri, root->getData(EntryKey::File_Name), root->startLine, root->getData(EntryKey::Main_Docs).length() != 0);
+               cd->setGroupDefForAllMembers(fgd, pri, root->getData(EntryKey::File_Name), root->startLine,
+                  root->getData(EntryKey::Main_Docs).length() != 0);
             }
          }
       }

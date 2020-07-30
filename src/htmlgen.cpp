@@ -703,8 +703,6 @@ void HtmlGenerator::init()
    static const QString htmlDirName   = Config::getString("html-output");
    static const QString htmlHeader    = Config::getString("html-header");
    static const QString htmlFooter    = Config::getString("html-footer");
-
-   static const bool disableIndex     = Config::getBool("disable-index");
    static const bool interactiveSvg   = Config::getBool("interactive-svg");
 
    static bool useMathJax  = Config::getBool("use-mathjax");
@@ -1398,13 +1396,12 @@ static void startSectionHeader(QTextStream &t_stream, const QString &relPath, in
 static void endSectionHeader(QTextStream &t_stream)
 {
    // m_stream << "<!-- endSectionHeader -->";
-
    t_stream << "</div>" << endl;
 }
 
 static void startSectionSummary(QTextStream &t_stream, int sectionCount)
 {
-   //t << "<!-- startSectionSummary -->";
+   // t_stream << "<!-- startSectionSummary -->";
    static bool dynamicSections = Config::getBool("html-dynamic-sections");
 
    if (dynamicSections) {
@@ -1416,7 +1413,7 @@ static void startSectionSummary(QTextStream &t_stream, int sectionCount)
 
 static void endSectionSummary(QTextStream &t_stream)
 {
-   //t << "<!-- endSectionSummary -->";
+   // t_stream << "<!-- endSectionSummary -->";
    static bool dynamicSections = Config::getBool("html-dynamic-sections");
 
    if (dynamicSections) {
@@ -1441,7 +1438,7 @@ static void startSectionContent(QTextStream &t_stream, int sectionCount)
 
 static void endSectionContent(QTextStream &t_stream)
 {
-   //t << "<!-- endSectionContent -->";
+   // t_stream << "<!-- endSectionContent -->";
    t_stream << "</div>" << endl;
 }
 
@@ -2209,7 +2206,8 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
       }
    }
 
-   if (count > 0) { // at least one item is visible
+   if (count > 0) {
+      // at least one item is visible
       startQuickIndexList(t_stream, false);
 
       for (auto entry : root->children()) {
@@ -2229,7 +2227,6 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
       endQuickIndexList(t_stream, false);
    }
 }
-
 
 static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath, LayoutNavEntry *hlEntry,
                   LayoutNavEntry::Kind kind, bool highlightParent, bool highlightSearch)
@@ -2284,12 +2281,13 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
                }
             }
 
-            if (!highlightSearch) // on the search page the index will be ended by the
-               // page itself
-            {
+            if (!highlightSearch) {
+               // on the search page the index will be ended by the page itself
                endQuickIndexList(t_stream, true);
             }
-         } else { // normal case for other rows than first one
+
+         } else {
+            // normal case for other rows than first one
             endQuickIndexList(t_stream, true);
          }
       }
@@ -2299,9 +2297,9 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
 static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, HighlightedItem hli,
                   const QString &file, const QString &relPath)
 {
-   static const bool searchEngine      = Config::getBool("html-search");
-   static const bool serverBasedSearch = Config::getBool("search-server-based");
-   static const bool externalSearch    = Config::getBool("search-external");
+   //   static const bool searchEngine      = Config::getBool("html-search");
+   //   static const bool serverBasedSearch = Config::getBool("search-server-based");
+   //   static const bool externalSearch    = Config::getBool("search-external");
 
    LayoutNavEntry *root = LayoutDocManager::instance().rootNavEntry();
    LayoutNavEntry::Kind kind = (LayoutNavEntry::Kind) - 1;
@@ -2325,6 +2323,10 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
          altKind = LayoutNavEntry::Namespaces;
          break;
 
+      case HLI_NamespaceMembers:
+         kind = LayoutNavEntry::NamespaceMembers;
+         break;
+
       case HLI_Hierarchy:
          kind = LayoutNavEntry::ClassHierarchy;
          break;
@@ -2342,10 +2344,6 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
       case HLI_Files:
          kind = LayoutNavEntry::FileList;
          altKind = LayoutNavEntry::Files;
-         break;
-
-      case HLI_NamespaceMembers:
-         kind = LayoutNavEntry::NamespaceMembers;
          break;
 
       case HLI_Functions:

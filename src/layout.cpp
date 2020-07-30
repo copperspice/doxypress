@@ -28,7 +28,6 @@
 #include <assert.h>
 
 #include <layout.h>
-
 #include <config.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
@@ -270,7 +269,7 @@ class LayoutParser : public QXmlDefaultHandler
       m_sHandler.insert("doxypress-layout",          QMakeShared<StartElement>(this, &LayoutParser::startLayout));
       m_eHandler.insert("doxypress-layout",          QMakeShared<EndElement>(this,   &LayoutParser::endLayout));
 
-      // class layout
+      // main navindex layout
       m_sHandler.insert("navindex",                  QMakeShared<StartElement>(this, &LayoutParser::startNavIndex));
       m_sHandler.insert("navindex/tab",              QMakeShared<StartElement>(this, &LayoutParser::startNavEntry));
       m_eHandler.insert("navindex/tab",              QMakeShared<EndElement>(this,   &LayoutParser::endNavEntry));

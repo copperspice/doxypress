@@ -518,7 +518,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
    static bool        const clangUseHeaders      = Config::getBool("clang-use-headers");
    static QStringList const clangFlags           = Config::getList("clang-flags");
 
-   static const Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
+   // static const Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
 
    static std::vector<QString> clangCmdArgs;
    std::vector<QString> argList;
@@ -850,6 +850,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
             // run the clang tooling to create a new FrontendAction
             int result = tool.run(clang::tooling::newFrontendActionFactory<DoxyFrontEnd>().get());
+            (void) result;
          }
       }
 
@@ -1039,13 +1040,14 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   CXTokenKind tokenKind = clang_getTokenKind(p->tokens[tmpIndex]);
 
                   if (tokenKind == CXToken_Comment) {
-                     tmpIndex++;
+                     ++tmpIndex;
 
                   }  else {
                      cursor = p->cursors[tmpIndex];
 
                      if (getCursorUSR(cursor).isEmpty()) {
-                        tmpIndex++;
+                        ++tmpIndex;
+
                      } else {
                         break;
                      }
@@ -1069,10 +1071,12 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   handleCommentBlock(comment, false, fileName, current);
 
                   if (isBrief && current->getData(EntryKey::Brief_Docs).isEmpty()) {
+
                      QString brief;
 
                      static QRegularExpression regExp("([^.]*\\.)\\s(.*)",  QPatternOption::ExactMatchOption);
                      QRegularExpressionMatch match = regExp.match(comment);
+
 
                      if (match.hasMatch()) {
                         brief   = match.captured(1);
@@ -1094,10 +1098,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       p->tokens    = 0;
       p->numTokens = 0;
       p->cursors   = 0;
-
-
-printf("\n   Heads Up - libClang is NOT happy  %d\n\n", errorCode);
-
 
       if (errorCode == CXError_InvalidArguments ) {
          err("libClang failed to parse file %s, invalid arguments", csPrintable(fileName));

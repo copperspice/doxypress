@@ -291,6 +291,7 @@ class HtmlGenerator : public OutputGenerator
    void writeRuler() override  {
       m_textStream << "<hr/>";
    }
+
    void writeAnchor(const QString &, const QString &name) override {
       m_textStream << "<a name=\"" << name << "\" id=\"" << name << "\"></a>";
    }
@@ -384,7 +385,6 @@ class HtmlGenerator : public OutputGenerator
 
       m_textStream << "<table class=\"fieldtable\">" << endl
            << "<tr><th>" << title1 << "</th><th>" << title2 << "</th></tr>";
-
    }
 
    void endEnumTable() override {
@@ -448,6 +448,7 @@ class HtmlGenerator : public OutputGenerator
    void writeSummaryLink(const QString &file, const QString &anchor, const QString &title, bool first) override;
    void startContents() override;
    void endContents() override;
+
    void startPageDoc(const QString &pageTitle) override;
    void endPageDoc() override;
    void writeNonBreakableSpace(int) override;

@@ -26,32 +26,28 @@
 class PageSDict;
 class OutputList;
 
-/** @brief A model of a page symbol. */
 class PageDef : public Definition
 {
   public:
    PageDef(const QString &f, int l, const QString &n, const QString &d, const QString &t);
    ~PageDef();
 
-   // setters
    void setFileName(const QString &name);
    void setLocalToc(const LocalToc &tl);
    // emerald, not ready yet void setShowLineNo(bool);
 
-   // getters
    DefType definitionType() const override {
       return TypePage;
    }
 
    bool isLinkableInProject() const override {
-      return /*hasDocumentation() &&*/ !isReference();
+      return ! isReference();
    }
 
    bool isLinkable() const override {
       return isLinkableInProject() || isReference();
    }
 
-   // functions to get a uniform interface with Definitions
    QString getOutputFileBase() const override;
 
    QString anchor() const  override{

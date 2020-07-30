@@ -437,7 +437,9 @@ class OutputGenerator : public BaseOutputDocInterface
       (void) pageTitle;
    };
 
-   virtual void endPageDoc() {};
+   virtual void endPageDoc() {
+   };
+
    virtual void startTextBlock(bool) = 0;
    virtual void endTextBlock(bool) = 0;
    virtual void lastIndexPage() = 0;
