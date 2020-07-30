@@ -16,8 +16,9 @@
 *
 *************************************************************************/
 
-#include <QRegularExpression>
 #include <QCryptographicHash>
+#include <QProcess>
+#include <QRegularExpression>
 
 #include <ctype.h>
 #include <stdio.h>
@@ -578,42 +579,63 @@ void Definition::setInbodyDocumentation(const QString &d, const QString &inbodyF
 static bool readCodeFragment(const QString &fileName, int &startLine, int &endLine, QString &result)
 {
    static const bool filterSourceFiles = Config::getBool("filter-source-files");
-   static const int tabSize            = Config::getInt("tab-size");
 
    if (fileName.isEmpty()) {
-      return false;   // not a valid file name
+      return false;
    }
+
+   SrcLangExt lang = getLanguageFromFileName(fileName);
 
    QString tmpResult;
    QString filter = getFileFilter(fileName, true);
 
-   FILE *f = nullptr;
-   bool usePipe = ! filter.isEmpty() && filterSourceFiles;
+   QByteArray buffer;
 
-   SrcLangExt lang = getLanguageFromFileName(fileName);
+   if (filterSourceFiles && ! filter.isEmpty()) {
 
-   if (! usePipe) {
-      // no filter given or wanted
-      f = fopen(fileName.toUtf8().constData(), "r");
+      QStringList cmdList;
+      cmdList.append(fileName);
 
-   } else {
-      // use filter
-      QString cmd = filter + " \"" + fileName + "\"";
-      f = popen(cmd.toUtf8().constData(), "r");
+      QProcess task;
+      task.start(filter, cmdList);
+
+      while (task.waitForReadyRead(-1)) {
+         buffer.append(task.readAllStandardOutput());
+      }
+
+      if (task.exitStatus() != QProcess::NormalExit) {
+         err("Unable to execute %s\n", csPrintable(fileName));
+         return false;
+      }
+
+    } else {
+      QFile f(fileName);
+
+      if (! f.open(QIODevice::ReadOnly)) {
+         err("Unable to open file for reading %s, error: %d\n", csPrintable(fileName), f.error());
+         return false;
+      }
+
+      buffer = f.readAll();
+      f.close();
    }
 
    // for TCL, Python, and Fortran no bracket search is possible
    bool found = (lang == SrcLangExt_Tcl) || (lang == SrcLangExt_Python) || (lang == SrcLangExt_Fortran);
 
-   if (f) {
+   const char *ptr = buffer.constData();
+
+   if (ptr) {
       int c      = 0;
-      int col    = 0;
       int lineNr = 1;
 
       // skip until the startLine has reached
 
-      while (lineNr < startLine && !feof(f)) {
-         while ((c = fgetc(f)) != '\n' && c != EOF) /* skip */;
+      while (lineNr < startLine && *ptr) {
+         while ((c = *ptr++) != '\n' && c != 0) {
+            // skip
+         }
+
          lineNr++;
 
          if (found && c == '\n') {
@@ -621,133 +643,61 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
          }
       }
 
-      if (! feof(f)) {
-         // skip until the opening bracket or lonely : is found
-         char cn = 0;
+      if (*ptr) {
+         found = true;
 
-         while (lineNr <= endLine && ! feof(f) && ! found) {
-            int pc = 0;
-
-            while ((c = fgetc(f)) != '{' && c != ':' && c != EOF) {
-
-               if (c == '\n') {
-                  lineNr++;
-                  col = 0;
-
-               } else if (c == '\t') {
-                  col += tabSize - (col % tabSize);
-
-               } else if (pc == '/' && c == '/') {
-                  // skip single line comment
-
-                  while ((c = fgetc(f)) != '\n' && c != EOF) {
-                     pc = c;
-                  }
-
-                  if (c == '\n') {
-                     lineNr++, col = 0;
-                  }
-
-               } else if (pc == '/' && c == '*') {
-                  // skip C style comment
-
-                  while (((c = fgetc(f)) != '/' || pc != '*') && c != EOF) {
-                     if (c == '\n') {
-                        lineNr++;
-                        col = 0;
-                     }
-
-                     pc = c;
-                  }
-
-               } else {
-                  col++;
-               }
-               pc = c;
-            }
-
-            if (c == ':') {
-               cn = fgetc(f);
-               if (cn != ':') {
-                  found = true;
-               }
-
-            } else if (c == '{') {
-               // } so vi matching brackets has no problem
-               found = true;
-            }
+         // skip over newline
+         if (c == '\n') {
+             c = *ptr;
+             ++ptr;
          }
 
-         if (found) {
-            // For code with more than one line, fill the line with spaces until we are
-            // at the right column so that the opening brace lines up with the closing brace
+         // copy until end of line
+         if (c != '\0') {
+            tmpResult += c;
+         }
 
-            if (endLine != startLine) {
-               QString spaces;
-               spaces.fill(' ', col);
+         startLine = lineNr;
 
-               tmpResult += spaces;
-            }
+         constexpr const int maxLineLength = 4096;
+         char lineStr[maxLineLength];
 
-            // copy until end of line
-            if (c) {
-               tmpResult += c;
-            }
-
-            startLine = lineNr;
-
-            if (c == ':') {
-               tmpResult += cn;
-
-               if (cn == '\n') {
-                  lineNr++;
-               }
-            }
-
-            const int maxLineLength = 4096;
-            char lineStr[maxLineLength];
+         do {
+            int size_read;
 
             do {
-               int size_read;
+               // read up to maxLineLength-1 bytes, the last byte being zero
+               int i = 0;
 
-               do {
-                  // read up to maxLineLength-1 bytes, the last byte being zero
-                  char *p = fgets(lineStr, maxLineLength, f);
+               while ((c = *ptr++) && i < maxLineLength - 1) {
+                  lineStr[i] = c;
+                  ++i;
 
-                  if (p) {
-                     size_read = qstrlen(p);
-
-                  } else { // nothing read
-                     size_read = -1;
-                     lineStr[0] = '\0';
+                  if (c == '\n') {
+                     break;
                   }
-                  tmpResult += lineStr;
+               }
 
-               } while (size_read == (maxLineLength - 1));
+               lineStr[i] = '\0';
+               size_read  = i;
 
-               lineNr++;
+               tmpResult += lineStr;
 
-            } while (lineNr <= endLine && ! feof(f));
+            } while (size_read == (maxLineLength - 1));
 
-            // strip stuff after closing bracket
-            int newLineIndex = tmpResult.lastIndexOf('\n');
-            int braceIndex   = tmpResult.lastIndexOf('}');
+            lineNr++;
 
-            if (braceIndex > newLineIndex) {
-               tmpResult.truncate(braceIndex + 1);
-            }
+         } while (lineNr <= endLine && *ptr);
 
-            endLine = lineNr - 1;
+         // strip stuff after closing bracket
+         int newLineIndex = tmpResult.lastIndexOf('\n');
+         int braceIndex   = tmpResult.lastIndexOf('}');
+
+         if (braceIndex > newLineIndex) {
+            tmpResult.truncate(braceIndex + 1);
          }
-      }
 
-      if (usePipe) {
-         pclose(f);
-         Debug::print(Debug::FilterOutput, 0, "Filter output\n");
-         Debug::print(Debug::FilterOutput, 0, "-------------\n%s\n-------------\n", csPrintable(tmpResult));
-
-      } else {
-         fclose(f);
+         endLine = lineNr - 1;
       }
    }
 
