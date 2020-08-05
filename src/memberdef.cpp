@@ -1887,6 +1887,9 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
 
    Specifier lvirt = virtualness();
 
+      if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && ! isRelated()) {
+         sl.append("inherited");
+      }
 
       if (isFriend()) {
          sl.append("friend");
@@ -2156,11 +2159,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
             sl.append("implementation");
          }
       }
-
-      if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && ! isRelated()) {
-         sl.append("inherited");
-      }
-
 }
 
 void MemberDef::_writeCallGraph(OutputList &ol)
