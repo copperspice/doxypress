@@ -1887,15 +1887,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
 
    Specifier lvirt = virtualness();
 
-   if (true) {
-
-/*
-      ( (! isObjCMethod() || isOptional() || isRequired()) &&
-         (protection() != Public || lvirt != Normal ||
-          isFriend() || isRelated() || (isInline() && inlineInfo) || isSignal() || isSlot() || isStatic() ||
-          (m_impl->classDef && m_impl->classDef != container && container->definitionType() == TypeClass) ||
-          (m_impl->memSpec & ~Entry::Inline) != 0 ) ) {
-*/
 
       if (isFriend()) {
          sl.append("friend");
@@ -2170,10 +2161,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
          sl.append("inherited");
       }
 
-   } else if (isObjCMethod() && isImplementation()) {
-      sl.append("implementation");
-
-   }
 }
 
 void MemberDef::_writeCallGraph(OutputList &ol)
