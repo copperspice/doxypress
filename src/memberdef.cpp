@@ -1902,6 +1902,15 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
          if (isUsingDeclaration()) {
             sl.append("using");
          }
+
+         if (isNoDiscard()) {
+            sl.append("nodiscard");
+         }
+
+         if (isNoReturn()) {
+            sl.append("noreturn");
+         }
+
          if (isInlineInfo && isInline()) {
             sl.append("inline");
          }
@@ -4551,6 +4560,16 @@ bool MemberDef::isExplicit() const
 bool MemberDef::isDeprecated() const
 {
    return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Deprecated);
+}
+
+bool MemberDef::isNoDiscard() const
+{
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::NoDiscard);
+}
+
+bool MemberDef::isNoReturn() const
+{
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::NoReturn);
 }
 
 bool MemberDef::isMutable() const

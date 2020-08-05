@@ -205,6 +205,10 @@ class Entry : public EnableSharedFromThis
       PrivateSettable,         // C# private setter
       ProtectedSettable,       // C# protected setter
 
+      // atrributes
+      NoDiscard,
+      NoReturn,
+
       Inline,
       Final,
       Explicit,

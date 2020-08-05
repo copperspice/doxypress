@@ -131,6 +131,8 @@ class MemberDef : public Definition
    bool isStatic() const;
    bool isInline() const;
    bool isExplicit() const;
+   bool isNoDiscard() const;
+   bool isNoReturn() const;
    bool isDeprecated() const;
    bool isMutable() const;
    bool isGettable() const;
