@@ -86,16 +86,16 @@ class ClassDef : public Definition
     *  \param startColumn  column number where the definition of this compound starts.
     *  \param name         the name of this compound (including scope)
     *  \param ct           the kind of Compound
-    *  \param ref          the tag file from which this compound is extracted
+    *  \param tag          the tag file from which this compound is extracted
     *                      or 0 if the compound doesn't come from a tag file
-    *  \param fName        the file name as found in the tag file.
+    *  \param tagFileName  the file name as found in the tag file.
     *                      This overwrites the file DoxyPress normally generates based on the compound type & name.
     *  \param isSymbol     If true this class name is added as a publicly visible (and referencable) symbol.
     *  \param isJavaEnum   If true this class is actually a Java enum.
     *                      did not add this to CompoundType to avoid having to adapt all translators.
     */
-   ClassDef(const QString &fileName, int startLine, int startColumn, const QString &name,
-                  enum CompoundType ct, const QString &ref = QString(), const QString &fName = QString(),
+   ClassDef(const QString &fileName, int startLine, int startColumn, const QString &fullName,
+                  enum CompoundType ct, const QString &tag = QString(), const QString &tagFileName = QString(),
                   bool isSymbol = true, bool isJavaEnum = false);
 
    ~ClassDef();

@@ -36,12 +36,12 @@
 #include <message.h>
 #include <util.h>
 
-ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const QString &x_name, CompoundType ct,
-                   const QString &lref, const QString &fName, bool isSymbol, bool isJavaEnum)
-   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(x_name), "", "", isSymbol)
+ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const QString &fullName, CompoundType ct,
+                   const QString &tag, const QString &tagFileName, bool isSymbol, bool isJavaEnum)
+   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(fullName), "", "", isSymbol)
 {
    visited = false;
-   setReference(lref);
+   setReference(tag);
 
    m_compType   = ct;
    m_isJavaEnum = isJavaEnum;
@@ -49,11 +49,11 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
    QString tname = name();
    const QString ctStr = compoundTypeString();
 
-   if (! fName.isEmpty()) {
-      m_fileName = stripExtension(fName);
+   if (tagFileName.isEmpty()) {
+      m_fileName = ctStr + tname;
 
    } else {
-      m_fileName = ctStr + tname;
+      m_fileName = stripExtension(tagFileName);
 
    }
 
