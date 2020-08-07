@@ -2124,7 +2124,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
          // if a forward declaration has different template parameter names
 
          ArgumentList tArgList = getTemplateArgumentsFromName(cd->name(), root->m_templateArgLists);
-         cd->setTemplateArguments(tArgList);
+         cd->setTemplateArgumentList(tArgList);
       }
 
       cd->setCompoundType(convertToCompoundType(root->section, root->m_traits));
@@ -2184,7 +2184,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       cd->setClassTraits(root->m_traits);
 
       cd->setTypeConstraints(root->typeConstr);
-      cd->setTemplateArguments(tArgList);
+      cd->setTemplateArgumentList(tArgList);
 
       cd->setProtection(root->protection);
       cd->setIsStatic(root->stat);

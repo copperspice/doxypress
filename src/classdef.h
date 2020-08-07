@@ -331,7 +331,7 @@ class ClassDef : public Definition
 
    void setClassTraits(Entry::Traits traits);
 
-   void setTemplateArguments(const ArgumentList &al);
+   void setTemplateArgumentList(const ArgumentList &al);
    void setTemplateBaseClassNames(const QHash<QString, int> &templateNames);
    void setTemplateMaster(QSharedPointer<ClassDef> tm);
    void setTypeConstraints(const ArgumentList &al);

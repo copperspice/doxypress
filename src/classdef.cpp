@@ -2321,7 +2321,7 @@ void ClassDef::setTypeConstraints(const ArgumentList &al)
    m_typeConstraints = al;
 }
 
-void ClassDef::setTemplateArguments(const ArgumentList &al)
+void ClassDef::setTemplateArgumentList(const ArgumentList &al)
 {
    m_tempArgs = al;
 }
