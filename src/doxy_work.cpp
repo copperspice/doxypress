@@ -205,7 +205,7 @@ namespace Doxy_Work{
    void addClassToContext(QSharedPointer<Entry> ptrEntry);
    void addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry);
 
-   void addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> ifd, QSharedPointer<Entry> root);
+   static void addIncludeFileClass(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root);
    void addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd,
                   QString const &rname);
 
@@ -1734,7 +1734,7 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
    RECURSE_ENTRYTREE(buildFileList, ptrEntry);
 }
 
-void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> ifd, QSharedPointer<Entry> root)
+void Doxy_Work::addIncludeFileClass(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root)
 {
    static const bool forceLocalInc = Config::getBool("force-local-includes");
    static const bool extractAll    = Config::getBool("extract-all");
@@ -1782,8 +1782,8 @@ void Doxy_Work::addIncludeFile(QSharedPointer<ClassDef> cd, QSharedPointer<FileD
 
          warn(root->getData(EntryKey::File_Name), root->startLine, text);
 
-      } else if (includeFile.isEmpty() && ifd && determineSection(ifd->name()) == Entry::HEADER_SEC) {
-         fd = ifd;
+      } else if (includeFile.isEmpty() && include_fd && determineSection(include_fd->name()) == Entry::HEADER_SEC) {
+         fd = include_fd;
       }
 
       // if a file is found, mark it as a source file
@@ -2211,7 +2211,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
    }
 
    if (cd->hasDocumentation()) {
-      addIncludeFile(cd, fd, root);
+      addIncludeFileClass(cd, fd, root);
    }
 
    if (fd && (root->section & Entry::COMPOUND_MASK)) {
