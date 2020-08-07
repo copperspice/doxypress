@@ -499,22 +499,16 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          // noexcept
          const clang::FunctionProtoType *protoType = node->getType()->getAs<clang::FunctionProtoType>();
-         clang::FunctionProtoType::NoexceptResult noExceptValue = protoType->getNoexceptSpec(*m_context);
+         clang::ExceptionSpecificationType noExceptValue = protoType->getExceptionSpecType();
 
          switch (noExceptValue) {
 
-           case clang::FunctionProtoType::NR_BadNoexcept:
-           case clang::FunctionProtoType::NR_NoNoexcept:
-           case clang::FunctionProtoType::NR_Throw:
-               // do nothing
-               break;
-
-           case clang::FunctionProtoType::NR_Nothrow:
+           case clang::ExceptionSpecificationType::EST_NoThrow:
                args += " noexcept ";
                current->m_traits.setTrait(Entry::Virtue::NoExcept);
                break;
 
-            case clang::FunctionProtoType::NR_Dependent:
+           case clang::ExceptionSpecificationType::EST_DependentNoexcept: {
                const clang::Expr *tExpr = protoType->getNoexceptExpr();
 
                std::string tString;
@@ -523,6 +517,20 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
                args += " noexcept(" + toQString(tStream.str()) + ")";
                current->m_traits.setTrait(Entry::Virtue::NoExcept);
+
+               break;
+           }
+
+           case clang::ExceptionSpecificationType::EST_None:
+           case clang::ExceptionSpecificationType::EST_DynamicNone:
+           case clang::ExceptionSpecificationType::EST_Dynamic:
+           case clang::ExceptionSpecificationType::EST_MSAny:
+           case clang::ExceptionSpecificationType::EST_BasicNoexcept:
+           case clang::ExceptionSpecificationType::EST_NoexceptFalse:
+           case clang::ExceptionSpecificationType::EST_NoexceptTrue:
+           case clang::ExceptionSpecificationType::EST_Unevaluated:
+           case clang::ExceptionSpecificationType::EST_Uninstantiated:
+           case clang::ExceptionSpecificationType::EST_Unparsed:
                break;
          }
 
