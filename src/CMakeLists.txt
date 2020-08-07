@@ -248,28 +248,30 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
    set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
 
    target_link_libraries(DoxyPress
+      PRIVATE
       CopperSpice::CsCore
       CopperSpice::CsXml
 
       -L${CLANG_LIB_DIR}
-      -lLLVMSupport
       -lclangAST
       -lclangBasic
       -lclangTooling
       -lclangStaticAnalyzerFrontend
       -lclangFrontend
-      -lLLVMProfileData
       -lclangDriver
       -lclangParse
       -lclangIndex
+      -lLLVMBitstreamReader
+      -lLLVMDemangle
+      -lLLVMFrontendOpenMP
       -lLLVMMCParser
+      -lLLVMProfileData
+      -lLLVMRemarks
       -lclangSerialization
       -lclangSema
       -lclangEdit
       -lLLVMBitReader
       -lLLVMOption
-      -lLLVMDemangle
-      -lncurses
       -lclangStaticAnalyzerCheckers
       -lclangStaticAnalyzerCore
       -lclangAnalysis
@@ -288,22 +290,26 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
    set_target_properties(DoxyPress PROPERTIES OUTPUT_NAME doxypress)
 
    target_link_libraries(DoxyPress
+      PRIVATE
       CopperSpice::CsCore
       CopperSpice::CsXml
 
       -L${CLANG_LIB_DIR}
       -Wl,--start-group
-      -lLLVMSupport
       -lclangAST
       -lclangBasic
       -lclangTooling
       -lclangStaticAnalyzerFrontend
       -lclangFrontend
-      -lLLVMProfileData
       -lclangDriver
       -lclangParse
       -lclangIndex
+      -lLLVMBitstreamReader
+      -lLLVMDemangle
+      -lLLVMFrontendOpenMP
       -lLLVMMCParser
+      -lLLVMProfileData
+      -lLLVMRemarks
       -lclangSerialization
       -lclangSema
       -lclangEdit
@@ -327,22 +333,26 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
 elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
 
    target_link_libraries(DoxyPress
+      PRIVATE
       CopperSpice::CsCore
       CopperSpice::CsXml
 
       -L${CLANG_LIB_DIR}
       -Wl,--start-group
-      -lLLVMSupport
       -lclangAST
       -lclangBasic
       -lclangTooling
       -lclangStaticAnalyzerFrontend
       -lclangFrontend
-      -lLLVMProfileData
       -lclangDriver
       -lclangParse
       -lclangIndex
+      -lLLVMBitstreamReader
+      -lLLVMDemangle
+      -lLLVMFrontendOpenMP
       -lLLVMMCParser
+      -lLLVMProfileData
+      -lLLVMRemarks
       -lclangSerialization
       -lclangSema
       -lclangEdit

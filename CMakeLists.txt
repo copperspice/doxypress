@@ -43,7 +43,7 @@ endif()
 set(CLANG_PATH "../clang_lib")
 
 # lib clang hdr
-set(CLANG_INC ${CLANG_PATH}/include/6.0.1)
+set(CLANG_INC ${CLANG_PATH}/include/10.0.1)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
@@ -57,8 +57,8 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
 
    # lib clang dll
    list(APPEND CLANG_LIBS
-      ${CLANG_PATH}/lib/libclang.so.6
-      ${CLANG_PATH}/lib/libclang.so.6.0
+      ${CLANG_PATH}/lib/libclang.so
+      ${CLANG_PATH}/lib/libclang.so.10
    )
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -69,9 +69,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
    )
 
 endif()
-
-# find_package(LibClang   REQUIRED)
-# find_package(LibTooling REQUIRED)
 
 set(PACKAGE           "doxypress")
 set(PACKAGE_NAME      "DoxyPress")
