@@ -604,14 +604,14 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                current->m_traits.setTrait(Entry::Virtue::Override);
             }
 
-            unsigned int qualifiers = methodDecl->getTypeQualifiers();
+            clang::Qualifiers qualifiers = methodDecl->getMethodQualifiers();
 
-            if (qualifiers & clang::Qualifiers::Restrict)  {
+            if (qualifiers.hasRestrict())  {
                args += " restrict ";
                // not used - argList.restrictSpecifier = true;
             }
 
-            if (qualifiers & clang::Qualifiers::Volatile)  {
+            if (qualifiers.hasVolatile())  {
                args += " volatile ";
                argList.volatileSpecifier = true;
             }
