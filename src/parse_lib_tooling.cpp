@@ -99,7 +99,7 @@ static QString getUSR_Decl(const clang::Decl *node)
    QString retval;
    llvm::SmallVector<char, 100> buffer;
 
-   if (node->getLocStart().isInvalid() && (std::string(node->getDeclKindName()) == "TranslationUnit") ) {
+   if (node->getBeginLoc().isInvalid() && (std::string(node->getDeclKindName()) == "TranslationUnit") ) {
       return QString("TranslationUnit");
    }
 
@@ -187,8 +187,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString currentUSR = getUSR_Decl(node);
          s_entryMap.insert(currentUSR, current);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
          QString name = getName(node);
 
          if (node->isClass() ) {
@@ -363,7 +363,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          s_entryMap.insert(currentUSR, current);
 
-         clang::FullSourceLoc location    = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location    = m_context->getFullLoc(node->getBeginLoc());
          clang::CXXMethodDecl *methodDecl = llvm::dyn_cast<clang::CXXMethodDecl>(node);
 
          QString name = toQString(node->getNameInfo().getName());
@@ -645,7 +645,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR = getUSR_Decl(node->getParent());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
 
          auto tQualType = node->getType();
          QString name   = getName(node);
@@ -708,8 +708,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getParent());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
          QString name = toQString(node->getNameAsString());
          QString className;
 
@@ -770,8 +770,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
          QString name = toQString(node->getNameAsString());
          QString className;
 
@@ -851,7 +851,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
 
          QString name         = toQString(node->getNameAsString());
          QString type         = toQString(node->getType());
@@ -909,7 +909,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
 
          QString name;
          QString returnType;
@@ -1064,7 +1064,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QSharedPointer<Entry> parentEntry;
          QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
 
          QString parentUSR    = getUSR_DeclContext(node->getParent());
          parentEntry          = s_entryMap.value(parentUSR);
@@ -1113,7 +1113,6 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QSharedPointer<Entry> parentEntry;
          QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
 
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
@@ -1180,7 +1179,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString currentUSR = getUSR_Decl(node);
          s_entryMap.insert(currentUSR, current);
 
-         clang::FullSourceLoc location = m_context->getFullLoc(node->getLocStart());
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
 
          QString name = getName(node);
 
