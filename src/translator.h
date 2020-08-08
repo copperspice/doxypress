@@ -79,6 +79,10 @@ class Translator
    virtual QString trRelatedPagesDescription() = 0;
    virtual QString trModulesDescription() = 0;
 
+   virtual QString trConcepts() = 0;
+   virtual QString trConceptList() = 0;
+   virtual QString trConceptListDescription() = 0;
+
    virtual QString trDocumentation() = 0;
    virtual QString trModuleIndex() = 0;
    virtual QString trHierarchicalIndex() = 0;

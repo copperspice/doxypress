@@ -1444,6 +1444,24 @@ class LayoutParser : public QXmlDefaultHandler
          },
 
          {
+            "concepts",
+            LayoutNavEntry::Concepts,
+            theTranslator->trConcepts(),
+            theTranslator->trConceptList(),
+            theTranslator->trConceptListDescription(),
+            "concepts"
+         },
+
+         {
+            "conceptlist",
+            LayoutNavEntry::ConceptList,
+            theTranslator->trConceptList(),
+            "",
+            theTranslator->trConceptListDescription(),
+            "concepts"
+         },
+
+         {
             "hierarchy",
             LayoutNavEntry::ClassHierarchy,
             theTranslator->trClassHierarchy(),

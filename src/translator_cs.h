@@ -314,6 +314,21 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Here is a list of all modules:");
    }
 
+   /*! This is an introduction for  concepts */
+   QString trConcepts() override {
+      return QCoreApplication::translate("doxy-text", "Concepts");
+   }
+
+   /*! This is an introduction to the page with the list of concepts */
+   QString trConceptList() override {
+      return QCoreApplication::translate("doxy-text", "Concept List");
+   }
+
+   /*! This is an introduction to the page with the list of class/file groups */
+   QString trConceptListDescription() override {
+      return QCoreApplication::translate("doxy-text", "Here is a list of all concepts with brief descriptions:");
+   }
+
    // index titles (the project name is prepended for these)
 
    /*! This is used in HTML as the title of index.html. */

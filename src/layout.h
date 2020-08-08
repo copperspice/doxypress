@@ -144,6 +144,8 @@ struct LayoutNavEntry {
       ClassIndex,
       ClassHierarchy,
       ClassMembers,
+      Concepts,
+      ConceptList,
       Files,
       FileList,
       FileGlobals,
