@@ -2679,7 +2679,7 @@ void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
 /*! Writes the "detailed documentation" section of this member to all active output formats
  */
 void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol, const QString &scName,
-                  QSharedPointer<Definition> container, bool inGroup, bool showEnumValues, bool showInline)
+                  QSharedPointer<Definition> def, bool inGroup, bool showEnumValues, bool showInline)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
@@ -2689,7 +2689,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    // if this member is in a group find the real scope name
    bool hasParameterList = false;
-   bool inFile  = container->definitionType() == Definition::TypeFile;
+   bool inFile  = def->definitionType() == Definition::TypeFile;
    bool hasDocs = isDetailedSectionVisible(inGroup, inFile);
 
    QSharedPointer<ClassDef> cd = getClassDef();
@@ -2707,11 +2707,11 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
    QString scopeName = scName;
    QString memAnchor = anchor();
-   QString ciname    = container->displayName();
+   QString ciname    = def->displayName();
 
-   QSharedPointer<Definition> scopedContainer = container;
+   QSharedPointer<Definition> scopedContainer = def;
 
-   if (container->definitionType() == TypeGroup) {
+   if (def->definitionType() == TypeGroup) {
       QSharedPointer<Definition> tmp;
 
       if (tmp = getClassDef()) {
@@ -2728,15 +2728,15 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
 
       }
 
-      ciname = container.dynamicCast<GroupDef>()->groupTitle();
+      ciname = def.dynamicCast<GroupDef>()->groupTitle();
 
-   } else if (container->definitionType() == TypeFile && getNamespaceDef() && lang != SrcLangExt_Python) {
+   } else if (def->definitionType() == TypeFile && getNamespaceDef() && lang != SrcLangExt_Python) {
       // member is in a namespace but is written as part of the file documentation as well
       // make sure its label is unique
       memAnchor.prepend("file_");
    }
 
-   QString cname  = container->name();
+   QString cname  = def->name();
    QString cfname = getOutputFileBase();
 
    QString fullMemberName = name();           // member name with scope

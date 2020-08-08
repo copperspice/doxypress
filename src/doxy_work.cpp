@@ -2138,13 +2138,13 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       extractNamespaceName(fullName, className, namespaceName);
 
       QString tagName;
-      QString refFileName;
+      QString tagFileName;
 
       const TagInfo &tagInfo = ptrEntry->m_tagInfo;
 
       if (! tagInfo.isEmpty()) {
          tagName     = tagInfo.tag_Name;
-         refFileName = tagInfo.tag_FileName;
+         tagFileName = tagInfo.tag_FileName;
 
          if (fullName.contains("::")) {
             // symbols imported via tag files may come without the parent scope
@@ -2171,7 +2171,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       bool isEnum = root->m_traits.hasTrait(Entry::Virtue::Enum);
 
       cd = QMakeShared<ClassDef>(! tagInfo.isEmpty() ? tagName : root->getData(EntryKey::File_Name),
-                  root->startLine, root->startColumn, fullName, sec, tagName, refFileName, true, isEnum);
+                  root->startLine, root->startColumn, fullName, sec, tagName, tagFileName, true, isEnum);
 
       // copy docs to definition
       cd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
@@ -3894,9 +3894,9 @@ void Doxy_Work::buildVarList(QSharedPointer<Entry> ptrEntry)
       addVariable(ptrEntry, isFuncPtr);
    }
 
-   for (auto e : ptrEntry->children() ) {
-      if (e->section != Entry::ENUM_SEC) {
-         buildVarList(e);
+   for (auto item : ptrEntry->children() ) {
+      if (item->section != Entry::ENUM_SEC) {
+         buildVarList(item);
       }
    }
 }
