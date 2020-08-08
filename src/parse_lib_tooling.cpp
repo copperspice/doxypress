@@ -202,12 +202,12 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->m_srcLang        = SrcLangExt_Cpp;
             current->startLine   = location.getSpellingLineNumber();
             current->startColumn = location.getSpellingColumnNumber();
-            current->bodyLine    = current->startLine;
 
             if (node->hasAttr<clang::FinalAttr>())  {
                current->m_traits.setTrait(Entry::Virtue::Final);
             }
 
+            current->startBodyLine = current->startLine;
             if (! node->hasDefinition()) {
                // required, check to ensure bases() container has entries
                return true;
@@ -282,11 +282,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->setData(EntryKey::Member_Type,  "struct");
             current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
-            current->bodyLine    = current->startLine;
             current->m_srcLang     = SrcLangExt_Cpp;
             current->startLine     = location.getSpellingLineNumber();
             current->startColumn   = location.getSpellingColumnNumber();
 
+            current->startBodyLine = current->startLine;
             current->m_traits.setTrait(Entry::Virtue::Struct);
 
             if (node->hasAttr<clang::FinalAttr>())  {
@@ -319,7 +319,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->m_srcLang     = SrcLangExt_Cpp;
             current->startLine     = location.getSpellingLineNumber();
             current->startColumn   = location.getSpellingColumnNumber();
-            current->bodyLine    = current->startLine;
+
+            current->startBodyLine = current->startLine;
 
             current->m_traits.setTrait(Entry::Virtue::Union);
 
@@ -551,7 +552,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->m_srcLang     = SrcLangExt_Cpp;
             current->startLine     = location.getSpellingLineNumber();
             current->startColumn   = location.getSpellingColumnNumber();
-            current->bodyLine    = current->startLine;
+
+            current->startBodyLine = current->startLine;
 
             if (parentEntry) {
                parentEntry->addSubEntry(current, parentEntry);
@@ -629,7 +631,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->m_srcLang     = SrcLangExt_Cpp;
             current->startLine     = location.getSpellingLineNumber();
             current->startColumn   = location.getSpellingColumnNumber();
-            current->bodyLine    = current->startLine;
+
+            current->startBodyLine = current->startLine;
 
             if (parentEntry) {
                parentEntry->addSubEntry(current, parentEntry);
@@ -751,7 +754,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->m_srcLang     = SrcLangExt_Cpp;
          current->startLine     = location.getSpellingLineNumber();
          current->startColumn   = location.getSpellingColumnNumber();
-         current->bodyLine    = current->startLine;
+
+         current->startBodyLine = current->startLine;
 
          if (node->isScoped()) {
             current->m_traits.setTrait(Entry::Virtue::Strong);
@@ -816,7 +820,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->startLine     = location.getSpellingLineNumber();
          current->startColumn   = location.getSpellingColumnNumber();
 
-         current->bodyLine    = current->startLine;
+         current->startBodyLine = current->startLine;
 
          auto tExpr = node->getInitExpr();
 
@@ -880,7 +884,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->startLine     = location.getSpellingLineNumber();
          current->startColumn   = location.getSpellingColumnNumber();
 
-         current->bodyLine    = current->startLine;
+         current->startBodyLine = current->startLine;
 
          if (node->getStorageClass() == clang::SC_Static) {
             current->prependData(EntryKey::Member_Type,  "static ");
@@ -1007,11 +1011,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->argList       = argList;
          current->protection    = getAccessSpecifier(node);
 
-         current->bodyLine    = current->startLine;
          current->m_srcLang     = SrcLangExt_Cpp;
          current->startLine     = location.getSpellingLineNumber();
          current->startColumn   = location.getSpellingColumnNumber();
 
+         current->startBodyLine = current->startLine;
          parentEntry->addSubEntry(current, parentEntry);
 
          return true;
@@ -1039,7 +1043,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 //       current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 //       current->startLine     = location.getSpellingLineNumber();
 //       current->startColumn   = location.getSpellingColumnNumber();
-         current->bodyLine    = current->startLine;
+
+//       current->startBodyLine = current->startLine;
 
          // printf("\n  broom - Macro Definition  name: %s   line: %d  col: %d \n",
          //         csPrintable(name), current->startLine, current->startColumn );
@@ -1091,7 +1096,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->m_srcLang     = SrcLangExt_Cpp;
          current->startLine     = location.getSpellingLineNumber();
          current->startColumn   = location.getSpellingColumnNumber();
-         current->bodyLine    = current->startLine;
+
+         current->startBodyLine = current->startLine;
 
          if (name.isEmpty() ) {
             // anonymous namespace
@@ -1201,7 +1207,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->m_srcLang     = SrcLangExt_Cpp;
          current->startLine     = location.getSpellingLineNumber();
          current->startColumn   = location.getSpellingColumnNumber();
-         current->bodyLine    = current->startLine;
+
+         current->startBodyLine = current->startLine;
 
          if (llvm::dyn_cast<clang::TypeAliasDecl>(node)) {
            current->m_traits.setTrait(Entry::Virtue::Alias);

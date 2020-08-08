@@ -405,8 +405,10 @@ class Entry : public EnableSharedFromThis
    int  docLine;                   // line number at which the documentation was found
    int  briefLine;                 // line number at which the brief desc. was found
    int  inbodyLine;                // line number at which the body doc was found
-   int  bodyLine;                  // line number of the definition in the source
+
+   int  startBodyLine;             // line number of the definition in the source
    int  endBodyLine;               // line number where the definition ends
+
    int  mGrpId;                    // member group id
    int  startLine;                 // start line of entry in the source
    int  startColumn;               // start column of entry in the source

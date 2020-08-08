@@ -1486,7 +1486,6 @@ char *parse_py_YYtext;
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include <unistd.h>
 
 #include <arguments.h>
 #include <commentscan.h>
@@ -1806,8 +1805,8 @@ static void initSpecialBlock()
 static void searchFoundDef()
 {
    current->setData(EntryKey::File_Name, yyFileName);
-   current->startLine = yyLineNr;
-   current->bodyLine  = yyLineNr;
+   current->startLine     = yyLineNr;
+   current->startBodyLine = yyLineNr;
 
    current->section   = Entry::FUNCTION_SEC;
    current->m_srcLang = SrcLangExt_Python;
@@ -1832,8 +1831,8 @@ static void searchFoundClass()
    current->appendData(EntryKey::Member_Type, "class");
 
    current->setData(EntryKey::File_Name, yyFileName);
-   current->startLine = yyLineNr;
-   current->bodyLine  = yyLineNr;
+   current->startLine     = yyLineNr;
+   current->startBodyLine = yyLineNr;
 
    s_packageCommentAllowed = false;
 }
@@ -1858,6 +1857,7 @@ static int yyread(char *buf, int max_size)
 }
 
 /* start command character */
+#define YY_NO_UNISTD_H 1
 /* Main start state */
 
 /* Mid-comment states */
@@ -2148,7 +2148,7 @@ yy_match:
 			*(yy_state_ptr)++ = yy_current_state;
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 2902 );
+		while ( yy_current_state != 542 );
 
 yy_find_action:
 		yy_current_state = *--(yy_state_ptr);
@@ -2272,8 +2272,8 @@ YY_RULE_SETUP
       current->m_entryName = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startBodyLine = yyLineNr;
 
       s_packageCommentAllowed = false;
 
@@ -2292,12 +2292,12 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_py_YYtext);
 
       s_indent = computeIndent(text);
-      current->section   = Entry::VARIABLE_SEC;
-      current->m_entryName      = text.trimmed();
+      current->section        = Entry::VARIABLE_SEC;
+      current->m_entryName    = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);;
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine      = yyLineNr;
+      current->startBodyLine  = yyLineNr;
       s_packageCommentAllowed = false;
 
       BEGIN(VariableDec);
@@ -2318,12 +2318,12 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_py_YYtext);
       s_indent = computeIndent(text);
 
-      current->section   = Entry::VARIABLE_SEC;
-      current->m_entryName      = text.trimmed();
+      current->section        = Entry::VARIABLE_SEC;
+      current->m_entryName    = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine      = yyLineNr;
+      current->startBodyLine  = yyLineNr;
 
       s_packageCommentAllowed = false;
       newVariable();
@@ -2612,12 +2612,12 @@ YY_RULE_SETUP
          DBG_CTX((stderr,"Found instance method variable %s in %s at %d\n", csPrintable(text.mid(5)),
                   csPrintable(current_root->m_entryName), yyLineNr));
 
-         current->m_entryName      = text.mid(5);
-         current->section   = Entry::VARIABLE_SEC;
+         current->m_entryName    = text.mid(5);
+         current->section        = Entry::VARIABLE_SEC;
 
          current->setData(EntryKey::File_Name,   yyFileName);
-         current->startLine = yyLineNr;
-         current->bodyLine  = yyLineNr;
+         current->startLine      = yyLineNr;
+         current->startBodyLine  = yyLineNr;
 
          current->setData(EntryKey::Member_Type, "");
 
@@ -2637,12 +2637,12 @@ YY_RULE_SETUP
       DBG_CTX(stderr, "Found class method variable %s in %s at%d\n",
                   csPrintable(text.mid(4)), csPrintable(current_root->m_entryName), yyLineNr);
 
-      current->m_entryName      = text.mid(4);
-      current->section   = Entry::VARIABLE_SEC;
+      current->m_entryName   = text.mid(4);
+      current->section       = Entry::VARIABLE_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startBodyLine = yyLineNr;
 
       current->setData(EntryKey::Member_Type, "");
 
@@ -2947,9 +2947,11 @@ case 70:
 YY_RULE_SETUP
 {
       // function without arguments
-      s_specialBlock     = true;          // expecting a docstring
-      bodyEntry          = current;
-      current->bodyLine  = yyLineNr;
+      s_specialBlock = true;          // expecting a docstring
+      bodyEntry      = current;
+
+      current->startBodyLine = yyLineNr;
+
       BEGIN( FunctionBody );
    }
 	YY_BREAK
@@ -3008,10 +3010,10 @@ case 77:
 YY_RULE_SETUP
 {
       // expecting a docstring
+      s_specialBlock = true;
+      bodyEntry      = current;
 
-      s_specialBlock    = true;
-      bodyEntry         = current;
-      current->bodyLine = yyLineNr;
+      current->startBodyLine = yyLineNr;
       BEGIN( FunctionBody );
    }
 	YY_BREAK
@@ -3308,8 +3310,8 @@ case 103:
 YY_RULE_SETUP
 {
       // begin of the class definition
-      s_specialBlock     = true;                // expecting a docstring
-      current->bodyLine  = yyLineNr;
+      s_specialBlock         = true;                // expecting a docstring
+      current->startBodyLine = yyLineNr;
       current->setData(EntryKey::Source_Text, "");
       BEGIN(ClassCaptureIndent);
    }
@@ -4612,10 +4614,6 @@ static void parse_py_YY_load_buffer_state  (void)
 	parse_py_YYfree((void *) b  );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a parse_py_YYrestart() or at EOF.
@@ -4639,7 +4637,7 @@ extern int isatty (int );
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 	errno = oerrno;
 }
@@ -5093,7 +5091,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          }
 
          yyFileName = ce->getData(EntryKey::File_Name);
-         yyLineNr   = ce->bodyLine ;
+         yyLineNr   = ce->startBodyLine;
 
          current = QMakeShared<Entry>();
          initEntry();
@@ -5152,13 +5150,13 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       current            = QMakeShared<Entry>();
       initEntry();
 
-      current->m_entryName      = s_moduleScope;
-      current->section   = Entry::NAMESPACE_SEC;
+      current->m_entryName    = s_moduleScope;
+      current->section        = Entry::NAMESPACE_SEC;
       current->setData(EntryKey::Member_Type, "namespace");
 
       current->setData(EntryKey::File_Name,   yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine      = yyLineNr;
+      current->startBodyLine  = yyLineNr;
 
       rt->addSubEntry(current, rt);
 

@@ -726,7 +726,6 @@ char *parse_tcl_YYtext;
 #include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-#include <unistd.h>
 
 #include <arguments.h>
 #include <config.h>
@@ -1384,6 +1383,8 @@ static tcl_scan *tcl_codify_token(tcl_scan *myScan, const QString type, const QS
 #undef  YY_INPUT
 #define YY_INPUT(buf,result,max_size) result = yyread(buf,max_size);
 
+#define YY_NO_UNISTD_H 1
+
 #define INITIAL 0
 #define ERROR 1
 #define TOP 2
@@ -1652,16 +1653,12 @@ yy_match:
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 570 );
+		while ( yy_current_state != 178 );
+		yy_cp = (yy_last_accepting_cpos);
+		yy_current_state = (yy_last_accepting_state);
 
 yy_find_action:
 		yy_act = yy_accept[yy_current_state];
-		if ( yy_act == 0 )
-			{ /* have to back up */
-			yy_cp = (yy_last_accepting_cpos);
-			yy_current_state = (yy_last_accepting_state);
-			yy_act = yy_accept[yy_current_state];
-			}
 
 		YY_DO_BEFORE_ACTION;
 
@@ -2293,7 +2290,8 @@ ECHO;
 
 			else
 				{
-				yy_cp = (yy_c_buf_p);
+				yy_cp = (yy_last_accepting_cpos);
+				yy_current_state = (yy_last_accepting_state);
 				goto yy_find_action;
 				}
 			}
@@ -2785,10 +2783,6 @@ static void parse_tcl_YY_load_buffer_state  (void)
 	parse_tcl_YYfree((void *) b  );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a parse_tcl_YYrestart() or at EOF.
@@ -2812,7 +2806,7 @@ extern int isatty (int );
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 	errno = oerrno;
 }
@@ -4375,12 +4369,12 @@ static void tcl_command_PROC()
 
    // why not needed here? tcl.fn.remove(myName);
 
-   tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = MethodType::Method;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::FUNCTION_SEC;
+   tcl.entry_current->mtype         = MethodType::Method;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
    tcl_command_ArgList(tcl.listCommandwords[4]);
@@ -4424,12 +4418,12 @@ static void tcl_command_Method()
    // needed in case of more then one definition p.e. itcl::method and itcl::body
    // see also bug #
    tcl.fn.remove(myName);
-   tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = MethodType::Method;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::FUNCTION_SEC;
+   tcl.entry_current->mtype         = MethodType::Method;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
    tcl_command_ArgList(tcl.listCommandwords[4]);
 
@@ -4467,12 +4461,12 @@ static void tcl_command_Constructor()
       myEntryCl = myScan->entry_cl;
    }
 
-   tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = MethodType::Method;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::FUNCTION_SEC;
+   tcl.entry_current->mtype         = MethodType::Method;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
    tcl_command_ArgList(tcl.listCommandwords[2]);
@@ -4512,12 +4506,12 @@ static void tcl_command_DESTRUCTOR()
       myEntryCl = myScan->entry_cl;
    }
 
-   tcl.entry_current->section     = Entry::FUNCTION_SEC;
-   tcl.entry_current->mtype       = MethodType::Method;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::FUNCTION_SEC;
+   tcl.entry_current->mtype         = MethodType::Method;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
    myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
@@ -4553,11 +4547,11 @@ static void tcl_command_Namespace()
       myName = myNs + "::" + myName;
    }
 
-   tcl.entry_current->section     = Entry::NAMESPACE_SEC;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::NAMESPACE_SEC;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
 
    tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
    tcl.ns.insert(myName, tcl.entry_current);
@@ -4600,11 +4594,11 @@ static void tcl_command_ITCL_CLASS()
       myName = myNs + "::" + myName;
    }
 
-   tcl.entry_current->section     = Entry::CLASS_SEC;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::CLASS_SEC;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
 
    tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
 
@@ -4639,11 +4633,11 @@ static void tcl_command_OO_CLASS()
    if (myNs.length()) {
       myName = myNs + "::" + myName;
    }
-   tcl.entry_current->section     = Entry::CLASS_SEC;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::CLASS_SEC;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
 
    tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
 
@@ -4697,12 +4691,12 @@ static void tcl_command_OO_DEFINE()
       // code snippet taken from tcl_command_Method()/tcl_command_Constructor
       tcl.fn.remove(myMethod);
 
-      tcl.entry_current->section     = Entry::FUNCTION_SEC;
-      tcl.entry_current->mtype       = MethodType::Method;
-      tcl.entry_current->m_entryName = myMethod;
-      tcl.entry_current->startLine   = tcl.line_command;
-      tcl.entry_current->bodyLine    = tcl.line_body0;
-      tcl.entry_current->endBodyLine = tcl.line_body1;
+      tcl.entry_current->section       = Entry::FUNCTION_SEC;
+      tcl.entry_current->mtype         = MethodType::Method;
+      tcl.entry_current->m_entryName   = myMethod;
+      tcl.entry_current->startLine     = tcl.line_command;
+      tcl.entry_current->startBodyLine = tcl.line_body0;
+      tcl.entry_current->endBodyLine   = tcl.line_body1;
       tcl_protection(tcl.entry_current);
 
       if (n == 11) {
@@ -4772,11 +4766,11 @@ static void tcl_command_Variable(int inclass)
          tcl.entry_current->stat = true;
       }
    }
-   tcl.entry_current->section     = Entry::VARIABLE_SEC;
-   tcl.entry_current->m_entryName = myName;
-   tcl.entry_current->startLine   = tcl.line_command;
-   tcl.entry_current->bodyLine    = tcl.line_body0;
-   tcl.entry_current->endBodyLine = tcl.line_body1;
+   tcl.entry_current->section       = Entry::VARIABLE_SEC;
+   tcl.entry_current->m_entryName   = myName;
+   tcl.entry_current->startLine     = tcl.line_command;
+   tcl.entry_current->startBodyLine = tcl.line_body0;
+   tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
    myEntry->addSubEntry(tcl.entry_current, myEntry);

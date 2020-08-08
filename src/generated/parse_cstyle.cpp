@@ -13514,6 +13514,7 @@ static int yyread(char *buf, int max_size)
 }
 
 /* start command character */
+#define YY_NO_UNISTD_H 1
 /* language parsing states */
 
 /* prototype scanner states */
@@ -13942,7 +13943,7 @@ yy_match:
 			*(yy_state_ptr)++ = yy_current_state;
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 43761 );
+		while ( yy_current_state != 5310 );
 
 yy_find_action:
 		yy_current_state = *--(yy_state_ptr);
@@ -14337,17 +14338,18 @@ YY_RULE_SETUP
          // C++/CLI event
          lineCount();
 
-         current->mtype    = mtype = MethodType::Event;
-         current->bodyLine = yyLineNr;
-         curlyCount        = 0;
+         current->mtype         = mtype = MethodType::Event;
+         current->startBodyLine = yyLineNr;
+
+         curlyCount = 0;
 
          BEGIN( CliPropertyType );
 
       } else if (insideCSharp) {
          lineCount();
 
-         current->mtype    = MethodType::Event;
-         current->bodyLine = yyLineNr;
+         current->mtype         = MethodType::Event;
+         current->startBodyLine = yyLineNr;
 
       } else {
          REJECT;
@@ -14361,9 +14363,10 @@ YY_RULE_SETUP
       if (insideCli) {
          // C++/CLI property
          lineCount();
-         current->mtype    = mtype = MethodType::Property;
-         current->bodyLine = yyLineNr;
-         curlyCount        = 0;
+         current->mtype         = mtype = MethodType::Property;
+         current->startBodyLine = yyLineNr;
+
+         curlyCount = 0;
 
          BEGIN( CliPropertyType );
 
@@ -14505,16 +14508,16 @@ YY_RULE_SETUP
          lineCount();
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
 
-         current->bodyLine    = yyLineNr;
-         current->section     = Entry::FUNCTION_SEC;
-         current->protection  = protection = Public;
+         current->startBodyLine = yyLineNr;
+         current->section       = Entry::FUNCTION_SEC;
+         current->protection    = protection = Public;
 
-         language             = SrcLangExt_ObjC;
-         current->m_srcLang   = SrcLangExt_ObjC;
-         insideObjC           = true;
+         language               = SrcLangExt_ObjC;
+         current->m_srcLang     = SrcLangExt_ObjC;
+         insideObjC             = true;
 
          current->virt  = Specifier::Virtual;
          current->stat  = (text[0]=='+');
@@ -14868,9 +14871,9 @@ YY_RULE_SETUP
       current->setData(EntryKey::Member_Type, "namespace");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
    }
@@ -15051,9 +15054,9 @@ YY_RULE_SETUP
       current->setData(EntryKey::Member_Type, "namespace");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15071,14 +15074,14 @@ YY_RULE_SETUP
       lineCount();
 
       if (insideIDL) {
-         isTypedef            = false;
-         current->section     = Entry::NAMESPACE_SEC;
+         isTypedef              = false;
+         current->section       = Entry::NAMESPACE_SEC;
          current->setData(EntryKey::Member_Type, "module");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -15102,13 +15105,13 @@ YY_RULE_SETUP
       if (insideIDL) {
          isTypedef = false;
 
-         current->section     = Entry::NAMESPACE_SEC;
+         current->section = Entry::NAMESPACE_SEC;
          current->setData(EntryKey::Member_Type, "library");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -15129,13 +15132,13 @@ YY_RULE_SETUP
       if (insideIDL) {
          isTypedef = false;
 
-         current->section     = Entry::NAMESPACE_SEC;
+         current->section = Entry::NAMESPACE_SEC;
          current->setData(EntryKey::Member_Type, "constants");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -15172,8 +15175,8 @@ YY_RULE_SETUP
          current->appendData(EntryKey::Member_Type, " service");
          current->setData(EntryKey::File_Name, yyFileName);
 
-         current->startLine = yyLineNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -15209,8 +15212,8 @@ YY_RULE_SETUP
          current->appendData(EntryKey::Member_Type, " singleton ");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine = yyLineNr;
-         current->bodyLine  = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -15250,9 +15253,9 @@ YY_RULE_SETUP
          current->appendData(EntryKey::Member_Type, " interface");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -15281,8 +15284,8 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " implementation");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine  = yyLineNr;
-      current->bodyLine   = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startBodyLine = yyLineNr;
 
       BEGIN( CompoundName );
    }
@@ -15311,9 +15314,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " interface");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       BEGIN( CompoundName );
    }
@@ -15341,9 +15344,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " protocol");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       BEGIN( CompoundName );
    }
@@ -15366,9 +15369,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " exception");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
       lineCount();
 
       BEGIN( CompoundName );
@@ -15402,9 +15405,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       if (text[0] == '@') {
          language           = SrcLangExt_ObjC;
@@ -15447,9 +15450,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " value class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15478,9 +15481,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " ref class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15506,9 +15509,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " interface class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15534,9 +15537,9 @@ YY_RULE_SETUP
          current->appendData(EntryKey::Member_Type, " coclass");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          lineCount();
 
@@ -15587,9 +15590,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15618,9 +15621,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " value struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15649,9 +15652,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " ref struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15680,9 +15683,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " interface struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15724,9 +15727,9 @@ YY_RULE_SETUP
       current->appendData(EntryKey::Member_Type, " union");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -15768,9 +15771,9 @@ YY_RULE_SETUP
       }
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -16029,29 +16032,30 @@ YY_RULE_SETUP
       current->section     = Entry::USINGDECL_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
-
       current->startLine = yyLineNr;
-      current_root->addSubEntry(current, current_root);
 
+      current_root->addSubEntry(current, current_root);
       previous = current;
       current  = QMakeShared<Entry>();
+
+      initEntry();
 
       if (insideCSharp) {
          // in C# a using declaration and directive have the same syntax
          // so we also add it as a using directive here
 
          current->m_entryName = text;
+         current->section     = Entry::USINGDIR_SEC;
 
          current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
-         current->section     = Entry::USINGDIR_SEC;
 
          current_root->addSubEntry(current, current_root);
          current = QMakeShared<Entry>();
+         initEntry();
       }
 
-      initEntry();
       BEGIN(Using);
    }
 	YY_BREAK
@@ -16070,9 +16074,9 @@ YY_RULE_SETUP
       tmpType = "typedef " + previous->getData(EntryKey::Member_Args);
       tmpType = tmpType.simplified();
 
-      previous->section     = Entry::VARIABLE_SEC;
-      previous->m_entryName = previous->m_entryName.trimmed();
-      previous->bodyLine    = yyLineNr;
+      previous->section       = Entry::VARIABLE_SEC;
+      previous->m_entryName   = previous->m_entryName.trimmed();
+      previous->startBodyLine = yyLineNr;
 
       previous->setData(EntryKey::Member_Type, tmpType);
       previous->setData(EntryKey::Member_Args, "");
@@ -16295,7 +16299,7 @@ YY_RULE_SETUP
 
       if (roundCount == 0 && --sharpCount <= 0) {
 
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
          current->setData(EntryKey::Member_Args, "(");
 
          fullArgString = "(";
@@ -16368,7 +16372,7 @@ case 171:
 YY_RULE_SETUP
 {
       if (insidePHP) {
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
          BEGIN( DefinePHP );
       }  else {
          REJECT;
@@ -16647,33 +16651,33 @@ case 205:
 YY_RULE_SETUP
 {
       // end property
-    lineCount();
+      lineCount();
 
-    current->setData(EntryKey::File_Name, yyFileName);
-    current->startLine   = yyLineNr;
-    current->startColumn = yyColNr;
+      current->setData(EntryKey::File_Name, yyFileName);
+      current->startLine   = yyLineNr;
+      current->startColumn = yyColNr;
 
-    current->m_entryName = current->m_entryName.trimmed();
-    current->section     = Entry::VARIABLE_SEC;
+      current->m_entryName = current->m_entryName.trimmed();
+      current->section     = Entry::VARIABLE_SEC;
 
-    // unknown data type, decipher later on
-    // current->setData(EntryKey::Member_Type, = "");
+      // unknown data type, decipher later on
+      // current->setData(EntryKey::Member_Type, = "");
 
-    current_root->addSubEntry(current, current_root);
-    current = QMakeShared<Entry>();
-    initEntry();
-    BEGIN(FindMembers);
+      current_root->addSubEntry(current, current_root);
+      current = QMakeShared<Entry>();
+      initEntry();
+      BEGIN(FindMembers);
    }
 	YY_BREAK
 case 206:
 YY_RULE_SETUP
 {
-    current->protection = Public;
-    current->mtype      = MethodType::Property;
-    current->m_traits.setTrait(Entry::Virtue::Readable);
-    current->setData(EntryKey::Member_Type, "");
+      current->protection = Public;
+      current->mtype      = MethodType::Property;
+      current->m_traits.setTrait(Entry::Virtue::Readable);
+      current->setData(EntryKey::Member_Type, "");
 
-    BEGIN(CsPropReadVar);
+      BEGIN(CsPropReadVar);
    }
 	YY_BREAK
 case 207:
@@ -17060,7 +17064,7 @@ YY_RULE_SETUP
       if (! current->m_entryName.isEmpty()) {
 
          current->setData(EntryKey::Member_Args, text);
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
 
          fullArgString = text;
 
@@ -17498,8 +17502,8 @@ YY_RULE_SETUP
          REJECT;
       }
 
-      current->bodyLine = yyLineNr;
-      lastDefineContext = YY_START;
+      current->startBodyLine = yyLineNr;
+      lastDefineContext      = YY_START;
       BEGIN( Define );
    }
 	YY_BREAK
@@ -17596,7 +17600,7 @@ YY_RULE_SETUP
 
       current->setData(EntryKey::Member_Args, "(");
 
-      current->bodyLine      = yyLineNr;
+      current->startBodyLine = yyLineNr;
       currentArgumentContext = DefineEnd;
 
       fullArgString = "(";
@@ -17623,8 +17627,8 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->bodyLine     = yyLineNr;
-      current->m_entryName  = text;
+      current->startBodyLine = yyLineNr;
+      current->m_entryName   = text;
       BEGIN(DefineEnd);
    }
 	YY_BREAK
@@ -17705,16 +17709,16 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->m_entryName = text;
-      current->m_entryName = current->m_entryName.trimmed();
-      current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
-      current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1);
-      current->bodyLine = yyLineNr;
+      current->m_entryName   = text;
+      current->m_entryName   = current->m_entryName.trimmed();
+      current->m_entryName   = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
+      current->m_entryName   = current->m_entryName.left(current->m_entryName.length() - 1);
+      current->startBodyLine = yyLineNr;
 
-      lastRoundContext  = DefinePHPEnd;
+      lastRoundContext = DefinePHPEnd;
 
       s_roundGEntry = current;
-      s_roundGEnum   = EntryKey::Initial_Value;
+      s_roundGEnum  = EntryKey::Initial_Value;
 
       roundCount = 0;
       BEGIN( GCopyRound );
@@ -17753,8 +17757,8 @@ YY_RULE_SETUP
       static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
       static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
-      if (current->bodyLine == -1) {
-         current->bodyLine = yyLineNr;
+      if (current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
       }
 
       s_docBlockContext = YY_START;
@@ -17828,8 +17832,8 @@ YY_RULE_SETUP
       // */ (editor syntax fix)
 
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      if (current->bodyLine == -1) {
-         current->bodyLine = yyLineNr;
+      if (current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
       }
 
       s_docBlockContext   = YY_START;
@@ -17928,11 +17932,11 @@ YY_RULE_SETUP
       // in PHP code this could also be due to "<?="
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      current->bodyLine        = yyLineNr;
+      current->startBodyLine = yyLineNr;
       current->setData(EntryKey::Initial_Value, text);
 
       lastInitializerContext = YY_START;
-      initBracketCount     = 0;
+      initBracketCount       = 0;
 
       BEGIN(ReadInitializer);
    }
@@ -18968,8 +18972,8 @@ YY_RULE_SETUP
       QString tmpType = current->getData(EntryKey::Member_Type);
       QString oldType = tmpType;
 
-      if (current->bodyLine == -1) {
-         current->bodyLine = yyLineNr;
+      if (current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
       }
 
       if (insidePHP && tmpType.startsWith("var")) {
@@ -19453,8 +19457,8 @@ case 449:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      current->bodyLine    = yyLineNr;
-      current->m_entryName = text;
+      current->startBodyLine = yyLineNr;
+      current->m_entryName   = text;
    }
 	YY_BREAK
 case 450:
@@ -20183,12 +20187,14 @@ YY_RULE_SETUP
 {
       /* typedef void (A::*ptr_t)(args...) or int (*func(int))[], the ^ is for Obj-C blocks */
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
+
       if (insidePHP)    {
          // reference parameter
          REJECT
 
       } else {
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
+
          lineCount();
          addType(current);
          funcPtrType = text;
@@ -20203,6 +20209,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       current->m_entryName = text;
+
       if (nameIsOperator(current->m_entryName)) {
          BEGIN( FuncPtrOperator );
 
@@ -20302,12 +20309,11 @@ YY_RULE_SETUP
 case 494:
 YY_RULE_SETUP
 {
-      // a function returning a function or
-      // a function returning a pointer to an array
+      // a function returning a function or a function returning a pointer to an array
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
-      current->bodyLine      = yyLineNr;
+      current->startBodyLine = yyLineNr;
       currentArgumentContext = FuncFuncEnd;
       fullArgString          = current->getData(EntryKey::Member_Args);
 
@@ -20449,17 +20455,15 @@ YY_RULE_SETUP
       // for catching typedef void (__stdcall *f)() like definitions
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
-      if (current->getData(EntryKey::Member_Type).startsWith("typedef") && current->bodyLine == -1) {
-         // the bodyLine check is to prevent this guard to be true more than once
-
-         current->bodyLine = yyLineNr;
+      if (current->getData(EntryKey::Member_Type).startsWith("typedef") && current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
          BEGIN( GetCallType );
 
       } else if (! current->m_entryName.isEmpty())    {
          // normal function
          current->setData(EntryKey::Member_Args, text);
 
-         current->bodyLine      = yyLineNr;
+         current->startBodyLine = yyLineNr;
          currentArgumentContext = FuncQual;
          fullArgString          = text;
 
@@ -20491,12 +20495,12 @@ YY_RULE_SETUP
       if (! current->m_entryName.isEmpty()) {
          current->setData(EntryKey::Member_Args, text);
 
-         current->bodyLine      = yyLineNr;
+         current->startBodyLine = yyLineNr;
          currentArgumentContext = FuncQual;
          fullArgString          = text;
 
-         s_argEntry  = current;
-         s_argEnum   = ArgKey::Member_Args;
+         s_argEntry = current;
+         s_argEnum  = ArgKey::Member_Args;
 
          BEGIN( ReadFuncArgType );
       }
@@ -21758,7 +21762,7 @@ YY_RULE_SETUP
 
             if (previous->section != Entry::VARIABLE_SEC) {
                // a function/member declaration
-               previous->bodyLine = -1;
+               previous->startBodyLine = -1;
             }
 
             BEGIN( FindMembers );
@@ -23540,7 +23544,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       bool isAttribute = current->m_traits.hasTrait(Entry::Virtue::Attribute);
-      QString tmpType   = current->getData(EntryKey::Member_Type);
+      QString tmpType  = current->getData(EntryKey::Member_Type);
 
       if (externC) {
          externC = false;
@@ -23549,14 +23553,15 @@ YY_RULE_SETUP
 
          if (containsWord(tmpType, "event")) {
             // event
-            current->mtype = mtype = MethodType::Event;
+            current->mtype = MethodType::Event;
+            mtype          = MethodType::Event;
 
          } else {
             // property
             current->mtype = mtype = MethodType::Property;
          }
 
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
          curlyCount = 0;
 
          BEGIN( CSAccessorDecl );
@@ -23586,7 +23591,7 @@ YY_RULE_SETUP
             // C++11 style initializer list
             current->setData(EntryKey::Initial_Value, text);
 
-            current->bodyLine      = yyLineNr;
+            current->startBodyLine = yyLineNr;
             lastInitializerContext = YY_START;
             initBracketCount       = 1;
 
@@ -25179,10 +25184,6 @@ static void parse_cstyle_YY_load_buffer_state  (void)
 	parse_cstyle_YYfree((void *) b  );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a parse_cstyle_YYrestart() or at EOF.
@@ -25206,7 +25207,7 @@ extern int isatty (int );
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 	errno = oerrno;
 }

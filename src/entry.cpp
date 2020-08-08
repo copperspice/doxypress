@@ -48,7 +48,7 @@ Entry::Entry(const Entry &e)
    docLine          = e.docLine;
    briefLine        = e.briefLine;
    inbodyLine       = e.inbodyLine;
-   bodyLine         = e.bodyLine;
+   startBodyLine    = e.startBodyLine;
    endBodyLine      = e.endBodyLine;
    mGrpId           = e.mGrpId;
    startLine        = e.startLine;
@@ -113,16 +113,16 @@ void Entry::reset()
    m_traits.clear();
 
    // int
-   section      = Entry::EMPTY_SEC;
-   initLines    = -1;
-   docLine      = -1;
-   briefLine    = -1;
-   inbodyLine   = -1;
-   bodyLine     = -1;
-   endBodyLine  = -1;
-   mGrpId       = -1;
-   startLine    = 1;
-   startColumn  = 1;
+   section       = Entry::EMPTY_SEC;
+   initLines     = -1;
+   docLine       = -1;
+   briefLine     = -1;
+   inbodyLine    = -1;
+   startBodyLine = -1;
+   endBodyLine   = -1;
+   mGrpId        = -1;
+   startLine     = 1;
+   startColumn   = 1;
 
    // bool
    stat             = false;

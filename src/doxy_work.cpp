@@ -2111,8 +2111,8 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       cd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
       cd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
 
-      if (root->bodyLine != -1 && cd->getStartBodyLine() == -1) {
-         cd->setBodySegment(root->bodyLine, root->endBodyLine);
+      if (root->startBodyLine != -1 && cd->getStartBodyLine() == -1) {
+         cd->setBodySegment(root->startBodyLine, root->endBodyLine);
          cd->setBodyDef(fd);
       }
 
@@ -2190,7 +2190,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       cd->setIsStatic(root->stat);
 
       // file definition containing the class cd
-      cd->setBodySegment(root->bodyLine, root->endBodyLine);
+      cd->setBodySegment(root->startBodyLine, root->endBodyLine);
       cd->setBodyDef(fd);
 
       // see if the class is found inside a namespace
@@ -2596,7 +2596,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
             // the empty string test is needed for extract all case
             nd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
             nd->insertUsedFile(fd);
-            nd->setBodySegment(root->bodyLine, root->endBodyLine);
+            nd->setBodySegment(root->startBodyLine, root->endBodyLine);
             nd->setBodyDef(fd);
 
             // add class to the list
@@ -3130,7 +3130,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    md->setFromAnonymousMember(fromAnnMemb);
 
    // md->setIndentDepth(indentDepth);
-   md->setBodySegment(ptrEntry->bodyLine, ptrEntry->endBodyLine);
+   md->setBodySegment(ptrEntry->startBodyLine, ptrEntry->endBodyLine);
    md->setInitializer(ptrEntry->getData(EntryKey::Initial_Value));
    md->setMaxInitLines(ptrEntry->initLines);
    md->setMemberGroupId(ptrEntry->mGrpId);
@@ -3375,7 +3375,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    md->setExplicitExternal(root->explicitExternal);
 
    if (! root->explicitExternal) {
-      md->setBodySegment(root->bodyLine, root->endBodyLine);
+      md->setBodySegment(root->startBodyLine, root->endBodyLine);
       md->setBodyDef(fd);
    }
    addMemberToGroups(root, md);
@@ -3607,7 +3607,7 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
    Debug::print(Debug::Variables, 0, "VARIABLE_SEC: \n"
                 "  type=`%s' name=`%s' args=`%s' bodyLine=`%d' mGrpId=%d relates=%s\n",
                 csPrintable(root->getData(EntryKey::Member_Type)), csPrintable(root->m_entryName),
-                csPrintable(root->getData(EntryKey::Member_Args)), root->bodyLine, root->mGrpId,
+                csPrintable(root->getData(EntryKey::Member_Args)), root->startBodyLine, root->mGrpId,
                 csPrintable(root->getData(EntryKey::Related_Class)) );
 
    if (root->getData(EntryKey::Member_Type).isEmpty() && ! root->m_entryName.contains("operator") &&
@@ -3966,7 +3966,7 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    md->setDocsForDefinition(false);
    md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
    md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
-   md->setBodySegment(root->bodyLine, root->endBodyLine);
+   md->setBodySegment(root->startBodyLine, root->endBodyLine);
    md->setMemberTraits(root->m_traits);
    md->setMemberGroupId(root->mGrpId);
    md->setTypeConstraints(root->typeConstr);
@@ -4037,7 +4037,7 @@ void Doxy_Work::buildInterfaceAndServiceList(QSharedPointer<Entry> ptrEntry)
                    csPrintable(root->getData(EntryKey::Member_Type)), csPrintable(ptrEntry->parent()->m_entryName),
                    csPrintable(root->m_entryName),
                    csPrintable(root->getData(EntryKey::Member_Args)), csPrintable(root->getData(EntryKey::Related_Class)), root->relatesType,
-                   csPrintable(root->getData(EntryKey::File_Name)), root->startLine, root->bodyLine, tmpValue, root->mGrpId, root->proto,
+                   csPrintable(root->getData(EntryKey::File_Name)), root->startLine, root->startBodyLine, tmpValue, root->mGrpId, root->proto,
                    csPrintable(root->getData(EntryKey::MainDocs_File)) );
 
       QString const rname = removeRedundantWhiteSpace(root->m_entryName);
@@ -4179,7 +4179,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    md->setDocsForDefinition(! root->proto);
    md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
    md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
-   md->setBodySegment(root->bodyLine, root->endBodyLine);
+   md->setBodySegment(root->startBodyLine, root->endBodyLine);
    md->setMemberTraits(root->m_traits);
    md->setMemberGroupId(root->mGrpId);
    md->setTypeConstraints(root->typeConstr);
@@ -4277,7 +4277,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                    csPrintable(root->getData(EntryKey::Member_Type)), csPrintable(ptrEntry->parent()->m_entryName),
                    csPrintable(root->m_entryName),
                    csPrintable(root->getData(EntryKey::Member_Args)), csPrintable(root->getData(EntryKey::Related_Class)), root->relatesType,
-                   csPrintable(root->getData(EntryKey::File_Name)), root->startLine, root->bodyLine, tmpValue, root->mGrpId, root->proto,
+                   csPrintable(root->getData(EntryKey::File_Name)), root->startLine, root->startBodyLine, tmpValue, root->mGrpId, root->proto,
                    csPrintable(root->getData(EntryKey::MainDocs_File)) );
 
       bool isFriend = root->getData(EntryKey::Member_Type).indexOf("friend ") != -1;
@@ -4468,8 +4468,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         item->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
                         item->setDocsForDefinition(! root->proto);
 
-                        if (item->getStartBodyLine() == -1 && root->bodyLine != -1) {
-                           item->setBodySegment(root->bodyLine, root->endBodyLine);
+                        if (item->getStartBodyLine() == -1 && root->startBodyLine != -1) {
+                           item->setBodySegment(root->startBodyLine, root->endBodyLine);
                            item->setBodyDef(rfd);
                         }
 
@@ -4532,7 +4532,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md->setDocsForDefinition(!root->proto);
                md->setTypeConstraints(root->typeConstr);
 
-               md->setBodySegment(root->bodyLine, root->endBodyLine);
+               md->setBodySegment(root->startBodyLine, root->endBodyLine);
 
                QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
@@ -5968,8 +5968,8 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
    md->setMaxInitLines(root->initLines);
 
    if (rfd) {
-      if ((md->getStartBodyLine() == -1 && root->bodyLine != -1)) {
-         md->setBodySegment(root->bodyLine, root->endBodyLine);
+      if ((md->getStartBodyLine() == -1 && root->startBodyLine != -1)) {
+         md->setBodySegment(root->startBodyLine, root->endBodyLine);
          md->setBodyDef(rfd);
       }
 
@@ -7022,7 +7022,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setDocsForDefinition(! root->proto);
                md->setPrototype(root->proto);
                md->addSectionsToDefinition(root->m_anchors);
-               md->setBodySegment(root->bodyLine, root->endBodyLine);
+               md->setBodySegment(root->startBodyLine, root->endBodyLine);
 
                QSharedPointer<FileDef> fd = ptrEntry->fileDef();
                md->setBodyDef(fd);
@@ -7107,7 +7107,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setDocsForDefinition(! root->proto);
                md->setPrototype(root->proto);
                md->addSectionsToDefinition(root->m_anchors);
-               md->setBodySegment(root->bodyLine, root->endBodyLine);
+               md->setBodySegment(root->startBodyLine, root->endBodyLine);
 
                QSharedPointer<FileDef> fd = ptrEntry->fileDef();
                md->setBodyDef(fd);
@@ -7283,7 +7283,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                // try to find the matching line number of the body from the global function list
                bool found = false;
 
-               if (root->bodyLine == -1) {
+               if (root->startBodyLine == -1) {
                   QSharedPointer<MemberName> rmn = Doxy_Globals::functionNameSDict.find(funcName);
 
                   if (rmn) {
@@ -7319,7 +7319,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                if (! found) {
                   // line number could not be found or is available in this entry
 
-                  md->setBodySegment(root->bodyLine, root->endBodyLine);
+                  md->setBodySegment(root->startBodyLine, root->endBodyLine);
                   md->setBodyDef(fd);
                }
 
@@ -7405,7 +7405,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             md->setDocsForDefinition(!root->proto);
             md->setPrototype(root->proto);
             md->addSectionsToDefinition(root->m_anchors);
-            md->setBodySegment(root->bodyLine, root->endBodyLine);
+            md->setBodySegment(root->startBodyLine, root->endBodyLine);
 
             QSharedPointer<FileDef> fd = ptrEntry->fileDef();
             md->setBodyDef(fd);
@@ -7688,7 +7688,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
             md->setMemberClass(cd);
          }
 
-         md->setBodySegment(root->bodyLine, root->endBodyLine);
+         md->setBodySegment(root->startBodyLine, root->endBodyLine);
          md->setBodyDef(ptrEntry->fileDef());
          md->setMemberTraits(root->m_traits);
          md->setEnumBaseType(root->getData(EntryKey::Member_Args));
@@ -8815,7 +8815,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
                      md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
                   }
 
-                  md->setBodySegment(root->bodyLine, root->endBodyLine);
+                  md->setBodySegment(root->startBodyLine, root->endBodyLine);
                   md->setBodyDef(ptrEntry->fileDef());
                   md->addSectionsToDefinition(root->m_anchors);
                   md->setMaxInitLines(root->initLines);
@@ -8830,7 +8830,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
             }
 
          } else if (count > 1 && (! root->getData(EntryKey::Main_Docs).isEmpty() || ! root->getData(EntryKey::Brief_Docs).isEmpty() ||
-                  root->bodyLine != -1))
+                  root->startBodyLine != -1))
 
             // multiple defines,  do not know where to add docs
             // but maybe they are in different files together with their documentation
@@ -8851,7 +8851,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
                         md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
                      }
 
-                     md->setBodySegment(root->bodyLine, root->endBodyLine);
+                     md->setBodySegment(root->startBodyLine, root->endBodyLine);
                      md->setBodyDef(ptrEntry->fileDef());
                      md->addSectionsToDefinition(root->m_anchors);
                      md->setRefItems(root->m_specialLists);

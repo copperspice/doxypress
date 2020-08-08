@@ -1192,17 +1192,18 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          // C++/CLI event
          lineCount();
 
-         current->mtype    = mtype = MethodType::Event;
-         current->bodyLine = yyLineNr;
-         curlyCount        = 0;
+         current->mtype         = mtype = MethodType::Event;
+         current->startBodyLine = yyLineNr;
+
+         curlyCount = 0;
 
          BEGIN( CliPropertyType );
 
       } else if (insideCSharp) {
          lineCount();
 
-         current->mtype    = MethodType::Event;
-         current->bodyLine = yyLineNr;
+         current->mtype         = MethodType::Event;
+         current->startBodyLine = yyLineNr;
 
       } else {
          REJECT;
@@ -1213,9 +1214,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (insideCli) {
          // C++/CLI property
          lineCount();
-         current->mtype    = mtype = MethodType::Property;
-         current->bodyLine = yyLineNr;
-         curlyCount        = 0;
+         current->mtype         = mtype = MethodType::Property;
+         current->startBodyLine = yyLineNr;
+
+         curlyCount = 0;
 
          BEGIN( CliPropertyType );
 
@@ -1327,16 +1329,16 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          lineCount();
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
 
-         current->bodyLine    = yyLineNr;
-         current->section     = Entry::FUNCTION_SEC;
-         current->protection  = protection = Public;
+         current->startBodyLine = yyLineNr;
+         current->section       = Entry::FUNCTION_SEC;
+         current->protection    = protection = Public;
 
-         language             = SrcLangExt_ObjC;
-         current->m_srcLang   = SrcLangExt_ObjC;
-         insideObjC           = true;
+         language               = SrcLangExt_ObjC;
+         current->m_srcLang     = SrcLangExt_ObjC;
+         insideObjC             = true;
 
          current->virt  = Specifier::Virtual;
          current->stat  = (text[0]=='+');
@@ -1619,9 +1621,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::Member_Type, "namespace");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
    }
@@ -1754,9 +1756,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::Member_Type, "namespace");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -1771,14 +1773,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
 
       if (insideIDL) {
-         isTypedef            = false;
-         current->section     = Entry::NAMESPACE_SEC;
+         isTypedef              = false;
+         current->section       = Entry::NAMESPACE_SEC;
          current->setData(EntryKey::Member_Type, "module");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -1799,13 +1801,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (insideIDL) {
          isTypedef = false;
 
-         current->section     = Entry::NAMESPACE_SEC;
+         current->section = Entry::NAMESPACE_SEC;
          current->setData(EntryKey::Member_Type, "library");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -1823,13 +1825,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (insideIDL) {
          isTypedef = false;
 
-         current->section     = Entry::NAMESPACE_SEC;
+         current->section = Entry::NAMESPACE_SEC;
          current->setData(EntryKey::Member_Type, "constants");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -1863,8 +1865,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->appendData(EntryKey::Member_Type, " service");
          current->setData(EntryKey::File_Name, yyFileName);
 
-         current->startLine = yyLineNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -1897,8 +1899,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->appendData(EntryKey::Member_Type, " singleton ");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine = yyLineNr;
-         current->bodyLine  = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -1935,9 +1937,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->appendData(EntryKey::Member_Type, " interface");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          BEGIN( CompoundName );
 
@@ -1963,8 +1965,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " implementation");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine  = yyLineNr;
-      current->bodyLine   = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startBodyLine = yyLineNr;
 
       BEGIN( CompoundName );
    }
@@ -1990,9 +1992,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " interface");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       BEGIN( CompoundName );
    }
@@ -2017,9 +2019,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " protocol");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       BEGIN( CompoundName );
    }
@@ -2039,9 +2041,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " exception");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
       lineCount();
 
       BEGIN( CompoundName );
@@ -2071,9 +2073,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       if (text[0] == '@') {
          language           = SrcLangExt_ObjC;
@@ -2113,9 +2115,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " value class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2141,9 +2143,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " ref class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2166,9 +2168,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " interface class");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2191,9 +2193,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->appendData(EntryKey::Member_Type, " coclass");
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startLine   = yyLineNr;
-         current->startColumn = yyColNr;
-         current->bodyLine    = yyLineNr;
+         current->startLine     = yyLineNr;
+         current->startColumn   = yyColNr;
+         current->startBodyLine = yyLineNr;
 
          lineCount();
 
@@ -2240,9 +2242,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2268,9 +2270,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " value struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2296,9 +2298,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " ref struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2324,9 +2326,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " interface struct");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2364,9 +2366,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Type, " union");
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
-      current->startColumn  = yyColNr;
-      current->bodyLine     = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2404,9 +2406,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine   = yyLineNr;
-      current->startColumn = yyColNr;
-      current->bodyLine    = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
 
       lineCount();
 
@@ -2642,9 +2644,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       tmpType = "typedef " + previous->getData(EntryKey::Member_Args);
       tmpType = tmpType.simplified();
 
-      previous->section     = Entry::VARIABLE_SEC;
-      previous->m_entryName = previous->m_entryName.trimmed();
-      previous->bodyLine    = yyLineNr;
+      previous->section       = Entry::VARIABLE_SEC;
+      previous->m_entryName   = previous->m_entryName.trimmed();
+      previous->startBodyLine = yyLineNr;
 
       previous->setData(EntryKey::Member_Type, tmpType);
       previous->setData(EntryKey::Member_Args, "");
@@ -2822,7 +2824,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       if (roundCount == 0 && --sharpCount <= 0) {
 
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
          current->setData(EntryKey::Member_Args, "(");
 
          fullArgString = "(";
@@ -2877,7 +2879,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>"define"{BN}*"("{BN}*["']      {
       if (insidePHP) {
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
          BEGIN( DefinePHP );
       }  else {
          REJECT;
@@ -3082,31 +3084,31 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <CsPropClose>")"             {
       // end property
-    lineCount();
+      lineCount();
 
-    current->setData(EntryKey::File_Name, yyFileName);
-    current->startLine   = yyLineNr;
-    current->startColumn = yyColNr;
+      current->setData(EntryKey::File_Name, yyFileName);
+      current->startLine   = yyLineNr;
+      current->startColumn = yyColNr;
 
-    current->m_entryName = current->m_entryName.trimmed();
-    current->section     = Entry::VARIABLE_SEC;
+      current->m_entryName = current->m_entryName.trimmed();
+      current->section     = Entry::VARIABLE_SEC;
 
-    // unknown data type, decipher later on
-    // current->setData(EntryKey::Member_Type, = "");
+      // unknown data type, decipher later on
+      // current->setData(EntryKey::Member_Type, = "");
 
-    current_root->addSubEntry(current, current_root);
-    current = QMakeShared<Entry>();
-    initEntry();
-    BEGIN(FindMembers);
+      current_root->addSubEntry(current, current_root);
+      current = QMakeShared<Entry>();
+      initEntry();
+      BEGIN(FindMembers);
    }
 
 <FindMembers>"CS_PROPERTY_READ"     {
-    current->protection = Public;
-    current->mtype      = MethodType::Property;
-    current->m_traits.setTrait(Entry::Virtue::Readable);
-    current->setData(EntryKey::Member_Type, "");
+      current->protection = Public;
+      current->mtype      = MethodType::Property;
+      current->m_traits.setTrait(Entry::Virtue::Readable);
+      current->setData(EntryKey::Member_Type, "");
 
-    BEGIN(CsPropReadVar);
+      BEGIN(CsPropReadVar);
    }
 
 <CsPropReadVar>"("                  {
@@ -3397,7 +3399,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (! current->m_entryName.isEmpty()) {
 
          current->setData(EntryKey::Member_Args, text);
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
 
          fullArgString = text;
 
@@ -3751,8 +3753,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          REJECT;
       }
 
-      current->bodyLine = yyLineNr;
-      lastDefineContext = YY_START;
+      current->startBodyLine = yyLineNr;
+      lastDefineContext      = YY_START;
       BEGIN( Define );
    }
 
@@ -3826,7 +3828,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       current->setData(EntryKey::Member_Args, "(");
 
-      current->bodyLine      = yyLineNr;
+      current->startBodyLine = yyLineNr;
       currentArgumentContext = DefineEnd;
 
       fullArgString = "(";
@@ -3852,8 +3854,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <Define>{ID}            {
       QString text = QString::fromUtf8(yytext);
 
-      current->bodyLine     = yyLineNr;
-      current->m_entryName  = text;
+      current->startBodyLine = yyLineNr;
+      current->m_entryName   = text;
       BEGIN(DefineEnd);
    }
 
@@ -3915,16 +3917,16 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <DefinePHP>{ID}["']{BN}*","{BN}*      {
       QString text = QString::fromUtf8(yytext);
 
-      current->m_entryName = text;
-      current->m_entryName = current->m_entryName.trimmed();
-      current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
-      current->m_entryName = current->m_entryName.left(current->m_entryName.length() - 1);
-      current->bodyLine = yyLineNr;
+      current->m_entryName   = text;
+      current->m_entryName   = current->m_entryName.trimmed();
+      current->m_entryName   = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
+      current->m_entryName   = current->m_entryName.left(current->m_entryName.length() - 1);
+      current->startBodyLine = yyLineNr;
 
-      lastRoundContext  = DefinePHPEnd;
+      lastRoundContext = DefinePHPEnd;
 
       s_roundGEntry = current;
-      s_roundGEnum   = EntryKey::Initial_Value;
+      s_roundGEnum  = EntryKey::Initial_Value;
 
       roundCount = 0;
       BEGIN( GCopyRound );
@@ -3956,8 +3958,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
       static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
-      if (current->bodyLine == -1) {
-         current->bodyLine = yyLineNr;
+      if (current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
       }
 
       s_docBlockContext = YY_START;
@@ -4025,8 +4027,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // */ (editor syntax fix)
 
       QString text = QString::fromUtf8(yytext);
-      if (current->bodyLine == -1) {
-         current->bodyLine = yyLineNr;
+      if (current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
       }
 
       s_docBlockContext   = YY_START;
@@ -4118,11 +4120,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // in PHP code this could also be due to "<?="
       QString text = QString::fromUtf8(yytext);
 
-      current->bodyLine        = yyLineNr;
+      current->startBodyLine = yyLineNr;
       current->setData(EntryKey::Initial_Value, text);
 
       lastInitializerContext = YY_START;
-      initBracketCount     = 0;
+      initBracketCount       = 0;
 
       BEGIN(ReadInitializer);
    }
@@ -4951,8 +4953,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       QString tmpType = current->getData(EntryKey::Member_Type);
       QString oldType = tmpType;
 
-      if (current->bodyLine == -1) {
-         current->bodyLine = yyLineNr;
+      if (current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
       }
 
       if (insidePHP && tmpType.startsWith("var")) {
@@ -5344,8 +5346,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindFields>{ID}     {
       QString text = QString::fromUtf8(yytext);
-      current->bodyLine    = yyLineNr;
-      current->m_entryName = text;
+      current->startBodyLine = yyLineNr;
+      current->m_entryName   = text;
    }
 
 <FindFields>"("      {
@@ -5992,12 +5994,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>("("({BN}*"::"*{BN}*{TSCOPE}{BN}*"::")*({BN}*[*&\^]{BN}*)+)+ {
       /* typedef void (A::*ptr_t)(args...) or int (*func(int))[], the ^ is for Obj-C blocks */
       QString text = QString::fromUtf8(yytext);
+
       if (insidePHP)    {
          // reference parameter
          REJECT
 
       } else {
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
+
          lineCount();
          addType(current);
          funcPtrType = text;
@@ -6009,6 +6013,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FuncPtr>{SCOPENAME}           {
       QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
+
       if (nameIsOperator(current->m_entryName)) {
          BEGIN( FuncPtrOperator );
 
@@ -6073,12 +6078,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <EndFuncPtr>"("            {
-      // a function returning a function or
-      // a function returning a pointer to an array
+      // a function returning a function or a function returning a pointer to an array
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args, text[0]);
 
-      current->bodyLine      = yyLineNr;
+      current->startBodyLine = yyLineNr;
       currentArgumentContext = FuncFuncEnd;
       fullArgString          = current->getData(EntryKey::Member_Args);
 
@@ -6177,17 +6181,15 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // for catching typedef void (__stdcall *f)() like definitions
       QString text = QString::fromUtf8(yytext);
 
-      if (current->getData(EntryKey::Member_Type).startsWith("typedef") && current->bodyLine == -1) {
-         // the bodyLine check is to prevent this guard to be true more than once
-
-         current->bodyLine = yyLineNr;
+      if (current->getData(EntryKey::Member_Type).startsWith("typedef") && current->startBodyLine == -1) {
+         current->startBodyLine = yyLineNr;
          BEGIN( GetCallType );
 
       } else if (! current->m_entryName.isEmpty())    {
          // normal function
          current->setData(EntryKey::Member_Args, text);
 
-         current->bodyLine      = yyLineNr;
+         current->startBodyLine = yyLineNr;
          currentArgumentContext = FuncQual;
          fullArgString          = text;
 
@@ -6214,12 +6216,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (! current->m_entryName.isEmpty()) {
          current->setData(EntryKey::Member_Args, text);
 
-         current->bodyLine      = yyLineNr;
+         current->startBodyLine = yyLineNr;
          currentArgumentContext = FuncQual;
          fullArgString          = text;
 
-         s_argEntry  = current;
-         s_argEnum   = ArgKey::Member_Args;
+         s_argEntry = current;
+         s_argEnum  = ArgKey::Member_Args;
 
          BEGIN( ReadFuncArgType );
       }
@@ -7252,7 +7254,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
             if (previous->section != Entry::VARIABLE_SEC) {
                // a function/member declaration
-               previous->bodyLine = -1;
+               previous->startBodyLine = -1;
             }
 
             BEGIN( FindMembers );
@@ -8697,7 +8699,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       QString text = QString::fromUtf8(yytext);
 
       bool isAttribute = current->m_traits.hasTrait(Entry::Virtue::Attribute);
-      QString tmpType   = current->getData(EntryKey::Member_Type);
+      QString tmpType  = current->getData(EntryKey::Member_Type);
 
       if (externC) {
          externC = false;
@@ -8706,14 +8708,15 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          if (containsWord(tmpType, "event")) {
             // event
-            current->mtype = mtype = MethodType::Event;
+            current->mtype = MethodType::Event;
+            mtype          = MethodType::Event;
 
          } else {
             // property
             current->mtype = mtype = MethodType::Property;
          }
 
-         current->bodyLine = yyLineNr;
+         current->startBodyLine = yyLineNr;
          curlyCount = 0;
 
          BEGIN( CSAccessorDecl );
@@ -8743,7 +8746,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             // C++11 style initializer list
             current->setData(EntryKey::Initial_Value, text);
 
-            current->bodyLine      = yyLineNr;
+            current->startBodyLine = yyLineNr;
             lastInitializerContext = YY_START;
             initBracketCount       = 1;
 

@@ -536,7 +536,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
       QString text = QString::fromUtf8(yytext);
 
       ifType = IF_GENERIC;
-      current->bodyLine = yyLineNr + s_lineCountPrepass + 1;
+      current->startBodyLine = yyLineNr + s_lineCountPrepass + 1;
 
       // need to be at the line after the definition and we have to take continuation lines into account.
       yy_push_state(InterfaceBody);
@@ -744,8 +744,8 @@ private                                 {
       current->m_traits.setTrait(Entry::Virtue::Struct);
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->bodyLine  = yyLineNr;
-      current->startLine = yyLineNr;
+      current->startBodyLine = yyLineNr;
+      current->startLine     = yyLineNr;
 
       /* if type is part of a module, mod name is necessary for output */
       if ((current_root) && (current_root->section == Entry::CLASS_SEC || current_root->section == Entry::NAMESPACE_SEC)) {
@@ -794,8 +794,8 @@ private                                 {
       current->m_entryName = text;
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->bodyLine   = yyLineNr;
-      current->startLine  = yyLineNr;
+      current->startBodyLine = yyLineNr;
+      current->startLine     = yyLineNr;
 
       addCurrentEntry(1);
    }
@@ -879,8 +879,8 @@ private                                 {
 ^{BS}{TYPE_SPEC}/{SEPARATE}             {
       QString text = QString::fromUtf8(yytext);
 
-      current->bodyLine    = yyLineNr + 1;
-      current->endBodyLine = yyLineNr + s_lineCountPrepass;
+      current->startBodyLine = yyLineNr + 1;
+      current->endBodyLine   = yyLineNr + s_lineCountPrepass;
 
       /* variable declaration starts */
       if(YY_START == Start) {
@@ -1038,8 +1038,8 @@ private                                 {
          current->setData(EntryKey::Member_Type, argType);
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->bodyLine  = yyLineNr;                         // used for source reference
-         current->startLine = yyLineNr;
+         current->startBodyLine = yyLineNr;                         // used for source reference
+         current->startLine     = yyLineNr;
 
          addCurrentEntry(1);
 
@@ -1288,8 +1288,8 @@ private                                 {
       BEGIN(Subprog);
 
       // need to be at the line after the definition and we have to take continuation lines into account
-      current->bodyLine  = yyLineNr + s_lineCountPrepass + 1;
-      current->startLine = yyLineNr;
+      current->startBodyLine = yyLineNr + s_lineCountPrepass + 1;
+      current->startLine     = yyLineNr;
    }
 
 <Start,ModuleBody,SubprogBody,InterfaceBody,ModuleBodyContains,SubprogBodyContains>^{BS}({PREFIX}{BS_})?{SUBPROG}{BS_} {
@@ -1307,8 +1307,8 @@ private                                 {
       yy_push_state(Subprog);
 
       // need to be at the line after the definition and we have to take continuation lines into account
-      current->bodyLine  = yyLineNr + s_lineCountPrepass + 1;
-      current->startLine = yyLineNr;
+      current->startBodyLine = yyLineNr + s_lineCountPrepass + 1;
+      current->startLine     = yyLineNr;
     }
 
 <Subprog>{BS}                          {
@@ -2062,10 +2062,10 @@ static void copyEntry(QSharedPointer<Entry> dest, QSharedPointer<Entry> src)
    dest->setData(EntryKey::Brief_Docs,   src->getData(EntryKey::Brief_Docs));
    dest->setData(EntryKey::Main_Docs,    src->getData(EntryKey::Main_Docs));
 
-   dest->startLine   = src->startLine;
-   dest->bodyLine    = src->bodyLine;
-   dest->endBodyLine = src->endBodyLine;
-   dest->argList     = src->argList;
+   dest->startLine     = src->startLine;
+   dest->startBodyLine = src->startBodyLine;
+   dest->endBodyLine   = src->endBodyLine;
+   dest->argList       = src->argList;
 }
 
 /** fill empty interface module procedures with info from
@@ -2721,12 +2721,12 @@ static void addModule(const QString &name, bool isModule)
       current->m_entryName = fname;
    }
 
-   current->setData(EntryKey::Member_Type,   "program");
+   current->setData(EntryKey::Member_Type, "program");
 
    current->setData(EntryKey::File_Name, yyFileName);
-   current->bodyLine   = yyLineNr;       // used for source reference
-   current->startLine  = yyLineNr;
-   current->protection = Public;
+   current->startBodyLine = yyLineNr;       // used for source reference
+   current->startLine     = yyLineNr;
+   current->protection    = Public;
 
    addCurrentEntry(1);
    startScope(last_entry);
@@ -2752,8 +2752,8 @@ static void addSubprogram(const QString &text)
    current->setData(EntryKey::Member_Args, "");
 
    current->setData(EntryKey::File_Name, yyFileName);
-   current->bodyLine  = yyLineNr;    // used for source reference start of body of routine
-   current->startLine = yyLineNr;    // used for source reference start of definition
+   current->startBodyLine = yyLineNr;    // used for source reference start of body of routine
+   current->startLine     = yyLineNr;    // used for source reference start of definition
 
    current->argList.clear();
    docBlock.resize(0);
@@ -2795,8 +2795,8 @@ static void addInterface(const QString &name, InterfaceType type)
    }
 
    current->setData(EntryKey::File_Name, yyFileName);
-   current->bodyLine  = yyLineNr;
-   current->startLine = yyLineNr;
+   current->startBodyLine = yyLineNr;
+   current->startLine     = yyLineNr;
 
    addCurrentEntry(1);
 }

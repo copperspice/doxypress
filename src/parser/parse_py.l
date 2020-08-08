@@ -334,8 +334,8 @@ static void initSpecialBlock()
 static void searchFoundDef()
 {
    current->setData(EntryKey::File_Name, yyFileName);
-   current->startLine = yyLineNr;
-   current->bodyLine  = yyLineNr;
+   current->startLine     = yyLineNr;
+   current->startBodyLine = yyLineNr;
 
    current->section   = Entry::FUNCTION_SEC;
    current->m_srcLang = SrcLangExt_Python;
@@ -360,8 +360,8 @@ static void searchFoundClass()
    current->appendData(EntryKey::Member_Type, "class");
 
    current->setData(EntryKey::File_Name, yyFileName);
-   current->startLine = yyLineNr;
-   current->bodyLine  = yyLineNr;
+   current->startLine     = yyLineNr;
+   current->startBodyLine = yyLineNr;
 
    s_packageCommentAllowed = false;
 }
@@ -544,8 +544,8 @@ STARTDOCSYMS      "##"
       current->m_entryName = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startBodyLine = yyLineNr;
 
       s_packageCommentAllowed = false;
 
@@ -561,12 +561,12 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
 
       s_indent = computeIndent(text);
-      current->section   = Entry::VARIABLE_SEC;
-      current->m_entryName      = text.trimmed();
+      current->section        = Entry::VARIABLE_SEC;
+      current->m_entryName    = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);;
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine      = yyLineNr;
+      current->startBodyLine  = yyLineNr;
       s_packageCommentAllowed = false;
 
       BEGIN(VariableDec);
@@ -584,12 +584,12 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
       s_indent = computeIndent(text);
 
-      current->section   = Entry::VARIABLE_SEC;
-      current->m_entryName      = text.trimmed();
+      current->section        = Entry::VARIABLE_SEC;
+      current->m_entryName    = text.trimmed();
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine      = yyLineNr;
+      current->startBodyLine  = yyLineNr;
 
       s_packageCommentAllowed = false;
       newVariable();
@@ -810,12 +810,12 @@ STARTDOCSYMS      "##"
          DBG_CTX((stderr,"Found instance method variable %s in %s at %d\n", csPrintable(text.mid(5)),
                   csPrintable(current_root->m_entryName), yyLineNr));
 
-         current->m_entryName      = text.mid(5);
-         current->section   = Entry::VARIABLE_SEC;
+         current->m_entryName    = text.mid(5);
+         current->section        = Entry::VARIABLE_SEC;
 
          current->setData(EntryKey::File_Name,   yyFileName);
-         current->startLine = yyLineNr;
-         current->bodyLine  = yyLineNr;
+         current->startLine      = yyLineNr;
+         current->startBodyLine  = yyLineNr;
 
          current->setData(EntryKey::Member_Type, "");
 
@@ -833,12 +833,12 @@ STARTDOCSYMS      "##"
       DBG_CTX(stderr, "Found class method variable %s in %s at%d\n",
                   csPrintable(text.mid(4)), csPrintable(current_root->m_entryName), yyLineNr);
 
-      current->m_entryName      = text.mid(4);
-      current->section   = Entry::VARIABLE_SEC;
+      current->m_entryName   = text.mid(4);
+      current->section       = Entry::VARIABLE_SEC;
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine     = yyLineNr;
+      current->startBodyLine = yyLineNr;
 
       current->setData(EntryKey::Member_Type, "");
 
@@ -1073,9 +1073,11 @@ STARTDOCSYMS      "##"
 
    {B}":"         {
       // function without arguments
-      s_specialBlock     = true;          // expecting a docstring
-      bodyEntry          = current;
-      current->bodyLine  = yyLineNr;
+      s_specialBlock = true;          // expecting a docstring
+      bodyEntry      = current;
+
+      current->startBodyLine = yyLineNr;
+
       BEGIN( FunctionBody );
    }
 
@@ -1121,10 +1123,10 @@ STARTDOCSYMS      "##"
 
    ":"{B}                    {
       // expecting a docstring
+      s_specialBlock = true;
+      bodyEntry      = current;
 
-      s_specialBlock    = true;
-      bodyEntry         = current;
-      current->bodyLine = yyLineNr;
+      current->startBodyLine = yyLineNr;
       BEGIN( FunctionBody );
    }
 
@@ -1364,8 +1366,8 @@ STARTDOCSYMS      "##"
 
    ":"                {
       // begin of the class definition
-      s_specialBlock     = true;                // expecting a docstring
-      current->bodyLine  = yyLineNr;
+      s_specialBlock         = true;                // expecting a docstring
+      current->startBodyLine = yyLineNr;
       current->setData(EntryKey::Source_Text, "");
       BEGIN(ClassCaptureIndent);
    }
@@ -2021,7 +2023,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          }
 
          yyFileName = ce->getData(EntryKey::File_Name);
-         yyLineNr   = ce->bodyLine ;
+         yyLineNr   = ce->startBodyLine;
 
          current = QMakeShared<Entry>();
          initEntry();
@@ -2080,13 +2082,13 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       current            = QMakeShared<Entry>();
       initEntry();
 
-      current->m_entryName      = s_moduleScope;
-      current->section   = Entry::NAMESPACE_SEC;
+      current->m_entryName    = s_moduleScope;
+      current->section        = Entry::NAMESPACE_SEC;
       current->setData(EntryKey::Member_Type, "namespace");
 
       current->setData(EntryKey::File_Name,   yyFileName);
-      current->startLine = yyLineNr;
-      current->bodyLine  = yyLineNr;
+      current->startLine      = yyLineNr;
+      current->startBodyLine  = yyLineNr;
 
       rt->addSubEntry(current, rt);
 
