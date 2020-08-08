@@ -57,7 +57,6 @@ class Translator
    virtual QString trPackageTypes() = 0;
    virtual QString trPrivateTypes() = 0;
 
-   // quick reference sections
    virtual QString trModules() = 0;
    virtual QString trClassHierarchy() = 0;
    virtual QString trCompoundList() = 0;
@@ -69,6 +68,7 @@ class Translator
    virtual QString trFileSource() = 0;
    virtual QString trExamples() = 0;
    virtual QString trSearch() = 0;
+
    virtual QString trClassHierarchyDescription() = 0;
    virtual QString trFileListDescription(bool extractAll) = 0;
    virtual QString trCompoundListDescription() = 0;
@@ -84,11 +84,13 @@ class Translator
    virtual QString trHierarchicalIndex() = 0;
    virtual QString trCompoundIndex() = 0;
    virtual QString trFileIndex() = 0;
+
    virtual QString trModuleDocumentation() = 0;
    virtual QString trClassDocumentation() = 0;
    virtual QString trFileDocumentation() = 0;
    virtual QString trExampleDocumentation() = 0;
    virtual QString trPageDocumentation() = 0;
+
    virtual QString trReferenceManual() = 0;
    virtual QString trDefines() = 0;
 

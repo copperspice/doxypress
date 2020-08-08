@@ -114,7 +114,7 @@ static bool handleCopyBrief(const QString &str, const QStringList &list);
 static bool handleCopyDetails(const QString &str, const QStringList &list);
 static bool handleParBlock(const QString &str, const QStringList &list);
 static bool handleEndParBlock(const QString &str, const QStringList &list);
-static void handleGuard(const QString &str, const QStringList &list);
+//   static void handleGuard(const QString &str, const QStringList &list);
 static bool handleParam(const QString &str, const QStringList &list);
 static bool handleRetval(const QString &str, const QStringList &list);
 
@@ -396,7 +396,7 @@ static QString          yyFileName;            // file name that is read from
 static int              yyLineNr;              // line number in the input
 static bool             inBody;                // was the comment found inside the body of a function?
 static OutputContext    inContext;             // are we inside the brief, details or xref part
-static bool             briefEndsAtDot;        // does the brief description stop at a dot?
+static bool             briefEndsAtDot;        // does the brief description stop at a dot
 static QString          formulaText;           // Running text of a formula
 static QString          formulaEnv;            // environment name
 static int              formulaNewLines;       // amount of new lines in the formula
@@ -410,7 +410,7 @@ static bool             s_isEnabledSection;
 static QString          s_functionProto;       // function prototype
 
 static bool             s_needNewEntry;
-static int              s_docBlockContext;
+// static int              s_docBlockContext;
 
 static QString          s_sectionLabel;
 static QString          s_sectionTitle;
@@ -490,6 +490,7 @@ static bool getDocSectionName(int s)
     case Entry::EXAMPLE_SEC:
     case Entry::MEMBERGRP_SEC:
       return true;
+
     default:
       return false;
   }
@@ -497,23 +498,24 @@ static bool getDocSectionName(int s)
 
 static bool makeStructuralIndicator(Entry::Sections s)
 {
-  if (getDocSectionName(current->section)) {
-    return true;
+   if (getDocSectionName(current->section)) {
+      return true;
 
-  } else {
-    s_needNewEntry     = true;
-    current->section   = s;
-    current->startLine = yyLineNr;
+   } else {
+      s_needNewEntry     = true;
+      current->section   = s;
+      current->startLine = yyLineNr;
 
-    current->setData(EntryKey::File_Name, yyFileName);
-    return false;
-  }
+      current->setData(EntryKey::File_Name, yyFileName);
+
+      return false;
+   }
 }
 static void lineCount()
 {
-  for (const char *c = yytext ; *c ; ++c) {
-    yyLineNr += (*c == '\n') ;
-  }
+   for (const char *c = yytext ; *c ; ++c) {
+      yyLineNr += (*c == '\n') ;
+   }
 }
 
 static QString stripQuotes(const QString &s)
@@ -703,7 +705,7 @@ static void addCite()
 // strip trailing whitespace (excluding newlines) from string s
 static void stripTrailingWhiteSpace(QString &s)
 {
-   uint len = s.length();
+   int len = s.length();
 
    int i = len - 1;
    QChar c;
@@ -798,9 +800,8 @@ static inline void setOutput(OutputContext ctx)
 
       case OutputBrief:
          if (oldContext != inContext) {
-
             if (current->getData(EntryKey::Brief_File).isEmpty()) {
-               current->setData(EntryKey::Brief_File,   yyFileName);
+               current->setData(EntryKey::Brief_File, yyFileName);
                current->briefLine = yyLineNr;
             }
          }
@@ -875,7 +876,7 @@ static void addToOutput(QChar c)
 static void endBrief(bool isOutput = true)
 {
    if (! current->getData(EntryKey::Brief_Docs).trimmed().isEmpty()) {
-      // only go to the detailed description if we found some brief description and not just whitespace
+      // only go to the detailed description if we found a brief description and not just whitespace
 
       briefEndsAtDot = false;
       setOutput(OutputMainDoc);
@@ -1444,7 +1445,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if (inContext == OutputXRef) {
-         // see bug 613024, need to put the newlines after ending the XRef section.
+         // need to put the newlines after ending the XRef section
 
          if (! s_insideParBlock) {
             setOutput(OutputMainDoc);
@@ -1484,10 +1485,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          setOutput(OutputMainDoc);
 
       } else {
-          // inContext == OutputBrief
-          // only go to the detailed description if we have
-          // found some brief description and not just whitespace
-
+          // inContext == OutputBrief, switch from brief to main docs
          endBrief(false);
       }
 
@@ -1500,18 +1498,16 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput(text[0]);
 
       if (briefEndsAtDot) {
-         setOutput(OutputMainDoc);
          briefEndsAtDot = false;
+         setOutput(OutputMainDoc);
       }
    }
-
 
 <Comment>\n             {
       // newline
       addToOutput('\n');
       yyLineNr++;
    }
-
 
 <Comment>[\xC0-\xFF][\x80-\xBF]+    {
       // utf-8 code point
@@ -1804,7 +1800,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // ignore other stuff
    }
 
-
 <ClassDocArg3>[<"]?{FILE}?[">]?     {
       // third argument, include file name
       QString text = QString::fromUtf8(yytext);
@@ -1828,7 +1823,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
-<ClassDocArg3>.            {
+<ClassDocArg3>.               {
       // ignore other stuff
    }
 
@@ -1903,13 +1898,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
-
   /* --------- handle arguments of page/mainpage command ------------------- */
 
 <PageDocArg1>{FILE}        {
-      // first argument; page name
-      QString text  = QString::fromUtf8(yytext);
+      // first argument, page name
+      QString text = QString::fromUtf8(yytext);
       current->m_entryName = stripQuotes(text);
+
       BEGIN( PageDocArg2 );
    }
 
@@ -1918,8 +1913,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput('\n');
    }
 
-<PageDocArg1>{DOCNL}          {
-      // missing arguement
+<PageDocArg1>{DOCNL}       {
+      // missing argument
       QString text = QString::fromUtf8(yytext);
       warn(yyFileName, yyLineNr, "Missing argument after \\page");
 
@@ -1936,7 +1931,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <PageDocArg2>.*"\n"        {
-      // second argument; page title
+      // second argument, page title
       QString text = QString::fromUtf8(yytext);
 
       text = substitute(substitute(text, "@<","&lt;"),  "@>", "&gt;");
@@ -2142,7 +2137,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <RelatesParam1>.        {
       // ignore other stuff
    }
-
 
   /* ----- handle arguments of the relates(also)/addindex commands ----- */
 
@@ -3273,20 +3267,21 @@ static bool handleDir(const QString &str, const QStringList &list)
 
 static bool handleExample(const QString &str, const QStringList &list)
 {
-  (void) str;
+   (void) str;
 
-  Entry::Sections section = Entry::EXAMPLE_SEC;
+   Entry::Sections section = Entry::EXAMPLE_SEC;
 
-  for (auto item : list) {
-    QString opt = item.trimmed().toLower();
+   for (auto item : list) {
+      QString opt = item.trimmed().toLower();
 
-    if (opt == "lineno") {
-      section = Entry::EXAMPLE_LINENO_SEC;
+      if (opt == "lineno") {
+         section = Entry::EXAMPLE_LINENO_SEC;
 
-    } else {
-      warn(yyFileName, yyLineNr, "Unsupported option '%s' for command '\\%s'", csPrintable(opt), csPrintable(str));
-    }
-  }
+      } else {
+         warn(yyFileName, yyLineNr, "Unsupported option '%s' for command '\\%s'", csPrintable(opt), csPrintable(str));
+      }
+   }
+
    bool stop = makeStructuralIndicator(section);
 
    if (! stop) {
@@ -3326,7 +3321,6 @@ static bool handleName(const QString &str, const QStringList &list)
 
       if (s_memberGroupId != DOX_NOGROUP) {
          // end of previous member group
-
          closeGroup(current,yyFileName,yyLineNr,true);
        }
    }

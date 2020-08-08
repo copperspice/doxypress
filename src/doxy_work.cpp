@@ -234,8 +234,8 @@ namespace Doxy_Work{
    QSharedPointer<MemberDef> addVariableToFile(QSharedPointer<Entry> ptrEntry, MemberDefType memberType, const QString &scope,
                   const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb);
 
-   void buildClassDocList(QSharedPointer<Entry> ptrEntry);
    void buildClassList(QSharedPointer<Entry> ptrEntry);
+   void buildClassDocList(QSharedPointer<Entry> ptrEntry);
    void buildCompleteMemberLists();
    void buildFileList(QSharedPointer<Entry> ptrEntry);
    void buildExampleList(QSharedPointer<Entry> ptrEntry);
@@ -5467,7 +5467,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                   }
 
                } else if (mode == DocumentedOnly || mode == Undocumented) {
-                  //printf("       => insert base class\n");
+                  // insert base class
                   QString usedName;
 
                   if (baseClassTypeDef || cd->isCSharp()) {
@@ -7773,8 +7773,10 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
       }
 
    } else {
-      RECURSE_ENTRYTREE(findEnums, ptrEntry);
-
+      // recursive call
+      for (auto item : ptrEntry->children() ) {
+         findEnums(item);
+      }
    }
 }
 
@@ -7925,8 +7927,10 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                            fmd->setTagInfo(e->m_tagInfo);
                            fmd->setLanguage(root->m_srcLang);
                            fmd->setId(root->getData(EntryKey::Clang_Id));
-                           fmd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
+
+                           fmd->setDocumentation(root->getData(EntryKey::Main_Docs),     root->getData(EntryKey::MainDocs_File), root->docLine);
                            fmd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+
                            fmd->addSectionsToDefinition(root->m_anchors);
                            fmd->setInitializer(root->getData(EntryKey::Initial_Value));
                            fmd->setMaxInitLines(root->initLines);

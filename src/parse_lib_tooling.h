@@ -31,14 +31,14 @@
 #include <clang/Tooling/CommonOptionsParser.h>
 #include <clang/Tooling/Tooling.h>
 
-
 extern QSharedPointer<Entry> s_current_root;
 extern QMap<QString, QSharedPointer<Entry>> s_entryMap;
 
 class DoxyFrontEnd : public clang::ASTFrontendAction
 {
    public:
-      std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &compiler, llvm::StringRef file) override;
+      std::unique_ptr<clang::ASTConsumer> CreateASTConsumer(clang::CompilerInstance &compiler,
+                  llvm::StringRef file) override;
 };
 
 #endif
