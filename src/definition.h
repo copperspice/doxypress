@@ -71,14 +71,15 @@ class DefinitionIntf : public EnableSharedFromThis
    // Types of derived classes
    enum DefType {
       TypeClass      = 0,
-      TypeFile       = 1,
-      TypeNamespace  = 2,
-      TypeMember     = 3,
-      TypeGroup      = 4,
-      TypePackage    = 5,
-      TypePage       = 6,
-      TypeDir        = 7,
-      TypeSymbolList = 8
+      TypeConcept    = 1,
+      TypeFile       = 2,
+      TypeNamespace  = 3,
+      TypeMember     = 4,
+      TypeGroup      = 5,
+      TypePackage    = 6,
+      TypePage       = 7,
+      TypeDir        = 8,
+      TypeSymbolList = 9
    };
 
    // Use this for dynamic inspection of the type of the derived class
