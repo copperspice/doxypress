@@ -487,8 +487,8 @@ static bool documentKind(CXCursor cursor)
 
        kind == CXCursor_TypedefDecl               ||            // 20
        kind == CXCursor_CXXMethod                 ||            // 21
-
        kind == CXCursor_Namespace                 ||            // 22
+
        kind == CXCursor_Constructor               ||            // 24
        kind == CXCursor_Destructor                ||            // 25
        kind == CXCursor_ConversionFunction        ||            // 26
@@ -498,7 +498,11 @@ static bool documentKind(CXCursor cursor)
        kind == CXCursor_FunctionTemplate          ||            // 30
        kind == CXCursor_ClassTemplate             ||            // 31
        kind == CXCursor_ClassTemplatePartialSpecialization ||   // 32
+
+       kind == CXCursor_UsingDirective            ||            // 34
+       kind == CXCursor_UsingDeclaration          ||            // 35
        kind == CXCursor_TypeAliasDecl             ||            // 36
+
        kind == CXCursor_MacroDefinition   )                     // 501
    {
       return true;
@@ -976,6 +980,28 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                    ++index;
                }
 
+               // skip punctuation and attribute
+               uint bracket = 0;
+
+               while (index < p->numTokens) {
+                  CXTokenKind tokenKind = clang_getTokenKind(p->tokens[index]);
+
+                  if (tokenKind != CXToken_Punctuation && bracket == 0) {
+                     // might be another comment
+                     break;
+                  }
+
+                  QString extra = getTokenSpelling(p->tu, p->tokens[index]);
+                  if (extra == "[") {
+                     ++bracket;
+                  } else if (extra == "]") {
+                     --bracket;
+                  }
+
+                  ++index;
+                  cursor = p->cursors[index];
+               }
+
                while (index < p->numTokens && ! documentKind(cursor) ) {
                   cursor = p->cursors[++index];
                }
@@ -1011,12 +1037,33 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                      comment += "\n\n" + extra;
 
-                   } else {
+                  } else {
+                    break;
+
+                  }
+
+                  ++index;
+               }
+
+               // skip punctuation and attribute
+               uint bracket = 0;
+
+               while (index < p->numTokens) {
+                  CXTokenKind tokenKind = clang_getTokenKind(p->tokens[index]);
+
+                  if (tokenKind != CXToken_Punctuation && bracket == 0) {
                      break;
+                  }
 
-                   }
+                  QString extra = getTokenSpelling(p->tu, p->tokens[index]);
 
-                   ++index;
+                  if (extra == "[") {
+                     ++bracket;
+                  } else if (extra == "]") {
+                     --bracket;
+                  }
+
+                  cursor = p->cursors[++index];
                }
 
                while (index < p->numTokens && ! documentKind(cursor) ) {
@@ -1052,6 +1099,26 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                         break;
                      }
                   }
+               }
+
+               // skip punctuation and attribute
+               uint bracket = 0;
+
+               while (tmpIndex < p->numTokens) {
+                  CXTokenKind tokenKind = clang_getTokenKind(p->tokens[tmpIndex]);
+
+                  if (tokenKind != CXToken_Punctuation && bracket == 0) {
+                     break;
+                  }
+
+                  QString extra = getTokenSpelling(p->tu, p->tokens[tmpIndex]);
+                  if (extra == "[") {
+                     ++bracket;
+                  } else if (extra == "]") {
+                     --bracket;
+                  }
+
+                  cursor = p->cursors[++tmpIndex];
                }
 
             } else  {
