@@ -616,7 +616,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
          // user provided clang headers
          if (clangUseHeaders) {
-            QString inc = "-I" + QCoreApplication::applicationDirPath() + "/include/6.0.1/include";
+            QString inc = "-I" + QCoreApplication::applicationDirPath() + "/include/10.0.1/include";
             argList.push_back(std::move(inc));
          }
 
