@@ -1052,6 +1052,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   CXTokenKind tokenKind = clang_getTokenKind(p->tokens[index]);
 
                   if (tokenKind != CXToken_Punctuation && bracket == 0) {
+                     // might be another comment
                      break;
                   }
 
@@ -1126,6 +1127,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
             }
 
+
             // test if the cursor is related to documentation
             if (documentKind(cursor)) {
                // add the comment to cursor
@@ -1150,12 +1152,10 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   handleCommentBlock(comment, false, fileName, current);
 
                   if (isBrief && current->getData(EntryKey::Brief_Docs).isEmpty()) {
-
                      QString brief;
 
                      static QRegularExpression regExp("([^.]*\\.)\\s(.*)",  QPatternOption::ExactMatchOption);
                      QRegularExpressionMatch match = regExp.match(comment);
-
 
                      if (match.hasMatch()) {
                         brief   = match.captured(1);
@@ -1223,14 +1223,7 @@ void ClangParser::finish()
 
 static void handleCommentBlock(const QString &comment, bool brief, const QString &fileName, QSharedPointer<Entry> current)
 {
-   static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
    bool docBlockInBody = false;
-
-/*
-   if (docBlockInBody && hideInBodyDocs) {
-      return;
-   }
-*/
 
    int lineNum         = 0;
    int position        = 0;
@@ -1245,42 +1238,27 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
       lineNum = current->docLine;
    }
 
-/*
-   if (! docBlockInBody) {
-      isBrief = brief;
 
-      bool docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
-      isJavaDocStyle = docBlockAutoBrief;
-   }
 
-   QSharedPointer<Entry> docEntry = docBlockInBody && previous ? previous : current;
 
-   if (docBlockInBody && docEntry && docEntry->inbodyLine == -1) {
-      docEntry->inbodyFile = fileName;
-      docEntry->inbodyLine = lineNum;
-   }
-*/
 
-   QSharedPointer<Entry> docEntry = current;
 
-   while (parseCommentBlock(nullptr, docEntry, comment, fileName, lineNum, isBrief, isJavaDocStyle,
+   while (parseCommentBlock(nullptr, current, comment, fileName, lineNum, isBrief, isJavaDocStyle,
                   docBlockInBody, current->protection, position, needsEntry) ) {
 
       if (needsEntry) {
          QString docFile = current->getData(EntryKey::MainDocs_File);
 
          QSharedPointer<Entry> parent = current->parent();
+
          current = QMakeShared<Entry>();
 
-         // resolve better by adding to orphan map
          if (parent) {
             parent->addSubEntry(current, parent);
          }
 
          current->setData(EntryKey::MainDocs_File, docFile);
          current->docLine = lineNum;
-
-         docEntry = current;
       }
    }
 }
