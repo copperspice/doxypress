@@ -254,19 +254,21 @@ enum ClassHighlight {
    CHL_Total = CHL_Exceptions + 1
 };
 
+enum IndexTotals {
+   AnnotatedCount,
+   HierarchyCount,
+   DocumentedDirs,
+   DocumentedGroups,
+   DocumentedNamespaces,
+   DocumentedClassMembers,
+   DocumentedFileMembers,
+   DocumentedNamespaceMembers,
+};
 void writeGraphInfo(OutputList &ol);
 void writeIndexHierarchy(OutputList &ol);
 
 void countDataStructures();
-
-extern int annotatedClasses;
-extern int hierarchyClasses;
-extern int documentedGroups;
-extern int documentedNamespaces;
-extern int documentedClassMembers[CMHL_Total];
-extern int documentedFileMembers[FMHL_Total];
-extern int documentedNamespaceMembers[NMHL_Total];
-extern int documentedDirs;
+int getCount(IndexTotals symbol);
 
 void startTitle(OutputList &ol, const QString &fileName, QSharedPointer<Definition> def = QSharedPointer<Definition>() );
 void endTitle(OutputList &ol, const QString &fileName, const QString &name);

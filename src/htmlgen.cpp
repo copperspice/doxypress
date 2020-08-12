@@ -2154,40 +2154,33 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
          return Doxy_Globals::indexedPages > 0;
 
       case LayoutNavEntry::Modules:
-         return documentedGroups > 0;
+         return getCount(IndexTotals::DocumentedGroups) > 0;
 
       case LayoutNavEntry::Namespaces:
-         return documentedNamespaces > 0 && showNamespaces;
-
       case LayoutNavEntry::NamespaceList:
-         return documentedNamespaces > 0 && showNamespaces;
+         return getCount(IndexTotals::DocumentedNamespaces) > 0 && showNamespaces;
 
       case LayoutNavEntry::NamespaceMembers:
-         return documentedNamespaceMembers[NMHL_All] > 0;
+        return getCount(IndexTotals::DocumentedNamespaceMembers) > 0;
 
       case LayoutNavEntry::Classes:
-         return annotatedClasses > 0;
-
       case LayoutNavEntry::ClassList:
-         return annotatedClasses > 0;
-
       case LayoutNavEntry::ClassIndex:
-         return annotatedClasses > 0;
+         return getCount(IndexTotals::AnnotatedCount) > 0;
 
       case LayoutNavEntry::ClassHierarchy:
-         return hierarchyClasses > 0;
+         return getCount(IndexTotals::HierarchyCount) > 0;
 
       case LayoutNavEntry::ClassMembers:
-         return documentedClassMembers[CMHL_All] > 0;
+         return getCount(IndexTotals::DocumentedClassMembers) > 0;
+
 
       case LayoutNavEntry::Files:
-         return Doxy_Globals::documentedHtmlFiles > 0 && showFiles;
-
       case LayoutNavEntry::FileList:
          return Doxy_Globals::documentedHtmlFiles > 0 && showFiles;
 
       case LayoutNavEntry::FileGlobals:
-         return documentedFileMembers[FMHL_All] > 0;
+         return getCount(IndexTotals::DocumentedFileMembers) > 0;
 
       case LayoutNavEntry::Examples:
          return Doxy_Globals::exampleSDict.count() > 0;
