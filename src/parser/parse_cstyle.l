@@ -9446,7 +9446,7 @@ static void startCommentBlock(bool isBrief)
 static void newEntry()
 {
    if (tempEntry == nullptr) {
-      // if temp entry is not 0 it holds current
+      // if temp entry is not a nullptr then it holds current
       // current is replaced by previous which was already added to current_root
       // do not add it again
 
@@ -9464,9 +9464,6 @@ static void handleCommentBlock(const QString &doc, bool brief)
 {
    static const bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
 
-   int position    = 0;
-   bool needsEntry = false;
-
    if (s_docBlockInBody && hideInBodyDocs) {
       return;
    }
@@ -9475,19 +9472,27 @@ static void handleCommentBlock(const QString &doc, bool brief)
       return;
    }
 
+   int lineNum         = 0;
+   int position        = 0;
+
+   bool needsEntry     = false;
+   bool isBrief        = false;
+   bool isJavaDocStyle = false;
+
    // line of block start
-   int lineNr = brief ? current->briefLine : current->docLine;
+   if (brief) {
+      lineNum = current->briefLine;
+   } else {
+      lineNum = current->docLine;
+   }
 
    // fill in inbodyFile && inbodyLine the first time
    QSharedPointer<Entry> docEntry = s_docBlockInBody && previous ? previous : current;
 
    if (s_docBlockInBody && docEntry && docEntry->inbodyLine == -1) {
       docEntry->setData(EntryKey::Inbody_File, yyFileName);
-      docEntry->inbodyLine = lineNr;
+      docEntry->inbodyLine = lineNum;
    }
-
-   bool isBrief = false;
-   bool isJavaDocStyle = false;
 
    if (! s_docBlockInBody) {
       isBrief = brief;
@@ -9495,18 +9500,17 @@ static void handleCommentBlock(const QString &doc, bool brief)
    }
 
    while (parseCommentBlock(s_thisParser, docEntry, stripIndentation(doc), yyFileName,
-                  lineNr, isBrief, isJavaDocStyle, s_docBlockInBody,
+                  lineNum, isBrief, isJavaDocStyle, s_docBlockInBody,
                   protection, position, needsEntry) ) {                   // last 3 are passed by reference
 
       if (needsEntry) {
-         QString tmpDocFile = current->getData(EntryKey::MainDocs_File);
+         QString docFile = current->getData(EntryKey::MainDocs_File);
 
          newEntry();
 
-         current->setData(EntryKey::MainDocs_File, tmpDocFile);
-         current->docLine = lineNr;
+         current->setData(EntryKey::MainDocs_File, docFile);
+         current->docLine = lineNum;
 
-         //
          docEntry = s_docBlockInBody && previous ? previous : current;
       }
    }
