@@ -2485,17 +2485,17 @@ void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> cont
 
                ol.startDescTableData();
 
-               bool hasBrief   = ! fmd->briefDescription().isEmpty();
-               bool hasDetails = ! fmd->documentation().isEmpty();
+               QString briefEnum    = fmd->briefDescription();
+               QString mainDocsEnum = fmd->documentation();
 
-               if (hasBrief) {
+               if (! briefEnum.isEmpty()) {
                   ol.generateDoc(fmd->briefFile(), fmd->briefLine(), getOuterScope() ? getOuterScope() : container,
-                                 fmd, fmd->briefDescription(), true, false);
+                                 fmd, briefEnum, true, false);
                }
 
-               if (hasDetails) {
+               if (! mainDocsEnum.isEmpty()) {
                   ol.generateDoc(fmd->docFile(), fmd->docLine(), getOuterScope() ? getOuterScope() : container,
-                                 fmd, fmd->documentation() + "\n", true, false);
+                                 fmd, mainDocsEnum + "\n", true, false);
                }
 
                ol.endDescTableData();
