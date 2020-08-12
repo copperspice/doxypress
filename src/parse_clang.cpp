@@ -1238,10 +1238,21 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
       lineNum = current->docLine;
    }
 
+   static QRegularExpression regExp("^\\s*[\\\\@](class|concept|enum|file|fn|page|var)\\b");
+   QRegularExpressionMatch match = regExp.match(comment);
 
+   if (match.hasMatch()) {
+      // unique to clang, must pre add a new entry before calling parseCommentBlock
 
+      QSharedPointer<Entry> parent = current->parent();
 
+      current = QMakeShared<Entry>();
+      current->m_srcLang = SrcLangExt_Cpp;
 
+      if (parent) {
+         parent->addSubEntry(current, parent);
+      }
+   }
 
    while (parseCommentBlock(nullptr, current, comment, fileName, lineNum, isBrief, isJavaDocStyle,
                   docBlockInBody, current->protection, position, needsEntry) ) {
