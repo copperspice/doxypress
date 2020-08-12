@@ -1682,7 +1682,6 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
          ((ptrEntry->section & Entry::FILE_MASK) && extractAll)) &&
          ! ptrEntry->m_entryName.isEmpty() && ptrEntry->m_tagInfo.isEmpty() ) {
 
-
       // skip any file coming from tag files
       QSharedPointer<Entry> root = ptrEntry->entry();
 
@@ -1690,22 +1689,20 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
       QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, root->m_entryName, ambig);
 
       if (fd && ! ambig) {
-         {
-            // using false in setDocumentation is small hack to make sure a file
-            // is documented even if a \file command is used without further documentation
+         // using false in setDocumentation is a work around to ensure a file is
+         // documented even if a \file command is used without further documentation
 
-            fd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine, false);
-            fd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-            fd->addSectionsToDefinition(root->m_anchors);
-            fd->setRefItems(root->m_specialLists);
+         fd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine, false);
+         fd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+         fd->addSectionsToDefinition(root->m_anchors);
+         fd->setRefItems(root->m_specialLists);
 
-            for (auto &g : root->m_groups) {
-               QSharedPointer<GroupDef> gd;
+         for (auto &g : root->m_groups) {
+            QSharedPointer<GroupDef> gd;
 
-               if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
-                  gd->addFile(fd);
-                  fd->makePartOfGroup(gd);
-               }
+            if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
+               gd->addFile(fd);
+               fd->makePartOfGroup(gd);
             }
          }
 
