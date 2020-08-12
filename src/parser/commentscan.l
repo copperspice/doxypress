@@ -218,7 +218,7 @@ static DocCmdMap docCmdMap[] =
   { "showrefs",        &handleReferencesRelation,       false },
   { "hiderefs",        &handleHideReferencesRelation,   false },
   { "internal",        &handleInternal,         true  },
-  { "_linebr",         &handleLineBr,           false },
+  { "internal_linebr", &handleLineBr,           false },
   { "static",          &handleStatic,           false },
   { "pure",            &handlePure,             false },
   { "private",         &handlePrivate,          false },
@@ -938,7 +938,7 @@ BL              [ \t\r]*"\n"
 B               [ \t]
 BS              ^(({B}*"//")?)(({B}*"*"+)?){B}*
 ATTR            ({B}+[^>\n]*)?
-DOCNL           "\n"|"\\_linebr"
+DOCNL           "\n"|"\\internal_linebr"
 LC              "\\"{B}*"\n"
 NW              [^a-z_A-Z0-9]
 FILESCHAR       [a-z_A-Z0-9\x80-\xFF\\:\\\/\-\+@&#]
@@ -1439,8 +1439,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput(text);
    }
 
-<Comment>(\n|\\_linebr)({B}*(\n|\\_linebr))+    {
-      // at least one blank line (or blank line command)
+<Comment>(\n|\\internal_linebr)({B}*(\n|\\internal_linebr))+    {
+      // at least one blank line or blank line command
 
       QString text = QString::fromUtf8(yytext);
 
@@ -1456,7 +1456,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
                addToOutput('\n');
                ++i;
 
-            } else if (text.mid(i) == "\\_linebr")  {
+            } else if (text.mid(i) == "\\internal_linebr")  {
                addToOutput('\n');
                i += 8;
 
@@ -1472,7 +1472,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
                addToOutput('\n');
                i++;
 
-            } else if (text.mid(i) == "\\_linebr")  {
+            } else if (text.mid(i) == "\\internal_linebr")  {
                 addToOutput('\n');
                 i += 8;
 
@@ -2205,7 +2205,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
-<SectionTitle>[^\n@\\]*/"\\_linebr"     {
+<SectionTitle>[^\n@\\]*/"\\internal_linebr"     {
       // end of section title
       QString text = QString::fromUtf8(yytext);
       addSection();
