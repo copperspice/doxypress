@@ -1134,6 +1134,18 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                QSharedPointer<Entry> current = s_entryMap.value(key);
 
+               QStringView tmpComment = comment;
+               tmpComment = tmpComment.trimmed();
+
+               if (current == nullptr && tmpComment.startsWith("\\file")) {
+                  // documentation for a file does not belong to any source code
+
+                  current = QMakeShared<Entry>();
+                  current->m_srcLang = SrcLangExt_Cpp;
+
+                  s_current_root->addSubEntry(current, s_current_root);
+               }
+
                if (current) {
                   handleCommentBlock(comment, false, fileName, current);
 
@@ -1155,6 +1167,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      }
 
                      current->setData(EntryKey::Brief_Docs, brief);
+                     current->setData(EntryKey::Main_Docs,  comment);
                   }
                }
             }
