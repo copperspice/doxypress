@@ -6063,6 +6063,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Bold, true));
          retval = handleStyleArgument(this, m_children, cmdName);
          m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Bold, false));
+
          if (retval != TK_WORD) {
             m_children.append(new DocWhiteSpace(this, " "));
          }

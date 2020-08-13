@@ -2221,7 +2221,6 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
 }
 
 // build a list of all classes mentioned in the documentation
-// and all classes that have a documentation block before their definition
 void Doxy_Work::buildClassList(QSharedPointer<Entry> ptrEntry)
 {
    if (((ptrEntry->section & Entry::COMPOUND_MASK) || ptrEntry->section == Entry::OBJCIMPL_SEC) &&
@@ -2232,6 +2231,7 @@ void Doxy_Work::buildClassList(QSharedPointer<Entry> ptrEntry)
    RECURSE_ENTRYTREE(buildClassList, ptrEntry);
 }
 
+// build a list of all classes that have a documentation block before their definition
 void Doxy_Work::buildClassDocList(QSharedPointer<Entry> ptrEntry)
 {
    if ((ptrEntry->section & Entry::COMPOUNDDOC_MASK) && ! ptrEntry->m_entryName.isEmpty()) {
@@ -2851,7 +2851,7 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<Entry> ptrEntry)
 
          if (usingCd == 0) {
             // definition not in the input => add an artificial class
-            usingCd = QMakeShared<ClassDef>("<using>", 1, 1,name, CompoundType::Class);
+            usingCd = QMakeShared<ClassDef>("<using>", 1, 1, name, CompoundType::Class);
 
             Doxy_Globals::hiddenClasses.insert(root->m_entryName, usingCd);
             usingCd->setArtificial(true);
@@ -4069,7 +4069,7 @@ void Doxy_Work::buildInterfaceAndServiceList(QSharedPointer<Entry> ptrEntry)
    }
 }
 
-// search the Entry tree for Function sections, if found store in their class or the global list
+// search the Entry tree for function sections, if found store in their class or the global list
 
 void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd,
       const QString &rname, bool isFriend)

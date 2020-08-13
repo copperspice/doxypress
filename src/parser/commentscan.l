@@ -291,12 +291,12 @@ class DocCmdMapper
       bool endsBrief;
     };
 
-    /** maps a command name to a handler function */
+    // maps a command name to a handler function
     static Cmd *map(const QString &name) {
       return instance()->find(name);
     }
 
-    /** release the singleton */
+    // release the instance
     static void freeInstance() {
       delete s_instance;
       s_instance = nullptr;
@@ -325,7 +325,7 @@ class DocCmdMapper
          cmd->endsBrief = p->endsBrief;
 
          m_map.insert(p->cmdName, cmd);
-         p++;
+         ++p;
       }
    }
 
@@ -337,7 +337,7 @@ class DocCmdMapper
    static DocCmdMapper *s_instance;
 };
 
-DocCmdMapper *DocCmdMapper::s_instance = 0;
+DocCmdMapper *DocCmdMapper::s_instance = nullptr;
 
 #define YY_NEVER_INTERACTIVE 1
 
@@ -1210,7 +1210,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
          int i = 0;
          while (text[i] == ' ' || text[i] == '\t') {
-            i++;
+            ++i;
          }
 
          s_spaceBeforeCmd = text.left(i);
@@ -1223,8 +1223,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          }
 
          if (cmdPtr->func && cmdPtr->func(cmdName, optList)) {
-            // implicit split of the comment block into two entries
-            // restart the next block at the start of this command
+            // handler wants to stop and reenter this parser
 
             s_parseMore = true;
 
@@ -1232,13 +1231,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
             yyterminate();
 
          } else if (cmdPtr->func == nullptr) {
-            // command without handler is processed later by parserdoc.cpp
+            // command without handler is processed later by docparser
             addToOutput(text);
          }
 
       } else {
          // some command was found, just pass it on
-
          addToOutput(text);
       }
    }
@@ -1760,11 +1758,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       warn(yyFileName, yyLineNr, "Missing argument after \\%s",
                   YY_START == ClassDocArg1 ? "class" : "category" );
 
-      addToOutput('\n');
-
       if (text[0] == '\n') {
          yyLineNr++;
       }
+
+      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -3221,6 +3219,7 @@ static bool handleFile(const QString &str, const QStringList &list)
    }
 
    BEGIN( FileDocArg1 );
+
    return stop;
 }
 

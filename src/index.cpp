@@ -55,7 +55,6 @@ static int s_documentedNamespaces;
 static int s_documentedClassMembers[CMHL_Total];
 static int s_documentedFileMembers[FMHL_Total];
 static int s_documentedNamespaceMembers[NMHL_Total];
-static QVector<bool> s_indexWritten = QVector<bool>(LayoutNavEntry::LastValue+1, false);
 
 static int countClassAnnotated();
 static int countClassHierarchy();
@@ -65,6 +64,8 @@ static int countNamespaces();
 
 static void countFiles();
 static void countRelatedPages();
+
+static QVector<bool> s_indexWritten = QVector<bool>(LayoutNavEntry::LastValue+1, false);
 
 void countDataStructures()
 {
@@ -576,11 +577,14 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                   if (! isAnonymous && (! hideUndocMembers || md->hasDocumentation()) && (! md->isStatic() || extractStatic)) {
 
                      if (md->getOuterScope() == def || md->getOuterScope() == Doxy_Globals::globalScope) {
+                        // includes free functions
+
                         Doxy_Globals::indexList.addContentsItem(isDir, md->name(), md->getReference(),
                                  md->getOutputFileBase(), md->anchor(), addToIndex, md);
 
                      } else {
                         // inherited member
+
                         Doxy_Globals::indexList.addContentsItem(isDir, md->name(), def->getReference(),
                                  def->getOutputFileBase(), md->anchor(), addToIndex, md);
                      }
@@ -637,7 +641,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
 // Generates HTML Help tree of classes
 static void writeBaseClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl, bool hideSuper, int level, FTVHelp *ftv, bool addToIndex)
 {
-   if (bcl == 0) {
+   if (bcl == nullptr) {
       return;
    }
 
@@ -1536,7 +1540,6 @@ static void writeFileSourceIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-
 void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
 {
    for (auto cd : clDict) {
@@ -1605,6 +1608,7 @@ static void writeNamespaceTree(const NamespaceSDict &nsDict, FTVHelp *ftv, bool 
 
                ftv->incContentsDepth();
                writeNamespaceTree(nd->getNamespaceSDict(), ftv, false, showClasses, addToIndex);
+
                if (showClasses) {
                   writeClassTree(nd->getClassSDict(), ftv, addToIndex, false);
                }
