@@ -635,7 +635,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
 }
 
 // Generates HTML Help tree of classes
-static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl, bool hideSuper, int level, FTVHelp *ftv, bool addToIndex)
+static void writeBaseClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl, bool hideSuper, int level, FTVHelp *ftv, bool addToIndex)
 {
    if (bcl == 0) {
       return;
@@ -709,7 +709,7 @@ static void writeClassTree(OutputList &ol, const SortedList<BaseClassDef *> *bcl
             bool wasVisited = cd->visited;
             cd->visited = true;
 
-            writeClassTree(ol, cd->subClasses(), wasVisited, level + 1, ftv, addToIndex);
+            writeBaseClassTree(ol, cd->subClasses(), wasVisited, level + 1, ftv, addToIndex);
          }
 
          ol.endIndexListItem();
@@ -1028,7 +1028,7 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
             }
 
             if (hasChildren) {
-               writeClassTree(ol, cd->subClasses(), cd->visited, 1, ftv, addToIndex);
+               writeBaseClassTree(ol, cd->subClasses(), cd->visited, 1, ftv, addToIndex);
                cd->visited = true;
             }
 
