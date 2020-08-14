@@ -706,6 +706,14 @@ static void writeTemplateSpec(OutputList &ol, QSharedPointer<Definition> d, cons
          ol.lineBreak();
       }
 
+      // concepts
+      const QString & str = d->getRequires();
+
+      if (! str.isEmpty()) {
+         ol.docify("requires " + str);
+         ol.lineBreak();
+      }
+
       ol.docify(type.toLower() + " " + name);
       ol.endSubsubsection();
       ol.writeString("\n");
