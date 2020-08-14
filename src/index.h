@@ -204,6 +204,7 @@ enum HighlightedItem {
    HLI_UserGroup,
 
    HLI_ClassVisible,
+   HLI_ConceptVisible,
    HLI_NamespaceVisible,
    HLI_FileVisible,
 };
@@ -257,6 +258,7 @@ enum ClassHighlight {
 enum IndexTotals {
    AnnotatedCount,
    HierarchyCount,
+   ConceptCount,
    DocumentedDirs,
    DocumentedGroups,
    DocumentedNamespaces,
@@ -264,6 +266,7 @@ enum IndexTotals {
    DocumentedFileMembers,
    DocumentedNamespaceMembers,
 };
+
 void writeGraphInfo(OutputList &ol);
 void writeIndexHierarchy(OutputList &ol);
 

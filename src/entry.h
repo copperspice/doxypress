@@ -87,6 +87,8 @@ enum class EntryKey {
    Member_Args,                    // member argument string                              args
    Member_Bitfields,               // member's bit fields                                 bitfields
 
+   Requires_Clause,                // template requires clause
+   Constraint,                     // concept constraint
    Exception_Spec,                 // throw specification                                 exception
    Related_Class,                  // related class (doc block)                           relates
    Initial_Value,                  // initial value (for variables)                       Initializer
