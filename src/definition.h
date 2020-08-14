@@ -58,7 +58,6 @@ struct BriefInfo {
    QString doc;
    QString tooltip;
    QString file;
-
 };
 
 // Abstract interface for a Definition or DefinitionList
@@ -293,6 +292,23 @@ class Definition : public DefinitionIntf
    // Sets the tag file id via which this definition was imported.
    void setReference(const QString &r);
 
+   // concepts
+   const QString & getRequires() const {
+      return m_requires;
+   }
+
+   void setRequires(QString text) {
+      m_requires = std::move(text);
+   }
+
+   const QString & getConstraint() const {
+      return m_constraint;
+   }
+
+   void setConstraint(QString text) {
+      m_constraint = std::move(text);
+   }
+
    // Add the list of anchors that mark the sections that are found in the documentation.
    void addSectionsToDefinition(const QVector<SectionInfo> &anchorList);
    void addSourceReferencedBy(QSharedPointer<MemberDef>d);
@@ -367,9 +383,13 @@ class Definition : public DefinitionIntf
    Definition_Private *m_private;
    QString m_name;
 
-   bool m_isPhrase;
+   // concepts
+   QString m_requires;
+   QString m_constraint;
 
    QString m_phraseName;
+   bool m_isPhrase;
+
    int m_defLine;
    int m_defColumn;
    int m_inputOrderId;

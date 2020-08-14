@@ -234,6 +234,8 @@ Definition::Definition(const Definition &d)
    : DefinitionIntf()
 {
    m_name      = d.m_name;
+   m_requires  = d.m_requires;
+
    m_defLine   = d.m_defLine;
    m_defColumn = d.m_defColumn;
 
