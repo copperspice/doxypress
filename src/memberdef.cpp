@@ -1948,7 +1948,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
          }
 
          if (extractPrivate) {
-
             if (isPrivateGettable()) {
                sl.append("private get");
             }
@@ -3214,6 +3213,17 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       ol.writeString("</table>\n");
    }
    ol.popGeneratorState();
+
+   // show concepts
+   const QString & str = getRequires();
+
+   if (! str.isEmpty()) {
+      ol.writeString("<span class=\"requiresdoc\">");
+      ol.writeString("Constraint");
+      ol.writeString("</span>");
+
+      ol.docify(" requires " + str);
+   }
 
    //
    _writeEnumValues(ol, scopedContainer, cfname, ciname, cname);
