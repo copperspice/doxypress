@@ -18,6 +18,7 @@
 
 #include <stringmap.h>
 
+#include <conceptdef.h>
 #include <dirdef.h>
 #include <example.h>
 #include <groupdef.h>
@@ -26,6 +27,11 @@
 #include <membername.h>
 #include <pagedef.h>
 #include <searchindex.h>
+
+int ConceptSDict::compareMapValues(const QSharedPointer<ConceptDef> &item1, const QSharedPointer<ConceptDef> &item2) const
+{
+   return item1->name().compare(item2->name(), Qt::CaseInsensitive);
+}
 
 int DirSDict::compareMapValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const
 {

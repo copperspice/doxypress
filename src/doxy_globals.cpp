@@ -29,6 +29,8 @@ CiteDict         Doxy_Globals::citeDict;                   // database of biblio
 ClassSDict       Doxy_Globals::classSDict;
 ClassSDict       Doxy_Globals::hiddenClasses;
 
+ConceptSDict     Doxy_Globals::conceptSDict;
+
 DirSDict         Doxy_Globals::directories;
 
 FormulaDict      Doxy_Globals::formulaDict;                // all formulas

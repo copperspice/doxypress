@@ -32,6 +32,7 @@
 class Definition;
 
 class ClassDef;
+class ConceptDef;
 class DirDef;
 class Example;
 class FileNameList;
@@ -369,6 +370,16 @@ class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
 
  private:
    int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
+};
+
+
+/** A sorted dictionary of Concept objects. */
+class ConceptSDict : public StringMap<QSharedPointer<ConceptDef>>
+{
+   public:
+      ConceptSDict() : StringMap<QSharedPointer<ConceptDef>>() {}
+
+      int compareMapValues(const QSharedPointer<ConceptDef> &item1, const QSharedPointer<ConceptDef> &item2) const override;
 };
 
 /** A sorted dictionary of DirDef objects. */

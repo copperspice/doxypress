@@ -28,8 +28,10 @@
 #include <QSharedPointer>
 #include <QTime>
 
+#include <classdef.h>
 #include <classlist.h>
 #include <cite.h>
+#include <conceptdef.h>
 #include <dirdef.h>
 #include <entry.h>
 #include <filenamelist.h>
@@ -99,6 +101,8 @@ class Doxy_Globals
 
       static ClassSDict        classSDict;
       static ClassSDict        hiddenClasses;
+
+      static ConceptSDict      conceptSDict;
 
       static DirSDict          directories;
 
