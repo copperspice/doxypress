@@ -47,6 +47,7 @@ static int s_annotatedClassesPrinted;
 
 static int s_annotatedCount;
 static int s_hierarchyCount;
+static int s_conceptCount;
 
 static int s_documentedDirs;
 static int s_documentedGroups;
@@ -58,6 +59,7 @@ static int s_documentedNamespaceMembers[NMHL_Total];
 
 static int countClassAnnotated();
 static int countClassHierarchy();
+static int countConcepts();
 static int countGroups();
 static int countDirs();
 static int countNamespaces();
@@ -75,6 +77,8 @@ void countDataStructures()
    // "hierarchy"
    s_hierarchyCount = countClassHierarchy();
 
+   // "concepts"
+   s_conceptCount = countConcepts();
 
    // "dirs"
    s_documentedDirs = countDirs();
@@ -104,6 +108,9 @@ int getCount(IndexTotals symbol)
 
       case IndexTotals::HierarchyCount:
          return s_hierarchyCount;
+
+      case IndexTotals::ConceptCount:
+         return s_conceptCount;
 
       case IndexTotals::DocumentedDirs:
          return s_documentedDirs;
@@ -182,6 +189,20 @@ static int countClassHierarchy()
 
    return count;
 }
+
+static int countConcepts()
+{
+   int count = 0;
+
+   for (auto conceptdef : Doxy_Globals::conceptSDict) {
+      if (conceptdef->isLinkableInProject()) {
+         ++count;
+      }
+   }
+
+   return count;
+}
+
 static int countDirs()
 {
    int count = 0;
@@ -2197,6 +2218,131 @@ static QString writeClassLink(OutputList &ol, QSharedPointer<MemberDef> md, cons
    return retval;
 }
 
+static bool conceptVisibleInIndex(QSharedPointer<ConceptDef> conceptDef)
+{
+   static bool allExternals = Config::getBool("all-externals");
+   return (allExternals && conceptDef->isLinkable()) || conceptDef->isLinkableInProject();
+}
+
+static void writeConceptTree(const ConceptSDict &conceptDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
+{
+   for (auto conceptDef : conceptDict) {
+
+      if (! globalOnly || conceptDef->getOuterScope() == 0 || conceptDef->getOuterScope() == Doxy_Globals::globalScope ) {
+
+         if (conceptVisibleInIndex(conceptDef)) {
+
+            ftv->addContentsItem(false, conceptDef->name(), conceptDef->getReference(),
+                  conceptDef->getOutputFileBase(), conceptDef->anchor(), true, conceptDef);
+
+            if (addToIndex) {
+                 Doxy_Globals::indexList.addContentsItem(false, conceptDef->name(), conceptDef->getReference(),
+                      conceptDef->getOutputFileBase(), conceptDef->anchor(), true, conceptDef);
+            }
+         }
+      }
+   }
+}
+
+static void writeConceptIndex(OutputList &ol)
+{
+   if (s_conceptCount == 0) {
+      return;
+   }
+
+   ol.pushGeneratorState();
+   ol.disable(OutputGenerator::Man);
+
+   if (s_annotatedClassesPrinted == 0) {
+      ol.disable(OutputGenerator::Latex);
+      ol.disable(OutputGenerator::RTF);
+   }
+
+   LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::ConceptList);
+
+   QString title   = lne ? lne->title() : theTranslator->trConceptList();
+   bool addToIndex = (lne == nullptr || lne->visible());
+
+   startFile(ol, "concepts", QString(), title, HLI_Concepts);
+
+   startTitle(ol, 0);
+   ol.parseText(title);
+   endTitle(ol, 0, 0);
+
+   ol.startContents();
+
+   ol.startTextBlock();
+   ol.parseText(lne ? lne->intro() : theTranslator->trConceptListDescription());
+   ol.endTextBlock();
+
+   bool firstEntry = true;
+
+   // concept index for Latex/RTF
+   ol.pushGeneratorState();
+   ol.disable(OutputGenerator::Html);
+
+   for (auto &conceptDef : Doxy_Globals::conceptSDict) {
+
+      if (conceptDef->isLinkableInProject()) {
+
+         if (firstEntry) {
+            ol.startIndexList();
+            firstEntry = false;
+         }
+
+         ol.startIndexKey();
+         ol.writeObjectLink(0, conceptDef->getOutputFileBase(), 0, conceptDef->displayName());
+         ol.endIndexKey();
+
+         bool hasBrief = ! conceptDef->briefDescription().isEmpty();
+         ol.startIndexValue(hasBrief);
+
+         if (hasBrief) {
+            ol.generateDoc(conceptDef->briefFile(), conceptDef->briefLine(), conceptDef, QSharedPointer<MemberDef>(),
+                  conceptDef->briefDescription(true), false, false, "", true, true);
+         }
+
+         ol.endIndexValue(conceptDef->getOutputFileBase(), hasBrief);
+      }
+   }
+
+   if (! firstEntry) {
+      ol.endIndexList();
+   }
+
+   ol.popGeneratorState();
+
+   // Hierarchical class index for HTML
+   ol.pushGeneratorState();
+   ol.disableAllBut(OutputGenerator::Html);
+
+   {
+      if (addToIndex) {
+         Doxy_Globals::indexList.addContentsItem(true, title, "", "concepts", "", true);
+         Doxy_Globals::indexList.incContentsDepth();
+      }
+
+      FTVHelp *ftv = new FTVHelp(false);
+      writeConceptTree(Doxy_Globals::conceptSDict, ftv, addToIndex, false);
+
+      QString outStr;
+      QTextStream t(&outStr);
+
+      ftv->generateTreeViewInline(t);
+      ol.writeString(outStr);
+      delete ftv;
+
+      if (addToIndex) {
+         Doxy_Globals::indexList.decContentsDepth();
+      }
+   }
+
+   ol.popGeneratorState();
+   endFile(ol);
+
+   ol.popGeneratorState();
+}
+
 static QString writeFileLink(OutputList &ol, QSharedPointer<MemberDef> md, const QString &separator, const QString &prevName)
 {
    QString retval = prevName;
@@ -4101,6 +4247,19 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                writeClassMemberIndex(ol);
                break;
 
+            case LayoutNavEntry::Concepts:
+               if (s_conceptCount > 0 && addToIndex) {
+                    Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", lne->baseFile(), "");
+                    Doxy_Globals::indexList.incContentsDepth();
+                    needsClosing = true;
+               }
+               break;
+
+            case LayoutNavEntry::ConceptList:
+               msg("Generating concept index\n");
+               writeConceptIndex(ol);
+               break;
+
             case LayoutNavEntry::Files: {
                static const bool showFiles = Config::getBool("show-file-page");
 
@@ -4211,19 +4370,8 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
       writeIndexHierarchyEntries(ol, lne->children());
 
       if (needsClosing) {
-         switch (kind) {
-            case LayoutNavEntry::Namespaces:
-            case LayoutNavEntry::Classes:
-            case LayoutNavEntry::Files:
-            case LayoutNavEntry::UserGroup:
-               Doxy_Globals::indexList.decContentsDepth();
-               break;
-
-            default:
-               break;
-         }
+         Doxy_Globals::indexList.decContentsDepth();
       }
-
    }
 }
 

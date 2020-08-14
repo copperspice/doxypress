@@ -2174,6 +2174,9 @@ static bool quickLinkVisible(LayoutNavEntry::Kind kind)
       case LayoutNavEntry::ClassMembers:
          return getCount(IndexTotals::DocumentedClassMembers) > 0;
 
+      case LayoutNavEntry::Concepts:
+      case LayoutNavEntry::ConceptList:
+         return getCount(IndexTotals::ConceptCount) > 0;
 
       case LayoutNavEntry::Files:
       case LayoutNavEntry::FileList:
@@ -2334,6 +2337,11 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
          altKind = LayoutNavEntry::Classes;
          break;
 
+      case HLI_Concepts:
+         kind = LayoutNavEntry::ConceptList;
+         altKind = LayoutNavEntry::Concepts;
+         break;
+
       case HLI_Files:
          kind = LayoutNavEntry::FileList;
          altKind = LayoutNavEntry::Files;
@@ -2366,6 +2374,12 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
       case HLI_ClassVisible:
          kind = LayoutNavEntry::ClassList;
          altKind = LayoutNavEntry::Classes;
+         highlightParent = true;
+         break;
+
+      case HLI_ConceptVisible:
+         kind = LayoutNavEntry::ConceptList;
+         altKind = LayoutNavEntry::Concepts;
          highlightParent = true;
          break;
 
