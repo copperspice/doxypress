@@ -290,6 +290,7 @@ QString yearToString();
 
 // **
 QSharedPointer<ClassDef>     getClass(const QString &key);
+QSharedPointer<ConceptDef>   getConcept(const QString &key);
 
 QSharedPointer<ClassDef>     getResolvedClass(QSharedPointer<const Definition> scope,
                   QSharedPointer<const FileDef> fileScope, const QString &key,

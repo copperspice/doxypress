@@ -505,6 +505,28 @@ QSharedPointer<ClassDef> getClass(const QString &name)
    return retval;
 }
 
+QSharedPointer<ConceptDef> getConcept(const QString &name)
+{
+   if (name.isEmpty()) {
+      return QSharedPointer<ConceptDef>();
+   }
+
+   static QHash<QString, QSharedPointer<ConceptDef>> cache;
+   auto iter = cache.find(name);
+
+   if (iter != cache.constEnd()) {
+      return iter.value();
+   }
+
+   QSharedPointer<ConceptDef> retval = Doxy_Globals::conceptSDict.find(name);
+
+   if (retval != nullptr) {
+      cache.insert(name, retval);
+   }
+
+   return retval;
+}
+
 QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
 {
    if (name.isEmpty()) {
