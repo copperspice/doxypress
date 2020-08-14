@@ -956,9 +956,10 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                comment = comment.mid(3, len);
 
                ++index;
+               cursor = p->cursors[index];
 
-               while (index < p->numTokens) {
-                  // skip over the cursor comment
+/*             while (index < p->numTokens) {
+                  // get the next cursor, skip over the current comment
                   cursor = p->cursors[index];
 
                   tokenKind = clang_getTokenKind(p->tokens[index]);
@@ -979,6 +980,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                    ++index;
                }
+*/
 
                // skip punctuation and attribute
                uint bracket = 0;
@@ -1002,8 +1004,17 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   cursor = p->cursors[index];
                }
 
-               while (index < p->numTokens && ! documentKind(cursor) ) {
-                  cursor = p->cursors[++index];
+               tokenKind = clang_getTokenKind(p->tokens[index]);
+
+               if (tokenKind == CXToken_Comment) {
+                  // back up since the loop counter will increment past this comment
+                  --index;
+
+               } else {
+                  while (index < p->numTokens && ! documentKind(cursor) ) {
+                     ++index;
+                     cursor = p->cursors[index];
+                  }
                }
 
                // remove single *
@@ -1021,9 +1032,10 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                comment = comment.mid(3, len);
 
                ++index;
+               cursor = p->cursors[index];
 
-               while (index < p->numTokens) {
-                  // skip over the cursor comment
+/*             while (index < p->numTokens) {
+                  // get the next cursor, skip over the current comment
                   cursor = p->cursors[index];
 
                   tokenKind = clang_getTokenKind(p->tokens[index]);
@@ -1044,6 +1056,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                   ++index;
                }
+*/
 
                // skip punctuation and attribute
                uint bracket = 0;
@@ -1064,11 +1077,21 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      --bracket;
                   }
 
-                  cursor = p->cursors[++index];
+                  ++index;
+                  cursor = p->cursors[index];
                }
 
-               while (index < p->numTokens && ! documentKind(cursor) ) {
-                  cursor = p->cursors[++index];
+               tokenKind = clang_getTokenKind(p->tokens[index]);
+
+               if (tokenKind == CXToken_Comment) {
+                  // back up since the loop counter will increment past this comment
+                  --index;
+
+               } else {
+                  while (index < p->numTokens && ! documentKind(cursor) ) {
+                     ++index;
+                     cursor = p->cursors[index];
+                  }
                }
 
                if (qt_auto_brief) {
@@ -1263,6 +1286,7 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
          QSharedPointer<Entry> parent = current->parent();
 
          current = QMakeShared<Entry>();
+         current->m_srcLang = SrcLangExt_Cpp;
 
          if (parent) {
             parent->addSubEntry(current, parent);
