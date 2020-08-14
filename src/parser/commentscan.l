@@ -49,6 +49,7 @@ static bool handleWeakGroup(const QString &str, const QStringList &list);
 static bool handleNamespace(const QString &str, const QStringList &list);
 static bool handlePackage(const QString &str, const QStringList &list);
 static bool handleClass(const QString &str, const QStringList &list);
+static bool handleConcept(const QString &str, const QStringList &list);
 static bool handleHeaderFile(const QString &str, const QStringList &list);
 static bool handleProtocol(const QString &str, const QStringList &list);
 static bool handleCategory(const QString &str, const QStringList &list);
@@ -155,6 +156,7 @@ static DocCmdMap docCmdMap[] =
   { "namespace",       &handleNamespace,        false },
   { "package",         &handlePackage,          false },
   { "class",           &handleClass,            false },
+  { "concept",         &handleConcept,          false },
   { "headerfile",      &handleHeaderFile,       false },
   { "protocol",        &handleProtocol,         false },
   { "category",        &handleCategory,         false },
@@ -469,26 +471,27 @@ static void initParser()
 static bool getDocSectionName(int s)
 {
   switch(s) {
-    case Entry::CLASSDOC_SEC:
-    case Entry::STRUCTDOC_SEC:
-    case Entry::UNIONDOC_SEC:
-    case Entry::EXCEPTIONDOC_SEC:
-    case Entry::NAMESPACEDOC_SEC:
-    case Entry::PROTOCOLDOC_SEC:
     case Entry::CATEGORYDOC_SEC:
-    case Entry::ENUMDOC_SEC:
-    case Entry::PAGEDOC_SEC:
-    case Entry::VARIABLEDOC_SEC:
-    case Entry::MEMBERDOC_SEC:
-    case Entry::OVERLOADDOC_SEC:
-    case Entry::FILEDOC_SEC:
+    case Entry::CLASSDOC_SEC:
+    case Entry::CONCEPTDOC_SEC:
     case Entry::DEFINEDOC_SEC:
+    case Entry::DIRDOC_SEC:
+    case Entry::ENUMDOC_SEC:
+    case Entry::EXAMPLE_SEC:
+    case Entry::EXCEPTIONDOC_SEC:
+    case Entry::FILEDOC_SEC:
     case Entry::GROUPDOC_SEC:
     case Entry::MAINPAGEDOC_SEC:
-    case Entry::PACKAGEDOC_SEC:
-    case Entry::DIRDOC_SEC:
-    case Entry::EXAMPLE_SEC:
+    case Entry::MEMBERDOC_SEC:
     case Entry::MEMBERGRP_SEC:
+    case Entry::NAMESPACEDOC_SEC:
+    case Entry::OVERLOADDOC_SEC:
+    case Entry::PACKAGEDOC_SEC:
+    case Entry::PAGEDOC_SEC:
+    case Entry::PROTOCOLDOC_SEC:
+    case Entry::STRUCTDOC_SEC:
+    case Entry::UNIONDOC_SEC:
+    case Entry::VARIABLEDOC_SEC:
       return true;
 
     default:
@@ -968,6 +971,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 %x ClassDocArg2
 %x ClassDocArg3
 %x CategoryDocArg1
+%x ConceptDocArg1
+%x ConceptDocArg2
 %x XRefItemParam1
 %x XRefItemParam2
 %x XRefItemParam3
@@ -1825,6 +1830,38 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // ignore other stuff
    }
 
+  /* --------- handle arguments of concept command ------------------- */
+
+<ConceptDocArg1>{SCOPENAME}   {
+      // first argument, concept name
+      QString text = QString::fromUtf8(yytext);
+      current->m_entryName = substitute(text,".","::");
+
+      BEGIN( Comment );
+   }
+
+<ConceptDocArg1>{LC}          {
+      yyLineNr++;
+      addToOutput('\n');
+   }
+
+<ConceptDocArg1>{DOCNL}       {
+      // missing argument
+      QString text = QString::fromUtf8(yytext);
+
+      warn(yyFileName, yyLineNr, "Missing argument after \\concept");
+
+      if (text[0] == '\n') {
+         yyLineNr++;
+      }
+
+      addToOutput('\n');
+      BEGIN( Comment );
+   }
+
+<ConceptDocArg1>.             {
+      // ignore other stuff
+   }
 
   /* --------- handle arguments of {def,add,weak} group commands --------- */
 
@@ -3097,6 +3134,17 @@ static bool handleClass(const QString &str, const QStringList &list)
 
    bool stop = makeStructuralIndicator(Entry::CLASSDOC_SEC);
    BEGIN( ClassDocArg1 );
+
+   return stop;
+}
+
+static bool handleConcept(const QString &str, const QStringList &list)
+{
+   (void) str;
+   (void) list;
+
+   bool stop = makeStructuralIndicator(Entry::CONCEPTDOC_SEC);
+   BEGIN( ConceptDocArg1 );
 
    return stop;
 }
