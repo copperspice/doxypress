@@ -203,6 +203,8 @@ static STLInfo g_stlinfo[] = {
 namespace Doxy_Work{
 
    void addClassToContext(QSharedPointer<Entry> ptrEntry);
+   void addConceptToContext(QSharedPointer<Entry> ptrEntry);
+
    void addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry);
 
    static void addIncludeFileClass(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root);
@@ -236,6 +238,9 @@ namespace Doxy_Work{
 
    void buildClassList(QSharedPointer<Entry> ptrEntry);
    void buildClassDocList(QSharedPointer<Entry> ptrEntry);
+
+   void buildConceptList(QSharedPointer<Entry> ptrEntry);
+
    void buildCompleteMemberLists();
    void buildFileList(QSharedPointer<Entry> ptrEntry);
    void buildExampleList(QSharedPointer<Entry> ptrEntry);
@@ -627,6 +632,10 @@ void processFiles()
 
    Doxy_Globals::infoLog_Stat.begin("Associating documentation with classes\n");
    buildClassDocList(root);
+
+   Doxy_Globals::infoLog_Stat.begin("Building concept list\n");
+   buildConceptList(root);
+   Doxy_Globals::infoLog_Stat.end();
 
    // build list of using declarations here (global list)
    buildListOfUsingDecls(root);
@@ -2220,6 +2229,105 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
    cd->setRefItems(root->m_specialLists);
 }
 
+void Doxy_Work::addConceptToContext(QSharedPointer<Entry> ptrEntry)
+{
+   QSharedPointer<Entry> root = ptrEntry;
+   QSharedPointer<FileDef> fd = ptrEntry->fileDef();
+
+   QString scName;
+   if (ptrEntry->parent()->section & Entry::SCOPE_MASK) {
+      scName = ptrEntry->parent()->m_entryName;
+   }
+
+   // name without parent scope
+   QString fullName = root->m_entryName;
+
+   // strip off any template parameters (but not those for specializations)
+   fullName = stripTemplateSpecifiersFromScope(fullName);
+
+   // name with scope (if not present already)
+   QString qualifiedName = fullName;
+
+   if (! scName.isEmpty() && ! leftScopeMatch(fullName, scName)) {
+      qualifiedName.prepend(scName + "::");
+   }
+
+   // check if this concept has been seen before
+   QSharedPointer<ConceptDef> conceptDef = getConcept(qualifiedName);
+
+   if (conceptDef != nullptr) {
+      // concept exists
+
+      fullName = conceptDef->name();
+
+      conceptDef->setDocumentation(root->getData(EntryKey::Main_Docs),     root->getData(EntryKey::MainDocs_File), root->docLine);
+      conceptDef->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+
+      if (root->startBodyLine != -1 && conceptDef->getStartBodyLine() == -1) {
+         conceptDef->setBodySegment(root->startBodyLine, root->endBodyLine);
+         conceptDef->setBodyDef(fd);
+      }
+
+      if (! root->m_templateArgLists.isEmpty() && conceptDef->getTemplateArgumentList().listEmpty()) {
+         // happens if a template class is declared before the actual definition
+
+         ArgumentList templateArgList = root->m_templateArgLists.first();
+         conceptDef->setTemplateArgumentList(templateArgList);
+      }
+
+   } else {
+      // new cconcept
+
+      QString tagName;
+      QString tagFileName;
+
+      const TagInfo &tagInfo = ptrEntry->m_tagInfo;
+
+      if (! tagInfo.isEmpty()) {
+         tagName     = tagInfo.tag_Name;
+         tagFileName = tagInfo.tag_FileName;
+
+         if (fullName.contains("::")) {
+            // symbols imported via tag files may come without the parent scope
+            // so we artificially create it here
+
+            buildScopeFromQualifiedName(fullName, fullName.count("::"), root->m_srcLang, tagInfo);
+         }
+      }
+
+      ArgumentList templateArgList;
+
+      if (! root->m_templateArgLists.isEmpty()) {
+         templateArgList = root->m_templateArgLists.first();
+      }
+
+      conceptDef = QMakeShared<ConceptDef>(! tagInfo.isEmpty() ? tagName : root->getData(EntryKey::File_Name),
+                  root->startLine, root->startColumn, fullName, tagName, tagFileName);
+
+      // copy docs to definition
+      conceptDef->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
+      conceptDef->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+      conceptDef->setLanguage(root->m_srcLang);
+      conceptDef->setId(root->getData(EntryKey::Clang_Id));
+
+      conceptDef->setTemplateArgumentList(templateArgList);
+
+      conceptDef->setRequires(root->getData(EntryKey::Requires_Clause));
+      conceptDef->setConstraint(root->getData(EntryKey::Constraint));
+
+      conceptDef->setBodySegment(root->startBodyLine, root->endBodyLine);
+      conceptDef->setBodyDef(fd);
+
+      // is the concept is found inside a namespace
+      //   conceptDef->insertUsedFile(fd);
+
+      // add concept to the list
+      Doxy_Globals::conceptSDict.insert(fullName, conceptDef);
+   }
+
+   conceptDef->addSectionsToDefinition(root->m_anchors);
+}
+
 // build a list of all classes mentioned in the documentation
 void Doxy_Work::buildClassList(QSharedPointer<Entry> ptrEntry)
 {
@@ -2239,6 +2347,20 @@ void Doxy_Work::buildClassDocList(QSharedPointer<Entry> ptrEntry)
    }
 
    RECURSE_ENTRYTREE(buildClassDocList, ptrEntry);
+}
+
+void Doxy_Work::buildConceptList(QSharedPointer<Entry> ptrEntry)
+{
+   if (ptrEntry->m_srcLang == SrcLangExt_Cpp) {
+      if ((ptrEntry->section == Entry::CONCEPTDOC_SEC) && ! ptrEntry->m_entryName.isEmpty()) {
+         addConceptToContext(ptrEntry);
+      }
+   }
+
+   // recursive call
+   for (auto item : ptrEntry->children() ) {
+      buildConceptList(item);
+   }
 }
 
 void Doxy_Work::resolveClassNestingRelations()
