@@ -30,6 +30,7 @@ list(APPEND DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/commentscan.h
    ${CMAKE_CURRENT_SOURCE_DIR}/condparser.h
    ${CMAKE_CURRENT_SOURCE_DIR}/config.h
+   ${CMAKE_CURRENT_SOURCE_DIR}/conceptdef.h
    ${CMAKE_CURRENT_SOURCE_DIR}/constexp.h
    ${CMAKE_CURRENT_SOURCE_DIR}/cppvalue.h
    ${CMAKE_CURRENT_SOURCE_DIR}/declinfo.h
@@ -137,6 +138,7 @@ list(APPEND DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/config_json.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/cmdmapper.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/condparser.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/conceptdef.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/cppvalue.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/definition.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/dia.cpp
