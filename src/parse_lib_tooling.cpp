@@ -400,7 +400,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          // method, function, constructor, destructor, conversion
 
          QSharedPointer<Entry> parentEntry;
-         QSharedPointer<Entry> current = QMakeShared<Entry>();
+         QSharedPointer<Entry> current;
 
          QString parentUSR = getUSR_DeclContext(node->getParent());
 
@@ -409,13 +409,16 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          QString currentUSR = getUSR_Decl(node);
+         current = s_entryMap.value(currentUSR);
 
-         if (s_entryMap.contains(currentUSR)) {
-            // can occur when a method is declared in the class and then defined later in the same file
+         if (current == nullptr) {
+            current = QMakeShared<Entry>();
+            s_entryMap.insert(currentUSR, current);
+
+         } else if (current->startBodyLine != -2) {
+
             return true;
          }
-
-         s_entryMap.insert(currentUSR, current);
 
          clang::FullSourceLoc location    = m_context->getFullLoc(node->getBeginLoc());
          clang::CXXMethodDecl *methodDecl = llvm::dyn_cast<clang::CXXMethodDecl>(node);
