@@ -216,18 +216,31 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          // class, struct, union
 
          QSharedPointer<Entry> parentEntry;
-         QSharedPointer<Entry> current = QMakeShared<Entry>();
+         QSharedPointer<Entry> current;
 
          QString parentUSR  = getUSR_DeclContext(node->getParent());
-
          QString currentUSR = getUSR_Decl(node);
-         s_entryMap.insert(currentUSR, current);
 
+         current = s_entryMap.value(currentUSR);
+
+         // bool newEntry      = false;
+         bool isForwardDecl = false;
+
+         if (current == nullptr) {
+            current = QMakeShared<Entry>();
+            s_entryMap.insert(currentUSR, current);
+
+            // newEntry = true;
+         }
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
          QString name = getName(node);
 
          if (node->isClass() ) {
+
+            if (! node->isCompleteDefinition())  {
+               isForwardDecl = true;
+            }
 
             current->section     = Entry::CLASS_SEC;
             current->m_entryName = name;
@@ -235,68 +248,69 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->setData(EntryKey::Member_Type,  "class");
             current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
 
-            current->m_srcLang        = SrcLangExt_Cpp;
-            current->startLine   = location.getSpellingLineNumber();
-            current->startColumn = location.getSpellingColumnNumber();
-
-            if (node->hasAttr<clang::FinalAttr>())  {
-               current->m_traits.setTrait(Entry::Virtue::Final);
-            }
+            current->m_srcLang     = SrcLangExt_Cpp;
+            current->startLine     = location.getSpellingLineNumber();
+            current->startColumn   = location.getSpellingColumnNumber();
 
             current->startBodyLine = current->startLine;
-            if (! node->hasDefinition()) {
-               // required, check to ensure bases() container has entries
-               return true;
-            }
+            current->endBodyLine   = m_context->getFullLoc(node->getEndLoc()).getSpellingLineNumber();
 
-            //
-            clang::ClassTemplatePartialSpecializationDecl *specialNode =
-                  llvm::dyn_cast<clang::ClassTemplatePartialSpecializationDecl>(node);
+            if (true) {    //  (! isForwardDecl) {
+               if (node->hasAttr<clang::FinalAttr>())  {
+                  current->m_traits.setTrait(Entry::Virtue::Final);
+               }
 
-            if (specialNode != nullptr) {
-               // partial
-
-               std::string tString;
-               llvm::raw_string_ostream tStream(tString);
-
-
-               auto tmpArgs = specialNode->getTemplateArgsAsWritten();
-               clang::printTemplateArgumentList(tStream, tmpArgs->arguments(), m_policy);
-               current->m_entryName += toQString(tStream.str());
-
-            } else {
-               clang::ClassTemplateSpecializationDecl *specialNode =
-                  llvm::dyn_cast<clang::ClassTemplateSpecializationDecl>(node);
+               clang::ClassTemplatePartialSpecializationDecl *specialNode =
+                     llvm::dyn_cast<clang::ClassTemplatePartialSpecializationDecl>(node);
 
                if (specialNode != nullptr) {
-                  // full
+                  // partial
 
                   std::string tString;
                   llvm::raw_string_ostream tStream(tString);
 
-                  specialNode->getNameForDiagnostic(tStream, m_policy, true);
-                  current->m_entryName = toQString(tStream.str());
+                  auto tmpArgs = specialNode->getTemplateArgsAsWritten();
+                  clang::printTemplateArgumentList(tStream, tmpArgs->arguments(), m_policy);
+                  current->m_entryName += toQString(tStream.str());
+
+               } else {
+                  clang::ClassTemplateSpecializationDecl *specialNode =
+                     llvm::dyn_cast<clang::ClassTemplateSpecializationDecl>(node);
+
+                  if (specialNode != nullptr) {
+                     // full
+
+                     std::string tString;
+                     llvm::raw_string_ostream tStream(tString);
+
+                     specialNode->getNameForDiagnostic(tStream, m_policy, true);
+                     current->m_entryName = toQString(tStream.str());
+                  }
                }
-            }
 
+               if (! isForwardDecl) {
+                  // inheritance
+                  for (auto &item : node->bases()) {
+                     QString name = toQString(item.getType());
 
-            // inheritance
-            for (auto &item : node->bases()) {
-               QString name = toQString(item.getType());
+                     Protection protection = getAccessSpecifier(&item);
+                     Specifier virtualType = Specifier::Normal;
 
-               Protection protection = getAccessSpecifier(&item);
-               Specifier virtualType = Specifier::Normal;
+                     if (item.isVirtual()) {
+                        virtualType = Specifier::Virtual;
+                     }
 
-               if (item.isVirtual()) {
-                  virtualType = Specifier::Virtual;
+                     auto tmpBase = BaseInfo(name, protection, virtualType);
+                     current->extends.append(tmpBase);
+                  }
                }
-
-               auto tmpBase = BaseInfo(name, protection, virtualType);
-               current->extends.append(tmpBase);
             }
 
             if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
-               s_current_root->addSubEntry(current, s_current_root);
+
+//             if (newEntry) {
+                  s_current_root->addSubEntry(current, s_current_root);
+//             }
 
             } else {
                // nested class
