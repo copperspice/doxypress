@@ -23,6 +23,7 @@
 
 static QMap<QString, clang::DeclContext *>       s_parentNodeMap;
 static QMultiMap<QString, QSharedPointer<Entry>> s_orphanMap;
+static QMap<QString, QSharedPointer<Entry>>      s_conceptMap;
 static int anonNSCount  = 0;
 
 static Protection getAccessSpecifier(const clang::Decl *node)
@@ -647,6 +648,57 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          return true;
       }
 
+      virtual bool VisitConceptDecl(clang::ConceptDecl *node) {
+         // concept
+
+         QSharedPointer<Entry> parentEntry;
+         QSharedPointer<Entry> current = QMakeShared<Entry>();
+
+         QString parentUSR;
+         QString currentUSR = getUSR_Decl(node);
+
+         s_entryMap.insert(currentUSR, current);
+
+         clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
+         QString name = getName(node);
+
+         //
+         auto constraintExpr = node->getConstraintExpr();
+
+         std::string tString;
+         llvm::raw_string_ostream tStream(tString);
+         constraintExpr->printPretty(tStream, 0, m_policy);
+
+         QString constraintStr = toQString(tStream.str());
+
+         //
+         current->section     = Entry::CONCEPTDOC_SEC;
+         current->m_entryName = name;
+
+         current->setData(EntryKey::Member_Type,  "concept");
+         current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
+
+         current->m_srcLang     = SrcLangExt_Cpp;
+         current->startLine     = location.getSpellingLineNumber();
+         current->startColumn   = location.getSpellingColumnNumber();
+
+         current->startBodyLine = current->startLine;
+         current->endBodyLine   = m_context->getFullLoc(node->getEndLoc()).getSpellingLineNumber();
+
+         current->setData(EntryKey::Constraint,  constraintStr);
+
+         clang::TemplateParameterList *list = node->getTemplateParameters();
+
+         for (clang::NamedDecl *item : *list) {
+            QString currentUSR = getUSR_Decl(item);
+            s_conceptMap.insert(currentUSR, current);
+         }
+
+         s_current_root->addSubEntry(current, s_current_root);
+
+         return true;
+      }
+
       virtual bool VisitFieldDecl(clang::FieldDecl *node) {
          // class member
 
@@ -1125,14 +1177,25 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          // template type
 
          QSharedPointer<Entry> parentEntry;
-         QSharedPointer<Entry> current = QMakeShared<Entry>();
-
 
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
          parentEntry = s_entryMap.value(parentUSR);
 
-         if (parentEntry != nullptr && parentUSR != "TranslationUnit") {
+         QString currentUSR = getUSR_Decl(node);
 
+         bool isConcept = false;
+
+         if (parentEntry != nullptr && parentUSR == "TranslationUnit") {
+            // concept will land here
+            parentEntry = s_conceptMap.value(currentUSR);
+
+            if (parentEntry != nullptr) {
+               // parentEntry is the "current" entry this template node belongs to
+               isConcept = true;
+            }
+         }
+
+         if ((parentEntry != nullptr && parentUSR != "TranslationUnit") || isConcept) {
             auto parentNode = node->getParentFunctionOrMethod();
 
             if (s_parentNodeMap.contains(parentUSR) && (s_parentNodeMap.value(parentUSR) != parentNode) ) {
@@ -1141,8 +1204,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
             s_parentNodeMap.insert(parentUSR, parentNode);
+            QSharedPointer<Entry> current = QMakeShared<Entry>();
 
-            QString currentUSR = getUSR_Decl(node);
             s_entryMap.insert(currentUSR, current);
 
             if (parentEntry->m_templateArgLists.isEmpty()) {
@@ -1235,6 +1298,8 @@ class DoxyASTConsumer : public clang::ASTConsumer {
 
       virtual void HandleTranslationUnit(clang::ASTContext &context)  override {
          m_visitor.TraverseDecl(context.getTranslationUnitDecl());
+
+         s_conceptMap.clear();
 
          // clean up orphan list
          auto iter = s_orphanMap.begin();
