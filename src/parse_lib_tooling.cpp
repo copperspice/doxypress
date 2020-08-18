@@ -522,6 +522,26 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          args += ")" ;
 
+         // attributes
+         if (node->hasAttrs())  {
+            clang::AttrVec attributes = node->getAttrs();
+
+            for (clang::Attr *item : attributes) {
+               QByteArray name = item->getSpelling();
+
+               if (name == "deprecated") {
+                  current->m_traits.setTrait(Entry::Virtue::Deprecated);
+
+               } else if (name == "nodiscard") {
+                  current->m_traits.setTrait(Entry::Virtue::NoDiscard);
+
+               } else if (name == "noreturn") {
+                  current->m_traits.setTrait(Entry::Virtue::NoReturn);
+
+               }
+            }
+         }
+
          if (node->isConstexpr())  {
             returnType.prepend("constexpr ");
             current->m_traits.setTrait(Entry::Virtue::ConstExpr);
