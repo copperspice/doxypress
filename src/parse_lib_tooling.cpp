@@ -177,6 +177,41 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          return retval;
       }
 
+      virtual bool VisitClassTemplateDecl(clang::ClassTemplateDecl *node) {
+         // class templates
+
+         QSharedPointer<Entry> current;
+
+         QString currentUSR = getUSR_Decl(node);
+
+         current = s_entryMap.value(currentUSR);
+
+         if (current == nullptr) {
+            QString name = getName(node);
+
+            current = QMakeShared<Entry>();
+            s_entryMap.insert(currentUSR, current);
+
+            current->section     = Entry::CLASS_SEC;
+            current->m_entryName = name;
+         }
+
+         if (node->hasAssociatedConstraints()) {
+            const clang::Expr *tExpr = node->getTemplateParameters()->getRequiresClause();
+
+            if (tExpr != nullptr) {
+
+               std::string tString;
+               llvm::raw_string_ostream tStream(tString);
+               tExpr->printPretty(tStream, 0, m_policy);
+
+               current->setData(EntryKey::Requires_Clause, toQString(tStream.str()));
+            }
+         }
+
+         return true;
+      }
+
       virtual bool VisitCXXRecordDecl(clang::CXXRecordDecl *node) {
          // class, struct, union
 
