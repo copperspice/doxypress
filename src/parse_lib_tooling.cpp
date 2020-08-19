@@ -1307,6 +1307,16 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             if (node->wasDeclaredWithTypename())  {
                type = "typename";
+
+            } else if (node->hasTypeConstraint()) {
+               auto tc   = node->getTypeConstraint();
+               auto expr = tc->getImmediatelyDeclaredConstraint();
+
+               std::string tString;
+               llvm::raw_string_ostream tStream(tString);
+               expr->printPretty(tStream, 0, m_policy);
+
+               type = toQString(tStream.str());
             }
 
             if (node->isParameterPack())  {
