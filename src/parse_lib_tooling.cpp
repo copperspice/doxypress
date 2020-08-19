@@ -885,15 +885,24 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          // enum
 
          QSharedPointer<Entry> parentEntry;
-         QSharedPointer<Entry> current = QMakeShared<Entry>();
+         QSharedPointer<Entry> current;
 
          QString parentUSR  = getUSR_DeclContext(node->getParent());
-         parentEntry = s_entryMap.value(parentUSR);
+         QString currentUSR = getUSR_Decl(node);
 
+         current = s_entryMap.value(currentUSR);
+
+         if (current == nullptr) {
+            current = QMakeShared<Entry>();
+            s_entryMap.insert(currentUSR, current);
+         }
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
          QString name = toQString(node->getNameAsString());
+
          QString className;
+
+         parentEntry = s_entryMap.value(parentUSR);
 
          if (parentEntry) {
             className = parentEntry->m_entryName;
@@ -907,13 +916,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   }
                }
             }
-
-         } else {
-            // printf("\n broom enum parentEntry NULLPTR   name = %s  USR = %s", csPrintable(name), csPrintable(parentUSR) );
          }
-
-         QString currentUSR = getUSR_Decl(node);
-         s_entryMap.insert(currentUSR, current);
 
          current->section     = Entry::ENUM_SEC;
          current->m_entryName = className + "::" + name;
@@ -949,36 +952,25 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          // enum values
 
          QSharedPointer<Entry> parentEntry;
-         QSharedPointer<Entry> current = QMakeShared<Entry>();
+         QSharedPointer<Entry> current;
 
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
-         parentEntry = s_entryMap.value(parentUSR);
+         QString currentUSR = getUSR_Decl(node);
 
+         if (current == nullptr) {
+            current = QMakeShared<Entry>();
+            s_entryMap.insert(currentUSR, current);
+         }
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
          QString name = toQString(node->getNameAsString());
-         QString className;
+
+         parentEntry = s_entryMap.value(parentUSR);
 
          if (parentEntry == nullptr) {
-           // might need to reslove
-
-         } else {
-            className = parentEntry->m_entryName;
-
+            // may need to review
+            return true;
          }
-
-         if (! name.isEmpty()) {
-            // not sure there is an anonymous enum constant
-
-            for (auto entry : parentEntry->children() ) {
-               if (entry->m_entryName == className + name) {
-                   return true;
-               }
-            }
-         }
-
-         QString currentUSR = getUSR_Decl(node);
-         s_entryMap.insert(currentUSR, current);
 
          current->section     = Entry::VARIABLE_SEC;
          current->m_entryName = name;
