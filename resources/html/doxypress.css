@@ -262,7 +262,7 @@ div.line
    font-family: monospace, fixed;
    font-size: 13px;
    min-height: 13px;
-   line-height: 1.0;
+   line-height: 1.1;
    white-space: -moz-pre-wrap; /* Moz */
    white-space: -pre-wrap;     /* Opera 4-6 */
    white-space: -o-pre-wrap;   /* Opera 7 */
@@ -649,6 +649,11 @@ table.memberdecls
    font-size: 65%;
    display: inline-block;
    vertical-align: middle;
+}
+
+.requiresdoc
+{
+   text-decoration: underline;
 }
 
 .memtemplate
