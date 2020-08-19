@@ -24,7 +24,9 @@
 static QMap<QString, clang::DeclContext *>       s_parentNodeMap;
 static QMultiMap<QString, QSharedPointer<Entry>> s_orphanMap;
 static QMap<QString, QSharedPointer<Entry>>      s_conceptMap;
-static int anonNSCount  = 0;
+static QSet<QPair<QString, uint>>                s_templateDeclMap;
+
+static int anonNSCount = 0;
 
 static Protection getAccessSpecifier(const clang::Decl *node)
 {
@@ -1327,7 +1329,16 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                return true;
             }
 
+            QPair<QString, uint> key = {parentUSR, node->getIndex()};
+
+            if (s_templateDeclMap.contains(key)) {
+               // already have this template parameter, might be a forward declaration
+               return true;
+            }
+
             s_parentNodeMap.insert(parentUSR, parentNode);
+            s_templateDeclMap.insert(key);
+
             QSharedPointer<Entry> current = QMakeShared<Entry>();
 
             s_entryMap.insert(currentUSR, current);
@@ -1435,6 +1446,7 @@ class DoxyASTConsumer : public clang::ASTConsumer {
          m_visitor.TraverseDecl(context.getTranslationUnitDecl());
 
          s_conceptMap.clear();
+         s_templateDeclMap.clear();
 
          // clean up orphan list
          auto iter = s_orphanMap.begin();
