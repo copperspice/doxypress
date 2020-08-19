@@ -11,12 +11,14 @@
 #define FUNCTION_H
 
 /** \file function.h
-    \brief  Intro or brief documentation goes here
+    \brief  Brief description for this function header file
 
-    Detailed documentation for a file with a function
+    Detailed documentation for a file command which contains one free function.
 */
 
-/// Documentation for a function
+
+/// A free function which appears after a file command, show this brief
 void myFunction();
+
 
 #endif

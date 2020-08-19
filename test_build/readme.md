@@ -1,4 +1,4 @@
-## DoxyPress
+## DoxyPress (readme)
 
 ### Introduction
 
