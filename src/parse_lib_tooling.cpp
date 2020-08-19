@@ -396,6 +396,44 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          return true;
       }
 
+      virtual bool VisitFunctionTemplateDecl(clang::FunctionTemplateDecl *node) {
+         // function or method templates
+
+         QSharedPointer<Entry> current;
+
+         QString currentUSR = getUSR_Decl(node);
+
+         current = s_entryMap.value(currentUSR);
+
+         if (current == nullptr) {
+            QString name = getName(node);
+
+            current = QMakeShared<Entry>();
+            s_entryMap.insert(currentUSR, current);
+
+            current->section     = Entry::FUNCTION_SEC;
+            current->m_entryName = name;
+
+            // used to mark this entry is a template
+            current->startBodyLine = -2;
+         }
+
+         if (node->hasAssociatedConstraints()) {
+            const clang::Expr *tExpr = node->getTemplateParameters()->getRequiresClause();
+
+            if (tExpr != nullptr) {
+
+               std::string tString;
+               llvm::raw_string_ostream tStream(tString);
+               tExpr->printPretty(tStream, 0, m_policy);
+
+               current->setData(EntryKey::Requires_Clause, toQString(tStream.str()));
+            }
+         }
+
+         return true;
+      }
+
       virtual bool VisitFunctionDecl(clang::FunctionDecl *node) {
          // method, function, constructor, destructor, conversion
 
