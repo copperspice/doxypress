@@ -2388,11 +2388,8 @@ static QString writeNamespaceLink(OutputList &ol, QSharedPointer<MemberDef> md, 
 }
 
 static void writeMemberList(OutputList &ol, bool useSections, int page,
-                  const LetterToIndexMap<MemberIndexList> &memberLists, DefinitionIntf::DefType type)
+                  const LetterToIndexMap<MemberIndexList> &memberLists, DefinitionIntf::DefType definitionType)
 {
-   int index = (int)type;
-   assert(index < 3);
-
    QString prevName;
    QString prevDefName;
 
@@ -2480,17 +2477,20 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
          }
 
          // write the link for the specific list type
-         switch (index)  {
-            case 0:
+         switch (definitionType)  {
+            case Definition::TypeClass:
                prevDefName = writeClassLink(ol, md, sep, prevDefName);
                break;
 
-            case 1:
+            case Definition::TypeFile:
                prevDefName = writeFileLink(ol, md, sep, prevDefName);
                break;
 
-            case 2:
+            case Definition::TypeNamespace:
                prevDefName = writeNamespaceLink(ol, md, sep, prevDefName);
+               break;
+
+            default:
                break;
          }
       }
