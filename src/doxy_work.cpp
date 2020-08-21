@@ -208,6 +208,8 @@ namespace Doxy_Work{
    void addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry);
 
    static void addIncludeFileClass(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root);
+   static void addIncludeFileConcept(QSharedPointer<ConceptDef> conceptDef, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root);
+
    void addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd,
                   QString const &rname);
 
@@ -2331,7 +2333,107 @@ void Doxy_Work::addConceptToContext(QSharedPointer<Entry> ptrEntry)
    }
 
    conceptDef->addSectionsToDefinition(root->m_anchors);
+
+   if (conceptDef->hasDocumentation()) {
+      addIncludeFileConcept(conceptDef, fd, root);
+   }
 }
+
+void Doxy_Work::addIncludeFileConcept(QSharedPointer<ConceptDef> conceptDef, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root)
+{
+   static const bool forceLocalInc           = Config::getBool("force-local-includes");
+   static const QStringList stripFromIncPath = Config::getList("strip-from-inc-path");
+
+   bool local_inc      = forceLocalInc;
+   QString includeFile = root->getData(EntryKey::Include_File);
+
+   if (! includeFile.isEmpty() && includeFile.at(0) == '"') {
+      local_inc   = true;
+      includeFile = includeFile.mid(1, includeFile.length() - 2);
+
+   } else if (! includeFile.isEmpty() && includeFile.at(0) == '<') {
+      local_inc   = false;
+      includeFile = includeFile.mid(1, includeFile.length() - 2);
+   }
+
+   bool ambig;
+   QSharedPointer<FileDef> fd;
+
+   // do need to include a verbatim copy of the header file
+
+   if (! includeFile.isEmpty() && (fd = findFileDef(&Doxy_Globals::inputNameDict, includeFile, ambig)) == nullptr) {
+      // explicit request
+
+      QString text = QString("The name `%1' supplied as the argument of the \\concept or \\include command ")
+                     .formatArg(includeFile);
+
+      if (ambig) {
+         // name is ambiguous
+
+         text += "matches the following input files:\n";
+         text += showFileDefMatches(Doxy_Globals::inputNameDict, root->getData(EntryKey::Include_File));
+         text += "Use a more specific name by including a larger part of the path\n";
+
+      } else {
+         // name is not an input file
+         text += "is not an input file\n";
+      }
+
+      warn(root->getData(EntryKey::File_Name), root->startLine, text);
+
+   } else if (includeFile.isEmpty() && include_fd && determineSection(include_fd->name()) == Entry::HEADER_SEC) {
+      fd = include_fd;
+   }
+
+   // if a file is found, mark it as a source file
+   if (fd != nullptr) {
+      QString iName = root->getData(EntryKey::Include_Name);
+
+      if (iName.isEmpty()) {
+         iName = includeFile;
+      }
+
+      if (! iName.isEmpty()) {
+         // user specified include file
+
+         if (iName.at(0) == '<') {
+            // explicit override
+            local_inc = false;
+
+         } else if (iName.at(0) == '"') {
+            local_inc = true;
+
+         }
+
+         if (iName.at(0) == '"' || iName.at(0) == '<') {
+            // strip quotes or brackets
+            iName = iName.mid(1, iName.length() - 2);
+         }
+
+         if (iName.isEmpty()) {
+            iName = fd->name();
+         }
+
+      } else if (! stripFromIncPath.isEmpty()) {
+         iName = stripFromIncludePath(fd->getFilePath());
+
+      } else {
+         // use name of the file containing the concept definition
+         iName = fd->name();
+      }
+
+      if (fd->generateSourceFile()) {
+         // generate code for header
+         conceptDef->setIncludeFile(fd, iName, local_inc, ! root->getData(EntryKey::Include_Name).isEmpty());
+
+      } else {
+         // put #include in the class documentation without link
+         conceptDef->setIncludeFile(QSharedPointer<FileDef>(), iName, local_inc, true);
+
+      }
+   }
+}
+
 
 // build a list of all classes mentioned in the documentation
 void Doxy_Work::buildClassList(QSharedPointer<Entry> ptrEntry)
