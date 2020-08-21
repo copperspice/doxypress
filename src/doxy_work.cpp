@@ -353,6 +353,7 @@ namespace Doxy_Work{
 
    void generateClassList(ClassSDict &classSDict);
    void generateClassDocs();
+   void generateConceptDocs();
    void generateExampleDocs();
    void generateFileDocs();
    void generateSourceCode();
@@ -1046,6 +1047,10 @@ void generateOutput()
 
    Doxy_Globals::infoLog_Stat.begin("Generating class documentation\n");
    generateClassDocs();
+   Doxy_Globals::infoLog_Stat.end();
+
+   Doxy_Globals::infoLog_Stat.begin("Generating concept documentation\n");
+   generateConceptDocs();
    Doxy_Globals::infoLog_Stat.end();
 
    Doxy_Globals::infoLog_Stat.begin("Generating namespace documentation\n");
@@ -8665,6 +8670,21 @@ void Doxy_Work::generateClassDocs()
 {
    generateClassList(Doxy_Globals::classSDict);
    generateClassList(Doxy_Globals::hiddenClasses);
+}
+
+// generate the documentation of all concepts
+void Doxy_Work::generateConceptDocs()
+{
+   for (auto conceptDef : Doxy_Globals::conceptSDict) {
+
+      if (conceptDef) {
+         if (conceptDef->isLinkableInProject()) {
+            msg("Generating docs for compound %s\n", csPrintable(conceptDef->name()));
+
+            conceptDef->writeDocumentation(Doxy_Globals::outputList);
+         }
+      }
+   }
 }
 
 void Doxy_Work::inheritDocumentation()
