@@ -1561,7 +1561,7 @@ static void writeFileSourceIndex(OutputList &ol)
    ol.popGeneratorState();
 }
 
-void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
+static void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
 {
    for (auto cd : clDict) {
 
@@ -2021,6 +2021,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
                                  "</td>"
                                  "</tr>"
                                  "</table>\n");
+                  ol.writeString("</td>");
 
                } else if (cell->classDef() != dummyContext) {
 
@@ -2065,13 +2066,13 @@ static void writeAlphabeticalClassList(OutputList &ol)
                   }
 
                   ol.writeNonBreakableSpace(3);
+                  ol.writeString("</td>");
 
                } else {
-                  ol.writeString("<td>");
+                  // ol.writeString("<td>");
+                  // ol.writeString("</td>");
 
                }
-
-               ol.writeString("</td>");
             }
 
          } else {
