@@ -1198,8 +1198,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString currentUSR = getUSR_PP(node);
          s_entryMap.insert(currentUSR, current);
 
-         clang::SourceRange smRange     = node->getSourceRange();
-         clang::SourceLocation location = smRange.getBegin();
+//       clang::SourceRange smRange     = node->getSourceRange();
+//       clang::SourceLocation location = smRange.getBegin();
 
          QString name           = toQString(node->getName());
 
@@ -1438,7 +1438,6 @@ class DoxyASTConsumer : public clang::ASTConsumer {
          m_visitor.TraverseDecl(context.getTranslationUnitDecl());
 
          s_conceptMap.clear();
-         s_templateDeclMap.clear();
 
          // clean up orphan list
          auto iter = s_orphanMap.begin();
@@ -1460,7 +1459,7 @@ class DoxyASTConsumer : public clang::ASTConsumer {
          }
 
          // increment for each TU
-         anonNSCount++;
+         ++anonNSCount;
       }
 
    private:
