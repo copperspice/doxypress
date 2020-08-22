@@ -954,6 +954,8 @@ static bool checkSpecialType(QString &name)
    return ! name.isEmpty() && keywords.contains(name);
 }
 
+#define YY_NO_UNISTD_H 1
+
 #define INITIAL 0
 #define Start 1
 #define CopyArgString 2
@@ -1217,7 +1219,7 @@ yy_match:
 			*(yy_state_ptr)++ = yy_current_state;
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 941 );
+		while ( yy_current_state != 264 );
 
 yy_find_action:
 		yy_current_state = *--(yy_state_ptr);
@@ -2522,10 +2524,6 @@ static void default_argsYY_load_buffer_state  (void)
 	default_argsYYfree((void *) b  );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a default_argsYYrestart() or at EOF.
@@ -2549,7 +2547,7 @@ extern int isatty (int );
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 	errno = oerrno;
 }

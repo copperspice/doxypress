@@ -34720,6 +34720,7 @@ static int yyread(char *buf, int max_size)
 }
 
 /* assume that attribute statements are almost the same as attributes. */
+#define YY_NO_UNISTD_H 1
 
 #define INITIAL 0
 #define Start 1
@@ -35001,7 +35002,7 @@ yy_match:
 			*(yy_state_ptr)++ = yy_current_state;
 			++yy_cp;
 			}
-		while ( yy_base[yy_current_state] != 125881 );
+		while ( yy_current_state != 13643 );
 
 yy_find_action:
 		yy_current_state = *--(yy_state_ptr);
@@ -36575,10 +36576,6 @@ static void code_fortran_YY_load_buffer_state  (void)
 	code_fortran_YYfree((void *) b  );
 }
 
-#ifndef __cplusplus
-extern int isatty (int );
-#endif /* __cplusplus */
-    
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a code_fortran_YYrestart() or at EOF.
@@ -36602,7 +36599,7 @@ extern int isatty (int );
         b->yy_bs_column = 0;
     }
 
-        b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
+        b->yy_is_interactive = 0;
     
 	errno = oerrno;
 }
