@@ -1304,6 +1304,7 @@ void clearAll()
    Doxy_Globals::g_inputFiles.clear();
 
    Doxy_Globals::classSDict.clear();
+   Doxy_Globals::conceptSDict.clear();
    Doxy_Globals::namespaceSDict.clear();
    Doxy_Globals::pageSDict.clear();
    Doxy_Globals::exampleSDict.clear();
@@ -2195,6 +2196,9 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       cd->setHidden(root->hidden);
       cd->setArtificial(root->artificial);
       cd->setClassTraits(root->m_traits);
+
+      // concept clause
+      cd->setRequires(root->getData(EntryKey::Requires_Clause));
 
       cd->setTypeConstraints(root->typeConstr);
       cd->setTemplateArgumentList(tArgList);
@@ -3346,8 +3350,10 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    // md->setDefFile(ptrEntry->fileName);
    // md->setDefLine(ptrEntry->startLine);
 
+   md->setRequires(ptrEntry->getData(EntryKey::Requires_Clause));
    md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
    md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
+
    md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs), ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
    md->setDefinition(def);
    md->setBitfields(ptrEntry->getData(EntryKey::Member_Bitfields));
@@ -4401,6 +4407,8 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
+
+   md->setRequires(root->getData(EntryKey::Requires_Clause));
    md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
    md->setDocsForDefinition(! root->proto);
    md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
