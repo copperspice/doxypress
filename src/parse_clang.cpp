@@ -1150,20 +1150,17 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
             }
 
+            if (! comment.isEmpty()) {
+               // test if the cursor is related to something we have parsed
 
-            // test if the cursor is related to documentation
-            if (documentKind(cursor)) {
-               // add the comment to cursor
                QString name = getCursorSpelling(cursor);
                QString key  = getCursorUSR(cursor);
 
+
                QSharedPointer<Entry> current = s_entryMap.value(key);
 
-               QStringView tmpComment = comment;
-               tmpComment = tmpComment.trimmed();
-
-               if (current == nullptr && tmpComment.startsWith("\\file")) {
-                  // documentation for a file does not belong to any source code
+               if (current == nullptr) {
+                  // documentation does not belong to any source code
 
                   current = QMakeShared<Entry>();
                   current->m_srcLang = SrcLangExt_Cpp;
