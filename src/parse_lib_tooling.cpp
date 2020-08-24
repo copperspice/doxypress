@@ -1026,19 +1026,28 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QSharedPointer<Entry> current = QMakeShared<Entry>();
 
          QString parentUSR  = getUSR_DeclContext(node->getDeclContext());
-         parentEntry = s_entryMap.value(parentUSR);
+         QString currentUSR = getUSR_Decl(node);
+
+         s_entryMap.insert(currentUSR, current);
+
+         if (! parentUSR.isEmpty()) {
+            parentEntry = s_entryMap.value(parentUSR);
+         }
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
 
-         QString name         = toQString(node->getNameAsString());
-         QString type         = toQString(node->getType());
+         QString name  = toQString(node->getNameAsString());
+         QString type  = toQString(node->getType());
 
-         // remove the scope from the return type
-         QString scopeName = parentEntry->m_entryName + "::";
-         type = type.remove(scopeName);
+         if (! parentEntry->m_entryName.isEmpty()) {
+            // remove a redundant scope from the return type
 
-         current->section     = Entry::VARIABLE_SEC;
-         current->m_entryName = name;
+            QString scopeName = parentEntry->m_entryName + "::";
+            type = type.remove(scopeName);
+         }
+
+         current->section       = Entry::VARIABLE_SEC;
+         current->m_entryName   = name;
 
          current->setData(EntryKey::Member_Type,  type);
          current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
