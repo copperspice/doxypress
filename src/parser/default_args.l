@@ -733,7 +733,6 @@ ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList 
    return stringToArgumentList(argsString, al, dummy);
 }
 
-
 ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &al, QString &extraTypeChars)
 {
    if (argsString.isEmpty()) {

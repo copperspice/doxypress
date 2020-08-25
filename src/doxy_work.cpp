@@ -2606,7 +2606,8 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
 
          QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(md->getDefFileName(), md->getDefLine(),
                    md->getDefColumn(), md->typeString(), md->name(), md->argsString(), md->excpString(),
-                   md->protection(), md->virtualness(), md->isStatic(), Member, md->memberType(), ArgumentList(), ArgumentList());
+                   md->protection(), md->virtualness(), md->isStatic(), Relationship::Member,
+                   md->memberType(), ArgumentList(), ArgumentList());
 
          imd->setMemberClass(cd);
 
@@ -3154,7 +3155,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
 
                            newMd = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, md->typeString(),
                               memName, md->argsString(), md->excpString(), root->protection, root->virt, md->isStatic(),
-                              Member, md->memberType(), templateArgList, arglist);
+                              Relationship::Member, md->memberType(), templateArgList, arglist);
                         }
 
                         newMd->setMemberClass(cd);
@@ -3584,9 +3585,9 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    }
 
    // new global variable, enum value, or typedef
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, root->getData(EntryKey::Member_Type),
-                  name, root->getData(EntryKey::Member_Args), nullptr, root->protection, Normal, root->stat, Relationship::Member,
-                  memberType, tmpList, ArgumentList());
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
+                  root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args), nullptr,
+                  root->protection, Specifier::Normal, root->stat, Relationship::Member, memberType, tmpList, ArgumentList());
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberTraits(root->m_traits);
@@ -4189,7 +4190,7 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    }
 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
-         root->getData(EntryKey::Member_Type), rname, "", "", root->protection, root->virt, root->stat, Member,
+         root->getData(EntryKey::Member_Type), rname, "", "", root->protection, root->virt, root->stat, Relationship::Member,
          type, ArgumentList(), root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
@@ -4752,7 +4753,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
 
                md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                   root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args),
-                  root->getData(EntryKey::Exception_Spec), root->protection, root->virt, root->stat, Member,
+                  root->getData(EntryKey::Exception_Spec), root->protection, root->virt, root->stat, Relationship::Member,
                   MemberDefType::Function, tArgList, root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
@@ -7237,9 +7238,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                MemberDefType memberType = MemberDefType::Function;
 
-               md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn, funcType, funcName,
-                                  funcArgs, exceptions, declMd ? declMd->protection() : root->protection,
-                                  root->virt, root->stat, Member, memberType, ArgumentList(), root->argList);
+               md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn, funcType,
+                        funcName, funcArgs, exceptions, declMd ? declMd->protection() : root->protection, root->virt, root->stat,
+                        Relationship::Member, memberType, ArgumentList(), root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
                md->setLanguage(root->m_srcLang);
@@ -7622,8 +7623,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                          csPrintable(scopeName), csPrintable(className));
 
             QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine,
-               root->startColumn, funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat, Member,
-               MemberDefType::Function, ArgumentList(), root->argList);
+               root->startColumn, funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat,
+               Relationship::Member, MemberDefType::Function, ArgumentList(), root->argList);
 
             md->setTagInfo(ptrEntry->m_tagInfo);
             md->setLanguage(root->m_srcLang);
@@ -7909,8 +7910,9 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          // new enum type
 
          md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
-                        "", name, "", "", root->protection, Normal, false, isMemberOf ? Foreign : isRelated ? Related : Member,
-                        MemberDefType::Enumeration, ArgumentList(), ArgumentList());
+                  "", name, "", "", root->protection, Specifier::Normal, false,
+                  isMemberOf ? Relationship::Foreign : isRelated ? Relationship::Related : Relationship::Member,
+                  MemberDefType::Enumeration, ArgumentList(), ArgumentList());
 
          md->setTagInfo(ptrEntry->m_tagInfo);
          md->setLanguage(root->m_srcLang);
@@ -8143,8 +8145,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
 
                            QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, root->startLine,
                               root->startColumn, root->getData(EntryKey::Member_Type), root->m_entryName,
-                              root->getData(EntryKey::Member_Args), "", root->protection, Normal, root->stat, Member,
-                              MemberDefType::EnumValue, ArgumentList(), ArgumentList());
+                              root->getData(EntryKey::Member_Args), "", root->protection, Specifier::Normal,
+                              root->stat, Relationship::Member, MemberDefType::EnumValue, ArgumentList(), ArgumentList());
 
                            if (md->getClassDef()) {
                               fmd->setMemberClass(md->getClassDef());
@@ -9027,7 +9029,8 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
          // define read from a tag file
          QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(ptrEntry->m_tagInfo.tag_Name,
                   1, 1, "#define", root->m_entryName, root->getData(EntryKey::Member_Args), "",
-                  Public, Normal, false, Member, MemberDefType::Define, ArgumentList(), ArgumentList());
+                  Protection::Public, Specifier::Normal, false, Relationship::Member, MemberDefType::Define,
+                  ArgumentList(), ArgumentList());
 
          md->setTagInfo(ptrEntry->m_tagInfo);
          md->setLanguage(root->m_srcLang);
@@ -9053,12 +9056,14 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
 
          for (auto md : *mn) {
             if (md->memberType() == MemberDefType::Define) {
-               count++;
+               ++count;
             }
          }
 
          if (count == 1) {
+
             for (auto md : *mn) {
+
                if (md->memberType() == MemberDefType::Define) {
                   md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                   md->setDocsForDefinition(! root->proto);
@@ -9082,11 +9087,10 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
                }
             }
 
-         } else if (count > 1 && (! root->getData(EntryKey::Main_Docs).isEmpty() || ! root->getData(EntryKey::Brief_Docs).isEmpty() ||
-                  root->startBodyLine != -1))
+         } else if (count > 1 && (! root->getData(EntryKey::Main_Docs).isEmpty() ||
+                  ! root->getData(EntryKey::Brief_Docs).isEmpty() || root->startBodyLine != -1))
 
-            // multiple defines,  do not know where to add docs
-            // but maybe they are in different files together with their documentation
+            // multiple defines
 
             for (auto md : *mn) {
 
@@ -9094,7 +9098,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
                   QSharedPointer<FileDef> fd = md->getFileDef();
 
                   if (fd && fd->getFilePath() == root->getData(EntryKey::File_Name)) {
-                     // doc and define in the same file assume they belong together.
+                     // doc and define in the same file, assume they belong together
 
                      md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                      md->setDocsForDefinition(!root->proto);

@@ -1633,7 +1633,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // *** write exceptions
-   if (!  excpString().isEmpty() ) {
+   if (! excpString().isEmpty() ) {
       ol.writeString(" ");
       ol.docify(excpString());
    }
@@ -1646,7 +1646,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    } else if (hasOneLineInitializer() ) {
       // add initializer
 
-      if (!isDefine()) {
+      if (! isDefine()) {
          ol.writeString(" ");
          linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->initializer.simplified());
 
@@ -3775,11 +3775,11 @@ void MemberDef::setInitializer(const QString &initializer)
 {
    m_impl->initializer = initializer;
 
-   int l = m_impl->initializer.length();
-   int p = l - 1;
+   int max = m_impl->initializer.length();
+   int p   = max - 1;
 
    while (p >= 0 && m_impl->initializer.at(p).isSpace() ) {
-      p--;
+      --p;
    }
 
    m_impl->initializer = m_impl->initializer.left(p + 1);

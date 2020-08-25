@@ -23,9 +23,7 @@
 
 #include <arguments.h>
 
-
 ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &argList = ArgumentList());
-
 ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &argList, QString &extraTypeChars);
 
 #endif

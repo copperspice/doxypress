@@ -150,7 +150,6 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          m_policy.PolishForDeclaration = true;
       }
 
-
       static QString toQString(const llvm::StringRef &value) {
          return QString::fromUtf8(value.data(), value.size());
       }
@@ -442,14 +441,14 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QSharedPointer<Entry> parentEntry;
          QSharedPointer<Entry> current;
 
-         QString parentUSR = getUSR_DeclContext(node->getParent());
+         QString parentUSR  = getUSR_DeclContext(node->getParent());
+         QString currentUSR = getUSR_Decl(node);
+
+         current = s_entryMap.value(currentUSR);
 
          if (! parentUSR.isEmpty()) {
             parentEntry = s_entryMap.value(parentUSR);
          }
-
-         QString currentUSR = getUSR_Decl(node);
-         current = s_entryMap.value(currentUSR);
 
          if (current == nullptr) {
             current = QMakeShared<Entry>();
@@ -1422,7 +1421,7 @@ class DoxyASTConsumer : public clang::ASTConsumer {
       }
 
    private:
-       DoxyVisitor m_visitor;
+      DoxyVisitor m_visitor;
 };
 
 std::unique_ptr<clang::ASTConsumer> DoxyFrontEnd::CreateASTConsumer(clang::CompilerInstance &compiler, llvm::StringRef file) {

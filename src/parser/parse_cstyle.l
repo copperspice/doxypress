@@ -3822,9 +3822,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <Define>{ID}{B}*"("        {
       QString text = QString::fromUtf8(yytext);
-
-      current->m_entryName   = text;
-      current->m_entryName   = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
+      current->m_entryName   = text.left(text.length() - 1).trimmed();
 
       current->setData(EntryKey::Member_Args, "(");
 
@@ -3834,7 +3832,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       fullArgString = "(";
 
       s_argEntry  = current;
-      s_argEnum    = ArgKey::Member_Args;
+      s_argEnum   = ArgKey::Member_Args;
 
       BEGIN( ReadFuncArgType ) ;
    }
@@ -3874,6 +3872,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
+
       initEntry();
       BEGIN(lastDefineContext);
    }
@@ -3895,6 +3894,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
+
       initEntry();
       BEGIN(FindMembers);
    }

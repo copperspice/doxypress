@@ -959,7 +959,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                cursor = p->cursors[index];
 
 /*             while (index < p->numTokens) {
-                  // get the next cursor, skip over the current comment
                   cursor = p->cursors[index];
 
                   tokenKind = clang_getTokenKind(p->tokens[index]);
@@ -1035,7 +1034,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                cursor = p->cursors[index];
 
 /*             while (index < p->numTokens) {
-                  // get the next cursor, skip over the current comment
                   cursor = p->cursors[index];
 
                   tokenKind = clang_getTokenKind(p->tokens[index]);
@@ -1104,7 +1102,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                }
 
             } else if (comment.startsWith("///") || comment.startsWith("//!")  ) {
-               // triple slash or //!  which is always a brief
+               // triple slash or //! starts a brief and may include details
 
                comment = comment.mid(3);
                isBrief = true;
@@ -1118,7 +1116,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   if (tokenKind == CXToken_Comment) {
                      ++tmpIndex;
 
-                  }  else {
+                  } else {
                      cursor = p->cursors[tmpIndex];
 
                      if (getCursorUSR(cursor).isEmpty()) {
@@ -1153,7 +1151,9 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      break;
                   }
 
-                  cursor = p->cursors[++tmpIndex];
+                  ++tmpIndex;
+                  cursor = p->cursors[tmpIndex];
+
                }
 
             } else  {
@@ -1195,6 +1195,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      } else {
                         brief   = comment;
                         comment = "";
+
                      }
 
                      current->setData(EntryKey::Brief_Docs, brief);
@@ -1730,4 +1731,3 @@ void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> 
    ol.endCodeLine();
    TooltipManager::instance()->writeTooltips(ol);
 }
-

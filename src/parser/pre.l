@@ -1643,17 +1643,19 @@ QSharedPointer<A_Define> newDefine()
 void addDefine()
 {
    if (s_skip) {
-      return;   // do not add this define as it is inside a
+      // do not add this define as it is inside a
+      // conditional section (cond command) that is disabled
+
+      return;
    }
 
-   // conditional section (cond command) that is disabled
    if (! Doxy_Globals::gatherDefines) {
       return;
    }
 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(s_yyFileName, s_yyLineNr - s_yyMLines, s_yyColNr,
-               "#define", s_defName, s_defArgsStr, "", Public, Normal, false, Member,
-               MemberDefType::Define, ArgumentList(), ArgumentList());
+               "#define", s_defName, s_defArgsStr, "", Protection::Public, Specifier::Normal, false,
+               Relationship::Member, MemberDefType::Define, ArgumentList(), ArgumentList());
 
    if (! s_defArgsStr.isEmpty()) {
       ArgumentList argList;
@@ -1674,8 +1676,6 @@ void addDefine()
 
       QString::const_iterator iter = s_defLitText.constBegin() + k;
 
-//    while ((c = *p++) != 0 && (c == ' ' || c == '\t')) {
-
       while (iter !=  s_defLitText.constEnd())  {
          QChar c = *iter;
          ++iter;
@@ -1691,8 +1691,8 @@ void addDefine()
 
       s_defLitText = s_defLitText.mid(len + 1, k - len - 1) + s_defLitText.trimmed();
    }
-   md->setInitializer(s_defLitText.trimmed());
 
+   md->setInitializer(s_defLitText.trimmed());
    md->setFileDef(s_inputFileDef);
    md->setDefinition("#define " + s_defName);
 
@@ -2210,7 +2210,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
                   (def = DefineManager::instance().isDefined(text)) &&
                   (! s_expandOnlyPredef || def->isPredefined)) {
 
-         // fount it
+         // found it
          s_roundCount = 0;
          s_defArgsStr = text;
 
