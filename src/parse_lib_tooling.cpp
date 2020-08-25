@@ -1198,56 +1198,6 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          return true;
       }
 
-      virtual bool VisitMacroDefinitionRecord(clang::MacroDefinitionRecord *node) {
-         // #define
-
-         QSharedPointer<Entry> parentEntry;
-         QSharedPointer<Entry> current = QMakeShared<Entry>();
-
-         QString currentUSR = getUSR_PP(node);
-         s_entryMap.insert(currentUSR, current);
-
-//       clang::SourceRange smRange     = node->getSourceRange();
-//       clang::SourceLocation location = smRange.getBegin();
-
-         QString name           = toQString(node->getName());
-
-         current->section       = Entry::DEFINE_SEC;
-         current->m_entryName   = name;
-
-         current->m_srcLang     = SrcLangExt_Cpp;
-
-//       current->setData(EntryKey::File_Name,    toQString(location.getManager().getFilename(location)));
-//       current->startLine     = location.getSpellingLineNumber();
-//       current->startColumn   = location.getSpellingColumnNumber();
-
-//       current->startBodyLine = current->startLine;
-//       current->endBodyLine   = m_context->getFullLoc(node->getEndLoc()).getSpellingLineNumber();
-
-         // printf("\n  broom - Macro Definition  name: %s   line: %d  col: %d \n",
-         //         csPrintable(name), current->startLine, current->startColumn );
-
-         s_current_root->addSubEntry(current, s_current_root);
-
-         return true;
-      }
-
-      virtual bool VisitMacroExpansion(clang::MacroExpansion *node) {
-
-         QSharedPointer<Entry> parentEntry;
-         QSharedPointer<Entry> current = QMakeShared<Entry>();
-
-         QString name = toQString(node->getName());
-
-         // printf("\n  broom - Macro Expansion  %s\n", csPrintable(name));
-
-         if (name == "CS_OBJECT" || name == "Q_OBJECT") {
-            // do nothing at this time
-         }
-
-         return true;
-      }
-
       virtual bool VisitNamespaceDecl(clang::NamespaceDecl *node) {
          // namespace
          static const bool extractAnonNS = Config::getBool("extract-anon-namespaces");
