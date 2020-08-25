@@ -1073,8 +1073,13 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                   if (extra == "[") {
                      ++bracket;
+
                   } else if (extra == "]") {
                      --bracket;
+
+                  } else if (extra == "::")  {
+                     // bail out
+                     break;
                   }
 
                   ++index;
@@ -1136,10 +1141,16 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   }
 
                   QString extra = getTokenSpelling(p->tu, p->tokens[tmpIndex]);
+
                   if (extra == "[") {
                      ++bracket;
+
                   } else if (extra == "]") {
                      --bracket;
+
+                  } else if (extra == "::")  {
+                     // bail out
+                     break;
                   }
 
                   cursor = p->cursors[++tmpIndex];
