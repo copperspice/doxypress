@@ -1640,7 +1640,7 @@ QSharedPointer<A_Define> newDefine()
    return def;
 }
 
-void addDefine()
+static void addDefine()
 {
    if (s_skip) {
       // do not add this define as it is inside a
