@@ -19,6 +19,8 @@
 #include <parse_lib_tooling.h>
 
 #include <config.h>
+#include <doxy_globals.h>
+#include <default_args.h>
 #include <util.h>
 
 static QMap<QString, clang::DeclContext *>       s_parentNodeMap;
@@ -125,17 +127,18 @@ static QString getUSR_DeclContext(const clang::DeclContext *node)
    return retval;
 }
 
-static QString getUSR_PP(const clang::MacroDefinitionRecord *node)
+static QString getUSR_PP(clang::StringRef srcName, clang::SourceLocation srcLocation, clang::SourceManager &srcManager)
 {
-   (void) node;
-
    QString retval;
    llvm::SmallVector<char, 100> buffer;
 
-   bool ignore = false;      // broom - clang::index::generateUSRForMacro(node, buffer);
+   bool ignore = clang::index::generateUSRForMacro(srcName, srcLocation, srcManager, buffer);
 
    if (! ignore) {
       retval = QString::fromUtf8(buffer.data(), buffer.size());
+
+      static QRegularExpression regExp("@\\d+@macro@");
+      retval.replace(regExp, "@macro@");
    }
 
    return retval;
@@ -1382,6 +1385,155 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
       clang::PrintingPolicy m_policy;
 };
 
+class DoxyPPConsumer : public clang::PPCallbacks {
+
+   public:
+      explicit DoxyPPConsumer(clang::ASTContext *context)
+            : m_context(context)
+      {
+      }
+
+      void MacroDefined(const clang::Token &macroName, const clang::MacroDirective *node) override;
+
+      static QString toQString(const llvm::StringRef &value) {
+         return QString::fromUtf8(value.data(), value.size());
+      }
+
+   private:
+      clang::ASTContext *m_context;
+};
+
+static void addDefine(QSharedPointer<Entry> current_define, ArgumentList argList,
+      QString defineArgs, QString defineInit)
+{
+   // conditional section
+   if (! Doxy_Globals::gatherDefines) {
+      return;
+   }
+
+   QString defineName  = current_define->m_entryName;
+   QString defineFName = current_define->getData(EntryKey::File_Name);
+
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(
+            defineFName, current_define->startLine, current_define->startColumn,
+            "#define", defineName, defineArgs, "", Protection::Public, Specifier::Normal, false,
+            Relationship::Member, MemberDefType::Define, ArgumentList(), ArgumentList());
+
+   md->setArgumentList(argList);
+
+   // align code
+   static QRegularExpression regExp("^[^\\n]*?\\n(\\s*).*$", QPatternOption::DotMatchesEverythingOption);
+   QRegularExpressionMatch match = regExp.match(defineInit);
+
+   if (match.hasMatch()) {
+      // align the items on the first line with the items on the second line
+      defineInit = match.captured(1) + defineInit;
+   }
+
+   md->setInitializer(defineInit);
+
+   bool ambig;
+   QSharedPointer<FileDef> fd  = findFileDef(&Doxy_Globals::inputNameDict, defineFName, ambig);
+   md->setFileDef(fd);
+
+   md->setDefinition("#define " + defineName);
+
+   QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(defineName);
+
+   if (mn == nullptr) {
+      mn = QMakeShared<MemberName>(defineName);
+      Doxy_Globals::functionNameSDict.insert(defineName, mn);
+   }
+
+   mn->append(md);
+
+   if (fd) {
+      fd->insertMember(md);
+   }
+}
+
+void DoxyPPConsumer::MacroDefined(const clang::Token &macroToken, const clang::MacroDirective *node)
+{
+   clang::SourceManager &srcManager  = m_context->getSourceManager();
+   clang::SourceLocation srcLocation = node->getLocation();
+
+   if (! srcManager.isWrittenInMainFile(srcLocation) ) {
+      // not in the current file being processed
+      return;
+   }
+
+   if (macroToken.isAnyIdentifier()) {
+      // #define
+      clang::StringRef srcName = macroToken.getIdentifierInfo()->getName();
+
+      QSharedPointer<Entry> current = QMakeShared<Entry>();
+
+      QString currentUSR = getUSR_PP(srcName, srcLocation, srcManager);
+      s_entryMap.insert(currentUSR, current);
+
+      clang::FullSourceLoc location = m_context->getFullLoc(srcLocation);
+
+      const clang::MacroInfo *macroInfo = node->getMacroInfo();
+
+      current->section       = Entry::DEFINE_SEC;
+      current->m_entryName   = toQString(srcName);
+
+      current->setData(EntryKey::File_Name,   toQString(srcManager.getFilename(location)));
+
+      current->m_srcLang     = SrcLangExt_Cpp;
+      current->startLine     = location.getSpellingLineNumber();
+      current->startColumn   = location.getSpellingColumnNumber();
+
+      current->startBodyLine = current->startLine;
+      current->endBodyLine   = m_context->getFullLoc(macroInfo->getDefinitionEndLoc()).getSpellingLineNumber();
+
+      // parameters
+      ArgumentList argList;
+      QString args;
+
+      if (! macroInfo->param_empty()) {
+         args = "(";
+
+         bool addComma = false;
+
+         for (auto item : macroInfo->params()) {
+
+            if (addComma) {
+               args += ", ";
+            } else {
+               addComma = true;
+            }
+
+            Argument tmp;
+            tmp.name = toQString(item->getName());
+            args += tmp.name;
+
+            argList.append(std::move(tmp));
+         }
+
+         args += ")";
+      }
+
+      QString defineInit;
+
+      if (! macroInfo->tokens_empty()) {
+
+         auto first = macroInfo->tokens_begin();
+         auto last  = macroInfo->tokens_end() - 1;
+
+         const char *begin = srcManager.getCharacterData(first->getLocation());
+         const char *end   = srcManager.getCharacterData(last->getEndLoc());
+
+         defineInit = QString::fromUtf8(begin, end - begin);
+      }
+
+      s_current_root->addSubEntry(current, s_current_root);
+
+      // create member definition for preprocessor macros
+      addDefine(current, argList, args, defineInit);
+   }
+}
+
 class DoxyASTConsumer : public clang::ASTConsumer {
 
    public:
@@ -1427,5 +1579,12 @@ class DoxyASTConsumer : public clang::ASTConsumer {
 std::unique_ptr<clang::ASTConsumer> DoxyFrontEnd::CreateASTConsumer(clang::CompilerInstance &compiler, llvm::StringRef file) {
    (void) file;
 
+   // add callback for preprocessor macros
+   std::unique_ptr<DoxyPPConsumer> callBack = std::make_unique<DoxyPPConsumer>(&compiler.getASTContext());
+
+   clang::Preprocessor &pp = compiler.getPreprocessor();
+   pp.addPPCallbacks(std::move(callBack));
+
+   // add main call back for AST processing
    return std::unique_ptr<clang::ASTConsumer>(new DoxyASTConsumer(&compiler.getASTContext()));
 }
