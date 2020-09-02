@@ -2985,6 +2985,13 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
             linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, init);
 
          } else {
+            // write arguments for define
+
+            if (! argsString().isEmpty()) {
+               QString args = substitute(argsString(), ",", ", ");
+               linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, args);
+            }
+
             ol.writeNonBreakableSpace(3);
             linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, m_impl->initializer);
          }
