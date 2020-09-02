@@ -882,7 +882,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       // walk the tokens
-      for (int index = 0; index < p->numTokens; ++index)  {
+      for (uint index = 0; index < p->numTokens; ++index)  {
 
          CXTokenKind tokenKind = clang_getTokenKind(p->tokens[index]);
 
@@ -1107,7 +1107,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                comment = comment.mid(3);
                isBrief = true;
 
-               int tmpIndex = index + 1;
+               uint tmpIndex = index + 1;
 
                while (tmpIndex < p->numTokens)  {
                   // is the next cursor a comment?
