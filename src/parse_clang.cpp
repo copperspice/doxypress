@@ -956,7 +956,11 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                comment = comment.mid(3, len);
 
                ++index;
-               cursor = p->cursors[index];
+
+               if (index < p->numTokens) {
+                  // get the next cursor, skipping over the current comment
+                  cursor = p->cursors[index];
+               }
 
 /*             while (index < p->numTokens) {
                   cursor = p->cursors[index];
@@ -1031,7 +1035,11 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                comment = comment.mid(3, len);
 
                ++index;
-               cursor = p->cursors[index];
+
+               if (index < p->numTokens) {
+                  // get the next cursor, skipping over the current comment
+                  cursor = p->cursors[index];
+               }
 
 /*             while (index < p->numTokens) {
                   cursor = p->cursors[index];
