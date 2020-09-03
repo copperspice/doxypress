@@ -397,7 +397,7 @@
         ],
         "macro-expansion": false,
         "predefined-macros": [
-            ""
+            "__linux=1"
         ],
         "search-includes": false,
         "skip-function-macros": false
@@ -405,7 +405,7 @@
     "project": {
         "project-brief": "",
         "project-logo": "images/cslogo-32.png",
-        "project-name": "DoxyPress Clang Parsing ",
+        "project-name": "DoxyPress Clang Parsing",
         "project-version": "1.4.0"
     },
     "source": {

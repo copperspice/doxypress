@@ -16,10 +16,18 @@
 #include <QObject>
 #include <QString>
 
-/// document def for max
+/// This is brief documentation for max variable which is a define
 #define MAX 100
 
-/// document a preprocessor directive, docs are missing
+/*! Here we have detailed comment, macro will be expanded to return the smaller value which is either A or B */
+#define MIN(a, b)    ((a < b ) ? (a) : (b))
+
+/// This is brief for a multi line macro
+#define MultiLines \
+   do { \
+   } while (false)
+
+/// document a preprocessor directive, docs missing as they should be
 #ifdef __linux
    #define BUILD_LINUX
 #endif
@@ -63,7 +71,7 @@ class Clang_gameBase
 template <typename T1, class T2>
 concept CS_IsClass = std::is_class_v<T1>;
 
-/// Brief documentation for a Concept.
+/// Brief documentation for a moveable concept.
 template <typename U>
 concept CS_Moveable = std::is_move_constructible_v<U>;
 
@@ -83,10 +91,13 @@ class Concept_Test
       requires CS_Moveable<T> && CS_Moveable<U>
       T moveMe_2(U varA);
 
+      /// Requires clause is located at the end of the declaration
+      template <typename T, typename U>
+      T moveMe_3(U varA) requires CS_Moveable<T> && CS_Moveable<U>;
+
       /// Template using a hand written concept
       template <typename T>
       void makeFood(T varB);
-
 
       /// form (a) one for nodiscard
       [[nodiscard]] int thing_a1(bool varC);
@@ -245,7 +256,7 @@ class Clang_gameSports : public Clang_gameBase
       int villageStores[42][17][8];
 
       // C++17 syntax
-      static inline int trailLength = 27;             ///< Can we have an inline variable?
+      static inline int trail_Length = 27;            ///< Can we have an inline variable?
 
       std::variant<int, bool, float> someSize;        ///< Declaration for a variant. This data type is part of C++17
 
