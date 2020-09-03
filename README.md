@@ -44,6 +44,17 @@ library are required. DoxyPress links with CsCore and CsXml which are part of th
 CMake build files are provided with the DoxyPress source distribution.
 
 
+### Dependencies
+
+ * C++17 compiler
+
+ * CopperSpice CsCore and CsXml libraries
+
+ * C++17 standard library when using clang for parsing
+
+ * clang 10 must be compiled with RTTI enabled ( pre-built bianary files are available from our download page )
+
+
 ### Documentation
 
 Full documentation for DoxyPress is available on the website or from our download page.
