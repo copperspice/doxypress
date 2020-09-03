@@ -1128,6 +1128,20 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      cursor = p->cursors[tmpIndex];
 
                      if (getCursorUSR(cursor).isEmpty()) {
+                        QString extra = getTokenSpelling(p->tu, p->tokens[tmpIndex]);
+
+                        if (extra == "#" || extra == "define") {
+                           // define
+
+                        } else {
+                           CXCursorKind kind = clang_getCursorKind(cursor);
+
+                           if (kind == CXCursor_MacroDefinition || kind == CXCursor_PreprocessingDirective ||
+                                       kind == CXCursor_InclusionDirective) {
+                              break;
+                           }
+                        }
+
                         ++tmpIndex;
 
                      } else {
@@ -1175,6 +1189,12 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                QString name = getCursorSpelling(cursor);
                QString key  = getCursorUSR(cursor);
 
+               if (key.contains("@macro@")) {
+                  // remove any numbers in the key
+
+                  static QRegularExpression regExp("@\\d+@macro@");
+                  key.replace(regExp, "@macro@");
+               }
 
                QSharedPointer<Entry> current = s_entryMap.value(key);
 
