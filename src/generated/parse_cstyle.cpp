@@ -17594,9 +17594,7 @@ case 298:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-
-      current->m_entryName   = text;
-      current->m_entryName   = current->m_entryName.left(current->m_entryName.length() - 1).trimmed();
+      current->m_entryName   = text.left(text.length() - 1).trimmed();
 
       current->setData(EntryKey::Member_Args, "(");
 
@@ -17606,7 +17604,7 @@ YY_RULE_SETUP
       fullArgString = "(";
 
       s_argEntry  = current;
-      s_argEnum    = ArgKey::Member_Args;
+      s_argEnum   = ArgKey::Member_Args;
 
       BEGIN( ReadFuncArgType ) ;
    }
@@ -17650,6 +17648,7 @@ YY_RULE_SETUP
 
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
+
       initEntry();
       BEGIN(lastDefineContext);
    }
@@ -17673,6 +17672,7 @@ YY_RULE_SETUP
 
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>();
+
       initEntry();
       BEGIN(FindMembers);
    }
