@@ -1509,7 +1509,6 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    s_inputPosition    = 0;
    s_isFixedForm      = recognizeFixedForm(s, format);
    s_currentFontClass = "";
-
    s_contLineNr       = 1;
 
    s_hasContLine.clear();
@@ -1531,7 +1530,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    if (endLine != -1) {
       s_inputLines  = endLine + 1;
    } else {
-      s_inputLines  = countLines();
+      s_inputLines  = s_yyLineNr + countLines() - 1;
    }
 
    s_exampleBlock  = exBlock;

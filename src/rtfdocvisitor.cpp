@@ -598,20 +598,39 @@ void RTFDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Snippet:
          m_t << "{" << endl;
-         if (!m_lastIsPara) {
+
+         if (! m_lastIsPara) {
             m_t << "\\par" << endl;
          }
+
          m_t << rtf_Style_Reset << getStyle("CodeExample");
-         Doxy_Globals::parserManager.getParser(inc->extension())
-         ->parseCode(m_ci,
-                     inc->context(),
-                     extractBlock(inc->text(), inc->blockId()),
-                     langExt,
-                     inc->isExample(),
-                     inc->exampleFile()
-                    );
+
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(), inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile());
          m_t << "}";
          break;
+
+      case DocInclude::SnipWithLines: {
+         m_t << "{" << endl;
+
+         if (! m_lastIsPara) {
+            m_t << "\\par" << endl;
+         }
+
+         m_t << rtf_Style_Reset << getStyle("CodeExample");
+
+         QFileInfo cfi(inc->file());
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
+
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(),inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile(), fd,
+                  lineBlock(inc->text(), inc->blockId()), -1, false, QSharedPointer<MemberDef>(), true);
+
+         m_t << "}";
+      }
+      break;
    }
    m_lastIsPara = true;
 }

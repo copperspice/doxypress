@@ -4375,16 +4375,16 @@ void parseCCode(CodeOutputInterface &outputX, const QString &className, const QS
    g_collectXRefs       = collectXRefs;
    g_inFunctionTryBlock = false;
 
-   if (endLine != -1) {
-      g_inputLines  = endLine + 1;
-   } else {
-      g_inputLines  = countLines();
-   }
-
    if (startLine != -1) {
       g_yyLineNr    = startLine;
    } else {
       g_yyLineNr    = 1;
+   }
+
+   if (endLine != -1) {
+      g_inputLines  = endLine + 1;
+   } else {
+      g_inputLines  = g_yyLineNr + countLines() - 1;
    }
 
    g_curlyCount      = 0;

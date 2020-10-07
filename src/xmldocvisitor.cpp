@@ -476,9 +476,27 @@ void XmlDocVisitor::visit(DocInclude *inc)
       case DocInclude::Snippet:
          m_t << "<programlisting filename=\"" << inc->file() << "\">";
 
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
-                     langExt, inc->isExample(), inc->exampleFile() );
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(), inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile());
+
          m_t << "</programlisting>";
+         break;
+
+      case DocInclude::SnipWithLines: {
+         m_t << "<programlisting filename=\"" << inc->file() << "\">";
+
+         QFileInfo cfi( inc->file() );
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
+
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(), inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile(), fd,
+                  lineBlock(inc->text(), inc->blockId()), -1, false, QSharedPointer<MemberDef>(), true);
+
+         m_t << "</programlisting>";
+      }
+      break;
          break;
    }
 }

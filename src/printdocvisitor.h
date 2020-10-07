@@ -365,6 +365,10 @@ class PrintDocVisitor : public DocVisitor
          case DocInclude::Snippet:
             printf("snippet");
             break;
+
+         case DocInclude::SnipWithLines:
+            printf("snipwithlines");
+            break;
       }
       printf("\"/>");
    }

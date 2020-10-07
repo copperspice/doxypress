@@ -779,16 +779,29 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          m_t << PREFRAG_START;
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     extractBlock(inc->text(), inc->blockId()), langExt, inc->isExample(), inc->exampleFile(),
-                     QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), true, m_ctx);
+                     extractBlock(inc->text(), inc->blockId()), langExt,
+                     inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
+                     -1, -1, true, QSharedPointer<MemberDef>(), true, m_ctx);
 
          m_t << PREFRAG_END;
          forceStartParagraph(inc);
       }
       break;
 
-      // case DocInclude::SnipWithLines:
-      // break;
+      case DocInclude::SnipWithLines: {
+         forceEndParagraph(inc);
+
+         QFileInfo cfi(inc->file());
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
+
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(), inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile(), fd,
+                  lineBlock(inc->text(), inc->blockId()), -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
+
+         forceStartParagraph(inc);
+      }
+      break;
 
 //    case DocInclude::SnippetDoc:
 //    case DocInclude::IncludeDoc:

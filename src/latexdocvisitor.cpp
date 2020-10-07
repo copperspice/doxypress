@@ -583,11 +583,25 @@ void LatexDocVisitor::visit(DocInclude *inc)
          m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
          LatexCodeGenerator::setDoxyCodeOpen(true);
 
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci,
-                     inc->context(), extractBlock(inc->text(), inc->blockId()),
-                     langExt, inc->isExample(), inc->exampleFile());
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(), inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile());
+
          LatexCodeGenerator::setDoxyCodeOpen(false);
          m_t << "\\end{DoxyCodeInclude}" << endl;
+      }
+      break;
+
+      case DocInclude::SnipWithLines: {
+        QFileInfo cfi( inc->file() );
+        QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
+
+        Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(),inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile(), fd,
+                  lineBlock(inc->text(),inc->blockId()),
+                  -1, false, QSharedPointer<MemberDef>(), true);
+
       }
       break;
    }

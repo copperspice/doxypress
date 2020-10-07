@@ -396,13 +396,16 @@ void ManDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::Snippet:
-         if (!m_firstCol) {
+         if (! m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
-         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(), extractBlock(inc->text(), inc->blockId()),
-                     langExt, inc->isExample(), inc->exampleFile() );
+
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                     extractBlock(inc->text(), inc->blockId()), langExt,
+                     inc->isExample(), inc->exampleFile());
 
          if (! m_firstCol) {
             m_t << endl;
@@ -411,6 +414,35 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_t << ".fi" << endl;
          m_t << ".PP" << endl;
          m_firstCol = true;
+
+         break;
+
+     case DocInclude::SnipWithLines: {
+
+         if (! m_firstCol) {
+            m_t << endl;
+         }
+
+         m_t << ".PP" << endl;
+         m_t << ".nf" << endl;
+
+         QFileInfo cfi( inc->file() );
+         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
+
+         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
+                  extractBlock(inc->text(), inc->blockId()), langExt,
+                  inc->isExample(), inc->exampleFile(), fd,
+                  lineBlock(inc->text(), inc->blockId()), -1, false, QSharedPointer<MemberDef>(), true);
+
+         if (! m_firstCol) {
+            m_t << endl;
+         }
+
+         m_t << ".fi" << endl;
+         m_t << ".PP" << endl;
+         m_firstCol = true;
+      }
+      break;
          break;
    }
 }

@@ -793,7 +793,7 @@ class DocInclude : public DocNode
       Snippet,
       IncludeDoc,
       SnippetDoc,
-//    SnipWithLines,
+      SnipWithLines,
       DontIncWithLines,
       RtfInclude,
       ManInclude,

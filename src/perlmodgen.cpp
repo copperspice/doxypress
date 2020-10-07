@@ -904,6 +904,7 @@ void PerlModDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::Snippet:
+      case DocInclude::SnipWithLines:
          return;
    }
 

@@ -2208,11 +2208,11 @@ void DocInclude::parse()
          break;
 
       case Snippet:
+      case SnipWithLines:
          readTextFileByName(m_file, m_text);
-         // check here for the existence of the blockId inside the file, so we
-         // only generate the warning once
          int count;
 
+         // check for the existence of the blockId inside the file, so the warning is only generated once
          if (! m_blockId.isEmpty() && (count = m_text.count(m_blockId)) != 2) {
 
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Block marked with %s for \\snippet should appear twice "
@@ -5859,7 +5859,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
          t = DocInclude::IncWithLines;
 
       } else if (t == DocInclude::Snippet && optList.contains("lineno")) {
-//       t = DocInclude::SnipWithLines;
+         t = DocInclude::SnipWithLines;
 
       } else if (t == DocInclude::DontInclude && optList.contains("lineno")) {
          t = DocInclude::DontIncWithLines;
@@ -5905,7 +5905,8 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
    QString fileName = g_token->name;
    QString blockId;
 
-   if (t == DocInclude::Snippet || t == DocInclude::SnippetDoc) {
+   if (t == DocInclude::Snippet || t == DocInclude::SnippetDoc || t == DocInclude::SnipWithLines) {
+
       if (fileName == "this") {
          fileName = s_fileName;
       }
@@ -6595,6 +6596,10 @@ int DocPara::handleCommand(const QString &cmdName)
 
       case CMD_SNIPPET:
          handleInclude(cmdName, DocInclude::Snippet);
+         break;
+
+      case CMD_SNIPWITHLINES:
+         handleInclude(cmdName, DocInclude::SnipWithLines);
          break;
 
       case CMD_INCLUDEDOC:

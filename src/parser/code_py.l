@@ -1633,16 +1633,17 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
    s_searchCtx = searchCtx;
    s_collectXRefs = collectXRefs;
 
-   if (endLine != -1) {
-      s_inputLines  = endLine + 1;
-   } else {
-      s_inputLines  = countLines();
-   }
 
    if (startLine != -1) {
       s_yyLineNr    = startLine;
    } else {
       s_yyLineNr    = 1;
+   }
+
+   if (endLine != -1) {
+      s_inputLines  = endLine + 1;
+   } else {
+      s_inputLines  = s_yyLineNr + countLines() - 1;
    }
 
    s_exampleBlock  = exBlock;
