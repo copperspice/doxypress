@@ -116,7 +116,7 @@ void LatexCodeGenerator::codify(const QString &str)
             while (iter != iter_end) {
                c = *iter;
 
-               if (c != 0x0c && c != '\t' && c != '\n' && c != ' ')  {
+               if (c != 0x0c && c != '\t' && c != '\n' && c != ' ' && c!='^')  {
                   result += c;
                   ++iter;
                } else {
