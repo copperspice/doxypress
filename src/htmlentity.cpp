@@ -727,7 +727,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#9830;",       "{$\\diamondsuit$}",      NULL,         "\\u9830?",               { NULL,         DocSymbol::Perl_unknown }},
 
    { SYM(quot),       "\"",                     "&quot;",     "\"",
-     "&quot;",        "\"",                     "\"",         "\"",                     { "\"",         DocSymbol::Perl_char    }},
+     "&quot;",        "\"{}",                     "\"",         "\"",                   { "\"",         DocSymbol::Perl_char    }},
 
    { SYM(amp),        "&",                      "&amp;",      "&amp;",
      "&amp;",         "\\&",                    "&",          "&",                      { "&",          DocSymbol::Perl_char    }},
@@ -864,7 +864,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "|",             "$|$",                    "|",          "|",                      { "|",          DocSymbol::Perl_char    }},
 
    { SYM(Quot),       "\"",                     "\"",         "\"",
-     "&quot;",        "\"",                     "\"",         "\"",                     { "\"",         DocSymbol::Perl_char    }},
+     "&quot;",        "\"{}",                   "\"",         "\"",                     { "\"",         DocSymbol::Perl_char    }},
 
    { SYM(Minus),      "-",                      "-",          "-",
      "-",             "-\\/",                   "-",          "-",                      { "-",          DocSymbol::Perl_char    }},

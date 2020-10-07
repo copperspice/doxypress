@@ -6220,6 +6220,16 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "\\$";
                break;
 
+
+            case '"':
+               t << "\"{}";
+               break;
+
+            case '-':
+               t << "-\\/";
+               break;
+
+
             case '^':
                (usedTableLevels() > 0) ? t << "\\string^" : t << c;
                break;
