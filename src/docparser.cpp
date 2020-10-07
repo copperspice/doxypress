@@ -86,6 +86,8 @@ struct DocParserContext {
    QString fileName;
    QString relPath;
 
+   int lineNum;
+
    bool hasParamCommand;
    bool hasReturnCommand;
 
@@ -157,6 +159,7 @@ static void docParserPushContext(bool saveParamInfo = true)
    ctx.initialStyleStack  = s_initialStyleStack;
    ctx.copyStack          = s_copyStack;
    ctx.fileName           = s_fileName;
+   ctx.lineNum            = getDoctokenLineNum();
    ctx.relPath            = s_relPath;
 
    if (saveParamInfo) {
@@ -220,6 +223,7 @@ static void docParserPopContext(bool keepParamInfo = false)
    delete g_token;
    g_token               = ctx.token;
 
+   setDoctokenLineNum(ctx.lineNum);
    doctokenizerYYpopContext();
 }
 
@@ -2214,6 +2218,13 @@ void DocInclude::parse()
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Block marked with %s for \\snippet should appear twice "
                 "in file %s, found it %d times\n", csPrintable(m_blockId), csPrintable(m_file), count);
          }
+         break;
+
+      case DocInclude::IncludeDoc:
+      case DocInclude::SnippetDoc:
+         err("Unexpected command found for IncludeDoc or SnippetDoc in file: %s,"
+               " contact the developers\n", csPrintable(m_file));
+
          break;
    }
 }
@@ -5854,10 +5865,10 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
          t = DocInclude::DontIncWithLines;
 
       } else if (t == DocInclude::Include && optList.contains("doc")) {
-//       t = DocInclude::IncludeDoc;
+         t = DocInclude::IncludeDoc;
 
       } else if (t == DocInclude::Snippet && optList.contains("doc")) {
-//       t = DocInclude::SnippetDoc;
+         t = DocInclude::SnippetDoc;
       }
 
       tok = doctokenizerYYlex();
@@ -5894,7 +5905,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
    QString fileName = g_token->name;
    QString blockId;
 
-   if (t == DocInclude::Snippet) {
+   if (t == DocInclude::Snippet || t == DocInclude::SnippetDoc) {
       if (fileName == "this") {
          fileName = s_fileName;
       }
@@ -5914,9 +5925,29 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
       blockId = "[" + g_token->name + "]";
    }
 
-   DocInclude *inc = new DocInclude(this, fileName, s_context, t, s_isExample, s_exampleName, blockId, isBlock);
-   m_children.append(inc);
-   inc->parse();
+  // only place to handle the \includedoc and \snippetdoc commands
+  if (t == DocInclude::IncludeDoc || t == DocInclude::SnippetDoc) {
+     int inc_line = 1;
+
+     QString inc_text;
+     readTextFileByName(fileName, inc_text);
+
+     if (t == DocInclude::SnippetDoc) {
+       inc_line = lineBlock(inc_text, blockId);
+       inc_text = extractBlock(inc_text, blockId);
+     }
+
+     docParserPushContext();
+     s_fileName = fileName;
+     setDoctokenLineNum(inc_line);
+     internalValidatingParseDoc(this,m_children,inc_text);
+     docParserPopContext();
+
+  } else {
+     DocInclude *inc = new DocInclude(this, fileName, s_context, t, s_isExample, s_exampleName, blockId, isBlock);
+     m_children.append(inc);
+     inc->parse();
+  }
 }
 
 void DocPara::handleSection(const QString &cmdName)
@@ -6564,6 +6595,14 @@ int DocPara::handleCommand(const QString &cmdName)
 
       case CMD_SNIPPET:
          handleInclude(cmdName, DocInclude::Snippet);
+         break;
+
+      case CMD_INCLUDEDOC:
+         handleInclude(cmdName, DocInclude::IncludeDoc);
+         break;
+
+      case CMD_SNIPPETDOC:
+         handleInclude(cmdName, DocInclude::SnippetDoc);
          break;
 
       case CMD_SKIP:
@@ -8671,7 +8710,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    s_paramsFound.clear();
    s_sectionDict = 0;
 
-   doctokenizerYYlineno = startLine;
+   setDoctokenLineNum(startLine);
    uint inputLen = input.length();
 
    QString tmpData = processCopyDoc(input, inputLen);
@@ -8739,8 +8778,7 @@ DocText *validatingParseText(const QString &input)
    DocText *txt = new DocText;
 
    if (! input.isEmpty()) {
-
-      doctokenizerYYlineno = 1;
+      setDoctokenLineNum(1);
       doctokenizerYYinit(input, s_fileName);
 
       // build abstract syntax tree

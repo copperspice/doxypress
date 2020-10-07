@@ -791,8 +791,8 @@ class DocInclude : public DocNode
       LatexInclude,
       IncWithLines,
       Snippet,
-//    IncludeDoc,      // emerald
-//    SnippetDoc,
+      IncludeDoc,
+      SnippetDoc,
 //    SnipWithLines,
       DontIncWithLines,
       RtfInclude,

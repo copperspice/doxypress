@@ -209,6 +209,7 @@ QString linkToText(SrcLangExt lang, const QString &link, bool isFileName);
 QString lowerCaseFirstLetter(QString &&text);
 
 bool    leftScopeMatch(const QString &scope, const QString &name);
+int     lineBlock(const QString text, const QString marker);
 
 void    linkifyText(const TextGeneratorIntf &ol, QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
                   QSharedPointer<const Definition> self, const QString &text,

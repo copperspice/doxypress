@@ -41,6 +41,8 @@ static QString      s_inputString;
 static QString      s_fileName;
 static bool         s_insidePre;
 
+static int          s_yyLineNum = 0;
+
 static QString      s_secLabel;
 static QString      s_secTitle;
 
@@ -2155,4 +2157,13 @@ void doctokenizerYYstartAutoList()
 void doctokenizerYYendAutoList()
 {
    s_autoListLevel--;
+}
+void setDoctokenLineNum(int lineNum)
+{
+   s_yyLineNum = lineNum;
+}
+
+int getDoctokenLineNum()
+{
+   return s_yyLineNum;
 }

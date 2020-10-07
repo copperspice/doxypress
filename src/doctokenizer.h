@@ -166,4 +166,7 @@ void doctokenizerYYsetStateOptions();
 void doctokenizerYYsetStateBlock();
 void doctokenizerYYsetStateEmoji();
 
+void setDoctokenLineNum(int lineNum);
+int getDoctokenLineNum();
+
 #endif

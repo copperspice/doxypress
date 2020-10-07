@@ -23,6 +23,7 @@
 #include <QHash>
 #include <QProcess>
 #include <QRegularExpression>
+#include <QStringView>
 #include <QTextCodec>
 
 #include <stdlib.h>
@@ -7766,7 +7767,36 @@ QString extractBlock(const QString &text, const QString &marker)
    return l2 > l1 ? text.mid(l1, l2 - l1) : QString();
 }
 
-// Returns a string representation of lang.
+int lineBlock(const QString text, const QString marker)
+{
+   int retval = 1;
+
+   // find the character position of the first marker
+   auto iterM = text.find_fast(marker);
+
+   if (iterM == text.end()) {
+      return retval;
+   }
+
+   QStringView tmpView = QStringView(text.begin(), iterM);
+   auto iter = text.begin();
+
+   // find start line positions for the markers
+   while (true) {
+      iter = tmpView.find_fast('\n', iter);
+
+      if (iter == tmpView.end()) {
+         break;
+      }
+
+      ++iter;
+      ++retval;
+   }
+
+   return retval;
+}
+
+// Returns a string representation of lang
 QString langToString(SrcLangExt lang)
 {
    QString retval = "Unknown";
