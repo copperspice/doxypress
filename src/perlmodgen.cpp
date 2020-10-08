@@ -850,6 +850,7 @@ void PerlModDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines:
+
 #if 0
       {
          m_t << "<div class=\"fragment\"><pre>";
@@ -906,6 +907,12 @@ void PerlModDocVisitor::visit(DocInclude *inc)
       case DocInclude::Snippet:
       case DocInclude::SnipWithLines:
          return;
+
+      case DocInclude::IncludeDoc:
+      case DocInclude::SnippetDoc:
+         err("Unexpected command found for IncludeDoc or SnippetDoc in file: %s,"
+               " contact the developers\n", csPrintable(inc->file()));
+         break;
    }
 
    openItem(type);

@@ -803,9 +803,10 @@ void HtmlDocVisitor::visit(DocInclude *inc)
       }
       break;
 
-//    case DocInclude::SnippetDoc:
-//    case DocInclude::IncludeDoc:
-//       err("Possible issue");
+      case DocInclude::IncludeDoc:
+      case DocInclude::SnippetDoc:
+         err("Unexpected command found for IncludeDoc or SnippetDoc in file: %s,"
+               " contact the developers\n", csPrintable(inc->file()));
          break;
    }
 }

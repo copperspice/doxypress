@@ -1,3 +1,4 @@
+
 /************************************************************************
 *
 * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
@@ -335,7 +336,6 @@ class PrintDocVisitor : public DocVisitor
             if (inc->isBlock()) {
                printf(" block=\"yes\"");
             }
-
             break;
 
          case DocInclude::LatexInclude:
@@ -369,7 +369,14 @@ class PrintDocVisitor : public DocVisitor
          case DocInclude::SnipWithLines:
             printf("snipwithlines");
             break;
+
+         case DocInclude::IncludeDoc:
+         case DocInclude::SnippetDoc:
+            err("Unexpected command found for IncludeDoc or SnippetDoc in file: %s,"
+                  " contact the developers\n", csPrintable(inc->file()));
+            break;
       }
+
       printf("\"/>");
    }
 

@@ -315,6 +315,7 @@ void ManDocVisitor::visit(DocInclude *inc)
    if (m_hide) {
       return;
    }
+
    SrcLangExt langExt = getLanguageFromFileName(inc->extension());
 
    switch (inc->type()) {
@@ -393,6 +394,7 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_t << ".fi" << endl;
          m_t << ".PP" << endl;
          m_firstCol = true;
+
          break;
 
       case DocInclude::Snippet:
@@ -443,6 +445,11 @@ void ManDocVisitor::visit(DocInclude *inc)
          m_firstCol = true;
       }
       break;
+
+      case DocInclude::IncludeDoc:
+      case DocInclude::SnippetDoc:
+         err("Unexpected command found for IncludeDoc or SnippetDoc in file: %s,"
+               " contact the developers\n", csPrintable(inc->file()));
          break;
    }
 }

@@ -459,6 +459,12 @@ void DocbookDocVisitor::visit(DocInclude *inc)
          m_t << "</computeroutput></literallayout>";
       }
       break;
+
+      case DocInclude::IncludeDoc:
+      case DocInclude::SnippetDoc:
+         err("Unexpected command found for IncludeDoc or SnippetDoc in file: %s,"
+               " contact the developers\n", csPrintable(inc->file()));
+         break;
    }
 }
 
