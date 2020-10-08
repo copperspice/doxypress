@@ -585,7 +585,7 @@ void RTFDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::RtfInclude:
          m_t << inc->text();
-        break;
+         break;
 
       case DocInclude::VerbInclude:
          m_t << "{" << endl;

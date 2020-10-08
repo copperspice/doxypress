@@ -412,7 +412,7 @@ static bool             s_isEnabledSection;
 static QString          s_functionProto;       // function prototype
 
 static bool             s_needNewEntry;
-// static int              s_docBlockContext;
+// static int           s_docBlockContext;
 
 static QString          s_sectionLabel;
 static QString          s_sectionTitle;
@@ -446,7 +446,6 @@ static QString          s_compoundName;
 
 static bool             s_internalDocs;
 static bool             s_processInternalDocs = false;
-
 
 static ParserInterface        *langParser;        // the language parser calling us
 
@@ -651,7 +650,6 @@ static QString addFormula()
    // keep the warnings correctly aligned
    return formLabel;
 }
-
 
 static SectionInfo::SectionType sectionLevelToType(int level)
 {
@@ -1172,7 +1170,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // simulate calling addToOutPut()
       QString text = QString::fromUtf8(yytext);
       s_docsEntry->appendData(EntryKey::Main_Docs, text);
-
    }
 
 <Comment>{B}*{CMD}[a-z_A-Z]+"{"[a-zA-Z_,:0-9\. ]*"}"{B}*  |

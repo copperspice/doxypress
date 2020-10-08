@@ -1243,7 +1243,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 <SuiteMaintain>{
 
    {BB}/({NONEMPTY}|{EXPCHAR}) {
-      // This implements poor indendation-tracking should be improved.
+      // This implements poor indentation-tracking should be improved.
       // (translate tabs to space, etc)
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
@@ -1613,7 +1613,6 @@ static void adjustScopesAndSuites(unsigned indentLength)
    }
 }
 
-
 void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s, bool exBlock, const QString &exName,
                      QSharedPointer<FileDef> fd, int startLine, int endLine, bool,
                      QSharedPointer<MemberDef> , bool, QSharedPointer<Definition> searchCtx, bool collectXRefs)
@@ -1630,9 +1629,8 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
    s_inputPosition    = 0;
    s_currentFontClass = "";
    s_needsTermination = false;
-   s_searchCtx = searchCtx;
-   s_collectXRefs = collectXRefs;
-
+   s_searchCtx        = searchCtx;
+   s_collectXRefs     = collectXRefs;
 
    if (startLine != -1) {
       s_yyLineNr    = startLine;
@@ -1668,12 +1666,11 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
    yyrestart( yyin );
    yylex();
 
-
    if (s_needsTermination) {
       endCodeLine();
    }
 
-   if (fd) {
+   if (fd != nullptr) {
       TooltipManager::instance()->writeTooltips(*s_code);
    }
 

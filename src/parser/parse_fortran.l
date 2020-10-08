@@ -118,7 +118,7 @@ static int		         s_inputPosition;
 
 static bool             s_isFixedForm;
 static QString          s_inputStringPrepass;    // Input string for prepass of line cont. '&'
-static QString          s_inputStringSemi;       // Input string after command separetor ';'
+static QString          s_inputStringSemi;       // Input string after command separator ';'
 static unsigned int     s_inputPositionPrepass;
 static int              s_lineCountPrepass = 0;
 
@@ -2909,7 +2909,7 @@ static void subrHandleCommentBlock(const QString &doc, bool brief)
          // strip direction
          loc_doc = loc_doc.right(loc_doc.length() - directionParam[SymbolModifiers::IN].length());
 
-         // in case of empty documentation or (now) just name, consider it as no documemntation
+         // in case of empty documentation or (now) just name, consider it as no documentation
          if (loc_doc.isEmpty() || (loc_doc.toLower() == argName.toLower())) {
            // reset current back to the part inside the routine
            current = tmp_entry;

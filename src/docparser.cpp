@@ -180,8 +180,8 @@ static void docParserPushContext(bool saveParamInfo = true)
    ctx.includeFileLine    = s_includeFileLine;
    ctx.includeFileUseLN   = s_includeFileUseLN;
 
-   ctx.token              = g_token;
-   g_token = new TokenInfo;
+   ctx.token = g_token;
+   g_token   = new TokenInfo;
 
    s_parserStack.push(ctx);
 }
@@ -1501,7 +1501,10 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
    doctokenizerYYsetStatePara();
 
    handlePendingStyleCommands(parent,children);
+
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == parent);
 }
 
@@ -2692,8 +2695,9 @@ void DocSecRefItem::parse()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocSecRefItem::parse() end\n"));
 }
 
@@ -2755,8 +2759,9 @@ void DocSecRefList::parse()
 
 endsecreflist:
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocSecRefList::parse() end\n"));
 }
 
@@ -2806,8 +2811,9 @@ void DocInternalRef::parse()
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocInternalRef::parse() end\n"));
 }
 
@@ -2988,6 +2994,8 @@ void DocRef::parse()
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
 }
 
@@ -3147,8 +3155,9 @@ endlink:
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocLink::parse() end\n"));
 
    return result;
@@ -3354,8 +3363,9 @@ endheader:
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlHeader::parse() end\n"));
 
    return retval;
@@ -3411,8 +3421,9 @@ endhref:
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHRef::parse() end\n"));
 
    return retval;
@@ -3482,8 +3493,9 @@ int DocInternal::parse(int level)
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocInternal::parse() end: retval=%x\n", retval));
 
    return retval;
@@ -3649,8 +3661,9 @@ int DocIndexEntry::parse()
 endindexentry:
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocIndexEntry::parse() end retval = %x\n", retval));
 
    return retval;
@@ -3739,8 +3752,9 @@ endcaption:
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlCaption::parse() end\n"));
 
    return retval;
@@ -3796,8 +3810,9 @@ int DocHtmlCell::parse()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlCell::parse() end\n"));
 
    return retval;
@@ -3850,8 +3865,9 @@ int DocHtmlCell::parseXml()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlCell::parseXml() end\n"));
 
    return retval;
@@ -3979,8 +3995,9 @@ int DocHtmlRow::parse()
 
 endrow:
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlRow::parse() end\n"));
 
    return retval;
@@ -4051,8 +4068,9 @@ int DocHtmlRow::parseXml(bool isHeading)
 
 endrow:
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlRow::parseXml() end\n"));
 
    return retval;
@@ -4124,8 +4142,9 @@ getrow:
    computeTableGrid();
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlTable::parse() end\n"));
 
    return retval == RetVal_EndTable ? RetVal_OK : retval;
@@ -4174,8 +4193,9 @@ int DocHtmlTable::parseXml()
    computeTableGrid();
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlTable::parseXml() end\n"));
 
    tagId = Mappers::htmlTagMapper->map(g_token->name);
@@ -4412,8 +4432,9 @@ endtitle:
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlDescTitle::parse() end\n"));
 
    return retval;
@@ -4456,13 +4477,13 @@ int DocHtmlDescData::parse()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlDescData::parse() end\n"));
 
    return retval;
 }
-
 
 int DocHtmlDescList::parse()
 {
@@ -4532,8 +4553,9 @@ int DocHtmlDescList::parse()
 enddesclist:
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlDescList::parse() end\n"));
 
    return retval == RetVal_EndDesc ? RetVal_OK : retval;
@@ -4576,8 +4598,9 @@ int DocHtmlListItem::parse()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlListItem::parse() end retval=%x\n", retval));
 
    return retval;
@@ -4629,8 +4652,9 @@ int DocHtmlListItem::parseXml()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlListItem::parseXml() end retval=%x\n", retval));
 
    return retval;
@@ -4714,8 +4738,9 @@ int DocHtmlList::parse()
 
 endlist:
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlList::parse() end retval=%x\n", retval));
 
    return retval == RetVal_EndList ? RetVal_OK : retval;
@@ -4781,8 +4806,9 @@ int DocHtmlList::parseXml()
 
 endlist:
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlList::parseXml() end retval=%x\n", retval));
 
    return retval == RetVal_EndList ||
@@ -4826,8 +4852,9 @@ int DocHtmlBlockQuote::parse()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocHtmlBlockQuote::parse() end retval=%x\n", retval));
 
    return (retval == RetVal_EndBlockQuote) ? RetVal_OK : retval;
@@ -4869,8 +4896,9 @@ int DocParBlock::parse()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocParBlock::parse() end retval=%x\n", retval));
 
    return (retval == RetVal_EndBlockQuote) ? RetVal_OK : retval;
@@ -4885,6 +4913,8 @@ int DocSimpleListItem::parse()
    m_paragraph->markLast();
 
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
 
    return rv;
@@ -4903,6 +4933,8 @@ int DocSimpleList::parse()
    } while (rv == RetVal_ListItem);
 
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
 
    return (rv != TK_NEWPARA) ? rv : RetVal_OK;
@@ -4955,6 +4987,8 @@ int DocAutoListItem::parse()
    }
 
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
 
    return retval;
@@ -4994,6 +5028,8 @@ int DocAutoList::parse()
    doctokenizerYYendAutoList();
 
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
 
    return retval;
@@ -5034,6 +5070,8 @@ void DocTitle::parse()
    handlePendingStyleCommands(this, m_children);
 
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
 
    DBG(("DocTitle::parse() end\n"));
@@ -5110,8 +5148,9 @@ int DocSimpleSect::parse(bool userTitle, bool needsSeparator)
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocSimpleSect::parse() end retval=%d\n", retval));
 
    return retval;
@@ -5131,8 +5170,9 @@ int DocSimpleSect::parseRcs()
    docParserPopContext(); // this will restore the old g_token
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocSimpleSect::parseRcs()\n"));
 
    return RetVal_OK;
@@ -5179,8 +5219,9 @@ int DocSimpleSect::parseXml()
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocSimpleSect::parseXml() end retval=%d\n", retval));
 
    return retval;
@@ -5197,7 +5238,7 @@ void DocSimpleSect::appendLinkWord(const QString &word)
    } else {
       p = (DocPara *)m_children.last();
 
-      // Comma-seperate <see also> links.
+      // Comma separate <see also> links
       p->injectToken(TK_WORD, ",");
       p->injectToken(TK_WHITESPACE, " ");
    }
@@ -5362,8 +5403,9 @@ int DocParamList::parse(const QString &cmdName)
 
 endparamlist:
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocParamList::parse() end retval = %d\n", retval));
 
    return retval;
@@ -5429,8 +5471,9 @@ int DocParamList::parseXml(const QString &paramName)
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocParamList::parse() end retval=%d\n", retval));
 
    return retval;
@@ -5472,8 +5515,9 @@ int DocParamSect::parse(const QString &cmdName, bool xmlContext, Direction d)
    }
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocParamSect::parse() end retval = %d\n", retval));
 
    return retval;
@@ -6105,6 +6149,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Code, true));
          retval = handleStyleArgument(this, m_children, cmdName);
          m_children.append(new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Code, false));
+
          if (retval != TK_WORD) {
             m_children.append(new DocWhiteSpace(this, " "));
          }
@@ -6302,6 +6347,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStateManOnly();
          retval = doctokenizerYYlex();
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::ManOnly, s_isExample, s_exampleName));
+
          if (retval == 0) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "manonly section ended without end marker");
          }
@@ -6313,6 +6359,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStateRtfOnly();
          retval = doctokenizerYYlex();
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::RtfOnly, s_isExample, s_exampleName));
+
          if (retval == 0) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "rtfonly section ended without end marker");
          }
@@ -6324,6 +6371,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStateLatexOnly();
          retval = doctokenizerYYlex();
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::LatexOnly, s_isExample, s_exampleName));
+
          if (retval == 0) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "latexonly section ended without end marker");
          }
@@ -6335,6 +6383,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStateXmlOnly();
          retval = doctokenizerYYlex();
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::XmlOnly, s_isExample, s_exampleName));
+
          if (retval == 0) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "xmlonly section ended without end marker");
          }
@@ -6346,6 +6395,7 @@ int DocPara::handleCommand(const QString &cmdName)
          doctokenizerYYsetStateDbOnly();
          retval = doctokenizerYYlex();
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::DocbookOnly, s_isExample, s_exampleName));
+
          if (retval == 0) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Docbookonly section ended without end marker", doctokenizerYYlineno);
          }
@@ -6359,6 +6409,7 @@ int DocPara::handleCommand(const QString &cmdName)
          retval = doctokenizerYYlex();
 
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::Verbatim, s_isExample, s_exampleName));
+
          if (retval == 0) {
             warn_doc_error(s_fileName, doctokenizerYYlineno, "Verbatim section ended without an end marker");
          }
@@ -6519,15 +6570,15 @@ int DocPara::handleCommand(const QString &cmdName)
       break;
 
       case CMD_ADDINDEX: {
-         QSharedPointer<Definition> temp;
+         QSharedPointer<Definition> tmp;
 
          if (s_scope != Doxy_Globals::globalScope) {
-            temp = s_scope;
+            tmp = s_scope;
          } else {
-            temp = QSharedPointer<Definition>();
+            tmp = QSharedPointer<Definition>();
           }
 
-         DocIndexEntry *ie = new DocIndexEntry(this, temp, s_memberDef);
+         DocIndexEntry *ie = new DocIndexEntry(this, tmp, s_memberDef);
          m_children.append(ie);
          retval = ie->parse();
       }
@@ -6536,6 +6587,7 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_INTERNAL:
          retval = RetVal_Internal;
          break;
+
       case CMD_ENDINTERNAL:
          retval = RetVal_EndInternal;
          break;
@@ -6550,7 +6602,7 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_COPYDOC:
       case CMD_COPYBRIEF:
       case CMD_COPYDETAILS:
-         //retval = RetVal_CopyDoc;
+         // retval = RetVal_CopyDoc;
          // these commands should already be resolved by processCopyDoc()
          break;
 
@@ -6688,14 +6740,15 @@ int DocPara::handleCommand(const QString &cmdName)
       //  retval = handleLanguageSwitch();
       //  break;
 
-      case CMD_INTERNALREF:
-         // warn_doc_error(s_fileName,doctokenizerYYlineno, "Unexpected command %s",csPrintable(g_token->name));
-      {
+      case CMD_INTERNALREF: {
+         // warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s", csPrintable(g_token->name));
+
          DocInternalRef *ref = handleInternalRef(this);
          if (ref) {
             m_children.append(ref);
             ref->parse();
          }
+
          doctokenizerYYsetStatePara();
       }
       break;
@@ -7629,7 +7682,6 @@ int DocPara::parse(bool skipParse, int token)
 
          case TK_COMMAND_AT:
          case TK_COMMAND_BS: {
-
             // see if we have to start a simple section
             int cmd = Mappers::cmdMapper->map(g_token->name);
             DocNode *n = parent();
@@ -7652,6 +7704,7 @@ int DocPara::parse(bool skipParse, int token)
 
             // see if we are in a simple list
             n = parent();
+
             while (n && n->kind() != DocNode::Kind_SimpleListItem) {
                n = n->parent();
             }
@@ -7792,6 +7845,8 @@ endparagraph:
 
    if (! s_nodeStack.isEmpty() ) {
       DocNode *n = s_nodeStack.pop();
+      (void) n;
+
       assert(n == this);
    }
 
@@ -7899,6 +7954,7 @@ int DocSection::parse()
          m_children.append(s);
          retval = s->parse();
       }
+
    } else if (retval == RetVal_Paragraph && m_level == qMin(5, Doxy_Globals::subpageNestingLevel + 3)) {
       // then parse any number of nested sections
 
@@ -7919,7 +7975,6 @@ int DocSection::parse()
                      csPrintable(sectionLevelToName[level]), csPrintable(sectionLevelToName[m_level]) );
 
       retval = 0; // stop parsing
-   } else {
    }
 
    INTERNAL_ASSERT(retval == 0 ||
@@ -7931,9 +7986,11 @@ int DocSection::parse()
                    retval == RetVal_EndInternal
                   );
 
-   DBG(("DocSection::parse() end: retval=%x\n", retval));
    DocNode *n = s_nodeStack.pop();
+   (void) n;
+
    assert(n == this);
+   DBG(("DocSection::parse() end: retval=%x\n", retval));
 
    return retval;
 }
@@ -8056,8 +8113,9 @@ void DocText::parse()
    handleUnclosedStyleCommands();
 
    DocNode *n = s_nodeStack.pop();
-   assert(n == this);
+   (void) n;
 
+   assert(n == this);
    DBG(("DocText::parse() end\n"));
 }
 
@@ -8173,7 +8231,6 @@ void DocRoot::parse()
    (void) n;
 
    assert(n == this);
-
    DBG(("DocRoot::parse() end\n"));
 }
 

@@ -39,7 +39,7 @@
 class DevNullCodeDocInterface : public CodeOutputInterface
 {
  public:
-   void codify(const QString &) override {}
+   void codify(const QString &) override { }
 
    void writeCodeLink(const QString &, const QString &, const QString &,
                   const QString &, const QString &) override  {}
@@ -504,7 +504,7 @@ void FileDef::writeClassDeclarations(OutputList &ol, const QString &title)
 
 void FileDef::writeInlineClasses(OutputList &ol)
 {
-   // temporarily undo the disbling could be done by startMemberDocumentation()
+   // temporarily undo the disabling could be done by startMemberDocumentation()
    // as a result of setting SEPARATE MEMBER PAGES to YES; see bug730512
 
    QSharedPointer<FileDef> self = sharedFrom(this);

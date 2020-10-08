@@ -659,12 +659,12 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
    memDec        = QSharedPointer<MemberDef>();
    group         = QSharedPointer<GroupDef>();
 
-   grpId           = -1;
-   livesInsideEnum = false;
-   hasCallGraph    = false;
-   hasCallerGraph  = false;
-   initLines       = 0;
-   m_type          = type;
+   grpId             = -1;
+   livesInsideEnum   = false;
+   hasCallGraph      = false;
+   hasCallerGraph    = false;
+   initLines         = 0;
+   m_type            = type;
 
    if (memberType == MemberDefType::Typedef) {
       m_type = stripPrefix(m_type, "typedef ");
@@ -1629,7 +1629,8 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       }
 
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, param5, m_impl->annMemb, true, false, s_indentLevel); // different
+      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, param5, m_impl->annMemb,
+                  true, false, s_indentLevel); // different
    }
 
    // *** write exceptions
@@ -1849,7 +1850,7 @@ bool MemberDef::isDetailedSectionLinkable() const
    bool privateFilter = protectionLevelVisible(protection()) || isFriend();
 
 
-   // (not used ) member is part of an anonymous scope that is the type of another member in the list
+   // (not used) member is part of an anonymous scope that is the type of another member in the list
    // bool inAnonymousScope = ! briefDescription().isEmpty() && annUsed;
 
 
@@ -2378,7 +2379,8 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
 
 void MemberDef::_writeCategoryRelation(OutputList &ol)
 {
-   if (m_impl->classDef) { // this should be a member of a class/category
+   if (m_impl->classDef) {
+      // this should be a member of a class/category
 
       QString text;
       QString ref;

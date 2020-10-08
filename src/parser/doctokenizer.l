@@ -66,6 +66,7 @@ struct DocLexerContext {
 };
 static QStack<DocLexerContext *> s_lexerStack;
 
+
 // static functions
 static void yyunput(QChar c, char *yy_bp);
 
@@ -2151,13 +2152,14 @@ void doctokenizerYYpushBackHtmlTag(const QString &tag)
 
 void doctokenizerYYstartAutoList()
 {
-   s_autoListLevel++;
+   ++s_autoListLevel;
 }
 
 void doctokenizerYYendAutoList()
 {
-   s_autoListLevel--;
+   --s_autoListLevel;
 }
+
 void setDoctokenLineNum(int lineNum)
 {
    s_yyLineNum = lineNum;

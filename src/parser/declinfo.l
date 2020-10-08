@@ -294,7 +294,7 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
    int nb = s_name.lastIndexOf('[');
 
    if (nb != -1 && s_args.isEmpty()) {
-      // correct for [] in name ambigity (due to Java return type allowing [])
+      // correct for [] in name ambiguity (due to Java return type allowing [])
       s_args.prepend(s_name.right(s_name.length() - nb));
       s_name = s_name.left(nb);
    }

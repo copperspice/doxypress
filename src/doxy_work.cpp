@@ -3195,6 +3195,7 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
       }
 
    }
+
    RECURSE_ENTRYTREE(findUsingDeclImports, ptrEntry);
 }
 
@@ -4510,8 +4511,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                    "  `%s' `%s'::`%s' `%s' relates=`%s' relatesType=`%d' file=`%s' "
                    "line=`%d' bodyLine=`%d' #tArgLists=%d mGrpId=%d proto=%d docFile=%s\n",
                    csPrintable(root->getData(EntryKey::Member_Type)), csPrintable(ptrEntry->parent()->m_entryName),
-                   csPrintable(root->m_entryName),
-                   csPrintable(root->getData(EntryKey::Member_Args)), csPrintable(root->getData(EntryKey::Related_Class)), root->relatesType,
+                   csPrintable(root->m_entryName), csPrintable(root->getData(EntryKey::Member_Args)),
+                   csPrintable(root->getData(EntryKey::Related_Class)), root->relatesType,
                    csPrintable(root->getData(EntryKey::File_Name)), root->startLine, root->startBodyLine, tmpValue, root->mGrpId, root->proto,
                    csPrintable(root->getData(EntryKey::MainDocs_File)) );
 
@@ -6122,9 +6123,8 @@ void Doxy_Work::generateXRefPages()
    }
 }
 
-// Copy the documentation in entry `root' to member definition `md' and
-// set the function declaration of the member to `funcDecl'.
-// If 'overload' is set the standard overload text is added.
+// copy the documentation in entry (ptrEntry) to member definition in md
+// if 'overload' is set the standard overload text is added
 
 void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<MemberDef> md, const QString &funcDecl,
                   ArgumentList &argList, bool overload, NamespaceSDict *)
@@ -6230,7 +6230,8 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
                "one found here will be ignored.",  csPrintable(md->name()));
          }
 
-      } else { // set group id
+      } else {
+         // set group id
          md->setMemberGroupId(root->mGrpId);
       }
    }

@@ -3172,6 +3172,11 @@ void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scop
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
                   QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
+   (void) lang;
+   (void) endLine;
+   (void) inlineFragment;
+   (void) searchCtx;
+
    if (input.length() < 1) {
       return;
    }

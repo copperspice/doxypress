@@ -2603,9 +2603,9 @@ void ClassDef::mergeMembers()
                for (auto &srcMi : *srcMni) {
                   QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
 
-                  bool found   = false;
-                  bool ambigue = false;
-                  bool hidden  = false;
+                  bool found     = false;
+                  bool ambiguous = false;
+                  bool hidden    = false;
 
                   QSharedPointer<ClassDef> srcCd = srcMd->getClassDef();
 
@@ -2642,7 +2642,7 @@ void ClassDef::mergeMembers()
                               dstMi.ambiguityResolutionScope.prepend(scope);
                            }
 
-                           ambigue = true;
+                           ambiguous = true;
                         }
 
                      } else {
@@ -2664,7 +2664,7 @@ void ClassDef::mergeMembers()
                               dstMi.ambiguityResolutionScope.prepend(scope);
                            }
 
-                           ambigue = true;
+                           ambiguous = true;
                         }
                      }
                   }
@@ -2700,7 +2700,7 @@ void ClassDef::mergeMembers()
                      MemberInfo newMi = MemberInfo(srcMd, prot, virt, true);
                      newMi.scopePath = bClass->name() + sep + srcMi.scopePath;
 
-                     if (ambigue) {
+                     if (ambiguous) {
                         QString scope = bClass->name() + sep;
 
                         if (! srcMi.ambiguityResolutionScope.startsWith(scope)) {

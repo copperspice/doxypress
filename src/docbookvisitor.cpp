@@ -471,7 +471,7 @@ void DocbookDocVisitor::visit(DocInclude *inc)
 void DocbookDocVisitor::visit(DocIncOperator *op)
 {
    if (op->isFirst()) {
-      if ( !m_hide) {
+      if (! m_hide) {
          m_t << "<programlisting>";
       }
       pushEnabled();

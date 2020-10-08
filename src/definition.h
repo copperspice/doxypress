@@ -204,7 +204,7 @@ class Definition : public DefinitionIntf
    /*! Returns true iff the name may appear in the output */
    virtual bool isVisible() const;
 
-   /*! Returns true iff this item is supposed to be hidden from the output. */
+   /*! Returns true if this item is supposed to be hidden from the output. */
    bool isHidden() const;
 
    /*! returns true if this entity was artificially introduced, for

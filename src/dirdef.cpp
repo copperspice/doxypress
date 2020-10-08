@@ -37,7 +37,7 @@ DirDef::DirDef(const QString &path)
 {
    static const bool fullPathNames = Config::getBool("full-path-names");
 
-   // get display name (stipping the paths mentioned in STRIP_FROM_PATH)
+   // get display name (stripping the paths mentioned in STRIP_FROM_PATH)
    // get short name (last part of path)
 
    m_shortName = path;

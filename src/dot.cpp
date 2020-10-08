@@ -4769,7 +4769,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
 {
    t << "digraph \"" << dd->displayName() << "\" {\n";
 
-     if (Config::getBool("dot-transparent")) {
+   if (Config::getBool("dot-transparent")) {
       t << "  bgcolor=transparent;\n";
    }
 

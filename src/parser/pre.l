@@ -66,7 +66,7 @@ struct FileState {
    YY_BUFFER_STATE bufState;
 };
 
-/** @brief Singleton which manages the defines available while proprocessing files
+/** @brief Singleton which manages the defines available while preprocessing files
  */
 class DefineManager
 {
@@ -3734,8 +3734,6 @@ QString preprocessFile(const QString &fileName, const QString &input)
    s_includeStack.clear();
    s_expandedDict->clear();
    s_condStack.clear();
-
-   uint orgOffset = 0;
 
    setFileName(fileName);
 

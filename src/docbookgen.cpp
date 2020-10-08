@@ -268,8 +268,7 @@ class DocbookCodeGenerator : public CodeOutputInterface
       }
    }
 
-   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
-      (void) def;
+   void setCurrentDoc(QSharedPointer<Definition>, const QString &, bool) override {
    }
 
    void addWord(const QString &, bool) override {

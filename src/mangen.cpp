@@ -491,9 +491,10 @@ void ManGenerator::startCodeFragment()
 
 void ManGenerator::endCodeFragment()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
+
    m_textStream << ".fi" << endl;
    firstCol = true;
    paragraph = false;

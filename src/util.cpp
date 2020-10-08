@@ -2595,7 +2595,7 @@ Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPoi
    return prot;
 }
 
-#ifndef NEWMATCH
+#if 0      // #ifndef NEWMATCH
 // strip any template specifiers that follow className in string s
 static QString trimTemplateSpecifiers(const QString &namespaceName, const QString &className, const QString &s)
 {
@@ -2835,7 +2835,7 @@ void stripIrrelevantConstVolatile(QString &s)
    stripIrrelevantString(s, "final");
 }
 
-#ifndef NEWMATCH
+#if 0      // #ifndef NEWMATCH
 static bool matchArgument(const Argument *srcA, const Argument *dstA, const QString &className,
                           const QString &namespaceName, NamespaceSDict *usingNamespaces,
                           StringMap<QSharedPointer<Definition>> *usingClasses)

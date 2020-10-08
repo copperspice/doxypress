@@ -1129,7 +1129,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       const ArgumentList &argList = md->getArgumentList();
 
       if (argList.listEmpty())  {
-         // special case for "foo()" to disguish it from "foo".
+         // special case for "foo()" to distinguish it from "foo".
          t << "        <param></param>" << endl;
 
       } else {

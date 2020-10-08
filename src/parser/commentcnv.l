@@ -568,7 +568,7 @@ static int yyread(char *buf, int max_size)
    }
 
 <Scan>.   {
-      /* any ather character */
+      /* any other character */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }

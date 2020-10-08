@@ -1829,21 +1829,15 @@ void RTFGenerator::writeRTFReference(const QString &label)
 
 void RTFGenerator::startCodeFragment()
 {
-   DBG_RTF(m_textStream << "{\\comment (startCodeFragment) }"    << endl)
    m_textStream << "{" << endl;
-   //newParagraph();
+
    m_textStream << rtf_Style_Reset << rtf_Code_DepthStyle();
-   //styleStack.push(rtf_Style_CodeExample);
+
 }
 
 void RTFGenerator::endCodeFragment()
 {
-   //newParagraph();
-   //styleStack.pop();
-   //printf("RTFGenerator::endCodeFrament() top=%s\n",styleStack.top());
-   //m_textStream << rtf_Style_Reset << styleStack.top() << endl;
 
-   DBG_RTF(m_textStream << "{\\comment (endCodeFragment) }"    << endl)
    m_textStream << "}" << endl;
    m_omitParagraph = true;
 }

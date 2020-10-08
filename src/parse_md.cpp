@@ -2522,7 +2522,7 @@ static QString::const_iterator writeBlockQuote(QString &out, QStringView data)
          }
 
       } else if (level < curLevel) {
-         // quote level descreased => add end markers
+         // quote level decreased => add end markers
 
          for (int l = level; l < curLevel; l++) {
             out += "</blockquote>\n";
@@ -3136,7 +3136,7 @@ static QString detab(QStringView str, int &refIndent)
          break;
 
          case '\n':
-            // reset colomn counter
+            // reset column counter
 
             retval += c;
             col = 0;

@@ -53,14 +53,20 @@ static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCapti
          case DocImage::Html:
             t << "html";
             break;
+
          case DocImage::Latex:
             t << "latex";
             break;
+
          case DocImage::Rtf:
             t << "rtf";
             break;
+
          case DocImage::DocBook:
             t << "docbook";
+            break;
+
+         case DocImage::None:
             break;
       }
 

@@ -220,15 +220,8 @@ class BaseOutputDocInterface : public CodeOutputInterface
    /*! Ends a section of text displayed in italic. */
    virtual void endEmphasis() = 0;
 
-   /*! Starts a source code fragment. The fragment will be
-    *  fed to the code parser (see code_cstyle..h) for syntax highlighting
-    *  and cross-referencing. The fragment ends by a call to
-    *  endCodeFragment()
-    */
    virtual void startCodeFragment() = 0;
 
-   /*! Ends a source code fragment
-    */
    virtual void endCodeFragment() = 0;
 
 

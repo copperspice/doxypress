@@ -63,7 +63,7 @@ int RefList::addRefItem()
  */
 RefItem *RefList::getRefItem(int itemId)
 {
-   RefItem *retval = 0;
+   RefItem *retval = nullptr;
 
    retval = m_dict.value(itemId);
 
@@ -76,7 +76,7 @@ RefItem *RefList::getRefItem(int itemId)
  */
 RefItem *RefList::getFirstRefItem()
 {
-   RefItem *retval = 0;
+   RefItem *retval = nullptr;
 
    if (! m_dict.isEmpty())  {
       m_dictIterator.toFront();
@@ -92,7 +92,7 @@ RefItem *RefList::getFirstRefItem()
  */
 RefItem *RefList::getNextRefItem()
 {
-   RefItem *retval = 0;
+   RefItem *retval = nullptr;
 
    if (m_dictIterator.hasNext())  {
       m_dictIterator.next();

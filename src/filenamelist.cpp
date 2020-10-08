@@ -76,7 +76,7 @@ void FileNameList::generateDiskNames()
             // init for safety
             QChar letter = '\0';
 
-            if ( fd->m_path.length() > i) {
+            if (fd->m_path.length() > i) {
                letter = fd->m_path.at(i);
 
                if (letter == '/') {

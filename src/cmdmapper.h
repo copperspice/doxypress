@@ -133,18 +133,18 @@ enum CommandType {
    CMD_ANCHORNAME   = 104,
    CMD_SORTID       = 105,
 
-   CMD_PUNT           = 106,
-   CMD_PLUS           = 107,
-   CMD_MINUS          = 108,
-   CMD_INCLUDEDOC     = 109,
-   CMD_SNIPPETDOC     = 110,
-   CMD_SNIPWITHLINES  = 111,
-   CMD_EMOJI          = 112,
-   CMD_EQUAL          = 113,
-   CMD_RTFINCLUDE     = 114,
-   CMD_DOCBOOKINCLUDE = 115,
-   CMD_MANINCLUDE     = 116,
-   CMD_XMLINCLUDE     = 117
+   CMD_PUNT            = 106,
+   CMD_PLUS            = 107,
+   CMD_MINUS           = 108,
+   CMD_INCLUDEDOC      = 109,
+   CMD_SNIPPETDOC      = 110,
+   CMD_SNIPWITHLINES   = 111,
+   CMD_EMOJI           = 112,
+   CMD_EQUAL           = 113,
+   CMD_RTFINCLUDE      = 114,
+   CMD_DOCBOOKINCLUDE  = 115,
+   CMD_MANINCLUDE      = 116,
+   CMD_XMLINCLUDE      = 117,
 };
 
 enum HtmlTagType {
@@ -234,6 +234,5 @@ struct Mappers {
    static Mapper *cmdMapper;
    static Mapper *htmlTagMapper;
 };
-
 
 #endif

@@ -131,7 +131,7 @@ class DiagramRow : public QList<DiagramItem *>
    uint level;
 };
 
-/** Class represeting the tree layout for the built-in class diagram. */
+/** Class representing the tree layout for the built-in class diagram. */
 class TreeDiagram : public QList<DiagramRow *>
 {
  public:
@@ -354,7 +354,7 @@ QString DiagramItem::label() const
    QString result;
 
    if (! templSpec.isEmpty()) {
-      // we use classDef->name() here and not diplayName() in order
+      // we use classDef->name() here and not displayName() in order
       // to get the name used in the inheritance relation.
 
       QString n = classDef->name();
