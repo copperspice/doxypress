@@ -1440,7 +1440,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
 
    while ((tok = doctokenizerYYlex())) {
 
-      if (tok == TK_WORD && g_token->name == "width=" || g_token->name == "height=") {
+      if (tok == TK_WORD && (g_token->name == "width=" || g_token->name == "height=")) {
          // special case: no title, but we do have a size indicator
          break;
        }
