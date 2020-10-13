@@ -159,8 +159,8 @@ static bool matchExcludedSymbols(const QString &name)
             int sl = symName.length();
 
             // check if it is a whole word match
-            if ((i == 0 || pattern.at(0) == '*' || (! isId(symName.at(i - 1))  && ! forceStart)) &&
-                  (i + pl == sl || pattern.at(i + pl) == '*' || (! isId(symName.at(i + pl)) && ! forceEnd)) ) {
+            if ((i == 0 || pattern.startsWith('*') || (! isId(symName.at(i - 1))  && ! forceStart)) &&
+                  (i + pl == sl || pattern.endsWith('*') || (! isId(symName.at(i + pl)) && ! forceEnd)) ) {
                return true;
             }
          }
