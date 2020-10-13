@@ -260,11 +260,11 @@ class Definition : public DefinitionIntf
 
    QString id() const;
 
-   int getInputOrderId() {
+   int getInputOrderId() const {
       return m_inputOrderId;
    }
 
-   int getSortId() {
+   int getSortId() const {
       return m_sortId;
    }
 

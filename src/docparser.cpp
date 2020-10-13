@@ -322,6 +322,9 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
                }
                outputDir = Config::getString("rtf-output");
                break;
+
+            case DocImage::None:
+               break;
          }
 
          QString outputFile = outputDir + "/" + result;
