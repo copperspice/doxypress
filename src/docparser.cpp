@@ -785,18 +785,60 @@ static bool insideTable(DocNode *n)
  */
 static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandName, QString &doc, QString &brief)
 {
-   doc   = "";
-   brief = "";
-
    QSharedPointer<Definition> retval;
 
-   QString cmdArg = commandName.replace("#", "::");
-   int len = cmdArg.length();
-
-   if (len == 0) {
+   if (commandName.isEmpty()) {
       return retval;
    }
 
+   doc   = "";
+   brief = "";
+
+   QString cmdArg = commandName;
+
+   QSharedPointer<FileDef>  fd;
+   QSharedPointer<GroupDef> gd;
+   QSharedPointer<PageDef>  pd;
+
+   gd = Doxy_Globals::groupSDict.find(cmdArg);
+
+   if (gd != nullptr)  {
+      doc    = gd->documentation();
+      brief  = gd->briefDescription();
+      retval = gd;
+
+      return retval;
+   }
+
+   pd = Doxy_Globals::pageSDict.find(cmdArg);
+
+   if (pd != nullptr) {
+      doc    = pd->documentation();
+      brief  = pd->briefDescription();
+      retval = pd;
+
+      return retval;
+   }
+
+   bool ambig;
+   fd = findFileDef(&Doxy_Globals::inputNameDict, cmdArg, ambig);
+
+   if (fd != nullptr && ! ambig)  {
+      doc    = fd->documentation();
+      brief  = fd->briefDescription();
+      retval = fd;
+
+      return retval;
+   }
+
+   // normalize the separator, so A#B, or A\B, or A.B becomes A::B
+   cmdArg = substitute(cmdArg, "#" , "::");
+   cmdArg = substitute(cmdArg, "\\", "::");
+   cmdArg = substitute(cmdArg, ".",  "::");
+
+   int len = cmdArg.length();
+
+   //
    int funcStart = cmdArg.indexOf('(');
 
    if (funcStart == -1) {
@@ -820,15 +862,12 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
 
    // test if the link is to a member
    QSharedPointer<MemberDef>    md;
-   QSharedPointer<FileDef>      fd;
    QSharedPointer<ClassDef>     cd;
    QSharedPointer<NamespaceDef> nd;
-   QSharedPointer<GroupDef>     gd;
-   QSharedPointer<PageDef>      pd;
 
    // find('.') is a hack to detect files
    bool found = getDefs(s_context.indexOf('.') == -1 ? s_context : QString(), name, args.isEmpty() ? QString() : args,
-                        md, cd, fd, nd, gd, false, QSharedPointer<FileDef>(), true);
+                  md, cd, fd, nd, gd, false, QSharedPointer<FileDef>(), true);
 
    if (found && md) {
       doc    = md->documentation();
@@ -869,37 +908,6 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
          return retval;
       }
 
-      gd = Doxy_Globals::groupSDict.find(cmdArg);
-
-      if (gd) {
-         doc    = gd->documentation();
-         brief  = gd->briefDescription();
-         retval = gd;
-
-         return retval;
-      }
-
-      pd = Doxy_Globals::pageSDict.find(cmdArg);
-
-      if (pd) {
-         doc    = pd->documentation();
-         brief  = pd->briefDescription();
-         retval = pd;
-
-         return retval;
-      }
-
-      bool ambig;
-      fd = findFileDef(&Doxy_Globals::inputNameDict, cmdArg, ambig);
-
-      if (fd && ! ambig) {
-         doc    = fd->documentation();
-         brief  = fd->briefDescription();
-         retval = fd;
-
-         return retval;
-      }
-
       if (scopeOffset == 0) {
          scopeOffset = -1;
 
@@ -912,7 +920,6 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
       }
 
    } while (scopeOffset >= 0);
-
 
    return retval;
 }
