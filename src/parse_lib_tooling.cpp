@@ -1406,11 +1406,6 @@ class DoxyPPConsumer : public clang::PPCallbacks {
 static void addDefine(QSharedPointer<Entry> current_define, ArgumentList argList,
       QString defineArgs, QString defineInit)
 {
-   // conditional section
-   if (! Doxy_Globals::gatherDefines) {
-      return;
-   }
-
    QString defineName  = current_define->m_entryName;
    QString defineFName = current_define->getData(EntryKey::File_Name);
 

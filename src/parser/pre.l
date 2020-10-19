@@ -1649,10 +1649,6 @@ static void addDefine()
       return;
    }
 
-   if (! Doxy_Globals::gatherDefines) {
-      return;
-   }
-
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(s_yyFileName, s_yyLineNr - s_yyMLines, s_yyColNr,
                "#define", s_defName, s_defArgsStr, "", Protection::Public, Specifier::Normal, false,
                Relationship::Member, MemberDefType::Define, ArgumentList(), ArgumentList());

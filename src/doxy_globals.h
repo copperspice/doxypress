@@ -165,7 +165,6 @@ class Doxy_Globals
       static QString htmlFileExtension;
       static QString latexStyleExtension;
 
-      static bool gatherDefines;
       static bool outputToApp;
       static bool userComments;
       static bool insideMainPage;

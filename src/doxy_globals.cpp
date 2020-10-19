@@ -91,7 +91,6 @@ QCache<QString, LookupInfo>                  Doxy_Globals::lookupCache;
 QString Doxy_Globals::htmlFileExtension;
 QString Doxy_Globals::latexStyleExtension = ".sty";
 
-bool Doxy_Globals::gatherDefines       = true;
 bool Doxy_Globals::insideMainPage      = false;            // indicates if doc are generatedd for the main page
 bool Doxy_Globals::parseSourcesNeeded  = false;
 bool Doxy_Globals::outputToApp         = false;
