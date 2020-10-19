@@ -2936,7 +2936,7 @@ struct FileState {
    YY_BUFFER_STATE bufState;
 };
 
-/** @brief Singleton which manages the defines available while proprocessing files
+/** @brief Singleton which manages the defines available while preprocessing files
  */
 class DefineManager
 {
@@ -3994,6 +3994,7 @@ static int getNextId(const QString &expr, int p, int *l)
  */
 static bool expandExpression(QString &expr, QString *rest, int pos, int level)
 {
+
    if (expr.isEmpty()) {
      return true;
    }
@@ -4513,10 +4514,6 @@ static void addDefine()
       // do not add this define as it is inside a
       // conditional section (cond command) that is disabled
 
-      return;
-   }
-
-   if (! Doxy_Globals::gatherDefines) {
       return;
    }
 
@@ -8423,8 +8420,6 @@ QString preprocessFile(const QString &fileName, const QString &input)
    s_includeStack.clear();
    s_expandedDict->clear();
    s_condStack.clear();
-
-   uint orgOffset = 0;
 
    setFileName(fileName);
 
