@@ -450,6 +450,7 @@ void processFiles()
    // make sure the output directory exists
    QString outputDirectory = Config::getString("output-dir");
    int cacheSize           = Config::getInt("lookup-cache-size");
+   static const QString layoutFName  = Config::getString("layout-file");
 
    if (cacheSize < 0) {
       cacheSize = 0;
@@ -531,20 +532,18 @@ void processFiles()
    // handle layout file
    LayoutDocManager::instance().init();
 
-   QString layoutFileName = Config::getString("layout-file");
-
-   QFile layoutFile(layoutFileName);
+   QFile layoutFile(layoutFName);
 
    if (layoutFile.open(QIODevice::ReadOnly)) {
-      msg("Parse layout file %s\n", csPrintable(layoutFileName));
+      msg("Parse layout file %s\n", csPrintable(layoutFName));
 
       QTextStream t(&layoutFile);
       t.setCodec("UTF-8");
 
-      LayoutDocManager::instance().parse(t, layoutFileName);
+      LayoutDocManager::instance().parse(t, layoutFName);
 
-   } else if (layoutFileName != "doxy_layout.xml")  {
-      warn_uncond("Unable to open layout file '%s' for reading\n", csPrintable(layoutFileName));
+   } else if (layoutFName != "doxy_layout.xml")  {
+      warn_uncond("Unable to open %s layout file for reading\n", csPrintable(layoutFName));
 
    }
 
