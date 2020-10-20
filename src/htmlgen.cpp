@@ -978,7 +978,7 @@ QString HtmlGenerator::writeLogoAsString(const QString &path)
       result += theTranslator->trGeneratedBy();
    }
 
-   result += "&#160;\n<a href=\"http://www.copperspice.com/documentation-doxypress.html\">";
+   result += "&#160;\n<a href=\"https://www.copperspice.com/documentation-doxypress.html\">";
    result += "<img class=\"footer\" src=\"";
    result += path;
    result += "doxypress.png\" alt=\"DoxyPress\"/></a>";

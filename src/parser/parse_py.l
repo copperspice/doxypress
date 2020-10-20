@@ -139,7 +139,7 @@ static void newFunction()
 {
    if (current->m_entryName.startsWith("__") && current->m_entryName.endsWith("__")) {
 
-      // special method name, refer to http://docs.python.org/ref/specialnames.html
+      // special method name, refer to https://docs.python.org/ref/specialnames.html
       current->protection = Public;
 
    } else if (current->m_entryName.at(0) == '_') {
