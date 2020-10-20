@@ -313,7 +313,6 @@ void Config::load_Defaults()
    m_cfgBool.insert("all-externals",             struc_CfgBool   { false,           DEFAULT } );
    m_cfgBool.insert("external-groups",           struc_CfgBool   { true,            DEFAULT } );
    m_cfgBool.insert("external-pages",            struc_CfgBool   { true,            DEFAULT } );
-   m_cfgString.insert("perl-path",               struc_CfgString { "/usr/bin/perl", DEFAULT } );
 
    // tab 2 - dot
    m_cfgBool.insert("class-diagrams",            struc_CfgBool   { true,            DEFAULT } );
@@ -400,7 +399,7 @@ void Config::load_Defaults()
    m_cfgString.insert("ghostscript",             struc_CfgString { QString(),       DEFAULT } );
    m_cfgBool.insert("use-mathjax",               struc_CfgBool   { false,           DEFAULT } );
    m_cfgEnum.insert("mathjax-format",            struc_CfgEnum   { "HTML-CSS",      DEFAULT } );
-   m_cfgString.insert("mathjax-relpath",         struc_CfgString { "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/", DEFAULT } );
+   m_cfgString.insert("mathjax-relpath",         struc_CfgString { "https://cdn.jsdelivr.net/npm/mathjax@2", DEFAULT } );
    m_cfgList.insert("mathjax-extensions",        struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgString.insert("mathjax-codefile",        struc_CfgString { QString(),       DEFAULT } );
 
