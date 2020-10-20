@@ -50,7 +50,7 @@ void DocSets::initialize()
       QFile makefile(mfName);
 
       if (! makefile.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", csPrintable(mfName), makefile.error());
+         err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(mfName), makefile.error());
          Doxy_Work::stopDoxyPress();
       }
 
@@ -102,7 +102,7 @@ void DocSets::initialize()
       QFile plist(plName);
 
       if (! plist.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", csPrintable(plName), plist.error());
+         err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(plName), plist.error());
          Doxy_Work::stopDoxyPress();
       }
       QTextStream ts(&plist);
@@ -138,7 +138,7 @@ void DocSets::initialize()
    m_nf.setFileName(notes);
 
    if (! m_nf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(notes), m_nf.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(notes), m_nf.error());
       Doxy_Work::stopDoxyPress();
    }
 
@@ -163,7 +163,7 @@ void DocSets::initialize()
    m_tf.setFileName(tokens);
 
    if (! m_tf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(tokens), m_tf.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(tokens), m_tf.error());
       Doxy_Work::stopDoxyPress();
    }
 

@@ -10286,7 +10286,7 @@ void Doxy_Work::writeTagFile()
    QFile tag(generateTagFile);
 
    if (! tag.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(generateTagFile), tag.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(generateTagFile), tag.error());
       return;
    }
 

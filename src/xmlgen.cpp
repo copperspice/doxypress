@@ -210,7 +210,7 @@ static void writeCombineScript()
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1483,7 +1483,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    QFile fi(fileName);
 
    if (! fi.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), fi.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), fi.error());
       return;
    }
 
@@ -1722,7 +1722,7 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1797,8 +1797,8 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
 
    QFile f(fileName);
 
-   if (!f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+   if (! f.open(QIODevice::WriteOnly)) {
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1924,7 +1924,7 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-       err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+       err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -1983,7 +1983,7 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    QFile f(fileName);
 
    if (!f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -2041,7 +2041,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -2196,7 +2196,7 @@ void generateXML_output()
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
@@ -2242,7 +2242,7 @@ void generateXML_output()
    f.setFileName(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 

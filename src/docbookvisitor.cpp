@@ -320,7 +320,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".dot");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s.dot, error: %d\n", csPrintable(baseName), file.error());
+            err("Unable to open file %s.dot for writing, OS Error #: %d\n", csPrintable(baseName), file.error());
          }
 
          file.write( stext.toUtf8() );
@@ -347,7 +347,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s.msc, error: %d\n", csPrintable(baseName), file.error());
+            err("Unable to open file %s.msc for writing, OS Error #: %d\n", csPrintable(baseName), file.error());
          }
 
          QString text = "msc {" + stext + "}";
@@ -1096,11 +1096,11 @@ void DocbookDocVisitor::visitPost(DocImage *img)
          bool copyOk = inImage.copy(outputFile);
 
          if (! copyOk) {
-            err("Unable to open image file for writing %s, error: %d\n", csPrintable(outputFile), inImage.error());
+            err("Unable to open image file %s for writing, OS Error #: %d\n", csPrintable(outputFile), inImage.error());
          }
 
       } else {
-         err("Unable to open image file for reading %s, error: %d\n", csPrintable(m_file), inImage.error());
+         err("Unable to open image file %s for reading, OS Error #:  %d\n", csPrintable(m_file), inImage.error());
       }
 
    } else {

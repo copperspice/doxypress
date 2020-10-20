@@ -466,7 +466,7 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
    QFile f(fileName);
 
    if (! f.open(QIODevice::ReadOnly | QIODevice::Unbuffered)) {
-      err("Unable to open file for reading %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(fileName), f.error());
       return false;
    }
 
@@ -552,7 +552,7 @@ static bool readSVGSize(const QString &fileName, int *width, int *height)
    QFile f(fileName);
 
    if (! f.open(QIODevice::ReadOnly)) {
-      err("Unable to open file for reading %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(fileName), f.error());
       return false;
    }
 
@@ -965,14 +965,14 @@ bool DotFilePatcher::run()
    QFile fo(patchFile);
 
    if (! fi.open(QIODevice::ReadOnly)) {
-      err("Unable to open file for updating %s, error: %d\n", csPrintable(tmpName), fi.error());
+      err("Unable to open file for updating %s, OS Error #: %d\n", csPrintable(tmpName), fi.error());
 
       QDir::current().rename(tmpName, patchFile);
       return false;
    }
 
    if (! fo.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for updating %s, error: %d\n", csPrintable(m_patchFile), fo.error());
+      err("Unable to open file for updating %s, OS Error #: %d\n", csPrintable(m_patchFile), fo.error());
 
       QDir::current().rename(tmpName, patchFile);
       return false;
@@ -1126,12 +1126,12 @@ bool DotFilePatcher::run()
       QFile fo(orgName);
 
       if (! fi.open(QIODevice::ReadOnly)) {
-         err("Unable to open file for reading %s, error: %d\n", csPrintable(tmpName), fi.error());
+         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(tmpName), fi.error());
          return false;
       }
 
       if (! fo.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", csPrintable(orgName), fi.error());
+         err("Unable to open file %s for writing, OS error #: %d\n", csPrintable(orgName), fi.error());
          return false;
       }
 
@@ -4012,7 +4012,7 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
       QFile f(absDotName);
 
       if (! f.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", csPrintable(baseName), f.error());
+         err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(baseName), f.error());
       }
 
       QTextStream t(&f);
@@ -4177,7 +4177,7 @@ void generateGraphLegend(const QString &path)
       QFile dotFile(absDotName);
 
       if (! dotFile.open(QIODevice::WriteOnly)) {
-         err("Unable to open file for writing %s, error: %d\n", csPrintable(absDotName), dotFile.error());
+         err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(absDotName), dotFile.error());
          return;
       }
 

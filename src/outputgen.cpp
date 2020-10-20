@@ -40,7 +40,7 @@ void OutputGenerator::startPlainFile(const QString &name)
    m_file.setFileName(m_fileName);
 
    if (! m_file.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(m_fileName), m_file.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(m_fileName), m_file.error());
       Doxy_Work::stopDoxyPress();
    }
 

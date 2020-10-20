@@ -600,7 +600,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(fileName);
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());
+            err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), file.error());
 
          } else {
 
@@ -637,7 +637,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          QFile file(baseName + ".msc");
 
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s.msc error: %d\n", csPrintable(baseName), file.error());
+            err("Unable to open file %s.msc for writing, OS Error #: %d\n", csPrintable(baseName), file.error());
 
          } else {
             QString text = "msc {";

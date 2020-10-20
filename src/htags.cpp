@@ -133,10 +133,11 @@ bool Htags::loadFilemap(const QString &htmlDir)
                g_symbolDict.insert(key, value);
             }
          }
+
          return true;
 
       } else {
-         err("Unable to open file %s, error: %d\n", csPrintable(fileMapName), f.error());
+         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(fileMapName), f.error());
 
       }
    }

@@ -2216,7 +2216,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
          }
 
       } else {
-         err("Unable to open file for reading %s (rtf, preProcessA), error: %d  \n", csPrintable(input_FName), f.error());
+         err("Unable to open file %s for reading, OS Error #: %d  \n", csPrintable(input_FName), f.error());
       }
 
       return false;
@@ -2234,7 +2234,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
       lineBuf = f.readLine();
 
       if (f.error() != QFile::NoError) {
-         err("Unable to open file for reading %s, error: %d\n", csPrintable(input_FName), f.error());
+         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(input_FName), f.error());
          return false;
       }
 
@@ -2251,7 +2251,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
       lineBuf = f.readLine();
 
       if (f.error() != QFile::NoError) {
-         err("Unable to open file for reading %s, error: %d\n", csPrintable(input_FName), f.error());
+         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(input_FName), f.error());
          return false;
       }
 
@@ -2495,7 +2495,7 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    QFile outf(combinedName);
 
    if (! outf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s (rtf preProcessB), error: %d\n", csPrintable(combinedName), outf.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(combinedName), outf.error());
 
       // reset the directory to the original location
       QDir::setCurrent(oldDir);

@@ -262,7 +262,7 @@ static void writeLatexMakefile()
    QFile file(fileName);
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", csPrintable(fileName));
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), file.error());
       Doxy_Work::stopDoxyPress();
    }
 
@@ -367,7 +367,7 @@ static void writeMakeBat()
    bool generateBib = ! Doxy_Globals::citeDict.isEmpty();
 
    if (! file.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", csPrintable(fileName));
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), file.error());
       Doxy_Work::stopDoxyPress();
    }
 

@@ -451,7 +451,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
          QFile file(fileName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), file.error());
+            err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), file.error());
          }
 
          file.write( s->text().toUtf8() );
@@ -474,7 +474,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
 
          QFile file(baseName);
          if (! file.open(QIODevice::WriteOnly)) {
-            err("Unable to open file for writing %s, error: %d\n", csPrintable(baseName), file.error());
+            err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(baseName), file.error());
          }
 
          QString text = "msc {";

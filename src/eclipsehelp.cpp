@@ -75,7 +75,7 @@ void EclipseHelp::initialize()
    m_tocfile.setFileName(name);
 
    if (! m_tocfile.open(QIODevice::WriteOnly)) {
-      err("Unable to open file %s for writing\n", csPrintable(name));
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(name), m_tocfile.error());
       Doxy_Work::stopDoxyPress();
    }
 

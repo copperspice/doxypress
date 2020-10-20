@@ -284,7 +284,7 @@ void HtmlHelp::initialize()
    cf.setFileName(fName1);
 
    if (! cf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fName1), cf.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fName1), cf.error());
       Doxy_Work::stopDoxyPress();
    }
 
@@ -303,7 +303,7 @@ void HtmlHelp::initialize()
    kf.setFileName(fName2);
 
    if (! kf.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fName2), kf.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fName2), kf.error());
       Doxy_Work::stopDoxyPress();
    }
 
@@ -457,7 +457,7 @@ void HtmlHelp::createProjectFile()
       f.close();
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fName), f.error());
    }
 }
 

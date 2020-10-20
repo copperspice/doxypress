@@ -2481,7 +2481,7 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
    }
 
    if (! isFileOpened) {
-      err("Unable to open file `%s' for reading\n", csPrintable(name));
+      err("Unable to open file %s for reading\n", csPrintable(name));
    }
 
    return QString("");
@@ -7418,7 +7418,7 @@ bool readInputFile(const QString &fileName, QString &fileContents, bool filter, 
       QFile f(fileName);
 
       if (! f.open(QIODevice::ReadOnly)) {
-         err("Unable to open file %s, error: %d\n", csPrintable(fileName), f.error());
+         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(fileName), f.error());
          return false;
       }
 
@@ -7713,12 +7713,12 @@ bool copyFile(const QString &src, const QString &dest)
          delete[] buffer;
 
       } else {
-         err("Unable to open file for writing %s, error: %d\n", csPrintable(dest), df.error());
+         err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(dest), df.error());
          return false;
       }
 
    } else {
-      err("Unable to open file for reading %s, error: %d\n", csPrintable(src), sf.error());
+      err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(src), sf.error());
       return false;
    }
 

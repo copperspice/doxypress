@@ -1251,7 +1251,7 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
    f1.setFileName(epsName);
 
    if (! f1.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(epsName), f1.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(epsName), f1.error());
       Doxy_Work::stopDoxyPress();
    }
 
@@ -1533,7 +1533,7 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
       f.close();
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
 
    }
 

@@ -2545,7 +2545,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << ");\n\n";
       t_stream << "?>\n";
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(configFileName), cf.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(configFileName), cf.error());
    }
 
    ResourceMgr::instance().copyResourceAs("html/search_functions.php",  htmlOutput, "search_functions.php");
@@ -2594,7 +2594,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << ResourceMgr::instance().getAsString("html/extsearch.js");
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(scriptName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(scriptName), f.error());
    }
 }
 
@@ -2653,7 +2653,7 @@ void HtmlGenerator::writeExternalSearchPage()
       writePageFooter(t_stream, "Search", QString(), QString());
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
 
    }
 
@@ -2716,7 +2716,7 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << "});" << endl;
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(scriptName), sf.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(scriptName), sf.error());
    }
 }
 

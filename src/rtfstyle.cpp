@@ -520,9 +520,10 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Unable to open RTF style sheet file %s, using default file\n", csPrintable(name));
+      err("Unable to open RTF style sheet %s, OS Error #: %d. Using default style sheet.\n", csPrintable(name), file.error());
       return;
    }
+
    msg("Loading RTF style sheet %s\n", csPrintable(name));
 
    static const QRegularExpression regExp_seperator("[ \t]*=[ \t]*");
@@ -571,9 +572,10 @@ void loadExtensions(const QString &name)
    QFile file(name);
 
    if (! file.open(QIODevice::ReadOnly)) {
-      err("Unable to open RTF extensions file %s, error: %d, Using defaut values\n", csPrintable(name), file.error());
+      err("Unable to open RTF extensions %s, OS Error #: %d. Using default extension file.\n", csPrintable(name), file.error());
       return;
    }
+
    msg("Loading RTF extensions %s\n", csPrintable(name));
 
    static const QRegularExpression regExp_seperator("[ \t]*=[ \t]*");

@@ -334,7 +334,7 @@ void FormulaList::generateBitmaps(const QString &path)
                   f.close();
 
                } else {
-                  err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+                  err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
 
                }
             }

@@ -1948,8 +1948,8 @@ void writeDoxFont(const QString &dir)
    if (f.open(QIODevice::WriteOnly)) {
       f.write((char *)FreeSans_ttf, FreeSans_ttf_len);
 
-   } else {   
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+   } else {
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
 
    }
 

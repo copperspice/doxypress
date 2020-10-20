@@ -343,7 +343,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
                }
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file for writing %s, error: %d\n",
+               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file %s for writing, OS Error #: %d\n",
                         csPrintable(outputFile), inImage.error());
             }
 
@@ -353,7 +353,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file for reading %s, error: %d",
+         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file %s for reading, OS Error #: %d",
                         csPrintable(fileName), inImage.error() );
       }
 

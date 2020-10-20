@@ -614,7 +614,7 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
       QFile f(fileName);
 
       if (! f.open(QIODevice::ReadOnly)) {
-         err("Unable to open file for reading %s, error: %d\n", csPrintable(fileName), f.error());
+         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(fileName), f.error());
          return false;
       }
 

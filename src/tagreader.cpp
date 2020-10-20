@@ -1606,7 +1606,7 @@ void parseTagFile(QSharedPointer<Entry> root, const QString &fullName)
    QFile xmlFile(fullName);
 
    if (! xmlFile.open(QIODevice::ReadOnly)) {
-      err("Unable to open tag file for reading %s, error: %d\n", csPrintable(fullName), xmlFile.error());
+      err("Unable to open tag file %s for reading, OS Error #: %d\n", csPrintable(fullName), xmlFile.error());
       return;
    }
 

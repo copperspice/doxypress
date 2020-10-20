@@ -154,7 +154,7 @@ void CiteDict::generatePage() const
    f.setFileName(citeListFile);
 
    if ( ! f.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(citeListFile), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(citeListFile), f.error());
    }
 
    QTextStream t(&f);
@@ -235,7 +235,7 @@ void CiteDict::generatePage() const
    f.setFileName(citeListFile);
 
    if (! f.open(QIODevice::ReadOnly)) {
-     err("Unable to open file for reading %s, error: %d\n", csPrintable(citeListFile), f.error());
+     err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(citeListFile), f.error());
    }
 
    QByteArray data = f.readAll();

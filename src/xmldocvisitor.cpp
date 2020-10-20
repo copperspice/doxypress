@@ -1043,11 +1043,11 @@ void XmlDocVisitor::visitPre(DocImage *img)
          bool copyOk = inImage.copy(outputFile);
 
          if (! copyOk) {
-            err("Unable to open image file for writing %s, error: %d\n", csPrintable(outputFile), inImage.error());
+            err("Unable to open image file %s for writing, OS Error #: %d\n", csPrintable(outputFile), inImage.error());
          }
 
       } else {
-         err("Unable to open image file for reading %s, error: %d\n", csPrintable( img->name() ), inImage.error());
+         err("Unable to open image file %s for reading, OS Error #: %d\n", csPrintable( img->name() ), inImage.error());
       }
    }
 }
