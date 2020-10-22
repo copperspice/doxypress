@@ -956,10 +956,10 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
    ol.popGeneratorState();
 }
 
-void Definition::setBodySegment(int bls, int ble)
+void Definition::setBodySegment(int blineStart, int blineEnd)
 {
-   m_private->m_body_startLine = bls;
-   m_private->m_body_endLine   = ble;
+   m_private->m_body_startLine = blineStart;
+   m_private->m_body_endLine   = blineEnd;
 }
 
 void Definition::setBodyDef(QSharedPointer<FileDef> fd)

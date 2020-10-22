@@ -324,7 +324,7 @@ class Definition : public DefinitionIntf
    QVector<ListItemInfo> &getRefItems();
 
    // source references
-   void setBodySegment(int bls, int ble);
+   void setBodySegment(int blineStart, int blineEnd);
    void setBodyDef(QSharedPointer<FileDef> fd);
    void setRefItems(const QVector<ListItemInfo> &list);
 
