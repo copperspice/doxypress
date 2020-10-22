@@ -199,7 +199,9 @@ static void writeXMLHeader(QTextStream &t)
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;
    t << "<doxypress xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
    t << "xsi:noNamespaceSchemaLocation=\"compound.xsd\" ";
-   t << "version=\"" << versionString << "\">" << endl;
+   t << "version=\""  << versionString << "\" ";
+   t << "xml:lang=\"" << theTranslator->trLanguageId() << "\"";
+   t << ">" << endl;
 }
 
 static void writeCombineScript()
@@ -2252,7 +2254,9 @@ void generateXML_output()
    t << "<?xml version='1.0' encoding='UTF-8' standalone='no'?>" << endl;;
    t << "<doxypressindex xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" ";
    t << "xsi:noNamespaceSchemaLocation=\"index.xsd\" ";
-   t << "version=\"" << versionString << "\">" << endl;
+   t << "version=\""  << versionString << "\" ";
+   t << "xml:lang=\"" << theTranslator->trLanguageId() << "\"";
+   t << ">" << endl;
 
    for (auto cd : Doxy_Globals::classSDict) {
        generateXMLForClass(cd, t);
