@@ -716,11 +716,11 @@ QString Definition::getSourceFileBase() const
 {
    assert(definitionType() != Definition::TypeFile); // file overloads this method
 
-   static const bool sourceBrowser = Config::getBool("source-code");
+   static const bool sourceCode = Config::getBool("source-code");
 
    QString fn;
 
-   if (sourceBrowser && m_private->m_body_startLine != -1 && m_private->m_body_fileDef) {
+   if (sourceCode && m_private->m_body_startLine != -1 && m_private->m_body_fileDef) {
       fn = m_private->m_body_fileDef->getSourceFileBase();
    }
 
