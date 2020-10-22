@@ -655,6 +655,22 @@ SrcLangExt getLanguageFromFileName(const QString &fileName)
    return SrcLangExt_Cpp;    // not listed, assume C language
 }
 
+QString getFileNameExtension(const QString &fileName)
+{
+   QString retval;
+
+   if (fileName.isEmpty())  {
+      return retval;
+   }
+   QFileInfo fi(fileName);
+
+   // get the filename extension, everything after the last dot
+   retval = fi.suffix();
+
+
+   return retval;
+}
+
 void Doxy_Setup::usage()
 {
    printf("\n");

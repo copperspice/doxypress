@@ -321,6 +321,7 @@ Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPoi
 
 // method located in doxy_setup.cpp
 SrcLangExt getLanguageFromFileName(const QString &fileName);
+QString getFileNameExtension(const QString &fileName);
 
 // latex support
 int  usedTableLevels();
