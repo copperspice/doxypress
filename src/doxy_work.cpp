@@ -48,7 +48,6 @@
 #include <logos.h>
 #include <mangen.h>
 #include <msc.h>
-#include <objcache.h>
 #include <outputlist.h>
 #include <parse_clang.h>
 #include <parse_cstyle.h>

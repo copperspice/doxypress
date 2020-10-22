@@ -82,7 +82,6 @@ list(APPEND DOXYPRESS_INCLUDES
    ${CMAKE_CURRENT_SOURCE_DIR}/message.h
    ${CMAKE_CURRENT_SOURCE_DIR}/msc.h
    ${CMAKE_CURRENT_SOURCE_DIR}/namespacedef.h
-   ${CMAKE_CURRENT_SOURCE_DIR}/objcache.h
    ${CMAKE_CURRENT_SOURCE_DIR}/outputgen.h
    ${CMAKE_CURRENT_SOURCE_DIR}/outputlist.h
    ${CMAKE_CURRENT_SOURCE_DIR}/pagedef.h
@@ -179,7 +178,6 @@ list(APPEND DOXYPRESS_SOURCES
     ${CMAKE_CURRENT_SOURCE_DIR}/message.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/msc.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/namespacedef.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/objcache.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/outputgen.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/outputlist.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/parse_clang.cpp

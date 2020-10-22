@@ -36,7 +36,6 @@
 #include <message.h>
 #include <outputlist.h>
 #include <parse_base.h>
-#include <objcache.h>
 #include <util.h>
 
 int MemberDef::s_indentLevel = 0;
