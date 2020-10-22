@@ -110,7 +110,7 @@
     </message>
     <message>
         <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
-        <translation>Cette liste d'héritage est triée en gros, mais pas complètement, par ordre alphabétique:</translation>
+        <translation>Cette liste d&apos;héritage est triée en gros, mais pas complètement, par ordre alphabétique:</translation>
     </message>
     <message>
         <source>Here is a list of all files with brief descriptions:</source>
@@ -266,7 +266,7 @@
     </message>
     <message>
         <source>Enumeration Type Documentation</source>
-        <translation>Documentation du type de l'énumération</translation>
+        <translation>Documentation du type de l&apos;énumération</translation>
     </message>
     <message>
         <source>Function Documentation</source>
@@ -286,7 +286,7 @@
     </message>
     <message>
         <source>Inheritance diagram for %1:</source>
-        <translation>Graphe d'héritage de %1:</translation>
+        <translation>Graphe d&apos;héritage de %1:</translation>
     </message>
     <message>
         <source>For internal use only.</source>
@@ -366,7 +366,7 @@
     </message>
     <message>
         <source>%1 Union Reference</source>
-        <translation>%1 référence de l'Union</translation>
+        <translation>%1 référence de l&apos;Union</translation>
     </message>
     <message>
         <source>%1 Interface Template Reference</source>
@@ -374,7 +374,7 @@
     </message>
     <message>
         <source>%1 Interface Reference</source>
-        <translation>%1 Référence de l'interface</translation>
+        <translation>%1 Référence de l&apos;interface</translation>
     </message>
     <message>
         <source>%1 Protocol Template Reference</source>
@@ -398,7 +398,7 @@
     </message>
     <message>
         <source>%1 Exception Reference</source>
-        <translation>Référence %1 d'exception</translation>
+        <translation>Référence %1 d&apos;exception</translation>
     </message>
     <message>
         <source>%1 Template Reference</source>
@@ -414,7 +414,7 @@
     </message>
     <message>
         <source>%1 Namespace Reference</source>
-        <translation>Référence de l'espace de nommage %1</translation>
+        <translation>Référence de l&apos;espace de nommage %1</translation>
     </message>
     <message>
         <source>Public Member Functions</source>
@@ -490,11 +490,11 @@
     </message>
     <message>
         <source>Here is a list of all namespace members with links to the namespace documentation for each member:</source>
-        <translation>Voici une liste de tous les membres d'espace de noms avec des liens vers la documentation d'espace de noms pour chaque membre:</translation>
+        <translation>Voici une liste de tous les membres d&apos;espace de noms avec des liens vers la documentation d&apos;espace de noms pour chaque membre:</translation>
     </message>
     <message>
         <source>Here is a list of all documented namespace members with links to the namespaces they belong to:</source>
-        <translation>Voici une liste de tous les membres d'espace de noms documentées avec des liens vers les espaces de noms auxquels ils appartiennent:</translation>
+        <translation>Voici une liste de tous les membres d&apos;espace de noms documentées avec des liens vers les espaces de noms auxquels ils appartiennent:</translation>
     </message>
     <message>
         <source>Namespace Index</source>
@@ -871,7 +871,7 @@
     </message>
     <message>
         <source>Here is the call graph for this function:</source>
-        <translation>Voici le graphe d'appel pour cette fonction:</translation>
+        <translation>Voici le graphe d&apos;appel pour cette fonction:</translation>
     </message>
     <message>
         <source>Search Results</source>
@@ -935,7 +935,7 @@
     </message>
     <message>
         <source>Here is the caller graph for this function:</source>
-        <translation>Voici le graphe d'appel pour cette fonction:</translation>
+        <translation>Voici le graphe d&apos;appel pour cette fonction:</translation>
     </message>
     <message>
         <source>Enumerator Documentation</source>
@@ -1187,11 +1187,11 @@
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation>Fourni par catégorie @1.</translation>
+        <translation type="obsolete">Fourni par catégorie @1.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation>Étend la classe @1</translation>
+        <translation type="obsolete">Étend la classe @1</translation>
     </message>
     <message>
         <source>%1 Constant Group Reference</source>
@@ -1239,7 +1239,7 @@
     </message>
     <message>
         <source>Instance Methods</source>
-        <translation>Méthodes d'instance</translation>
+        <translation>Méthodes d&apos;instance</translation>
     </message>
     <message>
         <source>Method Documentation</source>
@@ -1323,13 +1323,13 @@
         <source>Dot Graph legend source code</source>
         <translation>Cette page explique comment interpréter les graphes générés par DoxyPress.
 
-Considérez l'exemple suivant:
+Considérez l&apos;exemple suivant:
 
 \code
-/*! Classe invisible à cause d'une troncature */
+/*! Classe invisible à cause d&apos;une troncature */
 class Invisible { };
 
-/*! Classe tronquée, la relation d'héritage est masquée */
+/*! Classe tronquée, la relation d&apos;héritage est masquée */
 class Truncated : public Invisible { };
 
 /*! Classe non documentée avec des commentaires Doxygen */
@@ -1368,15 +1368,15 @@ Les rectangles du graphe ci-dessus ont la signification suivante:
 \li Un rectangle plein noir représente la structure ou la classe pour laquelle le graphe est généré.
 \li Un rectangle avec un bord noir indique une classe ou une structure documentée.
 \li Un rectangle avec un bord gris indique une classe ou une structure non documentée.
-\li Un rectangle avec un bord rouge indique une structure ou une classe documentée pour laquelle des relations d'héritage ou de collaboration manquent. Un graphe est tronqué s'il n'entre pas dans les limites spécifiées.
+\li Un rectangle avec un bord rouge indique une structure ou une classe documentée pour laquelle des relations d&apos;héritage ou de collaboration manquent. Un graphe est tronqué s&apos;il n&apos;entre pas dans les limites spécifiées.
 
 Les flèches ont la signification suivante :
 
-\li Une flèche bleu foncé est utilisée pour visualiser une relation d'héritage publique entre deux classes.
-\li Une flèche vert foncé est utilisée pour une relation d'héritage protégée.
-\li Une flèche rouge foncé est utilisée pour une relation d'héritage privée.
-\li Une flèche violette en pointillés est utilisée si une classe est contenue ou utilisée par une autre classe. La flèche est étiquetée avec la ou les variable(s) qui permettent d'accéder à la classe ou structure pointée.
-\li Une flèche jaune en pointillés indique une relation entre un modèle d'instance et le modèle de classe duquel il est instancié. La flèche est étiquetée avec les paramètres de modèle de l'instance.
+\li Une flèche bleu foncé est utilisée pour visualiser une relation d&apos;héritage publique entre deux classes.
+\li Une flèche vert foncé est utilisée pour une relation d&apos;héritage protégée.
+\li Une flèche rouge foncé est utilisée pour une relation d&apos;héritage privée.
+\li Une flèche violette en pointillés est utilisée si une classe est contenue ou utilisée par une autre classe. La flèche est étiquetée avec la ou les variable(s) qui permettent d&apos;accéder à la classe ou structure pointée.
+\li Une flèche jaune en pointillés indique une relation entre un modèle d&apos;instance et le modèle de classe duquel il est instancié. La flèche est étiquetée avec les paramètres de modèle de l&apos;instance.
         </translation>
     </message>
     <message>
@@ -1533,6 +1533,30 @@ Les flèches ont la signification suivante :
         <source>authors</source>
         <comment>trAuthor</comment>
         <translation>auteurs</translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>fr</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished">Fourni par catégorie @1. {0.?}</translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
+        <translation type="unfinished">Étend la classe @0</translation>
     </message>
 </context>
 <context>

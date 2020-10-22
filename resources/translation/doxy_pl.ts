@@ -110,8 +110,8 @@
     </message>
     <message>
         <source>This inheritance list is sorted roughly, but not completely, alphabetically:</source>
-        <translation>Ta lista dziedziczenia posortowana jest z grubsza, "
-             "choć nie całkowicie, alfabetycznie:</translation>
+        <translation>Ta lista dziedziczenia posortowana jest z grubsza, &quot;
+             &quot;choć nie całkowicie, alfabetycznie:</translation>
     </message>
     <message>
         <source>Here is a list of all files with brief descriptions:</source>
@@ -1186,14 +1186,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Provided by category @1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Extends class @1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%1 Constant Group Reference</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1329,7 +1321,7 @@ Rozważ następujący przykład:
 /*! Klasa Niewidzialna z powodu okrojenia */
 class Niewidzialna { };
 
-/*! Klasa Okrojona, relacja dziedziczenia jest ukryta */"
+/*! Klasa Okrojona, relacja dziedziczenia jest ukryta */&quot;
 class Okrojona : public Niewidzialna { };
 
 /* Klasa nie udokumentowana komentarzami DoxyPress */
@@ -1350,7 +1342,7 @@ class PrywatnaBaza { };
 /*! Klasa, która jest użyta przez klasę Dziedziczona *
 class Uzyta { };
 
-/*! Superklasa, która dziedziczy kilka innych klas */\n"
+/*! Superklasa, która dziedziczy kilka innych klas */\n&quot;
 class Dziedziczona : public PublicznaBaza, protected ChronionaBaza, private PrywatnaBaza,
                      public Nieudokumentowana, public Templ&lt;int&gt;
 {
@@ -1531,6 +1523,30 @@ Strzałki mają następujące znaczenie:
     <message>
         <source>authors</source>
         <comment>trAuthor</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>pl</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

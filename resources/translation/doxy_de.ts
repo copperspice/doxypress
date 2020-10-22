@@ -1163,11 +1163,11 @@
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation>Nach Kategorie @1 zur Verfügung gestellt.</translation>
+        <translation type="obsolete">Nach Kategorie @1 zur Verfügung gestellt.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation>Erstreckt Klasse @1</translation>
+        <translation type="obsolete">Erstreckt Klasse @1</translation>
     </message>
     <message>
         <source>%1 Module Template Reference</source>
@@ -1533,6 +1533,30 @@ Die Pfeile bedeuten:
         <source>authors</source>
         <comment>trAuthor</comment>
         <translation>autoren</translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>de</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished">Nach Kategorie @1 zur Verfügung gestellt. {0.?}</translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
+        <translation type="unfinished">Erstreckt Klasse @0</translation>
     </message>
 </context>
 <context>

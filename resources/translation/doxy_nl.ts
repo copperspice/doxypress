@@ -98,7 +98,7 @@
     </message>
     <message>
         <source>Related Pages</source>
-        <translation>Gerelateerde pagina's</translation>
+        <translation>Gerelateerde pagina&apos;s</translation>
     </message>
     <message>
         <source>Examples</source>
@@ -166,7 +166,7 @@
     </message>
     <message>
         <source>Here is a list of all related documentation pages:</source>
-        <translation>Hieronder volgt de lijst met alle pagina's die gerelateerde documentatie bevatten:</translation>
+        <translation>Hieronder volgt de lijst met alle pagina&apos;s die gerelateerde documentatie bevatten:</translation>
     </message>
     <message>
         <source>Here is a list of all modules:</source>
@@ -1173,10 +1173,6 @@
         <translation></translation>
     </message>
     <message>
-        <source>The documentation for this enum was generated from the following files:</source>
-        <translation></translation>
-    </message>
-    <message>
         <source>%1 Enum Reference</source>
         <translation>%1 Enum Referentie</translation>
     </message>
@@ -1186,11 +1182,11 @@
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation>Wordt aangeboden door category @0.</translation>
+        <translation type="obsolete">Wordt aangeboden door category @0.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation>Uitbereiding van klasse @0.</translation>
+        <translation type="obsolete">Uitbereiding van klasse @0.</translation>
     </message>
     <message>
         <source>%1 Constant Group Reference</source>
@@ -1531,6 +1527,34 @@ De pijlen hebben de volgende betekenis:
         <source>authors</source>
         <comment>trAuthor</comment>
         <translation>auteurs</translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>nl</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>The documentation for this enum was generated  from the following files:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished">Wordt aangeboden door category @0. {0.?}</translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
+        <translation type="unfinished">Uitbereiding van klasse @0. {0?}</translation>
     </message>
 </context>
 <context>

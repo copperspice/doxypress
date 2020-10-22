@@ -30,7 +30,7 @@
     </message>
     <message>
         <source>Member Typedef Documentation</source>
-        <translation>Documentación de los 'Typedef' miembros de la clase</translation>
+        <translation>Documentación de los &apos;Typedef&apos; miembros de la clase</translation>
     </message>
     <message>
         <source>Member Enumeration Documentation</source>
@@ -1186,11 +1186,11 @@
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation>Ofrecido por categoría @1.</translation>
+        <translation type="obsolete">Ofrecido por categoría @1.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation>Extiende la clase @1</translation>
+        <translation type="obsolete">Extiende la clase @1</translation>
     </message>
     <message>
         <source>%1 Constant Group Reference</source>
@@ -1532,6 +1532,30 @@ Las flechas tienen el siguiente significado:
         <source>authors</source>
         <comment>trAuthor</comment>
         <translation>autores</translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>es</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished">Ofrecido por categoría @1. {0.?}</translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
+        <translation type="unfinished">Extiende la clase @0</translation>
     </message>
 </context>
 <context>

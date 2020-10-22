@@ -1181,14 +1181,6 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Provided by category @1.</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <source>Extends class @1</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <source>%1 Constant Group Reference</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1475,6 +1467,30 @@
     <message>
         <source>authors</source>
         <comment>trAuthor</comment>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>fa</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

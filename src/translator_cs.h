@@ -51,6 +51,10 @@ class Translator_Cs : public Translator
       return retval;
    }
 
+   QString trLanguageId() override {
+      return QCoreApplication::translate("doxy-text", "ISO639 language code");
+   }
+
    /*! used in the compound documentation before a list of related functions. */
    QString trRelatedFunctions() override {
       return QCoreApplication::translate("doxy-text", "Related Functions");
@@ -2018,14 +2022,14 @@ class Translator_Cs : public Translator
     *  by a link.
     */
    QString trProvidedByCategory() override  {
-      return QCoreApplication::translate("doxy-text", "Provided by category @1.");
+      return QCoreApplication::translate("doxy-text", "Provided by category @0.");
    }
 
    /*! Used in a method of an Objective-C category that extends a class.
     *  Note that the @1 marker is required and is replaced by a link to
     *  the class method. */
    QString trExtendsClass() override  {
-      return QCoreApplication::translate("doxy-text", "Extends class @1");
+      return QCoreApplication::translate("doxy-text", "Extends class @0");
    }
 
    /*! header of a list of class methods in Objective-C.

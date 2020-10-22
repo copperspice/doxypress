@@ -62,7 +62,7 @@
     </message>
     <message>
         <source>This is the complete list of members for </source>
-        <translation>Questo è l'elenco completo di tutti i membri di </translation>
+        <translation>Questo è l&apos;elenco completo di tutti i membri di </translation>
     </message>
     <message>
         <source>, including all inherited members.</source>
@@ -906,7 +906,7 @@
     </message>
     <message>
         <source>Directories</source>
-        <translation>Directory"</translation>
+        <translation>Directory&quot;</translation>
     </message>
     <message>
         <source>This directory hierarchy is sorted roughly, but not completely, alphabetically:</source>
@@ -1150,7 +1150,7 @@
     </message>
     <message>
         <source>Copyright</source>
-        <translation>Diritto D'autore</translation>
+        <translation>Diritto D&apos;autore</translation>
     </message>
     <message>
         <source>Directory dependency graph for %1:</source>
@@ -1186,11 +1186,11 @@
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation>Fornito da categoria @1.</translation>
+        <translation type="obsolete">Fornito da categoria @1.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation>Estende classe @1</translation>
+        <translation type="obsolete">Estende classe @1</translation>
     </message>
     <message>
         <source>%1 Constant Group Reference</source>
@@ -1322,7 +1322,7 @@
         <source>Dot Graph legend source code</source>
         <translation>Questa pagina spiega come interpretare i grafi generati da DoxyPress.
 
-Si consideri l'esempio seguente:
+Si consideri l&apos;esempio seguente:
 
 \code
 /*! Classe invisibile per troncamento */
@@ -1347,7 +1347,7 @@ class ProtectedBase { };
 class PrivateBase { };
 
 /*! Classe utilizzata dalla classe Inherited *
-class Used { };\n\n"
+class Used { };\n\n&quot;
 
 /*! Classe che eredita da varie classi*/
 class Inherited : public PublicBase, protected ProtectedBase, private PrivateBase,
@@ -1372,10 +1372,10 @@ I riquadri nel grafo qui sopra hanno il seguente significato:
 Le frecce hanno il seguente significato:
 
 \li Una freccia blu scuro indica una relazione di ereditarietà pubblica tra due classi.
-\li Una freccia verde indica un'ereditarietà protetta.
-\li Una freccia rossa indica un'ereditarietà privata.
-\li Una freccia viola tratteggiata indica che una classe è contenuta o usata da un'altra classe. La freccia viene etichettata con la o le variabili attraverso cui la struct o la classe puntata dalla freccia è accessibile.
-\li Una freccia gialla tratteggiata indica la relazione tra una istanza di un template e la classe templatizzata da cui è stata istanziata. La freccia viene etichettata con i parametri di template dell'istanza.
+\li Una freccia verde indica un&apos;ereditarietà protetta.
+\li Una freccia rossa indica un&apos;ereditarietà privata.
+\li Una freccia viola tratteggiata indica che una classe è contenuta o usata da un&apos;altra classe. La freccia viene etichettata con la o le variabili attraverso cui la struct o la classe puntata dalla freccia è accessibile.
+\li Una freccia gialla tratteggiata indica la relazione tra una istanza di un template e la classe templatizzata da cui è stata istanziata. La freccia viene etichettata con i parametri di template dell&apos;istanza.
         </translation>
     </message>
     <message>
@@ -1532,6 +1532,30 @@ Le frecce hanno il seguente significato:
         <source>authors</source>
         <comment>trAuthor</comment>
         <translation>autori</translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>it</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished">Fornito da categoria @1. {0.?}</translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
+        <translation type="unfinished">Estende classe @0</translation>
     </message>
 </context>
 <context>

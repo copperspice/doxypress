@@ -29,6 +29,7 @@ class Translator
    virtual ~Translator() {}
 
    virtual QString latexLanguageSupportCommand() = 0;
+   virtual QString trLanguageId() = 0;
 
    virtual QString trRelatedFunctions() = 0;
    virtual QString trRelatedSubscript() = 0;
@@ -381,6 +382,7 @@ class Translator
    virtual QString trSingletonReference(const QString &sName) = 0;
    virtual QString trServiceGeneratedFromFiles(bool single) = 0;
    virtual QString trSingletonGeneratedFromFiles(bool single) = 0;
+
 };
 
 #endif

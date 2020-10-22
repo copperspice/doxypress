@@ -1182,11 +1182,11 @@
     </message>
     <message>
         <source>Provided by category @1.</source>
-        <translation>По группам @0.</translation>
+        <translation type="obsolete">По группам @0.</translation>
     </message>
     <message>
         <source>Extends class @1</source>
-        <translation>Расширяет класс @0.</translation>
+        <translation type="obsolete">Расширяет класс @0.</translation>
     </message>
     <message>
         <source>%1 Constant Group Reference</source>
@@ -1480,6 +1480,30 @@
         <source>authors</source>
         <comment>trAuthor</comment>
         <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>ISO639 language code</source>
+        <translation>ru</translation>
+    </message>
+    <message>
+        <source>Concepts</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Concept List</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Here is a list of all concepts with brief descriptions:</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Provided by category @0.</source>
+        <translation type="unfinished">По группам @0. {0.?}</translation>
+    </message>
+    <message>
+        <source>Extends class @0</source>
+        <translation type="unfinished">Расширяет класс @0. {0?}</translation>
     </message>
 </context>
 <context>
