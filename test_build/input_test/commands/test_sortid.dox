@@ -1,0 +1,45 @@
+/*************************************************************************
+*
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
+*
+* GNU Free Documentation License
+*
+*************************************************************************/
+
+/*!
+\page test-sort Sort Id 100
+\sortid 100
+
+This page demonstrates the \c \\sortid command which was added in DoxyPress. The sortid allows you to
+override the default order of pages in the navigation tree view.
+
+This page has a sortid of 100
+
+*/
+
+
+/*!
+\page test-two Sort Id 200
+\sortid 200
+
+This page has a sortid of 200.
+
+*/
+
+
+/*!
+\page test-four Sort Id 400
+\sortid 400
+
+This page has a sortid of 400. Appears in the file before the page with a sortid of 300.
+
+*/
+
+
+/*!
+\page test-three Sort Id 300
+\sortid 300
+
+This page has a sortid of 300. Appears in the file after the page with a sortid of 400.
+
+*/

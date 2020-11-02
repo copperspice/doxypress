@@ -6,22 +6,31 @@
 *
 *************************************************************************/
 
-#ifndef QSSL_H
-#define QSSL_H
 
-namespace QSsl {
+/*!
+\defgroup g1 Group one
 
-   enum KeyType {
-      PrivateKey,
-      PublicKey
-   };
+Description for group one.
 
-   enum KeyAlgorithm {
-      Rsa,
-      Dsa
-   };
 
-   void someFunction(QString data);
-};
+*/
 
-#endif
+
+
+/*!
+\defgroup g2 Group two
+\ingroup g1
+
+Description for group two.
+
+*/
+
+
+
+/*!
+\defgroup g3 Group three
+\ingroup g2
+
+Description for group three.
+
+*/

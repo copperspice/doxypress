@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -9,7 +9,7 @@
 /*!
 \page note-test-one  Note - Test One
 
-This information pertains to building Diamond to run on Windows.
+This information pertains to building DoxyPress to run on Windows.
 
 <h3>Test 1</h3>
 
@@ -20,12 +20,8 @@ This information pertains to building Diamond to run on Windows.
 
 Some information goes here.
 
-\note{ All of the Autotool commands are run from a Bash prompt. For information about installing a Bourne
-shell on Windows refer to require-win.}
-
-(1)&nbsp; Run Autoconf from your project directory with the syntax shown below. This step is run once or anytime
-configure.ac is modified. When this command runs successfully, there is no output displayed.
-
+\note A Slot only needs to be registered when it is used from the connect() overload, which
+contains the SLOT() macro. If you are using method pointers the SLOT does not need to be registered.
 
 */
 

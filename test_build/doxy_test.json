@@ -31,7 +31,7 @@
         "extract-static": false,
         "file-version-filter": "",
         "force-local-includes": false,
-        "full-path-names": false,
+        "full-path-names": true,
         "generate-bug-list": true,
         "generate-deprecate-list": true,
         "generate-test-list": true,
@@ -117,7 +117,7 @@
         "dot-transparent": false,
         "generate-legend": true,
         "group-graphs": true,
-        "have-dot": false,
+        "have-dot": true,
         "hide-undoc-relations": true,
         "interactive-svg": false,
         "msc-file-dirs": [
@@ -140,9 +140,8 @@
         "external-groups": true,
         "external-pages": true,
         "generate-tagfile": "",
-        "perl-path": "/usr/bin/perl",
         "tag-files": [
-            "cs_api.tag=http://www.copperspice.com/docs/cs_api/"
+            "cs_api.tag=https://www.copperspice.com/docs/cs_api/"
         ]
     },
     "general": {
@@ -162,7 +161,7 @@
         "aliases": [
             "badref=<span class='badref'>Bad Ref</span>",
             "note{1}=<div class='cs_note1'><span class='cs_note2'>Note:</span>\\1</div>",
-            "cs_docs_url{1}=<a class=\"docs-link\" href=\"http://www.copperspice.com/docs/cs_overview\\1\">"
+            "cs_docs_url{1}=<a class=\"docs-link\" href=\"https://www.copperspice.com/docs/cs_overview\\1\">"
         ],
         "lookup-cache-size": 0,
         "optimize-c": false,
@@ -176,7 +175,7 @@
             ""
         ],
         "strip-from-path": [
-            ""
+            "z:/doxypress/test_build/input_test"
         ],
         "tab-size": 8
     },
@@ -300,7 +299,7 @@
             ""
         ],
         "mathjax-format": "HTML-CSS",
-        "mathjax-relpath": "https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/",
+        "mathjax-relpath": "https://cdn.jsdelivr.net/npm/mathjax@2",
         "search-data-file": "searchdata.xml",
         "search-external": false,
         "search-external-id": "",
@@ -335,7 +334,7 @@
         "latex-paper-type": "a4",
         "latex-pdf": true,
         "latex-ps": true,
-        "latex-source-code": false,
+        "latex-source-code": true,
         "latex-stylesheets": [
             ""
         ],
@@ -422,15 +421,19 @@
         "source-tooltips": true,
         "strip-code-comments": true,
         "suffix-exclude-navtree": [
-            ""
+            "doc",
+            "dox",
+            "md",
+            "markdown",
+            "txt"
         ],
         "suffix-header-navtree": [
-            ""
+            "h"
         ],
         "suffix-source-navtree": [
-            ""
+            "cpp"
         ],
         "use-htags": false,
-        "verbatim-headers": false
+        "verbatim-headers": true
     }
 }

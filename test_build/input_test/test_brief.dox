@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -9,10 +9,11 @@
 /*!
 \page brief-1-test Brief Description - Test 1
 
-There is no defined brief description on this page. The tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO-BRIEF" is <b>on</b>. The text for this "\\page" will be split and the first sentence will appear as the brief description. The
-remaining text will be considered as the body. The opening marker for this \\page" is \c /&zwnj;*!
+There is no defined brief description on this page. The tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO-BRIEF" is <b>on</b>.
+The text for this \c \\page will be split and the first sentence will appear as the brief description. The
+remaining text will be considered as the body. The opening marker for this \c \\page is \c /&zwnj;*!
 
-This same behavior will happen for a documented entity such as "\\class" or "\\file".
+This same behavior will happen for a documented entity such as \c \\class or \c \\file.
 
 */
 
@@ -21,9 +22,10 @@ This same behavior will happen for a documented entity such as "\\class" or "\\f
 /**
 \page brief-2-test Brief Description - Test 2
 
-There is no brief description on this page. The tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO-BRIEF" is <b>on</b>. This entire text will appear in the body of the page since the opening marker for this \\page" is \c /&zwnj;**
+There is no brief description on this page. The tag for "JAVADOC-AUTO-BRIEF" is <b>off</b> and "QT-AUTO-BRIEF" is <b>on</b>.
+This entire text will appear in the body of the page since the opening marker for this \c \\page is \c /&zwnj;**
 
-This same behavior will happen for a documented entity such as "\\class" or "\\file".
+This same behavior will happen for a documented entity such as \c \\class or \c \\file.
 
 */
 
@@ -31,9 +33,12 @@ This same behavior will happen for a documented entity such as "\\class" or "\\f
 /*!
 \class test_Brief
 
-There is a test class to show how what happens with the brief description and the detailed section text. For this example the tag for "QT-AUTO-BRIEF" is <b>on</b>.
+There is a test class to show how what happens with the brief description and the detailed section text. For this
+example the tag for "QT-AUTO-BRIEF" is <b>on</b>.
 
-For myMethod1() there is only one line of text and it will be treated as the brief description. There is no detailed text. With the tag, "Always show detailed section" set <b>on</b>, the brief will be displayed. If this tag is set <b>off</b>, the method will be omitted from the documentation.
+For myMethod1() there is only one line of text and it will be treated as the brief description. There is no detailed
+text. With the tag, "Always show detailed section" set <b>on</b>, the brief will be displayed. If this tag is set
+<b>off</b>, the method will be omitted from the documentation.
 
 */
 

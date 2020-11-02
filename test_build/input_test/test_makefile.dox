@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -9,8 +9,9 @@
 /**
 \page makefile-test Makefile Test
 
-The following test shows a new option in DoxPress for displaying a Makefile in a code block. The \\code command is followed by a new parameter to
-indicate the source is a Makefile. There is currently no syntax highlighting since Makefiles seldom require this.
+The following test shows a new option in DoxPress for displaying a Makefile in a code block. The \c \\code command is
+followed by a new parameter to indicate the source is a Makefile. There is currently no syntax highlighting since
+Makefiles seldom require this.
 
 The source code is placed inside a block structured like the following:
 
@@ -22,50 +23,40 @@ The source code is placed inside a block structured like the following:
    \\endcode
 </pre>
 
-
 <br>
 
 \code {.mk}
-AUTOMAKE_OPTIONS=subdir-objects
+cmake_minimum_required(VERSION 3.8.0 FATAL_ERROR)
 
-# location where CopperSpice libraries are installed
-CS_HOME:=$(shell cd $(CS_HOME); pwd)
+cmake_policy(VERSION 3.8..3.13)
 
-# location of includes, libs, defines for compiling
-AM_CXXFLAGS=$(AM_CFLAGS) -I$(CS_HOME)/include $(patsubst %,-I$(CS_HOME)/include/Qt%,$(cslibs))
+project(doxypress)
 
-# location of CopperSpice libraries for linking
-AM_LDFLAGS=-L$(CS_HOME)/lib
+set(BUILD_MAJOR "1")
+set(BUILD_MINOR "4")
+set(BUILD_MICRO "0")
 
-# location of CopperSpice programs
-LRELEASE=$(CS_HOME)/bin/lrelease
-RCC=$(CS_HOME)/bin/rcc
-UIC=$(CS_HOME)/bin/uic
+set(BUILD_COMPONENTS "doxypress")
 
-# 'deploy' is the folder for "make deploy"
-deploydir=$(abs_top_builddir)/deploy
+find_package(CopperSpice REQUIRED)
 
-BUILT_SOURCES=$(patsubst forms/%.ui, ui_%.h,$(FORMS))
-EXTRA_DIST=$(FORMS)
+set(PACKAGE           "doxypress")
+set(PACKAGE_NAME      "DoxyPress")
+set(PACKAGE_VERSION   "${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_MICRO}")
+set(PACKAGE_STRING    "doxypress ${BUILD_MAJOR}.${BUILD_MINOR}.${BUILD_MICRO}")
+set(PACKAGE_TARNAME   "doxypress")
+set(PACKAGE_BUGREPORT "info@copperspice.com")
+set(PACKAGE_URL       "https://www.copperspice.com/")
 
-BUILT_SOURCES+=$(patsubst %.qrc,qrc_%.cpp,$(RESOURCES))
-EXTRA_DIST+=$(RESOURCES)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_INCLUDE_DIRECTORIES_BEFORE ON)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 17)
 
-BUILT_SOURCES+=$(patsubst %.ts,%.qm,$(TRANSLATIONS))
-EXTRA_DIST+=$(TRANSLATIONS)
+# location for building binary files
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
-%.qm: %.ts
-	$(LRELEASE) $< $@
-
-qrc_%.cpp: %.qrc
-	$(RCC) $< -o $@ -name $(notdir $(basename $<))
-
-ui_%.h: forms/%.ui
-	$(UIC) $< -o $@
-
-clean-local:
-	-rm qrc_*.cpp
-	-rm ui_*.h
+add_subdirectory(src)
 
 \endcode
 

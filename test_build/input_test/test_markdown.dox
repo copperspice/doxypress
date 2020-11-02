@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -84,9 +84,9 @@ ______
 
 <div class="md">Inline Links</div>
 
-   [Link text A](http://www.copperspice.com/)
+   [Link text A](https://www.copperspice.com/)
 
-   [Link text B](http://www.copperspice.com/ "Hover Link Title B")
+   [Link text B](https://www.copperspice.com/ "Hover Link Title B")
 
    [Link text C](/relative/path/to/index.html "Hover Link Title C")
 
@@ -94,7 +94,7 @@ ______
 
 
 
-   [link name E]: http://www.copperspice.com "Optional Title"
+   [link name E]: https://www.copperspice.com "Optional Title"
 
    [Link text E][link name E]
 

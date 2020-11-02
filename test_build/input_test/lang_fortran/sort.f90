@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -10,7 +10,7 @@
 !! The fortran_sort_routines module provides several routines to sort arrays
 !<
 !
-!> @defgroup Fortran library
+!> @defgroup Fortran Fortran Library
 !! The fortran_sort_routines module provides several routines to sort arrays
 !!
 module fortran_sort_routines

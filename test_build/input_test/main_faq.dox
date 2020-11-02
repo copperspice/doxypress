@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -27,7 +27,7 @@ The following information is a collection of Questions and Answers regarding the
 <b><i>Question</i></b>:  &nbsp;Where do I find additional information about the CopperSpice Gui library used in DoxyPress?
 
 <b><i>Answer</i></b>:  &nbsp;For additional information about our GUI library visit our our web site.
-<a class="www-link" href="http://www.copperspice.com">CopperSpice</a>
+<a class="www-link" href="https://www.copperspice.com">CopperSpice</a>
 
 <br>
 

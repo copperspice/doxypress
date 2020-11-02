@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -8,8 +8,6 @@
 
 #ifndef  QSSL_DUP_ENUM_H
 #define QSSL_DUP_ENUM_H
-
-QT_BEGIN_NAMESPACE
 
 namespace QSsl_DupEnum {
 
@@ -25,7 +23,4 @@ namespace QSsl_DupEnum {
 
 };
 
-QT_END_NAMESPACE
-
 #endif
-

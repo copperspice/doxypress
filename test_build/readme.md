@@ -6,7 +6,7 @@ DoxyPress is a modern C++ application for generating documentation from annotate
 DoxyPress and DoxyPressApp were initially derived from Doxygen and DoxyWizard.
 
 
-###### Major enhancements
+### Major Enhancements
 
 Parsing
 
@@ -44,6 +44,17 @@ library are required. DoxyPress links with CsCore and CsXml which are part of th
 CMake build files are provided with the DoxyPress source distribution.
 
 
+### Dependencies
+
+ * C++17 compiler
+
+ * CopperSpice CsCore and CsXml libraries
+
+ * C++17 standard library when using clang for parsing
+
+ * clang 10 must be compiled with RTTI enabled ( pre-built bianary files are available from our download page )
+
+
 ### Documentation
 
 Full documentation for DoxyPress is available on the website or from our download page.
@@ -60,6 +71,18 @@ www.copperspice.com/docs/doxypress/build-doxypress.html
 
 
 
+### Presentations
+
+The YouTube channel videos are about modern C++, build systems, CopperSpice, DoxyPress, and other topics related to
+our open source work.
+
+https://www.youtube.com/copperspice
+
+Links to technical presentations recorded at CppNow and CppCon:
+
+https://www.copperspice.com/presentations.html
+
+
 ### Authors / Contributors
 
 * **Ansel Sermersheim**
@@ -70,9 +93,3 @@ www.copperspice.com/docs/doxypress/build-doxypress.html
 
 This program is released under the GPL 2 license. For more information refer to the LICENSE file provided with this
 project.
-
-
-### References
-
-* Website: www.copperspice.com
-* Email:   info@copperspice.com

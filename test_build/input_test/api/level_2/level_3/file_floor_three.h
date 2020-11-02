@@ -6,22 +6,13 @@
 *
 *************************************************************************/
 
-#ifndef QSSL_H
-#define QSSL_H
+#ifndef Floor_Three_H
+#define Floor_Three_H
 
-namespace QSsl {
-
-   enum KeyType {
-      PrivateKey,
-      PublicKey
-   };
-
-   enum KeyAlgorithm {
-      Rsa,
-      Dsa
-   };
-
-   void someFunction(QString data);
-};
+class FloorThree
+{
+   public:
+      int dummy;	
+}
 
 #endif

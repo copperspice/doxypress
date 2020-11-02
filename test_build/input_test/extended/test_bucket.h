@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -9,12 +9,12 @@
 #ifndef BUCKET_H
 #define BUCKET_H
 
-#include "QString.h"
+#include <QString>
+
 class QTextCodec;
 
 class test_Bucket
 {
-
  public:
    static QString escape(const QString &plain);
 
@@ -206,13 +206,13 @@ class test_Bucket
    };
 
    enum DayOfWeek {
-      Monday = 1,
-      Tuesday = 2,
+      Monday    = 1,
+      Tuesday   = 2,
       Wednesday = 3,
-      Thursday = 4,
-      Friday = 5,
-      Saturday = 6,
-      Sunday = 7
+      Thursday  = 4,
+      Friday    = 5,
+      Saturday  = 6,
+      Sunday    = 7
    };
 
    enum LayoutDirection {
@@ -221,13 +221,13 @@ class test_Bucket
       LayoutDirectionAuto
    };
 
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_DARWIN)
    typedef void *HANDLE;
 
 #elif defined(Q_OS_WIN)
    typedef void *HANDLE;
 
-#elif defined(Q_WS_X11)
+#elif defined(Q_OS_UNIX)
    typedef unsigned long HANDLE;
 
 #else
@@ -246,6 +246,7 @@ class test_Bucket
    };
 
    enum HitTestAccuracy { ExactHit, FuzzyHit };
+
    enum WhiteSpaceMode {
       WhiteSpaceNormal,
       WhiteSpacePre,
@@ -256,7 +257,6 @@ class test_Bucket
    static bool mightBeRichText(const QString &);
    static QString convertFromPlainText(const QString &plain, WhiteSpaceMode mode = WhiteSpacePre);
    static QTextCodec *codecForHtml(const QByteArray &ba);
-
 };
 
 #endif

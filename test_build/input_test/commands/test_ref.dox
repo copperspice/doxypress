@@ -1,30 +1,30 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
 *************************************************************************/
 
 /*!
-\page ref-test Command Ref Test
+\page ref-test Ref Test
 
-The following is a test of the \\ref command when the physical page name is not the same as the \\page name.
+The following is a test of the \c \\ref command.
 
 
-<h3>Test One</h3>
+<h2>Test One</h2>
 
 <dl class="project">
-
    <dt>\ref cppblock</dt>
-      <dd>This example is a \\ref in a dl.</dd>
-
+      <dd>The link directly above this line is a \c \\ref command located in an HTML 'dt' block.</dd>
 </dl>
 
-<h3>Test Two</h3>
 
-<a class="el" href="topic-source.html#cppblock">Comments in C Source Code</a>
-<br>This example is using the href tag with hard coded HTML.
+
+<h2>Test Two</h2>
+
+<a class="el" href="ref-test.html#cppblock">Comments in C Source Code</a>
+<br>The line directly above is using an \c href attribute in an \c <a> element.
 
 
 
@@ -34,5 +34,6 @@ For each entity (class, method, function, etc) in the code there are two categor
 brief documentation and detailed documentation. If both are supplied the brief will come first.
 You can specify either of these or both as needed.
 
+<br>
 
 */

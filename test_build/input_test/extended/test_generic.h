@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -23,7 +23,6 @@ class test_Slot
       const int &shape();
 };
 
-
 inline void test_Slot::setOffset(qreal dx)
 {
    int foo;
@@ -34,6 +33,5 @@ inline QString color()
 {
    return "blue";
 }
-
 
 #endif

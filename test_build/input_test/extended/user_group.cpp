@@ -1,67 +1,67 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
 *************************************************************************/
 
-/** @defgroup group1 Group A
+/** @defgroup group_a Group A
  *  Entries in group A
  *  @{
  */
 
-/** @brief  Brief description of a function in group 1 */
+/** @brief  Brief description of a function in group A */
 void func_a1() {}
 
-/** Another function in group 1 */
+/** Another function in group A */
 void func_a2() {}
 
-/** @} */ // end of group1
+/** @} */ // end of group A
 
 
 
 /**
- *  @defgroup group2 Group B
+ *  @defgroup group_b Group B
  *  Entries in group B
  */
 
 
 
-/** @defgroup group3 Group C
+/** @defgroup group_c Group C
  *  Entries in group C
  */
 
 
 
-/** @defgroup group4 Group D
- *  @ingroup group3
+/** @defgroup group_d Group D
+ *  @ingroup group_c
  *  Group D is a child of group C
  */
 
 
 
 /**
- *  @ingroup group2
+ *  @ingroup group_b
  *  @brief Function in group B
  */
 void func_b1() {};
 
-/** @ingroup group2
+/** @ingroup group_b
  *  @brief Function in group B
  */
 void func_b2() {};
 
 
 
-/** @ingroup group3
- *  @brief Function in @link group3 Group C@endlink.
+/** @ingroup group_c
+ *  @brief Function in @link group_c Group C@endlink.
  */
 void func_c1() {};
 
 
 
-/** @ingroup group1 group2 group3 group4
+/** @ingroup group_a group_b group_c group_d
  *  Namespace groupNS is in groups A, B, C, D
  *
  */
@@ -74,13 +74,13 @@ namespace groupNS{
 
 
 /** @file
- *  @ingroup group3
+ *  @ingroup group_c
  *  @brief this file in group C
  */
 
 
 
-/** @defgroup group5 Group E
+/** @defgroup group_e Group E
  *  Entries in group E
  *  @{
  */
@@ -94,11 +94,11 @@ namespace groupNS{
  */
 void func_e() {};
 
-/** @} */ // end of group5
+/** @} */ // end of group_e
 
 
 
-/** @addtogroup group1
+/** @addtogroup group_a
  *
  *  More documentation for group A.
  *  @{
@@ -110,5 +110,5 @@ void func_a3() {}
 /** yet another function in group A */
 void func_a4() {}
 
-/** @} */ // end of group1
+/** @} */ // end of group_a
 

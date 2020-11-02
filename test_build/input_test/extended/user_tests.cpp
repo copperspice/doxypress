@@ -1,6 +1,6 @@
 /*************************************************************************
 *
-* Copyright (C) 2012-2019 Barbara Geller & Ansel Sermersheim
+* Copyright (C) 2012-2020 Barbara Geller & Ansel Sermersheim
 *
 * GNU Free Documentation License
 *
@@ -10,7 +10,6 @@ testTypeDef::myTypeDef testTypeDef::someMethod()
 {
    /// empty method is ok, does this cause a return type mismatch?
 }
-
 
 
 /**
@@ -26,7 +25,6 @@ This text will appear in the output since MY_TAG is false.  ( GOOD, this should 
 class TagTest
 {
 };
-
 
 
 /// Test overflow issue for Class_A through Class_E
