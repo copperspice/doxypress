@@ -465,7 +465,8 @@ class MemberDef : public Definition
 
    void _writeCategoryRelation(OutputList &ol);
    void _writeTagData(const DefType);
-   void _addToSearchIndex();
+
+   void addToSearchIndex();
 
    void writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool onlyText = false);

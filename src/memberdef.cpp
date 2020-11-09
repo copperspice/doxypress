@@ -1368,7 +1368,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    //_writeTagData(compoundType);
-   _addToSearchIndex();
+   addToSearchIndex();
 
    QString cname  = d->name();
    QString cdname = d->displayName();
@@ -4138,7 +4138,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
 
       if (isLinkableInProject() || hasDocumentedEnumValues()) {
          //_writeTagData(compoundType);
-         _addToSearchIndex();
+         addToSearchIndex();
          writeLink(typeDecl, cd, nd, fd, gd);
 
       } else {
@@ -4186,7 +4186,8 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
                if (fmd->hasDocumentation()) {
                   // enum value has docs
                   // fmd->_writeTagData(compoundType);
-                  fmd->_addToSearchIndex();
+
+                  fmd->addToSearchIndex();
                   fmd->writeLink(typeDecl, cd, nd, fd, gd);
 
                } else {
@@ -5331,7 +5332,7 @@ QString MemberDef::displayName(bool unused) const
    return Definition::name();
 }
 
-void MemberDef::_addToSearchIndex()
+void MemberDef::addToSearchIndex()
 {
    // write search index info
    QSharedPointer<MemberDef> self = sharedFrom(this);
