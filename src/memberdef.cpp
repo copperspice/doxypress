@@ -2406,7 +2406,7 @@ void MemberDef::_writeCategoryRelation(OutputList &ol)
             name = m_impl->classDef->categoryOf()->displayName();
          }
 
-         i = text.indexOf("@1");
+         i = text.indexOf("@0");
 
          if (i != -1) {
             QSharedPointer<MemberDef> md = m_impl->categoryRelation;
