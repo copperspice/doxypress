@@ -1176,34 +1176,33 @@ void Config::expandAliases()
 
 void Config::escapeAliases()
 {
-   for (auto &s : Doxy_Globals::cmdAliasDict) {
-      QString value = s;
-      QString newValue;
+   for (auto &str : Doxy_Globals::cmdAliasDict) {
+      const QString orig_value = str;
+      str.clear();
 
-      int in;
-      int p = 0;
+      int index;
+      int pos = 0;
 
       // for each \n in the alias command value
-      while ((in = value.indexOf("\\n", p)) != -1) {
-         newValue += value.mid(p, in - p);
+      while ((index = orig_value.indexOf("\\n", pos)) != -1) {
+         str += orig_value.mid(pos, index - pos);
 
          // expand newlines, except if \n is part of a built-in command
 
-         if (value.mid(in, 5) != "\\note" && value.mid(in, 5) != "\\name" &&
-               value.mid(in, 10) != "\\namespace" && value.mid(in, 14) != "\\nosubgrouping") {
+         if (orig_value.mid(index, 5) != "\\note" && orig_value.mid(index, 5) != "\\name" &&
+               orig_value.mid(index, 10) != "\\namespace" && orig_value.mid(index, 14) != "\\nosubgrouping") {
 
-            newValue += "\\internal_linebr ";
+            str += "\\internal_linebr ";
 
          } else {
-            newValue += "\\n";
+            str += "\\n";
 
          }
 
-         p = in + 2;
+         pos = index + 2;
       }
 
-      newValue += value.mid(p, value.length() - p);
-      s = newValue;
+      str += orig_value.mid(pos, orig_value.length() - pos);
    }
 }
 
