@@ -36,8 +36,8 @@
 #include <outputlist.h>
 #include <util.h>
 
-GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &t, QString refFileName)
-                  : Definition(df, dl, 1, na)
+GroupDef::GroupDef(const QString &df, int dl, const QString &g_name, const QString &t, QString refFileName)
+                  : Definition(df, dl, 1, g_name)
 {
    pageDict       = new PageSDict();
    exampleDict    = new PageSDict();
@@ -51,7 +51,7 @@ GroupDef::GroupDef(const QString &df, int dl, const QString &na, const QString &
       fileName = stripExtension(refFileName);
 
    } else {
-      fileName = "group_" + QString(na);
+      fileName = "group_" + QString(g_name);
    }
 
    setGroupTitle(t);
