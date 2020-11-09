@@ -2027,9 +2027,10 @@ static unsigned Crc32_crc_table_computed = 0;
 static unsigned Crc32_crc_table[256];
 
 /*Make the table for a fast CRC.*/
-static void Crc32_make_crc_table(void)
+static void Crc32_make_crc_table()
 {
    unsigned int c, k, n;
+
    for (n = 0; n < 256; n++) {
       c = n;
       for (k = 0; k < 8; k++) {
@@ -2041,6 +2042,7 @@ static void Crc32_make_crc_table(void)
       }
       Crc32_crc_table[n] = c;
    }
+
    Crc32_crc_table_computed = 1;
 }
 

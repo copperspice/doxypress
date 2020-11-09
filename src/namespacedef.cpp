@@ -1001,7 +1001,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
             name = nd->displayName();
          }
 
-         ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), 0, name);
+         ol.writeObjectLink(nd->getReference(), nd->getOutputFileBase(), QString(), name);
          ol.endMemberItem();
 
          if (! nd->briefDescription().isEmpty() && briefMemberDesc) {

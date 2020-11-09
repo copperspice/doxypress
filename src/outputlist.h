@@ -33,9 +33,6 @@ class DotGfxHierarchyTable;
 class DotGroupCollaboration;
 class DocRoot;
 
-/** Class representing a list of output generators that are written to
- *  in parallel.
- */
 class OutputList : public OutputDocInterface
 {
  public:
@@ -59,10 +56,8 @@ class OutputList : public OutputDocInterface
    void pushGeneratorState() override;
    void popGeneratorState() override;
 
-
-   //  OutputDocInterface implementation
    bool generateDoc(const QString &fileName, int startLine, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md,
-                    const QString &docStr,bool indexWords, bool isExample, const QString &exampleName = 0,
+                    const QString &docStr, bool indexWords, bool isExample, const QString &exampleName = QString(),
                     bool singleLine = false, bool linkFromIndex = false);
 
    void writeDoc(DocRoot *root, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md);
@@ -125,10 +120,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endTitle);
    }
 
-   // void newParagraph()
-   //    { forall(&OutputGenerator::newParagraph); }
-
-   void startParagraph(const QString &className = QString("")) override {
+   void startParagraph(const QString &className = QString()) override {
       forall(&OutputGenerator::startParagraph, className);
    }
 
@@ -251,12 +243,10 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endGroupHeader, extraLevels);
    }
 
-   // void writeListItem()
-   // { forall(&OutputGenerator::writeListItem); }
-
    void startItemListItem() override {
       forall(&OutputGenerator::startItemListItem);
    }
+
    void endItemListItem() override {
       forall(&OutputGenerator::endItemListItem);
    }
@@ -327,26 +317,32 @@ class OutputList : public OutputDocInterface
    void endMemberTemplateParams(const QString &anchor, const QString &inheritId) {
       forall(&OutputGenerator::endMemberTemplateParams, anchor, inheritId);
    }
+
    void startMemberGroupHeader(bool b) {
       forall(&OutputGenerator::startMemberGroupHeader, b);
    }
+
    void endMemberGroupHeader() {
       forall(&OutputGenerator::endMemberGroupHeader);
    }
+
    void startMemberGroupDocs() {
       forall(&OutputGenerator::startMemberGroupDocs);
    }
+
    void endMemberGroupDocs() {
       forall(&OutputGenerator::endMemberGroupDocs);
    }
+
    void startMemberGroup() {
       forall(&OutputGenerator::startMemberGroup);
    }
+
    void endMemberGroup(bool last) {
       forall(&OutputGenerator::endMemberGroup, last);
    }
 
-  void insertMemberAlign(bool templ = false) {
+   void insertMemberAlign(bool templ = false) {
       forall(&OutputGenerator::insertMemberAlign, templ);
    }
 
@@ -467,7 +463,7 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endSmall);
    }
 
-   void lineBreak(const QString &style = 0)  override {
+   void lineBreak(const QString &style = QString())  override {
       forall(&OutputGenerator::lineBreak, style);
    }
 

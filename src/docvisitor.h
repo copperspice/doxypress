@@ -29,7 +29,6 @@ const int DocVisitor_Text  = 5;
 const int DocVisitor_Other = 6;
 const int DocVisitor_Docbook = 7;
 
-// forward declarations
 class DocWord;
 class DocWhiteSpace;
 class DocAutoList;
@@ -89,12 +88,13 @@ class DocParBlock;
  */
 class DocVisitor
 {
-   int m_id;
-
  public:
-   DocVisitor(int id) : m_id(id) {}
+   DocVisitor(int id)
+      : m_id(id)
+   { }
 
-   virtual ~DocVisitor() {}
+   virtual ~DocVisitor()
+   { }
 
    int id() const {
       return m_id;
@@ -196,6 +196,9 @@ class DocVisitor
    virtual void visitPost(DocHtmlBlockQuote *) = 0;
    virtual void visitPre(DocParBlock *) = 0;
    virtual void visitPost(DocParBlock *) = 0;
+
+ private:
+   int m_id;
 };
 
 #endif

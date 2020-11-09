@@ -257,14 +257,14 @@ void DirDef::writeSubDirList(OutputList &ol)
             ol.startMemberItem(dd->getOutputFileBase(), 0);
             ol.parseText(theTranslator->trDir(false, true) + " ");
             ol.insertMemberAlign();
-            ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
+            ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), QString(), dd->shortName());
             ol.endMemberItem();
 
             if (! dd->briefDescription().isEmpty() && briefMemberDesc) {
                ol.startMemberDescription(dd->getOutputFileBase());
 
                ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
-                              false, false, "", true, true);
+                              false, false, QString(), true, true);
 
                ol.endMemberDescription();
             }
@@ -305,7 +305,7 @@ void DirDef::writeFileList(OutputList &ol)
             ol.insertMemberAlign();
 
             if (fd->isLinkable()) {
-               ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fd->name());
+               ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), QString(), fd->name());
             } else {
                ol.startBold();
                ol.docify(fd->name());
@@ -423,13 +423,17 @@ void DirDef::writeDocumentation(OutputList &ol)
 
    startTitle(ol, getOutputFileBase());
    ol.pushGeneratorState();
+
    ol.disableAllBut(OutputGenerator::Html);
    ol.parseText(shortTitle());
    ol.enableAll();
+
    ol.disable(OutputGenerator::Html);
    ol.parseText(title);
    ol.popGeneratorState();
+
    endTitle(ol, getOutputFileBase(), title);
+
    ol.startContents();
 
    //---------------------------------------- start flexible part -------------------------------
@@ -446,21 +450,27 @@ void DirDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
             break;
+
          case LayoutDocEntry::DirGraph:
             writeDirectoryGraph(ol);
             break;
+
          case LayoutDocEntry::MemberDeclStart:
             startMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::DirSubDirs:
             writeSubDirList(ol);
             break;
+
          case LayoutDocEntry::DirFiles:
             writeFileList(ol);
             break;
+
          case LayoutDocEntry::MemberDeclEnd:
             endMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::DetailedDesc: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeDetailedDescription(ol, ls->title(lang));
@@ -729,7 +739,7 @@ static void writePartialDirPath(OutputList &ol, QSharedPointer<const DirDef> roo
       ol.writeString("&#160;/&#160;");
    }
 
-   ol.writeObjectLink(target->getReference(), target->getOutputFileBase(), 0, target->shortName());
+   ol.writeObjectLink(target->getReference(), target->getOutputFileBase(), QString(), target->shortName());
 }
 
 static void writePartialFilePath(OutputList &ol, QSharedPointer<const DirDef> root, QSharedPointer<const FileDef> fd)
@@ -740,7 +750,7 @@ static void writePartialFilePath(OutputList &ol, QSharedPointer<const DirDef> ro
    }
 
    if (fd->isLinkable()) {
-      ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fd->name());
+      ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), QString(), fd->name());
 
    } else {
       ol.startBold();

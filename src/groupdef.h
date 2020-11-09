@@ -102,10 +102,10 @@ class GroupDef : public Definition
       return m_subGrouping;
    }
 
-   bool visited;    // number of times accessed for output - KPW
+   bool visited;    // number of times accessed for output
 
    // friend void writeGroupTreeNode(OutputList&, GroupDef*, int, FTVHelp*);
-   // make accessible for writing tree view of group in index.cpp - KPW
+   // make accessible for writing tree view of group in index.cpp
 
    void setGroupScope(QSharedPointer<Definition> d) {
       groupScope = d;

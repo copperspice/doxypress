@@ -124,7 +124,7 @@ void ConceptDef::writeIncludeFiles(OutputList &ol)
       ol.enable(OutputGenerator::Html);
 
       if (m_incInfo.fileDef) {
-         ol.writeObjectLink(0, m_incInfo.fileDef->includeName(), 0, nm);
+         ol.writeObjectLink(QString(), m_incInfo.fileDef->includeName(), QString(), nm);
       } else {
          ol.docify(nm);
       }

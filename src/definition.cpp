@@ -788,8 +788,8 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::RTF);
             }
 
-            // write line link (HTML, LaTeX optionally, RTF optionally)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr);
+            // write line link (HTML, LaTeX, Docbook, RTF)
+            ol.writeObjectLink(QString(), fn, anchorStr, lineStr);
             ol.enableAll();
 
             ol.disable(OutputGenerator::Html);
@@ -807,7 +807,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::RTF);
             }
 
-            // write normal text (Man / RTF, Latex optionally)
+            // write normal text (Latex, Man, RTF)
             ol.docify(lineStr);
             ol.popGeneratorState();
 
@@ -832,7 +832,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write file link (HTML, LaTeX optionally, RTF optionally)
-            ol.writeObjectLink(0, fn, 0, m_private->m_body_fileDef->name());
+            ol.writeObjectLink(QString(), fn, QString(), m_private->m_body_fileDef->name());
             ol.enableAll();
 
             ol.disable(OutputGenerator::Html);
@@ -876,7 +876,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write file link (HTML only)
-            ol.writeObjectLink(0, fn, 0, m_private->m_body_fileDef->name());
+            ol.writeObjectLink(QString(), fn, QString(), m_private->m_body_fileDef->name());
 
             ol.enableAll();
 
@@ -920,7 +920,7 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
             }
 
             // write line link (HTML only)
-            ol.writeObjectLink(0, fn, anchorStr, lineStr);
+            ol.writeObjectLink(QString(), fn, anchorStr, lineStr);
             ol.enableAll();
 
             ol.disable(OutputGenerator::Html);
@@ -1085,7 +1085,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                QString anchorStr;
                anchorStr = QString("l%1").formatArg(md->getStartBodyLine(), 5, 10, QChar('0'));
 
-               ol.writeObjectLink(0, md->getBodyDef()->getSourceFileBase(), anchorStr, name);
+               ol.writeObjectLink(QString(), md->getBodyDef()->getSourceFileBase(), anchorStr, name);
                ol.popGeneratorState();
 
                // for the other output formats just mention the name

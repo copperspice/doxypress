@@ -69,7 +69,7 @@ class RTFGenerator : public OutputGenerator
    }
 
    OutputGenerator *get(OutputType o) override {
-      return (o == RTF) ? this : 0;
+      return (o == RTF) ? this : nullptr;
    }
 
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;

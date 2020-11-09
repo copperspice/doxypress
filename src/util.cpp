@@ -26,10 +26,6 @@
 #include <QStringView>
 #include <QTextCodec>
 
-#include <stdlib.h>
-#include <errno.h>
-#include <math.h>
-
 #include <util.h>
 
 #include <config.h>
@@ -44,6 +40,10 @@
 #include <message.h>
 #include <portable.h>
 #include <textdocvisitor.h>
+
+#include <stdlib.h>
+#include <errno.h>
+#include <math.h>
 
 struct FindFileCacheElem {
    FindFileCacheElem(QSharedPointer<FileDef> fd, bool ambig)
@@ -842,7 +842,7 @@ static QSharedPointer< const Definition> followPath(QSharedPointer<const Definit
 bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<const FileDef> fileScope,
                              QSharedPointer<const Definition> item, const QString &explicitScopePart = QString(""))
 {
-   if (cl) {
+   if (cl != nullptr) {
       // see if the class was imported via a using statement
       bool explicitScopePartEmpty = explicitScopePart.isEmpty();
 
@@ -868,11 +868,11 @@ bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QS
 }
 
 static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item, const QString &explicitScopePart = QString(""))
+                  QSharedPointer<const Definition> item, const QString &explicitScopePart = QString())
 {
    static QSet<QString> visitedDict;
 
-   if (nl) {
+   if (nl != nullptr) {
       // check used namespaces for the class
 
       for (auto und : *nl) {
@@ -2136,7 +2136,7 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
       ol.disable(OutputGenerator::RTF);
 
       // link for Html / man
-      ol.writeObjectLink(0, e->file, e->anchor, e->name);
+      ol.writeObjectLink(QString(), e->file, e->anchor, e->name);
       ol.popGeneratorState();
 
       ol.pushGeneratorState();
@@ -2147,7 +2147,7 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
       // link for Latex / pdf with anchor because the sources
       // are not hyperlinked (not possible with a verbatim environment)
 
-      ol.writeObjectLink(0, e->file, 0, e->name);
+      ol.writeObjectLink(QString(), e->file, QString(), e->name);
       ol.popGeneratorState();
 
       current_iter = match.capturedEnd();
@@ -2484,7 +2484,7 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
       err("Unable to open file %s for reading\n", csPrintable(name));
    }
 
-   return QString("");
+   return QString();
 }
 
 QString dateTimeHHMM()
@@ -4515,7 +4515,7 @@ void generateFileRef(OutputDocInterface &od, const QString &name, const QString 
    if ((fd = findFileDef(&Doxy_Globals::inputNameDict, name, ambig)) && fd->isLinkable()) {
       // link to documented input file
 
-      od.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, linkText);
+      od.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), QString(), linkText);
 
    } else {
       od.docify(linkText);
@@ -4545,8 +4545,8 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
    QFileInfo fi(name);
    QString fName = fi.fileName();
 
-   // this will cause an error in fileSystemEngine if the name starts with ::
-   QString path  = fi.absolutePath() + "/";
+
+   QString path = fi.absolutePath() + "/";
 
    if (fName.isEmpty()) {
       s_findFileDefCache.insert(key, cachedResult);
@@ -4556,7 +4556,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
    // returns a FileName which inherits from FileList
    QSharedPointer<FileNameList> fn = (*fnDict)[fName];
 
-   if (fn) {
+   if (fn != nullptr) {
 
       if (fn->count() == 1) {
          QSharedPointer<FileDef> fd = fn->first();
@@ -4601,6 +4601,7 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
          cachedResult->fileDef = lastMatch;
 
          s_findFileDefCache.insert(key, cachedResult);
+
          return lastMatch;
       }
    }
@@ -5274,7 +5275,8 @@ QString convertToXML(const QString &str)
          case 29:
          case 30:
          case 31:
-            break; // skip invalid XML characters (see http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
+            // skip invalid XML characters (see http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
+            break;
 
          default:
             retval += c;
@@ -6028,7 +6030,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
 
       Doxy_Globals::pageSDict.insert(baseName, pd);
 
-      if (gd) {
+      if (gd != nullptr) {
          gd->addPage(pd);
       }
 
@@ -6036,7 +6038,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
          // a page name is a label as well
          QString file;
 
-         if (gd) {
+         if (gd != nullptr) {
             file = gd->getOutputFileBase();
 
          } else {
@@ -6129,7 +6131,7 @@ bool recursivelyAddGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d
             ol.writeString(" &raquo; ");
          }
 
-         ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
+         ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), QString(), gd->groupTitle());
       }
 
       if (root) {

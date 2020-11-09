@@ -84,6 +84,12 @@ class ArgumentList : public QVector<Argument>
    // Does any argument of this list have documentation?
    bool hasDocumentation() const;
 
+   bool isEmpty() const = delete;
+
+   bool listEmpty() const {
+      return QVector<Argument>::isEmpty();
+   }
+
    // Does the member modify the state of the class? default: false.
    bool constSpecifier;
 
@@ -101,12 +107,6 @@ class ArgumentList : public QVector<Argument>
    // parsing a method with = delete
    bool isDeleted;
 
-   // methods
-   bool isEmpty() const = delete;
-
-   bool listEmpty() const {
-      return QVector<Argument>::isEmpty();
-   }
 };
 
 using ArgumentListIterator = QVectorIterator<Argument>;

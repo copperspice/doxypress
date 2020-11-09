@@ -63,7 +63,7 @@ class DirDef : public Definition
 
    void addSubDir(QSharedPointer<DirDef> subdir);
 
-   const FileList &getFiles() const        {
+   const FileList &getFiles() const  {
       return m_fileList;
    }
 

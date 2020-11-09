@@ -252,7 +252,7 @@ class LocalToc
  public:
    enum Type {
       None           = 0,      // initial value
-      Html           = 0,      // index / also to be used as bit position in mask (1 << Html)
+      Html           = 0,      // also to be used as bit position in mask (1 << Html)
       Latex          = 1,
       Xml            = 2,
       Docbook        = 3,

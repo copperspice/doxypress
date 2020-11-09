@@ -733,7 +733,7 @@ void ClassDef::writeBriefDescription(OutputList &ol, bool exampleFlag)
       ol.popGeneratorState();
 
       ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                  briefDescription(), true, false, "", true, false);
+                  briefDescription(), true, false, QString(), true, false);
 
       ol.pushGeneratorState();
 
@@ -793,11 +793,9 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    if (hasExamples()) {
       ol.startSimpleSect(BaseOutputDocInterface::Examples, 0, 0, theTranslator->trExamples() + ": ");
       ol.startDescForItem();
-      //ol.startParagraph();
 
       writeExample(ol, m_exampleSDict);
 
-      //ol.endParagraph();
       ol.endDescForItem();
       ol.endSimpleSect();
    }
@@ -914,19 +912,21 @@ void ClassDef::showUsedFiles(OutputList &ol)
       ol.disableAllBut(OutputGenerator::Html);
 
       if (fd->generateSourceFile()) {
-         ol.writeObjectLink(0, fd->getSourceFileBase(), 0, fname);
+         ol.writeObjectLink(QString(), fd->getSourceFileBase(), QString(), fname);
       } else if (fd->isLinkable()) {
-         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fname);
+         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), QString(), fname);
       } else {
          ol.docify(fname);
       }
+
       ol.popGeneratorState();
 
       // for other output formats
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
+
       if (fd->isLinkable()) {
-         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), 0, fname);
+         ol.writeObjectLink(fd->getReference(), fd->getOutputFileBase(), QString(), fname);
       } else {
          ol.docify(fname);
       }
@@ -934,6 +934,7 @@ void ClassDef::showUsedFiles(OutputList &ol)
 
       ol.endItemListItem();
    }
+
    if (!first) {
       ol.endItemList();
    }
@@ -1179,7 +1180,7 @@ void ClassDef::writeIncludeFiles(OutputList &ol)
       ol.enable(OutputGenerator::Html);
 
       if (m_incInfo.fileDef) {
-         ol.writeObjectLink(0, m_incInfo.fileDef->includeName(), 0, nm);
+         ol.writeObjectLink(QString(), m_incInfo.fileDef->includeName(), QString(), nm);
       } else {
          ol.docify(nm);
       }
@@ -1541,7 +1542,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
             break;
 
          case LayoutDocEntry::MemberDefStart:
-            if (!isSimple) {
+            if (! isSimple) {
                startMemberDocumentation(ol);
             }
             break;
@@ -1588,23 +1589,26 @@ void ClassDef::writeMoreLink(OutputList &ol, const QString &anchor)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
    ol.docify(" ");
-   ol.startTextLink(getOutputFileBase(), anchor.isEmpty() ? "details" : anchor);
+   ol.startTextLink(getOutputFileBase(), anchor.isEmpty() ? QString("details") : anchor);
    ol.parseText(theTranslator->trMore());
    ol.endTextLink();
    ol.popGeneratorState();
 
-   if (!anchor.isEmpty()) {
+   if (! anchor.isEmpty()) {
       ol.pushGeneratorState();
 
-      // LaTeX + RTF
       ol.disable(OutputGenerator::Html);
       ol.disable(OutputGenerator::Man);
-      if (!(usePDFLatex && pdfHyperlinks)) {
+
+      // LaTeX, RTF
+      if (! (usePDFLatex && pdfHyperlinks)) {
          ol.disable(OutputGenerator::Latex);
       }
-      if (!rtfHyperlinks) {
+
+      if (! rtfHyperlinks) {
          ol.disable(OutputGenerator::RTF);
       }
+
       ol.docify(" ");
       ol.startTextLink(getOutputFileBase(), anchor);
       ol.parseText(theTranslator->trMore());
@@ -2051,7 +2055,7 @@ void ClassDef::writeMemberList(OutputList &ol)
    QString memListFile = getMemberListFileName();
 
    startFile(ol, memListFile, memListFile, theTranslator->trMemberList(),
-                  HLI_ClassVisible, !generateTreeView, getOutputFileBase());
+                  HLI_ClassVisible, ! generateTreeView, getOutputFileBase());
 
    if (! generateTreeView) {
       if (getOuterScope() != Doxy_Globals::globalScope) {
@@ -2062,7 +2066,7 @@ void ClassDef::writeMemberList(OutputList &ol)
    }
 
    startTitle(ol, 0);
-   ol.parseText((displayName() + " " + theTranslator->trMemberList()));
+   ol.parseText(displayName() + " " + theTranslator->trMemberList());
    endTitle(ol, 0, 0);
 
    ol.startContents();
@@ -2396,7 +2400,7 @@ void ClassDef::writeDeclaration(OutputList &ol, QSharedPointer<MemberDef> md, bo
       ol.docify(" ");
 
       if (md && isLinkable()) {
-         ol.writeObjectLink(0, 0, md->anchor(), cn);
+         ol.writeObjectLink(QString(), QString(), md->anchor(), cn);
 
       } else {
          ol.startBold();

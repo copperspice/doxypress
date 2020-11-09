@@ -55,11 +55,12 @@ class DevNullCodeDocInterface : public CodeOutputInterface
    void writeCodeAnchor(const QString &) override {}
    void linkableSymbol(int, QString &, QSharedPointer<Definition>(), QSharedPointer<Definition>()) {}
 
-   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
-      (void) def;
+   void setCurrentDoc(QSharedPointer<Definition>, const QString &, bool) override {
    }
 
-   void addWord(const QString &, bool) override {}
+   void addWord(const QString &, bool) override {
+   }
+
 };
 
 /*! create a new file definition, where \a p is the file path,
@@ -298,7 +299,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
             // should always pass this
 
             ol.parseText(refText.left(fileMarkerPos));                          //text left from marker 1
-            ol.writeObjectLink(0, getSourceFileBase(), 0, name());
+            ol.writeObjectLink(QString(), getSourceFileBase(), QString(), name());
             ol.parseText(refText.right( refText.length() - fileMarkerPos - 2)); // text right from marker 2
 
          } else {
@@ -402,7 +403,7 @@ void FileDef::writeIncludeFiles(OutputList &ol)
 
             if (fd && fd->isLinkable()) {
                ol.writeObjectLink(fd->getReference(),
-                  fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(), 0, item.includeName);
+                  fd->generateSourceFile() ? fd->includeName() : fd->getOutputFileBase(), QString(), item.includeName);
 
             } else {
                ol.docify(item.includeName);
@@ -605,8 +606,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
    ol.popGeneratorState();
 }
 
-/*! Write the documentation page for this file to the file of output
-    generators \a ol.
+/*! Write the documentation page for this file to the file of output generators \a ol.
 */
 void FileDef::writeDocumentation(OutputList &ol)
 {
@@ -623,7 +623,7 @@ void FileDef::writeDocumentation(OutputList &ol)
    QString pageTitle = theTranslator->trFileReference(m_docname);
 
    if (getDirDef()) {
-      startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, !generateTreeView);
+      startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_FileVisible, ! generateTreeView);
 
       if (! generateTreeView) {
          getDirDef()->writeNavigationPath(ol);
@@ -633,12 +633,17 @@ void FileDef::writeDocumentation(OutputList &ol)
       QString pageTitleShort = theTranslator->trFileReference(name());
       startTitle(ol, getOutputFileBase(), self);
       ol.pushGeneratorState();
+
+      // Html only
       ol.disableAllBut(OutputGenerator::Html);
-      ol.parseText(pageTitleShort); // Html only
+      ol.parseText(pageTitleShort);
       ol.enableAll();
       ol.disable(OutputGenerator::Html);
-      ol.parseText(pageTitle); // other output formats
+
+      // other output formats
+      ol.parseText(pageTitle);
       ol.popGeneratorState();
+
       addGroupListToTitle(ol, self);
       endTitle(ol, getOutputFileBase(), title);
 
@@ -1323,7 +1328,7 @@ void FileDef::addListReferences()
    const QVector<ListItemInfo> &xrefItems = getRefItems();
 
    addRefItem(xrefItems, getOutputFileBase(), theTranslator->trFile(true, true), getOutputFileBase(), name(),
-              "", QSharedPointer<Definition>());
+              QString(), QSharedPointer<Definition>());
 
    for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);

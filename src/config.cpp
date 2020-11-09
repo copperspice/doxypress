@@ -916,7 +916,7 @@ bool Config::verify()
 
 
 
-   // ********** save data to structers and variables
+   // ********** save data to structures and variables
 
    Doxy_Globals::parseSourcesNeeded = Config::getBool("dot-call") ||  Config::getBool("dot-called-by") ||
                   Config::getBool("ref-relation") || Config::getBool("ref-by-relation");

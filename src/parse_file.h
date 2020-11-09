@@ -25,7 +25,10 @@
 class FileParser : public ParserInterface
 {
  public:
-   virtual ~FileParser() {}
+   virtual ~FileParser()
+   {
+   }
+
    void finishTranslationUnit() override {}
 
    void parseInput(const QString &, const QString &, QSharedPointer<Entry>,

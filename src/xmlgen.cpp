@@ -121,6 +121,7 @@ inline void writeXMLCodeString(QTextStream &t, const QString &text, int &col)
             }
             break;
          }
+
          case ' ':
             t << "<sp/>";
             col++;
@@ -277,10 +278,11 @@ class TextGeneratorXMLImpl : public TextGeneratorIntf
       writeXMLString(m_t, text);
    }
 
-   void writeBreak(int) const override {}
+   void writeBreak(int) const override {
+   }
 
    void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const override {
-      writeXMLLink(m_t, extRef, file, anchor, text, 0);
+      writeXMLLink(m_t, extRef, file, anchor, text, QString());
    }
 
  private:
@@ -541,12 +543,12 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 }
 
 static void writeMemberReference(QTextStream &t, QSharedPointer<Definition> def,
-                                 QSharedPointer<MemberDef> rmd, const QString &tagName)
+                  QSharedPointer<MemberDef> rmd, const QString &tagName)
 {
    QString scope = rmd->getScopeString();
    QString name  = rmd->name();
 
-   if (!scope.isEmpty() && scope != def->name()) {
+   if (! scope.isEmpty() && scope != def->name()) {
       name.prepend(scope + getLanguageSpecificSeparator(rmd->getLanguage()));
    }
 
@@ -722,12 +724,15 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       case Public:
          t << "public";
          break;
+
       case Protected:
          t << "protected";
          break;
+
       case Private:
          t << "private";
          break;
+
       case Package:
          t << "package";
          break;
@@ -823,12 +828,15 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          case Normal:
             t << "non-virtual";
             break;
+
          case Virtual:
             t << "virtual";
             break;
+
          case Pure:
             t << "pure-virtual";
             break;
+
          default:
             assert(0);
       }
@@ -961,15 +969,20 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << " accessor=\"";
          if (md->isAssign()) {
             t << "assign";
+
          } else if (md->isCopy()) {
             t << "copy";
+
          } else if (md->isRetain()) {
             t << "retain";
+
          } else if (md->isStrong()) {
             t << "strong";
+
          } else if (md->isWeak()) {
             t << "weak";
          }
+
          t << "\"";
       }
 
@@ -1173,12 +1186,15 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
                case Public:
                   t << "public";
                   break;
+
                case Protected:
                   t << "protected";
                   break;
+
                case Private:
                   t << "private";
                   break;
+
                case Package:
                   t << "package";
                   break;
@@ -1189,7 +1205,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
             writeXMLString(t, emd->name());
 
             t << "</name>" << endl;
-            if (!emd->initializer().isEmpty()) {
+            if (! emd->initializer().isEmpty()) {
                t << "          <initializer>";
                writeXMLString(t, emd->initializer());
                t << "</initializer>" << endl;
@@ -1319,12 +1335,15 @@ static void writeListOfAllMembers(QSharedPointer<ClassDef> cd, QTextStream &t)
                case Public:
                   t << "public";
                   break;
+
                case Protected:
                   t << "protected";
                   break;
+
                case Private:
                   t << "private";
                   break;
+
                case Package:
                   t << "package";
                   break;
@@ -1335,9 +1354,11 @@ static void writeListOfAllMembers(QSharedPointer<ClassDef> cd, QTextStream &t)
                case Normal:
                   t << "non-virtual";
                   break;
+
                case Virtual:
                   t << "virtual";
                   break;
+
                case Pure:
                   t << "pure-virtual";
                   break;
@@ -1368,12 +1389,15 @@ static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
             case Public:
                t << "public";
                break;
+
             case Protected:
                t << "protected";
                break;
+
             case Private:
                t << "private";
                break;
+
             case Package:
                t << "package";
                break;
@@ -1454,11 +1478,11 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    // - examples using the class
 
    if (cd->isReference()) {
-      return;   // skip external references.
+      return;   // skip external references
    }
 
    if (cd->isHidden()) {
-      return;   // skip hidden classes.
+      return;   // skip hidden classes
    }
 
    if (cd->name().indexOf('@') != -1) {
@@ -1466,7 +1490,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    }
 
    if (cd->templateMaster() != 0) {
-      return;   // skip generated template instances.
+      return;   // skip generated template instances
    }
 
    if (cd->isArtificial()) {
@@ -1501,12 +1525,15 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       case Public:
          t << "public";
          break;
+
       case Protected:
          t << "protected";
          break;
+
       case Private:
          t << "private";
          break;
+
       case Package:
          t << "package";
          break;
@@ -1542,12 +1569,15 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
             case Public:
                t << "public";
                break;
+
             case Protected:
                t << "protected";
                break;
+
             case Private:
                t << "private";
                break;
+
             case Package:
                assert(0);
                break;
@@ -1558,9 +1588,11 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
             case Normal:
                t << "non-virtual";
                break;
+
             case Virtual:
                t << "virtual";
                break;
+
             case Pure:
                t << "pure-virtual";
                break;
@@ -1590,12 +1622,15 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
             case Public:
                t << "public";
                break;
+
             case Protected:
                t << "protected";
                break;
+
             case Private:
                t << "private";
                break;
+
             case Package:
                assert(0);
                break;
@@ -1606,9 +1641,11 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
             case Normal:
                t << "non-virtual";
                break;
+
             case Virtual:
                t << "virtual";
                break;
+
             case Pure:
                t << "pure-virtual";
                break;
@@ -1772,19 +1809,6 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
 
 static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
 {
-   // + includes files
-   // + includedby files
-   // + include graph
-   // + included by graph
-   // + contained class definitions
-   // + contained namespace definitions
-   // + member groups
-   // + normal members
-   // + brief desc
-   // + detailed desc
-   // + source code
-   // + location
-   // - number of lines
 
    if (fd->isReference()) {
       return;   // skip external references
@@ -1847,14 +1871,14 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    }
 
    DotInclDepGraph incDepGraph(fd, false);
-   if (!incDepGraph.isTrivial()) {
+   if (! incDepGraph.isTrivial()) {
       t << "    <incdepgraph>" << endl;
       incDepGraph.writeXML(t);
       t << "    </incdepgraph>" << endl;
    }
 
    DotInclDepGraph invIncDepGraph(fd, true);
-   if (!invIncDepGraph.isTrivial()) {
+   if (! invIncDepGraph.isTrivial()) {
       t << "    <invincdepgraph>" << endl;
       invIncDepGraph.writeXML(t);
       t << "    </invincdepgraph>" << endl;
@@ -2014,9 +2038,6 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
 
 static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool isExample)
 {
-   // + name
-   // + title
-   // + documentation
 
    const char *kindName = isExample ? "example" : "page";
 
@@ -2030,7 +2051,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    }
 
    if (pageName == "index") {
-      pageName = "indexpage";   // to prevent overwriting the generated index page.
+      pageName = "indexpage";   // to prevent overwriting the generated index page
    }
 
    ti << "  <compound refid=\"" << pageName
@@ -2073,7 +2094,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    } else {
       QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(pd->name());
 
-      if (si) {
+      if (si != nullptr) {
          t << "    <title>" << convertToXML(convertCharEntities(filterTitle(si->title)))
            << "</title>" << endl;
       }

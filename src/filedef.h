@@ -94,7 +94,7 @@ class FileDef : public Definition
    }
 
    QString anchor() const override {
-      return QString("");
+      return QString();
    }
 
    QString getFileBase() const {

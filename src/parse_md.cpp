@@ -3066,7 +3066,7 @@ static QString extractPageTitle(QString &docs, QString &id)
    }
 
    if (iter == iter_end) {
-      return QString("");
+      return QString();
    }
 
    QString::const_iterator iter_endA = iter + 1;

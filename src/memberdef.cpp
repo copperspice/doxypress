@@ -374,7 +374,8 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    ol.disable(OutputGenerator::Latex);
 
    if (! md->isObjCMethod()) {
-      ol.docify(")");   // end argument list
+      // end argument list
+      ol.docify(")");
    }
 
    ol.enableAll();
@@ -971,7 +972,7 @@ QString MemberDef::getReference() const
       return m_impl->fileDef->getReference();
    }
 
-   return QString("");
+   return QString();
 }
 
 QString MemberDef::anchor() const
@@ -986,7 +987,8 @@ QString MemberDef::anchor() const
       return m_impl->templateMaster->anchor();
    }
 
-   if (m_impl->enumScope && m_impl->enumScope != this) { // avoid recursion for C#'s public enum E { E, F }
+   if (m_impl->enumScope && m_impl->enumScope != this) {
+      // avoid recursion for C#'s public enum E { E, F }
       result.prepend(m_impl->enumScope->anchor());
    }
 
@@ -997,6 +999,7 @@ QString MemberDef::anchor() const
          result.prepend("g");
       }
    }
+
    return result;
 }
 
@@ -1029,7 +1032,7 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (m_impl->group && !m_impl->group->isLinkableInProject()) {
+   if (m_impl->group && ! m_impl->group->isLinkableInProject()) {
       // group but group not linkable
       m_isLinkableCached = 1;
       return;
@@ -1046,8 +1049,8 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (! m_impl->group && !m_impl->nspace && ! m_impl->m_related && !m_impl->classDef &&
-         m_impl->fileDef && !m_impl->fileDef->isLinkableInProject()) {
+   if (! m_impl->group && ! m_impl->nspace && ! m_impl->m_related && ! m_impl->classDef &&
+         m_impl->fileDef != nullptr && ! m_impl->fileDef->isLinkableInProject()) {
 
       m_isLinkableCached = 1;    // in file (and not in namespace) but file not linkable
       return;
@@ -4180,7 +4183,8 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
                   typeDecl.popGeneratorState();
                }
 
-               if (fmd->hasDocumentation()) { // enum value has docs
+               if (fmd->hasDocumentation()) {
+                  // enum value has docs
                   // fmd->_writeTagData(compoundType);
                   fmd->_addToSearchIndex();
                   fmd->writeLink(typeDecl, cd, nd, fd, gd);
@@ -5330,7 +5334,7 @@ QString MemberDef::displayName(bool unused) const
 void MemberDef::_addToSearchIndex()
 {
    // write search index info
-  QSharedPointer<MemberDef> self = sharedFrom(this);
+   QSharedPointer<MemberDef> self = sharedFrom(this);
 
    if (Doxy_Globals::searchIndexBase != nullptr && isLinkableInProject()) {
       Doxy_Globals::searchIndexBase->setCurrentDoc(self, anchor(), false);

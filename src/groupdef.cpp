@@ -365,7 +365,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
             addMemberToList(MemberListType_docProSlotMembers, md);
 
          } else {
-            if (!docOnly) {
+            if (! docOnly) {
                addMemberToList(MemberListType_decPriSlotMembers, md);
             }
             addMemberToList(MemberListType_docPriSlotMembers, md);
@@ -812,7 +812,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
          ol.docify(theTranslator->trFile(false, true) + " ");
 
          ol.insertMemberAlign();
-         ol.writeObjectLink(item->getReference(), item->getOutputFileBase(), 0, item->name());
+         ol.writeObjectLink(item->getReference(), item->getOutputFileBase(), QString(), item->name());
          ol.endMemberItem();
 
          if (! item->briefDescription().isEmpty() && briefMemberDesc) {
@@ -871,7 +871,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
             ol.startMemberItem(gd->getOutputFileBase(), 0);
 
             ol.insertMemberAlign();
-            ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), 0, gd->groupTitle());
+            ol.writeObjectLink(gd->getReference(), gd->getOutputFileBase(), QString(), gd->groupTitle());
             ol.endMemberItem();
 
             if (! gd->briefDescription().isEmpty() && briefMemberDesc) {
@@ -910,13 +910,13 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
          ol.parseText(theTranslator->trDir(false, true));
 
          ol.insertMemberAlign();
-         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), 0, dd->shortName());
+         ol.writeObjectLink(dd->getReference(), dd->getOutputFileBase(), QString(), dd->shortName());
          ol.endMemberItem();
 
          if (! dd->briefDescription().isEmpty() && briefMemberDesc) {
             ol.startMemberDescription(dd->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
-                           false, false, "", true, false);
+                           false, false, QString(), true, false);
 
             ol.endMemberDescription();
          }

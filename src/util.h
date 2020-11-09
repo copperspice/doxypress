@@ -25,9 +25,6 @@
 #include <QStringList>
 #include <QTextStream>
 
-#include <ctype.h>
-#include <types.h>
-
 #include <arguments.h>
 #include <classdef.h>
 #include <filedef.h>
@@ -37,6 +34,9 @@
 #include <outputlist.h>
 #include <stringmap.h>
 #include <sortedlist_fwd.h>
+
+#include <ctype.h>
+#include <types.h>
 
 class BaseClassDef;
 class Definition;
@@ -319,7 +319,7 @@ Protection getProtection(const QString &data);
 Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef> bcd,
                   Protection prot = Public, int level = 0);
 
-// method located in doxy_setup.cpp
+// methods located in doxy_setup.cpp
 SrcLangExt getLanguageFromFileName(const QString &fileName);
 QString getFileNameExtension(const QString &fileName);
 

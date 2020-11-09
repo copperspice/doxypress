@@ -164,11 +164,11 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    //
    ol.disableAllBut(OutputGenerator::Man);
-   startFile(ol, getOutputFileBase(), manPageName, title(), HLI_Pages, !generateTreeView);
+   startFile(ol, getOutputFileBase(), manPageName, title(), HLI_Pages, ! generateTreeView);
    ol.enableAll();
 
    ol.disable(OutputGenerator::Man);
-   startFile(ol, getOutputFileBase(), pageName, title(), HLI_Pages, !generateTreeView);
+   startFile(ol, getOutputFileBase(), pageName, title(), HLI_Pages, ! generateTreeView);
    ol.popGeneratorState();
 
    if (! generateTreeView) {
@@ -218,7 +218,7 @@ void PageDef::writeDocumentation(OutputList &ol)
       endTitle(ol, getOutputFileBase(), name());
 
    } else {
-      ol.startPageDoc("");
+      ol.startPageDoc(QString());
    }
 
    ol.startContents();
@@ -324,7 +324,7 @@ bool PageDef::visibleInIndex() const
 {
    static bool externalPages = Config::getBool("external-pages");
 
-   return ! getGroupDef() && (!isReference() || externalPages);
+   return ! getGroupDef() && (! isReference() || externalPages);
 }
 
 bool PageDef::documentedPage() const
