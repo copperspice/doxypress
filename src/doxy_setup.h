@@ -60,7 +60,6 @@ void searchInputFiles();
 void processFiles();
 void generateOutput();
 
-void readFormulaRepository();
 void shutDownDoxyPress();
 
 void initDefaultLangMapping();

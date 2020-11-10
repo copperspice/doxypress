@@ -386,6 +386,8 @@ namespace Doxy_Work{
    void processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef>tagParentCd,
                   const QString &prefix, int count);
 
+   void readFormulas(QString dir, bool compare);
+
 struct ReadDirArgs {
    bool recursive       = false;
    bool errorIfNotExist = true;
@@ -449,6 +451,9 @@ void processFiles()
    // make sure the output directory exists
    QString outputDirectory = Config::getString("output-dir");
    int cacheSize           = Config::getInt("lookup-cache-size");
+   static const bool generateHtml    = Config::getBool("generate-html");
+   static const bool generateRtf     = Config::getBool("generate-rtf");
+   static const bool useMathJax      = Config::getBool("use-mathjax");
    static const QString layoutFName  = Config::getString("layout-file");
 
    if (cacheSize < 0) {
@@ -467,7 +472,6 @@ void processFiles()
 
    // Check/create output directories
    QString htmlOutput;
-   static const bool generateHtml = Config::getBool("generate-html");
 
    if (generateHtml) {
       htmlOutput = createOutputDirectory(outputDirectory, "html-output", "/html");
@@ -495,7 +499,6 @@ void processFiles()
    }
 
    QString rtfOutput;
-   static const bool generateRtf = Config::getBool("generate-rtf");
 
    if (generateRtf) {
       rtfOutput = createOutputDirectory(outputDirectory, "rtf-output", "/rtf");
@@ -574,8 +577,12 @@ void processFiles()
 
    // **  Note: the order of the function calls below are important
 
-   if (Config::getBool("generate-html")) {
-      readFormulaRepository();
+   if (generateHtml && ! useMathJax) {
+      readFormulas(htmlOutput, false);
+   }
+
+   if (generateRtf) {
+      readFormulas(rtfOutput, (generateHtml && ! useMathJax));
    }
 
    msg("Parse tag files\n");
@@ -10170,36 +10177,69 @@ void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
    return;
 }
 
-void readFormulaRepository()
+void Doxy_Work::readFormulas(QString dir, bool compare)
 {
-   QFile f(Config::getString("html-output") + "/formula.repository");
+   static int currentCnt = 0;
+   int newCnt = 0;
 
-   if (f.open(QIODevice::ReadOnly)) {
-      // open repository
+   QFile file(dir + "/formula.repository");
 
+   if (file.open(QIODevice::ReadOnly)) {
       msg("Reading formula repository\n");
-      QTextStream t(&f);
+
+      QTextStream t(&file);
       QString line;
 
       while (! t.atEnd()) {
-         line = t.readLine();
-         int se = line.indexOf(':'); // find name and text separator
+         line   = t.readLine();
+         int se = line.indexOf(':');    // find name and text separator
 
          if (se == -1) {
-            warn_uncond("formula.repository is corrupted\n");
+            warn_uncond("File formula.repository appears to be corrupted\n");
             break;
 
          } else {
             QString formName = line.left(se);
             QString formText = line.right(line.length() - se - 1);
 
-            Formula f = Formula(formText);
+            if (compare) {
+               auto iter = Doxy_Globals::formulaDict.find(formText);
 
-            Doxy_Globals::formulaList.append(f);
-            Doxy_Globals::formulaDict.insert(formText, f);
-            Doxy_Globals::formulaNameDict.insert(formName, f);
+               if (iter == Doxy_Globals::formulaDict.constEnd()) {
+                  warn_uncond("Inconsistency between formulas. Please remove the files formula.repository and "
+                     "'form_*' in the output directories\n");
+                  stopDoxyPress(1);
+               }
+
+               QString formLabel = QString("\\form#%1").formatArg(iter->getId());
+
+               if (formLabel != formName) {
+                  warn_uncond("Inconsistency between formulas. Please remove the files formula.repository and "
+                     "'form_*' in the output directories\n");
+                  stopDoxyPress(1);
+               }
+
+               ++newCnt;
+
+            } else {
+               Formula f = Formula(formText);
+
+               Doxy_Globals::formulaList.append(f);
+               Doxy_Globals::formulaDict.insert(formText, f);
+               Doxy_Globals::formulaNameDict.insert(formName, f);
+
+               ++currentCnt;
+            }
          }
       }
+   }
+
+   if (compare && (currentCnt != newCnt)) {
+
+      warn_uncond("Size mismatch between formulas. Please remove the files formula.repository and "
+            "'form_*' in the output directories\n");
+
+      stopDoxyPress(1);
    }
 }
 
