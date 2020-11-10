@@ -976,6 +976,7 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
    static const bool haveDot       = Config::getBool("have-dot");
    static const bool classDiagrams = Config::getBool("class-diagrams");
    static const bool classGraph    = Config::getBool("dot-class-graph");
+   static const int  maxNodes      = Config::getInt("dot-graph-max-nodes");
 
    // count direct inheritance relations
    const int count = countInheritanceNodes();
@@ -983,11 +984,15 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
    bool renderDiagram = false;
 
    if (haveDot && (classDiagrams || classGraph)) {
-
       // write class diagram using dot
       DotClassGraph inheritanceGraph(self, DotNode::Inheritance);
 
-      if (! inheritanceGraph.isTrivial() && ! inheritanceGraph.isTooBig()) {
+      if (inheritanceGraph.isTooBig()) {
+         warn_uncond("Inheritance graph was not generated as there were too many nodes. "
+            "Graph '%s' has %d nodes, threshold is %d. Increase the value for DOT_GRAPH_MAX_NODES.\n",
+             csPrintable(name()), inheritanceGraph.numNodes(), maxNodes);
+
+      } else if (! inheritanceGraph.isTrivial()) {
          ol.pushGeneratorState();
          ol.disable(OutputGenerator::Man);
          ol.startDotGraph();

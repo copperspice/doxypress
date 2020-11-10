@@ -433,12 +433,16 @@ void FileDef::writeIncludeGraph(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config::getBool("dot-include")*/) {
+   static const bool haveDot  = Config::getBool("have-dot");
+   static const int  maxNodes = Config::getInt("dot-graph-max-nodes");
 
+   if (haveDot) {
       DotInclDepGraph incDepGraph(self, false);
 
       if (incDepGraph.isTooBig()) {
-         warn_uncond("Include graph for '%s' not generated, too many nodes. Consider increasing DOT_GRAPH_MAX_NODES.\n", csPrintable(name()));
+         warn_uncond("Include graph was not generated as there were too many nodes. "
+            "Graph '%s' has %d nodes, threshold is %d. Increase the value for DOT_GRAPH_MAX_NODES.\n",
+             csPrintable(name()), incDepGraph.numNodes(), maxNodes);
 
       } else if (! incDepGraph.isTrivial()) {
          ol.startTextBlock();
@@ -456,12 +460,16 @@ void FileDef::writeIncludedByGraph(OutputList &ol)
 {
    QSharedPointer<FileDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config::getBool("dot-included-by")*/) {
+   static const bool haveDot  = Config::getBool("have-dot");
+   static const int  maxNodes = Config::getInt("dot-graph-max-nodes");
+
+   if (haveDot) {
       DotInclDepGraph incDepGraph(self, true);
 
       if (incDepGraph.isTooBig()) {
-         warn_uncond("Included by graph for '%s' not generated, too many nodes. "
-                     " Consider increasing 'DOT GRAPH MAX NODES'\n", csPrintable(name()));
+         warn_uncond("Included by graph was not generated as there were too many nodes. "
+            "Graph '%s' has %d nodes, threshold is %d. Increase the value for DOT_GRAPH_MAX_NODES.\n",
+             csPrintable(name()), incDepGraph.numNodes(), maxNodes);
 
       } else if (! incDepGraph.isTrivial()) {
          ol.startTextBlock();

@@ -3014,15 +3014,26 @@ bool DotClassGraph::isTrivial() const
 
 bool DotClassGraph::isTooBig() const
 {
-   static int maxNodes = Config::getInt("dot-graph-max-nodes");
+   static const int maxNodes = Config::getInt("dot-graph-max-nodes");
 
-   int numNodes = 0;
-   numNodes += m_startNode->m_children ? m_startNode->m_children->count() : 0;
+   return numNodes() >= maxNodes;
+}
+
+int DotClassGraph::numNodes() const
+{
+   int retval = 0;
+
+   if (m_startNode->m_children != nullptr) {
+      retval = m_startNode->m_children->count();
+   }
 
    if (m_graphType == DotNode::Inheritance) {
-      numNodes += m_startNode->m_parents ? m_startNode->m_parents->count() : 0;
+      if (m_startNode->m_parents != nullptr) {
+         retval += m_startNode->m_parents->count();
+      }
    }
-   return numNodes >= maxNodes;
+
+   return retval;
 }
 
 DotClassGraph::~DotClassGraph()
@@ -3630,9 +3641,19 @@ bool DotInclDepGraph::isTrivial() const
 bool DotInclDepGraph::isTooBig() const
 {
    static int maxNodes = Config::getInt("dot-graph-max-nodes");
-   int numNodes = m_startNode->m_children ? m_startNode->m_children->count() : 0;
 
-   return numNodes >= maxNodes;
+   return numNodes() >= maxNodes;
+}
+
+int DotInclDepGraph::numNodes() const
+{
+   int retval = 0;
+
+   if (m_startNode->m_children != nullptr) {
+      retval = m_startNode->m_children->count();
+   }
+
+   return retval;
 }
 
 void DotInclDepGraph::writeXML(QTextStream &t)
@@ -3920,9 +3941,20 @@ bool DotCallGraph::isTrivial() const
 
 bool DotCallGraph::isTooBig() const
 {
-   static int maxNodes = Config::getInt("dot-graph-max-nodes");
-   int numNodes = m_startNode->m_children ? m_startNode->m_children->count() : 0;
-   return numNodes >= maxNodes;
+   static const int maxNodes = Config::getInt("dot-graph-max-nodes");
+
+   return numNodes() >= maxNodes;
+}
+
+int DotCallGraph::numNodes() const
+{
+   int retval = 0;
+
+   if (m_startNode->m_children != nullptr) {
+      retval = m_startNode->m_children->count();
+   }
+
+   return retval;
 }
 
 DotDirDeps::DotDirDeps(QSharedPointer<DirDef> dir)

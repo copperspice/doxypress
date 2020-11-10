@@ -2176,7 +2176,8 @@ void MemberDef::_writeCallGraph(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   static const bool haveDot = Config::getBool("have-dot");
+   static const bool haveDot  = Config::getBool("have-dot");
+   static const int  maxNodes = Config::getInt("dot-graph-max-nodes");
 
    // write call graph
    if (m_impl->hasCallGraph && (isFunction() || isSlot() || isSignal()) && haveDot) {
@@ -2184,8 +2185,9 @@ void MemberDef::_writeCallGraph(OutputList &ol)
       DotCallGraph callGraph(self, false);
 
       if (callGraph.isTooBig()) {
-         warn_uncond("Call graph for '%s' not generated, too many nodes. Consider increasing "
-                     "DOT_GRAPH_MAX_NODES.\n", csPrintable(qualifiedName()));
+         warn_uncond("Call graph was not generated as there were too many nodes. "
+             "Graph '%s' has %d nodes, threshold is %d. Increase the value for DOT_GRAPH_MAX_NODES.\n",
+             csPrintable(qualifiedName()), callGraph.numNodes(), maxNodes);
 
       } else if (! callGraph.isTrivial()) {
          msg("Generating call graph for function %s\n", csPrintable(qualifiedName()));
@@ -2207,17 +2209,19 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
-   static const bool haveDot = Config::getBool("have-dot");
+   static const bool haveDot  = Config::getBool("have-dot");
+   static const int  maxNodes = Config::getInt("dot-graph-max-nodes");
 
    if (m_impl->hasCallerGraph && (isFunction() || isSlot() || isSignal()) && haveDot) {
 
       DotCallGraph callerGraph(self, true);
 
       if (callerGraph.isTooBig()) {
-         warn_uncond("Caller graph for '%s' was not generated, too many nodes. "
-                     "Consider increasing DOT_GRAPH_MAX_NODES.\n", csPrintable(qualifiedName()));
+         warn_uncond("Caller graph was not generated as there were too many nodes. "
+            "Graph '%s' has %d nodes, threshold is %d. Increase the value for DOT_GRAPH_MAX_NODES.\n",
+            csPrintable(qualifiedName()), callerGraph.numNodes(), maxNodes);
 
-      } else if (! callerGraph.isTrivial() && !callerGraph.isTooBig()) {
+      } else if (! callerGraph.isTrivial() ) {
          msg("Generating caller graph for function %s\n", csPrintable(qualifiedName()));
 
          ol.disable(OutputGenerator::Man);

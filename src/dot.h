@@ -188,6 +188,7 @@ class DotClassGraph
 
    bool isTrivial() const;
    bool isTooBig() const;
+   int numNodes() const;
 
    QString writeGraph(QTextStream &t, GraphOutputFormat gf, EmbeddedOutputFormat ef,
                          const QString &path, const QString &fileName, const QString &relPath,
@@ -228,9 +229,12 @@ class DotInclDepGraph
 
    bool isTrivial() const;
    bool isTooBig() const;
+   int numNodes() const;
+
    QString diskName() const;
    void writeXML(QTextStream &t);
    void writeDocbook(QTextStream &t);
+
    static void resetNumbering();
 
  private:
@@ -260,6 +264,8 @@ class DotCallGraph
    void buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int distance);
    bool isTrivial() const;
    bool isTooBig() const;
+   int numNodes() const;
+
    void determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes);
    void determineTruncatedNodes(QList<DotNode *> &queue);
    static void resetNumbering();
