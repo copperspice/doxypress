@@ -2645,6 +2645,8 @@ void HtmlDocVisitor::popEnabled()
 
 void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, const QString &context)
 {
+   static const QString htmlOutput = Config::getString("html-output");
+
    QString baseName = fn;
    int i;
 
@@ -2658,14 +2660,16 @@ void HtmlDocVisitor::writeDotFile(const QString &fn, const QString &relPath, con
    }
 
    baseName.prepend("dot_");
-   QString outDir = Config::getString("html-output");
 
-   writeDotGraphFromFile(fn, outDir, baseName, GOF_BITMAP);
-   writeDotImageMapFromFile(m_t, fn, outDir, relPath, baseName, context);
+   writeDotGraphFromFile(fn, htmlOutput, baseName, GOF_BITMAP);
+   writeDotImageMapFromFile(m_t, fn, htmlOutput, relPath, baseName, context);
 }
 
 void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPath, const QString &context)
 {
+   static const QString htmlOutput = Config::getString("html-output");
+   static const QString imageExt  = Config::getEnum("dot-image-extension");
+
    QString baseName = fileName;
    int i;
 
@@ -2681,21 +2685,20 @@ void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPat
 
    baseName.prepend("msc_");
 
-   static const QString outDir   = Config::getString("html-output");
-   static const QString imageExt = Config::getEnum("dot-image-extension");
-
    MscOutputFormat mscFormat = MSC_BITMAP;
 
    if (imageExt == "svg") {
       mscFormat = MSC_SVG;
    }
 
-   writeMscGraphFromFile(fileName, outDir, baseName, mscFormat);
-   writeMscImageMapFromFile(m_t, fileName, outDir, relPath, baseName, context, mscFormat);
+   writeMscGraphFromFile(fileName, htmlOutput, baseName, mscFormat);
+   writeMscImageMapFromFile(m_t, fileName, htmlOutput, relPath, baseName, context, mscFormat);
 }
 
 void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPath, const QString &)
 {
+   static const QString htmlOutput  = Config::getString("html-output");
+
    QString baseName = fileName;
    int i;
 
@@ -2711,14 +2714,16 @@ void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPat
 
    baseName.prepend("dia_");
 
-   QString outDir = Config::getString("html-output");
-   writeDiaGraphFromFile(fileName, outDir, baseName, DIA_BITMAP);
+   writeDiaGraphFromFile(fileName, htmlOutput, baseName, DIA_BITMAP);
 
    m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;
 }
 
 void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &relPath, const QString &)
 {
+   static const QString htmlOutput = Config::getString("html-output");
+   static const QString imageExt   = Config::getEnum("dot-image-extension");
+
    QString baseName = fileName;
    int i;
 
@@ -2732,16 +2737,13 @@ void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &r
       baseName = baseName.left(i);
    }
 
-   static const QString outDir   = Config::getString("html-output");
-   static const QString imageExt = Config::getEnum("dot-image-extension");
-
    if (imageExt == "svg") {
-      generatePlantUMLOutput(fileName, outDir, PUML_SVG);
+      generatePlantUMLOutput(fileName, htmlOutput, PUML_SVG);
 
       m_t << "<object type=\"image/svg+xml\" data=\"" << relPath << baseName << ".svg\"></object>" << endl;
 
    } else {
-      generatePlantUMLOutput(fileName, outDir, PUML_BITMAP);
+      generatePlantUMLOutput(fileName, htmlOutput, PUML_BITMAP);
       m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;
    }
 }

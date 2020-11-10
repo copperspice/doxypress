@@ -807,11 +807,11 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
 
 bool ClassDef::hasDetailedDescription() const
 {
-   static const bool repeatBrief   = Config::getBool("repeat-brief");
-   static const bool sourceBrowser = Config::getBool("source-code");
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+   static const bool sourceCode  = Config::getBool("source-code");
 
    return ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty() ||
-           (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()));
+           (sourceCode && getStartBodyLine() != -1 && getBodyDef()));
 }
 
 // write the detailed description for this class

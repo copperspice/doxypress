@@ -321,11 +321,11 @@ void ConceptDef::writeDetailedDocumentationBody(OutputList &ol)
 
 bool ConceptDef::hasDetailedDescription() const
 {
-   static const bool repeatBrief   = Config::getBool("repeat-brief");
-   static const bool sourceBrowser = Config::getBool("source-code");
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+   static const bool sourceCode  = Config::getBool("source-code");
 
    return ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty() ||
-           (sourceBrowser && getStartBodyLine() != -1 && getBodyDef()));
+           (sourceCode && getStartBodyLine() != -1 && getBodyDef()));
 }
 
 void ConceptDef::writeMoreLink(OutputList &ol, const QString &anchor)
