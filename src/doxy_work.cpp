@@ -448,13 +448,19 @@ void processFiles()
 {
    printf("Parse input files\n");
 
-   // make sure the output directory exists
-   QString outputDirectory = Config::getString("output-dir");
-   int cacheSize           = Config::getInt("lookup-cache-size");
+   static const QString outputDir    = Config::getString("output-dir");
    static const bool generateHtml    = Config::getBool("generate-html");
+   static const bool generateDocbook = Config::getBool("generate-docbook");
+   static const bool generateLatex   = Config::getBool("generate-latex");
+   static const bool generateMan     = Config::getBool("generate-man");
    static const bool generateRtf     = Config::getBool("generate-rtf");
+   static const bool generateXml     = Config::getBool("generate-xml");
+
+   static const bool haveDot         = Config::getBool("have-dot");
    static const bool useMathJax      = Config::getBool("use-mathjax");
    static const QString layoutFName  = Config::getString("layout-file");
+
+   int cacheSize = Config::getInt("lookup-cache-size");
 
    if (cacheSize < 0) {
       cacheSize = 0;
@@ -470,63 +476,59 @@ void processFiles()
    signal(SIGINT, stopDoxyPress);
 #endif
 
-   // Check/create output directories
+   // make sure the output directory exists
    QString htmlOutput;
 
    if (generateHtml) {
-      htmlOutput = createOutputDirectory(outputDirectory, "html-output", "/html");
+      htmlOutput = createOutputDirectory(outputDir, "html-output", "/html");
    }
 
    QString docbookOutput;
-   static const bool generateDocbook = Config::getBool("generate-docbook");
 
    if (generateDocbook) {
-      docbookOutput = createOutputDirectory(outputDirectory, "docbook-output", "/docbook");
-   }
-
-   QString xmlOutput;
-   static const bool generateXml = Config::getBool("generate-xml");
-
-   if (generateXml) {
-      xmlOutput = createOutputDirectory(outputDirectory, "xml-output", "/xml");
+      docbookOutput = createOutputDirectory(outputDir, "docbook-output", "/docbook");
    }
 
    QString latexOutput;
-   static const bool generateLatex = Config::getBool("generate-latex");
 
    if (generateLatex) {
-      latexOutput = createOutputDirectory(outputDirectory, "latex-output", "/latex");
+      latexOutput = createOutputDirectory(outputDir, "latex-output", "/latex");
+   }
+
+   QString manOutput;
+
+   if (generateMan) {
+      manOutput = createOutputDirectory(outputDir, "man-output", "/man");
    }
 
    QString rtfOutput;
 
    if (generateRtf) {
-      rtfOutput = createOutputDirectory(outputDirectory, "rtf-output", "/rtf");
+      rtfOutput = createOutputDirectory(outputDir, "rtf-output", "/rtf");
    }
 
-   QString manOutput;
-   static const bool generateMan = Config::getBool("generate-man");
+   QString xmlOutput;
 
-   if (generateMan) {
-      manOutput = createOutputDirectory(outputDirectory, "man-output", "/man");
+   if (generateXml) {
+      xmlOutput = createOutputDirectory(outputDir, "xml-output", "/xml");
    }
 
-   if (Config::getBool("have-dot")) {
-      QString curFontPath = Config::getString("dot-font-path");
 
-      if (curFontPath.isEmpty()) {
-         portable_getenv("dot-font-path");
-         QString  newFontPath = ".";
+   if (haveDot) {
+      static const QString dotFontPath = Config::getString("dot-font-path");
 
-         if (! curFontPath.isEmpty()) {
+      if (dotFontPath.isEmpty()) {
+         QString newFontPath = ".";
+
+         if (! dotFontPath.isEmpty()) {
             newFontPath += portable_pathListSeparator();
-            newFontPath += curFontPath;
+            newFontPath += dotFontPath;
          }
 
-         portable_setenv("dot-font-path", newFontPath);
+         portable_setenv("DOTFONTPATH", newFontPath);
 
       } else {
-         portable_setenv("dot-font-path", curFontPath);
+         portable_setenv("DOTFONTPATH", dotFontPath);
 
       }
    }
@@ -896,9 +898,9 @@ void generateOutput()
    const bool generateXml         = Config::getBool("generate-xml");
 
    const QString htmlOutput       = Config::getString("html-output");
+   const QString docbookOutput    = Config::getString("docbook-output");
    const QString latexOutput      = Config::getString("latex-output");
    const QString rtfOutput        = Config::getString("rtf-output");
-   const QString dookbookOutput   = Config::getString("docbook-output");
 
    // only used when HTML is enabled
    const bool generateHtmlHelp    = Config::getBool("generate-chm");
@@ -906,6 +908,9 @@ void generateOutput()
    const bool generateQhp         = Config::getBool("generate-qthelp");
    const bool generateTreeView    = Config::getBool("generate-treeview");
    const bool generateDocSet      = Config::getBool("generate-docset");
+
+   const bool searchEngine        = Config::getBool("html-search");
+   const bool serverBasedSearch   = Config::getBool("search-server-based");
 
    if (generateHtml) {
       Doxy_Globals::infoLog_Stat.begin("Enable HTML output\n");
@@ -1001,9 +1006,6 @@ void generateOutput()
    // write first part
    Doxy_Globals::outputList.writeStyleInfo(0);
    Doxy_Globals::infoLog_Stat.end();
-
-   static bool searchEngine      = Config::getBool("html-search");
-   static bool serverBasedSearch = Config::getBool("search-server-based");
 
    // generate search indices (need to do this before writing other HTML
    // pages as these contain a drop down menu with options depending on
