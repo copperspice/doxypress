@@ -1367,11 +1367,8 @@ void HtmlGenerator::docify(const QString &text, bool inHtmlComment)
 
 void HtmlGenerator::writeChar(char c)
 {
-   char cs[2];
-   cs[0] = c;
-   cs[1] = 0;
-
-   docify(cs);
+   QString tmp = QChar(c);
+   docify(tmp);
 }
 
 static void startSectionHeader(QTextStream &t_stream, const QString &relPath, int sectionCount)
@@ -1449,31 +1446,43 @@ void HtmlGenerator::startClassDiagram()
 
 void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname, const QString &name)
 {
+   QString imgData;
+   QTextStream t_stream(&imgData);
+   d.writeImage(t_stream, m_dir, m_relativePath, fname);
+
+   //
    endSectionHeader(m_textStream);
    startSectionSummary(m_textStream, m_sectionCount);
 
    endSectionSummary(m_textStream);
    startSectionContent(m_textStream, m_sectionCount);
 
-   m_textStream << " <div class=\"center\">" << endl;
-   m_textStream << "  <img src=\"";
-   m_textStream << m_relativePath << fname << ".png\" usemap=\"#";  // << convertToId(name);
-   docify(name);
+   if (! imgData.isEmpty()) {
 
-   m_textStream << "_map\" alt=\"\"/>" << endl;
-   m_textStream << "  <map id=\"";   // << convertToId(name);
-   docify(name);
+      m_textStream << " <div class=\"center\">" << endl;
+      m_textStream << "  <img src=\"";
+      m_textStream << m_relativePath << fname << ".png\" usemap=\"#" << convertToId(name);
 
-   m_textStream << "_map\" name=\"";
-   docify(name);
+      m_textStream << "_map\" alt=\"\"/>" << endl;
+      m_textStream << "  <map id=\"" << convertToId(name);
 
-   m_textStream << "_map\">" << endl;
-   d.writeImage(m_textStream, m_dir, m_relativePath, fname);
+      m_textStream << "_map\" name=\"" << convertToId(name);
+      m_textStream << "_map\">" << endl;
 
-   m_textStream << " </div>";
+      m_textStream << imgData;
+
+      m_textStream << "  </map>" << endl;
+      m_textStream << " </div>";
+
+   } else {
+      m_textStream << " <div class=\"center\">" << endl;
+      m_textStream << "  <img src=\"";
+      m_textStream << m_relativePath << fname << ".png\" alt=\"\"/>" << endl;
+      m_textStream << " </div>";
+  }
+
    endSectionContent(m_textStream);
-
-   m_sectionCount++;
+   ++m_sectionCount;
 }
 
 void HtmlGenerator::startMemberList()
