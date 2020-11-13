@@ -2081,8 +2081,7 @@ void ClassDef::writeMemberList(OutputList &ol)
    ol.parseText(theTranslator->trIncludingInheritedMembers());
    ol.endParagraph();
 
-   ol.writeString("<table class=\"directory\">\n");
-
+   bool first = true;
    int idx = 0;
 
    for (auto mni : m_allMemberNameInfoSDict) {
@@ -2101,6 +2100,10 @@ void ClassDef::writeMemberList(OutputList &ol)
                // create a link to the documentation
                QString name = mi.ambiguityResolutionScope + md->name();
 
+              if (first) {
+                  ol.writeString("<table class=\"directory\">\n");
+                  first = false;
+               }
                ol.writeString("  <tr");
                if ((idx & 1) == 0) {
                   ol.writeString(" class=\"even\"");
@@ -2154,12 +2157,18 @@ void ClassDef::writeMemberList(OutputList &ol)
 
                // no documentation, generate link to the class instead
 
+               if (first) {
+                  ol.writeString("<table class=\"directory\">\n");
+                  first = false;
+               }
+
                ol.writeString("  <tr bgcolor=\"#f0f0f0\"");
+
                if ((idx & 1) == 0) {
                   ol.writeString(" class=\"even\"");
                }
 
-               idx++;
+               ++idx;
 
                ol.writeString("><td class=\"entry\">");
                if (cd->isObjectiveC()) {
@@ -2245,8 +2254,9 @@ void ClassDef::writeMemberList(OutputList &ol)
          }
       }
    }
-
-   ol.writeString("</table>");
+   if (! first) {
+      ol.writeString("</table>");
+   }
 
    endFile(ol);
    ol.popGeneratorState();
