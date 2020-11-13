@@ -318,7 +318,7 @@ static void writeMapArea(QTextStream &t, QSharedPointer<ClassDef> cd, const QStr
       QString tooltip = cd->briefDescriptionAsTooltip();
 
       if (! tooltip.isEmpty()) {
-         t << "title=\"" << tooltip << "\" ";
+         t << "title=\"" << convertToHtml(tooltip) << "\" ";
       }
 
       t << "alt=\"" << convertToXML(cd->displayName());

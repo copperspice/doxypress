@@ -1859,11 +1859,11 @@ void HtmlDocVisitor::visitPre(DocHRef *href)
 
    if (href->url().startsWith("mailto:")) {
       QString url = href->url();
-      m_t << "<a href=\"" << convertToXML(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
+      m_t << "<a href=\"" << convertToHtml(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
 
    } else {
       QString url = correctURL(href->url(), href->relPath());
-      m_t << "<a href=\"" << convertToXML(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
+      m_t << "<a href=\"" << convertToHtml(url) << "\"" << htmlAttribsToString(href->attribs()) << ">";
    }
 }
 
@@ -2622,7 +2622,7 @@ void HtmlDocVisitor::startLink(const QString &ref, const QString &file, const QS
    m_t << "\"";
 
    if (! tooltip.isEmpty()) {
-      m_t << " title=\"" << substitute(tooltip, "\"", "&quot;") << "\"";
+      m_t << " title=\"" << convertToHtml(tooltip) << "\"";
    }
 
    m_t << ">";
