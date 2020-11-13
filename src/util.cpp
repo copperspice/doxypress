@@ -5214,8 +5214,8 @@ QString stripScope(const QString &name)
    return name;
 }
 
-/*! Converts a string to an XML-encoded string */
-QString convertToXML(const QString &str)
+
+QString convertToId(const QString &str)
 {
    QString retval;
 
@@ -5223,7 +5223,47 @@ QString convertToXML(const QString &str)
       return retval;
    }
 
+   bool first = true;
+
    for (auto c : str) {
+
+      if (c.isLetterOrNumber() || c == '-' || c == ':' || c == '.') {
+
+
+         if (first && c.isDigit())  {
+            // do not start with a digit
+            retval += 'a';
+         }
+
+         retval += c;
+
+
+      } else {
+         retval += QString("_%1").formatArg(c.unicode(), 2, 16, QChar('0'));
+
+      }
+
+      first = false;
+   }
+
+   return retval;
+}
+
+/*! Converts a string to an XML-encoded string */
+QString convertToXML(const QString &str, bool keepEntities)
+{
+   QString retval;
+
+   if (str.isEmpty()) {
+      return retval;
+   }
+
+   auto iter = str.constBegin();
+
+   while (iter != str.constEnd()) {
+
+      QChar c = *iter;
+      ++iter;
 
       switch (c.unicode()) {
          case '<':
@@ -5235,7 +5275,35 @@ QString convertToXML(const QString &str)
             break;
 
          case '&':
-            retval += "&amp;";
+            if (keepEntities) {
+               auto iterEnd = iter;
+
+               while (iterEnd != str.constEnd()) {
+
+                  if (*iterEnd == ';' || (! (isId(*iterEnd) || *iterEnd == '#'))) {
+                     break;
+                  }
+
+                  ++iterEnd;
+               }
+
+               if (iterEnd != str.constEnd() && *iterEnd == ';') {
+                  // found end of an entity, copy entry verbatim
+                  retval += c;
+
+                  while (iter != iterEnd) {
+                     retval += *iter;
+                     ++iter;
+                  }
+
+               } else {
+                  retval += "&amp;";
+               }
+
+            } else {
+               retval += "&amp;";
+
+            }
             break;
 
          case '\'':

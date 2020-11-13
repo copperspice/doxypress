@@ -142,6 +142,7 @@ QChar   charToUpper(const QString &s, int index);
 
 bool    classVisibleInIndex(QSharedPointer<ClassDef> cd);
 bool    classHasVisibleChildren(QSharedPointer<ClassDef> cd);
+QString convertToId(const QString &str);
 bool    copyFile(const QString &src, const QString &dest);
 bool    checkIfTypedef(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,const QString &name);
 int     computeQualifiedIndex(const QString &name);
@@ -154,7 +155,7 @@ QString correctURL(const QString &url, const QString &relPath);
 QString convertNameToFile_X(const QString &name, bool allowDots = false, bool allowUnderscore = false);
 QString convertToHtml(const QString &s,  bool keepEntities  = true);
 QString convertToLatex(const QString &s, bool insideTabbing = false, bool keepSpaces = false);
-QString convertToXML(const QString &s);
+QString convertToXML(const QString &s, bool keepEntities = false);
 QString convertToJSString(const QString &s, bool applyTextDir = true);
 bool    checkExtension(const QString &fName, const QString &ext);
 

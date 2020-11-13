@@ -462,10 +462,10 @@ static void writeTemplateArgumentList(const ArgumentList &al, QTextStream &t, QS
          t << "</type>" << endl;
       }
 
-      if (! arg.name.isEmpty()) {
-         t << indentStr <<  "    <declname>" << arg.name << "</declname>" << endl;
-         t << indentStr <<  "    <defname>"  << arg.name << "</defname>" << endl;
-      }
+         if (! arg.name.isEmpty()) {
+            t << indentStr <<  "    <declname>" << convertToXML(arg.name) << "</declname>" << endl;
+            t << indentStr <<  "    <defname>"  << convertToXML(arg.name) << "</defname>" << endl;
+         }
 
       if (! arg.defval.isEmpty()) {
          t << indentStr << "    <defval>";
@@ -1237,7 +1237,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    if (md->getDefLine() != -1) {
       t << "        <location file=\""
-        << stripFromPath(md->getDefFileName()) << "\" line=\""
+        << convertToXML(stripFromPath(md->getDefFileName())) << "\" line=\""
         << md->getDefLine() << "\"" << " column=\""
         << md->getDefColumn() << "\"" ;
 
@@ -1245,7 +1245,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          QSharedPointer<FileDef> bodyDef = md->getBodyDef();
 
          if (bodyDef) {
-            t << " bodyfile=\"" << bodyDef->getFilePath() << "\"";
+            t << " bodyfile=\"" << convertToXML(stripFromPath(bodyDef->getFilePath())) << "\"";
          }
          t << " bodystart=\"" << md->getStartBodyLine() << "\" bodyend=\""
            << md->getEndBodyLine() << "\"";
@@ -1714,7 +1714,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    }
 
    t << "    <location file=\""
-     << stripFromPath(cd->getDefFileName()) << "\" line=\""
+     << convertToXML(stripFromPath(cd->getDefFileName())) << "\" line=\""
      << cd->getDefLine() << "\"" << " column=\""
      << cd->getDefColumn() << "\"" ;
 
@@ -1722,7 +1722,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       QSharedPointer<FileDef> bodyDef = cd->getBodyDef();
 
       if (bodyDef) {
-         t << " bodyfile=\"" << bodyDef->getFilePath() << "\"";
+         t << " bodyfile=\"" << convertToXML(stripFromPath(bodyDef->getFilePath())) << "\"";
       }
       t << " bodystart=\"" << cd->getStartBodyLine() << "\" bodyend=\""
         << cd->getEndBodyLine() << "\"";
@@ -1798,7 +1798,7 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
   writeXMLDocBlock(t, nd->docFile(), nd->docLine(), nd, QSharedPointer<MemberDef>(), nd->documentation());
    t << "    </detaileddescription>" << endl;
    t << "    <location file=\""
-     << stripFromPath(nd->getDefFileName()) << "\" line=\""
+     << convertToXML(stripFromPath(nd->getDefFileName())) << "\" line=\""
      << nd->getDefLine() << "\"" << " column=\""
      << nd->getDefColumn() << "\"/>" << endl ;
    t << "  </compounddef>" << endl;
@@ -2029,7 +2029,7 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    t << "    <detaileddescription>" << endl;
    writeXMLDocBlock(t, dd->docFile(), dd->docLine(), dd, QSharedPointer<MemberDef>(), dd->documentation());
    t << "    </detaileddescription>" << endl;
-   t << "    <location file=\"" << stripFromPath(dd->name()) << "\"/>" << endl;
+   t << "    <location file=\"" << convertToXML(stripFromPath(dd->name())) << "\"/>" << endl;
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 

@@ -74,15 +74,15 @@ static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCapti
    }
 
    if (! name.isEmpty()) {
-      t << " name=\"" << name << "\"";
+      t << " name=\"" << convertToXML(name, true) << "\"";
    }
 
    if (! width.isEmpty()) {
-      t << " width=\"" << convertToXML(width) << "\"";
+      t << " width=\"" << convertToXML(width, false) << "\"";
    }
 
    if (! height.isEmpty()) {
-      t << " height=\"" << convertToXML(height) << "\"";
+      t << " height=\"" << convertToXML(height, false) << "\"";
    }
 
    if (doCaption) {
@@ -982,9 +982,8 @@ void XmlDocVisitor::visitPre(DocHRef *href)
    if (m_hide) {
       return;
    }
-   m_t << "<ulink url=\"";
-   filter(href->url());
-   m_t << "\">";
+
+   m_t << "<ulink url=\"" << convertToXML(href->url(), true) << "\">";
 }
 
 void XmlDocVisitor::visitPost(DocHRef *)
