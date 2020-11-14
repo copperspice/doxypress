@@ -54,7 +54,8 @@ enum ContextState
 };
 
 static const QString contexts[10] =
-{  "",
+{
+   "",
    "startli",
    "interli",
    "endli",
@@ -525,6 +526,8 @@ static void visitCaption(HtmlDocVisitor *parent, QList<DocNode *> children)
 
 void HtmlDocVisitor::visit(DocVerbatim *s)
 {
+   static const QString htmlOutput = Config::getString("html-output");
+
    if (m_hide) {
       return;
    }
@@ -595,7 +598,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
 
          QString fileName;
-         fileName = QString("%1%2.dot").formatArg(Config::getString("html-output") + "/inline_dotgraph_").formatArg(dotindex++);
+         fileName = QString("%1%2.dot").formatArg(htmlOutput + "/inline_dotgraph_").formatArg(dotindex++);
 
          QFile file(fileName);
 
@@ -632,7 +635,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          static int mscindex = 1;
 
          QString baseName;
-         baseName = QString("%1%2").formatArg(Config::getString("html-output") + "/inline_mscgraph_").formatArg(mscindex++);
+         baseName = QString("%1%2").formatArg(htmlOutput + "/inline_mscgraph_").formatArg(mscindex++);
 
          QFile file(baseName + ".msc");
 
@@ -667,8 +670,6 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       break;
 
       case DocVerbatim::PlantUML: {
-         static QString htmlOutput = Config::getString("html-output");
-
          forceEndParagraph(s);
 
          // QString imgExt = getDotImageExtension();
@@ -825,12 +826,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       m_hide = true;
    }
 
-   // QString locLangExt = getFileNameExtension(op->includeFileName());
 
-   // if (locLangExt.isEmpty()) {
-   //    locLangExt = m_langExt;
-   // }
-   // SrcLangExt langExt = getLanguageFromFileName(locLangExt);
 
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
 
@@ -902,6 +898,7 @@ void HtmlDocVisitor::visit(DocFormula *f)
       filterQuotedCdataAttr(f->text());
 
       m_t << "\"";
+
       // emerald
       m_t << " src=\"" << f->relPath() << f->name() << ".png\"/>";
 
@@ -1016,6 +1013,7 @@ void HtmlDocVisitor::visitPost(DocAutoListItem *li)
    if (m_hide) {
       return;
    }
+
    m_t << "</li>";
 
    if (! li->isPreformatted()) {
@@ -2339,6 +2337,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
          } else if (type->kind() == DocNode::Kind_LinkedWord) {
             visit((DocLinkedWord *)type);
          }
+
       }
 
       m_t << "</td>";

@@ -930,6 +930,7 @@ void XmlDocVisitor::visitPre(DocHtmlCell *c)
    if (m_hide) {
       return;
    }
+
    if (c->isHeading()) {
       m_t << "<entry thead=\"yes\">";
    } else {
@@ -991,6 +992,7 @@ void XmlDocVisitor::visitPost(DocHRef *)
    if (m_hide) {
       return;
    }
+
    m_t << "</ulink>";
 }
 
@@ -999,6 +1001,7 @@ void XmlDocVisitor::visitPre(DocHtmlHeader *header)
    if (m_hide) {
       return;
    }
+
    m_t << "<heading level=\"" << header->level() << "\">";
 }
 

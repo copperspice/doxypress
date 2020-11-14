@@ -1014,11 +1014,11 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
 void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   const QString &text, const MemberSDict &members)
 {
-   static const bool sourceBrowser   = Config::getBool("source-code");
-   static const bool refLinkSource   = Config::getBool("ref-link-source");
-   static const bool latexSourceCode = Config::getBool("latex-source-code");
-   static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
-// static const bool docbookSourceCode = Config::getBool("docbook-programlisting");
+   static const bool sourceCode        = Config::getBool("source-code");
+   static const bool docbookSourceCode = Config::getBool("docbook-program-listing");
+   static const bool latexSourceCode   = Config::getBool("latex-source-code");
+   static const bool refLinkSource     = Config::getBool("ref-link-source");
+   static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
 
 
    ol.pushGeneratorState();
@@ -1062,7 +1062,7 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                name += "()";
             }
 
-            if (sourceBrowser && ! (md->isLinkable() && !refLinkSource) && md->getStartBodyLine() != -1 && md->getBodyDef()) {
+            if (sourceCode && ! (md->isLinkable() && !refLinkSource) && md->getStartBodyLine() != -1 && md->getBodyDef()) {
                // for HTML write a real link
 
                ol.pushGeneratorState();

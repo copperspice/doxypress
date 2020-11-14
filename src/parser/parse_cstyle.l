@@ -935,7 +935,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <NextSemi>"("  {
-      roundCount=0;
+      roundCount = 0;
       BEGIN(SkipRoundBlock);
    }
 
@@ -1062,7 +1062,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*("properties"){BN}*":"{BN}*    {
       // IDL or Borland C++ builder property
 
-      current->mtype       = mtype = MethodType::Property;
+      mtype                = MethodType::Property;
+      current->mtype       = MethodType::Property;
       current->protection  = protection = Public;
 
       current->m_entryName = "";
@@ -2511,7 +2512,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_entryName = removeRedundantWhiteSpace(substitute(text,"\\","::"));
       current->setData(EntryKey::File_Name, yyFileName);
 
-      // add a using declaraton
+      // add a using declaration
       current->section = Entry::USINGDECL_SEC;
       current_root->addSubEntry(current, current_root);
       current = QMakeShared<Entry>(*current);
@@ -2535,7 +2536,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       Doxy_Globals::namespaceAliasDict.insert(text,
       removeRedundantWhiteSpace(substitute(aliasName,"\\","::")));
 
-      aliasName.resize(0);
+      aliasName.clear();
    }
 
 <PHPUse,PHPUseAs>[,;]         {
@@ -5591,7 +5592,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <ReadBody,ReadNSBody>"}"      {
       QString text = QString::fromUtf8(yytext);
 
-      if ( curlyCount > 0 )   {
+      if (curlyCount > 0)   {
          current->appendData(EntryKey::Source_Text, text);
          --curlyCount;
 
@@ -5644,7 +5645,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
                   memspecEntry = QSharedPointer<Entry>();
 
-                  BEGIN( FindMembers ) ;
+                  BEGIN( FindMembers );
 
                } else {
                   static QRegularExpression regExp("@[0-9]+$");
@@ -5653,8 +5654,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                      // not typedef or anonymous type
                      // enabled the next two lines for
 
-                     current->setData(EntryKey::Brief_Docs,  "");
-                     current->setData(EntryKey::Main_Docs,   "");
+                     current->setData(EntryKey::Brief_Docs,  QString());
+                     current->setData(EntryKey::Main_Docs,   QString());
                   }
 
                   BEGIN( MemberSpec );
@@ -5724,7 +5725,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <TypedefName>";"        {
       /* typedef of anonymous type */
-      current->m_entryName = QString("@%1").formatArg(anonCount++);
+      current->m_entryName = QString("@%1").formatArg(anonCount);
+      ++anonCount;
 
       bool isEnum = current->m_traits.hasTrait(Entry::Virtue::Enum);
 
@@ -5821,7 +5823,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                if (p->m_entryName.at(pi) == '@') {
                   // anonymous compound inside -> insert dummy variable name
 
-                  msName = QString("@%1").formatArg(anonCount++);
+                  msName = QString("@%1").formatArg(anonCount);
+                  ++anonCount;
                   break;
                }
             }
@@ -6780,6 +6783,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Member_Args, " = 0");
       current->virt = Pure;
       current->argList.pureSpecifier = true;
+
       BEGIN(FuncQual);
    }
 
@@ -6797,6 +6801,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
       current->appendData(EntryKey::Member_Args, " = default");
       current->m_traits.setTrait(Entry::Virtue::Default);
+
       BEGIN(FuncQual);
    }
 
@@ -6807,13 +6812,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(TrailingReturn);
    }
 
-<TrailingReturn>[{;]                      {
+<TrailingReturn>[{;]                   {
       unput(*yytext);
       BEGIN(FuncQual);
    }
 
 <TrailingReturn>.                         {
       QString text = QString::fromUtf8(yytext);
+
       current->argList.trailingReturnType += text;
       current->appendData(EntryKey::Member_Args, text);
    }
@@ -8182,7 +8188,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             }
 
          } else {
-            current->m_entryName = QString("@%1").formatArg(anonCount++);
+            current->m_entryName = QString("@%1").formatArg(anonCount);
+            ++anonCount;
          }
       }
 
@@ -9763,7 +9770,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
       parseCompounds(rt);
       s_inputFile.close();
 
-      anonNSCount++;
+      ++anonNSCount;
    }
 }
 

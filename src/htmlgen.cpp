@@ -19,8 +19,6 @@
 #include <QDir>
 #include <QRegularExpression>
 
-#include <stdlib.h>
-
 #include <htmlgen.h>
 
 #include <config.h>
@@ -39,6 +37,8 @@
 #include <message.h>
 #include <resourcemgr.h>
 #include <util.h>
+
+#include <stdlib.h>
 
 //#define DBG_HTML(x) x;
 #define DBG_HTML(x)
@@ -71,7 +71,7 @@ static void writeClientSearchBox(QTextStream &t, const QString &relPath)
 
 static void writeServerSearchBox(QTextStream &t, const QString &relPath, bool highlightSearch)
 {
-   static bool externalSearch = Config::getBool("search-external");
+   static const bool externalSearch = Config::getBool("search-external");
 
    t << "        <div id=\"MSearchBox\" class=\"MSearchBoxInactive\">\n";
    t << "          <div class=\"left\">\n";
@@ -190,12 +190,6 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings
 
-   QString generatedBy;
-   QString treeViewCssJs;
-   QString searchCssJs;
-   QString searchBox;
-   QString mathJaxJs;
-
    static const QDir configDir   = Config::getConfigDir();
 
    static QString projectName    = Config::getString("project-name");
@@ -221,8 +215,14 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 
    static bool titleArea = (hasProjectName || hasProjectBrief || hasProjectLogo || (disableIndex && searchEngine));
 
+   QString generatedBy;
+   QString treeViewCssJs;
+   QString searchCssJs;
+   QString searchBox;
+   QString mathJaxJs;
+
    // always first
-   QString cssFile = "doxypress.css";
+   QString cssFile      = "doxypress.css";
    QString extraCssText = "";
 
    for (auto fileName : extraCssFile) {
@@ -340,31 +340,31 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
       result = result.replace("$title", convertToHtml(title));
    }
 
-   result = result.replace("$datetimeHHMM",   dateTimeHHMM());
-   result = result.replace("$datetime",       dateToString(true));
-   result = result.replace("$date",           dateToString(false));
-   result = result.replace("$year",           yearToString());
+   result = result.replace("$datetimeHHMM",     dateTimeHHMM());
+   result = result.replace("$datetime",         dateToString(true));
+   result = result.replace("$date",             dateToString(false));
+   result = result.replace("$year",             yearToString());
 
    result = result.replace("$doxypressversion", versionString);
    result = result.replace("$doxygenversion",   versionString);      // compatibility
 
-   result = result.replace("$projectname",    convertToHtml(projectName));
-   result = result.replace("$projectversion", convertToHtml(projectVersion));
-   result = result.replace("$projectbrief",   convertToHtml(projectBrief));
-   result = result.replace("$projectlogo",    stripPath(projectLogo));
+   result = result.replace("$projectname",      convertToHtml(projectName));
+   result = result.replace("$projectversion",   convertToHtml(projectVersion));
+   result = result.replace("$projectbrief",     convertToHtml(projectBrief));
+   result = result.replace("$projectlogo",      stripPath(projectLogo));
 
    // additional HTML only keywords
-   result = result.replace("$navpath",         navPath);
-   result = result.replace("$stylesheet",      cssFile);
-   result = result.replace("$extrastylesheet", extraCssText);
-   result = result.replace("$treeview",        treeViewCssJs);
-   result = result.replace("$searchbox",       searchBox);
-   result = result.replace("$search",          searchCssJs);
-   result = result.replace("$mathjax",         mathJaxJs);
-   result = result.replace("$generatedby",     generatedBy);
+   result = result.replace("$navpath",          navPath);
+   result = result.replace("$stylesheet",       cssFile);
+   result = result.replace("$extrastylesheet",  extraCssText);
+   result = result.replace("$treeview",         treeViewCssJs);
+   result = result.replace("$searchbox",        searchBox);
+   result = result.replace("$search",           searchCssJs);
+   result = result.replace("$mathjax",          mathJaxJs);
+   result = result.replace("$generatedby",      generatedBy);
 
-   result = result.replace("$relpath$", relPath); //<-- obsolete: for backwards compatibility only
-   result = result.replace("$relpath^", relPath); //<-- must be last
+   result = result.replace("$relpath$",         relPath);  // backwards compatibility only
+   result = result.replace("$relpath^",         relPath);  // keep last
 
    // additional HTML only conditional blocks
    result = selectBlock(result, "DISABLE_INDEX",     disableIndex);
@@ -700,6 +700,9 @@ HtmlGenerator::~HtmlGenerator()
 
 void HtmlGenerator::init()
 {
+   static const bool sourceCode       = Config::getBool("source-code");
+   static const bool toolTips         = Config::getBool("source-tooltips");
+
    static const QString htmlDirName   = Config::getString("html-output");
    static const QString htmlHeader    = Config::getString("html-header");
    static const QString htmlFooter    = Config::getString("html-footer");
@@ -757,7 +760,7 @@ void HtmlGenerator::init()
          QTextStream t(&f);
          t << resource;
 
-         if (Config::getBool("source-code") && Config::getBool("source-tooltips")) {
+         if (sourceCode && toolTips) {
             t << endl <<
               "$(document).ready(function() {\n"
               "  $('.code,.codeRef').each(function() {\n"
@@ -903,6 +906,8 @@ void HtmlGenerator::writeFooterFile(QFile &file)
 
 void HtmlGenerator::startFile(const QString &name, const QString &, const QString &title)
 {
+   static const bool searchEngine = Config::getBool("html-search");
+
    QString fileName = name;
 
    m_lastTitle    = title;
@@ -913,7 +918,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    }
 
    startPlainFile(fileName);
-   m_codeGen = QMakeShared<HtmlCodeGenerator> (m_textStream, m_relativePath);
+   m_codeGen = QMakeShared<HtmlCodeGenerator>(m_textStream, m_relativePath);
 
    //
    Doxy_Globals::indexList.addIndexFile(fileName);
@@ -922,13 +927,11 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
    m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->" << endl;
 
-   static bool searchEngine = Config::getBool("html-search");
-
-   if (searchEngine /*&& !generateTreeView*/) {
+   if (searchEngine /*&& ! generateTreeView*/) {
       m_textStream << "<script type=\"text/javascript\">\n";
 
       m_textStream << "var searchBox = new SearchBox(\"searchBox\", \""
-        << m_relativePath << "search\",false,'" << theTranslator->trSearch() << "');\n";
+                   << m_relativePath << "search\",false,'" << theTranslator->trSearch() << "');\n";
 
       m_textStream << "</script>\n";
    }
@@ -1361,7 +1364,6 @@ void HtmlGenerator::docify(const QString &text, bool inHtmlComment)
       if (isBackSlash && c != '\\') {
          isBackSlash = false;
       }
-
    }
 }
 
@@ -1555,7 +1557,6 @@ void HtmlGenerator::endMemberTemplateParams(const QString &anchor, const QString
 
    m_textStream << "\"><td class=\"memTemplItemLeft\" align=\"right\" valign=\"top\">";
 }
-
 
 void HtmlGenerator::insertMemberAlign(bool templ)
 {
@@ -2553,6 +2554,7 @@ void HtmlGenerator::writeSearchPage()
       t_stream << "  'logo' => \"" << substitute(substitute(writeLogoAsString(""), "\"", "\\\""), "\n", "\\n") << "\",\n";
       t_stream << ");\n\n";
       t_stream << "?>\n";
+
    } else {
       err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(configFileName), cf.error());
    }

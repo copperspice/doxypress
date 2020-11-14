@@ -1258,19 +1258,18 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_PlantUML>[^\\@\n]+ |
 <St_PlantUML>\n        |
-<St_PlantUML>.           {
-      /* plantuml text */
+<St_PlantUML>.                 {
       g_token->verb += QString::fromUtf8(yytext);
    }
 
-<St_Title>"\""           {
+<St_Title>"\""         {
       // quoted title
       BEGIN(St_TitleQ);
    }
 
 <St_Title>[ \t]+       {
       g_token->chars = QString::fromUtf8(yytext);
-         return TK_WHITESPACE;
+      return TK_WHITESPACE;
    }
 
 <St_Title>.           {
@@ -1281,7 +1280,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Title>\n          {
       unput(yytext[0]);
-         return 0;
+      return 0;
    }
 
 <St_TitleN>"&"{ID}";"  {
@@ -1294,7 +1293,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_TitleN>{SPCMD1}    |
-<St_TitleN>{SPCMD2}                    {
+<St_TitleN>{SPCMD2}        {
       /* special command */
       QString text      = QString::fromUtf8(yytext);
       g_token->name     = text.mid(1);
@@ -1302,7 +1301,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_COMMAND_SEL();
    }
 
-<St_TitleN>{ID}"="     {
+<St_TitleN>{ID}"="        {
       /* attribute */
       QString text = QString::fromUtf8(yytext);
 
@@ -1392,7 +1391,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       int i = g_token->name.indexOf('=');
       g_token->name = g_token->name.left(i).trimmed();
 
-         BEGIN(St_TitleV);
+      BEGIN(St_TitleV);
    }
 
 <St_TitleV>[^ \t\r\n]+ {
@@ -1403,8 +1402,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_TitleV,St_TitleA>. {
-         unput(yytext[0]);
-         return 0;
+      unput(yytext[0]);
+      return 0;
    }
 
 <St_TitleV,St_TitleA>\n     {
@@ -1541,7 +1540,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Ref2>{SPCMD1}      |
 <St_Ref2>{SPCMD2}                      {
       /* special command */
-      QString text = QString::fromUtf8(yytext);
+      QString text      = QString::fromUtf8(yytext);
       g_token->name     = text.mid(1);
       g_token->paramDir = TokenInfo::Unspecified;
       return TK_COMMAND_SEL();
@@ -1883,7 +1882,6 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <*>[\\@<>&$#%~"=]      {
       // */ (editor syntax fix)
       /* unescaped special character */
-      // warn(s_fileName,yylineno,"Unexpected character `%s', assuming command \\%s was meant.", yytext, yytext);
 
       g_token->name = QString::fromUtf8(yytext);
       return TK_COMMAND_SEL();

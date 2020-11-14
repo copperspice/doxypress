@@ -229,6 +229,7 @@ static int getDotFontSize()
 static void writeGraphHeader(QTextStream &t, const QString &title = QString())
 {
    static const bool interactiveSVG = Config::getBool("interactive-svg");
+   static const bool dotTransparent = Config::getBool("dot-transparent");
 
    t << "digraph ";
 
@@ -245,7 +246,7 @@ static void writeGraphHeader(QTextStream &t, const QString &title = QString())
       t << " // INTERACTIVE_SVG=YES\n";
    }
 
-   if (Config::getBool("dot-transparent")) {
+   if (dotTransparent) {
       t << "  bgcolor=\"transparent\";" << endl;
    }
 
@@ -501,10 +502,10 @@ static bool readBoundingBox(const QString &fileName, int *width, int *height, bo
 
 static bool writeVecGfxFigure(QTextStream &out, const QString &baseName, const QString &figureName)
 {
+   static const bool usePdfLatex = Config::getBool("latex-pdf");
+
    int width  = 400;
    int height = 550;
-
-   static bool usePdfLatex = Config::getBool("latex-pdf");
 
    if (usePdfLatex) {
       if (! readBoundingBox(figureName + ".pdf", &width, &height, false)) {
@@ -681,7 +682,7 @@ static bool insertMapFile(QTextStream &out, const QString &mapFile, const QStrin
       QTextStream tmpout(&tmpstr);
 
       convertMapFile(tmpout, mapFile, relPath);
-      if (!tmpstr.isEmpty()) {
+      if (! tmpstr.isEmpty()) {
          out << "<map name=\"" << mapLabel << "\" id=\"" << mapLabel << "\">" << endl;
          out << tmpstr;
          out << "</map>" << endl;
@@ -690,7 +691,7 @@ static bool insertMapFile(QTextStream &out, const QString &mapFile, const QStrin
       return true;
    }
 
-   return false; // no map file yet, need to generate it
+   return false;     // no map file yet, need to generate it
 }
 
 static void removeDotGraph(const QString &dotName)
@@ -937,7 +938,7 @@ int DotFilePatcher::addSVGObject(const QString &baseName, const QString &absImgN
 
 bool DotFilePatcher::run()
 {
-   static bool interactiveSVG = Config::getBool("interactive-svg");
+   bool interactiveSVG = Config::getBool("interactive-svg");  // keep non const
 
    bool isSVGFile = m_patchFile.endsWith(".svg");
    int graphId    = -1;
@@ -1026,6 +1027,7 @@ bool DotFilePatcher::run()
                   t << "<svg id=\"graph\" class=\"graph\">\n";
                   t << "<g id=\"viewport\">\n";
                }
+
                insideHeader = false;
                replacedHeader = true;
             }
@@ -1158,6 +1160,7 @@ bool DotFilePatcher::run()
 
    return true;
 }
+
 void DotRunnerQueue::enqueue(DotRunner *runner)
 {
    QMutexLocker locker(&m_mutex);
@@ -1225,26 +1228,29 @@ DotManager *DotManager::instance()
 
 DotManager::DotManager()
 {
+   static const int dotNumThreads = Config::getInt("dot-num-threads");
+
    m_queue = new DotRunnerQueue;
 
-   int i;
-   int numThreads = qMin(32, Config::getInt("dot-num-threads"));
+   int numThreads = qMin(32, dotNumThreads);
 
    if (numThreads != 1) {
       if (numThreads == 0) {
          numThreads = qMax(2, QThread::idealThreadCount() + 1);
       }
 
-      for (i = 0; i < numThreads; i++) {
+      for (int i = 0; i < numThreads; ++i) {
          DotWorkerThread *thread = new DotWorkerThread(m_queue);
          thread->start();
 
          if (thread->isRunning()) {
             m_workers.append(thread);
-         } else { // no more threads available!
+         } else {
+            // no more threads available
             delete thread;
          }
       }
+
       assert(m_workers.count() > 0);
    }
 }
@@ -1653,15 +1659,16 @@ static QString escapeTooltip(const QString &tooltip)
 }
 
 static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberList> ml,
-                  QSharedPointer<ClassDef> scope, bool isStatic = false,
-                  const QSet<QString> *skipNames = 0)
+            QSharedPointer<ClassDef> scope, bool isStatic = false, const QSet<QString> *skipNames = nullptr)
 {
-   if (ml) {
+   static const int limit = Config::getInt("uml-limit-num-fields");
+
+   if (ml != nullptr) {
       int totalCount = 0;
 
       for (auto mma : *ml) {
          if (mma->getClassDef() == scope && (skipNames == 0 || ! skipNames->contains(mma->name()))) {
-            totalCount++;
+            ++totalCount;
          }
       }
 
@@ -1670,14 +1677,10 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
       for (auto mma : *ml) {
          if (mma->getClassDef() == scope && (skipNames == 0 || ! skipNames->contains(mma->name()))) {
 
-            static int limit = Config::getInt("uml-limit-num-fields");
+            if (limit > 0 && (totalCount > ((limit * 3) / 2) && count >= limit)) {
 
-            if (limit > 0 && (totalCount > limit * 3 / 2 && count >= limit)) {
-
-               QString temp;
-               temp = QString("%1").formatArg(totalCount - count);
-
-               t << theTranslator->trAndMore(temp) << "\\l";
+               QString tmp = QString("%1").formatArg(totalCount - count);
+               t << theTranslator->trAndMore(tmp) << "\\l";
 
                break;
 
@@ -1685,12 +1688,12 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
                t << prot << " ";
                t << convertLabel(mma->name());
 
-               if (!mma->isObjCMethod() && (mma->isFunction() || mma->isSlot() || mma->isSignal())) {
+               if (! mma->isObjCMethod() && (mma->isFunction() || mma->isSlot() || mma->isSignal())) {
                   t << "()";
                }
 
                t << "\\l";
-               count++;
+               ++count;
             }
          }
       }
@@ -1698,7 +1701,7 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
       // write member groups within the memberlist
       QList<MemberGroup> *mgl = ml->getMemberGroupList();
 
-      if (mgl) {
+      if (mgl != nullptr) {
          for (auto &mg : *mgl) {
             if (mg.members()) {
                writeBoxMemberList(t, prot, mg.members(), scope, isStatic, skipNames);
@@ -1716,12 +1719,13 @@ static QString stripProtectionPrefix(const QString &s)
    } else {
       return s;
    }
-
 }
 
 void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool hasNonReachableChildren)
 {
-   static bool umlLook = Config::getBool("uml-look");
+   static const bool umlLook        = Config::getBool("uml-look");
+   static const bool extractPrivate = Config::getBool("extract-private");
+   static const bool dotTransparent = Config::getBool("dot-transparent");
 
    // non link
    const char *labCol = m_url.isEmpty() ? "grey75" :
@@ -1757,8 +1761,6 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
             }
          }
       }
-
-      static bool extractPrivate = Config::getBool("extract-private");
 
       t << "{" << convertLabel(m_label);
       t << "\\n|";
@@ -1813,7 +1815,6 @@ void DotNode::writeBox(QTextStream &t, GraphType gt, GraphOutputFormat, bool has
       t << ",color=\"black\", fillcolor=\"grey75\", style=\"filled\", fontcolor=\"black\"";
 
    } else {
-      static bool dotTransparent = Config::getBool("dot-transparent");
 
       if (! dotTransparent) {
          t << ",color=\"" << labCol << "\", fillcolor=\"";
@@ -2336,6 +2337,9 @@ const DotNode *DotNode::findDocNode() const
 
 void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, const QString &fileName) const
 {
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    if (m_rootSubgraphs->count() == 0) {
       return;
    }
@@ -2354,9 +2358,6 @@ void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, con
    int count = 0;
 
    for (auto n : *m_rootSubgraphs) {
-      static const QString imageFormat = Config::getEnum("dot-image-format");
-      static const QString imageExt    = Config::getEnum("dot-image-extension");
-
       QString baseName = QString("inherit_graph_%1").formatArg(count++);
 
       QString imageName = baseName + "." + imageExt;
@@ -2725,6 +2726,8 @@ void DotClassGraph::determineTruncatedNodes(QList<DotNode *> &queue, bool includ
 
 bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool includeParents)
 {
+   static const int maxDepth = Config::getInt("dot-graph-max-depth");
+
    QList<DotNode *> childQueue;
    QList<DotNode *> parentQueue;
 
@@ -2740,7 +2743,6 @@ bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool 
 
    // despite being marked visible in the child loop
    while ((childQueue.count() > 0 || parentQueue.count() > 0) && maxNodes > 0) {
-      static int maxDepth = Config::getInt("dot-graph-max-depth");
 
       if (childQueue.count() > 0) {
          DotNode *n = childQueue.takeAt(0);
@@ -2810,7 +2812,8 @@ bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool 
    }
 
    if (Config::getBool("uml-look")) {
-      return false;   // UML graph are always top to bottom
+      // UML graph are always top to bottom
+      return false;
    }
 
    int maxWidth = 0;
@@ -2840,15 +2843,15 @@ bool DotClassGraph::determineVisibleNodes(DotNode *rootNode, int maxNodes, bool 
 
 void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool base, int distance)
 {
-   // ---- Add inheritance relations
-   static bool templateRelations = Config::getBool("template-relations");
+   // add inheritance relations
+   static const bool templateRelations = Config::getBool("template-relations");
 
    if (m_graphType == DotNode::Inheritance || m_graphType == DotNode::Collaboration) {
       SortedList<BaseClassDef *> *bcl = base ? cd->baseClasses() : cd->subClasses();
 
-      if (bcl) {
-         for (auto bcd : *bcl) {
-            addClass(bcd->classDef, n, bcd->prot, "", bcd->usedName, bcd->templSpecifiers, base, distance);
+      if (bcl != nullptr) {
+         for (const auto bcd : *bcl) {
+            addClass(bcd->classDef, n, bcd->prot, QString(), bcd->usedName, bcd->templSpecifiers, base, distance);
          }
       }
    }
@@ -2963,6 +2966,8 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
 
 DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
 {
+   static const int maxNodes = Config::getInt("dot-graph-max-nodes");
+
    m_graphType = t;
 
    QString tmp_url = "";
@@ -2990,8 +2995,6 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
       buildGraph(cd, m_startNode, false, 1);
    }
 
-   static int maxNodes = Config::getInt("dot-graph-max-nodes");
-
    m_lrRank = determineVisibleNodes(m_startNode, maxNodes, t == DotNode::Inheritance);
    QList<DotNode *> openNodeQueue;
    openNodeQueue.append(m_startNode);
@@ -3003,12 +3006,12 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
 
 bool DotClassGraph::isTrivial() const
 {
-   static bool umlLook = Config::getBool("uml-look");
+   static const bool umlLook = Config::getBool("uml-look");
 
    if (m_graphType == DotNode::Inheritance) {
       return m_startNode->m_children == 0 && m_startNode->m_parents == 0;
    } else {
-      return !umlLook && m_startNode->m_children == 0;
+      return ! umlLook && m_startNode->m_children == 0;
    }
 }
 
@@ -3122,6 +3125,10 @@ QString DotClassGraph::diskName() const
 QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                   const QString &path, const QString &fileName, const QString &relPath, bool, bool generateImageMap, int graphId) const
 {
+   static const bool usePDFLatex    = Config::getBool("latex-pdf");
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    QDir d(path);
 
    // store the original directory
@@ -3129,8 +3136,6 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
       err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
-
-   static bool usePDFLatex = Config::getBool("latex-pdf");
 
    QString baseName;
    QString mapName;
@@ -3152,8 +3157,6 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
    baseName = convertNameToFile_X(diskName());
 
    // derive target file names from baseName
-   static const QString imageFormat = Config::getEnum("dot-image-format");
-   static const QString imageExt    = Config::getEnum("dot-image-extension");
 
    QString absBaseName = d.absolutePath() + "/" + baseName;
    QString absDotName  = absBaseName + ".dot";
@@ -3213,7 +3216,8 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
          DotManager::instance()->addRun(dotRun);
 
-      } else if (graphFormat == GOF_EPS) { // run dot to create a .eps image
+      } else if (graphFormat == GOF_EPS) {
+         // run dot to create a .eps image
          DotRunner *dotRun = new DotRunner(absDotName, d.absolutePath(), false);
 
          if (usePDFLatex) {
@@ -3258,7 +3262,8 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
       out << "    </figure>" << endl;
       out << "</para>" << endl;
 
-   } else if (graphFormat == GOF_BITMAP && generateImageMap) { // produce HTML to include the image
+   } else if (graphFormat == GOF_BITMAP && generateImageMap) {
+      // produce HTML to include the image
       QString mapLabel = escapeCharsInString(m_startNode->m_label, false) + "_" + escapeCharsInString(mapName, false);
 
       if (imageExt == "svg") {
@@ -3278,7 +3283,8 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
          out << "</div>" << endl;
 
-      } else { // add link to bitmap file with image map
+      } else {
+         // add link to bitmap file with image map
 
          out << "<div class=\"center\">";
          out << "<img src=\"" << relPath << baseName << "." << imageExt << "\" border=\"0\" usemap=\"#"
@@ -3288,9 +3294,11 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
             case DotNode::Collaboration:
                out << "Collaboration graph";
                break;
+
             case DotNode::Inheritance:
                out << "Inheritance graph";
                break;
+
             default:
                assert(0);
                break;
@@ -3298,6 +3306,7 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
          out << "\"/>";
          out << "</div>" << endl;
+
          if (regenerate || !insertMapFile(out, absMapName, relPath, mapLabel)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,
                         false, QString(), mapLabel);
@@ -3403,14 +3412,15 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
 
 void DotInclDepGraph::determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes)
 {
+   static const int maxDepth = Config::getInt("dot-graph-max-depth");
+
    while (queue.count() > 0 && maxNodes > 0) {
-      static int maxDepth = Config::getInt("dot-graph-max-depth");
       DotNode *n = queue.takeAt(0);
 
       if (! n->isVisible() && n->distance() <= maxDepth) {
          // not yet processed
          n->markAsVisible();
-         maxNodes--;
+         --maxNodes;
 
          // add direct children
          if (n->m_children) {
@@ -3454,7 +3464,7 @@ void DotInclDepGraph::resetNumbering()
 
 DotInclDepGraph::DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse)
 {
-   static int nodes = Config::getInt("dot-graph-max-nodes");
+   static const int nodes = Config::getInt("dot-graph-max-nodes");
 
    m_inverse = inverse;
    assert(fd != 0);
@@ -3505,6 +3515,10 @@ QString DotInclDepGraph::diskName() const
 QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                                        const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
+   static const bool usePDFLatex    = Config::getBool("latex-pdf");
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    QDir d(path);
 
    // store the original directory
@@ -3512,7 +3526,6 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
       err("Output dir %s does not exist\n", csPrintable(path));
       Doxy_Work::stopDoxyPress();
    }
-   static bool usePDFLatex = Config::getBool("latex-pdf");
 
    QString baseName = m_diskName;
 
@@ -3527,9 +3540,6 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
    if (m_inverse) {
       mapName += "dep";
    }
-
-   static const QString imageFormat = Config::getEnum("dot-image-format");
-   static const QString imageExt    = Config::getEnum("dot-image-extension");
 
    QString absBaseName = d.absolutePath() + "/" + baseName;
    QString absDotName  = absBaseName + ".dot";
@@ -3712,14 +3722,15 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
 
 void DotCallGraph::determineVisibleNodes(QList<DotNode *> &queue, int &maxNodes)
 {
+   static const int maxDepth = Config::getInt("dot-graph-max-depth");
+
    while (queue.count() > 0 && maxNodes > 0) {
-      static int maxDepth = Config::getInt("dot-graph-max-depth");
       DotNode *n = queue.takeAt(0);
 
       if (! n->isVisible() && n->distance() <= maxDepth) {
          // not yet processed
          n->markAsVisible();
-         maxNodes--;
+         --maxNodes;
 
          // add direct children
          if (n->m_children) {
@@ -3760,7 +3771,7 @@ void DotCallGraph::resetNumbering()
 
 DotCallGraph::DotCallGraph(QSharedPointer<MemberDef> md, bool inverse)
 {
-   static int nodes = Config::getInt("dot-graph-max-nodes");
+   static const int nodes = Config::getInt("dot-graph-max-nodes");
 
    m_inverse = inverse;
    m_diskName = md->getOutputFileBase() + "_" + md->anchor();
@@ -3807,6 +3818,10 @@ DotCallGraph::~DotCallGraph()
 QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                   const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
+   static const bool usePDFLatex    = Config::getBool("latex-pdf");
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    QDir d(path);
 
    // store the original directory
@@ -3815,13 +3830,8 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
       Doxy_Work::stopDoxyPress();
    }
 
-   static bool usePDFLatex = Config::getBool("latex-pdf");
-
    QString baseName = m_diskName + (m_inverse ? QString("_icgraph") : QString("_cgraph"));
    QString mapName  = baseName;
-
-   static const QString imageFormat = Config::getEnum("dot-image-format");
-   static const QString imageExt    = Config::getEnum("dot-image-extension");
 
    QString absBaseName = d.absolutePath() + "/" + baseName;
    QString absDotName  = absBaseName + ".dot";
@@ -3892,7 +3902,7 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
 
          out << "<div class=\"center\">";
 
-         if (regenerate || !writeSVGFigureLink(out, relPath, baseName, absImgName)) {
+         if (regenerate || ! writeSVGFigureLink(out, relPath, baseName, absImgName)) {
             // need to patch the links in the generated SVG file
 
             if (regenerate) {
@@ -3969,6 +3979,10 @@ DotDirDeps::~DotDirDeps()
 QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
                   const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
+   static const bool usePDFLatex    = Config::getBool("latex-pdf");
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    QDir d(path);
 
    // store the original directory
@@ -3977,13 +3991,8 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
       Doxy_Work::stopDoxyPress();
    }
 
-   static bool usePDFLatex = Config::getBool("latex-pdf");
-
    QString baseName = m_dir->getOutputFileBase() + "_dep";
    QString mapName  = escapeCharsInString(baseName, false);
-
-   static const QString imageFormat = Config::getEnum("dot-image-format");
-   static const QString imageExt    = Config::getEnum("dot-image-extension");
 
    QString absBaseName = d.absolutePath() + "/" + baseName;
    QString absDotName  = absBaseName + ".dot";
@@ -4141,9 +4150,11 @@ bool DotDirDeps::isTrivial() const
    return m_dir->depGraphIsTrivial();
 }
 
-
 void generateGraphLegend(const QString &path)
 {
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    QDir d(path);
 
    // store the original directory
@@ -4192,13 +4203,8 @@ void generateGraphLegend(const QString &path)
              "\",color=\"black\",URL=\"$classUsed" << Doxy_Globals::htmlFileExtension << "\"];\n";
    writeGraphFooter(md5stream);
 
-
-   static const QString imageFormat = Config::getEnum("dot-image-format");
-   static const QString imageExt    = Config::getEnum("dot-image-extension");
-
    QByteArray data = QCryptographicHash::hash(theGraph.toUtf8(), QCryptographicHash::Md5).toHex();
    QString sigStr  = QString::fromLatin1(data);
-
 
    QString absBaseName = path + "/graph_legend";
    QString absDotName  = absBaseName + ".dot";
@@ -4235,15 +4241,15 @@ void generateGraphLegend(const QString &path)
 
 void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, GraphOutputFormat format)
 {
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    QDir d(outDir);
 
    if (! d.exists()) {
       err("Output directory %s does not exist\n", csPrintable(outDir));
       Doxy_Work::stopDoxyPress();
    }
-
-   static const QString imageFormat = Config::getEnum("dot-image-format");
-   static const QString imageExt    = Config::getEnum("dot-image-extension");
 
    const QString imageName   = outFile + "." + imageExt;
    const QString absImgName  = d.absolutePath() + "/" + imageName;
@@ -4291,15 +4297,15 @@ void writeDotGraphFromFile(const QString &inFile, const QString &outDir, const Q
 void writeDotImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir,
                   const QString &relPath, const QString &baseName, const QString &context, int graphId)
 {
+   static const QString imageFormat = Config::getEnum("dot-image-format");
+   static const QString imageExt    = Config::getEnum("dot-image-extension");
+
    QDir d(outDir);
 
    if (! d.exists()) {
       err("Output dir %s does not exist\n", csPrintable(outDir));
       Doxy_Work::stopDoxyPress();
    }
-
-   static const QString imageFormat = Config::getEnum("dot-image-format");
-   static const QString imageExt    = Config::getEnum("dot-image-extension");
 
    QString mapName    = baseName + ".map";
    QString imgName    = baseName + "." + imageExt;
@@ -4371,8 +4377,8 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // write parents
    SortedList<QSharedPointer<GroupDef>> *groups = gd->partOfGroups();
 
-   if (groups) {
-      for (auto d : *groups) {
+   if (groups != nullptr) {
+      for (const auto d : *groups) {
          DotNode *nnode = m_usedNodes->value(d->name());
 
          if ( !nnode ) {
@@ -4393,7 +4399,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add subgroups
    if ( gd->getSubGroups() && gd->getSubGroups()->count() ) {
 
-      for (auto def : *gd->getSubGroups()) {
+      for (const auto def : *gd->getSubGroups()) {
          DotNode *nnode = m_usedNodes->value(def->name());
 
          if ( ! nnode ) {
@@ -4419,23 +4425,24 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    QString htmlEntenstion = Doxy_Globals::htmlFileExtension;
 
    // Add classes
-   for (auto def : gd->getClasses()) {
+   for (const auto def : gd->getClasses()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
 
-      if (!def->anchor().isEmpty()) {
+      if (! def->anchor().isEmpty()) {
          tmp_url += "#" + def->anchor();
       }
+
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tclass);
    }
 
    // Add namespaces
-   for (auto &def : gd->getNamespaces()) {
+   for (const auto &def : gd->getNamespaces()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tnamespace);
    }
 
    // Add files
-   for (auto def : gd->getFiles()) {
+   for (const auto def : gd->getFiles()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile);
    }
@@ -4443,7 +4450,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add pages
    if (gd->getPages()) {
 
-      for (auto def : *gd->getPages()) {
+      for (const auto def : *gd->getPages()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tpages);
       }
@@ -4452,7 +4459,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add directories
    if (gd->getDirs()) {
 
-      for (auto def : *gd->getDirs()) {
+      for (const auto def : *gd->getDirs()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tdir);
       }
@@ -4528,7 +4535,6 @@ void DotGroupCollaboration::addCollaborationMember(QSharedPointer<Definition> de
       }
    }
 }
-
 
 QString DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat graphFormat,
       EmbeddedOutputFormat textFormat, const QString &path, const QString &fileName, const QString &relPath,
@@ -4777,6 +4783,8 @@ bool DotGroupCollaboration::isTrivial() const
 
 void DotGroupCollaboration::writeGraphHeader(QTextStream &t, const QString &title) const
 {
+   static const bool dotTransparent = Config::getBool("dot-transparent");
+
    t << "digraph ";
    if (title.isEmpty()) {
       t << "\"Dot Graph\"";
@@ -4787,7 +4795,7 @@ void DotGroupCollaboration::writeGraphHeader(QTextStream &t, const QString &titl
    t << endl;
    t << "{" << endl;
 
-   if (Config::getBool("dot-transparent")) {
+   if (dotTransparent) {
       t << "  bgcolor=\"transparent\";" << endl;
    }
 
@@ -4799,9 +4807,11 @@ void DotGroupCollaboration::writeGraphHeader(QTextStream &t, const QString &titl
 
 void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
 {
+   static const bool dotTransparent = Config::getBool("dot-transparent");
+
    t << "digraph \"" << dd->displayName() << "\" {\n";
 
-   if (Config::getBool("dot-transparent")) {
+   if (dotTransparent) {
       t << "  bgcolor=transparent;\n";
    }
 
@@ -4830,7 +4840,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
         << dd->shortName() << "\"];\n";
 
       // add nodes for sub directories
-      for (auto sdir : dd->subDirs()) {
+      for (const auto sdir : dd->subDirs()) {
          t << "    " << sdir->getOutputFileBase() << " [shape=box label=\""
            << sdir->shortName() << "\"";
 
@@ -4876,7 +4886,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
               << usedDir->shortName() << "\"";
 
             if (usedDir->isCluster()) {
-               if (! Config::getBool("dot-transparent")) {
+               if (! dotTransparent) {
                   t << " fillcolor=\"white\" style=\"filled\"";
                }
                t << " color=\"red\"";

@@ -608,6 +608,7 @@ void RTFDocVisitor::visit(DocInclude *inc)
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                   extractBlock(inc->text(), inc->blockId()), langExt,
                   inc->isExample(), inc->exampleFile());
+
          m_t << "}";
          break;
 
@@ -644,39 +645,45 @@ void RTFDocVisitor::visit(DocInclude *inc)
 
 void RTFDocVisitor::visit(DocIncOperator *op)
 {
-   DBG_RTF("{\\comment RTFDocVisitor::visit(DocIncOperator)}\n");
 
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
    if (op->isFirst()) {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << "{" << endl;
          m_t << "\\par" << endl;
          m_t << rtf_Style_Reset << getStyle("CodeExample");
       }
+
       pushEnabled();
       m_hide = true;
    }
+
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          Doxy_Globals::parserManager.getParser(m_langExt)
          ->parseCode(m_ci, op->context(), op->text(), langExt,
                      op->isExample(), op->exampleFile());
       }
+
       pushEnabled();
       m_hide = true;
    }
+
    if (op->isLast()) {
       popEnabled();
-      if (!m_hide) {
+
+      if (! m_hide) {
          m_t << "\\par";
          m_t << "}" << endl;
       }
       m_lastIsPara = true;
+
    } else {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << endl;
       }
+
       m_lastIsPara = false;
    }
 }
@@ -1742,7 +1749,6 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
          m_t << "{";
       }
 
-
       bool first = true;
 
       for (auto type : pl->paramTypes() ) {
@@ -1757,6 +1763,7 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
             visit((DocLinkedWord *)type);
          }
       }
+
       if (useTable) {
          m_t << "\\cell }";
       }

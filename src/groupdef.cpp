@@ -167,11 +167,13 @@ bool GroupDef::addNamespace(QSharedPointer<NamespaceDef> def)
 
 void GroupDef::addDir(QSharedPointer<DirDef> def)
 {
+   static const bool sortBriefDocs = Config::getBool("sort-brief-docs");
+
    if (def->isHidden()) {
       return;
    }
 
-   if (Config::getBool("sort-brief-docs")) {
+   if (sortBriefDocs) {
       dirList->inSort(def);
 
    } else {
@@ -215,7 +217,6 @@ void GroupDef::addMembersToMemberGroup()
       mg->setInGroup(true);
    }
 }
-
 
 bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 {
@@ -568,7 +569,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::GroupClasses:
          {
-            for (auto cd : m_classSDict) {
+            for (const auto cd : m_classSDict) {
                if (cd->isLinkableInProject()) {
                   tagFile << "    <class kind=\"" << cd->compoundTypeString()
                           << "\">" << convertToXML(cd->name()) << "</class>" << endl;
@@ -579,8 +580,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::GroupNamespaces:
          {
-
-            for (auto &nd : m_namespaceSDict) {
+            for (const auto &nd : m_namespaceSDict) {
                if (nd->isLinkableInProject()) {
                   tagFile << "    <namespace>" << convertToXML(nd->name())
                           << "</namespace>" << endl;
@@ -592,7 +592,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::GroupFiles:
          {
-            for (auto item : fileList)  {
+            for (const auto item : fileList)  {
                if (item->isLinkableInProject()) {
                   tagFile << "    <file>" << convertToXML(item->name()) << "</file>" << endl;
                }
@@ -602,8 +602,8 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::GroupPageDocs:
          {
-            if (pageDict) {
-               for (auto item : *pageDict)  {
+            if (pageDict != nullptr) {
+               for (const auto item : *pageDict)  {
                   QString pageName = item->getOutputFileBase();
 
                   if (item->isLinkableInProject()) {
@@ -617,7 +617,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          case LayoutDocEntry::GroupDirs:
          {
             if (dirList) {
-               for (auto item : *dirList)  {
+               for (const auto item : *dirList)  {
                   if (item->isLinkableInProject()) {
                      tagFile << "    <dir>" << convertToXML(item->displayName()) << "</dir>" << endl;
                   }
@@ -628,8 +628,8 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::GroupNestedGroups:
          {
-            if (groupList) {
-               for (auto item : *groupList)  {
+            if (groupList != nullptr) {
+               for (const auto item : *groupList)  {
                   if (item->isVisible()) {
                      tagFile << "    <subgroup>" << convertToXML(item->name()) << "</subgroup>" << endl;
                   }
@@ -650,7 +650,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::MemberGroups: {
 
-            for (auto mg : m_memberGroupSDict) {
+            for (const auto mg : m_memberGroupSDict) {
                mg->writeTagFile(tagFile);
             }
          }
@@ -733,6 +733,7 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 void GroupDef::writeBriefDescription(OutputList &ol)
 {
    static const bool repeatBrief = Config::getBool("repeat-brief");
+
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
    if (hasBriefDescription()) {
@@ -772,9 +773,11 @@ void GroupDef::writeBriefDescription(OutputList &ol)
 
 void GroupDef::writeGroupGraph(OutputList &ol)
 {
+   static const bool haveDot = Config::getBool("have-dot");
+
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
-   if (Config::getBool("have-dot") /*&& Config::getBool("group-graphs")*/ ) {
+   if (haveDot) {
       DotGroupCollaboration graph(self);
 
       if (! graph.isTrivial()) {
@@ -838,6 +841,7 @@ void GroupDef::writeNamespaces(OutputList &ol, const QString &title)
 void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
 {
    static const bool briefMemberDesc = Config::getBool("brief-member-desc");
+   static const bool sortGroupNames  = Config::getBool("sort-group-names");
 
    // write list of groups
    int count = 0;
@@ -856,7 +860,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
       ol.endMemberHeader();
       ol.startMemberList();
 
-      if (Config::getBool("sort-group-names")) {
+      if (sortGroupNames) {
          groupList->sort();
       }
 
@@ -899,7 +903,7 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
       ol.endMemberHeader();
       ol.startMemberList();
 
-      for (auto dd : *dirList ) {
+      for (const auto dd : *dirList ) {
 
          if (! dd->hasDocumentation()) {
             continue;
@@ -985,7 +989,9 @@ void GroupDef::endMemberDeclarations(OutputList &ol)
 
 void GroupDef::startMemberDocumentation(OutputList &ol)
 {
-   if (Config::getBool("separate-member-pages")) {
+   static const bool separateMemberPages  = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
       Doxy_Globals::suppressDocWarnings = true;
@@ -994,7 +1000,9 @@ void GroupDef::startMemberDocumentation(OutputList &ol)
 
 void GroupDef::endMemberDocumentation(OutputList &ol)
 {
-   if (Config::getBool("separate-member-pages")) {
+   static const bool separateMemberPages  = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.popGeneratorState();
       Doxy_Globals::suppressDocWarnings = false;
    }
@@ -1071,9 +1079,9 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
 
 void GroupDef::writeDocumentation(OutputList &ol)
 {
-   QSharedPointer<GroupDef> self = sharedFrom(this);
+   static const bool separateMemberPages  = Config::getBool("separate-member-pages");
 
-   // static bool generateTreeView = Config::getBool("generate-treeview");
+   QSharedPointer<GroupDef> self = sharedFrom(this);
 
    ol.pushGeneratorState();
    startFile(ol, getOutputFileBase(), name(), m_title, HLI_Modules);
@@ -1125,23 +1133,28 @@ void GroupDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
             break;
+
          case LayoutDocEntry::MemberDeclStart:
             startMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::GroupClasses: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeClasses(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::GroupInlineClasses: {
             writeInlineClasses(ol);
          }
          break;
+
          case LayoutDocEntry::GroupNamespaces: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeNamespaces(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberGroups:
             writeMemberGroups(ol);
             break;
@@ -1150,9 +1163,11 @@ void GroupDef::writeDocumentation(OutputList &ol)
             writeMemberDeclarations(ol, lmd->type, lmd->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDeclEnd:
             endMemberDeclarations(ol);
             break;
+
          case LayoutDocEntry::DetailedDesc: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeDetailedDescription(ol, ls->title(lang));
@@ -1166,17 +1181,21 @@ void GroupDef::writeDocumentation(OutputList &ol)
             writeMemberDocumentation(ol, lmd->type, lmd->title(lang));
          }
          break;
+
          case LayoutDocEntry::MemberDefEnd:
             endMemberDocumentation(ol);
             break;
+
          case LayoutDocEntry::GroupNestedGroups: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeNestedGroups(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::GroupPageDocs:
             writePageDocumentation(ol);
             break;
+
          case LayoutDocEntry::GroupDirs: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeDirs(ol, ls->title(lang));
@@ -1187,12 +1206,15 @@ void GroupDef::writeDocumentation(OutputList &ol)
             writeFiles(ol, ls->title(lang));
          }
          break;
+
          case LayoutDocEntry::GroupGraph:
             writeGroupGraph(ol);
             break;
+
          case LayoutDocEntry::AuthorSection:
             writeAuthorSection(ol);
             break;
+
          case LayoutDocEntry::ClassIncludes:
          case LayoutDocEntry::ClassInheritanceGraph:
          case LayoutDocEntry::ClassNestedClasses:
@@ -1227,7 +1249,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
 
    ol.popGeneratorState();
 
-   if (Config::getBool("separate-member-pages")) {
+   if (separateMemberPages) {
       allMemberList->sort();
       writeMemberPages(ol);
    }
@@ -1502,10 +1524,10 @@ QSharedPointer<MemberList> GroupDef::createMemberList(MemberListType lt)
 
 void GroupDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {
-   QSharedPointer<MemberList> ml = createMemberList(lt);
-
    static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static const bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   QSharedPointer<MemberList> ml = createMemberList(lt);
 
    bool isSorted = false;
 

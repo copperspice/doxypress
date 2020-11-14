@@ -51,10 +51,9 @@ ManGenerator::ManGenerator()
 
    col = 0;
 
-   firstCol  = true;
-   paragraph = true;
-   upperCase = false;
-
+   firstCol      = true;
+   paragraph     = true;
+   upperCase     = false;
    insideTabbing = false;
    inHeader      = false;
 }
@@ -496,7 +495,7 @@ void ManGenerator::endCodeFragment()
    }
 
    m_textStream << ".fi" << endl;
-   firstCol = true;
+   firstCol  = true;
    paragraph = false;
    col = 0;
 }
@@ -514,7 +513,9 @@ void ManGenerator::startMemberDoc(const QString &, const QString &, const QStrin
 
 void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, const QString &, const QString &name, const QString &)
 {
-   if ( ! Config::getBool("man-links") ) {
+   static const bool manLinks = Config::getBool("man-links");
+
+   if ( ! manLinks) {
       return;
    }
 

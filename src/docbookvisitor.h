@@ -16,8 +16,8 @@
 *
 *************************************************************************/
 
-#ifndef DOCBOOKDOCVISITOR_H
-#define DOCBOOKDOCVISITOR_H
+#ifndef DOCBOOKVISITOR_H
+#define DOCBOOKVISITOR_H
 
 #include <QStack>
 #include <QTextStream>
@@ -31,9 +31,6 @@ class DocbookDocVisitor : public DocVisitor
 {
  public:
    DocbookDocVisitor(QTextStream &t, CodeOutputInterface &ci);
-   //--------------------------------------
-   // visitor functions for leaf nodes
-   //--------------------------------------
    void visit(DocWord *) override;
    void visit(DocLinkedWord *) override;
    void visit(DocWhiteSpace *) override;

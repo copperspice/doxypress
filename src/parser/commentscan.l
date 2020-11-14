@@ -1532,7 +1532,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
    }
 
@@ -1881,7 +1881,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <GroupDocArg1>"\\"{B}*"\n"       {
       // line continuation
-      yyLineNr++;
+      ++yyLineNr;
       addToOutput('\n');
    }
 
@@ -1904,7 +1904,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <GroupDocArg2>"\\"{B}*"\n"    {
       // line continuation
-      yyLineNr++;
+      ++yyLineNr;
       addToOutput('\n');
    }
 
@@ -1918,8 +1918,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if ( current->groupDocType == Entry::GROUPDOC_NORMAL && current->getData(EntryKey::Member_Type).isEmpty()) {
-            // defgroup requires second argument
-            warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", csPrintable(current->m_entryName) );
+         // defgroup requires second argument
+         warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", csPrintable(current->m_entryName) );
       }
 
       if (text[0] == '\n') {
@@ -1935,13 +1935,14 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <PageDocArg1>{FILE}        {
       // first argument, page name
       QString text = QString::fromUtf8(yytext);
+
       current->m_entryName = stripQuotes(text);
 
       BEGIN( PageDocArg2 );
    }
 
 <PageDocArg1>{LC}          {
-      yyLineNr++;
+      ++yyLineNr;
       addToOutput('\n');
    }
 
@@ -2065,6 +2066,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       addToOutput('\n');
       inContext = OutputMainDoc;
+
       BEGIN( Comment );
    }
 
@@ -2096,6 +2098,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       addToOutput('\n');
       inContext = OutputMainDoc;
+
       BEGIN( Comment );
    }
 
@@ -2130,6 +2133,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       addToOutput('\n');
       inContext = OutputMainDoc;
+
       BEGIN( Comment );
    }
 
@@ -2213,6 +2217,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <SectionLabel>{DOCNL}         {
       // missing argument
       QString text = QString::fromUtf8(yytext);
+
       warn(yyFileName, yyLineNr, "\\section command has no label");
 
       if (text[0] == '\n') {
@@ -2220,6 +2225,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       }
 
       addToOutput('\n');
+
       BEGIN( Comment );
    }
 
@@ -2232,8 +2238,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <SectionTitle>[^\n@\\*]*/"\n"           {
       // end of section title
       QString text = QString::fromUtf8(yytext);
+
       addSection();
       addToOutput(text);
+
       BEGIN( Comment );
    }
 
@@ -2306,6 +2314,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       }
 
       addToOutput('\n');
+
       BEGIN( Comment );
    }
 
@@ -2313,6 +2322,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // no title, end command
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
+
       BEGIN( Comment );
    }
 
@@ -2320,6 +2330,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // add title, end of command
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
+
       BEGIN( Comment );
    }
 
@@ -2454,6 +2465,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <GuardParam>{B}*"("                     {
       s_guardExpr  = QString::fromUtf8(yytext);
       s_roundCount = 1;
+
       BEGIN(GuardExpr);
    }
 
@@ -2463,12 +2475,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <GuardExpr>"("                          {
       s_guardExpr += QString::fromUtf8(yytext);
-      s_roundCount++;
+      ++s_roundCount;
    }
 
 <GuardExpr>")"                          {
       s_guardExpr += QString::fromUtf8(yytext);
-      s_roundCount--;
+      --s_roundCount;
 
       if (s_roundCount == 0) {
          handleGuard(s_guardExpr);
@@ -2492,18 +2504,15 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
-
-      // next line is commented out due to bug620924
-      // addToOutput('\n');
 
       BEGIN( Comment );
    }
 
 <GuardParam>{LC}        {
       // line continuation
-      yyLineNr++;
+      ++yyLineNr;
       addToOutput('\n');
    }
 
@@ -2597,8 +2606,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       if (text[0] == '\n') {
          yyLineNr++;
       }
-
-      // addToOutput('\n');
    }
 
 <SkipGuardedSection>[^ \\@\n]+      {
@@ -3242,7 +3249,7 @@ static bool handleMainpage(const QString &str, const QStringList &list)
    bool stop = makeStructuralIndicator(Entry::MAINPAGEDOC_SEC);
 
    if (stop) {
-      current->m_entryName = "";
+      current->m_entryName = QString();
    } else {
       current->m_entryName = "mainpage";
    }
@@ -4004,6 +4011,7 @@ static bool handleInherit(const QString &str, const QStringList &list)
    (void) list;
 
    BEGIN(InheritParam);
+
    return false;
 }
 

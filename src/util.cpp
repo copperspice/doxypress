@@ -5711,7 +5711,7 @@ QString normalizeNonTemplateArgumentsInString(const QString &name, QSharedPointe
       bool found  = false;
 
       // check that tmp is not a formal template argument
-      for (auto &arg : formalArgList) {
+      for (const auto &arg : formalArgList) {
 
          if (arg.name == tmp) {
             found = true;
@@ -6094,7 +6094,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
       }
 
       pd->setInputOrderId(id);
-      id++;
+      ++id;
 
       Doxy_Globals::pageSDict.insert(baseName, pd);
 

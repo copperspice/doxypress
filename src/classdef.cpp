@@ -182,6 +182,8 @@ void ClassDef::addMembersToMemberGroup()
 // adds new member definition to the class
 void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection prot, bool addToAllList)
 {
+   static const bool hideFriendCompound = Config::getBool("hide-friend-compounds");
+
    if (md->isHidden()) {
       return;
    }
@@ -478,8 +480,6 @@ void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection pro
       m_arrowOperator = md;
    }
 
-   static const bool hideFriendCompound = Config::getBool("hide-friend-compounds");
-
    if (addToAllList && ! (hideFriendCompound && md->isFriend() && (md->typeString() == "friend class" ||
             md->typeString() == "friend struct" || md->typeString() == "friend union"))) {
 
@@ -754,11 +754,11 @@ void ClassDef::writeBriefDescription(OutputList &ol, bool exampleFlag)
 
 void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
 {
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
-   static const bool repeatBrief = Config::getBool("repeat-brief");
    const QString docText = documentation();
-
    ol.startTextBlock();
 
    if (getLanguage() == SrcLangExt_Cpp) {
@@ -971,12 +971,12 @@ int ClassDef::countInheritanceNodes()
 
 void ClassDef::writeInheritanceGraph(OutputList &ol)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
-
    static const bool haveDot       = Config::getBool("have-dot");
    static const bool classDiagrams = Config::getBool("class-diagrams");
    static const bool classGraph    = Config::getBool("dot-class-graph");
    static const int  maxNodes      = Config::getInt("dot-graph-max-nodes");
+
+   QSharedPointer<ClassDef> self = sharedFrom(this);
 
    // count direct inheritance relations
    const int count = countInheritanceNodes();
@@ -1115,11 +1115,11 @@ void ClassDef::writeInheritanceGraph(OutputList &ol)
 
 void ClassDef::writeCollaborationGraph(OutputList &ol)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
-
    static const bool haveDot = Config::getBool("have-dot");
 
-   if (haveDot) {       // && Config::getBool("dot-collaboration")
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+
+   if (haveDot) {
       DotClassGraph usageImplGraph(self, DotNode::Collaboration);
 
       if (! usageImplGraph.isTrivial()) {
@@ -1640,10 +1640,10 @@ bool ClassDef::visibleInParentsDeclList() const
 
 void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
-
    static const bool briefMemberDesc    = Config::getBool("brief-member-desc");
    // static const bool optimizeFortran = Config::getBool("optimize-fortran");
+
+   QSharedPointer<ClassDef> self = sharedFrom(this);
 
    SrcLangExt lang = getLanguage();
 
@@ -1930,11 +1930,11 @@ QString ClassDef::title() const
 // write all documentation for this class
 void ClassDef::writeDocumentation(OutputList &ol)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
-
    static const bool generateTreeView    = Config::getBool("generate-treeview");
    static const bool separateMemberPages = Config::getBool("separate-member-pages");
    // static const bool optimizeFortran  = Config::getBool("optimize-fortran");
+
+   QSharedPointer<ClassDef> self = sharedFrom(this);
 
    QString pageTitle = title();
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ClassVisible, ! generateTreeView);
@@ -2043,11 +2043,11 @@ void ClassDef::writeDocumentationForInnerClasses(OutputList &ol)
 // write the list of all (inherited) members for this class
 void ClassDef::writeMemberList(OutputList &ol)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
-
    static const bool optimizeC        = Config::getBool("optimize-c");
    static const bool generateTreeView = Config::getBool("generate-treeview");
    static const bool hideUndocMembers = Config::getBool("hide-undoc-members");
+
+   QSharedPointer<ClassDef> self = sharedFrom(this);
 
    if (m_allMemberNameInfoSDict.count() == 0 || optimizeC) {
       return;

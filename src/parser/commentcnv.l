@@ -675,7 +675,7 @@ static int yyread(char *buf, int max_size)
          int len = 0;
 
          while (len < text.length() && (text[len] == ' ' || text[len] == '\t')) {
-            len++;
+            ++len;
          }
 
          copyToOutput(text, len);
@@ -733,13 +733,13 @@ static int yyread(char *buf, int max_size)
       BEGIN(s_charContext);
    }
 
-<SkipChar>.                    {
+<SkipChar>.                     {
       /* any other string character */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
 
-<SkipChar>\n                   {
+<SkipChar>\n                    {
       /* new line character */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());

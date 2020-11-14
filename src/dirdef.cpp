@@ -217,13 +217,13 @@ void DirDef::writeDirectoryGraph(OutputList &ol)
          msg("Generating dependency graph for directory %s\n", csPrintable(displayName()));
          ol.disable(OutputGenerator::Man);
 
-         //ol.startParagraph();
+         // ol.startParagraph();
 
          ol.startDirDepGraph();
          ol.parseText(theTranslator->trDirDepGraph(shortName()));
          ol.endDirDepGraph(dirDep);
 
-         //ol.endParagraph();
+         // ol.endParagraph();
 
          ol.enableAll();
       }
@@ -238,12 +238,13 @@ void DirDef::writeSubDirList(OutputList &ol)
 
    for (auto dd : m_subdirs) {
       if (dd->hasDocumentation() || dd->getFiles().count() > 0) {
-         numSubdirs++;
+         ++numSubdirs;
       }
    }
 
    // write subdir list
    if (numSubdirs > 0) {
+
       ol.startMemberHeader("subdirs");
       ol.parseText(theTranslator->trDir(true, false));
       ol.endMemberHeader();
@@ -285,7 +286,7 @@ void DirDef::writeFileList(OutputList &ol)
 
    for (auto fd : m_fileList) {
       if (fd->hasDocumentation()) {
-         numFiles++;
+         ++numFiles;
        }
    }
 
@@ -334,6 +335,7 @@ void DirDef::writeFileList(OutputList &ol)
 
                ol.endMemberDescription();
             }
+
             ol.endMemberDeclaration(0, 0);
          }
       }
@@ -381,21 +383,23 @@ void DirDef::writeTagFile(QTextStream &tagFile)
 
             if (m_subdirs.count() > 0) {
 
-               for (auto dd : m_subdirs) {
+               for (const auto dd : m_subdirs) {
                   tagFile << "    <dir>" << convertToXML(dd->displayName()) << "</dir>" << endl;
                }
             }
          }
          break;
+
          case LayoutDocEntry::DirFiles: {
             if (m_fileList.count() > 0) {
 
-               for (auto fd : m_fileList) {
+               for (const auto fd : m_fileList) {
                   tagFile << "    <file>" << convertToXML(fd->name()) << "</file>" << endl;
                }
             }
          }
          break;
+
          default:
             break;
       }
@@ -407,9 +411,10 @@ void DirDef::writeTagFile(QTextStream &tagFile)
 
 void DirDef::writeDocumentation(OutputList &ol)
 {
+   static const bool generateTreeView = Config::getBool("generate-treeview");
+
    QSharedPointer<DirDef> self = sharedFrom(this);
 
-   static bool generateTreeView = Config::getBool("generate-treeview");
    ol.pushGeneratorState();
 
    QString title = theTranslator->trDirReference(m_dispName);
@@ -707,6 +712,8 @@ bool DirDef::matchPath(const QString &path, const QStringList &list)
  */
 QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QString &path)
 {
+   static const QStringList stripFromPath = Config::getList("strip-from-path");
+
    int p = 0;
    int i = 0;
 
@@ -715,7 +722,7 @@ QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QString &path)
    while ((i = path.indexOf('/', p)) != -1) {
       QString part = path.left(i + 1);
 
-      if (! matchPath(part, Config::getList("strip-from-path")) && (part != "/" && part != "//")) {
+      if (! matchPath(part, stripFromPath) && (part != "/" && part != "//")) {
          dir = createNewDir(part);
       }
 

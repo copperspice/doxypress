@@ -557,18 +557,23 @@ void processFiles()
    if (generateHtml) {
       exclPatterns.append(htmlOutput);
    }
+
    if (generateDocbook) {
       exclPatterns.append(docbookOutput);
    }
+
    if (generateXml) {
       exclPatterns.append(xmlOutput);
    }
+
    if (generateLatex) {
       exclPatterns.append(latexOutput);
    }
+
    if (generateRtf) {
       exclPatterns.append(rtfOutput);
    }
+
    if (generateMan) {
       exclPatterns.append(manOutput);
    }
@@ -880,6 +885,7 @@ void generateOutput()
       dumpGlossary();
       exit(0);
    }
+
    // move to the output directory
    QString outputDir = Config::getString("output-dir");
    QDir::setCurrent(outputDir);
@@ -988,7 +994,7 @@ void generateOutput()
       }
    }
 
-   // ** generate documentation
+   // create ttf for dot program
    if (generateHtml) {
       writeDoxFont(htmlOutput);
    }
@@ -1003,6 +1009,7 @@ void generateOutput()
 
    Doxy_Globals::infoLog_Stat.begin("Generating style sheet\n");
 
+   // ** generate documentation
    // write first part
    Doxy_Globals::outputList.writeStyleInfo(0);
    Doxy_Globals::infoLog_Stat.end();
@@ -5865,6 +5872,7 @@ bool Doxy_Work::isClassSection(QSharedPointer<Entry> ptrEntry)
          }
       }
    }
+
    return false;
 }
 
@@ -5915,7 +5923,7 @@ void Doxy_Work::findInheritedTemplateInstances()
       QString bName = extractClassName(ptrEntry);
       cd = getClass(bName);
 
-      if (cd) {
+      if (cd != nullptr) {
          findBaseClassesForClass(ptrEntry, cd, cd, cd, TemplateInstances, false);
       }
    }
@@ -5935,7 +5943,7 @@ void Doxy_Work::findUsedTemplateInstances()
 
       Debug::print(Debug::Classes, 0, "  Usage: Class %s : \n", csPrintable(bName));
 
-      if (cd) {
+      if (cd != nullptr) {
          findUsedClassesForClass(ptrEntry, cd, cd, cd, true);
          cd->addTypeConstraints();
       }
@@ -5958,17 +5966,17 @@ void Doxy_Work::computeClassRelations()
 
       Debug::print(Debug::Classes, 0, "  Relations: Class %s : \n", csPrintable(bName));
 
-      if (cd) {
+      if (cd != nullptr) {
          findBaseClassesForClass(ptrEntry, cd, cd, cd, DocumentedOnly, false);
       }
 
       int numMembers = 0;
 
-      if (cd) {
+      if (cd != nullptr) {
          numMembers = cd->memberNameInfoSDict().count();
       }
 
-      if ((cd == 0 || (! cd->hasDocumentation() && ! cd->isReference())) && numMembers > 0 && ! bName.endsWith("::")) {
+      if ((cd == nullptr || (! cd->hasDocumentation() && ! cd->isReference())) && numMembers > 0 && ! bName.endsWith("::")) {
 
          if (! ptrEntry->m_entryName.isEmpty() && ptrEntry->m_entryName.indexOf('@') == -1 &&
                (determineSection(ptrEntry->getData(EntryKey::File_Name)) == Entry::HEADER_SEC || extractLocalClass) &&
@@ -5989,7 +5997,7 @@ void Doxy_Work::computeTemplateClassRelations()
 
       QSharedPointer<ClassDef> cd = getClass(bName);
 
-      if (cd) {
+      if (cd != nullptr) {
          // strip any anonymous scopes first
          const QHash<QString, QSharedPointer<ClassDef>> &templInstances = cd->getTemplateInstances();
 
@@ -6152,10 +6160,10 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
 
    QString fullName;
 
-   if (cd) {
+   if (cd != nullptr) {
       fullName = cd->name();
 
-   } else if (nd) {
+   } else if (nd != nullptr) {
       fullName = nd->name();
    }
 
@@ -6198,7 +6206,8 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
 
       md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
 
-      if ((md->inbodyDocumentation().isEmpty() || ! ptrEntry->parent()->m_entryName.isEmpty() ) && ! root->getData(EntryKey::Inbody_Docs).isEmpty()) {
+      if ((md->inbodyDocumentation().isEmpty() || ! ptrEntry->parent()->m_entryName.isEmpty() ) &&
+                  ! root->getData(EntryKey::Inbody_Docs).isEmpty()) {
          md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
       }
    }
@@ -6225,7 +6234,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
    md->addSectionsToDefinition(root->m_anchors);
    addMemberToGroups(root, md);
 
-   if (cd) {
+   if (cd != nullptr) {
       cd->insertUsedFile(rfd);
    }
 
@@ -6275,7 +6284,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
       memberList = Doxy_Globals::functionNameSDict.find(name);
    }
 
-   if (memberList) {
+   if (memberList != nullptr ) {
       // function name defined
 
       Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() found symbol scope\n");

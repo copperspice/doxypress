@@ -332,9 +332,9 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
 
 void NamespaceDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
-   QSharedPointer<NamespaceDef> self = sharedFrom(this);
-
    static const bool repeatBrief = Config::getBool("repeat-brief");
+
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
    if (hasDetailedDescription()) {
       ol.pushGeneratorState();
@@ -483,9 +483,9 @@ void NamespaceDef::writeMemberGroups(OutputList &ol)
 
 void NamespaceDef::writeAuthorSection(OutputList &ol)
 {
-   // write Author section (Man only)
    static const QString projectName = Config::getString("project-name");
 
+   // write Author section (Man only)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Man);
    ol.startGroupHeader();
@@ -552,7 +552,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
    static const bool separateMemberPages = Config::getBool("separate-member-pages");
 
    // static bool outputJava = Config::getBool("optimize-java");
-   // static bool fortranOpt = Config::_getBool("optimize-fortran");
+   // static bool fortranOpt = Config::getBool("optimize-fortran");
 
    QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
@@ -824,8 +824,9 @@ QSharedPointer<Definition> NamespaceDef::findInnerCompound(const QString &n) con
 
 void NamespaceDef::addListReferences()
 {
-   QSharedPointer<NamespaceDef> self = sharedFrom(this);
    // bool fortranOpt = Config::getBool("optimize-fortran");
+
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
    const QVector<ListItemInfo> &xrefItems = getRefItems();
 
@@ -927,6 +928,9 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
 {
    static const bool briefMemberDesc = Config::getBool("brief-member-desc");
 
+   // bool javaOpt    = Config::getBool("optimize-java");
+   // bool fortranOpt = Config::getBool("optimize-fortran");
+
    if (count() == 0) {
       // no namespaces in the list
       return;
@@ -968,9 +972,6 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
 
    // write list of namespaces
    ol.startMemberHeader("namespaces");
-
-   //bool javaOpt    = Config::getBool("optimize-java");
-   //bool fortranOpt = Config::getBool("optimize-fortran");
 
    ol.parseText(title);
    ol.endMemberHeader();
@@ -1037,11 +1038,11 @@ QSharedPointer<MemberList> NamespaceDef::createMemberList(MemberListType lt)
 
 void NamespaceDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {
-   QSharedPointer<NamespaceDef> self = sharedFrom(this);
-   QSharedPointer<MemberList> ml     = createMemberList(lt);
-
    static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static const bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   QSharedPointer<NamespaceDef> self = sharedFrom(this);
+   QSharedPointer<MemberList> ml     = createMemberList(lt);
 
    bool isSorted = false;
 

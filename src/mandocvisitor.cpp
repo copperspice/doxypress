@@ -459,14 +459,15 @@ void ManDocVisitor::visit(DocIncOperator *op)
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
 
    if (op->isFirst()) {
-      if (!m_hide) {
-         if (!m_firstCol) {
+      if (! m_hide) {
+         if (! m_firstCol) {
             m_t << endl;
          }
 
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
       }
+
       pushEnabled();
       m_hide = true;
    }

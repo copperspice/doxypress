@@ -95,11 +95,12 @@ inline void writeDocbookString(QTextStream &t, const QString &text)
 
 inline void writeDocbookCodeString(QTextStream &t, const QString &s, int &col)
 {
+   static const int tabSize = Config::getInt("tab-size");
+
    for (auto c : s) {
 
       switch (c.unicode()) {
          case '\t': {
-            static int tabSize = Config::getInt("tab-size");
             int spacesToNextTabStop = tabSize - (col % tabSize);
 
             col += spacesToNextTabStop;
@@ -108,33 +109,39 @@ inline void writeDocbookCodeString(QTextStream &t, const QString &s, int &col)
             }
             break;
          }
+
          case ' ':
             t << "&#32;";
-            col++;
+            ++col;
             break;
+
          case '<':
             t << "&lt;";
-            col++;
+            ++col;
             break;
+
          case '>':
             t << "&gt;";
-            col++;
+            ++col;
             break;
+
          case '&':
             t << "&amp;";
-            col++;
+            ++col;
             break;
+
          case '\'':
             t << "&apos;";
             col++;
             break;
+
          case '"':
             t << "&quot;";
-            col++;
+            ++col;
             break;
          default:
             t << c;
-            col++;
+            ++col;
             break;
       }
    }

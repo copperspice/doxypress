@@ -1486,7 +1486,7 @@ static void checkContLines(const QString &str)
    s_hasContLine[0] = 0;
 }
 
-void resetFortranCodeParserState() {}
+void resetFortranCodeParserState() { }
 
 void parseFortranCode(CodeOutputInterface &od, const QString &className, const QString &s,
                   bool exBlock, const QString &exName, QSharedPointer<FileDef> fd, int startLine,
@@ -1500,7 +1500,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
       return;
    }
 
-   printlex(yy_flex_debug, true, __FILE__, fd ? fd->fileName() : "" );
+   printlex(yy_flex_debug, true, __FILE__, fd == nullptr ? QString() : fd->fileName() );
 
    TooltipManager::instance()->clearTooltips();
    s_code = &od;
@@ -1555,8 +1555,9 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
 
    s_includeCodeFragment = inlineFragment;
    startCodeLine();
-   s_parmName.resize(0);
-   s_parmType.resize(0);
+
+   s_parmName.clear();
+   s_parmType.clear();
 
    yyrestart( yyin );
    BEGIN( Start );
@@ -1567,7 +1568,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
       s_code->endCodeLine();
    }
 
-   if (fd) {
+   if (fd != nullptr) {
       TooltipManager::instance()->writeTooltips(*s_code);
    }
 
@@ -1577,8 +1578,6 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    }
 
    s_hasContLine.clear();
-
-   printlex(yy_flex_debug, false, __FILE__, fd ? fd->fileName() : "" );
 
    return;
 }

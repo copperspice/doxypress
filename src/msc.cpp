@@ -38,7 +38,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
    if (! f.open(QIODevice::ReadOnly)) {
 
       if (logCount < 5) {
-         logCount++;
+         ++logCount;
 
          errNoPrefixAll("\n");
          errAll("Unable to open dot map file %s\n"
@@ -46,7 +46,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
                    csPrintable(mapName));
 
       } else if (logCount == 5) {
-         logCount++;
+         ++logCount;
          errNoPrefixAll("\n** Suppressing all further messages regarding dot map file\n\n");
 
       }

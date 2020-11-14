@@ -632,7 +632,10 @@ static QSharedPointer<MemberDef> setCallContextForVar(const QString &name)
    DBG_CTX((stderr, "setCallContextForVar(%s) g_classScope = %s\n", csPrintable(name), csPrintable(g_classScope)));
 
    int scopeEnd = name.lastIndexOf("::");
-   if (scopeEnd != -1) { // name with explicit scope
+
+   if (scopeEnd != -1) {
+      // name with explicit scope
+
       QString scope   = name.left(scopeEnd);
       QString locName = name.right(name.length() - scopeEnd - 2);
 
@@ -2111,8 +2114,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       g_theVarContext.popScope();
-      g_type.resize(0);
-      g_name.resize(0);
+      g_type.clear();
+      g_name.clear();
 
       if (! g_scopeStack.isEmpty()) {
          int scope = g_scopeStack.pop();
@@ -2228,7 +2231,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <AlignAs>\n                             {
       QString text = QString::fromUtf8(yytext);
-      g_yyLineNr++;
+      ++g_yyLineNr;
       codifyLines(text);
    }
 
@@ -2869,7 +2872,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_name += text;
    }
 
-<Body>{SCOPENAME}/{B}*           {
+<Body>{SCOPENAME}/{B}*  {
       // p->func()
       QString text = QString::fromUtf8(yytext);
       addType();
@@ -2885,7 +2888,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       int s = 0;
 
       while (s < text.length() && ! isId(text[s])) {
-         s++;
+         ++s;
       }
 
       int e = text.length() - 1;
@@ -3190,7 +3193,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <ObjCMemberCall>{ID}          {
       QString text = QString::fromUtf8(yytext);
 
-      if (qstrcmp(yytext,"self")==0 || qstrcmp(yytext,"super")==0) {
+      if (qstrcmp(yytext,"self") == 0 || qstrcmp(yytext,"super") == 0) {
          // TODO: get proper base class for "super"
          g_theCallContext.setClass(getClass(g_curClassName));
          startFontClass("keyword");
@@ -3832,7 +3835,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       int s = 0;
 
       while (! isId(text[s])) {
-         s++;
+         ++s;
       }
 
       int e = text.length() - 1;
@@ -4369,7 +4372,7 @@ void parseCCode(CodeOutputInterface &outputX, const QString &className, const QS
    g_code               = &outputX;
    s_inputString        = s;
    s_inputPosition      = 0;
-   g_currentFontClass   = "";
+   g_currentFontClass   = QString();
    g_needsTermination   = false;
    g_searchCtx          = searchCtx;
    g_collectXRefs       = collectXRefs;

@@ -236,12 +236,12 @@ void FileDef::writeTagFile(QTextStream &tagFile)
 
 void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
+   static const bool sourceCode        = Config::getBool("source-code");
+   static const bool repeatBrief       = Config::getBool("repeat-brief");
+   static const bool latexSourceCode   = Config::getBool("latex-source-code");
+   static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
 
-   static const bool sourceCode      = Config::getBool("source-code");
-   static const bool repeatBrief     = Config::getBool("repeat-brief");
-   static const bool latexSourceCode = Config::getBool("latex-source-code");
-   static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
+   QSharedPointer<FileDef> self = sharedFrom(this);
 
    if (hasDetailedDescription()) {
       ol.pushGeneratorState();
@@ -318,6 +318,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 void FileDef::writeBriefDescription(OutputList &ol)
 {
    static const bool repeatBrief = Config::getBool("repeat-brief");
+
    QSharedPointer<FileDef> self  = sharedFrom(this);
 
    if (hasBriefDescription()) {
@@ -431,10 +432,10 @@ void FileDef::writeIncludeFiles(OutputList &ol)
 
 void FileDef::writeIncludeGraph(OutputList &ol)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
-
    static const bool haveDot  = Config::getBool("have-dot");
    static const int  maxNodes = Config::getInt("dot-graph-max-nodes");
+
+   QSharedPointer<FileDef> self = sharedFrom(this);
 
    if (haveDot) {
       DotInclDepGraph incDepGraph(self, false);
@@ -458,10 +459,10 @@ void FileDef::writeIncludeGraph(OutputList &ol)
 
 void FileDef::writeIncludedByGraph(OutputList &ol)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
-
    static const bool haveDot  = Config::getBool("have-dot");
    static const int  maxNodes = Config::getInt("dot-graph-max-nodes");
+
+   QSharedPointer<FileDef> self = sharedFrom(this);
 
    if (haveDot) {
       DotInclDepGraph incDepGraph(self, true);
@@ -541,7 +542,9 @@ void FileDef::endMemberDeclarations(OutputList &ol)
 
 void FileDef::startMemberDocumentation(OutputList &ol)
 {
-   if (Config::getBool("separate-member-pages")) {
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.disable(OutputGenerator::Html);
       Doxy_Globals::suppressDocWarnings = true;
    }
@@ -549,7 +552,9 @@ void FileDef::startMemberDocumentation(OutputList &ol)
 
 void FileDef::endMemberDocumentation(OutputList &ol)
 {
-   if (Config::getBool("separate-member-pages")) {
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+
+   if (separateMemberPages) {
       ol.enable(OutputGenerator::Html);
       Doxy_Globals::suppressDocWarnings = false;
    }
@@ -557,7 +562,7 @@ void FileDef::endMemberDocumentation(OutputList &ol)
 
 void FileDef::writeMemberGroups(OutputList &ol)
 {
-   /* write user defined member groups */
+   // write user defined member groups
    QSharedPointer<FileDef> self = sharedFrom(this);
 
    for (auto mg : m_memberGroupSDict) {
@@ -569,13 +574,15 @@ void FileDef::writeMemberGroups(OutputList &ol)
 
 void FileDef::writeAuthorSection(OutputList &ol)
 {
+   static const QString projectName = Config::getString("project-name");
+
    // write Author section (Man only)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Man);
    ol.startGroupHeader();
    ol.parseText(theTranslator->trAuthor(true, true));
    ol.endGroupHeader();
-   ol.parseText(theTranslator->trGeneratedAutomatically(Config::getString("project-name")));
+   ol.parseText(theTranslator->trGeneratedAutomatically(projectName));
    ol.popGeneratorState();
 }
 
@@ -618,8 +625,10 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 */
 void FileDef::writeDocumentation(OutputList &ol)
 {
+   static const bool generateTreeView    = Config::getBool("generate-treeview");
+   static const bool separateMemberPages = Config::getBool("separate-member-pages");
+
    QSharedPointer<FileDef> self = sharedFrom(this);
-   static const bool generateTreeView = Config::getBool("generate-treeview");
 
    QString versionTitle;
 
@@ -804,12 +813,13 @@ void FileDef::writeDocumentation(OutputList &ol)
 
    endFileWithNavPath(self, ol);
 
-   if (Config::getBool("separate-member-pages")) {
+   if (separateMemberPages) {
       QSharedPointer<MemberList> ml = getMemberList(MemberListType_allMembersList);
 
       if (ml) {
          ml->sort();
       }
+
       writeMemberPages(ol);
    }
 }
@@ -872,13 +882,13 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> cu
 // write source listing of this file to the output
 void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFiles)
 {
-   QSharedPointer<FileDef> self = sharedFrom(this);
-
    static const bool generateTreeView  = Config::getBool("generate-treeview");
    static const bool filterSourceFiles = Config::getBool("filter-source-files");
    static const bool latexSourceCode   = Config::getBool("latex-source-code");
    static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
    static const bool clangParsing      = Config::getBool("clang-parsing");
+
+   QSharedPointer<FileDef> self = sharedFrom(this);
 
    DevNullCodeDocInterface devNullIntf;
    QString title = m_docname;
@@ -997,9 +1007,10 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
 
 void FileDef::parseSource(bool sameTu, QStringList &includedFiles)
 {
+   static const bool filterSourceFiles = Config::getBool("filter-source-files");
+   static const bool clangParsing      = Config::getBool("clang-parsing");
+
    QSharedPointer<FileDef> self  = sharedFrom(this);
-   static bool filterSourceFiles = Config::getBool("filter-source-files");
-   static bool clangParsing = Config::getBool("clang-parsing");
 
    DevNullCodeDocInterface devNullIntf;
    auto srcLang = getLanguage();
@@ -1141,17 +1152,19 @@ void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 
 QString FileDef::name() const
 {
-   if (Config::getBool("full-path-names")) {
+   static const bool fullPathNames = Config::getBool("full-path-names");
+
+   if (fullPathNames) {
       return m_fileName;
    } else {
       return Definition::name();
    }
 }
 
-void FileDef::addSourceRef(int line, QSharedPointer<Definition> d, QSharedPointer<MemberDef> md)
+void FileDef::addSourceRef(int line, QSharedPointer<Definition> def, QSharedPointer<MemberDef> md)
 {
-   if (d) {
-      m_srcDefDict.insert(line, d);
+   if (def) {
+      m_srcDefDict.insert(line, def);
 
       if (md) {
          m_srcMemberDict.insert(line, md);
@@ -1296,13 +1309,13 @@ bool FileDef::isIncluded(const QString &name) const
 
 bool FileDef::generateSourceFile() const
 {
-   static bool sourceBrowser   = Config::getBool("source-code");
-   static bool verbatimHeaders = Config::getBool("verbatim-headers");
+   static const bool sourceCode      = Config::getBool("source-code");
+   static const bool verbatimHeaders = Config::getBool("verbatim-headers");
 
    bool retval = ! isReference();
 
    if (retval) {
-      retval = (sourceBrowser || (verbatimHeaders && determineSection(name()) == Entry::HEADER_SEC));
+      retval = (sourceCode || (verbatimHeaders && determineSection(name()) == Entry::HEADER_SEC));
    }
 
    if (retval) {
@@ -1314,7 +1327,7 @@ bool FileDef::generateSourceFile() const
 
 bool FileDef::isDocumentationFile() const
 {
-   const QStringList suffixExclude = Config::getList("suffix-exclude-navtree");
+   static const QStringList suffixExclude = Config::getList("suffix-exclude-navtree");
 
    QFileInfo fi(name());
    QString suffix = fi.suffix();
@@ -1602,11 +1615,11 @@ QSharedPointer<MemberList> FileDef::createMemberList(MemberListType lt)
 
 void FileDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 {
-   QSharedPointer<FileDef> self  = sharedFrom(this);
-   QSharedPointer<MemberList> ml = createMemberList(lt);
-
    static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static const bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   QSharedPointer<FileDef> self  = sharedFrom(this);
+   QSharedPointer<MemberList> ml = createMemberList(lt);
 
    bool isSorted = false;
 

@@ -219,7 +219,7 @@ void MemberList::countDocMembers(bool countEnumValues)
    for (auto md : *this) {
 
       if (md->isDetailedSectionVisible(m_inGroup, m_inFile)) {
-         // do not count enum values, since they do not produce entries of their own
+         // do not count enum values since they do not produce entries of their own
 
          if (countEnumValues || md->memberType() != MemberDefType::EnumValue) {
             m_numDocMembers++;
@@ -655,7 +655,7 @@ void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName
    for (auto md : *this) {
       if (md->isDetailedSectionLinkable()) {
          QString diskName = md->getOutputFileBase();
-         QString title = md->qualifiedName();
+         QString title    = md->qualifiedName();
 
          startFile(ol, diskName, md->name(), title, HLI_None, ! generateTreeView, diskName);
          if (! generateTreeView) {

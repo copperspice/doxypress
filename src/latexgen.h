@@ -71,6 +71,7 @@ class LatexGenerator : public OutputGenerator
    ~LatexGenerator();
 
    static void init();
+
    static void writeStyleSheetFile(QFile &f);
    static void writeHeaderFile(QFile &f);
    static void writeFooterFile(QFile &f);
@@ -113,7 +114,6 @@ class LatexGenerator : public OutputGenerator
       return (o == Latex) ? this : 0;
    }
 
-   // CodeOutputInterface
    void codify(const QString &text) override {
       m_codeGen->codify(text);
    }
@@ -220,6 +220,7 @@ class LatexGenerator : public OutputGenerator
    void startTypewriter()  override {
       m_textStream << "{\\ttfamily ";
    }
+
    void endTypewriter()    override {
       m_textStream << "}";
    }
@@ -230,6 +231,7 @@ class LatexGenerator : public OutputGenerator
    void startItemListItem() override {
       m_textStream << "\\item " << endl;
    }
+
    void endItemListItem() override {}
 
    void startMemberSections() override {}
@@ -294,6 +296,7 @@ class LatexGenerator : public OutputGenerator
    void lineBreak(const QString &style = 0) override;
    void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) override;
    void endMemberDoc(bool) override;
+
    void startDoxyAnchor(const QString &, const QString &, const QString &, const QString &, const QString &) override;
    void endDoxyAnchor(const QString &, const QString &) override;
 
@@ -386,7 +389,7 @@ class LatexGenerator : public OutputGenerator
    void endContents() override { }
    void writeNonBreakableSpace(int) override;
 
-   void startEnumTable()  override{
+   void startEnumTable() override {
       startSimpleSect(EnumValues, 0, 0, theTranslator->trEnumerationValues());
       startDescForItem();
       m_textStream << "\\begin{description}" << endl;
@@ -461,8 +464,7 @@ class LatexGenerator : public OutputGenerator
    void writeLabel(const QString &l, bool isLast) override;
    void endLabels() override;
 
-   void setCurrentDoc(QSharedPointer<Definition> d, const QString &, bool) override {
-      (void) d;
+   void setCurrentDoc(QSharedPointer<Definition>, const QString &, bool) override {
    }
 
    void addWord(const QString &word, bool hiPriority) override {

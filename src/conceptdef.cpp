@@ -144,9 +144,9 @@ void ConceptDef::writeIncludeFiles(OutputList &ol)
 
 void ConceptDef::writeDocumentation(OutputList &ol)
 {
-   QSharedPointer<ConceptDef> self = sharedFrom(this);
-
    static bool generateTreeView = Config::getBool("generate-treeview");
+
+   QSharedPointer<ConceptDef> self = sharedFrom(this);
 
    QString pageName    = escapeCharsInString(name(), false, true);
    QString manPageName = escapeCharsInString(name(), true, true);
@@ -287,11 +287,11 @@ void ConceptDef::writeDetailedDescription(OutputList &ol, const QString &title, 
 
 void ConceptDef::writeDetailedDocumentationBody(OutputList &ol)
 {
+   static const bool repeatBrief = Config::getBool("repeat-brief");
+
    QSharedPointer<ConceptDef> self = sharedFrom(this);
 
-   static const bool repeatBrief = Config::getBool("repeat-brief");
    const QString docText = documentation();
-
    ol.startTextBlock();
 
    // repeat brief description

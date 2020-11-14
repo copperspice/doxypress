@@ -82,9 +82,9 @@ static int               s_braceCount;
 static bool              s_lexInit = false;
 static bool              s_packageCommentAllowed;
 
-static bool              s_start_init = false;
-static int               s_search_count = 0;
-static QString           s_argType = "";
+static bool              s_start_init    = false;
+static int               s_search_count  = 0;
+static QString           s_argType       = QString();
 
 static void initParser()
 {
@@ -250,7 +250,7 @@ static void handleCommentBlock(const QString &doc, bool isBrief)
       QString tmpDocs = previous->getData(EntryKey::Main_Docs);
 
       if (! tmpDocs.isEmpty()) {
-         previous->setData(EntryKey::Main_Docs,  tmpDocs.trimmed() + "\n\n");
+         previous->setData(EntryKey::Main_Docs, tmpDocs.trimmed() + "\n\n");
       }
    }
 
@@ -598,6 +598,7 @@ STARTDOCSYMS      "##"
    "'"          {
       // start of a single quoted string
       s_stringContext = YY_START;
+
       s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
 
@@ -609,6 +610,7 @@ STARTDOCSYMS      "##"
    "\""         {
       // start of a double quoted string
       s_stringContext = YY_START;
+
       s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
 
@@ -874,6 +876,7 @@ STARTDOCSYMS      "##"
    "'"                {
       // start of a single quoted string
       s_stringContext = YY_START;
+
       s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
 
@@ -883,8 +886,10 @@ STARTDOCSYMS      "##"
    "\""              {
       // start of a double quoted string
       s_stringContext = YY_START;
+
       s_defVal_active = false;
       s_docsEntry     = QSharedPointer<Entry>();
+
       BEGIN( DoubleQuoteString );
    }
 
@@ -1078,7 +1083,7 @@ STARTDOCSYMS      "##"
 
       current->startBodyLine = yyLineNr;
 
-      BEGIN( FunctionBody );
+      BEGIN(FunctionBody);
    }
 
    {B}"("                  {
@@ -1105,14 +1110,15 @@ STARTDOCSYMS      "##"
       s_argType = "";
    }
 
-   "="             {
+   "="                       {
       // default value
 
       // TODO: this rule is too simple, need to be able to
       // match things like =")" as well
 
-      s_defVal.resize(0);
+      s_defVal.clear();
       s_braceCount = 0;
+
       BEGIN(FunctionParamDefVal);
    }
 
@@ -1186,18 +1192,18 @@ STARTDOCSYMS      "##"
       s_docsEntry     = QSharedPointer<Entry>();
 
       s_stringContext  = FunctionParamDefVal;
-      BEGIN( SingleQuoteString );
+      BEGIN(SingleQuoteString);
    }
 
    "\""                      {
       QString text = QString::fromUtf8(yytext);
-      s_defVal   += text[0];
+      s_defVal += text[0];
 
       s_defVal_active = true;
       s_docsEntry     = QSharedPointer<Entry>();;
 
       s_stringContext = FunctionParamDefVal;
-      BEGIN( DoubleQuoteString );
+      BEGIN(DoubleQuoteString);
    }
 
    \n                        {
@@ -1884,7 +1890,7 @@ STARTDOCSYMS      "##"
    }
 
    \\.               {
-      // espaced char
+      // escaped char
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
    }
@@ -1960,9 +1966,9 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
 
-      bool xx = (text[0] == '"');
+      bool tmp = (text[0] == '"');
 
-      if (s_doubleQuote == xx)  {
+      if (s_doubleQuote == tmp)  {
          BEGIN(s_stringContext);
       }
    }

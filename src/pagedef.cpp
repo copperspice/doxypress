@@ -140,9 +140,10 @@ void PageDef::writeTagFile(QTextStream &tagFile)
 
 void PageDef::writeDocumentation(OutputList &ol)
 {
-   QSharedPointer<PageDef> self = sharedFrom(this);
+   static const bool generateTreeView = Config::getBool("generate-treeview");
+   static const bool disableIndex     = Config::getBool("disable-index");
 
-   static bool generateTreeView = Config::getBool("generate-treeview");
+   QSharedPointer<PageDef> self = sharedFrom(this);
 
    QString pageName;
    QString manPageName;
@@ -172,7 +173,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    ol.popGeneratorState();
 
    if (! generateTreeView) {
-      if (getOuterScope() != Doxy_Globals::globalScope && ! Config::getBool("disable-index")) {
+      if (getOuterScope() != Doxy_Globals::globalScope && ! disableIndex) {
          getOuterScope()->writeNavigationPath(ol);
       }
       ol.endQuickIndices();
@@ -231,7 +232,7 @@ void PageDef::writeDocumentation(OutputList &ol)
    writePageDocumentation(ol);
    ol.endPageDoc();
 
-   if (generateTreeView && getOuterScope() != Doxy_Globals::globalScope && ! Config::getBool("disable-index")) {
+   if (generateTreeView && getOuterScope() != Doxy_Globals::globalScope && ! disableIndex) {
       ol.endContents();
       endFileWithNavPath(getOuterScope(), ol);
 
@@ -311,9 +312,9 @@ void PageDef::writePageDocumentation(OutputList &ol)
          ol.parseText(title);
          ol.endSection(subPage->name(), sectionType);
 
-         Doxy_Globals::subpageNestingLevel++;
+         ++Doxy_Globals::subpageNestingLevel;
          subPage->writePageDocumentation(ol);
-         Doxy_Globals::subpageNestingLevel--;
+         --Doxy_Globals::subpageNestingLevel;
       }
 
       ol.popGeneratorState();
@@ -322,7 +323,7 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
 bool PageDef::visibleInIndex() const
 {
-   static bool externalPages = Config::getBool("external-pages");
+   static const bool externalPages = Config::getBool("external-pages");
 
    return ! getGroupDef() && (! isReference() || externalPages);
 }

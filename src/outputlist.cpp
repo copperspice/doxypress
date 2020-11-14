@@ -158,7 +158,7 @@ bool OutputList::parseText(const QString &textStr)
 
    DocText *root = validatingParseText(textStr);
 
-   for (auto item : m_outputs) {
+   for (const auto &item : m_outputs) {
 
       if (item->isEnabled()) {
          item->writeDoc(root, QSharedPointer<Definition>(), QSharedPointer<MemberDef>());

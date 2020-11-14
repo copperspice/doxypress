@@ -64,7 +64,7 @@ class CodeOutputInterface
     *  spaces visible, should break lines at a newline and should convert
     *  tabs to the right number of spaces.
     */
-   virtual void codify(const QString &s) = 0 ;
+   virtual void codify(const QString &text) = 0;
 
    /*! Writes a link to an object in a code fragment.
     *  \param ref      If this is non-zero, the object is to be found in
@@ -98,32 +98,25 @@ class CodeOutputInterface
                              const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo ) = 0;
 
    virtual void startCodeLine(bool hasLineNumbers) = 0;
-
-   /*! Ends a line of code started with startCodeLine() */
    virtual void endCodeLine() = 0;
 
    /*! Starts a block with a certain meaning. Used for syntax highlighting,
     *  which elements of the same type are rendered using the same 'font class'.
     *  \param clsName The category name.
     */
-   virtual void startFontClass(const QString &clsName) = 0;
-
-   /*! Ends a block started with startFontClass() */
+   virtual void startFontClass(const QString &fontName) = 0;
    virtual void endFontClass() = 0;
 
-   /*! Write an anchor to a source listing. */
    virtual void writeCodeAnchor(const QString &name) = 0;
 
    virtual void setCurrentDoc(QSharedPointer<Definition> context, const QString &anchor, bool isSourceFile) = 0;
    virtual void addWord(const QString &word, bool hiPriority) = 0;
 };
 
-/** Base Interface used for generating output outside of the
- *  comment blocks.
+/** Base Interface used for generating output outside of the comment blocks.
  *
- *  This abstract class is used by output generation functions
- *  to generate the output for a specific format,
- *  or a list of formats (see OutputList). This interface
+ *  Abstract class used by output generation functions to generate the
+ *  output for a specific format, or a list of formats (see OutputList). This interface
  *  contains functions that generate fragments of the output.
  */
 class BaseOutputDocInterface : public CodeOutputInterface
@@ -171,8 +164,6 @@ class BaseOutputDocInterface : public CodeOutputInterface
     */
    virtual void writeString(const QString &text) = 0;
 
-   /*! Starts a new paragraph */
-   //virtual void newParagraph()   = 0;
 
    /*! Starts a new paragraph */
    virtual void startParagraph(const QString &className) = 0;
@@ -180,14 +171,6 @@ class BaseOutputDocInterface : public CodeOutputInterface
    /*! Ends a paragraph */
    virtual void endParagraph() = 0;
 
-   /*! Writes a link to an object in the documentation.
-    *  \param ref    If this is non-zero, the object is to be found in
-    *                an external documentation file.
-    *  \param file   The file in which the object is located.
-    *  \param anchor The anchor uniquely identifying the object within
-    *                the file.
-    *  \param name   The text to display as a placeholder for the link.
-    */
    virtual void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) = 0;
 
    /*! Starts a (link to an) URL found in the documentation.
@@ -198,7 +181,6 @@ class BaseOutputDocInterface : public CodeOutputInterface
    /*! Ends a link started by startHtmlLink().
     */
    virtual void endHtmlLink() = 0;
-
 
    /*! Changes the text font to bold face. The bold section ends with endBold() */
    virtual void startBold()      = 0;
@@ -212,8 +194,7 @@ class BaseOutputDocInterface : public CodeOutputInterface
    /*! End a section of text displayed in typewriter style. */
    virtual void endTypewriter() = 0;
 
-   /*! Changes the text font to italic. The italic section ends with
-    *  endEmphasis()
+   /*! Changes the text font to italic. The italic section ends with endEmphasis()
     */
    virtual void startEmphasis() = 0;
 
@@ -223,9 +204,6 @@ class BaseOutputDocInterface : public CodeOutputInterface
    virtual void startCodeFragment() = 0;
 
    virtual void endCodeFragment() = 0;
-
-
-   /*! Writes a horizontal ruler to the output */
    virtual void writeRuler() = 0;
 
    /*! Starts a description list: e.g. \c \<dl\> in HTML
@@ -258,7 +236,6 @@ class BaseOutputDocInterface : public CodeOutputInterface
    virtual void startParamList(ParamListTypes t, const QString &title) = 0;
    virtual void endParamList() = 0;
 
-   //virtual void writeDescItem() = 0;
    virtual void startTitle() = 0;
    virtual void endTitle()   = 0;
 
@@ -500,7 +477,7 @@ class OutputDocInterface : public BaseOutputDocInterface
    /*! Create a new output generator. This can later by appended
     *  to the current one using append().
     */
-   //virtual OutputDocInterface *clone() = 0;
+   // virtual OutputDocInterface *clone() = 0;
 
    /*! Disables all output formats except format \a o
     *  (useful for OutputList only)
@@ -542,6 +519,5 @@ class OutputDocInterface : public BaseOutputDocInterface
     */
    virtual void popGeneratorState() = 0;
 };
-
 
 #endif

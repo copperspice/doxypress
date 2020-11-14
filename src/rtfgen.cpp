@@ -1752,10 +1752,8 @@ void RTFGenerator::codify(const QString &str)
 
 void RTFGenerator::writeChar(char c)
 {
-   char cs[2];
-   cs[0] = c;
-   cs[1] = 0;
-   docify(cs);
+   QString tmp = QChar(c);
+   docify(tmp);
 }
 
 void RTFGenerator::startClassDiagram()

@@ -813,44 +813,55 @@ void LatexDocVisitor::visitPre(DocSimpleSect *s)
          m_t << "\\begin{DoxyDate}{";
          filter(theTranslator->trDate());
          break;
+
       case DocSimpleSect::Note:
          m_t << "\\begin{DoxyNote}{";
          filter(theTranslator->trNote());
          break;
+
       case DocSimpleSect::Warning:
          m_t << "\\begin{DoxyWarning}{";
          filter(theTranslator->trWarning());
          break;
+
       case DocSimpleSect::Pre:
          m_t << "\\begin{DoxyPrecond}{";
          filter(theTranslator->trPrecondition());
          break;
+
       case DocSimpleSect::Post:
          m_t << "\\begin{DoxyPostcond}{";
          filter(theTranslator->trPostcondition());
          break;
+
       case DocSimpleSect::Copyright:
          m_t << "\\begin{DoxyCopyright}{";
          filter(theTranslator->trCopyright());
          break;
+
       case DocSimpleSect::Invar:
          m_t << "\\begin{DoxyInvariant}{";
          filter(theTranslator->trInvariant());
          break;
+
       case DocSimpleSect::Remark:
          m_t << "\\begin{DoxyRemark}{";
          filter(theTranslator->trRemarks());
          break;
+
       case DocSimpleSect::Attention:
          m_t << "\\begin{DoxyAttention}{";
          filter(theTranslator->trAttention());
          break;
+
       case DocSimpleSect::User:
          m_t << "\\begin{DoxyParagraph}{";
          break;
+
       case DocSimpleSect::Rcs:
          m_t << "\\begin{DoxyParagraph}{";
          break;
+
       case DocSimpleSect::Unknown:
          break;
    }
@@ -934,6 +945,7 @@ void LatexDocVisitor::visitPost(DocTitle *)
    if (m_hide) {
       return;
    }
+
    m_insideItem = false;
    m_t << "}\n";
 }
@@ -943,6 +955,7 @@ void LatexDocVisitor::visitPre(DocSimpleList *)
    if (m_hide) {
       return;
    }
+
    m_t << "\\begin{DoxyItemize}" << endl;
 }
 
@@ -992,6 +1005,7 @@ void LatexDocVisitor::visitPre(DocHtmlList *s)
    if (m_hide) {
       return;
    }
+
    if (s->type() == DocHtmlList::Ordered) {
       m_t << "\n\\begin{DoxyEnumerate}";
    } else {
@@ -1451,6 +1465,7 @@ void LatexDocVisitor::visitPre(DocHtmlHeader *header)
    if (m_hide) {
       return;
    }
+
    m_t << "\\" << getSectionName(header->level()) << "*{";
 }
 
@@ -1599,8 +1614,9 @@ void LatexDocVisitor::visitPost(DocRef *ref)
 
    if (ref->isSubPage()) {
       endLink(ref->ref(), 0, ref->anchor());
+
    } else {
-      if (!ref->file().isEmpty()) {
+      if (! ref->file().isEmpty()) {
          endLink(ref->ref(), ref->file(), ref->anchor());
       }
    }
@@ -1608,12 +1624,13 @@ void LatexDocVisitor::visitPost(DocRef *ref)
 
 void LatexDocVisitor::visitPre(DocSecRefItem *ref)
 {
+   static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    if (m_hide) {
       return;
    }
 
    m_t << "\\item \\contentsline{section}{";
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       m_t << "\\hyperlink{" << ref->file() << "_" << ref->anchor() << "}{" ;
@@ -1622,11 +1639,11 @@ void LatexDocVisitor::visitPre(DocSecRefItem *ref)
 
 void LatexDocVisitor::visitPost(DocSecRefItem *ref)
 {
+   static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    if (m_hide) {
       return;
    }
-
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       m_t << "}";
@@ -1670,9 +1687,12 @@ void LatexDocVisitor::visitPre(DocParamSect *s)
          m_t << "\n\\begin{DoxyParams}";
          if      (hasInOutSpecs && hasTypeSpecs) {
             m_t << "[2]";   // 2 extra cols
+
          } else if (hasInOutSpecs || hasTypeSpecs) {
             m_t << "[1]";   // 1 extra col
+
          }
+
          m_t << "{";
          filter(theTranslator->trParameters());
          break;
@@ -1849,6 +1869,8 @@ void LatexDocVisitor::visitPost(DocParamList *pl)
 
 void LatexDocVisitor::visitPre(DocXRefItem *x)
 {
+   static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    if (m_hide) {
       return;
    }
@@ -1856,8 +1878,6 @@ void LatexDocVisitor::visitPre(DocXRefItem *x)
    if (x->title().isEmpty()) {
       return;
    }
-
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    m_t << "\\begin{DoxyRefDesc}{";
    filter(x->title());
@@ -1884,9 +1904,11 @@ void LatexDocVisitor::visitPost(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
+
    m_t << "\\end{DoxyRefDesc}" << endl;
 }
 
@@ -1960,7 +1982,7 @@ void LatexDocVisitor::filter(const QString &str)
 
 void LatexDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor, bool refToTable)
 {
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (ref.isEmpty() && pdfHyperlinks) {
       // internal PDF link
@@ -2001,16 +2023,16 @@ void LatexDocVisitor::startLink(const QString &ref, const QString &file, const Q
 
 void LatexDocVisitor::endLink(const QString &ref, const QString &file, const QString &anchor)
 {
-   m_t << "}";
+   static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   m_t << "}";
 
    if (ref.isEmpty() && ! pdfHyperlinks) {
       m_t << "{";
       filter(theTranslator->trPageAbbreviation());
 
       m_t << "}{" << file;
-      if (! file.isEmpty() && !anchor.isEmpty()) {
+      if (! file.isEmpty() && ! anchor.isEmpty()) {
          m_t << "_";
       }
 

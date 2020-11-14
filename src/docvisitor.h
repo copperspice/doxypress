@@ -78,7 +78,7 @@ class DocLinkedWord;
 class DocParamSect;
 class DocParamList;
 class DocInternalRef;
-class DocCopy;             // TODO: no longer generated => remove
+class DocCopy;
 class DocText;
 class DocSimpleSectSep;
 class DocHtmlBlockQuote;

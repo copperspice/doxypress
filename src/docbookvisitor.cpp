@@ -96,6 +96,7 @@ void DocbookDocVisitor::visit(DocWord *w)
    if (m_hide) {
       return;
    }
+
    filter(w->word());
 }
 
@@ -115,6 +116,7 @@ void DocbookDocVisitor::visit(DocWhiteSpace *w)
    if (m_hide) {
       return;
    }
+
    if (m_insidePre) {
       m_t << w->chars();
    } else {
@@ -184,6 +186,7 @@ void DocbookDocVisitor::visit(DocHorRuler *)
    if (m_hide) {
       return;
    }
+
    m_t << "<informaltable frame='bottom'><tgroup cols='1'><colspec align='center'/><tbody><row><entry align='center'>\n";
    m_t << "</entry></row></tbody></tgroup></informaltable>\n";
 }
@@ -193,6 +196,7 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
    if (m_hide) {
       return;
    }
+
    switch (s->style()) {
       case DocStyleChange::Bold:
          if (s->enable()) {
@@ -323,7 +327,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
             err("Unable to open file %s.dot for writing, OS Error #: %d\n", csPrintable(baseName), file.error());
          }
 
-         file.write( stext.toUtf8() );
+         file.write(stext.toUtf8());
          file.close();
 
          writeDotFile(baseName, s);
@@ -488,14 +492,17 @@ void DocbookDocVisitor::visit(DocIncOperator *op)
                      op->text(), langExt, op->isExample(),
                      op->exampleFile());
       }
+
       pushEnabled();
       m_hide = true;
    }
+
    if (op->isLast()) {
       popEnabled();
       if (! m_hide) {
          m_t << "</programlisting>";
       }
+
    } else {
       if (! m_hide) {
          m_t << endl;
@@ -534,6 +541,7 @@ void DocbookDocVisitor::visit(DocCite *cite)
    if (m_hide) {
       return;
    }
+
    if (! cite->file().isEmpty()) {
       startLink(cite->file(), cite->anchor());
    }
@@ -604,18 +612,19 @@ void DocbookDocVisitor::visitPost(DocPara *)
    if (m_hide) {
       return;
    }
+
    m_t << "</para>";
    m_t << endl;
 }
 
 void DocbookDocVisitor::visitPre(DocRoot *)
 {
-   //m_t << "<hr><h4><font color=\"red\">New parser:</font></h4>\n";
+   // m_t << "<hr><h4><font color=\"red\">New parser:</font></h4>\n";
 }
 
 void DocbookDocVisitor::visitPost(DocRoot *)
 {
-   //m_t << "<hr><h4><font color=\"red\">Old parser:</font></h4>\n";
+   // m_t << "<hr><h4><font color=\"red\">Old parser:</font></h4>\n";
 }
 
 void DocbookDocVisitor::visitPre(DocSimpleSect *s)
@@ -623,6 +632,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
    if (m_hide) {
       return;
    }
+
    switch (s->type()) {
       case DocSimpleSect::See:
          if (m_insidePre) {
@@ -631,6 +641,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trSeeAlso()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Return:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trReturns() << ": </title>" << endl;
@@ -638,6 +649,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trReturns()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Author:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trAuthor(true, true) << ": </title>" << endl;
@@ -645,6 +657,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trAuthor(true, true)) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Authors:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trAuthor(true, false) << ": </title>" << endl;
@@ -652,6 +665,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trAuthor(true, false)) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Version:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trVersion() << ": </title>" << endl;
@@ -666,6 +680,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trSince()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Date:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trDate() << ": </title>" << endl;
@@ -673,6 +688,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trDate()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Note:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trNote() << ": </title>" << endl;
@@ -687,6 +703,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trWarning()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Pre:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trPrecondition() << ": </title>" << endl;
@@ -694,6 +711,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trPrecondition()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Post:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trPostcondition() << ": </title>" << endl;
@@ -701,6 +719,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trPostcondition()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Copyright:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trCopyright() << ": </title>" << endl;
@@ -722,6 +741,7 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
             m_t << "<formalpara><title>" << convertToXML(theTranslator->trRemarks()) << ": </title>" << endl;
          }
          break;
+
       case DocSimpleSect::Attention:
          if (m_insidePre) {
             m_t << "<formalpara><title>" << theTranslator->trAttention() << ": </title>" << endl;
@@ -780,6 +800,7 @@ void DocbookDocVisitor::visitPre(DocSimpleList *)
    if (m_hide) {
       return;
    }
+
    m_t << "<itemizedlist>\n";
 }
 
@@ -816,6 +837,7 @@ void DocbookDocVisitor::visitPre(DocSection *s)
    if (!s->anchor().isEmpty()) {
       m_t << "_1" << s->anchor();
    }
+
    m_t << "\">" << endl;
    m_t << "<title>";
    filter(s->title());
@@ -832,6 +854,7 @@ void DocbookDocVisitor::visitPre(DocHtmlList *s)
    if (m_hide) {
       return;
    }
+
    if (s->type() == DocHtmlList::Ordered) {
       m_t << "<orderedlist>\n";
    } else {
@@ -844,6 +867,7 @@ void DocbookDocVisitor::visitPost(DocHtmlList *s)
    if (m_hide) {
       return;
    }
+
    if (s->type() == DocHtmlList::Ordered) {
       m_t << "</orderedlist>\n";
    } else {
@@ -856,6 +880,7 @@ void DocbookDocVisitor::visitPre(DocHtmlListItem *)
    if (m_hide) {
       return;
    }
+
    m_t << "<listitem>\n";
 }
 
@@ -967,6 +992,7 @@ void DocbookDocVisitor::visitPost(DocHtmlCell *)
    if (m_hide) {
       return;
    }
+
    m_t << "</entry>";
 }
 
@@ -975,6 +1001,7 @@ void DocbookDocVisitor::visitPre(DocHtmlCaption *)
    if (m_hide) {
       return;
    }
+
    m_t << "<caption>";
 }
 
@@ -983,6 +1010,7 @@ void DocbookDocVisitor::visitPost(DocHtmlCaption *)
    if (m_hide) {
       return;
    }
+
    m_t << "</caption>\n";
 }
 
@@ -991,7 +1019,8 @@ void DocbookDocVisitor::visitPre(DocInternal *)
    if (m_hide) {
       return;
    }
-   // TODO: to be implemented
+
+   // emerald implement
 }
 
 void DocbookDocVisitor::visitPost(DocInternal *)
@@ -999,7 +1028,8 @@ void DocbookDocVisitor::visitPost(DocInternal *)
    if (m_hide) {
       return;
    }
-   // TODO: to be implemented
+
+   // emerald implement
 }
 
 void DocbookDocVisitor::visitPre(DocHRef *href)
@@ -1015,6 +1045,7 @@ void DocbookDocVisitor::visitPost(DocHRef *)
    if (m_hide) {
       return;
    }
+
    m_t << "</link>";
 }
 
@@ -1023,6 +1054,7 @@ void DocbookDocVisitor::visitPre(DocHtmlHeader *)
    if (m_hide) {
       return;
    }
+
    m_t << "<formalpara><title>";
 }
 
@@ -1031,6 +1063,7 @@ void DocbookDocVisitor::visitPost(DocHtmlHeader *)
    if (m_hide) {
       return;
    }
+
    m_t << "</title></formalpara>\n";
 }
 
@@ -1060,13 +1093,13 @@ void DocbookDocVisitor::visitPre(DocImage *img)
 
 void DocbookDocVisitor::visitPost(DocImage *img)
 {
+   static const QString docbookOutDir = Config::getString("docbook-output");
+
    if (img->type() == DocImage::DocBook) {
 
       if (m_hide) {
          return;
       }
-
-      static const QString docbookOutDir = Config::getString("docbook-output");
 
       visitPostEnd(m_t, img->hasCaption());
 
@@ -1181,6 +1214,7 @@ void DocbookDocVisitor::visitPre(DocRef *ref)
    if (! ref->file().isEmpty()) {
       startLink(ref->file(), ref->anchor());
    }
+
    if (! ref->hasLinkText()) {
       filter(ref->targetTitle());
    }
@@ -1191,7 +1225,8 @@ void DocbookDocVisitor::visitPost(DocRef *ref)
    if (m_hide) {
       return;
    }
-   if (!ref->file().isEmpty()) {
+
+   if (! ref->file().isEmpty()) {
       endLink();
    }
 }
@@ -1233,6 +1268,7 @@ void DocbookDocVisitor::visitPre(DocParamSect *s)
    if (m_hide) {
       return;
    }
+
    m_t <<  endl;
    m_t << "                <formalpara>" << endl;
    m_t << "                    <title/>" << endl;
@@ -1242,15 +1278,19 @@ void DocbookDocVisitor::visitPre(DocParamSect *s)
       case DocParamSect::Param:
          m_t << theTranslator->trParameters();
          break;
+
       case DocParamSect::RetVal:
          m_t << theTranslator->trReturnValues();
          break;
+
       case DocParamSect::Exception:
          m_t << theTranslator->trExceptions();
          break;
+
       case DocParamSect::TemplateParam:
          m_t << theTranslator->trTemplateParameters();
          break;
+
       default:
          assert(0);
    }
@@ -1267,6 +1307,7 @@ void DocbookDocVisitor::visitPost(DocParamSect *)
    if (m_hide) {
       return;
    }
+
    m_t << "                        </tbody>" << endl;
    m_t << "                        </tgroup>" << endl;
    m_t << "                    </table>" << endl;
@@ -1282,15 +1323,16 @@ void DocbookDocVisitor::visitPre(DocParamList *pl)
 
    m_t << "                            <row>" << endl;
 
-   if (pl->parameters().isEmpty()) {
+   if ( pl->parameters().isEmpty()) {
       m_t << "                                <entry></entry>" << endl;
 
    } else {
-      m_t << "                                <entry>";
       int cnt = 0;
 
+      m_t << "                                <entry>";
+
       for (auto param : pl->parameters()) {
-         if (cnt) {
+         if (cnt != 0) {
             m_t << ", ";
          }
 
@@ -1302,8 +1344,9 @@ void DocbookDocVisitor::visitPre(DocParamList *pl)
 
          }
 
-         cnt++;
+         ++cnt;
       }
+
       m_t << "</entry>" << endl;
    }
 
@@ -1315,6 +1358,7 @@ void DocbookDocVisitor::visitPost(DocParamList *)
    if (m_hide) {
       return;
    }
+
    m_t << "</entry>" << endl;
    m_t << "                            </row>" << endl;
 }
@@ -1324,13 +1368,16 @@ void DocbookDocVisitor::visitPre(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
    m_t << "<para><link linkend=\"";
    m_t << x->file() << "_1" << x->anchor();
    m_t << "\">";
+
    filter(x->title());
+
    m_t << "</link>";
    m_t << " ";
 }
@@ -1340,6 +1387,7 @@ void DocbookDocVisitor::visitPost(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
@@ -1351,6 +1399,7 @@ void DocbookDocVisitor::visitPre(DocInternalRef *ref)
    if (m_hide) {
       return;
    }
+
    startLink(ref->file(), ref->anchor());
 }
 
@@ -1359,6 +1408,7 @@ void DocbookDocVisitor::visitPost(DocInternalRef *)
    if (m_hide) {
       return;
    }
+
    endLink();
    m_t << " ";
 }
@@ -1368,7 +1418,8 @@ void DocbookDocVisitor::visitPre(DocCopy *)
    if (m_hide) {
       return;
    }
-   // TODO: to be implemented
+
+   // emerald - implement
 }
 
 
@@ -1377,19 +1428,20 @@ void DocbookDocVisitor::visitPost(DocCopy *)
    if (m_hide) {
       return;
    }
-   // TODO: to be implemented
+
+   // emerald - implement
 }
 
 
 void DocbookDocVisitor::visitPre(DocText *)
 {
-   // TODO: to be implemented
+   // emerald - implement
 }
 
 
 void DocbookDocVisitor::visitPost(DocText *)
 {
-   // TODO: to be implemented
+   // emerald - implement
 }
 
 
@@ -1398,6 +1450,7 @@ void DocbookDocVisitor::visitPre(DocHtmlBlockQuote *)
    if (m_hide) {
       return;
    }
+
    m_t << "<blockquote>";
 }
 
@@ -1406,6 +1459,7 @@ void DocbookDocVisitor::visitPost(DocHtmlBlockQuote *)
    if (m_hide) {
       return;
    }
+
    m_t << "</blockquote>";
 }
 
@@ -1443,20 +1497,19 @@ void DocbookDocVisitor::pushEnabled()
 
 void DocbookDocVisitor::popEnabled()
 {
-   bool v = m_enabled.pop();
-   m_hide = v;
+   m_hide = m_enabled.pop();
 }
 
 void DocbookDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
 {
+   static const QString docbookOutDir = Config::getString("docbook-output");
+
    QString shortName = baseName;
    int i;
 
    if ((i = shortName.lastIndexOf('/')) != -1) {
       shortName = shortName.right(shortName.length() - i - 1);
    }
-
-   static const QString docbookOutDir = Config::getString("docbook-output");
 
    writeMscGraphFromFile(baseName + ".msc", docbookOutDir, shortName, MSC_BITMAP);
 
@@ -1467,6 +1520,8 @@ void DocbookDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
 
 void DocbookDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *s)
 {
+   static const QString docbookOutDir = Config::getString("docbook-output");
+
    QString shortName = baseName;
    int i;
 
@@ -1474,7 +1529,6 @@ void DocbookDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   static const QString docbookOutDir = Config::getString("docbook-output");
 
    generatePlantUMLOutput(baseName, docbookOutDir, PUML_BITMAP);
 

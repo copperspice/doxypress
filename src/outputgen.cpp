@@ -49,9 +49,8 @@ void OutputGenerator::startPlainFile(const QString &name)
 
 void OutputGenerator::endPlainFile()
 {
-   m_textStream.setDevice(0);
-
-   m_fileName = "";
+   m_textStream.setDevice(nullptr);
+   m_fileName = QString();
 
    m_file.close();
    m_file.setFileName(m_fileName);
@@ -74,4 +73,3 @@ void OutputGenerator::popGeneratorState()
 
    }
 }
-
