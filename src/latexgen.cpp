@@ -2381,13 +2381,11 @@ void LatexGenerator::endConstraintList()
 
 void LatexGenerator::startCodeFragment()
 {
-   m_textStream << "\n\\begin{DoxyCode}{" << usedTableLevels() << "}\n";
 }
 
 void LatexGenerator::endCodeFragment()
 {
    endCodeLine();
-   m_textStream << "\\end{DoxyCode}\n";
 }
 
 void LatexGenerator::startInlineHeader()

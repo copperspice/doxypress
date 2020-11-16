@@ -170,7 +170,7 @@ QString LatexDocVisitor::escapeMakeIndexChars(const QString &str)
    return result;
 }
 
-LatexDocVisitor::LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt, bool insideTabbing)
+LatexDocVisitor::LatexDocVisitor(QTextStream &t, LatexCodeGenerator &ci, const QString &langExt, bool insideTabbing)
    : DocVisitor(DocVisitor_Latex), m_t(t), m_ci(ci), m_insidePre(false), m_insideItem(false),
      m_hide(false), m_hideCaption(false), m_insideTabbing(insideTabbing), m_langExt(langExt)
 {

@@ -24,13 +24,13 @@
 #include <QTextStream>
 
 #include <docvisitor.h>
-class CodeOutputInterface;
 
-/*! @brief Concrete visitor implementation for LaTeX output. */
+class LatexCodeGenerator;
+
 class LatexDocVisitor : public DocVisitor
 {
  public:
-   LatexDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt, bool insideTabbing);
+   LatexDocVisitor(QTextStream &t, LatexCodeGenerator &ci, const QString &langExt, bool insideTabbing);
 
    // visitor functions for leaf nodes
 
@@ -167,7 +167,7 @@ class LatexDocVisitor : public DocVisitor
    void popEnabled();
 
    QTextStream &m_t;
-   CodeOutputInterface &m_ci;
+   LatexCodeGenerator &m_ci;
 
    bool m_insidePre;
    bool m_insideItem;
