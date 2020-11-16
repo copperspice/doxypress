@@ -45,6 +45,8 @@
         <file>resources/html/tab_s.lum</file>
         <file>resources/html/tabs.css</file>
         <file>resources/latex/doxypress.sty</file>
+        <file>resources/latex/longtable_doxypress.sty</file>
+        <file>resources/latex/tabu_doxypress.sty</file>
         <file>resources/translation/doxy_en.qm</file>
         <file>resources/translation/doxy_af.qm</file>
         <file>resources/translation/doxy_ar.qm</file>    
