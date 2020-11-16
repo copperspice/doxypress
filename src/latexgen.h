@@ -24,6 +24,7 @@
 
 class QFile;
 
+#define LATEX_STYLE_EXTENSION ".sty"
 class LatexCodeGenerator : public CodeOutputInterface
 {
    public:
@@ -49,18 +50,35 @@ class LatexCodeGenerator : public CodeOutputInterface
       void addWord(const QString &, bool) override {}
 
       static void setDoxyCodeOpen(bool value);
+      // not part of CodeGenerator
+      void incUsedTableLevel() {
+         ++m_usedTableLevel;
+      }
+
+      void decUsedTableLevel() {
+         --m_usedTableLevel;
+      }
+
+      int usedTableLevel() const {
+         return m_usedTableLevel;
+      }
 
    private:
       void _writeCodeLink(const QString &className, const QString &ref, const QString &file,
                   const QString &anchor, const QString &name, const QString &tooltip);
 
       void docify(const QString &str);
-      bool m_streamSet;
 
-      QString      m_relPath;
-      QString      m_sourceFileName;
-      int          m_col;
-      bool         m_prettyCode;
+      QString m_relPath;
+      QString m_sourceFileName;
+
+      bool m_streamSet  = false;
+      bool m_prettyCode       = false;
+      bool m_doxyCodeLineOpen = false;
+
+      int m_col;
+      int m_usedTableLevel;
+
       QTextStream  &m_t;
 };
 
@@ -479,13 +497,13 @@ class LatexGenerator : public OutputGenerator
    QString modifyKeywords(const QString &s);
    QString m_relPath;
 
-   bool insideTabbing;
-   bool firstDescItem;
-   bool disableLinks;
+   bool m_insideTabbing;
+   bool m_firstDescItem;
+   bool m_disableLinks;
+   bool m_templateMemberItem;
+   bool m_prettyCode;
 
    int m_indent;
-   bool templateMemberItem;
-   bool m_prettyCode;
 
    QSharedPointer<LatexCodeGenerator> m_codeGen;
 };

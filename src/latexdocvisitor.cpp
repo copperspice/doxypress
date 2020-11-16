@@ -38,25 +38,24 @@
 #include <plantuml.h>
 #include <util.h>
 
-const int maxLevels = 5;
-static const char *secLabels[maxLevels] = {
-      "section", "subsection", "subsubsection", "paragraph", "subparagraph" };
+constexpr const int maxLevels = 5;
 
-static const char *getSectionName(int level)
+static const QString secLabels[maxLevels] = {
+      "doxysection", "doxysubsection", "doxysubsubsection", "doxyparagraph", "doxysubparagraph" };
+
+static QString getSectionName(int level)
 {
    static bool compactLatex = Config::getBool("latex-compact");
 
-   int l = level;
-
    if (compactLatex) {
-      l++;
+      ++level;
    }
 
    if (Doxy_Globals::insideMainPage) {
-      l--;
+      --level;
    }
 
-   return secLabels[qMin(maxLevels - 1, l)];
+   return secLabels[qMin(maxLevels - 1, level)];
 }
 
 static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name,
@@ -412,14 +411,10 @@ void LatexDocVisitor::visit(DocVerbatim *s)
 
    switch (s->type()) {
       case DocVerbatim::Code: {
-         m_t << "\n\\begin{DoxyCode}{" << usedTableLevels() << "}\n";
-         LatexCodeGenerator::setDoxyCodeOpen(true);
 
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                   langExt, s->isExample(), s->exampleFile());
 
-         LatexCodeGenerator::setDoxyCodeOpen(false);
-         m_t << "\\end{DoxyCode}\n";
       }
       break;
 
@@ -533,8 +528,6 @@ void LatexDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines: {
-         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
-         LatexCodeGenerator::setDoxyCodeOpen(true);
 
          QFileInfo cfi(inc->file());
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
@@ -543,21 +536,15 @@ void LatexDocVisitor::visit(DocInclude *inc)
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd,
                      -1, -1, false, QSharedPointer<MemberDef>(), true);
 
-         LatexCodeGenerator::setDoxyCodeOpen(false);
-         m_t << "\\end{DoxyCodeInclude}" << endl;
       }
       break;
 
       case DocInclude::Include:
-         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
-         LatexCodeGenerator::setDoxyCodeOpen(true);
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
-                     inc->text(), langExt, inc->isExample(),inc->exampleFile(), QSharedPointer<FileDef>(),
+                     inc->text(), langExt, inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
                      -1, -1, true, QSharedPointer<MemberDef>(), false);
 
-         LatexCodeGenerator::setDoxyCodeOpen(false);
-         m_t << "\\end{DoxyCodeInclude}\n";
          break;
 
       case DocInclude::DontInclude:
@@ -579,18 +566,13 @@ void LatexDocVisitor::visit(DocInclude *inc)
          m_t << "\\end{DoxyVerbInclude}\n";
          break;
 
-      case DocInclude::Snippet: {
-         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
-         LatexCodeGenerator::setDoxyCodeOpen(true);
+      case DocInclude::Snippet:
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                   extractBlock(inc->text(), inc->blockId()), langExt,
                   inc->isExample(), inc->exampleFile());
 
-         LatexCodeGenerator::setDoxyCodeOpen(false);
-         m_t << "\\end{DoxyCodeInclude}" << endl;
-      }
-      break;
+         break;
 
       case DocInclude::SnipWithLines: {
         QFileInfo cfi( inc->file() );
@@ -617,10 +599,8 @@ void LatexDocVisitor::visit(DocIncOperator *op)
 {
    if (op->isFirst()) {
       if (! m_hide) {
-         m_t << "\n\\begin{DoxyCodeInclude}{" << usedTableLevels() << "}\n";
       }
 
-      LatexCodeGenerator::setDoxyCodeOpen(true);
       pushEnabled();
       m_hide = true;
    }
@@ -632,16 +612,15 @@ void LatexDocVisitor::visit(DocIncOperator *op)
          Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
                   langExt, op->isExample(), op->exampleFile());
       }
+
       pushEnabled();
       m_hide = true;
    }
 
    if (op->isLast()) {
       popEnabled();
-      LatexCodeGenerator::setDoxyCodeOpen(false);
 
       if (! m_hide) {
-         m_t << "\n\\end{DoxyCodeInclude}\n";
       }
 
    } else {
@@ -660,7 +639,7 @@ void LatexDocVisitor::visit(DocFormula *f)
    for (QChar ch : f->text()) {
 
       if (ch == '\'') {
-         m_t << "\\text{'}";
+         m_t << "\\textnormal{\\textquotesingle}";
 
       } else {
          m_t << ch;
@@ -676,9 +655,9 @@ void LatexDocVisitor::visit(DocIndexEntry *i)
    }
 
    m_t << "\\index{";
-   m_t << latexEscapeLabelName(i->entry(), false);
+   m_t << latexEscapeLabelName(i->entry());
    m_t << "@{";
-   m_t << latexEscapeIndexChars(i->entry(), false);
+   m_t << latexEscapeIndexChars(i->entry());
    m_t << "}}";
 }
 
@@ -1633,7 +1612,7 @@ void LatexDocVisitor::visitPre(DocSecRefItem *ref)
    m_t << "\\item \\contentsline{section}{";
 
    if (pdfHyperlinks) {
-      m_t << "\\hyperlink{" << ref->file() << "_" << ref->anchor() << "}{" ;
+      m_t << "\\mbox{\\hyperlink{" << ref->file() << "_" << ref->anchor() << "}{" ;
    }
 }
 
@@ -1646,8 +1625,9 @@ void LatexDocVisitor::visitPost(DocSecRefItem *ref)
    }
 
    if (pdfHyperlinks) {
-      m_t << "}";
+      m_t << "}}";
    }
+
    m_t << "}{\\ref{" << ref->file() << "_" << ref->anchor() << "}}{}" << endl;
 }
 
@@ -1680,7 +1660,7 @@ void LatexDocVisitor::visitPre(DocParamSect *s)
    bool hasInOutSpecs = s->hasInOutSpecifier();
    bool hasTypeSpecs  = s->hasTypeSpecifier();
 
-   incUsedTableLevels();
+   m_ci.incUsedTableLevel();
 
    switch (s->type()) {
       case DocParamSect::Param:
@@ -1728,7 +1708,7 @@ void LatexDocVisitor::visitPost(DocParamSect *s)
       return;
    }
 
-   decUsedTableLevels();
+   m_ci.decUsedTableLevel();
 
    switch (s->type()) {
       case DocParamSect::Param:
@@ -1793,14 +1773,9 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
    }
 
    if (sect && sect->hasTypeSpecifier()) {
-      bool first = true;
+
 
       for (auto type : pl->paramTypes() ) {
-         if (! first) {
-            m_t << " | ";
-         } else {
-            first = false;
-         }
 
          if (type->kind() == DocNode::Kind_Word) {
             visit((DocWord *)type);
@@ -1887,15 +1862,20 @@ void LatexDocVisitor::visitPre(DocXRefItem *x)
    m_t << "\\item[";
 
    if (pdfHyperlinks && ! anonymousEnum) {
-      m_t << "\\hyperlink{" << stripPath(x->file()) << "_" << x->anchor() << "}{";
+      m_t << "\\mbox{\\hyperlink{" << stripPath(x->file()) << "_" << x->anchor() << "}{";
    } else {
-      m_t << "{\\bf ";
+      m_t << "\\textbf{ ";
    }
 
    m_insideItem = true;
    filter(x->title());
 
    m_insideItem = false;
+
+   if (pdfHyperlinks && ! anonymousEnum) {
+    m_t << "}";
+   }
+
    m_t << "}]";
 }
 
@@ -1977,7 +1957,7 @@ void LatexDocVisitor::visitPost(DocParBlock *)
 
 void LatexDocVisitor::filter(const QString &str)
 {
-   filterLatexString(m_t, str, m_insideTabbing, m_insidePre, m_insideItem);
+   filterLatexString(m_t, str, m_insideTabbing, m_insidePre, m_insideItem, m_ci.usedTableLevel() > 0, false);
 }
 
 void LatexDocVisitor::startLink(const QString &ref, const QString &file, const QString &anchor, bool refToTable)
@@ -1991,7 +1971,7 @@ void LatexDocVisitor::startLink(const QString &ref, const QString &file, const Q
          m_t << "\\doxytablelink{";
 
       } else {
-         m_t << "\\hyperlink{";
+         m_t << "\\mbox{\\hyperlink{";
       }
 
       if (! file.isEmpty()) {
@@ -2017,7 +1997,7 @@ void LatexDocVisitor::startLink(const QString &ref, const QString &file, const Q
 
    } else {
       // external link
-      m_t << "{\\bf ";
+      m_t << "\\textbf{ ";
    }
 }
 
