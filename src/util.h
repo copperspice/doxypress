@@ -176,8 +176,8 @@ QString filterCRLF(const QString &buffer);
 QString fileToString(const QString &name, bool filter = false, bool isSourceCode = false);
 bool    findAndRemoveWord(QString &s, const QString &word);
 
-void    filterLatexString(QTextStream &t, const QString &str, bool insideTabbing = false,
-                  bool insidePre = false, bool insideItem = false, bool keepSpaces = false);
+void    filterLatexString(QTextStream &t, const QString &str, bool insideTabbing,
+                  bool insidePre, bool insideItem, bool insideTable, bool keepSpaces);
 
 bool    getDefs(const QString &scName, const QString &mbName, const QString &args, QSharedPointer<MemberDef> &md,
                   QSharedPointer<ClassDef> &cd, QSharedPointer<FileDef> &fd, QSharedPointer<NamespaceDef> &nd,
@@ -201,8 +201,8 @@ int     isAccessibleFrom(QSharedPointer<const Definition> scope, QSharedPointer<
 void    initClassHierarchy(ClassSDict *cl);
 
 QString langToString(SrcLangExt lang);
-QString latexEscapeLabelName(const QString &data,  bool insideTabbing);
-QString latexEscapeIndexChars(const QString &data, bool insideTabbing);
+QString latexEscapeLabelName(const QString &data);
+QString latexEscapeIndexChars(const QString &data);
 QString latexEscapePDFString(const QString &data);
 QString latexFilterURL(const QString &str);
 
@@ -323,12 +323,6 @@ Protection classInheritedProtectionLevel(QSharedPointer<ClassDef> cd, QSharedPoi
 // methods located in doxy_setup.cpp
 SrcLangExt getLanguageFromFileName(const QString &fileName);
 QString getFileNameExtension(const QString &fileName);
-
-// latex support
-int  usedTableLevels();
-void incUsedTableLevels();
-void decUsedTableLevels();
-
 
 //  *******
 QString insertTemplateSpecifierInScope(const QString &scope, const QString &templ);

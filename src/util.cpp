@@ -5456,7 +5456,7 @@ QString convertToLatex(const QString &text, bool insideTabbing, bool keepSpaces)
    QString result;
 
    QTextStream t(&result);
-   filterLatexString(t, text, insideTabbing, false, false, keepSpaces);
+   filterLatexString(t, text, insideTabbing, false, false, false, keepSpaces);
 
    return result;
 }
@@ -6218,26 +6218,8 @@ void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d)
    recursivelyAddGroupListToTitle(ol, d, true);
 }
 
-// latex only
-static int s_usedTableLevels = 0;
-
-void incUsedTableLevels()
-{
-   ++s_usedTableLevels;
-}
-
-void decUsedTableLevels()
-{
-   --s_usedTableLevels;
-}
-
-int usedTableLevels()
-{
-   return s_usedTableLevels;
-}
-
 void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, bool insidePre,
-                  bool insideItem, bool keepSpaces)
+                  bool insideItem, bool insideTable, bool keepSpaces)
 {
    static bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
 
@@ -6258,6 +6240,11 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
       if (insidePre) {
          switch (c.unicode()) {
+            case 0xFFFD:
+               // "Replacement character"
+               t << "{\\ucr}";
+               break;
+
             case '\\':
                t << "\\(\\backslash\\)";
                break;
@@ -6299,13 +6286,12 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "-\\/";
                break;
 
-
             case '^':
-               (usedTableLevels() > 0) ? t << "\\string^" : t << c;
+               insideTable ? t << "\\string^" : t << c;
                break;
 
             case '~':
-               (usedTableLevels() > 0) ? t << "\\string~" : t << c;
+               t << "\\string~";
                break;
 
             case ' ':
@@ -6325,6 +6311,11 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
       } else {
 
          switch (c.unicode()) {
+            case 0xFFFD:
+               // "Replacement character"
+               t << "{\\ucr}";
+               break;
+
             case '#':
                t << "\\#";
                break;
@@ -6497,7 +6488,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
    }
 }
 
-QString latexEscapeLabelName(const QString &text, bool insideTabbing)
+QString latexEscapeLabelName(const QString &text)
 {
    QString result;
 
@@ -6557,7 +6548,7 @@ QString latexEscapeLabelName(const QString &text, bool insideTabbing)
 
             }
 
-            filterLatexString(t, tmp, insideTabbing);
+            filterLatexString(t, tmp, true, false, false, false, false);
             break;
          }
       }
@@ -6566,7 +6557,7 @@ QString latexEscapeLabelName(const QString &text, bool insideTabbing)
    return result;
 }
 
-QString latexEscapeIndexChars(const QString &text, bool insideTabbing)
+QString latexEscapeIndexChars(const QString &text)
 {
    QString result;
 
@@ -6629,7 +6620,7 @@ QString latexEscapeIndexChars(const QString &text, bool insideTabbing)
 
             }
 
-            filterLatexString(t, tmp, insideTabbing);
+            filterLatexString(t, tmp, true, false, false, false, false);
             break;
          }
        }
