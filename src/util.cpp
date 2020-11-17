@@ -114,7 +114,6 @@ void TextGeneratorOLImpl::writeLink(const QString &extRef, const QString &file,
    m_od.writeObjectLink(extRef, file, anchor, text);
 }
 
-
 // an inheritance tree of depth of 100000 should be enough
 const int maxInheritanceDepth = 100000;
 
@@ -868,19 +867,20 @@ static bool accessibleViaUsingNamespace(const NamespaceSDict *nl, QSharedPointer
          if (sc && item->getOuterScope() == sc) {
             return true;
          }
+         if (item->getLanguage() == SrcLangExt_Cpp) {
 
-         QString key = und->name();
+            QString key = und->name();
 
-         if (! visitedDict.contains(key)) {
-            visitedDict.insert(key);
+            if (! visitedDict.contains(key)) {
+               visitedDict.insert(key);
 
-            if (accessibleViaUsingNamespace(&(und->getUsedNamespaces()), fileScope, item, explicitScopePart)) {
-               return true;
+               if (accessibleViaUsingNamespace(&(und->getUsedNamespaces()), fileScope, item, explicitScopePart)) {
+                  return true;
+               }
+
+               visitedDict.remove(key);
             }
-
-            visitedDict.remove(key);
          }
-
       }
    }
 
@@ -2133,7 +2133,7 @@ QString argListToString(const ArgumentList &argList, bool useCanonicalType, bool
    }
 
    if (! argList.trailingReturnType.isEmpty()) {
-      result += " -> " + argList.trailingReturnType;
+      result += argList.trailingReturnType;
    }
 
    if (argList.pureSpecifier) {
@@ -4472,21 +4472,16 @@ QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &n
       if (fn->count() == 1) {
          QSharedPointer<FileDef> fd = fn->first();
 
-         QFileInfo fdFile(fd->getPath());
          QString fdPath = fi.absolutePath() + "/";
 
-#if defined(_WIN32) || defined(__MACOSX__)
-         // Windows or MacOSX
-         bool isSamePath = fdPath.toLower() == path.toLower();
-#else
-         // Unix
-         bool isSamePath = fdPath == path;
-#endif
+         // tests using the correct platform casing rules
+         bool isSamePath = (QFileInfo(fdPath) == QFileInfo(path));
 
          if (path.isEmpty() || isSamePath) {
             cachedResult->fileDef = fd;
 
             s_findFileDefCache.insert(key, cachedResult);
+
             return fd;
          }
 
@@ -4794,19 +4789,29 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
             break;
 
          case '=':
-            retval += "_0A";
+            retval += "_0a";
             break;
 
          case '$':
-            retval += "_0B";
+            retval += "_0b";
             break;
 
          case '\\':
-            retval += "_0C";
+            retval += "_0c";
             break;
 
          case '@':
-            retval += "_0D";
+            retval += "_0d";
+            break;
+         case ']':
+            retval += "_0e";
+            break;
+
+         case '[':
+            retval += "_0f";
+            break;
+         case '#':
+            retval += "_0g";
             break;
 
          default:
@@ -6017,23 +6022,25 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
          // a page name is a label as well
          QString file;
 
+         int line = -1;
          if (gd != nullptr) {
             file = gd->getOutputFileBase();
 
          } else {
             file = pd->getOutputFileBase();
 
+            line = pd->getStartBodyLine();
          }
 
          QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(pd->name());
 
          if (si) {
             if (si->lineNr != -1) {
-               warn(file, -1, "multiple use of section label '%s', (first occurrence: %s, line %d)",
+               warn(file, line, "multiple use of section label '%s', (first occurrence: %s, line %d)",
                     csPrintable(pd->name()), csPrintable(si->fileName), si->lineNr);
 
             } else {
-               warn(file, -1, "multiple use of section label '%s', (first occurrence: %s)",
+               warn(file, line, "multiple use of section label '%s', (first occurrence: %s)",
                     csPrintable(pd->name()), csPrintable(si->fileName));
             }
 
@@ -7580,7 +7587,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
    static Qt::CaseSensitivity ignoreCase = Config::getCase("case-sensitive-fname");
 
    // For Windows and Mac OS X always do the case insensitive match
-#if defined(_WIN32) || defined(__MACOSX__)
+#if defined(Q_OS_WIN) || defined(Q_OS_DARWIN)
    ignoreCase = Qt::CaseInsensitive;
 #endif
 
@@ -7927,6 +7934,14 @@ QString langToString(SrcLangExt lang)
 
       case SrcLangExt_Markdown:
          retval = "Markdown";
+         break;
+
+      case SrcLangExt_Docs:
+         retval = "Docs";
+         break;
+
+      case SrcLangExt_Make:
+         retval = "Make";
          break;
    }
 
