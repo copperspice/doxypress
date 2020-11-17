@@ -452,19 +452,21 @@ class MemberDef : public Definition
    void computeIsConstructor() const;
    void computeIsDestructor() const;
 
-   void _writeGroupInclude(OutputList &ol, bool inGroup);
-   void _writeCallGraph(OutputList &ol);
-   void _writeCallerGraph(OutputList &ol);
-   void _writeReimplements(OutputList &ol);
-   void _writeReimplementedBy(OutputList &ol);
-   void _writeExamples(OutputList &ol);
-   void _writeTypeConstraints(OutputList &ol);
+   void writeGroupInclude(OutputList &ol, bool inGroup);
+   void writeCallGraph(OutputList &ol);
+   void writeCallerGraph(OutputList &ol);
 
-   void _writeEnumValues(OutputList &ol, QSharedPointer<Definition> container,
+   void writeReimplements(OutputList &ol);
+   void writeReimplementedBy(OutputList &ol);
+
+   void writeExamples(OutputList &ol);
+   void writeTypeConstraints(OutputList &ol);
+
+   void writeEnumValues(OutputList &ol, QSharedPointer<Definition> container,
                   const QString &cfname, const QString &ciname, const QString &cname);
 
-   void _writeCategoryRelation(OutputList &ol);
-   void _writeTagData(const DefType);
+   void writeCategoryRelation(OutputList &ol);
+   void writeTagData(const DefType);
 
    void addToSearchIndex();
 

@@ -1367,7 +1367,6 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
       }
    }
 
-   //_writeTagData(compoundType);
    addToSearchIndex();
 
    QString cname  = d->name();
@@ -2172,7 +2171,7 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
       }
 }
 
-void MemberDef::_writeCallGraph(OutputList &ol)
+void MemberDef::writeCallGraph(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
@@ -2205,7 +2204,7 @@ void MemberDef::_writeCallGraph(OutputList &ol)
    }
 }
 
-void MemberDef::_writeCallerGraph(OutputList &ol)
+void MemberDef::writeCallerGraph(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
@@ -2237,7 +2236,7 @@ void MemberDef::_writeCallerGraph(OutputList &ol)
    }
 }
 
-void MemberDef::_writeReimplements(OutputList &ol)
+void MemberDef::writeReimplements(OutputList &ol)
 {
    QSharedPointer<MemberDef> bmd = reimplements();
    QSharedPointer<ClassDef> bcd;
@@ -2291,7 +2290,7 @@ void MemberDef::_writeReimplements(OutputList &ol)
    }
 }
 
-void MemberDef::_writeReimplementedBy(OutputList &ol)
+void MemberDef::writeReimplementedBy(OutputList &ol)
 {
    QSharedPointer<MemberList> bml = reimplementedBy();
 
@@ -2383,7 +2382,7 @@ void MemberDef::_writeReimplementedBy(OutputList &ol)
    }
 }
 
-void MemberDef::_writeCategoryRelation(OutputList &ol)
+void MemberDef::writeCategoryRelation(OutputList &ol)
 {
    if (m_impl->classDef) {
       // this should be a member of a class/category
@@ -2430,7 +2429,7 @@ void MemberDef::_writeCategoryRelation(OutputList &ol)
    }
 }
 
-void MemberDef::_writeExamples(OutputList &ol)
+void MemberDef::writeExamples(OutputList &ol)
 {
    // write the list of examples that use this member
    if (hasExamples()) {
@@ -2442,7 +2441,7 @@ void MemberDef::_writeExamples(OutputList &ol)
    }
 }
 
-void MemberDef::_writeTypeConstraints(OutputList &ol)
+void MemberDef::writeTypeConstraints(OutputList &ol)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
@@ -2451,7 +2450,7 @@ void MemberDef::_writeTypeConstraints(OutputList &ol)
    }
 }
 
-void MemberDef::_writeEnumValues(OutputList &ol, QSharedPointer<Definition> container, const QString &cfname,
+void MemberDef::writeEnumValues(OutputList &ol, QSharedPointer<Definition> container, const QString &cfname,
                   const QString &ciname, const QString &cname)
 {
    if (isEnumerate()) {
@@ -2635,7 +2634,7 @@ QString MemberDef::displayDefinition() const
    return substitute(ldef, "::", sep);
 }
 
-void MemberDef::_writeGroupInclude(OutputList &ol, bool inGroup)
+void MemberDef::writeGroupInclude(OutputList &ol, bool inGroup)
 {
    // only write out the include file if this is not part of a class or file definition
    static const bool showGroupedMembInc = Config::getBool("show-grouped-members-inc");
@@ -3117,7 +3116,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
    ol.endDoxyAnchor(cfname, memAnchor);
    ol.startIndent();
 
-   _writeGroupInclude(ol, inGroup);
+   writeGroupInclude(ol, inGroup);
 
    // write multi-line initializer (if any)
    if (hasMultiLineInitializer()) {
@@ -3240,21 +3239,22 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       ol.docify(" requires " + str);
    }
 
-   //
-   _writeEnumValues(ol, scopedContainer, cfname, ciname, cname);
-   _writeReimplements(ol);
-   _writeReimplementedBy(ol);
-   _writeCategoryRelation(ol);
-   _writeExamples(ol);
-   _writeTypeConstraints(ol);
+   writeEnumValues(ol, scopedContainer, cfname, ciname, cname);
+
+   writeReimplements(ol);
+   writeReimplementedBy(ol);
+
+   writeCategoryRelation(ol);
+   writeExamples(ol);
+   writeTypeConstraints(ol);
 
    writeSourceDef(ol, cname);
    writeSourceRefs(ol, cname);
    writeSourceReffedBy(ol, cname);
    writeInlineCode(ol, cname);
 
-   _writeCallGraph(ol);
-   _writeCallerGraph(ol);
+   writeCallGraph(ol);
+   writeCallerGraph(ol);
 
    if (Doxy_Globals::userComments) {
       ol.pushGeneratorState();
@@ -4141,7 +4141,6 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
       // not an anonymous enum
 
       if (isLinkableInProject() || hasDocumentedEnumValues()) {
-         //_writeTagData(compoundType);
          addToSearchIndex();
          writeLink(typeDecl, cd, nd, fd, gd);
 
@@ -4189,7 +4188,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
 
                if (fmd->hasDocumentation()) {
                   // enum value has docs
-                  // fmd->_writeTagData(compoundType);
+                  // fmd->writeTagData(compoundType);
 
                   fmd->addToSearchIndex();
                   fmd->writeLink(typeDecl, cd, nd, fd, gd);
