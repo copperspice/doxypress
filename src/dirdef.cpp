@@ -252,8 +252,7 @@ void DirDef::writeSubDirList(OutputList &ol)
 
       for (auto dd : m_subdirs) {
 
-         if (dd->hasDocumentation() || dd->getFiles().count()== 0) {
-
+         if (dd->hasDocumentation() || dd->getFiles().count() > 0) {
             ol.startMemberDeclaration();
             ol.startMemberItem(dd->getOutputFileBase(), 0);
             ol.parseText(theTranslator->trDir(false, true) + " ");
@@ -285,7 +284,7 @@ void DirDef::writeFileList(OutputList &ol)
    int numFiles = 0;
 
    for (auto fd : m_fileList) {
-      if (fd->hasDocumentation()) {
+      if (fd->hasDocumentation() || fd->generateSourceFile()) {
          ++numFiles;
        }
    }
@@ -299,7 +298,7 @@ void DirDef::writeFileList(OutputList &ol)
 
       for (auto fd : m_fileList) {
 
-         if (fd->hasDocumentation()) {
+         if (fd->hasDocumentation() || fd->generateSourceFile()) {
             ol.startMemberDeclaration();
             ol.startMemberItem(fd->getOutputFileBase(), 0);
             ol.docify(theTranslator->trFile(false, true) + " ");
