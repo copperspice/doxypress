@@ -714,8 +714,6 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
 
 QString Definition::getSourceFileBase() const
 {
-   assert(definitionType() != Definition::TypeFile); // file overloads this method
-
    static const bool sourceCode = Config::getBool("source-code");
 
    QString fn;
@@ -747,9 +745,9 @@ QString Definition::getSourceAnchor() const
 /*! Write a reference to the source code defining this definition */
 void Definition::writeSourceDef(OutputList &ol, const QString &)
 {
-   static const bool latexSourceCode = Config::getBool("latex-source-code");
-   static const bool rtfSourceCode   = Config::getBool("rtf-source-code");
-   // static const bool docbookSourceCode = Config::getBool("docbook-programlisting");
+   static const bool latexSourceCode   = Config::getBool("latex-source-code");
+   static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
+   static const bool docbookSourceCode = Config::getBool("docbook-program-listing");
 
    ol.pushGeneratorState();
 
@@ -1000,7 +998,7 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
          }
 
          ol.startCodeFragment();
-         pIntf->parseCode(ol, scopeName, codeFragment, m_private->lang, false, nullptr,
+         pIntf->parseCode(ol, scopeName, codeFragment, m_private->lang, false, QString(),
                   m_private->m_body_fileDef, actualStart, actualEnd, true, thisMd, true);
 
          ol.endCodeFragment();
@@ -1019,7 +1017,6 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
    static const bool latexSourceCode   = Config::getBool("latex-source-code");
    static const bool refLinkSource     = Config::getBool("ref-link-source");
    static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
-
 
    ol.pushGeneratorState();
 
@@ -1171,7 +1168,6 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
 void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 {
    static const bool referencedByRelation = Config::getBool("ref-by-relation");
-   // emerald - remove the global test
 
    if (referencedByRelation) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferencedBy(), m_private->m_sourceRefByDict);
@@ -1181,7 +1177,6 @@ void Definition::writeSourceReffedBy(OutputList &ol, const QString &scopeName)
 void Definition::writeSourceRefs(OutputList &ol, const QString &scopeName)
 {
    static const bool referencesRelation = Config::getBool("ref-relation");
-   // emerald - remove the global test
 
    if (referencesRelation) {
       _writeSourceRefList(ol, scopeName, theTranslator->trReferences(), m_private->m_sourceRefsDict);
@@ -1315,10 +1310,22 @@ void Definition::mergeRefItems(QSharedPointer<Definition> def)
 {
    QVector<ListItemInfo> &xrefList = def->getRefItems();
 
-   for (auto &item : xrefList) {
-      if (_getXRefListId(item.type) == -1) {
-         m_private->m_xrefListItems.append(item);
+   for (auto &item_A : xrefList) {
+
+      bool found = false;
+
+      for (auto &item_B : m_private->m_xrefListItems) {
+         if (item_A.type == item_B.type && item_A.itemId == item_B.itemId) {
+
+            found = true;
+            break;
+         }
       }
+
+      if (! found) {
+         m_private->m_xrefListItems.append(item_A);
+      }
+
    }
 }
 
@@ -1479,7 +1486,8 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
 
       int maxLevel = localToc.htmlLevel();
       int level    = 1;
-      bool inLi[5] = { false, false, false, false, false };
+
+      bool activeLevel[5] = { false, false, false, false, false };
 
       QString cs;
 
@@ -1492,20 +1500,20 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
             int nextLevel = si->type;
 
             if (nextLevel > level) {
-               for (int l = level; l < nextLevel; l++) {
-                  if (l < maxLevel) {
+               for (int index = level; index < nextLevel; ++index) {
+                  if (index < maxLevel) {
                      ol.writeString("<ul>");
                   }
                }
 
             } else if (nextLevel < level) {
-               for (int l = level; l > nextLevel; l--) {
-                  if (l <= maxLevel && inLi[l]) {
+               for (int index = level; index > nextLevel; --index) {
+                  if (index <= maxLevel && activeLevel[index]) {
                      ol.writeString("</li>\n");
                   }
 
-                  inLi[l] = false;
-                  if (l <= maxLevel) {
+                  activeLevel[index] = false;
+                  if (index <= maxLevel) {
                      ol.writeString("</ul>\n");
                   }
                }
@@ -1513,7 +1521,7 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
 
             cs = QString::number(nextLevel);
 
-            if (nextLevel <= maxLevel && inLi[nextLevel]) {
+            if (nextLevel <= maxLevel && activeLevel[nextLevel]) {
                ol.writeString("</li>\n");
             }
 
@@ -1522,7 +1530,7 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
                ol.writeString("<li class=\"level" + cs + "\"><a href=\"#" + si->label + "\">" + (si->title.isEmpty() ? si->label : titleDoc) + "</a>");
             }
 
-            inLi[nextLevel] = true;
+            activeLevel[nextLevel] = true;
             level = nextLevel;
          }
       }
@@ -1532,20 +1540,20 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
       }
 
       while (level > 1 && level <= maxLevel) {
-         if (inLi[level]) {
+         if (activeLevel[level]) {
             ol.writeString("</li>\n");
          }
 
-         inLi[level] = false;
+         activeLevel[level] = false;
          ol.writeString("</ul>\n");
-         level--;
+         --level;
       }
 
-      if (level <= maxLevel && inLi[level])  {
+      if (level <= maxLevel && activeLevel[level])  {
          ol.writeString("</li>\n");
       }
 
-      inLi[level] = false;
+      activeLevel[level] = false;
       ol.writeString("</ul>\n");
       ol.writeString("</div>\n");
       ol.popGeneratorState();
