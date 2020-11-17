@@ -275,8 +275,8 @@ QString substitute(const QString &origString, const QString &oldWord, const QStr
 QString substituteOne(const QString &origString, QChar oldChar, const QString &newWord);
 QString showFileDefMatches(const FileNameDict &fnDict, const QString &xName);
 
-bool    srcFileVisibleInIndex(QSharedPointer<FileDef> fd);
-void    setAnchors(QSharedPointer<MemberList> ml);
+bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd);
+void setAnchors(QSharedPointer<MemberList> ml);
 
 QString transcodeToQString(const QByteArray &input);
 QString tempArgListToString(const ArgumentList &al, SrcLangExt lang);
@@ -299,7 +299,7 @@ QSharedPointer<ClassDef>     getResolvedClass(QSharedPointer<const Definition> s
                   QSharedPointer<MemberDef> *pTypeDef = 0, QString *pTemplSpec = nullptr, bool mayBeUnlinkable = false,
                   bool mayBeHidden = false, QString *pResolvedType = nullptr );
 
-QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
+QSharedPointer<FileDef>      findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
 
 QSharedPointer<MemberDef>    getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
                    const QByteArray &name);
@@ -328,10 +328,11 @@ QString getFileNameExtension(const QString &fileName);
 QString insertTemplateSpecifierInScope(const QString &scope, const QString &templ);
 QString trimEmptyLines(const QString &s, int &docLine);
 QString expandAlias(const QString &aliasName, const QString &aliasValue);
+QString extractBlock(const QString &text, const QString &marker);
 QString convertCharEntities(const QString &s);
+
 bool    patternMatch(const QFileInfo &fi, const QStringList &patList);
 void    writeColoredImgData(ColoredImgDataItem data);
-QString extractBlock(const QString &text, const QString &marker);
 bool    protectionLevelVisible(Protection prot);
 bool    docFileVisibleInIndex(QSharedPointer<FileDef> fd);
 void    addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst);

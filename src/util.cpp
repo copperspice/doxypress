@@ -290,27 +290,6 @@ void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn)
    od.popGeneratorState();
 }
 
-void writeExtraLatexPackages(QTextStream &t_stream)
-{
-   // user specified packages
-   static const QStringList extraPackages = Config::getList("latex-extra-packages");
-
-   if (! extraPackages.isEmpty()) {
-      t_stream << "% Packages requested by user\n";
-
-      for (const auto &pkgName : extraPackages) {
-
-         if (pkgName.startsWith('[') || pkgName.startsWith('{')) {
-            t_stream << "\\usepackage" << pkgName << "\n";
-         } else {
-            t_stream << "\\usepackage{" << pkgName << "}\n";
-         }
-      }
-
-      t_stream << "\n";
-   }
-}
-
 static QString stripFromPath(const QString &path, const QStringList &list)
 {
    // look at all the strings in the list and strip the longest match
@@ -2088,74 +2067,6 @@ void linkifyText(const TextGeneratorIntf &out, QSharedPointer<const Definition> 
    }
 
    out.writeString(QStringView(skip_iter, text.constEnd()), keepSpaces);
-}
-
-void writeExample(OutputList &ol, const ExampleSDict &ed)
-{
-   QString exampleLine = theTranslator->trWriteList(ed.count());
-
-   // bool latexEnabled = ol.isEnabled(OutputGenerator::Latex);
-   // bool manEnabled   = ol.isEnabled(OutputGenerator::Man);
-   // bool htmlEnabled  = ol.isEnabled(OutputGenerator::Html);
-
-   static QRegularExpression regExp_marker("@[0-9]+");
-
-   QString::const_iterator current_iter = exampleLine.constBegin();
-   QString::const_iterator start_iter   = exampleLine.constBegin();
-
-   QRegularExpressionMatch match = regExp_marker.match(exampleLine);
-
-   // replace all markers with links to the classes
-   while (match.hasMatch()) {
-
-      start_iter = match.capturedStart();
-      ol.parseText(QStringView(current_iter, start_iter));
-
-      QString tmp    = QStringView(start_iter + 1, match.capturedEnd() );
-      int entryIndex = tmp.toInteger<int>();
-
-      ExampleSDict::const_iterator iter = ed.begin();
-      for (int i = 0; i < entryIndex; i++) {
-
-         if (iter == ed.end()) {
-            break;
-         }
-
-         ++iter;
-      }
-
-      QSharedPointer<Example> e;
-
-      if (iter != ed.end()) {
-         e = iter.value();
-      }
-
-      ol.pushGeneratorState();
-
-      ol.disable(OutputGenerator::Latex);
-      ol.disable(OutputGenerator::RTF);
-
-      // link for Html / man
-      ol.writeObjectLink(QString(), e->file, e->anchor, e->name);
-      ol.popGeneratorState();
-
-      ol.pushGeneratorState();
-
-      ol.disable(OutputGenerator::Man);
-      ol.disable(OutputGenerator::Html);
-
-      // link for Latex / pdf with anchor because the sources
-      // are not hyperlinked (not possible with a verbatim environment)
-
-      ol.writeObjectLink(QString(), e->file, QString(), e->name);
-      ol.popGeneratorState();
-
-      current_iter = match.capturedEnd();
-      match = regExp_marker.match(exampleLine, current_iter);
-   }
-
-   ol.parseText(QStringView(current_iter, exampleLine.constEnd()));
-   ol.writeString(".");
 }
 
 QString argListToString(const ArgumentList &argList, bool useCanonicalType, bool showDefVals)
@@ -7423,6 +7334,95 @@ QString expandAlias(const QString &aliasName, const QString &aliasValue)
    result = expandAliasRec(aliasValue);
 
    return result;
+}
+
+void writeExample(OutputList &ol, const ExampleSDict &ed)
+{
+   QString exampleLine = theTranslator->trWriteList(ed.count());
+
+   // bool latexEnabled = ol.isEnabled(OutputGenerator::Latex);
+   // bool manEnabled   = ol.isEnabled(OutputGenerator::Man);
+   // bool htmlEnabled  = ol.isEnabled(OutputGenerator::Html);
+
+   static QRegularExpression regExp_marker("@[0-9]+");
+
+   QString::const_iterator current_iter = exampleLine.constBegin();
+   QString::const_iterator start_iter   = exampleLine.constBegin();
+
+   QRegularExpressionMatch match = regExp_marker.match(exampleLine);
+
+   // replace all markers with links to the classes
+   while (match.hasMatch()) {
+
+      start_iter = match.capturedStart();
+      ol.parseText(QStringView(current_iter, start_iter));
+
+      QString tmp    = QStringView(start_iter + 1, match.capturedEnd() );
+      int entryIndex = tmp.toInteger<int>();
+
+      ExampleSDict::const_iterator iter = ed.begin();
+      for (int i = 0; i < entryIndex; i++) {
+
+         if (iter == ed.end()) {
+            break;
+         }
+
+         ++iter;
+      }
+
+      QSharedPointer<Example> e;
+
+      if (iter != ed.end()) {
+         e = iter.value();
+      }
+
+      ol.pushGeneratorState();
+
+      ol.disable(OutputGenerator::Latex);
+      ol.disable(OutputGenerator::RTF);
+
+      // link for Html / man
+      ol.writeObjectLink(QString(), e->file, e->anchor, e->name);
+      ol.popGeneratorState();
+
+      ol.pushGeneratorState();
+
+      ol.disable(OutputGenerator::Man);
+      ol.disable(OutputGenerator::Html);
+
+      // link for Latex / pdf with anchor because the sources
+      // are not hyperlinked (not possible with a verbatim environment)
+
+      ol.writeObjectLink(QString(), e->file, QString(), e->name);
+      ol.popGeneratorState();
+
+      current_iter = match.capturedEnd();
+      match = regExp_marker.match(exampleLine, current_iter);
+   }
+
+   ol.parseText(QStringView(current_iter, exampleLine.constEnd()));
+   ol.writeString(".");
+}
+
+void writeExtraLatexPackages(QTextStream &t_stream)
+{
+   // user specified packages
+   static const QStringList extraPackages = Config::getList("latex-extra-packages");
+
+   if (! extraPackages.isEmpty()) {
+      t_stream << "% Packages requested by user\n";
+
+      for (const auto &pkgName : extraPackages) {
+
+         if (pkgName.startsWith('[') || pkgName.startsWith('{')) {
+            t_stream << "\\usepackage" << pkgName << "\n";
+         } else {
+            t_stream << "\\usepackage{" << pkgName << "}\n";
+         }
+      }
+
+      t_stream << "\n";
+   }
 }
 
 void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList)
