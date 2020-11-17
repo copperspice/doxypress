@@ -284,9 +284,9 @@ QString tempArgListToString(const ArgumentList &al, SrcLangExt lang);
 QString upperCaseFirstLetter(QString &&text);
 
 void writeExample(OutputList &ol, const ExampleSDict &el);
-void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList);
 void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn);
 void writeExtraLatexPackages(QTextStream &t);
+void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList);
 
 QString yearToString();
 

@@ -7432,7 +7432,7 @@ void writeExtraLatexPackages(QTextStream &t_stream)
    }
 }
 
-void writeTypeConstraints(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList)
+void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList)
 {
    if (argList.listEmpty()) {
       return;

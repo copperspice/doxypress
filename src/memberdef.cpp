@@ -2447,7 +2447,7 @@ void MemberDef::_writeTypeConstraints(OutputList &ol)
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
    if (! m_impl->m_typeConstraints.listEmpty()) {
-      writeTypeConstraints(ol, self, m_impl->m_typeConstraints);
+      writeTypeConstraints_internal(ol, self, m_impl->m_typeConstraints);
    }
 }
 

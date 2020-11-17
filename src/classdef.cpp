@@ -787,7 +787,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
    }
 
    // write type constraints
-   writeTypeConstraints(ol, self, m_typeConstraints);
+   writeTypeConstraints_internal(ol, self, m_typeConstraints);
 
    // write examples
    if (hasExamples()) {
