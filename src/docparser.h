@@ -87,7 +87,6 @@ void docFindSections(const QString &input, QSharedPointer<Definition> def,
 class DocNode
 {
  public:
-   /* Available node types. */
    enum Kind { Kind_Root           = 0,
                Kind_Word           = 1,
                Kind_WhiteSpace     = 2,
@@ -141,7 +140,8 @@ class DocNode
 
                Kind_ParBlock       = 51,
                Kind_DiaFile        = 52,
-               Kind_Emoji          = 53
+               Kind_Emoji          = 53,
+               Kind_Sep            = 54
              };
 
    /*! Creates a new node */
@@ -677,6 +677,31 @@ class DocWhiteSpace : public DocNode
 
  private:
    QString m_chars;
+};
+
+
+/** Node representing a separator */
+class DocSeparator : public DocNode
+{
+ public:
+   DocSeparator(DocNode *parent, const QString &chars)
+      : m_chars(chars)
+   {
+      m_parent = parent;
+   }
+
+   Kind kind() const {
+      return Kind_Sep;
+   }
+
+   QString chars() const {
+      return m_chars;
+   }
+
+   void accept(DocVisitor *) { }
+
+  private:
+    QString  m_chars;
 };
 
 /** Node representing a verbatim, unparsed text fragment */

@@ -855,14 +855,20 @@ class PrintDocVisitor : public DocVisitor
    void visitPre(DocParamList *pl) override {
       indent_pre();
       printf("<parameters>");
-
-      for (auto param : pl->parameters()) {
+      if (! pl->parameters().isEmpty()) {
          printf("<param>");
 
-         if (param->kind() == DocNode::Kind_Word) {
-            visit((DocWord *)param);
-         } else if (param->kind() == DocNode::Kind_LinkedWord) {
-            visit((DocLinkedWord *)param);
+         for (auto param : pl->parameters()) {
+
+            if (param->kind() == DocNode::Kind_Word) {
+               visit((DocWord *)param);
+            } else if (param->kind() == DocNode::Kind_LinkedWord) {
+               visit((DocLinkedWord *)param);
+
+            }  else if (param->kind() == DocNode::Kind_Sep) {
+               printf("</param>");
+               printf("<param>");
+            }
          }
 
          printf("</param>");

@@ -1749,18 +1749,14 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
          m_t << "{";
       }
 
-      bool first = true;
-
       for (auto type : pl->paramTypes() ) {
-         if (!first) {
-            m_t << " | ";
-         } else {
-            first = false;
-         }
          if (type->kind() == DocNode::Kind_Word) {
             visit((DocWord *)type);
          } else if (type->kind() == DocNode::Kind_LinkedWord) {
             visit((DocLinkedWord *)type);
+
+         } else if (type->kind() == DocNode::Kind_Sep) {
+            m_t << " " << ((DocSeparator *)type)->chars() << " ";
          }
       }
 

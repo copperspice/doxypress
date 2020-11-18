@@ -1245,18 +1245,21 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
    for (auto param : pl->parameters()) {
 
       if (pl->paramTypes().count() > 0) {
+         m_t << "<parametertype>";
 
          for (auto type : pl->paramTypes()) {
-            m_t << "<parametertype>";
-
             if (type->kind() == DocNode::Kind_Word) {
                visit((DocWord *)type);
             } else if (type->kind() == DocNode::Kind_LinkedWord) {
                visit((DocLinkedWord *)type);
-            }
 
-            m_t << "</parametertype>" << endl;
+            } else if (type->kind() == DocNode::Kind_Sep) {
+               m_t << "</parametertype>" << endl;
+               m_t << "<parametertype>";
+            }
          }
+
+         m_t << "</parametertype>" << endl;
       }
 
       m_t << "<parametername";

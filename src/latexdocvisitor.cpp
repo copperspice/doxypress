@@ -1781,6 +1781,9 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
             visit((DocWord *)type);
          } else if (type->kind() == DocNode::Kind_LinkedWord) {
             visit((DocLinkedWord *)type);
+
+         }  else if (type->kind() == DocNode::Kind_Sep) {
+            m_t << " " << ((DocSeparator *)type)->chars() << " ";
          }
       }
 
