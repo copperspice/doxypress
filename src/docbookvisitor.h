@@ -158,7 +158,11 @@ class DocbookDocVisitor : public DocVisitor
    CodeOutputInterface &m_ci;
    bool m_insidePre;
    bool m_hide;
+
+   int m_colCnt;
+
    QStack<bool> m_enabled;
+   QStack<bool> m_bodySet;
    QString m_langExt;
 };
 

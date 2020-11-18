@@ -80,7 +80,9 @@ void FormulaList::generateBitmaps(const QString &path)
       }
 
       t << "\\documentclass{article}" << endl;
-      t << "\\usepackage{epsfig}" << endl;       // include images
+      t << "\\usepackage{ifthen}" << endl;
+      t << "\\usepackage{epsfig}" << endl;          // include images
+      t << "\\usepackage[utf8]{inputenc}" << endl;  // some older distributions with newunicode package 1.1 need this option
 
       writeExtraLatexPackages(t);
 

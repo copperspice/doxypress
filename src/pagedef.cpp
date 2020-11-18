@@ -230,10 +230,10 @@ void PageDef::writeDocumentation(OutputList &ol)
    }
 
    writePageDocumentation(ol);
+   ol.endContents();
    ol.endPageDoc();
 
    if (generateTreeView && getOuterScope() != Doxy_Globals::globalScope && ! disableIndex) {
-      ol.endContents();
       endFileWithNavPath(getOuterScope(), ol);
 
    } else {

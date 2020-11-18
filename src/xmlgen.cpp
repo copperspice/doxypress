@@ -228,7 +228,7 @@ static void writeCombineScript()
      "<xsl:stylesheet xmlns:xsl=\"http://www.w3.org/1999/XSL/Transform\" version=\"1.0\">\n"
      "  <xsl:output method=\"xml\" version=\"1.0\" indent=\"no\" standalone=\"yes\" />\n"
      "  <xsl:template match=\"/\">\n"
-     "    <doxypress version=\"{doxypressindex/@version}\">\n"
+     "    <doxypress version=\"{doxypressindex/@version}\" xml:lang=\"{doxypressindex/@xml:lang}\">\n"
      "      <!-- Load all doxypress generated xml files -->\n"
      "      <xsl:for-each select=\"doxypressindex/compound\">\n"
      "        <xsl:copy-of select=\"document( concat( @refid, '.xml' ) )/doxypress/*\" />\n"
@@ -533,13 +533,12 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
    SrcLangExt langExt = getLanguageFromFileName(fd->getDefFileExtension());
    pIntf->resetCodeParserState();
 
-   XMLCodeGenerator *xmlGen = new XMLCodeGenerator(t);
+   QSharedPointer<XMLCodeGenerator> xmlGen = QMakeShared<XMLCodeGenerator>(t);
 
    pIntf->parseCode(*xmlGen, 0, fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
                     langExt, false, 0, fd, -1, -1, false, QSharedPointer<MemberDef>(), true );
 
    xmlGen->finish();
-   delete xmlGen;
 }
 
 static void writeMemberReference(QTextStream &t, QSharedPointer<Definition> def,
@@ -786,6 +785,14 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       }
       t << "\"";
 
+      if (al.refSpecifier == RefType::LValueRef) {
+         t << " refSpecifier=\"lvalue\"";
+
+      } else if (al.refSpecifier == RefType::RValueRef) {
+         t << " refSpecifier=\"rvalue\"";
+
+      }
+
       // **
       if (md->isFinal()) {
          t << " final=\"yes\"";
@@ -815,13 +822,6 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << " volatile=\"yes\"";
       }
 
-      if (al.refSpecifier == RefType::LValueRef) {
-         t << " refSpecifier=\"lvalue\"";
-
-      } else if (al.refSpecifier == RefType::RValueRef) {
-         t << " refSpecifier=\"rvalue\"";
-
-      }
 
       t << " virt=\"";
       switch (md->virtualness()) {
@@ -1375,7 +1375,7 @@ static void writeListOfAllMembers(QSharedPointer<ClassDef> cd, QTextStream &t)
 static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
 {
    for (auto cd : cl) {
-      if (! cd->isHidden() && cd->name().indexOf('@') == -1) {
+      if (! cd->isHidden() && ! cd->isAnonymous()) {
          // skip anonymous scopes
          t << "    <innerclass refid=\"" << classOutputFileBase(cd) << "\" prot=\"";
 
@@ -1408,7 +1408,8 @@ static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
       if (! nd->isHidden() && nd->name().indexOf('@') == -1) {
          // skip anonymous scopes
          t << "    <innernamespace refid=\"" << nd->getOutputFileBase()
-           << "\">" << convertToXML(nd->name()) << "</innernamespace>" << endl;
+           << "\"" << (nd->isInlineNS() ? " inline=\"yes\"" : "")
+           << ">" << convertToXML(nd->name()) << "</innernamespace>" << endl;
       }
    }
 }
@@ -1479,8 +1480,8 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       return;   // skip hidden classes
    }
 
-   if (cd->name().indexOf('@') != -1) {
-      return;   // skip anonymous compounds.
+   if (cd->isAnonymous()) {
+      return;   // skip anonymous compounds
    }
 
    if (cd->templateMaster() != 0) {
@@ -1762,7 +1763,9 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
 
    writeXMLHeader(t);
    t << "  <compounddef id=\"" << nd->getOutputFileBase()
-     << "\" kind=\"namespace\" language=\""
+     << "\" kind=\"namespace\" "
+     << (nd->isInlineNS() ? "inline=\"yes\" ":"")
+     << "language=\""
      << langToString(nd->getLanguage()) << "\">" << endl;
    t << "    <compoundname>";
 
@@ -2100,13 +2103,12 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    writeInnerPages(pd->getSubPages(), t);
    SectionDict &sectionDict = pd->getSectionDict();
 
-   if (pd->localToc().isXmlEnabled()) {
+   if (pd->localToc().isXmlEnabled() && ! sectionDict.isEmpty()) {
       t << "    <tableofcontents>" << endl;
 
       int level = 1;
-      int l;
 
-      bool inLi[5] = { false, false, false, false, false };
+      bool activeLevel[5] = { false, false, false, false, false };
       int maxLevel = pd->localToc().xmlLevel();
 
       for (auto si : sectionDict) {
@@ -2117,22 +2119,22 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
 
             if (nextLevel > level) {
 
-               for (l = level; l < nextLevel; l++) {
-                  if (l < maxLevel) {
+               for (int index = level; index < nextLevel; ++index) {
+                  if (index < maxLevel) {
                      t << "    <tableofcontents>" << endl;
                   }
                }
 
             } else if (nextLevel < level) {
 
-               for (l = level; l > nextLevel; l--) {
-                  if (l <= maxLevel && inLi[l]) {
+               for (int index = level; index > nextLevel; --index) {
+                  if (index <= maxLevel && activeLevel[index]) {
                      t << "    </tocsect>" << endl;
                   }
 
-                  inLi[l] = false;
+                  activeLevel[index] = false;
 
-                  if (l <= maxLevel) {
+                  if (index <= maxLevel) {
                      t << "    </tableofcontents>" << endl;
                   }
                }
@@ -2140,7 +2142,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
 
             if (nextLevel <= maxLevel) {
 
-               if (inLi[nextLevel]) {
+               if (activeLevel[nextLevel]) {
                   t << "    </tocsect>" << endl;
                }
 
@@ -2149,28 +2151,28 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
                t << "      <tocsect>" << endl;
                t << "        <name>" << (si->title.isEmpty() ? si->label : titleDoc) << "</name>" << endl;
                t << "        <reference>"  <<  convertToXML(pageName) << "_1" << convertToXML(si->label) << "</reference>" << endl;
-            }
 
-            inLi[nextLevel] = true;
-            level = nextLevel;
+               activeLevel[nextLevel] = true;
+               level = nextLevel;
+            }
          }
       }
 
       while (level > 1 && level <= maxLevel) {
-         if (inLi[level]) {
+         if (activeLevel[level]) {
             t << "    </tocsect>" << endl;
          }
 
-         inLi[level] = false;
+         activeLevel[level] = false;
          t << "    </tableofcontents>" << endl;
-         level--;
+         --level;
       }
 
-      if (level <= maxLevel && inLi[level]) {
+      if (level <= maxLevel && activeLevel[level]) {
          t << "    </tocsect>" << endl;
       }
 
-      inLi[level] = false;
+      activeLevel[level] = false;
       t << "    </tableofcontents>" << endl;
    }
 
@@ -2210,6 +2212,7 @@ void generateXML_output()
 
    createSubDirs(xmlDir);
 
+   ResourceMgr::instance().copyResourceAs("xml/xml.xsd",   outputDirectory, "xml.xsd");
    ResourceMgr::instance().copyResourceAs("xml/index.xsd", outputDirectory, "index.xsd");
 
    QString fileName = outputDirectory + "/compound.xsd";

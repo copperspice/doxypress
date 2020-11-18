@@ -3105,6 +3105,10 @@ static QString extractPageTitle(QString &docs, QString &id)
       if (level > 0) {
          docs = QStringView(iter_endA, iter_end);               // modify passed values
       }
+
+   } else {
+      id = extractTitleId(title, 0);
+
    }
 
    return title;
@@ -3214,7 +3218,7 @@ QString markdownFileNameToId(const QString &fileName)
       baseFn = baseFn.left(i);
    }
 
-   QString baseName = substitute(substitute(baseFn, " ", "_"), "/", "_");
+   QString baseName = substitute(substitute(substitute(baseFn, " ", "_"), "/", "_"), ":","_");
 
    return "md_" + baseName;
 }

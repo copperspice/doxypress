@@ -1538,9 +1538,5 @@ void ClassDiagram::writeImage(QTextStream &t, const QString &path, const QString
    }
 
    Doxy_Globals::indexList.addImageFile(fName + IMAGE_EXT);
-
-   if (generateMap) {
-      t << "</map>" << endl;
-   }
 }
 

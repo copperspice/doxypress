@@ -3234,32 +3234,15 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
-      out << "    <figure>" << endl;
-      out << "        <title>";
-
-      switch (m_graphType) {
-         case DotNode::Collaboration:
-            out << "Collaboration graph";
-            break;
-
-         case DotNode::Inheritance:
-            out << "Inheritance graph";
-            break;
-
-         default:
-            assert(0);
-            break;
-      }
-
-      out << "</title>" << endl;
+      out << "    <informalfigure>" << endl;
       out << "        <mediaobject>" << endl;
       out << "            <imageobject>" << endl;
       out << "                <imagedata";
-      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"1\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
+      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"0\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
       out << "</imagedata>" << endl;
       out << "            </imageobject>" << endl;
       out << "        </mediaobject>" << endl;
-      out << "    </figure>" << endl;
+      out << "    </informalfigure>" << endl;
       out << "</para>" << endl;
 
    } else if (graphFormat == GOF_BITMAP && generateImageMap) {
@@ -3583,17 +3566,15 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
-      out << "    <figure>" << endl;
-      out << "        <title>Dependency diagram";
-      out << "</title>" << endl;
+      out << "    <informalfigure>" << endl;
       out << "        <mediaobject>" << endl;
       out << "            <imageobject>" << endl;
       out << "                <imagedata";
-      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"1\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
+      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"0\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
       out << "</imagedata>" << endl;
       out << "            </imageobject>" << endl;
       out << "        </mediaobject>" << endl;
-      out << "    </figure>" << endl;
+      out << "    </informalfigure>" << endl;
       out << "</para>" << endl;
 
    } else if (graphFormat == GOF_BITMAP && generateImageMap) {
@@ -3882,17 +3863,15 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
-      out << "    <figure>" << endl;
-      out << "        <title>Call diagram";
-      out << "</title>" << endl;
+      out << "    <informalfigure>" << endl;
       out << "        <mediaobject>" << endl;
       out << "            <imageobject>" << endl;
       out << "                <imagedata";
-      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"1\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
+      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"0\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
       out << "</imagedata>" << endl;
       out << "            </imageobject>" << endl;
       out << "        </mediaobject>" << endl;
-      out << "    </figure>" << endl;
+      out << "    </informalfigure>" << endl;
       out << "</para>" << endl;
 
    } else if (graphFormat == GOF_BITMAP && generateImageMap) {
@@ -4088,17 +4067,15 @@ QString DotDirDeps::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, 
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       out << "<para>" << endl;
-      out << "    <figure>" << endl;
-      out << "        <title>Directory Dependency diagram";
-      out << "</title>" << endl;
+      out << "    <informalfigure>" << endl;
       out << "        <mediaobject>" << endl;
       out << "            <imageobject>" << endl;
       out << "                <imagedata";
-      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"1\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
+      out << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"0\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
       out << "</imagedata>" << endl;
       out << "            </imageobject>" << endl;
       out << "        </mediaobject>" << endl;
-      out << "    </figure>" << endl;
+      out << "    </informalfigure>" << endl;
       out << "</para>" << endl;
 
    } else if (graphFormat == GOF_BITMAP && generateImageMap) {
@@ -4661,17 +4638,15 @@ QString DotGroupCollaboration::writeGraph( QTextStream &t, GraphOutputFormat gra
 
    if (graphFormat == GOF_BITMAP && textFormat == EOF_DocBook) {
       t << "<para>" << endl;
-      t << "    <figure>" << endl;
-      t << "        <title>Group Collaboration diagram";
-      t << "</title>" << endl;
+      t << "    <informalfigure>" << endl;
       t << "        <mediaobject>" << endl;
       t << "            <imageobject>" << endl;
       t << "                <imagedata";
-      t << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"1\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
+      t << " width=\"50%\" align=\"center\" valign=\"middle\" scalefit=\"0\" fileref=\"" << relPath << baseName << "." << imageExt << "\">";
       t << "</imagedata>" << endl;
       t << "            </imageobject>" << endl;
       t << "        </mediaobject>" << endl;
-      t << "    </figure>" << endl;
+      t << "    </informalfigure>" << endl;
       t << "</para>" << endl;
 
    } else if (graphFormat == GOF_BITMAP && writeImageMap) {

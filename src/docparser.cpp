@@ -402,7 +402,7 @@ static void checkArgumentName(const QString &name, bool isParam)
       return;
    }
 
-   if (s_memberDef == nullptr) {
+   if (s_memberDef == nullptr || name.isEmpty()) {
       return;
    }
 
@@ -1336,18 +1336,49 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 static void handleParameterType(DocNode *parent, QList<DocNode *> &children, const QString &paramTypes)
 {
    QString name = g_token->name;
-   int p = 0;
-   int i;
+   QString tmp;
 
-   while ((i = paramTypes.indexOf('|', p)) != -1) {
-      g_token->name = paramTypes.mid(p, i - p);
+   int pos = 0;
+   int index;
+   int tmpIndex;
+
+   while ((index = paramTypes.indexOf('|', pos)) != -1) {
+
+      tmp      = paramTypes.mid(pos, index - pos);
+      tmpIndex = tmp.indexOf('[');
+
+      // take part without []
+      if (tmpIndex != -1) {
+         g_token->name = tmp.mid(0, tmpIndex);
+      } else {
+         g_token->name = tmp;
+      }
 
       handleLinkedWord(parent, children);
-      p = i + 1;
+
+      if (tmpIndex !=- 1) {
+          // add [] part
+         children.append(new DocWord(parent, tmp.mid(tmpIndex)));
+      }
+
+      pos = index + 1;
+      children.append(new DocSeparator(parent, "|"));
    }
 
-   g_token->name = paramTypes.mid(p);
+   tmp      = paramTypes.mid(pos);
+   tmpIndex = tmp.indexOf('[');
+
+   if (tmpIndex != -1) {
+      g_token->name = tmp.mid(0, tmpIndex);
+   } else {
+      g_token->name = tmp;
+   }
+
    handleLinkedWord(parent, children);
+
+   if (tmpIndex != -1) {
+      children.append(new DocWord(parent, tmp.mid(tmpIndex)));
+   }
 
    g_token->name = name;
 }

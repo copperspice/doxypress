@@ -923,7 +923,7 @@ QString MemberDef::getOutputFileBase() const
          return baseName;
       }
 
-   } else if (m_impl->nspace) {
+   } else if (m_impl->nspace && m_impl->nspace->isLinkableInProject() ) {
       baseName = m_impl->nspace->getOutputFileBase();
 
    } else if (m_impl->fileDef) {
@@ -1044,8 +1044,9 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (! m_impl->group && m_impl->nspace && ! m_impl->m_related && !m_impl->nspace->isLinkableInProject()) {
-      m_isLinkableCached = 1; // in namespace but namespace not linkable
+   if (! m_impl->group && m_impl->nspace && ! m_impl->m_related && ! m_impl->nspace->isLinkableInProject() &&
+         (m_impl->fileDef == nullptr || ! m_impl->fileDef->isLinkableInProject()) ) {
+      m_isLinkableCached = 1;    // in namespace but namespace not linkable
       return;
    }
 
@@ -1871,7 +1872,7 @@ bool MemberDef::isDetailedSectionVisible(bool inGroup, bool inFile) const
    static const bool hideUndocMembers    = Config::getBool("hide-undoc-members");
 
    bool groupFilter = getGroupDef() == 0 || inGroup || separateMemPages;
-   bool fileFilter  = getNamespaceDef() == 0 || ! inFile;
+   bool fileFilter  = getNamespaceDef() == 0 || ! getNamespaceDef()->isLinkable() || ! inFile;
 
    bool simpleFilter = (hasBriefDescription() || ! hideUndocMembers) && inlineSimpleStructs &&
                        getClassDef() != 0 && getClassDef()->isSimple();
@@ -3561,7 +3562,7 @@ void MemberDef::warnIfUndocumentedParams()
    static const bool warnUndoc      = Config::getBool("warn-undoc");
    static const bool warnUndocParam = Config::getBool("warn-undoc-param");
 
-   if (! extractAll && warnUndoc &&  warnUndocParam && ! isReference() && ! Doxy_Globals::suppressDocWarnings) {
+   if (! extractAll && warnUndoc && warnUndocParam && ! isDeleted() && ! isReference() && ! Doxy_Globals::suppressDocWarnings) {
 
       if (! hasDocumentedParams()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Parameters for member %s are not fully documented",
