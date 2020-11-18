@@ -613,16 +613,31 @@ static void checkUndocumentedParams()
    }
 }
 
+static QString stripTrailingReturn(const QString trailingReturn)
+{
+  QString retval = trailingReturn;
+
+  QStringView tmp = QStringView(retval).trimmed();
+
+  if (tmp.startsWith("->")) {
+    retval = tmp.mid(2).trimmed();
+  }
+
+  return retval;
+}
+
 /*! Check if a member has documentation for its parameter and or return
  *  type. If found this will be stored in the member, this
  *  is needed as a member can have brief and detailed documentation, while
  *  only one of these needs to document the parameters.
  */
-static void detectNoDocumentedParams()
+static void detectUndocumentedParams()
 {
-   if (s_memberDef && Config::getBool("warn-undoc-param")) {
-      const ArgumentList &argList = s_memberDef->getArgumentList();
-      const ArgumentList &declAl  = s_memberDef->getDeclArgumentList();
+   static const bool warnUndocParam = Config::getBool("warn-undoc-param");
+
+   if (s_memberDef != nullptr &&  warnUndocParam) {
+      const ArgumentList &argList     = s_memberDef->getArgumentList();
+      const ArgumentList &declArgList = s_memberDef->getDeclArgumentList();
 
       QString returnType = s_memberDef->removeReturnKeywords();
 
@@ -630,8 +645,23 @@ static void detectNoDocumentedParams()
       bool isPython   = (lang == SrcLangExt_Python);
       bool isFortran  = (lang == SrcLangExt_Fortran);
 
-      bool isFortranSubroutine = isFortran && returnType.find("subroutine") != -1;
-      bool isVoidReturn = (returnType == "void");
+      bool isFortranSubroutine = (isFortran && returnType.contains("subroutine"));
+      bool isVoidReturn        = (returnType == "void");
+
+      if (! isVoidReturn && returnType == "auto")   {
+         const ArgumentList *defArgList;
+
+         if (s_memberDef->isDocsForDefinition())  {
+            defArgList = &argList;
+         } else {
+            defArgList = &declArgList;
+         }
+
+         if (! defArgList->trailingReturnType.isEmpty()) {
+            QString strippedTrailingReturn = stripTrailingReturn(defArgList->trailingReturnType);
+            isVoidReturn = (strippedTrailingReturn == "void") || (strippedTrailingReturn.endsWith(" void"));
+         }
+      }
 
       if (! s_memberDef->hasDocumentedParams() && s_hasParamCommand) {
          s_memberDef->setHasDocumentedParams(true);
@@ -656,11 +686,11 @@ static void detectNoDocumentedParams()
                }
             }
 
-            if (! allDoc && ! declAl.listEmpty()) {
+            if (! allDoc && ! declArgList.listEmpty()) {
                // try declaration arguments as well
                allDoc = true;
 
-               for (const auto &arg : declAl) {
+               for (const auto &arg : declArgList) {
 
                   if (! allDoc) {
                      break;
@@ -8805,7 +8835,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    }
 
    checkUndocumentedParams();
-   detectNoDocumentedParams();
+   detectUndocumentedParams();
 
    // TODO: should be called at the end of the program
    // doctokenizerYYcleanup();
