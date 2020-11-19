@@ -1,5 +1,5 @@
 <RCC>
-    <qresource prefix="/">       
+    <qresource prefix="/">
         <file>resources/layout_default.xml</file>
         <file>resources/html/bc_s.luma</file>
         <file>resources/html/bdwn.luma</file>
@@ -15,7 +15,7 @@
         <file>resources/html/folderclosed.luma</file>
         <file>resources/html/folderopen.luma</file>
         <file>resources/html/footer.html</file>
-        <file>resources/html/header.html</file>       
+        <file>resources/html/header.html</file>
         <file>resources/html/jquery.js</file>
         <file>resources/html/mag.png</file>
         <file>resources/html/mag_sel.png</file>
@@ -49,7 +49,7 @@
         <file>resources/latex/tabu_doxypress.sty</file>
         <file>resources/translation/doxy_en.qm</file>
         <file>resources/translation/doxy_af.qm</file>
-        <file>resources/translation/doxy_ar.qm</file>    
+        <file>resources/translation/doxy_ar.qm</file>
         <file>resources/translation/doxy_am.qm</file>
         <file>resources/translation/doxy_pt_br.qm</file>
         <file>resources/translation/doxy_ca.qm</file>
@@ -80,7 +80,7 @@
         <file>resources/translation/doxy_pt.qm</file>
         <file>resources/translation/doxy_ro.qm</file>
         <file>resources/translation/doxy_ru.qm</file>
-        <file>resources/translation/doxy_sr.qm</file>    
+        <file>resources/translation/doxy_sr.qm</file>
         <file>resources/translation/doxy_sr_cyrillic.qm</file>
         <file>resources/translation/doxy_sk.qm</file>
         <file>resources/translation/doxy_sl.qm</file>
@@ -90,6 +90,7 @@
         <file>resources/translation/doxy_uk.qm</file>
         <file>resources/translation/doxy_vi.qm</file>
         <file>resources/xml/compound.xsd</file>
-        <file>resources/xml/index.xsd</file> 
+        <file>resources/xml/index.xsd</file>
+        <file>resources/xml/xml.xsd</file>
     </qresource>
 </RCC>

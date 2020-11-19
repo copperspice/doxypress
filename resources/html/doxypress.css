@@ -83,6 +83,10 @@ p.startli, p.startdd
    margin-top: 2px;
 }
 
+th p.starttd, th p.intertd, th p.endtd {
+   font-size: 100%;
+   font-weight: 700;
+}
 p.starttd
 {
    margin-top: 0px;
@@ -734,6 +738,10 @@ table.memberdecls
    -webkit-border-top-left-radius: 4px;
 }
 
+.overload {
+   font-family: "courier new",courier,monospace;
+   font-size: 65%;
+}
 .memdoc, dl.reflist dd
 {
    border-bottom: 1px solid ##B4;
@@ -1461,11 +1469,13 @@ dl.citelist dt
    font-weight: bold;
    margin-right: 10px;
    padding:5px;
+   text-align:right;
+   width:52px;
 }
 
 dl.citelist dd
 {
-   margin:2px 0;
+   margin:2px 0 2px 72px;
    padding:5px 0;
 }
 

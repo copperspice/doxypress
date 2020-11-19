@@ -8,6 +8,7 @@
       <xsd:element name="compound" type="CompoundType" minOccurs="0" maxOccurs="unbounded"/>
     </xsd:sequence>
     <xsd:attribute name="version" type="xsd:string" use="required"/>
+    <xsd:attribute ref="xml:lang" use="required"/>
   </xsd:complexType>
 
   <xsd:complexType name="CompoundType">
@@ -42,6 +43,7 @@
       <xsd:enumeration value="page"/>
       <xsd:enumeration value="example"/>
       <xsd:enumeration value="dir"/>
+      <xsd:enumeration value="type"/>
     </xsd:restriction>
   </xsd:simpleType>
 
