@@ -232,7 +232,7 @@ void LatexCodeGenerator::endFontClass()
 // **
 LatexGenerator::LatexGenerator() : OutputGenerator()
 {
-   m_dir        = Config::getString("latex-output");
+   m_outputDir  = Config::getString("latex-output");
    m_prettyCode = Config::getBool("latex-source-code");
 
    m_insideTabbing      = false;
@@ -1980,7 +1980,7 @@ void LatexGenerator::startClassDiagram()
 
 void LatexGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname, const QString &)
 {
-   d.writeFigure(m_textStream, m_dir, fname);
+   d.writeFigure(m_textStream, m_outputDir, fname);
 }
 
 void LatexGenerator::startAnonTypeScope(int indent)
@@ -2175,7 +2175,7 @@ void LatexGenerator::startDotGraph()
 
 void LatexGenerator::endDotGraph(const DotClassGraph &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, m_relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, m_outputDir, m_fileName, m_relPath);
 }
 
 void LatexGenerator::startInclDepGraph()
@@ -2184,7 +2184,8 @@ void LatexGenerator::startInclDepGraph()
 
 void LatexGenerator::endInclDepGraph(const DotInclDepGraph &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, m_relPath);
+
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, m_outputDir, m_fileName, m_relPath);
 }
 
 void LatexGenerator::startGroupCollaboration()
@@ -2193,7 +2194,7 @@ void LatexGenerator::startGroupCollaboration()
 
 void LatexGenerator::endGroupCollaboration(const DotGroupCollaboration &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, m_relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, m_outputDir, m_fileName, m_relPath);
 }
 
 void LatexGenerator::startCallGraph()
@@ -2202,7 +2203,7 @@ void LatexGenerator::startCallGraph()
 
 void LatexGenerator::endCallGraph(const DotCallGraph &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, m_relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, m_outputDir, m_fileName, m_relPath);
 }
 
 void LatexGenerator::startDirDepGraph()
@@ -2211,7 +2212,7 @@ void LatexGenerator::startDirDepGraph()
 
 void LatexGenerator::endDirDepGraph(const DotDirDeps &g)
 {
-   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, Config::getString("latex-output"), m_fileName, m_relPath);
+   g.writeGraph(m_textStream, GOF_EPS, EOF_LaTeX, m_outputDir, m_fileName, m_relPath);
 }
 
 void LatexGenerator::startDescription()

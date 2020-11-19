@@ -452,7 +452,7 @@ class OutputGenerator : public BaseOutputDocInterface
 
    QFile    m_file;
    QString  m_fileName;
-   QString  m_dir;
+   QString  m_outputDir;
    bool     active;
 
    QStack<bool> genStack;

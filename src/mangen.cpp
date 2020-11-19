@@ -47,7 +47,7 @@ static QString getSubdir()
 ManGenerator::ManGenerator()
    : OutputGenerator()
 {
-   m_dir = Config::getString("man-output") + "/" + getSubdir();
+   m_outputDir = Config::getString("man-output") + "/" + getSubdir();
 
    col = 0;
 
@@ -530,7 +530,7 @@ void ManGenerator::startDoxyAnchor(const QString &, const QString &manName, cons
    }
 
    // remove dangerous characters and append suffix, then add dir prefix
-   QString fname = m_dir + "/" + buildFileName(baseName);
+   QString fname = m_outputDir + "/" + buildFileName(baseName);
    QFile linkfile(fname);
 
    // only create file if it does not exist

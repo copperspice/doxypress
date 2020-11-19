@@ -55,7 +55,7 @@ static QString dateToRTFDateString()
 
 RTFGenerator::RTFGenerator() : OutputGenerator()
 {
-   m_dir        = Config::getString("rtf-output");
+   m_outputDir  = Config::getString("rtf-output");
    m_prettyCode = Config::getBool("rtf-source-code");
 
    col         = 0;
@@ -1766,7 +1766,7 @@ void RTFGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname, 
    newParagraph();
 
    // create a png file
-   d.writeImage(m_textStream, m_dir, relPath, fname, false);
+   d.writeImage(m_textStream, m_outputDir, relPath, fname, false);
 
    // display the file
    m_textStream << "{" << endl;
@@ -1894,8 +1894,8 @@ void RTFGenerator::endMemberList()
 //  {
 //    baseName=baseName.right(baseName.length()-i-1);
 //  }
-//  QString outDir = Config::getString("rtf-output");
-//  writeDotGraphFromFile(name,outDir,baseName,BITMAP);
+
+//  writeDotGraphFromFile(name, m_outputDir,baseName,BITMAP);
 //  newParagraph();
 //  m_textStream << "{" << endl;
 //  m_textStream << rtf_Style_Reset << endl;
@@ -2316,9 +2316,7 @@ void RTFGenerator::endDotGraph(const DotClassGraph &g)
 {
    newParagraph();
 
-   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"),
-                  m_fileName, relPath, true, false);
-
+   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, true, false);
    static const QString imageExt = Config::getEnum("dot-image-extension");
 
    // display the file
@@ -2342,8 +2340,8 @@ void RTFGenerator::endInclDepGraph(const DotInclDepGraph &g)
 {
    newParagraph();
 
-   QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
    static const QString imageExt = Config::getEnum("dot-image-extension");
+   QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, false);
 
    // display the file
    m_textStream << "{" << endl;
@@ -2373,8 +2371,8 @@ void RTFGenerator::endCallGraph(const DotCallGraph &g)
 {
    newParagraph();
 
-   QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
    static const QString imageExt = Config::getEnum("dot-image-extension");
+   QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, false);
 
    // display the file
    m_textStream << "{" << endl;
@@ -2395,8 +2393,8 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
 {
    newParagraph();
 
-   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, Config::getString("rtf-output"), m_fileName, relPath, false);
    static const QString imageExt = Config::getEnum("dot-image-extension");
+   QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, false);
 
    // display the file
    m_textStream << "{" << endl;

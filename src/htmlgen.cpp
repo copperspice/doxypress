@@ -689,7 +689,7 @@ void HtmlCodeGenerator::writeCodeAnchor(const QString &anchor)
 
 HtmlGenerator::HtmlGenerator() : OutputGenerator()
 {
-   m_dir = Config::getString("html-output");
+   m_outputDir    = Config::getString("html-output");
    m_emptySection = false;
    m_sectionCount = 0;
 }
@@ -1450,7 +1450,7 @@ void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname,
 {
    QString imgData;
    QTextStream t_stream(&imgData);
-   d.writeImage(t_stream, m_dir, m_relativePath, fname);
+   d.writeImage(t_stream, m_outputDir, m_relativePath, fname);
 
    //
    endSectionHeader(m_textStream);
@@ -1858,7 +1858,7 @@ void HtmlGenerator::endDotGraph(const DotClassGraph &g)
    endSectionSummary(m_textStream);
    startSectionContent(m_textStream, m_sectionCount);
 
-   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_dir, m_fileName, m_relativePath, true, true, m_sectionCount);
+   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_outputDir, m_fileName, m_relativePath, true, true, m_sectionCount);
 
    if (generateLegend && ! umlLook) {
       m_textStream << "<center><span class=\"legend\">[";
@@ -1886,7 +1886,7 @@ void HtmlGenerator::endInclDepGraph(const DotInclDepGraph &g)
    endSectionSummary(m_textStream);
    startSectionContent(m_textStream, m_sectionCount);
 
-   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_dir, m_fileName, m_relativePath, true, m_sectionCount);
+   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_outputDir, m_fileName, m_relativePath, true, m_sectionCount);
 
    endSectionContent(m_textStream);
    m_sectionCount++;
@@ -1904,7 +1904,7 @@ void HtmlGenerator::endGroupCollaboration(const DotGroupCollaboration &g)
    endSectionSummary(m_textStream);
    startSectionContent(m_textStream, m_sectionCount);
 
-   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_dir, m_fileName, m_relativePath, true, m_sectionCount);
+   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_outputDir, m_fileName, m_relativePath, true, m_sectionCount);
 
    endSectionContent(m_textStream);
    m_sectionCount++;
@@ -1922,7 +1922,7 @@ void HtmlGenerator::endCallGraph(const DotCallGraph &g)
    endSectionSummary(m_textStream);
    startSectionContent(m_textStream, m_sectionCount);
 
-   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_dir, m_fileName, m_relativePath, true, m_sectionCount);
+   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_outputDir, m_fileName, m_relativePath, true, m_sectionCount);
 
    endSectionContent(m_textStream);
    m_sectionCount++;
@@ -1940,7 +1940,7 @@ void HtmlGenerator::endDirDepGraph(const DotDirDeps &g)
    endSectionSummary(m_textStream);
    startSectionContent(m_textStream, m_sectionCount);
 
-   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_dir, m_fileName, m_relativePath, true, m_sectionCount);
+   g.writeGraph(m_textStream, GOF_BITMAP, EOF_Html, m_outputDir, m_fileName, m_relativePath, true, m_sectionCount);
 
    endSectionContent(m_textStream);
    m_sectionCount++;
@@ -1948,7 +1948,7 @@ void HtmlGenerator::endDirDepGraph(const DotDirDeps &g)
 
 void HtmlGenerator::writeGraphicalHierarchy(const DotGfxHierarchyTable &g)
 {
-   g.writeGraph(m_textStream, m_dir, m_fileName);
+   g.writeGraph(m_textStream, m_outputDir, m_fileName);
 }
 
 void HtmlGenerator::startMemberGroupHeader(bool)

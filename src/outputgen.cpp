@@ -36,7 +36,7 @@ OutputGenerator::~OutputGenerator()
 
 void OutputGenerator::startPlainFile(const QString &name)
 {
-   m_fileName = m_dir + "/" + name;
+   m_fileName = m_outputDir + "/" + name;
    m_file.setFileName(m_fileName);
 
    if (! m_file.open(QIODevice::WriteOnly)) {
