@@ -153,6 +153,7 @@ void    convertProtectionLevel(MemberListType inListType,Protection inProt, int 
 
 QString correctURL(const QString &url, const QString &relPath);
 QString convertNameToFile_X(const QString &name, bool allowDots = false, bool allowUnderscore = false);
+QString convertToDocBook(const QString &s);
 QString convertToHtml(const QString &s,  bool keepEntities  = true);
 QString convertToLatex(const QString &s, bool insideTabbing = false, bool keepSpaces = false);
 QString convertToXML(const QString &s, bool keepEntities = false);
@@ -283,9 +284,11 @@ QString tempArgListToString(const ArgumentList &al, SrcLangExt lang);
 
 QString upperCaseFirstLetter(QString &&text);
 
+void writeColoredImgData(ColoredImgDataItem data);
 void writeExample(OutputList &ol, const ExampleSDict &el);
 void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn);
 void writeExtraLatexPackages(QTextStream &t);
+void writeLatexSpecialFormulaChars(QTextStream &t);
 void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList);
 
 QString yearToString();
@@ -332,7 +335,6 @@ QString extractBlock(const QString &text, const QString &marker);
 QString convertCharEntities(const QString &s);
 
 bool    patternMatch(const QFileInfo &fi, const QStringList &patList);
-void    writeColoredImgData(ColoredImgDataItem data);
 bool    protectionLevelVisible(Protection prot);
 bool    docFileVisibleInIndex(QSharedPointer<FileDef> fd);
 void    addDocCrossReference(QSharedPointer<MemberDef> src, QSharedPointer<MemberDef> dst);

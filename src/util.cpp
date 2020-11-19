@@ -5271,6 +5271,118 @@ QString convertToXML(const QString &str, bool keepEntities)
    return retval;
 }
 
+/*! Converts a string to an DocBook-encoded string */
+QString convertToDocBook(const QString &str)
+{
+   QString retval;
+
+   if (str.isEmpty()) {
+      return retval;
+   }
+
+   auto iter = str.constBegin();
+
+   while (iter != str.constEnd()) {
+
+      QChar c = *iter;
+      ++iter;
+
+      switch (c.unicode()) {
+         case '<':
+            retval += "&lt;";
+            break;
+
+         case '>':
+            retval += "&gt;";
+            break;
+
+         case '&': {
+            auto iterEnd = iter;
+
+            // need to count both: & ;
+            int cnt = 2;
+
+            while (iterEnd->isLetterOrNumber()) {
+               ++cnt;
+               ++iterEnd;
+            }
+
+            if (*iterEnd == ';') {
+               // includes the &
+               --iter;
+
+               QStringView tmp = QStringView(iter, str.constEnd()).left(cnt);
+               DocSymbol::SymType symbol = HtmlEntityMapper::instance()->name2sym(tmp);
+
+               if (symbol == DocSymbol::Sym_Unknown) {
+                   retval += "&amp;";
+                   ++iter;
+
+               } else {
+                  retval += HtmlEntityMapper::instance()->docbook(symbol);
+
+                  iter = iterEnd + 1;
+               }
+
+            } else {
+               retval += "&amp;";
+            }
+         }
+
+         break;
+
+         case '\'':
+            retval += "&apos;";
+            break;
+
+         case '"':
+            retval += "&quot;";
+            break;
+
+         case '\007':
+            retval += "&#x2407;";
+            break;
+
+         case  1:
+         case  2:
+         case  3:
+         case  4:
+         case  5:
+         case  6:
+         case  8:
+         case 11:
+         case 12:
+         case 13:
+         case 14:
+         case 15:
+         case 16:
+         case 17:
+         case 18:
+         case 19:
+         case 20:
+         case 21:
+         case 22:
+         case 23:
+         case 24:
+         case 25:
+         case 26:
+         case 27:
+         case 28:
+         case 29:
+         case 30:
+         case 31:
+            // skip invalid XML characters (http://www.w3.org/TR/2000/REC-xml-20001006#NT-Char)
+            break;
+
+         default:
+            retval += c;
+            break;
+      }
+   }
+
+   return retval;
+}
+
 /*! Converts a string to a HTML-encoded string */
 QString convertToHtml(const QString &str, bool keepEntities)
 {
@@ -7343,6 +7455,37 @@ QString expandAlias(const QString &aliasName, const QString &aliasValue)
    return result;
 }
 
+/** Writes the intensity only bitmap represented by \a data as an image to
+ *  directory using the colors defined by html_colorstyle.
+ */
+void writeColoredImgData(ColoredImgDataItem data)
+{
+   static int hue   = Config::getInt("html-colorstyle-hue");
+   static int sat   = Config::getInt("html-colorstyle-sat");
+   static int gamma = Config::getInt("html-colorstyle-gamma");
+
+   QString fileName = data.path + "/" + data.name;
+   QFile f(fileName);
+
+   if (f.open(QIODevice::WriteOnly)) {
+
+      ColoredImage image(data.width, data.height, data.content, data.alpha, sat, hue, gamma);
+      QByteArray buffer = image.convert();
+
+      if (f.write(buffer) == -1) {
+         err("Unable to write file %s, error: %d\n", csPrintable(fileName), f.error());
+      }
+
+      f.close();
+
+   } else {
+      err("Unable to save image file %s, error: %d\n", csPrintable(fileName), f.error());
+
+   }
+
+   Doxy_Globals::indexList.addImageFile(data.name);
+}
+
 void writeExample(OutputList &ol, const ExampleSDict &ed)
 {
    QString exampleLine = theTranslator->trWriteList(ed.count());
@@ -7432,6 +7575,18 @@ void writeExtraLatexPackages(QTextStream &t_stream)
    }
 }
 
+void writeLatexSpecialFormulaChars(QTextStream &t)
+{
+   QChar minus = U'\u207B';
+   QChar sup2  = U'\u00B2';
+   QChar sup3  = U'\u00B3';
+
+   t << "\\usepackage{newunicodechar}\n"
+        "  \\newunicodechar{" << minus << "}{${}^{-}$}% Superscript minus\n"
+        "  \\newunicodechar{" << sup2  << "}{${}^{2}$}% Superscript two\n"
+        "  \\newunicodechar{" << sup3  << "}{${}^{3}$}% Superscript three\n"
+        "\n";
+}
 void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList)
 {
    if (argList.listEmpty()) {
@@ -7679,37 +7834,6 @@ QString externalRef(const QString &relPath, const QString &ref, bool href)
    }
 
    return result;
-}
-
-/** Writes the intensity only bitmap represented by \a data as an image to
- *  directory using the colors defined by html_colorstyle.
- */
-void writeColoredImgData(ColoredImgDataItem data)
-{
-   static int hue   = Config::getInt("html-colorstyle-hue");
-   static int sat   = Config::getInt("html-colorstyle-sat");
-   static int gamma = Config::getInt("html-colorstyle-gamma");
-
-   QString fileName = data.path + "/" + data.name;
-   QFile f(fileName);
-
-   if (f.open(QIODevice::WriteOnly)) {
-
-      ColoredImage image(data.width, data.height, data.content, data.alpha, sat, hue, gamma);
-      QByteArray buffer = image.convert();
-
-      if (f.write(buffer) == -1) {
-         err("Unable to write file %s, error: %d\n", csPrintable(fileName), f.error());
-      }
-
-      f.close();
-
-   } else {
-      err("Unable to save image file %s, error: %d\n", csPrintable(fileName), f.error());
-
-   }
-
-   Doxy_Globals::indexList.addImageFile(data.name);
 }
 
 /** Replaces any markers of the form \#\#AA in input string \a str
