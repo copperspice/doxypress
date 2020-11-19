@@ -921,8 +921,10 @@ void generateOutput()
    if (generateHtml) {
       Doxy_Globals::infoLog_Stat.begin("Enable HTML output\n");
 
-      Doxy_Globals::outputList.add(QMakeShared<HtmlGenerator>());
-      HtmlGenerator::init();
+      auto obj = QMakeShared<HtmlGenerator>();
+
+      Doxy_Globals::outputList.add(obj);
+      obj->init();
 
       if (generateEclipseHelp) {
          Doxy_Globals::indexList.addIndex(QSharedPointer<EclipseHelp>(new EclipseHelp));
@@ -955,15 +957,19 @@ void generateOutput()
    if (generateLatex) {
       Doxy_Globals::infoLog_Stat.begin("Enable Latex output\n");
 
-      Doxy_Globals::outputList.add(QMakeShared<LatexGenerator>());
-      LatexGenerator::init();
+      auto obj = QMakeShared<LatexGenerator>();
+
+      Doxy_Globals::outputList.add(obj);
+      obj->init();
    }
 
    if (generateMan) {
       Doxy_Globals::infoLog_Stat.begin("Enable Man output\n");
 
-      Doxy_Globals::outputList.add(QMakeShared<ManGenerator>());
-      ManGenerator::init();
+      auto obj = QMakeShared<ManGenerator>();
+
+      Doxy_Globals::outputList.add(obj);
+      obj->init();
    }
 
    if (generatePerl) {
@@ -973,8 +979,10 @@ void generateOutput()
    if (generateRtf) {
       Doxy_Globals::infoLog_Stat.begin("Enable RTF output\n");
 
-      Doxy_Globals::outputList.add(QMakeShared<RTFGenerator>());
-      RTFGenerator::init();
+      auto obj = QMakeShared<RTFGenerator>();
+
+      Doxy_Globals::outputList.add(obj);
+      obj->init();
 
       copyLogo(rtfOutput);
    }
