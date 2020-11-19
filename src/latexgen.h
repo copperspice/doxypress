@@ -88,7 +88,7 @@ class LatexGenerator : public OutputGenerator
    LatexGenerator();
    ~LatexGenerator();
 
-   static void init();
+   void init();
 
    static void writeStyleSheetFile(QFile &f);
    static void writeHeaderFile(QFile &f);

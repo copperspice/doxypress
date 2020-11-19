@@ -161,12 +161,12 @@ void RTFGenerator::writeExtensionsFile(QFile &file)
 void RTFGenerator::init()
 {
    static const QString rtfStyleSheetFile = Config::getString("rtf-stylesheet");
-   static const QString dir               = Config::getString("rtf-output");
+   static const QString rtfExtensionsFile = Config::getString("rtf-extension");
 
-   QDir d(dir);
+   QDir d(m_outputDir);
 
-   if (! d.exists() && ! d.mkdir(dir)) {
-      err("Unable to create output directory %s\n", csPrintable(dir));
+   if (! d.exists() && ! d.mkdir(m_outputDir)) {
+      err("Unable to create output directory %s\n", csPrintable(m_outputDir));
       Doxy_Work::stopDoxyPress();
    }
 
@@ -189,8 +189,6 @@ void RTFGenerator::init()
    }
 
    // if user has defined an extension file, load its content.
-   QString rtfExtensionsFile = Config::getString("rtf-extension");
-
    if (! rtfExtensionsFile.isEmpty()) {
       loadExtensions(rtfExtensionsFile);
    }

@@ -30,6 +30,8 @@ class ManGenerator : public OutputGenerator
 {
  public:
    ManGenerator();
+
+   void init();
    ~ManGenerator();
 
    void enable() override {
@@ -73,7 +75,6 @@ class ManGenerator : public OutputGenerator
 
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;
 
-   static void init();
    void startFile(const QString &name, const QString &manName, const QString &title) override;
    void writeSearchInfo() override {}
    void writeFooter(const QString &) override {}

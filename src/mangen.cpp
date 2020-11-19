@@ -80,20 +80,10 @@ ManGenerator::~ManGenerator()
 
 void ManGenerator::init()
 {
-   QString manOutput = Config::getString("man-output");
+   QDir d(m_outputDir);
 
-   QDir d(manOutput);
-
-   if (! d.exists() && ! QDir::current().mkpath(manOutput)) {
-      err("Unable to create Man output directory %s\n", csPrintable(manOutput));
-      Doxy_Work::stopDoxyPress();
-   }
-
-   QString subdir = getSubdir();
-   d.setPath(manOutput + "/" + subdir);
-
-   if (! d.exists() && ! QDir::current().mkpath(manOutput + "/" + subdir)) {
-      err("Unable to create output directory %s/%s\n", csPrintable(manOutput), csPrintable(subdir));
+   if (! d.exists() && ! QDir::current().mkpath(m_outputDir)) {
+      err("Unable to create output directory %s\n", csPrintable(m_outputDir));
       Doxy_Work::stopDoxyPress();
    }
 

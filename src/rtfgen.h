@@ -30,7 +30,8 @@ class RTFGenerator : public OutputGenerator
    RTFGenerator();
    ~RTFGenerator();
 
-   static void init();
+   void init();
+
    static void writeStyleSheetFile(QFile &f);
    static void writeExtensionsFile(QFile &file);
 

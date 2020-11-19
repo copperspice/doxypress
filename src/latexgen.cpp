@@ -470,11 +470,10 @@ static void writeMakeBat()
 
 void LatexGenerator::init()
 {
-   QString dir = Config::getString("latex-output");
-   QDir d(dir);
+   QDir d(m_outputDir);
 
-   if (! d.exists() && ! d.mkdir(dir)) {
-      err("Unable to create output directory %s\n", csPrintable(dir));
+   if (! d.exists() && ! d.mkdir(m_outputDir)) {
+      err("Unable to create output directory %s\n", csPrintable(m_outputDir));
       Doxy_Work::stopDoxyPress();
    }
 
