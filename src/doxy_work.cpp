@@ -222,7 +222,7 @@ namespace Doxy_Work{
 
    void addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<Entry> ptrEntry);
    void addListReferences();
-   void addRelatedPage_X(QSharedPointer<Entry> ptrEntry);
+   void addRelatedPage_internal(QSharedPointer<Entry> ptrEntry);
    void addSourceReferences();
    void addSTLClasses(QSharedPointer<Entry> ptrEntry);
    void addSTLIterator(QSharedPointer<Entry> classEntry, const QString &name);
@@ -1537,7 +1537,7 @@ void Doxy_Work::addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<Entr
    }
 }
 
-void Doxy_Work::addRelatedPage_X(QSharedPointer<Entry> ptrEntry)
+void Doxy_Work::addRelatedPage_internal(QSharedPointer<Entry> ptrEntry)
 {
    QSharedPointer<Entry> root = ptrEntry->entry();
    QSharedPointer<GroupDef> gd;
@@ -9232,7 +9232,7 @@ void Doxy_Work::buildPageList(QSharedPointer<Entry> ptrEntry)
       QSharedPointer<Entry> root = ptrEntry->entry();
 
       if (! root->m_entryName.isEmpty()) {
-         addRelatedPage_X(ptrEntry);
+         addRelatedPage_internal(ptrEntry);
       }
 
    } else if (ptrEntry->section == Entry::MAINPAGEDOC_SEC) {
