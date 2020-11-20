@@ -996,8 +996,8 @@ void generateOutput()
 
       if (! Htags::execute(htmlOutput)) {
          err("'USE HTAGS' is set, however htags(1) failed\n");
-      }
-      if (! Htags::loadFilemap(htmlOutput)) {
+
+      } else if (! Htags::loadFilemap(htmlOutput)) {
          err("htags(1) ended normally but failed to load the file map\n");
       }
    }

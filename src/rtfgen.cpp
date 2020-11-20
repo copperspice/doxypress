@@ -206,6 +206,8 @@ static QString makeIndexName(const QString &s, int i)
 
 void RTFGenerator::beginRTFDocument()
 {
+   static const QString paperName = Config::getEnum("rtf-paper-type");
+
    // all the included RTF files should begin with the same header
 
    m_textStream << "{\\rtf1\\ansi\\ansicpg" << theTranslator->trRTFansicp();
@@ -249,8 +251,6 @@ void RTFGenerator::beginRTFDocument()
    m_textStream << "{\\widctlpar\\adjustright \\fs20\\cgrid \\snext0 Normal;}\n";
 
    // set the paper dimensions according to the rtf paper type
-   static const QString paperName = Config::getEnum("rtf-paper-type");
-
    m_textStream << "{";
 
    if (paperName == "a4") {
@@ -312,14 +312,15 @@ void RTFGenerator::beginRTFDocument()
 
 void RTFGenerator::beginRTFChapter()
 {
+   static const bool rtfCompact = Config::getBool("rtf-compact");
+
    DBG_RTF(m_textStream << "{\\comment BeginRTFChapter}\n")
 
    m_textStream << "\n";
    m_textStream << rtf_Style_Reset;
 
-   // if we are compact, no extra page breaks
-
-   if (Config::getBool("rtf-compact")) {
+   if (rtfCompact) {
+      // no extra page breaks
       m_textStream << "\\sect\\sbknone\n";
       rtfwriteRuler_thick();
 
@@ -332,14 +333,15 @@ void RTFGenerator::beginRTFChapter()
 
 void RTFGenerator::beginRTFSection()
 {
+   static const bool rtfCompact = Config::getBool("rtf-compact");
+
    DBG_RTF(m_textStream << "{\\comment BeginRTFSection}\n")
 
    m_textStream << "\n";
    m_textStream << rtf_Style_Reset;
 
-   // if we are compact, no extra page breaks
-
-   if (Config::getBool("rtf-compact")) {
+   if (rtfCompact) {
+      // no extra page breaks
       m_textStream << "\\sect\\sbknone\n";
       rtfwriteRuler_emboss();
 
@@ -702,7 +704,6 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          }
 
          m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
-         //if (Config::getBool("generate-treeview")) t << "main"; else t << "index";
          m_textStream  << "index";
          m_textStream  << ".rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
          break;
@@ -1132,8 +1133,9 @@ void RTFGenerator::endIndexItem(const QString &ref, const QString &fn)
 
 void RTFGenerator::startHtmlLink(const QString &url)
 {
+   static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
 
-   if (Config::getBool("rtf-hyperlinks")) {
+   if (rtfHyperlinks) {
       m_textStream << "{\\field {\\*\\fldinst { HYPERLINK \"";
       m_textStream << url;
       m_textStream << "\" }{}";
@@ -1146,7 +1148,9 @@ void RTFGenerator::startHtmlLink(const QString &url)
 
 void RTFGenerator::endHtmlLink()
 {
-  if (Config::getBool("rtf-hyperlinks")) {
+   static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
+
+   if (rtfHyperlinks) {
       m_textStream << "}}}" << endl;
    } else {
       endTypewriter();
@@ -1162,6 +1166,8 @@ void RTFGenerator::endHtmlLink()
 
 void RTFGenerator::writeStartAnnoItem(const QString &, const QString &f, const QString &path, const QString &name)
 {
+   static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
+
    DBG_RTF(m_textStream << "{\\comment (writeStartAnnoItem)}" << endl)
    m_textStream << "{\\b ";
 
@@ -1169,7 +1175,7 @@ void RTFGenerator::writeStartAnnoItem(const QString &, const QString &f, const Q
       docify(path);
    }
 
-   if (! f.isEmpty() && Config::getBool("rtf-hyperlinks")) {
+   if (! f.isEmpty() && rtfHyperlinks) {
       m_textStream << "{\\field {\\*\\fldinst { HYPERLINK  \\\\l \"";
       m_textStream << rtfFormatBmkStr(f);
       m_textStream << "\" }{}";
@@ -1189,6 +1195,7 @@ void RTFGenerator::writeStartAnnoItem(const QString &, const QString &f, const Q
 void RTFGenerator::writeEndAnnoItem(const QString &name)
 {
    DBG_RTF(m_textStream << "{\\comment (writeEndAnnoItem)}" << endl)
+
    if (! name.isEmpty()) {
       m_textStream << "\\tab ";
       writeRTFReference(name);
@@ -1196,6 +1203,7 @@ void RTFGenerator::writeEndAnnoItem(const QString &name)
    } else {
       m_textStream << endl;
    }
+
    newParagraph();
 }
 
@@ -1213,6 +1221,7 @@ void RTFGenerator::endIndexKey()
 void RTFGenerator::startIndexValue(bool hasBrief)
 {
    DBG_RTF(m_textStream << "{\\comment (startIndexValue)}" << endl)
+
    m_textStream << " ";
    if (hasBrief) {
       m_textStream << "(";
@@ -1222,6 +1231,7 @@ void RTFGenerator::startIndexValue(bool hasBrief)
 void RTFGenerator::endIndexValue(const QString &name, bool hasBrief)
 {
    DBG_RTF(m_textStream << "{\\comment (endIndexValue)}" << endl)
+
    if (hasBrief) {
       m_textStream << ")";
    }
@@ -1270,8 +1280,9 @@ void RTFGenerator::endSubsubsection()
 
 void RTFGenerator::startTextLink(const QString &f, const QString &anchor)
 {
-   if (Config::getBool("rtf-hyperlinks")) {
+   static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
 
+   if (rtfHyperlinks) {
       QString ref;
 
       if (! f.isEmpty()) {
@@ -1292,14 +1303,18 @@ void RTFGenerator::startTextLink(const QString &f, const QString &anchor)
 
 void RTFGenerator::endTextLink()
 {
-   if (Config::getBool("rtf-hyperlinks")) {
+   static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
+
+   if (rtfHyperlinks) {
       m_textStream << "}}}" << endl;
    }
 }
 
 void RTFGenerator::writeObjectLink(const QString &ref, const QString &f, const QString &anchor, const QString &text)
 {
-   if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
+   static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
+
+   if (ref.isEmpty() && rtfHyperlinks) {
       QString refName;
 
       if (! f.isEmpty()) {
@@ -1353,7 +1368,9 @@ void RTFGenerator::endPageRef(const QString &clname, const QString &anchor)
 void RTFGenerator::writeCodeLink(const QString &ref, const QString &f, const QString &anchor,
                                  const QString &name, const QString &)
 {
-   if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
+   static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
+
+   if (ref.isEmpty() && rtfHyperlinks) {
       QString refName;
 
       if (! f.isEmpty()) {
@@ -1407,9 +1424,11 @@ void RTFGenerator::endTitleHead(const QString &fileName, const QString &name)
 
 void RTFGenerator::startTitle()
 {
+   static const bool rtfCompact = Config::getBool("rtf-compact");
+
    DBG_RTF( << "{\\comment startTitle}" << endl)
 
-   if (Config::getBool("rtf-compact")) {
+   if (rtfCompact) {
       beginRTFSection();
    } else {
       beginRTFChapter();
@@ -1708,6 +1727,8 @@ void RTFGenerator::codify(const QString &str)
    // nothing... add a "newParagraph()";
    // static char spaces[]="        ";
 
+   static const int tabSize = Config::getInt("tab-size");
+
    for (auto c : str ) {
       int spacesToNextTabStop;
 
@@ -1878,12 +1899,12 @@ void RTFGenerator::endMemberList()
 //  m_textStream << " \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
 //  m_textStream << "}" << endl;
 //}
-//
+
 //void RTFGenerator::endImage(bool)
 //{
 //  // not yet implemented
 //}
-//
+
 //void RTFGenerator::startDotFile(const char *name,bool)
 //{
 //  QString baseName = name;
@@ -1895,6 +1916,7 @@ void RTFGenerator::endMemberList()
 
 //  writeDotGraphFromFile(name, m_outputDir,baseName,BITMAP);
 //  newParagraph();
+//
 //  m_textStream << "{" << endl;
 //  m_textStream << rtf_Style_Reset << endl;
 //  m_textStream << "\\par\\pard \\qc {\\field\\flddirty {\\*\\fldinst INCLUDEPICTURE ";
@@ -1902,7 +1924,7 @@ void RTFGenerator::endMemberList()
 //  m_textStream << " \\\\d \\\\*MERGEFORMAT}{\\fldrslt IMAGE}}\\par" << endl;
 //  m_textStream << "}" << endl;
 //}
-//
+
 //void RTFGenerator::endDotFile(bool)
 //{
 //  // not yet implemented
@@ -2312,10 +2334,11 @@ void RTFGenerator::startDotGraph()
 
 void RTFGenerator::endDotGraph(const DotClassGraph &g)
 {
+   static const QString imageExt  = Config::getEnum("dot-image-extension");
+
    newParagraph();
 
    QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, true, false);
-   static const QString imageExt = Config::getEnum("dot-image-extension");
 
    // display the file
    m_textStream << "{" << endl;
@@ -2336,9 +2359,10 @@ void RTFGenerator::startInclDepGraph()
 
 void RTFGenerator::endInclDepGraph(const DotInclDepGraph &g)
 {
+   static const QString imageExt  = Config::getEnum("dot-image-extension");
+
    newParagraph();
 
-   static const QString imageExt = Config::getEnum("dot-image-extension");
    QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, false);
 
    // display the file
@@ -2367,9 +2391,10 @@ void RTFGenerator::startCallGraph()
 
 void RTFGenerator::endCallGraph(const DotCallGraph &g)
 {
+   static const QString imageExt  = Config::getEnum("dot-image-extension");
+
    newParagraph();
 
-   static const QString imageExt = Config::getEnum("dot-image-extension");
    QString fn = g.writeGraph(m_textStream, GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, false);
 
    // display the file
@@ -2389,9 +2414,10 @@ void RTFGenerator::startDirDepGraph()
 
 void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
 {
+   static const QString imageExt = Config::getEnum("dot-image-extension");
+
    newParagraph();
 
-   static const QString imageExt = Config::getEnum("dot-image-extension");
    QString fn = g.writeGraph(m_textStream , GOF_BITMAP, EOF_Rtf, m_outputDir, m_fileName, relPath, false);
 
    // display the file
@@ -2405,9 +2431,7 @@ void RTFGenerator::endDirDepGraph(const DotDirDeps &g)
    DBG_RTF(m_textStream << "{\\comment (endDirDepGraph)}"    << endl)
 }
 
-/** Tests the integrity of the result by counting brackets.
- *
- */
+// Tests the integrity of the result by counting brackets
 void testRTFOutput(const QString &name)
 {
    int bcount = 0;
@@ -2461,6 +2485,8 @@ err:
  */
 bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &name)
 {
+   static const QString outputDir = Config::getString("output-dir");
+
    QDir d(path);
 
    if (! d.exists()) {
@@ -2469,7 +2495,6 @@ bool RTFGenerator::preProcessFileInplace(const QString &path, const QString &nam
    }
 
    // move to the output directory
-   QString outputDir = Config::getString("output-dir");
    QString rtfDir;
 
    if (d.isAbsolute()) {
@@ -2579,7 +2604,7 @@ void RTFGenerator::startSimpleSect(SectionTypes, const QString &file, const QStr
    newParagraph();
 
    if (! file.isEmpty()) {
-      writeObjectLink(0, file, anchor, title);
+      writeObjectLink(QString(), file, anchor, title);
    } else {
       docify(title);
    }

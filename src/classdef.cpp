@@ -2084,7 +2084,7 @@ void ClassDef::writeMemberList(OutputList &ol)
    bool first = true;
    int idx = 0;
 
-   for (auto mni : m_allMemberNameInfoSDict) {
+   for (auto &mni : m_allMemberNameInfoSDict) {
 
       for (auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
@@ -2287,9 +2287,9 @@ bool ClassDef::hasExamples() const
 
 void ClassDef::addTypeConstraint(const QString &typeConstraint, const QString &type)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
-
    static const bool hideUndocRelation = Config::getBool("hide-undoc-relations");
+
+   QSharedPointer<ClassDef> self = sharedFrom(this);
 
    if (typeConstraint.isEmpty() || type.isEmpty()) {
       return;
@@ -2585,13 +2585,13 @@ static bool isStandardFunc(QSharedPointer<MemberDef> md)
  */
 void ClassDef::mergeMembers()
 {
-   if (m_membersMerged) {
-      return;
-   }
-
    static const bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
    static const bool extractPrivate         = Config::getBool("extract-private");
    // static const bool optimizeJava        = Config::getBool("optimize-java");
+
+   if (m_membersMerged) {
+      return;
+   }
 
    SrcLangExt lang = getLanguage();
    QString sep     = getLanguageSpecificSeparator(lang, true);
@@ -2799,10 +2799,12 @@ void ClassDef::mergeMembers()
  */
 void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
    static const bool extractLocalMethods = Config::getBool("extract-local-methods");
 
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+
    bool makePrivate = category->isLocal();
+
    // in case extract local methods is not enabled we don't add the methods
    // of the category in case it is defined in the .m file.
    if (makePrivate && !extractLocalMethods) {
@@ -3501,11 +3503,11 @@ QSharedPointer<MemberList> ClassDef::getMemberList(MemberListType lt) const
 
 void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, bool isBrief)
 {
-   QSharedPointer<ClassDef> self = sharedFrom(this);
-   QSharedPointer<MemberList> ml = createMemberList(lt);
-
    static const bool sortBriefDocs  = Config::getBool("sort-brief-docs");
    static const bool sortMemberDocs = Config::getBool("sort-member-docs");
+
+   QSharedPointer<ClassDef> self = sharedFrom(this);
+   QSharedPointer<MemberList> ml = createMemberList(lt);
 
    bool isSorted = false;
 
@@ -3528,8 +3530,10 @@ void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, 
 }
 
 int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
-                                      int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
+                  int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
+   static const bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
+
    int count = 0;
 
    QSharedPointer<MemberList> ml  = getMemberList(lt);
@@ -3555,8 +3559,6 @@ int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef
          }
       }
    }
-
-   static const bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
    if (! inlineInheritedMembers) {
       // show inherited members as separate lists
@@ -3722,9 +3724,11 @@ void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType l
 }
 
 void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
-                                       const QString &subTitle, bool showInline, QSharedPointer<ClassDef> inheritedFrom, int lt2,
-                                       bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
+                  const QString &subTitle, bool showInline, QSharedPointer<ClassDef> inheritedFrom, int lt2,
+                  bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
+static const bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
+
    QSharedPointer<ClassDef> self = sharedFrom(this);
 
    QSharedPointer<MemberList> ml  = getMemberList(lt);
@@ -3744,8 +3748,6 @@ void ClassDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
       ml2->writeDeclarations(ol, self,  QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
                  QSharedPointer<GroupDef>(), tt, st, false, showInline, inheritedFrom, lt);
    }
-
-   static const bool inlineInheritedMembers = Config::getBool("inline-inherited-member");
 
    if (! inlineInheritedMembers) {
       // show inherited members as separate lists

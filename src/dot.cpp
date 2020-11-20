@@ -374,7 +374,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
    if (! f.open(QIODevice::ReadOnly)) {
 
       if (logCount < 5) {
-         logCount++;
+         ++logCount;
 
          errNoPrefixAll("\n");
          errAll("Unable to open dot map file %s\n"
@@ -382,8 +382,8 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
                    csPrintable(mapName));
 
       } else if (logCount == 5) {
-         logCount++;
          errNoPrefixAll("\n** Suppressing all further messages regarding dot map file\n\n");
+         ++logCount;
 
       }
 
@@ -517,7 +517,7 @@ static bool writeVecGfxFigure(QTextStream &out, const QString &baseName, const Q
          return false;
       }
    }
-   //printf("Got PDF/EPS size %d,%d\n",width,height);
+
    int maxWidth  = 350;  /* approx. page width in points, excl. margins */
    int maxHeight = 550;  /* approx. page height in points, excl. margins */
 
@@ -838,8 +838,7 @@ error:
    std::lock_guard<std::mutex> lock(m_output_mutex);
 
    if (logCount < 5) {
-
-      logCount++;
+      ++logCount;
 
       if (exitCode == -1) {
          errAll("Unable to run '%s', most likely the Dot program was not found\n", csPrintable(m_dotExe));
@@ -851,9 +850,8 @@ error:
       }
 
    } else if (logCount == 5) {
-
-      logCount++;
       errNoPrefixAll("\n** Suppressing all further messages regarding dot program execution\n\n");
+      ++logCount;
 
    }
 
@@ -990,7 +988,6 @@ bool DotFilePatcher::run()
    bool foundSize      = false;
 
    while (! fi.atEnd()) {
-
       QByteArray line = fi.readLine();
 
       if (line.isEmpty()) {
@@ -1094,7 +1091,7 @@ bool DotFilePatcher::run()
             Map map = m_maps[mapId];
 
             if (! writeVecGfxFigure(t, map.label, map.mapFile)) {
-               err("Unable to write FIG %d figure\n", mapId);
+               err("Unable to write FIG %d figure, verify if the dot program is installed\n", mapId);
                return false;
             }
 
@@ -1106,12 +1103,11 @@ bool DotFilePatcher::run()
          }
 
       } else {
-
          t << line;
 
       }
 
-      lineNr++;
+      ++lineNr;
    }
 
    fi.close();
@@ -3496,7 +3492,7 @@ QString DotInclDepGraph::diskName() const
 }
 
 QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
-                                       const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
+            const QString &path, const QString &fileName, const QString &relPath, bool generateImageMap, int graphId) const
 {
    static const bool usePDFLatex    = Config::getBool("latex-pdf");
    static const QString imageFormat = Config::getEnum("dot-image-format");

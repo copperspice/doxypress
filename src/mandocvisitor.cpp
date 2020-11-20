@@ -252,17 +252,21 @@ void ManDocVisitor::visit(DocVerbatim *s)
    if (! s->language().isEmpty()) { // explicit language setting
       lang = s->language();
    }
+
    SrcLangExt langExt = getLanguageFromFileName(lang);
+
    switch (s->type()) {
       case DocVerbatim::Code:
          if (! m_firstCol) {
             m_t << endl;
          }
+
          m_t << ".PP" << endl;
          m_t << ".nf" << endl;
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
-               langExt, s->isExample(), s->exampleFile());
-         if (!m_firstCol) {
+                  langExt, s->isExample(), s->exampleFile());
+
+         if (! m_firstCol) {
             m_t << endl;
          }
 
@@ -474,7 +478,7 @@ void ManDocVisitor::visit(DocIncOperator *op)
 
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          Doxy_Globals::parserManager.getParser(m_langExt)
          ->parseCode(m_ci, op->context(), op->text(), langExt,
                      op->isExample(), op->exampleFile());
@@ -484,7 +488,7 @@ void ManDocVisitor::visit(DocIncOperator *op)
    }
    if (op->isLast()) {
       popEnabled();
-      if (!m_hide) {
+      if (! m_hide) {
          if (!m_firstCol) {
             m_t << endl;
          }
@@ -493,7 +497,7 @@ void ManDocVisitor::visit(DocIncOperator *op)
          m_firstCol = true;
       }
    } else {
-      if (!m_hide) {
+      if (! m_hide) {
          m_t << endl;
       }
    }

@@ -291,8 +291,8 @@ static void countRelatedPages()
 static void startIndexHierarchy(OutputList &ol, int level)
 {
    ol.pushGeneratorState();
-   ol.disable(OutputGenerator::Man);
    ol.disable(OutputGenerator::Html);
+   ol.disable(OutputGenerator::Man);
 
    if (level < 6) {
       ol.startIndexList();
@@ -308,8 +308,8 @@ static void startIndexHierarchy(OutputList &ol, int level)
 static void endIndexHierarchy(OutputList &ol, int level)
 {
    ol.pushGeneratorState();
-   ol.disable(OutputGenerator::Man);
    ol.disable(OutputGenerator::Html);
+   ol.disable(OutputGenerator::Man);
 
    if (level < 6) {
       ol.endIndexList();
@@ -2859,7 +2859,7 @@ static void ClassMemberRedirect(QString fName, QString link)
    QFile fout(outputName);
 
    if (! fout.open(QIODevice::WriteOnly)) {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fName), fout.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fName), fout.error());
       Doxy_Work::stopDoxyPress();
    }
 

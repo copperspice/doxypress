@@ -206,7 +206,8 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    static QString mathJaxFormat  = Config::getEnum("mathjax-format");
    static bool disableIndex      = Config::getBool("disable-index");
 
-   static const QStringList extraCssFile = Config::getList("html-stylesheets");
+   static const QStringList extraCssFile      = Config::getList("html-stylesheets");
+   static const QStringList mathJaxExtensions = Config::getList("mathjax-extensions");
 
    static bool hasProjectName    = ! projectName.isEmpty();
    static bool hasProjectVersion = ! projectVersion.isEmpty();
@@ -309,8 +310,6 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
       mathJaxJs = "<script type=\"text/x-mathjax-config\">\n"
                   "  MathJax.Hub.Config({\n"
                   "    extensions: [\"tex2jax.js\"";
-
-      const QStringList mathJaxExtensions = Config::getList("mathjax-extensions");
 
       for (auto item : mathJaxExtensions) {
          mathJaxJs += ", \"" + item + ".js\"";
@@ -776,7 +775,7 @@ void HtmlGenerator::init()
       }
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
 
    }
 
@@ -867,7 +866,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
       }
 
    } else {
-      err("Unable to open file for writing %s, error: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
    }
 }
 
@@ -1691,8 +1690,7 @@ void HtmlGenerator::startMemberDoc(const QString &clName, const QString &memName
    (void) title;
    (void) showInline;
 
-   DBG_HTML(m_textStream << "<!-- startMemberDoc -->" << endl;)
-
+   // bypass 'tab' above docs
    m_textStream << "\n<div class=\"memitem\">" << endl;
    m_textStream << "<div class=\"memproto\">" << endl;
 }
@@ -1835,12 +1833,11 @@ void HtmlGenerator::endMemberDoc(bool hasArgs)
 {
    DBG_HTML(m_textStream << "<!-- endMemberDoc -->" << endl;)
 
-   if (!hasArgs) {
+   if (! hasArgs) {
       m_textStream << "        </tr>" << endl;
    }
 
    m_textStream << "      </table>" << endl;
-   // m_textStream << "</div>" << endl;
 }
 
 void HtmlGenerator::startDotGraph()
