@@ -6087,16 +6087,22 @@ int getScopeFragment(const QString &str, int p, int *l)
 }
 
 QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
-                  const QString &fileName, int startLine, const QVector<ListItemInfo> &list,
-                  QSharedPointer<GroupDef> gd, const TagInfo &tagInfo, SrcLangExt lang)
+                  const QString &fileName, int docLine, int startLine, const QVector<ListItemInfo> &list,
+                  QSharedPointer<GroupDef> gd, const TagInfo &tagInfo, bool xref, SrcLangExt lang)
 {
    static int id = 1;
 
    QSharedPointer<PageDef> pd;
 
    if ((pd = Doxy_Globals::pageSDict.find(name)) && tagInfo.isEmpty()) {
+
+      if (! xref) {
+         warn(fileName, startLine, "Multiple use of page label %s, previous use in %s on line: %d)",
+            csPrintable(name), csPrintable(pd->docFile()), pd->getStartBodyLine());
+      }
+
       // append documentation block to the page
-      pd->setDocumentation(doc, fileName, startLine);
+      pd->setDocumentation(doc, fileName, docLine);
       pd->setRefItems(list);
 
    } else {
@@ -6111,7 +6117,8 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
       }
 
       QString title = ptitle.trimmed();
-      pd = QMakeShared<PageDef>(fileName, startLine, baseName, doc, title);
+      pd = QMakeShared<PageDef>(fileName, docLine, baseName, doc, title);
+      pd->setBodySegment(startLine, -1);
 
       pd->setRefItems(list);
       pd->setLanguage(lang);

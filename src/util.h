@@ -309,10 +309,10 @@ QSharedPointer<MemberDef>    getMemberFromSymbol(QSharedPointer<Definition> scop
 
 QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &key);
 
-QSharedPointer<PageDef>      addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
-                  const QString &fileName, int startLine, const QVector<ListItemInfo> &list,
+QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
+                  const QString &fileName, int docLine, int startLine, const QVector<ListItemInfo> &list,
                   QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
-                  const TagInfo &tagInfo = TagInfo(), SrcLangExt lang = SrcLangExt_Unknown);
+                  const TagInfo &tagInfo = TagInfo(), bool xref = false, SrcLangExt lang = SrcLangExt_Unknown);
 
 QSharedPointer<ClassDef>     newResolveTypedef(QSharedPointer<const FileDef> fileScope, QSharedPointer<MemberDef> md,
                   QSharedPointer<MemberDef> *pMemType = nullptr, QString *pTemplSpec = nullptr, QString *pResolvedType = nullptr,

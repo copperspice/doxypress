@@ -1559,8 +1559,8 @@ void Doxy_Work::addRelatedPage_X(QSharedPointer<Entry> ptrEntry)
    }
 
    QSharedPointer<PageDef> pd = addRelatedPage(root->m_entryName, root->getData(EntryKey::Member_Args),
-                  doc, root->getData(EntryKey::MainDocs_File), root->docLine, root->m_specialLists, gd,
-                  ptrEntry->m_tagInfo, root->m_srcLang);
+                  doc, root->getData(EntryKey::MainDocs_File), root->docLine, root->startLine,
+                  root->m_specialLists, gd, ptrEntry->m_tagInfo, false, root->m_srcLang);
 
    if (pd) {
       pd->setBriefDescription(tmpBriefDocs, root->getData(EntryKey::Brief_File), root->briefLine);
