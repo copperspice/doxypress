@@ -397,6 +397,14 @@ class XMLCodeGenerator : public CodeOutputInterface
       XML_DB(("(writeCodeAnchor)\n"));
    }
 
+   void startCodeFragment(const QString &) override {
+      m_t << "    <programlisting>" << endl;
+   }
+
+   void endCodeFragment(const QString &) override  {
+      m_t << "    </programlisting>" << endl;
+   }
+
    void writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) override {
       XML_DB(("(writeLineNumber)\n"));
 

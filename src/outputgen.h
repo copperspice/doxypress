@@ -107,6 +107,8 @@ class CodeOutputInterface
    virtual void startFontClass(const QString &fontName) = 0;
    virtual void endFontClass() = 0;
 
+   virtual void startCodeFragment(const QString &style) = 0;
+   virtual void endCodeFragment(const QString &style) = 0;
    virtual void writeCodeAnchor(const QString &name) = 0;
 
    virtual void setCurrentDoc(QSharedPointer<Definition> context, const QString &anchor, bool isSourceFile) = 0;
@@ -201,9 +203,8 @@ class BaseOutputDocInterface : public CodeOutputInterface
    /*! Ends a section of text displayed in italic. */
    virtual void endEmphasis() = 0;
 
-   virtual void startCodeFragment() = 0;
-
-   virtual void endCodeFragment() = 0;
+   virtual void startCodeFragment(const QString &style) = 0;
+   virtual void endCodeFragment(const QString &style) = 0;
    virtual void writeRuler() = 0;
 
    /*! Starts a description list: e.g. \c \<dl\> in HTML

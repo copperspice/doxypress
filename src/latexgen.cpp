@@ -229,6 +229,17 @@ void LatexCodeGenerator::endFontClass()
    m_t << "}";
 }
 
+void LatexCodeGenerator::startCodeFragment(const QString &style)
+{
+   m_t << "\n\\begin{" << style << "}{" << m_usedTableLevel << "}\n";
+}
+
+void LatexCodeGenerator::endCodeFragment(const QString &style)
+{
+   endCodeLine();
+   m_t << "\\end{" << style << "}\n";
+}
+
 // **
 LatexGenerator::LatexGenerator() : OutputGenerator()
 {
@@ -2377,15 +2388,6 @@ void LatexGenerator::endConstraintList()
 {
    m_textStream << "\\end{description}" << endl;
    m_textStream << "\\end{Desc}" << endl;
-}
-
-void LatexGenerator::startCodeFragment()
-{
-}
-
-void LatexGenerator::endCodeFragment()
-{
-   endCodeLine();
 }
 
 void LatexGenerator::startInlineHeader()

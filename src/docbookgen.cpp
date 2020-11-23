@@ -287,6 +287,15 @@ class DocbookCodeGenerator : public CodeOutputInterface
       }
    }
 
+   void startCodeFragment(const QString &) override {
+      m_t << "<programlisting>";
+   }
+
+   void endCodeFragment(const QString &) override {
+      endCodeLine();
+      m_t << "</programlisting>";
+   }
+
  private:
    QTextStream &m_t;
    QString m_refId;

@@ -61,6 +61,12 @@ class DevNullCodeDocInterface : public CodeOutputInterface
    void addWord(const QString &, bool) override {
    }
 
+   void startCodeFragment(const QString &) override {
+   }
+
+   void endCodeFragment(const QString &) override {
+   }
+
 };
 
 /*! create a new file definition, where \a p is the file path,
@@ -962,7 +968,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
    auto srcLang = getLanguage();
 
    if (clangParsing && (srcLang == SrcLangExt_Cpp || srcLang == SrcLangExt_ObjC)) {
-      ol.startCodeFragment();
+      ol.startCodeFragment("DoxyCode");
 
       if (sameTu) {
          ClangParser::instance()->switchToFile(getFilePath());
@@ -973,14 +979,14 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
       }
 
       ClangParser::instance()->writeSources(ol, self);
-      ol.endCodeFragment();
+      ol.endCodeFragment("DoxyCode");
 
    } else  {
       // use lex parsing
 
       ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
-      ol.startCodeFragment();
+      ol.startCodeFragment("DoxyCode");
 
       bool needs2PassParsing = Doxy_Globals::parseSourcesNeeded && ! filterSourceFiles &&
                   ! getFileFilter(getFilePath(), true).isEmpty();
@@ -997,7 +1003,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
                        srcLang, false, 0, self, -1, -1, false,
                        QSharedPointer<MemberDef>(), true, QSharedPointer<Definition>(), ! needs2PassParsing);
 
-      ol.endCodeFragment();
+      ol.endCodeFragment("DoxyCode");
    }
 
    ol.endContents();

@@ -1844,7 +1844,7 @@ void RTFGenerator::writeRTFReference(const QString &label)
    m_textStream << " \\\\*MERGEFORMAT}{\\fldrslt pagenum}}";
 }
 
-void RTFGenerator::startCodeFragment()
+void RTFGenerator::startCodeFragment(const QString &)
 {
    m_textStream << "{" << endl;
 
@@ -1852,8 +1852,9 @@ void RTFGenerator::startCodeFragment()
 
 }
 
-void RTFGenerator::endCodeFragment()
+void RTFGenerator::endCodeFragment(const QString &)
 {
+   endCodeLine();
 
    m_textStream << "}" << endl;
    m_omitParagraph = true;

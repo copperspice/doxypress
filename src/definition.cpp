@@ -997,11 +997,11 @@ void Definition::writeInlineCode(OutputList &ol, const QString &scopeName)
             thisMd = self.dynamicCast<MemberDef>();
          }
 
-         ol.startCodeFragment();
+         ol.startCodeFragment("DoxyCode");
          pIntf->parseCode(ol, scopeName, codeFragment, m_private->lang, false, QString(),
                   m_private->m_body_fileDef, actualStart, actualEnd, true, thisMd, true);
 
-         ol.endCodeFragment();
+         ol.endCodeFragment("DoxyCode");
       }
    }
 

@@ -3134,14 +3134,14 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol
       ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
 
-      ol.startCodeFragment();
+      ol.startCodeFragment("DoxyCode");
 
       if (m_impl->initializer.startsWith("=")) {
          m_impl->initializer = m_impl->initializer.mid(1).trimmed();
       }
 
       pIntf->parseCode(ol, scopeName, m_impl->initializer, lang, false, 0, getFileDef(), -1, -1, true, self, false, self);
-      ol.endCodeFragment();
+      ol.endCodeFragment("DoxyCode");
    }
 
    QString brief    = briefDescription();

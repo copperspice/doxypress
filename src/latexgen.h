@@ -49,6 +49,9 @@ class LatexCodeGenerator : public CodeOutputInterface
       void setCurrentDoc(QSharedPointer<Definition>, const QString &, bool) override {}
       void addWord(const QString &, bool) override {}
 
+      void startCodeFragment(const QString &style) override;
+      void endCodeFragment(const QString &style) override;
+
       static void setDoxyCodeOpen(bool value);
       // not part of CodeGenerator
       void incUsedTableLevel() {
@@ -170,6 +173,14 @@ class LatexGenerator : public OutputGenerator
       m_codeGen->writeCodeAnchor(anchor);
    }
 
+   void startCodeFragment(const QString &style) override {
+      m_codeGen->startCodeFragment(style);
+   }
+
+   void endCodeFragment(const QString &style) override {
+      m_codeGen->endCodeFragment(style);
+   }
+
    //
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;
 
@@ -287,8 +298,6 @@ class LatexGenerator : public OutputGenerator
    }
 
    void writeAnchor(const QString &fileName, const QString &name) override;
-   void startCodeFragment() override;
-   void endCodeFragment() override;
 
    void startEmphasis() override {
       m_textStream << "{\\em ";

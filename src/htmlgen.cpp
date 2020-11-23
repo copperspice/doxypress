@@ -695,6 +695,20 @@ void HtmlCodeGenerator::writeCodeAnchor(const QString &anchor)
    m_streamCode << "<a name=\"" << anchor << "\"></a>";
 }
 
+void HtmlCodeGenerator::startCodeFragment(const QString &)
+{
+
+   m_streamCode << "<div class=\"fragment\">";
+}
+
+void HtmlCodeGenerator::endCodeFragment(const QString &)
+{
+   // endCodeLine checks if an open code line exists, if so closes it
+   endCodeLine();
+
+   m_streamCode << "</div><!-- end fragment -->\n";
+}
+
 HtmlGenerator::HtmlGenerator() : OutputGenerator()
 {
    m_outputDir    = Config::getString("html-output");

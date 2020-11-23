@@ -470,7 +470,7 @@ void ManGenerator::endItemListItem()
 {
 }
 
-void ManGenerator::startCodeFragment()
+void ManGenerator::startCodeFragment(const QString &)
 {
    newParagraph();
    m_textStream << ".nf" << endl;
@@ -478,7 +478,7 @@ void ManGenerator::startCodeFragment()
    paragraph = false;
 }
 
-void ManGenerator::endCodeFragment()
+void ManGenerator::endCodeFragment(const QString &)
 {
    if (! firstCol) {
       m_textStream << endl;

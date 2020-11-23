@@ -176,9 +176,8 @@ class RTFGenerator : public OutputGenerator
    }
 
    void writeAnchor(const QString &fileName, const QString &name) override;
-   void startCodeFragment() override;
-   void endCodeFragment() override;
-
+   void startCodeFragment(const QString &style) override;
+   void endCodeFragment(const QString &style) override;
    void writeLineNumber(const QString &, const QString &, const QString &, int l) override {
       m_textStream << QString("%1").formatArg(l, 5) << " ";
    }

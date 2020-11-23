@@ -546,7 +546,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Code:
 
          forceEndParagraph(s);
-         m_t << PREFRAG_START;
+         m_ci.startCodeFragment("DoxyCode");
 
          {
             auto tmp = Doxy_Globals::parserManager.getParser(lang);
@@ -557,18 +557,18 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
                   true, m_ctx);
          }
 
-         m_t << PREFRAG_END;
+         m_ci.endCodeFragment("DoxyCode");
          forceStartParagraph(s);
 
          break;
 
       case DocVerbatim::Verbatim:
          forceEndParagraph(s);
-         m_t << /*PREFRAG_START <<*/ "<pre class=\"fragment\">";
+         m_t << "<pre class=\"fragment\">";
 
          filter(s->text());
 
-         m_t << "</pre>" /*<< PREFRAG_END*/;
+         m_t << "</pre>";
          forceStartParagraph(s);
 
          break;
@@ -719,19 +719,20 @@ void HtmlDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::Include:
          forceEndParagraph(inc);
-         m_t << PREFRAG_START;
+         m_ci.startCodeFragment("DoxyCode");
+
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),
                      QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), false, m_ctx);
 
-         m_t << PREFRAG_END;
+         m_ci.endCodeFragment("DoxyCode");
          forceStartParagraph(inc);
          break;
 
       case DocInclude::IncWithLines: {
          forceEndParagraph(inc);
-         m_t << PREFRAG_START;
+         m_ci.startCodeFragment("DoxyCode");
 
          QFileInfo cfi( inc->file() );
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
@@ -740,7 +741,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),
                      fd, -1, -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
 
-         m_t << PREFRAG_END;
+         m_ci.endCodeFragment("DoxyCode");
          forceStartParagraph(inc);
       }
       break;
@@ -769,28 +770,31 @@ void HtmlDocVisitor::visit(DocInclude *inc)
 
       case DocInclude::VerbInclude:
          forceEndParagraph(inc);
-         m_t << /*PREFRAG_START <<*/ "<pre class=\"fragment\">";
+         m_t << "<pre class=\"fragment\">";
+
          filter(inc->text());
-         m_t << "</pre>" /*<< PREFRAG_END*/;
+
+         m_t << "</pre>";
          forceStartParagraph(inc);
          break;
 
       case DocInclude::Snippet: {
          forceEndParagraph(inc);
-         m_t << PREFRAG_START;
+         m_ci.startCodeFragment("DoxyCode");
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      extractBlock(inc->text(), inc->blockId()), langExt,
                      inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
                      -1, -1, true, QSharedPointer<MemberDef>(), true, m_ctx);
 
-         m_t << PREFRAG_END;
+         m_ci.endCodeFragment("DoxyCode");
          forceStartParagraph(inc);
       }
       break;
 
       case DocInclude::SnipWithLines: {
          forceEndParagraph(inc);
+         m_ci.startCodeFragment("DoxyCode");
 
          QFileInfo cfi(inc->file());
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
@@ -800,6 +804,7 @@ void HtmlDocVisitor::visit(DocInclude *inc)
                   inc->isExample(), inc->exampleFile(), fd,
                   lineBlock(inc->text(), inc->blockId()), -1, false, QSharedPointer<MemberDef>(), true, m_ctx);
 
+         m_ci.endCodeFragment("DoxyCode");
          forceStartParagraph(inc);
       }
       break;
@@ -819,7 +824,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       forceEndParagraph(op);
 
       if (! m_hide) {
-         m_t << PREFRAG_START;
+         m_ci.startCodeFragment("DoxyCode");
       }
 
       pushEnabled();
@@ -852,7 +857,7 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
    if (op->isLast()) {
       popEnabled();
       if (! m_hide) {
-         m_t << PREFRAG_END;
+         m_ci.endCodeFragment("DoxyCode");
       }
 
       forceStartParagraph(op);

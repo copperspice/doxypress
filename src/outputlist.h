@@ -354,12 +354,12 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeAnchor, fileName, name);
    }
 
-   void startCodeFragment() override {
-      forall(&OutputGenerator::startCodeFragment);
+   void startCodeFragment(const QString &style) override {
+      forall(&OutputGenerator::startCodeFragment, style);
    }
 
-   void endCodeFragment() override {
-      forall(&OutputGenerator::endCodeFragment);
+   void endCodeFragment(const QString &style) override {
+      forall(&OutputGenerator::endCodeFragment, style);
    }
 
    void startCodeLine(bool hasLineNumbers) override {

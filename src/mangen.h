@@ -182,8 +182,8 @@ class ManGenerator : public OutputGenerator
 
    void writeRuler() override {}
    void writeAnchor(const QString &, const QString &) override {}
-   void startCodeFragment() override;
-   void endCodeFragment() override;
+   void startCodeFragment(const QString &style) override;
+   void endCodeFragment(const QString &style) override;
 
    void writeLineNumber(const QString &, const QString &, const QString &, int l) override {
       m_textStream << l << " ";

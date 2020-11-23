@@ -27,9 +27,6 @@
 #include <language.h>
 #include <outputgen.h>
 
-#define PREFRAG_START   "<div class=\"fragment\">"
-#define PREFRAG_END     "</div><!-- fragment -->"
-
 class HtmlCodeGenerator : public CodeOutputInterface
 {
  public:
@@ -55,6 +52,8 @@ class HtmlCodeGenerator : public CodeOutputInterface
       (void) def;
    }
 
+   void startCodeFragment(const QString &style) override;
+   void endCodeFragment(const QString &style) override;
    void addWord(const QString &name, bool) override {
       (void) name;
    }
@@ -301,14 +300,6 @@ class HtmlGenerator : public OutputGenerator
       m_textStream << "<a name=\"" << name << "\" id=\"" << name << "\"></a>";
    }
 
-   void startCodeFragment() override {
-      m_textStream << PREFRAG_START;
-   }
-
-   void endCodeFragment()  override {
-      m_textStream << PREFRAG_END;
-   }
-
    void startEmphasis() override {
       m_textStream << "<em>";
    }
@@ -323,6 +314,14 @@ class HtmlGenerator : public OutputGenerator
 
    void endBold()  override {
       m_textStream << "</b>";
+   }
+
+   void startCodeFragment(const QString &style) override {
+      m_codeGen->startCodeFragment(style);
+   }
+
+   void endCodeFragment(const QString &style) override {
+      m_codeGen->endCodeFragment(style);
    }
 
    void startDescription() override {
