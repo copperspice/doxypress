@@ -254,10 +254,6 @@ LatexGenerator::LatexGenerator() : OutputGenerator()
    m_indent = 0;
 }
 
-LatexGenerator::~LatexGenerator()
-{
-}
-
 static void writeLatexMakefile()
 {
    static const bool generateBib      = ! Doxy_Globals::citeDict.isEmpty();

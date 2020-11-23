@@ -37,7 +37,9 @@ class OutputList : public OutputDocInterface
 {
  public:
    OutputList();
-   OutputList(const OutputList &dummy) = delete;
+
+   OutputList(const OutputList &) = delete;
+   OutputList &operator=(const OutputList &ol) = delete;
 
    virtual ~OutputList();
 

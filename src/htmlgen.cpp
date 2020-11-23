@@ -716,10 +716,6 @@ HtmlGenerator::HtmlGenerator() : OutputGenerator()
    m_sectionCount = 0;
 }
 
-HtmlGenerator::~HtmlGenerator()
-{
-}
-
 void HtmlGenerator::init()
 {
    static const bool sourceCode       = Config::getBool("source-code");

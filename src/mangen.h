@@ -32,7 +32,6 @@ class ManGenerator : public OutputGenerator
    ManGenerator();
 
    void init();
-   ~ManGenerator();
 
    void enable() override {
       if (! genStack.isEmpty()) {

@@ -58,10 +58,6 @@ ManGenerator::ManGenerator()
    inHeader      = false;
 }
 
-ManGenerator::~ManGenerator()
-{
-}
-
 //void ManGenerator::append(const OutputGenerator *g)
 //{
 //  QByteArray r=g->getContents();

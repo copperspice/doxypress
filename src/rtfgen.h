@@ -28,7 +28,6 @@ class RTFGenerator : public OutputGenerator
 {
  public:
    RTFGenerator();
-   ~RTFGenerator();
 
    void init();
 

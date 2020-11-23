@@ -66,10 +66,6 @@ RTFGenerator::RTFGenerator() : OutputGenerator()
    m_omitParagraph = false;
 }
 
-RTFGenerator::~RTFGenerator()
-{
-}
-
 //void RTFGenerator::append(const OutputGenerator *g)
 //{
 //  t << g->getContents();

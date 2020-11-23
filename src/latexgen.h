@@ -89,7 +89,6 @@ class LatexGenerator : public OutputGenerator
 {
  public:
    LatexGenerator();
-   ~LatexGenerator();
 
    void init();
 

@@ -79,9 +79,9 @@ class HtmlGenerator : public OutputGenerator
 {
  public:
    HtmlGenerator();
-   virtual ~HtmlGenerator();
 
    static void init();
+
    static void writeStyleSheetFile(QFile &f);
    static void writeHeaderFile(QFile &f);
    static void writeFooterFile(QFile &f);
