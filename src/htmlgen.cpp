@@ -524,7 +524,7 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
    m_streamCode << "<a name=\"" << lineAnchor << "\"></a><span class=\"lineno\">";
 
    if (! filename.isEmpty()) {
-      _writeCodeLink("line", ref, filename, anchor, lineNumber, "");
+      writeCodeLinkHtml("line", ref, filename, anchor, lineNumber, "");
    } else {
       codify(lineNumber);
    }
@@ -538,10 +538,10 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
 void HtmlCodeGenerator::writeCodeLink(const QString &ref, const QString &f, const QString &anchor,
                   const QString &name, const QString &tooltip)
 {
-   _writeCodeLink("code", ref, f, anchor, name, tooltip);
+   writeCodeLinkHtml("code", ref, f, anchor, name, tooltip);
 }
 
-void HtmlCodeGenerator::_writeCodeLink(const QString &className, const QString &ref, const QString &f,
+void HtmlCodeGenerator::writeCodeLinkHtml(const QString &className, const QString &ref, const QString &f,
                   const QString &anchor, const QString &name, const QString &tooltip)
 {
    if (! ref.isEmpty()) {

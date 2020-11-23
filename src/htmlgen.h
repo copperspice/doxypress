@@ -60,7 +60,7 @@ class HtmlCodeGenerator : public CodeOutputInterface
    }
 
  private:
-   void _writeCodeLink(const QString &className, const QString &ref, const QString &file,
+   void writeCodeLinkHtml(const QString &className, const QString &ref, const QString &file,
                   const QString &anchor, const QString &name, const QString &tooltip);
 
    void docify(const QString &text);
