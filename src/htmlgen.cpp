@@ -381,7 +381,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 }
 
 HtmlCodeGenerator::HtmlCodeGenerator(QTextStream &t, const QString &relPath)
-   : m_col(0), m_relPath(relPath), m_streamX(t)
+   : m_streamCode(t), m_streamSet(false), m_lineOpen(false), m_col(0), m_relPath(relPath)
 {
 }
 
@@ -406,7 +406,7 @@ void HtmlCodeGenerator::codify(const QString &str)
       if (isBackSlash) {
          isBackSlash = false;
 
-         m_streamX << "\\";
+         m_streamCode << "\\";
          m_col++;
       }
 
@@ -414,13 +414,13 @@ void HtmlCodeGenerator::codify(const QString &str)
 
          case '\t':
             spacesToNextTabStop = tabSize - (m_col % tabSize);
-            m_streamX << QString(spacesToNextTabStop, ' ');
+            m_streamCode << QString(spacesToNextTabStop, ' ');
 
             m_col += spacesToNextTabStop;
             break;
 
          case '\n':
-            m_streamX << "\n";
+            m_streamCode << "\n";
             m_col = 0;
             break;
 
@@ -428,27 +428,27 @@ void HtmlCodeGenerator::codify(const QString &str)
             break;
 
          case '<':
-            m_streamX << "&lt;";
+            m_streamCode << "&lt;";
             m_col++;
             break;
 
          case '>':
-            m_streamX << "&gt;";
+            m_streamCode << "&gt;";
             m_col++;
             break;
 
          case '&':
-            m_streamX << "&amp;";
+            m_streamCode << "&amp;";
             m_col++;
             break;
 
          case '"':
-            m_streamX << "&quot;";
+            m_streamCode << "&quot;";
             m_col++;
             break;
 
          case '\'':
-            m_streamX << "&#39;";
+            m_streamCode << "&#39;";
             m_col++;                // &apos; is not valid XHTML
             break;
 
@@ -457,7 +457,7 @@ void HtmlCodeGenerator::codify(const QString &str)
             break;
 
          default:
-            m_streamX << c;
+            m_streamCode << c;
             m_col++;
             break;
       }
@@ -473,19 +473,19 @@ void HtmlCodeGenerator::docify(const QString &text)
 
       switch (c.unicode()) {
          case '<':
-            m_streamX << "&lt;";
+            m_streamCode << "&lt;";
             break;
 
          case '>':
-            m_streamX << "&gt;";
+            m_streamCode << "&gt;";
             break;
 
          case '&':
-            m_streamX << "&amp;";
+            m_streamCode << "&amp;";
             break;
 
          case '"':
-            m_streamX << "&quot;";
+            m_streamCode << "&quot;";
             break;
 
          case '\\':
@@ -493,7 +493,7 @@ void HtmlCodeGenerator::docify(const QString &text)
             if (isBackSlash) {
               isBackSlash = false;
 
-              m_streamX << "\\";
+              m_streamCode << "\\";
 
             } else {
               isBackSlash = true;
@@ -503,7 +503,7 @@ void HtmlCodeGenerator::docify(const QString &text)
             break;
 
          default:
-            m_streamX << c;
+            m_streamCode << c;
       }
 
       if (isBackSlash && c != '\\') {
@@ -517,8 +517,11 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
    const QString lineNumber = QString("%1").formatArg(len, 5, 10);
    const QString lineAnchor = QString("l%1").formatArg(len, 5, 10, QChar('0'));
 
-   m_streamX << "<div class=\"line\">";
-   m_streamX << "<a name=\"" << lineAnchor << "\"></a><span class=\"lineno\">";
+   if (! m_lineOpen) {
+      m_streamCode << "<div class=\"line\">";
+      m_lineOpen = true;
+   }
+   m_streamCode << "<a name=\"" << lineAnchor << "\"></a><span class=\"lineno\">";
 
    if (! filename.isEmpty()) {
       _writeCodeLink("line", ref, filename, anchor, lineNumber, "");
@@ -526,8 +529,10 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
       codify(lineNumber);
    }
 
-   m_streamX << "</span>";
-   m_streamX << "&#160;";
+   m_streamCode << "</span>";
+   m_streamCode << "&#160;";
+
+   m_col = 0;
 }
 
 void HtmlCodeGenerator::writeCodeLink(const QString &ref, const QString &f, const QString &anchor,
@@ -540,150 +545,154 @@ void HtmlCodeGenerator::_writeCodeLink(const QString &className, const QString &
                   const QString &anchor, const QString &name, const QString &tooltip)
 {
    if (! ref.isEmpty()) {
-      m_streamX << "<a class=\"" << className << "Ref\" ";
-      m_streamX << externalLinkTarget() << externalRef(m_relPath, ref, false);
+      m_streamCode << "<a class=\"" << className << "Ref\" ";
+      m_streamCode << externalLinkTarget() << externalRef(m_relPath, ref, false);
 
    } else {
-      m_streamX << "<a class=\"" << className << "\" ";
+      m_streamCode << "<a class=\"" << className << "\" ";
    }
 
-   m_streamX << "href=\"";
-   m_streamX << externalRef(m_relPath, ref, true);
+   m_streamCode << "href=\"";
+   m_streamCode << externalRef(m_relPath, ref, true);
 
    if (! f.isEmpty()) {
-      m_streamX << f << Doxy_Globals::htmlFileExtension;
+      m_streamCode << f << Doxy_Globals::htmlFileExtension;
    }
 
    if (! anchor.isEmpty()) {
-      m_streamX << "#" << anchor;
+      m_streamCode << "#" << anchor;
    }
 
-   m_streamX << "\"";
+  m_streamCode << "\"";
 
    if (! tooltip.isEmpty()) {
-      m_streamX << " title=\"" << convertToHtml(tooltip) << "\"";
+      m_streamCode << " title=\"" << convertToHtml(tooltip) << "\"";
    }
 
-   m_streamX << ">";
+   m_streamCode << ">";
    docify(name);
 
-   m_streamX << "</a>";
+   m_streamCode << "</a>";
    m_col += name.length();
 }
 
 void HtmlCodeGenerator::writeTooltip(const QString &id, const DocLinkInfo &docInfo, const QString &decl,
                   const QString &desc, const SourceLinkInfo &defInfo, const SourceLinkInfo &declInfo)
 {
-   m_streamX << "<div class=\"ttc\" id=\"" << id << "\">";
-   m_streamX << "<div class=\"ttname\">";
+   m_streamCode << "<div class=\"ttc\" id=\"" << id << "\">";
+   m_streamCode << "<div class=\"ttname\">";
 
    if (! docInfo.url.isEmpty()) {
-      m_streamX << "<a href=\"";
-      m_streamX << externalRef(m_relPath, docInfo.ref, true);
-      m_streamX << docInfo.url << Doxy_Globals::htmlFileExtension;
+      m_streamCode << "<a href=\"";
+      m_streamCode << externalRef(m_relPath, docInfo.ref, true);
+      m_streamCode << docInfo.url << Doxy_Globals::htmlFileExtension;
 
       if (! docInfo.anchor.isEmpty()) {
-         m_streamX << "#" << docInfo.anchor;
+         m_streamCode << "#" << docInfo.anchor;
       }
 
-      m_streamX << "\">";
+      m_streamCode << "\">";
    }
 
    docify(docInfo.name);
 
    if (! docInfo.url.isEmpty()) {
-      m_streamX << "</a>";
+      m_streamCode << "</a>";
    }
 
-   m_streamX << "</div>";
+   m_streamCode << "</div>";
 
    if (! decl.isEmpty()) {
-      m_streamX << "<div class=\"ttdeci\">";
+      m_streamCode << "<div class=\"ttdeci\">";
       docify(decl);
-      m_streamX << "</div>";
+      m_streamCode << "</div>";
    }
 
    if (! desc.isEmpty()) {
-      m_streamX << "<div class=\"ttdoc\">";
+      m_streamCode << "<div class=\"ttdoc\">";
 
       // desc is already HTML escaped but there are still < and > signs
       docify(desc);
 
-      m_streamX << "</div>";
+      m_streamCode << "</div>";
    }
 
    if (! defInfo.file.isEmpty()) {
-      m_streamX << "<div class=\"ttdef\"><b>Definition:</b> ";
+      m_streamCode << "<div class=\"ttdef\"><b>Definition:</b> ";
 
       if (! defInfo.url.isEmpty()) {
-         m_streamX << "<a href=\"";
-         m_streamX << externalRef(m_relPath, defInfo.ref, true);
-         m_streamX << defInfo.url << Doxy_Globals::htmlFileExtension;
+         m_streamCode << "<a href=\"";
+         m_streamCode << externalRef(m_relPath, defInfo.ref, true);
+         m_streamCode << defInfo.url << Doxy_Globals::htmlFileExtension;
          if (!defInfo.anchor.isEmpty()) {
-            m_streamX << "#" << defInfo.anchor;
+            m_streamCode << "#" << defInfo.anchor;
          }
-         m_streamX << "\">";
+         m_streamCode << "\">";
       }
 
-      m_streamX << defInfo.file << ":" << defInfo.line;
+      m_streamCode << defInfo.file << ":" << defInfo.line;
       if (!defInfo.url.isEmpty()) {
-         m_streamX << "</a>";
+         m_streamCode << "</a>";
       }
-      m_streamX << "</div>";
+      m_streamCode << "</div>";
    }
 
    if (! declInfo.file.isEmpty()) {
-      m_streamX << "<div class=\"ttdecl\"><b>Declaration:</b> ";
+      m_streamCode << "<div class=\"ttdecl\"><b>Declaration:</b> ";
       if (!declInfo.url.isEmpty()) {
-         m_streamX << "<a href=\"";
-         m_streamX << externalRef(m_relPath, declInfo.ref, true);
-         m_streamX << declInfo.url << Doxy_Globals::htmlFileExtension;
+         m_streamCode << "<a href=\"";
+         m_streamCode << externalRef(m_relPath, declInfo.ref, true);
+         m_streamCode << declInfo.url << Doxy_Globals::htmlFileExtension;
          if (!declInfo.anchor.isEmpty()) {
-            m_streamX << "#" << declInfo.anchor;
+            m_streamCode << "#" << declInfo.anchor;
          }
-         m_streamX << "\">";
+         m_streamCode << "\">";
       }
-      m_streamX << declInfo.file << ":" << declInfo.line;
+      m_streamCode << declInfo.file << ":" << declInfo.line;
       if (!declInfo.url.isEmpty()) {
-         m_streamX << "</a>";
+         m_streamCode << "</a>";
       }
-      m_streamX << "</div>";
+      m_streamCode << "</div>";
    }
 
-   m_streamX << "</div>" << endl;
+   m_streamCode << "</div>" << endl;
 }
 
-void HtmlCodeGenerator::startCodeLine(bool hasLineNumbers)
+void HtmlCodeGenerator::startCodeLine(bool)
 {
-   if (! hasLineNumbers) {
-      m_streamX << "<div class=\"line\">";
-   }
-
    m_col = 0;
+
+   if (! m_lineOpen) {
+      m_streamCode << "<div class=\"line\">";
+      m_lineOpen = true;
+   }
 }
 
 void HtmlCodeGenerator::endCodeLine()
 {
    if (m_col == 0) {
-      m_streamX << " ";
+      m_streamCode << " ";
       ++m_col;
    }
-   m_streamX << "</div>";
+   if (m_lineOpen) {
+      m_streamCode << "</div>\n";
+      m_lineOpen = false;
+   }
 }
 
 void HtmlCodeGenerator::startFontClass(const QString &s)
 {
-   m_streamX << "<span class=\"" << s << "\">";
+   m_streamCode << "<span class=\"" << s << "\">";
 }
 
 void HtmlCodeGenerator::endFontClass()
 {
-   m_streamX << "</span>";
+   m_streamCode << "</span>";
 }
 
 void HtmlCodeGenerator::writeCodeAnchor(const QString &anchor)
 {
-   m_streamX << "<a name=\"" << anchor << "\"></a>";
+   m_streamCode << "<a name=\"" << anchor << "\"></a>";
 }
 
 HtmlGenerator::HtmlGenerator() : OutputGenerator()

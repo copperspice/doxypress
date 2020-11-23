@@ -65,9 +65,14 @@ class HtmlCodeGenerator : public CodeOutputInterface
 
    void docify(const QString &text);
 
+   QTextStream &m_streamCode;
+
+   bool m_streamSet;
+   bool m_lineOpen;
+
    int m_col;
+
    QString m_relPath;
-   QTextStream &m_streamX;
 };
 
 /** Generator for HTML output */
@@ -505,17 +510,18 @@ class HtmlGenerator : public OutputGenerator
  private:
    static void writePageFooter(QTextStream &t, const QString &, const QString &, const QString &);
 
-   QString m_lastTitle;
-   QString m_relativePath;
-   QString m_lastFile;
-
    void docify(const QString &text, bool inHtmlComment);
 
    HtmlGenerator &operator=(const HtmlGenerator &g);
    HtmlGenerator(const HtmlGenerator &g);
 
-   int m_sectionCount;
    bool m_emptySection;
+
+   int m_sectionCount;
+
+   QString m_lastTitle;
+   QString m_relativePath;
+   QString m_lastFile;
 
    QSharedPointer<HtmlCodeGenerator> m_codeGen;
 };
