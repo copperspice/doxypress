@@ -411,10 +411,12 @@ void LatexDocVisitor::visit(DocVerbatim *s)
 
    switch (s->type()) {
       case DocVerbatim::Code: {
+         m_ci.startCodeFragment("DoxyCode");
 
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(),
                   langExt, s->isExample(), s->exampleFile());
 
+         m_ci.endCodeFragment("DoxyCode");
       }
       break;
 
@@ -528,6 +530,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines: {
+         m_ci.startCodeFragment("DoxyCodeInclude");
 
          QFileInfo cfi(inc->file());
          QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
@@ -536,15 +539,19 @@ void LatexDocVisitor::visit(DocInclude *inc)
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), fd,
                      -1, -1, false, QSharedPointer<MemberDef>(), true);
 
+
+         m_ci.endCodeFragment("DoxyCodeInclude");
       }
       break;
 
       case DocInclude::Include:
+         m_ci.startCodeFragment("DoxyCodeInclude");
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(), QSharedPointer<FileDef>(),
                      -1, -1, true, QSharedPointer<MemberDef>(), false);
 
+         m_ci.endCodeFragment("DoxyCodeInclude");
          break;
 
       case DocInclude::DontInclude:
@@ -567,16 +574,20 @@ void LatexDocVisitor::visit(DocInclude *inc)
          break;
 
       case DocInclude::Snippet:
+         m_ci.startCodeFragment("DoxyCodeInclude");
 
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                   extractBlock(inc->text(), inc->blockId()), langExt,
                   inc->isExample(), inc->exampleFile());
 
+         m_ci.endCodeFragment("DoxyCodeInclude");
          break;
 
       case DocInclude::SnipWithLines: {
         QFileInfo cfi( inc->file() );
         QSharedPointer<FileDef> fd = QMakeShared<FileDef>(cfi.path(), cfi.fileName());
+
+        m_ci.startCodeFragment("DoxyCodeInclude");
 
         Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                   extractBlock(inc->text(),inc->blockId()), langExt,
@@ -584,6 +595,7 @@ void LatexDocVisitor::visit(DocInclude *inc)
                   lineBlock(inc->text(),inc->blockId()),
                   -1, false, QSharedPointer<MemberDef>(), true);
 
+        m_ci.endCodeFragment("DoxyCodeInclude");
       }
       break;
 
@@ -599,6 +611,7 @@ void LatexDocVisitor::visit(DocIncOperator *op)
 {
    if (op->isFirst()) {
       if (! m_hide) {
+         m_ci.startCodeFragment("DoxyCodeInclude");
       }
 
       pushEnabled();
@@ -621,6 +634,7 @@ void LatexDocVisitor::visit(DocIncOperator *op)
       popEnabled();
 
       if (! m_hide) {
+         m_ci.endCodeFragment("DoxyCodeInclude");
       }
 
    } else {
