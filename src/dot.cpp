@@ -373,7 +373,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
 
    if (! f.open(QIODevice::ReadOnly)) {
 
-      if (logCount < 5) {
+      if (logCount < 3) {
          ++logCount;
 
          errNoPrefixAll("\n");
@@ -381,9 +381,9 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
                   "If dot was installed after a previous issue, delete the output directory and run DoxyPress again\n",
                    csPrintable(mapName));
 
-      } else if (logCount == 5) {
-         errNoPrefixAll("\n** Suppressing all further messages regarding dot map file\n\n");
+      } else if (logCount == 3) {
          ++logCount;
+         errNoPrefixAll("\n** Suppressing further messages regarding dot map file\n\n");
 
       }
 
@@ -681,7 +681,7 @@ static bool insertMapFile(QTextStream &out, const QString &mapFile, const QStrin
       QString tmpstr;
       QTextStream tmpout(&tmpstr);
 
-      convertMapFile(tmpout, mapFile, relPath);
+      convertMapFile(tmpout, mapFile, relPath, false);
       if (! tmpstr.isEmpty()) {
          out << "<map name=\"" << mapLabel << "\" id=\"" << mapLabel << "\">" << endl;
          out << tmpstr;
@@ -837,7 +837,7 @@ bool DotRunner::run()
 error:
    std::lock_guard<std::mutex> lock(m_output_mutex);
 
-   if (logCount < 5) {
+   if (logCount < 3) {
       ++logCount;
 
       if (exitCode == -1) {
@@ -849,9 +849,9 @@ error:
                      exitCode, csPrintable(dotArgs));
       }
 
-   } else if (logCount == 5) {
-      errNoPrefixAll("\n** Suppressing all further messages regarding dot program execution\n\n");
+   } else if (logCount == 3) {
       ++logCount;
+      errNoPrefixAll("\n** Suppressing further messages regarding dot program execution\n\n");
 
    }
 
@@ -954,6 +954,11 @@ bool DotFilePatcher::run()
 
    QString tmpName   = m_patchFile + ".tmp";
    QString patchFile = m_patchFile;
+
+   if (QDir::current().exists(tmpName)) {
+      // remove old tmp file
+      QDir::current().remove(tmpName);
+   }
 
    if (! QDir::current().rename(patchFile, tmpName)) {
       err("Unable to rename file %s to %s\n", csPrintable(m_patchFile), csPrintable(tmpName));
