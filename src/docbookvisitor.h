@@ -158,6 +158,12 @@ class DocbookDocVisitor : public DocVisitor
    void writeDiaFile(const QString &fileName, DocVerbatim *s);
    void writePlantUMLFile(const QString &fileName, DocVerbatim *s);
 
+   void visitPreStart(QTextStream  &t, const QList<DocNode  *> &children, bool hasCaption,
+                  const QString &name, const QString &width, const QString &height, bool inlineImage = false);
+
+   void visitPostEnd(QTextStream  &t, bool hasCaption, bool inlineImage = false);
+   void visitCaption(const QList<DocNode *> &children);
+
    QTextStream &m_t;
    CodeOutputInterface &m_ci;
    bool m_insidePre;

@@ -36,53 +36,71 @@
 #include <plantuml.h>
 #include <util.h>
 
-static void visitCaption(DocbookDocVisitor *parent, QList<DocNode *> children)
+
+
+void DocbookDocVisitor::visitPreStart(QTextStream  &t, const QList<DocNode *> &children, bool hasCaption,
+                  const QString &name, const QString &width, const QString &height, bool inlineImage)
 {
-   for (auto n : children) {
-      n->accept(parent);
+   if (hasCaption && ! inlineImage)   {
+
+      t << "    <figure>" << endl;
+      t << "        <title>" << endl;
+
+      visitCaption(children);
+
+      t << "        </title>" << endl;
+
+   } else {
+      t << "    <informalfigure>" << endl;
+   }
+
+   t << "        <mediaobject>" << endl;
+   t << "            <imageobject>" << endl;
+   t << "                <imagedata";
+
+   if (! width.isEmpty()) {
+      t << " width=\"" << convertToDocBook(width) << "\"";
+
+   } else if (! height.isEmpty() && ! inlineImage) {
+     t << " width=\"50%\"";
+   }
+
+   if (! height.isEmpty()) {
+      t << " depth=\"" << convertToDocBook(height) << "\"";
+   }
+
+   t << " align=\"center\" valign=\"middle\" scalefit=\"0\" fileref=\"" << name << "\">";
+   t << "</imagedata>" << endl;
+   t << "            </imageobject>" << endl;
+
+   if (hasCaption && ! inlineImage) {
+      t << "        <!--" << endl;
    }
 }
 
-static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name,
-                  const QString &width, const QString &height)
-{
-  QString tmpStr;
-  t << "    <figure>" << endl;
-  t << "        <title></title>" << endl;
-  t << "        <mediaobject>" << endl;
-  t << "            <imageobject>" << endl;
-  t << "                <imagedata";
-
-  if (! width.isEmpty()) {
-    t << " width=\"" << convertToXML(width) << "\"";
-
-  } else {
-    t << " width=\"50%\"";
-  }
-
-  if (! height.isEmpty()) {
-      t << " depth=\"" << convertToXML(tmpStr) << "\"";
-  }
-
-  t << " align=\"center\" valign=\"middle\" scalefit=\"1\" fileref=\"" << name << "\">";
-  t << "</imagedata>" << endl;
-  t << "            </imageobject>" << endl;
-
-  if (hasCaption) {
-    t << "        <caption>" << endl;
-  }
-}
-
-static void visitPostEnd(QTextStream &t, const bool hasCaption)
+void DocbookDocVisitor::visitPostEnd(QTextStream &t, const bool hasCaption, bool inlineImage)
 {
    t << endl;
 
-   if (hasCaption) {
-      t << "        </caption>" << endl;
+   if (hasCaption && ! inlineImage) {
+      t << "        -->" << endl;
    }
 
    t << "        </mediaobject>" << endl;
-   t << "    </figure>" << endl;
+
+   if (hasCaption && ! inlineImage) {
+      t << "    </figure>" << endl;
+
+   } else {
+      t << "    </informalfigure>" << endl;
+   }
+}
+
+void DocbookDocVisitor::visitCaption(const QList<DocNode *> &children)
+{
+   for (auto item : children) {
+      item->accept(this);
+   }
 }
 
 DocbookDocVisitor::DocbookDocVisitor(QTextStream &t, CodeOutputInterface &ci)
@@ -1200,7 +1218,7 @@ void DocbookDocVisitor::visitPre(DocImage *img)
          baseName = baseName.right(baseName.length() - i - 1);
       }
 
-      visitPreStart(m_t, img->hasCaption(), baseName, img->width(), img->height());
+      visitPreStart(m_t, img->children(), img->hasCaption(), img->relPath() + baseName, img->width(), img->height(), img->isInlineImage());
 
    } else {
       pushEnabled();
@@ -1667,8 +1685,9 @@ void DocbookDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
 
    writeMscGraphFromFile(baseName + ".msc", docbookOutDir, shortName, MSC_BITMAP);
 
-   visitPreStart(m_t, s->hasCaption(), shortName, s->width(),s->height());
-   visitCaption(this, s->children());
+   visitPreStart(m_t, s->children(), s->hasCaption(), s->relPath() + shortName + ".png", s->width(), s->height());
+
+   visitCaption(s->children());
    visitPostEnd(m_t,  s->hasCaption());
 }
 
@@ -1685,9 +1704,8 @@ void DocbookDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *
 
    generatePlantUMLOutput(baseName, docbookOutDir, PlantUMLOutputFormat::PUML_BITMAP);
 
-
-   visitPreStart(m_t, s->hasCaption(), shortName, s->width(),s->height());
-   visitCaption(this, s->children());
+   visitPreStart(m_t, s->children(), s->hasCaption(), s->relPath() + shortName + ".png", s->width(), s->height());
+   visitCaption(s->children());
    visitPostEnd(m_t,  s->hasCaption());
 }
 
@@ -1711,7 +1729,7 @@ void DocbookDocVisitor::startMscFile(const QString &fileName, const QString &wid
 
    writeMscGraphFromFile(fileName, docbookOutDir, baseName, MscOutputFormat::MSC_BITMAP);
    m_t << "<para>" << endl;
-   visitPreStart(m_t, hasCaption, baseName + ".png", width, height);
+   visitPreStart(m_t, children, hasCaption, baseName + ".png",  width,  height);
 }
 
 void DocbookDocVisitor::endMscFile(bool hasCaption)
@@ -1736,8 +1754,8 @@ void DocbookDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
    }
 
    writeDiaGraphFromFile(baseName + ".dia", docbookOutDir, shortName, DIA_BITMAP);
-   visitPreStart(m_t, s->hasCaption(), shortName, s->width(), s->height());
-   visitCaption(this, s->children());
+   visitPreStart(m_t, s->children(), s->hasCaption(), shortName, s->width(),s->height());
+   visitCaption(s->children());
    visitPostEnd(m_t,  s->hasCaption());
 }
 
@@ -1761,7 +1779,7 @@ void DocbookDocVisitor::startDiaFile(const QString &fileName, const QString &wid
 
    writeDiaGraphFromFile(fileName, docbookOutDir, baseName, DiaOutputFormat::DIA_BITMAP);
    m_t << "<para>" << endl;
-   visitPreStart(m_t, hasCaption, baseName + ".png", width, height);
+   visitPreStart(m_t, children, hasCaption, baseName + ".png", width, height);
 }
 
 void DocbookDocVisitor::endDiaFile(bool hasCaption)
@@ -1786,9 +1804,9 @@ void DocbookDocVisitor::writeDotFile(const QString &baseName, DocVerbatim *s)
    }
 
    writeDotGraphFromFile(baseName + ".dot", docbookOutDir, shortName, GraphOutputFormat::GOF_BITMAP);
+   visitPreStart(m_t, s->children(), s->hasCaption(), s->relPath() + shortName + ".dot", s->width(), s->height());
 
-   visitPreStart(m_t, s->hasCaption(), baseName + ".dot", s->width(), s->height());
-   visitCaption(this, s->children());
+   visitCaption(s->children());
    visitPostEnd(m_t,  s->hasCaption());
 }
 
@@ -1813,7 +1831,7 @@ void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &wid
 
    writeDotGraphFromFile(fileName, docbookOutDir, baseName, GOF_BITMAP);
    m_t << "<para>" << endl;
-   visitPreStart(m_t, hasCaption, baseName + "." + imageExt, width, height);
+   visitPreStart(m_t, children, hasCaption, baseName + "." + imageExt, width, height);
 }
 
 void DocbookDocVisitor::endDotFile(bool hasCaption)
