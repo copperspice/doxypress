@@ -36,7 +36,37 @@
 #include <plantuml.h>
 #include <util.h>
 
+static QString filterId(const QString &str)
+{
+   QString retval;
 
+   if (str.isEmpty())  {
+      return retval;
+   }
+
+   for (QChar c : str) {
+
+      switch (c.unicode()) {
+         case ':':
+            retval.append("_1");
+            break;
+
+         default:
+            retval.append(c);
+            break;
+         }
+   }
+
+   return retval;
+}
+
+static bool supportedHtmlAttribute(const QString &name)
+{
+   static const QSet<QString> htmlWords = { "align", "bgcolor", "border", "cellpadding", "cellspacing",
+            "class", "frame", "label", "style", "width", "tabstyle", "title" };
+
+   return htmlWords.contains(name);
+}
 
 void DocbookDocVisitor::visitPreStart(QTextStream  &t, const QList<DocNode *> &children, bool hasCaption,
                   const QString &name, const QString &width, const QString &height, bool inlineImage)
@@ -196,7 +226,7 @@ void DocbookDocVisitor::visit(DocLineBreak *)
    if (m_hide) {
       return;
    }
-   m_t << endl << "<literallayout>\n</literallayout>" << endl;
+   m_t << endl << "<literallayout>&#160;&#xa;</literallayout>" << endl;
 }
 
 void DocbookDocVisitor::visit(DocHorRuler *)
@@ -331,13 +361,14 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          QString name;
          QString baseName;
-         QString tempStr = docbookOutDir + "/inline_dotgraph_";
+         QString tmpStr  = docbookOutDir + "/inline_dotgraph_%1";
          QString stext   = s->text();
 
          m_t << "<para>" << endl;
 
-         name = QString("dot_inline_dotgraph_%1").formatArg(dotindex);
-         baseName = QString("tempStr%1").formatArg(dotindex++);
+         name     = QString("dot_inline_dotgraph_%1").formatArg(dotindex);
+         baseName = tmpStr.formatArg(dotindex);
+         ++dotindex;
 
          QFile file(baseName + ".dot");
 
@@ -358,13 +389,14 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          QString name;
          QString baseName;
-         QString tempStr = docbookOutDir + "/inline_mscgraph_";
+         QString tmpStr  = docbookOutDir + "/inline_mscgraph_%1";
          QString stext   = s->text();
 
          m_t << "<para>" << endl;
 
          name = QString("msc_inline_mscgraph_%1").formatArg(mscindex);
-         baseName = QString("tempStr%1").formatArg(mscindex++);
+         baseName = tmpStr.formatArg(mscindex);
+         ++mscindex;
 
          QFile file(baseName + ".msc");
 
@@ -405,7 +437,8 @@ void DocbookDocVisitor::visit(DocAnchor *anc)
    if (m_hide) {
       return;
    }
-   m_t << "<anchor id=\"" << anc->file() << "_1" << anc->anchor() << "\"/>";
+
+   m_t << "<anchor xml:id=\"_" << stripPath(anc->file()) << "_1" << filterId(anc->anchor()) << "\"/>";
 }
 
 void DocbookDocVisitor::visit(DocInclude *inc)
@@ -575,7 +608,7 @@ void DocbookDocVisitor::visit(DocCite *cite)
    }
 
    if (! cite->file().isEmpty()) {
-      startLink(cite->file(), cite->anchor());
+      startLink(cite->file(), filterId(cite->anchor()));
    }
 
    filter(cite->text());
@@ -1477,6 +1510,7 @@ void DocbookDocVisitor::visitPost(DocParamSect *)
    m_t << "                        </tbody>" << endl;
    m_t << "                        </tgroup>" << endl;
    m_t << "                    </table>" << endl;
+   m_t << "                    </para>" << endl;
    m_t << "                </formalpara>" << endl;
    m_t << "                ";
 }
@@ -1488,6 +1522,49 @@ void DocbookDocVisitor::visitPre(DocParamList *pl)
    }
 
    m_t << "                            <row>" << endl;
+   DocParamSect *sect = nullptr;
+
+   if (pl->parent() && pl->parent()->kind() == DocNode::Kind_ParamSect) {
+      sect=(DocParamSect*)pl->parent();
+   }
+
+   if (sect && sect->hasInOutSpecifier()) {
+      m_t << "                                <entry>";
+
+      if (pl->direction() != DocParamSect::Unspecified) {
+         if (pl->direction() == DocParamSect::In) {
+            m_t << "in";
+
+         } else if (pl->direction() == DocParamSect::Out) {
+            m_t << "out";
+         } else if (pl->direction() == DocParamSect::InOut) {
+            m_t << "in,out";
+         }
+      }
+
+      m_t << "                                </entry>";
+   }
+
+   if (sect && sect->hasTypeSpecifier()) {
+
+      m_t << "                                <entry>";
+
+      for (auto type : pl->paramTypes()) {
+
+         if (type->kind() == DocNode::Kind_Word) {
+            visit((DocWord*)type);
+
+         } else if (type->kind() == DocNode::Kind_LinkedWord) {
+            visit((DocLinkedWord*)type);
+
+         } else if (type->kind() == DocNode::Kind_Sep) {
+           m_t << " " << ((DocSeparator *)type)->chars() << " ";
+         }
+
+      }
+
+      m_t << "                                </entry>";
+   }
 
    if ( pl->parameters().isEmpty()) {
       m_t << "                                <entry></entry>" << endl;
@@ -1753,7 +1830,7 @@ void DocbookDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   writeDiaGraphFromFile(baseName + ".dia", docbookOutDir, shortName, DIA_BITMAP);
+   writeDiaGraphFromFile(baseName + ".dia", docbookOutDir, shortName, DiaOutputFormat::DIA_BITMAP);
    visitPreStart(m_t, s->children(), s->hasCaption(), shortName, s->width(),s->height());
    visitCaption(s->children());
    visitPostEnd(m_t,  s->hasCaption());
