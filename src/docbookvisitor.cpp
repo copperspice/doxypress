@@ -1264,7 +1264,7 @@ void DocbookDocVisitor::visitPre(DocDotFile *df)
    if (m_hide) {
       return;
    }
-   startDotFile(df->file(), df->width(), df->height(), df->hasCaption());
+   startDotFile(df->file(), df->width(), df->height(), df->hasCaption(), df->children());
 }
 
 void DocbookDocVisitor::visitPost(DocDotFile *df)
@@ -1280,7 +1280,8 @@ void DocbookDocVisitor::visitPre(DocMscFile *df)
    if (m_hide) {
       return;
    }
-   startMscFile(df->file(), df->width(), df->height(), df->hasCaption());
+
+   startMscFile(df->file(), df->width(), df->height(), df->hasCaption(), df->children());
 }
 
 void DocbookDocVisitor::visitPost(DocMscFile *df)
@@ -1295,7 +1296,7 @@ void DocbookDocVisitor::visitPre(DocDiaFile *df)
    if (m_hide) {
       return;
    }
-   startDiaFile(df->file(), df->width(), df->height(), df->hasCaption());
+   startDiaFile(df->file(), df->width(), df->height(), df->hasCaption(), df->children());
 }
 
 void DocbookDocVisitor::visitPost(DocDiaFile *df)
@@ -1691,7 +1692,7 @@ void DocbookDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *
 }
 
 void DocbookDocVisitor::startMscFile(const QString &fileName, const QString &width, const QString &height,
-                  bool hasCaption)
+                  bool hasCaption, const QList<DocNode *> &children)
 {
    static const QString docbookOutDir = Config::getString("docbook-output");
 
@@ -1741,7 +1742,7 @@ void DocbookDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
 }
 
 void DocbookDocVisitor::startDiaFile(const QString &fileName, const QString &width, const QString &height,
-                  bool hasCaption )
+                  bool hasCaption, const QList<DocNode *> &children)
 {
    static const QString docbookOutDir = Config::getString("docbook-output");
 
@@ -1792,7 +1793,7 @@ void DocbookDocVisitor::writeDotFile(const QString &baseName, DocVerbatim *s)
 }
 
 void DocbookDocVisitor::startDotFile(const QString &fileName, const QString &width, const QString &height,
-                  bool hasCaption)
+                  bool hasCaption, const QList<DocNode *> &children)
 {
    static const QString docbookOutDir = Config::getString("docbook-output");
    static const QString imageExt      = Config::getEnum("dot-image-extension");

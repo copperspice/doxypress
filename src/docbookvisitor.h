@@ -22,6 +22,7 @@
 #include <QStack>
 #include <QTextStream>
 
+#include <docparser.h>
 #include <docvisitor.h>
 
 class CodeOutputInterface;
@@ -140,13 +141,16 @@ class DocbookDocVisitor : public DocVisitor
    void endLink();
    void pushEnabled();
    void popEnabled();
-   void startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
+   void startMscFile(const QString &fileName, const QString &width, const QString &height,
+            bool hasCaption, const QList<DocNode *> &children);
    void endMscFile(bool hasCaption);
 
-   void startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
+   void startDiaFile(const QString &fileName, const QString &width, const QString &height,
+            bool hasCaption, const QList<DocNode *> &children);
    void endDiaFile(bool hasCaption);
 
-   void startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
+   void startDotFile(const QString &fileName, const QString &width, const QString &height,
+            bool hasCaption, const QList<DocNode *> &children);
    void endDotFile(bool hasCaption);
 
    void writeDotFile(const QString &fileName, DocVerbatim *s);
