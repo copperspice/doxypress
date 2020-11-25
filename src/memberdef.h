@@ -417,7 +417,7 @@ class MemberDef : public Definition
                   bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(),
                   const QString &inheritId = 0);
 
-   void writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol, const QString &scopeName,
+   void writeDocumentation(QSharedPointer<MemberList> ml, int memCount, int memTotal, OutputList &ol, const QString &scopeName,
                   QSharedPointer<Definition> container,
                   bool inGroup, bool showEnumValues = false, bool showInline = false);
 

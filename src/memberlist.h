@@ -88,6 +88,9 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
       assert(m_numDecMembers != -1);
       return m_friendCnt;
    }
+   int numDocEnumValues() const {
+      return m_numDocEnumValues;
+   }
 
    int numDecMembers() const  {
       assert(m_numDecMembers != -1);
@@ -152,6 +155,8 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
    int m_friendCnt;
    int m_numDecMembers;  // number of members in the brief part of the memberlist
    int m_numDocMembers;  // number of members in the detailed part of the memberlist
+
+   int m_numDocEnumValues;
 
    QList<MemberGroup> *m_memberGroupList;
 

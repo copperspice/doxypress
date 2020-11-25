@@ -2685,7 +2685,7 @@ void MemberDef::writeGroupInclude(OutputList &ol, bool inGroup)
 
 /*! Writes the "detailed documentation" section of this member to all active output formats
  */
-void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, OutputList &ol, const QString &scName,
+void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, int memTotal, OutputList &ol, const QString &scName,
                   QSharedPointer<Definition> def, bool inGroup, bool showEnumValues, bool showInline)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
