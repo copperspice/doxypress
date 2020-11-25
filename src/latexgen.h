@@ -30,9 +30,7 @@ class LatexCodeGenerator : public CodeOutputInterface
    public:
       LatexCodeGenerator(QTextStream &t, const QString &relPath, const QString &sourceFile);
 
-      void setRelativePath(const QString &path);
-      void setSourceFileName(const QString &sourceFileName);
-
+      // overrides
       void codify(const QString &text) override;
       void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
                   const QString &name, const QString &tooltip) override;
@@ -52,7 +50,6 @@ class LatexCodeGenerator : public CodeOutputInterface
       void startCodeFragment(const QString &style) override;
       void endCodeFragment(const QString &style) override;
 
-      static void setDoxyCodeOpen(bool value);
       // not part of CodeGenerator
       void incUsedTableLevel() {
          ++m_usedTableLevel;

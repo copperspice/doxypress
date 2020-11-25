@@ -32,7 +32,6 @@ class HtmlCodeGenerator : public CodeOutputInterface
  public:
    HtmlCodeGenerator(QTextStream &t, const QString &relPath);
 
-   void setRelativePath(const QString &path);
    void codify(const QString &text) override;
 
    void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,

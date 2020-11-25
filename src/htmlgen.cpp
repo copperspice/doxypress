@@ -385,11 +385,6 @@ HtmlCodeGenerator::HtmlCodeGenerator(QTextStream &t, const QString &relPath)
 {
 }
 
-void HtmlCodeGenerator::setRelativePath(const QString &path)
-{
-   m_relPath = path;
-}
-
 void HtmlCodeGenerator::codify(const QString &str)
 {
    if (str.isEmpty()) {

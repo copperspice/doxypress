@@ -41,16 +41,6 @@ LatexCodeGenerator::LatexCodeGenerator(QTextStream &t, const QString &relPath, c
    m_prettyCode = Config::getBool("latex-source-code");
 }
 
-void LatexCodeGenerator::setRelativePath(const QString &path)
-{
-   m_relPath = path;
-}
-
-void LatexCodeGenerator::setSourceFileName(const QString &name)
-{
-   m_sourceFileName = name;
-}
-
 void LatexCodeGenerator::codify(const QString &str)
 {
    static const int tabSize  = Config::getInt("tab-size");
