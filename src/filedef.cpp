@@ -73,26 +73,29 @@ class DevNullCodeDocInterface : public CodeOutputInterface
     \a nm the file name, and \a lref is an HTML anchor name if the
     file was read from a tag file or 0 otherwise
 */
-FileDef::FileDef(const QString &p, const QString &nm, const QString &lref, const QString &dn)
-   : Definition(p + nm, 1, 1, nm)
+FileDef::FileDef(const QString &p, const QString &f_name, const QString &lref, const QString &dn)
+   : Definition(p + f_name, 1, 1, f_name)
 {
    static const bool fullPathNames = Config::getBool("full-path-names");
 
-   m_path     = p;
-   m_filePath = m_path + nm;
-   m_fileName = nm;
-   m_diskName = dn;
+   m_fileName = f_name;
 
-   if (m_diskName.isEmpty()) {
-      m_diskName = nm;
+   m_path     = p;
+   m_filePath = m_path +  m_fileName;
+
+   if (dn.isEmpty()) {
+      m_diskName = "file_" + m_fileName;
+   } else {
+      m_diskName = "file_" + dn;
    }
 
    setReference(lref);
 
-   m_package   = QSharedPointer<PackageDef>();
-   m_isSource  = determineSection(nm) == Entry::SOURCE_SEC;
-   m_docname   = nm;
    m_dir       = QSharedPointer<DirDef>();
+   m_package   = QSharedPointer<PackageDef>();
+   m_isSource  = determineSection(m_fileName) == Entry::SOURCE_SEC;
+
+   m_docname   = m_fileName;
 
    if (fullPathNames) {
       m_docname.prepend(stripFromPath(m_path));
