@@ -498,6 +498,8 @@ void Definition::setBriefDescription(const QString &b, const QString &briefFile,
 
    QString brief = b.trimmed();
 
+   brief = trimEmptyLines(brief, briefLine);
+   brief = brief.trimmed();
    if (brief.isEmpty()) {
       return;
    }

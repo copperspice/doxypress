@@ -1276,6 +1276,16 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    t << "      </memberdef>" << endl;
 }
 
+// namespace members are also inserted in the file scope, but
+// used to prevent duplication in the XML output
+static bool memberVisible(QSharedPointer<Definition> def, QSharedPointer<MemberDef> md)
+{
+   // emerald - enable when tag is added
+   static const bool xmlIncludeNsMembers = false;          // Config::getBool("xml-include-ns-members");
+
+   return xmlIncludeNsMembers || def->definitionType() != Definition::TypeFile || md->getNamespaceDef() == nullptr;
+}
+
 static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QTextStream &t, QSharedPointer<MemberList> ml,
                                const QString &kind, const QString &header = QString(), const QString &documentation = QString() )
 {
@@ -1286,7 +1296,7 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
    int count = 0;
 
    for (auto md : *ml) {
-      if (d->definitionType() != Definition::TypeFile || md->getNamespaceDef() == 0) {
+      if (memberVisible(d, md) && (md->memberType() != MemberDefType::EnumValue) && ! md->isHidden()) {
          count++;
       }
    }
@@ -1308,7 +1318,7 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
    }
 
    for (auto md : *ml) {
-      if (d->definitionType() != Definition::TypeFile || md->getNamespaceDef() == 0) {
+      if (memberVisible(d, md)) {
          generateXMLForMember(md, ti, t, d);
       }
 

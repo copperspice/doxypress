@@ -2434,7 +2434,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
                QString cs = letterToLabel(ml->letter());
                QString cl = ml->letter();
 
-               QString anchor = "index_" + cs;
+               QString anchor = "index_" + convertToId(cs);
                QString title  = "- " + cl + " -";
 
                ol.startSection(anchor, title, SectionInfo::Subsection);
@@ -2703,7 +2703,7 @@ static void writeQuickMemberIndex(OutputList &ol, const LetterToIndexMap<MemberI
          anchor = "#index_";
       }
 
-      startQuickIndexItem(ol, anchor + ci, i == page, true);
+      startQuickIndexItem(ol, anchor + convertToId(ci), i == page, true);
       ol.writeString(is);
       endQuickIndexItem(ol);
    }

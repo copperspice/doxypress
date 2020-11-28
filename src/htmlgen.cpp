@@ -2068,7 +2068,7 @@ void HtmlGenerator::startSimpleSect(SectionTypes, const QString &filename, const
    m_textStream << "<dl><dt><b>";
 
    if (! filename.isEmpty()) {
-      writeObjectLink(0, filename, anchor, title);
+      writeObjectLink(QString(), filename, anchor, title);
 
    } else {
       docify(title);
