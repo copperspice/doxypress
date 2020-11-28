@@ -4305,9 +4305,10 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                break;
 
             case LayoutNavEntry::FileSource: {
-               static const bool showFiles = Config::getBool("show-file-page");
+               // enabled from source code
+               static const bool showSource = Config::getBool("source-code");
 
-               if (showFiles)  {
+               if (showSource)  {
                   msg("Generating file source index\n");
                   writeFileSourceIndex(ol);
                }
