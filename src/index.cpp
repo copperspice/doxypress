@@ -3852,6 +3852,8 @@ static void writeIndex(OutputList &ol)
 
    static const bool optimizeFortran   = Config::getBool("optimize-fortran");
    static const bool latexHideIndices  = Config::getBool("latex-hide-indices");
+   static const bool showNamespacePage = Config::getBool("show-namespace-page");
+   static const bool showFilePage      = Config::getBool("show-file-page");
    static const bool disableIndex      = Config::getBool("disable-index");
 
    // save old generator state
@@ -4073,7 +4075,7 @@ static void writeIndex(OutputList &ol)
          ol.endIndexSection(isModuleIndex);
       }
 
-      if (s_documentedNamespaces > 0) {
+      if (showNamespacePage && s_documentedNamespaces > 0) {
          ol.startIndexSection(isNamespaceIndex);
          ol.parseText(/*projPrefix+*/(optimizeFortran ? theTranslator->trModulesIndex() : theTranslator->trNamespaceIndex()));
          ol.endIndexSection(isNamespaceIndex);
@@ -4093,7 +4095,9 @@ static void writeIndex(OutputList &ol)
          ol.endIndexSection(isCompoundIndex);
       }
 
-      if (Doxy_Globals::documentedFiles > 0) {
+      if (showFilePage &&  Doxy_Globals::documentedFiles > 0) {
+         // enabled from build options, file command
+
          ol.startIndexSection(isFileIndex);
          ol.parseText(/*projPrefix+*/theTranslator->trFileIndex());
          ol.endIndexSection(isFileIndex);
