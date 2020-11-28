@@ -307,6 +307,7 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void startFile(const QString &name, const QString &manName, const QString &title) = 0;
    virtual void writeSearchInfo() = 0;
    virtual void writeFooter(const QString &navPath) = 0;
+   virtual void insertMemberAlignLeft(int, bool) = 0;
    virtual void endFile() = 0;
    virtual void startIndexSection(IndexSections) = 0;
    virtual void endIndexSection(IndexSections) = 0;

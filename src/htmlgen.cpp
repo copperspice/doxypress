@@ -1532,21 +1532,7 @@ void HtmlGenerator::startMemberItem(const QString &anchor, int annoType, const Q
    }
 
    m_textStream << "\">";
-
-   switch (annoType) {
-      case 0:
-         m_textStream << "<td class=\"memItemLeft\" align=\"right\" valign=\"top\">";
-         break;
-      case 1:
-         m_textStream << "<td class=\"memItemLeft\" >";
-         break;
-      case 2:
-         m_textStream << "<td class=\"memItemLeft\" valign=\"top\">";
-         break;
-      default:
-         m_textStream << "<td class=\"memTemplParams\" colspan=\"2\">";
-         break;
-   }
+   insertMemberAlignLeft(annoType, true);
 }
 
 void HtmlGenerator::endMemberItem()
@@ -1571,10 +1557,35 @@ void HtmlGenerator::endMemberTemplateParams(const QString &anchor, const QString
    m_textStream << "\"><td class=\"memTemplItemLeft\" align=\"right\" valign=\"top\">";
 }
 
-void HtmlGenerator::insertMemberAlign(bool templ)
+void HtmlGenerator::insertMemberAlign(bool alignRight)
 {
-   QString className = templ ? QString("memTemplItemRight") : QString("memItemRight");
+   QString className = alignRight ? QString("memTemplItemRight") : QString("memItemRight");
    m_textStream << "&#160;</td><td class=\"" << className << "\" valign=\"bottom\">";
+}
+
+void HtmlGenerator::insertMemberAlignLeft(int annoType, bool alignLeft)
+{
+   if (! alignLeft) {
+      m_textStream << "&#160;</td>";
+   }
+
+  switch(annoType)  {
+      case 0:
+         m_textStream << "<td class=\"memItemLeft\" align=\"right\" valign=\"top\">";
+         break;
+
+      case 1:
+         m_textStream << "<td class=\"memItemLeft\" >";
+         break;
+
+      case 2:
+         m_textStream << "<td class=\"memItemLeft\" valign=\"top\">";
+         break;
+
+      default:
+         m_textStream << "<td class=\"memTemplParams\" colspan=\"2\">";
+         break;
+  }
 }
 
 void HtmlGenerator::startMemberDescription(const QString &anchor, const QString &inheritId)

@@ -153,6 +153,8 @@ class ManGenerator : public OutputGenerator
    void startMemberHeader(const QString &) override;
    void endMemberHeader() override;
    void insertMemberAlign(bool) override {}
+   void insertMemberAlignLeft(int, bool) override {}
+
    void startMemberSubtitle() override {}
    void endMemberSubtitle() override {}
 

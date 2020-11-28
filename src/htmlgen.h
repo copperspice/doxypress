@@ -451,6 +451,7 @@ class HtmlGenerator : public OutputGenerator
    void writeSummaryLink(const QString &file, const QString &anchor, const QString &title, bool first) override;
    void startContents() override;
    void endContents() override;
+   void insertMemberAlignLeft(int, bool) override;
 
    void startPageDoc(const QString &pageTitle) override;
    void endPageDoc() override;

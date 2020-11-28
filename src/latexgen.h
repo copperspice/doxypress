@@ -288,6 +288,7 @@ class LatexGenerator : public OutputGenerator
    void endMemberGroup(bool) override;
 
    void insertMemberAlign(bool) override {}
+   void insertMemberAlignLeft(int, bool) override {}
 
    void writeRuler() override {
       m_textStream << endl << endl;

@@ -344,8 +344,12 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endMemberGroup, last);
    }
 
-   void insertMemberAlign(bool templ = false) {
-      forall(&OutputGenerator::insertMemberAlign, templ);
+   void insertMemberAlign(bool alignRight = false) {
+      forall(&OutputGenerator::insertMemberAlign, alignRight);
+   }
+
+   void insertMemberAlignLeft(int annoTtype = 0, bool alignLeft = false) {
+      forall(&OutputGenerator::insertMemberAlignLeft, annoTtype, alignLeft);
    }
 
    void writeRuler() override {

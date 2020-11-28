@@ -168,7 +168,9 @@ class RTFGenerator : public OutputGenerator
    void endMemberItem() override;
    void startMemberTemplateParams() override {}
    void endMemberTemplateParams(const QString &, const QString &) override {}
+
    void insertMemberAlign(bool) override {}
+   void insertMemberAlignLeft(int, bool) override {}
 
    void writeRuler() override {
       rtfwriteRuler_thin();
