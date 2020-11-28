@@ -218,7 +218,7 @@ namespace Doxy_Work{
    void addMembersToMemberGroup();
 
    void addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<MemberDef> md, const QString &funcDecl,
-                  ArgumentList &argList, bool overload, NamespaceSDict *nl = nullptr);
+                  ArgumentList &argList, bool overload);
 
    void addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<Entry> ptrEntry);
    void addListReferences();
@@ -6149,8 +6149,8 @@ void Doxy_Work::generateXRefPages()
 // copy the documentation in entry (ptrEntry) to member definition in md
 // if 'overload' is set the standard overload text is added
 
-void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<MemberDef> md, const QString &funcDecl,
-                  ArgumentList &argList, bool overload, NamespaceSDict *)
+void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<MemberDef> md,
+         const QString &funcDecl, ArgumentList &argList, bool overload)
 {
    QSharedPointer<Entry> root = ptrEntry->entry();
 
@@ -7079,7 +7079,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                      if (matching) {
                         ArgumentList tmp;
-                        addMemberDocs(ptrEntry, md, funcDecl, tmp, overloaded, nullptr);
+                        addMemberDocs(ptrEntry, md, funcDecl, tmp, overloaded);
 
                         count++;
                         memFound = true;
@@ -7161,7 +7161,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         // with this name in the scope, use the found match
 
                         ArgumentList tmp;
-                        addMemberDocs(ptrEntry, maybe_md, funcDecl, tmp, overloaded, nullptr);
+                        addMemberDocs(ptrEntry, maybe_md, funcDecl, tmp, overloaded);
                         return;
 
                      } else if (candidates > 1 && exact_cd != nullptr && exact_md != nullptr) {
@@ -7169,7 +7169,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         // has the exact same signature, use it
 
                         ArgumentList tmp;
-                        addMemberDocs(ptrEntry, exact_md, funcDecl, tmp, overloaded, nullptr);
+                        addMemberDocs(ptrEntry, exact_md, funcDecl, tmp, overloaded);
                         return;
                      }
                   }
