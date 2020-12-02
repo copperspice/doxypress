@@ -149,8 +149,9 @@ class LatexDocVisitor : public DocVisitor
 
    void filter(const QString &str);
    void startLink(const QString &ref, const QString &file, const QString &anchor, bool refToTable = false);
-   void endLink(const QString &ref, const QString &file, const QString &anchor);
+   void endLink(const QString &ref, const QString &file, const QString &anchor, bool refToTable = false);
    QString escapeMakeIndexChars(const QString &s);
+
    void startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDotFile(bool hasCaption);
 
@@ -161,6 +162,7 @@ class LatexDocVisitor : public DocVisitor
    void startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption);
    void endDiaFile(bool hasCaption);
    void writeDiaFile(const QString &fileName, DocVerbatim *s);
+
    void writePlantUMLFile(const QString &fileName, DocVerbatim *s);
 
    void pushEnabled();

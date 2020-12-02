@@ -1610,7 +1610,7 @@ void LatexDocVisitor::visitPost(DocRef *ref)
 
    } else {
       if (! ref->file().isEmpty()) {
-         endLink(ref->ref(), ref->file(), ref->anchor());
+         endLink(ref->ref(), ref->file(), ref->anchor(), ref->refToTable());
       }
    }
 }
@@ -2018,7 +2018,7 @@ void LatexDocVisitor::startLink(const QString &ref, const QString &file, const Q
    }
 }
 
-void LatexDocVisitor::endLink(const QString &ref, const QString &file, const QString &anchor)
+void LatexDocVisitor::endLink(const QString &ref, const QString &file, const QString &anchor, bool refToTable)
 {
    static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
@@ -2034,6 +2034,14 @@ void LatexDocVisitor::endLink(const QString &ref, const QString &file, const QSt
       }
 
       m_t << anchor << "}";
+   }
+
+   if (ref.isEmpty() && pdfHyperlinks) {
+      // internal PDF link
+
+      if (! refToTable) {
+         m_t << "}";
+      }
    }
 }
 
