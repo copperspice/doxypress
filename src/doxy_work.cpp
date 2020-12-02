@@ -7216,7 +7216,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                            const ArgumentList &templAl = md->getTemplateArgumentList();
 
                            if (! templAl.listEmpty()) {
-                              warnMsg += "  'template ";
+                              warnMsg += "  template ";
                               warnMsg += tempArgListToString(templAl, root->m_srcLang);
                               warnMsg += '\n';
                            }
@@ -7237,7 +7237,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                            }
 
                            if (noMatchCount > 1) {
-                              warnMsg += "' at line " + QString::number(md->getDefLine()) +  " of file " + md->getDefFileName();
+                              warnMsg += " at line " + QString::number(md->getDefLine()) +  " of file " + md->getDefFileName();
                            }
 
                            warnMsg += '\n';
