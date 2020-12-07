@@ -2804,7 +2804,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
 
          if (vmd->isEnumerate() && match.captured() == vmd->name()) {
             ol.startDoxyAnchor(cfname, cname, memAnchor, fullMemberName, memberArgs);
-            ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
+            ol.startMemberDoc(ciname, name(), memAnchor, name(), memCount, memTotal, showInline);
 
             linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(ldef.constBegin(), match.capturedStart()));
 
@@ -2819,7 +2819,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
          // anonymous compound
 
          ol.startDoxyAnchor(cfname, cname, memAnchor, fullMemberName, memberArgs);
-         ol.startMemberDoc(ciname, name(), memAnchor, name(), showInline);
+         ol.startMemberDoc(ciname, name(), memAnchor, name(), memCount, memTotal, showInline);
 
          // search for the last anonymous compound name in the definition
          auto iter_s = ldef.indexOfFast(' ');
@@ -2857,7 +2857,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
       // write member name and documentation
 
       ol.startDoxyAnchor(cfname, cname, memAnchor, fullMemberName, memberArgs);
-      ol.startMemberDoc(ciname, name(), memAnchor, title, showInline);
+      ol.startMemberDoc(ciname, name(), memAnchor, title, memCount, memTotal, showInline);
 
       QSharedPointer<ClassDef> cd     = getClassDef();
       QSharedPointer<NamespaceDef> nd = getNamespaceDef();

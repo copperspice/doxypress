@@ -1469,7 +1469,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    {
       // only HTML only
       ol.writeAnchor("", anchor());
-      ol.startMemberDoc(0, 0, 0, 0, false);
+      ol.startMemberDoc(0, 0, anchor(), name(), 1, 1, false);
       ol.startMemberDocName(false);
       ol.parseText(s);
       ol.endMemberDocName();

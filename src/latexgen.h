@@ -263,7 +263,7 @@ class LatexGenerator : public OutputGenerator
    void endMemberSections() override {}
    void startHeaderSection() override {}
    void endHeaderSection() override {}
-   void startMemberHeader(const QString &) override;
+   void startMemberHeader(const QString &, int) override;
    void endMemberHeader() override;
    void startMemberSubtitle() override {}
    void endMemberSubtitle() override {}
@@ -318,7 +318,10 @@ class LatexGenerator : public OutputGenerator
    void endDescItem() override;
 
    void lineBreak(const QString &style = 0) override;
-   void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) override;
+
+   void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor, const QString &title,
+                  int memCount, int memTotal, bool showInline) override;
+
    void endMemberDoc(bool) override;
 
    void startDoxyAnchor(const QString &, const QString &, const QString &, const QString &, const QString &) override;
@@ -365,7 +368,7 @@ class LatexGenerator : public OutputGenerator
       m_textStream << "\\normalsize ";
    }
 
-   void startMemberDescription(const QString &, const QString &) override;
+   void startMemberDescription(const QString &, const QString &, bool) override;
    void endMemberDescription() override;
    void startMemberDeclaration() override{}
 

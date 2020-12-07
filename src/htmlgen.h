@@ -143,14 +143,10 @@ class HtmlGenerator : public OutputGenerator
    void docify(const QString &text) override;
    void lineBreak(const QString &style) override;
 
-   void startMemberHeader(const QString &) override;
-   void endMemberHeader() override;
    void writeAnchor(const QString &, const QString &name) override {
       m_textStream << "<a name=\"" << name << "\" id=\"" << name << "\"></a>";
    }
 
-   void startMemberDescription(const QString &anchor, const QString &inheritId) override;
-   void endMemberDescription() override;
    void writeChar(char c) override;
    void writeNonBreakableSpace(int) override;
    void writeObjectLink(const QString &ref, const QString &file, const QString &anchor, const QString &name) override;
@@ -310,8 +306,6 @@ class HtmlGenerator : public OutputGenerator
    void endSubsubsection() override  {
       m_textStream << "</h3>" << endl;
    }
-   void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor,
-                  const QString &title, bool showInline) override;
 
    // from outputgenerator
    void enable() override {
@@ -413,6 +407,8 @@ class HtmlGenerator : public OutputGenerator
    void endMemberSections() override;
    void startHeaderSection() override;
    void endHeaderSection() override;
+   void startMemberHeader(const QString &, int) override;
+   void endMemberHeader() override;
    void startMemberSubtitle() override;
    void endMemberSubtitle() override;
    void startMemberDocList() override;
@@ -448,6 +444,8 @@ class HtmlGenerator : public OutputGenerator
       m_textStream << "</div>";
    }
 
+   void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor, const QString &title,
+                  int memCount, int memTotal, bool showInline) override;
    void endMemberDoc(bool) override;
 
    void startDoxyAnchor(const QString &fName, const QString &manName, const QString &anchor,
@@ -455,6 +453,8 @@ class HtmlGenerator : public OutputGenerator
 
    void endDoxyAnchor(const QString &fileName, const QString &anchor) override;
 
+   void startMemberDescription(const QString &anchor, const QString &inheritId, bool type) override;
+   void endMemberDescription() override;
 
    void startMemberDeclaration()override { }
    void endMemberDeclaration(const QString &anchor, const QString &inheritId) override;

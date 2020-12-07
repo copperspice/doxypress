@@ -150,8 +150,9 @@ class ManGenerator : public OutputGenerator
    void endMemberSections() override {}
    void startHeaderSection() override {}
    void endHeaderSection() override;
-   void startMemberHeader(const QString &) override;
+   void startMemberHeader(const QString &, int) override;
    void endMemberHeader() override;
+
    void insertMemberAlign(bool) override {}
    void insertMemberAlignLeft(int, bool) override {}
 
@@ -227,8 +228,11 @@ class ManGenerator : public OutputGenerator
    }
 
    void writeChar(char c) override;
-   void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) override;
+
+   void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor, const QString &title,
+                  int memCount, int memTotal, bool showInline) override;
    void endMemberDoc(bool) override;
+
    void startDoxyAnchor(const QString &, const QString &, const QString &, const QString &, const QString &) override;
    void endDoxyAnchor(const QString &, const QString &) override {}
    void writeLatexSpacing() override {}
@@ -249,7 +253,7 @@ class ManGenerator : public OutputGenerator
    void startSmall()  override {}
    void endSmall()    override {}
 
-   void startMemberDescription(const QString &, const QString &) override {
+   void startMemberDescription(const QString &, const QString &, bool) override {
       m_textStream << "\n.RI \"";
       firstCol = false;
    }

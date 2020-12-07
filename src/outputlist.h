@@ -266,9 +266,11 @@ class OutputList : public OutputDocInterface
    void endHeaderSection() {
       forall(&OutputGenerator::endHeaderSection);
    }
-   void startMemberHeader(const QString &anchor) {
-      forall(&OutputGenerator::startMemberHeader, anchor);
+
+   void startMemberHeader(const QString &anchor, int type = 2) {
+      forall(&OutputGenerator::startMemberHeader, anchor, type);
    }
+
    void endMemberHeader() {
       forall(&OutputGenerator::endMemberHeader);
    }
@@ -392,10 +394,11 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::writeChar, c);
    }
 
-   void startMemberDoc(const QString &clName, const QString &memName,
-                       const QString &anchor, const QString &title, bool showInline) {
-      forall(&OutputGenerator::startMemberDoc, clName, memName, anchor, title, showInline);
+   void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor, const QString &title,
+                  int memCount, int memTotal, bool showInline) {
+      forall(&OutputGenerator::startMemberDoc, clName, memName, anchor, title, memCount, memTotal, showInline);
    }
+
    void endMemberDoc(bool hasArgs) {
       forall(&OutputGenerator::endMemberDoc, hasArgs);
    }
@@ -481,8 +484,8 @@ class OutputList : public OutputDocInterface
       forall(&OutputGenerator::endBold);
    }
 
-   void startMemberDescription(const QString &anchor, const QString &inheritId = 0) {
-      forall(&OutputGenerator::startMemberDescription, anchor, inheritId);
+   void startMemberDescription(const QString &anchor, const QString &inheritId = QString(), bool type = false ) {
+      forall(&OutputGenerator::startMemberDescription, anchor, inheritId, type);
    }
 
    void endMemberDescription() {

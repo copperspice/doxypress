@@ -1588,7 +1588,7 @@ void HtmlGenerator::insertMemberAlignLeft(int annoType, bool alignLeft)
   }
 }
 
-void HtmlGenerator::startMemberDescription(const QString &anchor, const QString &inheritId)
+void HtmlGenerator::startMemberDescription(const QString &anchor, const QString &inheritId, bool type)
 {
    if (m_emptySection) {
       m_textStream << "<table class=\"memberdecls\">" << endl;
@@ -1601,7 +1601,13 @@ void HtmlGenerator::startMemberDescription(const QString &anchor, const QString 
       m_textStream << " inherit " << inheritId;
    }
 
-   m_textStream << "\"><td class=\"mdescLeft\">&#160;</td><td class=\"mdescRight\">";
+   m_textStream << "\"><td class=\"mdescLeft\">&#160;</td>";
+
+   if (type) {
+      m_textStream << "<td class=\"mdescLeft\">&#160;</td>";
+   }
+
+   m_textStream << "<td class=\"mdescRight\">";
 }
 
 void HtmlGenerator::endMemberDescription()
@@ -1628,7 +1634,7 @@ void HtmlGenerator::endMemberSections()
    }
 }
 
-void HtmlGenerator::startMemberHeader(const QString &anchor)
+void HtmlGenerator::startMemberHeader(const QString &anchor, int type)
 {
    DBG_HTML(m_textStream << "<!-- startMemberHeader -->" << endl)
 
@@ -1642,7 +1648,7 @@ void HtmlGenerator::startMemberHeader(const QString &anchor)
       m_emptySection = false;
    }
 
-   m_textStream << "<tr class=\"heading\"><td colspan=\"2\"><h2 class=\"groupheader\">";
+   m_textStream << "<tr class=\"heading\"><td colspan=\"" << type << "\"><h2 class=\"groupheader\">";
 
    if (! anchor.isEmpty()) {
       m_textStream << "<a name=\"" << anchor << "\"></a>" << endl;
@@ -1706,14 +1712,11 @@ void HtmlGenerator::endMemberDocList()
    DBG_HTML(m_textStream << "<!-- endMemberDocList -->" << endl;)
 }
 
-void HtmlGenerator::startMemberDoc(const QString &clName, const QString &memName,
-                  const QString &anchor, const QString &title, bool showInline)
+void HtmlGenerator::startMemberDoc(const QString &, const QString &, const QString &, const QString &,
+            int memCount, int memTotal, bool)
 {
-   (void) clName;
-   (void) memName;
-   (void) anchor;
-   (void) title;
-   (void) showInline;
+   (void) memCount;
+   (void) memTotal;
 
    // bypass 'tab' above docs
    m_textStream << "\n<div class=\"memitem\">" << endl;

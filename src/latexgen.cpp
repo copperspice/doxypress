@@ -1686,7 +1686,7 @@ void LatexGenerator::endGroupHeader(int)
    m_disableLinks = false;
 }
 
-void LatexGenerator::startMemberHeader(const QString &)
+void LatexGenerator::startMemberHeader(const QString &, int)
 {
    static const bool latexCompact = Config::getBool("latex-compact");
 
@@ -1706,7 +1706,7 @@ void LatexGenerator::endMemberHeader()
 }
 
 void LatexGenerator::startMemberDoc(const QString &clname, const QString &memname, const QString &,
-                  const QString &title, bool showInline)
+                  const QString &title, int memCount, int memTotal, bool showInline)
 {
    static const QString levelLab[] = {
       "doxysubsubsection",
@@ -1779,7 +1779,9 @@ void LatexGenerator::startMemberDoc(const QString &clname, const QString &memnam
    if (pdfHyperlinks) {
       m_textStream << "}{" << latexEscapePDFString(title) << "}";
    }
-
+   if (memTotal > 1) {
+    m_textStream << "\\hspace{0.1cm}{\\footnotesize\\ttfamily [" << memCount << "/" << memTotal << "]}";
+   }
    m_textStream << "}";
    m_textStream << "\n{\\footnotesize\\ttfamily ";
 }
@@ -2033,7 +2035,7 @@ void LatexGenerator::endMemberItem()
    m_templateMemberItem = false;
 }
 
-void LatexGenerator::startMemberDescription(const QString &, const QString &)
+void LatexGenerator::startMemberDescription(const QString &, const QString &, bool)
 {
    if (! m_insideTabbing) {
       m_textStream << "\\begin{DoxyCompactList}\\small\\item\\em ";

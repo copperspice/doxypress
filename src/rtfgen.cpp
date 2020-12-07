@@ -1459,13 +1459,14 @@ void RTFGenerator::endGroupHeader(int)
    m_textStream << rtf_Style_Reset << endl;
 }
 
-void RTFGenerator::startMemberDoc(const QString &clname, const QString &memname, const QString &, const QString &, bool showInline)
+void RTFGenerator::startMemberDoc(const QString &clName, const QString &memName, const QString &, const QString &,
+                  int, int, bool showInline)
 {
    DBG_RTF(m_textStream << "{\\comment startMemberDoc}" << endl)
 
-   if (! memname.isEmpty() && ! memname.startsWith('@')) {
-      addIndexItemName(memname, clname);
-      addIndexItemName(clname, memname);
+   if (! memName.isEmpty() && ! memName.startsWith('@')) {
+      addIndexItemName(memName, clName);
+      addIndexItemName(clName, memName);
    }
 
    m_textStream << rtf_Style_Reset << rtf_Style[showInline ? "Heading5" : "Heading4"].m_reference;
@@ -1573,7 +1574,7 @@ void RTFGenerator::endDescItem()
    newParagraph();
 }
 
-void RTFGenerator::startMemberDescription(const QString &, const QString &)
+void RTFGenerator::startMemberDescription(const QString &, const QString &, bool)
 {
    DBG_RTF(m_textStream << "{\\comment (startMemberDescription)}"    << endl)
    m_textStream << "{" << endl;

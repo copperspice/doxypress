@@ -271,7 +271,7 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void endMemberSections() = 0;
    virtual void startHeaderSection() = 0;
    virtual void endHeaderSection() = 0;
-   virtual void startMemberHeader(const QString &anchor) = 0;
+   virtual void startMemberHeader(const QString &anchor, int type) = 0;
    virtual void endMemberHeader() = 0;
    virtual void startMemberSubtitle() = 0;
    virtual void endMemberSubtitle() = 0;
@@ -295,20 +295,21 @@ class OutputGenerator : public BaseOutputDocInterface
    virtual void startMemberGroup() = 0;
    virtual void endMemberGroup(bool) = 0;
 
-   virtual void startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool) = 0;
    virtual void startGroupHeader(int) = 0;
    virtual void endGroupHeader(int) = 0;
 
    virtual void startTextBlock(bool) = 0;
    virtual void endTextBlock(bool) = 0;
 
+   virtual void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor, const QString &title,
+                  int memCount, int memTotal, bool showInline) = 0;
    virtual void endMemberDoc(bool) = 0;
 
    virtual void startDoxyAnchor(const QString &fName, const QString &manName, const QString &anchor,
                   const QString &name, const QString &args) = 0;
    virtual void endDoxyAnchor(const QString &fileName, const QString &anchor) = 0;
 
-   virtual void startMemberDescription(const QString &anchor, const QString &inheritId) = 0;
+   virtual void startMemberDescription(const QString &anchor, const QString &inheritId, bool type) = 0;
    virtual void endMemberDescription() = 0;
    virtual void startMemberDeclaration() = 0;
    virtual void endMemberDeclaration(const QString &anchor, const QString &inheritId) = 0;

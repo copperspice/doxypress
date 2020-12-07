@@ -287,7 +287,7 @@ void ManGenerator::endGroupHeader(int)
    upperCase = false;
 }
 
-void ManGenerator::startMemberHeader(const QString &)
+void ManGenerator::startMemberHeader(const QString &, int)
 {
    if (! firstCol) {
       m_textStream << endl;
@@ -486,7 +486,7 @@ void ManGenerator::endCodeFragment(const QString &)
    col = 0;
 }
 
-void ManGenerator::startMemberDoc(const QString &, const QString &, const QString &, const QString &, bool)
+void ManGenerator::startMemberDoc(const QString &, const QString &, const QString &, const QString &, int, int, bool)
 {
    if (! firstCol) {
       m_textStream << endl;
@@ -713,15 +713,15 @@ void ManGenerator::startSection(const QString &, const QString &, SectionInfo::S
             break;
 
          case SectionInfo::Subsection:
-            startMemberHeader(0);
+            startMemberHeader(0, -1);
             break;
 
          case SectionInfo::Subsubsection:
-            startMemberHeader(0);
+            startMemberHeader(0, -1);
             break;
 
          case SectionInfo::Paragraph:
-            startMemberHeader(0);
+            startMemberHeader(0, -1);
             break;
 
          default:
