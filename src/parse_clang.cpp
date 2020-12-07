@@ -39,14 +39,14 @@
 
 static void handleCommentBlock(const QString &comment, bool brief, const QString &fileName, QSharedPointer<Entry> current);
 
-static QSet<QString>                 s_includedFiles;
-static QSharedPointer<Definition>    s_currentDefinition;
-static QSharedPointer<MemberDef>     s_currentMemberDef;
+static QSet<QString>               s_includedFiles;
+static QSharedPointer<Definition>  s_currentDefinition;
+static QSharedPointer<MemberDef>   s_currentMemberDef;
 
-static uint g_currentLine    = 0;
-static uint g_bracketCount   = 0;
-static bool g_searchForBody  = false;
-static bool g_insideBody     = false;
+static uint g_currentLine   = 0;
+static uint g_bracketCount  = 0;
+static bool g_searchForBody = false;
+static bool g_insideBody    = false;
 
 QSharedPointer<Entry>                s_current_root;
 QMap<QString, QSharedPointer<Entry>> s_entryMap;

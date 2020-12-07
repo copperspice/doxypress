@@ -6588,8 +6588,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
    Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [start] root= %p   funcDecl= %s   related= %s\n"
                 "  overload= %d   isFunc= %d   mGrpId= %d  (# of tArgs= %d)  lang= %x\n",
-                root.data(), csPrintable(funcDecl), csPrintable(root->getData(EntryKey::Related_Class)), overloaded, isFunc, root->mGrpId,
-                tmpValue, root->m_srcLang);
+                root.data(), csPrintable(funcDecl), csPrintable(root->getData(EntryKey::Related_Class)),
+                overloaded, isFunc, root->mGrpId, tmpValue, root->m_srcLang);
 
    QString scopeName;
    QString className;
@@ -7081,13 +7081,13 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         ArgumentList tmp;
                         addMemberDocs(ptrEntry, md, funcDecl, tmp, overloaded);
 
-                        count++;
+                        ++count;
                         memFound = true;
                      }
 
                   } else if (cd && cd != tcd) {
                      // searching for funcDecl, found a different class which has a method of the same name
-                     noMatchCount++;
+                     ++noMatchCount;
 
                   }
 

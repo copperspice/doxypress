@@ -134,8 +134,8 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    ol.pushGeneratorState();
    // ol.disableAllBut(OutputGenerator::Html);
 
-   bool htmlOn  = ol.isEnabled(OutputGenerator::Html);
-   bool latexOn = ol.isEnabled(OutputGenerator::Latex);
+   bool htmlOn    = ol.isEnabled(OutputGenerator::Html);
+   bool latexOn   = ol.isEnabled(OutputGenerator::Latex);
 
    {
       // html and latex
@@ -277,8 +277,9 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       if (! arg.name.isEmpty() || arg.type == "...") {
          // argument has a name
 
-         ol.disable(OutputGenerator::Latex);
          ol.disable(OutputGenerator::Html);
+         ol.disable(OutputGenerator::Latex);
+
          ol.docify(" ");                         // man pages
 
          if (htmlOn) {
@@ -299,8 +300,9 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
             ol.docify(arg.name);
          }
 
-         ol.disable(OutputGenerator::Man);
          ol.disable(OutputGenerator::Latex);
+         ol.disable(OutputGenerator::Man);
+
          ol.endEmphasis();
          ol.enable(OutputGenerator::Man);
 
@@ -1419,8 +1421,9 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    if (! detailsVisible) {
       ol.pushGeneratorState();
-      ol.disable(OutputGenerator::Man);
       ol.disable(OutputGenerator::Latex);
+      ol.disable(OutputGenerator::Man);
+
       ol.docify("\n");
       ol.popGeneratorState();
    }
