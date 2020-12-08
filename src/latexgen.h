@@ -417,15 +417,19 @@ class LatexGenerator : public OutputGenerator
    void writeNonBreakableSpace(int) override;
 
    void startEnumTable() override {
-      startSimpleSect(EnumValues, 0, 0, theTranslator->trEnumerationValues());
-      startDescForItem();
-      m_textStream << "\\begin{description}" << endl;
+      QString title1 = theTranslator->trEnumerationValues();
+      QString title2 = theTranslator->trDocumentation();
+
+      m_textStream << "\\tabulinesep=1mm\n\\begin{longtabu}spread 0pt [c]{*{" << 2 << "}{|X[-1]}|}\n";
+
+      m_textStream << "\\rowcolor{\\tableheadbgcolor}"
+                   << "\\cellcolor{\\tableheadbgcolor}\\textbf{ " << title1 << "}&"
+                   << "\\cellcolor{\\tableheadbgcolor}\\textbf{ " << title2 << "}"
+                   << "\\\\\\cline{1-2}\n\\endfirsthead\n\\hline\n\\endfoot\n\\hline";
    }
 
    void endEnumTable() override {
-      m_textStream << "\\end{description}" << endl;
-      endDescForItem();
-      endSimpleSect();
+      m_textStream << "\\end{longtabu}\n";
    }
 
    void startDescTable(const QString &title) override;
