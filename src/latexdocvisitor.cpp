@@ -270,7 +270,7 @@ void LatexDocVisitor::visit(DocURL *u)
          m_t << "mailto:";
       }
 
-      m_t << u->url() << "}";
+      m_t << latexFilterURL(u->url()) << "}";
    }
 
    m_t << "{\\texttt{ ";
@@ -1111,7 +1111,7 @@ static bool tableIsNested(const DocNode *n)
 static void writeStartTableCommand(QTextStream &t, const DocNode *n, int cols)
 {
    if (tableIsNested(n))  {
-      t << "\\begin{tabularx}{\\linewidth}{|*{" << cols << "}{>{\\raggedright\\arraybackslash}X|}}";
+      t << "{\\begin{tabularx}{\\linewidth}{|*{" << cols << "}{>{\\raggedright\\arraybackslash}X|}}";
 
    } else {
       t << "\\tabulinesep=1mm\n\\begin{longtabu}spread 0pt [c]{*{" << cols << "}{|X[-1]}|}\n";
@@ -1123,7 +1123,7 @@ static void writeStartTableCommand(QTextStream &t, const DocNode *n, int cols)
 static void writeEndTableCommand(QTextStream &t, const DocNode *n)
 {
    if (tableIsNested(n)) {
-      t << "\\end{tabularx}\n";
+      t << "\\end{tabularx}}\n";
 
    } else {
       t << "\\end{longtabu}\n";
@@ -1176,7 +1176,12 @@ void LatexDocVisitor::visitPre(DocHtmlTable *t)
 
    if (firstRow && firstRow->isHeading()) {
       setFirstRow(true);
-      firstRow->accept(this);
+      DocNode *n = t->parent();
+
+      if (! tableIsNested(n)) {
+         firstRow->accept(this);
+      }
+
       setFirstRow(false);
    }
 }
@@ -1207,10 +1212,6 @@ void LatexDocVisitor::visitPost(DocHtmlCaption *)
 void LatexDocVisitor::visitPre(DocHtmlRow *r)
 {
    setCurrentColumn(0);
-
-   if (r->isHeading()) {
-      m_t << "\\rowcolor{\\tableheadbgcolor}";
-   }
 }
 
 void LatexDocVisitor::visitPost(DocHtmlRow *row)
@@ -1218,6 +1219,8 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
    if (m_hide) {
       return;
    }
+
+   DocNode *n = row->parent() ->parent();
 
    int c = currentColumn();
 
@@ -1236,10 +1239,7 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
                // row span is also part of a column span
 
                m_t << "\\multicolumn{" << span.colSpan << "}{";
-               m_t << "p{(\\linewidth-\\tabcolsep*"
-                   << numCols() << "-\\arrayrulewidth*"
-                   << row->visibleCells() << ")*"
-                   << span.colSpan << "/" << numCols() << "}|}{}";
+               m_t << "}|}{}";
 
             } else {
                // solitary row span
@@ -1280,7 +1280,7 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
 
    m_t << "\n";
 
-   if (row->isHeading() && row->rowIndex() == 1) {
+   if (row->isHeading() && row->rowIndex() == 1 && ! tableIsNested(n)) {
 
       if (firstRow()) {
          m_t << "\\endfirsthead" << endl;
@@ -1438,7 +1438,7 @@ void LatexDocVisitor::visitPre(DocHRef *href)
 
    if (pdfHyperlinks) {
       m_t << "\\href{";
-      m_t << href->url();
+      m_t << latexFilterURL(href->url());
       m_t << "}";
    }
 
@@ -1771,7 +1771,8 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
 
    if (sect && sect->hasInOutSpecifier()) {
       if (pl->direction() != DocParamSect::Unspecified) {
-         m_t << "\\mbox{\\tt ";
+         m_t << "\\mbox{\\texttt{ ";
+
          if (pl->direction() == DocParamSect::In) {
             m_t << "in";
          } else if (pl->direction() == DocParamSect::Out) {
@@ -1779,7 +1780,7 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
          } else if (pl->direction() == DocParamSect::InOut) {
             m_t << "in,out";
          }
-         m_t << "} ";
+         m_t << "}} ";
       }
       if (useTable) {
          m_t << " & ";
