@@ -2472,11 +2472,11 @@ void LatexGenerator::startLabels()
    m_textStream << "\\hspace{0.3cm}";
 }
 
-void LatexGenerator::writeLabel(const QString &l, bool isLast)
+void LatexGenerator::writeLabel(const QString &label, bool isLast)
 {
-   m_textStream << "{\\ttfamily [" << l << "]}";
+   m_textStream << "{\\ttfamily [" << latexEscapeLabelName(label) << "]}";
 
-   if (!isLast) {
+   if (! isLast) {
       m_textStream << ", ";
    }
 }
