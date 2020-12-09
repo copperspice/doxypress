@@ -74,6 +74,8 @@ class MemberGroup : public EnableSharedFromThis
    void addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
+   void setAnonymousEnumType();
+
    QString documentation() const {
       return doc;
    }
@@ -83,11 +85,15 @@ class MemberGroup : public EnableSharedFromThis
    }
 
    void addToDeclarationSection();
-   int countDecMembers(QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>());
-   int countDocMembers();
+
+   void countDecMembers();
+   void countDocMembers();
+
    int countGroupedInheritedMembers(MemberListType lt);
    void distributeMemberGroupDocumentation();
    void findSectionsInDocumentation();
+
+/*
    int varCount() const;
    int funcCount() const;
    int enumCount() const;
@@ -96,8 +102,13 @@ class MemberGroup : public EnableSharedFromThis
    int protoCount() const;
    int defineCount() const;
    int friendCount() const;
+*/
+
    int numDecMembers() const;
+   int numDecEnumValues() const;
    int numDocMembers() const;
+   int numDocEnumValues() const;
+
    int countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const;
    void setInGroup(bool b);
    void addListReferences(QSharedPointer<Definition> d);
@@ -137,8 +148,6 @@ class MemberGroup : public EnableSharedFromThis
    QSharedPointer<Definition> m_parent;
 
    bool inSameSection;
-   int  m_numDecMembers;
-   int  m_numDocMembers;
 
    QVector<ListItemInfo> m_xrefListItems;
 };

@@ -34,6 +34,7 @@ MemberList::MemberList()
 {
    m_memberGroupList = nullptr;
 
+/*
    m_varCnt     = 0;
    m_funcCnt    = 0;
    m_enumCnt    = 0;
@@ -42,11 +43,15 @@ MemberList::MemberList()
    m_protoCnt   = 0;
    m_defCnt     = 0;
    m_friendCnt  = 0;
-   m_numDecMembers = -1; // special value indicating that value needs to be computed
-   m_numDocMembers = -1; // special value indicating that value needs to be computed
+*/
 
-   m_inGroup   = false;
-   m_inFile    = false;
+   m_numDecMembers    = -1; // special value indicating that value needs to be computed
+   m_numDecEnumValues = 0;
+
+   m_numDocMembers    = -1; // special value indicating that value needs to be computed
+   m_numDocEnumValues = 0;
+   m_inGroup = false;
+   m_inFile  = false;
 }
 
 MemberList::MemberList(MemberListType lt)
@@ -54,6 +59,7 @@ MemberList::MemberList(MemberListType lt)
 {
    m_memberGroupList = nullptr;
 
+/*
    m_varCnt     = 0;
    m_funcCnt    = 0;
    m_enumCnt    = 0;
@@ -62,11 +68,16 @@ MemberList::MemberList(MemberListType lt)
    m_protoCnt   = 0;
    m_defCnt     = 0;
    m_friendCnt  = 0;
-   m_numDecMembers = -1; // special value indicating that value needs to be computed
-   m_numDocMembers = -1; // special value indicating that value needs to be computed
+*/
 
-   m_inGroup  = false;
-   m_inFile   = false;
+   m_numDecMembers    = -1; // special value indicating that value needs to be computed
+   m_numDecEnumValues = 0;
+
+   m_numDocMembers    = -1; // special value indicating that value needs to be computed
+   m_numDocEnumValues = 0;
+
+   m_inGroup = false;
+   m_inFile  = false;
 }
 
 MemberList::~MemberList()
@@ -117,14 +128,14 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
 /*! Count the number of members in this list which are visible in
  *  the declaration part of a compound documentation page.
  */
-void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> gd)
+void MemberList::countDecMembers()
 {
    if (m_numDecMembers != -1) {
       return;
    }
 
-   m_varCnt  = m_funcCnt = m_enumCnt = m_enumValCnt = 0;
-   m_typeCnt = m_protoCnt = m_defCnt = m_friendCnt = 0;
+//   m_varCnt  = m_funcCnt = m_enumCnt = m_enumValCnt = 0;
+//   m_typeCnt = m_protoCnt = m_defCnt = m_friendCnt = 0;
 
    m_numDecMembers = 0;
 
@@ -133,15 +144,16 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
       if (md->isBriefSectionVisible()) {
 
          if (md->isFriend()) {
-            m_friendCnt++;
+            // m_friendCnt++;
+            ++m_numDecMembers;
          }
 
          switch (md->memberType()) {
             case MemberDefType::Variable:
             case MemberDefType::Event:
             case MemberDefType::Property:
-               m_varCnt++;
-               m_numDecMembers++;
+               // m_varCnt++;
+               ++m_numDecMembers;
                break;
 
             // necessary to get this to show up in declarations section?
@@ -152,35 +164,33 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
             case MemberDefType::DCOP:
             case MemberDefType::Slot:
                if (! md->isRelated() || md->getClassDef()) {
-                  m_funcCnt++;
-                  m_numDecMembers++;
+                  // m_funcCnt++;
+                  ++m_numDecMembers;
                }
                break;
 
             case MemberDefType::Enumeration:
-               m_enumCnt++;
-               m_numDecMembers++;
+               // m_enumCnt++;
+               ++m_numDecMembers;
                break;
 
             case MemberDefType::EnumValue:
-               if (countEnumValues) {
-                  m_enumValCnt++;
-                  m_numDecMembers++;
-               }
+               ++m_numDecEnumValues;
+               ++m_numDecMembers;
+
                break;
 
             case MemberDefType::Typedef:
-               m_typeCnt++;
-               m_numDecMembers++;
+               // m_typeCnt++;
+               ++m_numDecMembers;
                break;
 
-            // case MemberDefType::Prototype:   m_protoCnt++,m_numDecMembers++; break;
 
             case MemberDefType::Define:
                if (Config::getBool("extract-all") || ! md->argsString().isEmpty() ||
                       ! md->initializer().isEmpty() || md->hasDocumentation()) {
-                  m_defCnt++;
-                  m_numDecMembers++;
+                  // m_defCnt++;
+                  ++m_numDecMembers;
                }
                break;
 
@@ -193,8 +203,7 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
    if (m_memberGroupList) {
 
       for (auto &mg : *m_memberGroupList) {
-         mg.countDecMembers(gd);
-
+/*
          m_varCnt        += mg.varCount();
          m_funcCnt       += mg.funcCount();
          m_enumCnt       += mg.enumCount();
@@ -203,12 +212,16 @@ void MemberList::countDecMembers(bool countEnumValues, QSharedPointer<GroupDef> 
          m_protoCnt      += mg.protoCount();
          m_defCnt        += mg.defineCount();
          m_friendCnt     += mg.friendCount();
-         m_numDecMembers += mg.numDecMembers();
+*/
+
+         mg.countDecMembers();
+         m_numDecMembers    += mg.numDecMembers();
+         m_numDecEnumValues += mg.numDecEnumValues();
       }
    }
 }
 
-void MemberList::countDocMembers(bool countEnumValues)
+void MemberList::countDocMembers()
 {
    if (m_numDocMembers != -1) {
       return;   // used cached value
@@ -221,23 +234,26 @@ void MemberList::countDocMembers(bool countEnumValues)
       if (md->isDetailedSectionVisible(m_inGroup, m_inFile)) {
          // do not count enum values since they do not produce entries of their own
 
-         if (countEnumValues || md->memberType() != MemberDefType::EnumValue) {
-            m_numDocMembers++;
+         if (md->memberType()== MemberDefType::EnumValue) {
+
+            ++m_numDocEnumValues;
          }
+         ++m_numDocMembers;
       }
    }
 
    if (m_memberGroupList) {
       for (auto &mg : *m_memberGroupList) {
          mg.countDocMembers();
-         m_numDocMembers += mg.numDocMembers();
+         m_numDocMembers    += mg.numDocMembers();
+         m_numDocEnumValues += mg.numDocEnumValues();
       }
    }
 }
 
 int MemberList::countEnumValues(QSharedPointer<MemberDef> md, bool setAnonEnumType) const
 {
-   int enumVars = 0;
+   int numEnumVars = 0;
 
    QString name(md->name());
    int i = name.lastIndexOf("::");
@@ -252,17 +268,53 @@ int MemberList::countEnumValues(QSharedPointer<MemberDef> md, bool setAnonEnumTy
       for (auto value_md : *this) {
 
          if (value_md->typeString().contains(name)) {
-            enumVars++;
+            ++numEnumVars;
 
             if (setAnonEnumType) {
                value_md->setAnonymousEnumType(md);
             }
-
          }
       }
    }
 
-   return enumVars;
+   return numEnumVars;
+}
+
+void MemberList::setAnonymousEnumType()
+{
+   for (auto &md : *this) {
+
+      if (md->isBriefSectionVisible()) {
+         QString name(md->name());
+         int pos = name.lastIndexOf("::");
+
+         if (pos != -1) {
+            name = name.right(name.length() - pos - 2);
+         }
+
+         if (md->memberType() == MemberDefType::Enumeration && name.startsWith('@')) {
+            QSharedPointer<MemberList> mfl = md->enumFieldList();
+
+            if (mfl != nullptr) {
+
+               for (auto &vmd : *mfl) {
+
+                  QString vtype = vmd->typeString();
+
+                  if (vtype.contains(name)) {
+                     vmd->setAnonymousEnumType(md);
+                  }
+               }
+            }
+         }
+      }
+   }
+
+   if (m_memberGroupList != nullptr) {
+      for (auto &mg : *m_memberGroupList) {
+         mg.setAnonymousEnumType();
+      }
+   }
 }
 
 bool MemberList::declVisible() const
@@ -314,7 +366,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
 
    countDecMembers();
 
-   if (numDecMembers() == 0) {
+   if (numDecMembers() <= numDecEnumValues()) {
       // no members in this list
       return;
    }
@@ -478,7 +530,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
    QString inheritId;
 
    // count members shown in this section
-   countDecMembers(false, gd);
+   countDecMembers();
 
    QSharedPointer<Definition> ctx = cd;
 
@@ -495,6 +547,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
    }
 
    int num = numDecMembers();
+   int numEnumValues = numDecEnumValues();
 
    if (inheritedFrom) {
 
@@ -512,7 +565,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
          ol.popGeneratorState();
       }
 
-   } else if (num > 0) {
+   } else if (num > numEnumValues) {
 
       if (! title.isEmpty()) {
 
@@ -545,7 +598,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
       }
    }
 
-   if (num > 0) {
+   if (num > numEnumValues) {
       writePlainDeclarations(ol, cd, nd, fd, gd, inheritedFrom, inheritId);
 
       if (m_memberGroupList) {
@@ -591,7 +644,7 @@ void MemberList::writeDocumentation(OutputList &ol, const QString &scopeName, QS
 {
    QSharedPointer<MemberList> self = sharedFrom(this);
 
-   countDocMembers(showEnumValues);
+   countDocMembers();
 
    if (numDocMembers() == 0) {
       return;
@@ -657,9 +710,9 @@ void MemberList::writeDocumentation(OutputList &ol, const QString &scopeName, QS
 // members in a table
 void MemberList::writeSimpleDocumentation(OutputList &ol, QSharedPointer<Definition> container)
 {
-   countDocMembers(false);
+   countDocMembers();
 
-   if (numDocMembers() == 0) {
+   if (numDocMembers() <= numDocEnumValues()) {
       return;
    }
 

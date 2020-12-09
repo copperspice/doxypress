@@ -42,8 +42,6 @@ MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QStrin
    doc             = d;
 
    inSameSection   = true;
-   m_numDecMembers = -1;
-   m_numDocMembers = -1;
 
    m_docFile       = docFile;
    m_docLine       = docLine;
@@ -118,6 +116,10 @@ void MemberGroup::writeDocumentationPage(OutputList &ol, const QString &scopeNam
    memberList->writeDocumentationPage(ol, scopeName, container);
 }
 
+void MemberGroup::setAnonymousEnumType()
+{
+  memberList->setAnonymousEnumType();
+}
 void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<ClassDef> cd, MemberListType lt,
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {
@@ -161,23 +163,14 @@ void MemberGroup::addToDeclarationSection()
    }
 }
 
-int MemberGroup::countDecMembers(QSharedPointer<GroupDef> gd)
+void MemberGroup::countDecMembers()
 {
-   if (m_numDecMembers == -1) {
-      /* number of member not cached */
-      memberList->countDecMembers(gd);
-      m_numDecMembers = memberList->numDecMembers();
-   }
-   return m_numDecMembers;
+   memberList->countDecMembers();
 }
 
-int MemberGroup::countDocMembers()
+void MemberGroup::countDocMembers()
 {
-   if (m_numDocMembers == -1) {
-      memberList->countDocMembers();
-      m_numDocMembers = memberList->numDocMembers();
-   }
-   return m_numDocMembers;
+   memberList->countDocMembers();
 }
 
 int MemberGroup::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const
@@ -207,6 +200,8 @@ void MemberGroup::distributeMemberGroupDocumentation()
       }
    }
 }
+
+/*
 
 int MemberGroup::varCount() const
 {
@@ -248,14 +243,26 @@ int MemberGroup::friendCount() const
    return memberList->friendCount();
 }
 
+*/
+
 int MemberGroup::numDecMembers() const
 {
    return memberList->numDecMembers();
 }
 
+int MemberGroup::numDecEnumValues() const
+{
+  return memberList->numDecEnumValues();
+}
+
 int MemberGroup::numDocMembers() const
 {
    return memberList->numDocMembers();
+}
+
+int MemberGroup::numDocEnumValues() const
+{
+  return memberList->numDocEnumValues();
 }
 
 void MemberGroup::setInGroup(bool b)

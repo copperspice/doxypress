@@ -86,11 +86,13 @@ class GroupDef : public Definition
    void writeMemberPages(OutputList &ol);
    void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const override;
    void writeTagFile(QTextStream &);
-   int  countMembers() const;
    bool isLinkableInProject() const override;
    bool isLinkable() const override;
    bool isASubGroup() const;
    void computeAnchors();
+
+   void countMembers();
+   int  numDocMembers() const;
 
    void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();

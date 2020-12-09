@@ -3568,6 +3568,41 @@ int ClassDef::countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef
    return count;
 }
 
+void ClassDef::setAnonymousEnumType()
+{
+   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Class) ) {
+
+      if (lde->kind() == LayoutDocEntry::MemberDecl) {
+
+         LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
+         QSharedPointer<MemberList> ml = getMemberList(lmd->type);
+
+         if (ml != nullptr) {
+            ml->setAnonymousEnumType();
+         }
+
+      } else if (lde->kind() == LayoutDocEntry::MemberGroups) {
+
+         for (auto &mg : m_memberGroupSDict) {
+            mg->setAnonymousEnumType();
+         }
+      }
+   }
+}
+
+void ClassDef::countMembers()
+{
+   for (auto &ml : m_memberLists) {
+      ml->countDecMembers();
+      ml->countDocMembers();
+   }
+
+   for (auto &mg : m_memberGroupSDict) {
+      mg->countDecMembers();
+      mg->countDocMembers();
+   }
+}
+
 int ClassDef::countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool invert,
                   bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {

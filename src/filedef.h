@@ -207,6 +207,10 @@ class FileDef : public Definition
       return m_subGrouping;
    }
 
+   void countMembers();
+   int numDocMembers() const;
+   int numDecMembers() const;
+
    void addSourceRef(int line, QSharedPointer<Definition> d, QSharedPointer<MemberDef> md);
 
    void writeDocumentation(OutputList &ol);

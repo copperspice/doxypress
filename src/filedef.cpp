@@ -1725,3 +1725,29 @@ QString FileDef::fileVersion() const
 {
    return m_fileVersion;
 }
+
+
+void FileDef::countMembers()
+{
+   for (auto &ml : m_memberLists) {
+      ml->countDecMembers();
+      ml->countDocMembers();
+   }
+
+   for (auto &mg : m_memberGroupSDict) {
+      mg->countDecMembers();
+      mg->countDocMembers();
+   }
+}
+
+int FileDef::numDocMembers() const
+{
+   QSharedPointer<MemberList> ml = getMemberList(MemberListType_allMembersList);
+   return ml ? ml->numDocMembers() : 0;
+}
+
+int FileDef::numDecMembers() const
+{
+   QSharedPointer<MemberList> ml = getMemberList(MemberListType_allMembersList);
+   return ml ? ml->numDecMembers() : 0;
+}

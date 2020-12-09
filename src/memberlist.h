@@ -49,6 +49,8 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
    void append(QSharedPointer<MemberDef> md);
    void insert(uint index, QSharedPointer<MemberDef> md);
 
+
+/*
    int varCount() const {
       assert(m_numDecMembers != -1);
       return m_varCnt;
@@ -88,22 +90,28 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
       assert(m_numDecMembers != -1);
       return m_friendCnt;
    }
-   int numDocEnumValues() const {
-      return m_numDocEnumValues;
-   }
+*/
 
    int numDecMembers() const  {
       assert(m_numDecMembers != -1);
       return m_numDecMembers;
    }
 
+   int numDecEnumValues() const {
+      return m_numDecEnumValues;
+   }
+
    int numDocMembers() const  {
       assert(m_numDocMembers != -1);
       return m_numDocMembers;
    }
+   int numDocEnumValues() const {
+      return m_numDocEnumValues;
+   }
 
-   void countDecMembers(bool countEnumValues = false, QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>());
-   void countDocMembers(bool countEnumValues = false);
+   void countDecMembers();
+   void countDocMembers();
+
    int countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) const;
 
    void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
@@ -142,9 +150,12 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
       return m_memberGroupList;
    }
 
+   void setAnonymousEnumType();
+
  private:
    int countEnumValues(QSharedPointer<MemberDef> md, bool setAnonEnumType) const;
 
+/*
    int m_varCnt;
    int m_funcCnt;
    int m_enumCnt;
@@ -153,9 +164,11 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
    int m_protoCnt;
    int m_defCnt;
    int m_friendCnt;
-   int m_numDecMembers;  // number of members in the brief part of the memberlist
-   int m_numDocMembers;  // number of members in the detailed part of the memberlist
+*/
+   int m_numDecMembers;      // number of members in the brief part of the memberlist
+   int m_numDecEnumValues;
 
+   int m_numDocMembers;      // number of members in the detailed part of the memberlist
    int m_numDocEnumValues;
 
    QList<MemberGroup> *m_memberGroupList;

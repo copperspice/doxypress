@@ -545,7 +545,20 @@ bool GroupDef::isASubGroup() const
    return groups != 0 && groups->count() != 0;
 }
 
-int GroupDef::countMembers() const
+void GroupDef::countMembers()
+{
+   for (auto &ml : m_memberLists) {
+      ml->countDecMembers();
+      ml->countDocMembers();
+   }
+
+   for (auto &mg : m_memberGroupSDict) {
+      mg->countDecMembers();
+      mg->countDocMembers();
+   }
+}
+
+int GroupDef::numDocMembers() const
 {
    return fileList.count() + m_classSDict.count() + m_namespaceSDict.count() + groupList->count() +
           allMemberList->count() + pageDict->count() + exampleDict->count();
@@ -675,7 +688,7 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
       ol.pushGeneratorState();
 
-      if (pageDict->count() != countMembers()) {
+      if (pageDict->count() != numDocMembers()) {
          // not only pages -> classical layout
 
          ol.pushGeneratorState();

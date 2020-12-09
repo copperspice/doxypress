@@ -763,15 +763,24 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDe
    ol.writeString("      </div>\n");
 }
 
-int NamespaceDef::countMembers()
+void NamespaceDef::countMembers()
+{
+   for (auto &ml : m_memberLists) {
+      ml->countDecMembers();
+      ml->countDocMembers();
+   }
+
+   for (auto &mg : m_memberGroupSDict) {
+      mg->countDecMembers();
+      mg->countDocMembers();
+   }
+}
+
+int NamespaceDef::numDocMembers() const
 {
    QSharedPointer<MemberList> allMemberList = getMemberList(MemberListType_allMembersList);
 
-   if (allMemberList) {
-      allMemberList->countDocMembers();
-   }
-
-   return (allMemberList ? allMemberList->numDocMembers() : 0) + m_classSDict.count();
+   return (allMemberList ? allMemberList->numDocMembers() : 0) + m_innerCompounds.count();
 }
 
 void NamespaceDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)

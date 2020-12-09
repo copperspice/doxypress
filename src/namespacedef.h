@@ -68,7 +68,8 @@ class NamespaceDef : public Definition
    void insertMember(QSharedPointer<MemberDef> md);
 
    void computeAnchors();
-   int countMembers();
+   void countMembers();
+   int  numDocMembers() const;
 
    void addUsingDirective(QSharedPointer<NamespaceDef> nd);
    void addUsingDeclaration(QSharedPointer<Definition> def);

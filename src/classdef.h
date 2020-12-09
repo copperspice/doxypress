@@ -352,6 +352,10 @@ class ClassDef : public Definition
    void computeAnchors();
    void mergeMembers();
    void distributeMemberGroupDocumentation();
+
+   void setAnonymousEnumType();
+   void countMembers();
+
    void writeDocumentation(OutputList &ol);
    void writeDocumentationForInnerClasses(OutputList &ol);
    void writeMemberPages(OutputList &ol);
