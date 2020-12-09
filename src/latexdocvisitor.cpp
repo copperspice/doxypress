@@ -397,6 +397,8 @@ void LatexDocVisitor::visit(DocStyleChange *s)
 
 void LatexDocVisitor::visit(DocVerbatim *s)
 {
+   static const QString latexOutput = Config::getString("latex-output");
+
    if (m_hide) {
       return;
    }
@@ -441,8 +443,8 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Dot: {
          static int dotindex = 1;
 
-         QString latexOutput = Config::getString("latex-output") + "/inline_dotgraph_";
-         QString fileName = QString("%1%2.dot").formatArg(latexOutput).formatArg(dotindex++);
+         QString fileName = QString("%1%2.dot").formatArg(latexOutput + "/inline_dotgraph_").formatArg(dotindex);
+         ++dotindex;
 
          QFile file(fileName);
 
@@ -468,8 +470,8 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       case DocVerbatim::Msc: {
          static int mscindex = 1;
 
-         QString latexOutput = Config::getString("latex-output") + "/inline_mscgraph_";
-         QString baseName = QString("%1%2").formatArg(latexOutput).formatArg(mscindex++);
+         QString baseName = QString("%1%2").formatArg(latexOutput + "/inline_mscgraph_").formatArg(mscindex);
+         ++mscindex;
 
          QFile file(baseName + ".msc");
 
@@ -495,8 +497,7 @@ void LatexDocVisitor::visit(DocVerbatim *s)
       break;
 
       case DocVerbatim::PlantUML: {
-         QString latexOutput = Config::getString("latex-output");
-         QString baseName    = writePlantUMLSource(latexOutput, s->exampleFile(), s->text());
+         QString baseName = writePlantUMLSource(latexOutput, s->exampleFile(), s->text());
 
          writePlantUMLFile(baseName, s);
       }
@@ -1430,11 +1431,11 @@ void LatexDocVisitor::visitPost(DocInternal *)
 
 void LatexDocVisitor::visitPre(DocHRef *href)
 {
+   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    if (m_hide) {
       return;
    }
-
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       m_t << "\\href{";
@@ -2056,6 +2057,8 @@ void LatexDocVisitor::popEnabled()
 
 void LatexDocVisitor::startDotFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
+   static const QString latexOutput = Config::getString("latex-output");
+
    QString baseName = fileName;
    int i;
 
@@ -2068,10 +2071,10 @@ void LatexDocVisitor::startDotFile(const QString &fileName, const QString &width
    }
 
    baseName.prepend("dot_");
-   QString outDir = Config::getString("latex-output");
+
    QString name = fileName;
 
-   writeDotGraphFromFile(name, outDir, baseName, GOF_EPS);
+   writeDotGraphFromFile(name, latexOutput, baseName, GOF_EPS);
    visitPreStart(m_t, hasCaption, baseName, width, height);
 }
 
@@ -2086,20 +2089,22 @@ void LatexDocVisitor::endDotFile(bool hasCaption)
 
 void LatexDocVisitor::startMscFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
+   static const QString latexOutput = Config::getString("latex-output");
+
    QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
+
    if ((i = baseName.indexOf('.')) != -1) {
       baseName = baseName.left(i);
    }
+
    baseName.prepend("msc_");
 
-   QString outDir = Config::getString("latex-output");
-
-   writeMscGraphFromFile(fileName, outDir, baseName, MSC_EPS);
+   writeMscGraphFromFile(fileName, latexOutput, baseName, MSC_EPS);
    visitPreStart(m_t,hasCaption, baseName, width, height);
 }
 
@@ -2114,6 +2119,8 @@ void LatexDocVisitor::endMscFile(bool hasCaption)
 
 void LatexDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
 {
+   static const QString latexOutput = Config::getString("latex-output");
+
    QString shortName = baseName;
    int i;
 
@@ -2121,9 +2128,7 @@ void LatexDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QString outDir = Config::getString("latex-output");
-
-   writeMscGraphFromFile(baseName + ".msc", outDir, shortName, MSC_EPS);
+   writeMscGraphFromFile(baseName + ".msc", latexOutput, shortName, MSC_EPS);
 
    visitPreStart(m_t, s->hasCaption(), shortName, s->width(),s->height());
    visitCaption(this, s->children());
@@ -2132,20 +2137,22 @@ void LatexDocVisitor::writeMscFile(const QString &baseName, DocVerbatim *s)
 
 void LatexDocVisitor::startDiaFile(const QString &fileName, const QString &width, const QString &height, bool hasCaption)
 {
+   static const QString latexOutput = Config::getString("latex-output");
+
    QString baseName = fileName;
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
       baseName = baseName.right(baseName.length() - i - 1);
    }
+
    if ((i = baseName.indexOf('.')) != -1) {
       baseName = baseName.left(i);
    }
+
    baseName.prepend("dia_");
 
-   QString outDir = Config::getString("latex-output");
-
-   writeDiaGraphFromFile(fileName, outDir, baseName, DIA_EPS);
+   writeDiaGraphFromFile(fileName, latexOutput, baseName, DIA_EPS);
    visitPreStart(m_t,hasCaption, baseName, width, height);
 }
 
@@ -2160,6 +2167,8 @@ void LatexDocVisitor::endDiaFile(bool hasCaption)
 
 void LatexDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
 {
+   static const QString latexOutput = Config::getString("latex-output");
+
    QString shortName = baseName;
    int i;
 
@@ -2167,8 +2176,7 @@ void LatexDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QString outDir = Config::getString("latex-output");
-   writeDiaGraphFromFile(baseName + ".dia", outDir, shortName, DIA_EPS);
+   writeDiaGraphFromFile(baseName + ".dia", latexOutput, shortName, DIA_EPS);
 
    visitPreStart(m_t, s->hasCaption(), shortName, s->width(), s->height());
    visitCaption(this, s->children());
@@ -2177,6 +2185,8 @@ void LatexDocVisitor::writeDiaFile(const QString &baseName, DocVerbatim *s)
 
 void LatexDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *s)
 {
+   static const QString latexOutput = Config::getString("latex-output");
+
    QString shortName = baseName;
    int i;
 
@@ -2184,8 +2194,7 @@ void LatexDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *s)
       shortName = shortName.right(shortName.length() - i - 1);
    }
 
-   QString outDir = Config::getString("latex-output");
-   generatePlantUMLOutput(baseName, outDir, PUML_EPS);
+   generatePlantUMLOutput(baseName, latexOutput, PUML_EPS);
 
    visitPreStart(m_t, s->hasCaption(), shortName, s->width(), s->height());
    visitCaption(this, s->children());
