@@ -938,16 +938,18 @@ void RTFDocVisitor::visitPre(DocSimpleSect *s)
 
    // special case 1: user defined title
    if (s->type() != DocSimpleSect::User && s->type() != DocSimpleSect::Rcs) {
-      m_t << ":";
+
       m_t << "\\par";
       m_t << "}"; // end bold
       incIndentLevel();
       m_t << rtf_Style_Reset << getStyle("DescContinue");
+      m_t << "{\\s17 \\sa60 \\sb30\n";
    }
+
    m_lastIsPara = false;
 }
 
-void RTFDocVisitor::visitPost(DocSimpleSect *)
+void RTFDocVisitor::visitPost(DocSimpleSect *s)
 {
    if (m_hide) {
       return;
@@ -957,6 +959,11 @@ void RTFDocVisitor::visitPost(DocSimpleSect *)
       m_t << "\\par" << endl;
    }
    decIndentLevel();
+
+   if (s->type() != DocSimpleSect::User && s->type() != DocSimpleSect::Rcs) {
+      m_t << "}";
+   }
+
    m_t << "}"; // end desc
    m_lastIsPara = true;
 }
@@ -1640,7 +1647,7 @@ void RTFDocVisitor::visitPre(DocParamSect *s)
       default:
          assert(0);
    }
-   m_t << ":";
+
    m_t << "\\par";
    m_t << "}" << endl;
    bool useTable = s->type() == DocParamSect::Param ||

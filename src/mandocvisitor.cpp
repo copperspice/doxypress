@@ -681,7 +681,7 @@ void ManDocVisitor::visitPre(DocSimpleSect *s)
 
    // special case 1: user defined title
    if (s->type() != DocSimpleSect::User && s->type() != DocSimpleSect::Rcs) {
-      m_t << ":\\fP" << endl;
+      m_t << "\\fP" << endl;
       m_t << ".RS 4" << endl;
    }
 }
@@ -1162,7 +1162,8 @@ void ManDocVisitor::visitPre(DocParamSect *s)
       default:
          assert(0);
    }
-   m_t << ":\\fP" << endl;
+
+   m_t << "\\fP" << endl;
    m_t << ".RS 4" << endl;
 }
 
