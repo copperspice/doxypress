@@ -3232,6 +3232,10 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
    }
    ol.popGeneratorState();
 
+   // emerald, turn off for latex, resolve
+   ol.pushGeneratorState();
+   ol.disable(OutputGenerator::Latex);
+
    // show concepts
    const QString & str = getRequires();
 
@@ -3242,6 +3246,8 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
 
       ol.docify(" requires " + str);
    }
+
+   ol.popGeneratorState();
 
    writeEnumValues(ol, scopedContainer, cfname, ciname, cname);
 
