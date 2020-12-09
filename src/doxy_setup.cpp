@@ -633,28 +633,29 @@ void addCodeOnlyMappings()
    updateLanguageMapping(".xml",      "xml");
 }
 
-
 SrcLangExt getLanguageFromFileName(const QString &fileName)
 {
    QFileInfo fi(fileName);
 
    // get the filename extension, everything after the last dot
-   QString key = fi.suffix().toLower();
+   QString ext = fi.suffix().toLower();
 
-   if (key.isEmpty()) {
-      key = ".no_extension";
+   if (ext.isEmpty()) {
+      ext = ".no_extension";
+
+   } else {
+      ext.prepend(".");
    }
 
-   if (! key.isEmpty()) {
+   if (! ext.isEmpty()) {
       // s_extLookUp data obtained from initDefaultLangMapping and user mapping
-      auto iter = s_extLookup.find(key);
+      auto iter = s_extLookup.find(ext);
 
       if (iter != s_extLookup.end() ) {
          // listed extension
          return (SrcLangExt) *iter;
       }
    }
-
 
    return SrcLangExt_Cpp;    // not listed, assume C language
 }
