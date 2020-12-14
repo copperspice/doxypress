@@ -73,45 +73,45 @@ static int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scope, 
                      ((x)>='a' && (x)<='f') ? ((x)-'a'+10) :    \
                      ((x)>='A' && (x)<='F') ? ((x)-'A'+10) : 0)
 
-TextGeneratorOLImpl::TextGeneratorOLImpl(OutputDocInterface &od) : m_od(od)
+TextFragment::TextFragment(TextGenerator &text)
+   : m_text(text)
 {
 }
 
-void TextGeneratorOLImpl::writeString(const QString &text, bool keepSpaces) const
+void TextFragment::writeString(const QString &str, bool keepSpaces) const
 {
-   if (text.isEmpty()) {
+   if (str.isEmpty()) {
       return;
    }
 
    if (keepSpaces) {
-      for (QChar c : text) {
+      for (QChar ch : str) {
 
-         if (c == ' ') {
-            m_od.writeNonBreakableSpace(1);
+         if (ch == ' ') {
+            m_text.writeNonBreakableSpace(1);
          } else {
-            m_od.docify(c);
+            m_text.docify(ch);
          }
       }
 
    } else {
-      m_od.docify(text);
+      m_text.docify(str);
 
    }
 }
 
-void TextGeneratorOLImpl::writeBreak(int indent) const
+void TextFragment::writeBreak(int indent) const
 {
-   m_od.lineBreak("typebreak");
+   m_text.lineBreak("typebreak");
 
-   for (int i = 0; i < indent; i++) {
-      m_od.writeNonBreakableSpace(3);
+   for (int i = 0; i < indent; ++i) {
+      m_text.writeNonBreakableSpace(3);
    }
 }
 
-void TextGeneratorOLImpl::writeLink(const QString &extRef, const QString &file,
-                  const QString &anchor, const QString &text) const
+void TextFragment::writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const
 {
-   m_od.writeObjectLink(extRef, file, anchor, text);
+   m_text.writeObjectLink(extRef, file, anchor, text);
 }
 
 // an inheritance tree of depth of 100000 should be enough
@@ -262,31 +262,6 @@ QString stripAnonymousNamespaceScope(const QString &s)
    }
 
    return newScope;
-}
-
-void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn)
-{
-   static const bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
-   static const bool rtfHyperLinks = Config::getBool("rtf-hyperlinks");
-
-   od.pushGeneratorState();
-
-   od.disable(OutputGenerator::Html);
-   od.disable(OutputGenerator::Man);
-
-   if (latexHyperPdf) {
-      od.disable(OutputGenerator::Latex);
-   }
-
-   if (rtfHyperLinks) {
-      od.disable(OutputGenerator::RTF);
-   }
-
-   od.startPageRef();
-   od.docify(theTranslator->trPageAbbreviation());
-   od.endPageRef(cn, mn);
-
-   od.popGeneratorState();
 }
 
 static QString stripFromPath(const QString &path, const QStringList &list)
@@ -1862,7 +1837,7 @@ bool leftScopeMatch(const QString &scope, const QString &name)
             sl > nl + 1 && scope.at(nl) == ':' && scope.at(nl + 1) == ':') );
 }
 
-void linkifyText(const TextGeneratorIntf &out, QSharedPointer<const Definition> scope,
+void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> scope,
                   QSharedPointer<const FileDef> fileScope, QSharedPointer<const Definition> def,
                   const QString &text, bool autoBreak, bool external, bool keepSpaces, int indentLevel)
 {
@@ -7594,6 +7569,32 @@ void writeLatexSpecialFormulaChars(QTextStream &t)
         "  \\newunicodechar{" << sup3  << "}{${}^{3}$}% Superscript three\n"
         "\n";
 }
+
+void writePageRef(TextGenerator &od, const QString &cn, const QString &mn)
+{
+   static const bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
+   static const bool rtfHyperLinks = Config::getBool("rtf-hyperlinks");
+
+   od.pushGeneratorState();
+
+   od.disable(OutputGenerator::Html);
+   od.disable(OutputGenerator::Man);
+
+   if (latexHyperPdf) {
+      od.disable(OutputGenerator::Latex);
+   }
+
+   if (rtfHyperLinks) {
+      od.disable(OutputGenerator::RTF);
+   }
+
+   od.startPageRef();
+   od.docify(theTranslator->trPageAbbreviation());
+   od.endPageRef(cn, mn);
+
+   od.popGeneratorState();
+}
+
 void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList)
 {
    if (argList.listEmpty()) {
@@ -7608,7 +7609,7 @@ void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d,
       ol.endConstraintParam();
       ol.startConstraintType();
 
-      linkifyText(TextGeneratorOLImpl(ol), d, QSharedPointer<FileDef>(), QSharedPointer<Definition>(), a.type);
+      linkifyText(TextFragment(ol), d, QSharedPointer<FileDef>(), QSharedPointer<Definition>(), a.type);
 
       ol.endConstraintType();
       ol.startConstraintDocs();

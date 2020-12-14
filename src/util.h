@@ -51,22 +51,25 @@ struct SectionInfo;
 struct TagInfo;
 
 // Abstract interface for a hyperlinked text fragment
-class TextGeneratorIntf
+class TextFragmentBase
 {
  public:
-   virtual ~TextGeneratorIntf() {}
+   virtual ~TextFragmentBase()
+   { }
 
    virtual void writeString(const QString &, bool) const = 0;
    virtual void writeBreak(int indent) const = 0;
    virtual void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const = 0;
 };
 
-// Implements TextGeneratorIntf for an OutputDocInterface stream
-class TextGeneratorOLImpl : public TextGeneratorIntf
+// Implements TextGenerator for an TextGenerator stream
+class TextFragment : public TextFragmentBase
 {
  public:
-   TextGeneratorOLImpl(OutputDocInterface &od);
-   virtual ~TextGeneratorOLImpl() {}
+   TextFragment(TextGenerator &text);
+
+   virtual ~TextFragment()
+   { }
 
    void writeString(const QString &text, bool keepSpaces) const override;
    void writeBreak(int indent) const override;
@@ -214,7 +217,7 @@ QString lowerCaseFirstLetter(QString &&text);
 bool    leftScopeMatch(const QString &scope, const QString &name);
 int     lineBlock(const QString text, const QString marker);
 
-void    linkifyText(const TextGeneratorIntf &ol, QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
+void    linkifyText(const TextFragmentBase &ol, QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
                   QSharedPointer<const Definition> self, const QString &text,
                   bool autoBreak = false, bool external = true, bool keepSpaces = false, int indentLevel = 0);
 

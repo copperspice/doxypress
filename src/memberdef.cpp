@@ -239,7 +239,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          }
 
          argType = renameNS_Aliases(argType);
-         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, argType);
+         linkifyText(TextFragment(ol), scopeDef, md->getBodyDef(), md, argType);
 
       } else {
          // non-function pointer type
@@ -257,7 +257,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
             argType = renameNS_Aliases(argType);
 
-            linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, argType);
+            linkifyText(TextFragment(ol), scopeDef, md->getBodyDef(), md, argType);
          }
       }
 
@@ -317,7 +317,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       if (hasFuncPtrType)  {
          // write the part of the argument type that comes after the name
-         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, arg.type.right(arg.type.length() - vp));
+         linkifyText(TextFragment(ol), scopeDef, md->getBodyDef(), md, arg.type.right(arg.type.length() - vp));
       }
 
       if (! arg.defval.isEmpty()) {
@@ -331,7 +331,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          ol.docify(" = ");
 
          ol.startTypewriter();
-         linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, n, false, true, true);   // different
+         linkifyText(TextFragment(ol), scopeDef, md->getBodyDef(), md, n, false, true, true);   // different
          ol.endTypewriter();
       }
 
@@ -416,7 +416,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    }
 
    if (! defArgList.trailingReturnType.isEmpty()) {
-      linkifyText(TextGeneratorOLImpl(ol), scopeDef, md->getBodyDef(), md, defArgList.trailingReturnType);
+      linkifyText(TextFragment(ol), scopeDef, md->getBodyDef(), md, defArgList.trailingReturnType);
    }
 
    return true;
@@ -437,7 +437,7 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
       for (int comma = exception.indexOf(',', index); comma != -1; ) {
          ++comma; // include comma
-         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, exception.mid(index, comma - index));
+         linkifyText(TextFragment(ol), cd, md->getBodyDef(), md, exception.mid(index, comma - index));
          ol.exceptionEntry(0, false);
          index = comma;
          comma = exception.indexOf(',', index);
@@ -446,7 +446,7 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
       int close = exception.indexOf(')', index);
       if (close != -1) {
          QString tmpType = removeRedundantWhiteSpace(exception.mid(index, close - index));
-         linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, tmpType);
+         linkifyText(TextFragment(ol), cd, md->getBodyDef(), md, tmpType);
          ol.exceptionEntry(0, true);
 
       } else {
@@ -455,7 +455,7 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
    } else { // Java Exception
       ol.docify(" ");
-      linkifyText(TextGeneratorOLImpl(ol), cd, md->getBodyDef(), md, exception);
+      linkifyText(TextFragment(ol), cd, md->getBodyDef(), md, exception);
    }
 }
 
@@ -1503,14 +1503,14 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          if (getAnonymousEnumType()) {
             // type is an anonymous enum
 
-            linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype.left(i));
+            linkifyText(TextFragment(ol), d, getBodyDef(), self, ltype.left(i));
             getAnonymousEnumType()->writeEnumDeclaration(ol, cd, nd, fd, gd);
 
-            linkifyText(TextGeneratorOLImpl(ol), d, m_impl->fileDef, self, ltype.right(ltype.length() - i - l), true);  // different
+            linkifyText(TextFragment(ol), d, m_impl->fileDef, self, ltype.right(ltype.length() - i - l), true);  // different
 
          } else {
             ltype = ltype.left(i) + " { ... } " + removeAnonymousScopes(ltype.right(ltype.length() - i - l));
-            linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype);
+            linkifyText(TextFragment(ol), d, getBodyDef(), self, ltype);
          }
       }
 
@@ -1524,7 +1524,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          ltype.append(")");
       }
 
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, ltype);
+      linkifyText(TextFragment(ol), d, getBodyDef(), self, ltype);
    }
 
    bool htmlOn = ol.isEnabled(OutputGenerator::Html);
@@ -1634,7 +1634,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       }
 
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, param5, m_impl->annMemb,
+      linkifyText(TextFragment(ol), d, getBodyDef(), self, param5, m_impl->annMemb,
                   true, false, s_indentLevel); // different
    }
 
@@ -1647,24 +1647,24 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    // *** write bitfields
    if (! m_impl->bitfields.isEmpty()) {
       // add bitfields
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->bitfields);
+      linkifyText(TextFragment(ol), d, getBodyDef(), self, m_impl->bitfields);
 
    } else if (hasOneLineInitializer() ) {
       // add initializer
 
       if (! isDefine()) {
          ol.writeString(" ");
-         linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->initializer.simplified());
+         linkifyText(TextFragment(ol), d, getBodyDef(), self, m_impl->initializer.simplified());
 
       } else {
          ol.writeNonBreakableSpace(3);
-         linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->initializer);
+         linkifyText(TextFragment(ol), d, getBodyDef(), self, m_impl->initializer);
       }
 
    } else if (isAlias()) {
       // using template alias
       ol.writeString(" = ");
-      linkifyText(TextGeneratorOLImpl(ol), d, getBodyDef(), self, m_impl->m_type);
+      linkifyText(TextFragment(ol), d, getBodyDef(), self, m_impl->m_type);
    }
 
    if ((isObjCMethod() || isObjCProperty()) && isImplementation()) {
@@ -2809,10 +2809,10 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
             ol.startDoxyAnchor(cfname, cname, memAnchor, fullMemberName, memberArgs);
             ol.startMemberDoc(ciname, name(), memAnchor, name(), memCount, memTotal, showInline);
 
-            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(ldef.constBegin(), match.capturedStart()));
+            linkifyText(TextFragment(ol), scopedContainer, getBodyDef(), self, QStringView(ldef.constBegin(), match.capturedStart()));
 
             vmd->writeEnumDeclaration(ol, getClassDef(), getNamespaceDef(), getFileDef(), getGroupDef());
-            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(match.capturedEnd(), ldef.constEnd()));
+            linkifyText(TextFragment(ol), scopedContainer, getBodyDef(), self, QStringView(match.capturedEnd(), ldef.constEnd()));
 
             found = true;
          }
@@ -2852,7 +2852,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
             iter_e = iter_n + 2;
          }
 
-         linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, QStringView(iter_e, ldef.constEnd()));
+         linkifyText(TextFragment(ol), scopedContainer, getBodyDef(), self, QStringView(iter_e, ldef.constEnd()));
       }
 
    } else {
@@ -2976,7 +2976,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
          }
       }
 
-      linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, substitute(ldef, "::", sep));
+      linkifyText(TextFragment(ol), scopedContainer, getBodyDef(), self, substitute(ldef, "::", sep));
 
       QSharedPointer<Definition> scopeDef = cd;
       if (scopeDef == nullptr) {
@@ -2993,18 +2993,18 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
             ol.docify(" ");
 
             QString init = m_impl->initializer.simplified();
-            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, init);
+            linkifyText(TextFragment(ol), scopedContainer, getBodyDef(), self, init);
 
          } else {
             // write arguments for define
 
             if (! argsString().isEmpty()) {
                QString args = substitute(argsString(), ",", ", ");
-               linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, args);
+               linkifyText(TextFragment(ol), scopedContainer, getBodyDef(), self, args);
             }
 
             ol.writeNonBreakableSpace(3);
-            linkifyText(TextGeneratorOLImpl(ol), scopedContainer, getBodyDef(), self, m_impl->initializer);
+            linkifyText(TextFragment(ol), scopedContainer, getBodyDef(), self, m_impl->initializer);
          }
       }
 
@@ -3386,7 +3386,7 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
 
       } else {
          // use standard auto linking
-         linkifyText(TextGeneratorOLImpl(ol), scopeDef, getBodyDef(), self, ts);
+         linkifyText(TextFragment(ol), scopeDef, getBodyDef(), self, ts);
       }
 
       ol.endDoxyAnchor(cfname, memAnchor);
@@ -3397,11 +3397,11 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    ol.docify(doxyName);
 
    if (isVariable() && ! argsString().isEmpty() && ! isObjCMethod()) {
-      linkifyText(TextGeneratorOLImpl(ol), getOuterScope(), getBodyDef(), self, argsString());
+      linkifyText(TextFragment(ol), getOuterScope(), getBodyDef(), self, argsString());
    }
 
    if (! m_impl->bitfields.isEmpty()) { // add bitfields
-      linkifyText(TextGeneratorOLImpl(ol), getOuterScope(), getBodyDef(), self, m_impl->bitfields);
+      linkifyText(TextFragment(ol), getOuterScope(), getBodyDef(), self, m_impl->bitfields);
    }
    ol.endInlineMemberName();
 
