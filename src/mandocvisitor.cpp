@@ -32,7 +32,7 @@
 #include <parse_base.h>
 #include <util.h>
 
-ManDocVisitor::ManDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt)
+ManDocVisitor::ManDocVisitor(QTextStream &t, CodeGenerator &ci, const QString &langExt)
    : DocVisitor(DocVisitor_Man), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_firstCol(false),
      m_indent(0), m_langExt(langExt)
 {

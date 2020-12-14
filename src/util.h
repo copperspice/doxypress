@@ -44,7 +44,7 @@ class FileNameDict;
 class MemberList;
 class MemberDef;
 class NamespaceDef;
-class OutputDocInterface;
+class TextGenerator;
 
 struct ListItemInfo;
 struct SectionInfo;
@@ -72,8 +72,8 @@ class TextGeneratorOLImpl : public TextGeneratorIntf
    void writeBreak(int indent) const override;
    void writeLink(const QString &extRef, const QString &file, const QString &anchor, const QString &text) const override;
 
-  private:
-   OutputDocInterface &m_od;
+ private:
+   TextGenerator &m_text;
 };
 
 // maps a letter to a QList of T::ElementType
@@ -189,8 +189,9 @@ QString getLanguageSpecificSeparator(SrcLangExt lang, bool classScope = false);
 QString getFileFilter(const QString &name, bool isSourceCode);
 int     getScopeFragment(const QString &s, int p, int *l);
 int     getPrefixIndex(const QString &name);
-bool    generateLink(OutputDocInterface &od, const QString &clName, const QString &lr, bool inSeeBlock, const QString &lt);
-void    generateFileRef(OutputDocInterface &od, const QString &name, const QString &text = QString() );
+
+bool    generateLink(TextGenerator &od, const QString &clName, const QString &lr, bool inSeeBlock, const QString &lt);
+void    generateFileRef(TextGenerator &od, const QString &name, const QString &text = QString() );
 
 QByteArray getCanonicalTemplateSpec(QSharedPointer<Definition> d, QSharedPointer<FileDef> fs, const QByteArray &spec);
 
@@ -286,9 +287,9 @@ QString upperCaseFirstLetter(QString &&text);
 
 void writeColoredImgData(ColoredImgDataItem data);
 void writeExample(OutputList &ol, const ExampleSDict &el);
-void writePageRef(OutputDocInterface &od, const QString &cn, const QString &mn);
 void writeExtraLatexPackages(QTextStream &t);
 void writeLatexSpecialFormulaChars(QTextStream &t);
+void writePageRef(TextGenerator &od, const QString &cn, const QString &mn);
 void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d, ArgumentList &argList);
 
 QString yearToString();

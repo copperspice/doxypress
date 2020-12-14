@@ -255,7 +255,7 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs, QString *altVa
    return result;
 }
 
-HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, QSharedPointer<Definition> ctx)
+HtmlDocVisitor::HtmlDocVisitor(QTextStream &t, CodeGenerator &ci, QSharedPointer<Definition> ctx)
    : DocVisitor(DocVisitor_Html), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_ctx(ctx)
 {
    if (ctx) {

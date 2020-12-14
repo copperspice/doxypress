@@ -24,7 +24,7 @@
 #include <clang-c/Index.h>
 #include <clang-c/Documentation.h>
 
-class CodeOutputInterface;
+class CodeGenerator;
 class Entry;
 class FileDef;
 
@@ -49,7 +49,7 @@ class ClangParser
 
    // writes the syntax highlighted source code for a file
    // ol- output generator list to write to, fd- file to write sources for
-   void writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> fd);
+   void writeSources(CodeGenerator &ol, QSharedPointer<FileDef> fd);
 
    class Private;
    Private *getPrivate();
@@ -60,13 +60,13 @@ class ClangParser
 
    Private *p;
 
-   void linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line,
+   void linkIdentifier(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint &line,
                   uint &column, const QString &text, int tokenIndex);
 
-   void linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line,
+   void linkMacro(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint &line,
                   uint &column, const QString &text);
 
-   void linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line,
+   void linkInclude(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint &line,
                   uint &column, const QString &text);
 
    void determineInputFiles(QStringList &includeFiles);

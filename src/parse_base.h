@@ -26,7 +26,7 @@
 
 class Entry;
 class FileDef;
-class CodeOutputInterface;
+class CodeGenerator;
 class MemberDef;
 class Definition;
 
@@ -87,7 +87,7 @@ class ParserInterface
     *  @param[in] searchCtx context under which search data has to be stored.
     *  @param[in] collectXRefs collect cross-reference relations.
     */
-   virtual void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
+   virtual void parseCode(CodeGenerator &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                           bool isExampleBlock, const QString &exampleName = QString(),
                           QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                           int startLine = -1, int endLine = -1, bool inlineFragment = false,

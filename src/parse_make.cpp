@@ -21,12 +21,12 @@
 #include <doxy_globals.h>
 #include <outputgen.h>
 
-static CodeOutputInterface     *g_code;
+static CodeGenerator          *g_code;
 static QString                 g_currentFontClass;
 static QSharedPointer<FileDef> g_sourceFileDef;
 static int                     g_yyLineNr;
 
-void MakeFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+void MakeFileParser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName, const QString &input,
          SrcLangExt xx, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
          int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
          QSharedPointer<Definition> searchCtx, bool collectXRefs )

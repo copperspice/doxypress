@@ -3310,7 +3310,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    Doxy_Globals::markdownSupport = markdownEnabled;
 }
 
-void MarkdownFileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
+void MarkdownFileParser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName,
                   const QString &input, SrcLangExt lang, bool isExampleBlock, const QString &exampleName,
                   QSharedPointer<FileDef> fileDef, int startLine, int endLine, bool inlineFragment,
                   QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,

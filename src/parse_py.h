@@ -44,21 +44,21 @@ class Python_Parser : public ParserInterface
 
    bool needsPreprocessing(const QString &extension) const override;
 
-   void parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
+   void parseCode(CodeGenerator &codeOutIntf, const QString &scopeName, const QString &input, SrcLangExt lang,
                   bool isExampleBlock, const QString &exampleName = QString(),
                   QSharedPointer<FileDef> fileDef = QSharedPointer<FileDef>(),
                   int startLine = -1, int endLine = -1, bool inlineFragment = false,
                   QSharedPointer<MemberDef> memberDef = QSharedPointer<MemberDef>(), bool showLineNumbers = true,
-                  QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override ;
+                  QSharedPointer<Definition> searchCtx = QSharedPointer<Definition>(), bool collectXRefs = true) override;
 
    void resetCodeParserState() override;
    void parsePrototype(const QString &text) override;
 };
 
-extern void parsePythonCode(CodeOutputInterface &, const QString &, const QString &,
-                            bool , const QString &, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
-                            QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
-                            bool collectXRefs);
+extern void parsePythonCode(CodeGenerator &od, const QString &, const QString &s, bool exBlock, const QString &exName,
+                  QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
+                  QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
+                  bool collectXRefs);
 
 extern void resetPythonCodeParserState();
 

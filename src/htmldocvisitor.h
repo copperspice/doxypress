@@ -24,7 +24,7 @@
 
 #include <docvisitor.h>
 
-class CodeOutputInterface;
+class CodeGenerator;
 class Definition;
 class DocNode;
 class MemberDef;
@@ -33,7 +33,7 @@ class MemberDef;
 class HtmlDocVisitor : public DocVisitor
 {
  public:
-   HtmlDocVisitor(QTextStream &t, CodeOutputInterface &ci, QSharedPointer<Definition> ctx);
+   HtmlDocVisitor(QTextStream &t, CodeGenerator &ci, QSharedPointer<Definition> ctx);
 
    // visitor functions for leaf nodes
 
@@ -153,7 +153,7 @@ class HtmlDocVisitor : public DocVisitor
    void forceStartParagraph(DocNode *n);
 
    QTextStream &m_t;
-   CodeOutputInterface &m_ci;
+   CodeGenerator &m_ci;
    bool m_insidePre;
 
    bool m_hide;

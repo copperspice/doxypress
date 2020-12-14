@@ -25,7 +25,8 @@
 class QFile;
 
 #define LATEX_STYLE_EXTENSION ".sty"
-class LatexCodeGenerator : public CodeOutputInterface
+
+class LatexCodeGenerator : public CodeGenerator
 {
    public:
       LatexCodeGenerator(QTextStream &t, const QString &relPath, const QString &sourceFile);

@@ -25,13 +25,15 @@
 #include <docparser.h>
 #include <docvisitor.h>
 
-class CodeOutputInterface;
+class CodeGenerator;
 
 /*! @brief Concrete visitor implementation for Docbook output. */
 class DocbookDocVisitor : public DocVisitor
 {
  public:
-   DocbookDocVisitor(QTextStream &t, CodeOutputInterface &ci);
+   DocbookDocVisitor(QTextStream &t, CodeGenerator &ci);
+   ~DocbookDocVisitor();
+
    void visit(DocWord *) override;
    void visit(DocLinkedWord *) override;
    void visit(DocWhiteSpace *) override;
@@ -165,7 +167,8 @@ class DocbookDocVisitor : public DocVisitor
    void visitCaption(const QList<DocNode *> &children);
 
    QTextStream &m_t;
-   CodeOutputInterface &m_ci;
+   CodeGenerator &m_ci;
+
    bool m_insidePre;
    bool m_hide;
 

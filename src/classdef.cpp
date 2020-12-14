@@ -791,7 +791,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
 
    // write examples
    if (hasExamples()) {
-      ol.startSimpleSect(BaseOutputDocInterface::Examples, 0, 0, theTranslator->trExamples() + ": ");
+      ol.startSimpleSect(DocGenerator::Examples, 0, 0, theTranslator->trExamples() + ": ");
       ol.startDescForItem();
 
       writeExample(ol, m_exampleSDict);

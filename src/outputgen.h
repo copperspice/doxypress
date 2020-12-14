@@ -53,11 +53,12 @@ struct SourceLinkInfo {
    QString anchor;
 };
 
-class CodeOutputInterface
 // Output interface for code parser
+class CodeGenerator
 {
  public:
-   virtual ~CodeOutputInterface() {}
+   virtual ~CodeGenerator()
+   { }
 
    virtual void addWord(const QString &word, bool hiPriority) = 0;
    virtual void codify(const QString &text) = 0;
@@ -83,11 +84,11 @@ class CodeOutputInterface
    virtual void endCodeFragment(const QString &style) = 0;
 };
 
-class BaseOutputDocInterface : public CodeOutputInterface
 // Base Interface used for generating output outside of the comment blocks
+class DocGenerator : public CodeGenerator
 {
  public:
-   virtual ~BaseOutputDocInterface() {}
+   virtual ~DocGenerator() {}
 
    enum ParamListTypes { Param, RetVal, Exception };
    enum SectionTypes { EnumValues,  Examples};
@@ -180,8 +181,8 @@ class BaseOutputDocInterface : public CodeOutputInterface
    virtual void endSubsubsection() = 0;
 };
 
-class OutputGenerator : public BaseOutputDocInterface
 // Abstract output generator
+class OutputGenerator : public DocGenerator
 {
  public:
    enum OutputType { Html, Latex, Man, RTF, XML, DEF, Perl };
@@ -382,11 +383,12 @@ class OutputGenerator : public BaseOutputDocInterface
    OutputGenerator &operator=(const OutputGenerator &o);
 };
 
-class OutputDocInterface : public BaseOutputDocInterface
 // Interface used for generating documentation
+class TextGenerator : public DocGenerator
 {
  public:
-   virtual ~OutputDocInterface() {}
+   virtual ~TextGenerator()
+   { }
 
    virtual void disableAllBut(OutputGenerator::OutputType o) = 0;
    virtual void enableAll() = 0;

@@ -20,7 +20,7 @@
 
 #include <outputgen.h>
 
-void FileParser::parseCode(CodeOutputInterface &codeOutIntf, const QString &, const QString &input,
+void FileParser::parseCode(CodeGenerator &codeOutIntf, const QString &, const QString &input,
             SrcLangExt, bool, const QString &,  QSharedPointer<FileDef> fd, int startLine, int endLine,
             bool, QSharedPointer<MemberDef> md, bool showLineNumbers, QSharedPointer<Definition> context, bool)
 {

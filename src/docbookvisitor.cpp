@@ -133,8 +133,12 @@ void DocbookDocVisitor::visitCaption(const QList<DocNode *> &children)
    }
 }
 
-DocbookDocVisitor::DocbookDocVisitor(QTextStream &t, CodeOutputInterface &ci)
-   : DocVisitor(DocVisitor_Docbook), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false)
+DocbookDocVisitor::DocbookDocVisitor(QTextStream &t, CodeGenerator &ci)
+   : DocVisitor(DocVisitor_Docbook), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false), m_colCnt(0)
+{
+}
+
+DocbookDocVisitor::~DocbookDocVisitor()
 {
 }
 

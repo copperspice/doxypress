@@ -95,7 +95,7 @@ void TooltipManager::addTooltip(QSharedPointer<Definition> d)
    }
 }
 
-void TooltipManager::writeTooltips(CodeOutputInterface &ol)
+void TooltipManager::writeTooltips(CodeGenerator &ol)
 {
    QHash<QString, QSharedPointer<Definition>>::iterator iter = m_tooltipInfo.begin();
 

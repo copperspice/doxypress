@@ -25,13 +25,12 @@
 
 #include <docvisitor.h>
 
-class CodeOutputInterface;
+class CodeGenerator;
 
-/*! @brief Concrete visitor implementation for XML output. */
 class XmlDocVisitor : public DocVisitor
 {
  public:
-   XmlDocVisitor(QTextStream &t, CodeOutputInterface &ci);
+   XmlDocVisitor(QTextStream &t, CodeGenerator &ci);
 
    //--------------------------------------
    // visitor functions for leaf nodes
@@ -150,7 +149,7 @@ class XmlDocVisitor : public DocVisitor
    void popEnabled();
 
    QTextStream &m_t;
-   CodeOutputInterface &m_ci;
+   CodeGenerator &m_ci;
 
    bool m_insidePre;
    bool m_hide;

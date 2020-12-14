@@ -2437,7 +2437,7 @@ void MemberDef::writeExamples(OutputList &ol)
 {
    // write the list of examples that use this member
    if (hasExamples()) {
-      ol.startSimpleSect(BaseOutputDocInterface::Examples, 0, 0, theTranslator->trExamples() + ": ");
+      ol.startSimpleSect(DocGenerator::Examples, 0, 0, theTranslator->trExamples() + ": ");
       ol.startDescForItem();
       writeExample(ol, m_impl->exampleSDict);
       ol.endDescForItem();

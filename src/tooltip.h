@@ -20,7 +20,7 @@
 #define TOOLTIP_H
 
 class Definition;
-class CodeOutputInterface;
+class CodeGenerator;
 
 class TooltipManager
 {
@@ -28,7 +28,7 @@ class TooltipManager
    static TooltipManager *instance();
    void clearTooltips();
    void addTooltip(QSharedPointer<Definition> d);
-   void writeTooltips(CodeOutputInterface &ol);
+   void writeTooltips(CodeGenerator &ol);
 
  private:
    QHash<QString, QSharedPointer<Definition>> m_tooltipInfo;

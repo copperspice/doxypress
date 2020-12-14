@@ -24,13 +24,13 @@
 
 #include <docvisitor.h>
 
-class CodeOutputInterface;
+class CodeGenerator;
 
 /*! @brief Concrete visitor implementation for RTF output. */
 class RTFDocVisitor : public DocVisitor
 {
  public:
-   RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt);
+   RTFDocVisitor(QTextStream &t, CodeGenerator &ci, const QString &langExt);
 
    // visitor functions for leaf nodes
 
@@ -156,7 +156,7 @@ class RTFDocVisitor : public DocVisitor
    void writePlantUMLFile(const QString &fileName, const bool hasCaption);
 
    QTextStream &m_t;
-   CodeOutputInterface &m_ci;
+   CodeGenerator &m_ci;
    bool m_insidePre;
    bool m_hide;
    int m_indentLevel;

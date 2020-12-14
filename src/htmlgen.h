@@ -27,7 +27,7 @@
 #include <language.h>
 #include <outputgen.h>
 
-class HtmlCodeGenerator : public CodeOutputInterface
+class HtmlCodeGenerator : public CodeGenerator
 {
  public:
    HtmlCodeGenerator(QTextStream &t, const QString &relPath);

@@ -99,7 +99,7 @@ static void visitPostEnd(QTextStream &t, const QString &cmd)
    t << "</" << cmd << ">" << endl;
 }
 
-XmlDocVisitor::XmlDocVisitor(QTextStream &t, CodeOutputInterface &ci)
+XmlDocVisitor::XmlDocVisitor(QTextStream &t, CodeGenerator &ci)
    : DocVisitor(DocVisitor_XML), m_t(t), m_ci(ci), m_insidePre(false), m_hide(false)
 {
 }

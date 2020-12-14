@@ -33,7 +33,7 @@ class DotGfxHierarchyTable;
 class DotGroupCollaboration;
 class DocRoot;
 
-class OutputList : public OutputDocInterface
+class OutputList : public TextGenerator
 {
  public:
    OutputList();

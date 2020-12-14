@@ -69,7 +69,7 @@ static QString align(DocHtmlCell *cell)
    return retval;
 }
 
-RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeOutputInterface &ci, const QString &langExt)
+RTFDocVisitor::RTFDocVisitor(QTextStream &t, CodeGenerator &ci, const QString &langExt)
    : DocVisitor(DocVisitor_RTF), m_t(t), m_ci(ci), m_insidePre(false),
      m_hide(false), m_indentLevel(0), m_lastIsPara(false), m_langExt(langExt)
 {

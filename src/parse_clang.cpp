@@ -51,7 +51,7 @@ static bool g_insideBody    = false;
 QSharedPointer<Entry>                s_current_root;
 QMap<QString, QSharedPointer<Entry>> s_entryMap;
 
-static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint line);
+static void writeLineNumber(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint line);
 
 class ClangParser::Private
 {
@@ -125,7 +125,7 @@ ClangParser::Private *ClangParser::getPrivate()
    return p;
 }
 
-static void codifyLines(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
+static void codifyLines(CodeGenerator &ol, QSharedPointer<FileDef> fd,
                   const QString &text, uint &line, uint &column, const QString &fontClass)
 {
    if (! fontClass.isEmpty()) {
@@ -373,7 +373,7 @@ static QString keywordToType(const QString &key)
    return QString("keyword");
 }
 
-static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint line)
+static void writeLineNumber(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint line)
 {
    QSharedPointer<Definition> d;
 
@@ -419,7 +419,7 @@ static void writeLineNumber(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
    }
 }
 
-static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column,
+static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint &line, uint &column,
                   QSharedPointer<Definition> d, const QString &text)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
@@ -1452,7 +1452,7 @@ QString ClangParser::lookup(uint line, const QString &symbol)
    return retval;
 }
 
-void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> fileDef, uint &line,
+void ClangParser::linkInclude(CodeGenerator &ol, QSharedPointer<FileDef> fileDef, uint &line,
             uint &column, const QString &text)
 {
    (void) fileDef;
@@ -1490,7 +1490,7 @@ void ClangParser::linkInclude(CodeOutputInterface &ol, QSharedPointer<FileDef> f
    }
 }
 
-void ClangParser::linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text)
+void ClangParser::linkMacro(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint &line, uint &column, const QString &text)
 {
    QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(text);
 
@@ -1507,7 +1507,7 @@ void ClangParser::linkMacro(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
    codifyLines(ol, fd, text, line, column, "");
 }
 
-void ClangParser::linkIdentifier(CodeOutputInterface &ol, QSharedPointer<FileDef> fd,
+void ClangParser::linkIdentifier(CodeGenerator &ol, QSharedPointer<FileDef> fd,
                                  uint &line, uint &column, const QString &text, int tokenIndex)
 {
    CXCursor c = p->cursors[tokenIndex];
@@ -1589,7 +1589,7 @@ void ClangParser::switchToFile(const QString &fileName)
    }
 }
 
-void ClangParser::writeSources(CodeOutputInterface &ol, QSharedPointer<FileDef> fd)
+void ClangParser::writeSources(CodeGenerator &ol, QSharedPointer<FileDef> fd)
 {
    static const bool stripCodeComments = Config::getBool("strip-code-comments");
 

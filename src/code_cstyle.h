@@ -24,12 +24,12 @@
 
 #include <types.h>
 
-class CodeOutputInterface;
+class CodeGenerator;
 class FileDef;
 class MemberDef;
 class Definition;
 
-void parseCCode(CodeOutputInterface &, const QString &, const QString &, SrcLangExt lang, bool isExample, 
+void parseCCode(CodeGenerator &, const QString &, const QString &, SrcLangExt lang, bool isExample,
                 const QString &exName, QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
                 QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs);
 

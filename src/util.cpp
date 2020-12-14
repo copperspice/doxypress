@@ -4373,7 +4373,7 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
 // This link has the text 'lt' (if not 0), otherwise `lr' is used as a
 // basis for the link's text returns true if a link could be generated.
 
-bool generateLink(OutputDocInterface &od, const QString &clName, const QString &lr, bool inSeeBlock, const QString &lt)
+bool generateLink(TextGenerator &od, const QString &clName, const QString &lr, bool inSeeBlock, const QString &lt)
 {
    QSharedPointer<Definition> compound;
 
@@ -4412,7 +4412,7 @@ bool generateLink(OutputDocInterface &od, const QString &clName, const QString &
    }
 }
 
-void generateFileRef(OutputDocInterface &od, const QString &name, const QString &text)
+void generateFileRef(TextGenerator &od, const QString &name, const QString &text)
 {
    QString linkText = text;
 

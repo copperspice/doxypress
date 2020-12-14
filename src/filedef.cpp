@@ -35,8 +35,7 @@
 #include <parse_clang.h>
 #include <util.h>
 
-/** Class implementing CodeOutputInterface by throwing away everything. */
-class DevNullCodeDocInterface : public CodeOutputInterface
+class DevNullCodeDocInterface : public CodeGenerator
 {
  public:
    void codify(const QString &) override { }
