@@ -268,11 +268,14 @@ void writeXMLLink(QTextStream &t, const QString &extRef, const QString &compound
    t << "</ref>";
 }
 
-/** Implements TextGeneratorIntf for an XML stream. */
-class TextGeneratorXMLImpl : public TextGeneratorIntf
+/** Implements TextGenerator for an XML stream. */
+class TextFragmentXml : public TextFragmentBase
 {
  public:
-   TextGeneratorXMLImpl(QTextStream &t): m_t(t) {}
+   TextFragmentXml(QTextStream &t)
+      : m_t(t)
+   {
+   }
 
    void writeString(const QString &text, bool) const override {
       writeXMLString(m_t, text);
@@ -289,169 +292,136 @@ class TextGeneratorXMLImpl : public TextGeneratorIntf
    QTextStream &m_t;
 };
 
+void XMLCodeGenerator::codify(const QString &text) {
+   XML_DB(("(codify \"%s\")\n", text));
 
-/** Generator for producing XML formatted source code. */
-class XMLCodeGenerator : public CodeOutputInterface
-{
- public:
-
-   XMLCodeGenerator(QTextStream &t) : m_t(t), m_lineNumber(-1), m_isMemberRef(false), m_col(0),
-      m_insideCodeLine(false), m_normalHLNeedStartTag(true), m_insideSpecialHL(false)
-   {}
-
-   virtual ~XMLCodeGenerator()
-   { }
-
-   void codify(const QString &text) override {
-      XML_DB(("(codify \"%s\")\n", text));
-
-      if (m_insideCodeLine && !m_insideSpecialHL && m_normalHLNeedStartTag) {
-         m_t << "<highlight class=\"normal\">";
-         m_normalHLNeedStartTag = false;
-      }
-
-      writeXMLCodeString(m_t, text, m_col);
+   if (m_insideCodeLine && ! m_insideSpecialHL && m_normalHLNeedStartTag) {
+      m_t << "<highlight class=\"normal\">";
+      m_normalHLNeedStartTag = false;
    }
 
-   void writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
-                      const QString &name, const QString &tooltip) override {
+   writeXMLCodeString(m_t, text, m_col);
+}
 
-      XML_DB(("(writeCodeLink)\n"));
+void XMLCodeGenerator::writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
+                   const QString &name, const QString &tooltip) {
 
-      if (m_insideCodeLine && !m_insideSpecialHL && m_normalHLNeedStartTag) {
-         m_t << "<highlight class=\"normal\">";
-         m_normalHLNeedStartTag = false;
-      }
+   XML_DB(("(writeCodeLink)\n"));
 
-      writeXMLLink(m_t, ref, file, anchor, name, tooltip);
-      m_col += name.length();
+   if (m_insideCodeLine && ! m_insideSpecialHL && m_normalHLNeedStartTag) {
+      m_t << "<highlight class=\"normal\">";
+      m_normalHLNeedStartTag = false;
    }
 
-   void writeTooltip(const QString &, const DocLinkInfo &, const QString &,
-                     const QString &, const SourceLinkInfo &, const SourceLinkInfo &) override {
-      XML_DB(("(writeToolTip)\n"));
-   }
+   writeXMLLink(m_t, ref, file, anchor, name, tooltip);
+   m_col += name.length();
+}
 
-   void startCodeLine(bool) override {
-      XML_DB(("(startCodeLine)\n"));
+void XMLCodeGenerator::writeTooltip(const QString &, const DocLinkInfo &, const QString &,
+                  const QString &, const SourceLinkInfo &, const SourceLinkInfo &) {
+   XML_DB(("(writeToolTip)\n"));
+}
 
-      m_t << "<codeline";
+void XMLCodeGenerator::startCodeLine(bool) {
+   XML_DB(("(startCodeLine)\n"));
 
-      if (m_lineNumber != -1) {
-         m_t << " lineno=\"" << m_lineNumber << "\"";
+   m_t << "<codeline";
 
-         if (! m_refId.isEmpty()) {
-            m_t << " refid=\"" << m_refId << "\"";
+   if (m_lineNumber != -1) {
+      m_t << " lineno=\"" << m_lineNumber << "\"";
 
-            if (m_isMemberRef) {
-               m_t << " refkind=\"member\"";
-            } else {
-               m_t << " refkind=\"compound\"";
-            }
-         }
+      if (! m_refId.isEmpty()) {
+         m_t << " refid=\"" << m_refId << "\"";
 
-         if (! m_external.isEmpty()) {
-            m_t << " external=\"" << m_external << "\"";
+         if (m_isMemberRef) {
+            m_t << " refkind=\"member\"";
+         } else {
+            m_t << " refkind=\"compound\"";
          }
       }
-      m_t << ">";
-      m_insideCodeLine = true;
-      m_col = 0;
-   }
 
-   void endCodeLine() override {
-      XML_DB(("(endCodeLine)\n"));
-
-      if (! m_insideSpecialHL && ! m_normalHLNeedStartTag) {
-         m_t << "</highlight>";
-         m_normalHLNeedStartTag = true;
-      }
-
-      m_t << "</codeline>" << endl;    // non DocBook
-
-      m_lineNumber = -1;
-      m_refId.resize(0);
-      m_external.resize(0);
-      m_insideCodeLine = false;
-   }
-
-   void startFontClass(const QString &colorClass) override {
-      XML_DB(("(startFontClass)\n"));
-
-      if (m_insideCodeLine && !m_insideSpecialHL && !m_normalHLNeedStartTag) {
-         m_t << "</highlight>";
-         m_normalHLNeedStartTag = true;
-      }
-
-      m_t << "<highlight class=\"" << colorClass << "\">"; // non DocBook
-      m_insideSpecialHL = true;
-   }
-
-   void endFontClass() override {
-      XML_DB(("(endFontClass)\n"));
-      m_t << "</highlight>"; // non DocBook
-      m_insideSpecialHL = false;
-   }
-
-   void writeCodeAnchor(const QString &) override {
-      XML_DB(("(writeCodeAnchor)\n"));
-   }
-
-   void startCodeFragment(const QString &) override {
-      m_t << "    <programlisting>" << endl;
-   }
-
-   void endCodeFragment(const QString &) override  {
-      m_t << "    </programlisting>" << endl;
-   }
-
-   void writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) override {
-      XML_DB(("(writeLineNumber)\n"));
-
-      // we remember the information provided here to use it at the <codeline> start tag
-
-      m_lineNumber = l;
-
-      if (! compId.isEmpty()) {
-         m_refId = compId;
-
-         if (! anchorId.isEmpty()) {
-            m_refId += "_1" + anchorId;
-         }
-
-         m_isMemberRef = anchorId != 0;
-
-         if (! extRef.isEmpty()) {
-            m_external = extRef;
-         }
+      if (! m_external.isEmpty()) {
+         m_t << " external=\"" << m_external << "\"";
       }
    }
 
-   void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool)  override {
-      (void) def;
+   m_t << ">";
+   m_insideCodeLine = true;
+   m_col = 0;
+}
+
+void XMLCodeGenerator::endCodeLine() {
+   XML_DB(("(endCodeLine)\n"));
+
+   if (! m_insideSpecialHL && ! m_normalHLNeedStartTag) {
+      m_t << "</highlight>";
+      m_normalHLNeedStartTag = true;
    }
 
-   void addWord(const QString &, bool) override {}
+   m_t << "</codeline>" << endl;    // non DocBook
 
-   void finish() {
+   m_lineNumber = -1;
+   m_refId.resize(0);
+   m_external.resize(0);
+   m_insideCodeLine = false;
+}
+
+void XMLCodeGenerator::startFontClass(const QString &colorClass) {
+   XML_DB(("(startFontClass)\n"));
+
+   if (m_insideCodeLine && !m_insideSpecialHL && !m_normalHLNeedStartTag) {
+      m_t << "</highlight>";
+      m_normalHLNeedStartTag = true;
+   }
+
+   m_t << "<highlight class=\"" << colorClass << "\">"; // non DocBook
+   m_insideSpecialHL = true;
+}
+
+void XMLCodeGenerator::endFontClass() {
+   XML_DB(("(endFontClass)\n"));
+   m_t << "</highlight>"; // non DocBook
+   m_insideSpecialHL = false;
+}
+
+void XMLCodeGenerator::writeCodeAnchor(const QString &) {
+   XML_DB(("(writeCodeAnchor)\n"));
+}
+
+void XMLCodeGenerator::writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) {
+   XML_DB(("(writeLineNumber)\n"));
+
+   // we remember the information provided here to use it at the <codeline> start tag
+   m_lineNumber = l;
+
+   if (! compId.isEmpty()) {
+      m_refId = compId;
+
+      if (! anchorId.isEmpty()) {
+         m_refId += "_1" + anchorId;
+      }
+
+      m_isMemberRef = anchorId != 0;
+
+      if (! extRef.isEmpty()) {
+         m_external = extRef;
+      }
+   }
+}
+
+void XMLCodeGenerator::startCodeFragment(const QString &)  {
+   m_t << "    <programlisting>" << endl;
+}
+
+void XMLCodeGenerator::endCodeFragment(const QString &)  {
+   m_t << "    </programlisting>" << endl;
+}
+
+void XMLCodeGenerator::finish() {
       if (m_insideCodeLine) {
          endCodeLine();
       }
-   }
-
- private:
-   QTextStream &m_t;
-   QString m_refId;
-   QString m_external;
-
-   int m_lineNumber;
-   bool m_isMemberRef;
-   int m_col;
-
-   bool m_insideCodeLine;
-   bool m_normalHLNeedStartTag;
-   bool m_insideSpecialHL;
-};
+}
 
 static void writeTemplateArgumentList(const ArgumentList &al, QTextStream &t, QSharedPointer<Definition> scope,
                   QSharedPointer<FileDef> fileScope, int indent)
@@ -459,48 +429,49 @@ static void writeTemplateArgumentList(const ArgumentList &al, QTextStream &t, QS
    QString indentStr;
    indentStr.fill(' ', indent);
 
-   t << indentStr << "<templateparamlist>" << endl;
+   if (! al.listEmpty()) {
+      t << indentStr << "<templateparamlist>" << endl;
 
-   for (auto &arg : al) {
-      t << indentStr << "  <param>" << endl;
+      for (const auto &arg : al) {
+         t << indentStr << "  <param>" << endl;
 
-      if (! arg.type.isEmpty()) {
-         t << indentStr <<  "    <type>";
-         linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), arg.type);
-         t << "</type>" << endl;
-      }
+         if (! arg.type.isEmpty()) {
+            t << indentStr <<  "    <type>";
+            linkifyText(TextFragmentXml(t), scope, fileScope, QSharedPointer<Definition>(), arg.type);
+            t << "</type>" << endl;
+         }
 
          if (! arg.name.isEmpty()) {
             t << indentStr <<  "    <declname>" << convertToXML(arg.name) << "</declname>" << endl;
             t << indentStr <<  "    <defname>"  << convertToXML(arg.name) << "</defname>" << endl;
          }
 
-      if (! arg.defval.isEmpty()) {
-         t << indentStr << "    <defval>";
-         linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), arg.defval);
-         t << "</defval>" << endl;
+         if (! arg.defval.isEmpty()) {
+            t << indentStr << "    <defval>";
+            linkifyText(TextFragmentXml(t), scope, fileScope, QSharedPointer<Definition>(), arg.defval);
+            t << "</defval>" << endl;
+         }
+
+         if (! arg.typeConstraint.isEmpty()) {
+           t << indentStr << "    <typeconstraint>";
+           linkifyText(TextFragmentXml(t), scope, fileScope, QSharedPointer<Definition>(), arg.typeConstraint);
+           t << "</typeconstraint>" << endl;
+         }
+
+         t << indentStr << "  </param>" << endl;
       }
 
-      if (! arg.typeConstraint.isEmpty()) {
-        t << indentStr << "    <typeconstraint>";
-        linkifyText(TextGeneratorXMLImpl(t), scope, fileScope, QSharedPointer<Definition>(), arg.typeConstraint);
-        t << "</typeconstraint>" << endl;
-      }
-
-      t << indentStr << "  </param>" << endl;
+      t << indentStr << "</templateparamlist>" << endl;
    }
-   t << indentStr << "</templateparamlist>" << endl;
-
 }
 
 static void writeMemberTemplateLists(QSharedPointer<MemberDef> md, QTextStream &t)
 {
-   const ArgumentList &templMd = md->getTemplateArgumentList();
+   const ArgumentList &argList = md->getTemplateArgumentList();
 
-   if (! templMd.listEmpty()) {
-      // function template prefix
-      writeTemplateArgumentList(templMd, t, md->getClassDef(), md->getFileDef(), 8);
-   }
+
+   writeTemplateArgumentList(argList, t, md->getClassDef(), md->getFileDef(), 8);
+
 }
 
 static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
@@ -542,10 +513,12 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
    pIntf->resetCodeParserState();
 
    QSharedPointer<XMLCodeGenerator> xmlGen = QMakeShared<XMLCodeGenerator>(t);
+   xmlGen->startCodeFragment("DoxyCode");
 
    pIntf->parseCode(*xmlGen, 0, fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
                     langExt, false, 0, fd, -1, -1, false, QSharedPointer<MemberDef>(), true );
 
+   xmlGen->endCodeFragment("DoxyCode");
    xmlGen->finish();
 }
 
@@ -1031,7 +1004,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       stripQualifiers(typeStr);
 
       t << "        <type>";
-      linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, typeStr);
+      linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, typeStr);
 
       t << "</type>" << endl;
       t << "        <definition>" << convertToXML(md->definition()) << "</definition>" << endl;
@@ -1040,7 +1013,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    if (md->memberType() == MemberDefType::Enumeration)  {
       t << "        <type>";
-      linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, md->enumBaseType());
+      linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, md->enumBaseType());
       t << "</type>" << endl;
    }
 
@@ -1103,7 +1076,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
          if (! arg.type.isEmpty()) {
             t << "          <type>";
-            linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.type);
+            linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, arg.type);
             t << "</type>" << endl;
          }
 
@@ -1127,7 +1100,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
          if (! arg.defval.isEmpty()) {
             t << "          <defval>";
-            linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, arg.defval);
+            linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, arg.defval);
             t << "</defval>" << endl;
          }
 
@@ -1157,7 +1130,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
       } else {
 
-         for (auto &arg : argList) {
+         for (const auto &arg : argList) {
             t << "        <param><defname>" << arg.type << "</defname></param>" << endl;
          }
       }
@@ -1165,13 +1138,13 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    if (md->hasOneLineInitializer() || md->hasMultiLineInitializer()) {
       t << "        <initializer>";
-      linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, md->initializer());
+      linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, md->initializer());
       t << "</initializer>" << endl;
    }
 
    if (! md->excpString().isEmpty() ) {
       t << "        <exceptions>";
-      linkifyText(TextGeneratorXMLImpl(t), def, md->getBodyDef(), md, md->excpString());
+      linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, md->excpString());
       t << "</exceptions>" << endl;
    }
 
@@ -1258,6 +1231,13 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << " bodystart=\"" << md->getStartBodyLine() << "\" bodyend=\""
            << md->getEndBodyLine() << "\"";
       }
+
+/*    if (md->getDeclLine() != -1 ) {
+         t << " declfile=\"" << convertToXML(stripFromPath(md->getDeclFileName())) << "\" declline=\""
+           << md->getDeclLine() << "\" declcolumn=\""
+           << md->getDeclColumn() << "\"";
+      }
+*/
       t << "/>" << endl;
    }
 
@@ -1280,8 +1260,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 // used to prevent duplication in the XML output
 static bool memberVisible(QSharedPointer<Definition> def, QSharedPointer<MemberDef> md)
 {
-   // emerald - enable when tag is added
-   static const bool xmlIncludeNsMembers = false;          // Config::getBool("xml-include-ns-members");
+   static const bool xmlIncludeNsMembers = Config::getBool("xml-include-ns-members");
 
    return xmlIncludeNsMembers || def->definitionType() != Definition::TypeFile || md->getNamespaceDef() == nullptr;
 }
