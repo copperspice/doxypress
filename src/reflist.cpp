@@ -34,7 +34,7 @@ RefList::RefList(const QString &listName, const QString &pageTitle, const QStrin
    m_id = 0;
 
    m_listName  = listName;
-   m_fileName  = convertNameToFile_X(listName, false, true);
+   m_fileName  = convertNameToFile_internal(listName, false, true);
    m_pageTitle = pageTitle;
    m_secTitle  = secTitle;
 }

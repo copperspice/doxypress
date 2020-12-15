@@ -1348,7 +1348,7 @@ QString Definition::convertNameToFile(const QString &name, bool allowDots) const
       return name;
 
    } else {
-      return convertNameToFile_X(name, allowDots);
+      return convertNameToFile_internal(name, allowDots);
 
    }
 }

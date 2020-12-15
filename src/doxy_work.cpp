@@ -9471,7 +9471,7 @@ void Doxy_Work::buildExampleList(QSharedPointer<Entry> ptrEntry)
                   root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Member_Args));
 
          pd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-         pd->setFileName(convertNameToFile_X(pd->name() + "-example", false, true));
+         pd->setFileName(convertNameToFile_internal(pd->name() + "-example", false, true));
          pd->addSectionsToDefinition(root->m_anchors);
          pd->setLanguage(root->m_srcLang);
 

@@ -1550,7 +1550,7 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    s_currentMemberDef  = QSharedPointer<MemberDef>();
 
    if (! s_exampleName.isEmpty()) {
-      s_exampleFile = convertNameToFile_X(s_exampleName + "-example");
+      s_exampleFile = convertNameToFile_internal(s_exampleName + "-example");
    }
 
    s_includeCodeFragment = inlineFragment;

@@ -2213,7 +2213,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
       QString citeValue = Doxy_Globals::citeDict.find(id.mid(CiteConsts::anchorPrefix.length()));
 
       if (citeValue.isEmpty()) {
-         m_file   = convertNameToFile_X(CiteConsts::fileName, false, true);
+         m_file   = convertNameToFile_internal(CiteConsts::fileName, false, true);
          m_anchor = id;
 
       } else {
@@ -3085,7 +3085,7 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
 
       m_text   = citeValue;
       m_anchor = CiteConsts::anchorPrefix + target;
-      m_file   = convertNameToFile_X(CiteConsts::fileName, false, true);
+      m_file   = convertNameToFile_internal(CiteConsts::fileName, false, true);
 
       return;
    }

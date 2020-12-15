@@ -29,7 +29,7 @@ ConceptDef::ConceptDef(const QString &defFileName, int defLine, int defColumn, c
 {
    (void) tagFileName;
 
-   m_fileName = convertNameToFile_X(fullName, false, true);
+   m_fileName = convertNameToFile_internal(fullName, false, true);
    m_title    += fullName + " Concept";
 
    setReference(tag);

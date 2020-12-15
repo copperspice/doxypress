@@ -4434,7 +4434,7 @@ void parseCCode(CodeOutputInterface &outputX, const QString &className, const QS
    g_bracketCount      = 0;
 
    if (! g_exampleName.isEmpty()) {
-      g_exampleFile = convertNameToFile_X(g_exampleName + "-example", false, true);
+      g_exampleFile = convertNameToFile_internal(g_exampleName + "-example", false, true);
    }
 
    g_includeCodeFragment = inlineFragment;

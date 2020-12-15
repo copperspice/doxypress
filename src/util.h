@@ -155,7 +155,7 @@ void    createSubDirs(QDir &d);
 void    convertProtectionLevel(MemberListType inListType,Protection inProt, int *outListType1, int *outListType2);
 
 QString correctURL(const QString &url, const QString &relPath);
-QString convertNameToFile_X(const QString &name, bool allowDots = false, bool allowUnderscore = false);
+QString convertNameToFile_internal(const QString &name, bool allowDots = false, bool allowUnderscore = false);
 QString convertToDocBook(const QString &s);
 QString convertToHtml(const QString &s,  bool keepEntities  = true);
 QString convertToLatex(const QString &s, bool insideTabbing = false, bool keepSpaces = false);

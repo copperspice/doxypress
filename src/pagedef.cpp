@@ -33,7 +33,7 @@ PageDef::PageDef(const QString &f, int l, const QString &name, const QString &d,
 
    m_subPageDict  = new PageSDict();
    m_nestingLevel = 0;
-   m_fileName     = convertNameToFile_X(name, false, true);
+   m_fileName     = convertNameToFile_internal(name, false, true);
 }
 
 PageDef::~PageDef()

@@ -3155,9 +3155,8 @@ QString DotClassGraph::writeGraph(QTextStream &out, GraphOutputFormat graphForma
          break;
    }
 
-   baseName = convertNameToFile_X(diskName());
-
    // derive target file names from baseName
+   baseName = convertNameToFile_internal(diskName());
 
    QString absBaseName = d.absolutePath() + "/" + baseName;
    QString absDotName  = absBaseName + ".dot";
@@ -3493,7 +3492,7 @@ QString DotInclDepGraph::diskName() const
 
    result += "_incl";
 
-   return convertNameToFile_X(result);
+   return convertNameToFile_internal(result);
 }
 
 QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat, EmbeddedOutputFormat textFormat,
@@ -3518,7 +3517,7 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
    }
 
    baseName += "_incl";
-   baseName = convertNameToFile_X(baseName);
+   baseName = convertNameToFile_internal(baseName);
 
    QString mapName = escapeCharsInString(m_startNode->m_label, false);
    if (m_inverse) {

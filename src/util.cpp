@@ -4846,7 +4846,7 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
 // determines the file name on disk of an item given its name, could be a class name with template arguments
 // so special characters need to be escaped
 
-QString convertNameToFile_X(const QString &name, bool allowDots, bool allowUnderscore)
+QString convertNameToFile_internal(const QString &name, bool allowDots, bool allowUnderscore)
 {
    static const bool shortNames    = Config::getBool("short-names");
    static const bool createSubdirs = Config::getBool("create-subdirs");
