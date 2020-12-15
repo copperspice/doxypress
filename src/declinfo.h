@@ -21,8 +21,10 @@
 
 #include <QByteArray>
 
+#include <types.h>
+
 #include <stdio.h>
 
-extern void parseFuncDecl(const QString &decl, bool objC, QString &clName, QString &type,
+extern void parseFuncDecl(const QString &decl, SrcLangExt lang, QString &clName, QString &type,
                   QString &name, QString &args, QString &funcTempList, QString &exceptions);
 #endif

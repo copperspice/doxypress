@@ -6672,7 +6672,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
    } else {
       // extract information from the declaration in the documentation
 
-      parseFuncDecl(funcDecl, root->m_srcLang == SrcLangExt_ObjC, scopeName, funcType, funcName,
+      parseFuncDecl(funcDecl, root->m_srcLang, scopeName, funcType, funcName,
                     funcArgs, funcTemplateArgs, exceptions);
    }
 

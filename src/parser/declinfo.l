@@ -29,6 +29,7 @@ static QString  s_args;
 
 static int      sharpCount;
 static bool     insideObjC;
+static bool     insidePHP;
 
 static void addType()
 {
@@ -267,7 +268,7 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
 
 %%
 
-void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
+void parseFuncDecl(const QString &decl, SrcLangExt lang, QString &cl, QString &t,
                    QString &n, QString &a, QString &ftl, QString &exc)
 {
    if (decl.isEmpty()) {
@@ -275,7 +276,8 @@ void parseFuncDecl(const QString &decl, bool objC, QString &cl, QString &t,
    }
 
    s_inputString        = decl;
-   insideObjC           = objC;
+   insideObjC           = (lang == SrcLangExt_ObjC);
+   insidePHP            = (lang == SrcLangExt_PHP);
 
    s_inputPosition      = 0;
    s_exceptionString    = "";
