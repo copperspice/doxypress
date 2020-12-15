@@ -2195,7 +2195,7 @@ bool Python_Parser::needsPreprocessing(const QString &) const
   return false;
 }
 
-void Python_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
+void Python_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName,
                   const QString &input, SrcLangExt, bool isExampleBlock,
                   const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,

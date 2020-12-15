@@ -1,4 +1,3 @@
-
 /*************************************************************************
  *
  * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
@@ -23,7 +22,7 @@
 #include <tooltip.h>
 #include <util.h>
 
-static CodeOutputInterface *s_code;
+static CodeGenerator *s_code;
 
 static QString       s_curClassName;
 
@@ -329,7 +328,7 @@ string      \"([^"&]|{esc})*\"|\'([^'&]|{esc})*\'
 
 %%
 
-void parseXmlCode(CodeOutputInterface &outputX, const QString &className, const QString &s,
+void parseXmlCode(CodeGenerator &outputX, const QString &className, const QString &s,
                 SrcLangExt lang, bool exBlock, const QString &exName, QSharedPointer<FileDef> fd,
                 int startLine, int endLine, bool inlineFragment,
                 QSharedPointer<MemberDef> memberDef, bool showLineNumbers,

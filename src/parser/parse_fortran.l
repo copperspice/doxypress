@@ -34,7 +34,7 @@
 static const int fixedCommentAfter = 72;
 
 // forward declarations, source in code_fortran.cpp
-void parseFortranCode(CodeOutputInterface &, const QString &, const QString &, bool, const QString &,
+void parseFortranCode(CodeGenerator &, const QString &, const QString &, bool, const QString &,
                   QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
                   QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
                   bool collectRefs, FortranFormat format);
@@ -3128,7 +3128,7 @@ void Fortran_Parser::parseInput(const QString &fileName, const QString &fileBuf,
    printlex(yy_flex_debug, false, __FILE__, fileName);
 }
 
-void Fortran_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName,
+void Fortran_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName,
                   const QString &input, SrcLangExt, bool isExampleBlock, const QString &exampleName,
                   QSharedPointer<FileDef> fileDef, int startLine, int endLine, bool inlineFragment,
                   QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition>

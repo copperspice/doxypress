@@ -62,7 +62,7 @@ static int           s_stringContext;
 static QString       s_docBlock;
 static bool          s_endComment;
 
-static CodeOutputInterface          *s_code;
+static CodeGenerator               *s_code;
 
 static QStack<uint>                 s_indents;           // tracks indentation levels for scoping in python
 static QSharedPointer<Definition>   s_searchCtx;
@@ -406,7 +406,7 @@ static void endFontClass()
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const QString &text)
+static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition> d, const QString &text)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
@@ -480,7 +480,7 @@ static void codifyLines(const QString &text)
 }
 
 static bool getLinkInScope(const QString &c, const QString &m,  const QString &memberText,
-                           CodeOutputInterface &ol, const QString &text )
+                           CodeGenerator &ol, const QString &text )
 {
    QSharedPointer<MemberDef>    md;
    QSharedPointer<ClassDef>     cd;
@@ -519,7 +519,7 @@ static bool getLinkInScope(const QString &c, const QString &m,  const QString &m
    return false;
 }
 
-static bool getLink(const QString &className, const QString &memberName, CodeOutputInterface &ol,
+static bool getLink(const QString &className, const QString &memberName, CodeGenerator &ol,
                   const QString &text = QString())
 {
    QString m = removeRedundantWhiteSpace(memberName);
@@ -544,7 +544,7 @@ static bool getLink(const QString &className, const QString &memberName, CodeOut
   For a given string in the source code,
   finds its class or global id and links to it.
 */
-static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName, bool typeOnly = false)
+static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, bool typeOnly = false)
 {
    QString className = clName;
 
@@ -697,7 +697,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 }
 
 // seems to work for file members, but scopes are not being correctly tracked for classes
-static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcName)
+static void generateFunctionLink(CodeGenerator &ol, const QString &funcName)
 {
    QSharedPointer<ClassDef> ccd;
 
@@ -729,7 +729,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
    return;
 }
 
-static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> def, const QString &name)
+static bool findMemberLink(CodeGenerator &ol, QSharedPointer<Definition> def, const QString &name)
 {
    if (def->getOuterScope() && def->getOuterScope()->definitionType() == Definition::TypeClass &&
          s_currentDefinition->definitionType() == Definition::TypeClass) {
@@ -757,7 +757,7 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> d
    return false;
 }
 
-static void findMemberLink(CodeOutputInterface &ol, const QString &phrase)
+static void findMemberLink(CodeGenerator &ol, const QString &phrase)
 {
    if (s_currentDefinition) {
       auto iter = Doxy_Globals::glossary().find(phrase);
@@ -1613,8 +1613,8 @@ static void adjustScopesAndSuites(unsigned indentLength)
    }
 }
 
-void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s, bool exBlock, const QString &exName,
-                     QSharedPointer<FileDef> fd, int startLine, int endLine, bool,
+void parsePythonCode(CodeGenerator &od, const QString &, const QString &s, bool exBlock, const QString &exName,
+                     QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
                      QSharedPointer<MemberDef> , bool, QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
    if (s.isEmpty()) {

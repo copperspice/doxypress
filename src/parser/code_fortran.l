@@ -91,7 +91,7 @@ static UseEntry    *useEntry = 0;                // current use statement info
 
 static QString str = "";                         // contents of fortran string
 
-static CodeOutputInterface *s_code;
+static CodeGenerator *s_code;
 
 // TODO: is this still needed? if so, make it work
 static QString     s_parmType;
@@ -267,8 +267,7 @@ static void codifyLines(const QString &text)
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol,
-                  QSharedPointer<Definition> d, const QString &text)
+static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition> d, const QString &text)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
@@ -446,7 +445,7 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
  todo: implementation
 */
 static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
-            const QString &memberText, CodeOutputInterface &ol)
+            const QString &memberText, CodeGenerator &ol)
 {
    (void) cd;
    (void) memberText;
@@ -455,8 +454,7 @@ static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
    return false;
 }
 
-static bool getLink(UseSDict *usedict, const QString &memberText,
-            CodeOutputInterface &ol, const QString &text)
+static bool getLink(UseSDict *usedict, const QString &memberText, CodeGenerator &ol, const QString &text)
 {
    QSharedPointer<MemberDef> md;
    QString memberName = removeRedundantWhiteSpace(memberText);
@@ -500,7 +498,7 @@ static bool getLink(UseSDict *usedict, const QString &memberText,
    return false;
 }
 
-static void generateLink(CodeOutputInterface &ol, const QString &lname)
+static void generateLink(CodeGenerator &ol, const QString &lname)
 {
    QSharedPointer<ClassDef> cd;
    QSharedPointer<NamespaceDef> nd;
@@ -1488,8 +1486,8 @@ static void checkContLines(const QString &str)
 
 void resetFortranCodeParserState() { }
 
-void parseFortranCode(CodeOutputInterface &od, const QString &className, const QString &s,
-                  bool exBlock, const QString &exName, QSharedPointer<FileDef> fd, int startLine,
+void parseFortranCode(CodeGenerator &od, const QString &className, const QString &input,
+                  bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fd, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool,
                   QSharedPointer<Definition> searchCtx, bool collectXRefs, FortranFormat format)
 {

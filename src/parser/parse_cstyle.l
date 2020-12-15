@@ -9858,7 +9858,7 @@ void CPP_Parser::parseInput(const QString &fileName, const QString &fileBuffer,
    }
 }
 
-void CPP_Parser::parseCode(CodeOutputInterface &outputX, const QString &scopeName, const QString &input,
+void CPP_Parser::parseCode(CodeGenerator &outputX, const QString &scopeName, const QString &input,
                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef,
                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )

@@ -35,7 +35,7 @@
 
 static bool          s_stripCodeComments;
 
-static CodeOutputInterface *g_code;
+static CodeGenerator *g_code;
 
 static QString       g_curClassName;
 static QStringList   g_curClassBases;
@@ -481,7 +481,7 @@ static void codifyLines(const QString &text)
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d,
+static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition> d,
                   const QString &text)
 
 {
@@ -750,7 +750,7 @@ static void updateCallContextForSmartPointer()
 }
 
 static bool getLinkInScope(const QString &c, const QString &m, const QString  memberText,
-                           CodeOutputInterface &ol, const QString &text, bool varOnly = false)
+                           CodeGenerator &ol, const QString &text, bool varOnly = false)
 {
    QSharedPointer<MemberDef>    md;
    QSharedPointer<ClassDef>     cd;
@@ -818,7 +818,7 @@ static bool getLinkInScope(const QString &c, const QString &m, const QString  me
    return false;
 }
 
-static bool getLink(const QString &className, const QString &memberName, CodeOutputInterface &ol,
+static bool getLink(const QString &className, const QString &memberName, CodeGenerator &ol,
                   const QString &text = QString(), bool varOnly = false)
 {
    QString m = removeRedundantWhiteSpace(memberName);
@@ -841,7 +841,7 @@ static bool getLink(const QString &className, const QString &memberName, CodeOut
    return true;
 }
 
-static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName, bool typeOnly = false, bool varOnly = false)
+static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, bool typeOnly = false, bool varOnly = false)
 {
    if (clName.isEmpty()) {
       return;
@@ -1013,7 +1013,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
    }
 }
 
-static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<MemberDef> xmd, const QString &memName)
+static bool generateClassMemberLink(CodeGenerator &ol, QSharedPointer<MemberDef> xmd, const QString &memName)
 {
    // extract class definition of the return type in order to resolve
    // a->b()->c() like call chains
@@ -1069,7 +1069,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Memb
    return false;
 }
 
-static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> def, const QString &memName)
+static bool generateClassMemberLink(CodeGenerator &ol, QSharedPointer<Definition> def, const QString &memName)
 {
    if (def && def->definitionType() == Definition::TypeClass) {
       QSharedPointer<ClassDef>  cd  = def.dynamicCast<ClassDef>();
@@ -1104,7 +1104,7 @@ static bool generateClassMemberLink(CodeOutputInterface &ol, QSharedPointer<Defi
    return false;
 }
 
-static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, const QString &memName)
+static void generateMemberLink(CodeGenerator &ol, const QString &varName, const QString &memName)
 {
    if (varName.isEmpty()) {
       return;
@@ -1187,8 +1187,7 @@ static void generateMemberLink(CodeOutputInterface &ol, const QString &varName, 
    return;
 }
 
-
-static void generatePHPVariableLink(CodeOutputInterface &ol, const QString &varName)
+static void generatePHPVariableLink(CodeGenerator &ol, const QString &varName)
 {
    // strip $this->
    QString name = varName.mid(7);
@@ -1199,7 +1198,7 @@ static void generatePHPVariableLink(CodeOutputInterface &ol, const QString &varN
    }
 }
 
-static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcName)
+static void generateFunctionLink(CodeGenerator &ol, const QString &funcName)
 {
    QSharedPointer<ClassDef> ccd;
 
@@ -4355,7 +4354,7 @@ void resetCCodeParserState()
   g_anchorCount = 0;
 }
 
-void parseCCode(CodeOutputInterface &outputX, const QString &className, const QString &s,
+void parseCCode(CodeGenerator &outputX, const QString &className, const QString &s,
                 SrcLangExt lang, bool exBlock, const QString &exName, QSharedPointer<FileDef> fd,
                 int startLine, int endLine, bool inlineFragment,
                 QSharedPointer<MemberDef> memberDef, bool showLineNumbers,

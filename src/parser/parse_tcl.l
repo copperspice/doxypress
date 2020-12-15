@@ -290,7 +290,7 @@ typedef struct {
 // Structure containing all internal global variables
 static struct
 {
-   CodeOutputInterface *code;              // if set then we are codifying the file
+   CodeGenerator *code;                    // if set then we are codifying the file
 
    int code_line;                          // current line of code
    int code_linenumbers;                   // if true create line numbers in code
@@ -3167,7 +3167,7 @@ void Tcl_Parser::parseInput(const QString &fileName, const QString &input, QShar
 }
 
 // Parse file and codify
-void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+void Tcl_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName, const QString &input,
                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
                   QSharedPointer<Definition> searchCtx, bool collectXRefs)
