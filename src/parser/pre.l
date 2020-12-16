@@ -35,8 +35,6 @@
 #include <membername.h>
 #include <util.h>
 
-#define YY_NEVER_INTERACTIVE 1
-
 // Toggle for some debugging info
 // #define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)

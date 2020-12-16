@@ -22,7 +22,6 @@
 #include <util.h>
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 #define ADDCHAR(c)     s_outputString += c
 

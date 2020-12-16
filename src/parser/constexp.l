@@ -12,7 +12,6 @@
 #include <ce_parse.h>         // generated header file
 #include <message.h>
 
-#define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 
 QString         g_strToken;

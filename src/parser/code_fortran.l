@@ -35,9 +35,7 @@
 // #define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)
 
-#define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
-#define YY_NO_TOP_STATE 1
 
 /*
  * For fixed formatted code position 6 is of importance (continuation character).
@@ -661,6 +659,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 %option case-insensitive
 %option never-interactive
 %option nounistd
+%option noyy_top_state
 %option noyywrap
 %option stack
 

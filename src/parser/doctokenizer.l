@@ -25,7 +25,6 @@
 #include <util.h>
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 #define TK_COMMAND_SEL() (yytext[0] == '@' ? TK_COMMAND_AT : TK_COMMAND_BS)
 

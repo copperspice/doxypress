@@ -31,7 +31,6 @@
 #include <util.h>
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 static ParserInterface *s_thisParser;
 static QString          s_inputString;

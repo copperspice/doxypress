@@ -26,7 +26,6 @@
 #define DBs_CTX(...)     do { } while(0)
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 static ClassSDict    s_codeClassSDict;
 static QString       s_curClassName;
@@ -917,6 +916,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
 %option never-interactive
 %option nounistd
+%option noyy_top_state
 %option noyywrap
 %option stack
 

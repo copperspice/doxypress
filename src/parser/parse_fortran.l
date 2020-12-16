@@ -46,7 +46,6 @@ void codeFreeScanner();
 // #define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)
 
-#define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
 
 enum ScanVar       { V_IGNORE, V_VARIABLE, V_PARAMETER, V_RESULT};

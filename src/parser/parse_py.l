@@ -30,7 +30,6 @@
 #define DBG_CTX(...)     do { } while(0)
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 static QSharedPointer<Entry> current_root;
 static QSharedPointer<Entry> current;

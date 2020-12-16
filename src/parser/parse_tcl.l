@@ -34,7 +34,6 @@
 #include <util.h>
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 #define MAX_INCLUDE_DEPTH 10
 
@@ -681,6 +680,7 @@ ws              ([ \t]|\\\n)
 
 %option never-interactive
 %option nounistd
+%option noyy_top_state
 %option noyywrap
 %option stack
 %option yylineno
