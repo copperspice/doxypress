@@ -67,7 +67,7 @@ static QStack<DocLexerContext *> s_lexerStack;
 
 
 // static functions
-static void yyunput(QChar c, char *yy_bp);
+static void yyunput(QChar c, char *);
 
 void doctokenizerYYpushContext()
 {
@@ -410,10 +410,10 @@ static void handleHtmlTag()
             if (i < len) {
                // option has value
                c = tagText.at(i);
+
             } else {
                c = '\0';
             }
-
          }
 
          opt.value = tagText.mid(startAttrib, endAttrib - startAttrib);
@@ -725,6 +725,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->isEnumList = text.at(dashPos + 1) == '#';
       g_token->id         = -1;
       g_token->indent     = computeIndent(text,dashPos);
+
       return TK_LISTITEM;
    }
 
@@ -748,12 +749,14 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
          g_token->isEnumList = false;
          g_token->id         = -1;
          g_token->indent     = computeIndent(text, markPos);
+
          return TK_LISTITEM;
       }
    }
 
 <St_Para>{BLANK}*\n{OLISTITEM}     {
       /* list item on next line */
+
       if (! Doxy_Globals::markdownSupport || s_insidePre) {
          REJECT;
 
@@ -772,6 +775,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
          g_token->isEnumList = true;
          g_token->id         = text.mid(digitPos,dotPos - digitPos).toInteger<int>();
          g_token->indent     = computeIndent(text,digitPos);
+
          return TK_LISTITEM;
       }
    }
@@ -783,6 +787,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       int dotPos = text.lastIndexOf('.');
       g_token->indent = computeIndent(text, dotPos);
+
       return TK_ENDLIST;
    }
 
@@ -795,6 +800,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       int dotPos = text.lastIndexOf('.');
 
       g_token->indent = computeIndent(text,dotPos);
+
       return TK_ENDLIST;
    }
 
@@ -892,15 +898,16 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->name = QString::fromUtf8(yytext);
       g_token->name = g_token->name.mid(1, g_token->name.length() - 2);
       g_token->isEMailAddr = false;
+
       return TK_URL;
    }
 
 <St_Para>{MAILADR}     {
-      // Mail address
+      // mail address
       g_token->name = QString::fromUtf8(yytext);
       g_token->name = stripPrefix(g_token->name, "mailto:");
-
       g_token->isEMailAddr = true;
+
       return TK_URL;
    }
 
@@ -909,8 +916,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->name = QString::fromUtf8(yytext);
       g_token->name = g_token->name.mid(1, g_token->name.length() - 2);
       g_token->name = stripPrefix(g_token->name, "mailto:");
-
       g_token->isEMailAddr = true;
+
       return TK_URL;
    }
 
@@ -929,7 +936,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       g_token->name  = tagName.left(index);
       int text_begin = index + 2;
-      int text_end    = tagName.length() - 1;
+      int text_end   = tagName.length() - 1;
 
       if (tagName[text_begin - 1] == ':')  {
          /* check for Subversion fixed-length keyword */
@@ -970,6 +977,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para,St_Text>"&"{ID}";" {
       /* special symbol */
       g_token->name = QString::fromUtf8(yytext);
+
       return TK_SYMBOL;
    }
 
@@ -1091,9 +1099,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       g_token->indent = computeIndent(text, text.length());
 
-      int i;
       // put back the indentation (needed for list items)
-      for (i = 0; i < g_token->indent; i++) {
+      for (int i = 0; i < g_token->indent; i++) {
          unput(' ');
       }
 
@@ -1277,8 +1284,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_PlantUMLOpt>{BLANK}*"{"[^}]*"}" {
       // case 1: file name is specified as {filename}
-      QString text = QString::fromUtf8(yytext);
-      g_token->sectionId = text.trimmed();
+      g_token->sectionId = QString::fromUtf8(yytext).trimmed();
 
       // skip curly brackets around the optional image name
       g_token->sectionId = g_token->sectionId.mid(1, g_token->sectionId.length()-2).trimmed();
@@ -1287,22 +1293,19 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_PlantUMLOpt>{BLANK}*{FILEMASK}{BLANK}+/{ID}"=" {
       // case 2: plain file name specified followed by an attribute
-      QString text = QString::fromUtf8(yytext);
-      g_token->sectionId = text.trimmed();
+      g_token->sectionId = QString::fromUtf8(yytext).trimmed();
       return RetVal_OK;
    }
 
 <St_PlantUMLOpt>{BLANK}*{FILEMASK}{BLANK}+/"\"" {
       // case 3: plain file name specified followed by a quoted title
-      QString text = QString::fromUtf8(yytext);
-      g_token->sectionId = text.trimmed();
+      g_token->sectionId = QString::fromUtf8(yytext).trimmed();
       return RetVal_OK;
    }
 
 <St_PlantUMLOpt>{BLANK}*{FILEMASK}{BLANK}*/\n {
       // case 4: plain file name specified without title or attributes
-      QString text = QString::fromUtf8(yytext);
-      g_token->sectionId = text.trimmed();
+      g_token->sectionId = QString::fromUtf8(yytext).trimmed();
       return RetVal_OK;
    }
 <St_PlantUMLOpt>"\n"   |
@@ -1312,7 +1315,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
        return RetVal_OK;
    }
 
-<St_PlantUML>{CMD}"enduml"  {
+<St_PlantUML>{CMD}"enduml"     {
       return RetVal_OK;
    }
 
@@ -1993,7 +1996,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 %%
 
 
-static void yyunput(QChar c, char *yy_bp)
+static void yyunput(QChar c, char *)
 {
    QString tmp1    = c;
    QByteArray tmp2 = tmp1.toUtf8();

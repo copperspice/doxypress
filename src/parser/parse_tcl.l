@@ -5,6 +5,7 @@
  * Copyright (C) 2010      by Rene Zaumseil
 
 *************************************************************************/
+
 %{
 
 #include <QFile>
@@ -1465,7 +1466,7 @@ static void tcl_word(int what, const QString &text)
          }
 
          if (myList.size() != 1 || myList[0] != '.') {
-            tcl_warn("level = %d expected = %c\n", myList.size(), myList.top().unicode());
+            tcl_warn("level = %ld expected = %c\n", static_cast<long>(myList.size()), myList.top().unicode());
          }
 
          myWord = ' ';
@@ -1748,13 +1749,15 @@ static void tcl_codify_link(const QString &name)
       }
    }
 
-   if (myDef) { // documented command
+   if (myDef != nullptr) {
+      // documented command
+
       tcl.code->writeCodeLink(myDef->getReference(), myDef->getOutputFileBase(), myDef->anchor(),
                               name, myDef->qualifiedName());
 
       if (tcl.memberdef) {
          myDef->addSourceReferencedBy(tcl.memberdef);
-         tcl.memberdef->addSourceReferences(myDef);
+         tcl.memberdef->addSourceReferences(myDef);         // consider removing
 
       } else {
          QSharedPointer<Entry> callerEntry;
@@ -2028,8 +2031,8 @@ static void tcl_command_SWITCH()
 
    } else {
       // not properly detected syntax
-      tcl_warn("Invalid switch syntax: %d options followed by %d tokens.\n",
-              lastOptionIndex / 2, (tcl.listCommandwords.count() - 1) / 2 - lastOptionIndex / 2);
+      tcl_warn("Invalid switch syntax: %d options followed by %ld tokens.\n",
+             lastOptionIndex / 2, static_cast<long>((tcl.listCommandwords.count() - 1) / 2 - lastOptionIndex / 2));
 
       for (i = lastOptionIndex + 1; i <= tcl.listCommandwords.count(); i++) {
          myScan = tcl_command_ARG(myScan, i, false);
@@ -2251,7 +2254,7 @@ static void tcl_command_Method()
 
    tcl.fn.insert(myName, tcl.entry_current);
    myEntry = tcl.entry_current;
-   myScan = tcl_scan_start(tcl.word_is, tcl.listCommandwords.at(6), myNs, myEntryCl, myEntry);
+   myScan  = tcl_scan_start(tcl.word_is, tcl.listCommandwords.at(6), myNs, myEntryCl, myEntry);
 }
 
 // Handle constructor statements inside class definitions.
@@ -2976,7 +2979,9 @@ static void tcl_command(int what, const QString &text)
 
 command_warn:
    // print warning message because of wrong syntax
-   tcl_warn("Line %d, Count = %d: %s\n", myLine, tcl.listCommandwords.count(), csPrintable(tcl.listCommandwords.join(" ")) );
+   tcl_warn("Line %d, Count = %ld: %s\n", myLine, static_cast<long>(tcl.listCommandwords.count()),
+                  csPrintable(tcl.listCommandwords.join(" ")) );
+
    tcl_command_OTHER();
 
 command_end:

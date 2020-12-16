@@ -1148,10 +1148,10 @@ STARTDOCSYMS      "##"
 <FunctionParamDefVal>{
    "["      |
    "("                       {
-      // internal opening brace, assumme code is correct and braces match
       QString text = QString::fromUtf8(yytext);
-      s_braceCount++;
       s_defVal += text[0];
+
+      ++s_braceCount;
    }
 
    ","       |

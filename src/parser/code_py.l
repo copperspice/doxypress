@@ -23,7 +23,7 @@
 #include <tooltip.h>
 #include <util.h>
 
-#define DBs_CTX(...)     do { } while(0)
+#define DBG_CTX(...)     do { } while(0)
 
 #define YY_NO_INPUT 1
 
@@ -552,7 +552,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
       return;
    }
 
-   DBs_CTX(stderr, "generateClassOrGlobalLink(className=%s)\n", csPrintable(className) );
+   DBG_CTX(stderr, "generateClassOrGlobalLink(className=%s)\n", csPrintable(className) );
 
    QSharedPointer<ClassDef> cd;
    QSharedPointer<ClassDef> lcd;
@@ -567,10 +567,10 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
 
       cd = getResolvedClass(d, s_sourceFileDef, substitute(className, ".", "::"), &md);
 
-      DBs_CTX(stderr, "d=%s s_sourceFileDef=%s\n", d ? csPrintable(d->displayName()) : "<null>",
+      DBG_CTX(stderr, "d=%s s_sourceFileDef=%s\n", d ? csPrintable(d->displayName()) : "<null>",
                s_currentDefinition ? csPrintable(s_currentDefinition->displayName()) : "<null>");
 
-      DBs_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
+      DBG_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
 
       if (cd == 0 && md == 0) {
          // also see if it is variable or enum or enum value
@@ -591,7 +591,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
          s_theCallContext.setClass(lcd);
       }
 
-      DBs_CTX(stderr, "is a local variable cd=%p\n", cd.data());
+      DBG_CTX(stderr, "is a local variable cd=%p\n", cd.data());
    }
 
    if (cd && cd->isLinkable()) { // is it a linkable class
@@ -625,7 +625,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
 
          QSharedPointer<ClassDef> mcd = getClass(scope);
 
-         DBs_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
+         DBG_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
 
          if (mcd) {
             QSharedPointer<MemberDef> md = mcd->getMemberByName(locName);
@@ -703,7 +703,7 @@ static void generateFunctionLink(CodeGenerator &ol, const QString &funcName)
    QString locScope = s_classScope;
    QString locFunc = removeRedundantWhiteSpace(funcName);
 
-   DBs_CTX(stdout, "*** locScope=%s locFunc=%s\n", csPrintable(locScope), csPrintable(locFunc));
+   DBG_CTX(stdout, "*** locScope=%s locFunc=%s\n", csPrintable(locScope), csPrintable(locFunc));
    int i = locFunc.lastIndexOf("::");
 
    if (i > 0) {
@@ -742,7 +742,7 @@ static bool findMemberLink(CodeGenerator &ol, QSharedPointer<Definition> def, co
          }
       }
 
-      DBs_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
+      DBG_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
                   thisCd ? csPrintable(thisCd->name()) : "<none>");
 
       // TODO: find the nearest base class in case cd is a base class of thisCd
@@ -1292,7 +1292,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    \\.               {
-      // espaced char
+      // escaped char
       QString text = QString::fromUtf8(yytext);
       codify(text);
    }

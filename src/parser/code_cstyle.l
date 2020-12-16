@@ -27,6 +27,7 @@
 
 // Toggle for some debugging info
 // #define DBG_CTX(x) fprintf x
+
 #define DBG_CTX(x) do { } while(0)
 
 #define CLASSBLOCK 1
@@ -2060,9 +2061,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body,Bases>^[ \t]*"#"        {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("preprocessor");
       g_lastSkipCppContext = YY_START;
       g_code->codify(text);
+
       BEGIN( SkipCPP ) ;
    }
 

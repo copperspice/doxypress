@@ -62,7 +62,6 @@ static bool handleFile(const QString &str, const QStringList &list);
 static bool handleDir(const QString &str, const QStringList &list);
 static bool handleExample(const QString &str, const QStringList &list);
 static bool handleDetails(const QString &str, const QStringList &list);
-
 static bool handleName(const QString &str, const QStringList &list);
 static bool handleTodo(const QString &str, const QStringList &list);
 static bool handleTest(const QString &str, const QStringList &list);
@@ -114,9 +113,9 @@ static bool handleCopyBrief(const QString &str, const QStringList &list);
 static bool handleCopyDetails(const QString &str, const QStringList &list);
 static bool handleParBlock(const QString &str, const QStringList &list);
 static bool handleEndParBlock(const QString &str, const QStringList &list);
-//   static void handleGuard(const QString &str, const QStringList &list);
 static bool handleParam(const QString &str, const QStringList &list);
 static bool handleRetval(const QString &str, const QStringList &list);
+//   static void handleGuard(const QString &str, const QStringList &list);
 
 static void checkFormula();
 
@@ -281,7 +280,6 @@ static DocCmdMap docCmdMap[] =
   { "xmlinclude",      0,                       false },
   { 0, 0, false }
 };
-
 
 //  Maps a command name (as found in a comment block) onto a specific handler function
 class DocCmdMapper
@@ -504,6 +502,7 @@ static bool makeStructuralIndicator(Entry::Sections s)
 
    } else {
       s_needNewEntry     = true;
+
       current->section   = s;
       current->startLine = yyLineNr;
 
@@ -3846,7 +3845,7 @@ static bool handleInternal(const QString &str, const QStringList &list)
       // is not treated as "documentation"
 
       if (current->getData(EntryKey::Main_Docs).trimmed().isEmpty()) {
-         current->setData(EntryKey::Main_Docs, "");
+         current->setData(EntryKey::Main_Docs, QString());
       }
 
       s_condCount = 0;
@@ -4134,7 +4133,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    inBody           = isInbody;
    s_protection     = r_protection;
    s_inputPosition  = r_position;
-   s_outputXRef     = "";
+   s_outputXRef     = QString();
    xrefKind         = XRef_None;
 
    xrefAppendFlag   = false;

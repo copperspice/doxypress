@@ -5616,7 +5616,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             }
 
             // add compound definition to the tree
-            current->setData(EntryKey::Member_Args,   removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
+            current->setData(EntryKey::Member_Args, removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
 
             current->setData(EntryKey::Member_Type, current->getData(EntryKey::Member_Type).simplified());
             current->m_entryName = current->m_entryName.trimmed();
@@ -7268,14 +7268,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <SkipInits>">"{BN}*"{"                {
-      // C++11 style initializer
+      // C++ style initializer
       lineCount();
       curlyCount = 1;
       BEGIN(SkipC11Inits);
    }
 
 <SkipInits>{ID}{BN}*"{"                {
-      // C++11 style initializer
+      // C++ style initializer
       lineCount();
       curlyCount = 1;
       BEGIN(SkipC11Inits);
@@ -7296,7 +7296,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <SkipInits>"{"                         {
-      // C++11 style initializer
+      // C++ style initializer
       unput('{');
       BEGIN( Function );
    }
