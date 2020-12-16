@@ -277,7 +277,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
          QString text = QString("Image file %1 is ambiguous.\n").formatArg(fileName);
          text += "Possible candidates:\n" + showFileDefMatches(Doxy_Globals::imageNameDict, fileName);
 
-         warn_doc_error(s_fileName, doctokenizerYYlineno, text);
+         warn_doc_error(s_fileName, getDoctokenLineNum(), text);
       }
       QString inputFile = fd->getFilePath();
       QFile inImage(inputFile);
@@ -343,17 +343,17 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
                }
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file %s for writing, OS Error #: %d\n",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unable to open image file %s for writing, OS Error #: %d\n",
                         csPrintable(outputFile), inImage.error());
             }
 
          } else {
-            warn(s_fileName, doctokenizerYYlineno, "Source and destination directories are the same, unable to copy %s\n",
+            warn(s_fileName, getDoctokenLineNum(), "Source and destination directories are the same, unable to copy %s\n",
                         csPrintable(inputFile));
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to open image file %s for reading, OS Error #: %d",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unable to open image file %s for reading, OS Error #: %d",
                         csPrintable(fileName), inImage.error() );
       }
 
@@ -383,7 +383,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
       result = fileName;
 
       if (! result.startsWith("http:") && ! result.startsWith("https:") && dowarn)  {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Image file %s was not found in 'IMAGE PATH': "
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Image file %s was not found in 'IMAGE PATH': "
                         "assuming it is an external image", csPrintable(fileName) );
       }
    }
@@ -719,7 +719,7 @@ static void detectUndocumentedParams()
            s_memberDef->isConstructor() || s_memberDef->isDestructor()) )  {
 
          // return type is documented in a function without a return type
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Documented empty return type");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Documented empty return type");
 
 
       } else if ( s_memberDef->hasDocumentedReturnType() ||
@@ -961,7 +961,7 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return tok;
    }
 
@@ -980,13 +980,13 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
             case TK_COMMAND_AT:
             case TK_COMMAND_BS:
 
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command \\%s as the argument of a \\%s command",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command \\%s as the argument of a \\%s command",
                               csPrintable(g_token->name), csPrintable(cmdName));
 
                break;
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found while handling command %s",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found while handling command %s",
                               csPrintable(g_token->name), csPrintable(cmdName));
                break;
 
@@ -1000,7 +1000,7 @@ static int handleStyleArgument(DocNode *parent, QList<DocNode *> &children, cons
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s while handling command %s",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s while handling command %s",
                   csPrintable(tokToString(tok)), csPrintable(cmdName));
                break;
          }
@@ -1032,15 +1032,15 @@ static void handleStyleLeave(DocNode *parent, QList<DocNode *> &children, DocSty
    if (s_styleStack.isEmpty() || s_styleStack.top().style() != s || s_styleStack.top().position() != s_nodeStack.count()) {
 
       if (s_styleStack.isEmpty()) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </%s> tag without matching <%s>",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Found </%s> tag without matching <%s>",
                         csPrintable(tagName), csPrintable(tagName));
 
       } else if (s_styleStack.top().style() != s) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </%s> tag while expecting </%s>",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Found </%s> tag while expecting </%s>",
                         csPrintable(tagName), csPrintable(s_styleStack.top().styleString()));
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </%s> at a different nesting level (%d) than expected (%d)",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Found </%s> at a different nesting level (%d) than expected (%d)",
                         csPrintable(tagName), s_nodeStack.count(), s_styleStack.top().position());
       }
 
@@ -1111,7 +1111,7 @@ static int handleAHref(DocNode *parent, QList<DocNode *> &children, const HtmlAt
             break; // stop looking for other tag attribs
 
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Found <a> tag with name option but without a value");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Found <a> tag with name option but without a value");
          }
 
       } else if (opt.name == "href") { // <a href=url>..</a> tag
@@ -1214,7 +1214,7 @@ static void handleUnclosedStyleCommands()
 
       handleUnclosedStyleCommands();
 
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "End of comment block while expecting "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "End of comment block while expecting "
                      "command </%s>", csPrintable(sc.styleString()));
    }
 }
@@ -1321,7 +1321,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       // normal non-linkable word
 
       if (g_token->name.startsWith("#") || g_token->name.startsWith("::")) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Explicit link request to '%s' could not be resolved",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Explicit link request to '%s' could not be resolved",
                   csPrintable(name));
 
          children.append(new DocWord(parent, g_token->name));
@@ -1389,7 +1389,7 @@ static DocInternalRef *handleInternalRef(DocNode *parent)
    QString tokenName = g_token->name;
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(tokenName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(tokenName));
       return 0;
    }
 
@@ -1397,7 +1397,7 @@ static DocInternalRef *handleInternalRef(DocNode *parent)
    tok = doctokenizerYYlex(); // get the reference id
 
    if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                   csPrintable(tokToString(tok)), csPrintable(tokenName));
       return 0;
    }
@@ -1410,7 +1410,7 @@ static DocAnchor *handleAnchor(DocNode *parent)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command",
                      csPrintable(g_token->name));
       return 0;
    }
@@ -1419,12 +1419,12 @@ static DocAnchor *handleAnchor(DocNode *parent)
    tok = doctokenizerYYlex();   // get the anchor id
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s", csPrintable(g_token->name));
       return 0;
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                   csPrintable(tokToString(tok)), csPrintable(g_token->name));
       return 0;
    }
@@ -1443,19 +1443,19 @@ static void handleAnchorName(DocNode *parent)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(g_token->name));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(g_token->name));
       return;
    }
 
    tok = doctokenizerYYlex();   // get the anchor id
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s", csPrintable(g_token->name));
       return;
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                   csPrintable(tokToString(tok)), csPrintable(g_token->name));
       return;
    }
@@ -1467,7 +1467,7 @@ static void handleAnchorName(DocNode *parent)
    tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\anchorname command");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\anchorname command");
       return;
    }
 
@@ -1483,7 +1483,7 @@ static void handleAnchorName(DocNode *parent)
       sec->title = title;
 
    } else {
-     warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to find anchor %s for anchorname", csPrintable(id));
+     warn_doc_error(s_fileName, getDoctokenLineNum(), "Unable to find anchor %s for anchorname", csPrintable(id));
 
    }
 
@@ -1521,17 +1521,17 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS:  {
-               warn_doc_error(s_fileName, doctokenizerYYlineno," Illegal command %s as part of a \\%s",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\%s",
                csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)) );
                break;
             }
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno," Unsupported symbol %s found", csPrintable(g_token->name));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found", csPrintable(g_token->name));
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
          }
       }
@@ -1559,7 +1559,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
             height = g_token->chars;
 
          } else {
-            warn_doc_error(s_fileName,doctokenizerYYlineno,"Unknown option %s after \\%s command, expected 'width' or 'height'",
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unknown option %s after \\%s command, expected 'width' or 'height'",
                      csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)));
 
             break;
@@ -1593,7 +1593,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
  */
 static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &children, bool handleWord)
 {
-   DBG(("token %s at %d", csPrintable(tokToString(tok)), doctokenizerYYlineno));
+   DBG(("token %s at %d", csPrintable(tokToString(tok)), getDoctokenLineNum()));
 
    if (tok == TK_WORD || tok == TK_LNKWORD || tok == TK_SYMBOL || tok == TK_URL ||
          tok == TK_COMMAND_AT  || tok == TK_COMMAND_BS || tok == TK_HTMLTAG) {
@@ -1751,7 +1751,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                                   s_isExample, s_exampleName, g_token->name == "block"));
 
                   if (tok == 0) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Htmlonly section ended without an end marker");
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Htmlonly section ended without an end marker");
                   }
                   doctokenizerYYsetStatePara();
                }
@@ -1763,7 +1763,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   children.append(new DocVerbatim(parent, s_context, g_token->verb, DocVerbatim::ManOnly, s_isExample, s_exampleName));
 
                   if (tok == 0) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Manonly section ended without an end marker");
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Manonly section ended without an end marker");
                   }
 
                   doctokenizerYYsetStatePara();
@@ -1776,7 +1776,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   children.append(new DocVerbatim(parent, s_context, g_token->verb, DocVerbatim::RtfOnly, s_isExample, s_exampleName));
 
                   if (tok == 0) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Rtfonly section ended without an end marker");
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Rtfonly section ended without an end marker");
                   }
                   doctokenizerYYsetStatePara();
                }
@@ -1787,7 +1787,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   tok = doctokenizerYYlex();
                   children.append(new DocVerbatim(parent, s_context, g_token->verb, DocVerbatim::LatexOnly, s_isExample, s_exampleName));
                   if (tok == 0) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Latexonly section ended without an end marker", doctokenizerYYlineno);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Latexonly section ended without an end marker");
                   }
                   doctokenizerYYsetStatePara();
                }
@@ -1798,7 +1798,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   tok = doctokenizerYYlex();
                   children.append(new DocVerbatim(parent, s_context, g_token->verb, DocVerbatim::XmlOnly, s_isExample, s_exampleName));
                   if (tok == 0) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Xmlonly section ended without an end marker", doctokenizerYYlineno);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Xmlonly section ended without an end marker");
                   }
                   doctokenizerYYsetStatePara();
                }
@@ -1809,8 +1809,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   tok = doctokenizerYYlex();
                   children.append(new DocVerbatim(parent, s_context, g_token->verb, DocVerbatim::DocbookOnly, s_isExample, s_exampleName));
                   if (tok == 0) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Docbookonly section ended without an end marker",
-                           doctokenizerYYlineno);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Docbookonly section ended without an end marker");
                   }
                   doctokenizerYYsetStatePara();
                }
@@ -1866,11 +1865,11 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
          case TK_HTMLTAG: {
             switch (Mappers::htmlTagMapper->map(tokenName)) {
                case HTML_DIV:
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Found <div> tag in heading\n");
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Found <div> tag in heading");
                   break;
 
                case HTML_PRE:
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Found <pre> tag in heading\n");
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Found <pre> tag in heading");
                   break;
 
                case HTML_BOLD:
@@ -2044,7 +2043,7 @@ static void handleImg(DocNode *parent, QList<DocNode *> &children, const HtmlAtt
    }
 
    if (! found) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "IMG tag does not have a SRC attribute\n");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "IMG tag does not have a SRC attribute");
    }
 }
 
@@ -2077,7 +2076,7 @@ DocEmoji::DocEmoji(DocNode *parent, const QString &symName)
    m_index   = EmojiEntityMapper::instance()->symbol2index(m_symName);
 
    if (m_index == -1) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno," Found unsupported emoji symbol '%s'\n", csPrintable(m_symName));
+      warn_doc_error(s_fileName, getDoctokenLineNum()," Found unsupported emoji symbol '%s'", csPrintable(m_symName));
    }
 }
 static int internalValidatingParseDoc(DocNode *parent, QList<DocNode *> &children, const QString &doc)
@@ -2166,12 +2165,12 @@ static void readTextFileByName(const QString &file, QString &text)
       text = fileToString(fd->getFilePath(), filterSourceFiles);
 
    } else if (ambig) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "included file name %s is ambiguous"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "included file name %s is ambiguous"
                   "Possible candidates:\n%s", csPrintable(file),
                   csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, file)));
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included file %s was not found. "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Included file %s was not found. "
                      "Check the EXAMPLE PATH in your project file.", csPrintable(file));
    }
 }
@@ -2202,7 +2201,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
    m_parent = parent;
 
    if (id.isEmpty()) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Empty anchor label");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Empty anchor label");
    }
 
    if (newAnchor) {
@@ -2217,7 +2216,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
          m_anchor = id;
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid cite anchor id '%s'", csPrintable(id));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid cite anchor id '%s'", csPrintable(id));
          m_file   = "invalid";
          m_anchor = "invalid";
 
@@ -2237,7 +2236,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid anchor id '%s'", csPrintable(id));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid anchor id '%s'", csPrintable(id));
          m_file   = "invalid";
          m_anchor = "invalid";
 
@@ -2289,7 +2288,7 @@ void DocInclude::parse()
          // check for the existence of the blockId inside the file, so the warning is only generated once
          if (! m_blockId.isEmpty() && (count = m_text.count(m_blockId)) != 2) {
 
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Block marked with %s for \\snippet should appear twice "
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Block marked with %s for \\snippet should appear twice "
                 "in file %s, found it %d times\n", csPrintable(m_blockId), csPrintable(m_file), count);
          }
          break;
@@ -2326,7 +2325,7 @@ void DocIncOperator::parse()
             break;
       }
 
-      warn_doc_error(s_fileName, doctokenizerYYlineno,
+      warn_doc_error(s_fileName, getDoctokenLineNum(),
           "No previous '\\include' or \\dontinclude' command for '%s' present", csPrintable(cmd));
    }
 
@@ -2601,12 +2600,11 @@ void DocCopy::parse(QList<DocNode *> &children)
 
       } else {
          // oops, recursion
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "recursive call chain of \\copydoc commands detected at %d\n",
-                        doctokenizerYYlineno);
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Recursive call chain of \\copydoc commands detected");
       }
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "target %s of \\copydoc command not found", csPrintable(m_link));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Target %s of \\copydoc command not found", csPrintable(m_link));
    }
 }
 
@@ -2680,7 +2678,7 @@ DocFormula::DocFormula(DocNode *parent, int id)
 
    } else {
       // wrong \form#<n> command
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Incorrect formula id %d", id);
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Incorrect formula id %d", id);
       m_id = -1;
 
    }
@@ -2724,18 +2722,18 @@ void DocSecRefItem::parse()
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS:   {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\refitem",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\refitem",
                               csPrintable(g_token->name));
                break;
             }
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)) );
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2758,11 +2756,11 @@ void DocSecRefItem::parse()
          }
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "reference to unknown section %s", csPrintable(m_target));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "reference to unknown section %s", csPrintable(m_target));
       }
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "reference to empty target");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "reference to empty target");
    }
 
    DocNode *n = s_nodeStack.pop();
@@ -2791,12 +2789,14 @@ void DocSecRefList::parse()
             case CMD_SECREFITEM: {
                int tok = doctokenizerYYlex();
                if (tok != TK_WHITESPACE) {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\refitem command");
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\refitem command");
                   break;
                }
+
                tok = doctokenizerYYlex();
+
                if (tok != TK_WORD && tok != TK_LNKWORD) {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of \\refitem",
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of \\refitem",
                                  csPrintable(tokToString(tok)));
                   break;
                }
@@ -2810,7 +2810,7 @@ void DocSecRefList::parse()
             case CMD_ENDSECREFLIST:
                goto endsecreflist;
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\secreflist",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\secreflist",
                               csPrintable(g_token->name));
                goto endsecreflist;
          }
@@ -2819,7 +2819,7 @@ void DocSecRefList::parse()
          // ignore whitespace
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s inside section reference list",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s inside section reference list",
                         csPrintable(tokToString(tok)));
 
          goto endsecreflist;
@@ -2863,17 +2863,17 @@ void DocInternalRef::parse()
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS: {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\ref",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\ref",
                               csPrintable(g_token->name));
                break;
             }
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
          }
       }
@@ -2912,9 +2912,8 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
       // ref to section or anchor
 
       if (sec->dupAnchor_cnt > 0)  {
-         warn(s_fileName, doctokenizerYYlineno, "Link to ambiguous anchor '%s', "
-            "using first anchor declared in %s, line %d", csPrintable(target),
-            csPrintable(sec->dupAnchor_fName), sec->lineNr);
+         warn(s_fileName, getDoctokenLineNum(), "Link to ambiguous anchor '%s', using first anchor "
+            "declared in %s, line %d", csPrintable(target), csPrintable(sec->dupAnchor_fName), sec->lineNr);
       }
 
       QSharedPointer<PageDef> pd;
@@ -2989,7 +2988,7 @@ DocRef::DocRef(DocNode *parent, const QString &target, const QString &context)
    }
 
    m_text = target;
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to '%s' for \\ref command",
+   warn_doc_error(s_fileName, getDoctokenLineNum(), "Unable to resolve reference to '%s' for \\ref command",
                   csPrintable(target));
 }
 
@@ -3030,13 +3029,13 @@ void DocRef::parse()
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS: {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\ref",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\ref",
                               csPrintable(g_token->name));
                break;
             }
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
 
@@ -3044,7 +3043,7 @@ void DocRef::parse()
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s",
                               csPrintable(tokToString(tok)));
                break;
          }
@@ -3093,14 +3092,14 @@ DocCite::DocCite(DocNode *parent, const QString &target, const QString &)
    m_text = target;
 
    if (numBibFiles == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "No bib files for the \\cite command were specified in 'CITE BIB FILES'");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "No bib files for the \\cite command were specified in 'CITE BIB FILES'");
 
    } else if (citeValue.isEmpty()) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve reference to '%s' for \\cite command",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unable to resolve reference to '%s' for \\cite command",
                   csPrintable(target));
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "No value was specified for the \\cite command to '%s'",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "No value was specified for the \\cite command to '%s'",
                   csPrintable(target));
    }
 }
@@ -3138,7 +3137,7 @@ DocLink::DocLink(DocNode *parent, const QString &target)
    }
 
    // bogus link target
-   warn_doc_error(s_fileName, doctokenizerYYlineno, "Unable to resolve link to '%s' for \\link command", csPrintable(target));
+   warn_doc_error(s_fileName, getDoctokenLineNum(), "Unable to resolve link to '%s' for \\link command", csPrintable(target));
 }
 
 QString DocLink::parse(bool isJavaLink, bool isXmlLink)
@@ -3159,24 +3158,25 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
                switch (Mappers::cmdMapper->map(g_token->name)) {
                   case CMD_ENDLINK:
                      if (isJavaLink) {
-                        warn_doc_error(s_fileName, doctokenizerYYlineno, "{@link.. ended with @endlink command");
+                        warn_doc_error(s_fileName, getDoctokenLineNum(), "{@link.. ended with @endlink command");
                      }
                      goto endlink;
+
                   default:
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a \\link",
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\link",
                                     csPrintable(g_token->name));
                      break;
                }
                break;
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
 
             case TK_HTMLTAG:
-               if (g_token->name != "see" || !isXmlLink) {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected xml/html command %s found",
+               if (g_token->name != "see" || ! isXmlLink) {
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected xml/html command %s found",
                                  csPrintable(g_token->name));
                }
                goto endlink;
@@ -3206,14 +3206,14 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
          }
       }
    }
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside link command\n");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside link command\n");
    }
 
 endlink:
@@ -3256,11 +3256,11 @@ void DocDotFile::parse()
       m_file = fd->getFilePath();
 
    } else if (ambig) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dot file name %s is ambiguous.\n"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dot file name %s is ambiguous.\n"
                   "Possible candidates:\n%s", csPrintable(m_name),
                   csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dot file %s was not found "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dot file %s was not found "
                   "in any of the paths specified via DOTFILE_DIRS", csPrintable(m_name));
    }
 }
@@ -3287,12 +3287,12 @@ void DocMscFile::parse()
       m_file = fd->getFilePath();
 
    } else if (ambig) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included msc file name %s is ambiguous.\n"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Included msc file name %s is ambiguous.\n"
                   "Possible candidates:\n%s", csPrintable(m_name),
                   csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included msc file %s was not found "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Included msc file %s was not found "
                   "in any of the paths specified via MSCFILE DIRS", csPrintable(m_name));
    }
 }
@@ -3319,12 +3319,12 @@ void DocDiaFile::parse()
       m_file = fd->getFilePath();
 
    } else if (ambig) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dia file name %s is ambiguous.\n"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dia file name %s is ambiguous.\n"
                   "Possible candidates:\n%s", csPrintable(m_name),
                   csPrintable(showFileDefMatches(Doxy_Globals::exampleNameDict, m_name)));
 
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Included dia file %s was not found "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dia file %s was not found "
                   "in any of the paths specified via DIAFILE DIRS", csPrintable(m_name));
    }
 }
@@ -3354,7 +3354,7 @@ int DocHtmlHeader::parse()
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <h%d> tag",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a <h%d> tag",
                               csPrintable(g_token->name), m_level);
                break;
 
@@ -3362,37 +3362,37 @@ int DocHtmlHeader::parse()
                int tagId = Mappers::htmlTagMapper->map(g_token->name);
                if (tagId == HTML_H1 && g_token->endTag) {        // found </h1> tag
                   if (m_level != 1) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h1>", m_level);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "<h%d> ended with </h1>", m_level);
                   }
                   goto endheader;
 
                } else if (tagId == HTML_H2 && g_token->endTag) { // found </h2> tag
                   if (m_level != 2) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h2>", m_level);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "<h%d> ended with </h2>", m_level);
                   }
                   goto endheader;
 
                } else if (tagId == HTML_H3 && g_token->endTag) { // found </h3> tag
                   if (m_level != 3) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h3>", m_level);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "<h%d> ended with </h3>", m_level);
                   }
                   goto endheader;
 
                } else if (tagId == HTML_H4 && g_token->endTag) { // found </h4> tag
                   if (m_level != 4) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h4>", m_level);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "<h%d> ended with </h4>", m_level);
                   }
                   goto endheader;
 
                } else if (tagId == HTML_H5 && g_token->endTag) { // found </h5> tag
                   if (m_level != 5) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h5>", m_level);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "<h%d> ended with </h5>", m_level);
                   }
                   goto endheader;
 
                } else if (tagId == HTML_H6 && g_token->endTag) { // found </h6> tag
                   if (m_level != 6) {
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "<h%d> ended with </h6>", m_level);
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "<h%d> ended with </h6>", m_level);
                   }
                   goto endheader;
 
@@ -3405,7 +3405,7 @@ int DocHtmlHeader::parse()
                   m_children.append(lb);
 
                } else {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected html tag <%s%s> found within <h%d> context",
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected html tag <%s%s> found within <h%d> context",
                                  g_token->endTag ? "/" : "", csPrintable(g_token->name), m_level);
                }
 
@@ -3413,12 +3413,12 @@ int DocHtmlHeader::parse()
             break;
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s",
                               csPrintable(tokToString(tok)));
                break;
          }
@@ -3426,8 +3426,7 @@ int DocHtmlHeader::parse()
    }
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside"
-                     " <h%d> tag\n", m_level);
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside <h%d> tag", m_level);
    }
 
 endheader:
@@ -3455,12 +3454,12 @@ int DocHRef::parse()
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <a>..</a> block",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a <a>..</a> block",
                               csPrintable(g_token->name));
                break;
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
 
@@ -3471,21 +3470,19 @@ int DocHRef::parse()
                if (tagId == HTML_A && g_token->endTag) { // found </a> tag
                   goto endhref;
                } else {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected html tag <%s%s> found within <a href=...> context",
-                                 g_token->endTag ? "/" : "", csPrintable(g_token->name), doctokenizerYYlineno);
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected html tag <%s%s> found within <a href=...> context",
+                                 g_token->endTag ? "/" : "", csPrintable(g_token->name));
                }
             }
             break;
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
-                              csPrintable(tokToString(tok)), doctokenizerYYlineno);
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
          }
       }
    }
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside"
-                     " <a href=...> tag", doctokenizerYYlineno);
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside <a href=...> tag");
    }
 
 endhref:
@@ -3532,7 +3529,7 @@ int DocInternal::parse(int level)
       }
 
       if (retval == TK_LISTITEM) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid list item found", doctokenizerYYlineno);
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid list item found");
       }
 
    } while (retval != 0 &&
@@ -3560,7 +3557,7 @@ int DocInternal::parse(int level)
    }
 
    if (retval == RetVal_Internal) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "\\internal command found inside internal section");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "An \\internal command was found inside internal section");
    }
 
    DocNode *n = s_nodeStack.pop();
@@ -3581,7 +3578,7 @@ int DocIndexEntry::parse()
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\addindex command");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\addindex command");
       goto endindexentry;
    }
 
@@ -3651,7 +3648,7 @@ int DocIndexEntry::parse()
                   m_entry += "---";
                   break;
                default:
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected symbol found as argument of \\addindex");
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected symbol found as argument of \\addindex");
                   break;
             }
          }
@@ -3715,14 +3712,14 @@ int DocIndexEntry::parse()
                   break;
 
                default:
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s found as argument of \\addindex",
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected command %s found as argument of \\addindex",
                         csPrintable(g_token->name));
                   break;
             }
             break;
 
          default:
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
             break;
       }
    }
@@ -3761,7 +3758,7 @@ DocHtmlCaption::DocHtmlCaption(DocNode *parent, HtmlAttribList attribs)
             }
 
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid caption id '%s'", csPrintable(item.value));
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid caption id '%s'", csPrintable(item.value));
 
          }
 
@@ -3787,12 +3784,12 @@ int DocHtmlCaption::parse()
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <caption> tag",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a <caption> tag",
                               csPrintable(g_token->name));
                break;
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
 
@@ -3802,21 +3799,21 @@ int DocHtmlCaption::parse()
                   retval = RetVal_OK;
                   goto endcaption;
                } else {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected html tag <%s%s> found within <caption> context",
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected html tag <%s%s> found within <caption> context",
                                  g_token->endTag ? "/" : "", csPrintable(g_token->name));
                }
             }
             break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
          }
       }
    }
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside"
-                     " <caption> tag", doctokenizerYYlineno);
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside"
+                     " <caption> tag");
    }
 
 endcaption:
@@ -4029,7 +4026,7 @@ int DocHtmlRow::parse()
 
       } else {
          // found some other tag
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <td> or <th> tag but "
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <td> or <th> tag but "
                         "found <%s> instead", csPrintable(g_token->name));
 
          doctokenizerYYpushBackHtmlTag(g_token->name);
@@ -4037,11 +4034,11 @@ int DocHtmlRow::parse()
       }
 
    } else if (tok == 0) { // premature end of comment
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while looking for an html description title");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while looking for an html description title");
       goto endrow;
 
    } else { // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <td> or <th> tag, found %s token instead ", csPrintable(tokToString(tok)));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <td> or <th> tag, found %s token instead ", csPrintable(tokToString(tok)));
       goto endrow;
 
    }
@@ -4104,7 +4101,7 @@ int DocHtmlRow::parseXml(bool isHeading)
 
       } else {
          // found some other tag
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <term> or <description> tag, "
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <term> or <description> tag, "
                         "found <%s> instead", csPrintable(g_token->name));
 
          doctokenizerYYpushBackHtmlTag(g_token->name);
@@ -4112,12 +4109,12 @@ int DocHtmlRow::parseXml(bool isHeading)
       }
 
    } else if (tok == 0) { // premature end of comment
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while looking"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while looking"
                      " for an html description title");
       goto endrow;
 
    } else { // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <td> or <th> tag, found %s token instead",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <td> or <th> tag, found %s token instead",
                      csPrintable(tokToString(tok)));
       goto endrow;
    }
@@ -4175,7 +4172,7 @@ getrow:
          // found <caption> tag
 
          if (m_caption) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "table already has a caption, found another one");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "table already has a caption, found another one");
 
          } else {
             m_caption = new DocHtmlCaption(this, g_token->attribs);
@@ -4189,17 +4186,17 @@ getrow:
 
       } else {
          // found wrong token
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <tr> or <caption> tag but "
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <tr> or <caption> tag but "
                         "found <%s%s> instead", g_token->endTag ? "/" : "", csPrintable(g_token->name));
       }
 
    } else if (tok == 0) {
       // premature end of comment
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while looking for a <tr> or <caption> tag");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while looking for a <tr> or <caption> tag");
 
    } else {
       // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <tr> tag, found %s token instead ", csPrintable(tokToString(tok)));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <tr> tag, found %s token instead ", csPrintable(tokToString(tok)));
    }
 
    // parse one or more rows
@@ -4391,7 +4388,7 @@ int DocHtmlDescTitle::parse()
                      int tok = doctokenizerYYlex();
 
                      if (tok != TK_WHITESPACE) {
-                        warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command",
+                        warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command",
                               csPrintable(g_token->name));
 
                      } else {
@@ -4399,7 +4396,7 @@ int DocHtmlDescTitle::parse()
                         tok = doctokenizerYYlex(); // get the reference id
 
                         if (tok != TK_WORD) {
-                           warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+                           warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                                           csPrintable(tokToString(tok)), csPrintable(cmdName));
 
                         } else {
@@ -4420,7 +4417,7 @@ int DocHtmlDescTitle::parse()
                   case CMD_LINK: {
                      int tok = doctokenizerYYlex();
                      if (tok != TK_WHITESPACE) {
-                        warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \%s command",
+                        warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \%s command",
                                        csPrintable(cmdName));
 
                      } else {
@@ -4428,7 +4425,7 @@ int DocHtmlDescTitle::parse()
                         tok = doctokenizerYYlex();
 
                         if (tok != TK_WORD) {
-                           warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+                           warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                                           csPrintable(tokToString(tok)), csPrintable(cmdName));
 
                         } else {
@@ -4445,15 +4442,16 @@ int DocHtmlDescTitle::parse()
                   }
 
                   break;
+
                   default:
-                     warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a <dt> tag",
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a <dt> tag",
                                     csPrintable(g_token->name));
                }
             }
             break;
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found", csPrintable(g_token->name));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found", csPrintable(g_token->name));
                break;
 
             case TK_HTMLTAG: {
@@ -4482,21 +4480,21 @@ int DocHtmlDescTitle::parse()
                   }
 
                } else {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected html tag <%s%s> found within <dt> context",
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected html tag <%s%s> found within <dt> context",
                                  g_token->endTag ? "/" : "", csPrintable(g_token->name));
                }
             }
             break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
          }
       }
    }
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside <dt> tag");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside <dt> tag");
    }
 
 endtitle:
@@ -4578,18 +4576,18 @@ int DocHtmlDescList::parse()
 
       } else {
          // found some other tag
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <dt> tag, found <%s> instead", csPrintable(g_token->name));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <dt> tag, found <%s> instead", csPrintable(g_token->name));
          doctokenizerYYpushBackHtmlTag(g_token->name);
          goto enddesclist;
       }
 
    } else if (tok == 0) { // premature end of comment
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while looking"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while looking"
                      " for an html description title");
       goto enddesclist;
 
    } else { // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <dt> tag, found %s token instead", csPrintable(tokToString(tok)));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <dt> tag, found %s token instead", csPrintable(tokToString(tok)));
       goto enddesclist;
 
    }
@@ -4617,7 +4615,7 @@ int DocHtmlDescList::parse()
       }
 
       if (retval == 0) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside <dl> block");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside <dl> block");
       }
    }
 
@@ -4760,7 +4758,7 @@ int DocHtmlList::parse()
          // add dummy item to obtain valid HTML
 
          m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "empty list");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Empty list");
          retval = RetVal_EndList;
          goto endlist;
 
@@ -4769,7 +4767,7 @@ int DocHtmlList::parse()
          // add dummy item to obtain valid HTML
          m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
 
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <li> tag,  "
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <li> tag,  "
                         "found <%s%s> instead", g_token->endTag ? "/" : "", csPrintable(g_token->name));
 
          doctokenizerYYpushBackHtmlTag(g_token->name);
@@ -4781,7 +4779,7 @@ int DocHtmlList::parse()
       // add dummy item to obtain valid HTML
 
       m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while looking"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while looking"
                      " for an html list item");
       goto endlist;
 
@@ -4790,7 +4788,7 @@ int DocHtmlList::parse()
       // add dummy item to obtain valid HTML
 
       m_children.append(new DocHtmlListItem(this, HtmlAttribList(), 1));
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <li> tag, found %s token instead",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <li> tag, found %s token instead",
                      csPrintable(tokToString(tok)));
       goto endlist;
    }
@@ -4803,7 +4801,7 @@ int DocHtmlList::parse()
    } while (retval == RetVal_ListItem);
 
    if (retval == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside <%cl> block",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside <%cl> block",
                      m_type == Unordered ? 'u' : 'o');
    }
 
@@ -4840,7 +4838,7 @@ int DocHtmlList::parseXml()
       if (tagId == XML_ITEM && !g_token->endTag) { // found <item> tag
          // ok, we can go on.
       } else { // found some other tag
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <item> tag, "
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <item> tag, "
                         "found <%s> instead", csPrintable(g_token->name));
 
          doctokenizerYYpushBackHtmlTag(g_token->name);
@@ -4848,12 +4846,12 @@ int DocHtmlList::parseXml()
       }
 
    } else if (tok == 0) { // premature end of comment
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while looking"
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while looking"
                      " for an html list item");
       goto endlist;
 
    } else { // token other than html token
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected <item> tag, found %s token instead",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected <item> tag, found %s token instead",
                      csPrintable(tokToString(tok)));
       goto endlist;
    }
@@ -4871,7 +4869,7 @@ int DocHtmlList::parseXml()
    } while (retval == RetVal_ListItem);
 
    if (retval == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment while inside <list type=\"%s\"> block",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment while inside <list type=\"%s\"> block",
                      m_type == Unordered ? "bullet" : "number");
    }
 
@@ -5120,17 +5118,17 @@ void DocTitle::parse()
          switch (tok) {
             case TK_COMMAND_AT:
             case TK_COMMAND_BS:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal command %s as part of a title section",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a title section",
                               csPrintable(g_token->name));
                break;
 
             case TK_SYMBOL:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found",
                               csPrintable(g_token->name));
                break;
 
             default:
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s",
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s",
                               csPrintable(tokToString(tok)));
                break;
          }
@@ -5409,7 +5407,7 @@ int DocParamList::parse(const QString &cmdName)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       retval = 0;
       goto endparamlist;
    }
@@ -5451,7 +5449,7 @@ int DocParamList::parse(const QString &cmdName)
 
    if (tok == 0) {
       // premature end of comment block
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s", csPrintable(cmdName));
       retval = 0;
       goto endparamlist;
@@ -5459,7 +5457,7 @@ int DocParamList::parse(const QString &cmdName)
 
    if (tok != TK_WHITESPACE) {
       // premature end of comment block
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token in comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token in comment block while parsing the "
                      "argument of command %s", csPrintable(saveCmdName));
       retval = 0;
       goto endparamlist;
@@ -5536,7 +5534,7 @@ int DocParamList::parseXml(const QString &paramName)
 
 
    if (retval == 0) { /* premature end of comment block */
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "unterminated param or exception tag");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "unterminated param or exception tag");
    } else {
       retval = RetVal_OK;
    }
@@ -5657,7 +5655,7 @@ void DocPara::handleCite()
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable("cite"));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable("cite"));
       return;
    }
 
@@ -5665,12 +5663,12 @@ void DocPara::handleCite()
    tok = doctokenizerYYlex();
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s\n", csPrintable("cite"));
       return;
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable("cite"));
       return;
    }
@@ -5688,19 +5686,19 @@ void DocPara::handleSortId()
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable("sortid"));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable("sortid"));
       return;
    }
 
    tok = doctokenizerYYlex();
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s\n", csPrintable("sortid"));
       return;
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable("sortid"));
       return;
    }
@@ -5719,7 +5717,7 @@ void DocPara::handleEmoji()
   int tok = doctokenizerYYlex();
 
   if (tok != TK_WHITESPACE) {
-    warn_doc_error(s_fileName,doctokenizerYYlineno,"Expected whitespace after \\%s command", csPrintable("emoji"));
+    warn_doc_error(s_fileName,getDoctokenLineNum(),"Expected whitespace after \\%s command", csPrintable("emoji"));
     return;
   }
 
@@ -5727,12 +5725,12 @@ void DocPara::handleEmoji()
   tok = doctokenizerYYlex();
 
   if (tok == 0) {
-    warn_doc_error(s_fileName, doctokenizerYYlineno, "Unnexpected end of comment block while parsing the "
+    warn_doc_error(s_fileName, getDoctokenLineNum(), "Unnexpected end of comment block while parsing the "
         "argument of command %s\n", csPrintable("emoji"));
     return;
 
   } else if (tok != TK_WORD) {
-    warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+    warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
         csPrintable(tokToString(tok)), csPrintable("emoji"));
     return;
   }
@@ -5770,7 +5768,7 @@ void DocPara::handleIncludeOperator(const QString &cmdName, DocIncOperator::Type
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
 
@@ -5779,12 +5777,12 @@ void DocPara::handleIncludeOperator(const QString &cmdName, DocIncOperator::Type
    doctokenizerYYsetStatePara();
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s", csPrintable(cmdName));
       return;
 
    } else if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
@@ -5825,20 +5823,20 @@ void DocPara::handleImage(const QString &cmdName)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
 
    tok = doctokenizerYYlex();
 
    if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
    tok = doctokenizerYYlex();
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
 
@@ -5854,7 +5852,7 @@ void DocPara::handleImage(const QString &cmdName)
    } else if (imgType == "rtf") {
       t = DocImage::Rtf;
    } else {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "image type %s specified as the first argument of "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "image type %s specified as the first argument of "
                      "%s is not valid", csPrintable(imgType), csPrintable(cmdName));
       return;
    }
@@ -5864,7 +5862,7 @@ void DocPara::handleImage(const QString &cmdName)
    doctokenizerYYsetStatePara();
 
    if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
@@ -5881,7 +5879,7 @@ void DocPara::handleFile(const QString &cmdName)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command",
                      csPrintable(cmdName));
       return;
    }
@@ -5891,7 +5889,7 @@ void DocPara::handleFile(const QString &cmdName)
    doctokenizerYYsetStatePara();
 
    if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
@@ -5908,14 +5906,14 @@ void DocPara::handleLink(const QString &cmdName, bool isJavaLink)
    int tok = doctokenizerYYlex();
 
   if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
    doctokenizerYYsetStateLink();
    tok = doctokenizerYYlex();
 
    if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "%s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "%s as the argument of %s",
                     csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
@@ -5935,7 +5933,7 @@ void DocPara::handleRef(const QString &cmdName)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
 
@@ -5944,7 +5942,7 @@ void DocPara::handleRef(const QString &cmdName)
    DocRef *ref = 0;
 
    if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable(cmdName));
       goto endref;
    }
@@ -5998,7 +5996,7 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
       tok = doctokenizerYYlex();
 
    } else if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
 
@@ -6007,12 +6005,12 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
    doctokenizerYYsetStatePara();
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s", csPrintable(cmdName));
       return;
 
    } else if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
@@ -6031,9 +6029,8 @@ void DocPara::handleInclude(const QString &cmdName, DocInclude::Type t)
       doctokenizerYYsetStatePara();
 
       if (tok != TK_WORD) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected block identifier, "
-               "found token %s instead while parsing the %s command",
-               csPrintable(tokToString(tok)), csPrintable(cmdName));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected block identifier, "
+               "found token %s instead while parsing the %s command", csPrintable(tokToString(tok)), csPrintable(cmdName));
 
          return;
       }
@@ -6072,19 +6069,19 @@ void DocPara::handleSection(const QString &cmdName)
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Expected whitespace after \\%s command", csPrintable(cmdName));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
       return;
    }
 
    tok = doctokenizerYYlex();
 
    if (tok == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end of comment block while parsing the "
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
                      "argument of command %s\n", csPrintable(cmdName));
       return;
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s as the argument of %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
                      csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
@@ -6143,7 +6140,7 @@ int DocPara::handleStartCode()
                      s_exampleName, false, lang));
 
    if (retval == 0) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Code section ended without end marker");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Code section ended without end marker");
    }
 
    doctokenizerYYsetStatePara();
@@ -6193,7 +6190,7 @@ int DocPara::handleCommand(const QString &cmdName)
 
    switch (cmdId) {
       case CMD_UNKNOWN:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Found unknown command '\\%s'", csPrintable(cmdName));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Found unknown command '\\%s'", csPrintable(cmdName));
          break;
 
       case CMD_EMPHASIS:
@@ -6408,7 +6405,7 @@ int DocPara::handleCommand(const QString &cmdName)
                   s_isExample, s_exampleName, g_token->name == "block"));
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "htmlonly section ended without end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "htmlonly section ended without end marker");
          }
          doctokenizerYYsetStatePara();
       }
@@ -6420,7 +6417,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::ManOnly, s_isExample, s_exampleName));
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "manonly section ended without end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "manonly section ended without end marker");
          }
          doctokenizerYYsetStatePara();
       }
@@ -6432,7 +6429,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::RtfOnly, s_isExample, s_exampleName));
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "rtfonly section ended without end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "rtfonly section ended without end marker");
          }
          doctokenizerYYsetStatePara();
       }
@@ -6444,7 +6441,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::LatexOnly, s_isExample, s_exampleName));
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "latexonly section ended without end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Latexonly section ended without end marker");
          }
          doctokenizerYYsetStatePara();
       }
@@ -6456,7 +6453,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::XmlOnly, s_isExample, s_exampleName));
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "xmlonly section ended without end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Xmlonly section ended without end marker");
          }
          doctokenizerYYsetStatePara();
       }
@@ -6468,7 +6465,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::DocbookOnly, s_isExample, s_exampleName));
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Docbookonly section ended without end marker", doctokenizerYYlineno);
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Docbookonly section ended without end marker");
          }
          doctokenizerYYsetStatePara();
       }
@@ -6482,7 +6479,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(new DocVerbatim(this, s_context, g_token->verb, DocVerbatim::Verbatim, s_isExample, s_exampleName));
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Verbatim section ended without an end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Verbatim section ended without an end marker");
          }
          doctokenizerYYsetStatePara();
       }
@@ -6507,7 +6504,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(dv);
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno,"Dot section ended without an end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(),"Dot section ended without an end marker");
          }
 
          doctokenizerYYsetStatePara();
@@ -6533,7 +6530,7 @@ int DocPara::handleCommand(const QString &cmdName)
          m_children.append(dv);
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno,"Msc section ended without an end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(),"Msc section ended without an end marker");
          }
 
          doctokenizerYYsetStatePara();
@@ -6566,7 +6563,7 @@ int DocPara::handleCommand(const QString &cmdName)
          dv->setHeight(height);
 
          if (jarPath.isEmpty()) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Ignoring \\startuml command since 'PLANTUML JAR PATH' was not set");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Ignoring \\startuml command since 'PLANTUML JAR PATH' was not set");
             delete dv;
 
          } else {
@@ -6574,7 +6571,7 @@ int DocPara::handleCommand(const QString &cmdName)
          }
 
          if (retval == 0) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "startuml section ended without an end marker");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Startuml section ended without an end marker");
          }
 
          doctokenizerYYsetStatePara();
@@ -6597,7 +6594,7 @@ int DocPara::handleCommand(const QString &cmdName)
       case CMD_ENDDOT:
       case CMD_ENDMSC:
       case CMD_ENDUML:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s inside paragraph", csPrintable(g_token->name));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected command %s inside paragraph", csPrintable(g_token->name));
          break;
 
       case CMD_PARAM:
@@ -6794,11 +6791,11 @@ int DocPara::handleCommand(const QString &cmdName)
       break;
 
       case CMD_SECREFITEM:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s inside paragraph", csPrintable(g_token->name));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected command %s inside paragraph", csPrintable(g_token->name));
          break;
 
       case CMD_ENDSECREFLIST:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s inside paragraph", csPrintable(g_token->name));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected command %s inside paragraph", csPrintable(g_token->name));
          break;
 
       case CMD_FORMULA: {
@@ -6812,7 +6809,7 @@ int DocPara::handleCommand(const QString &cmdName)
       //  break;
 
       case CMD_INTERNALREF: {
-         // warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command %s", csPrintable(g_token->name));
+         // warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected command %s", csPrintable(g_token->name));
 
          DocInternalRef *ref = handleInternalRef(this);
          if (ref) {
@@ -6834,7 +6831,7 @@ int DocPara::handleCommand(const QString &cmdName)
 
       default:
          // should not get here
-         warn(s_fileName, doctokenizerYYlineno, "Invalid state, command = %d\n", cmdId);
+         warn(s_fileName, getDoctokenLineNum(), "Invalid state, command = %d\n", cmdId);
 
          assert(0);
          break;
@@ -6873,7 +6870,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
    if (g_token->emptyTag && ! (tagId & XML_CmdMask) &&
          tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR && tagId != HTML_HR && tagId != HTML_P) {
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "HTML tags may not use the 'empty tag' XHTML syntax");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "HTML tags may not use the 'empty tag' XHTML syntax");
    }
 
    switch (tagId) {
@@ -6900,7 +6897,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          }
 
          if (! insideUL(this) && ! insideOL(this)) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Lonely <li> tag found");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Lonely <li> tag found");
          } else {
             retval = RetVal_ListItem;
          }
@@ -7048,7 +7045,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       case HTML_CAPTION:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag <caption> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag <caption> found");
          break;
 
       case HTML_BR: {
@@ -7148,7 +7145,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
             if (paramName.isEmpty()) {
                if (Config::getBool("warn-undoc-param")) {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Empty 'name' attribute for <param%s> tag.",
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Empty 'name' attribute for <param%s> tag.",
                         tagId == XML_PARAM ? "" : "type");
 
                }
@@ -7159,7 +7156,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             }
 
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param%s> tag.",
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Missing 'name' attribute from <param%s> tag.",
                         tagId == XML_PARAM ? "" : "type");
 
          }
@@ -7180,7 +7177,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             }
 
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'name' attribute from <param%sref> tag.",
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Missing 'name' attribute from <param%sref> tag.",
                   tagId == XML_PARAMREF ? "" : "type");
          }
       }
@@ -7196,7 +7193,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             retval = handleParamSection(exceptName, DocParamSect::Exception, true);
 
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'cref' attribute from <exception> tag.");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Missing 'cref' attribute from <exception> tag.");
          }
       }
 
@@ -7209,7 +7206,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          } else if (insideUL(this) || insideOL(this)) {
             retval = RetVal_ListItem;
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "lonely <item> tag found");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "lonely <item> tag found");
          }
          break;
 
@@ -7272,7 +7269,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             s_inSeeBlock = inSeeBlock;
 
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'cref' or 'langword' attribute from <see> tag.");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Missing 'cref' or 'langword' attribute from <see> tag.");
          }
       }
       break;
@@ -7302,7 +7299,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
             ss->appendLinkWord(cref);
             retval = RetVal_OK;
          } else {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Missing 'cref' attribute from <seealso> tag.");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Missing 'cref' attribute from <seealso> tag.");
          }
       }
       break;
@@ -7336,7 +7333,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       case HTML_UNKNOWN:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported xml/html tag <%s> found", csPrintable(tagName));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported xml/html tag <%s> found", csPrintable(tagName));
          m_children.append(new DocWord(this, "<" + tagName + tagHtmlAttribs.toString() + ">"));
          break;
 
@@ -7364,7 +7361,7 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
 
       case HTML_UL:
          if (! insideUL(this)) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "found </ul> tag without matching <ul>");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Found </ul> tag without matching <ul>");
          } else {
             retval = RetVal_EndList;
          }
@@ -7372,7 +7369,7 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
 
       case HTML_OL:
          if (! insideOL(this)) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </ol> tag without matching <ol>");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Found </ol> tag without matching <ol>");
          } else {
             retval = RetVal_EndList;
          }
@@ -7380,7 +7377,7 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
 
       case HTML_LI:
          if (! insideLI(this)) {
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Found </li> tag without matching <li>");
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Found </li> tag without matching <li>");
          } else {
             // ignore </li> tags
          }
@@ -7393,7 +7390,7 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
       //case HTML_PRE:
       //  if (! insidePRE(this))
       //  {
-      //    warn_doc_error(s_fileName,doctokenizerYYlineno,"Found </pre> tag without matching <pre>");
+      //    warn_doc_error(s_fileName,getDoctokenLineNum(),"Found </pre> tag without matching <pre>");
       //  }
       //  else
       //  {
@@ -7492,37 +7489,37 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
          break;
 
       case HTML_CAPTION:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </caption> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </caption> found");
          break;
       case HTML_BR:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Illegal </br> tag found\n");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </br> found");
          break;
       case HTML_H1:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </h1> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h1> found");
          break;
       case HTML_H2:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </h2> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h2> found");
          break;
       case HTML_H3:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </h3> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h3> found");
          break;
       case HTML_H4:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </h4> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h4> found");
          break;
       case HTML_H5:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </h5> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h5> found");
          break;
       case HTML_H6:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </h6> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h6> found");
          break;
       case HTML_IMG:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </img> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </img> found");
          break;
       case HTML_HR:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected tag </hr> found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </hr> found");
          break;
       case HTML_A:
-         //warn_doc_error(s_fileName,doctokenizerYYlineno,"Unexpected tag </a> found");
+         //warn_doc_error(s_fileName,getDoctokenLineNum(),"Unexpected tag </a> found");
          // ignore </a> tag (can be part of <a name=...></a>
          break;
 
@@ -7561,13 +7558,13 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
          break;
 
       case HTML_UNKNOWN:
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported xml/html tag </%s> found", csPrintable(tagName));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported xml/html tag </%s> found", csPrintable(tagName));
          m_children.append(new DocWord(this, "</" + tagName + ">"));
          break;
 
       default:
          // we should not get here
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected end tag %s\n", csPrintable(tagName));
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end tag %s\n", csPrintable(tagName));
          assert(0);
          break;
    }
@@ -7731,7 +7728,7 @@ int DocPara::parse(bool skipParse, int token)
          break;
 
          case TK_ENDLIST:
-            DBG(("Found end of list inside of paragraph at line %d\n", doctokenizerYYlineno));
+            DBG(("Found end of list inside of paragraph at line %d\n", getDoctokenLineNum()));
 
             if (parent()->kind() == DocNode::Kind_AutoListItem) {
                assert(parent()->parent()->kind() == DocNode::Kind_AutoList);
@@ -7743,11 +7740,11 @@ int DocPara::parse(bool skipParse, int token)
                   goto endparagraph;
 
                } else {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "End of list marker found with an invalid indent level");
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "End of list marker found with an invalid indent level");
                }
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "End of list marker found without any preceding list items");
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "End of list marker found without any preceding list items");
             }
             break;
 
@@ -7869,7 +7866,7 @@ int DocPara::parse(bool skipParse, int token)
                m_children.append(new DocSymbol(this, s));
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found", csPrintable(g_token->name));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found", csPrintable(g_token->name));
             }
             break;
          }
@@ -7904,7 +7901,7 @@ int DocPara::parse(bool skipParse, int token)
          break;
 
          default:
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Found unexpected token (id=%x)\n", tok);
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Found unexpected token (id=%x)\n", tok);
             break;
       }
    }
@@ -7978,7 +7975,7 @@ int DocSection::parse()
       }
 
       if (retval == TK_LISTITEM) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid list item found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid list item found");
       }
 
       if (retval == RetVal_Internal) {
@@ -8042,7 +8039,7 @@ int DocSection::parse()
              ) {
       int level = (retval == RetVal_Subsubsection) ? 3 : 4;
 
-      warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected %s command found inside %s",
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected %s command found inside %s",
                      csPrintable(sectionLevelToName[level]), csPrintable(sectionLevelToName[m_level]) );
 
       retval = 0; // stop parsing
@@ -8093,7 +8090,7 @@ void DocText::parse()
             if (s != DocSymbol::Sym_Unknown) {
                m_children.append(new DocSymbol(this, s));
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno, "Unsupported symbol %s found", csPrintable(g_token->name));
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Unsupported symbol %s found", csPrintable(g_token->name));
             }
          }
          break;
@@ -8170,13 +8167,13 @@ void DocText::parse()
                   break;
 
                default:
-                  warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected command '%s' found", csPrintable(g_token->name));
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected command '%s' found", csPrintable(g_token->name));
                   break;
             }
             break;
 
          default:
-            warn_doc_error(s_fileName, doctokenizerYYlineno, "Unexpected token %s", csPrintable(tokToString(tok)));
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
             break;
       }
    }
@@ -8255,16 +8252,16 @@ void DocRoot::parse()
       }
 
       if (retval == TK_LISTITEM) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid list item found");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid list item found");
 
       } else if (retval == RetVal_Subsection) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "found subsection command outside of section context");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Found subsection command outside of section context");
 
       } else if (retval == RetVal_Subsubsection) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "found subsubsection command outside of subsection context");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Found subsubsection command outside of subsection context");
 
       } else if (retval == RetVal_Paragraph) {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "found paragraph command outside of subsubsection context");
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Found paragraph command outside of subsubsection context");
       }
 
       if (retval == RetVal_Internal) {
@@ -8289,7 +8286,7 @@ void DocRoot::parse()
          retval = s->parse();
 
       } else {
-         warn_doc_error(s_fileName, doctokenizerYYlineno, "Invalid section id '%s', ignoring section",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid section id '%s', ignoring section",
                   csPrintable(g_token->sectionId));
 
          retval = 0;
@@ -8544,13 +8541,13 @@ static QString processCopyDoc(const QString &data, uint &len)
                   s_copyStack.removeOne(def);
 
                } else {
-                  warn_doc_error(s_fileName, doctokenizerYYlineno,
+                  warn_doc_error(s_fileName, getDoctokenLineNum(),
                                  "Found recursive @copy%s or @copydoc relation for argument '%s'.\n",
                                  isBrief ? "brief" : "details", csPrintable(id) );
                }
 
             } else {
-               warn_doc_error(s_fileName, doctokenizerYYlineno,
+               warn_doc_error(s_fileName, getDoctokenLineNum(),
                   "@copy%s or @copydoc target '%s' not found", isBrief ? "brief" : "details", csPrintable(id) );
             }
 

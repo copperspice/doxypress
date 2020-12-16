@@ -201,7 +201,7 @@ static void processSection()
       file = s_definition->getOutputFileBase();
 
    } else {
-      warn(s_fileName, yylineno, "Found section/anchor %s without context\n", csPrintable(s_secLabel));
+      warn(s_fileName, s_yyLineNum, "Found section/anchor %s without context\n", csPrintable(s_secLabel));
 
    }
 
@@ -662,6 +662,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para>^{LISTITEM}   {
       /* list item */
       QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
 
       int dashPos = text.lastIndexOf('-');
 
@@ -679,6 +680,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       } else {
          QString text = QString::fromUtf8(yytext);
+         s_yyLineNum += text.count('\n');
 
          static QRegularExpression regExp("^.*[*+]");
          QRegularExpressionMatch match = regExp.match(text);
@@ -716,6 +718,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para>{BLANK}*\n{LISTITEM}     {
       /* list item on next line */
       QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
 
       text = text.right(text.length() - text.indexOf('\n') - 1);
       int dashPos = text.lastIndexOf('-');
@@ -733,6 +736,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       } else {
          QString text = QString::fromUtf8(yytext);
+         s_yyLineNum += text.count('\n');
+
          text = text.right(text.length() - text.indexOf('\n') - 1);
 
          static QRegularExpression regExp("^.*[*+]");
@@ -755,6 +760,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       } else {
          QString text = QString::fromUtf8(yytext);
+         s_yyLineNum += text.count('\n');
 
          int nl  = text.lastIndexOf('\n');
          int len = text.length();
@@ -774,6 +780,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para>^{ENDLIST}       {
       /* end list */
       QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
 
       int dotPos = text.lastIndexOf('.');
       g_token->indent = computeIndent(text, dotPos);
@@ -783,6 +790,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para>{BLANK}*\n{ENDLIST}      {
       /* end list on next line */
       QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
 
       text = text.right(text.length() - text.indexOf('\n') - 1);
       int dotPos = text.lastIndexOf('.');
@@ -803,7 +811,6 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Para>"@_fakenl"     {
       // artificial new line
-      yylineno++;
    }
 
 <St_Para>{SPCMD3}      {
@@ -820,7 +827,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para>{CMD}"n"\n    {
       /* \n followed by real newline */
       QString text = QString::fromUtf8(yytext);
-      yylineno++;
+      s_yyLineNum += text.count('\n');
 
       g_token->name     = text.mid(1).trimmed();
       g_token->paramDir = TokenInfo::Unspecified;
@@ -954,6 +961,9 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Para>{HTMLTAG}     {
       /* html tag */
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
       handleHtmlTag();
       return TK_HTMLTAG;
    }
@@ -1001,6 +1011,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       // function call, rule resolves multiple digit numbers
 
       QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
 
       if (text.startsWith('%')) {
          // strip % if present
@@ -1033,7 +1044,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Para,St_Text>{BLANK}+      |
 <St_Para,St_Text>{BLANK}*\n{BLANK}* {
       /* white space */
-      g_token->chars = QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->chars = text;
       return TK_WHITESPACE;
    }
 
@@ -1047,6 +1061,9 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       if (s_insidePre || s_autoListLevel == 0) {
          REJECT;
       }
+
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
    }
 
 <St_Para>({BLANK}*\n)+{BLANK}*\n/{MLISTITEM} {
@@ -1054,6 +1071,9 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       if (! Doxy_Globals::markdownSupport || s_insidePre || s_autoListLevel == 0) {
          REJECT;
       }
+
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
    }
 
 <St_Para>({BLANK}*\n)+{BLANK}*\n/{OLISTITEM} {
@@ -1061,10 +1081,15 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       if (! Doxy_Globals::markdownSupport || s_insidePre || s_autoListLevel == 0) {
          REJECT;
       }
+
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
    }
 
 <St_Para>({BLANK}*\n)+{BLANK}*\n{BLANK}* {
       QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
       g_token->indent = computeIndent(text, text.length());
 
       int i;
@@ -1097,17 +1122,26 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_Code>{WS}*{CMD}"endcode" {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
       return RetVal_OK;
    }
 
 <St_XmlCode>{WS}*"</code>" {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
       return RetVal_OK;
    }
 
 <St_Code,St_XmlCode>[^\\@\n<]+  |
 <St_Code,St_XmlCode>\n          |
-<St_Code,St_XmlCode>.           {
-         g_token->verb += QString::fromUtf8(yytext);
+<St_Code,St_XmlCode>.              {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_HtmlOnlyOption>" [block]" {
@@ -1128,7 +1162,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_HtmlOnly>[^\\@\n$]+    |
 <St_HtmlOnly>\n            |
 <St_HtmlOnly>.                {
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_ManOnly>{CMD}"endmanonly" {
@@ -1138,7 +1175,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_ManOnly>[^\\@\n$]+    |
 <St_ManOnly>\n            |
 <St_ManOnly>.                {
-         g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_RtfOnly>{CMD}"endrtfonly" {
@@ -1148,7 +1188,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_RtfOnly>[^\\@\n$]+    |
 <St_RtfOnly>\n            |
 <St_RtfOnly>.                {
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_LatexOnly>{CMD}"endlatexonly" {
@@ -1158,7 +1201,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_LatexOnly>[^\\@\n]+     |
 <St_LatexOnly>\n            |
 <St_LatexOnly>.                {
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_XmlOnly>{CMD}"endxmlonly" {
@@ -1168,7 +1214,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_XmlOnly>[^\\@\n]+  |
 <St_XmlOnly>\n         |
 <St_XmlOnly>.             {
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_DbOnly>{CMD}"enddocbookonly" {
@@ -1178,7 +1227,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_DbOnly>[^\\@\n]+  |
 <St_DbOnly>\n         |
 <St_DbOnly>.              {
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_Verbatim>{CMD}"endverbatim" {
@@ -1190,7 +1242,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Verbatim>\n        |
 <St_Verbatim>.            {
       /* Verbatim text */
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_Dot>{CMD}"enddot"  {
@@ -1200,8 +1255,11 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Dot>[^\\@\n]+      |
 <St_Dot>\n             |
 <St_Dot>.                 {
-      /* dot text */;
-      g_token->verb += QString::fromUtf8(yytext);
+      /* dot text */
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_Msc>{CMD}("endmsc")  {
@@ -1212,7 +1270,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Msc>\n             |
 <St_Msc>.                 {
       /* msc text */
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_PlantUMLOpt>{BLANK}*"{"[^}]*"}" {
@@ -1259,7 +1320,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_PlantUML>[^\\@\n]+ |
 <St_PlantUML>\n        |
 <St_PlantUML>.                 {
-      g_token->verb += QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->verb += text;
    }
 
 <St_Title>"\""         {
@@ -1290,6 +1354,8 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_TitleN>{HTMLTAG}                   {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
    }
 
 <St_TitleN>{SPCMD1}    |
@@ -1320,6 +1386,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_TitleN>{WORD2}     {
       /* word */
       QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
 
       if (text.startsWith('%') ) {
          // strip % if present
@@ -1396,8 +1463,12 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_TitleV>[^ \t\r\n]+ {
       // attribute value
-      g_token->chars = QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->chars = text;
       BEGIN(St_TitleN);
+
       return TK_WORD;
    }
 
@@ -1412,7 +1483,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Anchor>{LABELID}{WS}? {
       // anchor
-      g_token->name = QString::fromUtf8(yytext).trimmed();
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->name = text.trimmed();
       return TK_WORD;
    }
 
@@ -1475,6 +1549,9 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Ref>{WS}+"\""{WS}* {
       // white space following by quoted string
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
       BEGIN(St_Ref2);
    }
 
@@ -1619,7 +1696,11 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Param>{WS}*","{WS}*
 <St_Param>{WS}           {
       // param separator
-      g_token->chars = QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->chars = text;
+
       return TK_WHITESPACE;
    }
 
@@ -1630,6 +1711,9 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Options>{WS}*","{WS}*
 <St_Options>{WS}       {
       // option separator
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
       g_token->name += ",";
    }
 
@@ -1710,6 +1794,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_Sections>"<"{CAPTION}({WS}+{ATTRIB})*">" {
       QString tag = QString::fromUtf8(yytext);
+      s_yyLineNum += tag.count('\n');
 
       int s = tag.indexOf("id=");
 
@@ -1845,8 +1930,12 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
    }
 
 <St_SecLabel1>{LABELID} {
-      s_secLabel = QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      s_secLabel = text;
       processSection();
+
       BEGIN(St_Sections);
    }
 
@@ -1858,7 +1947,11 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_SecTitle>[^\n]+    |
 <St_SecTitle>[^\n]*\n        {
-      s_secTitle = QString::fromUtf8(yytext).trimmed();
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      s_secTitle = text.trimmed();
+
       processSection();
       BEGIN(St_Sections);
    }
@@ -1895,7 +1988,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <*>.                   {
       QString text = QString::fromUtf8(yytext);
-      warn(s_fileName, yylineno,"Unexpected character '%s'", csPrintable(text));
+      warn(s_fileName, s_yyLineNum,"Unexpected character '%s'", csPrintable(text));
    }
 
 %%
@@ -1927,7 +2020,8 @@ void doctokenizerYYFindSections(const QString &input, QSharedPointer<Definition>
    s_fileName      = fileName;
 
    BEGIN(St_Sections);
-   doctokenizerYYlineno = 1;
+
+   s_yyLineNum = 1;
    doctokenizerYYlex();
 
    printlex(yy_flex_debug, false, __FILE__, fileName);
