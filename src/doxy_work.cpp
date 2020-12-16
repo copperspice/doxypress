@@ -1144,12 +1144,6 @@ void generateOutput()
       Doxy_Globals::infoLog_Stat.end();
    }
 
-   if (generateDocbook) {
-      Doxy_Globals::infoLog_Stat.begin("Generating Docbook output\n");
-      generateDocbook_output();
-      Doxy_Globals::infoLog_Stat.end();
-   }
-
    if (generatePerl) {
       Doxy_Globals::infoLog_Stat.begin("Generating Perl output\n");
       generatePerl_output();

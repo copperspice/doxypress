@@ -185,7 +185,7 @@ class DocGenerator : public CodeGenerator
 class OutputGenerator : public DocGenerator
 {
  public:
-   enum OutputType { Html, Latex, Man, RTF, XML, DEF, Perl };
+   enum OutputType { Html, Latex, Man, RTF, XML, DEF, Perl, Docbook };
 
    OutputGenerator();
    virtual ~OutputGenerator();
