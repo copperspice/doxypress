@@ -463,7 +463,7 @@ QSharedPointer<Entry> tcl_entry_namespace(const QString ns)
       myEntry->section      = Entry::NAMESPACE_SEC;
       myEntry->m_entryName  = ns;
 
-      tcl.entry_main->addSubEntry(myEntry, tcl.entry_main);
+      tcl.entry_main->addSubEntry(myEntry);
       tcl.ns.insert(ns, myEntry);
    }
 
@@ -488,7 +488,7 @@ QSharedPointer<Entry> tcl_entry_class(const QString cl)
       myEntry->section     = Entry::CLASS_SEC;
       myEntry->m_entryName = cl;
 
-      tcl.entry_main->addSubEntry(myEntry, tcl.entry_main);
+      tcl.entry_main->addSubEntry(myEntry);
       tcl.cl.insert(cl, myEntry);
    }
 
@@ -1583,7 +1583,7 @@ static void tcl_comment(int what, const QString  &text)
                   parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                                     myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
 
-                  tcl.entry_inside->addSubEntry(myEntry, tcl.entry_inside);
+                  tcl.entry_inside->addSubEntry(myEntry);
 
                } else {
                   // we can add to current entry in this case
@@ -1606,7 +1606,7 @@ static void tcl_comment(int what, const QString  &text)
                parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                                  myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
 
-               tcl.entry_inside->addSubEntry(myEntry, tcl.entry_inside);
+               tcl.entry_inside->addSubEntry(myEntry);
 
             } else {
                // we can add to current entry
@@ -1625,7 +1625,7 @@ static void tcl_comment(int what, const QString  &text)
                                      tcl.file_name, myLine, false, tcl.config_autobrief, FALSE,
                                      myProt, myPos, myNew)) {
                if (myNew) {
-                  tcl.entry_inside->addSubEntry(tcl.entry_current, tcl.entry_inside);
+                  tcl.entry_inside->addSubEntry(tcl.entry_current);
                   tcl.entry_current = tcl_entry_new();
 
                } else {
@@ -1635,7 +1635,7 @@ static void tcl_comment(int what, const QString  &text)
             }
 
             if (myNew) {
-               tcl.entry_inside->addSubEntry(tcl.entry_current, tcl.entry_inside);
+               tcl.entry_inside->addSubEntry(tcl.entry_current);
                tcl.entry_current = tcl_entry_new();
             } else {
                tcl.entry_current->section = tcl.entry_inside->section;
@@ -2199,7 +2199,7 @@ static void tcl_command_PROC()
 
    tcl_command_ArgList(tcl.listCommandwords[4]);
 
-   myEntryNs->addSubEntry(tcl.entry_current, myEntryNs);
+   myEntryNs->addSubEntry(tcl.entry_current);
 
    myEntry = tcl.entry_current;
    tcl.fn.insert(myName, myEntry);
@@ -2247,7 +2247,7 @@ static void tcl_command_Method()
    tcl_protection(tcl.entry_current);
    tcl_command_ArgList(tcl.listCommandwords[4]);
 
-   myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+   myEntryCl->addSubEntry(tcl.entry_current);
 
    tcl.fn.insert(myName, tcl.entry_current);
    myEntry = tcl.entry_current;
@@ -2292,7 +2292,7 @@ static void tcl_command_Constructor()
    tcl_command_ArgList(tcl.listCommandwords[2]);
 
    if (myEntryCl) {
-      myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+      myEntryCl->addSubEntry(tcl.entry_current);
    }
 
    myEntry = tcl.entry_current;
@@ -2334,7 +2334,7 @@ static void tcl_command_DESTRUCTOR()
    tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
-   myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+   myEntryCl->addSubEntry(tcl.entry_current);
    myEntry = tcl.entry_current;
    tcl.fn.insert(myName, myEntry);
 
@@ -2373,7 +2373,7 @@ static void tcl_command_Namespace()
    tcl.entry_current->startBodyLine = tcl.line_body0;
    tcl.entry_current->endBodyLine   = tcl.line_body1;
 
-   tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_current);
    tcl.ns.insert(myName, tcl.entry_current);
 
    myStr = tcl.listCommandwords.at(6);
@@ -2420,7 +2420,7 @@ static void tcl_command_ITCL_CLASS()
    tcl.entry_current->startBodyLine = tcl.line_body0;
    tcl.entry_current->endBodyLine   = tcl.line_body1;
 
-   tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_current);
 
    tcl.cl.insert(myName, tcl.entry_current);
 
@@ -2459,7 +2459,7 @@ static void tcl_command_OO_CLASS()
    tcl.entry_current->startBodyLine = tcl.line_body0;
    tcl.entry_current->endBodyLine   = tcl.line_body1;
 
-   tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_current);
 
    tcl.cl.insert(myName, tcl.entry_current);
    myEntryCl = tcl.entry_current;
@@ -2527,7 +2527,7 @@ static void tcl_command_OO_DEFINE()
       }
 
       if (myEntryCl) {
-         myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+         myEntryCl->addSubEntry(tcl.entry_current);
       }
 
       tcl.fn.insert(myMethod, tcl.entry_current);
@@ -2593,7 +2593,7 @@ static void tcl_command_Variable(int inclass)
    tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
-   myEntry->addSubEntry(tcl.entry_current, myEntry);
+   myEntry->addSubEntry(tcl.entry_current);
 
    tcl.entry_current = tcl_entry_new();
 }
@@ -3085,13 +3085,13 @@ static void tcl_parse(const QString ns, const QString cls)
    tcl.entry_file->section     = Entry::SOURCE_SEC;
    tcl.entry_file->protection  = Public;
 
-   tcl.entry_main->addSubEntry(tcl.entry_file, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_file);
 
    QSharedPointer<Entry> myEntry = tcl_entry_new();
 
    myEntry->m_entryName = "";
 
-   tcl.entry_main->addSubEntry(myEntry, tcl.entry_main);
+   tcl.entry_main->addSubEntry(myEntry);
    tcl.ns.insert("::", myEntry);
    tcl.entry_current = tcl_entry_new();
 

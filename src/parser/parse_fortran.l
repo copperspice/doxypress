@@ -471,7 +471,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
 
       current = QMakeShared<Entry>();
       current->m_srcLang = SrcLangExt_Fortran;
@@ -498,7 +498,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
 
       current = QMakeShared<Entry>();
       current->m_srcLang = SrcLangExt_Fortran;
@@ -2689,7 +2689,7 @@ static void addCurrentEntry(int case_insens)
       current->m_entryName = current->m_entryName.toLower();
    }
 
-   current_root->addSubEntry(current, current_root);
+   current_root->addSubEntry(current);
    last_entry = current;
 
    current = QMakeShared<Entry>();
@@ -3085,7 +3085,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       current->m_entryName = yyFileName;
       current->section     = Entry::SOURCE_SEC;
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
 
       file_root            = current;
       current              = QMakeShared<Entry>();

@@ -313,7 +313,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
 
 //             if (newEntry) {
-                  s_current_root->addSubEntry(current, s_current_root);
+                  s_current_root->addSubEntry(current);
 //             }
 
             } else {
@@ -324,7 +324,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   current->m_entryName.prepend(parentEntry->m_entryName + "::");
                   current->protection = getAccessSpecifier(node);
 
-                  parentEntry->addSubEntry(current, parentEntry);
+                  parentEntry->addSubEntry(current);
                }
             }
 
@@ -350,7 +350,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             }
 
             if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
-               s_current_root->addSubEntry(current, s_current_root);
+               s_current_root->addSubEntry(current);
 
             } else {
                // nested struct
@@ -360,7 +360,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   current->m_entryName.prepend(parentEntry->m_entryName + "::");
                   current->protection = getAccessSpecifier(node);
 
-                  parentEntry->addSubEntry(current, parentEntry);
+                  parentEntry->addSubEntry(current);
                }
             }
 
@@ -382,7 +382,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->m_traits.setTrait(Entry::Virtue::Union);
 
             if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
-               s_current_root->addSubEntry(current, s_current_root);
+               s_current_root->addSubEntry(current);
 
             } else {
                // nested union
@@ -392,7 +392,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   current->m_entryName.prepend(parentEntry->m_entryName + "::");
                   current->protection = getAccessSpecifier(node);
 
-                  parentEntry->addSubEntry(current, parentEntry);
+                  parentEntry->addSubEntry(current);
                }
             }
          }
@@ -675,10 +675,10 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->endBodyLine   = m_context->getFullLoc(node->getEndLoc()).getSpellingLineNumber();
 
             if (parentEntry) {
-               parentEntry->addSubEntry(current, parentEntry);
+               parentEntry->addSubEntry(current);
 
             } else {
-               s_current_root->addSubEntry(current, s_current_root);
+               s_current_root->addSubEntry(current);
 
             }
 
@@ -755,7 +755,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->endBodyLine   = m_context->getFullLoc(node->getEndLoc()).getSpellingLineNumber();
 
             if (parentEntry) {
-               parentEntry->addSubEntry(current, parentEntry);
+               parentEntry->addSubEntry(current);
 
             } else {
                // hold until we visit the parent
@@ -813,7 +813,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             s_conceptMap.insert(currentUSR, current);
          }
 
-         s_current_root->addSubEntry(current, s_current_root);
+         s_current_root->addSubEntry(current);
 
          return true;
       }
@@ -878,7 +878,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          QString currentUSR = getUSR_Decl(node);
          s_entryMap.insert(currentUSR, current);
 
-         parentEntry->addSubEntry(current, parentEntry);
+         parentEntry->addSubEntry(current);
 
          return true;
       }
@@ -939,7 +939,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          if (parentEntry) {
-            parentEntry->addSubEntry(current, parentEntry);
+            parentEntry->addSubEntry(current);
 
          } else {
             // hold until we visit the parent
@@ -1001,7 +1001,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->setData(EntryKey::Initial_Value, " = " + toQString(tStream.str()));
          }
 
-         parentEntry->addSubEntry(current, parentEntry);
+         parentEntry->addSubEntry(current);
 
          //
          bool isStrong = parentEntry->m_traits.hasTrait(Entry::Virtue::Strong);
@@ -1010,7 +1010,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             auto tmpEntry = parentEntry->parent();
 
             if (tmpEntry) {
-               tmpEntry->addSubEntry(current, tmpEntry);
+               tmpEntry->addSubEntry(current);
             }
          }
 
@@ -1079,11 +1079,11 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          if (parentEntry) {
-            parentEntry->addSubEntry(current, parentEntry);
+            parentEntry->addSubEntry(current);
 
          } else {
             // part of a file
-            s_current_root->addSubEntry(current, s_current_root);
+            s_current_root->addSubEntry(current);
          }
 
          return true;
@@ -1195,7 +1195,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          current->startBodyLine = current->startLine;
          current->endBodyLine   = m_context->getFullLoc(node->getEndLoc()).getSpellingLineNumber();
 
-         parentEntry->addSubEntry(current, parentEntry);
+         parentEntry->addSubEntry(current);
 
          return true;
       }
@@ -1244,9 +1244,9 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          if (parentEntry == nullptr)  {
-            s_current_root->addSubEntry(current, s_current_root);
+            s_current_root->addSubEntry(current);
          } else {
-            parentEntry->addSubEntry(current, parentEntry);
+            parentEntry->addSubEntry(current);
          }
 
          return true;
@@ -1376,7 +1376,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
            current->m_traits.setTrait(Entry::Virtue::Alias);
          }
 
-         parentEntry->addSubEntry(current, parentEntry);
+         parentEntry->addSubEntry(current);
          return true;
       }
 
@@ -1522,7 +1522,7 @@ void DoxyPPConsumer::MacroDefined(const clang::Token &macroToken, const clang::M
          defineInit = QString::fromUtf8(begin, end - begin);
       }
 
-      s_current_root->addSubEntry(current, s_current_root);
+      s_current_root->addSubEntry(current);
 
       // create member definition for preprocessor macros
       addDefine(current, argList, args, defineInit);
@@ -1552,7 +1552,7 @@ class DoxyASTConsumer : public clang::ASTConsumer {
 
             if (parentEntry) {
                // found a match
-               parentEntry->addSubEntry(iter.value(), parentEntry);
+               parentEntry->addSubEntry(iter.value());
 
                // remove and reset the iter
                iter = s_orphanMap.erase(iter);

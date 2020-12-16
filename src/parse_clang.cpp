@@ -1204,7 +1204,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                   current = QMakeShared<Entry>();
                   current->m_srcLang = SrcLangExt_Cpp;
 
-                  s_current_root->addSubEntry(current, s_current_root);
+                  s_current_root->addSubEntry(current);
                }
 
                if (current) {
@@ -1310,7 +1310,7 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
       current->m_srcLang = SrcLangExt_Cpp;
 
       if (parent) {
-         parent->addSubEntry(current, parent);
+         parent->addSubEntry(current);
       }
    }
 
@@ -1326,7 +1326,7 @@ static void handleCommentBlock(const QString &comment, bool brief, const QString
          current->m_srcLang = SrcLangExt_Cpp;
 
          if (parent) {
-            parent->addSubEntry(current, parent);
+            parent->addSubEntry(current);
          }
 
          current->setData(EntryKey::MainDocs_File, docFile);

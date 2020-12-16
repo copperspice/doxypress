@@ -1630,7 +1630,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <PackageName>";"        {
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current_root = current;
 
       current = QMakeShared<Entry>();
@@ -2514,12 +2514,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       // add a using declaration
       current->section = Entry::USINGDECL_SEC;
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>(*current);
 
       // also add it as a using directive
       current->section = Entry::USINGDIR_SEC;
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
 
       initEntry();
@@ -2558,7 +2558,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::File_Name, yyFileName);
       current->section  = Entry::USINGDIR_SEC;
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(Using);
@@ -2578,7 +2578,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->section=Entry::USINGDECL_SEC;
       }
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       previous = current;
       current  = QMakeShared<Entry>();
       initEntry();
@@ -2609,7 +2609,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine = yyLineNr;
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       previous = current;
       current  = QMakeShared<Entry>();
 
@@ -2626,7 +2626,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
 
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
          current = QMakeShared<Entry>();
          initEntry();
       }
@@ -2719,7 +2719,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(Using);
@@ -3097,7 +3097,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // unknown data type, decipher later on
       // current->setData(EntryKey::Member_Type, = "");
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(FindMembers);
@@ -3311,7 +3311,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
        current->m_entryName = current->m_entryName.trimmed();
        current->section     = Entry::VARIABLE_SEC;
 
-       current_root->addSubEntry(current, current_root);
+       current_root->addSubEntry(current);
        current = QMakeShared<Entry>();
        initEntry();
        BEGIN(FindMembers);
@@ -3425,7 +3425,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->section     = Entry::FUNCTION_SEC;
 
       currentArgumentContext = FindMembers;
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
 
@@ -3871,7 +3871,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_entryName = current->m_entryName.trimmed();
       current->section     = Entry::DEFINE_SEC;
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
 
       initEntry();
@@ -3893,7 +3893,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_entryName  = current->m_entryName.trimmed();
       current->section      = Entry::VARIABLE_SEC;
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
 
       initEntry();
@@ -4204,7 +4204,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->m_entryName = current->m_entryName.trimmed();
          current->section     = Entry::VARIABLE_SEC;
 
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
          current = QMakeShared<Entry>();
          initEntry();
 
@@ -4985,7 +4985,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->startLine   = yyBegLineNr;
          current->startColumn = yyBegColNr;
 
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
          needNewCurrent = true;
       }
 
@@ -5253,7 +5253,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
 
@@ -5393,7 +5393,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
             current->setData(EntryKey::Member_Args, current->getData(EntryKey::Member_Args).simplified());
 
-            current_root->addSubEntry(current, current_root);
+            current_root->addSubEntry(current);
             current = QMakeShared<Entry>();
             initEntry();
          }
@@ -5430,7 +5430,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
 
          // add enum value to the enum data type
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
 
          bool isStrong = current_root->m_traits.hasTrait(Entry::Virtue::Strong);
 
@@ -5441,7 +5441,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             current = QMakeShared<Entry>(*current);
 
             // add enum value to the enum data type parent (usually the class the enum belongs to)
-            current_root->parent()->addSubEntry(current, current_root->parent());
+            current_root->parent()->addSubEntry(current);
          }
 
          current = QMakeShared<Entry>();
@@ -5630,7 +5630,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                BEGIN( ReadBodyIntf );
 
             } else {
-               current_root->addSubEntry(current , current_root);
+               current_root->addSubEntry(current);
                memspecEntry = current;
                current = QMakeShared<Entry>(*current);
 
@@ -5711,7 +5711,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::Member_Args,   current->getData(EntryKey::Member_Args).simplified());
       current->setData(EntryKey::Member_Type,   current->getData(EntryKey::Member_Type).simplified());
 
-      current_root->addSubEntry(current , current_root);
+      current_root->addSubEntry(current);
 
       if (! firstTypedefEntry) {
          firstTypedefEntry = current;
@@ -5739,7 +5739,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::Member_Args,   current->getData(EntryKey::Member_Args).simplified());
       current->setData(EntryKey::Member_Type,   current->getData(EntryKey::Member_Type).simplified());
 
-      current_root->addSubEntry( current , current_root);
+      current_root->addSubEntry( current);
       memspecEntry = current;
       current = QMakeShared<Entry>(*current);
       initEntry();
@@ -5903,7 +5903,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                varEntry->addSpecialListItem(lii.type, lii.itemId);
             }
 
-            current_root->addSubEntry(varEntry, current_root);
+            current_root->addSubEntry(varEntry);
          }
       }
 
@@ -5977,7 +5977,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <ReadBodyIntf>"@end"/[^a-z_A-Z0-9]  {
       // end of Objective C block
-      current_root->addSubEntry( current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
 
@@ -7216,7 +7216,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          previous = current;
 
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
          current  = QMakeShared<Entry>();
          initEntry();
 
@@ -7578,7 +7578,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             baseName.resize(0);
          }
 
-         current_root->addSubEntry( current, current_root);
+         current_root->addSubEntry(current);
          current = QMakeShared<Entry>();
 
       } else {
@@ -7708,7 +7708,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          current->m_traits.setTrait(Entry::Virtue::ForwardDecl);
 
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
          current = QMakeShared<Entry>();
 
       } else if (insideIDL && ( ( (isInterface_Root || isService_Root) && (isInterface)) ||
@@ -7730,7 +7730,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->m_traits.setTrait(Entry::Virtue::Interface, false);
          current->m_traits.setTrait(Entry::Virtue::Service, false);
 
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
          current = QMakeShared<Entry>();
       }
 
@@ -9457,7 +9457,7 @@ static void newEntry()
       // current is replaced by previous which was already added to current_root
       // do not add it again
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
    }
 
    tempEntry = QSharedPointer<Entry>();
@@ -9738,7 +9738,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QStringLi
       } else {
          current->m_entryName = yyFileName;
          current->section     = sec;
-         current_root->addSubEntry(current, current_root);
+         current_root->addSubEntry(current);
 
          current = QMakeShared<Entry>();
          initEntry();

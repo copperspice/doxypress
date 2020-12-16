@@ -342,7 +342,7 @@ class Entry : public EnableSharedFromThis
    // ** sub entries
 
    // adds entry E as a child to this entry
-   void addSubEntry (QSharedPointer<Entry> e, QSharedPointer<Entry> dummy = QSharedPointer<Entry>());
+   void addSubEntry (QSharedPointer<Entry> e);
 
    // Removes entry E from the list of children
    void removeSubEntry(QSharedPointer<Entry> e);

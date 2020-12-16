@@ -3292,7 +3292,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
 
       if (needsEntry) {
          QString docFile = current->getData(EntryKey::MainDocs_File);
-         root->addSubEntry(current, root);
+         root->addSubEntry(current);
 
          current = QMakeShared<Entry>();
 
@@ -3303,7 +3303,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    }
 
    if (needsEntry) {
-      root->addSubEntry(current, root);
+      root->addSubEntry(current);
    }
 
    // restore setting

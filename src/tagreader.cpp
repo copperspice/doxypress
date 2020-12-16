@@ -1249,7 +1249,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
             ti.tag_FileName = evi.file;
 
             ev->m_tagInfo   = ti;
-            me->addSubEntry(ev, me);
+            me->addSubEntry(ev);
          }
       }
 
@@ -1328,7 +1328,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
          me->mtype = MethodType::Slot;
       }
 
-      ce->addSubEntry(me, ce);
+      ce->addSubEntry(me);
    }
 }
 
@@ -1442,7 +1442,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       }
 
       buildMemberList(ce, tci.members);
-      root->addSubEntry(ce, root);
+      root->addSubEntry(ce);
    }
 
    // build file list
@@ -1479,7 +1479,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       }
 
       buildMemberList(fe, tfi.members);
-      root->addSubEntry(fe, root);
+      root->addSubEntry(fe);
    }
 
    // build namespace list
@@ -1498,7 +1498,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ne->setData(EntryKey::Clang_Id, tni.clangId);
 
       buildMemberList(ne, tni.members);
-      root->addSubEntry(ne, root);
+      root->addSubEntry(ne);
    }
 
    // build package list
@@ -1516,7 +1516,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       pe->m_tagInfo   = ti;
 
       buildMemberList(pe, tpgi.members);
-      root->addSubEntry(pe, root);
+      root->addSubEntry(pe);
    }
 
    // build group list
@@ -1536,7 +1536,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ge->m_tagInfo   = ti;
 
       buildMemberList(ge, tgi.members);
-      root->addSubEntry(ge, root);
+      root->addSubEntry(ge);
    }
 
    // build page list
@@ -1561,7 +1561,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ti.tag_FileName = tpi.filename;
 
       pe->m_tagInfo   = ti;
-      root->addSubEntry(pe, root);
+      root->addSubEntry(pe);
    }
 }
 

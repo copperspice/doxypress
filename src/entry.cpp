@@ -151,10 +151,8 @@ void Entry::reset()
    m_sublist.clear();
 }
 
-void Entry::addSubEntry(QSharedPointer<Entry> child, QSharedPointer<Entry> dummy)
+void Entry::addSubEntry(QSharedPointer<Entry> child)
 {
-   (void) dummy;
-
    QSharedPointer<Entry> self = sharedFrom(this);
 
    child->m_parent = self;

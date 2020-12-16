@@ -114,7 +114,7 @@ static void initEntry()
 static void newEntry()
 {
    previous = current;
-   current_root->addSubEntry(current, current_root);
+   current_root->addSubEntry(current);
 
    current = QMakeShared<Entry>();
    initEntry();
@@ -726,7 +726,7 @@ STARTDOCSYMS      "##"
       current->section  = Entry::USINGDIR_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
 
       current = QMakeShared<Entry>();
       initEntry();
@@ -741,7 +741,7 @@ STARTDOCSYMS      "##"
       current->section  = Entry::USINGDECL_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
    }
@@ -754,7 +754,7 @@ STARTDOCSYMS      "##"
       current->section  = Entry::USINGDECL_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(Search);
@@ -785,7 +785,7 @@ STARTDOCSYMS      "##"
       current->section  = Entry::USINGDECL_SEC;
       current->setData(EntryKey::File_Name, yyFileName);
 
-      current_root->addSubEntry(current, current_root);
+      current_root->addSubEntry(current);
       current = QMakeShared<Entry>();
       initEntry();
       BEGIN(Search);
@@ -2096,7 +2096,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
       current->startLine      = yyLineNr;
       current->startBodyLine  = yyLineNr;
 
-      rt->addSubEntry(current, rt);
+      rt->addSubEntry(current);
 
       current_root  = current;
       initParser();
