@@ -57,7 +57,7 @@ static int              lastCSConstraint;
 static int              lastHereDocContext;
 static int              lastDefineContext;
 static int              lastAlignAsContext;
-static int              lastC11AttributeContext;
+static int              lastCppAttributeContext;
 
 static Protection       protection;
 static Protection       baseProt;
@@ -759,6 +759,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 %x CliPropertyType
 %x CliPropertyIndex
 %x CliOverride
+%x CppAttribute
 %x Bases
 %x BasesProt
 %x NextSemi
@@ -791,7 +792,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 %x SkipPHPString
 %x SkipInits
 %x SkipC11Inits
-%x SkipC11Attribute
 %x SkipCPP
 %x SkipCPPBlock
 %x SkipComment
@@ -1665,6 +1665,18 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
+<FindMembers>{B}*"const"{BN}+  {
+      if (insideCSharp) {
+         current->appendData(EntryKey::Member_Type, " const ");
+         current->stat = true;
+
+         lineCount();
+
+      } else {
+         REJECT;
+      }
+   }
+
 <FindMembers>{B}*"virtual"{BN}+     {
       current->appendData(EntryKey::Member_Type, " virtual ");
       current->virt = Virtual;
@@ -2531,9 +2543,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <PHPUseAs>{ID}                 {
       QString text = QString::fromUtf8(yytext);
-
-      Doxy_Globals::namespaceAliasDict.insert(text,
-      removeRedundantWhiteSpace(substitute(aliasName,"\\","::")));
+      if (! aliasName.isEmpty()) {
+         Doxy_Globals::namespaceAliasDict.insert(text,
+               removeRedundantWhiteSpace(substitute(aliasName, "\\", "::")));
+      }
 
       aliasName.clear();
    }
@@ -5597,6 +5610,59 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       } else {
          current->endBodyLine = yyLineNr;
+
+         // save current namespace
+         QSharedPointer<Entry> original_root = current_root;
+
+         if (current->section == Entry::NAMESPACE_SEC && current->getData(EntryKey::Member_Type) == "namespace") {
+             int split_point;
+
+             // save documentation values
+             QString doc       = current->getData(EntryKey::Main_Docs);
+             QString docFile   = current->getData(EntryKey::MainDocs_File);
+             int     docLine   = current->docLine;
+
+             QString brief     = current->getData(EntryKey::Brief_Docs);
+             QString briefFile = current->getData(EntryKey::Brief_File);
+             int     briefLine = current->briefLine;
+
+             // reset documentation values
+             current->setData(EntryKey::Main_Docs,     QString());
+             current->setData(EntryKey::MainDocs_File, QString());
+             current->docLine = 0;
+
+             current->setData(EntryKey::Brief_Docs, QString());
+             current->setData(EntryKey::Brief_File, QString());
+             current->briefLine = 0;
+
+             while ((split_point = current->m_entryName.indexOf("::")) != -1) {
+
+               QSharedPointer<Entry> new_current = QMakeShared<Entry>(*current);
+               current->setData(EntryKey::Source_Text, QString());
+
+               new_current->m_entryName = current->m_entryName.mid(split_point + 2);
+               current->m_entryName     = current->m_entryName.left(split_point);
+
+               if (! current_root->m_entryName.isEmpty()) {
+                  current->m_entryName.prepend(current_root->m_entryName + "::");
+               }
+
+               current_root->addSubEntry(current);
+
+               current_root = current;
+               current      = new_current;
+             }
+
+             // restore documentation values
+             current->setData(EntryKey::Main_Docs,     doc);
+             current->setData(EntryKey::MainDocs_File, docFile);
+             current->docLine = docLine;
+
+             current->setData(EntryKey::Brief_Docs, brief);
+             current->setData(EntryKey::Brief_File, briefFile);
+             current->briefLine = briefLine;
+         }
+
          QString &cn = current->m_entryName;
          QString rn  = current_root->m_entryName;
 
@@ -5640,8 +5706,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
                   // namespaces and interfaces and java classes ends with a closing bracket without semicolon
                   current->reset();
-                  initEntry();
 
+                  // restore scope from before namespace descent
+                  current_root = original_root;
+
+                  initEntry();
                   memspecEntry = QSharedPointer<Entry>();
 
                   BEGIN( FindMembers );
@@ -6808,14 +6877,41 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
       current->argList.trailingReturnType = " -> ";
       current->appendData(EntryKey::Member_Args, " -> ");
+      roundCount = 0;
+
       BEGIN(TrailingReturn);
    }
 
 <TrailingReturn>[{;]                   {
+      if (roundCount > 0)  {
+         REJECT;
+      }
+
       unput(*yytext);
       BEGIN(FuncQual);
    }
+<TrailingReturn>"("                    {
+      QString text = QString::fromUtf8(yytext);
 
+      ++roundCount;
+      current->argList.trailingReturnType += text;
+      current->appendData(EntryKey::Member_Args, text);
+   }
+
+<TrailingReturn>")"                    {
+      QString text = QString::fromUtf8(yytext);
+
+      if (roundCount > 0) {
+        --roundCount;
+
+      } else {
+         warn(yyFileName, yyLineNr, "Found ')' without opening '(' for trailing return type '%s'",
+               csPrintable(current->argList.trailingReturnType));
+      }
+
+      current->argList.trailingReturnType += text;
+      current->appendData(EntryKey::Member_Args, text);
+   }
 <TrailingReturn>.                         {
       QString text = QString::fromUtf8(yytext);
 
@@ -7291,17 +7387,25 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<SkipC11Attribute>"]]"                 {
-      BEGIN(lastC11AttributeContext);
-   }
-
 <SkipInits>"{"                         {
       // C++ style initializer
       unput('{');
       BEGIN( Function );
    }
 
-<SkipCurly>"{"                         {
+<CppAttribute>"deprecated"          {
+      current->m_traits.setTrait(Entry::Virtue::Deprecated);
+  }
+
+<CppAttribute>"nodiscard"          {
+      current->m_traits.setTrait(Entry::Virtue::NoDiscard);
+  }
+
+<CppAttribute>"]]"                 {
+      BEGIN(lastCppAttributeContext);
+   }
+
+<SkipCurly>"{"                      {
       ++curlyCount;
    }
 
@@ -7419,7 +7523,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( SkipCurlyCpp );
    }
 
-<SkipCurly,SkipC11Inits,SkipInits,SkipC11Attribute>\n           {
+<SkipCurly,SkipC11Inits,SkipInits,CppAttribute>\n  {
       lineCount();
    }
 
@@ -7447,24 +7551,24 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
-<SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp,SkipC11Attribute>"/*"      {
+<SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp,CppAttribute>"/*"      {
       // */ (editor syntax fix)
       lastCContext = YY_START;
       BEGIN(SkipComment);
    }
 
-<SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp,SkipC11Attribute>"//"     {
+<SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp,CppAttribute>"//"     {
       lastCContext = YY_START;
       BEGIN(SkipCxxComment);
    }
 
-<SkipInits,SkipC11Inits,SkipC11Attribute>"("     {
+<SkipInits,SkipC11Inits,CppAttribute>"("     {
       roundCount = 0;
       lastSkipRoundContext = YY_START;
       BEGIN(SkipRound);
    }
 
-<SkipInits,SkipC11Inits,SkipC11Attribute>\"      {
+<SkipInits,SkipC11Inits,CppAttribute>\"      {
       lastStringContext = YY_START;
       BEGIN( SkipString );
    }
@@ -7512,7 +7616,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp,SkipC11Attribute>.    {
+<SkipInits,SkipC11Inits,SkipCurly,SkipCurlyCpp,CppAttribute>.    {
       // no code
    }
 
@@ -8595,7 +8699,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Source_Text, text[0]);
    }
 
-<FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,SkipC11Inits,SkipC11Attribute,Bases,OldStyleArgs>("//"{B}*)?"/*!" {
+<FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,SkipC11Inits,CppAttribute,Bases,OldStyleArgs>("//"{B}*)?"/*!" {
 
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
@@ -9363,9 +9467,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <*>"[["                       {
-      // C++11 attribute
-      lastC11AttributeContext = YY_START;
-      BEGIN( SkipC11Attribute );
+      // C++ attributes
+      if (! insideCpp) {
+         REJECT;
+      }
+
+      lastCppAttributeContext = YY_START;
+      BEGIN( CppAttribute );
    }
 
 <*>\n       {
@@ -9829,9 +9937,9 @@ bool CPP_Parser::needsPreprocessing(const QString &extension) const
    QString fe = extension.toLower();
    SrcLangExt lang = getLanguageFromFileName(extension);
 
-   return (SrcLangExt_Cpp == lang) ||
-                  ! ( fe == ".java" || fe == ".as"    || fe == ".d"   || fe == ".php" ||
-                     fe == ".php4" || fe == ".inc" || fe == ".phtml");
+   return (SrcLangExt_Cpp == lang)  ||
+                  ! ( fe == ".java"  || fe == ".as"  || fe == ".d"   || fe == ".php" ||
+                      fe == ".php4"  || fe ==".php5" || fe == ".inc" || fe == ".phtml");
 }
 
 void CPP_Parser::parseInput(const QString &fileName, const QString &fileBuffer,

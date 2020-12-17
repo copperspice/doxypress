@@ -84,8 +84,8 @@ static QString     docBlock;                     // contents of all lines of a d
 static QString     currentModule;                // name of the current enclosing module
 static QString     currentClass;                 // name of the current enclosing class
 
-static UseSDict    *useMembers = new UseSDict;   // info about used modules
-static UseEntry    *useEntry = 0;                // current use statement info
+static UseSDict    *useMembers = nullptr;        // info about used modules
+static UseEntry    *useEntry   = nullptr;        // current use statement info
 
 static QString str = "";                         // contents of fortran string
 
@@ -1493,7 +1493,7 @@ void parseFortranCode(CodeGenerator &od, const QString &className, const QString
    (void) className;
    (void) memberDef;
 
-   if (s.isEmpty()) {
+   if (input.isEmpty()) {
       return;
    }
 
@@ -1502,9 +1502,11 @@ void parseFortranCode(CodeGenerator &od, const QString &className, const QString
    TooltipManager::instance()->clearTooltips();
    s_code = &od;
 
-   s_inputString      = s;
+   useMembers = new UseSDict;
+
+   s_inputString      = input;
    s_inputPosition    = 0;
-   s_isFixedForm      = recognizeFixedForm(s, format);
+   s_isFixedForm      = recognizeFixedForm(input, format);
    s_currentFontClass = "";
    s_contLineNr       = 1;
 
@@ -1530,13 +1532,13 @@ void parseFortranCode(CodeGenerator &od, const QString &className, const QString
       s_inputLines  = s_yyLineNr + countLines() - 1;
    }
 
-   s_exampleBlock  = exBlock;
-   s_exampleName   = exName;
+   s_exampleBlock  = isExampleBlock;
+   s_exampleName   = exampleName;
    s_sourceFileDef = fd;
 
-   if (exBlock && fd == 0) {
+   if (isExampleBlock && fd == nullptr) {
       // create a dummy filedef for the example
-      s_sourceFileDef = QMakeShared<FileDef>("", exName);
+      s_sourceFileDef = QMakeShared<FileDef>("", exampleName);
    }
 
    if (s_sourceFileDef) {
@@ -1569,11 +1571,12 @@ void parseFortranCode(CodeGenerator &od, const QString &className, const QString
       TooltipManager::instance()->writeTooltips(*s_code);
    }
 
-   if (exBlock && s_sourceFileDef) {
+   if (isExampleBlock && s_sourceFileDef) {
       // delete the temporary file definition used for this example
       s_sourceFileDef = QSharedPointer<FileDef>();
    }
 
+   delete useMembers;
    s_hasContLine.clear();
 
    return;

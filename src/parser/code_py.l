@@ -1648,9 +1648,11 @@ void parsePythonCode(CodeGenerator &od, const QString &, const QString &s, bool 
    s_exampleName   = exName;
    s_sourceFileDef = fd;
 
+   s_includeCodeFragment = inlineFragment;
+
    bool cleanupSourceDef = false;
 
-   if (fd == nullptr) {
+   if (exBlock && fd == nullptr) {
       // create a dummy filedef for the example
       s_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? exName : "generated"));
       cleanupSourceDef = true;

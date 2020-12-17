@@ -41,9 +41,10 @@
 
 struct CondCtx
 {
-
    CondCtx(int line, const QString &id, bool b)
-      : lineNr(line), sectionId(id), skip(b) {}
+      : lineNr(line), sectionId(id), skip(b)
+   {
+   }
 
    int lineNr;
    QString sectionId;
@@ -134,11 +135,11 @@ class DefineManager
       }
 
       QSharedPointer<DefinesPerFile> dpf = m_fileMap.value(fileName);
+
       if (dpf == nullptr) {
          // new file
 
-         dpf = QMakeShared<DefinesPerFile>();
-         m_fileMap.insert(fileName, dpf);
+         m_fileMap.insert(fileName, QMakeShared<DefinesPerFile>());
       }
    }
 
@@ -163,8 +164,7 @@ class DefineManager
       if (dpf == nullptr) {
          // new file
 
-         dpf = QMakeShared<DefinesPerFile>();
-         m_fileMap.insert(fileName, dpf);
+         m_fileMap.insert(fileName, QMakeShared<DefinesPerFile>());
 
       } else {
          // existing file
@@ -200,7 +200,7 @@ class DefineManager
          m_fileMap.insert(fileName, dpf);
       }
 
-      dpf->addDefine(def);
+      dpf->addDefine(std::move(def));
    }
 
    /** Add an include relation to the manager object.
@@ -218,6 +218,7 @@ class DefineManager
          dpf = QMakeShared<DefinesPerFile>();
          m_fileMap.insert(fromFileName, dpf);
       }
+
       dpf->addInclude(toFileName);
    }
 
@@ -1123,6 +1124,8 @@ static int getNextId(const QString &expr, int p, int *l)
  */
 static bool expandExpression(QString &expr, QString *rest, int pos, int level)
 {
+
+
    if (expr.isEmpty()) {
      return true;
    }
@@ -2006,6 +2009,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 %x    SkipString
 %x    CopyLine
 %x    CopyString
+%x    CopyStringCs
 %x    CopyStringFtn
 %x    Include
 %x    IncludeID
@@ -2144,6 +2148,16 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
    }
+<CopyLine>@\"  {
+      if (getLanguageFromFileName(s_yyFileName) != SrcLangExt_CSharp) {
+         REJECT;
+      }
+
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
+
+      BEGIN( CopyStringCs );
+   }
 
 <CopyLine>\"            {
       QString text = QString::fromUtf8(yytext);
@@ -2167,12 +2181,17 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       outputArray(text, text.length());
    }
 
-<CopyString>\\.            {
+<CopyStringCs>[^\"\r\n]+      {
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
    }
 
-<CopyString>\"             {
+<CopyString>\\. 	      {
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
+   }
+
+<CopyString,CopyStringCs>\"  {
       QString text = QString::fromUtf8(yytext);
       outputChar(text[0]);
       BEGIN( CopyLine );
@@ -3486,7 +3505,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_defLitText += text;
    }
 
-<SkipDoubleQuote>"/*"         {
+<SkipDoubleQuote>"/*"[*]?     {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
@@ -3494,7 +3513,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_defLitText += text;
    }
 
-<SkipDoubleQuote>\"        {
+<SkipDoubleQuote>\"          {
       QString text = QString::fromUtf8(yytext);
 
       s_defText    += text[0];

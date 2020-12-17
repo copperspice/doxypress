@@ -417,7 +417,16 @@ static void handleHtmlTag()
          }
 
          opt.value = tagText.mid(startAttrib, endAttrib - startAttrib);
+         if (opt.name == "align") {
+	    opt.value = opt.value.toLower();
 
+	 } else if (opt.name == "valign") {
+	   opt.value = opt.value.toLower();
+
+           if (opt.value == "center") {
+	      opt.value = "middle";
+	   }
+	}
       } else {
          // start next option
 
@@ -540,7 +549,7 @@ SPCMD2    {CMD}[\\@<>&$#%~".+=|-]
 SPCMD3    {CMD}form#[0-9]+
 SPCMD4    {CMD}"::"
 SPCMD5    {CMD}":"
-INOUT	  "inout"|"in"|"out"|("in"{BLANK}*","{BLANK}*"out")|("out"{BLANK}*","{BLANK}*"in")
+INOUT	    "in"|"out"|("in"{BLANK}*","?{BLANK}*"out")|("out"{BLANK}*","?{BLANK}*"in")
 PARAMIO   {CMD}param{BLANK}*"["{BLANK}*{INOUT}{BLANK}*"]"
 VARARGS   "..."
 TEMPCHAR  [a-z_A-Z0-9.,: \t\*\&\(\)\[\]]
@@ -599,6 +608,8 @@ REFWORD4_NOCV  (({SCOPEPRE}*"operator"{OPMASKOP2})|(("::"|"#"){SCOPEPRE}*"operat
 REFWORD4       {REFWORD4_NOCV}{CVSPEC}?
 REFWORD        {FILEMASK}|{LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
+
+RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"|"Revision"|"Source"|"State")":"[^:\n$][^\n$]*"$"
 
 %option never-interactive
 %option nounistd
@@ -714,7 +725,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       }
    }
 
-<St_Para>{BLANK}*\n{LISTITEM}     {
+<St_Para>{BLANK}*(\n|"\\internal_linebr"){LISTITEM}     {
       /* list item on next line */
       QString text = QString::fromUtf8(yytext);
       s_yyLineNum += text.count('\n');
@@ -729,7 +740,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_LISTITEM;
    }
 
-<St_Para>{BLANK}*\n{MLISTITEM}     {
+<St_Para>{BLANK}*(\n|"\\internal_linebr"){MLISTITEM}     {
       /* list item on next line */
       if (! Doxy_Globals::markdownSupport || s_insidePre) {
          REJECT;
@@ -754,7 +765,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       }
    }
 
-<St_Para>{BLANK}*\n{OLISTITEM}     {
+<St_Para>{BLANK}*(\n|"\\internal_linebr"){OLISTITEM}     {
       /* list item on next line */
 
       if (! Doxy_Globals::markdownSupport || s_insidePre) {
@@ -791,7 +802,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_ENDLIST;
    }
 
-<St_Para>{BLANK}*\n{ENDLIST}      {
+<St_Para>{BLANK}*(\n|"\\internal_linebr"){ENDLIST}      {
       /* end list on next line */
       QString text = QString::fromUtf8(yytext);
       s_yyLineNum += text.count('\n');
@@ -838,10 +849,11 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->paramDir = TokenInfo::Unspecified;
       return TK_COMMAND_SEL();
    }
-
-<St_Para>{SPCMD1}   |
-<St_Para>{SPCMD2}   |
-<St_Para>{SPCMD4}   |
+<St_Para>"\\internal_linebr"  {
+   }
+<St_Para>{SPCMD1}             |
+<St_Para>{SPCMD2}             |
+<St_Para>{SPCMD4}             |
 <St_Para>{SPCMD5}     {
       /* special command */
       QString text  = QString::fromUtf8(yytext);
@@ -877,10 +889,9 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_COMMAND_SEL();
    }
 
-<St_Para>{URLPROTOCOL}{URLMASK}/\. {
-      // URL.
-      QString text  = QString::fromUtf8(yytext);
-      g_token->name = text;
+<St_Para>{URLPROTOCOL}{URLMASK}/[,\.] {
+      // URL, or URL.
+      g_token->name = QString::fromUtf8(yytext);
       g_token->isEMailAddr = false;
 
       return TK_URL;
@@ -927,7 +938,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WORD;
    }
 
-<St_Para>"$"{ID}":"[^:\n$][^\n$]*"$" {
+<St_Para>{RCSID} {
       /* RCS tag */
       QString text = QString::fromUtf8(yytext);
 
@@ -1121,9 +1132,13 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       BEGIN(St_Code);
     }
 
-<St_CodeOpt>\n    |
+<St_CodeOpt>"\\internal_linebr" |
+<St_CodeOpt>\n                  |
 <St_CodeOpt>.          {
-      unput(yytext[0]);
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
       BEGIN(St_Code);
    }
 
@@ -1158,6 +1173,14 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
 <St_HtmlOnlyOption>.|\n {
       unput(yytext[0]);
+      BEGIN(St_HtmlOnly);
+   }
+
+<St_HtmlOnlyOption>"\\internal_linebr" {
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
       BEGIN(St_HtmlOnly);
    }
 
@@ -1308,11 +1331,25 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       g_token->sectionId = QString::fromUtf8(yytext).trimmed();
       return RetVal_OK;
    }
-<St_PlantUMLOpt>"\n"   |
-<St_PlantUMLOpt>.        {
-       g_token->sectionId = "";
-       unput(yytext[0]);
-       return RetVal_OK;
+
+<St_PlantUMLOpt>{BLANK}*{FILEMASK}{BLANK}*/"\\internal_linebr" {
+      // case 5: plain file name specified without title or attributes
+      g_token->sectionId = QString::fromUtf8(yytext).trimmed();
+
+      return RetVal_OK;
+   }
+
+<St_PlantUMLOpt>"\\internal_linebr" |
+<St_PlantUMLOpt>"\n"                |
+<St_PlantUMLOpt>.              {
+
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
+      g_token->sectionId = QString();
+
+      return RetVal_OK;
    }
 
 <St_PlantUML>{CMD}"enduml"     {
@@ -1349,6 +1386,14 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return 0;
    }
 
+<St_Title>"\\internal_linebr"    {
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
+      return 0;
+   }
+
 <St_TitleN>"&"{ID}";"  {
       /* symbol */
       g_token->name = QString::fromUtf8(yytext);
@@ -1358,6 +1403,21 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_TitleN>{HTMLTAG}                   {
       QString text = QString::fromUtf8(yytext);
       s_yyLineNum += text.count('\n');
+   }
+
+<St_TitleN>\n         {
+      /* new line => end of title */
+      unput(yytext[0]);
+      return 0;
+   }
+
+<St_TitleN>"\\internal_linebr"    {
+      /* new line => end of title */
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
+      return 0;
    }
 
 <St_TitleN>{SPCMD1}    |
@@ -1407,16 +1467,20 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
          return TK_WHITESPACE;
    }
 
-<St_TitleN>\n         {
-      /* new line => end of title */
-      unput(yytext[0]);
-      return 0;
-   }
-
 <St_TitleQ>"&"{ID}";"  {
       /* symbol */
       g_token->name = QString::fromUtf8(yytext);
          return TK_SYMBOL;
+   }
+
+
+<St_TitleQ>(\n|"\\internal_linebr")   {
+      /* new line => end of title */
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
+      return 0;
    }
 
 <St_TitleQ>{SPCMD1}    |
@@ -1447,12 +1511,6 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return 0;
    }
 
-<St_TitleQ>\n         {
-      /* new line => end of title */
-      unput(yytext[0]);
-      return 0;
-   }
-
 <St_TitleA>{BLANK}*{ID}{BLANK}*"="{BLANK}* {
       // title attribute
       g_token->name = QString::fromUtf8(yytext);
@@ -1479,8 +1537,12 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return 0;
    }
 
-<St_TitleV,St_TitleA>\n     {
-         return 0;
+<St_TitleV,St_TitleA>(\n|"\\internal_linebr")    {
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
+      return 0;
    }
 
 <St_Anchor>{LABELID}{WS}? {
@@ -1515,9 +1577,12 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return 0;
    }
 
-<St_Cite>\n           {
+<St_Cite>(\n|"\\internal_linebr")   {
       // new line
-      unput(yytext[0]);
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
       return 0;
    }
 
@@ -1557,9 +1622,12 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       BEGIN(St_Ref2);
    }
 
-<St_Ref>\n         {
+<St_Ref>(\n|"\\internal_linebr")         {
       // new line
-      unput(yytext[0]);
+      for (int i = yyleng - 1; i >= 0; --i) {
+         unput(yytext[i]);
+      }
+
       return 0;
    }
 
@@ -1616,6 +1684,14 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_SYMBOL;
    }
 
+<St_Ref2>"\""|\n|"\\internal_linebr"         {
+      /* " or \n => end of title */
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      return 0;
+   }
+
 <St_Ref2>{SPCMD1}      |
 <St_Ref2>{SPCMD2}                      {
       /* special command */
@@ -1635,11 +1711,6 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 <St_Ref2>[ \t]+        {
       g_token->chars = QString::fromUtf8(yytext);
       return TK_WHITESPACE;
-   }
-
-<St_Ref2>"\""|\n       {
-      /* " or \n => end of title */
-      return 0;
    }
 
 <St_XRefItem>{LABELID} {
@@ -1670,17 +1741,20 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WORD;
    }
 
-<St_Param>({PHPTYPE}{BLANK}*"|"{BLANK}*)*{PHPTYPE}{WS}+("&")?"$"{LABELID} {
-      QString params = QString::fromUtf8(yytext);
-      int j = params.indexOf('&');
-      int i = params.indexOf('$');
+<St_Param>({PHPTYPE}{BLANK}*("["{BLANK}*"]")*{BLANK}*"|"{BLANK}*)*{PHPTYPE}{BLANK}*("["{BLANK}*"]")*{WS}+("&")?"$"{LABELID} {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      int j = text.indexOf('&');
+      int i = text.indexOf('$');
 
       if (j < i && j != -1) {
          i = j;
       }
 
-      QString types = params.left(i).trimmed();
-      g_token->name = types + "#" + params.mid(i);
+      QString types = text.left(i).trimmed();
+      g_token->name = types + "#" + text.mid(i);
+
       return TK_WORD;
    }
 
@@ -1751,9 +1825,24 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       return TK_WORD;
    }
 
-<St_Pattern>[^\r\n]+   {
-      g_token->name = QString::fromUtf8(yytext).trimmed();
+<St_Pattern>[^\\\r\n]+    {
+      g_token->name += QString::fromUtf8(yytext);
+   }
+
+<St_Pattern>"\\internal_linebr"   {
+      g_token->name = g_token->name.trimmed();
       return TK_WORD;
+   }
+
+<St_Pattern>\n            {
+      ++s_yyLineNum;
+      g_token->name = g_token->name.trimmed();
+
+      return TK_WORD;
+   }
+
+<St_Pattern>.             {
+      g_token->name += QString::fromUtf8(yytext);
    }
 
 <St_Link>{LINKMASK}|{REFWORD}    {
@@ -1780,7 +1869,10 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       // nothing
    }
 
-<St_SkipTitle>\n     {
+<St_SkipTitle>(\n|"\\internal_linebr")     {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
       return 0;
    }
 
@@ -1919,7 +2011,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       // nothing
    }
 
-<St_SecSkip>\n         {
+<St_SecSkip>(\n|"\\internal_linebr") {
       // nothing
    }
 
@@ -1927,7 +2019,7 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
       // nothing
    }
 
-<St_Sections>\n   {
+<St_Sections>(\n|"\\internal_linebr")   {
       // nothing
    }
 
@@ -1954,24 +2046,42 @@ REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
 
       s_secTitle = text.trimmed();
 
+      if (s_secTitle.endsWith("\\internal_linebr"))  {
+         s_secTitle.chop(16);
+      }
+
       processSection();
       BEGIN(St_Sections);
    }
 
 <St_SecTitle,St_SecLabel1,St_SecLabel2>. {
       QString text = QString::fromUtf8(yytext);
-      warn(s_fileName, yylineno, "Unexpected character `%s' while looking for section label or title", csPrintable(text));
+      warn(s_fileName, s_yyLineNum, "Unexpected character `%s' while looking for section label or title", csPrintable(text));
    }
 
-<St_Snippet>[^\n]+     |
-<St_Snippet>[^\n]*\n   {
-      g_token->name = QString::fromUtf8(yytext).trimmed();
+<St_Snippet>[^\\\n]+     |
+<St_Snippet>"\\"   {
+      g_token->name += QString::fromUtf8(yytext);
+
+   }
+<St_Snippet>(\n|"\\internal_linebr")   {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->name = g_token->name.trimmed();
+
       return TK_WORD;
    }
 
      /* Generic rules that work for all states */
 <*>\n                  {
-      warn(s_fileName, yylineno, "Unexpected new line character");
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      warn(s_fileName, s_yyLineNum, "Unexpected new line character");
+   }
+
+<*>"\\internal_linebr"         {
    }
 
 <*>[\\@<>&$#%~"=]      {

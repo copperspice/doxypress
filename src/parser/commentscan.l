@@ -96,7 +96,6 @@ static bool handleHideReferencedByRelation(const QString &str, const QStringList
 static bool handleReferencesRelation(const QString &str, const QStringList &list);
 static bool handleHideReferencesRelation(const QString &str, const QStringList &list);
 static bool handleInternal(const QString &str, const QStringList &list);
-static bool handleLineBr(const QString &str, const QStringList &list);
 static bool handleStatic(const QString &str, const QStringList &list);
 static bool handlePure(const QString &str, const QStringList &list);
 static bool handlePrivate(const QString &str, const QStringList &list);
@@ -138,147 +137,146 @@ struct DocCmdMap
 static DocCmdMap docCmdMap[] =
 {
   // command name      handler function         ends brief description
-  { "brief",           &handleBrief,            false },
-  { "short",           &handleBrief,            false },
-  { "fn",              &handleFn,               false },
-  { "var",             &handleFn,               false },
-  { "typedef",         &handleFn,               false },
-  { "property",        &handleProperty,         false },
-  { "def",             &handleDef,              false },
-  { "overload",        &handleOverload,         false },
-  { "enum",            &handleEnum,             false },
-  { "defgroup",        &handleDefGroup,         false },
-  { "group",           &handleDefGroup,         false },
-  { "addtogroup",      &handleAddToGroup,       false },
-  { "weakgroup",       &handleWeakGroup,        false },
-  { "namespace",       &handleNamespace,        false },
-  { "package",         &handlePackage,          false },
-  { "class",           &handleClass,            false },
-  { "concept",         &handleConcept,          false },
-  { "headerfile",      &handleHeaderFile,       false },
-  { "protocol",        &handleProtocol,         false },
-  { "category",        &handleCategory,         false },
-  { "union",           &handleUnion,            false },
-  { "struct",          &handleStruct,           false },
-  { "interface",       &handleInterface,        false },
-  { "idlexcept",       &handleIdlException,     false },
-  { "page",            &handlePage,             false },
-  { "mainpage",        &handleMainpage,         false },
-  { "file",            &handleFile,             false },
-  { "dir",             &handleDir,              false },
-  { "example",         &handleExample,          false },
-  { "details",         &handleDetails,          true  },
-  { "name",            &handleName,             false },
-  { "todo",            &handleTodo,             false }, // end brief will be done differently
-  { "test",            &handleTest,             false }, // end brief will be done differently
-  { "bug",             &handleBug,              false }, // end brief will be done differently
-  { "deprecated",      &handleDeprecated,       false }, // end brief will be done differently
-  { "xrefitem",        &handleXRefItem,         false }, // end brief will be done differently
-  { "related",         &handleRelated,          true  },
-  { "relates",         &handleRelated,          true  },
-  { "relatedalso",     &handleRelatedAlso,      true  },
-  { "relatesalso",     &handleRelatedAlso,      true  },
-  { "parblock",        &handleParBlock,         true  },
-  { "endparblock",     &handleEndParBlock,      true  },
-  { "refitem",         &handleRefItem,          true  },
-  { "cite",            &handleCite,             false },
-  { "subpage",         &handleSubpage,          true  },
-  { "section",         &handleSection,          true  },
-  { "subsection",      &handleSection,          true  },
-  { "subsubsection",   &handleSection,          true  },
-  { "paragraph",       &handleSection,          true  },
-  { "anchor",          &handleAnchor,           true  },
-  { "verbatim",        &handleFormatBlock,      true  },
-  { "latexonly",       &handleFormatBlock,      false },
-  { "htmlonly",        &handleFormatBlock,      false },
-  { "xmlonly",         &handleFormatBlock,      false },
-  { "docbookonly",     &handleFormatBlock,      false },
-  { "rtfonly",         &handleFormatBlock,      false },
-  { "manonly",         &handleFormatBlock,      false },
-  { "dot",             &handleFormatBlock,      true  },
-  { "msc",             &handleFormatBlock,      true  },
-  { "startuml",        &handleFormatBlock,      true  },
-  { "code",            &handleFormatBlock,      true  },
-  { "addindex",        &handleAddIndex,         false },
-  { "if",              &handleIf,               false },
-  { "ifnot",           &handleIfNot,            false },
-  { "elseif",          &handleElseIf,           false },
-  { "else",            &handleElse,             false },
-  { "endif",           &handleEndIf,            false },
-  { "ingroup",         &handleIngroup,          false },
-  { "nosubgrouping",   &handleNoSubGrouping,    false },
-  { "showinitializer", &handleShowInitializer,  false },
-  { "hideinitializer", &handleHideInitializer,  false },
-  { "callgraph",       &handleCallgraph,        false },
-  { "hidecallgraph",   &handleHideCallgraph,    false },
-  { "callergraph",     &handleCallergraph,      false },
-  { "hidecallergraph", &handleHideCallergraph,  false },
-  { "showrefby",       &handleReferencedByRelation,     false },
+  { "addindex",        &handleAddIndex,                 false },
+  { "addtogroup",      &handleAddToGroup,               false },
+  { "anchor",          &handleAnchor,                   true  },
+  { "arg",             0,                               true  },
+  { "attention",       0,                               true  },
+  { "author",          0,                               true  },
+  { "authors",         0,                               true  },
+  { "brief",           &handleBrief,                    false },
+  { "bug",             &handleBug,                      false },
+  { "callergraph",     &handleCallergraph,              false },
+  { "callgraph",       &handleCallgraph,                false },
+  { "category",        &handleCategory,                 false },
+  { "cite",            &handleCite,                     false },
+  { "class",           &handleClass,                    false },
+  { "code",            &handleFormatBlock,              true  },
+  { "concept",         &handleConcept,                  false },
+  { "copybrief",       &handleCopyBrief,                false },
+  { "copydetails",     &handleCopyDetails,              true  },
+  { "copydoc",         &handleCopyDoc,                  true  },
+  { "copyright",       0,                               true  },
+  { "date",            0,                               true  },
+  { "def",             &handleDef,                      false },
+  { "defgroup",        &handleDefGroup,                 false },
+  { "deprecated",      &handleDeprecated,               false },
+  { "details",         &handleDetails,                  true  },
+  { "dir",             &handleDir,                      false },
+  { "docbookinclude",  0,                               false },
+  { "docbookonly",     &handleFormatBlock,              false },
+  { "dot",             &handleFormatBlock,              true  },
+  { "dotfile",         0,                               true  },
+  { "else",            &handleElse,                     false },
+  { "elseif",          &handleElseIf,                   false },
+  { "endif",           &handleEndIf,                    false },
+  { "endparblock",     &handleEndParBlock,              true  },
+  { "enum",            &handleEnum,                     false },
+  { "example",         &handleExample,                  false },
+  { "exception",       0,                               true  },
+  { "extends",         &handleExtends,                  true  },
+  { "file",            &handleFile,                     false },
+  { "fn",              &handleFn,                       false },
+  { "group",           &handleDefGroup,                 false },
+  { "headerfile",      &handleHeaderFile,               false },
+  { "hidecallergraph", &handleHideCallergraph,          false },
+  { "hidecallgraph",   &handleHideCallgraph,            false },
+  { "hideinitializer", &handleHideInitializer,          false },
   { "hiderefby",       &handleHideReferencedByRelation, false },
-  { "showrefs",        &handleReferencesRelation,       false },
   { "hiderefs",        &handleHideReferencesRelation,   false },
-  { "internal",        &handleInternal,         true  },
-  { "internal_linebr", &handleLineBr,           false },
-  { "static",          &handleStatic,           false },
-  { "pure",            &handlePure,             false },
-  { "private",         &handlePrivate,          false },
-  { "privatesection",  &handlePrivateSection,   false },
-  { "protected",       &handleProtected,        false },
-  { "protectedsection",&handleProtectedSection, false },
-  { "public",          &handlePublic,           false },
-  { "publicsection",   &handlePublicSection,    false },
-  { "tableofcontents", &handleToc,              false },
-  { "inherit",         &handleInherit,          true  },
-  { "extends",         &handleExtends,          true  },
-  { "implements",      &handleExtends,          true  },
-  { "memberof",        &handleMemberOf,         true  },
-  { "arg",             0,                       true  },
-  { "attention",       0,                       true  },
-  { "author",          0,                       true  },
-  { "authors",         0,                       true  },
-  { "copydoc",         &handleCopyDoc,          true  },
-  { "copybrief",       &handleCopyBrief,        false },
-  { "copydetails",     &handleCopyDetails,      true  },
-  { "copyright",       0,                       true  },
-  { "date",            0,                       true  },
-  { "dotfile",         0,                       true  },
-  { "htmlinclude",     0,                       false },
-  { "image",           0,                       true  },
-  { "include",         0,                       true  },
-  { "includelineno",   0,                       true  },
-  { "invariant",       0,                       true  },
-  { "latexinclude",    0,                       false },
-  { "li",              0,                       true  },
-  { "line",            0,                       true  },
-  { "note",            0,                       true  },
-  { "par",             0,                       true  },
-  { "param",           &handleParam,            true  },
-  { "tparam",          0,                       true  },
-  { "post",            0,                       true  },
-  { "pre",             0,                       true  },
-  { "remark",          0,                       true  },
-  { "remarks",         0,                       true  },
-  { "result",          0,                       true  },
-  { "return",          0,                       true  },
-  { "returns",         0,                       true  },
-  { "exception",       0,                       true  },
-  { "retval",          &handleRetval,           true  },
-  { "sa",              0,                       true  },
-  { "see",             0,                       true  },
-  { "since",           0,                       true  },
-  { "snippet",         0,                       true  },
-  { "snippetlineno",   0,                       true  },
-  { "throw",           0,                       true  },
-  { "throws",          0,                       true  },
-  { "until",           0,                       true  },
-  { "verbinclude",     0,                       false },
-  { "version",         0,                       true  },
-  { "warning",         0,                       true  },
-  { "rtfinclude",      0,                       false },
-  { "docbookinclude",  0,                       false },
-  { "maninclude",      0,                       false },
-  { "xmlinclude",      0,                       false },
-  { 0, 0, false }
+  { "htmlinclude",     0,                               false },
+  { "htmlonly",        &handleFormatBlock,              false },
+  { "idlexcept",       &handleIdlException,             false },
+  { "if",              &handleIf,                       false },
+  { "ifnot",           &handleIfNot,                    false },
+  { "image",           0,                               true  },
+  { "implements",      &handleExtends,                  true  },
+  { "include",         0,                               true  },
+  { "includelineno",   0,                               true  },
+  { "ingroup",         &handleIngroup,                  false },
+  { "inherit",         &handleInherit,                  true  },
+  { "interface",       &handleInterface,                false },
+  { "internal",        &handleInternal,                 true  },
+  { "invariant",       0,                               true  },
+  { "latexinclude",    0,                               false },
+  { "latexonly",       &handleFormatBlock,              false },
+  { "li",              0,                               true  },
+  { "line",            0,                               true  },
+  { "mainpage",        &handleMainpage,                 false },
+  { "maninclude",      0,                               false },
+  { "manonly",         &handleFormatBlock,              false },
+  { "memberof",        &handleMemberOf,                 true  },
+  { "msc",             &handleFormatBlock,              true  },
+  { "name",            &handleName,                     false },
+  { "namespace",       &handleNamespace,                false },
+  { "nosubgrouping",   &handleNoSubGrouping,            false },
+  { "note",            0,                               true  },
+  { "overload",        &handleOverload,                 false },
+  { "package",         &handlePackage,                  false },
+  { "page",            &handlePage,                     false },
+  { "par",             0,                               true  },
+  { "paragraph",       &handleSection,                  true  },
+  { "param",           &handleParam,                    true  },
+  { "parblock",        &handleParBlock,                 true  },
+  { "post",            0,                               true  },
+  { "pre",             0,                               true  },
+  { "private",         &handlePrivate,                  false },
+  { "privatesection",  &handlePrivateSection,           false },
+  { "property",        &handleProperty,                 false },
+  { "protected",       &handleProtected,                false },
+  { "protectedsection",&handleProtectedSection,         false },
+  { "protocol",        &handleProtocol,                 false },
+  { "public",          &handlePublic,                   false },
+  { "publicsection",   &handlePublicSection,            false },
+  { "pure",            &handlePure,                     false },
+  { "refitem",         &handleRefItem,                  true  },
+  { "related",         &handleRelated,                  true  },
+  { "relatedalso",     &handleRelatedAlso,              true  },
+  { "relates",         &handleRelated,                  true  },
+  { "relatesalso",     &handleRelatedAlso,              true  },
+  { "remark",          0,                               true  },
+  { "remarks",         0,                               true  },
+  { "result",          0,                               true  },
+  { "return",          0,                               true  },
+  { "returns",         0,                               true  },
+  { "retval",          &handleRetval,                   true  },
+  { "rtfinclude",      0,                               false },
+  { "rtfonly",         &handleFormatBlock,              false },
+  { "sa",              0,                               true  },
+  { "section",         &handleSection,                  true  },
+  { "see",             0,                               true  },
+  { "short",           &handleBrief,                    false },
+  { "showinitializer", &handleShowInitializer,          false },
+  { "showrefby",       &handleReferencedByRelation,     false },
+  { "showrefs",        &handleReferencesRelation,       false },
+  { "since",           0,                               true  },
+  { "snippet",         0,                               true  },
+  { "snippetlineno",   0,                               true  },
+  { "startuml",        &handleFormatBlock,              true  },
+  { "static",          &handleStatic,                   false },
+  { "struct",          &handleStruct,                   false },
+  { "subpage",         &handleSubpage,                  true  },
+  { "subsection",      &handleSection,                  true  },
+  { "subsubsection",   &handleSection,                  true  },
+  { "tableofcontents", &handleToc,                      false },
+  { "test",            &handleTest,                     false },
+  { "throw",           0,                               true  },
+  { "throws",          0,                               true  },
+  { "todo",            &handleTodo,                     false },
+  { "tparam",          0,                               true  },
+  { "typedef",         &handleFn,                       false },
+  { "union",           &handleUnion,                    false },
+  { "until",           0,                               true  },
+  { "var",             &handleFn,                       false },
+  { "verbatim",        &handleFormatBlock,              true  },
+  { "verbinclude",     0,                               false },
+  { "version",         0,                               true  },
+  { "warning",         0,                               true  },
+  { "weakgroup",       &handleWeakGroup,                false },
+  { "xmlinclude",      0,                               false },
+  { "xmlonly",         &handleFormatBlock,              false },
+  { "xrefitem",        &handleXRefItem,                 false },
+  { nullptr,          0,                               false }
 };
 
 //  Maps a command name (as found in a comment block) onto a specific handler function
@@ -387,6 +385,7 @@ void initGroupInfo(QSharedPointer<Entry> e);
 static void groupAddDocs(QSharedPointer<Entry> e);
 
 static QString          s_inputString;         // input string
+static QString          s_currentCommand;
 static int              s_inputPosition;       // read pointer
 static int              s_prevPosition;
 static char            *s_bufferPosition;
@@ -454,6 +453,9 @@ static QSharedPointer<Entry>  current;            // working entry
 
 static QStack<QSharedPointer<Grouping>> s_autoGroupStack;
 
+// double declared
+static void yyunput (int c, char *buf_ptr);
+
 static void initParser()
 {
    s_sectionLabel.resize(0);
@@ -505,16 +507,11 @@ static bool makeStructuralIndicator(Entry::Sections s)
 
       current->section   = s;
       current->startLine = yyLineNr;
+      current->docLine   = yyLineNr;
 
       current->setData(EntryKey::File_Name, yyFileName);
 
       return false;
-   }
-}
-static void lineCount()
-{
-   for (const char *c = yytext ; *c ; ++c) {
-      yyLineNr += (*c == '\n') ;
    }
 }
 
@@ -811,6 +808,12 @@ static inline void setOutput(OutputContext ctx)
             s_docsEnum  = EntryKey::Brief_Docs;
 
          } else {
+
+            if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
+               // when appending parts add a new line
+               current->appendData(EntryKey::Main_Docs, "\n");
+            }
+
             s_docsEntry  = current;
             s_docsEnum   = EntryKey::Main_Docs;
 
@@ -869,6 +872,18 @@ static void addToOutput(QChar c)
 
    } else {
       s_docsEntry->appendData(s_docsEnum, c);
+   }
+}
+
+static void unputString(const QString &str) {
+
+   auto iter     = str.storage_rbegin();
+   auto iter_end = str.storage_rend();
+
+   while (iter != iter_end) {
+      unput(*iter);
+
+      ++iter;
    }
 }
 
@@ -1164,6 +1179,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       s_processInternalDocs = false;
    }
 
+<Comment>{B}*"\\internal_linebr"{B}*            {
+      // preserve spacing around \\internal_linebr
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(text);
+   }
+
 <Comment>{B}*{CMD}"sortid"{B}+[0-9]+    {
       // simulate calling addToOutPut()
       QString text = QString::fromUtf8(yytext);
@@ -1174,6 +1195,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <Comment>{B}*{CMD}[a-z_A-Z]+{B}*    {
       // might be a valid command
       QString text = QString::fromUtf8(yytext);
+
+      /* handle `\f{` and `@f{` as special cases */
+      int idx = text.indexOf('{');
+
+      if ((idx > 1) && (text[idx - 1] == 'f') && (text[idx - 2] == '\\' || text[idx - 2] =='@')) {
+         REJECT;
+      }
 
       QStringView view = QStringView(text).trimmed();
 
@@ -1487,7 +1515,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          endBrief(false);
       }
 
-      lineCount();
+      yyLineNr += text.count('\n');
    }
 
 <Comment>"."            {
@@ -1501,10 +1529,15 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       }
    }
 
-<Comment>\n             {
+<Comment>{DOCNL}  {
       // newline
+      QString text = QString::fromUtf8(yytext);
+
       addToOutput('\n');
-      yyLineNr++;
+
+      if (text[0] == '\n') {
+         ++yyLineNr;
+      }
    }
 
 <Comment>[\xC0-\xFF][\x80-\xBF]+    {
@@ -1640,11 +1673,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       warn(yyFileName, yyLineNr, "Missing argument after \\enum");
-
-      addToOutput('\n');
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
+      unputString(text);
 
       BEGIN( Comment );
    }
@@ -1672,12 +1701,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <NameSpaceDocArg1>{DOCNL}     {
       // missing argument
       QString text = QString::fromUtf8(yytext);
-      warn(yyFileName, yyLineNr, "Missing argument after \\namespace");
 
-      addToOutput('\n');
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
+      warn(yyFileName, yyLineNr, "Missing argument after \\namespace");
+      unputString(text);
+
       BEGIN( Comment );
    }
 
@@ -1706,13 +1733,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       warn(yyFileName, yyLineNr, "Missing argument after \\package");
-      addToOutput('\n');
+      unputString(text);
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
+
       BEGIN( Comment );
    }
+
 <PackageDocArg1>.          {
       // ignore other stuff
    }
@@ -1755,19 +1781,21 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // missing argument
       QString text = QString::fromUtf8(yytext);
 
-      warn(yyFileName, yyLineNr, "Missing argument after \\%s",
-                  YY_START == ClassDocArg1 ? "class" : "category" );
+      warn(yyFileName, yyLineNr, "Missing argument after \\%s",  csPrintable(s_currentCommand));
+      unputString(text);
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
-
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
 <ClassDocArg1,CategoryDocArg1>.     {
       // ignore other stuff
+   }
+
+<ClassDocArg2>{DOCNL}         {
+      QString text = QString::fromUtf8(yytext);
+      unputString(text);
+
+      BEGIN( Comment );
    }
 
 <ClassDocArg2>{FILE}|"<>"     {
@@ -1781,17 +1809,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // line continuation
       yyLineNr++;
       addToOutput('\n');
-   }
-
-<ClassDocArg2>{DOCNL}         {
-      QString text = QString::fromUtf8(yytext);
-
-      addToOutput('\n');
-
-      if (text[0] == '\n')  {
-         yyLineNr++;
-      }
-      BEGIN( Comment );
    }
 
 <ClassDocArg2>.            {
@@ -1813,10 +1830,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <ClassDocArg3>{DOCNL}         {
       QString text = QString::fromUtf8(yytext);
-
-      if (text[0] =='\n') {
-         yyLineNr++;
-      }
+      unputString(text);
 
       BEGIN( Comment );
    }
@@ -1888,11 +1902,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       warn(yyFileName, yyLineNr, "Missing group name after %s", csPrintable(current->groupDocCmd()) );
+      unputString(text);
 
-      addToOutput('\n');
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
       BEGIN( Comment );
    }
 
@@ -1906,7 +1917,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput('\n');
    }
 
-<GroupDocArg2>[^\n\*]+        {
+<GroupDocArg2>[^\n\\]+        {
       // title (stored in type)
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Type, text.trimmed());
@@ -1920,12 +1931,14 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", csPrintable(current->m_entryName) );
       }
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
+      unputString(text);
 
-      addToOutput('\n');
       BEGIN( Comment );
+   }
+<GroupDocArg2>.            {
+      // title (stored in type)
+      QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Member_Type, text.trimmed());
    }
 
   /* --------- handle arguments of page/mainpage command ------------------- */
@@ -1935,6 +1948,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       current->m_entryName = stripQuotes(text);
+      current->setData(EntryKey::Member_Args, QString());
 
       BEGIN( PageDocArg2 );
    }
@@ -1947,13 +1961,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <PageDocArg1>{DOCNL}       {
       // missing argument
       QString text = QString::fromUtf8(yytext);
+
       warn(yyFileName, yyLineNr, "Missing argument after \\page");
+      unputString(text);
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
-
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -1961,19 +1972,29 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // ignore other stuff
    }
 
-<PageDocArg2>.*"\n"        {
-      // second argument, page title
+<PageDocArg2>{DOCNL}       {
+      // second argument; page title
+      QString text = QString::fromUtf8(yytext);
+      unputString(text);
+
+      BEGIN( Comment );
+   }
+
+<PageDocArg2>{CMD}[<>]        {
+
       QString text = QString::fromUtf8(yytext);
 
       text = substitute(substitute(text, "@<","&lt;"),  "@>", "&gt;");
       text = substitute(substitute(text, "\\<","&lt;"), "\\>","&gt;");
 
-      yyLineNr++;
-      current->setData(EntryKey::Member_Args, text);
-
-      addToOutput('\n');
-      BEGIN( Comment );
+      current->appendData(EntryKey::Member_Args, text);
    }
+
+<PageDocArg2>.             {
+      QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Member_Args, text);
+   }
+
 
   /* --------- handle arguments of the param command ------------ */
 <ParamArg1>{ID}/{B}*","   {
@@ -2011,12 +2032,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <FileDocArg1>{DOCNL}          {
       // no file name specified
       QString text = QString::fromUtf8(yytext);
+      unputString(text);
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
-
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -2158,13 +2175,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <RelatesParam1>{DOCNL}        {
       // missing argument
       QString text = QString::fromUtf8(yytext);
-      warn(yyFileName, yyLineNr, "Missing argument of \\relates or \\memberof command");
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
+      warn(yyFileName, yyLineNr, "Missing argument of \\%s command", csPrintable(s_currentCommand));
+      unputString(text);
 
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -2177,12 +2191,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <LineParam>{DOCNL}         {
       // end of argument
       QString text = QString::fromUtf8(yytext);
+      unputString(text);
 
-      if (text[0] == '\n')  {
-         yyLineNr++;
-      }
-
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -2521,7 +2531,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <GuardParamEnd>{B}*{DOCNL}       {
+      QString text = QString::fromUtf8(yytext);
+
+      yyLineNr += text.count('\n');
       s_spaceBeforeIf.clear();
+
       BEGIN(Comment);
    }
 
@@ -2692,12 +2706,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <NameParam>{DOCNL}         {
       // end of argument
       QString text = QString::fromUtf8(yytext);
+      unputString(text);
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
-
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -2734,11 +2744,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          warn(yyFileName,yyLineNr, "Missing group name for \\ingroup command");
       }
 
-      if (text[0] == '\n')   {
-         yyLineNr++;
-      }
+      unputString(text);
 
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -2762,11 +2769,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if (braceCount == 0) {
-         if (text[0] == '\n')   {
-            yyLineNr++;
-         }
-
-         addToOutput('\n');
+         unputString(text);
 
          if (langParser != nullptr) {
             // not used for clang parsing
@@ -2889,13 +2892,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <ExtendsParam>{DOCNL}         {
       // missing argument
       QString text = QString::fromUtf8(yytext);
-      warn(yyFileName,yyLineNr, "\\extends or \\implements command has no argument");
 
-      if (text[0] == '\n')   {
-         yyLineNr++;
-      }
+      warn(yyFileName,yyLineNr, "Missing argument for \\%s command", csPrintable(s_currentCommand));
+      unputString(text);
 
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -2949,13 +2949,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <CiteLabel>{DOCNL}         {
       // missing argument
       QString text = QString::fromUtf8(yytext);
-      warn(yyFileName, yyLineNr, "\\cite command has no label" );
 
-      if (text[0] == '\n')   {
-         yyLineNr++;
-      }
+      warn(yyFileName, yyLineNr, "\\cite command has no label");
+      unputString(text);
 
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -3131,10 +3128,10 @@ static bool handlePackage(const QString &str, const QStringList &list)
 
 static bool handleClass(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    bool stop = makeStructuralIndicator(Entry::CLASSDOC_SEC);
+   s_currentCommand = str;
    BEGIN( ClassDocArg1 );
 
    return stop;
@@ -3162,11 +3159,11 @@ static bool handleHeaderFile(const QString &str, const QStringList &list)
 
 static bool handleProtocol(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    // Obj-C protocol
    bool stop = makeStructuralIndicator(Entry::PROTOCOLDOC_SEC);
+   s_currentCommand = str;
    BEGIN( ClassDocArg1 );
 
    return stop;
@@ -3174,11 +3171,11 @@ static bool handleProtocol(const QString &str, const QStringList &list)
 
 static bool handleCategory(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    // Obj-C category
    bool stop = makeStructuralIndicator(Entry::CATEGORYDOC_SEC);
+   s_currentCommand = str;
    BEGIN( CategoryDocArg1 );
 
    return stop;
@@ -3186,10 +3183,10 @@ static bool handleCategory(const QString &str, const QStringList &list)
 
 static bool handleUnion(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    bool stop = makeStructuralIndicator(Entry::UNIONDOC_SEC);
+   s_currentCommand = str;
    BEGIN( ClassDocArg1 );
 
    return stop;
@@ -3197,10 +3194,10 @@ static bool handleUnion(const QString &str, const QStringList &list)
 
 static bool handleStruct(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    bool stop=makeStructuralIndicator(Entry::STRUCTDOC_SEC);
+   s_currentCommand = str;
    BEGIN( ClassDocArg1 );
 
    return stop;
@@ -3208,10 +3205,10 @@ static bool handleStruct(const QString &str, const QStringList &list)
 
 static bool handleInterface(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    bool stop = makeStructuralIndicator(Entry::INTERFACEDOC_SEC);
+   s_currentCommand = str;
    BEGIN( ClassDocArg1 );
 
    return stop;
@@ -3219,10 +3216,10 @@ static bool handleInterface(const QString &str, const QStringList &list)
 
 static bool handleIdlException(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    bool stop = makeStructuralIndicator(Entry::EXCEPTIONDOC_SEC);
+   s_currentCommand = str;
    BEGIN( ClassDocArg1 );
 
    return stop;
@@ -3490,7 +3487,7 @@ static bool handleRelated(const QString &str, const QStringList &list)
 
 static bool handleRelatedAlso(const QString &str, const QStringList &list)
 {
-   (void) str;
+
    (void) list;
 
    if (! current->getData(EntryKey::Related_Class).isEmpty()) {
@@ -3499,6 +3496,7 @@ static bool handleRelatedAlso(const QString &str, const QStringList &list)
    }
 
    current->relatesType = Duplicate;
+   s_currentCommand = str;
    BEGIN(RelatesParam1);
 
    return false;
@@ -3506,7 +3504,6 @@ static bool handleRelatedAlso(const QString &str, const QStringList &list)
 
 static bool handleMemberOf(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    if (! current->getData(EntryKey::Related_Class).isEmpty()) {
@@ -3515,6 +3512,7 @@ static bool handleMemberOf(const QString &str, const QStringList &list)
    }
 
    current->relatesType = MemberOf;
+   s_currentCommand = str;
    BEGIN(RelatesParam1);
 
    return false;
@@ -3855,16 +3853,6 @@ static bool handleInternal(const QString &str, const QStringList &list)
   return false;
 }
 
-static bool handleLineBr(const QString &str, const QStringList &list)
-{
-   (void) str;
-   (void) list;
-
-   addToOutput('\n');
-
-   return false;
-}
-
 static bool handleStatic(const QString &str, const QStringList &list)
 {
    (void) str;
@@ -4015,10 +4003,10 @@ static bool handleInherit(const QString &str, const QStringList &list)
 
 static bool handleExtends(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
-
+   s_currentCommand = str;
    BEGIN(ExtendsParam);
+
    return false;
 }
 
@@ -4140,6 +4128,11 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    insidePre        = false;
    s_needNewEntry   = false;
    s_parseMore      = false;
+
+   if (! isBrief && ! isAutoBrief && ! current->getData(EntryKey::Main_Docs).isEmpty()) {
+      // add newline separator between detailed comment blocks
+      current->appendData(EntryKey::Main_Docs, "\n");
+   }
 
    if (isBrief || isAutoBrief) {
       setOutput(OutputBrief);

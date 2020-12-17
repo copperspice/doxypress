@@ -1301,6 +1301,23 @@ exit:
    return;
 }
 
+static bool isCastKeyword(const QString &text)
+{
+   auto iter = text.indexOfFast('<');
+
+   if (iter == text.constEnd()) {
+      return false;
+   }
+
+   QStringView word = QStringView(text.constBegin(), iter).trimmed();
+
+   if (! word.endsWith("_cast")) {
+      return false;
+   }
+
+   return word == "const_cast" || word == "static_cast" || word == "dynamic_cast" || word == "reinterpret_cast";
+}
+
 // counts the number of lines in the input
 static int countLines()
 {
@@ -2069,22 +2086,33 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN( SkipCPP ) ;
    }
 
-<SkipCPP>.           {
+<SkipCPP>\"          {
+      QString text = QString::fromUtf8(yytext);
+
+      g_code->codify(text);
+      g_lastStringContext = YY_START;
+
+      BEGIN( SkipString );
+   }
+
+<SkipCPP>.               {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 
-<SkipCPP>[^\n\/\\]+        {
+<SkipCPP>[^\n\/\\\"]+    {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
 
-<SkipCPP>\\[\r]?\n         {
+<SkipCPP>\\[\r]?\n       {
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
    }
 
-<SkipCPP>"//"           {
+<SkipCPP>"//"/[^/!]      {
+      REJECT;     // reconsider
+
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
    }
@@ -2205,9 +2233,15 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       endFontClass();
    }
 
+<ClassName>{ID}("."{ID})*     |
 <ClassName>{ID}("::"{ID})*            {
       QString text = QString::fromUtf8(yytext);
-      g_curClassName = text;
+
+      if (g_insideCS) {
+         g_curClassName = substitute(text, ".", "::");
+      } else {
+         g_curClassName = text;
+      }
 
       addType();
 
@@ -2826,7 +2860,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       codifyLines(text);
    }
 
-<Body,FuncCall>{CASTKW}"<"                {
+<Body,MemberCall2,FuncCall>{CASTKW}{B}*"<" {
       // static_cast<T>(
       QString text = QString::fromUtf8(yytext);
 
@@ -2850,10 +2884,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       // A<T> *pt;
       QString text = QString::fromUtf8(yytext);
 
-      int i = text.indexOf('<');
-      QString kw = text.left(i).trimmed();
 
-      if (kw.right(5) == "_cast" && YY_START == Body) {
+
+      if (isCastKeyword(text) && YY_START == Body) {
          REJECT;
       }
 
@@ -2882,7 +2915,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_name += yytext;
    }
 
-<Body>"("{B}*("*"{B}*)+{SCOPENAME}*{B}*")"/{B}*    {
+<Body>"("{B}*("*"{B}*)+{SCOPENAME}+{B}*")"/{B}*    {
       // (*p)->func() but not "if (p) ..."
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
@@ -2895,8 +2928,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       int e = text.length() - 1;
 
-      while (e >= 0 && ! isId(text[e])) {
-         e--;
+      while (e > 0 && ! isId(text[e])) {
+         --e;
       }
 
       QString varname = text.mid(s, e - s + 1);
@@ -2905,9 +2938,14 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_name = varname;
    }
 
+<Body>{SCOPETNAME}{B}*"<"[^\n\/\-\.\{\"\>]*">"/{BN}*"(" |
 <Body>{SCOPETNAME}/{BN}*"("      {
       // a() or c::a() or t<A,B>::a() or A\B\foo()
+
       QString text = QString::fromUtf8(yytext);
+      if (isCastKeyword(text)) {
+         REJECT;
+      }
 
       addType();
       generateFunctionLink(*g_code, text);
@@ -3471,6 +3509,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <MemberCall2,FuncCall>{ID}(({B}*"<"[^\n\[\](){}<>]*">")?({B}*"::"{B}*{ID})?)* {
       QString text = QString::fromUtf8(yytext);
+
+      if (isCastKeyword(text)) {
+         REJECT;
+      }
+
       addParmType();
       g_parmName = text;
       generateClassOrGlobalLink(*g_code, text, ! g_insideBody);
@@ -3830,7 +3873,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN( MemberCall2 );
    }
 
-<FuncCall,MemberCall2>("("{B}*("*"{B}*)+{ID}*{B}*")"{B}*)/("."|"->") {
+<FuncCall,MemberCall2>("("{B}*("*"{B}*)+{ID}+{B}*")"{B}*)/("."|"->") {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
@@ -3841,8 +3884,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
 
       int e = text.length() - 1;
-      while (! isId(text[e])) {
-         e--;
+
+     while (e > 0 && ! isId(text[e])) {
+         --e;
       }
 
       g_name = text.mid(s, e - s + 1);
@@ -3944,15 +3988,23 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <RemoveSpecialCComment>"*/"{B}*\n({B}*\n)*({B}*(("//@"[{}])|("/*@"[{}]"*/")){B}*\n)? {
       QString text = QString::fromUtf8(yytext);
-
       g_yyLineNr += text.count('\n');
-      nextCodeLine();
 
       if (g_lastSpecialCContext == SkipCxxComment) {
          // force end of C++ comment here
+         nextCodeLine();
          endFontClass();
          BEGIN( g_lastCContext );
       } else {
+
+         if (text.endsWith('\n'))  {
+            --g_yyLineNr;
+            unput('\n');
+
+         } else {
+            nextCodeLine();
+         }
+
          BEGIN(g_lastSpecialCContext);
       }
    }
@@ -4003,9 +4055,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <SkipCPP>\n/.*\n        {
-      QString text = QString::fromUtf8(yytext);
       endFontClass();
-      codifyLines(text);
+      unput('\n');
+
       BEGIN( g_lastSkipCppContext );
    }
 
@@ -4102,7 +4154,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
    }
 
-<*>"//"[!/][^\n]*\n        {
+<*>"//"[!/][^\n]*/\n        {
       // strip special one-line comment
       QString text = QString::fromUtf8(yytext);
 
@@ -4110,13 +4162,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          REJECT;
       }
 
-      if (s_stripCodeComments) {
-         char c[2];
-         c[0] = '\n';
-         c[1] = 0;
-         codifyLines(c);
-
-      } else {
+      if (! s_stripCodeComments) {
          startFontClass("comment");
          codifyLines(text);
          endFontClass();

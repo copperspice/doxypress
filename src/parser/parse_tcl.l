@@ -968,11 +968,13 @@ ws              ([ \t]|\\\n)
    }
 
 <COMMAND>{ws}*\x1A {
+      QString text = QString::fromUtf8(yytext);
+
       tcl.string_commentcodify = "";
       tcl.string_commentline   = "";
       tcl.line_body1           = yylineno;
 
-      tcl_command(-1, "");
+      tcl_command(-1, text);
    }
 
 <COMMAND>{ws}*; {

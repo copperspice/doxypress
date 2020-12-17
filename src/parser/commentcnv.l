@@ -262,14 +262,14 @@ static int yyread(char *buf, int max_size)
 
 %%
 
-<Scan>[^"'!\/\n\\#,\-]*   {
+<Scan>[^"'!\/\n\\#,\-=; \t]*   {
       /* consume anything that is not " / , or \n */
 
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
 
-<Scan>[,]    {
+<Scan>[,= ;\t]    {
       /* consume so we have a nice separator in long initialization lines */
 
       QString text = QString::fromUtf8(yytext);
@@ -521,6 +521,24 @@ static int yyread(char *buf, int max_size)
       BEGIN(VerbatimCode);
    }
 
+
+<CComment,ReadLine>^[ \t]*("```"[`]*|"~~~"[~]*) {
+      /* start of markdown code block */
+
+      if (! Doxy_Globals::markdownSupport) {
+         REJECT;
+      }
+
+      QString text = QString::fromUtf8(yytext);
+      copyToOutput(text, text.length());
+
+      s_lastCommentContext = YY_START;
+      s_javaBlock = 0;
+      s_blockName = text.trimmed().left(3);
+
+      BEGIN(VerbatimCode);
+   }
+
 <CComment,ReadLine>[\\@]("dot"|"code"|"msc"|"startuml")/[^a-z_A-Z0-9] {
       /* start of a verbatim block */
       QString text = QString::fromUtf8(yytext);
@@ -617,6 +635,16 @@ static int yyread(char *buf, int max_size)
       }
    }
 
+<VerbatimCode>("```"[`]*|"~~~"[~]*) {
+      /* end of markdown code block */
+      QString text = QString::fromUtf8(yytext);
+      copyToOutput(text, text.length());
+
+      if (text[0] == s_blockName[0]) {
+         BEGIN(s_lastCommentContext);
+      }
+   }
+
 <VerbatimCode>[\\@]("enddot"|"endcode"|"endmsc"|"enduml") {
       /* end of verbatim block */
       QString text = QString::fromUtf8(yytext);
@@ -654,7 +682,7 @@ static int yyread(char *buf, int max_size)
       }
    }
 
-<Verbatim,VerbatimCode>[^@\/\\\n{}]* {
+<Verbatim,VerbatimCode>[^`~@\/\\\n{}]*  {
       /* any character not a backslash or new line or } */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
@@ -666,7 +694,7 @@ static int yyread(char *buf, int max_size)
       copyToOutput(text, text.length());
    }
 
-<Verbatim>^[ \t]*"///"             {
+<Verbatim>^[ \t]*"//"[/!]     {
       if (s_blockName == "dot" || s_blockName == "msc" || s_blockName == "uml" || s_blockName.startsWith('f') ) {
          // strip /// from dot images and formulas.
 
@@ -744,13 +772,13 @@ static int yyread(char *buf, int max_size)
       copyToOutput(text, text.length());
    }
 
-<CComment>[^\\!@*\n{\"\/]*     {
+<CComment>[^ `~<\\!@*\n{\"\/]*  {
       /* anything that is not a '*' or command */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
 
-<CComment>"*"+[^*/\\@\n{\"]*   {
+<CComment>"*"+[^*/\\@\n{\"]*    {
       /* stars without slashes */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
@@ -939,8 +967,24 @@ static int yyread(char *buf, int max_size)
 
       BEGIN(Scan);
    }
+<ReadLine>"/**"   {
+      copyToOutput("/&zwj;**", 8);
+   }
 
-<ReadLine>[^\\@\n]*/\n        {
+<ReadLine>"*/"   {
+      copyToOutput("*&zwj;/", 7);
+   }
+
+<ReadLine>"*"    {
+      QString text = QString::fromUtf8(yytext);
+      copyToOutput(text, text.length());
+   }
+<ReadLine>[^\\@\n\*/]*  {
+      QString text = QString::fromUtf8(yytext);
+      copyToOutput(text, text.length());
+   }
+
+<ReadLine>[^\\@\n\*/]*/\n  {
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
@@ -1094,6 +1138,12 @@ static int yyread(char *buf, int max_size)
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
+
+<*>.  {
+      QString text = QString::fromUtf8(yytext);
+      copyToOutput(text, text.length());
+   }
+
 
 %%
 
@@ -1286,7 +1336,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
            "a corresponding \\endcond command", csPrintable(sectionInfo));
    }
 
-   if (s_nestingCount > 0 && s_lang != SrcLangExt_Markdown) {
+   if (s_nestingCount > 0 && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran) {
       QString tmp = "(probable line reference: ";
 
       bool first = true;

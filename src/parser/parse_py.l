@@ -81,6 +81,7 @@ static int               s_braceCount;
 static bool              s_lexInit = false;
 static bool              s_packageCommentAllowed;
 
+static bool              s_funcParamsEnd = false;
 static bool              s_start_init    = false;
 static int               s_search_count  = 0;
 static QString           s_argType       = QString();
@@ -455,6 +456,8 @@ STARTDOCSYMS      "##"
 %x FunctionDec
 %x FunctionParams
 %x FunctionBody
+%x FunctionAnnotation
+%x FunctionTypeAnnotation
 %x FunctionParamDefVal
 
   /* Class states */
@@ -474,6 +477,8 @@ STARTDOCSYMS      "##"
 %x SingleQuoteString
 %x DoubleQuoteString
 %x TripleString
+%x SingleQuoteStringIgnore
+%x DoubleQuoteStringIgnore
 
   /* import */
 %x FromMod
@@ -1075,7 +1080,7 @@ STARTDOCSYMS      "##"
       newFunction();
    }
 
-   {B}":"         {
+   {B}":"{B}       {
       // function without arguments
       s_specialBlock = true;          // expecting a docstring
       bodyEntry      = current;
@@ -1085,8 +1090,24 @@ STARTDOCSYMS      "##"
       BEGIN(FunctionBody);
    }
 
-   {B}"("                  {
+   "->"           {
+      s_defVal.clear();
+      s_braceCount = 0;
+
+      BEGIN(FunctionTypeAnnotation);
+   }
+
+   {B}"("        {
+      s_funcParamsEnd = false;
+      current->startBodyLine  = yyLineNr;
       BEGIN( FunctionParams );
+   }
+
+   ")"           {
+      // end of parameter list
+
+      current->setData(EntryKey::Member_Args, argListToString(current->argList));
+      s_funcParamsEnd = true;
    }
 }
 
@@ -1121,18 +1142,16 @@ STARTDOCSYMS      "##"
       BEGIN(FunctionParamDefVal);
    }
 
-   ")"                {
-      // end of parameter list
-      current->setData(EntryKey::Member_Args, argListToString(current->argList));
+   ")"                       {
+      unput(*yytext);
+      BEGIN(FunctionDec);
+
    }
 
    ":"{B}                    {
-      // expecting a docstring
-      s_specialBlock = true;
-      bodyEntry      = current;
-
-      current->startBodyLine = yyLineNr;
-      BEGIN( FunctionBody );
+      s_defVal.clear();
+      s_braceCount = 0;
+      BEGIN(FunctionAnnotation);
    }
 
    {POUNDCOMMENT}            {
@@ -1142,10 +1161,10 @@ STARTDOCSYMS      "##"
    {PARAMNONEMPTY}           {
       // default rule inside arguments
    }
-
 }
 
-<FunctionParamDefVal>{
+<FunctionTypeAnnotation>{
+   "{"      |
    "["      |
    "("                       {
       QString text = QString::fromUtf8(yytext);
@@ -1154,29 +1173,176 @@ STARTDOCSYMS      "##"
       ++s_braceCount;
    }
 
-   ","       |
-   "]"       |
+   "}"      |
+   "]"      |
    ")"                       {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      --s_braceCount;
+   }
+
+   ":"                       {
+      QString text = QString::fromUtf8(yytext);
+
+      if (s_braceCount == 0) {
+         current->setData(EntryKey::Member_Type, s_defVal);
+
+         unput(*yytext);
+         BEGIN(FunctionDec);
+
+      } else {
+         s_defVal += text[0];
+      }
+   }
+
+   "'"                       {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal   += text[0];
+
+      s_defVal_active = true;
+
+      s_stringContext=FunctionTypeAnnotation;
+      BEGIN(SingleQuoteString);
+   }
+
+   "\""                      {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal   += text[0];
+
+      s_defVal_active = true;
+
+      s_stringContext = FunctionTypeAnnotation;
+      BEGIN(DoubleQuoteString);
+   }
+
+   \n                        {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+      incLineNr();
+   }
+
+   .                         {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+   }
+}
+
+<FunctionAnnotation>{
+   "{"       |
+   "["       |
+   "("                       {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      ++s_braceCount;
+   }
+
+   "}"       |
+   "]"                       {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      --s_braceCount;
+   }
+
+   ")"        |
+   "="        |
+   ","                   {
       QString text = QString::fromUtf8(yytext);
 
       if (s_braceCount == 0){
          // end of default argument
 
-         if (current->argList.listEmpty()) {
+         if (! current->argList.listEmpty()) {
+            current->argList.last().type = s_defVal.trimmed();
+         }
+
+         if (text[0] != ',') {
+            unput(*yytext);
+         }
+
+         BEGIN(FunctionParams);
+
+      } else {
+         if (text[0] == ')') {
+            --s_braceCount;
+         }
+
+         s_defVal += text[0];
+      }
+   }
+
+   "'"                       {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      s_defVal_active = true;
+
+      s_stringContext = FunctionAnnotation;
+      BEGIN(SingleQuoteString);
+   }
+
+   "\""                      {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      s_defVal_active = true;
+
+      s_stringContext = FunctionAnnotation;
+      BEGIN(DoubleQuoteString);
+   }
+
+   \n                        {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      incLineNr();
+   }
+
+   .             {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+   }
+}
+
+<FunctionParamDefVal>{
+   "{"       |
+   "["       |
+   "("                       {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      ++s_braceCount;
+   }
+
+   "}"       |
+   "]"                       {
+      QString text = QString::fromUtf8(yytext);
+      s_defVal += text[0];
+
+      --s_braceCount;
+   }
+
+   ")"       |
+   ","                       {
+      QString text = QString::fromUtf8(yytext);
+
+      if (s_braceCount == 0) {
+
+         if (! current->argList.listEmpty()) {
             current->argList.last().defval = s_defVal.trimmed();
          }
 
-          if (text[0] != ',') {
-             current->setData(EntryKey::Member_Args,  argListToString(current->argList));
-          }
-
-          BEGIN(FunctionParams);
-
-      }  else  {
-         // continue
-
          if (text[0] != ',') {
-            s_braceCount--;
+            unput(*yytext);
+         }
+
+         BEGIN(FunctionParams);
+
+      } else {
+         if (text[0] == ')') {
+            --s_braceCount;
          }
 
          s_defVal += text[0];
@@ -1188,7 +1354,6 @@ STARTDOCSYMS      "##"
       s_defVal   += text[0];
 
       s_defVal_active = true;
-      s_docsEntry     = QSharedPointer<Entry>();
 
       s_stringContext  = FunctionParamDefVal;
       BEGIN(SingleQuoteString);
@@ -1199,7 +1364,6 @@ STARTDOCSYMS      "##"
       s_defVal += text[0];
 
       s_defVal_active = true;
-      s_docsEntry     = QSharedPointer<Entry>();;
 
       s_stringContext = FunctionParamDefVal;
       BEGIN(DoubleQuoteString);
@@ -1381,6 +1545,40 @@ STARTDOCSYMS      "##"
       QString text = QString::fromUtf8(yytext);
       current->extends.append(BaseInfo(substitute(text,".","::"), Public, Normal));
       // Has base class-do stuff
+   }
+
+   "'"                        {
+      // start of a single quoted string
+      s_stringContext = YY_START;
+      BEGIN(SingleQuoteStringIgnore);
+   }
+
+   "\""                      {
+      // start of a double quoted string
+      s_stringContext = YY_START;
+      BEGIN(DoubleQuoteStringIgnore);
+   }
+}
+
+<SingleQuoteStringIgnore>{
+   "'"                        {
+      // end of a single quoted string
+      BEGIN(s_stringContext);
+   }
+
+   .                       {
+      // do nothing
+   }
+}
+
+<DoubleQuoteStringIgnore>{
+   "\""                       {
+      // end of a double quoted string
+      BEGIN(s_stringContext);
+   }
+
+   .                       {
+      // do nothing
    }
 }
 

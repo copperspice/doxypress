@@ -123,6 +123,19 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
       }
    }
 
+<Start>([~!]{B}*)?{ID}{B}*"["{B}*"]" {
+   // PHP
+
+   if (! insidePHP) {
+      REJECT;
+   }
+
+   QString text = QString::fromUtf8(yytext);
+
+   addTypeName();
+   s_name += removeRedundantWhiteSpace(text);
+   }
+
 <Start>([~!]{B}*)?{ID}/({B}*"["{B}*"]")* {
       // the []'s are for Java,
       // the / was add to deal with multi-dimensional C++ arrays like A[][15]
@@ -163,6 +176,10 @@ ID    "$"?([a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*)|(@[0-9]+)
    }
 
 <Start>{B}*"("({ID}"::")*{B}*[&*]({B}*("const"|"volatile"){B}+)?  {
+      if (insidePHP) {
+         REJECT;
+      }
+
       addType();
       s_type += QString::fromUtf8(yytext).trimmed();
    }
