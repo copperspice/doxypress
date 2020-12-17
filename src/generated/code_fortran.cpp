@@ -34134,9 +34134,7 @@ char *code_fortran_YYtext;
 // #define DBG_CTX(x) fprintf x
 #define DBG_CTX(x) do { } while(0)
 
-#define YY_NEVER_INTERACTIVE 1
 #define YY_NO_INPUT 1
-#define YY_NO_TOP_STATE 1
 
 /*
  * For fixed formatted code position 6 is of importance (continuation character).
@@ -34184,12 +34182,12 @@ static QString     docBlock;                     // contents of all lines of a d
 static QString     currentModule;                // name of the current enclosing module
 static QString     currentClass;                 // name of the current enclosing class
 
-static UseSDict    *useMembers = new UseSDict;   // info about used modules
-static UseEntry    *useEntry = 0;                // current use statement info
+static UseSDict    *useMembers = nullptr;        // info about used modules
+static UseEntry    *useEntry   = nullptr;        // current use statement info
 
 static QString str = "";                         // contents of fortran string
 
-static CodeOutputInterface *s_code;
+static CodeGenerator *s_code;
 
 // TODO: is this still needed? if so, make it work
 static QString     s_parmType;
@@ -34364,8 +34362,7 @@ static void codifyLines(const QString &text)
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol,
-                  QSharedPointer<Definition> d, const QString &text)
+static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition> d, const QString &text)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
@@ -34543,7 +34540,7 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
  todo: implementation
 */
 static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
-            const QString &memberText, CodeOutputInterface &ol)
+            const QString &memberText, CodeGenerator &ol)
 {
    (void) cd;
    (void) memberText;
@@ -34552,8 +34549,7 @@ static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
    return false;
 }
 
-static bool getLink(UseSDict *usedict, const QString &memberText,
-            CodeOutputInterface &ol, const QString &text)
+static bool getLink(UseSDict *usedict, const QString &memberText, CodeGenerator &ol, const QString &text)
 {
    QSharedPointer<MemberDef> md;
    QString memberName = removeRedundantWhiteSpace(memberText);
@@ -34597,7 +34593,7 @@ static bool getLink(UseSDict *usedict, const QString &memberText,
    return false;
 }
 
-static void generateLink(CodeOutputInterface &ol, const QString &lname)
+static void generateLink(CodeGenerator &ol, const QString &lname)
 {
    QSharedPointer<ClassDef> cd;
    QSharedPointer<NamespaceDef> nd;
@@ -34822,8 +34818,6 @@ static int input (void );
     static void yy_push_state (int new_state );
     
     static void yy_pop_state (void );
-    
-    static int yy_top_state (void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
@@ -36847,11 +36841,6 @@ YY_BUFFER_STATE code_fortran_YY_scan_bytes  (yyconst char * yybytes, int  _yybyt
 	BEGIN((yy_start_stack)[(yy_start_stack_ptr)]);
 }
 
-    static int yy_top_state  (void)
-{
-    	return (yy_start_stack)[(yy_start_stack_ptr) - 1];
-}
-
 #ifndef YY_EXIT_FAILURE
 #define YY_EXIT_FAILURE 2
 #endif
@@ -37093,30 +37082,31 @@ static void checkContLines(const QString &str)
    s_hasContLine[0] = 0;
 }
 
-void resetFortranCodeParserState() {}
+void resetFortranCodeParserState() { }
 
-void parseFortranCode(CodeOutputInterface &od, const QString &className, const QString &s,
-                  bool exBlock, const QString &exName, QSharedPointer<FileDef> fd, int startLine,
+void parseFortranCode(CodeGenerator &od, const QString &className, const QString &input,
+                  bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fd, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool,
                   QSharedPointer<Definition> searchCtx, bool collectXRefs, FortranFormat format)
 {
    (void) className;
    (void) memberDef;
 
-   if (s.isEmpty()) {
+   if (input.isEmpty()) {
       return;
    }
 
-   printlex(code_fortran_YY_flex_debug, true, __FILE__, fd ? fd->fileName() : "" );
+   printlex(code_fortran_YY_flex_debug, true, __FILE__, fd == nullptr ? QString() : fd->fileName() );
 
    TooltipManager::instance()->clearTooltips();
    s_code = &od;
 
-   s_inputString      = s;
-   s_inputPosition    = 0;
-   s_isFixedForm      = recognizeFixedForm(s, format);
-   s_currentFontClass = "";
+   useMembers = new UseSDict;
 
+   s_inputString      = input;
+   s_inputPosition    = 0;
+   s_isFixedForm      = recognizeFixedForm(input, format);
+   s_currentFontClass = "";
    s_contLineNr       = 1;
 
    s_hasContLine.clear();
@@ -37138,16 +37128,16 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    if (endLine != -1) {
       s_inputLines  = endLine + 1;
    } else {
-      s_inputLines  = countLines();
+      s_inputLines  = s_yyLineNr + countLines() - 1;
    }
 
-   s_exampleBlock  = exBlock;
-   s_exampleName   = exName;
+   s_exampleBlock  = isExampleBlock;
+   s_exampleName   = exampleName;
    s_sourceFileDef = fd;
 
-   if (exBlock && fd == 0) {
+   if (isExampleBlock && fd == nullptr) {
       // create a dummy filedef for the example
-      s_sourceFileDef = QMakeShared<FileDef>("", exName);
+      s_sourceFileDef = QMakeShared<FileDef>("", exampleName);
    }
 
    if (s_sourceFileDef) {
@@ -37158,13 +37148,14 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
    s_currentMemberDef  = QSharedPointer<MemberDef>();
 
    if (! s_exampleName.isEmpty()) {
-      s_exampleFile = convertNameToFile_X(s_exampleName + "-example");
+      s_exampleFile = convertNameToFile_internal(s_exampleName + "-example");
    }
 
    s_includeCodeFragment = inlineFragment;
    startCodeLine();
-   s_parmName.resize(0);
-   s_parmType.resize(0);
+
+   s_parmName.clear();
+   s_parmType.clear();
 
    code_fortran_YYrestart(code_fortran_YYin );
    BEGIN( Start );
@@ -37175,18 +37166,17 @@ void parseFortranCode(CodeOutputInterface &od, const QString &className, const Q
       s_code->endCodeLine();
    }
 
-   if (fd) {
+   if (fd != nullptr) {
       TooltipManager::instance()->writeTooltips(*s_code);
    }
 
-   if (exBlock && s_sourceFileDef) {
+   if (isExampleBlock && s_sourceFileDef) {
       // delete the temporary file definition used for this example
       s_sourceFileDef = QSharedPointer<FileDef>();
    }
 
+   delete useMembers;
    s_hasContLine.clear();
-
-   printlex(code_fortran_YY_flex_debug, false, __FILE__, fd ? fd->fileName() : "" );
 
    return;
 }

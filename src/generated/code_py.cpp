@@ -1286,10 +1286,9 @@ char *code_py_YYtext;
 #include <tooltip.h>
 #include <util.h>
 
-#define DBs_CTX(...)     do { } while(0)
+#define DBG_CTX(...)     do { } while(0)
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 static ClassSDict    s_codeClassSDict;
 static QString       s_curClassName;
@@ -1325,7 +1324,7 @@ static int           s_stringContext;
 static QString       s_docBlock;
 static bool          s_endComment;
 
-static CodeOutputInterface          *s_code;
+static CodeGenerator               *s_code;
 
 static QStack<uint>                 s_indents;           // tracks indentation levels for scoping in python
 static QSharedPointer<Definition>   s_searchCtx;
@@ -1668,7 +1667,7 @@ static void endFontClass()
  * line numbers for each line. If \a text contains newlines, the link will be
  * split into multiple links with the same destination, one for each line.
  */
-static void writeMultiLineCodeLink(CodeOutputInterface &ol, QSharedPointer<Definition> d, const QString &text)
+static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition> d, const QString &text)
 {
    static bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
@@ -1742,7 +1741,7 @@ static void codifyLines(const QString &text)
 }
 
 static bool getLinkInScope(const QString &c, const QString &m,  const QString &memberText,
-                           CodeOutputInterface &ol, const QString &text )
+                           CodeGenerator &ol, const QString &text )
 {
    QSharedPointer<MemberDef>    md;
    QSharedPointer<ClassDef>     cd;
@@ -1781,7 +1780,7 @@ static bool getLinkInScope(const QString &c, const QString &m,  const QString &m
    return false;
 }
 
-static bool getLink(const QString &className, const QString &memberName, CodeOutputInterface &ol,
+static bool getLink(const QString &className, const QString &memberName, CodeGenerator &ol,
                   const QString &text = QString())
 {
    QString m = removeRedundantWhiteSpace(memberName);
@@ -1806,7 +1805,7 @@ static bool getLink(const QString &className, const QString &memberName, CodeOut
   For a given string in the source code,
   finds its class or global id and links to it.
 */
-static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &clName, bool typeOnly = false)
+static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, bool typeOnly = false)
 {
    QString className = clName;
 
@@ -1815,7 +1814,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
       return;
    }
 
-   DBs_CTX(stderr, "generateClassOrGlobalLink(className=%s)\n", csPrintable(className) );
+   DBG_CTX(stderr, "generateClassOrGlobalLink(className=%s)\n", csPrintable(className) );
 
    QSharedPointer<ClassDef> cd;
    QSharedPointer<ClassDef> lcd;
@@ -1830,10 +1829,10 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
       cd = getResolvedClass(d, s_sourceFileDef, substitute(className, ".", "::"), &md);
 
-      DBs_CTX(stderr, "d=%s s_sourceFileDef=%s\n", d ? csPrintable(d->displayName()) : "<null>",
+      DBG_CTX(stderr, "d=%s s_sourceFileDef=%s\n", d ? csPrintable(d->displayName()) : "<null>",
                s_currentDefinition ? csPrintable(s_currentDefinition->displayName()) : "<null>");
 
-      DBs_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
+      DBG_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
 
       if (cd == 0 && md == 0) {
          // also see if it is variable or enum or enum value
@@ -1854,7 +1853,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
          s_theCallContext.setClass(lcd);
       }
 
-      DBs_CTX(stderr, "is a local variable cd=%p\n", cd.data());
+      DBG_CTX(stderr, "is a local variable cd=%p\n", cd.data());
    }
 
    if (cd && cd->isLinkable()) { // is it a linkable class
@@ -1888,7 +1887,7 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 
          QSharedPointer<ClassDef> mcd = getClass(scope);
 
-         DBs_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
+         DBG_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
 
          if (mcd) {
             QSharedPointer<MemberDef> md = mcd->getMemberByName(locName);
@@ -1959,14 +1958,14 @@ static void generateClassOrGlobalLink(CodeOutputInterface &ol, const QString &cl
 }
 
 // seems to work for file members, but scopes are not being correctly tracked for classes
-static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcName)
+static void generateFunctionLink(CodeGenerator &ol, const QString &funcName)
 {
    QSharedPointer<ClassDef> ccd;
 
    QString locScope = s_classScope;
    QString locFunc = removeRedundantWhiteSpace(funcName);
 
-   DBs_CTX(stdout, "*** locScope=%s locFunc=%s\n", csPrintable(locScope), csPrintable(locFunc));
+   DBG_CTX(stdout, "*** locScope=%s locFunc=%s\n", csPrintable(locScope), csPrintable(locFunc));
    int i = locFunc.lastIndexOf("::");
 
    if (i > 0) {
@@ -1991,7 +1990,7 @@ static void generateFunctionLink(CodeOutputInterface &ol, const QString &funcNam
    return;
 }
 
-static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> def, const QString &name)
+static bool findMemberLink(CodeGenerator &ol, QSharedPointer<Definition> def, const QString &name)
 {
    if (def->getOuterScope() && def->getOuterScope()->definitionType() == Definition::TypeClass &&
          s_currentDefinition->definitionType() == Definition::TypeClass) {
@@ -2005,7 +2004,7 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> d
          }
       }
 
-      DBs_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
+      DBG_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
                   thisCd ? csPrintable(thisCd->name()) : "<none>");
 
       // TODO: find the nearest base class in case cd is a base class of thisCd
@@ -2019,7 +2018,7 @@ static bool findMemberLink(CodeOutputInterface &ol, QSharedPointer<Definition> d
    return false;
 }
 
-static void findMemberLink(CodeOutputInterface &ol, const QString &phrase)
+static void findMemberLink(CodeGenerator &ol, const QString &phrase)
 {
    if (s_currentDefinition) {
       auto iter = Doxy_Globals::glossary().find(phrase);
@@ -2162,8 +2161,6 @@ static int input (void );
     static void yy_push_state (int new_state );
     
     static void yy_pop_state (void );
-    
-    static int yy_top_state (void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
@@ -2764,7 +2761,7 @@ YY_RULE_SETUP
 case 37:
 YY_RULE_SETUP
 {
-      // This implements poor indendation-tracking should be improved.
+      // This implements poor indentation-tracking should be improved.
       // (translate tabs to space, etc)
       QString text = QString::fromUtf8(code_py_YYtext);
       codifyLines(text);
@@ -2830,7 +2827,7 @@ YY_RULE_SETUP
 case 44:
 YY_RULE_SETUP
 {
-      // espaced char
+      // escaped char
       QString text = QString::fromUtf8(code_py_YYtext);
       codify(text);
    }
@@ -3969,11 +3966,6 @@ YY_BUFFER_STATE code_py_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_le
 	BEGIN((yy_start_stack)[(yy_start_stack_ptr)]);
 }
 
-    static int yy_top_state  (void)
-{
-    	return (yy_start_stack)[(yy_start_stack_ptr) - 1];
-}
-
 #ifndef YY_EXIT_FAILURE
 #define YY_EXIT_FAILURE 2
 #endif
@@ -4236,8 +4228,8 @@ static void adjustScopesAndSuites(unsigned indentLength)
    }
 }
 
-void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s, bool exBlock, const QString &exName,
-                     QSharedPointer<FileDef> fd, int startLine, int endLine, bool,
+void parsePythonCode(CodeGenerator &od, const QString &, const QString &s, bool exBlock, const QString &exName,
+                     QSharedPointer<FileDef> fd, int startLine, int endLine, bool inlineFragment,
                      QSharedPointer<MemberDef> , bool, QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
    if (s.isEmpty()) {
@@ -4252,14 +4244,8 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
    s_inputPosition    = 0;
    s_currentFontClass = "";
    s_needsTermination = false;
-   s_searchCtx = searchCtx;
-   s_collectXRefs = collectXRefs;
-
-   if (endLine != -1) {
-      s_inputLines  = endLine + 1;
-   } else {
-      s_inputLines  = countLines();
-   }
+   s_searchCtx        = searchCtx;
+   s_collectXRefs     = collectXRefs;
 
    if (startLine != -1) {
       s_yyLineNr    = startLine;
@@ -4267,13 +4253,21 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
       s_yyLineNr    = 1;
    }
 
+   if (endLine != -1) {
+      s_inputLines  = endLine + 1;
+   } else {
+      s_inputLines  = s_yyLineNr + countLines() - 1;
+   }
+
    s_exampleBlock  = exBlock;
    s_exampleName   = exName;
    s_sourceFileDef = fd;
 
+   s_includeCodeFragment = inlineFragment;
+
    bool cleanupSourceDef = false;
 
-   if (fd == nullptr) {
+   if (exBlock && fd == nullptr) {
       // create a dummy filedef for the example
       s_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? exName : "generated"));
       cleanupSourceDef = true;
@@ -4293,7 +4287,7 @@ void parsePythonCode(CodeOutputInterface &od, const QString &, const QString &s,
       endCodeLine();
    }
 
-   if (fd) {
+   if (fd != nullptr) {
       TooltipManager::instance()->writeTooltips(*s_code);
    }
 

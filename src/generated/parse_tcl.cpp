@@ -742,7 +742,6 @@ char *parse_tcl_YYtext;
 #include <util.h>
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 #define MAX_INCLUDE_DEPTH 10
 
@@ -998,7 +997,7 @@ typedef struct {
 // Structure containing all internal global variables
 static struct
 {
-   CodeOutputInterface *code;              // if set then we are codifying the file
+   CodeGenerator *code;                    // if set then we are codifying the file
 
    int code_line;                          // current line of code
    int code_linenumbers;                   // if true create line numbers in code
@@ -1171,7 +1170,7 @@ QSharedPointer<Entry> tcl_entry_namespace(const QString ns)
       myEntry->section      = Entry::NAMESPACE_SEC;
       myEntry->m_entryName  = ns;
 
-      tcl.entry_main->addSubEntry(myEntry, tcl.entry_main);
+      tcl.entry_main->addSubEntry(myEntry);
       tcl.ns.insert(ns, myEntry);
    }
 
@@ -1196,7 +1195,7 @@ QSharedPointer<Entry> tcl_entry_class(const QString cl)
       myEntry->section     = Entry::CLASS_SEC;
       myEntry->m_entryName = cl;
 
-      tcl.entry_main->addSubEntry(myEntry, tcl.entry_main);
+      tcl.entry_main->addSubEntry(myEntry);
       tcl.cl.insert(cl, myEntry);
    }
 
@@ -1479,8 +1478,6 @@ static int input (void );
     static void yy_push_state (int new_state );
     
     static void yy_pop_state (void );
-    
-    static int yy_top_state (void );
     
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
@@ -2053,11 +2050,13 @@ case 34:
 /* rule 34 can match eol */
 YY_RULE_SETUP
 {
+      QString text = QString::fromUtf8(parse_tcl_YYtext);
+
       tcl.string_commentcodify = "";
       tcl.string_commentline   = "";
       tcl.line_body1           = parse_tcl_YYlineno;
 
-      tcl_command(-1, "");
+      tcl_command(-1, text);
    }
 	YY_BREAK
 case 35:
@@ -3054,11 +3053,6 @@ YY_BUFFER_STATE parse_tcl_YY_scan_bytes  (yyconst char * yybytes, int  _yybytes_
 	BEGIN((yy_start_stack)[(yy_start_stack_ptr)]);
 }
 
-    static int yy_top_state  (void)
-{
-    	return (yy_start_stack)[(yy_start_stack_ptr) - 1];
-}
-
 #ifndef YY_EXIT_FAILURE
 #define YY_EXIT_FAILURE 2
 #endif
@@ -3645,7 +3639,7 @@ static void tcl_word(int what, const QString &text)
          }
 
          if (myList.size() != 1 || myList[0] != '.') {
-            tcl_warn("level = %d expected = %c\n", myList.size(), myList.top().unicode());
+            tcl_warn("level = %ld expected = %c\n", static_cast<long>(myList.size()), myList.top().unicode());
          }
 
          myWord = ' ';
@@ -3763,7 +3757,7 @@ static void tcl_comment(int what, const QString  &text)
                   parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                                     myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
 
-                  tcl.entry_inside->addSubEntry(myEntry, tcl.entry_inside);
+                  tcl.entry_inside->addSubEntry(myEntry);
 
                } else {
                   // we can add to current entry in this case
@@ -3786,7 +3780,7 @@ static void tcl_comment(int what, const QString  &text)
                parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                                  myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
 
-               tcl.entry_inside->addSubEntry(myEntry, tcl.entry_inside);
+               tcl.entry_inside->addSubEntry(myEntry);
 
             } else {
                // we can add to current entry
@@ -3805,7 +3799,7 @@ static void tcl_comment(int what, const QString  &text)
                                      tcl.file_name, myLine, false, tcl.config_autobrief, FALSE,
                                      myProt, myPos, myNew)) {
                if (myNew) {
-                  tcl.entry_inside->addSubEntry(tcl.entry_current, tcl.entry_inside);
+                  tcl.entry_inside->addSubEntry(tcl.entry_current);
                   tcl.entry_current = tcl_entry_new();
 
                } else {
@@ -3815,7 +3809,7 @@ static void tcl_comment(int what, const QString  &text)
             }
 
             if (myNew) {
-               tcl.entry_inside->addSubEntry(tcl.entry_current, tcl.entry_inside);
+               tcl.entry_inside->addSubEntry(tcl.entry_current);
                tcl.entry_current = tcl_entry_new();
             } else {
                tcl.entry_current->section = tcl.entry_inside->section;
@@ -3928,13 +3922,15 @@ static void tcl_codify_link(const QString &name)
       }
    }
 
-   if (myDef) { // documented command
+   if (myDef != nullptr) {
+      // documented command
+
       tcl.code->writeCodeLink(myDef->getReference(), myDef->getOutputFileBase(), myDef->anchor(),
                               name, myDef->qualifiedName());
 
       if (tcl.memberdef) {
          myDef->addSourceReferencedBy(tcl.memberdef);
-         tcl.memberdef->addSourceReferences(myDef);
+         tcl.memberdef->addSourceReferences(myDef);         // consider removing
 
       } else {
          QSharedPointer<Entry> callerEntry;
@@ -4208,8 +4204,8 @@ static void tcl_command_SWITCH()
 
    } else {
       // not properly detected syntax
-      tcl_warn("Invalid switch syntax: %d options followed by %d tokens.\n",
-              lastOptionIndex / 2, (tcl.listCommandwords.count() - 1) / 2 - lastOptionIndex / 2);
+      tcl_warn("Invalid switch syntax: %d options followed by %ld tokens.\n",
+             lastOptionIndex / 2, static_cast<long>((tcl.listCommandwords.count() - 1) / 2 - lastOptionIndex / 2));
 
       for (i = lastOptionIndex + 1; i <= tcl.listCommandwords.count(); i++) {
          myScan = tcl_command_ARG(myScan, i, false);
@@ -4379,7 +4375,7 @@ static void tcl_command_PROC()
 
    tcl_command_ArgList(tcl.listCommandwords[4]);
 
-   myEntryNs->addSubEntry(tcl.entry_current, myEntryNs);
+   myEntryNs->addSubEntry(tcl.entry_current);
 
    myEntry = tcl.entry_current;
    tcl.fn.insert(myName, myEntry);
@@ -4427,11 +4423,11 @@ static void tcl_command_Method()
    tcl_protection(tcl.entry_current);
    tcl_command_ArgList(tcl.listCommandwords[4]);
 
-   myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+   myEntryCl->addSubEntry(tcl.entry_current);
 
    tcl.fn.insert(myName, tcl.entry_current);
    myEntry = tcl.entry_current;
-   myScan = tcl_scan_start(tcl.word_is, tcl.listCommandwords.at(6), myNs, myEntryCl, myEntry);
+   myScan  = tcl_scan_start(tcl.word_is, tcl.listCommandwords.at(6), myNs, myEntryCl, myEntry);
 }
 
 // Handle constructor statements inside class definitions.
@@ -4472,7 +4468,7 @@ static void tcl_command_Constructor()
    tcl_command_ArgList(tcl.listCommandwords[2]);
 
    if (myEntryCl) {
-      myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+      myEntryCl->addSubEntry(tcl.entry_current);
    }
 
    myEntry = tcl.entry_current;
@@ -4514,7 +4510,7 @@ static void tcl_command_DESTRUCTOR()
    tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
-   myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+   myEntryCl->addSubEntry(tcl.entry_current);
    myEntry = tcl.entry_current;
    tcl.fn.insert(myName, myEntry);
 
@@ -4553,7 +4549,7 @@ static void tcl_command_Namespace()
    tcl.entry_current->startBodyLine = tcl.line_body0;
    tcl.entry_current->endBodyLine   = tcl.line_body1;
 
-   tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_current);
    tcl.ns.insert(myName, tcl.entry_current);
 
    myStr = tcl.listCommandwords.at(6);
@@ -4600,7 +4596,7 @@ static void tcl_command_ITCL_CLASS()
    tcl.entry_current->startBodyLine = tcl.line_body0;
    tcl.entry_current->endBodyLine   = tcl.line_body1;
 
-   tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_current);
 
    tcl.cl.insert(myName, tcl.entry_current);
 
@@ -4639,7 +4635,7 @@ static void tcl_command_OO_CLASS()
    tcl.entry_current->startBodyLine = tcl.line_body0;
    tcl.entry_current->endBodyLine   = tcl.line_body1;
 
-   tcl.entry_main->addSubEntry(tcl.entry_current, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_current);
 
    tcl.cl.insert(myName, tcl.entry_current);
    myEntryCl = tcl.entry_current;
@@ -4707,7 +4703,7 @@ static void tcl_command_OO_DEFINE()
       }
 
       if (myEntryCl) {
-         myEntryCl->addSubEntry(tcl.entry_current, myEntryCl);
+         myEntryCl->addSubEntry(tcl.entry_current);
       }
 
       tcl.fn.insert(myMethod, tcl.entry_current);
@@ -4773,7 +4769,7 @@ static void tcl_command_Variable(int inclass)
    tcl.entry_current->endBodyLine   = tcl.line_body1;
    tcl_protection(tcl.entry_current);
 
-   myEntry->addSubEntry(tcl.entry_current, myEntry);
+   myEntry->addSubEntry(tcl.entry_current);
 
    tcl.entry_current = tcl_entry_new();
 }
@@ -5156,7 +5152,9 @@ static void tcl_command(int what, const QString &text)
 
 command_warn:
    // print warning message because of wrong syntax
-   tcl_warn("Line %d, Count = %d: %s\n", myLine, tcl.listCommandwords.count(), csPrintable(tcl.listCommandwords.join(" ")) );
+   tcl_warn("Line %d, Count = %ld: %s\n", myLine, static_cast<long>(tcl.listCommandwords.count()),
+                  csPrintable(tcl.listCommandwords.join(" ")) );
+
    tcl_command_OTHER();
 
 command_end:
@@ -5265,13 +5263,13 @@ static void tcl_parse(const QString ns, const QString cls)
    tcl.entry_file->section     = Entry::SOURCE_SEC;
    tcl.entry_file->protection  = Public;
 
-   tcl.entry_main->addSubEntry(tcl.entry_file, tcl.entry_main);
+   tcl.entry_main->addSubEntry(tcl.entry_file);
 
    QSharedPointer<Entry> myEntry = tcl_entry_new();
 
    myEntry->m_entryName = "";
 
-   tcl.entry_main->addSubEntry(myEntry, tcl.entry_main);
+   tcl.entry_main->addSubEntry(myEntry);
    tcl.ns.insert("::", myEntry);
    tcl.entry_current = tcl_entry_new();
 
@@ -5347,11 +5345,16 @@ void Tcl_Parser::parseInput(const QString &fileName, const QString &input, QShar
 }
 
 // Parse file and codify
-void Tcl_Parser::parseCode(CodeOutputInterface &codeOutIntf, const QString &scopeName, const QString &input,
+void Tcl_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName, const QString &input,
                   SrcLangExt lang, bool isExampleBlock, const QString &exampleName, QSharedPointer<FileDef> fileDef, int startLine,
                   int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef, bool showLineNumbers,
                   QSharedPointer<Definition> searchCtx, bool collectXRefs)
 {
+   (void) lang;
+   (void) endLine;
+   (void) inlineFragment;
+   (void) searchCtx;
+
    if (input.length() < 1) {
       return;
    }

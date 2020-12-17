@@ -878,7 +878,6 @@ char *default_argsYYtext;
 #include <util.h>
 
 #define YY_NO_INPUT 1
-#define YY_NEVER_INTERACTIVE 1
 
 static QString          s_inputString;
 static int              s_inputPosition;
@@ -933,6 +932,7 @@ static bool checkSpecialType(QString &name)
       keywords.insert("signed");
       keywords.insert("bool");
       keywords.insert("char");
+      keywords.insert("wchar_t");
       keywords.insert("char8_t");
       keywords.insert("char16_t");
       keywords.insert("char32_t");
@@ -947,7 +947,14 @@ static bool checkSpecialType(QString &name)
       keywords.insert("uint16_t");
       keywords.insert("int32_t");
       keywords.insert("uint32_t");
+      keywords.insert("int64_t");
+      keywords.insert("uint64_t");
+      keywords.insert("intmax_t");
+      keywords.insert("intptr_t");
+      keywords.insert("uintmax_t");
+      keywords.insert("uintptr_t");
       keywords.insert("const");
+      keywords.insert("void");
       keywords.insert("volatile");
    }
 
