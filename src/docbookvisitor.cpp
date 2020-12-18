@@ -705,117 +705,121 @@ void DocbookDocVisitor::visitPre(DocSimpleSect *s)
    switch (s->type()) {
       case DocSimpleSect::See:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trSeeAlso() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trSeeAlso() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trSeeAlso()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trSeeAlso()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Return:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trReturns() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trReturns() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trReturns()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trReturns()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Author:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trAuthor(true, true) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trAuthor(true, true) << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trAuthor(true, true)) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trAuthor(true, true)) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Authors:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trAuthor(true, false) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trAuthor(true, false) << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trAuthor(true, false)) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trAuthor(true, false)) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Version:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trVersion() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trVersion() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trVersion()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trVersion()) << "</title>" << endl;
          }
          break;
+
       case DocSimpleSect::Since:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trSince() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trSince() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trSince()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trSince()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Date:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trDate() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trDate() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trDate()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trDate()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Note:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trNote() << ": </title>" << endl;
+            m_t << "<note><title>" << theTranslator->trNote() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trNote()) << ": </title>" << endl;
+            m_t << "<note><title>" << convertToDocBook(theTranslator->trNote()) << "</title>" << endl;
          }
          break;
+
       case DocSimpleSect::Warning:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trWarning() << ": </title>" << endl;
+            m_t << "<warning<title>" << theTranslator->trWarning() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trWarning()) << ": </title>" << endl;
+            m_t << "<warning><title>" << convertToDocBook(theTranslator->trWarning()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Pre:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trPrecondition() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trPrecondition() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trPrecondition()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trPrecondition()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Post:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trPostcondition() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trPostcondition() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trPostcondition()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trPostcondition()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Copyright:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trCopyright() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trCopyright() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trCopyright()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trCopyright()) << "</title>" << endl;
          }
          break;
+
       case DocSimpleSect::Invar:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trInvariant() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trInvariant() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trInvariant()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trInvariant()) << "</title>" << endl;
          }
          break;
+
       case DocSimpleSect::Remark:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trRemarks() << ": </title>" << endl;
+            m_t << "<formalpara><title>" << theTranslator->trRemarks() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trRemarks()) << ": </title>" << endl;
+            m_t << "<formalpara><title>" << convertToDocBook(theTranslator->trRemarks()) << "</title>" << endl;
          }
          break;
 
       case DocSimpleSect::Attention:
          if (m_insidePre) {
-            m_t << "<formalpara><title>" << theTranslator->trAttention() << ": </title>" << endl;
+            m_t << "<caution><title>" << theTranslator->trAttention() << "</title>" << endl;
          } else {
-            m_t << "<formalpara><title>" << convertToXML(theTranslator->trAttention()) << ": </title>" << endl;
+            m_t << "<caution><title>" << convertToDocBook(theTranslator->trAttention()) << "</title>" << endl;
          }
          break;
 
