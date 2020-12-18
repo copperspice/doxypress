@@ -1099,6 +1099,13 @@ void DocbookDocVisitor::visitPre(DocHtmlRow *tr)
 
    m_t << "      <row ";
 
+   for (const auto &opt : tr->attribs()) {
+
+      if (supportedHtmlAttribute(opt.name)) {
+         // process supported attributes only
+         m_t << " " << opt.name << "='" << convertToDocBook(opt.value) << "'";
+      }
+   }
 
    m_t << ">\n";
 }
@@ -1155,8 +1162,14 @@ void DocbookDocVisitor::visitPre(DocHtmlCell *cell)
                m_t << " align='center'";
            }
 
+         } else {
+            // skip 'markdownTable*' value ending with "None"
+            m_t << " class='" << convertToDocBook(opt.value) << "'";
          }
 
+
+      } else if (supportedHtmlAttribute(opt.name)) {
+         m_t << " " << opt.name << "='" << convertToDocBook(opt.value) << "'";
       }
    }
 
@@ -1213,7 +1226,8 @@ void DocbookDocVisitor::visitPre(DocHRef *href)
    if (m_hide) {
       return;
    }
-   m_t << "<link xlink:href=\"" << href->url() << "\">";
+
+   m_t << "<link xlink:href=\"" << convertToDocBook(href->url()) << "\">";
 }
 
 void DocbookDocVisitor::visitPost(DocHRef *)
@@ -1725,7 +1739,7 @@ void DocbookDocVisitor::visitPost(DocParBlock *)
 
 void DocbookDocVisitor::filter(const QString &str)
 {
-   m_t << convertToXML(str);
+   m_t << convertToDocBook(str);
 }
 
 void DocbookDocVisitor::startLink(const QString &file, const QString &anchor)
