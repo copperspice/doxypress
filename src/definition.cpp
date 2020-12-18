@@ -779,10 +779,9 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (! docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
 
             if (! rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -798,10 +797,9 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
 
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -822,10 +820,9 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (! docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
 
             if (! rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -840,10 +837,10 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
+
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
             }
@@ -867,10 +864,10 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (! docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
+
             if (! rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
             }
@@ -886,10 +883,9 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
 
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -910,10 +906,9 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.enable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
 
             if (rtfSourceCode) {
                ol.enable(OutputGenerator::RTF);
@@ -929,10 +924,9 @@ void Definition::writeSourceDef(OutputList &ol, const QString &)
                ol.disable(OutputGenerator::Latex);
             }
 
-/*          if (! docbookSourceCode) {
+            if (docbookSourceCode) {
                ol.disable(OutputGenerator::Docbook);
             }
-*/
 
             if (rtfSourceCode) {
                ol.disable(OutputGenerator::RTF);
@@ -1072,10 +1066,10 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                if (! latexSourceCode) {
                   ol.disable(OutputGenerator::Latex);
                }
-/*            if (! docbookSourceCode) {
+
+               if (! docbookSourceCode) {
                  ol.disable(OutputGenerator::Docbook);
                }
-*/
 
                if (! rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);
@@ -1095,10 +1089,9 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   ol.disable(OutputGenerator::Latex);
                }
 
-/*            if (docbookSourceCode) {
+               if (docbookSourceCode) {
                  ol.disable(OutputGenerator::Docbook);
                }
-*/
 
                if (rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);
@@ -1118,10 +1111,10 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   ol.disable(OutputGenerator::Latex);
                }
 
-/*            if (! docbookSourceCode) {
+              if (! docbookSourceCode) {
                  ol.disable(OutputGenerator::Docbook);
                }
-*/
+
                if (! rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);
                }
@@ -1137,10 +1130,9 @@ void Definition::_writeSourceRefList(OutputList &ol, const QString &scopeName,
                   ol.disable(OutputGenerator::Latex);
                }
 
-/*            if (docbookSourceCode) {
+               if (docbookSourceCode) {
                  ol.disable(OutputGenerator::Docbook);
                }
-*/
 
                if (rtfSourceCode) {
                   ol.disable(OutputGenerator::RTF);

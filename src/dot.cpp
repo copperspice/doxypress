@@ -1338,6 +1338,10 @@ bool DotManager::run()
       setDotFontPath(Config::getString("html-output"));
       setPath = true;
 
+   } else if (Config::getBool("generate-docbook")) {
+      setDotFontPath(Config::getString("docbook-output"));
+      setPath = true;
+
    } else if (Config::getBool("generate-latex")) {
       setDotFontPath(Config::getString("latex-output"));
       setPath = true;

@@ -246,6 +246,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
 {
    static const bool sourceCode        = Config::getBool("source-code");
    static const bool repeatBrief       = Config::getBool("repeat-brief");
+   static const bool docbookSourceCode = Config::getBool("docbook-program-listing");
    static const bool latexSourceCode   = Config::getBool("latex-source-code");
    static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
 
@@ -290,6 +291,11 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
          //if Latex enabled and LATEX_SOURCE_CODE is not, then skip
 
          ol.pushGeneratorState();
+
+         if (ol.isEnabled(OutputGenerator::Docbook) && ! docbookSourceCode) {
+            ol.disable(OutputGenerator::Docbook);
+         }
+
          if (ol.isEnabled(OutputGenerator::Latex) && ! latexSourceCode) {
             ol.disable(OutputGenerator::Latex);
          }
@@ -892,6 +898,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
 {
    static const bool generateTreeView  = Config::getBool("generate-treeview");
    static const bool filterSourceFiles = Config::getBool("filter-source-files");
+   static const bool docbookSourceCode = Config::getBool("docbook-program-listing");
    static const bool latexSourceCode   = Config::getBool("latex-source-code");
    static const bool rtfSourceCode     = Config::getBool("rtf-source-code");
    static const bool clangParsing      = Config::getBool("clang-parsing");
@@ -907,6 +914,10 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
 
    QString pageTitle = theTranslator->trSourceFile(title);
    ol.disable(OutputGenerator::Man);
+
+   if (! docbookSourceCode) {
+      ol.disable(OutputGenerator::Docbook);
+   }
 
    if (! latexSourceCode) {
       ol.disable(OutputGenerator::Latex);
@@ -945,6 +956,12 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
    ol.startContents();
 
    if (isLinkable()) {
+      ol.pushGeneratorState();
+
+      if (docbookSourceCode) {
+         ol.disable(OutputGenerator::Docbook);
+      }
+
       if (latexSourceCode) {
          ol.disable(OutputGenerator::Latex);
       }
@@ -957,13 +974,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
       ol.parseText(theTranslator->trGotoDocumentation());
       ol.endTextLink();
 
-      if (latexSourceCode) {
-         ol.enable(OutputGenerator::Latex);
-      }
-
-      if (rtfSourceCode) {
-         ol.enable(OutputGenerator::RTF);
-      }
+      ol.popGeneratorState();
    }
 
    // user specified
@@ -1724,7 +1735,6 @@ QString FileDef::fileVersion() const
 {
    return m_fileVersion;
 }
-
 
 void FileDef::countMembers()
 {

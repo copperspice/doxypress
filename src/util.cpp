@@ -7510,6 +7510,7 @@ void writeExample(OutputList &ol, const ExampleSDict &ed)
 
       ol.pushGeneratorState();
 
+      ol.disable(OutputGenerator::Docbook);
       ol.disable(OutputGenerator::Latex);
       ol.disable(OutputGenerator::RTF);
 
@@ -7577,6 +7578,7 @@ void writePageRef(TextGenerator &od, const QString &cn, const QString &mn)
 
    od.pushGeneratorState();
 
+   od.disable(OutputGenerator::Docbook);
    od.disable(OutputGenerator::Html);
    od.disable(OutputGenerator::Man);
 

@@ -135,6 +135,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    // ol.disableAllBut(OutputGenerator::Html);
 
    bool htmlOn    = ol.isEnabled(OutputGenerator::Html);
+   bool docbookOn = ol.isEnabled(OutputGenerator::Docbook);
    bool latexOn   = ol.isEnabled(OutputGenerator::Latex);
 
    {
@@ -147,12 +148,18 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          ol.enable(OutputGenerator::Latex);
       }
 
+      if (docbookOn) {
+         ol.enable(OutputGenerator::Docbook);
+      }
+
       ol.endMemberDocName();
       ol.startParameterList(! md->isObjCMethod());
    }
 
    ol.enableAll();
+
    ol.disable(OutputGenerator::Html);
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Latex);
 
    {
@@ -278,6 +285,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          // argument has a name
 
          ol.disable(OutputGenerator::Html);
+         ol.disable(OutputGenerator::Docbook);
          ol.disable(OutputGenerator::Latex);
 
          ol.docify(" ");                         // man pages
@@ -290,6 +298,10 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
          ol.startEmphasis();
          ol.enable(OutputGenerator::Man);
 
+         if (docbookOn) {
+            ol.enable(OutputGenerator::Docbook);
+         }
+
          if (latexOn) {
             ol.enable(OutputGenerator::Latex);
          }
@@ -300,11 +312,16 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
             ol.docify(arg.name);
          }
 
+         ol.disable(OutputGenerator::Docbook);
          ol.disable(OutputGenerator::Latex);
          ol.disable(OutputGenerator::Man);
 
          ol.endEmphasis();
          ol.enable(OutputGenerator::Man);
+
+         if (docbookOn) {
+            ol.enable(OutputGenerator::Docbook);
+         }
 
          if (latexOn) {
             ol.enable(OutputGenerator::Latex);
@@ -373,6 +390,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Html);
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Latex);
 
    if (! md->isObjCMethod()) {
@@ -383,6 +401,10 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
    ol.enableAll();
    if (htmlOn) {
       ol.enable(OutputGenerator::Html);
+   }
+
+   if (docbookOn) {
+      ol.enable(OutputGenerator::Docbook);
    }
 
    if (latexOn) {
@@ -1421,6 +1443,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    if (! detailsVisible) {
       ol.pushGeneratorState();
+      ol.disable(OutputGenerator::Docbook);
       ol.disable(OutputGenerator::Latex);
       ol.disable(OutputGenerator::Man);
 
@@ -4189,9 +4212,13 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
                if (numVisibleEnumValues > enumValuesPerLine && (enumMemCount % enumValuesPerLine) == 0 ) {
                   typeDecl.pushGeneratorState();
                   typeDecl.disableAllBut(OutputGenerator::Html);
+                  typeDecl.enable(OutputGenerator::Docbook);
                   typeDecl.enable(OutputGenerator::Latex);
+
                   typeDecl.lineBreak();
+                  typeDecl.disable(OutputGenerator::Docbook);
                   typeDecl.disable(OutputGenerator::Latex);
+
                   typeDecl.writeString("&#160;&#160;");
                   typeDecl.popGeneratorState();
                }

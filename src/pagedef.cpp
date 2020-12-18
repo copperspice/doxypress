@@ -206,6 +206,7 @@ void PageDef::writeDocumentation(OutputList &ol)
 
    //2.{
    ol.disable(OutputGenerator::Latex);
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::RTF);
    ol.disable(OutputGenerator::Man);
 
@@ -275,7 +276,9 @@ void PageDef::writePageDocumentation(OutputList &ol)
 
       ol.pushGeneratorState();
       ol.disableAll();
+
       ol.enable(OutputGenerator::Latex);
+      ol.enable(OutputGenerator::Docbook);
       ol.enable(OutputGenerator::RTF);
 
       for (auto subPage : *m_subPageDict) {

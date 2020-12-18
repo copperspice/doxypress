@@ -884,7 +884,19 @@ void ClassDef::showUsedFiles(OutputList &ol)
    ol.disable(OutputGenerator::Man);
 
    ol.writeRuler();
+
+   ol.pushGeneratorState();
+   ol.disableAllBut(OutputGenerator::Docbook);
+
+   ol.startParagraph();
    ol.parseText(generatedFromFiles());
+   ol.endParagraph();
+
+   ol.popGeneratorState();
+   ol.disable(OutputGenerator::Docbook);
+
+   ol.parseText(generatedFromFiles());
+   ol.enable(OutputGenerator::Docbook);
 
    bool first = true;
 
@@ -1604,6 +1616,7 @@ void ClassDef::writeMoreLink(OutputList &ol, const QString &anchor)
 
       ol.disable(OutputGenerator::Html);
       ol.disable(OutputGenerator::Man);
+      ol.disable(OutputGenerator::Docbook);
 
       // LaTeX, RTF
       if (! (usePDFLatex && pdfHyperlinks)) {

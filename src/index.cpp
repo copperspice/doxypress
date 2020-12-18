@@ -298,7 +298,10 @@ static void startIndexHierarchy(OutputList &ol, int level)
       ol.startIndexList();
    }
 
-   ol.enableAll();
+   ol.popGeneratorState();
+   ol.pushGeneratorState();
+
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Latex);
    ol.disable(OutputGenerator::RTF);
    ol.startItemList();
@@ -315,7 +318,10 @@ static void endIndexHierarchy(OutputList &ol, int level)
       ol.endIndexList();
    }
 
-   ol.enableAll();
+   ol.popGeneratorState();
+   ol.pushGeneratorState();
+
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Latex);
    ol.disable(OutputGenerator::RTF);
    ol.endItemList();
@@ -1094,6 +1100,7 @@ static void writeHierarchicalIndex(OutputList &ol)
    }
 
    ol.pushGeneratorState();
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Man);
 
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::ClassHierarchy);
@@ -1111,6 +1118,10 @@ static void writeHierarchicalIndex(OutputList &ol)
    ol.startTextBlock();
 
    if (Config::getBool("have-dot") && Config::getBool("dot-hierarchy")) {
+
+      ol.pushGeneratorState();
+
+      ol.disable(OutputGenerator::Docbook);
       ol.disable(OutputGenerator::Latex);
       ol.disable(OutputGenerator::RTF);
       ol.startParagraph();
@@ -1119,8 +1130,8 @@ static void writeHierarchicalIndex(OutputList &ol)
       ol.parseText(theTranslator->trGotoGraphicalHierarchy());
       ol.endTextLink();
       ol.endParagraph();
-      ol.enable(OutputGenerator::Latex);
-      ol.enable(OutputGenerator::RTF);
+
+      ol.popGeneratorState();
    }
 
    ol.parseText(lne ? lne->intro() : theTranslator->trClassHierarchyDescription());
@@ -1269,6 +1280,7 @@ static void writeFileIndex(OutputList &ol)
    }
 
    ol.pushGeneratorState();
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Man);
 
    if (Doxy_Globals::documentedFiles == 0) {
@@ -1652,6 +1664,7 @@ static void writeNamespaceIndex(OutputList &ol)
    }
 
    ol.pushGeneratorState();
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Man);
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::NamespaceList);
 
@@ -1752,6 +1765,7 @@ static void writeAnnotatedClassList(OutputList &ol)
       ol.pushGeneratorState();
 
       if (cd->isEmbeddedInOuterScope()) {
+         ol.disable(OutputGenerator::Docbook);
          ol.disable(OutputGenerator::Latex);
          ol.disable(OutputGenerator::RTF);
       }
@@ -3273,6 +3287,7 @@ static void writeExampleIndex(OutputList &ol)
    }
 
    ol.pushGeneratorState();
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Man);
 
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Examples);
@@ -3733,7 +3748,7 @@ static void writeGroupIndex(OutputList &ol)
    }
 
    ol.pushGeneratorState();
-
+   ol.disable(OutputGenerator::Docbook);
    ol.disable(OutputGenerator::Man);
 
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Modules);
@@ -3981,7 +3996,8 @@ static void writeIndex(OutputList &ol)
    endFile(ol);
    ol.disable(OutputGenerator::Html);
 
-   // write Latex & Rtf index
+   // write Docbook, Latex & Rtf index
+   ol.enable(OutputGenerator::Docbook);
    ol.enable(OutputGenerator::Latex);
    ol.enable(OutputGenerator::RTF);
 
@@ -3991,6 +4007,8 @@ static void writeIndex(OutputList &ol)
    if (! Config::getString("latex-header").isEmpty()) {
       ol.disable(OutputGenerator::Latex);
    }
+
+   ol.disable(OutputGenerator::Docbook);
 
    if (projPrefix.isEmpty()) {
       ol.parseText(theTranslator->trReferenceManual());
@@ -4010,6 +4028,8 @@ static void writeIndex(OutputList &ol)
    ol.startIndexSection(isTitlePageAuthor);
    ol.parseText(theTranslator->trGeneratedBy());
    ol.endIndexSection(isTitlePageAuthor);
+
+   ol.enable(OutputGenerator::Docbook);
    ol.enable(OutputGenerator::Latex);
 
    ol.lastIndexPage();
@@ -4044,15 +4064,22 @@ static void writeIndex(OutputList &ol)
                title = pd->name();
             }
 
+            ol.disable(OutputGenerator::Docbook);
+
             ol.startIndexSection(isPageDocumentation);
             ol.parseText(title);
             ol.endIndexSection(isPageDocumentation);
 
-            ol.pushGeneratorState(); // write TOC title (RTF only)
+            ol.enable(OutputGenerator::Docbook);
+
+            // write TOC title (RTF only)
+            ol.pushGeneratorState();
             ol.disableAllBut(OutputGenerator::RTF);
+
             ol.startIndexSection(isPageDocumentation2);
             ol.parseText(title);
             ol.endIndexSection(isPageDocumentation2);
+
             ol.popGeneratorState();
 
             ol.writeAnchor(QString(), pd->getOutputFileBase());
@@ -4066,6 +4093,8 @@ static void writeIndex(OutputList &ol)
          }
       }
    }
+
+   ol.disable(OutputGenerator::Docbook);
 
    if (! latexHideIndices) {
 
@@ -4103,6 +4132,8 @@ static void writeIndex(OutputList &ol)
          ol.endIndexSection(isFileIndex);
       }
    }
+
+   ol.enable(OutputGenerator::Docbook);
 
    if (s_documentedGroups > 0) {
       ol.startIndexSection(isModuleDocumentation);

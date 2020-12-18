@@ -588,6 +588,10 @@ void processFiles()
       readFormulas(htmlOutput, false);
    }
 
+   if (generateDocbook) {
+      readFormulas(docbookOutput, (generateHtml && ! useMathJax) || generateRtf);
+   }
+
    if (generateRtf) {
       readFormulas(rtfOutput, (generateHtml && ! useMathJax));
    }
@@ -952,6 +956,11 @@ void generateOutput()
 
    if (generateDocbook) {
       Doxy_Globals::infoLog_Stat.begin("Enable Docbook output\n");
+
+      auto obj = QMakeShared<DocbookGenerator>();
+
+      Doxy_Globals::outputList.add(obj);
+      obj->init();
    }
 
    if (generateLatex) {
@@ -1005,6 +1014,10 @@ void generateOutput()
    // create ttf for dot program
    if (generateHtml) {
       writeDoxFont(htmlOutput);
+   }
+
+   if (generateDocbook) {
+      writeDoxFont(docbookOutput);
    }
 
    if (generateLatex) {
@@ -1125,6 +1138,10 @@ void generateOutput()
          removeDoxFont(htmlOutput);
       }
 
+      if (generateDocbook) {
+         removeDoxFont(docbookOutput);
+      }
+
       if (generateRtf) {
          removeDoxFont(rtfOutput);
       }
@@ -1204,6 +1221,13 @@ void generateOutput()
       copyStyleSheet();
       copyLogo(htmlOutput);
       copyExtraFiles("html");
+   }
+
+   if (generateDocbook)  {
+      Doxy_Globals::infoLog_Stat.begin("Post process Docbook output\n");
+      copyLogo(docbookOutput);
+
+      Doxy_Globals::infoLog_Stat.end();
    }
 
    if (generateLatex)  {
