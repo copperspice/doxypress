@@ -275,6 +275,8 @@ namespace Doxy_Work{
    void copyStyleSheet();
    void copyLatexStyleSheet();
 
+   void countMembers();
+
    QString createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName);
    void createTemplateInstanceMembersX();
    QSharedPointer<ClassDef> createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ,
@@ -425,6 +427,8 @@ struct ReadDirArgs {
    void resolveUserReferences();
 
    void readTagFile(QSharedPointer<Entry> root, const QString &tag_file);
+
+   void setAnonymousEnumType();
 
    bool scopeIsTemplate(QSharedPointer<Definition> d);
    ArgumentList substituteTemplatesInArgList(const QVector<ArgumentList> &srcTempArgLists, QVector<ArgumentList> &dstTempArgLists,
@@ -842,6 +846,10 @@ void processFiles()
    generateXRefPages();
    Doxy_Globals::infoLog_Stat.end();
 
+   Doxy_Globals::infoLog_Stat.begin("Setting anonymous enum types\n");
+   setAnonymousEnumType();
+   Doxy_Globals::infoLog_Stat.end();
+
    if (Config::getBool("directory-graph")) {
       Doxy_Globals::infoLog_Stat.begin("Computing dependencies between directories\n");
       computeDirDependencies();
@@ -853,6 +861,10 @@ void processFiles()
 
    Doxy_Globals::infoLog_Stat.begin("Generating citations page\n");
    Doxy_Globals::citeDict.generatePage();
+   Doxy_Globals::infoLog_Stat.end();
+
+   Doxy_Globals::infoLog_Stat.begin("Counting class members...\n");
+   countMembers();
    Doxy_Globals::infoLog_Stat.end();
 
    Doxy_Globals::infoLog_Stat.begin("Counting data structures\n");
@@ -8795,6 +8807,35 @@ void Doxy_Work::addSourceReferences()
             fd->addSourceRef(md->getStartBodyLine(), md->getOuterScope(), md);
          }
       }
+   }
+}
+
+void Doxy_Work::setAnonymousEnumType()
+{
+   for (auto cd :Doxy_Globals::classSDict) {
+      cd->setAnonymousEnumType();
+   }
+}
+
+void Doxy_Work::countMembers()
+{
+   for (auto cd :Doxy_Globals::classSDict) {
+      cd->countMembers();
+   }
+
+   for (const auto &fn : Doxy_Globals::inputNameList) {
+
+      for (auto fd : *fn) {
+         fd->countMembers();
+      }
+   }
+
+   for (auto gd : Doxy_Globals::groupSDict) {
+      gd->countMembers();
+   }
+
+   for (auto nd : Doxy_Globals::namespaceSDict) {
+      nd->countMembers();
    }
 }
 
