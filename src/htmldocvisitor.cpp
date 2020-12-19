@@ -906,8 +906,6 @@ void HtmlDocVisitor::visit(DocFormula *f)
 
       // emerald
       m_t << " src=\"" << f->relPath() << f->name() << ".png\"/>";
-
-
    }
 
    if (bDisplay) {

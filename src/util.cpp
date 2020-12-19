@@ -8119,10 +8119,10 @@ QString correctURL(const QString &url, const QString &relPath)
 
 bool protectionLevelVisible(Protection prot)
 {
-   static bool extractPrivate = Config::getBool("extract-private");
-   static bool extractPackage = Config::getBool("extract-package");
+   static const bool extractPrivate = Config::getBool("extract-private");
+   static const bool extractPackage = Config::getBool("extract-package");
 
-   return (prot != Private && prot != Package)  || (prot == Private && extractPrivate) || (prot == Package && extractPackage);
+   return (prot != Private && prot != Package) || (prot == Private && extractPrivate) || (prot == Package && extractPackage);
 }
 
 QString stripIndentation(const QString &s)

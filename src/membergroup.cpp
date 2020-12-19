@@ -32,19 +32,20 @@ MemberGroup::MemberGroup()
 {
 }
 
-MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QString &hdr, const QString &d,
+MemberGroup::MemberGroup(QSharedPointer<Definition> parent, int id, const QString &hdr, const QString &docText,
                   const QString &docFile, int docLine)
    : m_parent(parent)
 {
    memberList      = QMakeShared<MemberList>(MemberListType_memberGroup);
-   grpId           = id;
+
    grpHeader       = hdr;
-   doc             = d;
+   doc             = docText;
+   m_docFile       = docFile;
+
+   m_docLine       = docLine;
+   grpId           = id;
 
    inSameSection   = true;
-
-   m_docFile       = docFile;
-   m_docLine       = docLine;
 }
 
 MemberGroup::~MemberGroup()
@@ -145,9 +146,10 @@ int MemberGroup::countGroupedInheritedMembers(MemberListType lt)
    for (auto md : *memberList) {
 
       if (lt == md->getSectionList(m_parent)->listType()) {
-         count++;
+         ++count;
       }
    }
+
    return count;
 }
 
@@ -290,7 +292,7 @@ void MemberGroup::addListReferences(QSharedPointer<Definition> def)
 
    if (! m_xrefListItems.isEmpty() && def) {
       QString name = def->getOutputFileBase() + "#" + anchor();
-      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, "", def);
+      addRefItem(m_xrefListItems, name, theTranslator->trGroup(true, true), name, grpHeader, QString(), def);
    }
 }
 

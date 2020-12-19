@@ -382,19 +382,11 @@ class RTFGenerator : public OutputGenerator
    QString rtf_LCList_DepthStyle();
    QString rtf_DList_DepthStyle();
    QString rtf_Code_DepthStyle();
+
    void incrementIndentLevel();
    void decrementIndentLevel();
 
    int  col;
-   bool m_prettyCode;
-
-   bool m_bstartedBody;     // has startbody been called yet?
-   int  m_listLevel;        // RTF does not really have a additive indent...manually set list level.
-   bool m_omitParagraph;    // should a the next paragraph command be ignored?
-   int  m_numCols;          // number of columns in a table
-
-   QString relPath;
-
    void beginRTFDocument();
    void beginRTFChapter();
    void beginRTFSection();
@@ -403,6 +395,14 @@ class RTFGenerator : public OutputGenerator
    void rtfwriteRuler_thick();
    void rtfwriteRuler_thin();
    void writeRTFReference(const QString &label);
+
+   bool m_prettyCode;
+   bool m_bstartedBody;           // has startbody been called yet
+   bool m_omitParagraph;          // should the next paragraph command be ignored
+   int  m_numCols;                // number of columns in a table
+   int  m_listLevel;              // RTF does not really have a additive indent, manually set list level
+
+   QString relPath;
 };
 
 #endif

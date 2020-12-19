@@ -3150,7 +3150,7 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
 
    while ((tok = doctokenizerYYlex())) {
 
-      if (!defaultHandleToken(this, tok, m_children, false)) {
+      if (! defaultHandleToken(this, tok, m_children, false)) {
          switch (tok) {
 
             case TK_COMMAND_AT:
@@ -3183,7 +3183,8 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
 
             case TK_LNKWORD:
             case TK_WORD:
-               if (isJavaLink) { // special case to detect closing }
+               if (isJavaLink) {
+                  // special case to detect closing }
                   QString w = g_token->name;
                   int p;
 
@@ -3194,7 +3195,8 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
                      uint l = w.length();
                      m_children.append(new DocWord(this, w.left(p)));
 
-                     if ((uint)p < l - 1) { // something left after the } (for instance a .)
+                     if ((uint)p < l - 1) {
+                        // something left after the } (for instance a .)
                         result = w.right(l - p - 1);
                      }
 

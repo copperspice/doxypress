@@ -182,7 +182,7 @@ void ClassDef::addMembersToMemberGroup()
 // adds new member definition to the class
 void ClassDef::internalInsertMember(QSharedPointer<MemberDef> md, Protection prot, bool addToAllList)
 {
-   static const bool hideFriendCompound = Config::getBool("hide-friend-compounds");
+   static const bool hideFriendCompound    = Config::getBool("hide-friend-compounds");
 
    if (md->isHidden()) {
       return;
@@ -1566,6 +1566,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
 
          case LayoutDocEntry::MemberDef: {
             LayoutDocEntryMemberDef *lmd = (LayoutDocEntryMemberDef *)lde;
+
             if (isSimple) {
                writeSimpleMemberDocumentation(ol, lmd->type);
             } else {
@@ -1575,7 +1576,7 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
          break;
 
          case LayoutDocEntry::MemberDefEnd:
-            if (!isSimple) {
+            if (! isSimple) {
                endMemberDocumentation(ol);
             }
             break;
@@ -2117,12 +2118,13 @@ void ClassDef::writeMemberList(OutputList &ol)
                   ol.writeString("<table class=\"directory\">\n");
                   first = false;
                }
+
                ol.writeString("  <tr");
                if ((idx & 1) == 0) {
                   ol.writeString(" class=\"even\"");
                }
 
-               idx++;
+               ++idx;
                ol.writeString("><td class=\"entry\">");
 
                if (cd->isObjectiveC()) {
@@ -2143,6 +2145,7 @@ void ClassDef::writeMemberList(OutputList &ol)
                   ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), md->name());
 
                } else {
+
                   ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), name);
 
                   if ( md->isFunction() || md->isSignal() || md->isSlot() || (md->isFriend() && ! md->argsString().isEmpty() )) {
@@ -3536,7 +3539,7 @@ void ClassDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, 
       ml->append(md);
    }
 
-   // for members in the declaration lists we set the section, needed for member grouping
+   // for members in the declaration lists set the section which is needed for member grouping
    if ((ml->listType() & MemberListType_detailedLists) == 0) {
       md->setSectionList(self, ml);
    }
@@ -3682,9 +3685,9 @@ int ClassDef::countAdditionalInheritedMembers()
 
          if (lmd->type != MemberListType_friends) {
             // friendship is not inherited
-            QSet<QSharedPointer<ClassDef>> visited;
+            QSet<QSharedPointer<ClassDef>> visitedClasses;
 
-            totalCount += countInheritedDecMembers(lmd->type, self, true, false, &visited);
+            totalCount += countInheritedDecMembers(lmd->type, self, true, false, &visitedClasses);
          }
       }
    }
@@ -3702,8 +3705,8 @@ void ClassDef::writeAdditionalInheritedMembers(OutputList &ol)
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
 
          if (lmd->type != MemberListType_friends) {
-            QSet<QSharedPointer<ClassDef>> visited;
-            writeInheritedMemberDeclarations(ol, lmd->type, -1, lmd->title(getLanguage()), self, true, false, &visited);
+            QSet<QSharedPointer<ClassDef>> visitedClasses;
+            writeInheritedMemberDeclarations(ol, lmd->type, -1, lmd->title(getLanguage()), self, true, false, &visitedClasses);
          }
       }
    }
@@ -3731,8 +3734,8 @@ int ClassDef::countMembersIncludingGrouped(MemberListType lt, QSharedPointer<Cla
 }
 
 void ClassDef::writeInheritedMemberDeclarations(OutputList &ol, MemberListType lt, int lt2, const QString &title,
-                                                QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways,
-                                                QSet<QSharedPointer<ClassDef>> *visitedClasses)
+                  QSharedPointer<ClassDef> inheritedFrom, bool invert, bool showAlways,
+                  QSet<QSharedPointer<ClassDef>> *visitedClasses)
 {
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
@@ -3785,7 +3788,7 @@ static const bool inlineInheritedMembers = Config::getBool("inline-inherited-mem
    QString tt = title;
    QString st = subTitle;
 
-   if (ml) {
+   if (ml != nullptr) {
       ml->writeDeclarations(ol, self, QSharedPointer<NamespaceDef>(), QSharedPointer<FileDef>(),
                             QSharedPointer<GroupDef>(), tt, st, false, showInline, inheritedFrom, lt);
       tt.resize(0);
@@ -3801,10 +3804,10 @@ static const bool inlineInheritedMembers = Config::getBool("inline-inherited-mem
       // show inherited members as separate lists
 
       if (visitedClasses == nullptr) {
-         QSet<QSharedPointer<ClassDef>> visited;
+         QSet<QSharedPointer<ClassDef>> tmp;
 
          writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : self,
-                 invert, showAlways, &visited);
+                 invert, showAlways, &tmp);
 
       } else {
          writeInheritedMemberDeclarations(ol, lt, lt2, title, inheritedFrom ? inheritedFrom : self,
@@ -3833,7 +3836,7 @@ void ClassDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, const
    QSharedPointer<ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
-   if (ml) {
+   if (ml != nullptr) {
       ml->writeDocumentation(ol, displayName(), self, title, false, showInline);
    }
 }
@@ -3843,7 +3846,7 @@ void ClassDef::writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt)
    QSharedPointer<ClassDef> self = sharedFrom(this);
    QSharedPointer<MemberList> ml = getMemberList(lt);
 
-   if (ml) {
+   if (ml != nullptr) {
       ml->writeSimpleDocumentation(ol, self);
    }
 }

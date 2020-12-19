@@ -243,8 +243,6 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
 
             // emerald, may need to set a flag to mark this inlineNS
          }
-
-
       }
    }
 }

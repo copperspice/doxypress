@@ -1210,7 +1210,7 @@ void LatexDocVisitor::visitPost(DocHtmlCaption *)
    m_hide = m_hideCaption;
 }
 
-void LatexDocVisitor::visitPre(DocHtmlRow *r)
+void LatexDocVisitor::visitPre(DocHtmlRow *)
 {
    setCurrentColumn(0);
 }
@@ -1228,7 +1228,7 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
    while (c <= numCols()) {
       // end of row while inside a row span?
 
-      for (int i = 0; i < rowSpans().count(); i++) {
+      for (int i = 0; i < rowSpans().count(); ++i) {
          const ActiveRowSpan &span = rowSpans()[i];
 
          if (span.rowSpan > 0 && span.column == c && row->rowIndex() > span.cell->rowIndex() ) {
@@ -1249,7 +1249,7 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
          }
       }
 
-      c++;
+      ++c;
    }
 
    m_t << "\\\\";
@@ -1260,7 +1260,7 @@ void LatexDocVisitor::visitPost(DocHtmlRow *row)
       ActiveRowSpan &span = const_cast<ActiveRowSpan &>(rowSpans()[i]);
 
       if (span.rowSpan > 0) {
-         span.rowSpan--;
+         --span.rowSpan;
       }
 
       if (span.rowSpan <= 0) {
@@ -1310,7 +1310,7 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
    setCurrentColumn(currentColumn() + 1);
 
    // Skip columns that span from above
-   for (int i = 0; i < rowSpans().count(); i++) {
+   for (int i = 0; i < rowSpans().count(); ++i) {
       const ActiveRowSpan &span = rowSpans()[i];
 
       if (span.rowSpan > 0 && span.column == currentColumn()) {
@@ -1451,6 +1451,7 @@ void LatexDocVisitor::visitPost(DocHRef *)
    if (m_hide) {
       return;
    }
+
    m_t << "}}";
 }
 
@@ -1468,6 +1469,7 @@ void LatexDocVisitor::visitPost(DocHtmlHeader *)
    if (m_hide) {
       return;
    }
+
    m_t << "}";
 }
 
@@ -2200,4 +2202,3 @@ void LatexDocVisitor::writePlantUMLFile(const QString &baseName, DocVerbatim *s)
    visitCaption(this, s->children());
    visitPostEnd(m_t, s->hasCaption());
 }
-

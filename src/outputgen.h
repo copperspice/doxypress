@@ -120,8 +120,8 @@ class DocGenerator : public CodeGenerator
    virtual void startHtmlLink(const QString &url) = 0;
    virtual void endHtmlLink() = 0;
 
-   virtual void startBold()      = 0;
-   virtual void endBold()        = 0;
+   virtual void startBold() = 0;
+   virtual void endBold()   = 0;
 
    virtual void startTypewriter() = 0;
    virtual void endTypewriter() = 0;

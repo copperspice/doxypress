@@ -44,7 +44,7 @@ class MemberGroup : public EnableSharedFromThis
 {
   public:
    MemberGroup();
-   MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docs,
+   MemberGroup(QSharedPointer<Definition> parent, int id, const QString &header, const QString &docText,
          const QString &docFile, int docLine);
 
    ~MemberGroup();
@@ -56,6 +56,7 @@ class MemberGroup : public EnableSharedFromThis
    int groupId() const {
       return grpId;
    }
+
    void insertMember(QSharedPointer<MemberDef> md);
    void setAnchors();
    void writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
@@ -135,17 +136,15 @@ class MemberGroup : public EnableSharedFromThis
  private:
    QSharedPointer<MemberList> memberList;      // list of all members in the group
    QSharedPointer<MemberList> inDeclSection;
-
-   int grpId;
-   QString grpHeader;
-   QString fileName;           // base name of the generated file
-   QString doc;
-
-   QString m_docFile;
-   int m_docLine;
-
-   QSharedPointer<Definition> scope;
    QSharedPointer<Definition> m_parent;
+
+   QString grpHeader;
+   QString fileName;                           // base name of the generated file
+   QString doc;
+   QString m_docFile;
+
+   int m_docLine;
+   int grpId;
 
    bool inSameSection;
 
@@ -155,9 +154,11 @@ class MemberGroup : public EnableSharedFromThis
 /** Data collected for a member group */
 struct MemberGroupInfo {
    MemberGroupInfo() : docLine(-1)
-   {}
+   {
+   }
 
-   ~MemberGroupInfo() {
+   ~MemberGroupInfo()
+   {
    }
 
    void setRefItems(const QVector<ListItemInfo> &list);

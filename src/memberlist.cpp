@@ -107,10 +107,10 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
 
             if (md->memberType() == MemberDefType::Function) {
                if (! md->isReimplementedBy(inheritedFrom)) {
-                  count++;
+                  ++count;
                }
             } else {
-               count++;
+               ++count;
             }
          }
       }
@@ -130,6 +130,8 @@ int MemberList::countInheritableMembers(QSharedPointer<ClassDef> inheritedFrom) 
  */
 void MemberList::countDecMembers()
 {
+   static const bool extractAll = Config::getBool("extract-all");
+
    if (m_numDecMembers != -1) {
       return;
    }
@@ -185,9 +187,8 @@ void MemberList::countDecMembers()
                ++m_numDecMembers;
                break;
 
-
             case MemberDefType::Define:
-               if (Config::getBool("extract-all") || ! md->argsString().isEmpty() ||
+               if (extractAll || ! md->argsString().isEmpty() ||
                       ! md->initializer().isEmpty() || md->hasDocumentation()) {
                   // m_defCnt++;
                   ++m_numDecMembers;
@@ -195,7 +196,7 @@ void MemberList::countDecMembers()
                break;
 
             default:
-               err("Unknown member type found for member `%s'\n", csPrintable(md->name()));
+               err("Unknown member type found for member %s\n", csPrintable(md->name()));
          }
       }
    }
@@ -224,7 +225,8 @@ void MemberList::countDecMembers()
 void MemberList::countDocMembers()
 {
    if (m_numDocMembers != -1) {
-      return;   // used cached value
+      // everything is already counted
+      return;
    }
 
    m_numDocMembers = 0;
@@ -262,7 +264,7 @@ int MemberList::countEnumValues(QSharedPointer<MemberDef> md, bool setAnonEnumTy
       name = name.right(name.length() - i - 2);   // strip scope, might not be required
    }
 
-   if (name[0] == '@') {
+   if (name.startsWith('@')) {
       // anonymous enum => append variables
 
       for (auto value_md : *this) {
@@ -355,6 +357,7 @@ bool MemberList::declVisible() const
          }
       }
    }
+
    return false;
 }
 
@@ -465,7 +468,8 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
             case MemberDefType::EnumValue: {
                if (m_inGroup) {
                   if (first) {
-                     ol.startMemberList(), first = false;
+                     ol.startMemberList();
+                     first = false;
                   }
                   md->writeDeclaration(ol, cd, nd, fd, gd, m_inGroup, inheritedFrom, inheritId);
                }
@@ -484,8 +488,6 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
          if (md->fromAnonymousScope() && ! md->anonymousDeclShown()) {
             md->setFromAnonymousScope(false);
 
-            //printf("anonymous compound members\n");
-
             if (md->isBriefSectionVisible()) {
 
                if (first) {
@@ -495,6 +497,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
 
                md->writeDeclaration(ol, cd, nd, fd, gd, m_inGroup);
             }
+
             md->setFromAnonymousScope(true);
          }
       }
@@ -551,7 +554,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
    if (inheritedFrom) {
 
-      if ( cd && cd->countMembersIncludingGrouped(m_listType, inheritedFrom, true) > 0 ) {
+      if (cd != nullptr && cd->countMembersIncludingGrouped(m_listType, inheritedFrom, true) > 0 ) {
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
 
@@ -591,7 +594,7 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
          if (! st.isEmpty()) {
             ol.startMemberSubtitle();
             ol.generateDoc("[generated]", -1, ctx, QSharedPointer<MemberDef>(), subtitle,
-                  false, false, "", false, false);
+                  false, false, QString(), false, false);
 
             ol.endMemberSubtitle();
          }
@@ -650,7 +653,7 @@ void MemberList::writeDocumentation(OutputList &ol, const QString &scopeName, QS
       return;
    }
 
-   if (! showEnumValues && numDocMembers() <= numDocEnumValues()) {
+   if (! showEnumValues && (numDocMembers() <= numDocEnumValues())) {
       return;
    }
 

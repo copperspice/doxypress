@@ -117,7 +117,6 @@ class Definition : public DefinitionIntf
 
    // Returns the base file name (without extension) of this definition,
    // as it is referenced to/written to disk.
-
    virtual QString getOutputFileBase() const = 0;
 
    /*! Returns the anchor within a page where this item can be found */

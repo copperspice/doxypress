@@ -117,7 +117,7 @@ class ParserManager
  public:
 
    ParserManager()
-      : m_defaultParser(0)
+      : m_defaultParser(nullptr)
    { }
 
    ~ParserManager() {

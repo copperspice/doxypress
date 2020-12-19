@@ -1072,6 +1072,8 @@ void generateOutput()
       Doxy_Globals::infoLog_Stat.end();
    }
 
+   // formula code
+
    Doxy_Globals::infoLog_Stat.begin("Generating example documentation\n");
    generateExampleDocs();
    Doxy_Globals::infoLog_Stat.end();
@@ -9752,9 +9754,8 @@ void Doxy_Work::copyExtraFiles(const QString &outputType)
    }
 }
 
-static ParserInterface *getParserForFile(const QString &fn)
+static ParserInterface *getParserForFile(const QString &fileName)
 {
-   QString fileName = fn;
    QString extension;
 
    int sep = fileName.lastIndexOf('/');

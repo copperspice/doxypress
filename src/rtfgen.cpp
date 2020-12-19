@@ -62,8 +62,8 @@ RTFGenerator::RTFGenerator() : OutputGenerator()
    m_numCols   = 0;
    m_listLevel = 0;
 
-   m_bstartedBody  = false;
-   m_omitParagraph = false;
+   m_bstartedBody     = false;
+   m_omitParagraph    = false;
 }
 
 //void RTFGenerator::append(const OutputGenerator *g)

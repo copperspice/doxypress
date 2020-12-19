@@ -1222,7 +1222,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                      } else {
                         brief   = comment;
-                        comment = "";
+                        comment = QString();
 
                      }
 

@@ -1523,7 +1523,7 @@ void LatexGenerator::endIndexValue(const QString &name, bool)
    m_textStream << "}{\\pageref{" << stripPath(name) << "}}{}" << endl;
 }
 
-//void LatexGenerator::writeClassLink(const char *,const char *, const char *,const char *name)
+//void LatexGenerator::writeClassLink(const char *, const char *, const char *,const char *name)
 //{
 //  m_textStream << "{\\bf ";
 //  docify(name);
@@ -2068,10 +2068,10 @@ void LatexGenerator::writeNonBreakableSpace(int)
 }
 
 void LatexGenerator::startDescTable(const QString &title)
- {
+{
    m_codeGen->incUsedTableLevel();
    m_textStream << "\\begin{DoxyEnumFields}{" << title << "}" << endl;
- }
+}
 
 void LatexGenerator::endDescTable()
 {

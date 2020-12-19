@@ -173,8 +173,8 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
 
    QList<MemberGroup> *m_memberGroupList;
 
-   bool m_inGroup;       // is this list part of a group definition
-   bool m_inFile;        // is this list part of a file definition
+   bool m_inGroup;           // part of a group definition
+   bool m_inFile;            // part of a file definition
 
    MemberListType m_listType;
 };
@@ -183,10 +183,14 @@ class MemberList : public SortedList<QSharedPointer<MemberDef>>, public EnableSh
 class MemberDict : public QHash<QString, MemberDef>
 {
  public:
-   MemberDict() : QHash<QString, MemberDef>()
-   {}
+   MemberDict()
+      : QHash<QString, MemberDef>()
+   {
+   }
 
-   virtual ~MemberDict() {}
+   virtual ~MemberDict()
+   {
+   }
 };
 
 

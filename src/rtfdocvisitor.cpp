@@ -415,8 +415,8 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          m_t << "\\par" << endl;
          m_t << rtf_Style_Reset << getStyle("CodeExample");
 
-         Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(), s->text(), langExt,
-                     s->isExample(), s->exampleFile());
+         Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(),
+                  s->text(), langExt, s->isExample(), s->exampleFile());
 
          //m_t << "\\par" << endl;
          m_t << "}" << endl;
@@ -872,7 +872,7 @@ void RTFDocVisitor::visitPre(DocSimpleSect *s)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSimpleSect)}\n");
 
-   if ( !m_lastIsPara) {
+   if (! m_lastIsPara) {
       m_t << "\\par" << endl;
    }
 
@@ -886,52 +886,69 @@ void RTFDocVisitor::visitPre(DocSimpleSect *s)
       case DocSimpleSect::See:
          m_t << theTranslator->trSeeAlso();
          break;
+
       case DocSimpleSect::Return:
          m_t << theTranslator->trReturns();
          break;
+
       case DocSimpleSect::Author:
          m_t << theTranslator->trAuthor(true, true);
          break;
+
       case DocSimpleSect::Authors:
          m_t << theTranslator->trAuthor(true, false);
          break;
+
       case DocSimpleSect::Version:
          m_t << theTranslator->trVersion();
          break;
+
       case DocSimpleSect::Since:
          m_t << theTranslator->trSince();
          break;
+
       case DocSimpleSect::Date:
          m_t << theTranslator->trDate();
          break;
+
       case DocSimpleSect::Note:
          m_t << theTranslator->trNote();
          break;
+
       case DocSimpleSect::Warning:
          m_t << theTranslator->trWarning();
          break;
+
       case DocSimpleSect::Pre:
          m_t << theTranslator->trPrecondition();
          break;
+
       case DocSimpleSect::Post:
          m_t << theTranslator->trPostcondition();
          break;
+
       case DocSimpleSect::Copyright:
          m_t << theTranslator->trCopyright();
          break;
+
       case DocSimpleSect::Invar:
          m_t << theTranslator->trInvariant();
          break;
+
       case DocSimpleSect::Remark:
          m_t << theTranslator->trRemarks();
          break;
+
       case DocSimpleSect::Attention:
          m_t << theTranslator->trAttention();
          break;
+
       case DocSimpleSect::User:
          break;
+
       case DocSimpleSect::Rcs:
          break;
+
       case DocSimpleSect::Unknown:
          break;
    }
@@ -954,10 +971,13 @@ void RTFDocVisitor::visitPost(DocSimpleSect *s)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocSimpleSect)}\n");
-   if (!m_lastIsPara) {
+
+   if (! m_lastIsPara) {
       m_t << "\\par" << endl;
    }
+
    decIndentLevel();
 
    if (s->type() != DocSimpleSect::User && s->type() != DocSimpleSect::Rcs) {
@@ -1623,23 +1643,32 @@ void RTFDocVisitor::visitPre(DocParamSect *s)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocParamSect)}\n");
-   m_t << "{"; // start param list
-   if (!m_lastIsPara) {
+
+   // start param list
+   m_t << "{";
+
+   if (! m_lastIsPara) {
       m_t << "\\par" << endl;
    }
-   //m_t << "{\\b "; // start bold
+
+   // start bold
+   // m_t << "{\\b ";
+
    m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
 
    switch (s->type()) {
       case DocParamSect::Param:
          m_t << theTranslator->trParameters();
          break;
+
       case DocParamSect::RetVal:
          m_t << theTranslator->trReturnValues();
          break;
+
       case DocParamSect::Exception:
          m_t << theTranslator->trExceptions();
          break;
+
       case DocParamSect::TemplateParam:
          m_t << theTranslator->trTemplateParameters();
          break;
@@ -1650,13 +1679,16 @@ void RTFDocVisitor::visitPre(DocParamSect *s)
 
    m_t << "\\par";
    m_t << "}" << endl;
+
    bool useTable = s->type() == DocParamSect::Param ||
                    s->type() == DocParamSect::RetVal ||
                    s->type() == DocParamSect::Exception ||
                    s->type() == DocParamSect::TemplateParam;
-   if (!useTable) {
+
+   if (! useTable) {
       incIndentLevel();
    }
+
    m_t << rtf_Style_Reset << getStyle("DescContinue");
    m_lastIsPara = true;
 }
@@ -1666,15 +1698,19 @@ void RTFDocVisitor::visitPost(DocParamSect *s)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocParamSect)}\n");
-   //m_t << "\\par" << endl;
+   // m_t << "\\par" << endl;
+
    bool useTable = s->type() == DocParamSect::Param ||
                    s->type() == DocParamSect::RetVal ||
                    s->type() == DocParamSect::Exception ||
                    s->type() == DocParamSect::TemplateParam;
-   if (!useTable) {
+
+   if (! useTable) {
       decIndentLevel();
    }
+
    m_t << "}" << endl;
 }
 
@@ -1686,28 +1722,36 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
       { 3, 25,  50, 100, 100 }, // no inout, type
       { 4, 14,  35, 55,  100 }, // inout, type
    };
+
    int config = 0;
+
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocParamList)}\n");
 
    DocParamSect::Type parentType = DocParamSect::Unknown;
-   DocParamSect *sect = 0;
+   DocParamSect *sect = nullptr;
+
    if (pl->parent() && pl->parent()->kind() == DocNode::Kind_ParamSect) {
       parentType = ((DocParamSect *)pl->parent())->type();
       sect = (DocParamSect *)pl->parent();
    }
+
    bool useTable = parentType == DocParamSect::Param ||
                    parentType == DocParamSect::RetVal ||
                    parentType == DocParamSect::Exception ||
                    parentType == DocParamSect::TemplateParam;
+
    if (sect && sect->hasInOutSpecifier()) {
       config += 1;
    }
+
    if (sect && sect->hasTypeSpecifier()) {
       config += 2;
    }
+
    if (useTable) {
       int i;
       m_t << "\\trowd \\trgaph108\\trleft426\\tblind426"
@@ -1919,7 +1963,7 @@ void RTFDocVisitor::visitPost(DocInternalRef *)
       return;
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocInternalRef)}\n");
-   endLink("");
+   endLink(QString());
    m_t << " ";
 }
 

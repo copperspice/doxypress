@@ -1718,7 +1718,7 @@ void HtmlGenerator::startMemberDoc(const QString &, const QString &, const QStri
    (void) memCount;
    (void) memTotal;
 
-   // bypass 'tab' above docs
+   // (emerald) bypass 'tab' above docs
    m_textStream << "\n<div class=\"memitem\">" << endl;
    m_textStream << "<div class=\"memproto\">" << endl;
 }

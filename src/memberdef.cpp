@@ -1086,7 +1086,7 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (m_impl->stat && m_impl->classDef == 0 && ! extractStatic) {
+   if (m_impl->stat && m_impl->classDef == nullptr && ! extractStatic) {
       m_isLinkableCached = 1;    // hidden due to staticness
       return;
    }
@@ -1539,7 +1539,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    } else if (ltype == "@") {
       // rename type from enum values
-      ltype = "";
+      ltype = QString();
 
    } else {
       if (isObjCMethod()) {
@@ -1808,15 +1808,15 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
             ol.docify(" ");
 
-            if (inheritedFrom || separateMemberPages || (m_impl->group != 0 && gd == 0) ||
-                  (m_impl->nspace != 0 && nd == 0) ) {
+            if (inheritedFrom || separateMemberPages || (m_impl->group != nullptr && gd == nullptr) ||
+                  (m_impl->nspace != nullptr && nd == nullptr) ) {
 
                // forward link to the page, group, or namespace
                ol.startTextLink(getOutputFileBase(), anchor());
 
             } else {
                // local link
-               ol.startTextLink(0, anchor());
+               ol.startTextLink(nullptr, anchor());
             }
 
             ol.parseText(theTranslator->trMore());
@@ -1852,7 +1852,6 @@ bool MemberDef::isDetailedSectionLinkable() const
    static const bool hideFriendCompound = Config::getBool("hide-friend-compounds");
 
    // member has details documentation for any of the following reasons
-
    bool docFilter = ( extractAll || ! documentation().isEmpty() || ! inbodyDocumentation().isEmpty() );
 
    docFilter = ( docFilter || (m_impl->m_memberType == MemberDefType::Enumeration && m_impl->docEnumValues) );
@@ -1870,20 +1869,15 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    docFilter = ( docFilter || temp_a || temp_b || temp_c || (isAttribute || isProperty) || Doxy_Globals::userComments);
 
-
    // not a global static or global statics should be extracted
    bool staticFilter = getClassDef() != nullptr || ! isStatic() || extractStatic;
 
    // only include members which are non-private unless extract_private is set or the member is part of a group
    bool privateFilter = protectionLevelVisible(protection()) || isFriend();
 
-
-   // (not used) member is part of an anonymous scope that is the type of another member in the list
-   // bool inAnonymousScope = ! briefDescription().isEmpty() && annUsed;
-
-
    // hide friend (class|struct|union) member if HIDE_FRIEND_COMPOUNDS is set
    // bool temp_e = (m_impl->m_type == "friend class" || m_impl->m_type == "friend struct" || m_impl->m_type == "friend union");
+
    bool friendCompoundFilter = ( ! hideFriendCompound || ! isFriend() || ! (isAttribute || isProperty) );
 
    bool result = ( docFilter && staticFilter && privateFilter && friendCompoundFilter && ! isHidden() );
@@ -1915,7 +1909,6 @@ void MemberDef::getLabels(QStringList &sl, QSharedPointer<Definition> container)
    static const bool extractPrivate = Config::getBool("extract-private");
 
    Specifier lvirt = virtualness();
-
       if (m_impl->classDef && container->definitionType() == TypeClass && m_impl->classDef != container && ! isRelated()) {
          sl.append("inherited");
       }
@@ -3157,8 +3150,8 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
 
       ol.endBold();
 
-      ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
-      pIntf->resetCodeParserState();
+      ParserInterface *interface = Doxy_Globals::parserManager.getParser(getDefFileExtension());
+      interface->resetCodeParserState();
 
       ol.startCodeFragment("DoxyCode");
 
@@ -3166,7 +3159,8 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
          m_impl->initializer = m_impl->initializer.mid(1).trimmed();
       }
 
-      pIntf->parseCode(ol, scopeName, m_impl->initializer, lang, false, 0, getFileDef(), -1, -1, true, self, false, self);
+      interface->parseCode(ol, scopeName, m_impl->initializer, lang, false, 0,
+               getFileDef(), -1, -1, true, self, false, self);
       ol.endCodeFragment("DoxyCode");
    }
 
@@ -3672,9 +3666,11 @@ bool MemberDef::isDeleted() const
 
 bool MemberDef::hasDocumentation() const
 {
-   return Definition::hasDocumentation() ||
-          (m_impl->m_memberType == MemberDefType::Enumeration && m_impl->docEnumValues) ||   // has enum values
-          m_impl->m_defArgList.hasDocumentation();                                    // has doc arguments
+   bool hasDocs     = Definition::hasDocumentation();
+   bool hasEnumDocs = m_impl->m_memberType == MemberDefType::Enumeration && m_impl->docEnumValues;  // has enum values
+   bool hasArgDocs  = m_impl->m_defArgList.hasDocumentation();                                      // has doc arguments
+
+   return hasDocs || hasEnumDocs || hasArgDocs;
 }
 
 void MemberDef::setMemberGroup(QSharedPointer<MemberGroup> grp)
@@ -3896,14 +3892,14 @@ void MemberDef::addListReference(QSharedPointer<Definition> def)
    }
 }
 
-QSharedPointer<MemberList> MemberDef::getSectionList(QSharedPointer<Definition> d) const
+QSharedPointer<MemberList> MemberDef::getSectionList(QSharedPointer<Definition> def) const
 {
-   return m_impl->classSectionSDict.value(d);
+   return m_impl->classSectionSDict.value(def);
 }
 
-void MemberDef::setSectionList(QSharedPointer<Definition> d, QSharedPointer<MemberList> sl)
+void MemberDef::setSectionList(QSharedPointer<Definition> def, QSharedPointer<MemberList> sl)
 {
-   m_impl->classSectionSDict.insert(d, sl);
+   m_impl->classSectionSDict.insert(def, sl);
 }
 
 Specifier MemberDef::virtualness(int count) const

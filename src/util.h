@@ -298,17 +298,17 @@ void writeTypeConstraints_internal(OutputList &ol, QSharedPointer<Definition> d,
 QString yearToString();
 
 // **
-QSharedPointer<ClassDef>     getClass(const QString &key);
-QSharedPointer<ConceptDef>   getConcept(const QString &key);
+QSharedPointer<ClassDef> getClass(const QString &key);
+QSharedPointer<ConceptDef> getConcept(const QString &key);
 
-QSharedPointer<ClassDef>     getResolvedClass(QSharedPointer<const Definition> scope,
+QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<const Definition> scope,
                   QSharedPointer<const FileDef> fileScope, const QString &key,
                   QSharedPointer<MemberDef> *pTypeDef = 0, QString *pTemplSpec = nullptr, bool mayBeUnlinkable = false,
                   bool mayBeHidden = false, QString *pResolvedType = nullptr );
 
-QSharedPointer<FileDef>      findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
+QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
 
-QSharedPointer<MemberDef>    getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
+QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
                    const QByteArray &name);
 
 QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &key);
@@ -318,7 +318,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
                   QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
                   const TagInfo &tagInfo = TagInfo(), bool xref = false, SrcLangExt lang = SrcLangExt_Unknown);
 
-QSharedPointer<ClassDef>     newResolveTypedef(QSharedPointer<const FileDef> fileScope, QSharedPointer<MemberDef> md,
+QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileScope, QSharedPointer<MemberDef> md,
                   QSharedPointer<MemberDef> *pMemType = nullptr, QString *pTemplSpec = nullptr, QString *pResolvedType = nullptr,
                   ArgumentList *actTemplParams = nullptr);
 

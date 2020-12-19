@@ -55,9 +55,11 @@ void ManDocVisitor::visit(DocLinkedWord *w)
    if (m_hide) {
       return;
    }
+
    m_t << "\\fB";
    filter(w->word());
    m_t << "\\fP";
+
    m_firstCol = false;
 }
 
@@ -524,14 +526,18 @@ void ManDocVisitor::visit(DocCite *cite)
    if (m_hide) {
       return;
    }
+
    m_t << "\\fB";
+
    if (cite->file().isEmpty()) {
       m_t << "[";
    }
+
    filter(cite->text());
    if (cite->file().isEmpty()) {
       m_t << "]";
    }
+
    m_t << "\\fP";
 }
 
@@ -1139,18 +1145,22 @@ void ManDocVisitor::visitPre(DocParamSect *s)
    if (m_hide) {
       return;
    }
-   if (!m_firstCol) {
+
+   if (! m_firstCol) {
       m_t << endl;
       m_t << ".PP" << endl;
    }
+
    m_t << "\\fB";
    switch (s->type()) {
       case DocParamSect::Param:
          m_t << theTranslator->trParameters();
          break;
+
       case DocParamSect::RetVal:
          m_t << theTranslator->trReturnValues();
          break;
+
       case DocParamSect::Exception:
          m_t << theTranslator->trExceptions();
          break;
@@ -1172,11 +1182,14 @@ void ManDocVisitor::visitPost(DocParamSect *)
    if (m_hide) {
       return;
    }
-   if (!m_firstCol) {
+
+   if (! m_firstCol) {
       m_t << endl;
    }
+
    m_t << ".RE" << endl;
    m_t << ".PP" << endl;
+
    m_firstCol = true;
 }
 
@@ -1191,7 +1204,7 @@ void ManDocVisitor::visitPre(DocParamList *pl)
    bool first = true;
 
    for (auto param : pl->parameters()) {
-      if (!first) {
+      if (! first) {
          m_t << ",";
 
       } else {
