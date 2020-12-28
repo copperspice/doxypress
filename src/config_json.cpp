@@ -285,6 +285,7 @@ void Config::load_Defaults()
    m_cfgString.insert("clang-compilation-path",  struc_CfgString { QString(),       DEFAULT } );
    m_cfgString.insert("clang-dialect",           struc_CfgString { "--std=c++14",   DEFAULT } );
    m_cfgBool.insert("clang-use-headers",         struc_CfgBool   { true,            DEFAULT } );
+   m_cfgBool.insert("clang-include-input-paths", struc_CfgBool   { true,            DEFAULT } );
    m_cfgList.insert("clang-flags",               struc_CfgList   { QStringList(),   DEFAULT } );
 
    // tab 2 - source listing

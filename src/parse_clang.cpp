@@ -514,13 +514,14 @@ static bool documentKind(CXCursor cursor)
 // ** entry point
 void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStringList &includeFiles, QSharedPointer<Entry> root)
 {
-   static QStringList const includePath          = Config::getList("include-path");
-   static QStringList const preDefinedMacros     = Config::getList("predefined-macros");
+   static QStringList const includePath            = Config::getList("include-path");
+   static QStringList const preDefinedMacros       = Config::getList("predefined-macros");
 
-   static QString     const clangCompilationPath = Config::getString("clang-compilation-path");
-   static QString     const clangDialect         = Config::getString("clang-dialect");
-   static bool        const clangUseHeaders      = Config::getBool("clang-use-headers");
-   static QStringList const clangFlags           = Config::getList("clang-flags");
+   static QString     const clangCompilationPath   = Config::getString("clang-compilation-path");
+   static QString     const clangDialect           = Config::getString("clang-dialect");
+   static bool        const clangUseHeaders        = Config::getBool("clang-use-headers");
+   static bool        const clangIncludeInputPaths = Config::getBool("clang-include-input-paths");
+   static QStringList const clangFlags             = Config::getList("clang-flags");
 
    // static const Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
 
@@ -625,8 +626,10 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
          }
 
          // add include paths for input files
-         for (auto &item : Doxy_Globals::inputPaths) {
-            argList.push_back("-I" + item);
+         if (clangIncludeInputPaths) {
+            for (auto &item : Doxy_Globals::inputPaths) {
+               argList.push_back("-I" + item);
+            }
          }
 
          // add external include paths
