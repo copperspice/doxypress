@@ -1,7 +1,7 @@
 /************************************************************************
 *
-* Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
-* Copyright (C) 1997-2014 by Dimitri van Heesch
+* Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
 * modify it under the terms of the GNU General Public License version 2
@@ -709,9 +709,9 @@ static int yy_more_len = 0;
 char *parse_tcl_YYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2020 Barbara Geller & Ansel Sermersheim
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
- * Copyright (C) 2010      by Rene Zaumseil
+ * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 1997-2014 Dimitri van Heesch
+ * Copyright (c) 2010      Rene Zaumseil
 
 *************************************************************************/
 
