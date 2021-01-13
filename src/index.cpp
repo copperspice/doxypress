@@ -1177,7 +1177,7 @@ static void writeHierarchicalIndex(OutputList &ol)
 
    ol.popGeneratorState();
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 
@@ -1207,7 +1207,7 @@ static void writeGraphicalClassHierarchy(OutputList &ol)
    ol.endTextBlock();
    DotGfxHierarchyTable g;
    ol.writeGraphicalHierarchy(g);
-   endFile(ol);
+   endFile(ol, false, false);
    ol.enableAll();
 }
 
@@ -1391,7 +1391,7 @@ static void writeFileIndex(OutputList &ol)
       Doxy_Globals::indexList.decContentsDepth();
    }
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 
@@ -1570,7 +1570,7 @@ static void writeFileSourceIndex(OutputList &ol)
       Doxy_Globals::indexList.decContentsDepth();
    }
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 
@@ -1750,7 +1750,7 @@ static void writeNamespaceIndex(OutputList &ol)
    }
 
    ol.popGeneratorState();
-   endFile(ol);
+   endFile(ol, false, false);
 
    ol.popGeneratorState();
 }
@@ -2130,7 +2130,7 @@ static void writeAlphabeticalIndex(OutputList &ol)
    ol.startContents();
 
    writeAlphabeticalClassList(ol);
-   endFile(ol);
+   endFile(ol, false, false);
 
    ol.popGeneratorState();
 }
@@ -2209,7 +2209,7 @@ static void writeAnnotatedIndex(OutputList &ol)
    }
 
    ol.popGeneratorState();
-   endFile(ol);
+   endFile(ol, false, false);
 
    ol.popGeneratorState();
 }
@@ -2354,7 +2354,7 @@ static void writeConceptIndex(OutputList &ol)
    }
 
    ol.popGeneratorState();
-   endFile(ol);
+   endFile(ol, false, false);
 
    ol.popGeneratorState();
 }
@@ -2854,7 +2854,7 @@ static void writeClassMemberIndexFiltered(OutputList &ol, ClassMemberHighlight h
 
       writeMemberList(ol, quickIndex, multiPageIndex ? page.unicode() : -1, g_memberIndexLetterUsed[hl], Definition::TypeClass);
 
-      endFile(ol);
+      endFile(ol, false, false);
    }
 
    if (multiPageIndex && addToIndex) {
@@ -3069,7 +3069,7 @@ static void writeFileMemberIndexFiltered(OutputList &ol, FileMemberHighlight hl)
 
       writeMemberList(ol, quickIndex, multiPageIndex ? page.unicode() : -1, g_fileIndexLetterUsed[hl], Definition::TypeFile);
 
-      endFile(ol);
+      endFile(ol, false, false);
    }
 
    if (multiPageIndex && addToIndex) {
@@ -3244,7 +3244,7 @@ static void writeNamespaceMemberIndexFiltered(OutputList &ol, NamespaceMemberHig
       }
 
       writeMemberList(ol, quickIndex, multiPageIndex ? page.unicode() : -1, g_namespaceIndexLetterUsed[hl], Definition::TypeNamespace);
-      endFile(ol);
+      endFile(ol, false, false);
    }
 
    if (multiPageIndex && addToIndex) {
@@ -3341,7 +3341,7 @@ static void writeExampleIndex(OutputList &ol)
    if (addToIndex) {
       Doxy_Globals::indexList.decContentsDepth();
    }
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 
@@ -3467,7 +3467,7 @@ static void writePageIndex(OutputList &ol)
 
    delete ftv;
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 
@@ -3530,7 +3530,7 @@ void writeGraphInfo(OutputList &ol)
    Config::setBool("strip-code-comments", oldStripCommentsState);
    Config::setBool("create-subdirs", oldCreateSubdirs);
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 
@@ -3817,7 +3817,7 @@ static void writeGroupIndex(OutputList &ol)
 
    ol.popGeneratorState();
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 
@@ -3855,7 +3855,7 @@ static void writeUserGroupStubPage(OutputList &ol, LayoutNavEntry *lne)
          ol.writeString("</ul>\n");
       }
 
-      endFile(ol);
+      endFile(ol, false, false);
       ol.popGeneratorState();
    }
 }
@@ -3993,7 +3993,7 @@ static void writeIndex(OutputList &ol)
       Doxy_Globals::insideMainPage = false;
    }
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.disable(OutputGenerator::Html);
 
    // write Docbook, Latex & Rtf index
@@ -4166,7 +4166,7 @@ static void writeIndex(OutputList &ol)
    }
 
    ol.endIndexSection(isEndIndex);
-   endFile(ol);
+   endFile(ol, false, false);
 
    if (Doxy_Globals::mainPage != nullptr) {
       Doxy_Globals::insideMainPage = true;
@@ -4181,7 +4181,7 @@ static void writeIndex(OutputList &ol)
                      Doxy_Globals::mainPage->documentation(), false, false);
 
       ol.endTextBlock();
-      endFile(ol);
+      endFile(ol, false, false);
 
       ol.enable(OutputGenerator::Man);
       Doxy_Globals::insideMainPage = false;

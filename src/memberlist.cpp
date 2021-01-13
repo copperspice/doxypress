@@ -798,7 +798,7 @@ void MemberList::writeDocumentationPage(OutputList &ol, const QString &scopeName
             ol.writeString("  </tr>\n");
             ol.writeString("</table>\n");
 
-            endFile(ol);
+            endFile(ol, false, false);
          }
       }
 

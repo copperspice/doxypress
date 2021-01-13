@@ -238,7 +238,7 @@ void PageDef::writeDocumentation(OutputList &ol)
       endFileWithNavPath(getOuterScope(), ol);
 
    } else {
-      endFile(ol);
+      endFile(ol, false, true);
    }
 
    ol.popGeneratorState();

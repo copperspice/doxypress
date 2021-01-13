@@ -2274,7 +2274,7 @@ void ClassDef::writeMemberList(OutputList &ol)
       ol.writeString("</table>");
    }
 
-   endFile(ol);
+   endFile(ol, false, false);
    ol.popGeneratorState();
 }
 

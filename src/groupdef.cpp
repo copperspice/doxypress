@@ -1258,7 +1258,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
 
    //---------------------------------------- end flexible part -------------------------------
 
-   endFile(ol);
+   endFile(ol, false, false);
 
    ol.popGeneratorState();
 

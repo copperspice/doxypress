@@ -9579,7 +9579,8 @@ void Doxy_Work::generateExampleDocs()
       Doxy_Globals::outputList.generateDoc(pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(),
                   pd->documentation() + "\n\n\\include " + pd->name(), true, true, pd->name() );
 
-      endFile(Doxy_Globals::outputList); // contains g_outputList->endContents()
+      // contains g_outputList->endContents()
+      endFile(Doxy_Globals::outputList, false, false);
    }
 
    Doxy_Globals::outputList.enable(OutputGenerator::Man);
