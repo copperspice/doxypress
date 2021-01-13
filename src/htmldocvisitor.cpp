@@ -831,9 +831,13 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       m_hide = true;
    }
 
+   QString fileExt = getFileNameExtension(op->includeFileName());
 
+   if (fileExt.isEmpty()) {
+      fileExt = m_langExt;
+   }
 
-   SrcLangExt langExt = getLanguageFromFileName(m_langExt);
+   SrcLangExt srcLangExt = getLanguageFromFileName(fileExt);
 
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
@@ -841,13 +845,14 @@ void HtmlDocVisitor::visit(DocIncOperator *op)
       if (! m_hide) {
          QSharedPointer<FileDef> fd;
 
-         // if (! op->includeFileName().isEmpty()) {
-         //   QFileInfo fileInfo(op->includeFileName());
-         //   fd = createFileDef(fileInfo.dir(), fileInfo.fileName());
-         // }
-         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
-            langExt, op->isExample(), op->exampleFile(), fd, -1, -1,
-            false, QSharedPointer<MemberDef>(), true, m_ctx);
+         if (! op->includeFileName().isEmpty()) {
+            QFileInfo fileInfo(op->includeFileName());
+            fd = QMakeShared<FileDef>(fileInfo.dir().path(), fileInfo.fileName());
+         }
+
+         Doxy_Globals::parserManager.getParser(fileExt)->parseCode(m_ci, op->context(), op->text(),
+            srcLangExt, op->isExample(), op->exampleFile(), fd, op->line(), -1,
+            false, QSharedPointer<MemberDef>(), op->showLineNo(), m_ctx);
       }
 
       pushEnabled();

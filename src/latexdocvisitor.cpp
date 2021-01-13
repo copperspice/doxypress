@@ -619,12 +619,20 @@ void LatexDocVisitor::visit(DocIncOperator *op)
       m_hide = true;
    }
 
-   SrcLangExt langExt = getLanguageFromFileName(m_langExt);
+   QString fileExt = getFileNameExtension(op->includeFileName());
+
+   if (fileExt.isEmpty()) {
+      fileExt = m_langExt;
+   }
+
+   SrcLangExt srcLangExt = getLanguageFromFileName(fileExt);
+
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
-      if (!m_hide) {
-         Doxy_Globals::parserManager.getParser(m_langExt)->parseCode(m_ci, op->context(), op->text(),
-                  langExt, op->isExample(), op->exampleFile());
+
+      if (! m_hide) {
+         Doxy_Globals::parserManager.getParser(fileExt)->parseCode(m_ci, op->context(), op->text(),
+                  srcLangExt, op->isExample(), op->exampleFile());
       }
 
       pushEnabled();

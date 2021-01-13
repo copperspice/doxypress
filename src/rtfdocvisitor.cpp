@@ -645,8 +645,14 @@ void RTFDocVisitor::visit(DocInclude *inc)
 
 void RTFDocVisitor::visit(DocIncOperator *op)
 {
+   QString fileExt = getFileNameExtension(op->includeFileName());
 
-   SrcLangExt langExt = getLanguageFromFileName(m_langExt);
+   if (fileExt.isEmpty()) {
+      fileExt = m_langExt;
+   }
+
+   SrcLangExt srcLangExt = getLanguageFromFileName(fileExt);
+
    if (op->isFirst()) {
       if (! m_hide) {
          m_t << "{" << endl;
@@ -661,9 +667,8 @@ void RTFDocVisitor::visit(DocIncOperator *op)
    if (op->type() != DocIncOperator::Skip) {
       popEnabled();
       if (! m_hide) {
-         Doxy_Globals::parserManager.getParser(m_langExt)
-         ->parseCode(m_ci, op->context(), op->text(), langExt,
-                     op->isExample(), op->exampleFile());
+         Doxy_Globals::parserManager.getParser(fileExt)->parseCode(m_ci, op->context(),
+                  op->text(), srcLangExt, op->isExample(), op->exampleFile());
       }
 
       pushEnabled();
