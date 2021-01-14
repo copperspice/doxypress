@@ -303,13 +303,7 @@ class ClassDef : public Definition
    QString getMemberListFileName() const;
    bool subGrouping() const;
 
-   void insertBaseClass(QSharedPointer<ClassDef> cd, const QString &name, Protection p, Specifier s, const QString &t = QString() );
-   void insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const QString &t = QString() );
    void setIncludeFile(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool force);
-   void insertMember(QSharedPointer<MemberDef> );
-   void insertUsedFile(QSharedPointer<FileDef> fd);
-   bool addExample(const QString &anchor, const QString &name, const QString &file);
-   void mergeCategory(QSharedPointer<ClassDef> category);
    void setNamespace(QSharedPointer<NamespaceDef> nd);
    void setFileDef(QSharedPointer<FileDef> fd);
    void setSubGrouping(bool enabled);
@@ -318,13 +312,6 @@ class ClassDef : public Definition
    void setGroupDefForAllMembers(QSharedPointer<GroupDef> g, Grouping::GroupPri_t pri, const QString &fileName,
                   int startLine, bool hasDocs);
 
-   void addInnerCompound(QSharedPointer<Definition> d) override;
-
-   QSharedPointer<ClassDef> insertTemplateInstance(const QString &fileName, int startLine, int startColumn,
-                  const QString &templSpec, bool &freshInstance);
-
-   void addUsedClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
-   void addUsedByClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
    void setIsStatic(bool b);
    void setCompoundType(enum CompoundType t);
    void setClassName(const QString &name);
@@ -335,16 +322,29 @@ class ClassDef : public Definition
    void setTemplateBaseClassNames(const QHash<QString, int> &templateNames);
    void setTemplateMaster(QSharedPointer<ClassDef> tm);
    void setTypeConstraints(const ArgumentList &al);
-   void addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const QString &templSpec);
-   void makeTemplateArgument(bool b = true);
    void setCategoryOf(QSharedPointer<ClassDef> cd);
    void setUsedOnly(bool b);
 
-   void addTaggedInnerClass(QSharedPointer<ClassDef> cd);
    void setTagLessReference(QSharedPointer<ClassDef> cd);
    void setName(const QString &name) override;
 
    // actions
+   void insertBaseClass(QSharedPointer<ClassDef> cd, const QString &name, Protection p, Specifier s, const QString &t = QString() );
+   void insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifier s, const QString &t = QString() );
+   void insertMember(QSharedPointer<MemberDef> );
+   void insertUsedFile(QSharedPointer<FileDef> fd);
+
+   void addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const QString &templSpec);
+   void addTaggedInnerClass(QSharedPointer<ClassDef> cd);
+   void addInnerCompound(QSharedPointer<Definition> d) override;
+   bool addExample(const QString &anchor, const QString &name, const QString &file);
+
+   QSharedPointer<ClassDef> insertTemplateInstance(const QString &fileName, int startLine, int startColumn,
+                  const QString &templSpec, bool &freshInstance);
+   void addUsedClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
+   void addUsedByClass(QSharedPointer<ClassDef> cd, const QString &accessName, Protection prot);
+   void makeTemplateArgument(bool b = true);
+   void mergeCategory(QSharedPointer<ClassDef> category);
    void findSectionsInDocumentation();
    void addMembersToMemberGroup();
    void addListReferences();
@@ -367,17 +367,24 @@ class ClassDef : public Definition
    void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> md) const override;
    void writeSummaryLinks(OutputList &ol) override;
    void reclassifyMember(QSharedPointer<MemberDef> md, MemberDefType t);
+   void removeMemberFromLists(QSharedPointer<MemberDef> md);
+
+   void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
+
+   void writeTagFile(QTextStream &);
+
    void writeInlineDocumentation(OutputList &ol);
    void writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames);
-   void removeMemberFromLists(QSharedPointer<MemberDef> md);
-   void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
 
    void setVisited(bool visited);
    bool isVisited() const;
+
+   // count members
    int countMembersIncludingGrouped(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool additional);
    int countInheritanceNodes();
-   void writeTagFile(QTextStream &);
 
+   int countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
+                  int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
  protected:
    void addUsedInterfaceClasses(QSharedPointer<MemberDef> md, const QString &typeStr);
@@ -412,7 +419,7 @@ class ClassDef : public Definition
                   const QString &title, const QString &anchor = QString());
 
    void writeIncludeFiles(OutputList &ol);
-   //void writeAllMembersLink(OutputList &ol);
+
    void writeInheritanceGraph(OutputList &ol);
    void writeCollaborationGraph(OutputList &ol);
    void writeMemberGroups(OutputList &ol, bool showInline = false);
@@ -429,9 +436,6 @@ class ClassDef : public Definition
    int countAdditionalInheritedMembers();
    void writeAdditionalInheritedMembers(OutputList &ol);
    void addClassAttributes(OutputList &ol);
-
-   int countMemberDeclarations(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
-                  int lt2, bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
    int countInheritedDecMembers(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom,
                   bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
