@@ -2670,8 +2670,12 @@ void ClassDef::mergeMembers()
                         } else  {
                            // member is in a non base class => multiple inheritance using the same base class
 
-                           auto t_iter = dstMi.scopePath.indexOfFast(sep) + sepLen;
-                           QStringView scope = QStringView(dstMi.scopePath.constBegin(), t_iter);
+                           auto iter_t = dstMi.scopePath.indexOfFast(sep);
+                           QStringView scope;
+
+                           if (iter_t != dstMi.scopePath.cend()) {
+                              scope  = QStringView(dstMi.scopePath.constBegin(), iter_t + sepLen);
+                           }
 
                            if (! dstMi.ambiguityResolutionScope.startsWith(scope)) {
                               dstMi.ambiguityResolutionScope.prepend(scope);
@@ -2692,8 +2696,12 @@ void ClassDef::mergeMembers()
                         } else  {
                            // member can be reached via multiple paths in the inheritance tree
 
-                           auto t_iter = dstMi.scopePath.indexOfFast(sep) + sepLen;
-                           QStringView scope = QStringView(dstMi.scopePath.constBegin(), t_iter);
+                           auto iter_t = dstMi.scopePath.indexOfFast(sep);
+                           QStringView scope;
+
+                           if (iter_t != dstMi.scopePath.cend()) {
+                              scope  = QStringView(dstMi.scopePath.constBegin(), iter_t + sepLen);
+                           }
 
                            if (! dstMi.ambiguityResolutionScope.startsWith(scope)) {
                               dstMi.ambiguityResolutionScope.prepend(scope);
