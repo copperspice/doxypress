@@ -1553,8 +1553,6 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
       ol.popGeneratorState();
    }
 
-   // emerald
-/*
    if (localToc.isDocbookEnabled()) {
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Docbook);
@@ -1564,7 +1562,6 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
 
       int maxLevel = localToc.docbookLevel();
       int level    = 1;
-      bool inLi[5] = { false, false, false, false, false };
 
       for (auto si : m_private->m_sectionList) {
          if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection    ||
@@ -1573,18 +1570,17 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
             int nextLevel = si->type;
 
             if (nextLevel > level) {
-               for (int l = level; l < nextLevel; l++) {
+               for (int index = level; index < nextLevel; ++index) {
 
-                  if (l < maxLevel) {
+                  if (index < maxLevel) {
                      ol.writeString("    <tocdiv>\n");
                   }
                }
 
             } else if (nextLevel < level) {
-               for (int l = level; l > nextLevel; l--) {
-                  inLi[l] = false;
+               for (int index = level; index > nextLevel; --index) {
 
-                  if (l <= maxLevel) {
+                  if (index <= maxLevel) {
                     ol.writeString("    </tocdiv>\n");
                   }
                }
@@ -1595,7 +1591,6 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
                ol.writeString("      <tocentry>" + (si->title.isEmpty() ? si->label:titleDoc) + "</tocentry>\n");
             }
 
-            inLi[nextLevel] = true;
             level = nextLevel;
          }
       }
@@ -1605,16 +1600,13 @@ void Definition::writeToc(OutputList &ol, const LocalToc &localToc) const
       }
 
       while (level>1 && level <= maxLevel) {
-         inLi[level] = false;
          ol.writeString("</tocdiv>\n");
          --level;
        }
 
-       inLi[level] = false;
        ol.writeString("    </toc>\n");
        ol.popGeneratorState();
    }
-*/
 
    if (localToc.isLatexEnabled()) {
       ol.pushGeneratorState();
