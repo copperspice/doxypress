@@ -396,7 +396,7 @@ void NamespaceDef::writeBriefDescription(OutputList &ol)
 
          if (hasDetailedDescription()) {
             ol.disableAllBut(OutputGenerator::Html);
-            ol.startTextLink(0, "details");
+            ol.startTextLink(getOutputFileBase(), "details");
             ol.parseText(theTranslator->trMore());
             ol.endTextLink();
          }
