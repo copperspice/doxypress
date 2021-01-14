@@ -40,11 +40,11 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
                    const QString &tag, const QString &tagFileName, bool isSymbol, bool isJavaEnum)
    : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(fullName), "", "", isSymbol)
 {
-   visited = false;
    setReference(tag);
 
    m_compType   = ct;
    m_isJavaEnum = isJavaEnum;
+   m_visited = false;
 
    QString tname = name();
    const QString ctStr = compoundTypeString();
@@ -4216,4 +4216,12 @@ void ClassDef::setName(const QString &name)
 bool ClassDef::isAnonymous() const
 {
    return m_isAnonymous;
+}
+
+void ClassDef::setVisited(bool visited) {
+   m_visited = visited;
+}
+
+bool ClassDef::isVisited() const {
+   return m_visited;
 }

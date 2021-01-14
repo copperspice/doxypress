@@ -1385,7 +1385,7 @@ void distributeClassGroupRelations()
    // static bool inlineGroupedClasses = Config::getBool("inline-grouped-classes");
 
    for (auto cd : Doxy_Globals::classSDict) {
-      cd->visited = false;
+      cd->setVisited(false);
    }
 
    for (auto cd : Doxy_Globals::classSDict) {
@@ -1393,7 +1393,7 @@ void distributeClassGroupRelations()
 
       QSharedPointer<GroupDef> gd = cd->partOfGroups()->at(0);
 
-      if (! cd->visited && cd->partOfGroups() != 0) {
+      if (! cd->isVisited() && cd->partOfGroups() != 0) {
 
          for (auto ncd : cd->getClassSDict() ) {
             if (ncd->partOfGroups() == 0) {
@@ -1403,7 +1403,7 @@ void distributeClassGroupRelations()
          }
 
          // only visit every class once
-         cd->visited = true;
+         cd->setVisited(true);
       }
    }
 }
@@ -2531,7 +2531,7 @@ void Doxy_Work::buildConceptList(QSharedPointer<Entry> ptrEntry)
 void Doxy_Work::resolveClassNestingRelations()
 {
    for (auto item : Doxy_Globals::classSDict) {
-      item->visited = false;
+      item->setVisited(false);
    }
 
    bool done = false;
@@ -2543,7 +2543,7 @@ void Doxy_Work::resolveClassNestingRelations()
 
       for (auto cd : Doxy_Globals::classSDict) {
 
-         if (! cd->visited) {
+         if (! cd->isVisited()) {
             QString name = stripAnonymousNamespaceScope(cd->name());
 
             // add class to the correct structural context
@@ -2570,7 +2570,7 @@ void Doxy_Work::resolveClassNestingRelations()
                         QString inLineNS_FullName = def->qualifiedName() + "::" + aliasCd->localName();
 
                         Doxy_Globals::classSDict.insert(inLineNS_FullName, aliasCd);
-                        aliasCd->visited = true;
+                        aliasCd->setVisited(true);
                      }
 
                   } else {
@@ -2578,7 +2578,7 @@ void Doxy_Work::resolveClassNestingRelations()
                   }
                }
 
-               cd->visited = true;
+               cd->setVisited(true);
                done = false;
             }
          }
@@ -2588,7 +2588,7 @@ void Doxy_Work::resolveClassNestingRelations()
    // give warnings for unresolved compounds
    for (auto cd : Doxy_Globals::classSDict) {
 
-      if (! cd->visited) {
+      if (! cd->isVisited()) {
          QString name = stripAnonymousNamespaceScope(cd->name());
 
          // create the scope artificially so we can at least relate scopes properly
@@ -5206,7 +5206,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
                   QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef> instanceCd, bool isArtificial,
                   const ArgumentList &actualArgs, QHash<QString, int> templateNames)
 {
-   masterCd->visited = true;
+   masterCd->setVisited(true);
    const ArgumentList &formalArgs = masterCd->getTemplateArgumentList();
 
    for (auto mni : masterCd->memberNameInfoSDict()) {
@@ -5354,7 +5354,7 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
 {
    QSharedPointer<Entry> root = ptrEntry;
 
-   masterCd->visited = true;
+   masterCd->setVisited(true);
 
    // base class could also be a non-nested class
    ArgumentList &formalArgs = masterCd->getTemplateArgumentList();
@@ -5954,7 +5954,7 @@ QString Doxy_Work::extractClassName(QSharedPointer<Entry> ptrEntry)
 void Doxy_Work::findInheritedTemplateInstances()
 {
    for (auto item : Doxy_Globals::classSDict) {
-      item->visited = false;
+      item->setVisited(false);
    }
 
    for (auto ptrEntry : Doxy_Globals::g_classEntries) {
@@ -5972,7 +5972,7 @@ void Doxy_Work::findInheritedTemplateInstances()
 void Doxy_Work::findUsedTemplateInstances()
 {
    for (auto item : Doxy_Globals::classSDict) {
-      item->visited = false;
+      item->setVisited(false);
    }
 
    for (auto ptrEntry : Doxy_Globals::g_classEntries) {
@@ -5996,7 +5996,7 @@ void Doxy_Work::computeClassRelations()
    static bool hideUndocClasses  = Config::getBool("hide-undoc-classes");
 
    for (auto item : Doxy_Globals::classSDict) {
-      item->visited = false;
+      item->setVisited(false);
    }
 
    for (auto ptrEntry : Doxy_Globals::g_classEntries) {

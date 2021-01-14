@@ -371,11 +371,13 @@ class ClassDef : public Definition
    void writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames);
    void removeMemberFromLists(QSharedPointer<MemberDef> md);
    void addGroupedInheritedMembers(OutputList &ol, MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId);
+
+   void setVisited(bool visited);
+   bool isVisited() const;
    int countMembersIncludingGrouped(MemberListType lt, QSharedPointer<ClassDef> inheritedFrom, bool additional);
    int countInheritanceNodes();
    void writeTagFile(QTextStream &);
 
-   bool visited;
 
  protected:
    void addUsedInterfaceClasses(QSharedPointer<MemberDef> md, const QString &typeStr);
@@ -383,6 +385,8 @@ class ClassDef : public Definition
    void showUsedFiles(OutputList &ol);
 
  private:
+   bool m_visited;
+
    void writeDocumentationContents(OutputList &ol, const QString  &pageTitle);
    void internalInsertMember(QSharedPointer<MemberDef> md, Protection prot, bool addToAllList);
    void addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md, bool isBrief);

@@ -4596,7 +4596,7 @@ static void initBaseClassHierarchy(SortedList<BaseClassDef *> *bcl)
          initBaseClassHierarchy(cd->baseClasses());
       }
 
-      cd->visited = false;
+      cd->setVisited(false);
    }
 }
 
@@ -4622,7 +4622,7 @@ bool classHasVisibleChildren(QSharedPointer<ClassDef> cd)
 void initClassHierarchy(ClassSDict *cl)
 {
    for (auto cd : *cl) {
-      cd->visited = false;
+      cd->setVisited(false);
       initBaseClassHierarchy(cd->baseClasses());
    }
 }

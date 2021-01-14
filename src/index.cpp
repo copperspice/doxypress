@@ -699,7 +699,7 @@ static void writeBaseClassTree(OutputList &ol, const SortedList<BaseClassDef *> 
 
          ol.startIndexListItem();
 
-         bool hasChildren = ! cd->visited && !hideSuper && classHasVisibleChildren(cd);
+         bool hasChildren = ! cd->isVisited() && ! hideSuper && classHasVisibleChildren(cd);
 
          if (cd->isLinkable()) {
             ol.startIndexItem(cd->getReference(), cd->getOutputFileBase());
@@ -737,8 +737,8 @@ static void writeBaseClassTree(OutputList &ol, const SortedList<BaseClassDef *> 
          }
 
          if (hasChildren) {
-            bool wasVisited = cd->visited;
-            cd->visited = true;
+            bool wasVisited = cd->isVisited();
+            cd->setVisited(true);
 
             writeBaseClassTree(ol, cd->subClasses(), wasVisited, level + 1, ftv, addToIndex);
          }
@@ -1017,7 +1017,7 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
 
             ol.startIndexListItem();
 
-            bool hasChildren = ! cd->visited && classHasVisibleChildren(cd);
+            bool hasChildren = ! cd->isVisited() && classHasVisibleChildren(cd);
 
             if (cd->isLinkable()) {
                ol.startIndexItem(cd->getReference(), cd->getOutputFileBase());
@@ -1057,8 +1057,8 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
             }
 
             if (hasChildren) {
-               writeBaseClassTree(ol, cd->subClasses(), cd->visited, 1, ftv, addToIndex);
-               cd->visited = true;
+               writeBaseClassTree(ol, cd->subClasses(), cd->isVisited(), 1, ftv, addToIndex);
+               cd->setVisited(true);
             }
 
             ol.endIndexListItem();

@@ -2495,9 +2495,9 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
                m_usedNodes->insert(bClass->name(), bn); // add node to the used list
             }
 
-            if (! bClass->visited && !hideSuper && bClass->subClasses()) {
-               bool wasVisited = bClass->visited;
-               bClass->visited = true;
+            if (! bClass->isVisited() && ! hideSuper && bClass->subClasses()) {
+               bool wasVisited = bClass->isVisited();
+               bClass->setVisited(true);
                addHierarchy(bn, bClass, wasVisited);
             }
          }
@@ -2528,9 +2528,9 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
          m_usedNodes->insert(cd->name(), n);
          m_rootNodes->insert(0, n);
 
-         if (! cd->visited && cd->subClasses()) {
-            addHierarchy(n, cd, cd->visited);
-            cd->visited = true;
+         if (! cd->isVisited() && cd->subClasses()) {
+            addHierarchy(n, cd, cd->isVisited());
+            cd->setVisited(true);
          }
       }
    }

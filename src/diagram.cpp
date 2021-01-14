@@ -421,7 +421,7 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
                   Specifier virt, const QString &ts)
 {
    // the visit check does not work in case of multiple inheritance of the same class
-   // if (cd->visited) return;
+   // if (cd->isVisited() return;
 
    DiagramItem *di = new DiagramItem(parent, diagram->at(level)->count(), cd, prot, virt, ts);
 
@@ -436,11 +436,12 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
    int count = 0;
 
    if (bcl) {
-      /* there are base/sub classes */
+      // there are base/sub classes
 
       for (auto bcd : *bcl) {
          QSharedPointer<ClassDef> ccd = bcd->classDef;
-         if (ccd && ccd->isVisibleInHierarchy() /*&& !ccd->visited*/) {
+
+         if (ccd && ccd->isVisibleInHierarchy()) {
             count++;
          }
       }
@@ -1164,7 +1165,7 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
 void clearVisitFlags()
 {
    for (auto cd : Doxy_Globals::classSDict) {
-      cd->visited = false;
+      cd->setVisited(false);
    }
 }
 
