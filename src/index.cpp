@@ -3951,8 +3951,8 @@ static void writeIndex(OutputList &ol)
          ol.startHeaderSection();
          ol.startTitleHead(0);
 
-         ol.generateDoc(Doxy_Globals::mainPage->docFile(), Doxy_Globals::mainPage->docLine(), Doxy_Globals::mainPage,
-                        QSharedPointer<MemberDef>(), Doxy_Globals::mainPage->title(), true, false, "", true, false);
+         ol.generateDoc(Doxy_Globals::mainPage->docFile(), Doxy_Globals::mainPage->getStartBodyLine(), Doxy_Globals::mainPage,
+                        QSharedPointer<MemberDef>(), Doxy_Globals::mainPage->title(), true, false, QString(), true, false);
 
          headerWritten = true;
       }
