@@ -249,11 +249,6 @@ void PageDef::writeDocumentation(OutputList &ol)
 void PageDef::writePageDocumentation(OutputList &ol)
 {
    QSharedPointer<PageDef> self = sharedFrom(this);
-   bool markdownEnabled = Doxy_Globals::markdownSupport;
-
-   if (getLanguage() == SrcLangExt_Markdown) {
-      Doxy_Globals::markdownSupport = true;
-   }
 
    ol.startTextBlock();
 
@@ -266,10 +261,19 @@ void PageDef::writePageDocumentation(OutputList &ol)
       ol.popGeneratorState();
    }
 
-   ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), docStr, true, false);
-   ol.endTextBlock();
+   // save setting
+   bool markdownEnabled = Doxy_Globals::markdownSupport;
 
+   if (getLanguage() == SrcLangExt_Markdown) {
+      Doxy_Globals::markdownSupport = true;
+   }
+
+   ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), docStr, true, false);
+
+   // restore setting
    Doxy_Globals::markdownSupport = markdownEnabled;
+
+   ol.endTextBlock();
 
    if (hasSubPages()) {
       // for printed documentation we write subpages as section's of the parent page.
