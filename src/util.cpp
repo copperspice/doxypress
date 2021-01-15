@@ -8314,25 +8314,26 @@ bool classVisibleInIndex(QSharedPointer<ClassDef> cd)
    return (allExternals && cd->isLinkable()) || cd->isLinkableInProject();
 }
 
-QString extractDirection(QString docs)
+std::pair<QString, QString> extractDirection(QString docs)
 {
    QString retval;
 
-   static QRegularExpression regExp("\\[[^\\]]+\\]");
+   static QRegularExpression regExp("\\[[ inout,]+\\]");
    QRegularExpressionMatch match = regExp.match(docs);
 
    if (match.hasMatch() && match.capturedStart() == docs.constBegin()) {
-      int len = match.capturedLength();
+      QString tmp = match.captured(0);
+      tmp = tmp.remove(" ");
+      tmp = tmp.remove(",");
 
-      int  inPos  = docs.indexOf("in",  1, Qt::CaseInsensitive);
-      int outPos  = docs.indexOf("out", 1, Qt::CaseInsensitive);
+      bool input  = tmp.contains("in");
+      bool output = tmp.contains("out");
 
-      bool input  = inPos  != -1 &&  inPos < len;
-      bool output = outPos != -1 && outPos < len;
+      tmp = tmp.remove("in");
+      tmp = tmp.remove("out");
 
-      if (input || output) {
-         // in,out attributes
-
+      if (tmp == "[]" && (input || output)) {
+         // in,out attributes found
          docs = QStringView(match.capturedEnd(), docs.constEnd());
 
          if (input && output) {
@@ -8347,7 +8348,7 @@ QString extractDirection(QString docs)
       }
    }
 
-   return retval;
+   return {retval, docs};
 }
 
 // Computes for a given list type inListType, which are the the corresponding list type(s) in

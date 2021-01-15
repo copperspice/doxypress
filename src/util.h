@@ -171,7 +171,7 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
 QString externalLinkTarget();
 QString externalRef(const QString &relPath, const QString &ref, bool href);
 QString extractAliasArgs(const QString &args, int pos);
-QString extractDirection(QString docs);
+std::pair<QString, QString> extractDirection(QString docs);
 void    extractNamespaceName(const QString &scopeName, QString &className, QString &namespaceName, bool allowEmptyClass = false);
 int     extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt = SrcLangExt_Unknown);
 

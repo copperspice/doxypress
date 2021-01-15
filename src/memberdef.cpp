@@ -3209,10 +3209,10 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
       QString paramDocs;
 
       // convert the parameter documentation into a list of @param commands
-      for (auto &a : *docArgList) {
-         if (a.hasDocumentation()) {
-            QString direction = extractDirection(a.docs);
-            paramDocs += "@param" + direction + " " + a.name + " " + a.docs;
+      for (const auto &item : *docArgList) {
+         if (item.hasDocumentation()) {
+            auto [direction, docsWithoutDir] = extractDirection(item.docs);
+            paramDocs += "@param" + direction + " " + item.name + " " + docsWithoutDir;
          }
       }
 
