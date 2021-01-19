@@ -258,10 +258,10 @@ int MemberList::countEnumValues(QSharedPointer<MemberDef> md, bool setAnonEnumTy
    int numEnumVars = 0;
 
    QString name(md->name());
-   int i = name.lastIndexOf("::");
+   int pos = name.lastIndexOf("::");
 
-   if (i != -1) {
-      name = name.right(name.length() - i - 2);   // strip scope, might not be required
+   if (pos != -1) {
+      name = name.right(name.length() - pos - 2);   // strip scope, might not be required
    }
 
    if (name.startsWith('@')) {

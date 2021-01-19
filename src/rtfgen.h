@@ -183,13 +183,8 @@ class RTFGenerator : public OutputGenerator
       m_textStream << QString("%1").formatArg(l, 5) << " ";
    }
 
-   void startCodeLine(bool) override {
-      col = 0;
-   }
-
-   void endCodeLine() override {
-      lineBreak();
-   }
+   void startCodeLine(bool) override;
+   void endCodeLine() override;
 
    void startEmphasis()  override {
       m_textStream << "{\\i ";
@@ -386,7 +381,6 @@ class RTFGenerator : public OutputGenerator
    void incrementIndentLevel();
    void decrementIndentLevel();
 
-   int  col;
    void beginRTFDocument();
    void beginRTFChapter();
    void beginRTFSection();
@@ -399,6 +393,8 @@ class RTFGenerator : public OutputGenerator
    bool m_prettyCode;
    bool m_bstartedBody;           // has startbody been called yet
    bool m_omitParagraph;          // should the next paragraph command be ignored
+
+   int  m_col;
    int  m_numCols;                // number of columns in a table
    int  m_listLevel;              // RTF does not really have a additive indent, manually set list level
 

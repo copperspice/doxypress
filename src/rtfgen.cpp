@@ -58,7 +58,7 @@ RTFGenerator::RTFGenerator() : OutputGenerator()
    m_outputDir  = Config::getString("rtf-output");
    m_prettyCode = Config::getBool("rtf-source-code");
 
-   col         = 0;
+   m_col       = 0;
    m_numCols   = 0;
    m_listLevel = 0;
 
@@ -1731,36 +1731,36 @@ void RTFGenerator::codify(const QString &str)
 
       switch (c.unicode()) {
          case '\t':
-            spacesToNextTabStop = Config::getInt("tab-size") - (col % Config::getInt("tab-size"));
+            spacesToNextTabStop = tabSize - (m_col % tabSize);
             m_textStream << QString(spacesToNextTabStop, ' ');
 
-            col += spacesToNextTabStop;
+            m_col += spacesToNextTabStop;
             break;
 
          case '\n':
             newParagraph();
             m_textStream << '\n';
-            col = 0;
+            m_col = 0;
             break;
 
          case '{':
             m_textStream << "\\{";
-            col++;
+            ++m_col;
             break;
 
          case '}':
             m_textStream << "\\}";
-            col++;
+            ++m_col;
             break;
 
          case '\\':
             m_textStream << "\\\\";
-            col++;
+            ++m_col;
             break;
 
          default:
             m_textStream << c;
-            col++;
+            ++m_col;
             break;
       }
    }
@@ -2890,6 +2890,17 @@ void RTFGenerator::endInlineMemberDoc()
 {
    DBG_RTF(m_textStream << "{\\comment (endInlineMemberDoc)}" << endl)
    m_textStream << "\\cell }{\\row }" << endl;
+}
+
+
+void RTFGenerator::startCodeLine(bool)
+{
+  m_col = 0;
+}
+
+void RTFGenerator::endCodeLine()
+{
+     lineBreak();
 }
 
 void RTFGenerator::startLabels()
