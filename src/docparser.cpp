@@ -676,13 +676,14 @@ static void detectUndocumentedParams()
 
             // see if all parameters have documentation
             for (const auto &arg : argList) {
-               if (! allDoc) {
-                  break;
-               }
 
                if (! arg.name.isEmpty() && arg.type != "void" &&
                      ! (isPython && (arg.name == "self" || arg.name == "cls"))) {
                   allDoc = ! arg.docs.isEmpty();
+
+                  if (! allDoc) {
+                     break;
+                  }
                }
             }
 
@@ -692,13 +693,13 @@ static void detectUndocumentedParams()
 
                for (const auto &arg : declArgList) {
 
-                  if (! allDoc) {
-                     break;
-                  }
-
                   if (! arg.name.isEmpty() && arg.type != "void" &&
                         ! (isPython && (arg.name == "self"|| arg.name == "cls"))) {
                      allDoc = ! arg.docs.isEmpty();
+
+                     if (! allDoc) {
+                        break;
+                     }
                   }
                }
             }
@@ -2785,6 +2786,9 @@ void DocSecRefList::parse()
    // handle items
    while (tok) {
       if (tok == TK_COMMAND_AT || tok == TK_COMMAND_BS) {
+
+         QString cmdStart = (tok == TK_COMMAND_AT ? "@" : "\\");
+
          switch (Mappers::cmdMapper->map(g_token->name)) {
             case CMD_SECREFITEM: {
                int tok = doctokenizerYYlex();
@@ -2811,7 +2815,7 @@ void DocSecRefList::parse()
                goto endsecreflist;
             default:
                warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\secreflist",
-                              csPrintable(g_token->name));
+                              csPrintable(cmdStart + g_token->name));
                goto endsecreflist;
          }
 
@@ -3151,9 +3155,13 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
    while ((tok = doctokenizerYYlex())) {
 
       if (! defaultHandleToken(this, tok, m_children, false)) {
+         QString cmdStart = "\\";
          switch (tok) {
 
             case TK_COMMAND_AT:
+               cmdStart = "@";
+               [[fallthrough]];
+
             case TK_COMMAND_BS:
                switch (Mappers::cmdMapper->map(g_token->name)) {
                   case CMD_ENDLINK:
@@ -3164,7 +3172,7 @@ QString DocLink::parse(bool isJavaLink, bool isXmlLink)
 
                   default:
                      warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a \\link",
-                                    csPrintable(g_token->name));
+                                    csPrintable(cmdStart + g_token->name));
                      break;
                }
                break;
@@ -3979,14 +3987,46 @@ DocHtmlCell::Alignment DocHtmlCell::alignment() const
 {
    HtmlAttribList attrs = attribs();
 
-   for (uint i = 0; i < attrs.count(); ++i) {
+   for (const auto &item : attrs) {
 
-      if (attrs.at(i).name.toLower() == "align") {
-         if (attrs.at(i).value.toLower() == "center") {
+      QString tmpValue = item.value.toLower();
+
+      if (item.name.toLower() == "align") {
+         if (tmpValue == "center") {
             return Center;
 
-         } else if (attrs.at(i).value.toLower() == "right") {
+         } else if (tmpValue == "right") {
             return Right;
+
+         } else {
+            return Left;
+         }
+
+      } else if (item.name.toLower() == "class") {
+
+         if (tmpValue == "markdowntableheadcenter") {
+            return Center;
+
+         } else if (tmpValue == "markdowntableheadright") {
+            return Right;
+
+         } else if (tmpValue == "markdowntableheadleft") {
+            return Left;
+
+         } else if (tmpValue == "markdowntableheadnone") {
+            return Center;
+
+         } else if (tmpValue == "markdowntablebodycenter") {
+            return Center;
+
+         } else if (tmpValue == "markdowntablebodyright") {
+            return Right;
+
+         } else if (tmpValue == "markdowntablebodyleft") {
+            return Left;
+
+         } else if (tmpValue == "markdowntablebodynone") {
+            return Left;
 
          } else {
             return Left;
@@ -4377,10 +4417,14 @@ int DocHtmlDescTitle::parse()
    while ((tok = doctokenizerYYlex())) {
 
       if (! defaultHandleToken(this, tok, m_children)) {
+         QString cmdStart = "\\";
 
          switch (tok) {
 
             case TK_COMMAND_AT:
+               cmdStart = "@";
+               [[fallthrough]];
+
             case TK_COMMAND_BS: {
                QString cmdName = g_token->name;
                bool isJavaLink = false;
@@ -4447,7 +4491,7 @@ int DocHtmlDescTitle::parse()
 
                   default:
                      warn_doc_error(s_fileName, getDoctokenLineNum(), "Invalid command %s as part of a <dt> tag",
-                                    csPrintable(g_token->name));
+                                    csPrintable(cmdStart + g_token->name));
                }
             }
             break;
