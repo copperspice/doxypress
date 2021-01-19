@@ -71,6 +71,11 @@ enum Tokens {
 /** @brief Data associated with a token used by the comment block parser. */
 struct TokenInfo {
 
+   TokenInfo()
+      : isEnumList(false), indent(0), id(-1), endTag(false), emptyTag(false), paramDir(Unspecified)
+   {
+   }
+
    // command token
    QString name;
 
