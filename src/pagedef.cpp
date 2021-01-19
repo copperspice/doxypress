@@ -195,7 +195,10 @@ void PageDef::writeDocumentation(OutputList &ol)
       ol.popGeneratorState();
 
       if (si->title != manPageName) {
-         ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);
+
+         // no need to pass markdown
+         ol.generateDoc(docFile(), getStartBodyLine(), self, QSharedPointer<MemberDef>(), si->title, true, false,
+               QString(), true, false);
          ol.endSection(si->label, si->type);
       }
    }
@@ -215,7 +218,9 @@ void PageDef::writeDocumentation(OutputList &ol)
       ol.startPageDoc(si->title);
       startTitle(ol, getOutputFileBase(), self);
 
-      ol.generateDoc(docFile(), docLine(), self, QSharedPointer<MemberDef>(), si->title, true, false, "", true, false);
+      // no need to pass markdown
+      ol.generateDoc(docFile(), getStartBodyLine(), self, QSharedPointer<MemberDef>(), si->title, true, false,
+             QString(), true, false);
 
       endTitle(ol, getOutputFileBase(), name());
 
