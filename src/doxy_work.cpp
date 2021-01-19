@@ -4738,7 +4738,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         md = item;
 
                         // merge argument lists
-                        mergeArguments(mdTempArgList, root->argList, ! root->getData(EntryKey::Main_Docs).isEmpty());
+                        mergeArguments(mdTempArgList, root->argList, ! root->proto);
 
                         // merge documentation
                         if (item->documentation().isEmpty() && ! root->getData(EntryKey::Main_Docs).isEmpty()) {
@@ -5014,7 +5014,7 @@ void Doxy_Work::transferFunctionDocumentation()
 
          if (mdec->isPrototype() || (mdec->isVariable() && mdec->isExternal()) ) {
             for (auto mdef : *mn ) {
-               if (mdec != mdef && mdec->getNamespaceDef()== mdef->getNamespaceDef() && ! mdec->isAlias() && ! mdef->isAlias()) {
+               if (mdec != mdef && mdec->getNamespaceDef() == mdef->getNamespaceDef() && ! mdec->isAlias() && ! mdef->isAlias()) {
                   combineDeclarationAndDefinition(mdec, mdef);
                }
             }
@@ -6220,10 +6220,10 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
    ArgumentList &mdArgList = md->getArgumentList();
 
    if (! argList.listEmpty()) {
-      mergeArguments(mdArgList, argList, ! root->getData(EntryKey::Main_Docs).isEmpty());
+      mergeArguments(mdArgList, argList, ! root->proto);
 
    } else if (matchArguments2(md->getOuterScope(), md->getFileDef(), mdArgList, rscope, rfd, root->argList, true)) {
-      mergeArguments(mdArgList, root->argList, ! root->getData(EntryKey::Main_Docs).isEmpty());
+      mergeArguments(mdArgList, root->argList, ! root->proto);
 
    }
 
@@ -9333,6 +9333,8 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
 
          Doxy_Globals::mainPage->setBriefDescription(root->getData(EntryKey::Brief_Docs),
                   root->getData(EntryKey::Brief_File), root->briefLine);
+
+         Doxy_Globals::mainPage->setBodySegment(root->startLine, -1);
          Doxy_Globals::mainPage->setFileName(indexName);
          Doxy_Globals::mainPage->setLocalToc(root->localToc);
 
@@ -9366,7 +9368,7 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
 
          warn(root->getData(EntryKey::File_Name), root->startLine, "Found more than one \\mainpage comment block "
             "(first occurrence: %s, line %d), Skip current block",
-            csPrintable(Doxy_Globals::mainPage->docFile()), Doxy_Globals::mainPage->docLine());
+            csPrintable(Doxy_Globals::mainPage->docFile()), Doxy_Globals::mainPage->getStartBodyLine());
       }
    }
 
