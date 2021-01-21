@@ -77,6 +77,8 @@ static QString addTemplateNames(const QString &s, const QString  &n, const QStri
 
 static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scopeDef, QSharedPointer<MemberDef> md)
 {
+   static const bool warn_param_mismatch = Config::getBool("warn-param-mismatch");
+
    const ArgumentList *tmp = nullptr;      // ok as a ptr
 
    if (md->isDocsForDefinition())  {
@@ -202,12 +204,22 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
    auto next = defArgList.begin();
 
-   for (const Argument &arg : defArgList)  {
+   ArgumentList::const_iterator iter_t1;
+   ArgumentList::const_iterator iter_t2;
 
+   if (warn_param_mismatch) {
+      const ArgumentList &t1 = md->getArgumentList();
+      const ArgumentList &t2 = md->getDeclArgumentList();
+
+      iter_t1 = t1.cbegin();
+      iter_t2 = t2.cbegin();
+   }
+
+   for (const Argument &arg : defArgList)  {
       ++next;
 
       if (isDefine || first) {
-         ol.startParameterType(first, "");
+         ol.startParameterType(first, QString());
          paramTypeStarted = true;
 
          if (isDefine) {
@@ -279,6 +291,27 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       if (hasFuncPtrType) {
          ol.docify(arg.type.mid(wp, vp - wp));
+      }
+
+      if (warn_param_mismatch)   {
+
+         QString kind = "function";
+
+         if (md->isFriend())  {
+            kind = "friend";
+         }
+
+         QString varName1 = iter_t1->name;
+         QString varName2 = iter_t2->name;
+
+         if (varName1 != varName2) {
+            warn(md->getDefFileName(), md->getDefLine(), "Parameter names do not agree, %s %s\n"
+                  "   (review docs and declarations)  %s, %s\n", csPrintable(kind),
+                  csPrintable(md->qualifiedName()), csPrintable(varName1), csPrintable(varName2));
+         }
+
+         ++iter_t1;
+         ++iter_t2;
       }
 
       if (! arg.name.isEmpty() || arg.type == "...") {
@@ -947,7 +980,7 @@ QString MemberDef::getOutputFileBase() const
          return baseName;
       }
 
-   } else if (m_impl->nspace && m_impl->nspace->isLinkableInProject() ) {
+   } else if (m_impl->nspace && m_impl->nspace->isLinkable() ) {
       baseName = m_impl->nspace->getOutputFileBase();
 
    } else if (m_impl->fileDef) {
@@ -3589,13 +3622,14 @@ void MemberDef::warnIfUndocumentedParams()
    static const bool warnUndocParam = Config::getBool("warn-undoc-param");
 
    if (! extractAll && warnUndoc && warnUndocParam && ! isDeleted() && ! isReference() && ! Doxy_Globals::suppressDocWarnings) {
+      QString returnType = typeString();
 
       if (! hasDocumentedParams()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Parameters for member %s are not fully documented",
                      csPrintable(qualifiedName()));
       }
 
-      if (! hasDocumentedReturnType() && isFunction() && hasDocumentation()) {
+      if (! hasDocumentedReturnType() && isFunction() && hasDocumentation() && ! returnType.isEmpty()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Return type of member %s is not documented",
                      csPrintable(qualifiedName()));
       }
