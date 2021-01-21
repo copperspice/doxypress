@@ -117,6 +117,7 @@ class Config
       static QStringList getSuffixHeader();
       static QStringList getSuffixExclude();
       static QStringList getDotImageFormat();
+      static QStringList getFormulaFormat();
       static QStringList getMathJaxFormat();
       static QStringList getLatexPaperType();
       static QStringList getRtfPaperType();

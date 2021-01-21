@@ -242,6 +242,7 @@ bool Config::preVerify()
 bool Config::verify()
 {
    const static QStringList s_dotImageFormat = getDotImageFormat();
+   const static QStringList s_formulaFormat  = getFormulaFormat();
    const static QStringList s_mathJaxFormat  = getMathJaxFormat();
    const static QStringList s_latexPaperType = getLatexPaperType();
    const static QStringList s_rtfPaperType   = getRtfPaperType();
@@ -713,6 +714,22 @@ bool Config::verify()
 
    iterInt.value().value = gamma;
 
+   // **
+   iterEnum = m_cfgEnum.find("formula-format");
+   QString formulaFormat = iterEnum.value().value;
+
+   if (! s_formulaFormat.contains(formulaFormat)) {
+
+      if (formulaFormat.isEmpty()) {
+         errAll("Formula Format can not be empty, setting to the default value of png\n");
+
+      } else  {
+         errAll("Invalid value of %s for Formula Format, setting to the default value of png\n", csPrintable(formulaFormat));
+
+      }
+
+      iterEnum.value().value = "png";
+   }
 
    // **
    iterEnum = m_cfgEnum.find("mathjax-format");
@@ -969,6 +986,16 @@ QStringList Config::getDotImageFormat()
 
    list.append("gif");
    list.append("jpg");
+   list.append("png");
+   list.append("svg");
+
+   return list;
+}
+
+QStringList Config::getFormulaFormat()
+{
+   QStringList list;
+
    list.append("png");
    list.append("svg");
 

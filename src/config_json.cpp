@@ -142,14 +142,16 @@ void Config::load_Defaults()
    m_cfgInt.insert("tab-size",                   struc_CfgInt    { 4,              DEFAULT } );
    m_cfgInt.insert("lookup-cache-size",          struc_CfgInt    { 0,              DEFAULT } );
 
-   // tab 2 - build configuration
+   // tab 2 - build configuration A
    m_cfgBool.insert("extract-all",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-private",           struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("extract-private-virtual",   struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-package",           struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-static",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-local-classes",     struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("extract-local-methods",     struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("extract-anon-namespaces",   struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("internal-docs",             struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgBool.insert("hide-undoc-members",        struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("hide-undoc-classes",        struc_CfgBool   { false,          DEFAULT } );
@@ -169,7 +171,6 @@ void Config::load_Defaults()
    m_cfgBool.insert("inline-info",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-grouped-classes",    struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inline-simple-struct",      struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("use-typedef-name",          struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgBool.insert("sort-member-docs",          struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("sort-brief-docs",           struc_CfgBool   { false,          DEFAULT } );
@@ -183,18 +184,21 @@ void Config::load_Defaults()
    m_cfgBool.insert("generate-bug-list",         struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("generate-deprecate-list",   struc_CfgBool   { true,           DEFAULT } );
 
+   // tab 2 - build configuration B
    m_cfgBool.insert("short-names",               struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("allow-unicode-names",       struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("create-subdirs",            struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("case-sensitive-fname",      struc_CfgBool   { true,           DEFAULT } );
 
    m_cfgBool.insert("markdown",                  struc_CfgBool   { true,           DEFAULT } );
    m_cfgBool.insert("auto-link",                 struc_CfgBool   { true,           DEFAULT } );
-   m_cfgBool.insert("strict-sig-matching",       struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("python-docstring",          struc_CfgBool   { false,          DEFAULT } );
 
-   m_cfgBool.insert("internal-docs",             struc_CfgBool   { false,          DEFAULT } );
-   m_cfgBool.insert("force-local-includes",      struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("strict-sig-matching",       struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("inherit-docs",              struc_CfgBool   { true,           DEFAULT } );
+
+   m_cfgBool.insert("use-typedef-name",          struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("create-subdirs",            struc_CfgBool   { false,          DEFAULT } );
+   m_cfgBool.insert("force-local-includes",      struc_CfgBool   { false,          DEFAULT } );
 
    m_cfgBool.insert("separate-member-pages",     struc_CfgBool   { false,          DEFAULT } );
    m_cfgBool.insert("allow-sub-grouping",        struc_CfgBool   { true,           DEFAULT } );
@@ -226,6 +230,7 @@ void Config::load_Defaults()
    m_cfgBool.insert("warn-undoc",                struc_CfgBool   { true,            DEFAULT } );
    m_cfgBool.insert("warn-doc-error",            struc_CfgBool   { true,            DEFAULT } );
    m_cfgBool.insert("warn-undoc-param",          struc_CfgBool   { false,           DEFAULT } );
+   m_cfgBool.insert("warn-param-mismatch",       struc_CfgBool   { false,           DEFAULT } );
    m_cfgString.insert("warn-format",             struc_CfgString { "$file:$line: $text", DEFAULT } );
    m_cfgString.insert("warn-logfile",            struc_CfgString { QString(),       DEFAULT } );
 
@@ -281,11 +286,12 @@ void Config::load_Defaults()
    m_cfgList.insert("expand-as-defined",         struc_CfgList   { QStringList(),   DEFAULT } );
 
    // tab 2 - clang
-   m_cfgBool.insert("clang-parsing",             struc_CfgBool   { false,           DEFAULT } );
-   m_cfgString.insert("clang-compilation-path",  struc_CfgString { QString(),       DEFAULT } );
-   m_cfgString.insert("clang-dialect",           struc_CfgString { "--std=c++14",   DEFAULT } );
-   m_cfgBool.insert("clang-use-headers",         struc_CfgBool   { true,            DEFAULT } );
-   m_cfgList.insert("clang-flags",               struc_CfgList   { QStringList(),   DEFAULT } );
+   m_cfgBool.insert("clang-parsing",              struc_CfgBool   { false,           DEFAULT } );
+   m_cfgString.insert("clang-compilation-path",   struc_CfgString { QString(),       DEFAULT } );
+   m_cfgString.insert("clang-dialect",            struc_CfgString { "--std=c++14",   DEFAULT } );
+   m_cfgBool.insert("clang-use-headers",          struc_CfgBool   { true,            DEFAULT } );
+   m_cfgBool.insert("clang-include-input-source", struc_CfgBool   { true,            DEFAULT } );
+   m_cfgList.insert("clang-flags",                struc_CfgList   { QStringList(),   DEFAULT } );
 
    // tab 2 - source listing
    m_cfgBool.insert("source-code",               struc_CfgBool   { false,           DEFAULT } );
@@ -394,8 +400,11 @@ void Config::load_Defaults()
    m_cfgString.insert("search-external-id",      struc_CfgString { QString(),        DEFAULT } );
    m_cfgList.insert("search-mappings",           struc_CfgList   { QStringList(),    DEFAULT } );
 
+   m_cfgEnum.insert("formula-format",            struc_CfgEnum   { "png",           DEFAULT } );
    m_cfgInt.insert("formula-fontsize",           struc_CfgInt    { 10,              DEFAULT } );
    m_cfgBool.insert("formula-transparent",       struc_CfgBool   { true,            DEFAULT } );
+   m_cfgString.insert("formula-macrofile",       struc_CfgString { QString(),        DEFAULT } );
+
    m_cfgString.insert("ghostscript",             struc_CfgString { QString(),       DEFAULT } );
    m_cfgBool.insert("use-mathjax",               struc_CfgBool   { false,           DEFAULT } );
    m_cfgEnum.insert("mathjax-format",            struc_CfgEnum   { "HTML-CSS",      DEFAULT } );
@@ -485,6 +494,7 @@ void Config::load_Defaults()
    // tab 3 - xml
    m_cfgString.insert("xml-output",              struc_CfgString { "xml",           DEFAULT } );
    m_cfgBool.insert("xml-program-listing",       struc_CfgBool   { true,            DEFAULT } );
+   m_cfgBool.insert("xml-include-ns-members",    struc_CfgBool   { false,           DEFAULT } );
 }
 
 bool Config::read_ProjectFile(const QString &fName)
@@ -538,8 +548,13 @@ bool Config::read_ProjectFile(const QString &fName)
          QString key        = iter2.key();
          QJsonValue tempObj = iter2.value();
 
-         if (key == "output-language" || key == "dot-image-format" || key == "mathjax-format" || key == "latex-paper-type" ||
-                  key == "rtf-paper-type")  {
+         // hold for now
+         if (key == "formula-format") {
+            continue;
+         }
+
+         if (key == "output-language" || key == "dot-image-format" ||
+                  key == "mathjax-format" || key == "latex-paper-type" || key == "rtf-paper-type")  {
 
             auto hashIter = m_cfgEnum.find(key);
 
