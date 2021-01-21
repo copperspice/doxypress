@@ -145,6 +145,7 @@ enum CommandType {
    CMD_DOCBOOKINCLUDE  = 115,
    CMD_MANINCLUDE      = 116,
    CMD_XMLINCLUDE      = 117,
+   CMD_BYPASSUNDOCWARN = 118
 };
 
 enum HtmlTagType {

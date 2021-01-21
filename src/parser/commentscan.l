@@ -1185,6 +1185,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput(text);
    }
 
+<Comment>{B}*{CMD}"bypassundocwarn"{B}* {
+      if (! current->m_entryName.isEmpty()) {
+         current->m_traits.setTrait(Entry::Virtue::BypassUndocWarn);
+      }
+   }
+
 <Comment>{B}*{CMD}"sortid"{B}+[0-9]+    {
       // simulate calling addToOutPut()
       QString text = QString::fromUtf8(yytext);

@@ -214,6 +214,9 @@ class Entry : public EnableSharedFromThis
       NoDiscard,
       NoReturn,
 
+      //
+      BypassUndocWarn,
+
       Inline,
       Final,
       Explicit,

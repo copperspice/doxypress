@@ -3582,7 +3582,10 @@ void MemberDef::warnIfUndocumented()
 
    }
 
-   if ((! hasUserDocumentation() && ! extractAll) && ! isFriendClass() && name().indexOf('@') == -1 &&
+   if ( m_impl->m_memberTraits.hasTrait(Entry::Virtue::BypassUndocWarn) ) {
+      // suppress warning of undocumented method, user wants to bypass this warning
+
+   } else if ((! hasUserDocumentation() && ! extractAll) && ! isFriendClass() && name().indexOf('@') == -1 &&
                   def != nullptr && def->name().indexOf('@') == -1 &&
                   protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 

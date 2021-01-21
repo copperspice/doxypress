@@ -40,6 +40,7 @@ CommandMap cmdMap[] = {
    { "author",          CMD_AUTHOR },
    { "authors",         CMD_AUTHORS },
    { "b",               CMD_BOLD },
+   { "bypassundocwarn", CMD_BYPASSUNDOCWARN },
    { "c",               CMD_CODE },
    { "cite",            CMD_CITE },
    { "code",            CMD_STARTCODE },
