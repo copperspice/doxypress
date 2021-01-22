@@ -1007,6 +1007,10 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                      --bracket;
                   }
 
+                  if (index == p->numTokens - 1) {
+                     break;
+                  }
+
                   ++index;
                   cursor = p->cursors[index];
                }
@@ -1019,6 +1023,11 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                } else {
                   while (index < p->numTokens && ! documentKind(cursor) ) {
+
+                     if (index == p->numTokens - 1) {
+                        break;
+                     }
+
                      ++index;
                      cursor = p->cursors[index];
                   }
@@ -1089,6 +1098,10 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                   } else if (extra == "::")  {
                      // bail out
+                     break;
+                  }
+
+                  if (index == p->numTokens - 1) {
                      break;
                   }
 
@@ -1179,7 +1192,6 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                   ++tmpIndex;
                   cursor = p->cursors[tmpIndex];
-
                }
 
             } else  {
