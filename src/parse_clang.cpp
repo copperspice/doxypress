@@ -520,6 +520,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
    static QString     const clangCompilationPath = Config::getString("clang-compilation-path");
    static QString     const clangDialect         = Config::getString("clang-dialect");
    static bool        const clangUseHeaders      = Config::getBool("clang-use-headers");
+   static bool        const clangIncInputSrc     = Config::getBool("clang-include-input-source");
    static QStringList const clangFlags           = Config::getList("clang-flags");
 
    // static const Qt::CaseSensitivity allowUpperCaseNames_enum = Config::getCase("case-sensitive-fname");
@@ -624,9 +625,12 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
             argList.push_back(std::move(inc));
          }
 
-         // add include paths for input files
-         for (auto &item : Doxy_Globals::inputPaths) {
-            argList.push_back("-I" + item);
+         if (clangIncInputSrc) {
+            // add include paths for input files
+
+            for (auto &item : Doxy_Globals::inputPaths) {
+               argList.push_back("-I" + item);
+            }
          }
 
          // add external include paths
