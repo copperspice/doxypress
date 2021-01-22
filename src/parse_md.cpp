@@ -3038,7 +3038,7 @@ static bool isExplicitPage(QStringView text)
    return false;
 }
 
-static QString extractPageTitle(QString &docs, QString &id)
+static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
 {
    // first non-empty line
    QString title;
@@ -3046,7 +3046,7 @@ static QString extractPageTitle(QString &docs, QString &id)
    QString::const_iterator iter      = docs.constBegin();
    QString::const_iterator iter_end  = docs.constEnd();
 
-   int maxLen = 0;
+   maxLen = 0;
 
    while (iter != iter_end) {
       QChar c = *iter;
@@ -3076,7 +3076,6 @@ static QString extractPageTitle(QString &docs, QString &id)
    }
 
    if (iter_endA != iter_end) {
-      ++maxLen;
 
       // second line form end1..end2
       QString::const_iterator iter_endB = iter_endA + 1;
@@ -3090,9 +3089,9 @@ static QString extractPageTitle(QString &docs, QString &id)
       if (level != 0) {
          title = QStringView(iter, iter_end - 1);
 
-         QString lns(maxLen, '\n');
 
-         docs = lns + QStringView(iter_endB, iter_end);      // modify passed values
+
+         docs = "\n\n" + QStringView(iter_endB, iter_end);      // modify passed values
          id   = extractTitleId(title, 0);
 
          return title;
@@ -3240,12 +3239,14 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
 
    QString id;
    QString docs    = fileBuf;
-   QString title   = extractPageTitle(docs, id).trimmed();
+   int prepend     = 0;       // number of empty lines in front
+   QString title   = extractPageTitle(docs, id, prepend).trimmed();
 
    QString titleFn = QFileInfo(fileName).baseName();
    QString fn      = QFileInfo(fileName).fileName();
+   bool wasEmpty   = id.isEmpty();
 
-   if (id.isEmpty()) {
+   if (wasEmpty) {
       id = markdownFileNameToId(fileName);
    }
 
@@ -3255,8 +3256,8 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
                   QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) )  {
 
          // tag option set to use md file as mainpage
-         docs.prepend("@anchor " + id + "\n");
-         docs.prepend("@mainpage " + title + "\n");
+         docs.prepend("@anchor " + id + "\\internal_linebr ");
+         docs.prepend("@mainpage " + title + "\\internal_linebr ");
 
       } else if (id == "mainpage" || id == "index") {
 
@@ -3264,17 +3265,24 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
             title = titleFn;
          }
 
-         docs.prepend("@anchor " + id + "\n");
-         docs.prepend("@mainpage " + title + "\n");
+         docs.prepend("@anchor " + id + "\\internal_linebr ");
+         docs.prepend("@mainpage " + title + "\\internal_linebr ");
 
       } else {
-
          if (title.isEmpty()) {
-            title = titleFn;
+            title   = titleFn;
+            prepend = 0;
          }
 
-         docs.prepend("@page " + id + " " + title + "\n");
+
+         if (! wasEmpty) {
+            docs.prepend("@anchor " + markdownFileNameToId(fileName) + "\\internal_linebr ");
+         }
+
+         docs.prepend("@page " + id + " " + title + "\\internal_linebr ");
       }
+
+      docs.prepend(QString('\n', prepend));
    }
 
    int lineNr   = 1;
