@@ -395,17 +395,14 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
              md->getClassDef() ? csPrintable(md->getClassDef()->name()) : "", csPrintable(name()) );
    }
 
-/* broom - unclear if this will be required
-
+   // this really goes here
    if (md->isFriend()) {
-
       if (! docOnly) {
          addMemberToList(MemberListType_decFriendMembers, md);
       }
 
       addMemberToList(MemberListType_docFriendMembers, md);
    }
-*/
 
    return true;
 }
@@ -506,14 +503,10 @@ void GroupDef::removeMember(QSharedPointer<MemberDef> md)
             err("GroupDef::removeMember(): unexpected member remove in file\n");
       }
 
-/* broom - unclear if this will be required
-
       if (md->isFriend()) {
          removeMemberFromList(MemberListType_decFriendMembers, md);
          removeMemberFromList(MemberListType_docFriendMembers, md);
       }
-*/
-
    }
 }
 
