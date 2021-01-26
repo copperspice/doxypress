@@ -682,14 +682,12 @@ static bool readCodeFragment(const QString &fileName, int &startLine, int &endLi
                   }
                }
 
-               lineStr[i] = '\0';
-               size_read  = i;
-
-               tmpResult += lineStr;
+               size_read = i;
+               tmpResult += QString::fromUtf8(lineStr, size_read);
 
             } while (size_read == (maxLineLength - 1));
 
-            lineNr++;
+            ++lineNr;
 
          } while (lineNr <= endLine && *ptr);
 
