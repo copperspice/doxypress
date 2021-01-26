@@ -64,6 +64,7 @@ RTFGenerator::RTFGenerator() : OutputGenerator()
 
    m_bstartedBody     = false;
    m_omitParagraph    = false;
+   m_doxyCodeLineOpen = false;
 }
 
 //void RTFGenerator::append(const OutputGenerator *g)
@@ -2892,15 +2893,48 @@ void RTFGenerator::endInlineMemberDoc()
    m_textStream << "\\cell }{\\row }" << endl;
 }
 
+void RTFGenerator::writeLineNumber(const QString &, const QString &fileName, const  QString &, int line)
+{
+  static const bool rtfHyperlinks = Config::getBool("rtf-hyperlinks");
+
+  m_doxyCodeLineOpen = true;
+  QString lineNumber = QString("%1").formatArg(line, 5, 10, QChar('0'));
+
+  if (m_prettyCode) {
+    if (! fileName.isEmpty() && ! m_sourceFileName.isEmpty() && rtfHyperlinks) {
+      QString lineAnchor = QString("_l%1").formatArg(line, 5, 10, '0');
+      lineAnchor.prepend(stripExtensionGeneral(m_sourceFileName, ".rtf"));
+
+      m_textStream << "{\\bkmkstart ";
+      m_textStream << rtfFormatBmkStr(lineAnchor);
+      m_textStream << "}";
+      m_textStream << "{\\bkmkend ";
+      m_textStream << rtfFormatBmkStr(lineAnchor);
+      m_textStream << "}" << endl;
+    }
+
+    m_textStream << lineNumber << " ";
+
+  } else {
+    m_textStream << line << " ";
+  }
+
+  m_col = 0;
+}
 
 void RTFGenerator::startCodeLine(bool)
 {
+  m_doxyCodeLineOpen = true;
   m_col = 0;
 }
 
 void RTFGenerator::endCodeLine()
 {
+   if (m_doxyCodeLineOpen) {
      lineBreak();
+   }
+
+   m_doxyCodeLineOpen = false;
 }
 
 void RTFGenerator::startLabels()

@@ -179,10 +179,7 @@ class RTFGenerator : public OutputGenerator
    void writeAnchor(const QString &fileName, const QString &name) override;
    void startCodeFragment(const QString &style) override;
    void endCodeFragment(const QString &style) override;
-   void writeLineNumber(const QString &, const QString &, const QString &, int l) override {
-      m_textStream << QString("%1").formatArg(l, 5) << " ";
-   }
-
+   void writeLineNumber(const QString &, const QString &fileName, const QString &, int line) override;
    void startCodeLine(bool) override;
    void endCodeLine() override;
 
@@ -393,12 +390,14 @@ class RTFGenerator : public OutputGenerator
    bool m_prettyCode;
    bool m_bstartedBody;           // has startbody been called yet
    bool m_omitParagraph;          // should the next paragraph command be ignored
+   bool m_doxyCodeLineOpen;
 
    int  m_col;
    int  m_numCols;                // number of columns in a table
    int  m_listLevel;              // RTF does not really have a additive indent, manually set list level
 
    QString relPath;
+   QString m_sourceFileName;
 };
 
 #endif
