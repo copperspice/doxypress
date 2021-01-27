@@ -18,7 +18,6 @@
 #ifndef USER_TESTS_H
 #define USER_TESTS_H
 
-
 /// docs for test_Tabs
 class test_Tabs
 {

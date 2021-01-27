@@ -57,7 +57,7 @@ class Ginger : public CSObject
       enum Spices { mint, basil, Salt, Pepper =100, cloves };
       enum Brands { Chinese, Jamaican, Thai, Yellow };
 
-      // registration is only reguired if the enum is used in a proptery or a signal
+      // registration is only reguired if the enum is used in a property or a signal
       CS_REGISTER_ENUM( enum Shapes { square, triangle, circle, trapezoid, diamond=0x10 }; )
 
       // testing Qt
@@ -94,6 +94,9 @@ class Ginger : public CSObject
       CS_SIGNAL_1(Public, void titleChanged(QString title))
       CS_SIGNAL_2(titleChanged, title)
 
+      CS_SLOT_1(Public, void newTitle(QString))
+      CS_SLOT_2(newTitle)
+
       // (2) methods for favorite property
       Spices getFavorite() const {
          return m_favorite;
@@ -104,9 +107,6 @@ class Ginger : public CSObject
       }
 
       void grindSpices(Spices ... data);
-
-      CS_SLOT_1(Public, void newTitle(QString))
-      CS_SLOT_2(newTitle)
 
       CS_SIGNAL_1(Public, void ready())
       CS_SIGNAL_2(ready)
@@ -130,7 +130,7 @@ class Ginger : public CSObject
       QString m_title;        // property
       Spices m_favorite;      // property
 
-      bool isScriptTitle() const;
+      static bool isScriptTitle();
 
       CS_SLOT_1(Private, void somePrivateSlot(int temp) )
       CS_SLOT_2(somePrivateSlot)
@@ -143,9 +143,6 @@ class Ginger : public CSObject
       CS_SLOT_2(test_C)
 };
 
-Q_DECLARE_METATYPE(Ginger::Spices)
-Q_DECLARE_TYPEINFO(QString, Q_MOVABLE_TYPE)
-Q_DECLARE_SHARED(QString)
 Q_DECLARE_OPERATORS_FOR_FLAGS(QString::SectionFlags)
 
 class Lemongrass : public CSObject

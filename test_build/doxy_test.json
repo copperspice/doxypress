@@ -5,6 +5,7 @@
         "clang-flags": [
             ""
         ],
+        "clang-include-input-source": true,
         "clang-parsing": false,
         "clang-use-headers": false
     },
@@ -28,6 +29,7 @@
         "extract-local-methods": false,
         "extract-package": false,
         "extract-private": true,
+        "extract-private-virtual": false,
         "extract-static": false,
         "file-version-filter": "",
         "force-local-includes": false,
@@ -64,6 +66,7 @@
         "ns-alias": [
             ""
         ],
+        "python-docstring": false,
         "qt-auto-brief": true,
         "repeat-brief": true,
         "separate-member-pages": false,
@@ -239,6 +242,7 @@
         "warn-doc-error": true,
         "warn-format": "$file:$line: $text",
         "warn-logfile": "error_log.txt",
+        "warn-param-mismatch": false,
         "warn-undoc": true,
         "warn-undoc-param": false,
         "warnings": true
@@ -273,6 +277,8 @@
         "enum-values-per-line": 4,
         "external-links-in-window": false,
         "formula-fontsize": 8,
+        "formula-format": "",
+        "formula-macrofile": "",
         "formula-transparent": true,
         "generate-html": true,
         "generate-treeview": true,
@@ -380,6 +386,7 @@
     },
     "output-xml": {
         "generate-xml": true,
+        "xml-include-ns-members": false,
         "xml-output": "xml",
         "xml-program-listing": false
     },
@@ -410,10 +417,10 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.3.2"
+        "project-version": "1.4.1"
     },
     "source": {
-        "inline-source": false,
+        "inline-source": true,
         "ref-by-relation": false,
         "ref-link-source": true,
         "ref-relation": false,

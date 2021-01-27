@@ -17,9 +17,9 @@
 
 /*!
 \namespace QSsl
-\brief The QSsl namespace declares enums common to all SSL classes in %CsNetwork.
+\brief Declares enums common to all SSL classes.
 
-The QSsl namespace declares enums common to all SSL classes in %CsNetwork.
+This is a namespace which declares several enums that are common to all of the  SSL classes in the %CsNetwork library.
 
 */
 
@@ -37,6 +37,7 @@ Describes the two types of keys QSslKey supports.
       <td><tt>0</tt></td>
       <td>A private key</td>
    </tr>
+
    <tr><td ><tt>QSsl::PublicKey</tt></td>
       <td><tt>1</tt></td>
       <td>A public key</td>

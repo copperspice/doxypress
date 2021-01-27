@@ -41,6 +41,7 @@ Describes the two types of keys QSslKey supports.
       <td><tt>0</tt></td>
       <td>A private key</td>
    </tr>
+
    <tr><td ><tt>QSsl::PublicKey</tt></td>
       <td><tt>1</tt></td>
       <td>A public key</td>
@@ -52,7 +53,6 @@ End of text for %KeyType in QSsl_DupEnum
 */
 
 
-
 /*!
 \enum QSsl_DupEnum::KeyAlgorithm_NotADup
 
@@ -60,8 +60,16 @@ Describes the different key algorithms supported by QSslKey.
 
 <table class="valuelist">
    <tr><th >Constant</th><th >Value</th><th >Description</th></tr>
-   <tr><td ><tt>QSsl::Rsa</tt></td><td ><tt>0</tt></td><td >The RSA algorithm.</td></tr>
-   <tr><td ><tt>QSsl::Dsa</tt></td><td ><tt>1</tt></td><td >The DSA algorithm.</td></tr>
+
+   <tr><td><tt>QSsl::Rsa</tt></td>
+       <td><tt>0</tt></td>
+       <td>The RSA algorithm</td>
+   </tr>
+
+   <tr><td><tt>QSsl::Dsa</tt></td>
+       <td><tt>1</tt></td>
+       <td >The DSA algorithm</td>
+   </tr>
 </table>
 
 */
