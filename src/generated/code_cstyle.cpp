@@ -11414,7 +11414,7 @@ char *code_cstyle_YYtext;
  *
  * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
-
+ *
 *************************************************************************/
 
 #include <QDir>
@@ -11609,7 +11609,7 @@ static void pushCallContext()
 
 QSharedPointer<ClassDef> VariableContext::dummyContext()
 {
-   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>("", 0, 0, "dummyContext-code", CompoundType::Class);
+   static QSharedPointer<ClassDef> dummyContext = QMakeShared<ClassDef>(QString(), 0, 0, "dummyContext-code", CompoundType::Class);
    return dummyContext;
 }
 
@@ -11816,19 +11816,18 @@ static void startCodeLine()
          QString lineAnchor = QString("l%1").formatArg(g_yyLineNr, 5, 10, QChar('0'));
 
          if (g_currentMemberDef) {
-            g_code->writeLineNumber(g_currentMemberDef->getReference(),
-                                    g_currentMemberDef->getOutputFileBase(),
-                                    g_currentMemberDef->anchor(), g_yyLineNr);
+            g_code->writeLineNumber(g_currentMemberDef->getReference(), g_currentMemberDef->getOutputFileBase(),
+                  g_currentMemberDef->anchor(), g_yyLineNr);
 
             setCurrentDoc(lineAnchor);
 
          } else if (d->isLinkableInProject()) {
-            g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(),0, g_yyLineNr);
+            g_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), QString(), g_yyLineNr);
             setCurrentDoc(lineAnchor);
          }
 
       } else {
-         g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
+         g_code->writeLineNumber(QString(), QString(), QString(), g_yyLineNr);
       }
   }
 
@@ -14207,7 +14206,7 @@ YY_RULE_SETUP
             DBG_CTX((stderr, "Adding new class %s\n", csPrintable(g_curClassName)));
 
             QSharedPointer<ClassDef> ncd = QMakeShared<ClassDef>("<code>", 1, 1, g_curClassName, CompoundType::Class,
-                  nullptr, "", false);
+                  QString(), QString(), false);
 
             g_codeClassSDict.insert(g_curClassName, ncd);
 

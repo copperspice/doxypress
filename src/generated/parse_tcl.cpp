@@ -1317,7 +1317,7 @@ static void tcl_codify(const QString &s, const QString &str)
          tcl.code->startCodeLine(tcl.code_linenumbers);
 
          if (tcl.code_linenumbers) {
-            tcl.code->writeLineNumber(0, 0, 0, tcl.code_line);
+            tcl.code->writeLineNumber(QString(), QString(), QString(), tcl.code_line);
          }
 
          if (! tcl.code_font.isEmpty()) {
@@ -5415,7 +5415,7 @@ void Tcl_Parser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeName,
    tcl.code->startCodeLine(tcl.code_linenumbers);
 
    if (tcl.code_linenumbers) {
-      tcl.code->writeLineNumber(0, 0, 0, tcl.code_line);
+      tcl.code->writeLineNumber(QString(), QString(), QString(), tcl.code_line);
    }
 
    tcl.file_name   = "";

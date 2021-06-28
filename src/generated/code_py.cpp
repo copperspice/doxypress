@@ -1601,18 +1601,18 @@ static void startCodeLine()
          lineAnchor = QString("l%1").formatArg(s_yyLineNr, 5, 10, QChar('0'));
 
          if (s_currentMemberDef) {
-            s_code->writeLineNumber(s_currentMemberDef->getReference(),
-                  s_currentMemberDef->getOutputFileBase(), s_currentMemberDef->anchor(), s_yyLineNr);
+            s_code->writeLineNumber(s_currentMemberDef->getReference(), s_currentMemberDef->getOutputFileBase(),
+                  s_currentMemberDef->anchor(), s_yyLineNr);
 
             setCurrentDoc(lineAnchor);
 
          } else {
-            s_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), 0, s_yyLineNr);
+            s_code->writeLineNumber(d->getReference(), d->getOutputFileBase(), QString(), s_yyLineNr);
             setCurrentDoc(lineAnchor);
          }
 
       } else {
-         s_code->writeLineNumber(0, 0, 0, s_yyLineNr);
+         s_code->writeLineNumber(QString(), QString(), QString(), s_yyLineNr);
       }
    }
 
