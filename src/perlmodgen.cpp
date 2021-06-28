@@ -1632,7 +1632,7 @@ void PerlModDocVisitor::visitPost(DocXRefItem *x)
 void PerlModDocVisitor::visitPre(DocInternalRef *ref)
 {
    openItem("ref");
-   addLink(0, ref->file(), ref->anchor());
+   addLink(QString(), ref->file(), ref->anchor());
    openSubBlock("content");
 }
 

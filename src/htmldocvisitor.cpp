@@ -2431,7 +2431,7 @@ void HtmlDocVisitor::visitPre(DocInternalRef *ref)
       return;
    }
 
-   startLink(0, ref->file(), ref->relPath(), ref->anchor());
+   startLink(QString(), ref->file(), ref->relPath(), ref->anchor());
 }
 
 void HtmlDocVisitor::visitPost(DocInternalRef *)

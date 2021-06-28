@@ -363,7 +363,7 @@ class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
    ~ClassSDict() {}
 
    void writeDeclaration(OutputList &ol, const enum CompoundType *filter = 0,
-                         const QString &header = 0, bool localNames = false);
+            const QString &header = QString(), bool localNames = false);
 
    void writeDocumentation(OutputList &ol, QSharedPointer<Definition> container = QSharedPointer<Definition>());
    bool declVisible(const enum CompoundType *filter = 0) const;

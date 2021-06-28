@@ -762,7 +762,7 @@ void GroupDef::writeBriefDescription(OutputList &ol)
 
          if (repeatBrief || ! documentation().isEmpty() ) {
             ol.disableAllBut(OutputGenerator::Html);
-            ol.startTextLink(0, "details");
+            ol.startTextLink(QString(), "details");
             ol.parseText(theTranslator->trMore());
             ol.endTextLink();
          }
@@ -831,7 +831,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
 
             ol.endMemberDescription();
          }
-         ol.endMemberDeclaration(0, 0);
+         ol.endMemberDeclaration(QString(), QString());
       }
 
       ol.endMemberList();
@@ -891,7 +891,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
 
                ol.endMemberDescription();
             }
-            ol.endMemberDeclaration(0, 0);
+            ol.endMemberDeclaration(QString(), QString());
          }
       }
       ol.endMemberList();
@@ -930,7 +930,7 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
 
             ol.endMemberDescription();
          }
-         ol.endMemberDeclaration(0, 0);
+         ol.endMemberDeclaration(QString(), QString());
       }
 
       ol.endMemberList();
@@ -1498,7 +1498,7 @@ void GroupDef::addListReferences()
    }
 
    addRefItem(xrefItems, getOutputFileBase(), title, getOutputFileBase(),
-              name(), 0, QSharedPointer<Definition>() );
+            name(), QString(), QSharedPointer<Definition>() );
 
    for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);
@@ -1568,7 +1568,7 @@ void GroupDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const 
 
    if (ml) {
       ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(),
-                            QSharedPointer<FileDef>(), self, title, 0);
+            QSharedPointer<FileDef>(), self, title, QString());
    }
 }
 

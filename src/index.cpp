@@ -723,16 +723,16 @@ static void writeBaseClassTree(OutputList &ol, const SortedList<BaseClassDef *> 
             }
 
          } else {
-            ol.startIndexItem(0, 0);
+            ol.startIndexItem(QString(), QString());
             ol.parseText(cd->name());
-            ol.endIndexItem(0, 0);
+            ol.endIndexItem(QString(), QString());
 
             if (addToIndex) {
-               Doxy_Globals::indexList.addContentsItem(hasChildren, cd->displayName(), "", "", "", false, cd);
+               Doxy_Globals::indexList.addContentsItem(hasChildren, cd->displayName(), QString(), QString(), QString(), false, cd);
             }
 
             if (ftv) {
-               ftv->addContentsItem(hasChildren, cd->displayName(), "", "", "", false, cd);
+               ftv->addContentsItem(hasChildren, cd->displayName(), QString(), QString(), QString(), false, cd);
             }
          }
 
@@ -1043,16 +1043,16 @@ static void writeClassTreeForList(OutputList &ol, ClassSDict *cl, bool &started,
 
             } else {
                // no link, use the name instead of the displayName, this will show the namespace::class
-               ol.startIndexItem(0, 0);
+               ol.startIndexItem(QString(), QString());
                ol.parseText(cd->name());
-               ol.endIndexItem(0, 0);
+               ol.endIndexItem(QString(), QString());
 
                if (addToIndex) {
-                  Doxy_Globals::indexList.addContentsItem(hasChildren, cd->name(), "", "", "", false, cd);
+                  Doxy_Globals::indexList.addContentsItem(hasChildren, cd->name(), QString(), QString(), QString(), false, cd);
                }
 
                if (ftv) {
-                  ftv->addContentsItem(hasChildren, cd->name(), "", "", "", false, cd);
+                  ftv->addContentsItem(hasChildren, cd->name(), QString(), QString(), QString(), false, cd);
                }
             }
 
@@ -1192,15 +1192,15 @@ static void writeGraphicalClassHierarchy(OutputList &ol)
 
    QString title = lne ? lne->title() : theTranslator->trClassHierarchy();
    startFile(ol, "inherits", QString(), title, HLI_Hierarchy, false, "hierarchy");
-   startTitle(ol, 0);
+   startTitle(ol, QString());
 
    ol.parseText(title);
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
 
    ol.startContents();
    ol.startTextBlock();
    ol.startParagraph();
-   ol.startTextLink("hierarchy", 0);
+   ol.startTextLink("hierarchy", QString());
    ol.parseText(theTranslator->trGotoTextualHierarchy());
    ol.endTextLink();
    ol.endParagraph();
@@ -1249,7 +1249,7 @@ static void writeSingleFileIndex(OutputList &ol, QSharedPointer<FileDef> fd)
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
          ol.docify(" ");
-         ol.startTextLink(fd->includeName(), 0);
+         ol.startTextLink(fd->includeName(), QString());
          ol.docify("[");
          ol.parseText(theTranslator->trCode());
          ol.docify("]");
@@ -1306,7 +1306,7 @@ static void writeFileIndex(OutputList &ol)
    ol.startTextBlock();
 
    if (addToIndex) {
-      Doxy_Globals::indexList.addContentsItem(true, title, "", "files", "", true);
+      Doxy_Globals::indexList.addContentsItem(true, title, QString(), "files", QString(), true);
       Doxy_Globals::indexList.incContentsDepth();
    }
 
@@ -1434,7 +1434,7 @@ static void writeSingleFileSourceIndex(OutputList &ol, QSharedPointer<FileDef> f
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
          ol.docify(" ");
-         ol.startTextLink(fd->includeName(), 0);
+         ol.startTextLink(fd->includeName(), QString());
          ol.docify("[");
          ol.parseText(theTranslator->trCode());
          ol.docify("]");
@@ -1478,9 +1478,9 @@ static void writeFileSourceIndex(OutputList &ol)
 
    startFile(ol, "filesource", QString(), title, HLI_FileSource);
 
-   startTitle(ol, 0);
+   startTitle(ol, QString());
    ol.parseText(title);
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
 
    ol.startContents();
    ol.startTextBlock();
@@ -1678,9 +1678,9 @@ static void writeNamespaceIndex(OutputList &ol)
 
    startFile(ol, "namespaces", QString(), title, HLI_Namespaces);
 
-   startTitle(ol, 0);
+   startTitle(ol, QString());
    ol.parseText(title);
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
 
    ol.startContents();
    ol.startTextBlock();
@@ -1730,7 +1730,7 @@ static void writeNamespaceIndex(OutputList &ol)
 
    {
       if (addToIndex) {
-         Doxy_Globals::indexList.addContentsItem(true, title, "", "namespaces", "", true);
+         Doxy_Globals::indexList.addContentsItem(true, title, QString(), "namespaces", QString(), true);
          Doxy_Globals::indexList.incContentsDepth();
       }
 
@@ -2281,9 +2281,9 @@ static void writeConceptIndex(OutputList &ol)
 
    startFile(ol, "concepts", QString(), title, HLI_Concepts);
 
-   startTitle(ol, 0);
+   startTitle(ol, QString());
    ol.parseText(title);
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
 
    ol.startContents();
 
@@ -3297,14 +3297,14 @@ static void writeExampleIndex(OutputList &ol)
 
    startFile(ol, "examples", QString(), title, HLI_Examples);
 
-   startTitle(ol, 0);
+   startTitle(ol, QString());
    ol.parseText(title);
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
 
    ol.startContents();
 
    if (addToIndex) {
-      Doxy_Globals::indexList.addContentsItem(true, title, "", "examples", "", true);
+      Doxy_Globals::indexList.addContentsItem(true, title, QString(), "examples", QString(), true);
       Doxy_Globals::indexList.incContentsDepth();
    }
 
@@ -3442,9 +3442,9 @@ static void writePageIndex(OutputList &ol)
    QString title = lne ? lne->title() : theTranslator->trRelatedPages();
    startFile(ol, "pages", QString(), title, HLI_Pages);
 
-   startTitle(ol, 0);
+   startTitle(ol, QString());
    ol.parseText(title);
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
 
    ol.startContents();
    ol.startTextBlock();
@@ -3506,10 +3506,10 @@ void writeGraphInfo(OutputList &ol)
 
    startFile(ol, "graph_legend", QString(), theTranslator->trLegendTitle());
 
-   startTitle(ol, 0);
+   startTitle(ol, QString());
    ol.parseText(theTranslator->trLegendTitle());
 
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
    ol.startContents();
 
    //
@@ -3828,10 +3828,10 @@ static void writeUserGroupStubPage(OutputList &ol, LayoutNavEntry *lne)
       ol.disableAllBut(OutputGenerator::Html);
 
       startFile(ol, lne->baseFile(), QString(), lne->title(), HLI_UserGroup);
-      startTitle(ol, 0);
+      startTitle(ol, QString());
 
       ol.parseText(lne->title());
-      endTitle(ol, 0, 0);
+      endTitle(ol, QString(), QString());
 
       ol.startContents();
 
@@ -3949,7 +3949,7 @@ static void writeIndex(OutputList &ol)
 
       if (Doxy_Globals::mainPage->title().toLower() != "notitle") {
          ol.startHeaderSection();
-         ol.startTitleHead(0);
+         ol.startTitleHead(QString());
 
          ol.generateDoc(Doxy_Globals::mainPage->docFile(), Doxy_Globals::mainPage->getStartBodyLine(), Doxy_Globals::mainPage,
                         QSharedPointer<MemberDef>(), Doxy_Globals::mainPage->title(), true, false, QString(), true, false);
@@ -3960,7 +3960,7 @@ static void writeIndex(OutputList &ol)
    } else if (! projectName.isEmpty()) {
 
       ol.startHeaderSection();
-      ol.startTitleHead(0);
+      ol.startTitleHead(QString());
       ol.parseText(projPrefix + theTranslator->trDocumentation());
 
       headerWritten = true;

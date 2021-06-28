@@ -187,7 +187,7 @@ void DirDef::writeBriefDescription(OutputList &ol)
 
          if (repeatBrief || ! documentation().isEmpty()) {
             ol.disableAllBut(OutputGenerator::Html);
-            ol.startTextLink(0, "details");
+            ol.startTextLink(QString(), "details");
             ol.parseText(theTranslator->trMore());
             ol.endTextLink();
          }
@@ -269,7 +269,7 @@ void DirDef::writeSubDirList(OutputList &ol)
                ol.endMemberDescription();
             }
 
-            ol.endMemberDeclaration(0, 0);
+            ol.endMemberDeclaration(QString(), QString());
          }
       }
 
@@ -316,7 +316,7 @@ void DirDef::writeFileList(OutputList &ol)
                ol.pushGeneratorState();
                ol.disableAllBut(OutputGenerator::Html);
                ol.docify(" ");
-               ol.startTextLink(fd->includeName(), 0);
+               ol.startTextLink(fd->includeName(), QString());
                ol.docify("[");
                ol.parseText(theTranslator->trCode());
                ol.docify("]");
@@ -335,7 +335,7 @@ void DirDef::writeFileList(OutputList &ol)
                ol.endMemberDescription();
             }
 
-            ol.endMemberDeclaration(0, 0);
+            ol.endMemberDeclaration(QString(), QString());
          }
       }
 

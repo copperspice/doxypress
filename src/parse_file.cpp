@@ -42,7 +42,7 @@ void FileParser::parseCode(CodeGenerator &codeOutIntf, const QString &, const QS
       codeOutIntf.startCodeLine(fd && showLineNumbers);
 
       if (fd  && showLineNumbers) {
-         codeOutIntf.writeLineNumber(0, 0, 0, lineNr);
+         codeOutIntf.writeLineNumber(QString(), QString(), QString(), lineNr);
       }
 
       if (! lineStr.isEmpty()) {

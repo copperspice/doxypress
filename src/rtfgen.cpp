@@ -1932,7 +1932,7 @@ void RTFGenerator::endMemberList()
 
 void RTFGenerator::startEnumTable()
 {
-   startSimpleSect(EnumValues, 0, 0, theTranslator->trEnumerationValues());
+   startSimpleSect(EnumValues, QString(), QString(), theTranslator->trEnumerationValues());
    startDescForItem();
 }
 

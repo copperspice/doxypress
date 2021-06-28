@@ -189,9 +189,9 @@ static const QStringList umlArrowStyleMap = {
    "onormal",       // Protected
    "onormal",       // Private
    "odiamond",      // "use" relation
-   0,               // Undocumented
-   0,               // template relation
-   0                // type constraint
+   QString(),       // Undocumented
+   QString(),       // template relation
+   QString()        // type constraint
 };
 
 static const QStringList normalArrowStyleMap = {
@@ -199,9 +199,9 @@ static const QStringList normalArrowStyleMap = {
    "empty",         // Protected
    "empty",         // Private
    "open",          // "use" relation
-   0,               // Undocumented
-   0,               // template relation
-   0                // type constraint
+   QString(),       // Undocumented
+   QString(),       // template relation
+   QString()        // type constraint
 };
 
 static QString getDotFontName()
@@ -2928,7 +2928,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
             label += "\n...";
          }
 
-         addClass(ccd->classDef, n, EdgeInfo::Orange2, label, 0, 0, true, distance);
+         addClass(ccd->classDef, n, EdgeInfo::Orange2, label, QString(), QString(), true, distance);
          ++count;
       }
 
@@ -2947,7 +2947,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
             for (auto templInstance : templMaster->getTemplateInstances()) {
 
                if (templInstance == cd) {
-                  addClass(templMaster, n, EdgeInfo::Orange, iter.key(), 0, 0, true, distance);
+                  addClass(templMaster, n, EdgeInfo::Orange, iter.key(),QString(), QString(), true, distance);
                }
 
                ++iter;
@@ -2961,7 +2961,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
          auto iter = templInstances.begin();
 
          for (auto templInstance : templInstances) {
-            addClass(templInstance, n, EdgeInfo::Orange, iter.key(), 0, 0, false, distance);
+            addClass(templInstance, n, EdgeInfo::Orange, iter.key(), QString(), QString(), false, distance);
 
             ++iter;
          }
@@ -3369,7 +3369,7 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
 
             if (bn) {
                // file is already a node in the graph
-               n->addChild(bn, 0, 0, 0);
+               n->addChild(bn, 0, 0, QString());
                bn->addParent(n);
                bn->setDistance(distance);
 
@@ -3383,7 +3383,7 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
                }
                bn = new DotNode(m_curNodeNumber++, item.includeName, tooltip, tmp_url, false, QSharedPointer<ClassDef>());
 
-               n->addChild(bn, 0, 0, 0);
+               n->addChild(bn, 0, 0, QString());
                bn->addParent(n);
                m_usedNodes->insert(in, bn);
                bn->setDistance(distance);
@@ -3678,7 +3678,7 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
 
          if (bn) {
             // file is already a node in the graph
-            n->addChild(bn, 0, 0, 0);
+            n->addChild(bn, 0, 0, QString());
             bn->addParent(n);
             bn->setDistance(distance);
 
@@ -3694,7 +3694,7 @@ void DotCallGraph::buildGraph(DotNode *n, QSharedPointer<MemberDef> md, int dist
             QString tooltip = rmd->briefDescriptionAsTooltip();
 
             bn = new DotNode(m_curNodeNumber++, linkToText(rmd->getLanguage(), name, false), tooltip, uniqueId, false);
-            n->addChild(bn, 0, 0, 0);
+            n->addChild(bn, 0, 0, QString());
             bn->addParent(n);
             bn->setDistance(distance);
             m_usedNodes->insert(uniqueId, bn);

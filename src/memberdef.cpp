@@ -110,7 +110,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
       ol.endMemberDocName();
 
       ol.startParameterList(false);
-      ol.startParameterType(true, 0);
+      ol.startParameterType(true, QString());
       ol.endParameterType();
 
       ol.startParameterName(false);
@@ -493,7 +493,7 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
       for (int comma = exception.indexOf(',', index); comma != -1; ) {
          ++comma; // include comma
          linkifyText(TextFragment(ol), cd, md->getBodyDef(), md, exception.mid(index, comma - index));
-         ol.exceptionEntry(0, false);
+         ol.exceptionEntry(QString(), false);
          index = comma;
          comma = exception.indexOf(',', index);
       }
@@ -502,7 +502,7 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
       if (close != -1) {
          QString tmpType = removeRedundantWhiteSpace(exception.mid(index, close - index));
          linkifyText(TextFragment(ol), cd, md->getBodyDef(), md, tmpType);
-         ol.exceptionEntry(0, true);
+         ol.exceptionEntry(QString(), true);
 
       } else {
          warn(md->getDefFileName(), md->getDefLine(), "missing ) in exception list on member %s", csPrintable(md->name()));
@@ -1849,7 +1849,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
             } else {
                // local link
-               ol.startTextLink(nullptr, anchor());
+               ol.startTextLink(QString(), anchor());
             }
 
             ol.parseText(theTranslator->trMore());
@@ -2325,7 +2325,7 @@ void MemberDef::writeReimplements(OutputList &ol)
                }
 
             } else {
-               ol.writeObjectLink(bcd->getReference(), bcd->getOutputFileBase(), 0, bcd->displayName());
+               ol.writeObjectLink(bcd->getReference(), bcd->getOutputFileBase(), QString(), bcd->displayName());
 
                if ( bcd->isLinkableInProject() ) {
                   writePageRef(ol, bcd->getOutputFileBase(), bcd->anchor());
@@ -2486,7 +2486,7 @@ void MemberDef::writeExamples(OutputList &ol)
 {
    // write the list of examples that use this member
    if (hasExamples()) {
-      ol.startSimpleSect(DocGenerator::Examples, 0, 0, theTranslator->trExamples() + ": ");
+      ol.startSimpleSect(DocGenerator::Examples, QString(), QString(), theTranslator->trExamples() + ": ");
       ol.startDescForItem();
       writeExample(ol, m_impl->exampleSDict);
       ol.endDescForItem();
@@ -3192,7 +3192,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
          m_impl->initializer = m_impl->initializer.mid(1).trimmed();
       }
 
-      interface->parseCode(ol, scopeName, m_impl->initializer, lang, false, 0,
+      interface->parseCode(ol, scopeName, m_impl->initializer, lang, false, QString(),
                getFileDef(), -1, -1, true, self, false, self);
       ol.endCodeFragment("DoxyCode");
    }

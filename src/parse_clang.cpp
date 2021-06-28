@@ -409,7 +409,7 @@ static void writeLineNumber(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint 
 
    } else {
       // no link
-      ol.writeLineNumber("", "", "", line);
+      ol.writeLineNumber(QString(), QString(), QString(), line);
    }
 
    // set search page target
@@ -1499,7 +1499,7 @@ void ClangParser::linkInclude(CodeGenerator &ol, QSharedPointer<FileDef> fileDef
    }
 
    if (ifd) {
-      ol.writeCodeLink(ifd->getReference(), ifd->getOutputFileBase(), 0, text, ifd->briefDescriptionAsTooltip());
+      ol.writeCodeLink(ifd->getReference(), ifd->getOutputFileBase(), QString(), text, ifd->briefDescriptionAsTooltip());
 
    } else {
       codifyLines(ol, ifd, text, line, column, "preprocessor");

@@ -109,7 +109,7 @@ void MemberGroup::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef
 void MemberGroup::writeDocumentation(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container,
                   bool showEnumValues, bool showInline)
 {
-   memberList->writeDocumentation(ol, scopeName, container, 0, showEnumValues, showInline);
+   memberList->writeDocumentation(ol, scopeName, container, QString(), showEnumValues, showInline);
 }
 
 void MemberGroup::writeDocumentationPage(OutputList &ol, const QString &scopeName, QSharedPointer<Definition> container)

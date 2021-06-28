@@ -1596,7 +1596,7 @@ void LatexDocVisitor::visitPre(DocRef *ref)
    // ref->anchor() for LaTeX/RTF
 
    if (ref->isSubPage()) {
-      startLink(ref->ref(), 0, ref->anchor());
+      startLink(ref->ref(), QString(), ref->anchor());
 
    } else {
 
@@ -1617,7 +1617,7 @@ void LatexDocVisitor::visitPost(DocRef *ref)
    }
 
    if (ref->isSubPage()) {
-      endLink(ref->ref(), 0, ref->anchor());
+      endLink(ref->ref(), QString(), ref->anchor());
 
    } else {
       if (! ref->file().isEmpty()) {
@@ -1924,7 +1924,7 @@ void LatexDocVisitor::visitPre(DocInternalRef *ref)
       return;
    }
 
-   startLink(0, ref->file(), ref->anchor());
+   startLink(QString(), ref->file(), ref->anchor());
 }
 
 void LatexDocVisitor::visitPost(DocInternalRef *ref)
@@ -1932,7 +1932,7 @@ void LatexDocVisitor::visitPost(DocInternalRef *ref)
    if (m_hide) {
       return;
    }
-   endLink(0, ref->file(), ref->anchor());
+   endLink(QString(), ref->file(), ref->anchor());
 }
 
 void LatexDocVisitor::visitPre(DocCopy *)

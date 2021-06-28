@@ -515,8 +515,8 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
    QSharedPointer<XMLCodeGenerator> xmlGen = QMakeShared<XMLCodeGenerator>(t);
    xmlGen->startCodeFragment("DoxyCode");
 
-   pIntf->parseCode(*xmlGen, 0, fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
-                    langExt, false, 0, fd, -1, -1, false, QSharedPointer<MemberDef>(), true );
+   pIntf->parseCode(*xmlGen, QString(), fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
+                    langExt, false, QString(), fd, -1, -1, false, QSharedPointer<MemberDef>(), true );
 
    xmlGen->endCodeFragment("DoxyCode");
    xmlGen->finish();

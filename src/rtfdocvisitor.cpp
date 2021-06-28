@@ -1557,7 +1557,7 @@ void RTFDocVisitor::visitPre(DocRef *ref)
    // ref->anchor() for LaTeX/RTF
 
    if (ref->isSubPage()) {
-      startLink(ref->ref(), 0, ref->anchor());
+      startLink(ref->ref(), QString(), ref->anchor());
    } else {
       if (!ref->file().isEmpty()) {
          startLink(ref->ref(), ref->file(), ref->anchor());
@@ -1958,8 +1958,9 @@ void RTFDocVisitor::visitPre(DocInternalRef *ref)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocInternalRef)}\n");
-   startLink("", ref->file(), ref->anchor());
+   startLink(QString(), ref->file(), ref->anchor());
 }
 
 void RTFDocVisitor::visitPost(DocInternalRef *)

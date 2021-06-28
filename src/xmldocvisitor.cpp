@@ -1340,7 +1340,8 @@ void XmlDocVisitor::visitPre(DocInternalRef *ref)
    if (m_hide) {
       return;
    }
-   startLink(0, ref->file(), ref->anchor());
+
+   startLink(QString(), ref->file(), ref->anchor());
 }
 
 void XmlDocVisitor::visitPost(DocInternalRef *)

@@ -415,7 +415,7 @@ class MemberDef : public Definition
    void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
                   bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(),
-                  const QString &inheritId = 0);
+                  const QString &inheritId = QString());
 
    void writeDocumentation(QSharedPointer<MemberList> ml, int memCount, int memTotal, OutputList &ol, const QString &scopeName,
                   QSharedPointer<Definition> container,

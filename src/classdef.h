@@ -405,7 +405,7 @@ class ClassDef : public Definition
                   bool invert, bool showAlways, QSet<QSharedPointer<ClassDef>> *visitedClasses);
 
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
-                  const QString &subTitle = 0, bool showInline = false,
+                  const QString &subTitle = QString(), bool showInline = false,
                   QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1,
                   bool invert = false, bool showAlways = false, QSet<QSharedPointer<ClassDef>> *visitedClasses = 0);
 

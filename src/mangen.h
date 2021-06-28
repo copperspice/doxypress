@@ -310,7 +310,7 @@ class ManGenerator : public OutputGenerator
    }
 
    void startEnumTable() override {
-      startSimpleSect(EnumValues, 0, 0, theTranslator->trEnumerationValues());
+      startSimpleSect(EnumValues, QString(), QString(), theTranslator->trEnumerationValues());
       startDescForItem();
    }
 
@@ -320,7 +320,7 @@ class ManGenerator : public OutputGenerator
    }
 
    void startDescTable(const QString &title) override {
-      startSimpleSect(EnumValues, 0, 0, title);
+      startSimpleSect(EnumValues, QString(), QString(), title);
       startDescForItem();
    }
 

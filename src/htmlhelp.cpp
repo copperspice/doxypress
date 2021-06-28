@@ -642,7 +642,7 @@ void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<M
          level1 = word;
       }
 
-      index->addItem(level1, 0, context->getOutputFileBase(), sectionAnchor, true, false);
+      index->addItem(level1, QString(), context->getOutputFileBase(), sectionAnchor, true, false);
    }
 }
 

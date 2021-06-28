@@ -318,7 +318,7 @@ class LatexGenerator : public OutputGenerator
    void startDescItem() override;
    void endDescItem() override;
 
-   void lineBreak(const QString &style = 0) override;
+   void lineBreak(const QString &style = QString()) override;
 
    void startMemberDoc(const QString &clName, const QString &memName, const QString &anchor, const QString &title,
                   int memCount, int memTotal, bool showInline) override;

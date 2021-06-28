@@ -174,7 +174,7 @@ void LatexCodeGenerator::writeLineNumber(const QString &ref, const QString &file
             m_t << "\\Hypertarget{" << stripPath(lineAnchor) << "}";
          }
 
-         writeCodeLink(ref, fileName, anchor, lineNumber, 0);
+         writeCodeLink(ref, fileName, anchor, lineNumber, QString());
 
       } else {
          codify(lineNumber);

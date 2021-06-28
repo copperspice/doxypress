@@ -338,7 +338,7 @@ void FileDef::writeBriefDescription(OutputList &ol)
    if (hasBriefDescription()) {
 
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                                             briefDescription(), true, false, "", true, false);
+             briefDescription(), true, false, QString(), true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
@@ -357,7 +357,7 @@ void FileDef::writeBriefDescription(OutputList &ol)
 
          if (repeatBrief || ! documentation().isEmpty()) {
             ol.disableAllBut(OutputGenerator::Html);
-            ol.startTextLink(0, "details");
+            ol.startTextLink(QString(), "details");
             ol.parseText(theTranslator->trMore());
             ol.endTextLink();
          }
@@ -504,7 +504,7 @@ void FileDef::writeSourceLink(OutputList &ol)
    if (generateSourceFile()) {
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
-      ol.startTextLink(includeName(), 0);
+      ol.startTextLink(includeName(), QString());
 
       ol.parseText(theTranslator->trGotoSourceCode());
 
@@ -950,7 +950,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
 
       startTitle(ol, getSourceFileBase());
       ol.parseText(title);
-      endTitle(ol, getSourceFileBase(), 0);
+      endTitle(ol, getSourceFileBase(), QString());
    }
 
    ol.startContents();
@@ -970,7 +970,7 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
          ol.disable(OutputGenerator::RTF);
       }
 
-      ol.startTextLink(getOutputFileBase(), 0);
+      ol.startTextLink(getOutputFileBase(), QString());
       ol.parseText(theTranslator->trGotoDocumentation());
       ol.endTextLink();
 
@@ -1009,11 +1009,11 @@ void FileDef::writeSource(OutputList &ol, bool sameTu, QStringList &includedFile
 
       if (needs2PassParsing) {
          // parse code for cross-references only (see bug707641)
-         pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), true, true), getLanguage(), false, 0, self);
+         pIntf->parseCode(devNullIntf, QString(), fileToString(getFilePath(), true, true), getLanguage(), false, QString(), self);
       }
 
-      pIntf->parseCode(ol, 0, fileToString(getFilePath(), filterSourceFiles, true),
-                       srcLang, false, 0, self, -1, -1, false,
+      pIntf->parseCode(ol, QString(), fileToString(getFilePath(), filterSourceFiles, true),
+                       srcLang, false, QString(), self, -1, -1, false,
                        QSharedPointer<MemberDef>(), true, QSharedPointer<Definition>(), ! needs2PassParsing);
 
       ol.endCodeFragment("DoxyCode");
@@ -1050,7 +1050,7 @@ void FileDef::parseSource(bool sameTu, QStringList &includedFiles)
 
       ParserInterface *pIntf = Doxy_Globals::parserManager.getParser(getDefFileExtension());
       pIntf->resetCodeParserState();
-      pIntf->parseCode(devNullIntf, 0, fileToString(getFilePath(), filterSourceFiles, true), srcLang, false, 0, self);
+      pIntf->parseCode(devNullIntf, QString(), fileToString(getFilePath(), filterSourceFiles, true), srcLang, false, QString(), self);
    }
 }
 
@@ -1681,7 +1681,7 @@ void FileDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, const Q
 
    if (ml) {
       ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(), self,
-                           QSharedPointer<GroupDef>(), title, 0);
+            QSharedPointer<GroupDef>(), title, QString());
    }
 }
 

@@ -423,7 +423,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
 
                   bool detailsLinkable = md->isDetailedSectionLinkable();
                   if (! detailsLinkable) {
-                     ol.startDoxyAnchor(md->getOutputFileBase(), 0, md->anchor(), md->name(), QString());
+                     ol.startDoxyAnchor(md->getOutputFileBase(), QString(), md->anchor(), md->name(), QString());
                   }
 
                   ol.writeString("enum ");

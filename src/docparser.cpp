@@ -1255,7 +1255,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       } else if ( ! s_context.isEmpty() )  {
          // tried once with s_context now try again with "" looking for a global scope
 
-         if (resolveRef("", tName, s_inSeeBlock, &compound, &member, true, QSharedPointer<FileDef>(), true))  {
+         if (resolveRef(QString(), tName, s_inSeeBlock, &compound, &member, true, QSharedPointer<FileDef>(), true))  {
             partA = true;
          }
       }
@@ -1298,7 +1298,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 
          // undocumented file that has source code we can link to
          children.append(new DocLinkedWord(parent, g_token->name, compound->getReference(), compound->getSourceFileBase(),
-                  "", compound->briefDescriptionAsTooltip() ) );
+                  QString(), compound->briefDescriptionAsTooltip() ) );
 
       } else {
          // not linkable

@@ -1016,12 +1016,12 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
 
             ol.startMemberDescription(nd->getOutputFileBase());
             ol.generateDoc(nd->briefFile(), nd->briefLine(), nd, QSharedPointer<MemberDef>(),
-                  nd->briefDescription(), false, false, "", true);
+                  nd->briefDescription(), false, false, QString(), true);
 
             ol.endMemberDescription();
          }
 
-         ol.endMemberDeclaration(0, 0);
+         ol.endMemberDeclaration(QString(), QString());
       }
    }
 
@@ -1091,7 +1091,7 @@ void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, co
    QSharedPointer<MemberList> ml     = getMemberList(lt);
 
    if (ml) {
-      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>(), title, 0);
+      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>(), title, QString());
    }
 }
 

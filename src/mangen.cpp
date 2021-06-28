@@ -713,15 +713,15 @@ void ManGenerator::startSection(const QString &, const QString &, SectionInfo::S
             break;
 
          case SectionInfo::Subsection:
-            startMemberHeader(0, -1);
+            startMemberHeader(QString(), -1);
             break;
 
          case SectionInfo::Subsubsection:
-            startMemberHeader(0, -1);
+            startMemberHeader(QString(), -1);
             break;
 
          case SectionInfo::Paragraph:
-            startMemberHeader(0, -1);
+            startMemberHeader(QString(), -1);
             break;
 
          default:

@@ -156,7 +156,7 @@ void ClassDef::insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifi
    }
 
    SortedList<BaseClassDef *> *temp = m_inheritedBy;
-   temp->inSort(new BaseClassDef(cd, 0, p, s, t));
+   temp->inSort(new BaseClassDef(cd, QString(), p, s, t));
 
    m_isSimple = false;
 }
@@ -791,7 +791,7 @@ void ClassDef::writeDetailedDocumentationBody(OutputList &ol)
 
    // write examples
    if (hasExamples()) {
-      ol.startSimpleSect(DocGenerator::Examples, 0, 0, theTranslator->trExamples() + ": ");
+      ol.startSimpleSect(DocGenerator::Examples, QString(), QString(), theTranslator->trExamples() + ": ");
       ol.startDescForItem();
 
       writeExample(ol, m_exampleSDict);
@@ -1229,7 +1229,7 @@ void ClassDef::writeAllMembersLink(OutputList &ol)
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
       ol.startParagraph();
-      ol.startTextLink(getMemberListFileName(), 0);
+      ol.startTextLink(getMemberListFileName(), QString());
       ol.parseText(theTranslator->trListOfAllMembers());
       ol.endTextLink();
       ol.endParagraph();
@@ -1480,8 +1480,8 @@ void ClassDef::writeInlineDocumentation(OutputList &ol)
    ol.disableAllBut(OutputGenerator::Html);
    {
       // only HTML only
-      ol.writeAnchor("", anchor());
-      ol.startMemberDoc(0, 0, anchor(), name(), 1, 1, false);
+      ol.writeAnchor(QString(), anchor());
+      ol.startMemberDoc(QString(), QString(), anchor(), name(), 1, 1, false);
       ol.startMemberDocName(false);
       ol.parseText(s);
       ol.endMemberDocName();
@@ -1723,7 +1723,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
          delete rootNode;
       }
 
-      ol.endMemberDeclaration(anchor(), 0);
+      ol.endMemberDeclaration(anchor(), QString());
    }
 }
 
@@ -2084,9 +2084,9 @@ void ClassDef::writeMemberList(OutputList &ol)
       ol.endQuickIndices();
    }
 
-   startTitle(ol, 0);
+   startTitle(ol, QString());
    ol.parseText(displayName() + " " + theTranslator->trMemberList());
-   endTitle(ol, 0, 0);
+   endTitle(ol, QString(), QString());
 
    ol.startContents();
    ol.startParagraph();
@@ -3277,7 +3277,7 @@ QSharedPointer<ClassDef> ClassDef::getVariableInstance(const QString &templSpec)
       QString tcname = removeRedundantWhiteSpace(name() + templSpec);
 
       QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>("<code>", 1, 1, tcname, CompoundType::Class,
-                  nullptr, "", false);
+                  QString(), QString(), false);
 
       temp->addMembersToTemplateInstance(self, templSpec);
       temp->setTemplateMaster(self);
@@ -3455,7 +3455,7 @@ void ClassDef::addListReferences()
 
    addRefItem(xrefItems, qualifiedName(),
                  lang == SrcLangExt_Fortran ? theTranslator->trType(true, true) : theTranslator->trClass(true, true),
-                 getOutputFileBase(), displayName(), 0, self);
+                 getOutputFileBase(), displayName(), QString(), self);
 
    for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);

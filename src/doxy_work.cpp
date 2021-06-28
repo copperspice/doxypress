@@ -3641,7 +3641,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
 
    // new global variable, enum value, or typedef
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
-                  root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args), nullptr,
+                  root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args), QString(),
                   root->protection, Specifier::Normal, root->stat, Relationship::Member, memberType, tmpList, ArgumentList());
 
    md->setTagInfo(ptrEntry->m_tagInfo);
@@ -9575,7 +9575,7 @@ void Doxy_Work::generateExampleDocs()
       startTitle(Doxy_Globals::outputList, n);
 
       Doxy_Globals::outputList.docify(pd->name());
-      endTitle(Doxy_Globals::outputList, n, 0);
+      endTitle(Doxy_Globals::outputList, n, QString());
 
       Doxy_Globals::outputList.startContents();
       Doxy_Globals::outputList.generateDoc(pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(),

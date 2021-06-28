@@ -105,7 +105,7 @@ QString LayoutNavEntry::url() const
       QString anchor;
       bool found = false;
 
-      if (resolveLink(0, url.mid(5).trimmed(), true, &d, anchor)) {
+      if (resolveLink(QString(), url.mid(5).trimmed(), true, &d, anchor)) {
 
          if (d && d->isLinkable()) {
             url = d->getOutputFileBase() + Doxy_Globals::htmlFileExtension;

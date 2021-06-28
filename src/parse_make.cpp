@@ -64,7 +64,7 @@ void MakeFileParser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeN
 
 void MakeFileParser::startCodeLine()
 {
-   g_code->writeLineNumber(0, 0, 0, g_yyLineNr);
+   g_code->writeLineNumber(QString(), QString(), QString(), g_yyLineNr);
 
    if (! g_currentFontClass.isEmpty()) {
       g_code->startFontClass(g_currentFontClass);
