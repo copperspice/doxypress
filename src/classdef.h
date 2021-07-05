@@ -227,7 +227,7 @@ class ClassDef : public Definition
    void getTemplateParameterLists(QVector<ArgumentList> &lists) const;
 
    QString qualifiedNameWithTemplateParameters(const QVector<ArgumentList> &actualParams = QVector<ArgumentList>(),
-                  int *actualParamIndex = 0) const;
+            int *actualParamIndex = nullptr) const;
 
    /** Returns true if there is at least one pure virtual member in this
     *  class.
@@ -407,7 +407,7 @@ class ClassDef : public Definition
    void writeMemberDeclarations(OutputList &ol, MemberListType lt, const QString &title,
                   const QString &subTitle = QString(), bool showInline = false,
                   QSharedPointer<ClassDef> inheritedFrom = QSharedPointer<ClassDef>(), int lt2 = -1,
-                  bool invert = false, bool showAlways = false, QSet<QSharedPointer<ClassDef>> *visitedClasses = 0);
+                  bool invert = false, bool showAlways = false, QSet<QSharedPointer<ClassDef>> *visitedClasses = nullptr);
 
    void writeMemberDocumentation(OutputList &ol, MemberListType lt, const QString &title, bool showInline = false);
    void writeSimpleMemberDocumentation(OutputList &ol, MemberListType lt);

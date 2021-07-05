@@ -303,7 +303,7 @@ QSharedPointer<ConceptDef> getConcept(const QString &key);
 
 QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<const Definition> scope,
                   QSharedPointer<const FileDef> fileScope, const QString &key,
-                  QSharedPointer<MemberDef> *pTypeDef = 0, QString *pTemplSpec = nullptr, bool mayBeUnlinkable = false,
+                  QSharedPointer<MemberDef> *pTypeDef = nullptr, QString *pTemplSpec = nullptr, bool mayBeUnlinkable = false,
                   bool mayBeHidden = false, QString *pResolvedType = nullptr );
 
 QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);

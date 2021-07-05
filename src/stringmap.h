@@ -362,11 +362,11 @@ class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
 
    ~ClassSDict() {}
 
-   void writeDeclaration(OutputList &ol, const enum CompoundType *filter = 0,
+   void writeDeclaration(OutputList &ol, const enum CompoundType *filter = nullptr,
             const QString &header = QString(), bool localNames = false);
 
    void writeDocumentation(OutputList &ol, QSharedPointer<Definition> container = QSharedPointer<Definition>());
-   bool declVisible(const enum CompoundType *filter = 0) const;
+   bool declVisible(const enum CompoundType *filter = nullptr) const;
 
  private:
    int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
