@@ -94,7 +94,7 @@ void RTFGenerator::writeStyleSheetFile(QFile &file)
    t_stream << "# All text after a hash (#) is considered a comment and will be ignored.\n";
    t_stream << "# Remove a hash to activate a line.\n\n";
 
-   for (int i = 0 ; rtf_Style_Default[i].style_reference != 0 ; i++ ) {
+   for (int i = 0; ! rtf_Style_Default[i].style_reference.isEmpty(); ++i ) {
 
       t_stream << "# " << rtf_Style_Default[i].style_name << " = "
         << rtf_Style_Default[i].style_reference
@@ -170,8 +170,9 @@ void RTFGenerator::init()
    // first duplicate strings of rtf_Style_Default
    const struct Rtf_Style_Default *def = rtf_Style_Default;
 
-   while (def->style_reference != 0) {
-      if (def->style_definition == 0) {
+   while (! def->style_reference.isEmpty()) {
+
+      if (def->style_definition.isEmpty()) {
          err("RTF Style Default [%s] has no definition\n", csPrintable(def->style_name));
       }
 

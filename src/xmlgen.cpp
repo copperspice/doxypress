@@ -397,11 +397,11 @@ void XMLCodeGenerator::writeLineNumber(const QString &extRef, const QString &com
    if (! compId.isEmpty()) {
       m_refId = compId;
 
-      if (! anchorId.isEmpty()) {
+      m_isMemberRef = (! anchorId.isEmpty());
+
+      if (m_isMemberRef) {
          m_refId += "_1" + anchorId;
       }
-
-      m_isMemberRef = anchorId != 0;
 
       if (! extRef.isEmpty()) {
          m_external = extRef;

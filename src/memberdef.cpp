@@ -3355,7 +3355,7 @@ static QString simplifyTypeForTable(const QString &s)
       QStringView a = QStringView(ts.constBegin(), match.capturedStart());
       QStringView b = QStringView(match.capturedEnd(), ts.constEnd());
 
-      ts = a + b;
+      ts    = QString(a) + b;
       match = regExp.match(ts);
    }
 

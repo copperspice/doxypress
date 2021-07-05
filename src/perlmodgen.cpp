@@ -314,7 +314,7 @@ void PerlModOutput::iaddFieldQuotedString(const QString &field, const QString &c
 
 void PerlModOutput::iopen(QChar c, const QString &s)
 {
-   if (s != 0) {
+   if (! s.isEmpty()) {
       iaddField(s);
    } else {
       continueBlock();
@@ -1987,7 +1987,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
 
       m_output.closeList();
 
-   } else if (md->memberType() == MemberDefType::Define && md->argsString() != 0) {
+   } else if (md->memberType() == MemberDefType::Define && ! md->argsString().isEmpty()) {
       // define
       m_output.openList("parameters");
 
@@ -1997,7 +1997,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
 
       m_output.closeList();
 
-   } else if (md->argsString() != 0) {
+   } else if (! md->argsString().isEmpty()) {
       m_output.addFieldQuotedString("arguments", md->argsString());
    }
 

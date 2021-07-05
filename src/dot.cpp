@@ -719,7 +719,7 @@ static bool checkAndUpdateMd5Signature(const QString &baseName, const QString &m
       QByteArray md5stored = f.readAll();
 
       // compare checksum
-      if (md5 == md5stored) {
+      if (md5.toUtf8() == md5stored) {
          // bail out if equal
          f.close();
          return false;

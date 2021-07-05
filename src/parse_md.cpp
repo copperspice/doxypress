@@ -537,7 +537,7 @@ static int processEmphasis3(QString &out, QStringView data, QChar c, QStringView
       } else if (iter_i + 1 != iter_size && iter_i[1] == c) {
          // double symbol found, handing over to emphasis1
 
-          QString tmp = pristineChars2 + data;
+          QString tmp = QString(pristineChars2) + data;
           len = processEmphasis1(out, tmp, c);
 
          if (len == 0) {
@@ -549,7 +549,7 @@ static int processEmphasis3(QString &out, QStringView data, QChar c, QStringView
       } else {
          // single symbol found, handing over to emphasis2
 
-         QString tmp = pristineChars2.mid(1) + data;
+         QString tmp = QString(pristineChars2.mid(1)) + data;
          len = processEmphasis2(out, tmp, c);
 
          if (len == 0) {
