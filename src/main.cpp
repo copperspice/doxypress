@@ -325,7 +325,7 @@ QLocale::Language getEnumLang()
       retval = QLocale::Language::Macedonian;
 
    } else if (outputLanguage == "norwegian") {
-      retval = QLocale::Language::Norwegian;
+      retval = QLocale::Language::NorwegianBokmal;
 
    } else if (outputLanguage == "persian)") {
       retval = QLocale::Language::Persian;
