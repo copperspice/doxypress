@@ -61,14 +61,6 @@
 #include <util.h>
 #include <xmlgen.h>
 
-#define RECURSE_ENTRYTREE(func, var) \
-   do {  \
-      for (auto item : var->children() ) { \
-         func(item);   \
-      }  \
-   } while(0)
-
-
 #if ! defined(_WIN32) || defined(__CYGWIN__)
 #include <signal.h>
 #define HAS_SIGNALS
@@ -1711,7 +1703,10 @@ void Doxy_Work::findGroupScope(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(findGroupScope, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findGroupScope(item);
+   }
 }
 
 void Doxy_Work::organizeSubGroupsFiltered(QSharedPointer<Entry> ptrEntry, bool additional)
@@ -1799,7 +1794,10 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(buildFileList, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      buildFileList(item);
+   }
 }
 
 void Doxy_Work::addIncludeFileClass(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root)
@@ -2501,7 +2499,10 @@ void Doxy_Work::buildClassList(QSharedPointer<Entry> ptrEntry)
       addClassToContext(ptrEntry);
    }
 
-   RECURSE_ENTRYTREE(buildClassList, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      buildClassList(item);
+   }
 }
 
 // build a list of all classes that have a documentation block before their definition
@@ -2511,7 +2512,10 @@ void Doxy_Work::buildClassDocList(QSharedPointer<Entry> ptrEntry)
       addClassToContext(ptrEntry);
    }
 
-   RECURSE_ENTRYTREE(buildClassDocList, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      buildClassDocList(item);
+   }
 }
 
 void Doxy_Work::buildConceptList(QSharedPointer<Entry> ptrEntry)
@@ -2930,7 +2934,10 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(buildNamespaceList, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      buildNamespaceList(item);
+   }
 }
 
 QSharedPointer<NamespaceDef> Doxy_Work::findUsedNamespace(const NamespaceSDict *unl, const QString &name)
@@ -3076,7 +3083,10 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(findUsingDirectives, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findUsingDirectives(item);
+   }
 }
 
 void Doxy_Work::buildListOfUsingDecls(QSharedPointer<Entry> ptrEntry)
@@ -3097,7 +3107,10 @@ void Doxy_Work::buildListOfUsingDecls(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(buildListOfUsingDecls, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      buildListOfUsingDecls(item);
+   }
 }
 
 void Doxy_Work::findUsingDeclarations(QSharedPointer<Entry> ptrEntry)
@@ -3161,7 +3174,10 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(findUsingDeclarations, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findUsingDeclarations(item);
+   }
 }
 
 void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
@@ -3250,7 +3266,10 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
 
    }
 
-   RECURSE_ENTRYTREE(findUsingDeclImports, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findUsingDeclImports(item);
+   }
 }
 
 void Doxy_Work::findIncludedUsingDirectives()
@@ -4352,7 +4371,11 @@ void Doxy_Work::buildInterfaceAndServiceList(QSharedPointer<Entry> ptrEntry)
    switch (ptrEntry->m_srcLang) {
       case SrcLangExt_Unknown: // (root node always is Unknown)
       case SrcLangExt_IDL:
-         RECURSE_ENTRYTREE(buildInterfaceAndServiceList, ptrEntry);
+         // recursive call
+         for (const auto &item : ptrEntry->children()) {
+            buildInterfaceAndServiceList(item);
+         }
+
          break;
 
       default:
@@ -4929,7 +4952,10 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(buildFunctionList, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      buildFunctionList(item);
+   }
 }
 
 void Doxy_Work::findFriends()
@@ -5917,13 +5943,16 @@ bool Doxy_Work::isClassSection(QSharedPointer<Entry> ptrEntry)
 }
 
 // Build a hash of all entrys in the tree starting with root
-void Doxy_Work::findClassEntries(QSharedPointer<Entry> ptr_root)
+void Doxy_Work::findClassEntries(QSharedPointer<Entry> ptrEntry)
 {
-   if (isClassSection(ptr_root)) {
-      Doxy_Globals::g_classEntries.insert(ptr_root->m_entryName, ptr_root);
+   if (isClassSection(ptrEntry)) {
+      Doxy_Globals::g_classEntries.insert(ptrEntry->m_entryName, ptrEntry);
    }
 
-   RECURSE_ENTRYTREE(findClassEntries, ptr_root);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findClassEntries(item);
+   }
 }
 
 QString Doxy_Work::extractClassName(QSharedPointer<Entry> ptrEntry)
@@ -8067,7 +8096,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
 
    } else {
       // recursive call
-      for (auto item : ptrEntry->children() ) {
+      for (const auto &item : ptrEntry->children() ) {
          findEnums(item);
       }
    }
@@ -8321,7 +8350,11 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
       }
 
    } else {
-      RECURSE_ENTRYTREE(addEnumValuesToEnums, ptrEntry);
+      // recursive call
+      for (const auto &item : ptrEntry->children()) {
+         addEnumValuesToEnums(item);
+      }
+
    }
 }
 
@@ -8452,7 +8485,10 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
 
    }
 
-   RECURSE_ENTRYTREE(findEnumDocumentation, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findEnumDocumentation(item);
+   }
 }
 
 // search for each enum (member or function) in mnl if it has documented enum values
@@ -9225,7 +9261,10 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
 
    }
 
-   RECURSE_ENTRYTREE(findDefineDocumentation, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findDefineDocumentation(item);
+   }
 }
 
 void Doxy_Work::findDirDocumentation(QSharedPointer<Entry> ptrEntry)
@@ -9283,7 +9322,10 @@ void Doxy_Work::findDirDocumentation(QSharedPointer<Entry> ptrEntry)
 
    }
 
-   RECURSE_ENTRYTREE(findDirDocumentation, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findDirDocumentation(item);
+   }
 }
 
 // create a (sorted) list of separate documentation pages
@@ -9372,7 +9414,10 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(findMainPage, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findMainPage(item);
+   }
 }
 
 // search for the main page imported via tag files and add only the section labels
@@ -9386,7 +9431,10 @@ void Doxy_Work::findMainPageTagFiles(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(findMainPageTagFiles, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      findMainPageTagFiles(item);
+   }
 }
 
 void Doxy_Work::computePageRelations(QSharedPointer<Entry> ptrEntry)
@@ -9423,7 +9471,10 @@ void Doxy_Work::computePageRelations(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(computePageRelations, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      computePageRelations(item);
+   }
 }
 
 void Doxy_Work::checkPageRelations()
@@ -9542,7 +9593,10 @@ void Doxy_Work::buildExampleList(QSharedPointer<Entry> ptrEntry)
       }
    }
 
-   RECURSE_ENTRYTREE(buildExampleList, ptrEntry);
+   // recursive call
+   for (const auto &item : ptrEntry->children()) {
+      buildExampleList(item);
+   }
 }
 
 // print the entry tree (for debugging)
