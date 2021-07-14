@@ -1070,11 +1070,9 @@ void generateOutput()
    generateExampleDocs();
    Doxy_Globals::infoLog_Stat.end();
 
-   if (! Htags::useHtags) {
-      Doxy_Globals::infoLog_Stat.begin("Generating source code\n");
-      generateSourceCode();
-      Doxy_Globals::infoLog_Stat.end();
-   }
+   Doxy_Globals::infoLog_Stat.begin("Generating source code\n");
+   generateSourceCode();
+   Doxy_Globals::infoLog_Stat.end();
 
    Doxy_Globals::infoLog_Stat.begin("Generating file documentation\n");
    generateFileDocs();
