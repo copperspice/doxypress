@@ -3193,6 +3193,16 @@ QString ClassDef::getSourceFileBase() const
    }
 }
 
+QString ClassDef::briefDescriptionAsTooltip() const
+{
+   if (m_templateMaster) {
+      return m_templateMaster->briefDescriptionAsTooltip();
+
+   } else {
+      return Definition::briefDescriptionAsTooltip();
+   }
+}
+
 void ClassDef::setGroupDefForAllMembers(QSharedPointer<GroupDef> gd, Grouping::GroupPri_t pri, const QString &fileName,
                   int startLine, bool hasDocs)
 {

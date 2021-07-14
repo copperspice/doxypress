@@ -145,7 +145,7 @@ class Definition : public DefinitionIntf
    // Returns a plain text version of the brief description suitable for use
    //  as a tool tip.
 
-   QString briefDescriptionAsTooltip()  const;
+   virtual QString briefDescriptionAsTooltip()  const;
 
    // Returns the line number at which the brief description was found.
    int briefLine() const;

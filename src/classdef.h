@@ -109,6 +109,8 @@ class ClassDef : public Definition
    QString getInstanceOutputFileBase() const;
    QString getFileBase() const;
 
+   QString briefDescriptionAsTooltip() const override;
+
    /** Returns the base name for the source code file */
    QString getSourceFileBase() const override;
 
