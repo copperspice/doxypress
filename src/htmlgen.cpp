@@ -558,7 +558,7 @@ void HtmlCodeGenerator::writeCodeLinkHtml(const QString &className, const QStrin
       m_streamCode << "#" << anchor;
    }
 
-  m_streamCode << "\"";
+   m_streamCode << "\"";
 
    if (! tooltip.isEmpty()) {
       m_streamCode << " title=\"" << convertToHtml(tooltip) << "\"";

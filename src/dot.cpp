@@ -1562,7 +1562,7 @@ static QString convertLabel(const QString &label)
    int len       = label.length();
    int charsLeft = len;
    int sinceLast = 0;
-   int foldLen   = 17;          // ideal text length
+   int foldLen   = 117;          // ideal text length
 
    for (QChar c : label) {
 
@@ -2979,7 +2979,7 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
 
    if (cd->isLinkable() && !cd->isHidden()) {
       tmp_url = cd->getReference() + "$" + cd->getOutputFileBase();
-      if (!cd->anchor().isEmpty()) {
+      if (! cd->anchor().isEmpty()) {
          tmp_url += "#" + cd->anchor();
       }
    }

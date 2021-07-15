@@ -230,8 +230,7 @@ void DocbookCodeGenerator::writeCodeAnchor(const QString &)
 {
 }
 
-void DocbookCodeGenerator::writeLineNumber(const QString &ref, const QString &fileName,
-   const QString &anchorId, int lineNumber)
+void DocbookCodeGenerator::writeLineNumber(const QString &ref, const QString &fileName, const QString &anchorId, int lineNumber)
 {
    m_insideCodeLine = true;
 

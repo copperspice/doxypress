@@ -391,7 +391,7 @@ void XMLCodeGenerator::writeCodeAnchor(const QString &) {
 void XMLCodeGenerator::writeLineNumber(const QString &extRef, const QString &compId, const QString &anchorId, int l) {
    XML_DB(("(writeLineNumber)\n"));
 
-   // we remember the information provided here to use it at the <codeline> start tag
+   // remember the information provided here to use it at the <codeline> start tag
    m_lineNumber = l;
 
    if (! compId.isEmpty()) {
@@ -523,7 +523,7 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
 }
 
 static void writeMemberReference(QTextStream &t, QSharedPointer<Definition> def,
-                  QSharedPointer<MemberDef> rmd, const QString &tagName)
+            QSharedPointer<MemberDef> rmd, const QString &tagName)
 {
    QString scope = rmd->getScopeString();
    QString name  = rmd->name();

@@ -855,7 +855,7 @@ void processFiles()
    Doxy_Globals::citeDict.generatePage();
    Doxy_Globals::infoLog_Stat.end();
 
-   Doxy_Globals::infoLog_Stat.begin("Counting class members...\n");
+   Doxy_Globals::infoLog_Stat.begin("Counting class members\n");
    countMembers();
    Doxy_Globals::infoLog_Stat.end();
 
@@ -8188,7 +8188,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
          QSharedPointer<MemberName> mn = mnsd->find(name);
 
          // for all members with this name
-         if (mn) {
+         if (mn != nullptr) {
 
             for (auto md : *mn) {
                // for each enum in this list
@@ -8229,7 +8229,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
 
                            QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, root->startLine,
                               root->startColumn, root->getData(EntryKey::Member_Type), root->m_entryName,
-                              root->getData(EntryKey::Member_Args), "", root->protection, Specifier::Normal,
+                              root->getData(EntryKey::Member_Args), QString(), root->protection, Specifier::Normal,
                               root->stat, Relationship::Member, MemberDefType::EnumValue, ArgumentList(), ArgumentList());
 
                            if (md->getClassDef()) {

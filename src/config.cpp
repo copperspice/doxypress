@@ -359,7 +359,7 @@ bool Config::verify()
                   csPrintable(extension), csPrintable(language));
 
          } else {
-            msg("Adding custom extension mapping: .%s, will be treated as language %s\n",
+            msg("Adding custom extension mapping: '%s', will be treated as language %s\n",
                   csPrintable(extension), csPrintable(language));
          }
       }

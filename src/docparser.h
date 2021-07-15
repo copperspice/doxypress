@@ -1992,6 +1992,7 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
    bool hasInOutSpecifier() const {
       return m_hasInOutSpecifier;
    }
+
    bool hasTypeSpecifier() const  {
       return m_hasTypeSpecifier;
    }

@@ -2796,14 +2796,14 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
       DocPara *para = (DocPara *)n->parent();
       int nodeIndex = para->children().indexOf(n);
 
-      nodeIndex--;
+      --nodeIndex;
       if (nodeIndex < 0) {
          // first node in paragraph
          return;
       }
 
       while (nodeIndex >= 0 && isInvisibleNode(para->children().at(nodeIndex))) {
-         nodeIndex--;
+         --nodeIndex;
       }
 
       if (nodeIndex < 0) {

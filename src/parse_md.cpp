@@ -833,8 +833,8 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    bool isImageLink = false;
    bool isToc = false;
 
-   int level = 1;
-   int nl    = 0;
+   int level   = 1;
+   int nl      = 0;
 
    if (*iter_i == '!') {
       isImageLink = true;
@@ -857,17 +857,17 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          // skip escaped characters
 
       } else if (c == '[') {
-         level++;
+         ++level;
 
       } else if (c == ']') {
-         level--;
+         --level;
 
          if (level <= 0) {
             break;
          }
 
       } else if (c == '\n') {
-         nl++;
+         ++nl;
 
          if (nl > 1) {
             return 0;   // only allow one newline in the content
@@ -929,7 +929,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
 
          if (c == '\n') {
             // unexpected EOL
-            nl++;
+            ++nl;
 
             if (nl > 1) {
                return 0;
@@ -978,7 +978,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
                   return 0;
                }
 
-               nl++;
+               ++nl;
             }
 
             ++iter_i;
@@ -1017,7 +1017,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
       while (iter_i != iter_size && *iter_i != ']') {
 
          if (*iter_i == '\n') {
-            nl++;
+            ++nl;
 
             if (nl > 1) {
                return 0;
@@ -3159,7 +3159,7 @@ static QString detab(QStringView str, int &refIndent)
             if (col < minIndent) {
                minIndent = col;
             }
-            col++;
+            ++col;
       }
    }
 

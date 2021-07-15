@@ -28,8 +28,9 @@ class Definition;
 
 // struct represents an item in the list of references.
 struct RefItem {
-   RefItem() : scope(0)
-   {}
+   RefItem()
+      : scope(0)
+   { }
 
    bool operator==(const RefItem &other) const {
       return (text == other.text && listAnchor == other.listAnchor && prefix == other.prefix &&
@@ -61,7 +62,14 @@ struct RefItem {
 class RefList
 {
  public:
-   int      addRefItem();
+   RefList()
+      : m_dictIterator(m_dict)
+   {}
+
+   RefList(const QString &listName, const QString &pageTitle, const QString &secTitle);
+
+   int addRefItem();
+
    RefItem *getRefItem(int todoItemId);
    RefItem *getFirstRefItem();
    RefItem *getNextRefItem();
@@ -70,11 +78,6 @@ class RefList
    QString fileName() const;
    QString pageTitle() const;
    QString sectionTitle() const;
-
-   RefList(const QString &listName, const QString &pageTitle, const QString &secTitle);
-
-   RefList() : m_dictIterator(m_dict)
-   {};
 
    ~RefList();
 

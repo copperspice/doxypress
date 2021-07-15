@@ -50,7 +50,7 @@ RefList::~RefList()
 int RefList::addRefItem()
 {
    RefItem *item = new RefItem;
-   m_id++;
+   ++m_id;
 
    m_dict.insert(m_id, item);
 

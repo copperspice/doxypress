@@ -738,18 +738,23 @@ void ManGenerator::endSection(const QString &, SectionInfo::SectionType type)
          case SectionInfo::Page:
             endGroupHeader(0);
             break;
+
          case SectionInfo::Section:
             endGroupHeader(0);
             break;
+
          case SectionInfo::Subsection:
             endMemberHeader();
             break;
+
          case SectionInfo::Subsubsection:
             endMemberHeader();
             break;
+
          case SectionInfo::Paragraph:
             endMemberHeader();
             break;
+
          default:
             assert(0);
             break;

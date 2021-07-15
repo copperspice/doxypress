@@ -1244,10 +1244,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    bool partA = false;
 
    if (! s_insideHtmlLink) {
-      QString tName = g_token->name;
-
-      // added 01/2016
-      tName = renameNS_Aliases(tName, false);
+      QString tName = renameNS_Aliases(g_token->name, false);
 
       if (resolveRef(s_context, tName, s_inSeeBlock, &compound, &member, false, fd, true)) {
          partA = true;
@@ -1262,7 +1259,6 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    }
 
    if (partA) {
-
       if (member && member->isLinkable()) {
 
          if (member->isObjCMethod()) {
@@ -1291,7 +1287,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
 
          } else {
             children.append(new DocLinkedWord(parent, name, compound->getReference(), compound->getOutputFileBase(),
-                  anchor, compound->briefDescriptionAsTooltip() ) );
+                  anchor, compound->briefDescriptionAsTooltip()));
          }
 
       } else if (compound->definitionType() == Definition::TypeFile && compound.dynamicCast<FileDef>()->generateSourceFile() ) {
@@ -6916,7 +6912,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
 
    if (g_token->emptyTag && ! (tagId & XML_CmdMask) &&
          tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR && tagId != HTML_HR && tagId != HTML_P) {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "HTML tags may not use the 'empty tag' XHTML syntax");
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "HTML tag '<%s/>' may not use the 'empty tag' XHTML syntax", csPrintable(tagName));
    }
 
    switch (tagId) {
@@ -7388,7 +7384,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       default:
-         // we should not get here!
+         // we should not get here
          assert(0);
          break;
    }
@@ -8244,7 +8240,7 @@ void DocRoot::parse()
 
    // first parse any number of paragraphs
    bool isFirst = true;
-   DocPara *lastPar = 0;
+   DocPara *lastPar = nullptr;
 
    do {
       bool divFound = false;

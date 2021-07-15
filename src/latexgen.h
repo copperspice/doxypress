@@ -39,7 +39,7 @@ class LatexCodeGenerator : public CodeGenerator
       void writeTooltip(const QString &, const DocLinkInfo &, const QString &, const QString &,
                   const SourceLinkInfo &, const SourceLinkInfo &) override {}
 
-      void writeLineNumber(const QString &, const QString &, const QString &, int) override;;
+      void writeLineNumber(const QString &, const QString &, const QString &, int) override;
       void startCodeLine(bool) override;
       void endCodeLine() override;
       void startFontClass(const QString &) override;
