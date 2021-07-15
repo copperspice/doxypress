@@ -245,6 +245,7 @@ QString readInputFile(const QString &fileName);
 bool    readInputFile(const QString &fileName, QString &fileContents, bool filter = true, bool isSourceCode = false);
 
 QString resolveAliasCmd(const QString &aliasCmd);
+QString removeAllWhiteSpace(const QString &str);
 QString removeRedundantWhiteSpace(const QString &s, bool makePretty = true);
 QString removeAnonymousScopes(const QString &s);
 QString replaceColorMarkers(const QString &str);

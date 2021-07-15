@@ -1540,6 +1540,19 @@ static bool findOperator2(const QString &s, int i)
    return true;
 }
 
+QString removeAllWhiteSpace(const QString &str)
+{
+   QString retval;
+
+   for (QChar ch : str) {
+      if (! ch.isSpace()) {
+         retval += ch;
+      }
+   }
+
+   return retval;
+}
+
 static const char constScope[]   = { 'c', 'o', 'n', 's', 't', ':' };
 static const char virtualScope[] = { 'v', 'i', 'r', 't', 'u', 'a', 'l', ':' };
 
