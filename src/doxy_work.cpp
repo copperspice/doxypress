@@ -10574,21 +10574,24 @@ void searchInputFiles()
       includePatterns = inputPatterns;
    }
 
-   for (auto fName : includePath) {
+   for (const auto &fName : includePath) {
       ReadDirArgs data;
 
-      data.recursive          = inputRecursive;
-      data.isFnDict           = true;
-      data.fnDict             = Doxy_Globals::includeNameDict;
-      data.includePatternList = includePatterns;
-      data.excludePatternList = excludePatterns;
+      data.recursive           = inputRecursive;
+      data.isFnDict            = true;
+      data.fnDict              = Doxy_Globals::includeNameDict;
+      data.includePatternList  = includePatterns;
+      data.excludePatternList  = excludePatterns;
+      data.isKillSet           = true;
+      data.killSet             = std::move(killSet);
 
       readFileOrDirectory(fName, data);
 
       Doxy_Globals::includeNameDict = data.fnDict;
+      killSet = std::move(data.killSet);
    }
    Doxy_Globals::infoLog_Stat.end();
-
+   killSet.clear();
 
    // examples
    Doxy_Globals::infoLog_Stat.begin("Searching for example files\n");
@@ -10597,118 +10600,137 @@ void searchInputFiles()
    const QStringList examplePatterns = Config::getList("example-patterns");
    const bool exampleRecursive       = Config::getBool("example-recursive");
 
-   for (auto s : examplePath) {
+   for (const auto &s : examplePath) {
       ReadDirArgs data;
 
       data.recursive          = exampleRecursive;
       data.isFnDict           = true;
       data.fnDict             = Doxy_Globals::exampleNameDict;
       data.includePatternList = examplePatterns;
+      data.isKillSet          = true;
+      data.killSet            = std::move(killSet);
 
       readFileOrDirectory(s, data);
 
-      Doxy_Globals::exampleNameDict = data.fnDict;
+      Doxy_Globals::exampleNameDict = std::move(data.fnDict);
+      killSet = std::move(data.killSet);
    }
    Doxy_Globals::infoLog_Stat.end();
+   killSet.clear();
 
 
    // images
    Doxy_Globals::infoLog_Stat.begin("Searching for images\n");
    const QStringList imagePath = Config::getList("image-path");
 
-   for (auto s : imagePath) {
+   for (const auto &s : imagePath) {
       ReadDirArgs data;
 
-      data.recursive = inputRecursive;
-      data.isFnDict  = true;
-      data.fnDict    = Doxy_Globals::imageNameDict;
+      data.recursive  = inputRecursive;
+      data.isFnDict   = true;
+      data.fnDict     = Doxy_Globals::imageNameDict;
+      data.isKillSet  = true;
+      data.killSet    = std::move(killSet);
 
       readFileOrDirectory(s, data);
 
-      Doxy_Globals::imageNameDict = data.fnDict;
+      Doxy_Globals::imageNameDict = std::move(data.fnDict);
+      killSet = std::move(data.killSet);
    }
    Doxy_Globals::infoLog_Stat.end();
+   killSet.clear();
 
 
    // dot files
    Doxy_Globals::infoLog_Stat.begin("Searching for dot files\n");
    const QStringList dotFiles = Config::getList("dot-file-dirs");
 
-   for (auto s : dotFiles) {
+   for (const auto &s : dotFiles) {
       ReadDirArgs data;
 
-      data.recursive  = inputRecursive;
-      data.isFnDict   = true;
-      data.fnDict     = Doxy_Globals::dotFileNameDict;
+      data.recursive   = inputRecursive;
+      data.isFnDict    = true;
+      data.fnDict      = Doxy_Globals::dotFileNameDict;
+      data.isKillSet   = true;
+      data.killSet     = std::move(killSet);
 
       readFileOrDirectory(s, data);
 
-      Doxy_Globals::dotFileNameDict = data.fnDict;
+      Doxy_Globals::dotFileNameDict = std::move(data.fnDict);
+      killSet = std::move(data.killSet);
    }
    Doxy_Globals::infoLog_Stat.end();
+   killSet.clear();
 
 
    // msc
    Doxy_Globals::infoLog_Stat.begin("Searching for msc files\n");
    const QStringList mscFiles = Config::getList("msc-file-dirs");
 
-   for (auto s : mscFiles) {
+   for (const auto &s : mscFiles) {
       ReadDirArgs data;
 
-      data.recursive  = inputRecursive;
-      data.isFnDict   = true;
-      data.fnDict     = Doxy_Globals::mscFileNameDict;
+      data.recursive   = inputRecursive;
+      data.isFnDict    = true;
+      data.fnDict      = Doxy_Globals::mscFileNameDict;
+      data.isKillSet   = true;
+      data.killSet     = std::move(killSet);
 
       readFileOrDirectory(s, data);
 
-      Doxy_Globals::mscFileNameDict = data.fnDict;
+      Doxy_Globals::mscFileNameDict = std::move(data.fnDict);
+      killSet = std::move(data.killSet);
    }
    Doxy_Globals::infoLog_Stat.end();
+   killSet.clear();
 
 
    // dia
    Doxy_Globals::infoLog_Stat.begin("Searching for dia files\n");
    const QStringList diaFiles = Config::getList("dia-file-dirs");
 
-   for (auto s : diaFiles) {
+   for (const auto &s : diaFiles) {
       ReadDirArgs data;
 
       data.recursive   = inputRecursive;
       data.isFnDict    = true;
       data.fnDict      = Doxy_Globals::diaFileNameDict;
+      data.isKillSet   = true;
+      data.killSet     = std::move(killSet);
 
       readFileOrDirectory(s, data);
 
-      Doxy_Globals::diaFileNameDict = data.fnDict;
+      Doxy_Globals::diaFileNameDict = std::move(data.fnDict);
+      killSet = std::move(data.killSet);
    }
    Doxy_Globals::infoLog_Stat.end();
+   killSet.clear();
 
 
    Doxy_Globals::infoLog_Stat.begin("Searching for files to exclude\n");
    const QStringList excludeFiles  = Config::getList("exclude-files");
 
-   for (auto s : excludeFiles) {
+   for (const auto &s : excludeFiles) {
       ReadDirArgs data;
 
       data.recursive          = inputRecursive;
       data.errorIfNotExist    = false;
       data.includePatternList = inputPatterns;
       data.isPrepExclude      = true;
-      data.prepExcludeSet     = excludeSet;
+      data.prepExcludeSet     = std::move(excludeSet);
 
       readFileOrDirectory(s, data);
 
-      excludeSet = data.prepExcludeSet;
+      excludeSet = std::move(data.prepExcludeSet);
    }
    Doxy_Globals::infoLog_Stat.end();
-
 
    // find input files
    Doxy_Globals::infoLog_Stat.begin("Searching for files to process\n");
 
    QStringList inputSource = Config::getList("input-source");
 
-   for (auto s : inputSource) {
+   for (const auto &s : inputSource) {
       QString path = s;
       uint len     = path.length();
 
@@ -10738,9 +10760,9 @@ void searchInputFiles()
 
          readFileOrDirectory(path, data);
 
-         Doxy_Globals::inputNameList  = data.fnList;
-         Doxy_Globals::inputNameDict  = data.fnDict;
-         Doxy_Globals::g_inputFiles   = data.resultList;
+         Doxy_Globals::inputNameList  = std::move(data.fnList);
+         Doxy_Globals::inputNameDict  = std::move(data.fnDict);
+         Doxy_Globals::g_inputFiles   = std::move(data.resultList);
          killSet                      = std::move(data.killSet);
          Doxy_Globals::inputPaths     = data.pathSet;
       }
