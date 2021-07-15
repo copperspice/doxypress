@@ -8101,6 +8101,18 @@ QString getLanguageSpecificSeparator(SrcLangExt lang, bool classScope)
    return retval;
 }
 
+/** Checks whether the given url starts with a supported protocol */
+bool isURL(const QString &url)
+{
+  QStringView tmpUrl = url;
+  tmpUrl = tmpUrl.trimmed();
+
+  return tmpUrl.startsWith("http:")  || tmpUrl.startsWith("https:") ||
+         tmpUrl.startsWith("ftp:")   || tmpUrl.startsWith("ftps:")  ||
+         tmpUrl.startsWith("sftp:")  || tmpUrl.startsWith("file:")  ||
+         tmpUrl.startsWith("news:")  || tmpUrl.startsWith("irc:")   ||  tmpUrl.startsWith("ircs:");
+}
+
 /** Corrects URL \a url according to the relative path \a relPath.
  *  Returns the corrected URL. For absolute URLs no correction will be done.
  */
@@ -8108,9 +8120,7 @@ QString correctURL(const QString &url, const QString &relPath)
 {
    QString result = url;
 
-   if (! relPath.isEmpty() && ! url.startsWith("http:") && ! url.startsWith("https:") &&
-            ! url.startsWith("ftp:") && ! url.startsWith("file:")) {
-
+   if (! relPath.isEmpty() && ! isURL(url)) {
       result.prepend(relPath);
    }
 

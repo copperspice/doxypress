@@ -203,6 +203,8 @@ bool    hasVisibleRoot(SortedList<BaseClassDef *> *bcl);
 int     isAccessibleFrom(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
                   QSharedPointer<const Definition> item);
 
+bool    isURL(const QString &url);
+
 void    initClassHierarchy(ClassSDict *cl);
 
 QString langToString(SrcLangExt lang);
