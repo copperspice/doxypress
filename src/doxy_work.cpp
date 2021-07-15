@@ -403,8 +403,8 @@ struct ReadDirArgs {
    bool isPrepExclude = false;
    QSet<QString> prepExcludeSet;
 
-   bool isKillDict = false;
-   QSet<QString> killDict;
+   bool isKillSet = false;
+   QSet<QString> killSet;
 
    bool isPathSet = false;
    QSet<QString> pathSet;
@@ -10178,7 +10178,7 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
                bool testA = (data.includePatternList.isEmpty() || patternMatch(cfi, data.includePatternList));
                bool testB = (! patternMatch(cfi, data.excludePatternList));
 
-               if (testA && testB && ! data.killDict.contains(filePath) ) {
+               if (testA && testB && ! data.killSet.contains(filePath) ) {
 
                   totalSize += cfi.size() + filePath.length() + 4;
                   QString name = cfi.fileName();
@@ -10210,8 +10210,8 @@ void Doxy_Work::readDir(const QFileInfo &fi, ReadDirArgs &data)
                      data.prepExcludeSet.insert(filePath);
                   }
 
-                  if (data.isKillDict) {
-                     data.killDict.insert(filePath);
+                  if (data.isKillSet) {
+                     data.killSet.insert(filePath);
                   }
                }
 
@@ -10266,7 +10266,7 @@ void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
 
          if (fi.isFile()) {
 
-            if (! data.killDict.contains(filePath)) {
+            if (! data.killSet.contains(filePath)) {
 
                if (data.isFnDict) {
                   QSharedPointer<FileDef> fd = QMakeShared<FileDef>(dirPath + "/", name);
@@ -10296,8 +10296,8 @@ void Doxy_Work::readFileOrDirectory(const QString &fn, ReadDirArgs &data)
                   data.prepExcludeSet.insert(filePath);
                }
 
-               if (data.isKillDict) {
-                  data.killDict.insert(filePath);
+               if (data.isKillSet) {
+                  data.killSet.insert(filePath);
                }
             }
 
@@ -10556,6 +10556,7 @@ QString Doxy_Work::getQchFileName()
 void searchInputFiles()
 {
    // gather names for all files in the include and example path
+   QSet<QString> killSet;
    QSet<QString> excludeSet;
 
    // source
@@ -10705,7 +10706,6 @@ void searchInputFiles()
    // find input files
    Doxy_Globals::infoLog_Stat.begin("Searching for files to process\n");
 
-   QSet<QString> killDict;
    QStringList inputSource = Config::getList("input-source");
 
    for (auto s : inputSource) {
@@ -10731,8 +10731,8 @@ void searchInputFiles()
          data.excludeSet         = excludeSet;
          data.isResultList       = true;
          data.resultList         = Doxy_Globals::g_inputFiles;
-         data.isKillDict         = true;
-         data.killDict           = killDict;
+         data.isKillSet          = true;
+         data.killSet            = std::move(killSet);
          data.isPathSet          = true;
          data.pathSet            = Doxy_Globals::inputPaths;
 
@@ -10741,7 +10741,7 @@ void searchInputFiles()
          Doxy_Globals::inputNameList  = data.fnList;
          Doxy_Globals::inputNameDict  = data.fnDict;
          Doxy_Globals::g_inputFiles   = data.resultList;
-         killDict                     = data.killDict;
+         killSet                      = std::move(data.killSet);
          Doxy_Globals::inputPaths     = data.pathSet;
       }
    }
@@ -10771,8 +10771,8 @@ void searchInputFiles()
       data.excludeSet         = excludeSet;
       data.isResultList       = true;
       data.resultList         = Doxy_Globals::g_inputFiles;
-      data.isKillDict         = false;
-      data.killDict           = QSet<QString>();
+      data.isKillSet          = false;
+      data.killSet            = QSet<QString>();
       data.isPathSet          = true;
       data.pathSet            = Doxy_Globals::inputPaths;
 
