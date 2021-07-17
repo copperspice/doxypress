@@ -1876,18 +1876,27 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
        start_iter = match.capturedStart();
        matchLen   = match.capturedLength();
 
-      if (start_iter != text.constBegin()) {
-         QChar prevChar = start_iter[-1];
-
-         if (prevChar >= '0' && prevChar <= '9') {
-            break;
-         }
-      }
-
       // avoid matching part of hex numbers
       // add non-word part to the result
 
       floatingIndex += (start_iter - skip_iter + matchLen);
+
+      if (start_iter != text.constBegin()) {
+         // ignore hex numbers
+         QChar prevChar = start_iter[-1];
+
+         if (prevChar >= '0' && prevChar <= '9') {
+
+            QStringView part = QStringView(skip_iter, start_iter + matchLen);
+            out.writeString(part, keepSpaces);
+
+            skip_iter    = start_iter + matchLen;
+            current_iter = skip_iter;
+
+            continue;
+         }
+      }
+
 
       bool insideString = false;
 
@@ -3994,7 +4003,6 @@ static bool getScopeDefs(const QString &docScope, const QString &scope,
    } else {
       scopeOffset = docScopeName.length();
    }
-
 
    do {
       // for each possible docScope (from largest to and including empty)
