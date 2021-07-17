@@ -4949,16 +4949,30 @@ void createSubDirs(QDir &d)
    if (Config::getBool("create-subdirs")) {
       // create 4096 subdirectories
 
-      int l1;
-      int l2;
+      int level_1;
+      int level_2;
 
-      for (l1 = 0; l1 < 16; l1++) {
-         QString temp = QString("d%1").formatArg(l1, 0, 16);
-         d.mkdir(temp);
+      for (level_1 = 0; level_1 < 16; ++level_1) {
+         QString tmp = QString("d%1").formatArg(level_1, 0, 16);
 
-         for (l2 = 0; l2 < 256; l2++) {
-            QString temp = QString("d%1/d%2").formatArg(l1, 0, 16).formatArg(l2, 2, 16, QChar('0'));
-            d.mkdir(temp);
+         if (! d.exists(tmp)) {
+            bool ok = d.mkdir(tmp);
+
+            if (! ok) {
+               err("Failed to create output directory '%s'\n", csPrintable(tmp));
+            }
+         }
+
+         for (level_2 = 0; level_2 < 256; ++level_2) {
+            QString tmp = QString("d%1/d%2").formatArg(level_1, 0, 16).formatArg(level_2, 2, 16, QChar('0'));
+            if (! d.exists(tmp)) {
+               bool ok = d.mkdir(tmp);
+
+               if (! ok) {
+                  err("Failed to create output directory '%s'\n", csPrintable(tmp));
+               }
+            }
+
          }
       }
    }
