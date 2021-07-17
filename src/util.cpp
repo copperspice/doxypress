@@ -6980,10 +6980,16 @@ QString trimEmptyLines(const QString &str, int &docLine)
 
    while (iter != iter_end) {
       c = *iter;
+      QStringView tmp = QStringView(iter, iter_end);
+
       ++iter;
 
       if (c == ' ' || c == '\t' || c == '\r') {
          // do nothing
+
+      } else if (tmp.startsWith("\\internal_linebr")) {
+         iter += 15;
+         iter_start = iter;
 
       } else if (c == '\n') {
          iter_start = iter;
@@ -7000,9 +7006,14 @@ QString trimEmptyLines(const QString &str, int &docLine)
 
    while (true) {
       c = *iter;
+      QStringView tmp = QStringView(iter, iter_end);
 
       if (c == ' ' || c == '\t' || c == '\r') {
          // do nothing
+      } else if (tmp.endsWith("\\internal_linebr")) {
+         iter -= 15;
+         iter_end = iter;
+
 
       } else if (c == '\n') {
          iter_end = iter;
