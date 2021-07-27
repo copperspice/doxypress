@@ -2613,45 +2613,36 @@ DocXRefItem::DocXRefItem(DocNode *parent, int id, const QString &key)
 
 bool DocXRefItem::parse()
 {
-   if (Doxy_Globals::xrefLists.contains(m_key)) {
+   auto iter = Doxy_Globals::xrefLists.find(m_key);
 
-      static const bool todoList  = Config::getBool("generate-todo-list");
-      static const bool testList  = Config::getBool("generate-test-list");
-      static const bool bugList   = Config::getBool("generate-bug-list");
-      static const bool depreList = Config::getBool("generate-deprecate-list");
+   if (iter != Doxy_Globals::xrefLists.end() && iter->isEnabled())  {
 
-      auto &refList = Doxy_Globals::xrefLists[m_key];
+      auto &refList = *iter;
 
-      if ( (m_key != "todo"       || todoList) &&
-           (m_key != "test"       || testList) &&
-           (m_key != "bug"        || bugList)  &&
-           (m_key != "deprecated" || depreList) ) {
+      // either not a built-in list or the list is enabled
+      RefItem *item = refList.getRefItem(m_id);
+      assert(item != nullptr);
 
-         // either not a built-in list or the list is enabled
-         RefItem *item = refList.getRefItem(m_id);
-         assert(item != nullptr);
+      if (item) {
+         if (s_memberDef && ! s_memberDef->name().isEmpty() && s_memberDef->name().at(0) == '@') {
+            m_file   = "@";  // can not cross reference anonymous enum
+            m_anchor = "@";
 
-         if (item) {
-            if (s_memberDef && ! s_memberDef->name().isEmpty() && s_memberDef->name().at(0) == '@') {
-               m_file   = "@";  // can not cross reference anonymous enum
-               m_anchor = "@";
-
-            } else {
-               m_file   = refList.fileName();
-               m_anchor = item->listAnchor;
-            }
-
-            m_title  = refList.sectionTitle();
-
-            if (! item->text.isEmpty()) {
-               docParserPushContext();
-               internalValidatingParseDoc(this, m_children, item->text);
-               docParserPopContext();
-            }
+         } else {
+            m_file   = refList.fileName();
+            m_anchor = item->listAnchor;
          }
 
-         return true;
+         m_title = refList.sectionTitle();
+
+         if (! item->text.isEmpty()) {
+            docParserPushContext();
+            internalValidatingParseDoc(this, m_children, item->text);
+            docParserPopContext();
+         }
       }
+
+      return true;
    }
 
    return false;
