@@ -79,8 +79,6 @@ class RefList
    QString pageTitle() const;
    QString sectionTitle() const;
 
-   ~RefList();
-
    void insertIntoList(const QString &key, RefItem *item);
    void generatePage();
 

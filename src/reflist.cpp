@@ -39,10 +39,6 @@ RefList::RefList(const QString &listName, const QString &pageTitle, const QStrin
    m_secTitle  = secTitle;
 }
 
-/*! Destroy the todo list. Currently not called! */
-RefList::~RefList()
-{
-}
 
 /*! Adds a new item to the list.
  *  \returns A unique id for this item.
