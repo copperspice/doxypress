@@ -39,7 +39,6 @@ RefList::RefList(const QString &listName, const QString &pageTitle, const QStrin
    m_secTitle  = secTitle;
 }
 
-
 /*! Adds a new item to the list.
  *  \returns A unique id for this item.
  */
@@ -98,6 +97,30 @@ RefItem *RefList::getNextRefItem()
    return retval;
 }
 
+bool RefList::isEnabled() const
+{
+   static const bool todoList  = Config::getBool("generate-todo-list");
+   static const bool testList  = Config::getBool("generate-test-list");
+   static const bool bugList   = Config::getBool("generate-bug-list");
+   static const bool depreList = Config::getBool("generate-deprecate-list");
+
+   if (m_listName == "todo" && ! todoList) {
+      return false;
+
+   } else if (m_listName == "test" && ! testList) {
+      return false;
+
+   } else if (m_listName == "bug"  && ! bugList) {
+      return false;
+
+   } else if (m_listName == "deprecated" && ! depreList) {
+      return false;
+
+   }
+
+   return true;
+}
+
 /*! Returns the name of the list as set in the constructor. */
 QString RefList::listName() const
 {
@@ -141,7 +164,7 @@ void RefList::insertIntoList(const QString &key, RefItem *item)
 
 void RefList::generatePage()
 {
-   if (m_itemMap.isEmpty()) {
+   if (m_itemMap.isEmpty() || ! isEnabled()) {
       return;
    }
 

@@ -80,6 +80,8 @@ class RefList
    QString sectionTitle() const;
 
    void insertIntoList(const QString &key, RefItem *item);
+   bool isEnabled() const;
+
    void generatePage();
 
  private:
