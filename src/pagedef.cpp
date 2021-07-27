@@ -29,6 +29,10 @@
 PageDef::PageDef(const QString &f, int l, const QString &name, const QString &d, const QString &t)
    : Definition(f, l, 1, name), m_title(t)
 {
+   if (m_title.isEmpty()) {
+      m_title = name;
+   }
+
    setDocumentation(d, f, l);
 
    m_subPageDict  = new PageSDict();

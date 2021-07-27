@@ -9365,6 +9365,9 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
          QSharedPointer<Entry> root = ptrEntry->entry();
 
          QString title = root->getData(EntryKey::Member_Args).trimmed();
+         if (title.isEmpty()) {
+            title = Config::getString("project-name");
+         }
 
          QString indexName = "index";
          Doxy_Globals::mainPage = QMakeShared<PageDef>(root->getData(EntryKey::MainDocs_File), root->docLine, indexName,
