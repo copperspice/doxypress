@@ -1050,6 +1050,51 @@ void LatexDocVisitor::visitPost(DocHtmlListItem *)
 //  m_insidePre=false;
 //  m_t << "\\end{alltt}\\normalsize " << endl;
 //}
+static bool classMatchesReflist(const DocNode *n)
+{
+   const DocHtmlDescList *obj = dynamic_cast<const DocHtmlDescList *>(n);
+
+   if (obj != nullptr) {
+      HtmlAttribList list = obj->attribs();
+
+      for (const auto &item : list) {
+
+         if (item.name == "class") {
+
+            if (item.value == "reflist") {
+               return true;
+            }
+
+            break;
+         }
+      }
+   }
+
+   return false;
+}
+
+static bool listIsNested(const DocNode *n)
+{
+   bool isNested = false;
+
+   if (n) {
+      if (classMatchesReflist(n)) {
+         return false;
+      }
+
+      n  = n->parent();
+   }
+
+   while (n && ! isNested) {
+      if (n->kind() == DocNode::Kind_HtmlDescList) {
+         isNested = ! classMatchesReflist(n);
+      }
+
+      n = n->parent();
+   }
+
+   return isNested;
+}
 
 void LatexDocVisitor::visitPre(DocHtmlDescList *dl)
 {
@@ -1057,11 +1102,14 @@ void LatexDocVisitor::visitPre(DocHtmlDescList *dl)
       return;
    }
 
-   QString val = dl->attribs().find("class");
-
-   if (val == "reflist") {
+   if (classMatchesReflist(dl)) {
       m_t << "\n\\begin{DoxyRefList}";
+
    } else {
+      if (listIsNested(dl)) {
+         m_t << "\n\\hfill";
+      }
+
       m_t << "\n\\begin{DoxyDescription}";
    }
 }
@@ -1071,8 +1119,8 @@ void LatexDocVisitor::visitPost(DocHtmlDescList *dl)
    if (m_hide) {
       return;
    }
-   QString val = dl->attribs().find("class");
-   if (val == "reflist") {
+
+   if (classMatchesReflist(dl)) {
       m_t << "\n\\end{DoxyRefList}";
    } else {
       m_t << "\n\\end{DoxyDescription}";
@@ -1084,6 +1132,7 @@ void LatexDocVisitor::visitPre(DocHtmlDescTitle *)
    if (m_hide) {
       return;
    }
+
    m_t << "\n\\item[";
    m_insideItem = true;
 }
