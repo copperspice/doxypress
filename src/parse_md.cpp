@@ -835,6 +835,9 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
 
    int level   = 1;
    int nl      = 0;
+   int nlCount = 0;
+
+
 
    if (*iter_i == '!') {
       isImageLink = true;
@@ -877,6 +880,9 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
       ++iter_i;
    }
 
+   nlCount += nl;
+   nl       = 0;
+
    if (iter_i == iter_size) {
       // premature end of comment -> no link
       return 0;
@@ -899,14 +905,18 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    if (iter_i != iter_size && *iter_i == '\n') {
       // one newline allowed here
       ++iter_i;
-
+      ++nl;
       // skip more whitespace
       while (iter_i != iter_size && *iter_i == ' ') {
          ++iter_i;
       }
    }
 
+   nlCount += nl;
+   nl = 0;
+
    bool explicitTitle = false;
+
    if (iter_i != iter_size && *iter_i == '(') {
       // inline link
       ++iter_i;
@@ -920,7 +930,6 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
       }
 
       iter_linkStart = iter_i;
-      nl = 0;
 
       int braceCount = 1;
 
@@ -947,6 +956,9 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
            ++iter_i;
          }
       }
+
+      nlCount += nl;
+      nl = 0;
 
       if (iter_i == iter_size|| *iter_i == '\n') {
          return 0;
@@ -1081,6 +1093,9 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
       return 0;
    }
 
+  nlCount += nl;
+  nl = 0;
+
    if (isToc) {
       // special case for [TOC]
       out += "@tableofcontents";
@@ -1126,12 +1141,33 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
       SrcLangExt lang = getLanguageFromFileName(link);
       int lp = -1;
 
-      if ((lp = link.indexOf("@ref ")) != -1 || (lp = link.indexOf("\\ref ")) != -1 || lang == SrcLangExt_Markdown) {
+      if ((lp = link.indexOf("@ref ")) != -1 || (lp = link.indexOf("\\ref ")) != -1 ||
+               (lang == SrcLangExt_Markdown && ! isURL(link))) {
          // assume DoxyPress symbol link
 
          if (lp == -1) {
             // link to markdown page
             out += "@ref ";
+
+            QFileInfo fi_link(link);
+
+            if (! (fi_link.isAbsolute() || isURL(link))) {
+
+               if (fi_link.exists() && fi_link.isReadable()) {
+                  link = fi_link.absoluteFilePath();
+
+               } else if (! (fi_link.exists() && fi_link.isReadable())) {
+                  QFileInfo fi_name(g_fileName);
+
+                  QString mdFile = fi_name.path() + link;
+
+                  QFileInfo fi_md(mdFile);
+
+                  if (fi_md.exists() && fi_md.isReadable()) {
+                     link = fi_md.absoluteFilePath();
+                  }
+               }
+            }
          }
 
          out += link;
@@ -1152,6 +1188,9 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          out += link;
          out += "\"";
 
+         for (int count = 0; count < nlCount; ++count) {
+            out += "\n";
+         }
          if (! title.isEmpty()) {
             out += " title=\"";
             out += substitute(title.simplified(), "\"", "&quot;");
