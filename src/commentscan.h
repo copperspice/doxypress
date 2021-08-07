@@ -70,9 +70,9 @@ void groupEnterFile(const QString &file, int line);
 void groupLeaveFile(const QString &file, int line);
 void groupLeaveCompound(const QString &file, int line, const QString &name);
 void groupEnterCompound(const QString &file, int line, const QString &name);
-void openGroup(QSharedPointer<Entry> e, const QString &file, int line);
-void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool foundInline = false);
-void initGroupInfo(QSharedPointer<Entry> e);
 
+void openGroup(QSharedPointer<Entry> e, const QString &file, int line, bool forceOpen = false);
+void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool isInline = false, bool forceClose = false);
+void initGroupInfo(QSharedPointer<Entry> e);
 
 #endif
