@@ -3192,8 +3192,15 @@ static QString detab(QStringView str, int &refIndent)
             break;
 
          default:
-            // non-whitespace => update minIndent
-            retval += c;
+            // non-whitespace, update minIndent
+            if (c.unicode() == 0xa0) {
+               // handle nbsp
+
+               retval += "&nbsp;";
+
+            } else {
+               retval += c;
+            }
 
             if (col < minIndent) {
                minIndent = col;
