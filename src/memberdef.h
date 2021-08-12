@@ -275,6 +275,10 @@ class MemberDef : public Definition
    bool hasCallerGraph() const;
    bool visibleMemberGroup(bool hideNoHeader);
 
+   // referenced related members
+   bool hasReferencesRelation() const;
+   bool hasReferencedByRelation() const;
+
    QSharedPointer<MemberDef> templateMaster() const;
    QString getScopeString() const;
    QSharedPointer<ClassDef> getClassDefOfAnonymousType();
@@ -382,6 +386,8 @@ class MemberDef : public Definition
    void enableCallGraph(bool e);
    void enableCallerGraph(bool e);
 
+   void enableReferencedByRelation(bool e);
+   void enableReferencesRelation(bool e);
    void setTemplateMaster(QSharedPointer<MemberDef> mt);
    void addListReference(QSharedPointer<Definition> d);
    void setDocsForDefinition(bool b);

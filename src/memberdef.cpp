@@ -687,6 +687,10 @@ class MemberDefImpl
    bool annUsed;
    bool hasCallGraph;
    bool hasCallerGraph;
+
+   bool hasReferencedByRelation;
+   bool hasReferencesRelation;
+
    bool explExt;             // member was explicitly declared external
    bool tspec;               // member is a template specialization
    bool groupHasDocs;        // true if the entry that caused the grouping was documented
@@ -720,6 +724,10 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
    livesInsideEnum   = false;
    hasCallGraph      = false;
    hasCallerGraph    = false;
+
+   hasReferencedByRelation = false;
+   hasReferencesRelation   = false;
+
    initLines         = 0;
    m_type            = type;
 
@@ -3309,9 +3317,15 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
    writeTypeConstraints(ol);
 
    writeSourceDef(ol, cname);
-   writeSourceRefs(ol, cname);
-   writeSourceReffedBy(ol, cname);
    writeInlineCode(ol, cname);
+
+   if (hasReferencesRelation()) {
+      writeSourceRefs(ol,cname);
+   }
+
+   if (hasReferencedByRelation()) {
+      writeSourceReffedBy(ol,cname);
+   }
 
    writeCallGraph(ol);
    writeCallerGraph(ol);
@@ -4370,6 +4384,24 @@ void MemberDef::enableCallerGraph(bool e)
    }
 }
 
+void MemberDef::enableReferencedByRelation(bool e)
+{
+   m_impl->hasReferencedByRelation = e;
+
+   if (e) {
+      Doxy_Globals::parseSourcesNeeded = true;
+   }
+}
+
+void MemberDef::enableReferencesRelation(bool e)
+{
+   m_impl->hasReferencesRelation = e;
+
+   if (e) {
+      Doxy_Globals::parseSourcesNeeded = true;
+   }
+}
+
 bool MemberDef::isObjCMethod() const
 {
    if (m_impl->classDef && m_impl->classDef->isObjectiveC() && isFunction()) {
@@ -5067,6 +5099,16 @@ bool MemberDef::hasCallerGraph() const
    return m_impl->hasCallerGraph;
 }
 
+bool MemberDef::hasReferencedByRelation() const
+{
+  return m_impl->hasReferencedByRelation;
+}
+
+bool MemberDef::hasReferencesRelation() const
+{
+  return m_impl->hasReferencesRelation;
+}
+
 QSharedPointer<MemberDef> MemberDef::templateMaster() const
 {
    return m_impl->templateMaster;
@@ -5537,6 +5579,10 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
          mdef->enableCallerGraph(mdec->hasCallerGraph() || mdef->hasCallerGraph());
          mdec->enableCallGraph(mdec->hasCallGraph() || mdef->hasCallGraph());
          mdec->enableCallerGraph(mdec->hasCallerGraph() || mdef->hasCallerGraph());
+         mdef->enableReferencedByRelation(mdec->hasReferencedByRelation() || mdef->hasReferencedByRelation());
+         mdef->enableReferencesRelation(mdec->hasReferencesRelation() || mdef->hasReferencesRelation());
+         mdec->enableReferencedByRelation(mdec->hasReferencedByRelation() || mdef->hasReferencedByRelation());
+         mdec->enableReferencesRelation(mdec->hasReferencesRelation() || mdef->hasReferencesRelation());
       }
    }
 }
