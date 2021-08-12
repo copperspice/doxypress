@@ -322,7 +322,7 @@ void HtmlDocVisitor::visit(DocEmoji *s)
    QString result = EmojiEntityMapper::instance()->unicode(s->index());
 
    if (! result.isEmpty()) {
-      m_t << result;
+      m_t << "<span class=\"emoji\">" << result << "</span>";
    } else {
       m_t << s->name();
    }
@@ -1906,9 +1906,10 @@ void HtmlDocVisitor::visitPre(DocImage *img)
 {
    if (img->type() == DocImage::Html) {
 
-      QString url      = img->url();
       bool inlineImage = img->isInlineImage();
       bool isImageSvg  = false;
+
+      QString url = img->url();
 
       if (url.isEmpty()) {
          if (img->name().endsWith(".svg")) {
@@ -1917,6 +1918,11 @@ void HtmlDocVisitor::visitPre(DocImage *img)
 
       } else if (url.endsWith(".svg"))  {
          isImageSvg = true;
+      }
+
+      if (! inlineImage) {
+         // may not be activated
+         forceEndParagraph(img);
       }
 
       if (m_hide) {
@@ -1965,15 +1971,11 @@ void HtmlDocVisitor::visitPre(DocImage *img)
          src = correctURL(url, img->relPath());
       }
 
-      if (isImageSvg) {
+      if (isImageSvg && ! inlineImage) {
          m_t << "<object type=\"image/svg+xml\" data=\"" << convertToHtml(src)
              << "\"" << sizeAttribs << attrs;
 
-         if (inlineImage) {
-            // skip closing tag
-         } else {
-            m_t << ">" << alt << "</object>" << endl;
-         }
+         m_t << ">" << alt << "</object>" << endl;
 
       } else {
          m_t << "<img src=\"" << convertToHtml(src) << "\" alt=\"" << alt << "\"" << sizeAttribs << attrs;
@@ -1993,11 +1995,8 @@ void HtmlDocVisitor::visitPre(DocImage *img)
             m_t << "<div class=\"caption\">" << endl;
          }
       } else if (inlineImage) {
-         if (isImageSvg) {
-            m_t << ">" << alt << "</object>";
-         } else  {
-            m_t << "/>";
-         }
+         m_t << "/>";
+
       }
 
    } else {
@@ -2015,33 +2014,12 @@ void HtmlDocVisitor::visitPost(DocImage *img)
       }
 
       bool inlineImage = img->isInlineImage();
-      bool isImageSvg  = false;
-
-      if (img->url().isEmpty()) {
-         if (img->name().endsWith(".svg")) {
-            isImageSvg = true;
-         }
-
-      } else if (img->url().endsWith(".svg"))  {
-         isImageSvg = true;
-      }
 
       if (img->hasCaption()) {
          if (inlineImage) {
-
-           if (isImageSvg) {
-             QString alt;
-             QString attrs = htmlAttribsToString(img->attribs(), &alt);
-
-             m_t << "\">" << alt << "</object>";
-
-           } else {
-             m_t << "\"/>";
-           }
+            m_t << "\"/>";
 
          } else {
-            // end <div class="caption">
-
             m_t << "</div>";
          }
       }
@@ -2049,6 +2027,7 @@ void HtmlDocVisitor::visitPost(DocImage *img)
       if (! inlineImage) {
          // end <div class="image">
          m_t << "</div>" << endl;
+         forceStartParagraph(img);
       }
 
 
