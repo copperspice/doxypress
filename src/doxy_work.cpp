@@ -3245,6 +3245,9 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
                         newMd->setDefinition(md->definition());
                         newMd->enableCallGraph(root->callGraph);
                         newMd->enableCallerGraph(root->callerGraph);
+                        newMd->enableReferencedByRelation(root->referencedByRelation);
+                        newMd->enableReferencesRelation(root->referencesRelation);
+
                         newMd->setBitfields(md->bitfieldString());
                         newMd->addSectionsToDefinition(root->m_anchors);
                         newMd->setBodySegment(md->getStartBodyLine(), md->getEndBodyLine());
@@ -3463,6 +3466,9 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
 
    md->enableCallGraph(ptrEntry->callGraph);
    md->enableCallerGraph(ptrEntry->callerGraph);
+   md->enableReferencedByRelation(ptrEntry->referencedByRelation);
+   md->enableReferencesRelation(ptrEntry->referencesRelation);
+
    md->setHidden(ptrEntry->hidden);
    md->setArtificial(ptrEntry->artificial);
    md->setLanguage(ptrEntry->m_srcLang);
@@ -3677,6 +3683,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    md->setId(root->getData(EntryKey::Clang_Id));
    md->enableCallGraph(root->callGraph);
    md->enableCallerGraph(root->callerGraph);
+   md->enableReferencedByRelation(root->referencedByRelation);
+   md->enableReferencesRelation(root->referencesRelation);
    md->setExplicitExternal(root->explicitExternal);
 
    if (! root->explicitExternal) {
@@ -4284,6 +4292,8 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    md->setDefinition(def);
    md->enableCallGraph(root->callGraph);
    md->enableCallerGraph(root->callerGraph);
+   md->enableReferencedByRelation(root->referencedByRelation);
+   md->enableReferencesRelation(root->referencesRelation);
 
    Debug::print(Debug::Functions, 0, "  Interface Member:\n"
                 "    `%s' `%s' proto=%d\n"
@@ -4543,6 +4553,8 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    md->setDefinition(def);
    md->enableCallGraph(root->callGraph);
    md->enableCallerGraph(root->callerGraph);
+   md->enableReferencedByRelation(ptrEntry->referencedByRelation);
+   md->enableReferencesRelation(ptrEntry->referencesRelation);
 
    // add member to the global list of all members
    QSharedPointer<MemberName> mn;
@@ -4794,6 +4806,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
 
                         item->enableCallGraph(item->hasCallGraph() || root->callGraph);
                         item->enableCallerGraph(item->hasCallerGraph() || root->callerGraph);
+                        item->enableReferencedByRelation(item->hasReferencedByRelation() || root->referencedByRelation);
+                        item->enableReferencesRelation(item->hasReferencesRelation() || root->referencesRelation);
 
                         // merge ingroup specifiers
                         if (item->getGroupDef() == 0 && root->m_groups.size() > 0) {
@@ -4892,7 +4906,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md->setDefinition(def);
                md->enableCallGraph(root->callGraph);
                md->enableCallerGraph(root->callerGraph);
-
+               md->enableReferencedByRelation(root->referencedByRelation);
+               md->enableReferencesRelation(root->referencesRelation);
                md->setRefItems(root->m_specialLists);
 
                if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
@@ -5019,8 +5034,14 @@ void Doxy_Work::findFriends()
 
                   mmd->enableCallGraph(mmd->hasCallGraph() || fmd->hasCallGraph());
                   mmd->enableCallerGraph(mmd->hasCallerGraph() || fmd->hasCallerGraph());
+                  mmd->enableReferencedByRelation(mmd->hasReferencedByRelation() || fmd->hasReferencedByRelation());
+                  mmd->enableReferencesRelation(mmd->hasReferencesRelation() || fmd->hasReferencesRelation());
+
                   fmd->enableCallGraph(mmd->hasCallGraph() || fmd->hasCallGraph());
                   fmd->enableCallerGraph(mmd->hasCallerGraph() || fmd->hasCallerGraph());
+                  fmd->enableReferencedByRelation(mmd->hasReferencedByRelation() || fmd->hasReferencedByRelation());
+                  fmd->enableReferencesRelation(mmd->hasReferencesRelation() || fmd->hasReferencesRelation());
+
                }
             }
          }
@@ -6221,6 +6242,8 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
    md->setDefinition(fDecl);
    md->enableCallGraph(root->callGraph);
    md->enableCallerGraph(root->callerGraph);
+   md->enableReferencedByRelation(root->referencedByRelation);
+   md->enableReferencesRelation(root->referencesRelation);
 
    QSharedPointer<ClassDef> cd     = md->getClassDef();
    QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
@@ -6296,6 +6319,8 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
 
    md->enableCallGraph(md->hasCallGraph() || root->callGraph);
    md->enableCallerGraph(md->hasCallerGraph() || root->callerGraph);
+   md->enableReferencedByRelation(md->hasReferencedByRelation() || root->referencedByRelation);
+   md->enableReferencesRelation(md->hasReferencesRelation() || root->referencesRelation);
 
    md->mergeMemberTraits(root->m_traits);
    md->addSectionsToDefinition(root->m_anchors);
@@ -7335,6 +7360,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setDefinition(funcDecl);
                md->enableCallGraph(root->callGraph);
                md->enableCallerGraph(root->callerGraph);
+               md->enableReferencedByRelation(root->referencedByRelation);
+               md->enableReferencesRelation(root->referencesRelation);
+
                md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
@@ -7414,6 +7442,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setDefinition(funcDecl);
                md->enableCallGraph(root->callGraph);
                md->enableCallerGraph(root->callerGraph);
+               md->enableReferencedByRelation(root->referencedByRelation);
+               md->enableReferencesRelation(root->referencesRelation);
 
                QString doc = theTranslator->trOverloadText();
                doc += "<p>";
@@ -7647,6 +7677,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setDefinition(funcDecl);
                md->enableCallGraph(root->callGraph);
                md->enableCallerGraph(root->callerGraph);
+               md->enableReferencedByRelation(root->referencedByRelation);
+               md->enableReferencesRelation(root->referencesRelation);
+
                md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
@@ -7718,6 +7751,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             md->setDefinition(funcDecl);
             md->enableCallGraph(root->callGraph);
             md->enableCallerGraph(root->callerGraph);
+            md->enableReferencedByRelation(root->referencedByRelation);
+            md->enableReferencesRelation(root->referencesRelation);
+
             md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
             md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
             md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
@@ -8017,7 +8053,8 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          md->setMemberGroupId(root->mGrpId);
          md->enableCallGraph(root->callGraph);
          md->enableCallerGraph(root->callerGraph);
-
+         md->enableReferencedByRelation(root->referencedByRelation);
+         md->enableReferencesRelation(root->referencesRelation);
          md->setRefItems(root->m_specialLists);
 
          bool defSet = false;
