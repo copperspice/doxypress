@@ -1751,6 +1751,27 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
       bool ambig;
       QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, ptrEntry->m_entryName, ambig);
 
+      if (! fd || ambig) {
+         // check if fd and root are in the same directory
+
+         int save_ambig = ambig;
+
+         QString fn   = ptrEntry->getData(EntryKey::File_Name);
+         int newIndex = fn.lastIndexOf('/');
+
+         if (newIndex < 0) {
+            fn = ptrEntry->m_entryName;
+         } else {
+           fn = fn.left(newIndex) + "/" + ptrEntry->m_entryName;
+         }
+
+         fd = findFileDef(&Doxy_Globals::inputNameDict, fn, ambig);
+
+         if (fd == nullptr) {
+            ambig = save_ambig;
+         }
+      }
+
       if (fd && ! ambig) {
          // using false in setDocumentation is a work around to ensure a file is
          // documented even if a \file command is used without further documentation
