@@ -4418,11 +4418,26 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 {
    static const bool hideScopeNames = Config::getBool("hide-scope-names");
 
-   QSharedPointer<Entry> root = ptrEntry;
    QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
-   QString entryMemberType = root->getData(EntryKey::Member_Type);
+   QString entryMemberType = ptrEntry->getData(EntryKey::Member_Type);
 
+   MemberDefType memberType;
+
+   if (ptrEntry->mtype == MethodType::Signal) {
+      memberType = MemberDefType::Signal;
+
+   } else if (ptrEntry->mtype == MethodType::Slot) {
+      memberType = MemberDefType::Slot;
+
+   } else if (ptrEntry->mtype == MethodType::DCOP) {
+      memberType = MemberDefType::DCOP;
+
+   } else {
+      memberType = MemberDefType::Function;
+   }
+
+   // ---
    static QRegularExpression regExp("\\([a-z_A-Z0-9: ]*[ &*]+[ ]*");
    QRegularExpressionMatch match = regExp.match(entryMemberType);
 
@@ -4442,43 +4457,41 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
       i = -1;
    }
 
-   bool isAlias = root->m_traits.hasTrait(Entry::Virtue::Alias);
+   bool isAlias = ptrEntry->m_traits.hasTrait(Entry::Virtue::Alias);
 
    if (cd->getLanguage() == SrcLangExt_Cpp && ! entryMemberType.isEmpty() && ! isAlias && i != -1) {
       // only C has pointers, function variable
 
-      root->prependData(EntryKey::Member_Args, entryMemberType.right(entryMemberType.length() - i - len));
-      root->setData(EntryKey::Member_Type,     entryMemberType.left(i + len));
+      ptrEntry->prependData(EntryKey::Member_Args, entryMemberType.right(entryMemberType.length() - i - len));
+      ptrEntry->setData(EntryKey::Member_Type,     entryMemberType.left(i + len));
    }
+   // ---
 
    QString name = removeRedundantWhiteSpace(rname);
    if (name.startsWith("::")) {
       name = name.right(name.length() - 2);
    }
 
-   MemberDefType memberType;
-
-   if (root->mtype == MethodType::Signal) {
-      memberType = MemberDefType::Signal;
-
-   } else if (root->mtype == MethodType::Slot) {
-      memberType = MemberDefType::Slot;
-
-   } else if (root->mtype == MethodType::DCOP) {
-      memberType = MemberDefType::DCOP;
-
-   } else {
-      memberType = MemberDefType::Function;
-   }
-
    // strip redundant template specifier for constructors
-   if ((fd == nullptr || fd->getLanguage() == SrcLangExt_Cpp) && name.left(9) != "operator " &&
-         (i = name.indexOf('<')) != -1 && name.indexOf('>') != -1) {
+   if (fd == nullptr || fd->getLanguage() == SrcLangExt_Cpp) {
 
-      name = name.left(i);
+      if (! name.startsWith("operator ")) {
+
+         int indexA = name.indexOf('<');
+         int indexB = name.indexOf('>');
+
+         if (indexA != -1 && indexB != -1) {
+            // contains < >
+
+            if (indexB != indexA + 2 || name.at(indexA + 1) != '=') {
+               // not a spaceship operator
+               name = name.left(indexA);
+            }
+         }
+      }
    }
 
-   QString fileName = root->getData(EntryKey::File_Name);
+   QString fileName = ptrEntry->getData(EntryKey::File_Name);
 
    if (fileName.isEmpty() && ! ptrEntry->m_tagInfo.isEmpty()) {
       fileName = ptrEntry->m_tagInfo.tag_Name;
@@ -4486,8 +4499,8 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 
    ArgumentList tmpList;
 
-   if (! root->m_templateArgLists.isEmpty()) {
-      tmpList = root->m_templateArgLists.last();
+   if (! ptrEntry->m_templateArgLists.isEmpty()) {
+      tmpList = ptrEntry->m_templateArgLists.last();
    }
 
    // adding class member
@@ -4496,10 +4509,10 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    if (isFriend) {
       tRelation = Relationship::Friend;
 
-   } else if (root->getData(EntryKey::Related_Class).isEmpty()) {
+   } else if (ptrEntry->getData(EntryKey::Related_Class).isEmpty()) {
       tRelation = Relationship::Member;
 
-   } else if (root->relatesType == RelatesType::MemberOf) {
+   } else if (ptrEntry->relatesType == RelatesType::MemberOf) {
       tRelation = Relationship::Foreign;
 
    } else {
@@ -4507,28 +4520,28 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 
    }
 
-   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
-               root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args),
-               root->getData(EntryKey::Exception_Spec), root->protection, root->virt,
-               (root->stat && root->relatesType != MemberOf), tRelation, memberType, tmpList, root->argList);
+   QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, ptrEntry->startLine, ptrEntry->startColumn,
+               ptrEntry->getData(EntryKey::Member_Type), name, ptrEntry->getData(EntryKey::Member_Args),
+               ptrEntry->getData(EntryKey::Exception_Spec), ptrEntry->protection, ptrEntry->virt,
+               (ptrEntry->stat && ptrEntry->relatesType != MemberOf), tRelation, memberType, tmpList, ptrEntry->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
 
-   md->setRequires(root->getData(EntryKey::Requires_Clause));
-   md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
-   md->setDocsForDefinition(! root->proto);
-   md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-   md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
-   md->setBodySegment(root->startBodyLine, root->endBodyLine);
-   md->setMemberTraits(root->m_traits);
-   md->setMemberGroupId(root->mGrpId);
-   md->setTypeConstraints(root->typeConstr);
-   md->setLanguage(root->m_srcLang);
-   md->setId(root->getData(EntryKey::Clang_Id));
+   md->setRequires(ptrEntry->getData(EntryKey::Requires_Clause));
+   md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
+   md->setDocsForDefinition(! ptrEntry->proto);
+   md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
+   md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs), ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
+   md->setBodySegment(ptrEntry->startBodyLine, ptrEntry->endBodyLine);
+   md->setMemberTraits(ptrEntry->m_traits);
+   md->setMemberGroupId(ptrEntry->mGrpId);
+   md->setTypeConstraints(ptrEntry->typeConstr);
+   md->setLanguage(ptrEntry->m_srcLang);
+   md->setId(ptrEntry->getData(EntryKey::Clang_Id));
    md->setBodyDef(fd);
    md->setFileDef(fd);
-   md->addSectionsToDefinition(root->m_anchors);
+   md->addSectionsToDefinition(ptrEntry->m_anchors);
    md->setFriend(isFriend);
 
    QString def;
@@ -4546,10 +4559,10 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
       scopeSeparator = "::";
    }
 
-   if (! root->getData(EntryKey::Related_Class).isEmpty() || isFriend || hideScopeNames) {
+   if (! ptrEntry->getData(EntryKey::Related_Class).isEmpty() || isFriend || hideScopeNames) {
 
-      if (! root->getData(EntryKey::Member_Type).isEmpty()) {
-         def = root->getData(EntryKey::Member_Type) + " " + name;
+      if (! ptrEntry->getData(EntryKey::Member_Type).isEmpty()) {
+         def = ptrEntry->getData(EntryKey::Member_Type) + " " + name;
 
       } else {
          def = name;
@@ -4557,8 +4570,8 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
       }
 
    } else {
-      if (! root->getData(EntryKey::Member_Type).isEmpty()) {
-        def = root->getData(EntryKey::Member_Type) + " " + qualScope + scopeSeparator + name;
+      if (! ptrEntry->getData(EntryKey::Member_Type).isEmpty()) {
+        def = ptrEntry->getData(EntryKey::Member_Type) + " " + qualScope + scopeSeparator + name;
 
       } else {
          def = qualScope + scopeSeparator + name;
@@ -4571,8 +4584,8 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    }
 
    md->setDefinition(def);
-   md->enableCallGraph(root->callGraph);
-   md->enableCallerGraph(root->callerGraph);
+   md->enableCallGraph(ptrEntry->callGraph);
+   md->enableCallerGraph(ptrEntry->callerGraph);
    md->enableReferencedByRelation(ptrEntry->referencedByRelation);
    md->enableReferencesRelation(ptrEntry->referencesRelation);
 
@@ -4580,7 +4593,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    QSharedPointer<MemberName> mn;
    mn = Doxy_Globals::memberNameSDict.find(name);
 
-   if (mn) {
+   if (mn != nullptr) {
       mn->append(md);
 
    } else {
@@ -4596,11 +4609,10 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    cd->insertUsedFile(fd);
 
    // add member to groups
-   addMemberToGroups(root, md);
-
+   addMemberToGroups(ptrEntry, md);
    ptrEntry->setSection(Entry::EMPTY_SEC);
 
-   md->setRefItems(root->m_specialLists);
+   md->setRefItems(ptrEntry->m_specialLists);
 }
 
 void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
