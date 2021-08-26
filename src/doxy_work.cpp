@@ -3788,17 +3788,17 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
    static QRegularExpression regExp_init("[0-9\"'&*!^]+");
    static QRegularExpression regExp_id("[a-z_A-Z][a-z_A-Z0-9]*");
 
-   bool result = false;
-   bool typeIsClass;
-
    QString type;
+   int ti;
+
+   bool result      = false;
+   bool typeIsClass = false;
+   bool outerBreak  = false;
 
    QSharedPointer<Definition> ctx;
    QSharedPointer<FileDef>    fd;
-   QSharedPointer<Entry>      root = ptrEntry->entry();
 
-   int ti;
-   bool outerBreak = false;
+   fd = ptrEntry->fileDef();
 
    do {
 
@@ -3807,13 +3807,13 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
          result = false;
          break;
 
-      } else if ((fd = ptrEntry->fileDef()) && (fd->name().endsWith(".c") || fd->name().endsWith(".h")) ) {
+      } else if ((fd != nullptr) && (fd->name().endsWith(".c") || fd->name().endsWith(".h")) ) {
          // inside a .c file
          result = false;
          break;
       }
 
-      if (root->getData(EntryKey::Member_Type).isEmpty()) {
+      if (ptrEntry->getData(EntryKey::Member_Type).isEmpty()) {
          result = false;
           break;
       }
@@ -3822,7 +3822,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
          ctx = Doxy_Globals::namespaceSDict.find(ptrEntry->parent()->m_entryName);
       }
 
-      type = root->getData(EntryKey::Member_Type);
+      type = ptrEntry->getData(EntryKey::Member_Type);
 
       // remove qualifiers
       findAndRemoveWord(type, "const");
@@ -3839,7 +3839,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
          // need to check if the arguments are types or values.
          // since we do not have complete type info, need on heuristics
 
-         const ArgumentList &argList = root->argList;
+         const ArgumentList &argList = ptrEntry->argList;
 
          if (argList.listEmpty()) {
             result = false;
