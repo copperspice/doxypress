@@ -1747,21 +1747,20 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
          ! ptrEntry->m_entryName.isEmpty() && ptrEntry->m_tagInfo.isEmpty() ) {
 
       // skip any file coming from tag files
-      QSharedPointer<Entry> root = ptrEntry->entry();
 
       bool ambig;
-      QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, root->m_entryName, ambig);
+      QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, ptrEntry->m_entryName, ambig);
 
       if (fd && ! ambig) {
          // using false in setDocumentation is a work around to ensure a file is
          // documented even if a \file command is used without further documentation
 
-         fd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine, false);
-         fd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-         fd->addSectionsToDefinition(root->m_anchors);
-         fd->setRefItems(root->m_specialLists);
+         fd->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine, false);
+         fd->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
+         fd->addSectionsToDefinition(ptrEntry->m_anchors);
+         fd->setRefItems(ptrEntry->m_specialLists);
 
-         for (auto &g : root->m_groups) {
+         for (const auto &g : ptrEntry->m_groups) {
             QSharedPointer<GroupDef> gd;
 
             if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
@@ -1771,16 +1770,16 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
          }
 
       } else {
-         const QString fn = root->getData(EntryKey::File_Name);
+         const QString fn = ptrEntry->getData(EntryKey::File_Name);
 
          QString text;
-         text = QString("Name `%1' supplied as the second argument in the \\file statement ").formatArg(root->m_entryName);
+         text = QString("Name `%1' supplied as the argument in the \\file statement ").formatArg(ptrEntry->m_entryName);
 
          if (ambig) {
             // name is ambiguous
 
             text += "matches the following input files:\n";
-            text += showFileDefMatches(Doxy_Globals::inputNameDict, root->m_entryName);
+            text += showFileDefMatches(Doxy_Globals::inputNameDict, ptrEntry->m_entryName);
             text += "Use a more specific name or include a larger part of the path";
 
          } else {
@@ -1788,7 +1787,7 @@ void Doxy_Work::buildFileList(QSharedPointer<Entry> ptrEntry)
             text += "is not an input file";
          }
 
-         warn(fn, root->startLine, text);
+         warn(fn, ptrEntry->startLine, text);
       }
    }
 
