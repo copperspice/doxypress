@@ -844,7 +844,7 @@ private                                 {
 
  /*------- module/global/typedef variable -------------- */
 
-<SubprogBody,SubprogBodyContains>^{BS}[0-9]*{BS}"end"({BS}{SUBPROG}({BS_}{ID})?)?{BS}/(\n|!) {
+<SubprogBody,SubprogBodyContains>^{BS}[0-9]*{BS}"end"({BS}{SUBPROG}({BS_}{ID})?)?{BS}/(\n|!|;) {
 
       // ABSTRACT and specific interfaces are stored
       // in a scope of their own, even if multiple
@@ -862,7 +862,9 @@ private                                 {
       }
 
       subrCurrent.removeAt(0);
-      yy_pop_state() ;
+      v_type = V_IGNORE;
+
+      yy_pop_state();
    }
 
 <BlockData>{
@@ -2260,7 +2262,7 @@ SymbolModifiers& SymbolModifiers::operator|=(QString mdfString)
 
       if (mdfStringLower.contains("(")) {
          newMdf.passVar = extractFromParens(mdfStringLower);
-	
+
       } else {
          newMdf.passVar = "";
       }
