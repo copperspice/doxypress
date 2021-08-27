@@ -1213,6 +1213,9 @@ static bool expandExpression(QString &expr, QString *rest, int pos, int level)
                   s_expandedDict->insert(macroName, def);
                   isExpanded = expandExpression(resultExpr, &restExpr, 0, level + 1);
                   s_expandedDict->remove(macroName);
+               } else if (def && def->nonRecursive) {
+                  isExpanded = true;
+
                }
                if (isExpanded) {
                   expr = expr.left(p) + resultExpr + restExpr;
@@ -3781,6 +3784,9 @@ QString preprocessFile(const QString &fileName, const QString &input)
             static QRegularExpression regExp_id("[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*");
             QHash<QString, int> argDict;
 
+            QString args    = definedMacro.mid(posOpen + 1, posClose - posOpen - 1);
+            bool hasVarArgs = args.contains("...");
+
             int index = posOpen + 1;
             int count = 0;
             int len;
@@ -3808,6 +3814,12 @@ QString preprocessFile(const QString &fileName, const QString &input)
                }
 
                match = regExp_id.match(definedMacro, definedMacro.constBegin() + index);
+            }
+
+            if (hasVarArgs) {
+              // add the variable argument if present
+              argDict.insert("__VA_ARGS__", count);
+              ++count;
             }
 
             // strip definition part
