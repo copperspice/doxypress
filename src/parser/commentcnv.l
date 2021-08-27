@@ -254,11 +254,14 @@ static int yyread(char *buf, int max_size)
 %x SkipChar
 %x SComment
 %x CComment
+%x CNComment
 %x Verbatim
 %x VerbatimCode
 %x ReadLine
 %x CondLine
 %x ReadAliasArgs
+
+MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z_A-Z0-9\-]+
 
 %%
 
@@ -462,6 +465,10 @@ static int yyread(char *buf, int max_size)
 
 <Scan>"/*"[*!]?   {
       /* start of a C comment */
+      if (s_lang == SrcLangExt_Python || s_lang == SrcLangExt_Tcl) {
+         REJECT;
+      }
+
       QString text = QString::fromUtf8(yytext);
 
       s_specialComment = (yyleng == 3);
@@ -470,8 +477,12 @@ static int yyread(char *buf, int max_size)
       s_commentStack.clear();
       copyToOutput(text, text.length());
 
-      BEGIN(CComment);
-      s_commentStack.push(CommentCtx(s_lineNr));
+      if (s_specialComment) {
+         BEGIN(CComment);
+      } else  {
+         BEGIN(CNComment);
+         s_commentStack.push(CommentCtx(s_lineNr));
+      }
    }
 
 <Scan>"#"("#")?   {
@@ -508,6 +519,13 @@ static int yyread(char *buf, int max_size)
          BEGIN(CComment);
          s_commentStack.push(CommentCtx(s_lineNr));
       }
+   }
+
+<CComment,CNComment,ReadLine>{MAILADR}  |
+<CComment,CNComment,ReadLine>"<"{MAILADR}">" {
+      // prevent parsing email address
+      QString text = QString::fromUtf8(yytext);
+      copyToOutput(text, text.length());
    }
 
 <CComment>"{@code"/[ \t\n]       {
@@ -772,19 +790,19 @@ static int yyread(char *buf, int max_size)
       copyToOutput(text, text.length());
    }
 
-<CComment>[^ `~<\\!@*\n{\"\/]*  {
+<CComment,CNComment>[^ `~<\\!@*\n{\"\/]*  {
       /* anything that is not a '*' or command */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
 
-<CComment>"*"+[^*/\\@\n{\"]*    {
+<CComment,CNComment>"*"+[^*\/\\@\n{\"]*    {
       /* stars without slashes */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
 
-<CComment>"\"\"\""             {
+<CComment>"\"\"\""  {
       /* end of Python docstring */
 
       if (s_lang != SrcLangExt_Python) {
@@ -801,7 +819,7 @@ static int yyread(char *buf, int max_size)
       }
    }
 
-<CComment>\n                    {
+<CComment,CNComment>\n {
       /* new line in comment */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
@@ -812,24 +830,28 @@ static int yyread(char *buf, int max_size)
       }
    }
 
-<CComment>"/"+"*"                  {
+<CComment,CNComment>"/"+"*"  {
       /* nested C comment */
+
+      if (s_lang == SrcLangExt_Python || s_lang == SrcLangExt_Tcl || s_lang == SrcLangExt_Markdown) {
+         REJECT;
+      }
       QString text = QString::fromUtf8(yytext);
 
-      s_nestingCount++;
+      ++s_nestingCount;
       s_commentStack.push(CommentCtx(s_lineNr));
       copyToOutput(text, text.length());
    }
 
-<CComment>"*"+"/"                  {
+<CComment,CNComment>"*"+"/"  {
       /* end of C comment */
-      if (s_lang == SrcLangExt_Python) {
+      if (s_lang == SrcLangExt_Python || s_lang == SrcLangExt_Tcl || s_lang == SrcLangExt_Markdown) {
          REJECT;
 
       } else {
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
-	 --s_nestingCount;
+         --s_nestingCount;
 
          if (s_nestingCount <= 0) {
             BEGIN(Scan);
@@ -840,7 +862,7 @@ static int yyread(char *buf, int max_size)
       }
    }
 
-<CComment>"\n"/[ \t]*"-"      {
+<CComment,CNComment>"\n"/[ \t]*"-"      {
       // end of Python comment
 
       if (s_lang != SrcLangExt_Python || s_pythonDocString) {
@@ -854,7 +876,7 @@ static int yyread(char *buf, int max_size)
       }
    }
 
-<CComment>"\n"/[ \t]*[^ \t#\-] 	   {
+<CComment,CNComment>"\n"/[ \t]*[^ \t#\-]        {
       QString text = QString::fromUtf8(yytext);
 
       if (s_lang == SrcLangExt_Python) {
@@ -872,7 +894,7 @@ static int yyread(char *buf, int max_size)
       }
    }
 
-<CComment>.             {
+<CComment,CNComment>.             {
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
@@ -991,7 +1013,7 @@ static int yyread(char *buf, int max_size)
       BEGIN(s_readLineCtx);
    }
 
-<CComment,ReadLine>[\\@][\\@][~a-z_A-Z][a-z_A-Z0-9]*[ \t]* {
+<CComment,CNComment,ReadLine>[\\@][\\@][~a-z_A-Z][a-z_A-Z0-9]*[ \t]* {
       // escaped command
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
