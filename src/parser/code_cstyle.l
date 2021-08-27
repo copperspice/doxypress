@@ -3855,6 +3855,16 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN( Body );
    }
 
+<SkipInits>{ID}{B}*"{"  {
+      QString text = QString::fromUtf8(yytext);
+
+      int bracketPos = text.indexOf('{');
+      int spacePos   = text.indexOf(' ');
+
+      int len = spacePos == -1 ? bracketPos : spacePos;
+      generateClassOrGlobalLink(*g_code, text.leftView(len));
+      g_code->codify(text.midView(len));
+   }
 <SkipInits>{ID}            {
       QString text = QString::fromUtf8(yytext);
       generateClassOrGlobalLink(*g_code, text);
