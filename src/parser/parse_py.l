@@ -328,7 +328,7 @@ static void initSpecialBlock()
    docBrief         = true;
 
    docBlock.resize(0);
-   startCommentBlock(true);
+   startCommentBlock(false);
 }
 
 static void searchFoundDef()
@@ -1964,9 +1964,10 @@ STARTDOCSYMS      "##"
 
             if (! docBlockSpecial) {
                // legacy unformatted docstring
-
-               actualDoc.prepend("\\verbatim ");
-               actualDoc.append("\\endverbatim ");
+               if (! actualDoc.isEmpty()) {
+                  actualDoc.prepend("\\verbatim ");
+                  actualDoc.append("\\endverbatim ");
+               }
             }
 
             handleCommentBlock(actualDoc, false);
@@ -1977,9 +1978,11 @@ STARTDOCSYMS      "##"
 
             if (! docBlockSpecial) {
                // legacy unformatted docstring
+               if (! actualDoc.isEmpty()) {
 
-               actualDoc.prepend("\\verbatim ");
-               actualDoc.append("\\endverbatim ");
+                  actualDoc.prepend("\\verbatim ");
+                  actualDoc.append("\\endverbatim ");
+               }
             }
 
             actualDoc.prepend("\\namespace " + s_moduleScope + " ");
@@ -2054,7 +2057,7 @@ STARTDOCSYMS      "##"
       // continuation of the comment on the next line
       docBlock  += '\n';
       docBrief  =  false;
-      startCommentBlock(false);
+
       incLineNr();
    }
 
