@@ -3463,14 +3463,19 @@ int DocHRef::parse()
 
             {
                int tagId = Mappers::htmlTagMapper->map(g_token->name);
-               if (tagId == HTML_A && g_token->endTag) { // found </a> tag
+               if (tagId == HTML_A && g_token->endTag) {
+                  // found </a> tag
                   goto endhref;
+               } else if (tagId == HTML_BR) {
+                  m_children.append(new DocLineBreak(this, g_token->attribs));
+
                } else {
                   warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected html tag <%s%s> found within <a href=...> context",
-                                 g_token->endTag ? "/" : "", csPrintable(g_token->name));
+                                 g_token->endTag ? "/" : QString(), csPrintable(g_token->name));
                }
             }
             break;
+
             default:
                warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s", csPrintable(tokToString(tok)));
                break;
