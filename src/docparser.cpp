@@ -613,10 +613,9 @@ static void checkUndocumentedParams()
    }
 }
 
-static QString stripTrailingReturn(const QString trailingReturn)
+static QString stripTrailingReturn(const QString str)
 {
-  QString retval = trailingReturn;
-
+  QString retval  = str;
   QStringView tmp = QStringView(retval).trimmed();
 
   if (tmp.startsWith("->")) {
