@@ -8259,7 +8259,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
          // for all members with this name
          if (mn != nullptr) {
 
-            for (auto md : *mn) {
+            QList< QPair<QString, QSharedPointer<MemberDef>> > extraMembers;
+            for (const auto &md : *mn) {
                // for each enum in this list
 
                if (md->isEnumerate()) {
@@ -8331,15 +8332,21 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                            md->insertEnumField(fmd);
                            fmd->setEnumScope(md, true);
 
-                           QSharedPointer<MemberName> mn = mnsd->find(root->m_entryName);
+                           QSharedPointer<MemberName> tmp_mn = mnsd->find(ptrEntry->m_entryName);
 
-                           if (mn) {
-                              mn->append(fmd);
+                           if (tmp_mn == nullptr) {
+                              // name did not exist
+
+                              tmp_mn = QMakeShared<MemberName>(ptrEntry->m_entryName);
+                              tmp_mn->append(fmd);
+                              mnsd->insert(ptrEntry->m_entryName, tmp_mn);
+
+                           } else if (mn != tmp_mn) {
+                              tmp_mn->append(fmd);
 
                            } else {
-                              mn = QMakeShared<MemberName>(root->m_entryName);
-                              mn->append(fmd);
-                              mnsd->insert(root->m_entryName, mn);
+                              // must defer
+                              extraMembers.append( {ptrEntry->m_entryName, std::move(fmd)} );
                            }
                         }
 
@@ -8412,6 +8419,12 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                      }
                   }
                }
+            }
+            // add deferred members
+            for (auto &item : extraMembers) {
+
+               QSharedPointer<MemberName> mn = mnsd->find(item.first);
+               mn->append(std::move(item.second));
             }
          }
       }
