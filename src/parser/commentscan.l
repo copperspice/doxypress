@@ -698,21 +698,47 @@ static void addCite()
 }
 
 // strip trailing whitespace (excluding newlines) from string s
-static void stripTrailingWhiteSpace(QString &s)
+static void stripTrailingWhiteSpace(QString &str)
 {
-   int len = s.length();
+   if (str.isEmpty()) {
+      return;
+   }
 
-   int i = len - 1;
+   QString::const_iterator iter       = str.constEnd() - 1;
+   QString::const_iterator iter_start = str.constBegin();
+
    QChar c;
 
-   while (i >= 0 && ((c = s.at(i)) == ' ' || c == '\t' || c == '\r')) {
-      i--;
+   while (true) {
+      c = *iter;
+      QStringView tmp = QStringView(iter, iter_end);
+
+      if (c == ' ' || c == '\t' || c == '\r') {
+         // normal whitespace
+
+      } else if (tmp.endsWith("\\internal_linebr")) {
+         // special line break marker
+
+         iter -= 15;
+
+      } else if (c == '\n') {
+         // normal newline
+
+      } else {
+         // non-whitespace, done
+         break;
+      }
+
+      if (iter == str.constBegin()) {
+         break;
+      }
+
+      --iter;
    }
 
-   if (i != len - 1) {
-      // string up to and including char at pos i and \0 terminator
-      s.resize(i + 2);
-   }
+
+   // update the string
+   str = QString(iter_start, iter+1);
 }
 
 // selects the output to write to
@@ -3351,7 +3377,7 @@ static bool handleDetails(const QString &str, const QStringList &list)
 
    if (inContext != OutputBrief) {
       // treat @details outside brief description as a new paragraph
-      addToOutput("\n\n");
+      addToOutput("\\internal_linebr\\internal_linebr");
    }
 
    setOutput(OutputMainDoc);

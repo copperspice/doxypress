@@ -1027,8 +1027,12 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_Para,St_Text>{WORD1}      |
 <St_Para,St_Text>{WORD2}               {
       // function call, rule resolves multiple digit numbers
-
       QString text = QString::fromUtf8(yytext);
+
+      if (text.contains("\\internal_linebr")) {
+         REJECT;
+      }
+
       s_yyLineNum += text.count('\n');
 
       if (text.startsWith('%')) {
@@ -1104,7 +1108,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       s_yyLineNum += text.count('\n');
    }
 
-<St_Para>({BLANK}*\n)+{BLANK}*\n{BLANK}* {
+<St_Para,St_Param>({BLANK}*(\n|"\\internal_linebr"))+{BLANK}*(\n|"\\internal_linebr"){BLANK}* {
       QString text = QString::fromUtf8(yytext);
       s_yyLineNum += text.count('\n');
 
@@ -1448,6 +1452,11 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_TitleN>{WORD2}     {
       /* word */
       QString text = QString::fromUtf8(yytext);
+
+      if (text.contains("\\internal_linebr")) {
+         REJECT;
+      }
+
       s_yyLineNum += text.count('\n');
 
       if (text.startsWith('%') ) {
