@@ -2652,18 +2652,21 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <UsingAlias>";"                        {
-      QString tmpType = "";
+      QString tmpType = previous->getData(EntryKey::Member_Args);
 
-      tmpType = "typedef " + previous->getData(EntryKey::Member_Args);
+      tmpType = tmpType.trimmed();
+      tmpType = stripPrefix(tmpType, "class ");
+      tmpType = stripPrefix(tmpType, "struct ");
+
+      tmpType = "typedef " + tmpType;
       tmpType = tmpType.simplified();
+      previous->section = Entry::VARIABLE_SEC;
 
-      previous->section       = Entry::VARIABLE_SEC;
       previous->m_entryName   = previous->m_entryName.trimmed();
       previous->startBodyLine = yyLineNr;
-
+      // previous->startBodyColumn = yyColNr;
       previous->setData(EntryKey::Member_Type, tmpType);
-      previous->setData(EntryKey::Member_Args, "");
-
+      previous->setData(EntryKey::Member_Args, QString());
       previous->m_traits.setTrait(Entry::Virtue::Alias);
 
       BEGIN(FindMembers);
@@ -3634,6 +3637,18 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                }
 
                current->m_entryName = current->m_entryName.mid(6);
+
+            } else if (current->m_entryName.startsWith("volatile ")) {
+
+               if (current->getData(EntryKey::Member_Type).isEmpty()) {
+                  current->setData(EntryKey::Member_Type, "volatile");
+
+               } else {
+                  current->appendData(EntryKey::Member_Type, "volatile ");
+               }
+
+               current->m_entryName = current->m_entryName.mid(9);
+
             }
          }
 
@@ -3645,6 +3660,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             BEGIN(FindMembers);
          }
       }
+
+      current->m_entryName = removeAllWhiteSpace(current->m_entryName);
    }
 
 <StaticAssert>"("     {
@@ -7210,8 +7227,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       QString text = QString::fromUtf8(yytext);
 
       current->m_entryName = current->m_entryName.simplified();
-      current->setData(EntryKey::Member_Type,   current->getData(EntryKey::Member_Type).simplified());
-      current->setData(EntryKey::Member_Args,   removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
+      current->setData(EntryKey::Member_Type, current->getData(EntryKey::Member_Type).simplified());
+      current->setData(EntryKey::Member_Args, removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
 
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyBegLineNr;
@@ -7219,22 +7236,19 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       static QRegularExpression regExp("\\([^)]*[*&][^)]*\\)");       // (...*...)
 
+      QString tmpType = current->getData(EntryKey::Member_Type);
+
+      int ts = tmpType.indexOf('<');
+      int te = tmpType.lastIndexOf('>');
+      int ti = tmpType.indexOf(regExp);
+
+      bool isFunction = (ti == -1) || (ts != -1 && ts < te && ts < ti && ti < te);
+      bool isVariable = (! tmpType.isEmpty() && (! isFunction || tmpType.startsWith("typedef ")));
+
       if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
+         QString tempName;
          int tempArg = current->m_entryName.indexOf('<');
 
-         QString tmpType = current->getData(EntryKey::Member_Type);
-
-         int ts = tmpType.indexOf('<');
-         int te = tmpType.lastIndexOf('>');
-         int ti = tmpType.indexOf(regExp);
-
-         // A<int(void *, char *)> get(); is not a function pointer
-         // not a (...*...) pattern
-         // (...*...) is part of a template argument list
-
-         bool isFunction = (ti == -1) || (ts != -1 && ts < te && ts < ti && ti < te);
-
-         QString tempName;
          if (tempArg == -1) {
             tempName = current->m_entryName;
 
@@ -7243,7 +7257,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          }
 
-         if (! tmpType.isEmpty() && (! isFunction || tmpType.startsWith("typedef ")) )  {
+         if (isVariable) {
 
             if (isTypedef && ! tmpType.startsWith("typedef ")) {
                current->prependData(EntryKey::Member_Type, "typedef ");
@@ -7253,14 +7267,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          } else {
             current->section = Entry::FUNCTION_SEC;
-            current->proto    = (text[0] == ';');
+            current->proto   = (text[0] == ';');
          }
 
-      } else   {
+      } else  {
          // a global function or function variable
-         QString tmpType = current->getData(EntryKey::Member_Type);
 
-         if (! tmpType.isEmpty() && (tmpType.contains(regExp) || tmpType.startsWith("typedef ")) ) {
+         if (isVariable)  {
 
             if (isTypedef && ! tmpType.startsWith("typedef ")) {
                current->prependData(EntryKey::Member_Type, "typedef ");
@@ -7274,9 +7287,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          }
 
       }
-
-      //
-      QString tmpType = current->getData(EntryKey::Member_Type);
 
       if (insidePHP) {
          if (findAndRemoveWord(tmpType, "final")) {
@@ -7295,7 +7305,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          if (text[0] == '{' ) {
             lastCurlyContext = FindMembers;
-            curlyCount      = 0;
+            curlyCount = 0;
             BEGIN( SkipCurly );
 
          } else {
@@ -7697,7 +7707,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( FindMembers ) ;
    }
 
-<CompoundName>{SCOPENAME}{BN}*/"<"  {
+<CompoundName>{SCOPENAME}/{BN}*"<"  {
       QString text = QString::fromUtf8(yytext);
 
       sharpCount  = 0;
@@ -8269,6 +8279,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <CompoundName,ClassVar>{B}*"{"{B}*  {
       static const bool extractAnonNS = Config::getBool("extract-anon-namespaces");
 
+      current->setData(EntryKey::Source_Text, QString());
+
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
@@ -8617,6 +8629,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <Bases>{B}*"{"{B}*         {
+      current->setData(EntryKey::Source_Text, QString());
+
       current->setData(EntryKey::File_Name, yyFileName);
       current->startLine    = yyLineNr;
       current->startColumn = yyColNr;
@@ -9644,6 +9658,10 @@ static void handleParametersCommentBlocks(ArgumentList &argList)
    for (auto &a : argList) {
 
       if (! a.docs.isEmpty()) {
+         if (a.name.isEmpty() && a.type == "...") {
+            a.name= "...";
+         }
+
          int position = 0;
          bool needsEntry;
 
