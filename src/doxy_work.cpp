@@ -7184,8 +7184,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                               // check if we are dealing with a partial template specialization.
                               // In this case we add it to the class even though the member arguments do not match.
 
-                              // TODO: copy other aspects?
-                              root->protection = md->protection();
+                              ptrEntry->protection = md->protection();
+                              ptrEntry->stat       = md->isStatic();
+                              ptrEntry->virt       = md->virtualness();
 
                               addMethodToClass(ptrEntry, cd, md->name(), isFriend);
                               return;
@@ -7237,6 +7238,10 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                            if (! root->m_templateArgLists.isEmpty() && ! md_tArgList.listEmpty()) {
 
                               if (root->m_templateArgLists.last().count() <= md_tArgList.count()) {
+                                 ptrEntry->protection = md->protection();
+                                 ptrEntry->stat       = md->isStatic();
+                                 ptrEntry->virt       = md->virtualness();
+
                                  addMethodToClass(ptrEntry, ccd, md->name(), isFriend);
                                  return;
                               }
