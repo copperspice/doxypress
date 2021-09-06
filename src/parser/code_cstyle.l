@@ -457,7 +457,7 @@ static void codifyLines(const QString &text)
    for (auto c : text) {
 
       if (c == '\n') {
-         g_yyLineNr++;
+         ++g_yyLineNr;
          g_yyColNr = 1;
 
          g_code->codify(tmp);
@@ -1838,6 +1838,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 %x    ObjCSkipStr
 %x    ObjCCallComment
 %x    OldStyleArgs
+%x    ConceptName
 %x    UsingName
 %x    RawString
 %x    InlineInit
@@ -4022,11 +4023,17 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN(g_lastSpecialCContext);
    }
 
-<RemoveSpecialCComment>[^*\n]+
-<RemoveSpecialCComment>"//"|"/*"
+<RemoveSpecialCComment>[^*\n]+   {
+
+   }
+
+<RemoveSpecialCComment>"//"|"/*" {
+
+   }
+
 <RemoveSpecialCComment>\n  {
       // */ (editor syntax fix)
-      g_yyLineNr++;
+      ++g_yyLineNr;
    }
 
 <RemoveSpecialCComment>.
@@ -4059,7 +4066,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (YY_START == SkipCxxComment) {
          endFontClass();
-         BEGIN( g_lastCContext ) ;
+         BEGIN( g_lastCContext );
       }
    }
 
@@ -4096,13 +4103,16 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
-         g_lastSpecialCContext = YY_START;
-         g_yyLineNr++;
+         if (YY_START != RemoveSpecialCComment) {
+            g_lastSpecialCContext = YY_START;
+         }
+
+         ++g_yyLineNr;
          BEGIN(RemoveSpecialCComment);
 
       } else {
          // check is to prevent getting stuck in skipping C++ comments
-         if (YY_START != SkipCxxComment) {
+         if (YY_START != SkipComment && YY_START != SkipCxxComment) {
             g_lastCContext = YY_START;
          }
 
@@ -4117,7 +4127,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
-         g_yyLineNr++;
+         ++g_yyLineNr;
          nextCodeLine();
 
       } else {
@@ -4133,12 +4143,16 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
-         g_lastSpecialCContext = YY_START;
+
+         if (YY_START != RemoveSpecialCComment) {
+            g_lastSpecialCContext = YY_START;
+         }
+
          BEGIN(RemoveSpecialCComment);
 
       } else {
          // check is to prevent getting stuck in skipping C++ comments
-         if (YY_START != SkipCxxComment) {
+         if (YY_START != SkipComment && YY_START != SkipCxxComment) {
             g_lastCContext = YY_START;
          }
 
@@ -4148,22 +4162,18 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
    }
 
-<*>^{B}*"//"[!/][^\n]*\n      {
+<*>^{B}*"//"[!/][^\n]*   {
       // remove special one-line comment
       QString text = QString::fromUtf8(yytext);
 
-      if (s_stripCodeComments) {
-         g_yyLineNr++;
-         // nextCodeLine();
-
-      } else {
+      if (! s_stripCodeComments) {
          startFontClass("comment");
          codifyLines(text);
          endFontClass();
       }
    }
 
-<*>"//"[!/][^\n]*/\n        {
+<*>"//"[!/][^\n]*   {
       // strip special one-line comment
       QString text = QString::fromUtf8(yytext);
 
@@ -4195,13 +4205,17 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
-         g_lastSpecialCContext = YY_START;
-         g_yyLineNr++;
+
+         if (YY_START != RemoveSpecialCComment) {
+            g_lastSpecialCContext = YY_START;
+         }
+
+         ++g_yyLineNr;
          BEGIN(RemoveSpecialCComment);
 
       } else {
-         // check is to prevent getting stuck in skipping C++ comments
-         if (YY_START != SkipCxxComment) {
+         // prevent getting stuck in skipping C++ comments
+         if (YY_START != SkipComment && YY_START != SkipCxxComment) {
             g_lastCContext = YY_START;
          }
 
@@ -4211,6 +4225,30 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
    }
 
+<*>^{B}*"/**"[*]+/[^/]                  {
+
+      // special C "banner" comment block at a new line
+      QString text = QString::fromUtf8(yytext);
+
+      if (s_stripCodeComments) {
+         if (YY_START != RemoveSpecialCComment) {
+            g_lastSpecialCContext = YY_START;
+         }
+
+        BEGIN(RemoveSpecialCComment);
+
+      } else {
+         // check is to prevent getting stuck in skipping C++ comment
+         if (YY_START != SkipComment && YY_START != SkipCxxComment) {
+            g_lastCContext = YY_START;
+         }
+
+         startFontClass("comment");
+         g_code->codify(text);
+
+         BEGIN(SkipComment);
+      }
+   }
 <*>^{B}*"/*"[!*]/[^/*]        {
       // */ (editor syntax fix)
       // special C comment block at a new line
@@ -4218,14 +4256,17 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (s_stripCodeComments) {
-         g_lastSpecialCContext = YY_START;
+         if (YY_START != RemoveSpecialCComment) {
+            g_lastSpecialCContext = YY_START;
+         }
+
          BEGIN(RemoveSpecialCComment);
 
       } else {
          // check is to prevent getting stuck in skipping C++ comments
 
-         if (YY_START != SkipCxxComment) {
-            g_lastCContext = YY_START ;
+         if (YY_START != SkipComment && YY_START != SkipCxxComment) {
+            g_lastCContext = YY_START;
          }
 
          startFontClass("comment");
@@ -4245,14 +4286,17 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
 
       if (s_stripCodeComments) {
-         g_lastSpecialCContext = YY_START;
+         if (YY_START != RemoveSpecialCComment) {
+            g_lastSpecialCContext = YY_START;
+         }
+
          BEGIN(RemoveSpecialCComment);
 
       } else {
          // check is to prevent getting stuck in skipping C++ comments
 
-         if (YY_START != SkipCxxComment) {
-            g_lastCContext = YY_START ;
+         if (YY_START != SkipComment && YY_START != SkipCxxComment) {
+            g_lastCContext = YY_START;
          }
 
          startFontClass("comment");
@@ -4288,7 +4332,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       // check is to prevent getting stuck in skipping C++ comments
 
-      if (YY_START != SkipCxxComment) {
+      if (YY_START != SkipComment && YY_START != SkipCxxComment) {
          g_lastCContext = YY_START ;
       }
       BEGIN( SkipComment );
