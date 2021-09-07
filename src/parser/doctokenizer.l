@@ -535,11 +535,11 @@ OLISTITEM {BLANK}*[1-9][0-9]*"."{BLANK}
 ENDLIST   {BLANK}*"."{BLANK}*\n
 ATTRNAME  [a-z_A-Z\x80-\xFF][:a-z_A-Z0-9\x80-\xFF\-]*
 ATTRIB    {ATTRNAME}{WS}*("="{WS}*(("\""[^\"]*"\"")|("'"[^\']*"'")|[^ \t\r\n'"><]+))?
-URLCHAR   [a-z_A-Z0-9\!\~\,\:\;\'\$\?\@\&\%\#\.\-\+\/\=]
+URLCHAR   [a-z_A-Z0-9\!\~\,\:\;\'\$\?\@\&\%\#\.\-\+\/\=\x80-\xFF]
 URLMASK   ({URLCHAR}+([({]{URLCHAR}*[)}])?)+
-URLPROTOCOL ("http:"|"https:"|"ftp:"|"file:"|"news:"|"irc")
-FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+&#]
-FILEECHAR [a-z_A-Z0-9\-\+&#]
+URLPROTOCOL ("http:"|"https:"|"ftp:"|"ftps:"|"sftp:"|"file:"|"news:"|"irc:"|"ircs:")
+FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+&#@]
+FILEECHAR [a-z_A-Z0-9\-\+&#@]
 
 HFILEMASK ("."{FILESCHAR}*{FILEECHAR}+)+
 FILEMASK  ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|{HFILEMASK}
@@ -587,7 +587,7 @@ LNKWORD3    ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
 ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
 CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 CHARWORDQ2  [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
-WORD1       {ESCWORD}|{CHARWORDQ2}{CHARWORDQ1}*|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
+WORD1       {ESCWORD}|{CHARWORDQ2}{CHARWORDQ1}*|"{"|"}"|"'\"'"|("\""([^"\n]*\n?)*[^"\n]*"\"")
 WORD2     "."|","|"("|")"|"["|"]"|"::"|":"|";"|"\?"|"="|"'"
 
 WORD1NQ     {ESCWORD}|{CHARWORDQ1}+|"{"|"}"
@@ -595,9 +595,8 @@ WORD2NQ   "."|","|"("|")"|"["|"]"|"::"|":"|";"|"\?"|"="|"'"
 CAPTION     [cC][aA][pP][tT][iI][oO][nN]
 HTMLTAG     "<"(("/")?){ID}({WS}+{ATTRIB})*{WS}*(("/")?)">"
 
-HTMLKEYL  "strong"|"center"|"table"|"caption"|"small"|"code"|"dfn"|"var"|"img"|"pre"|"sub"|"sup"|"tr"|"td"|"th"|"ol"|"ul"|"li"|"tt"|"kbd"|"em"|"hr"|"dl"|"dt"|"dd"|"br"|"i"|"a"|"b"|"p"|"strike"|"u"|"del"|"ins"
-
-HTMLKEYU  "STRONG"|"CENTER"|"TABLE"|"CAPTION"|"SMALL"|"CODE"|"DFN"|"VAR"|"IMG"|"PRE"|"SUB"|"SUP"|"TR"|"TD"|"TH"|"OL"|"UL"|"LI"|"TT"|"KBD"|"EM"|"HR"|"DL"|"DT"|"DD"|"BR"|"I"|"A"|"B"|"P"|"STRIKE"|"U"|"DEL"|"INS"
+HTMLKEYL  "strong"|"center"|"table"|"caption"|"small"|"code"|"dfn"|"var"|"img"|"pre"|"sub"|"sup"|"tr"|"td"|"th"|"ol"|"ul"|"li"|"tt"|"kbd"|"em"|"hr"|"dl"|"dt"|"dd"|"br"|"i"|"a"|"b"|"p"|"strike"|"u"|"del"|"ins"|"s"
+HTMLKEYU  "STRONG"|"CENTER"|"TABLE"|"CAPTION"|"SMALL"|"CODE"|"DFN"|"VAR"|"IMG"|"PRE"|"SUB"|"SUP"|"TR"|"TD"|"TH"|"OL"|"UL"|"LI"|"TT"|"KBD"|"EM"|"HR"|"DL"|"DT"|"DD"|"BR"|"I"|"A"|"B"|"P"|"STRIKE"|"U"|"DEL"|"INS"|"S"
 
 HTMLKEYW  {HTMLKEYL}|{HTMLKEYU}
 
@@ -780,13 +779,14 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
          int len = text.length();
          text    = text.right(len - nl - 1);
 
-         static QRegularExpression regExp("[1-9]");
-         int digitPos = text.indexOf(regExp);
-         int dotPos   = text.indexOf('.', digitPos);
+         static QRegularExpression regExp("([1-9]+)");
+         QRegularExpressionMatch match = regExp.match(text);
+
+         int digitPos = match.capturedStart() - text.begin();
 
          g_token->isEnumList = true;
-         g_token->id         = text.mid(digitPos,dotPos - digitPos).toInteger<int>();
-         g_token->indent     = computeIndent(text,digitPos);
+         g_token->id         = match.captured().toInteger<int>();
+         g_token->indent     = computeIndent(text, digitPos);
 
          return TK_LISTITEM;
       }
@@ -965,7 +965,10 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       return TK_RCSTAG;
    }
 
-<St_Para,St_HtmlOnly>"$("{ID}")"   {
+
+<St_Para,St_HtmlOnly,St_ManOnly,St_LatexOnly,St_RtfOnly,St_XmlOnly,St_DbOnly>"$("{ID}")"   |
+<St_Para,St_HtmlOnly,St_ManOnly,St_LatexOnly,St_RtfOnly,St_XmlOnly,St_DbOnly>"$("{ID}"("{ID}"))"   {
+
       /* environment variable */
       QString text = QString::fromUtf8(yytext);
 
@@ -1115,7 +1118,11 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       QString text = QString::fromUtf8(yytext);
 
       s_yyLineNum += text.count('\n');
+      if (s_insidePre) {
+          g_token->chars = text;
+          return TK_WHITESPACE;
 
+      } else {
          g_token->indent = computeIndent(text, text.length());
 
          // put back the indentation (needed for list items)
@@ -1129,6 +1136,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
          // start of a new paragraph
          return TK_NEWPARA;
+      }
    }
 
 <St_CodeOpt>{BLANK}*"{"(".")?{LABELID}"}" {
