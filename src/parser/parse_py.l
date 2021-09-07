@@ -254,9 +254,9 @@ static void handleCommentBlock(const QString &doc, bool isBrief)
       }
    }
 
-   bool needsEntry;
-   int position = 0;
-   int lineNr   = isBrief ? current->briefLine : current->docLine;
+   bool needsEntry = false;
+   int position    = 0;
+   int lineNr      = isBrief ? current->briefLine : current->docLine;
 
    while (parseCommentBlock(s_thisParser, (docBlockInBody && previous) ? previous : current,
              doc, yyFileName, lineNr, docBlockInBody ? false : isBrief, isJavaDocStyle, docBlockInBody,
@@ -644,7 +644,7 @@ STARTDOCSYMS      "##"
       s_packageCommentAllowed = false;
    }
 
-   ^{BB}         {
+   ^{BB}  {
       QString text = QString::fromUtf8(yytext);
       s_curIndent  = computeIndent(text);
    }
@@ -2013,7 +2013,7 @@ STARTDOCSYMS      "##"
          // strip s_curIndent amount of whitespace
 
          for (int i= 0; i<indent - s_curIndent; i++) {
-            docBlock+=' ';
+            docBlock += ' ';
          }
 
          DBG_CTX((stderr,"stripping indent %d\n",s_curIndent));

@@ -528,7 +528,7 @@ CITEID    {CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*|"\""{CITESCHAR}{C
 MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z_A-Z0-9\-]+
 MAILWS    [\t a-z_A-Z0-9+-]
 MAILADDR2 {MAILWS}+{BLANK}+("at"|"AT"|"_at_"|"_AT_"){BLANK}+{MAILWS}+("dot"|"DOT"|"_dot_"|"_DOT_"){BLANK}+{MAILWS}+
-OPTSTARS  ("//"{BLANK}*)?"*"*{BLANK}*
+
 LISTITEM  {BLANK}*[-]("#")?{WS}
 MLISTITEM {BLANK}*[+*]{WS}
 OLISTITEM {BLANK}*[1-9][0-9]*"."{BLANK}
@@ -540,8 +540,10 @@ URLMASK   ({URLCHAR}+([({]{URLCHAR}*[)}])?)+
 URLPROTOCOL ("http:"|"https:"|"ftp:"|"file:"|"news:"|"irc")
 FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+&#]
 FILEECHAR [a-z_A-Z0-9\-\+&#]
+
 HFILEMASK ("."{FILESCHAR}*{FILEECHAR}+)+
 FILEMASK  ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|{HFILEMASK}
+
 LINKMASK  [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)?
 VERBATIM  "verbatim"{BLANK}*
 SPCMD1    {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
@@ -582,10 +584,9 @@ LNKWORD1    ("::"|"#")?{SCOPEMASK}
 LNKWORD2    (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
 LNKWORD3    ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
 
-CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
+CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 CHARWORDQ2  [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
-
 WORD1       {ESCWORD}|{CHARWORDQ2}{CHARWORDQ1}*|"{"|"}"|"'\"'"|("\""[^"\n]*\n?[^"\n]*"\"")
 WORD2     "."|","|"("|")"|"["|"]"|"::"|":"|";"|"\?"|"="|"'"
 
@@ -849,8 +850,10 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       g_token->paramDir = TokenInfo::Unspecified;
       return TK_COMMAND_SEL();
    }
+
 <St_Para>"\\internal_linebr"  {
    }
+
 <St_Para>{SPCMD1}             |
 <St_Para>{SPCMD2}             |
 <St_Para>{SPCMD4}             |
@@ -971,7 +974,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
       QString value = portable_getenv(text);
 
-      for (int i = value.length() - 1; i >= 0; i--) {
+      for (int i = value.length() - 1; i >= 0; --i) {
          unput(value.at(i));
       }
    }
@@ -1110,21 +1113,22 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
 <St_Para,St_Param>({BLANK}*(\n|"\\internal_linebr"))+{BLANK}*(\n|"\\internal_linebr"){BLANK}* {
       QString text = QString::fromUtf8(yytext);
+
       s_yyLineNum += text.count('\n');
 
-      g_token->indent = computeIndent(text, text.length());
+         g_token->indent = computeIndent(text, text.length());
 
-      // put back the indentation (needed for list items)
-      for (int i = 0; i < g_token->indent; i++) {
-         unput(' ');
-      }
+         // put back the indentation (needed for list items)
+         for (int i = 0; i < g_token->indent; ++i) {
+            unput(' ');
+         }
 
-      // tell flex that after putting the last indent
-      // back we are at the beginning of the line
-      YY_CURRENT_BUFFER->yy_at_bol = 1;
+         // tell flex that after putting the last indent
+         // back we are at the beginning of the line
+         YY_CURRENT_BUFFER->yy_at_bol = 1;
 
-      // start of a new paragraph
-      return TK_NEWPARA;
+         // start of a new paragraph
+         return TK_NEWPARA;
    }
 
 <St_CodeOpt>{BLANK}*"{"(".")?{LABELID}"}" {

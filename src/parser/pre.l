@@ -758,7 +758,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
    int cc;
 
    while ((cc = getCurrentChar(expr, rest, j)) != EOF && isspace(cc)) {
-      len++;
+      ++len;
       getNextChar(expr, rest, j);
    }
 
