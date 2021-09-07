@@ -2,7 +2,7 @@
  *
  * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
-
+ *
 *************************************************************************/
 
 %{
@@ -706,6 +706,7 @@ static void stripTrailingWhiteSpace(QString &str)
 
    QString::const_iterator iter       = str.constEnd() - 1;
    QString::const_iterator iter_start = str.constBegin();
+   QString::const_iterator iter_end   = str.constEnd();
 
    QChar c;
 
@@ -1130,7 +1131,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // end of a .NET XML style detailed description
       QString text = QString::fromUtf8(yytext);
 
-      setOutput(OutputBrief);
       addToOutput(text);
       setOutput(OutputMainDoc);
    }
@@ -1543,7 +1543,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       } else {
           // inContext == OutputBrief, switch from brief to main docs
-         endBrief(false);
+         endBrief(true);
       }
 
       yyLineNr += text.count('\n');
@@ -1594,6 +1594,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '\n') {
+         addToOutput('\n');
          ++yyLineNr;
       }
    }
@@ -1616,7 +1617,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput('\n');
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
    }
 
@@ -1881,7 +1882,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
    }
 
 <ConceptDocArg1>{LC}          {
-      yyLineNr++;
+      ++yyLineNr;
       addToOutput('\n');
    }
 
@@ -2746,7 +2747,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // line continuation
       yyLineNr++;
       addToOutput('\n');
-      s_memberGroupHeader+=' ';
+      s_memberGroupHeader += ' ';
    }
 
 <NameParam>.            {
@@ -4147,6 +4148,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    yyLineNr         = lineNr;
    langParser       = parser;
    current          = curEntry;
+   current->docLine = (lineNr > 1 ? lineNr : 1);
 
    briefEndsAtDot   = isAutoBrief;
    inBody           = isInbody;
