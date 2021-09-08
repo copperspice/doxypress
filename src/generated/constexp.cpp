@@ -557,7 +557,7 @@ char *constexpYYtext;
  *
  * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
-
+ *
 *************************************************************************/
 
 #include <constexp.h>

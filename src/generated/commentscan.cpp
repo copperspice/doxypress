@@ -3791,9 +3791,9 @@ goto find_rule; \
 char *commentscanYYtext;
 /*************************************************************************
  *
- * Copyright (C) 2014-2021 Barbara Geller & Ansel Sermersheim
- * Copyright (C) 1997-2014 by Dimitri van Heesch.
-
+ * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 1997-2014 Dimitri van Heesch
+ *
 *************************************************************************/
 
 #include <QFile>
@@ -3806,6 +3806,7 @@ char *commentscanYYtext;
 #include <ctype.h>
 
 #include <cite.h>
+#include <commentscan.h>
 #include <condparser.h>
 #include <config.h>
 #include <default_args.h>
@@ -4168,9 +4169,6 @@ class GuardedSection
    bool m_parentVisible;
 };
 
-void openGroup(QSharedPointer<Entry> e, const QString &file, int line);
-void closeGroup(QSharedPointer<Entry> e, const QString &file, int line, bool foundInline = false);
-void initGroupInfo(QSharedPointer<Entry> e);
 static void groupAddDocs(QSharedPointer<Entry> e);
 
 static QString          s_inputString;         // input string
@@ -4223,6 +4221,7 @@ static QString          s_guardExpr;
 static int              s_roundCount;
 static bool             s_insideParBlock;
 
+static int              s_openCount;
 static int              s_memberGroupId = DOX_NOGROUP;
 static QString          s_memberGroupHeader;
 static QString          s_memberGroupDocs;
@@ -4488,21 +4487,47 @@ static void addCite()
 }
 
 // strip trailing whitespace (excluding newlines) from string s
-static void stripTrailingWhiteSpace(QString &s)
+static void stripTrailingWhiteSpace(QString &str)
 {
-   int len = s.length();
+   if (str.isEmpty()) {
+      return;
+   }
 
-   int i = len - 1;
+   QString::const_iterator iter       = str.constEnd() - 1;
+   QString::const_iterator iter_start = str.constBegin();
+   QString::const_iterator iter_end   = str.constEnd();
+
    QChar c;
 
-   while (i >= 0 && ((c = s.at(i)) == ' ' || c == '\t' || c == '\r')) {
-      i--;
+   while (true) {
+      c = *iter;
+      QStringView tmp = QStringView(iter, iter_end);
+
+      if (c == ' ' || c == '\t' || c == '\r') {
+         // normal whitespace
+
+      } else if (tmp.endsWith("\\internal_linebr")) {
+         // special line break marker
+
+         iter -= 15;
+
+      } else if (c == '\n') {
+         // normal newline
+
+      } else {
+         // non-whitespace, done
+         break;
+      }
+
+      if (iter == str.constBegin()) {
+         break;
+      }
+
+      --iter;
    }
 
-   if (i != len - 1) {
-      // string up to and including char at pos i and \0 terminator
-      s.resize(i + 2);
-   }
+   // update the string
+   str = QString(iter_start, iter+1);
 }
 
 // selects the output to write to
@@ -5170,7 +5195,6 @@ YY_RULE_SETUP
       // end of a .NET XML style detailed description
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      setOutput(OutputBrief);
       addToOutput(text);
       setOutput(OutputMainDoc);
    }
@@ -5667,7 +5691,7 @@ YY_RULE_SETUP
 
       } else {
           // inContext == OutputBrief, switch from brief to main docs
-         endBrief(false);
+         endBrief(true);
       }
 
       yyLineNr += text.count('\n');
@@ -5730,6 +5754,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentscanYYtext);
 
       if (text[0] == '\n') {
+         addToOutput('\n');
          ++yyLineNr;
       }
    }
@@ -5761,7 +5786,7 @@ YY_RULE_SETUP
       addToOutput('\n');
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
    }
 	YY_BREAK
@@ -6108,7 +6133,7 @@ case 95:
 /* rule 95 can match eol */
 YY_RULE_SETUP
 {
-      yyLineNr++;
+      ++yyLineNr;
       addToOutput('\n');
    }
 	YY_BREAK
@@ -7245,7 +7270,7 @@ YY_RULE_SETUP
       // line continuation
       yyLineNr++;
       addToOutput('\n');
-      s_memberGroupHeader+=' ';
+      s_memberGroupHeader += ' ';
    }
 	YY_BREAK
 case 198:
@@ -8946,7 +8971,7 @@ static bool handleDetails(const QString &str, const QStringList &list)
 
    if (inContext != OutputBrief) {
       // treat @details outside brief description as a new paragraph
-      addToOutput("\n\n");
+      addToOutput("\\internal_linebr\\internal_linebr");
    }
 
    setOutput(OutputMainDoc);
@@ -8967,7 +8992,7 @@ static bool handleName(const QString &str, const QStringList &list)
 
       if (s_memberGroupId != DOX_NOGROUP) {
          // end of previous member group
-         closeGroup(current,yyFileName,yyLineNr,true);
+         closeGroup(current, yyFileName, yyLineNr, true, true);
        }
    }
 
@@ -9716,6 +9741,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    yyLineNr         = lineNr;
    langParser       = parser;
    current          = curEntry;
+   current->docLine = (lineNr > 1 ? lineNr : 1);
 
    briefEndsAtDot   = isAutoBrief;
    inBody           = isInbody;
@@ -9786,7 +9812,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    if (current->section == Entry::MEMBERGRP_SEC && s_memberGroupId == DOX_NOGROUP) {
       // @name section but no group started yet
-      openGroup(current, yyFileName, yyLineNr);
+      openGroup(current, yyFileName, yyLineNr, true);
    }
 
    checkFormula();
@@ -9813,6 +9839,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
 void groupEnterFile(const QString &fileName, int)
 {
+   s_openCount = 0;
    s_autoGroupStack.clear();
    s_memberGroupId = DOX_NOGROUP;
    s_memberGroupDocs.clear();
@@ -9828,6 +9855,9 @@ void groupLeaveFile(const QString &fileName, int line)
 
    if (! s_autoGroupStack.isEmpty()) {
       warn(fileName, line, "End of file while inside a group\n");
+
+   } else if (s_openCount > 0)  {
+      warn(fileName, line, "End of file with unbalanced group command\n");
    }
 }
 
@@ -9880,8 +9910,12 @@ static int findExistingGroup(int &groupId, const QSharedPointer<MemberGroupInfo>
    return groupId;
 }
 
-void openGroup(QSharedPointer<Entry> e, const QString &, int)
+void openGroup(QSharedPointer<Entry> e, const QString &, int, bool forceOpen)
 {
+   if (! forceOpen) {
+      ++s_openCount;
+   }
+
    if (e->section == Entry::GROUPDOC_SEC) {
       // auto group
       s_autoGroupStack.push( QMakeShared<Grouping>(e->m_entryName, e->groupingPri()) );
@@ -9907,8 +9941,17 @@ void openGroup(QSharedPointer<Entry> e, const QString &, int)
    }
 }
 
-void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool foundInline)
+void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool isInline, bool forceClose)
 {
+   if (! forceClose) {
+
+      if (s_openCount < 1) {
+         warn(fileName, line, "Unbalanced Group Command");
+      } else {
+         --s_openCount;
+      }
+   }
+
    if (s_memberGroupId != DOX_NOGROUP) {
       // end of member group
 
@@ -9925,7 +9968,7 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
       s_memberGroupRelates.resize(0);
       s_memberGroupDocs.resize(0);
 
-      if (! foundInline) {
+      if (! isInline) {
          e->mGrpId = DOX_NOGROUP;
       }
 
@@ -9933,12 +9976,11 @@ void closeGroup(QSharedPointer<Entry> e, const QString &fileName, int line, bool
       // end of auto group
       QSharedPointer<Grouping> grp = s_autoGroupStack.pop();
 
-      // see bug577005: we should not remove the last group for e
-      if (! foundInline) {
+      if (! isInline && ! e->m_groups.empty()) {
          e->m_groups.removeLast();
       }
 
-      if (! foundInline) {
+      if (! isInline) {
          initGroupInfo(e);
       }
    }

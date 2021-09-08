@@ -1792,9 +1792,9 @@ static void handleCommentBlock(const QString &doc, bool isBrief)
       }
    }
 
-   bool needsEntry;
-   int position = 0;
-   int lineNr   = isBrief ? current->briefLine : current->docLine;
+   bool needsEntry = false;
+   int position    = 0;
+   int lineNr      = isBrief ? current->briefLine : current->docLine;
 
    while (parseCommentBlock(s_thisParser, (docBlockInBody && previous) ? previous : current,
              doc, yyFileName, lineNr, docBlockInBody ? false : isBrief, isJavaDocStyle, docBlockInBody,
@@ -1866,7 +1866,7 @@ static void initSpecialBlock()
    docBrief         = true;
 
    docBlock.resize(0);
-   startCommentBlock(true);
+   startCommentBlock(false);
 }
 
 static void searchFoundDef()
@@ -4092,9 +4092,10 @@ YY_RULE_SETUP
 
             if (! docBlockSpecial) {
                // legacy unformatted docstring
-
-               actualDoc.prepend("\\verbatim ");
-               actualDoc.append("\\endverbatim ");
+               if (! actualDoc.isEmpty()) {
+                  actualDoc.prepend("\\verbatim ");
+                  actualDoc.append("\\endverbatim ");
+               }
             }
 
             handleCommentBlock(actualDoc, false);
@@ -4105,9 +4106,11 @@ YY_RULE_SETUP
 
             if (! docBlockSpecial) {
                // legacy unformatted docstring
+               if (! actualDoc.isEmpty()) {
 
-               actualDoc.prepend("\\verbatim ");
-               actualDoc.append("\\endverbatim ");
+                  actualDoc.prepend("\\verbatim ");
+                  actualDoc.append("\\endverbatim ");
+               }
             }
 
             actualDoc.prepend("\\namespace " + s_moduleScope + " ");
@@ -4140,7 +4143,7 @@ YY_RULE_SETUP
          // strip s_curIndent amount of whitespace
 
          for (int i= 0; i<indent - s_curIndent; i++) {
-            docBlock+=' ';
+            docBlock += ' ';
          }
 
          DBG_CTX((stderr,"stripping indent %d\n",s_curIndent));
@@ -4200,7 +4203,7 @@ YY_RULE_SETUP
       // continuation of the comment on the next line
       docBlock  += '\n';
       docBrief  =  false;
-      startCommentBlock(false);
+
       incLineNr();
    }
 	YY_BREAK
