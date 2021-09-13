@@ -1026,11 +1026,15 @@ void XmlDocVisitor::visitPre(DocImage *img)
    }
 
    static const QString xmlOutDir = Config::getString("xml-output");
-   QString baseName = img->name();
 
-   int i;
-   if ((i = baseName.lastIndexOf('/')) != -1 || (i = baseName.lastIndexOf('\\')) != -1) {
-      baseName = baseName.right(baseName.length() - i - 1);
+   QString url      = img->url();
+   QString baseName;
+
+   if (url.isEmpty())   {
+      baseName = img->relPath() + img->name();
+
+   } else {
+      baseName = correctURL(url, img->relPath());
    }
 
    visitPreStart(m_t, "image", false, this, img->children(), baseName, true, img->type(), img->width(), img->height());
@@ -1041,7 +1045,7 @@ void XmlDocVisitor::visitPre(DocImage *img)
 
    fd = findFileDef(&Doxy_Globals::imageNameDict, img->name(), ambig);
 
-   if (fd != nullptr)  {
+   if (fd != nullptr && url.isEmpty())  {
       QFile inImage(fd->getFilePath());
       QString outputFile = xmlOutDir + "/" + baseName;
 
