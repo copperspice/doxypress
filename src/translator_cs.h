@@ -509,8 +509,11 @@ class Translator_Cs : public Translator
     *  the list of links to documented compounds
     */
    QString trCompounds() override {
-      if (Config::getBool("optimize-c")) {
+      static bool optimizeC = Config::getBool("optimize-c");
+
+      if (optimizeC) {
          return QCoreApplication::translate("doxy-text", "Data Structures", "trCompounds");
+
       } else {
          return QCoreApplication::translate("doxy-text", "Classes", "trCompounds");
       }
