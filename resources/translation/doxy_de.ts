@@ -738,11 +738,11 @@
     </message>
     <message>
         <source>Collaboration diagram for %1:</source>
-        <translation>Kollaborationsdiagramm für% 1:</translation>
+        <translation>Kollaborationsdiagramm für %1:</translation>
     </message>
     <message>
         <source>Include dependency graph for %1:</source>
-        <translation>Include-Abhängigkeitsdiagramm für% 1:</translation>
+        <translation>Include-Abhängigkeitsdiagramm für %1:</translation>
     </message>
     <message>
         <source>Test</source>
