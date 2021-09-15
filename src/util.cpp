@@ -1873,8 +1873,8 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
    // read a word from the text string
    while (match.hasMatch()) {
 
-       start_iter = match.capturedStart();
-       matchLen   = match.capturedLength();
+      start_iter = match.capturedStart();
+      matchLen   = match.capturedLength();
 
       // avoid matching part of hex numbers
       // add non-word part to the result
@@ -1893,6 +1893,7 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
             skip_iter    = start_iter + matchLen;
             current_iter = skip_iter;
 
+            match = regExp.match(text, current_iter);
             continue;
          }
       }
