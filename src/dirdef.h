@@ -57,7 +57,7 @@ class DirDef : public Definition
       return m_dispName;
    }
 
-   const QString &shortName() const {
+   QString shortName() const {
       return m_shortName;
    }
 
