@@ -645,7 +645,7 @@ static void detectUndocumentedParams()
       bool isFortran  = (lang == SrcLangExt_Fortran);
 
       bool isFortranSubroutine = (isFortran && returnType.contains("subroutine"));
-      bool isVoidReturn        = (returnType == "void");
+      bool isVoidReturn        = (returnType == "void") || (returnType.endsWith(" void")); ;
 
       if (! isVoidReturn && returnType == "auto")   {
          const ArgumentList *defArgList;
