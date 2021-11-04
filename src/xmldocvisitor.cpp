@@ -903,8 +903,25 @@ void XmlDocVisitor::visitPre(DocHtmlTable *t)
    if (m_hide) {
       return;
    }
+
    m_t << "<table rows=\"" << t->numRows()
-       << "\" cols=\"" << t->numColumns() << "\">" ;
+       << "\" cols=\"" << t->numColumns() << "\"";
+  for (const auto &opt : t->attribs()) {
+    if (opt.name == "width") {
+      m_t << " " << opt.name << "=\"" << opt.value << "\"";
+    }
+  }
+  m_t << ">";
+  if (t->hasCaption()) {
+    DocHtmlCaption *c = t->caption();
+    m_t << "<caption";
+
+    if (! c->file().isEmpty()) {
+      m_t << " id=\""  << stripPath(c->file()) << "_1" << c->anchor() << "\"";
+    }
+
+    m_t << ">";
+  }
 }
 
 void XmlDocVisitor::visitPost(DocHtmlTable *)
@@ -912,6 +929,7 @@ void XmlDocVisitor::visitPost(DocHtmlTable *)
    if (m_hide) {
       return;
    }
+
    m_t << "</table>\n";
 }
 
@@ -957,7 +975,6 @@ void XmlDocVisitor::visitPre(DocHtmlCaption *)
    if (m_hide) {
       return;
    }
-   m_t << "<caption>";
 }
 
 void XmlDocVisitor::visitPost(DocHtmlCaption *)
@@ -965,6 +982,7 @@ void XmlDocVisitor::visitPost(DocHtmlCaption *)
    if (m_hide) {
       return;
    }
+
    m_t << "</caption>\n";
 }
 
