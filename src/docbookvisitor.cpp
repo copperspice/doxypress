@@ -1060,6 +1060,14 @@ void DocbookDocVisitor::visitPre(DocHtmlTable *t)
    for (uint i = 0; i < t->numColumns(); ++i) {
     m_t << "      <colspec colname='c" << i+1 << "'/>\n";
   }
+  if (t->hasCaption()) {
+    DocHtmlCaption *c = t->caption();
+    m_t << "<caption>";
+
+    if (! c->file().isEmpty()) {
+      m_t << "<anchor xml:id=\"_" <<  stripPath(c->file()) << "_1" << filterId(c->anchor()) << "\"/>";
+    }
+  }
 }
 
 void DocbookDocVisitor::visitPost(DocHtmlTable *)
@@ -1194,8 +1202,6 @@ void DocbookDocVisitor::visitPre(DocHtmlCaption *)
    if (m_hide) {
       return;
    }
-
-   m_t << "<caption>";
 }
 
 void DocbookDocVisitor::visitPost(DocHtmlCaption *)
