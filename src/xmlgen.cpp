@@ -1219,7 +1219,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    if (md->getDefLine() != -1) {
       t << "        <location file=\""
         << convertToXML(stripFromPath(md->getDefFileName())) << "\" line=\""
-        << md->getDefLine() << "\"" << " column=\""
+        << md->getDefLine() << "\" column=\""
         << md->getDefColumn() << "\"" ;
 
       if (md->getStartBodyLine() != -1) {
@@ -2189,6 +2189,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
 
    t << "    </detaileddescription>" << endl;
 
+   t << "    <location file=\"" << convertToXML(stripFromPath(pd->getDefFileName())) << "\"/>\n";
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
