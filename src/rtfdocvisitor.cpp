@@ -1267,6 +1267,7 @@ void RTFDocVisitor::visitPre(DocHtmlCaption *)
 void RTFDocVisitor::visitPost(DocHtmlCaption *)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlCaption)}\n");
+   m_t << "}\n\\par\n";
 }
 
 void RTFDocVisitor::visitPre(DocHtmlRow *r)
