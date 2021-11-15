@@ -777,9 +777,17 @@ void RTFDocVisitor::visitPost(DocAutoList *)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocAutoList)}\n");
-   m_t << "\\par";
+
+   if (! m_lastIsPara)  {
+      m_t << "\\par";
+   }
+
    m_t << "}" << endl;
+
    m_lastIsPara = true;
+   if (m_indentLevel == 0) {
+     m_t << "\\par" << endl;
+   }
 }
 
 void RTFDocVisitor::visitPre(DocAutoListItem *)
