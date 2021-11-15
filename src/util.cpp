@@ -3267,11 +3267,8 @@ static bool matchArgument_Internal(QSharedPointer<Definition> srcScope, QSharedP
    stripIrrelevantConstVolatile(srcType);
    stripIrrelevantConstVolatile(dstType);
 
-   if (srcArg.canType.isEmpty()) {
+   if (srcArg.canType.isEmpty() || dstArg.canType.isEmpty()) {
       srcArg.canType = extractCanonicalArgType(srcScope, srcFileScope, srcArg);
-   }
-
-   if (dstArg.canType.isEmpty()) {
       dstArg.canType = extractCanonicalArgType(dstScope, dstFileScope, dstArg);
    }
 
