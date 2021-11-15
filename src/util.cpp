@@ -5794,7 +5794,7 @@ QString substituteTemplateArgumentsInString(const QString &name, const ArgumentL
 
    QString result;
 
-   static QRegularExpression regExp("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9\\x80-\\xFF]*");
+   static QRegularExpression regExp("[a-z_A-Z\\x80-\\xFF][a-z_A-Z0-9:\\x80-\\xFF]*");
    QRegularExpressionMatch match = regExp.match(name);
 
    QString::const_iterator iter_last = name.constBegin();
