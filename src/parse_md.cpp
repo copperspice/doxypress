@@ -2796,6 +2796,13 @@ static void writeFencedCodeBlock(QString &out, QStringView data, const QString &
       lang = lang.mid(1);
    }
 
+   while (data.startsWith(' ') || data.startsWith('\t')) {
+      // remove the first char
+      out += data[0];
+      data = data.mid(1);
+   }
+
+
    out += "@code";
 
    if (! lang.isEmpty()) {
@@ -3287,6 +3294,10 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    QString docs    = fileBuf;
    int prepend     = 0;       // number of empty lines in front
    QString title   = extractPageTitle(docs, id, prepend).trimmed();
+
+   if (id.startsWith("autotoc_md")) {
+      id.clear();
+   }
 
    QString titleFn = QFileInfo(fileName).baseName();
    QString fn      = QFileInfo(fileName).fileName();
