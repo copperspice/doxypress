@@ -1224,16 +1224,28 @@ void RTFDocVisitor::visitPost(DocHtmlDescData *)
    m_lastIsPara = true;
 }
 
-void RTFDocVisitor::visitPre(DocHtmlTable *)
+void RTFDocVisitor::visitPre(DocHtmlTable *t)
 {
    if (m_hide) {
       return;
    }
-   DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlTable)}\n");
-   if (!m_lastIsPara) {
+
+   if (! m_lastIsPara) {
       m_t << "\\par" << endl;
    }
    m_lastIsPara = true;
+
+   if (t->hasCaption()) {
+      DocHtmlCaption *c = t->caption();
+      m_t << "\\pard \\qc \\b";
+
+      if (!c ->file().isEmpty()) {
+         m_t << "{\\bkmkstart " << rtfFormatBmkStr(stripPath(c->file()) + "_" + c->anchor())   << "}" << endl;
+         m_t << "{\\bkmkend "   << rtfFormatBmkStr(stripPath(c->file())   + "_" + c->anchor()) << "}" << endl;
+      }
+
+      m_t << "{Table \\field\\flddirty{\\*\\fldinst { SEQ Table \\\\*Arabic }}{\\fldrslt {\\noproof 1}} ";
+   }
 }
 
 void RTFDocVisitor::visitPost(DocHtmlTable *)
