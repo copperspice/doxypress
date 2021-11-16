@@ -55,7 +55,9 @@ function initResizable()
     content.css({height:windowHeight + "px"});
     navtree.css({height:windowHeight + "px"});
     sidenav.css({height:windowHeight + "px"});
+
     var width=$(window).width();
+
     if (width!=collapsedWidth) {
       if (width<desktop_vp && collapsedWidth>=desktop_vp) {
         if (!collapsed) {
@@ -67,6 +69,10 @@ function initResizable()
         }
       }
       collapsedWidth=width;
+    }
+
+    if (location.hash.slice(1)) {
+      (document.getElementById(location.hash.slice(1))||document.body).scrollIntoView();
     }
   }
 

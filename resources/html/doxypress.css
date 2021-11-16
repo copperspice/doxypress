@@ -1586,6 +1586,10 @@ div.toc li.level4
    margin-left: 45px;
 }
 
+span.emoji {
+   /* refer to https://unicode.org/emoji/charts/full-emoji-list.html */
+}
+
 .inherit_header {
    font-weight: bold;
    color: gray;
