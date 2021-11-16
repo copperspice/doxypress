@@ -49,7 +49,7 @@ struct TagInfo;
 class MemberDef : public Definition
 {
  public:
-   MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &name,
+   MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &memberName,
              const QString &args, const QString &excp, Protection prot, Specifier virt, bool stat,
              Relationship related, MemberDefType memberType, const ArgumentList &tal, const ArgumentList &al);
 

@@ -799,10 +799,10 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
    isDMember = def->getDefFileName().endsWith(".d", Qt::CaseInsensitive);
 }
 
-MemberDef::MemberDef(const QString &df, int dl, int dc, const QString &type, const QString &na,
+MemberDef::MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &memberName,
                      const QString &a, const QString &e, Protection p, Specifier v, bool s,
                      Relationship r, MemberDefType memberType, const ArgumentList &tal, const ArgumentList &al)
-   : Definition(df, dl, dc, removeRedundantWhiteSpace(na)), visited(false), m_impl(new MemberDefImpl)
+   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(memberName)), visited(false), m_impl(new MemberDefImpl)
 {
    m_impl->init(this, type, a, e, p, v, s, r, memberType, tal, al);
 
