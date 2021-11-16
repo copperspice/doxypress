@@ -251,10 +251,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
       treeViewCssJs = "<link href=\"$relpath^navtree.css\" rel=\"stylesheet\" type=\"text/css\"/>\n"
                       "<script type=\"text/javascript\" src=\"$relpath^resize.js\"></script>\n"
                       "<script type=\"text/javascript\" src=\"$relpath^navtreedata.js\"></script>\n"
-                      "<script type=\"text/javascript\" src=\"$relpath^navtree.js\"></script>\n"
-                      "<script type=\"text/javascript\">\n"
-                      "  $(document).ready(initResizable);\n"
-                      "</script>";
+                      "<script type=\"text/javascript\" src=\"$relpath^navtree.js\"></script>\n";
    }
 
    if (searchEngine) {
@@ -2501,8 +2498,10 @@ QString HtmlGenerator::writeSplitBarAsString(const QString &name, const QString 
                   "  </div>\n"
                   "</div>\n"
                   "<script type=\"text/javascript\">\n"
-                  "$(document).ready(function(){initNavTree('" + name + Doxy_Globals::htmlFileExtension + "','" + relpath +
-                  "');});\n</script>\n<div id=\"doc-content\">\n";
+                  "$(document).ready(function(){initNavTree('" + name +
+                  Doxy_Globals::htmlFileExtension + "','" + relpath +
+                  "'); initResizable(); });\n" + "</script>\n" +
+                  "<div id=\"doc-content\">\n";
    }
 
    return result;
