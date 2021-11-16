@@ -80,14 +80,14 @@ class Definition_Private
    QString defFileName;
    QString defFileExt;
 
-   SrcLangExt lang;
+   SrcLangExt lang = SrcLangExt_Unknown;
 
    QString id;                // clang unique id
 };
 
 Definition_Private::Definition_Private()
    : partOfGroups(0), m_body_startLine(-1), m_body_endLine(-1), hidden(false),
-     isArtificial(false), lang(SrcLangExt_Unknown)
+     isArtificial(false)
 {
 }
 
