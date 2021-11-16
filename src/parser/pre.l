@@ -567,18 +567,18 @@ static QString extractTrailingComment(const QString &s)
 
       switch (c.unicode()) {
          case '/': {
-            i--;
+            --i;
 
             if (i >= 0 && s[i] == '*') {
                // end of a comment block
-               i--;
+               --i;
 
                while (i > 0 && !(s[i - 1] == '/' && s[i] == '*')) {
                   i--;
                }
 
                if (i == 0) {
-                  i++;
+                  ++i;
                }
 
                // only /*!< or /**< are treated as a comment for the macro name     */
@@ -605,7 +605,7 @@ static QString extractTrailingComment(const QString &s)
             return QString("");
       }
 
-      i--;
+      --i;
    }
 
    return QString("");
@@ -810,14 +810,14 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                }
 
                if (c == ')') {
-                  level--;
+                  --level;
                   arg += c;
                   if (level == 0) {
                      break;
                   }
 
                } else if (c == '(') {
-                  level++;
+                  ++level;
                   arg += c;
 
                } else {
@@ -959,18 +959,18 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
 
                // search for ## backward
                if (len2 >= 0 && d.at(len2) == '\"') {
-                  len2--;
+                  --len2;
                }
 
                while (len2 >= 0 && d.at(len2) == ' ') {
-                  len2--;
+                  --len2;
                }
 
                if (len2 > 0 && d.at(len2) == '#' && d.at(len2 - 1) == '#') {
                   hash = true;
                }
 
-               k++;
+               ++k;
 
                // scan the number
                while (k < d.length() && d.at(k) >= '0' && d.at(k) <= '9') {
@@ -982,11 +982,11 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                   len2 = k;
 
                   if (len2 < d.length() && d.at(len2) == '\"') {
-                     len2++;
+                     ++len2;
                   }
 
                   while (len2 < d.length() && d.at(len2) == ' ') {
-                     len2++;
+                     ++len2;
                   }
 
                   if (len2 < d.length() - 1 && d.at(len2) == '#' && d.at(len2 + 1) == '#') {
@@ -1059,7 +1059,7 @@ static int getNextId(const QString &expr, int p, int *l)
       if (c.isNumber()) {
          // skip number
          while (p < expr.length() && isId(expr.at(p))) {
-            p++;
+            ++p;
          }
 
       } else if (c.isLetter() || c == '_') {
@@ -1067,7 +1067,7 @@ static int getNextId(const QString &expr, int p, int *l)
          n = p - 1;
 
          while (p < expr.length() && isId(expr.at(p))) {
-            p++;
+            ++p;
          }
 
          *l = p - n;
@@ -1089,7 +1089,7 @@ static int getNextId(const QString &expr, int p, int *l)
             ppc = pc;
             pc = c;
             c = expr.at(p);
-            p++;
+            ++p;
          }
 
          if (p < expr.length()) {
@@ -1103,7 +1103,7 @@ static int getNextId(const QString &expr, int p, int *l)
             c = expr.at(p);
 
             if (c == '*') { // Start of C comment
-               p++;
+               ++p;
 
                while (p < expr.length() && !(pc == '*' && c == '/')) {
                   pc = c;
@@ -1240,7 +1240,7 @@ static bool expandExpression(QString &expr, QString *rest, int pos, int level)
 
          // check for too many inplace expansions without making progress
          if (i == startPos) {
-           samePosCount++;
+           ++samePosCount;
 
          } else {
            startPos     = i;
@@ -1420,10 +1420,10 @@ QString removeIdsAndMarkers(const QString &s)
                ++iter;
 
                if (c == '(') {
-                  count++;
+                  ++count;
 
                } else if (c == ')') {
-                  count--;
+                  --count;
 
                   if (count == 0) {
                      break;
@@ -1731,7 +1731,7 @@ static void readIncludeFile(const QString &inc)
 
    // find the start of the include file name
    while (i < inc.length() && (inc.at(i) == ' ' || inc.at(i) == '"' || inc.at(i) == '<')) {
-      i++;
+      ++i;
    }
    uint s = i;
 
@@ -1740,7 +1740,7 @@ static void readIncludeFile(const QString &inc)
 
    // find the end of the include file name
    while (i < inc.length() && inc.at(i) != '"' && inc.at(i) != '>') {
-      i++;
+      ++i;
    }
 
    if (s < inc.length() && i > s) {
@@ -2095,7 +2095,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
                   (def = DefineManager::instance().isDefined(name)) && (! s_expandOnlyPredef || def->isPredefined)) ) {
 
          outputChar('\n');
-         s_yyLineNr++;
+         ++s_yyLineNr;
 
       } else {
          // do not skip
@@ -2120,7 +2120,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
 
       if (s_includeStack.isEmpty())  {
-         s_curlyCount++;
+         ++s_curlyCount;
       }
 
       outputChar(text[0]);
@@ -2131,7 +2131,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
 
       if (s_includeStack.isEmpty() && s_curlyCount > 0)  {
-         s_curlyCount--;
+         --s_curlyCount;
       }
 
       outputChar(text[0]);
@@ -2278,18 +2278,18 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <CopyLine>\n            {
       outputChar('\n');
       BEGIN(Start);
-      s_yyLineNr++;
+      ++s_yyLineNr;
       s_yyColNr = 1;
    }
 
 <FindDefineArgs>"("        {
       s_defArgsStr += '(';
-      s_roundCount++;
+      ++s_roundCount;
    }
 
 <FindDefineArgs>")"        {
       s_defArgsStr += ')';
-      s_roundCount--;
+      --s_roundCount;
 
       if (s_roundCount == 0) {
          QString result = expandMacro(s_defArgsStr);
@@ -2345,7 +2345,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <FindDefineArgs>\n         {
       s_defArgsStr += ' ';
-      s_yyLineNr++;
+      ++s_yyLineNr;
       outputChar('\n');
    }
 
@@ -2369,7 +2369,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <ArgCopyCComment>\n        {
       s_defArgsStr += ' ';
-      s_yyLineNr++;
+      ++s_yyLineNr;
       outputChar('\n');
    }
 
@@ -2503,7 +2503,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <Command,IgnoreLine>\n        {
       outputChar('\n');
       BEGIN(Start);
-      s_yyLineNr++;
+      ++s_yyLineNr;
    }
 
 <Command>"pragma"{B}+"once"   {
@@ -2517,7 +2517,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <IgnoreLine>\\[\r]?\n         {
       outputChar('\n');
-      s_yyLineNr++;
+      ++s_yyLineNr;
    }
 
 <IgnoreLine>.
@@ -2579,7 +2579,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <DefinedExpr1,DefinedExpr2>\\\n     {
-      s_yyLineNr++;
+      ++s_yyLineNr;
       outputChar('\n');
    }
 
@@ -2611,7 +2611,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <DefinedExpr1,DefinedExpr2>\n       {
       // should not happen, handle anyway
 
-      s_yyLineNr++;
+      ++s_yyLineNr;
       s_ifcount = 0;
       BEGIN(SkipCPPBlock);
    }
@@ -2631,14 +2631,14 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCPPBlock>\n           {
-      s_yyLineNr++;
+      ++s_yyLineNr;
       outputChar('\n');
    }
 
 <SkipCPPBlock>.
 <SkipCommand>"if"(("n")?("def"))?/[ \t(!]    {
       incrLevel();
-      s_ifcount++;
+      ++s_ifcount;
    }
 
 <SkipCommand>"else"        {
@@ -2673,7 +2673,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <SkipCommand>\n            {
       outputChar('\n');
-      s_yyLineNr++;
+      ++s_yyLineNr;
       BEGIN(SkipCPPBlock);
    }
 
@@ -2713,7 +2713,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <SkipLine>\n            {
       outputChar('\n');
-      s_yyLineNr++;
+      ++s_yyLineNr;
       BEGIN(SkipCPPBlock);
    }
 
@@ -2767,7 +2767,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <EndImport>\\[\r]?"\n"        {
       outputChar('\n');
-      s_yyLineNr++;
+      ++s_yyLineNr;
    }
 
 <EndImport>.            {
@@ -2887,7 +2887,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <DefineArg>"\\\n"              {
       s_defExtraSpacing += "\n";
-      s_yyLineNr++;
+      ++s_yyLineNr;
    }
 
 <DefineArg>","{B}*             {
@@ -2918,7 +2918,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_defArgsStr +=  QString::fromUtf8(yytext);
 
       s_argDict->insert("__VA_ARGS__", s_defArgs);
-      s_defArgs++;
+      ++s_defArgs;
    }
 
 <DefineArg>{ID}{B}*("..."?)      {
@@ -2935,7 +2935,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       text = text.trimmed();
 
       s_argDict->insert(text, s_defArgs);
-      s_defArgs++;
+      ++s_defArgs;
    }
 
   /*
@@ -3006,7 +3006,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       outputChar('/');
       outputChar('*');
 
-      // s_commentCount++;
+      // ++s_commentCount;
    }
 
 <SkipCComment>[\\@][\\@]("f{"|"f$"|"f[") {
@@ -3157,7 +3157,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCond>\n                            {
-      s_yyLineNr++;
+      ++s_yyLineNr;
       outputChar('\n');
    }
 
@@ -3252,7 +3252,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCComment,SkipVerbatim>\n       {
-      s_yyLineNr++;
+      ++s_yyLineNr;
       outputChar('\n');
    }
 
@@ -3272,8 +3272,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_defLitText += text;
 
       s_defText += " ";
-      s_yyLineNr++;
-      s_yyMLines++;
+      ++s_yyLineNr;
+      ++s_yyMLines;
    }
 
 <CopyCComment>"*/"         {
@@ -3287,7 +3287,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <CopyCComment>\n        {
       QString text = QString::fromUtf8(yytext);
 
-      s_yyLineNr++;
+      ++s_yyLineNr;
 
       s_defLitText += text;
       s_defText+=' ';
@@ -3313,7 +3313,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <RemoveCComment>\n         {
       // */ (editor syntax fix)
 
-      s_yyLineNr++;
+      ++s_yyLineNr;
       outputChar('\n');
    }
 
@@ -3407,8 +3407,8 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_defLitText += text;
       outputChar('\n');
       s_defText += ' ';
-      s_yyLineNr++;
-      s_yyMLines++;
+      ++s_yyLineNr;
+      ++s_yyMLines;
    }
 
 <DefineText>\n             {
@@ -3455,7 +3455,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
       s_argDict = QSharedPointer<QHash<QString, int>>();
 
-      s_yyLineNr++;
+      ++s_yyLineNr;
       s_yyColNr = 1;
       s_lastGuardName.resize(0);
       BEGIN(Start);
@@ -3632,7 +3632,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <*>\n                {
       outputChar('\n');
-      s_yyLineNr++;
+      ++s_yyLineNr;
    }
 
 <*>[\xC0-\xFF][\x80-\xBF]+    {
@@ -3695,7 +3695,7 @@ static int getCurrentChar(const QString &expr, QString *rest, uint pos)
 static void unputChar(const QString &expr, QString *rest, uint &pos, char c)
 {
    if (pos < expr.length()) {
-      pos++;
+      ++pos;
 
    } else if (rest) {
       char cs[2];

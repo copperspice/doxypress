@@ -357,19 +357,19 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <CopyArgSharp>"("                       {
       QString text = QString::fromUtf8(yytext);
-      s_argRoundCount++;
+      ++s_argRoundCount;
       *s_copyArgValue += text[0];
    }
 
 <CopyArgSharp>")"                       {
       QString text = QString::fromUtf8(yytext);
-      s_argRoundCount--;
+      --s_argRoundCount;
       *s_copyArgValue += text[0];
    }
 
 <CopyArgCurly>"{"          {
       QString text = QString::fromUtf8(yytext);
-      s_argCurlyCount++;
+      ++s_argCurlyCount;
       *s_copyArgValue += text[0];
    }
 

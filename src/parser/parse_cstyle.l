@@ -8488,7 +8488,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       *specName += text[0];
 
       if (roundCount == 0) {
-         sharpCount++;
+         ++sharpCount;
       }
    }
 
@@ -8547,13 +8547,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <Specialization>"("        {
       QString text = QString::fromUtf8(yytext);
       *specName += text[0];
-      roundCount++;
+      ++roundCount;
    }
 
 <Specialization>")"          {
       QString text = QString::fromUtf8(yytext);
       *specName += text[0];
-      roundCount--;
+      --roundCount;
    }
 
 <Specialization>.            {

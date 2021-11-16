@@ -467,7 +467,7 @@ static void codifyLines(const QString &text)
 
       } else {
          tmp += c;
-         g_yyColNr++;
+         ++g_yyColNr;
 
       }
    }
@@ -504,7 +504,7 @@ static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition>
    for (auto c : text) {
 
       if (c == '\n') {
-         g_yyLineNr++;
+         ++g_yyLineNr;
 
          ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
          nextCodeLine();
@@ -770,7 +770,7 @@ static bool getLinkInScope(const QString &c, const QString &m, const QString  me
 
             if (md->addExample(anchor, g_exampleName, g_exampleFile)) {
                ol.writeCodeAnchor(anchor);
-               g_anchorCount++;
+               ++g_anchorCount;
             }
          }
 
@@ -2279,14 +2279,16 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <AlignAsEnd>"("                         {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
-      g_bracketCount++;
+      ++g_bracketCount;
    }
 
 <AlignAsEnd>")"                  {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
 
-      if (--g_bracketCount <= 0) {
+      --g_bracketCount;
+
+      if (g_bracketCount <= 0) {
          BEGIN(ClassName);
       }
    }
@@ -2760,7 +2762,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       popCallContext();
-      g_bracketCount--;
+      --g_bracketCount;
       g_parmType = g_name;
 
       BEGIN(FuncCall);
@@ -2774,7 +2776,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (text[0] == ')') {
          popCallContext();
-         g_bracketCount--;
+         --g_bracketCount;
          BEGIN(FuncCall);
       }
    }
@@ -3627,8 +3629,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       // commented out, otherwise a()->b() does not work for b().
 
       g_code->codify(text);
+      --g_bracketCount;
 
-      if (--g_bracketCount <= 0)  {
+      if (g_bracketCount <= 0)  {
          if (g_name.isEmpty()) {
             BEGIN( Body );
          } else {
