@@ -307,6 +307,12 @@ class MemberDef : public Definition
    QString fieldType() const;
    bool isReference() const override;
 
+   QString getDeclFileName() const;
+   void setDeclFile(const QString &df, int line, int column);
+
+   int getDeclLine() const;
+   int getDeclColumn() const;
+
    void setMemberType(MemberDefType t);
    void setDefinition(const QString &d);
    void setFileDef(QSharedPointer<FileDef> fd);

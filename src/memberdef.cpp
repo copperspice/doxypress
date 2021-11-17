@@ -601,6 +601,9 @@ class MemberDefImpl
    QString m_type;           // correct return type for this member
    QString accessorType;     // return type which indicates how to get to this member
 
+   int m_decline;
+   int m_declCol;
+
    QSharedPointer<ClassDef> accessorClass;        // class that this member accesses (for anonymous types)
 
    QString m_args;          // function arguments/variable array specifiers
@@ -698,6 +701,10 @@ class MemberDefImpl
 
    QSharedPointer<ClassDef> category;
    QSharedPointer<MemberDef> categoryRelation;
+
+   QString m_declFileName;
+   int m_declLine   = -1;
+   int m_declColumn = -1;
 };
 
 MemberDefImpl::MemberDefImpl() :
@@ -1388,6 +1395,28 @@ QString MemberDef::getDeclType() const
    }
 
    return retval;
+}
+
+void MemberDef::setDeclFile(const QString &df, int line, int column)
+{
+  m_impl->m_declFileName = df;
+  m_impl->m_declLine     = line;
+  m_impl->m_declColumn   = column;
+}
+
+QString MemberDef::getDeclFileName() const
+{
+  return m_impl->m_declFileName;
+}
+
+int MemberDef::getDeclLine() const
+{
+  return m_impl->m_declLine;
+}
+
+int MemberDef::getDeclColumn() const
+{
+  return m_impl->m_declColumn;
 }
 
 void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
