@@ -3882,11 +3882,6 @@ void ClassDef::writePlainMemberDeclaration(OutputList &ol, MemberListType lt, bo
    }
 }
 
-bool ClassDef::isLocal() const
-{
-   return m_isLocal;
-}
-
 const ClassSDict &ClassDef::getClassSDict()
 {
    return m_innerClasses;
@@ -3947,11 +3942,6 @@ QSharedPointer<ClassDef> ClassDef::templateMaster() const
    return m_templateMaster;
 }
 
-bool ClassDef::isTemplate() const
-{
-   return ! m_tempArgs.listEmpty();
-}
-
 const IncludeInfo &ClassDef::includeInfo() const
 {
    return m_incInfo;
@@ -3977,14 +3967,14 @@ QHash<QString, QSharedPointer<ConstraintClassDef>> ClassDef::templateTypeConstra
    return m_constraintClassDict;
 }
 
-bool ClassDef::isTemplateArgument() const
-{
-   return m_isTemplArg;
-}
-
 bool ClassDef::isAbstract() const
 {
    return m_isAbstract || (m_classTraits.hasTrait(Entry::Virtue::Abstract));
+}
+
+bool ClassDef::isLocal() const
+{
+   return m_isLocal;
 }
 
 bool ClassDef::isFinal() const
@@ -4015,6 +4005,16 @@ bool ClassDef::isObjectiveC() const
 bool ClassDef::isCSharp() const
 {
    return getLanguage() == SrcLangExt_CSharp;
+}
+
+bool ClassDef::isTemplateArgument() const
+{
+   return m_isTemplArg;
+}
+
+bool ClassDef::isTemplate() const
+{
+   return ! m_tempArgs.listEmpty();
 }
 
 QSharedPointer<ClassDef> ClassDef::categoryOf() const
@@ -4179,16 +4179,6 @@ void ClassDef::removeMemberFromLists(QSharedPointer<MemberDef> md)
    }
 }
 
-bool ClassDef::isJavaEnum() const
-{
-   return m_isJavaEnum;
-}
-
-bool ClassDef::isGeneric() const
-{
-   return m_isGeneric;
-}
-
 void ClassDef::setClassTraits(Entry::Traits traits)
 {
    m_classTraits = traits;
@@ -4231,13 +4221,23 @@ void ClassDef::setName(const QString &name)
    Definition::setName(name);
 }
 
+void ClassDef::setVisited(bool visited) {
+   m_visited = visited;
+}
+
 bool ClassDef::isAnonymous() const
 {
    return m_isAnonymous;
 }
 
-void ClassDef::setVisited(bool visited) {
-   m_visited = visited;
+bool ClassDef::isGeneric() const
+{
+   return m_isGeneric;
+}
+
+bool ClassDef::isJavaEnum() const
+{
+   return m_isJavaEnum;
 }
 
 bool ClassDef::isVisited() const {

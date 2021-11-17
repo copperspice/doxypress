@@ -290,10 +290,10 @@ class ClassDef : public Definition
 
    QSharedPointer<MemberDef> isSmartPointer() const;
 
+   bool isAnonymous() const;
+   bool isGeneric() const;
    bool isJavaEnum() const;
 
-   bool isGeneric() const;
-   bool isAnonymous() const;
    QString title() const;
 
    QString generatedFromFiles() const;

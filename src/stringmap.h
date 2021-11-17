@@ -67,10 +67,6 @@ class StringCompare {
 template<class T, class SC = StringCompare>
 class StringMap
 {
-
- private:
-   QMap<QString, T, SC> m_dict;
-
  public:
    // create an ordered dictionary
    // indicate whether the keys should be sorted in a case sensitive way
@@ -217,6 +213,8 @@ class StringMap
       typename QList<T>::iterator m_li;
    };
 
+ private:
+   QMap<QString, T, SC> m_dict;
 };
 
 // Ordered dictionary of elements of type T
