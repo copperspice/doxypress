@@ -976,7 +976,7 @@ void HtmlDocVisitor::visitPre(DocAutoList *l)
       //         1. (repeat)...
       //
 
-      m_t << "<ol type=\"" << types[l->depth() % NUM_HTML_LIST_TYPES] << "\"";
+      m_t << "<ol type=\"" << types[l->depth() % NUM_HTML_LIST_TYPES] << "\">";
 
    } else {
       m_t << "<ul";
