@@ -3664,6 +3664,21 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
                addMemberDocs(ptrEntry, md, def, tmp, false);
                md->setRefItems(root->m_specialLists);
 
+               // if md is a variable forward declaration and root is the definition
+               // then mark md as the definition
+
+               if (! root->explicitExternal && md->isExternal()) {
+                  md->setDeclFile(md->getDefFileName(), md->getDefLine(), md->getDefColumn());
+                  md->setExplicitExternal(false);
+
+               } else if (root->explicitExternal && ! md->isExternal()) {
+
+                  // if md is the definition and root points to a declaration
+                  // then add declaration info
+
+                  md->setDeclFile(root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
+               }
+
                return md;
             }
          }
@@ -4853,7 +4868,11 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         // if item is a declaration and root is the corresponding
                         // definition, then turn item into a definition
                         if (item->isPrototype() && ! root->proto) {
+                           item->setDeclFile(item->getDefFileName(), item->getDefLine(), item->getDefColumn());
                            item->setPrototype(false);
+                        } else if (!md->isPrototype() && root->proto) {
+                           // if md is already the definition, then add the declaration info
+                           md->setDeclFile(root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                         }
                      }
                   }

@@ -1232,12 +1232,12 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
            << md->getEndBodyLine() << "\"";
       }
 
-/*    if (md->getDeclLine() != -1 ) {
+      if (md->getDeclLine() != -1 ) {
          t << " declfile=\"" << convertToXML(stripFromPath(md->getDeclFileName())) << "\" declline=\""
            << md->getDeclLine() << "\" declcolumn=\""
            << md->getDeclColumn() << "\"";
       }
-*/
+
       t << "/>" << endl;
    }
 
