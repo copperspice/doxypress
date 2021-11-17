@@ -43,7 +43,8 @@ class Definition_Private
    Definition_Private();
    ~Definition_Private();
 
-   void init(const QString &df, const QString &n);
+   void init(const QString &df, const QString &entityName);
+   void setDefFileName(const QString &df);
 
    SectionDict m_sectionDict;                             // dictionary of all sections
    QVector<QSharedPointer <SectionInfo>> m_sectionList;   // list of sections, definiton order
@@ -83,6 +84,8 @@ class Definition_Private
    SrcLangExt lang = SrcLangExt_Unknown;
 
    QString id;                // clang unique id
+    int defLine;
+    int defColumn;
 };
 
 Definition_Private::Definition_Private()
@@ -96,7 +99,7 @@ Definition_Private::~Definition_Private()
    delete partOfGroups;
 }
 
-void Definition_Private::init(const QString &df, const QString &n)
+void Definition_Private::setDefFileName(const QString &df)
 {
    defFileName = df;
    int lastDot = defFileName.lastIndexOf('.');
@@ -104,14 +107,17 @@ void Definition_Private::init(const QString &df, const QString &n)
    if (lastDot != -1) {
       defFileExt = defFileName.mid(lastDot);
    }
+}
 
-   QString name = n;
+void Definition_Private::init(const QString &df, const QString &entityName)
+{
+   setDefFileName(df);
 
-   if (name != "<globalScope>") {
-      localName = stripScope(n);
+   if (entityName != "<globalScope>") {
+      localName = stripScope(entityName);
 
    } else {
-      localName = n;
+      localName = entityName;
    }
 
    partOfGroups    = nullptr;
@@ -120,6 +126,13 @@ void Definition_Private::init(const QString &df, const QString &n)
    hidden          = false;
    isArtificial    = false;
    lang            = SrcLangExt_Unknown;
+}
+
+void Definition::setDefFile(const QString &df, int defLine, int defCol)
+{
+  m_private->setDefFileName(df);
+  m_private->defLine   = defLine;
+  m_private->defColumn = defCol;
 }
 
 static bool matchExcludedSymbols(const QString &name)
