@@ -103,7 +103,7 @@ static QString          aliasName;
 static QString          baseName;
 static QString         *specName;
 static QString          formulaText;
-static bool              useOverrideCommands = false;
+static bool             useOverrideCommands = false;
 
 static SrcLangExt       language;
 
@@ -2227,7 +2227,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       isTypedef = text.indexOf("typedef") != -1;
 
-      bool isConst     = text.indexOf("const") != -1;
+      bool isConst    = text.indexOf("const") != -1;
       bool isVolatile = text.indexOf("volatile") != -1;
 
       current->section = Entry::CLASS_SEC;
@@ -2244,6 +2244,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_traits.setTrait(Entry::Virtue::Inline, isInline);
 
       addType( current );
+
       if (isConst) {
          current->appendData(EntryKey::Member_Type, " const");
 
@@ -2965,7 +2966,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
    }
 
-<CopyHereDocEnd>.               {
+<CopyHereDocEnd>.          {
       QString text = QString::fromUtf8(yytext);
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
    }
@@ -3687,8 +3688,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lastRoundContext = FindMembers;
 
       s_roundEntry = current;
-      s_roundEnum    = EntryKey::Member_Type;
-      roundCount  = 0;
+      s_roundEnum  = EntryKey::Member_Type;
+      roundCount   = 0;
 
       BEGIN(CopyRound);
    }
@@ -4087,9 +4088,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (previous && previous->section == Entry::GROUPDOC_SEC) {
          // link open command to the group defined in the previous entry
          openGroup(previous, yyFileName, yyLineNr);
+
       } else {
          // link open command to the current entry
-         openGroup(current,yyFileName,yyLineNr);
+         openGroup(current, yyFileName, yyLineNr);
       }
 
       // current = tmp;
@@ -8211,7 +8213,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          baseVirt = Normal;
          baseName.resize(0);
 
-         BEGIN( BasesProt ) ;
+         BEGIN( BasesProt );
       }
    }
 

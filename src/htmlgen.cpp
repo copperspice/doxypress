@@ -224,7 +224,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 
    // always first
    QString cssFile      = "doxypress.css";
-   QString extraCssText = "";
+   QString extraCssText;
 
    for (auto fileName : extraCssFile) {
 

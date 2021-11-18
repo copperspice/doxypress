@@ -42,7 +42,9 @@ struct SectionInfo;
 // Data associated with a detailed description
 struct DocInfo {
 
-   DocInfo() : line(1) {};
+   DocInfo()
+      : line(1)
+   {};
 
    int line;
    QString doc;
@@ -52,7 +54,9 @@ struct DocInfo {
 // Data associated with a brief description
 struct BriefInfo {
 
-   BriefInfo() : line(1) {};
+   BriefInfo()
+      : line(1)
+   {};
 
    int line;
    QString doc;

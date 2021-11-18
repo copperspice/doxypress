@@ -4797,6 +4797,7 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
          case '@':
             retval += "_0d";
             break;
+
          case ']':
             retval += "_0e";
             break;
@@ -4804,6 +4805,7 @@ QString escapeCharsInString(const QString &name, bool allowDots, bool allowUnder
          case '[':
             retval += "_0f";
             break;
+
          case '#':
             retval += "_0g";
             break;
@@ -7008,10 +7010,10 @@ QString trimEmptyLines(const QString &str, int &docLine)
 
       if (c == ' ' || c == '\t' || c == '\r') {
          // do nothing
+
       } else if (tmp.endsWith("\\internal_linebr")) {
          iter -= 15;
          iter_end = iter;
-
 
       } else if (c == '\n') {
          iter_end = iter;
@@ -7034,7 +7036,7 @@ QString trimEmptyLines(const QString &str, int &docLine)
 
    if (iter_end <= iter_start) {
       // only empty lines
-      return QString("");
+      return QString();
    }
 
    return QStringView(iter_start, iter_end);
@@ -8342,11 +8344,11 @@ QChar charToUpper(const QString &s, int index)
 
 bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClasses)
 {
-   for (auto &cnd : nd->getNamespaceSDict()) {
-      if (cnd->isLinkableInProject() && cnd->localName().indexOf('@') == -1) {
+   for (auto &item : nd->getNamespaceSDict()) {
+      if (item->isLinkableInProject() && item->localName().indexOf('@') == -1) {
          return true;
 
-      } else if (namespaceHasVisibleChild(cnd, includeClasses)) {
+      } else if (namespaceHasVisibleChild(item, includeClasses)) {
          return true;
       }
    }

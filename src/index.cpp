@@ -4378,7 +4378,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
                   if (! url.isEmpty()) {
                      if (url == "![none]") {
-                        Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", "", "", false);
+                        Doxy_Globals::indexList.addContentsItem(true, lne->title(), QString(), QString(), QString(), false);
 
                      } else {
                         bool isRelative = url.at(0) == '!';
@@ -4388,7 +4388,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
                            url.prepend("^"); // prepend ^ to absolute URL
                         }
 
-                        bool isRef = lne->baseFile().left(4) == "@ref" || lne->baseFile().left(4) == "\\ref";
+                        bool isRef = lne->baseFile().startsWith("@ref") || lne->baseFile().startsWith("\\ref");
                         Doxy_Globals::indexList.addContentsItem(true, lne->title(), "", url, "", isRef || isRelative);
                      }
 

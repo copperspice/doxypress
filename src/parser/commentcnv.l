@@ -472,9 +472,10 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       QString text = QString::fromUtf8(yytext);
 
       s_specialComment = (yyleng == 3);
-      s_nestingCount   = 1;
 
+      s_nestingCount   = 1;
       s_commentStack.clear();
+
       copyToOutput(text, text.length());
 
       if (s_specialComment) {
@@ -850,6 +851,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 
       } else {
          QString text = QString::fromUtf8(yytext);
+
          copyToOutput(text, text.length());
          --s_nestingCount;
 
@@ -989,6 +991,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 
       BEGIN(Scan);
    }
+
 <ReadLine>"/**"   {
       copyToOutput("/&zwj;**", 8);
    }
@@ -1001,6 +1004,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
+
 <ReadLine>[^\\@\n\*/]*  {
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
@@ -1314,7 +1318,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
    s_mlBrief  = Config::getBool("multiline-cpp-brief");
 
    s_inputString  = inBuf;
-   s_outputString       = "";
+   s_outputString = "";
 
    s_inputPosition = 0;
    s_col      = 0;
@@ -1359,7 +1363,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
    }
 
    if (s_nestingCount > 0 && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran) {
-      QString tmp = "(probable line reference: ";
+      QString tmp = "(probable line number : ";
 
       bool first = true;
 
@@ -1376,7 +1380,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
 
       tmp += ")";
       warn(s_fileName, s_lineNr, "Reached end of file while still inside a (nested) comment. "
-           "Nesting level %d %s", s_nestingCount, csPrintable(tmp) );
+           "\nNesting level %d %s", s_nestingCount, csPrintable(tmp) );
 
       // add one for "normal" expected end of comment
    }

@@ -509,7 +509,6 @@ void processFiles()
       xmlOutput = createOutputDirectory(outputDir, "xml-output", "/xml");
    }
 
-
    if (haveDot) {
       static const QString dotFontPath = Config::getString("dot-font-path");
 
@@ -2589,6 +2588,7 @@ void Doxy_Work::resolveClassNestingRelations()
                         QSharedPointer<ClassDef> aliasCd = cd;
 
                         def->addInnerCompound(aliasCd);
+
                         QString inLineNS_FullName = def->qualifiedName() + "::" + aliasCd->localName();
 
                         Doxy_Globals::classSDict.insert(inLineNS_FullName, aliasCd);
@@ -2719,16 +2719,16 @@ void Doxy_Work::processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPo
    if (cd->getClassSDict().count() > 0) {
       QSharedPointer<MemberList> ml = cd->getMemberList(MemberListType_pubAttribs);
 
-      if (ml) {
+      if (ml != nullptr) {
 
-         for (auto md : *ml) {
+         for (const auto &md : *ml) {
             // return type
             QString type = md->typeString();
 
             if (type.contains("::@")) {
                // member of tag less struct/union
 
-               for (auto icd : cd->getClassSDict()) {
+               for (const auto &icd : cd->getClassSDict()) {
 
                   if (type.contains(icd->name())) {
                      // matching tag less struct/union
@@ -3580,7 +3580,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    QString def;
 
    // determine the definition of the global variable
-   if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@' && ! hideScopeNames)   {
+   if (nd != nullptr && ! nd->name().isEmpty() && ! nd->name().startsWith('@') && ! hideScopeNames)   {
       // variable is inside a namespace, so put the scope before the name
 
       SrcLangExt lang = nd->getLanguage();
@@ -3657,10 +3657,9 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
             bool staticsInDifferentFiles = root->stat && md->isStatic() && (root->getData(EntryKey::File_Name) != md->getDefFileName());
 
             if (md->getFileDef() && ! isPHPArray && ! staticsInDifferentFiles) {
-               // not a php array
-               // not a php array variable
-
+               // not a php array or variable
                ArgumentList tmp;
+
                addMemberDocs(ptrEntry, md, def, tmp, false);
                md->setRefItems(root->m_specialLists);
 
@@ -3699,8 +3698,9 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
 
    // new global variable, enum value, or typedef
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
-                  root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args), QString(),
-                  root->protection, Specifier::Normal, root->stat, Relationship::Member, memberType, tmpList, ArgumentList());
+            root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args), QString(),
+            root->protection, Specifier::Normal, root->stat, Relationship::Member, memberType,
+            tmpList, root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberTraits(root->m_traits);
@@ -3729,7 +3729,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    addMemberToGroups(root, md);
 
    md->setRefItems(root->m_specialLists);
-   if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
+   if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
       md->setNamespace(nd);
       nd->insertMember(md);
    }
@@ -3768,7 +3768,6 @@ int Doxy_Work::findFunctionPtr(const QString &type, int lang, int *pLength)
 
    static const QRegularExpression regExp("\\([^)]*[\\*\\^][^)]*\\)");
    QRegularExpressionMatch match = regExp.match(type);
-
 
    if (match.hasMatch() && ! type.contains("operator")) {
 
@@ -4866,7 +4865,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         }
 
                         // if item is a declaration and root is the corresponding
-                        // definition, then turn item into a definition
+                        // definition, then mark item as definition
                         if (item->isPrototype() && ! root->proto) {
                            item->setDeclFile(item->getDefFileName(), item->getDefLine(), item->getDefColumn());
                            item->setPrototype(false, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
@@ -4905,7 +4904,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
                md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
-               md->setDocsForDefinition(!root->proto);
+               md->setDocsForDefinition(! root->proto);
                md->setTypeConstraints(root->typeConstr);
 
                md->setBodySegment(root->startBodyLine, root->endBodyLine);
@@ -4961,7 +4960,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md->enableReferencesRelation(root->referencesRelation);
                md->setRefItems(root->m_specialLists);
 
-               if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
+               if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
                   // add member to namespace
                   md->setNamespace(nd);
                   nd->insertMember(md);
@@ -5299,8 +5298,8 @@ QSharedPointer<ClassDef> Doxy_Work::findClassWithinClassContext(QSharedPointer<D
 }
 
 void Doxy_Work::findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context,
-                  QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef> instanceCd, bool isArtificial,
-                  const ArgumentList &actualArgs, QHash<QString, int> templateNames)
+            QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef> instanceCd, bool isArtificial,
+            const ArgumentList &actualArgs, QHash<QString, int> templateNames)
 {
    masterCd->setVisited(true);
    const ArgumentList &formalArgs = masterCd->getTemplateArgumentList();
@@ -5444,9 +5443,9 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
 }
 
 void Doxy_Work::findBaseClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context,
-         QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef>instanceCd,
-         FindBaseClassRelation_Mode mode, bool isArtificial, const ArgumentList &actualArgs,
-         QHash<QString, int> templateNames)
+            QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef>instanceCd,
+            FindBaseClassRelation_Mode mode, bool isArtificial, const ArgumentList &actualArgs,
+            QHash<QString, int> templateNames)
 {
    QSharedPointer<Entry> root = ptrEntry;
 
@@ -5490,7 +5489,7 @@ void Doxy_Work::findBaseClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
 }
 
 bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QSharedPointer<Definition> context, QSharedPointer<ClassDef> templateClass,
-               const QString &templSpec, QHash<QString, int> templateNames, bool isArtificial)
+            const QString &templSpec, QHash<QString, int> templateNames, bool isArtificial)
 {
    Debug::print(Debug::Classes, 0, "    derived from template %s with parameters %s\n",
                 csPrintable(templateClass->name()), csPrintable(templSpec));
@@ -5644,8 +5643,8 @@ int Doxy_Work::findEndOfTemplate(const QString &s, int startPos)
    return brCount == 0 ? e : -1;
 }
 
-bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context, QSharedPointer<ClassDef> cd, BaseInfo *bi,
-                                  QHash<QString, int> templateNames, FindBaseClassRelation_Mode mode, bool isArtificial)
+bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context, QSharedPointer<ClassDef> cd,
+            BaseInfo *bi, QHash<QString, int> templateNames, FindBaseClassRelation_Mode mode, bool isArtificial)
 {
    QSharedPointer<Entry> root = ptrEntry->entry();
 
@@ -6579,7 +6578,7 @@ bool Doxy_Work::scopeIsTemplate(QSharedPointer<Definition> d)
 }
 
 QString Doxy_Work::substituteTemplatesInString(const QVector<ArgumentList> &srcTempArgLists, QVector<ArgumentList> &dstTempArgLists,
-                  const ArgumentList &funcTemplateArgList, const QString &src)
+            const ArgumentList &funcTemplateArgList, const QString &src)
 {
    // can be used to match template specializations
    QString dst;
@@ -6697,7 +6696,7 @@ ArgumentList Doxy_Work::substituteTemplatesInArgList(const QVector<ArgumentList>
    retval.refSpecifier       = srcList.refSpecifier;
 
    retval.trailingReturnType = substituteTemplatesInString(srcTempArgLists, dstTempArgLists,
-                  funcTemplateArgList, srcList.trailingReturnType);
+            funcTemplateArgList, srcList.trailingReturnType);
 
    return retval;
 }
@@ -8068,7 +8067,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          mnsd = &Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
+      } else if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
          // found enum inside namespace
 
          mnsd = &Doxy_Globals::functionNameSDict;
@@ -8120,7 +8119,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
             baseType.prepend(" : ");
          }
 
-         if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
+         if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
 
             if (isRelated || hideScopeNames) {
                md->setDefinition(name + baseType);
@@ -8263,7 +8262,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
          mnsd = &Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
+      } else if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
          // found enum inside namespace
 
          mnsd = &Doxy_Globals::functionNameSDict;
@@ -8338,7 +8337,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                            }
 
                            fmd->setOuterScope(md->getOuterScope());
-                           fmd->setTagInfo(e->m_tagInfo);
+                           fmd->setTagInfo(root->m_tagInfo);
                            fmd->setLanguage(root->m_srcLang);
                            fmd->setId(root->getData(EntryKey::Clang_Id));
 
@@ -8399,7 +8398,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                               if (fmd->isEnumValue() && fmd->getOuterScope() == md->getOuterScope()) {
                                  // in same scope
 
-                                 if (nd && ! nd->name().isEmpty() && nd->name().at(0) != '@') {
+                                 if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
                                     QSharedPointer<NamespaceDef> fnd = fmd->getNamespaceDef();
 
                                     if (fnd == nd) {

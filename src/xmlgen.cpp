@@ -1276,7 +1276,7 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
 
    for (auto md : *ml) {
       if (memberVisible(d, md) && (md->memberType() != MemberDefType::EnumValue) && ! md->isHidden()) {
-         count++;
+         ++count;
       }
    }
 
@@ -1453,22 +1453,6 @@ static void writeInnerDirs(const SortedList<QSharedPointer<DirDef>> dl, QTextStr
 
 static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
 {
-   // + brief description
-   // + detailed description
-   // + template argument list(s)
-   // - include file
-   // + member groups
-   // + inheritance diagram
-   // + list of direct super classes
-   // + list of direct sub classes
-   // + list of inner classes
-   // + collaboration diagram
-   // + list of all members
-   // + user defined member sections
-   // + standard member sections
-   // + detailed member documentation
-   // - examples using the class
-
    if (cd->isReference()) {
       return;   // skip external references
    }

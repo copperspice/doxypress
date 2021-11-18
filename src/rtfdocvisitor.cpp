@@ -1253,7 +1253,7 @@ void RTFDocVisitor::visitPost(DocHtmlTable *)
    if (m_hide) {
       return;
    }
-   DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlTable)}\n");
+
    m_t << "\\pard\\plain" << endl;
    m_t << "\\par" << endl;
    m_lastIsPara = true;

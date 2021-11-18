@@ -42,7 +42,6 @@ static QString buildMultiTitle(const QString & titleA, enum SrcLangExt langId, c
 
 template<class ...Ts>
 static QString buildMultiTitle(const QString &titleA, enum SrcLangExt langId, const QString & titleB, Ts... Vs ) {
-
    QString retval = titleA + "|" + QString::number(langId) + "=" + titleB;
    retval = buildMultiTitle(retval, Vs...);
 
@@ -251,7 +250,6 @@ class LayoutParser : public QXmlDefaultHandler
          Handler       m_handler;
       };
 
-
  public:
    static LayoutParser &instance() {
       static LayoutParser theInstance;
@@ -259,6 +257,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void init() {
+
       m_part    = -1;
       m_rootNav = 0;
 

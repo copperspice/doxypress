@@ -587,7 +587,7 @@ static QString extractTrailingComment(const QString &s)
                return ((s[i + 1] == '*' || s[i + 1] == '!') && s[i + 2] == '<') ? s.mid(i - 1) : "";
 
             } else {
-               return QString("");
+               return QString();
             }
          }
 
@@ -635,9 +635,11 @@ static QString stringize(const QString &s)
             if (c == '"') {
                result += "\\\"";
                inString = true;
+
             } else if (c == '\'') {
                result += c;
                inChar = true;
+
             } else {
                result += c;
             }
@@ -650,6 +652,7 @@ static QString stringize(const QString &s)
             if (c == '\'') {
                result += '\'';
                inChar = false;
+
             } else if (c == '\\') {
                result += "\\\\";
             } else {
@@ -812,6 +815,7 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                if (c == ')') {
                   --level;
                   arg += c;
+
                   if (level == 0) {
                      break;
                   }
@@ -2115,7 +2119,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       outputArray(text, text.length());
    }
 
-<CopyLine>"{"           {
+<CopyLine>"{"   {
       // count brackets inside the main file
       QString text = QString::fromUtf8(yytext);
 
@@ -2151,6 +2155,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
    }
+
 <CopyLine>@\"  {
       if (getLanguageFromFileName(s_yyFileName) != SrcLangExt_CSharp) {
          REJECT;
@@ -2266,7 +2271,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       }
    }
 
-<CopyLine>"\\"\r?/\n          {
+<CopyLine>"\\"\r?/\n    {
       //  strip line continuation characters
    }
 
@@ -2542,7 +2547,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       ++s_yyLineNr;
    }
 
-<Guard>"defined"/{B}*"("      {
+<Guard>"defined"/{B}*"("   {
       BEGIN(DefinedExpr2);
    }
 
@@ -2554,7 +2559,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_guardExpr += QString::fromUtf8(yytext);
    }
 
-<Guard>"@" {
+<Guard>"@"  {
       s_guardExpr += "@@";
    }
 
@@ -3290,7 +3295,7 @@ CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       ++s_yyLineNr;
 
       s_defLitText += text;
-      s_defText+=' ';
+      s_defText    += ' ';
    }
 
 <RemoveCComment>"*/"{B}*"#"           {

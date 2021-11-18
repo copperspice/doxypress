@@ -216,7 +216,7 @@ void Definition::addToMap(const QString &name)
 }
 
 Definition::Definition(const QString &df, int dl, int dc, const QString &name, const QString &briefDoc,
-                  const QString &fullDoc, bool isPhrase)
+         const QString &fullDoc, bool isPhrase)
 {
    m_name      = name;
    m_defLine   = dl;

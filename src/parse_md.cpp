@@ -2628,7 +2628,7 @@ static int writeCodeBlock(QString &out, QStringView data, int refIndent)
          iter_i = iter_end;
 
       } else if (indent >= refIndent + codeBlockIndent) {
-         // there is enough indent to contine the code block
+         // there is enough indent to continue the code block
 
          while (emptyLines > 0) {
             // write skipped empty lines, add empty line

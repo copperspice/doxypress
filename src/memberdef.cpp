@@ -492,6 +492,7 @@ static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
       for (int comma = exception.indexOf(',', index); comma != -1; ) {
          ++comma; // include comma
+
          linkifyText(TextFragment(ol), cd, md->getBodyDef(), md, exception.mid(index, comma - index));
          ol.exceptionEntry(QString(), false);
          index = comma;
@@ -530,6 +531,7 @@ static void writeExceptionList(OutputList &ol, QSharedPointer<ClassDef> cd, QSha
          while (-1 != index) { // there should be no more than 2 (set / get)
             // omit '{' and ';' -> "set raises (...)"
             writeExceptionListImpl(ol, cd, md, exception.mid(oldIndex, index - oldIndex));
+
             oldIndex = index + 1;
             index = exception.indexOf(';', oldIndex);
          }
@@ -1498,7 +1500,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    // only write anchors for member which have no details and are
    // rendered inside the group page or are not grouped at all
 
-   bool writeAnchor = (inGroup || m_impl->group == 0) && ! detailsVisible && !m_impl->annMemb;
+   bool writeAnchor = (inGroup || m_impl->group == 0) && ! detailsVisible && ! m_impl->annMemb;
 
    if (writeAnchor) {
       QString doxyArgs = argsString();
@@ -2614,9 +2616,10 @@ QString MemberDef::displayDefinition() const
    if (isEnumerate()) {
 
       if (! title.isEmpty() && title.at(0) == '@') {
-         ldef = title = "anonymous enum";
+         ldef  = "anonymous enum";
+         title = ldef;
 
-         if (!m_impl->enumBaseType.isEmpty()) {
+         if (! m_impl->enumBaseType.isEmpty()) {
             ldef += " : " + m_impl->enumBaseType;
          }
 
@@ -3849,7 +3852,7 @@ void MemberDef::setNamespace(QSharedPointer<NamespaceDef> nd)
 }
 
 QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const ArgumentList &formalArgs,
-                  const ArgumentList &actualArgs)
+         const ArgumentList &actualArgs)
 {
    ArgumentList actualArgList;
    actualArgList = m_impl->m_defArgList;
@@ -4242,6 +4245,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
 
    QString n = name();
    int i = n.lastIndexOf("::");
+
    if (i != -1) {
       n = n.right(n.length() - i - 2);   // strip scope (TODO: is this needed?)
    }
@@ -5518,7 +5522,7 @@ static void transferArgumentDocumentation(ArgumentList &decArgList, ArgumentList
          defItem.docs = decItem.docs;
       }
 
-      ++ iter;
+      ++iter;
 
       if (iter == defArgList.end()) {
          break;

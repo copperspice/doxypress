@@ -215,10 +215,10 @@ static QString findPackageScope(const QString &fileName)
 
 static void lineCount()
 {
-   DBG_CTX((stderr, "yyLineNr = %d\n", yyLineNr));
+   // commentscan, parse_py
 
    for (const char *p = yytext; *p; ++p) {
-      yyLineNr += (*p == '\n') ;
+      yyLineNr += (*p == '\n');
    }
 }
 

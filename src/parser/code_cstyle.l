@@ -517,7 +517,7 @@ static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition>
       }
    }
 
-   if ( ! tmp.isEmpty() ) {
+   if (! tmp.isEmpty()) {
       ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
    }
 }
@@ -2639,6 +2639,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
           addType();
           g_name += text;
       }
+
       endFontClass();
    }
 
@@ -3138,20 +3139,20 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (getScopeCallContext()) {
-            if (!generateClassMemberLink(*g_code, getScopeCallContext(), text)) {
+            if (! generateClassMemberLink(*g_code, getScopeCallContext(), text)) {
                g_code->codify(text);
                addToSearchIndex(text);
             }
-            g_name.resize(0);
+            g_name.clear();
 
          } else {
             g_code->codify(text);
             addToSearchIndex(text);
-            g_name.resize(0);
+            g_name.clear();
          }
 
-         g_type.resize(0);
-         g_bracketCount = 0;
+         g_type.clear();
+         g_bracketCount = 0;        // required for member links
 
          if (g_memCallContext == Body) {
             BEGIN(FuncCall);
