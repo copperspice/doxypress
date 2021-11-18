@@ -4869,7 +4869,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         // definition, then turn item into a definition
                         if (item->isPrototype() && ! root->proto) {
                            item->setDeclFile(item->getDefFileName(), item->getDefLine(), item->getDefColumn());
-                           item->setPrototype(false);
+                           item->setPrototype(false, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                         } else if (!md->isPrototype() && root->proto) {
                            // if md is already the definition, then add the declaration info
                            md->setDeclFile(root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
@@ -4904,7 +4904,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
-               md->setPrototype(root->proto);
+               md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                md->setDocsForDefinition(!root->proto);
                md->setTypeConstraints(root->typeConstr);
 
@@ -7423,7 +7423,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
                md->setDocsForDefinition(! root->proto);
-               md->setPrototype(root->proto);
+               md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                md->addSectionsToDefinition(root->m_anchors);
                md->setBodySegment(root->startBodyLine, root->endBodyLine);
 
@@ -7510,7 +7510,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
 
                md->setDocsForDefinition(! root->proto);
-               md->setPrototype(root->proto);
+               md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                md->addSectionsToDefinition(root->m_anchors);
                md->setBodySegment(root->startBodyLine, root->endBodyLine);
 
@@ -7740,7 +7740,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
                md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
                md->setDocsForDefinition(!root->proto);
-               md->setPrototype(root->proto);
+               md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
                md->addSectionsToDefinition(root->m_anchors);
                md->setMemberGroupId(root->mGrpId);
@@ -7814,7 +7814,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
             md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
             md->setDocsForDefinition(!root->proto);
-            md->setPrototype(root->proto);
+            md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
             md->addSectionsToDefinition(root->m_anchors);
             md->setBodySegment(root->startBodyLine, root->endBodyLine);
 

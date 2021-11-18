@@ -5327,9 +5327,14 @@ void MemberDef::setAnonymousEnumType(QSharedPointer<MemberDef> md)
    m_impl->annEnumType = md;
 }
 
-void MemberDef::setPrototype(bool p)
+void MemberDef::setPrototype(bool isProto, const QString &df, int line, int column)
 {
-   m_impl->proto = p;
+   m_impl->proto = isProto;
+  if (isProto) {
+    setDeclFile(df, line, column);
+  } else {
+    setDefFile(df, line, column);
+  }
 }
 
 void MemberDef::setMemberGroupId(int id)

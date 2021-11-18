@@ -371,7 +371,7 @@ class MemberDef : public Definition
    bool addExample(const QString &anchor, const QString &name, const QString &file);
 
    // prototype related members
-   void setPrototype(bool p);
+   void setPrototype(bool isProto, const QString &df, int line, int column);
 
    //
    void setType(const QString &t);
