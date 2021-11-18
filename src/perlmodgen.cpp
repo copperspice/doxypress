@@ -2138,6 +2138,8 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 
    m_output.openHash().addFieldQuotedString("name", cd->name());
 
+   m_output.addFieldQuotedString("kind", cd->compoundTypeString());
+
    if (cd->baseClasses()) {
       m_output.openList("base");
 
