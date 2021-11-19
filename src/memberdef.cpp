@@ -1476,11 +1476,11 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    ol.startMemberDeclaration();
 
    // start a new member declaration
-   bool isAnonymous = annoClassDef || m_impl->annMemb || m_impl->annEnumType;
+   bool isAnonymousEntry = annoClassDef || m_impl->annMemb || m_impl->annEnumType;
 
    int x = 0;
 
-   if (isAnonymous)  {
+   if (isAnonymousEntry)  {
       x = 1;
 
    } else if (! m_impl->m_templateArgList.listEmpty()) {
@@ -1531,12 +1531,12 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    // *** write template lists
    if (! m_impl->m_templateArgList.listEmpty() && getLanguage() == SrcLangExt_Cpp) {
-      if (! isAnonymous) {
+      if (! isAnonymousEntry) {
          ol.startMemberTemplateParams();
       }
 
       writeTemplatePrefix(ol, m_impl->m_templateArgList);
-      if (! isAnonymous) {
+      if (! isAnonymousEntry) {
          ol.endMemberTemplateParams(anchor(), inheritId);
       }
    }
