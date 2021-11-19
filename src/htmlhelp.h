@@ -28,11 +28,31 @@
 #include <QSet>
 
 #include <index.h>
+#include <stringmap.h>
 
 class Definition;
-class HtmlHelpIndex;
+class HtmlHelp;
 
-// Class representing a field in the HTML help index.
+// manages a two level index in alphabetical order
+class HtmlHelpIndex
+{
+ public:
+   HtmlHelpIndex(HtmlHelp *help);
+
+   void addItem(const QString &first, const QString &second, const QString &url, const QString &anchor, bool hasLink, bool reversed);
+
+   size_t size() const {
+      return m_indexFieldDict.count();
+   }
+
+   void writeFields(QTextStream &t);
+
+ private:
+   IndexFieldSDict m_indexFieldDict;
+   HtmlHelp *m_help;
+};
+
+// Class representing a field in the HTML help index
 struct IndexField {
    QString name;
    QString url;
@@ -88,28 +108,31 @@ class HtmlHelp : public IndexIntf
    void decContentsDepth() override;
 
    void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
-                  bool unused, QSharedPointer<Definition> def, DirType category) override;
+         bool unused, QSharedPointer<Definition> def, DirType category) override;
 
    void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor,
-                  const QString &title) override;
+         const QString &title) override;
 
    void addIndexFile(const QString &name) override;
    void addImageFile(const QString &name) override;
+
    void addStyleSheetFile(const QString &name) override {
       (void) name;
    }
 
+   QString recode(const QString &s);
+
  private:
-   friend class HtmlHelpIndex;
    void createProjectFile();
 
    static HtmlHelp *theInstance;
-   HtmlHelpIndex *index;
+   HtmlHelpIndex m_index;
 
    QFile cf;
    QFile kf;
 
    int dc;
+   bool ctsItemPresent;
 
    QTextStream cts;
    QTextStream kts;
@@ -118,7 +141,6 @@ class HtmlHelp : public IndexIntf
    QStringList imageFiles;
    QSet<QString> indexFileDict;
 
-   QString recode(const QString &s);
 
    QTextCodec *m_toNewCodec;
 };

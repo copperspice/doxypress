@@ -33,20 +33,6 @@
 
 HtmlHelp *HtmlHelp::theInstance = nullptr;
 
-// manages a two level index in alphabetical order
-class HtmlHelpIndex
-{
- public:
-   HtmlHelpIndex(HtmlHelp *help);
-
-   void addItem(const QString &first, const QString &second, const QString &url, const QString &anchor, bool hasLink, bool reversed);
-   void writeFields(QTextStream &t);
-
- private:
-   IndexFieldSDict m_indexFieldDict;
-   HtmlHelp *m_help;
-};
-
 HtmlHelpIndex::HtmlHelpIndex(HtmlHelp *help)
    : m_help(help)
 {
@@ -79,17 +65,23 @@ void HtmlHelpIndex::addItem(const QString &level1, const QString &level2, const 
       return;
    }
 
-   if (m_indexFieldDict.find(key) == 0) {
+   QString key_anchor = key;
+
+   if (! anchor.isEmpty())  {
+      key_anchor += anchor;
+   }
+
+   if (m_indexFieldDict.find(key_anchor) == 0) {
       // new key
-      QSharedPointer<IndexField> f = QMakeShared<IndexField>();
+      QSharedPointer<IndexField> tmp = QMakeShared<IndexField>();
 
-      f->name     = key;
-      f->url      = url;
-      f->anchor   = anchor;
-      f->link     = hasLink;
-      f->reversed = reversed;
+      tmp->name     = key;
+      tmp->url      = url;
+      tmp->anchor   = anchor;
+      tmp->link     = hasLink;
+      tmp->reversed = reversed;
 
-      m_indexFieldDict.insert(key, f);
+      m_indexFieldDict.insert(key_anchor, tmp);
    }
 }
 
@@ -152,7 +144,7 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
          level2 = f->name.right(f->name.length() - i - 1);
 
       } else {
-         level1  = f->name;
+         level1 = f->name;
 
       }
 
@@ -193,7 +185,7 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
             t << "<param name=\"Local\" value=\"" << field2URL(f, false);
             t << "\">";
             t << "<param name=\"Name\" value=\"" << m_help->recode(level1) << "\">"
-              "</OBJECT>\n";
+                 "</OBJECT>\n";
 
          } else {
             if (f->link) {
@@ -201,18 +193,18 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
                t << "<param name=\"Local\" value=\"" << field2URL(f, true);
                t << "\">";
                t << "<param name=\"Name\" value=\"" << m_help->recode(level1) << "\">"
-                 "</OBJECT>\n";
+                    "</OBJECT>\n";
 
             } else {
                t << "  <LI><OBJECT type=\"text/sitemap\">";
                t << "<param name=\"See Also\" value=\"" << m_help->recode(level1) << "\">";
                t << "<param name=\"Name\" value=\"" << m_help->recode(level1) << "\">"
-                 "</OBJECT>\n";
+                    "</OBJECT>\n";
             }
          }
       }
 
-      if (! level2Started && !level2.isEmpty()) {
+      if (! level2Started && ! level2.isEmpty()) {
          // start new list at level 2
          t << "  <UL>" << endl;
          level2Started = true;
@@ -240,20 +232,14 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
 
 }
 
-/*! Constructs an html object.
- *  The object has to be \link initialize() initialized\endlink before it can be used.
- */
-HtmlHelp::HtmlHelp()
-{
-   // initial depth
-   dc = 0;
 
-   index = new HtmlHelpIndex(this);
+HtmlHelp::HtmlHelp()
+   : m_index(this), dc(0)
+{
 }
 
 HtmlHelp::~HtmlHelp()
 {
-   delete index;
 }
 
 static QHash<QString, QString> s_languageDict;
@@ -265,6 +251,7 @@ static QHash<QString, QString> s_languageDict;
 void HtmlHelp::initialize()
 {
    static const QString chmIndexEnc = Config::getString("chm-index-encoding");
+   static const QString htmlOutput  = Config::getString("html-output");
 
    QString str;
 
@@ -280,7 +267,7 @@ void HtmlHelp::initialize()
    }
 
    /* open the contents file */
-   static const QString fName1 = Config::getString("html-output") + "/index.hhc";
+   static const QString fName1 = htmlOutput + "/index.hhc";
    cf.setFileName(fName1);
 
    if (! cf.open(QIODevice::WriteOnly)) {
@@ -299,7 +286,7 @@ void HtmlHelp::initialize()
        "<UL>\n";
 
    /* open the contents file */
-   static const QString fName2 = Config::getString("html-output") + "/index.hhk";
+   static const QString fName2 = htmlOutput + "/index.hhk";
    kf.setFileName(fName2);
 
    if (! kf.open(QIODevice::WriteOnly)) {
@@ -332,7 +319,6 @@ void HtmlHelp::initialize()
    s_languageDict.insert("danish",              "0x406 Danish");
    s_languageDict.insert("dutch",               "0x413 Dutch");
    s_languageDict.insert("english",             "0x409 English");
-// s_languageDict.insert("esperanto",           "?? Esperanto");   // 0x48f
    s_languageDict.insert("farsi (persian)",     "0x429 Farsi");
    s_languageDict.insert("finnish",             "0x40B Finnish");
    s_languageDict.insert("french",              "0x40C French");
@@ -351,11 +337,12 @@ void HtmlHelp::initialize()
    s_languageDict.insert("norwegian",           "0x814 Norwegian");
    s_languageDict.insert("polish",              "0x415 Polish");
    s_languageDict.insert("portuguese",          "0x816 Portuguese (Portugal)");
+   s_languageDict.insert("persian",             "0x429 Persian (Iran)"),
    s_languageDict.insert("romanian",            "0x418 Romanian");
    s_languageDict.insert("russian",             "0x419 Russian");
    s_languageDict.insert("serbian",             "0x81A Serbian (Serbia, Latin)");
    s_languageDict.insert("serbian-cyrillic",    "0xC1A Serbian (Serbia, Cyrillic)");
-   s_languageDict.insert("slovenian",           "0x424 Slovenian");
+   s_languageDict.insert("slovene",             "0x424 Slovenian");
    s_languageDict.insert("slovak",              "0x41B Slovak");
    s_languageDict.insert("spanish",             "0x40A Spanish (Traditional Sort)");
    s_languageDict.insert("swedish",             "0x41D Swedish");
@@ -394,27 +381,48 @@ void HtmlHelp::createProjectFile()
    if (f.open(QIODevice::WriteOnly)) {
       QTextStream t(&f);
 
+      QString hhcFile = "\"index.hhc\"";
+      QString hhkFile = "\"index.hhk\"";
+
+      bool hhkPresent = m_index.size() > 0;
+
+      if (! ctsItemPresent) {
+         hhcFile.clear();
+      }
+
+      if (! hhkPresent) {
+         hhkFile.clear();
+      }
+
       QString indexName = "index" + Doxy_Globals::htmlFileExtension;
 
       t << "[OPTIONS]\n";
       if (! chmFile.isEmpty()) {
-         t << "Compiled file=" << chmFile << "\n";
+         t << "Compiled file=" << chmFile << endl;
       }
 
       t << "Compatibility=1.1\n"
-        "Full-text search=Yes\n"
-        "Contents file=index.hhc\n"
-        "Default Window=main\n"
-        "Default topic=" << indexName << "\n"
-        "Index file=index.hhk\n"
-        "Language=" << getLanguageString() << endl;
+           "Full-text search=Yes\n";
+
+      if (ctsItemPresent) {
+        t << "Contents file=index.hhc" << endl;
+      }
+
+      t << "Default Window=main\n"
+           "Default topic=" << indexName << endl;
+
+      if (hhkPresent) {
+        t << "Index file=index.hhk" << endl;
+      }
+
+      t << "Language=" << getLanguageString() << endl;
 
       if (binaryToc) {
-         t << "Binary TOC=YES\n";
+         t << "Binary TOC=YES" << endl;
       }
 
       if (genChi) {
-         t << "Create CHI file=YES\n";
+         t << "Create CHI file=YES" << endl;
       }
 
       t << "Title=" << recode(projectName) << endl << endl;
@@ -433,25 +441,24 @@ void HtmlHelp::createProjectFile()
       //       Value has been taken from htmlhelp.h file of the HTML Help Workshop
 
       if (binaryToc) {
-         t << "main=\"" << recode(projectName) << "\",\"index.hhc\","
-           "\"index.hhk\",\"" << indexName << "\",\"" <<
-           indexName << "\",,,,,0x23520,,0x70387e,,,,,,,,0" << endl << endl;
+         t << "main=\"" << recode(projectName) << "\"," << hhcFile << ","
+           << hhkFile   << ",\"" << indexName << "\",\"" <<
+              indexName << "\",,,,,0x23520,,0x70387e,,,,,,,,0" << endl << endl;
 
       } else {
-         t << "main=\"" << recode(projectName) << "\",\"index.hhc\","
-           "\"index.hhk\",\"" << indexName << "\",\"" <<
-           indexName << "\",,,,,0x23520,,0x10387e,,,,,,,,0" << endl << endl;
+         t << "main=\"" << recode(projectName) << "\"," << hhcFile << ","
+           << hhkFile   << ",\"" << indexName << "\",\"" <<
+              indexName << "\",,,,,0x23520,,0x10387e,,,,,,,,0" << endl << endl;
       }
 
       t << "[FILES]" << endl;
 
-      for (auto s : indexFiles) {
+      for (const auto &s : indexFiles) {
          t << s << endl;
       }
 
-      uint i;
-      for (i = 0; i < imageFiles.count(); i++) {
-         t << imageFiles.at(i) << endl;
+      for (const auto &item : imageFiles) {
+         t << item << endl;
       }
 
       f.close();
@@ -463,7 +470,7 @@ void HtmlHelp::createProjectFile()
 
 void HtmlHelp::addIndexFile(const QString &file)
 {
-   if (indexFileDict.contains(file)) {
+   if (! indexFileDict.contains(file)) {
       indexFiles.append(file);
       indexFileDict.insert(file);
    }
@@ -480,15 +487,17 @@ void HtmlHelp::finalize()
    cts << "</BODY>\n";
    cts << "</HTML>\n";
    cts.setDevice(0);
+
    cf.close();
 
-   index->writeFields(kts);
+   m_index.writeFields(kts);
 
    // end the index file
    kts << "</UL>\n";
    kts << "</BODY>\n";
    kts << "</HTML>\n";
    kts.setDevice(0);
+
    kf.close();
 
    createProjectFile();
@@ -501,7 +510,7 @@ void HtmlHelp::finalize()
  */
 void HtmlHelp::incContentsDepth()
 {
-   for (int i = 0; i < dc + 1; i++) {
+   for (int i = 0; i < dc + 1; ++i) {
       cts << "  ";
    }
 
@@ -515,7 +524,7 @@ void HtmlHelp::incContentsDepth()
  */
 void HtmlHelp::decContentsDepth()
 {
-   for (int i = 0; i < dc; i++) {
+   for (int i = 0; i < dc; ++i) {
       cts << "  ";
    }
 
@@ -548,6 +557,10 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &r
    // Tried this and I did not see any problems, when not using the
    // resetting of file and anchor the TOC works better // (prev / next button)
 
+   static const bool binaryToc = Config::getBool("binary-toc");
+
+   ctsItemPresent = true;
+
    for (int i = 0; i < dc; i++) {
       cts << "  ";
    }
@@ -558,7 +571,7 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &r
    if (! file.isEmpty()) {
       // made file optional param
 
-      if ( (file[0] == '!' || file[0] == '^')) {
+      if (file[0] == '!' || file[0] == '^') {
          // special markers for user defined URLs
 
          cts << "<param name=\"";
@@ -570,16 +583,20 @@ void HtmlHelp::addContentsItem(bool isDir, const QString &name, const QString &r
 
          cts << "\" value=\"";
          cts << file.mid(1);
+         cts << "\">";
 
       } else {
-         cts << "<param name=\"Local\" value=\"";
-         cts << file << Doxy_Globals::htmlFileExtension;
 
-         if (! anchor.isEmpty()) {
-            cts << "#" << anchor;
+         if (! (binaryToc && isDir)) {
+            cts << "<param name=\"Local\" value=\"";
+            cts << file << Doxy_Globals::htmlFileExtension;
+
+            if (! anchor.isEmpty()) {
+               cts << "#" << anchor;
+            }
+            cts << "\">";
          }
       }
-      cts << "\">";
    }
 
    cts << "<param name=\"ImageNumber\" value=\"";
@@ -630,8 +647,8 @@ void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<M
          anchor = sectionAnchor;
       }
 
-      index->addItem(level1, level2, contRef, anchor, true, false);
-      index->addItem(level2, level1, memRef, anchor, true, true);
+      m_index.addItem(level1, level2, contRef, anchor, true, false);
+      m_index.addItem(level2, level1, memRef, anchor, true, true);
 
    } else if (context) {
       QString level1;
@@ -642,7 +659,7 @@ void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<M
          level1 = word;
       }
 
-      index->addItem(level1, QString(), context->getOutputFileBase(), sectionAnchor, true, false);
+      m_index.addItem(level1, QString(), context->getOutputFileBase(), sectionAnchor, true, false);
    }
 }
 
