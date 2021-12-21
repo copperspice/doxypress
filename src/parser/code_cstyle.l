@@ -1784,13 +1784,26 @@ TEMPLIST    "<"[^\"\}\{\(\)\/\n\>]*">"
 SCOPETNAME  (((({ID}{TEMPLIST}?){BN}*)?{SEP}{BN}*)*)((~{BN}*)?{ID})
 SCOPEPREFIX ({ID}{TEMPLIST}?{BN}*{SEP}{BN}*)+
 
-KEYWORD_OBJC ("@public"|"@private"|"@protected"|"@class"|"@implementation"|"@interface"|"@end"|"@selector"|"@protocol"|"@optional"|"@required"|"@throw"|"@synthesize"|"@property")
+KEYWORD_OBJC_A ("@public"|"@private"|"@protected"|"@class"|"@implementation"|"@interface"|"@end"|"@selector"|"@protocol")
+KEYWORD_OBJC_B ("@optional"|"@required"|"@throw"|"@synthesize"|"@property")
+KEYWORD_OBJC   {KEYWORD_OBJC_A}|{KEYWORD_OBJC_B}
 
-KEYWORD ("asm"|"__assume"|"auto"|"class"|"const"|"delete"|"enum"|"explicit"|"extern"|"false"|"friend"|"gcnew"|"gcroot"|"set"|"get"|"inline"|"internal"|"mutable"|"namespace"|"new"|"null"|"nullptr"|"override"|"operator"|"pin_ptr"|"private"|"protected"|"public"|"raise"|"register"|"remove"|"self"|"sizeof"|"static"|"struct"|"__super"|"function"|"template"|"generic"|"this"|"true"|"typedef"|"typeid"|"typename"|"union"|"using"|"virtual"|"volatile"|"abstract"|"final"|"import"|"synchronized"|"transient"|"alignas"|"alignof"|{KEYWORD_OBJC})
+  /* review skipLanguageKeywords()  */
+KEYWORD_A   ("asm"|"__assume"|"auto"|"class"|"const"|"delete"|"enum"|"explicit"|"extern"|"false"|"friend"|"gcnew"|"gcroot"|"set"|"get")
+KEYWORD_B   ("inline"|"internal"|"mutable"|"namespace"|"new"|"null"|"nullptr"|"override"|"operator"|"pin_ptr"|"private"|"protected"|"public")
+KEYWORD_C   ("raise"|"register"|"remove"|"self"|"sizeof"|"static"|"struct"|"__super"|"function"|"template"|"generic"|"this"|"true"|"typedef")
+KEYWORD_D   ("typeid"|"typename"|"union"|"using"|"virtual"|"volatile"|"abstract"|"final"|"import"|"synchronized")
+KEYWORD_E   ("transient"|"alignas"|"alignof"|"concept"|"requires"|"decltype"|"constexpr"|"consteval"|"constinit")
+KEYWORD_F   ("co_await"|"co_return"|"co_yield"|"static_assert"|"noexcept"|"thread_local"|"enum"{B}+("class"|"struct"))
+KEYWORD     {KEYWORD_A}|{KEYWORD_B}|{KEYWORD_C}|{KEYWORD_D}|{KEYWORD_E}|{KEYWORD_F}|{KEYWORD_OBJC}
 
-FLOWKW    ("break"|"catch"|"continue"|"default"|"do"|"else"|"finally"|"return"|"switch"|"throw"|"throws"|"@catch"|"@finally")
+FLOWKW         ("break"|"catch"|"continue"|"default"|"do"|"else"|"finally"|"return"|"switch"|"throw"|"throws"|"@catch"|"@finally")
 FLOWCONDITION  ("case"|"for"|"foreach"|"for each"|"goto"|"if"|"try"|"while"|"@try")
-TYPEKW    ("bool"|"char"|"double"|"float"|"int"|"long"|"object"|"short"|"signed"|"unsigned"|"void"|"wchar_t"|"size_t"|"boolean"|"id"|"SEL"|"string"|"nullptr")
+
+TYPEKW_1  ("bool"|"byte"|"char"|"char8_t"|"char16_t"|"char32_t"|"double"|"float"|"int"|"long")
+TYPEKW_2  ("object"|"short"|"signed"|"unsigned"|"void"|"wchar_t"|"size_t"|"boolean"|"id"|"SEL"|"string"|"nullptr")
+TYPEKW    {TYPEKW_1}|{TYPEKW_2}
+
 CASTKW    ("const_cast"|"dynamic_cast"|"reinterpret_cast"|"static_cast")
 CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^' \\\n]{1,4}"'"))
 ARITHOP   "+"|"-"|"/"|"*"|"%"|"--"|"++"

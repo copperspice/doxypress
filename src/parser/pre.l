@@ -1999,10 +1999,13 @@ static int yyread(char *buf, int max_size)
 
 %}
 
-ID       [a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*
-B        [ \t]
-BN       [ \t\r\n]
-CHARLIT  (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
+IDSTART   [a-z_A-Z\x80-\xFF]
+ID        {IDSTART}[a-z_A-Z0-9\x80-\xFF]*
+B         [ \t]
+BN        [ \t\r\n]
+RAWBEGIN  (u|U|L|u8)?R\"[^ \t\(\)\\]{0,16}"("
+RAWEND    ")"[^ \t\(\)\\]{0,16}\"
+CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 %option never-interactive
 %option caseless
