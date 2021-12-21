@@ -697,6 +697,16 @@ static void addCite()
    Doxy_Globals::citeDict.insert(text);
 }
 
+
+static void lineCount()
+{
+   // commentscan, parse_py
+
+   for (const char *p = yytext; *p; ++p) {
+      yyLineNr += (*p == '\n');
+   }
+}
+
 // strip trailing whitespace (excluding newlines) from string s
 static void stripTrailingWhiteSpace(QString &str)
 {
@@ -1546,7 +1556,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
          endBrief(true);
       }
 
-      yyLineNr += text.count('\n');
+      lineCount();
    }
 
 <Comment>"."            {
@@ -1720,7 +1730,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <NameSpaceDocArg1>{SCOPENAME}       {
       // handle argument
       QString text  = QString::fromUtf8(yytext);
-      current->m_entryName = substitute(text,".", "::");
+
+      lineCount();
+      current->m_entryName = substitute(removeRedundantWhiteSpace(text),".", "::");
+
       BEGIN( Comment );
    }
 
@@ -1780,7 +1793,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <ClassDocArg1>{SCOPENAME}{TMPLSPEC}     {
       QString text = QString::fromUtf8(yytext);
+
+      lineCount();
       current->m_entryName = substitute(removeRedundantWhiteSpace(text),".","::");
+
       BEGIN( ClassDocArg2 );
    }
 
@@ -1788,7 +1804,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // first argument
       QString text = QString::fromUtf8(yytext);
 
+      lineCount();
       current->m_entryName = substitute(text,".","::");
+
       if (current->section == Entry::PROTOCOLDOC_SEC) {
          current->m_entryName += "-p";
       }
@@ -1799,7 +1817,10 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <CategoryDocArg1>{SCOPENAME}{B}*"("[^\)]+")" {
       QString text  = QString::fromUtf8(yytext);
+
+      lineCount();
       current->m_entryName = substitute(text,".","::");
+
       BEGIN( ClassDocArg2 );
    }
 
@@ -2511,6 +2532,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <GuardExpr>[^()]*                       {
       s_guardExpr += QString::fromUtf8(yytext);
+      lineCount();
    }
 
 <GuardExpr>"("                          {
@@ -2565,7 +2587,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <GuardParamEnd>{B}*{DOCNL}       {
       QString text = QString::fromUtf8(yytext);
 
-      yyLineNr += text.count('\n');
+      lineCount();
       s_spaceBeforeIf.clear();
 
       BEGIN(Comment);
@@ -3634,6 +3656,10 @@ static bool handleCite(const QString &str, const QStringList &list)
 
 static bool handleFormatBlock(const QString &str, const QStringList &list)
 {
+   if (! s_spaceBeforeCmd.isEmpty()) {
+      addToOutput(s_spaceBeforeCmd);
+      s_spaceBeforeCmd.clear();
+   }
    if (list.isEmpty()) {
       addToOutput("@" + str + " ");
 
