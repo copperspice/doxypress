@@ -378,6 +378,39 @@ static void setClassScope(const QString &name)
    pushScope(n);
 }
 
+static bool skipLanguageKeywords(const QString &keyword)
+{
+   static QSet<QString> non_cpp_keywords = {
+     "__assume", "__super", "abstract", "function", "gcnew", "gcroot", "generic", "get",
+     "internal", "null", "pin_ptr", "raise", "remove", "self", "set", "transient",
+   };
+
+   static QSet<QString> non_java_keywords = {
+      "alignas", "alignof", "and", "and_eq", "asm", "atomic_cancel", "atomic_commit", "atomic_noexcept", "auto",
+      "bitand", "bitor", "bool",
+      "char8_t", "char16_t", "char32_t", "compl", "concept", "consteval", "constexpr", "constinit",
+      "const_cast", "co_await", "co_return", "co_yield",
+      "decltype", "delete", "dynamic_cast", "explicit", "export", "extern",
+      "friend", "inline", "mutable", "namespace", "noexcept", "not", "not_eq", "nullptr",
+      "operator", "or", "or_eq", "reflexpr", "register", "reinterpret_cast", "requires",
+      "signed", "sizeof", "static_assert", "static_cast", "struct",
+      "template", "thread_local", "typedef", "typeid", "typename",
+      "union", "unsigned", "using", "virtual", "wchar_t", "xor", "xor_eq", "override",
+   };
+
+   bool retval = false;
+
+   if (g_insideCpp) {
+      retval = (non_cpp_keywords.contains(keyword));
+
+   } else if (g_insideJava) {
+      retval = (non_java_keywords.contains(keyword));
+
+   }
+
+   return retval;
+}
+
 /*! start a new line of code, inserting a line number if g_sourceFileDef
  * is true. If a definition starts at the current line, then the line
  * number is linked to the documentation of that definition.
@@ -2639,9 +2672,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (g_insideJava && (text == "internal")) {
+         // special case
          REJECT;
+      }
 
-      } else if (g_insideCpp && (text == "set" || text == "get" || text == "remove")) {
+      if (skipLanguageKeywords(text)) {
          REJECT;
       }
 
@@ -2659,7 +2694,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{KEYWORD}/{B}*          {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_insideCpp && (text == "set" || text == "get" || text == "remove")) {
+      if (skipLanguageKeywords(text)) {
          REJECT;
       }
 
@@ -2671,7 +2706,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{KEYWORD}/{BN}*"("      {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_insideCpp && (text == "set" || text == "get" || text == "remove")) {
+      if (skipLanguageKeywords(text)) {
          REJECT;
       }
 
@@ -3485,9 +3520,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <MemberCall2,FuncCall>{KEYWORD}/([^a-z_A-Z0-9]) {
       QString text = QString::fromUtf8(yytext);
 
-      if (g_insideCpp && (text == "set" || text == "get"  || text == "remove")) {
-         REJECT;
-      }
+      if (skipLanguageKeywords(text)) {
+         REJECT;      }
+
 
       startFontClass("keyword");
       g_code->codify(text);
