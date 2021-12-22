@@ -820,6 +820,8 @@ MemberDef::MemberDef(const QString &defFileName, int defLine, int defColumn, con
    m_isDestructorCached  = 0;
 
    m_usingDeclaration = false;
+
+   m_isAnonymous = memberName.isEmpty() || memberName.startsWith('@') || memberName.contains("::@");
 }
 
 MemberDef::MemberDef(const MemberDef &md)
@@ -1166,6 +1168,17 @@ void MemberDef::setHidden(bool b)
 {
    Definition::setHidden(b);
    m_isLinkableCached = 0;
+}
+
+void MemberDef::setName(const QString &name)
+{
+   m_isAnonymous = name.isEmpty() || name.startsWith('@') || name.contains("::@");
+   Definition::setName(name);
+}
+
+bool MemberDef::isAnonymous() const
+{
+   return m_isAnonymous;
 }
 
 bool MemberDef::isLinkableInProject() const

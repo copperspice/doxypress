@@ -213,6 +213,8 @@ class MemberDef : public Definition
    bool isUsingDeclaration() const;
 
    // output info
+   bool isAnonymous() const;
+
    bool isLinkableInProject() const override;
    bool isLinkable() const override;
 
@@ -299,6 +301,7 @@ class MemberDef : public Definition
 
    QString displayName(bool = true) const override;
    QString getDeclType() const;
+
    void getLabels(QStringList &sl, QSharedPointer<Definition> container) const;
 
    //
@@ -333,6 +336,9 @@ class MemberDef : public Definition
                     QSharedPointer<MemberDef> member = QSharedPointer<MemberDef>());
 
    void setExplicitExternal(bool b);
+
+
+   void setName(const QString &name) override;
 
    // property set
    void setPropertyRead(const QString &data);
@@ -496,6 +502,7 @@ class MemberDef : public Definition
    mutable uchar m_isConstructorCached;    // 0 = not cached, 1 = false, 2 = true
    mutable uchar m_isDestructorCached;     // 0 = not cached, 1 = false, 2 = true
 
+   bool m_isAnonymous;
    bool m_usingDeclaration;
 };
 
