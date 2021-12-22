@@ -84,7 +84,7 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
    }
 
    m_isGeneric   = (lang == SrcLangExt_CSharp || lang == SrcLangExt_Java) && tname.indexOf('<') != -1;
-   m_isAnonymous = tname.contains('@');
+   m_isAnonymous = tname.isEmpty() || tname.startsWith('@') || tname.contains("::@");
 }
 
 ClassDef::~ClassDef()
@@ -112,6 +112,12 @@ QString ClassDef::displayName(bool includeScope) const
       retval = className();
    }
 
+   retval = renameNS_Aliases(retval);
+
+   if (isAnonymous()) {
+      retval = removeAnonymousScopes(retval);
+   }
+
    QString sep = getLanguageSpecificSeparator(lang);
 
    if (sep != "::") {
@@ -122,13 +128,7 @@ QString ClassDef::displayName(bool includeScope) const
       retval = "<" + retval.left(retval.length() - 2) + ">";
    }
 
-   retval = renameNS_Aliases(retval);
-
-   if (retval.contains('@')) {
-      return removeAnonymousScopes(retval);
-   } else {
-      return retval;
-   }
+   return retval;
 }
 
 // inserts a base/super class in the inheritance list
@@ -4217,7 +4217,7 @@ bool ClassDef::subGrouping() const
 
 void ClassDef::setName(const QString &name)
 {
-   m_isAnonymous = name.contains('@');
+   m_isAnonymous = name.isEmpty() || name.startsWith('@') || name.contains("::@");
    Definition::setName(name);
 }
 

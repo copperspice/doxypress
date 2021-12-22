@@ -53,7 +53,7 @@ bool ClassSDict::declVisible(const enum CompoundType *filter) const
 
       for (auto cd : *this) {
 
-         if (! cd->name().contains('@') && (filter == 0 || *filter == cd->compoundType()) ) {
+         if (! cd->isAnonymous() && (filter == 0 || *filter == cd->compoundType()) ) {
             bool isLink = cd->isLinkable();
 
             if (isLink || (! hideUndocClasses && (! cd->isLocal() || extractLocalClasses) ) ) {
@@ -76,7 +76,7 @@ void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filte
 
       for (auto cd : *this) {
 
-         if (! cd->name().contains('@') && ! cd->isExtension() && (cd->protection() != Private || extractPrivate) &&
+         if (! cd->isAnonymous() && ! cd->isExtension() && (cd->protection() != Private || extractPrivate) &&
                (filter == 0 || *filter == cd->compoundType()) ) {
             cd->writeDeclarationLink(ol, found, header, localNames);
          }
@@ -102,7 +102,7 @@ void ClassSDict::writeDocumentation(OutputList &ol, QSharedPointer<Definition> c
       bool found = false;
 
       for (auto cd : *this) {
-         if (! cd->name().contains('@') && cd->isLinkableInProject() && cd->isEmbeddedInOuterScope() &&
+         if (! cd->isAnonymous() && cd->isLinkableInProject() && cd->isEmbeddedInOuterScope() &&
                (container == 0 || cd->partOfGroups() == 0) ) {
 
             if (! found) {

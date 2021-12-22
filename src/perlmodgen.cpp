@@ -2128,7 +2128,7 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
       return;   // skip external references.
    }
 
-   if (cd->name().indexOf('@') != -1) {
+   if (cd->isAnonymous()) {
       return;   // skip anonymous compounds.
    }
 
