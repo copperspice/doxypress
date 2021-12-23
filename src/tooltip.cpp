@@ -121,11 +121,8 @@ void TooltipManager::writeTooltips(CodeGenerator &ol)
 
       if (item->definitionType() == Definition::TypeMember) {
          QSharedPointer<MemberDef> md = item.dynamicCast<MemberDef>();
-         decl = md->declaration();
-
-         if (! decl.isEmpty() && decl.at(0) == '@') {
-            // hide enum values
-            decl.resize(0);
+         if (! md->isAnonymous()) {
+            decl = md->declaration();
          }
       }
 

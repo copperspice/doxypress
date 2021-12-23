@@ -1314,8 +1314,9 @@ static void writeListOfAllMembers(QSharedPointer<ClassDef> cd, QTextStream &t)
      for (auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
 
-         if (! md->name().isEmpty() && ! md->name().startsWith('@')) {
+         if (! md->isAnonymous()) {
             // skip anonymous members
+
             Protection prot = mi.prot;
             Specifier virt = md->virtualness();
 

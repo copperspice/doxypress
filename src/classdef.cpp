@@ -2107,7 +2107,7 @@ void ClassDef::writeMemberList(OutputList &ol)
          // Protection prot = mi.prot;
          // Specifier virt  = md->virtualness();
 
-         if (cd && ! md->name().isEmpty() && ! md->name().startsWith('@')) {
+         if (cd && ! md->isAnonymous()) {
             bool memberWritten = false;
 
             if (cd->isLinkable() && md->isLinkable()) {

@@ -596,7 +596,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
 
                   bool isDir = (enumList != 0 && md->isEnumerate());
-                  bool isAnonymous = md->name().contains('@');
+                  bool isAnonymous = md->isAnonymous();
 
                   static bool hideUndocMembers = Config::getBool("hide-undoc-members");
                   static bool extractStatic    = Config::getBool("extract-static");
@@ -3606,7 +3606,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
                   bool isDir = enumList != 0 && md->isEnumerate();
 
-                  if (md->isVisible() && md->name().indexOf('@') == -1) {
+                  if (md->isVisible() && ! md->isAnonymous()) {
                      Doxy_Globals::indexList.addContentsItem(isDir, md->name(), md->getReference(), md->getOutputFileBase(),
                            md->anchor(), addToIndex, md);
                   }

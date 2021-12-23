@@ -1096,8 +1096,8 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (name().isEmpty() || name().startsWith('@')) {
-      // not a valid or a dummy name
+   if (isAnonymous()) {
+      // not a valid name or a dummy name
       m_isLinkableCached = 1;
       return;
    }
@@ -1597,7 +1597,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
          ol.docify("}");
 
-         if (varName.isEmpty() && (name().isEmpty() || name().startsWith('@'))) {
+         if (varName.isEmpty() && isAnonymous()) {
             ol.docify(";");
 
          } else if (! varName.isEmpty() && (varName.startsWith('*') || varName.startsWith('&'))) {
@@ -1665,10 +1665,10 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    static const bool briefMemberDesc     = Config::getBool("brief-member-desc");
 
    // write name
-   if (! name().isEmpty() && name().at(0) != '@') {
+   if (! isAnonymous()) {
       // hide anonymous stuff
 
-      if (! (name().isEmpty() || name().at(0) == '@') && (hasDocumentation() || isReference()) &&
+      if (! name().isEmpty() && (hasDocumentation() || isReference()) &&
             ! (m_impl->prot == Private && ! extractPrivate && ! isFriend()) &&
             ! (isStatic() && m_impl->classDef == 0 && ! extractStatic)) {
 
@@ -1714,7 +1714,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    }
 
    // add to index
-   if (isEnumerate() && ! name().isEmpty() && name().at(0) == '@') {
+   if (isEnumerate() && isAnonymous()) {
       // do not add to index
 
    } else {
@@ -2628,7 +2628,7 @@ QString MemberDef::displayDefinition() const
 
    if (isEnumerate()) {
 
-      if (! title.isEmpty() && title.at(0) == '@') {
+      if (isAnonymous()) {
          ldef  = "anonymous enum";
          title = ldef;
 
@@ -2641,7 +2641,7 @@ QString MemberDef::displayDefinition() const
       }
 
    } else if (isEnumValue()) {
-      if (! ldef.isEmpty() && ldef.at(0) == '@') {
+      if (! ldef.isEmpty() && isAnonymous()) {
          ldef = ldef.mid(2);
       }
    }
@@ -2863,7 +2863,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
 
    if (isEnumerate() && ! title.isEmpty() ) {
 
-      if (title.at(0) == '@') {
+      if (isAnonymous()) {
          ldef = title = "anonymous enum";
 
          if (! m_impl->enumBaseType.isEmpty()) {
@@ -3603,7 +3603,6 @@ QString MemberDef::memberTypeName() const
    return retval;
 }
 
-
 void MemberDef::warnIfUndocumented()
 {
    static const bool extractAll = Config::getBool("extract-all");
@@ -3644,7 +3643,7 @@ void MemberDef::warnIfUndocumented()
    if ( m_impl->m_memberTraits.hasTrait(Entry::Virtue::BypassUndocWarn) ) {
       // suppress warning of undocumented method, user wants to bypass this warning
 
-   } else if ((! hasUserDocumentation() && ! extractAll) && ! isFriendClass() && name().indexOf('@') == -1 &&
+   } else if ((! hasUserDocumentation() && ! extractAll) && ! isFriendClass() && ! isAnonymous() &&
                   def != nullptr && def->name().indexOf('@') == -1 &&
                   protectionLevelVisible(m_impl->prot) && ! isReference() && ! isDeleted() ) {
 

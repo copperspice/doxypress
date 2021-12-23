@@ -2734,8 +2734,8 @@ void Doxy_Work::processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPo
                      // matching tag less struct/union
                      QString name = md->name();
 
-                     if (name.at(0) == '@') {
-                        name = "__unnamed__";
+                     if (md->isAnonymous()) {
+                        name = "__unnamed" + name.mid(1) + "__";
                      }
 
                      if (! prefix.isEmpty()) {
@@ -8135,7 +8135,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          // even if we have already added the enum to a namespace, we still
          // also want to add it to other appropriate places such as file or class
 
-         if (isGlobal) {
+         if (isGlobal && (nd == nullptr || (! nd->name().isEmpty() && ! nd->name().startsWith('@')))) {
 
             if (! defSet) {
                md->setDefinition(name + baseType);
@@ -8443,6 +8443,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                   }
                }
             }
+
             // add deferred members
             for (auto &item : extraMembers) {
 
