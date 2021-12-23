@@ -1853,6 +1853,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    (void) def;
 
    QString memType;
+   QString name;
    bool isFunc = false;
 
    switch (md->memberType()) {
@@ -1922,9 +1923,15 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       memType.prepend("friend ");
    }
 
+   name = md->name();
+
+   if (md->isAnonymous()) {
+      name = "__unnamed" + name.mid(1) + "__";
+   }
+
    m_output.openHash()
       .addFieldQuotedString("kind", memType)
-      .addFieldQuotedString("name", md->name())
+      .addFieldQuotedString("name", name)
       .addFieldQuotedString("virtualness", getVirtualnessName(md->virtualness()))
       .addFieldQuotedString("protection", getProtectionName(md->protection()))
       .addFieldBoolean("static", md->isStatic());
