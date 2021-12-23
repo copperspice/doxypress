@@ -999,7 +999,8 @@ QString MemberDef::getOutputFileBase() const
          return baseName;
       }
 
-   } else if (m_impl->nspace && m_impl->nspace->isLinkable() ) {
+   } else if (m_impl->nspace && (m_impl->nspace->isLinkable() ||
+         m_impl->nspace->name().isEmpty() || m_impl->nspace->name().startsWith('@'))) {
       baseName = m_impl->nspace->getOutputFileBase();
 
    } else if (m_impl->fileDef) {
