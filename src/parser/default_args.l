@@ -346,12 +346,15 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
 
-      // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
-      if (s_argSharpCount > 0 && s_argRoundCount == 0) {
-         s_argSharpCount--;
+      if (s_argSharpCount == 0 && s_argRoundCount > 0) {
+         // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
 
-      } else  {
-         BEGIN( s_readArgContext );
+      } else {
+         if (s_argSharpCount>0) {
+            --s_argSharpCount;
+         } else  {
+            BEGIN( s_readArgContext );
+         }
       }
    }
 
