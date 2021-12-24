@@ -367,11 +367,14 @@ static int          s_condCtx;
 static bool         s_skip;
 
 static bool         s_insideCS;          // C# has simpler preprocessor
+static bool         s_insideFortran;
 static bool         s_isSource;
 
 static bool         s_lexInit   = false;
 static int          s_fenceSize = 0;
 static bool         s_ccomment;
+
+QString             s_delimiter;
 
 static QSet<QString> s_allIncludes;
 static QSet<QString> s_expansionDict;
@@ -395,7 +398,9 @@ static void setFileName(const QString &name)
       s_yyFileDef = QSharedPointer<FileDef>();
    }
 
-   s_insideCS = getLanguageFromFileName(s_yyFileName) == SrcLangExt_CSharp;
+   s_insideCS      = getLanguageFromFileName(s_yyFileName) == SrcLangExt_CSharp;
+   s_insideFortran = getLanguageFromFileName(s_yyFileName) == SrcLangExt_Fortran;
+
    s_isSource = determineSection(s_yyFileName);
 }
 
@@ -2021,6 +2026,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 %x    CopyString
 %x    CopyStringCs
 %x    CopyStringFtn
+%x    CopyRawString
 %x    Include
 %x    IncludeID
 %x    EndImport
@@ -2098,7 +2104,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
       QSharedPointer<A_Define> def;
 
-      if (skipFuncMacros && name != "Q_PROPERTY" && ! ( (s_includeStack.isEmpty() || s_curlyCount > 0) && s_macroExpansion &&
+      if (skipFuncMacros && ! s_insideFortran && name != "Q_PROPERTY" && ! ( (s_includeStack.isEmpty() || s_curlyCount > 0) && s_macroExpansion &&
                   (def = DefineManager::instance().isDefined(name)) && (! s_expandOnlyPredef || def->isPredefined)) ) {
 
          outputChar('\n');
@@ -2115,11 +2121,20 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       }
    }
 
-<CopyLine>"extern"{BN}{0,80}"\"C\""*{BN}{0,80}"{"  {
+<CopyLine>"extern"{BN}*"\""[^\"]+"\""{BN}*("{")?  {
       QString text = QString::fromUtf8(yytext);
 
       s_yyLineNr += text.count('\n');
       outputArray(text, text.length());
+   }
+<CopyLine>{RAWBEGIN}        {
+      QString text = QString::fromUtf8(yytext);
+
+      s_delimiter = text.mid(2);
+      s_delimiter.chop(1);
+
+      outputArray(text, text.length());
+      BEGIN(CopyRawString);
    }
 
 <CopyLine>"{"   {
@@ -2224,6 +2239,28 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       BEGIN( CopyLine );
    }
 
+<CopyRawString>{RAWEND}  {
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
+
+      QString tmp = text.mid(1);
+      tmp.chop(1);
+
+      if (tmp == s_delimiter) {
+         BEGIN( CopyLine );
+      }
+   }
+
+<CopyRawString>[^)]+     {
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
+   }
+
+<CopyRawString>.         {
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
+   }
+
 <CopyLine>{ID}/{BN}{0,80}"("     {
       QString text = QString::fromUtf8(yytext);
 
@@ -2276,6 +2313,11 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <CopyLine>"\\"\r?/\n    {
       //  strip line continuation characters
+   }
+
+<CopyLine>\\.           {
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
    }
 
 <CopyLine>.             {
@@ -2558,7 +2600,47 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       BEGIN(DefinedExpr1);
    }
 
-<Guard>{ID}      {
+<Guard>"true"/{B}|{B}*[\r]?\n   {
+      s_guardExpr += "1L";
+   }
+
+<Guard>"false"/{B}|{B}*[\r]?\n  {
+      s_guardExpr += "0L";
+   }
+
+<Guard>"not"/{B}    {
+      s_guardExpr += '!';
+   }
+
+<Guard>"not_eq"/{B}    {
+      s_guardExpr += "!=";
+   }
+
+<Guard>"and"/{B}    {
+      s_guardExpr += "&&";
+   }
+
+<Guard>"or"/{B}      {
+      s_guardExpr+="||";
+   }
+
+<Guard>"bitand"/{B}     {
+      s_guardExpr += "&";
+   }
+
+<Guard>"bitor"/{B}      {
+      s_guardExpr += "|";
+   }
+
+<Guard>"xor"/{B}     {
+      s_guardExpr += "^";
+   }
+
+<Guard>"compl"/{B}   {
+      s_guardExpr += "~";
+   }
+
+<Guard>{ID}    {
       s_guardExpr += QString::fromUtf8(yytext);
    }
 
@@ -2572,7 +2654,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <Guard>\n            {
-      unput(*yytext);
+      unput('\n');
 
       bool guard = computeExpression(s_guardExpr);
       setCaseDone(guard);
@@ -3265,7 +3347,8 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCComment,SkipVerbatim>.     {
-      outputChar(*yytext);
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
    }
 
 <CopyCComment>[^*a-z_A-Z\x80-\xFF\n]*[^*a-z_A-Z\x80-\xFF\\\n] {
@@ -3299,6 +3382,8 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
       s_defLitText += text;
       s_defText    += ' ';
+
+      outputChar('\n');
    }
 
 <RemoveCComment>"*/"{B}*"#"           {
