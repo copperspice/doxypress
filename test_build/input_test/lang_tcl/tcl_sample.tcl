@@ -1,6 +1,6 @@
 #************************************************************************
 #
-# Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+# Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
 #
 # DoxyPress is free software: you can redistribute it and/or
 # modify it under the terms of the GNU General Public License version 2
