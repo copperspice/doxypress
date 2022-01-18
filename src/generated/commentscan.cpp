@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -3791,7 +3791,7 @@ goto find_rule; \
 char *commentscanYYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  *
 *************************************************************************/
@@ -4484,6 +4484,15 @@ static void addCite()
    }
 
    Doxy_Globals::citeDict.insert(text);
+}
+
+static void lineCount()
+{
+   // commentscan, parse_py
+
+   for (const char *p = commentscanYYtext; *p; ++p) {
+      yyLineNr += (*p == '\n');
+   }
 }
 
 // strip trailing whitespace (excluding newlines) from string s
@@ -5694,7 +5703,7 @@ YY_RULE_SETUP
          endBrief(true);
       }
 
-      yyLineNr += text.count('\n');
+      lineCount();
    }
 	YY_BREAK
 case 49:
@@ -5916,7 +5925,10 @@ YY_RULE_SETUP
 {
       // handle argument
       QString text  = QString::fromUtf8(commentscanYYtext);
-      current->m_entryName = substitute(text,".", "::");
+
+      lineCount();
+      current->m_entryName = substitute(removeRedundantWhiteSpace(text),".", "::");
+
       BEGIN( Comment );
    }
 	YY_BREAK
@@ -5992,7 +6004,10 @@ case 80:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
+
+      lineCount();
       current->m_entryName = substitute(removeRedundantWhiteSpace(text),".","::");
+
       BEGIN( ClassDocArg2 );
    }
 	YY_BREAK
@@ -6003,7 +6018,9 @@ YY_RULE_SETUP
       // first argument
       QString text = QString::fromUtf8(commentscanYYtext);
 
+      lineCount();
       current->m_entryName = substitute(text,".","::");
+
       if (current->section == Entry::PROTOCOLDOC_SEC) {
          current->m_entryName += "-p";
       }
@@ -6017,7 +6034,10 @@ case 82:
 YY_RULE_SETUP
 {
       QString text  = QString::fromUtf8(commentscanYYtext);
+
+      lineCount();
       current->m_entryName = substitute(text,".","::");
+
       BEGIN( ClassDocArg2 );
    }
 	YY_BREAK
@@ -6927,6 +6947,7 @@ case 166:
 YY_RULE_SETUP
 {
       s_guardExpr += QString::fromUtf8(commentscanYYtext);
+      lineCount();
    }
 	YY_BREAK
 case 167:
@@ -7001,7 +7022,7 @@ YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(commentscanYYtext);
 
-      yyLineNr += text.count('\n');
+      lineCount();
       s_spaceBeforeIf.clear();
 
       BEGIN(Comment);
@@ -9227,6 +9248,10 @@ static bool handleCite(const QString &str, const QStringList &list)
 
 static bool handleFormatBlock(const QString &str, const QStringList &list)
 {
+   if (! s_spaceBeforeCmd.isEmpty()) {
+      addToOutput(s_spaceBeforeCmd);
+      s_spaceBeforeCmd.clear();
+   }
    if (list.isEmpty()) {
       addToOutput("@" + str + " ");
 

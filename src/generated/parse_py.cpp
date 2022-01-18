@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -1540,7 +1540,7 @@ goto find_rule; \
 char *parse_py_YYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
 
 *************************************************************************/
@@ -1753,10 +1753,10 @@ static QString findPackageScope(const QString &fileName)
 
 static void lineCount()
 {
-   DBG_CTX((stderr, "yyLineNr = %d\n", yyLineNr));
+   // commentscan, parse_py
 
    for (const char *p = parse_py_YYtext; *p; ++p) {
-      yyLineNr += (*p == '\n') ;
+      yyLineNr += (*p == '\n');
    }
 }
 

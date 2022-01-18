@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -859,7 +859,7 @@ goto find_rule; \
 char *default_argsYYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2021 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
 
 *************************************************************************/
@@ -1540,12 +1540,15 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(default_argsYYtext);
       *s_copyArgValue += text[0];
 
-      // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
-      if (s_argSharpCount > 0 && s_argRoundCount == 0) {
-         s_argSharpCount--;
+      if (s_argSharpCount == 0 && s_argRoundCount > 0) {
+         // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
 
-      } else  {
-         BEGIN( s_readArgContext );
+      } else {
+         if (s_argSharpCount>0) {
+            --s_argSharpCount;
+         } else  {
+            BEGIN( s_readArgContext );
+         }
       }
    }
 	YY_BREAK
@@ -1553,7 +1556,7 @@ case 23:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      s_argRoundCount++;
+      ++s_argRoundCount;
       *s_copyArgValue += text[0];
    }
 	YY_BREAK
@@ -1561,7 +1564,7 @@ case 24:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      s_argRoundCount--;
+      --s_argRoundCount;
       *s_copyArgValue += text[0];
    }
 	YY_BREAK
@@ -1569,7 +1572,7 @@ case 25:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(default_argsYYtext);
-      s_argCurlyCount++;
+      ++s_argCurlyCount;
       *s_copyArgValue += text[0];
    }
 	YY_BREAK
