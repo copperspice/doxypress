@@ -3683,7 +3683,8 @@ void MemberDef::warnIfUndocumentedParams()
    static const bool warnUndoc      = Config::getBool("warn-undoc");
    static const bool warnUndocParam = Config::getBool("warn-undoc-param");
 
-   if (! extractAll && warnUndoc && warnUndocParam && ! isDeleted() && ! isReference() && ! Doxy_Globals::suppressDocWarnings) {
+   if (! extractAll && warnUndoc && warnUndocParam && isFunction() && ! isDeleted() && ! isReference() &&
+         ! Doxy_Globals::suppressDocWarnings) {
       QString returnType = typeString();
 
       if (! hasDocumentedParams()) {
@@ -3691,7 +3692,7 @@ void MemberDef::warnIfUndocumentedParams()
                      csPrintable(qualifiedName()));
       }
 
-      if (! hasDocumentedReturnType() && isFunction() && hasDocumentation() && ! returnType.isEmpty()) {
+      if (! hasDocumentedReturnType() && hasDocumentation() && ! returnType.isEmpty()) {
          warn_doc_error(getDefFileName(), getDefLine(), "Return type of member %s is not documented",
                      csPrintable(qualifiedName()));
       }
