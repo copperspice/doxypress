@@ -489,9 +489,19 @@ static int processEmphasis2(QString &out, QStringView data, QChar c)
          QChar ch_prev = iter_i[-1];
 
          if (ch_next == c && ch_prev != ' ' && ch_prev != '\n') {
-            out += "<strong>";
+
+            if (c == '~') {
+               out += "<strike>";
+            } else {
+               out += "<strong>";
+            }
+
             processInline(out, data, iter_i);
-            out += "</strong>";
+            if (c == '~') {
+               out += "</strike>";
+            } else {
+               out += "</strong>";
+            }
 
             return (iter_i - data.constBegin()) + 2;
          }
@@ -776,9 +786,10 @@ static int processEmphasis(QString &out, QStringView data, QString::const_iterat
 
    int ret;
 
-   if (len >= 2 && data.constBegin() + 2 < iter_size && data1 != data0) {
-      // _bla or *bla
+   if (len >= 2 && data0 != '~' && data.constBegin() + 2 < iter_size && data1 != data0) {
+      // bla or *bla
       // whitespace can not follow an opening emphasis
+
       QStringView s1 = QStringView(data.constBegin() + 1, data.constEnd());
 
       if (data1 == ' ' || data1 == '\n' || (ret = processEmphasis1(out, s1, data0)) == 0) {
@@ -799,7 +810,7 @@ static int processEmphasis(QString &out, QStringView data, QString::const_iterat
       return ret + 2;
    }
 
-   if (len >= 4 && data.constBegin() + 4 < iter_size && data1 == data0 && data2 == data0 && data3 != data0) {
+   if (len >= 4 && data0 != '~' && data.constBegin() + 4 < iter_size && data1 == data0 && data2 == data0 && data3 != data0) {
       // ___bla or ***bla
       // passing pristineChars2 as 5th
 
@@ -1389,6 +1400,7 @@ static void processInline(QString &out, const QStringView processText, QString::
    if (keys.isEmpty()) {
       keys.insert('_');   // processEmphasis
       keys.insert('*');   // processEmphasis
+      keys.insert('~');   // processEmphasis
       keys.insert('`');   // processCodeSpan
       keys.insert('\\');  // processSpecialCommand
       keys.insert('@');   // processSpecialCommand
@@ -1434,6 +1446,11 @@ static void processInline(QString &out, const QStringView processText, QString::
             break;
 
          case '*':
+            // last one is passing pristineChars1
+            skipCount = processEmphasis(out, s1, iter_size, s2);
+            break;
+
+         case '~':
             // last one is passing pristineChars1
             skipCount = processEmphasis(out, s1, iter_size, s2);
             break;
