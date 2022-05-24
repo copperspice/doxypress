@@ -809,6 +809,19 @@ static bool insideTable(DocNode *n)
    return false;
 }
 
+static const DocStyleChange *insideDetails(QStack<DocStyleChange> data)
+{
+   const DocStyleChange *retval = nullptr;
+
+   for (const auto &item : data) {
+      if (item.style() == DocStyleChange::Details) {
+         retval= &item;
+      }
+   }
+
+   return retval;
+}
+
 /*! Looks for a documentation block with name commandName in the current
  *  context (g_context). The resulting documentation string is put in doc and
  *  the definition in which the documentation was found is put in retval.
@@ -1200,6 +1213,22 @@ QString DocStyleChange::styleString() const
 
        case DocStyleChange::Ins:
          retval = "ins";
+         break;
+
+       case DocStyleChange::Cite:
+         retval = "cite";
+         break;
+
+       case DocStyleChange::Details:
+         retval = "details";
+         break;
+
+       case DocStyleChange::S:
+         retval = "s";
+         break;
+
+       case DocStyleChange::Summary:
+         retval = "summary";
          break;
    }
 
@@ -1905,9 +1934,33 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
 
                case HTML_INS:
                   if (! g_token->endTag) {
-                     handleStyleEnter(parent,children, DocStyleChange::Ins, &g_token->attribs);
+                     handleStyleEnter(parent, children, DocStyleChange::Ins, &g_token->attribs);
                   } else {
-                     handleStyleLeave(parent,children, DocStyleChange::Ins,tokenName);
+                     handleStyleLeave(parent, children, DocStyleChange::Ins, tokenName);
+                  }
+                  break;
+
+               case HTML_CITE:
+                  if (! g_token->endTag) {
+                    handleStyleEnter(parent, children, DocStyleChange::Cite, &g_token->attribs);
+                  } else {
+                    handleStyleLeave(parent, children, DocStyleChange::Cite, tokenName);
+                  }
+                  break;
+
+               case HTML_DETAILS:
+                  if (! g_token->endTag) {
+                     handleStyleEnter(parent, children, DocStyleChange::Details, &g_token->attribs);
+                  } else {
+                    handleStyleLeave(parent, children, DocStyleChange::Details, tokenName);
+                  }
+                  break;
+
+               case HTML_S:
+                  if (! g_token->endTag) {
+                    handleStyleEnter(parent, children, DocStyleChange::S, &g_token->attribs);
+                  } else {
+                    handleStyleLeave(parent, children, DocStyleChange::S,tokenName);
                   }
                   break;
 
@@ -6972,6 +7025,16 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          }
          break;
 
+      case HTML_DETAILS:
+         if (! g_token->emptyTag) {
+            handleStyleEnter(this, m_children, DocStyleChange::Details, &g_token->attribs);
+         }
+         break;
+
+      case HTML_S:
+         handleStyleEnter(this, m_children, DocStyleChange::S, &g_token->attribs);
+         break;
+
       case HTML_CODE:
          if (g_token->emptyTag) {
             break;
@@ -7152,6 +7215,15 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       case XML_SUMMARY:
+         if (insideDetails(s_styleStack)) {
+            if (! g_token->emptyTag) {
+               handleStyleEnter(this, m_children, DocStyleChange::Summary, &g_token->attribs);
+            }
+
+            break;
+         }
+         [[fallthrough]];
+
       case XML_REMARKS:
       case XML_EXAMPLE:
          s_xmlComment = true;
@@ -7441,6 +7513,10 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
          handleStyleLeave(this, m_children, DocStyleChange::Bold, "b");
          break;
 
+      case HTML_S:
+         handleStyleLeave(this, m_children, DocStyleChange::S, "s");
+         break;
+
       case HTML_STRIKE:
          handleStyleLeave(this, m_children,DocStyleChange::Strike, "strike");
          break;
@@ -7455,6 +7531,10 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
 
       case HTML_INS:
          handleStyleLeave(this, m_children,DocStyleChange::Ins, "ins");
+         break;
+
+      case HTML_DETAILS:
+         handleStyleLeave(this, m_children, DocStyleChange::Details, "details");
          break;
 
       case HTML_CODE:
@@ -7567,6 +7647,12 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
          break;
 
       case XML_SUMMARY:
+         if (insideDetails(s_styleStack)) {
+           handleStyleLeave(this, m_children, DocStyleChange::Summary, "summary");
+           break;
+         }
+         [[fallthrough]];
+
       case XML_REMARKS:
       case XML_PARA:
       case XML_VALUE:
