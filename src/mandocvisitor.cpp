@@ -159,10 +159,11 @@ void ManDocVisitor::visit(DocStyleChange *s)
          m_firstCol = false;
          break;
 
+      case DocStyleChange::S:
       case DocStyleChange::Strike:
       case DocStyleChange::Del:
-      /* not supported */
-      break;
+         // not supported
+         break;
 
       case DocStyleChange::Underline:
       case DocStyleChange::Ins:
@@ -212,12 +213,13 @@ void ManDocVisitor::visit(DocStyleChange *s)
          }
          m_firstCol = false;
          break;
+
       case DocStyleChange::Center:
-         /* not supported */
-         break;
       case DocStyleChange::Small:
-         /* not supported */
+      case DocStyleChange::Cite:
+         // not supported
          break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             if (!m_firstCol) {
@@ -236,9 +238,30 @@ void ManDocVisitor::visit(DocStyleChange *s)
             m_firstCol = true;
          }
          break;
-      case DocStyleChange::Div:  /* HTML only */
+
+      // html only
+      case DocStyleChange::Div:
+      case DocStyleChange::Span:
          break;
-      case DocStyleChange::Span: /* HTML only */
+
+      case DocStyleChange::Details:
+         // emulation of the <details> tag
+
+         if (! s->enable()) {
+            m_t << "\n\n";
+         }
+         break;
+
+      case DocStyleChange::Summary:
+         // emulation of the <summary> tag inside a <details> tag
+
+         if (s->enable()) {
+            m_t << "\\fB";
+         } else {
+            m_t << "\\fP\n.PP\n";
+         }
+
+         m_firstCol = false;
          break;
    }
 }

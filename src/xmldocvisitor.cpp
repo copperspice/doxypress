@@ -221,6 +221,14 @@ void XmlDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::S:
+         if (s->enable()) {
+            m_t << "<s>";
+         } else {
+            m_t << "</s>";
+         }
+         break;
+
       case DocStyleChange::Strike:
          if (s->enable()) {
             m_t << "<strike>";
@@ -301,6 +309,14 @@ void XmlDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::Cite:
+         if (s->enable()) {
+            m_t << "<cite>";
+         } else {
+            m_t << "</cite>";
+         }
+         break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             m_t << "<preformatted>";
@@ -314,6 +330,22 @@ void XmlDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Div:
       case DocStyleChange::Span:
          /// HTML only
+         break;
+
+      case DocStyleChange::Details:
+         if (s->enable()) {
+            m_t << "<details>";
+         } else {
+            m_t << "</details>";
+         }
+         break;
+
+      case DocStyleChange::Summary:
+         if (s->enable()) {
+            m_t << "<summary>";
+         } else {
+            m_t << "</summary>";
+         }
          break;
    }
 }

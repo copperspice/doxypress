@@ -314,6 +314,7 @@ void LatexDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::S:
       case DocStyleChange::Strike:
       case DocStyleChange::Del:
          if (s->enable()) {
@@ -378,6 +379,14 @@ void LatexDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::Cite:
+         if (s->enable()) {
+            m_t << "{\\itshape ";
+         } else {
+            m_t << "}";
+         }
+         break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             m_t << "\n\\begin{DoxyPre}";
@@ -391,6 +400,24 @@ void LatexDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Div:
       case DocStyleChange::Span:
          // HTML only
+         break;
+
+      case DocStyleChange::Details:
+         // emulation of the <details> tag
+
+         if (! s->enable()) {
+            m_t << "\n\n";
+         }
+         break;
+
+      case DocStyleChange::Summary:
+         // emulation of the <summary> tag inside a <details> tag
+
+         if (s->enable()) {
+            m_t << "{\\bfseries{";
+         } else {
+            m_t << "}}\\newline";
+         }
          break;
    }
 }

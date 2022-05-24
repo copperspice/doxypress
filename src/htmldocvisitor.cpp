@@ -243,6 +243,15 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs, QString *altVa
 
          }
 
+      } else if (att.name =="open") {
+        // open attribute is a boolean attribute
+        // Specifies the details should be visible (open) to the user
+        // As it is a boolean attribute the initialisation value is of no interest
+
+        result += " ";
+        result += att.name;
+        result += "=\"true\"";
+
       } else if (att.name == "nowrap") {
          // in XHTML, attribute minimization is not allowed and the nowrap attribute must
          // be defined as <td nowrap="nowrap">
@@ -388,6 +397,15 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::S:
+         if (s->enable()) {
+            m_t << "<s" << htmlAttribsToString(s->attribs()) << ">";
+         }  else {
+            m_t << "</s>";
+         }
+
+         break;
+
       case DocStyleChange::Strike:
          if (s->enable()) {
             m_t << "<strike" << htmlAttribsToString(s->attribs()) << ">";
@@ -468,6 +486,14 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::Cite:
+         if (s->enable()) {
+            m_t << "<cite" << htmlAttribsToString(s->attribs()) << ">";
+         } else {
+            m_t << "</cite>";
+         }
+         break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             forceEndParagraph(s);
@@ -500,6 +526,21 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::Details:
+         if (s->enable()) {
+            m_t << "<details" << htmlAttribsToString(s->attribs()) << ">\n";
+         } else {
+            m_t << "</details>\n";
+         }
+         break;
+
+      case DocStyleChange::Summary:
+         if (s->enable()) {
+            m_t << "<summary" << htmlAttribsToString(s->attribs()) << ">";
+         } else {
+            m_t << "</summary>";
+         }
+         break;
    }
 }
 

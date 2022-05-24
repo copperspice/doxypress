@@ -102,6 +102,14 @@ class PrintDocVisitor : public DocVisitor
             }
             break;
 
+         case DocStyleChange::S:
+            if (s->enable()) {
+               printf("<s>");
+            } else {
+               printf("</s>");
+            }
+            break;
+
          case DocStyleChange::Strike:
             if (s->enable()) {
                printf("<strike>");
@@ -133,6 +141,7 @@ class PrintDocVisitor : public DocVisitor
                printf("</ins>");
             }
             break;
+
          case DocStyleChange::Italic:
             if (s->enable()) {
                printf("<italic>");
@@ -172,11 +181,20 @@ class PrintDocVisitor : public DocVisitor
                printf("</center>");
             }
             break;
+
          case DocStyleChange::Small:
             if (s->enable()) {
                printf("<small>");
             } else {
                printf("</small>");
+            }
+            break;
+
+         case DocStyleChange::Cite:
+            if (s->enable()) {
+               printf("<cite>");
+            } else {
+               printf("</cite>");
             }
             break;
 
@@ -203,6 +221,27 @@ class PrintDocVisitor : public DocVisitor
                printf("</span>");
             }
             break;
+
+         case DocStyleChange::Details:
+            if (s->enable()) {
+               indent_pre();
+               printf("<details>\n");
+            } else  {
+               indent_post();
+               printf("</details>\n");
+            }
+            break;
+
+         case DocStyleChange::Summary:
+            if (s->enable()) {
+               indent_pre();
+               printf("<summary>\n");
+            } else {
+               indent_post();
+               printf("</summary>\n");
+            }
+            break;
+
       }
    }
 

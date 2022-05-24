@@ -295,6 +295,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::S:
       case DocStyleChange::Strike:
       case DocStyleChange::Del:
          if (s->enable()) {
@@ -362,6 +363,14 @@ void RTFDocVisitor::visit(DocStyleChange *s)
          }
          break;
 
+      case DocStyleChange::Cite:
+         if (s->enable()) {
+            m_t << "{\\i ";
+         } else {
+            m_t << "} ";
+         }
+         break;
+
       case DocStyleChange::Preformatted:
          if (s->enable()) {
             m_t << "{" << endl;
@@ -377,10 +386,32 @@ void RTFDocVisitor::visit(DocStyleChange *s)
          m_lastIsPara = true;
          break;
 
-      case DocStyleChange::Div:  /* HTML only */
+
+      // HTML only
+      case DocStyleChange::Div:
+      case DocStyleChange::Span:
          break;
 
-      case DocStyleChange::Span: /* HTML only */
+      case DocStyleChange::Details:
+         // emulation of the <details> tag
+         if (s->enable()) {
+            m_t << "{\n";
+            m_t << "\\par\n";
+         } else {
+            m_t << "\\par";
+            m_t << "}\n";
+         }
+
+         m_lastIsPara = true;
+         break;
+
+      case DocStyleChange::Summary:
+         // emulation of the <summary> tag inside a <details> tag
+         if (s->enable()) {
+            m_t << "{\\b ";
+         } else {
+            m_t << "}\\par ";
+         }
          break;
    }
 }

@@ -705,6 +705,10 @@ void PerlModDocVisitor::visit(DocStyleChange *s)
          style = "bold";
          break;
 
+      case DocStyleChange::S:
+         style = "s";
+         break;
+
       case DocStyleChange::Strike:
          style = "strike";
          break;
@@ -745,6 +749,10 @@ void PerlModDocVisitor::visit(DocStyleChange *s)
          style = "small";
          break;
 
+      case DocStyleChange::Cite:
+         style = "cite";
+         break;
+
       case DocStyleChange::Preformatted:
          style = "preformatted";
          break;
@@ -755,6 +763,16 @@ void PerlModDocVisitor::visit(DocStyleChange *s)
 
       case DocStyleChange::Span:
          style = "span";
+         break;
+
+       case DocStyleChange::Details:
+         // emulation of the <details> tag
+         style = "details";
+         break;
+
+      case DocStyleChange::Summary:
+         // emulation of the <summary> tag inside a <details> tag
+         style = "summary";
          break;
 
    }

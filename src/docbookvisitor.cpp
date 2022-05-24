@@ -313,7 +313,9 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
          // XSLT Stylesheets can be used
          break;
 
-      // following six are HTML only
+      // following are HTML only
+      case DocStyleChange::Cite:
+      case DocStyleChange::S:
       case DocStyleChange::Strike:
       case DocStyleChange::Del:
       case DocStyleChange::Underline:
@@ -321,6 +323,32 @@ void DocbookDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Div:
       case DocStyleChange::Span:
          break;
+
+   case DocStyleChange::Details:
+      // emulation of the <details> tag
+
+      if (s->enable()) {
+         m_t << "\n";
+         m_t << "<para>";
+
+      } else {
+        m_t << "</para>";
+        m_t << "\n";
+      }
+
+      break;
+
+    case DocStyleChange::Summary:
+      // emulation of the <summary> tag inside a <details> tag
+
+      if (s->enable()) {
+         m_t << "<para><emphasis role=\"bold\">";
+      } else {
+         m_t << "</emphasis></para>";
+      }
+
+      break;
+
    }
 }
 
