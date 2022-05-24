@@ -454,22 +454,26 @@ class DocStyleChange : public DocNode
 {
   public:
 
-   enum Style { Bold          = 0x0001,
-                Italic        = 0x0002,
-                Code          = 0x0004,
-                Center        = 0x0008,
-                Small         = 0x0010,
-                Subscript     = 0x0020,
-                Superscript   = 0x0040,
-                Preformatted  = 0x0080,
-                Span          = 0x0100,
-                Div           = 0x0200,
-                Strike        = 0x0400,
-                Underline     = 0x0800,
-                Del           = 0x1000,
-                Ins           = 0x2000,
+   enum Style {
+      Bold          = 0x00001,
+      Center        = 0x00002,
+      Cite          = 0x00004,
+      Code          = 0x00008,
+      Del           = 0x00010,
+      Details       = 0x00020,
+      Div           = 0x00040,
+      Ins           = 0x00080,
+      Italic        = 0x00100,
+      Preformatted  = 0x00200,
+      S             = 0x00400,
+      Small         = 0x00800,
+      Span          = 0x01000,
+      Strike        = 0x02000,
+      Subscript     = 0x04000,
+      Summary       = 0x08000,
+      Superscript   = 0x10000,
+      Underline     = 0x20000,
    };
-
 
    DocStyleChange(DocNode *parent, uint position, Style s, bool enable, HtmlAttribList attribs = HtmlAttribList())
       : m_position(position), m_style(s), m_enable(enable), m_attribs(std::move(attribs))
