@@ -6150,13 +6150,16 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
       if (! pd->title().isEmpty()) {
          // a page name is a label as well
          QString file;
+         QString oldFile;
 
          int line = -1;
          if (gd != nullptr) {
-            file = gd->getOutputFileBase();
+            file    = gd->getOutputFileBase();
+            oldFile = file;
 
          } else {
-            file = pd->getOutputFileBase();
+            file    = pd->getOutputFileBase();
+            oldFile = pd->docFile();
 
             line = pd->getStartBodyLine();
          }
@@ -6165,11 +6168,11 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
 
          if (si) {
             if (si->lineNr != -1) {
-               warn(file, line, "multiple use of section label '%s', (first occurrence: %s, line %d)",
+               warn(oldFile, line, "multiple use of section label '%s', (first occurrence: %s, line %d)",
                     csPrintable(pd->name()), csPrintable(si->fileName), si->lineNr);
 
             } else {
-               warn(file, line, "multiple use of section label '%s', (first occurrence: %s)",
+               warn(oldFile, line, "multiple use of section label '%s', (first occurrence: %s)",
                     csPrintable(pd->name()), csPrintable(si->fileName));
             }
 
