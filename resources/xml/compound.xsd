@@ -165,9 +165,9 @@
     <xsd:attribute name="inline" type="DoxBool" use="optional"/>
     <xsd:attribute name="refqual" type="DoxRefQualifierKind" use="optional"/>
     <xsd:attribute name="virt" type="DoxVirtualKind" use="optional"/>
-    <xsd:attribute name="volatile"  type="DoxBool" use="optional"/>
-    <xsd:attribute name="mutable"   type="DoxBool" use="optional"/>
-    <xsd:attribute name="noexcept"  type="DoxBool" use="optional"/>
+    <xsd:attribute name="volatile" type="DoxBool" use="optional"/>
+    <xsd:attribute name="mutable" type="DoxBool" use="optional"/>
+    <xsd:attribute name="noexcept" type="DoxBool" use="optional"/>
     <xsd:attribute name="constexpr" type="DoxBool" use="optional"/>
     <!-- CS properties -->
     <xsd:attribute name="readable" type="DoxBool" use="optional"/>
@@ -423,8 +423,10 @@
       <xsd:element name="superscript" type="docMarkupType" />
       <xsd:element name="center" type="docMarkupType" />
       <xsd:element name="small" type="docMarkupType" />
+      <xsd:element name="cite" type="docMarkupType" />
       <xsd:element name="del" type="docMarkupType" />
       <xsd:element name="ins" type="docMarkupType" />
+      <xsd:element name="summary" type="docMarkupType" />
       <xsd:element name="htmlonly" type="docHtmlOnlyType" />
       <xsd:element name="manonly" type="xsd:string" />
       <xsd:element name="xmlonly" type="xsd:string" />
@@ -473,6 +475,7 @@
       <xsd:element name="parameterlist" type="docParamListType" />
       <xsd:element name="xrefsect" type="docXRefSectType" />
       <xsd:element name="copydoc" type="docCopyType" />
+      <xsd:element name="details" type="docDetailsType" />
       <xsd:element name="blockquote" type="docBlockQuoteType" />
       <xsd:element name="parblock" type="docParBlockType" />
     </xsd:choice>
@@ -561,6 +564,7 @@
     </xsd:sequence>
     <xsd:attribute name="rows" type="xsd:integer" />
     <xsd:attribute name="cols" type="xsd:integer" />
+    <xsd:attribute name="width" type="xsd:string" />
   </xsd:complexType>
 
   <xsd:complexType name="docRowType">
