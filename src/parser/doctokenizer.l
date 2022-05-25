@@ -1706,12 +1706,17 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       return TK_SYMBOL;
    }
 
-<St_Ref2>"\""|\n|"\\internal_linebr"         {
-      /* " or \n => end of title */
+<St_Ref2>"\""         {
+   /* closing quote */
+      return 0;
+   }
+
+<St_Ref2>"\n"|"\\internal_linebr"         {
       QString text = QString::fromUtf8(yytext);
       s_yyLineNum += text.count('\n');
+      g_token->name = " ";
 
-      return 0;
+      return TK_WORD;
    }
 
 <St_Ref2>{SPCMD1}      |
