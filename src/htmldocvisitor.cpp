@@ -932,9 +932,12 @@ void HtmlDocVisitor::visit(DocFormula *f)
       QString text = f->text();
       bool closeInline = false;
 
-      if (!bDisplay && ! text.isEmpty() && text.at(0) == '$' && text.at(text.length() - 1) == '$') {
+      if (! bDisplay && ! text.isEmpty() && text.at(0) == '$' && text.at(text.length() - 1) == '$') {
          closeInline = true;
          text = text.mid(1, text.length() - 2);
+         m_t << "\\(";
+      }  else if (!bDisplay && ! text.isEmpty()) {
+         closeInline = true;
          m_t << "\\(";
       }
 
