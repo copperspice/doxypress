@@ -764,7 +764,7 @@ LOGICOP       "=="|"!="|">"|"<"|">="|"<="|"&&"|"||"|"!"|"<=>"
 BITOP         "&"|"|"|"^"|"<<"|">>"|"~"
 OPERATOR      "operator"{B}*({ARITHOP}|{ASSIGNOP}|{LOGICOP}|{BITOP})
 
-CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_INTERNAL"|"CS_CLASSINFO"|"CS_INTERFACES"|"CS_ENUM"|"CS_FLAG"|"CS_INVOKABLE_CONSTRUCTOR_1"|"CS_INVOKABLE_CONSTRUCTOR_2"|("CS_DECLARE"[_A-Z0-9]+)|("Q_DECLARE"[_A-Z0-9]+)|"Q_DISABLE_COPY"|"Q_ENUM"|"Q_ENUMS"|"Q_INTERFACES"|"K_DECLARE_PRIVATE"|"K_D"|"PHONON_HEIR")
+CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET_INTERNAL"|"CS_CLASSINFO"|"CS_INTERFACES"|"CS_ENUM"|"CS_FLAG"|"CS_INVOKABLE_CONSTRUCTOR_1"|"CS_INVOKABLE_CONSTRUCTOR_2"|("CS_DECLARE"[_A-Z0-9]+)|("Q_DECLARE"[_A-Z0-9]+)|"Q_DISABLE_COPY"|"Q_ENUM"|"Q_ENUMS"|"Q_INTERFACES"|"K_DECLARE_PRIVATE"|"K_D")
 
 %option never-interactive
 %option nounistd
@@ -3007,8 +3007,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       addToOutput(s_hereDocEntry, s_hereDocEnum, text);
    }
 
-<FindMembers>"Q_OBJECT"      {
-      // Q_object, ignore
+<FindMembers>"Q_OBJECT"|"Q_GADGET" {
+      // ignore both macros
    }
 
 <FindMembers>"Q_PROPERTY"  {
@@ -3086,10 +3086,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(QtPropAttr);
    }
 
-
    /* begin CopperSpice specific parsing */
 <FindMembers>"CS_OBJECT"     {
-      // cs_object
+      // handle both
       BEGIN(CsObject);
    }
 
