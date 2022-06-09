@@ -6417,8 +6417,6 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
 {
    static const bool useTypedefName = Config::getBool("use-typedef-name");
 
-   QSharedPointer<Entry> root = ptrEntry->entry();
-
    Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() namespace= %s   type= %s   name= %s   tempArg= %s   decl= %s\n",
                 csPrintable(namespaceName), csPrintable(type), csPrintable(name),
                 csPrintable(tempArg), csPrintable(decl) );
@@ -6432,22 +6430,20 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
       return false;
    }
 
-   // look in function dictionary
-   QSharedPointer<MemberName> memberList = Doxy_Globals::functionNameSDict.find(name + tempArg);
+   QSharedPointer<MemberName> memberName = Doxy_Globals::functionNameSDict.find(name + tempArg);
 
-   if (memberList == nullptr) {
+   if (memberName == nullptr) {
       // try without template arguments
-      memberList = Doxy_Globals::functionNameSDict.find(name);
+      memberName = Doxy_Globals::functionNameSDict.find(name);
    }
 
-   if (memberList != nullptr ) {
+   if (memberName != nullptr) {
       // function name defined
 
       Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() found symbol scope\n");
       bool found = false;
 
-      for (const auto &md : *memberList) {
-
+      for (const auto &md : *memberName) {
          QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
          QSharedPointer<FileDef> fd      = ptrEntry->fileDef();
 
@@ -6477,17 +6473,17 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
                   rnd = Doxy_Globals::globalScope;
                }
 
-               matching = matchArguments2(md->getOuterScope(), md->getFileDef(), mdAl, rnd, fd, root->argList, false);
+               matching = matchArguments2(md->getOuterScope(), md->getFileDef(), mdAl, rnd, fd, ptrEntry->argList, false);
             }
 
             // for template members we need to check if the number of template arguments is the same
             // otherwise we are dealing with different functions
 
-            if (matching && ! root->m_templateArgLists.isEmpty()) {
+            if (matching && ! ptrEntry->m_templateArgLists.isEmpty()) {
 
                const ArgumentList &mdTempl = md->getTemplateArgumentList();
 
-               if (root->m_templateArgLists.last().count() != mdTempl.count()) {
+               if (ptrEntry->m_templateArgLists.last().count() != mdTempl.count()) {
                   matching = false;
                }
             }
@@ -6496,16 +6492,16 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
             // This is needed because static members with the same name can be in different files.
             // It would be incoorect to put the comment block at the first syntactically matching member.
 
-            if (matching && md->isStatic() && md->getDefFileName() != root->getData(EntryKey::File_Name) && memberList->count() > 1) {
+            if (matching && md->isStatic() && md->getDefFileName() != ptrEntry->getData(EntryKey::File_Name) && memberName->count() > 1) {
                matching = false;
             }
 
             // for template member, check the return type
             const ArgumentList &tmpList = md->getTemplateArgumentList();
 
-            if (! root->m_templateArgLists.isEmpty()) {
+            if (! ptrEntry->m_templateArgLists.isEmpty()) {
 
-               if (tmpList.count() != root->m_templateArgLists.last().count() || md->typeString() != type) {
+               if (tmpList.count() != ptrEntry->m_templateArgLists.last().count() || md->typeString() != type) {
                   matching = false;
                }
             }
@@ -6514,41 +6510,41 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
                // add docs to the member
                Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() match found\n");
 
-               addMemberDocs(ptrEntry, md, decl, root->argList, false);
+               addMemberDocs(ptrEntry, md, decl, ptrEntry->argList, false);
                found = true;
                break;
             }
          }
       }
 
-      if (! found && root->relatesType != Duplicate && root->section == Entry::FUNCTION_SEC) {
+      if (! found && ptrEntry->relatesType != Duplicate && ptrEntry->section == Entry::FUNCTION_SEC) {
          // no match
          QString signature = decl;
-         signature += argListToString(root->argList, true);
+         signature += argListToString(ptrEntry->argList, true);
 
          QString warnMsg = QString("No matching member or function found for \n") + substitute(signature, "%", "%%");
 
-         if (memberList->count() > 0) {
+         if (memberName->count() > 0) {
             warnMsg += "\nPossible candidates:\n";
 
-            for (const auto &md : *memberList) {
+            for (const auto &md : *memberName) {
                warnMsg += "  '";
                warnMsg += substitute(md->declaration(), "%", "%%");
                warnMsg += "' at line " + QString::number(md->getDefLine()) + " in file " + md->getDefFileName() + "\n";
             }
          }
 
-         warn(root->getData(EntryKey::File_Name), root->startLine, warnMsg);
+         warn(ptrEntry->getData(EntryKey::File_Name), ptrEntry->startLine, warnMsg);
       }
 
    } else {
       // have docs for an undefined member
 
-      if (root->getData(EntryKey::Member_Type) != "friend class" && root->getData(EntryKey::Member_Type) != "friend struct" &&
-            root->getData(EntryKey::Member_Type) != "friend union" && root->getData(EntryKey::Member_Type) != "friend" &&
-            (! useTypedefName || root->getData(EntryKey::Member_Type).indexOf("typedef ") == -1)) {
+      if (ptrEntry->getData(EntryKey::Member_Type) != "friend class" && ptrEntry->getData(EntryKey::Member_Type) != "friend struct" &&
+            ptrEntry->getData(EntryKey::Member_Type) != "friend union" && ptrEntry->getData(EntryKey::Member_Type) != "friend" &&
+            (! useTypedefName || ptrEntry->getData(EntryKey::Member_Type).indexOf("typedef ") == -1)) {
 
-         warn(root->getData(EntryKey::File_Name), root->startLine, "documented symbol `%s' was not declared or defined",
+         warn(ptrEntry->getData(EntryKey::File_Name), ptrEntry->startLine, "Documented symbol \"%s\" was not declared or defined",
              csPrintable(decl) );
       }
    }
