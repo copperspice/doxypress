@@ -210,13 +210,13 @@ CommandMap htmlTagMap[] = {
    { "details",    HTML_DETAILS },
 
    { "c",            XML_C },
-// { "code",         XML_CODE },          // ambiguous <code> is also a HTML tag
+// { "code",         XML_CODE },          // ambiguous, <code> is also an HTML tag
    { "description",  XML_DESCRIPTION },
    { "example",      XML_EXAMPLE },
    { "exception",    XML_EXCEPTION },
    { "include",      XML_INCLUDE },
    { "item",         XML_ITEM },
-   { "list",         XML_LIST }, // type="table|bullet|number"
+   { "list",         XML_LIST },          // type="table|bullet|number"
    { "listheader",   XML_LISTHEADER },
    { "para",         XML_PARA },
    { "param",        XML_PARAM },
@@ -244,7 +244,7 @@ Mapper::Mapper(const CommandMap *cm, bool caseSensitive) : m_cs(caseSensitive)
 
    while (! p->cmdName.isEmpty()) {
       m_map.insert(p->cmdName, p->cmdId);
-      p++;
+      ++p;
    }
 }
 

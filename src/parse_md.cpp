@@ -35,7 +35,7 @@
 struct LinkRef {
    LinkRef(const QString &l, const QString &t)
       : link(l), title(t)
-   {}
+   { }
 
    QString link;
    QString title;
@@ -848,8 +848,6 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    int nl      = 0;
    int nlCount = 0;
 
-
-
    if (*iter_i == '!') {
       isImageLink = true;
 
@@ -1015,7 +1013,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
 
          // search back for closing marker
          while (iter_titleEnd != iter_titleStart && *iter_titleEnd == ' ') {
-            iter_titleEnd--;
+            --iter_titleEnd;
          }
 
          if (*iter_titleEnd == c) {
@@ -1023,7 +1021,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
             title = QStringView(iter_titleStart, iter_titleEnd);
 
          } else {
-            return 0;
+           return 0;
          }
       }
 
@@ -1091,7 +1089,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          iter_i = iter_contentEnd;
 
       } else if (content == "TOC") {
-         isToc = true;
+         isToc  = true;
          iter_i = iter_contentEnd;
 
       } else {
@@ -3304,7 +3302,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
 
    current->setData(EntryKey::File_Name, fileName);
    current->setData(EntryKey::MainDocs_File, fileName);
-   current->docLine  = 1;
+   current->docLine   = 1;
    current->m_srcLang = SrcLangExt_Markdown;
 
    QString id;
@@ -3347,7 +3345,6 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
             title   = titleFn;
             prepend = 0;
          }
-
 
          if (! wasEmpty) {
             docs.prepend("@anchor " + markdownFileNameToId(fileName) + "\\internal_linebr ");

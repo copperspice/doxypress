@@ -69,8 +69,7 @@ static const QString sectionLevelToName[] = {
    "subparagraph"
 };
 
-/** Parser's context to store all global variables.
- */
+// Parser's context to store all global variables
 struct DocParserContext {
    QSharedPointer<Definition> scope;
    QString context;
@@ -1419,7 +1418,7 @@ static DocInternalRef *handleInternalRef(DocNode *parent)
    }
 
    doctokenizerYYsetStateInternalRef();
-   tok = doctokenizerYYlex(); // get the reference id
+   tok = doctokenizerYYlex();             // get the reference id
 
    if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
@@ -1596,7 +1595,7 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
 
    doctokenizerYYsetStatePara();
 
-   handlePendingStyleCommands(parent,children);
+   handlePendingStyleCommands(parent, children);
 
    DocNode *n = s_nodeStack.pop();
    (void) n;
@@ -1907,27 +1906,27 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
 
                case HTML_STRIKE:
                   if (! g_token->endTag) {
-                     handleStyleEnter(parent,children, DocStyleChange::Strike, &g_token->attribs);
+                     handleStyleEnter(parent, children, DocStyleChange::Strike, &g_token->attribs);
                   } else {
-                     handleStyleLeave(parent,children,DocStyleChange::Strike, tokenName);
+                     handleStyleLeave(parent, children,DocStyleChange::Strike, tokenName);
                   }
 
                   break;
 
                 case HTML_DEL:
                   if (! g_token->endTag) {
-                     handleStyleEnter(parent,children, DocStyleChange::Del, &g_token->attribs);
+                     handleStyleEnter(parent, children, DocStyleChange::Del, &g_token->attribs);
                   } else {
-                     handleStyleLeave(parent,children, DocStyleChange::Del, tokenName);
+                     handleStyleLeave(parent, children, DocStyleChange::Del, tokenName);
                   }
 
                   break;
 
                case HTML_UNDERLINE:
                   if (! g_token->endTag) {
-                     handleStyleEnter(parent,children, DocStyleChange::Underline, &g_token->attribs);
+                     handleStyleEnter(parent, children, DocStyleChange::Underline, &g_token->attribs);
                   } else {
-                     handleStyleLeave(parent,children, DocStyleChange::Underline, tokenName);
+                     handleStyleLeave(parent, children, DocStyleChange::Underline, tokenName);
                   }
 
                   break;
@@ -1980,6 +1979,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                      handleStyleLeave(parent, children, DocStyleChange::Italic, tokenName);
                   }
                   break;
+
                case HTML_SUB:
                   if (!g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Subscript, &g_token->attribs);
@@ -2005,12 +2005,13 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   break;
 
                case HTML_SMALL:
-                  if (!g_token->endTag) {
+                  if (! g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Small, &g_token->attribs);
                   } else {
                      handleStyleLeave(parent, children, DocStyleChange::Small, tokenName);
                   }
                   break;
+
                default:
                   return false;
                   break;
@@ -4485,7 +4486,7 @@ int DocHtmlDescTitle::parse()
 
                      } else {
                         doctokenizerYYsetStateRef();
-                        tok = doctokenizerYYlex(); // get the reference id
+                        tok = doctokenizerYYlex();       // get the reference id
 
                         if (tok != TK_WORD) {
                            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
@@ -6009,12 +6010,13 @@ void DocPara::handleLink(const QString &cmdName, bool isJavaLink)
                     csPrintable(tokToString(tok)), csPrintable(cmdName));
       return;
    }
+
    doctokenizerYYsetStatePara();
    DocLink *lnk = new DocLink(this, g_token->name);
    m_children.append(lnk);
 
    QString leftOver = lnk->parse(isJavaLink);
-   if (!leftOver.isEmpty()) {
+   if (! leftOver.isEmpty()) {
       m_children.append(new DocWord(this, leftOver));
    }
 }
@@ -6030,8 +6032,9 @@ void DocPara::handleRef(const QString &cmdName)
    }
 
    doctokenizerYYsetStateRef();
-   tok = doctokenizerYYlex(); // get the reference id
-   DocRef *ref = 0;
+   tok = doctokenizerYYlex();          // get the reference id
+   DocRef *ref = nullptr;
+
 
    if (tok != TK_WORD) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
@@ -7610,33 +7613,43 @@ int DocPara::handleHtmlEndTag(const QString &tagName)
       case HTML_CAPTION:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </caption> found");
          break;
+
       case HTML_BR:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </br> found");
          break;
+
       case HTML_H1:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h1> found");
          break;
+
       case HTML_H2:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h2> found");
          break;
+
       case HTML_H3:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h3> found");
          break;
+
       case HTML_H4:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h4> found");
          break;
+
       case HTML_H5:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h5> found");
          break;
+
       case HTML_H6:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </h6> found");
          break;
+
       case HTML_IMG:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </img> found");
          break;
+
       case HTML_HR:
          warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected tag </hr> found");
          break;
+
       case HTML_A:
          //warn_doc_error(s_fileName,getDoctokenLineNum(),"Unexpected tag </a> found");
          // ignore </a> tag (can be part of <a name=...></a>

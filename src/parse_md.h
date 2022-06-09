@@ -24,7 +24,7 @@
 class Entry;
 
 /** processes string \a s and converts markdown into DoxyPress html commands. */
-QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointer<Entry> e, const  QString &s);
+QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointer<Entry> e, const QString &s);
 QString markdownFileNameToId(const QString &fileName);
 
 class MarkdownFileParser : public ParserInterface
@@ -35,7 +35,7 @@ class MarkdownFileParser : public ParserInterface
    void finishTranslationUnit() override {}
 
    void parseInput(const QString &fileName, const QString &fileBuf, QSharedPointer<Entry>root,
-                  enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
+      enum ParserMode mode, QStringList &includeFiles, bool useClang = false) override;
 
    bool needsPreprocessing(const QString &) const override {
       return false;

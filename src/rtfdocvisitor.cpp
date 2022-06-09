@@ -290,7 +290,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Bold:
          if (s->enable()) {
             m_t << "{\\b ";
-         }      else {
+         } else {
             m_t << "} ";
          }
          break;
@@ -318,7 +318,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "{\\i ";
-         }     else {
+         } else {
             m_t << "} ";
          }
          break;
@@ -326,7 +326,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Code:
          if (s->enable()) {
             m_t << "{\\f2 ";
-         }   else {
+         } else {
             m_t << "} ";
          }
          break;
@@ -334,7 +334,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Subscript:
          if (s->enable()) {
             m_t << "{\\sub ";
-         }    else {
+         } else {
             m_t << "} ";
          }
          break;
@@ -342,7 +342,7 @@ void RTFDocVisitor::visit(DocStyleChange *s)
       case DocStyleChange::Superscript:
          if (s->enable()) {
             m_t << "{\\super ";
-         }    else {
+         } else {
             m_t << "} ";
          }
          break;

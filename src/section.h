@@ -31,7 +31,7 @@ struct SectionInfo {
                       Paragraph     = 4,
                       Anchor        = 5,
                       Table         = 6
-                    };
+   };
 
    SectionInfo(const QString &f, const int line, const QString &anchor, const QString &t, SectionType secT,
       int lev, const QString &r = QString())

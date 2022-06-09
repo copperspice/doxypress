@@ -429,6 +429,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</u>";
          }
          break;
+
       case DocStyleChange::Ins:
          if (s->enable()) {
             m_t << "<ins" << htmlAttribsToString(s->attribs()) << ">";
@@ -436,6 +437,7 @@ void HtmlDocVisitor::visit(DocStyleChange *s)
             m_t << "</ins>";
          }
          break;
+
       case DocStyleChange::Italic:
          if (s->enable()) {
             m_t << "<em" << htmlAttribsToString(s->attribs()) << ">";
@@ -620,6 +622,7 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          }
 
          m_t << s->text();
+
          if (s->isBlock()) {
             forceStartParagraph(s);
          }
@@ -639,7 +642,8 @@ void HtmlDocVisitor::visit(DocVerbatim *s)
          forceEndParagraph(s);
 
          QString fileName;
-         fileName = QString("%1%2.dot").formatArg(htmlOutput + "/inline_dotgraph_").formatArg(dotindex++);
+         fileName = QString("%1%2.dot").formatArg(htmlOutput + "/inline_dotgraph_").formatArg(dotindex);
+         ++dotindex;
 
          QFile file(fileName);
 
@@ -996,7 +1000,7 @@ void HtmlDocVisitor::visit(DocCite *cite)
 
    filter(cite->text());
 
-   if (!cite->file().isEmpty()) {
+   if (! cite->file().isEmpty()) {
       endLink();
    } else {
       m_t << "]</b>";
@@ -1010,6 +1014,7 @@ void HtmlDocVisitor::visitPre(DocAutoList *l)
    }
 
    forceEndParagraph(l);
+
    if (l->isEnumList()) {
       //
       // Do list type based on depth:
@@ -1057,6 +1062,7 @@ void HtmlDocVisitor::visitPre(DocAutoListItem *)
    if (m_hide) {
       return;
    }
+
    m_t << "<li>";
 }
 
@@ -1096,21 +1102,25 @@ bool isSeparatedParagraph(DocSimpleSect *parent, DocPara *par)
    }
 
    int count = parent->children().count();
-   if (count > 1 && i == 0) { // first node
+   if (count > 1 && i == 0) {
+      // first node
       if (nodes.at(i + 1)->kind() == DocNode::Kind_SimpleSectSep) {
          return true;
       }
 
-   } else if (count > 1 && i == count - 1) { // last node
+   } else if (count > 1 && i == count - 1) {
+      // last node
       if (nodes.at(i - 1)->kind() == DocNode::Kind_SimpleSectSep) {
          return true;
       }
 
-   } else if (count > 2 && i > 0 && i < count - 1) { // intermediate node
+   } else if (count > 2 && i > 0 && i < count - 1) {
+      // intermediate node
       if (nodes.at(i - 1)->kind() == DocNode::Kind_SimpleSectSep && nodes.at(i + 1)->kind() == DocNode::Kind_SimpleSectSep) {
          return true;
       }
    }
+
    return false;
 }
 
@@ -1797,13 +1807,14 @@ void HtmlDocVisitor::visitPre(DocHtmlTable *t)
 
    if (attribs.isEmpty()) {
 
-      if(t->hasCaption()) {
+      if (t->hasCaption()) {
          m_t << getDirHtmlClassOfNode(textDirection(t->caption()), "doxtable");
       } else {
          m_t << getDirHtmlClassOfNode(textDirection(t), "doxtable");
       }
 
       m_t << ">\n";
+
    } else {
       if (t->hasCaption()) {
          m_t << getDirHtmlClassOfNode(textDirection(t->caption()));

@@ -709,12 +709,14 @@ class MemberDefImpl
    int m_declColumn = -1;
 };
 
-MemberDefImpl::MemberDefImpl() :
-   enumFields(0), redefinedBy(0), category(0), categoryRelation(0)
-{ }
+MemberDefImpl::MemberDefImpl()
+   : enumFields(nullptr), redefinedBy(0), category(0), categoryRelation(0)
+{
+}
 
 MemberDefImpl::~MemberDefImpl()
-{ }
+{
+}
 
 void MemberDefImpl::init(Definition *def, const QString &type, const QString &a, const QString &e, Protection p,
                   Specifier v, bool s,  Relationship r, MemberDefType memberType,
@@ -859,7 +861,7 @@ QSharedPointer<MemberDef> MemberDef::deepCopy() const
    result->m_impl->exampleSDict = m_impl->exampleSDict;
 
    if (m_impl->enumFields) {
-      for (auto md: *m_impl->enumFields) {
+      for (auto md : *m_impl->enumFields) {
          result->insertEnumField(md);
       }
    }
@@ -948,7 +950,7 @@ bool MemberDef::isReimplementedBy(QSharedPointer<ClassDef> cd) const
 
 void MemberDef::insertEnumField(QSharedPointer<MemberDef> md)
 {
-   if (m_impl->enumFields == 0) {
+   if (m_impl->enumFields == nullptr) {
       m_impl->enumFields = QMakeShared<MemberList>(MemberListType_enumFields);
    }
 
@@ -1396,7 +1398,7 @@ QString MemberDef::getDeclType() const
       retval = "using";
    }
 
-   // strip `friend' keyword from ltype
+   // strip `friend' keyword
    retval = stripPrefix(retval, "friend ");
 
    if (retval == "@") {
@@ -1890,7 +1892,6 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
             ol.pushGeneratorState();
             ol.disableAllBut(OutputGenerator::Html);
-            //ol.endEmphasis();
 
             ol.docify(" ");
 
@@ -1907,7 +1908,6 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
             ol.parseText(theTranslator->trMore());
             ol.endTextLink();
-            //ol.startEmphasis();
             ol.popGeneratorState();
          }
 
@@ -2816,7 +2816,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
    }
 
    SrcLangExt lang = getLanguage();
-   QString sep     = getLanguageSpecificSeparator(lang, true);
+   QString sep = getLanguageSpecificSeparator(lang, true);
 
    QString scopeName = scName;
    QString memAnchor = anchor();
@@ -4479,12 +4479,12 @@ QString MemberDef::qualifiedName() const
       qm += m_impl->classDef->name() + " ";
       qm += name();
       qm += "]";
+
       return qm;
 
    } else if (m_impl->enumScope && m_impl->enumScope->isStrong()) {
-      return m_impl->enumScope->qualifiedName() +
-             getLanguageSpecificSeparator(getLanguage()) +
-             localName();
+      return m_impl->enumScope->qualifiedName() + getLanguageSpecificSeparator(getLanguage()) + localName();
+
    } else {
       return Definition::qualifiedName();
    }

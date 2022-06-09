@@ -222,17 +222,21 @@ void ManDocVisitor::visit(DocStyleChange *s)
 
       case DocStyleChange::Preformatted:
          if (s->enable()) {
-            if (!m_firstCol) {
+            if (! m_firstCol) {
                m_t << endl;
             }
+
             m_t << ".PP" << endl;
             m_t << ".nf" << endl;
             m_insidePre = true;
+
          } else {
             m_insidePre = false;
-            if (!m_firstCol) {
+
+            if (! m_firstCol) {
                m_t << endl;
             }
+
             m_t << ".fi" << endl;
             m_t << ".PP" << endl;
             m_firstCol = true;
@@ -859,7 +863,9 @@ void ManDocVisitor::visitPre(DocHtmlListItem *li)
 
    if (((DocHtmlList *)li->parent())->type() == DocHtmlList::Ordered) {
       m_t << li->itemNumber() << ".\" " << m_indent + 2;
-   } else { // bullet list
+
+   } else {
+      // bullet list
       m_t << "\\(bu\" " << m_indent;
    }
 
@@ -872,6 +878,7 @@ void ManDocVisitor::visitPost(DocHtmlListItem *)
    if (m_hide) {
       return;
    }
+
    m_t << endl;
    m_firstCol = true;
 }

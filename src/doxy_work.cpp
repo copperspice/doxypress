@@ -598,7 +598,7 @@ void processFiles()
 
    for (const auto &s : tagFileList) {
       readTagFile(root, s);
-      root->createNavigationIndex(QSharedPointer<FileDef>());      // broom - (saving a nullptr which gets changed later on)
+      root->createNavigationIndex(QSharedPointer<FileDef>());      // saving a nullptr which gets changed later on
    }
 
    // parse source files
@@ -2184,9 +2184,9 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
    QSharedPointer<ClassDef> cd = getClass(qualifiedName);
 
    Debug::print(Debug::Classes, 0, "  Found class with name %s (qualifiedName=%s -> cd=%p)\n",
-                cd ? csPrintable(cd->name()) : csPrintable(root->m_entryName), csPrintable(qualifiedName), cd.data() );
+                cd != nullptr ? csPrintable(cd->name()) : csPrintable(root->m_entryName), csPrintable(qualifiedName), cd.data() );
 
-   if (cd) {
+   if (cd != nullptr ) {
       // class exists
       fullName = cd->name();
       Debug::print(Debug::Classes, 0, "  Existing class %s\n", csPrintable(cd->name()) );
@@ -3377,7 +3377,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    def = stripPrefix(def, "static ");
 
    // see if the member is already found in the same scope
-   // (this may be the case for a static member that is initialized outside the class)
+   // (this may be the case for a static member initialized outside the class)
    QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict.find(name);
 
    if (mn) {
@@ -3447,10 +3447,16 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    // md->setDefLine(ptrEntry->startLine);
 
    md->setRequires(ptrEntry->getData(EntryKey::Requires_Clause));
-   md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
-   md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
 
-   md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs), ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
+   md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File),
+      ptrEntry->docLine);
+
+   md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File),
+      ptrEntry->briefLine);
+
+   md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs),
+      ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
+
    md->setDefinition(def);
    md->setBitfields(ptrEntry->getData(EntryKey::Member_Bitfields));
    md->addSectionsToDefinition(ptrEntry->m_anchors);
@@ -3706,6 +3712,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    md->setMemberTraits(root->m_traits);
    md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
    md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+
    md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
    md->addSectionsToDefinition(root->m_anchors);
    md->setFromAnonymousScope(fromAnnScope);
@@ -4069,13 +4076,13 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
          cd = getClass(scope);
 
          if (cd) {
-            // cd  is the class to add member to
+            // cd is the class to add member to
             addVariableToClass(ptrEntry, cd, memberType, name, false, QSharedPointer<MemberDef>(), Protection::Public,
                      Relationship::Friend);
          }
       }
 
-      // skip this member, because it is a static variable definition (always?),  which will be found in a class scope as well,
+      // skip this member, because it is a static variable definition (always?), which will be found in a class scope as well,
       // but then we know the correct protection level, so only then it will be updated in the correct list
 
       return;
@@ -4096,7 +4103,7 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
    cd = getClass(scope);
 
-   if (cd == 0 && classScope != scope) {
+   if (cd == nullptr && classScope != scope) {
       cd = getClass(classScope);
    }
 
@@ -4126,7 +4133,7 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
          }
 
-         if (name.at(0) != '@') {
+         if (! name.startsWith('@')) {
 
             if (! pScope.isEmpty() && (pcd = getClass(pScope))) {
                // pcd is the class to add the member to
@@ -4147,7 +4154,8 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
                }
 
-               md = addVariableToClass(ptrEntry, pcd, memberType, name, true, QSharedPointer<MemberDef>(), root->protection, tRelation);
+               md = addVariableToClass(ptrEntry, pcd, memberType, name, true, QSharedPointer<MemberDef>(),
+                  root->protection, tRelation);
 
             } else {
                // anonymous scope inside namespace or file => put variable in the global scope
@@ -4178,7 +4186,7 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
 
       }
 
-      addVariableToClass(ptrEntry, cd,  memberType, name, false, md, root->protection, tRelation);
+      addVariableToClass(ptrEntry, cd, memberType, name, false, md, root->protection, tRelation);
 
    } else if (! name.isEmpty()) {
       // global variable, there is no classDef at this point
@@ -4304,8 +4312,8 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    }
 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
-         root->getData(EntryKey::Member_Type), rname, "", "", root->protection, root->virt, root->stat, Relationship::Member,
-         type, ArgumentList(), root->argList);
+         root->getData(EntryKey::Member_Type), rname, "", "", root->protection, root->virt, root->stat,
+         Relationship::Member, type, ArgumentList(), root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
@@ -4330,8 +4338,9 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    md->enableReferencesRelation(root->referencesRelation);
 
    Debug::print(Debug::Functions, 0, "  Interface Member:\n"
-                "    `%s' `%s' proto=%d\n"
-                "    def=`%s'\n", csPrintable(root->getData(EntryKey::Member_Type)), csPrintable(rname), root->proto, csPrintable(def));
+            "    `%s' `%s' proto=%d\n"
+            "    def=`%s'\n", csPrintable(root->getData(EntryKey::Member_Type)), csPrintable(rname),
+            root->proto, csPrintable(def));
 
    // add member to the global list of all members
    QSharedPointer<MemberName> mn;
@@ -4343,6 +4352,7 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    } else {
       mn = QMakeShared<MemberName>(rname);
       mn->append(md);
+
       Doxy_Globals::memberNameSDict.insert(rname, mn);
    }
 
@@ -4467,7 +4477,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    }
 
    if (i != -1 && ts != -1 && ts < te && ts < i && i < te) {
-      // avoid changing A<int(int*)>, see bug 677315
+      // avoid changing A<int(int*)>
       i = -1;
    }
 
@@ -4613,6 +4623,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    } else {
       mn = QMakeShared<MemberName>(name);
       mn->append(md);
+
       Doxy_Globals::memberNameSDict.insert(name, mn);
    }
 
@@ -4834,7 +4845,9 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         }
 
                         item->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
-                        item->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
+                        item->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File),
+                           root->inbodyLine);
+
                         item->setDocsForDefinition(! root->proto);
 
                         if (item->getStartBodyLine() == -1 && root->startBodyLine != -1) {
@@ -6341,9 +6354,10 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
       md->setDocsForDefinition(!root->proto);
 
    } else {
-      md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
-      md->setDocsForDefinition(! root->proto);
+      // docs for all enum values
 
+      md->setDocsForDefinition(! root->proto);
+      md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
       md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
 
       if ((md->inbodyDocumentation().isEmpty() || ! ptrEntry->parent()->m_entryName.isEmpty() ) &&
@@ -6810,6 +6824,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                     funcArgs, funcTemplateArgs, exceptions);
    }
 
+
    // class name can also be a namespace, decide later
    // if a related class name is specified and the class name could not
    // be derived from the function declaration then use the related field
@@ -6872,7 +6887,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
    // If not, we clear the funcSpec and treat this as a normal method of a template class.
 
    if (! (root->m_templateArgLists.count() > 0 && root->m_templateArgLists.first().count() == 0) ) {
-      funcSpec.resize(0);
+      funcSpec.clear();
    }
 
    // split scope into a namespace and a class part
@@ -7006,7 +7021,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             // class name is valid
 
             if (funcSpec.isEmpty()) {
-               // not a member specialization
+               // not a member specialization, addmemberfunction subroutine
+
                int count = 0;
 
                int noMatchCount = 0;
@@ -7036,8 +7052,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      tcd = cd;
                   }
 
-                  if (cd && tcd == cd) {
-                     // found the class this funcDecl belongs to
+                  if (cd != nullptr && tcd == cd) {
+                     // found the class this funcDecl (member) belongs to
 
                      Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [4] class definition: %s\n",
                         csPrintable(cd->name()));
@@ -7083,7 +7099,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                      bool matching = md->isVariable() || md->isTypedef();
 
-                     if (! matching ) {
+                     if (! matching) {
 
                         if (md->isProperty() && root->mtype == MethodType::Property)  {
                            // current source is for a property and docs are for a property
@@ -7113,7 +7129,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                         memType  = stripPrefix(memType, "static ");
                         funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", "");
-                        memType  = substitute(stripTemplateSpecifiersFromScope(memType, true), className+"::","");
+                        memType  = substitute(stripTemplateSpecifiersFromScope(memType, true), className + "::","");
 
                         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [6] comparing return types %s with %s"
                                      "#args %d with %d\n", csPrintable(md->typeString()), csPrintable(funcType),
@@ -7223,13 +7239,12 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   } else if (cd && cd != tcd) {
                      // searching for funcDecl, found a different class which has a method of the same name
                      ++noMatchCount;
-
                   }
 
-                  // end of main for loop
+                  // end of main for() loop
                }
 
-               if (count == 0 && ptrEntry->parent() && ptrEntry->parent()->section == Entry::OBJCIMPL_SEC) {
+               if (count == 0 && ptrEntry->parent() != nullptr && ptrEntry->parent()->section == Entry::OBJCIMPL_SEC) {
                   goto localObjCMethod;
                }
 
@@ -7351,7 +7366,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      for (auto md : *mn) {
                         QSharedPointer<ClassDef> cd = md->getClassDef();
 
-                        if (cd != 0 && rightScopeMatch(cd->name(), className)) {
+                        if (cd != nullptr && rightScopeMatch(cd->name(), className)) {
                            const ArgumentList &templAl = md->getTemplateArgumentList();
 
                            if (! templAl.listEmpty()) {
@@ -7420,7 +7435,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
-               md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
+               md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File),
+                  root->inbodyLine);
+
                md->setDocsForDefinition(! root->proto);
                md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                md->addSectionsToDefinition(root->m_anchors);
@@ -7437,9 +7454,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             }
 
          } else if (overloaded) {
-            // check if the function belongs to only one class
+            // check if this function belongs to only one class
             // for unique overloaded member we allow the class to be omitted
-            // using this should however be avoided, because it is error prone
+            // can be error prone, try to bypass
 
             bool unique = true;
             auto iter = mn->begin();
@@ -7485,7 +7502,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                const ArgumentList &tArgList = getTemplateArgumentsFromName(cd->name() + "::" +
                      funcName, root->m_templateArgLists);
 
-               QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
+               QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name),
+                     root->startLine, root->startColumn,
                      funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat,
                      Relationship::Related, memberType, tArgList, root->argList);
 
@@ -7506,7 +7524,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                md->setDocumentation(doc, root->getData(EntryKey::MainDocs_File), root->docLine);
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
-               md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
+               md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File),
+                  root->inbodyLine);
 
                md->setDocsForDefinition(! root->proto);
                md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
@@ -7533,11 +7552,12 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   fullFuncDecl += argListToString(root->argList, true);
                }
 
-               warn(root->getData(EntryKey::File_Name), root->startLine, "Can not determine class for function\n%s", csPrintable(fullFuncDecl));
+               warn(root->getData(EntryKey::File_Name), root->startLine,
+                     "Can not determine class for function\n%s", csPrintable(fullFuncDecl));
             }
          }
 
-      } else if (isRelated && !  root->getData(EntryKey::Related_Class).isEmpty()) {
+      } else if (isRelated && ! root->getData(EntryKey::Related_Class).isEmpty()) {
          Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [10] related function"
                       "   scopeName= %s   className= %s\n", csPrintable(scopeName), csPrintable(className));
 
@@ -7579,7 +7599,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
             QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
-            if ((mn = Doxy_Globals::memberNameSDict.find(funcName)) == 0) {
+            if ((mn = Doxy_Globals::memberNameSDict.find(funcName)) == nullptr) {
                mn = QMakeShared<MemberName>(funcName);
                newMemberName = true;        // create a new member name
 
@@ -7713,7 +7733,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      }
 
                      if (rmd) {
-                        // member found -> copy line number info
+                        // member found, copy line number info
                         md->setBodySegment(rmd->getStartBodyLine(), rmd->getEndBodyLine());
                         md->setBodyDef(rmd->getBodyDef());
                      }
@@ -7737,16 +7757,18 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                md->setBriefDescription(root->getData(EntryKey::Brief_Docs),root->getData(EntryKey::Brief_File),root->briefLine);
-               md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
+               md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File),
+                  root->inbodyLine);
+
                md->setDocsForDefinition(!root->proto);
                md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
-               md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
                md->addSectionsToDefinition(root->m_anchors);
                md->setMemberGroupId(root->mGrpId);
                md->setLanguage(root->m_srcLang);
                md->setId(root->getData(EntryKey::Clang_Id));
 
                // md->setMemberDefTemplateArguments(root->mtArgList);
+
                mn->append(md);
                cd->insertMember(md);
                cd->insertUsedFile(fd);
@@ -7786,7 +7808,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
       } else if (ptrEntry->parent() && ptrEntry->parent()->section == Entry::OBJCIMPL_SEC) {
 
-      localObjCMethod:
+         localObjCMethod:
+
          QSharedPointer<ClassDef> cd;
 
          if (Config::getBool("extract-local-methods") && (cd = getClass(scopeName))) {
@@ -7833,6 +7856,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             } else {
                mn = QMakeShared<MemberName>(root->m_entryName);
                mn->append(md);
+
                Doxy_Globals::memberNameSDict.insert(root->m_entryName, mn);
             }
 
@@ -7845,7 +7869,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
          bool globMem = findGlobalMember(ptrEntry, namespaceName, funcType, funcName, funcTemplateArgs, funcDecl);
 
-         if (className.isEmpty() && !globMem) {
+         if (className.isEmpty() && ! globMem) {
             warn(root->getData(EntryKey::File_Name), root->startLine, "Class for member `%s' can not "
                  "be found.",  csPrintable(funcName) );
 
@@ -8060,7 +8084,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          }
       }
 
-      if (cd && ! name.isEmpty()) {
+      if (cd != nullptr && ! name.isEmpty()) {
          // found an enum inside a compound
 
          fd   = QSharedPointer<FileDef>();
@@ -8145,12 +8169,12 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
                fd = ptrEntry->parent()->fileDef();
             }
 
-            if (fd) {
+            if (fd != nullptr) {
                md->setFileDef(fd);
                fd->insertMember(md);
             }
 
-         } else if (cd) {
+         } else if (cd != nullptr) {
             if (isRelated || hideScopeNames) {
                md->setDefinition(name + baseType);
 
@@ -8174,7 +8198,9 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
             mn->append(md);
 
          } else {
-            // new enum name
+            // new enum name or enum class name
+
+            // create new MemberName, then call memberNameSDict.insert() or functionNameSDict.insert
             mn = QMakeShared<MemberName>(name);
 
             mn->append(md);
@@ -8283,6 +8309,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
          if (mn != nullptr) {
 
             QList< QPair<QString, QSharedPointer<MemberDef>> > extraMembers;
+
             for (const auto &md : *mn) {
                // for each enum in this list
 
@@ -8374,7 +8401,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                         }
 
                      } else {
-                        // C++
+                        // normal enum
 
                         QSharedPointer<MemberName> fmn;
                         MemberNameSDict *enumDict = nullptr;
@@ -8520,7 +8547,8 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
                      md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
 
                      if (md->inbodyDocumentation().isEmpty() || ! ptrEntry->parent()->m_entryName.isEmpty()) {
-                        md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
+                        md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File),
+                           root->inbodyLine);
                      }
 
                      if (root->mGrpId != -1 && md->getMemberGroupId() == -1) {
@@ -8562,8 +8590,8 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
                   }
 
                   if (md->isEnumerate()) {
-                     md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                      md->setDocsForDefinition(! root->proto);
+                     md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
                      md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
                      md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
                      md->addSectionsToDefinition(root->m_anchors);
@@ -8614,7 +8642,7 @@ void Doxy_Work::findDEV(const MemberNameSDict &mnsd)
 
                for (auto fmd : *fmdl)  {
                   if (fmd->isLinkableInProject()) {
-                     documentedEnumValues++;
+                     ++documentedEnumValues;
                   }
                }
             }
@@ -9047,6 +9075,7 @@ void Doxy_Work::inheritDocumentation()
                md->setDocumentation(bmd->documentation(), bmd->docFile(), bmd->docLine());
                md->setDocsForDefinition(bmd->isDocsForDefinition());
                md->setBriefDescription(bmd->briefDescription(), bmd->briefFile(), bmd->briefLine());
+
                md->copyArgumentNames(bmd);
                md->setInbodyDocumentation(bmd->inbodyDocumentation(), bmd->inbodyFile(), bmd->inbodyLine());
             }
@@ -9477,11 +9506,11 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
 
          QString indexName = "index";
          Doxy_Globals::mainPage = QMakeShared<PageDef>(root->getData(EntryKey::MainDocs_File), root->docLine, indexName,
-                  root->getData(EntryKey::Brief_Docs) + root->getData(EntryKey::Main_Docs) +
-                  root->getData(EntryKey::Inbody_Docs), title);
+            root->getData(EntryKey::Brief_Docs) + root->getData(EntryKey::Main_Docs) +
+            root->getData(EntryKey::Inbody_Docs), title);
 
          Doxy_Globals::mainPage->setBriefDescription(root->getData(EntryKey::Brief_Docs),
-                  root->getData(EntryKey::Brief_File), root->briefLine);
+            root->getData(EntryKey::Brief_File), root->briefLine);
 
          Doxy_Globals::mainPage->setBodySegment(root->startLine, -1);
          Doxy_Globals::mainPage->setFileName(indexName);

@@ -3607,7 +3607,7 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
 
          QString absMapName = absBaseName + ".map";
 
-         if (regenerate || !insertMapFile(out, absMapName, relPath, mapName)) {
+         if (regenerate || ! insertMapFile(out, absMapName, relPath, mapName)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,
                         false, QString(), mapName);
 

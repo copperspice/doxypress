@@ -689,7 +689,6 @@ void HtmlCodeGenerator::writeCodeAnchor(const QString &anchor)
 
 void HtmlCodeGenerator::startCodeFragment(const QString &)
 {
-
    m_streamCode << "<div class=\"fragment\">";
 }
 

@@ -2150,11 +2150,11 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
    // - examples using the class
 
    if (cd->isReference()) {
-      return;   // skip external references.
+      return;   // skip external references
    }
 
    if (cd->isAnonymous()) {
-      return;   // skip anonymous compounds.
+      return;   // skip anonymous compounds
    }
 
    if (cd->templateMaster() != 0) {

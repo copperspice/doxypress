@@ -139,6 +139,7 @@ class TagClassInfo
    bool isObjC;
 };
 
+
 /** Container for namespace specific info that can be read from a tagfile */
 class TagNamespaceInfo
 {

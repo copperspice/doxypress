@@ -62,7 +62,9 @@ DirDef::DirDef(const QString &path)
       m_dispName = m_dispName.left(m_dispName.length() - 1);
    }
 
-   m_dirCount = g_dirCount++;
+   m_dirCount = g_dirCount;
+   ++g_dirCount;
+
    m_level    = -1;
 }
 
