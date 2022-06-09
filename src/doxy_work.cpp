@@ -8234,11 +8234,11 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
       QString name;
       QString scope;
 
-      if ((i = root->m_entryName.lastIndexOf("::")) != -1) {
+      if ((i = ptrEntry->m_entryName.lastIndexOf("::")) != -1) {
          // scope is specified
 
-         scope = root->m_entryName.left(i);                                      // extract scope
-         name  = root->m_entryName.right(root->m_entryName.length() - i - 2);    // extract name
+         scope = ptrEntry->m_entryName.left(i);                                         // extract scope
+         name  = ptrEntry->m_entryName.right(ptrEntry->m_entryName.length() - i - 2);   // extract name
          cd    = getClass(scope);
 
          if (cd == nullptr) {
@@ -8258,18 +8258,18 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
             }
          }
 
-         name = root->m_entryName;
+         name = ptrEntry->m_entryName;
       }
 
-      if (! root->getData(EntryKey::Related_Class).isEmpty()) {
+      if (! ptrEntry->getData(EntryKey::Related_Class).isEmpty()) {
          // related member, prefix user specified scope
          isRelated = true;
 
-         if (getClass(root->getData(EntryKey::Related_Class)) == nullptr && ! scope.isEmpty()) {
-            scope = mergeScopes(scope, root->getData(EntryKey::Related_Class));
+         if (getClass(ptrEntry->getData(EntryKey::Related_Class)) == nullptr && ! scope.isEmpty()) {
+            scope = mergeScopes(scope, ptrEntry->getData(EntryKey::Related_Class));
 
          } else {
-            scope = root->getData(EntryKey::Related_Class);
+            scope = ptrEntry->getData(EntryKey::Related_Class);
          }
 
          if ((cd = getClass(scope)) == nullptr) {
