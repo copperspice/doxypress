@@ -8218,7 +8218,6 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
 {
    if (ptrEntry->section == Entry::ENUM_SEC) {
       // non anonymous enumeration
-      QSharedPointer<Entry> root  = ptrEntry;
 
       QSharedPointer<ClassDef> cd = QSharedPointer<ClassDef>();
       QSharedPointer<FileDef>  fd = QSharedPointer<FileDef>();
@@ -8312,18 +8311,17 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                if (md->isEnumerate()) {
 
                   for (auto e : ptrEntry->children() ) {
-                     SrcLangExt sle;
+                     SrcLangExt sle = ptrEntry->m_srcLang;
 
-                     bool isStrong = root->m_traits.hasTrait(Entry::Virtue::Strong);
+                     bool isJavaLike = (sle == SrcLangExt_CSharp || sle == SrcLangExt_Java || sle == SrcLangExt_XML);
+                     bool isStrong   = ptrEntry->m_traits.hasTrait(Entry::Virtue::Strong);
 
-                     if ( (sle = ptrEntry->m_srcLang) == SrcLangExt_CSharp || sle == SrcLangExt_Java ||
-                              sle == SrcLangExt_XML || isStrong) {
-
+                     if (isJavaLike || isStrong) {
                         // Unlike C/C++ enums, C++11, C# & Java enum values are only
                         // visible inside the enum scope, must create them here and only add them to the enum
 
-                        QSharedPointer<Entry> root = e->entry();
 
+                        QSharedPointer<Entry> child = e->entry();
                         QString qualifiedName = substitute(ptrEntry->m_entryName,"::",".");
 
                         if (! scope.isEmpty() && ! ptrEntry->m_tagInfo.isEmpty()) {
@@ -8337,16 +8335,18 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                            // enum value scope matches that of the enum
                            // be less strict for tag files as members can have incomplete scope
 
-                           QString fileName = root->getData(EntryKey::File_Name);
+                           QString fileName = child->getData(EntryKey::File_Name);
 
-                           if (fileName.isEmpty() && ! ptrEntry->m_tagInfo.isEmpty() ) {
-                              fileName = ptrEntry->m_tagInfo.tag_Name;
+                           if (fileName.isEmpty() && ! child->m_tagInfo.isEmpty() ) {
+                              fileName = child->m_tagInfo.tag_Name;
                            }
 
-                           QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, root->startLine,
-                              root->startColumn, root->getData(EntryKey::Member_Type), root->m_entryName,
-                              root->getData(EntryKey::Member_Args), QString(), root->protection, Specifier::Normal,
-                              root->stat, Relationship::Member, MemberDefType::EnumValue, ArgumentList(), ArgumentList());
+                           // docs for enum values of a strong enum
+
+                           QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, child->startLine,
+                              child->startColumn, child->getData(EntryKey::Member_Type), child->m_entryName,
+                              child->getData(EntryKey::Member_Args), QString(), child->protection, Specifier::Normal,
+                              child->stat, Relationship::Member, MemberDefType::EnumValue, ArgumentList(), ArgumentList());
 
                            if (md->getClassDef()) {
                               fmd->setMemberClass(md->getClassDef());
@@ -8360,39 +8360,43 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                            }
 
                            fmd->setOuterScope(md->getOuterScope());
-                           fmd->setTagInfo(root->m_tagInfo);
-                           fmd->setLanguage(root->m_srcLang);
-                           fmd->setId(root->getData(EntryKey::Clang_Id));
+                           fmd->setTagInfo(child->m_tagInfo);
+                           fmd->setLanguage(child->m_srcLang);
+                           fmd->setId(child->getData(EntryKey::Clang_Id));
 
-                           fmd->setDocumentation(root->getData(EntryKey::Main_Docs),     root->getData(EntryKey::MainDocs_File), root->docLine);
-                           fmd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+                           fmd->setDocumentation(child->getData(EntryKey::Main_Docs),
+                              child->getData(EntryKey::MainDocs_File), child->docLine);
 
-                           fmd->addSectionsToDefinition(root->m_anchors);
-                           fmd->setInitializer(root->getData(EntryKey::Initial_Value));
-                           fmd->setMaxInitLines(root->initLines);
-                           fmd->setMemberGroupId(root->mGrpId);
-                           fmd->setExplicitExternal(root->explicitExternal);
-                           fmd->setRefItems(root->m_specialLists);
+                           fmd->setBriefDescription(child->getData(EntryKey::Brief_Docs),
+                               child->getData(EntryKey::Brief_File), child->briefLine);
+
+                           fmd->addSectionsToDefinition(child->m_anchors);
+                           fmd->setInitializer(child->getData(EntryKey::Initial_Value));
+                           fmd->setMaxInitLines(child->initLines);
+                           fmd->setMemberGroupId(child->mGrpId);
+                           fmd->setExplicitExternal(child->explicitExternal);
+                           fmd->setRefItems(child->m_specialLists);
                            fmd->setAnchor();
 
                            md->insertEnumField(fmd);
                            fmd->setEnumScope(md, true);
 
-                           QSharedPointer<MemberName> tmp_mn = mnsd->find(ptrEntry->m_entryName);
+                           QSharedPointer<MemberName> tmp_mn = mnsd->find(child->m_entryName);
 
                            if (tmp_mn == nullptr) {
                               // name did not exist
 
-                              tmp_mn = QMakeShared<MemberName>(ptrEntry->m_entryName);
+                              tmp_mn = QMakeShared<MemberName>(child->m_entryName);
                               tmp_mn->append(fmd);
-                              mnsd->insert(ptrEntry->m_entryName, tmp_mn);
+                              mnsd->insert(child->m_entryName, tmp_mn);
 
                            } else if (mn != tmp_mn) {
                               tmp_mn->append(fmd);
 
                            } else {
                               // must defer
-                              extraMembers.append( {ptrEntry->m_entryName, std::move(fmd)} );
+                              extraMembers.append( {child->m_entryName, std::move(fmd)} );
+
                            }
                         }
 
