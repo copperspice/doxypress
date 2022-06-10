@@ -69,9 +69,9 @@ QByteArray Config::json_ReadFile(const QString &fName)
    file.close();
 
    // set currentDir
-   QFileInfo temp(fName);
+   QFileInfo tmp(fName);
 
-   QString workingDir = temp.absolutePath();
+   QString workingDir = tmp.absolutePath();
    QDir::setCurrent(workingDir);
 
    // save currentDir
@@ -125,8 +125,8 @@ void Config::load_Defaults()
    m_cfgEnum.insert("output-language",           struc_CfgEnum   { "ENGLISH",      DEFAULT } );
    m_cfgList.insert("aliases",                   struc_CfgList   { QStringList(),  DEFAULT } );
 
-   const QStringList tempList1 = Config::getAbbreviateBrief();
-   m_cfgList.insert("abbreviate-brief",          struc_CfgList   { tempList1,      DEFAULT } );
+   const QStringList tmpList1 = Config::getAbbreviateBrief();
+   m_cfgList.insert("abbreviate-brief",          struc_CfgList   { tmpList1,       DEFAULT } );
 
    m_cfgList.insert("strip-from-path",           struc_CfgList   { QStringList(),  DEFAULT } );
    m_cfgList.insert("strip-from-inc-path",       struc_CfgList   { QStringList(),  DEFAULT } );
@@ -237,8 +237,8 @@ void Config::load_Defaults()
    // tab 2 -input source files
    m_cfgList.insert("input-source",              struc_CfgList   { QStringList(),   DEFAULT } );
 
-   QStringList tempList2 = Config::getFilePatterns();
-   m_cfgList.insert("input-patterns",            struc_CfgList   { tempList2,       DEFAULT } );
+   QStringList tmpList2 = Config::getFilePatterns();
+   m_cfgList.insert("input-patterns",            struc_CfgList   { tmpList2,        DEFAULT } );
 
    m_cfgString.insert("input-encoding",          struc_CfgString { "UTF-8",         DEFAULT } );
    m_cfgBool.insert("input-recursive",           struc_CfgBool   { false,           DEFAULT } );
@@ -251,9 +251,8 @@ void Config::load_Defaults()
    // tab 2 - input other files
    m_cfgList.insert("example-source",            struc_CfgList   { QStringList(),   DEFAULT } );
 
-   QStringList temp;
-   temp.append("*");
-   m_cfgList.insert("example-patterns",          struc_CfgList   { temp,            DEFAULT } );
+   QStringList tmpList3 = {"*"};
+   m_cfgList.insert("example-patterns",          struc_CfgList   { tmpList3,        DEFAULT } );
 
    m_cfgBool.insert("example-recursive",         struc_CfgBool   { false,           DEFAULT } );
 
@@ -304,14 +303,14 @@ void Config::load_Defaults()
    m_cfgBool.insert("source-tooltips",           struc_CfgBool   { true,            DEFAULT } );
    m_cfgBool.insert("use-htags",                 struc_CfgBool   { false,           DEFAULT } );
 
-   QStringList tempList3 = Config::getSuffixSource();
-   m_cfgList.insert("suffix-source-navtree",     struc_CfgList   { tempList3,       DEFAULT } );
+   QStringList tmpList4 = Config::getSuffixSource();
+   m_cfgList.insert("suffix-source-navtree",     struc_CfgList   { tmpList4,        DEFAULT } );
 
-   QStringList tempList4 = Config::getSuffixHeader();
-   m_cfgList.insert("suffix-header-navtree",     struc_CfgList   { tempList4,       DEFAULT } );
+   QStringList tmpList5 = Config::getSuffixHeader();
+   m_cfgList.insert("suffix-header-navtree",     struc_CfgList   { tmpList5,        DEFAULT } );
 
-   QStringList tempList5 = Config::getSuffixExclude();
-   m_cfgList.insert("suffix-exclude-navtree",    struc_CfgList   { tempList5,       DEFAULT } );
+   QStringList tmpList6 = Config::getSuffixExclude();
+   m_cfgList.insert("suffix-exclude-navtree",    struc_CfgList   { tmpList6,        DEFAULT } );
 
    // tab 2 - external
    m_cfgList.insert("tag-files",                 struc_CfgList   { QStringList(),   DEFAULT } );
@@ -511,15 +510,11 @@ bool Config::read_ProjectFile(const QString &fName)
    QJsonObject object = doc.object();
 
    // test json format
-   int format;
-   QJsonValue temp = object.value("doxypress-format");
+   int format = 0;
+   QJsonValue tmpValue = object.value("doxypress-format");
 
-   if (temp.isNull())  {
-      format = 0;
-
-   } else {
-      format = temp.toInt();
-
+   if (! tmpValue.isNull())  {
+      format = tmpValue.toInt();
    }
 
    if (format == 0)  {
@@ -545,8 +540,8 @@ bool Config::read_ProjectFile(const QString &fName)
       //
       for (auto iter2 = topObj.begin(); iter2 != topObj.end(); ++iter2) {
 
-         QString key        = iter2.key();
-         QJsonValue tempObj = iter2.value();
+         QString key       = iter2.key();
+         QJsonValue tmpObj = iter2.value();
 
          // hold for now
          if (key == "formula-format") {
@@ -559,7 +554,7 @@ bool Config::read_ProjectFile(const QString &fName)
             auto hashIter = m_cfgEnum.find(key);
 
             if (hashIter != m_cfgEnum.end()) {
-               hashIter.value() = { tempObj.toString(), PROJECT };
+               hashIter.value() = { tmpObj.toString(), PROJECT };
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown enum configuration parameter and not "
@@ -570,11 +565,11 @@ bool Config::read_ProjectFile(const QString &fName)
             continue;
          }
 
-         if (tempObj.isBool()) {
+         if (tmpObj.isBool()) {
             auto hashIter = m_cfgBool.find(key);
 
             if (hashIter != m_cfgBool.end()) {
-               hashIter.value() = { tempObj.toBool(), PROJECT };
+               hashIter.value() = { tmpObj.toBool(), PROJECT };
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown boolean configuration parameter and not "
@@ -583,11 +578,11 @@ bool Config::read_ProjectFile(const QString &fName)
             }
          }
 
-         if (tempObj.isDouble()) {
+         if (tmpObj.isDouble()) {
             auto hashIter = m_cfgInt.find(key);
 
             if (hashIter != m_cfgInt.end()) {
-               hashIter.value() = { tempObj.toInt(), PROJECT };
+               hashIter.value() = { tmpObj.toInt(), PROJECT };
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown integer configuration parameter and not "
@@ -596,19 +591,19 @@ bool Config::read_ProjectFile(const QString &fName)
             }
          }
 
-         if (tempObj.isArray()) {
+         if (tmpObj.isArray()) {
             auto hashIter = m_cfgList.find(key);
 
             if (hashIter != m_cfgList.end()) {
 
-               QJsonArray jsonArray = tempObj.toArray();
+               QJsonArray jsonArray = tmpObj.toArray();
                QStringList listData;
 
                for (auto item : jsonArray) {
-                  QString temp = item.toString();
+                  QString tmp = item.toString();
 
-                  if (! temp.isEmpty()) {
-                     listData.append(temp.trimmed());
+                  if (! tmp.isEmpty()) {
+                     listData.append(tmp.trimmed());
                   }
                }
 
@@ -621,11 +616,11 @@ bool Config::read_ProjectFile(const QString &fName)
             }
          }
 
-         if (tempObj.isString()) {
+         if (tmpObj.isString()) {
             auto hashIter = m_cfgString.find(key);
 
             if (hashIter != m_cfgString.end()) {
-               hashIter.value() = { tempObj.toString(), PROJECT };
+               hashIter.value() = { tmpObj.toString(), PROJECT };
 
             }  else {
                fprintf(stderr, "Error: %s is an unknown string configuration parameter and not "
