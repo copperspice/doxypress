@@ -830,38 +830,38 @@ void TreeDiagram::drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitm
       } else {
          // draw a tree of boxes
 
-         for (auto di : *dr) {
+         for (auto item : *dr) {
 
             if (bitmap) {
-               x = di->xPos() * (cellWidth + labelHorSpacing) / gridWidth;
+               x = item->xPos() * (cellWidth + labelHorSpacing) / gridWidth;
 
                if (doBase) {
                   y = image->getHeight() - superRows * cellHeight -
-                      (superRows - 1) * labelVertSpacing - di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
+                      (superRows - 1) * labelVertSpacing - item->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
                } else {
                   y = (baseRows - 1) * (cellHeight + labelVertSpacing) +
-                      di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
+                      item->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
                }
 
-               bool hasDocs = di->getClassDef()->isLinkable();
-               writeBitmapBox(di, image, x, y, cellWidth, cellHeight, firstRow, hasDocs);
+               bool hasDocs = item->getClassDef()->isLinkable();
+               writeBitmapBox(item, image, x, y, cellWidth, cellHeight, firstRow, hasDocs);
 
-               if (!firstRow && generateMap) {
-                  writeMapArea(t, di->getClassDef(), relPath, x, y, cellWidth, cellHeight);
+               if (! firstRow && generateMap) {
+                  writeMapArea(t, item->getClassDef(), relPath, x, y, cellWidth, cellHeight);
                }
 
             } else {
-               xf = di->xPos() / (float)gridWidth;
+               xf = item->xPos() / (float)gridWidth;
 
                if (doBase) {
-                  yf = di->yPos() / (float)gridHeight + superRows - 1;
+                  yf = item->yPos() / (float)gridHeight + superRows - 1;
 
                } else {
-                  yf = superRows - 1 - di->yPos() / (float)gridHeight;
+                  yf = superRows - 1 - item->yPos() / (float)gridHeight;
                }
 
-               writeVectorBox(t, di, xf, yf);
+               writeVectorBox(t, item, xf, yf);
             }
          }
       }
@@ -1040,68 +1040,74 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
       } else {
          // normal tree connector
 
-         for (auto di : *dr) {
+         for (auto item : *dr) {
 
             int x = 0;
             int y = 0;
 
-            QList<DiagramItem *> &dil = di->getChildren();
-            DiagramItem *parent  = di->parentItem();
+            QList<DiagramItem *> &itemChild = item->getChildren();
+            DiagramItem *parent = item->parentItem();
 
             if (parent) {
                // item has a parent -> connect to it
 
-               if (bitmap) { // draw pixels
-                  x = di->xPos() * (cellWidth + labelHorSpacing) / gridWidth + cellWidth / 2;
+               if (bitmap) {
+                  // draw pixels
+                  x = item->xPos() * (cellWidth + labelHorSpacing) / gridWidth + cellWidth / 2;
 
-                  if (doBase) { // base classes
+                  if (doBase) {
+                     // base classes
                      y = image->getHeight() - (superRows - 1) * (cellHeight + labelVertSpacing) -
-                         di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
+                         item->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
-                     /* write input line */
+                     // write input line
                      image->drawVertArrow(x, y, y + labelVertSpacing / 2,
-                                          protToColor(di->protection()),protToMask(di->protection()));
+                                          protToColor(item->protection()),protToMask(item->protection()));
 
                   } else {
                      // super classes
                      y = (baseRows - 1) * (cellHeight + labelVertSpacing) -
-                         labelVertSpacing / 2 + di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
+                         labelVertSpacing / 2 + item->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
-                     /* write output line */
+                     // write output line
                      image->drawVertLine(x, y, y + labelVertSpacing / 2,
-                                         protToColor(di->protection()), protToMask(di->protection()));
+                                         protToColor(item->protection()), protToMask(item->protection()));
                   }
-               } else { // draw pixels
-                  t << protToString(di->protection()) << endl;
+
+               } else {
+                  // draw pixels
+                  t << protToString(item->protection()) << endl;
+
                   if (doBase) {
-                     t << "1 " << di->xPos() / (float)gridWidth << " "
-                       << (di->yPos() / (float)gridHeight + superRows - 1) << " in\n";
+                     t << "1 " << item->xPos() / (float)gridWidth << " "
+                       << (item->yPos() / (float)gridHeight + superRows - 1) << " in\n";
+
                   } else {
-                     t << "0 " << di->xPos() / (float)gridWidth << " "
-                       << ((float)superRows - 0.25 - di->yPos() / (float)gridHeight)
+                     t << "0 " << item->xPos() / (float)gridWidth << " "
+                       << ((float)superRows - 0.25 - item->yPos() / (float)gridHeight)
                        << " in\n";
                   }
                }
             }
 
-            if (dil.count() > 0) {
-               Protection p = getMinProtectionLevel(dil);
+            if (itemChild.count() > 0) {
+               Protection p = getMinProtectionLevel(itemChild);
 
                uint mask = protToMask(p);
-               uint col = protToColor(p);
+               uint col  = protToColor(p);
 
                if (bitmap) {
-                  x = di->xPos() * (cellWidth + labelHorSpacing) / gridWidth + cellWidth / 2;
+                  x = item->xPos() * (cellWidth + labelHorSpacing) / gridWidth + cellWidth / 2;
 
                   if (doBase) { // base classes
                      y = image->getHeight() - (superRows - 1) * (cellHeight + labelVertSpacing) -
-                         cellHeight - labelVertSpacing / 2 - di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
+                         cellHeight - labelVertSpacing / 2 - item->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
                      image->drawVertLine(x, y, y + labelVertSpacing / 2 - 1, col, mask);
 
                   } else { // super classes
                      y = (baseRows - 1) * (cellHeight + labelVertSpacing) + cellHeight +
-                         di->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
+                         item->yPos() * (cellHeight + labelVertSpacing) / gridHeight;
 
                      image->drawVertArrow(x, y, y + labelVertSpacing / 2 - 1, col, mask);
                   }
@@ -1110,22 +1116,22 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
                   t << protToString(p) << endl;
 
                   if (doBase) {
-                     t << "0 " << di->xPos() / (float)gridWidth  << " "
-                       << (di->yPos() / (float)gridHeight + superRows - 1) << " out\n";
+                     t << "0 " << item->xPos() / (float)gridWidth  << " "
+                       << (item->yPos() / (float)gridHeight + superRows - 1) << " out\n";
 
                   } else {
-                     t << "1 " << di->xPos() / (float)gridWidth  << " "
-                       << ((float)superRows - 1.75 - di->yPos() / (float)gridHeight)
+                     t << "1 " << item->xPos() / (float)gridWidth  << " "
+                       << ((float)superRows - 1.75 - item->yPos() / (float)gridHeight)
                        << " out\n";
                   }
                }
 
-               /* write input line */
-               DiagramItem *first = dil.first();
-               DiagramItem *last  = dil.last();
+               // write input line
+               DiagramItem *first = itemChild.first();
+               DiagramItem *last  = itemChild.last();
 
-               if (first != last && !first->isInList()) {
-                  /* connect with all base classes */
+               if (first != last && ! first->isInList()) {
+                  // connect with all base classes
 
                   if (bitmap) {
                      int xs = first->xPos() * (cellWidth + labelHorSpacing) / gridWidth + cellWidth / 2;

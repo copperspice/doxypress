@@ -125,9 +125,9 @@ void MemberGroup::addGroupedInheritedMembers(OutputList &ol, QSharedPointer<Clas
                   QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {
    for (auto md : *memberList) {
-      QSharedPointer<MemberList> memberList = md->getSectionList(m_parent);
+      QSharedPointer<MemberList> list = md->getSectionList(m_parent);
 
-      if (memberList && lt == memberList->listType()) {
+      if (list != nullptr && lt == list->listType()) {
 
          MemberList ml(lt);
          ml.append(md);

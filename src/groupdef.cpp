@@ -272,10 +272,10 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
       mni->append(MemberInfo(md, md->protection(), md->virtualness(), false));
 
    } else {
-      QSharedPointer<MemberNameInfo> mni = QMakeShared<MemberNameInfo>(md->name());
-      mni->append(MemberInfo(md, md->protection(), md->virtualness(), false));
+      QSharedPointer<MemberNameInfo> tmp = QMakeShared<MemberNameInfo>(md->name());
+      tmp->append(MemberInfo(md, md->protection(), md->virtualness(), false));
 
-      allMemberNameInfoSDict->insert(mni->memberName(), mni);
+      allMemberNameInfoSDict->insert(tmp->memberName(), mni);
    }
 
    allMemberList->append(md);

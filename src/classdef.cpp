@@ -2891,7 +2891,6 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
          // new method name
          // create a deep copy of the list
 
-         QSharedPointer<ClassDef> self = sharedFrom(this);
          QSharedPointer<MemberNameInfo> newMni = QMakeShared<MemberNameInfo>(srcMni->memberName());
 
          // copy the member(s) from the category to this class

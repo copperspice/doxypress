@@ -2715,9 +2715,9 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
             for (  ; iter_end != data.end(); ++iter_end) {
                // search for end of block marker
                QChar ch       = *iter_end;
-               QChar prevCh_1 = iter_end[-1];
+               QChar prevCh_X = iter_end[-1];
 
-               if ((ch == '\\' || ch  == '@') && prevCh_1 != '\\' && prevCh_1 != '@') {
+               if ((ch == '\\' || ch  == '@') && prevCh_X != '\\' && prevCh_X != '@') {
 
                   QStringView s3 = QStringView(iter_end + 1, data.constEnd());
 
@@ -2957,7 +2957,7 @@ static QString processBlocks(QStringView str, int indent)
             }
 
             QString header = QStringView(iter_prev, iter_i - 1);
-            QString id     = extractTitleId(header, level);
+            id = extractTitleId(header, level);
 
             if (! header.isEmpty()) {
 
