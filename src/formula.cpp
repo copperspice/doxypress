@@ -282,13 +282,15 @@ void FormulaList::generateBitmaps(const QString &path)
                static int filterMask[] = {1, 2, 1, 2, 8, 2, 1, 2, 1};
                for (y = 0; y < srcImage.getHeight(); y++) {
                   for (x = 0; x < srcImage.getWidth(); x++) {
-                     int s = 0;
+                     int color = 0;
+
                      for (iy = 0; iy < 2; iy++) {
                         for (ix = 0; ix < 2; ix++) {
-                           s += srcImage.getPixel(x + ix - 1, y + iy - 1) * filterMask[iy * 3 + ix];
+                           color += srcImage.getPixel(x + ix - 1, y + iy - 1) * filterMask[iy * 3 + ix];
                         }
                      }
-                     filteredImage.setPixel(x, y, s);
+
+                     filteredImage.setPixel(x, y, color);
                   }
                }
 
@@ -325,18 +327,18 @@ void FormulaList::generateBitmaps(const QString &path)
                // save the result as a bitmap
                QString fileName = QString("form_%1.png").formatArg(pageNum);
 
-               QFile f(fileName);
+               QFile pngFile(fileName);
 
-               if (f.open(QIODevice::WriteOnly)) {
+               if (pngFile.open(QIODevice::WriteOnly)) {
 
                   // parameter 1 is used as a temporary hack to select the right color palette
                   QByteArray buffer = dstImage.convert(1);
 
-                  f.write(buffer);
-                  f.close();
+                  pngFile.write(buffer);
+                  pngFile.close();
 
                } else {
-                  err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
+                  err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), pngFile.error());
 
                }
             }

@@ -938,8 +938,7 @@ void FTVHelp::generateTreeViewInline(QTextStream &t, enum PageType outputType)
       t << theTranslator->trDetailLevel();
       t << " ";
 
-      int i;
-      for (i = 1; i <= depth; i++) {
+      for (int i = 1; i <= depth; i++) {
          t << "<span onclick=\"javascript:toggleLevel(" << i << ");\">" << i << "</span>";
       }
 

@@ -264,15 +264,15 @@ void CiteDict::generatePage() const
          doc += line + "\n";
       }
 
-      int i;
+      int pos;
 
       // determine text to use at the location of the @cite command
-      if (insideBib && (i = line.indexOf("name=\"CITEREF_")) != -1) {
+      if (insideBib && (pos = line.indexOf("name=\"CITEREF_")) != -1) {
          int j = line.indexOf("\">[");
          int k = line.indexOf("]</a>");
 
          if (j != -1 && k != -1) {
-            QString label  = line.mid(i + 14, j - i - 14);
+            QString label  = line.mid(pos + 14, j - pos - 14);
             QString number = line.mid(j + 2, k - j - 1);
 
             auto iter = m_entries.find(label);
@@ -291,7 +291,7 @@ void CiteDict::generatePage() const
    // 8. for latex copy the bib files to the output and let latex do this work
    if (generateLatex) {
       QString latexOutputDir = outputDir + QDir::separator() + latexOutput + QDir::separator();
-      int i = 0;
+      int count = 0;
 
       for (auto bibFile : citeDataList)  {
          // file can have multiple dots
@@ -305,8 +305,8 @@ void CiteDict::generatePage() const
          if (fi.exists()) {
             if (! bibFile.isEmpty()) {
                // suffix added to accomodate files with the same name
-               copyFile(bibFile, latexOutputDir + bibTmpFile + QString::number(i) + ".bib");
-               ++i;
+               copyFile(bibFile, latexOutputDir + bibTmpFile + QString::number(count) + ".bib");
+               ++count;
             }
 
          } else {
