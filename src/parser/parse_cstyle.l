@@ -1257,7 +1257,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <CliPropertyType>{ID}        {
       QString text = QString::fromUtf8(yytext);
-      addType( current );
+      addType(current);
       current->m_entryName = text;
    }
 
@@ -1286,7 +1286,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <CliPropertyType>.           {
       QString text = QString::fromUtf8(yytext);
-      addType( current );
+      addType(current);
       current->appendData(EntryKey::Member_Type, text);
    }
 
@@ -1911,11 +1911,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          BEGIN( CompoundName );
 
-      } else   {
-         // TODO is addType right? just copy/pasted
-
+      } else {
          QString text = QString::fromUtf8(yytext);
-         addType( current );
+         addType(current);
          current->m_entryName = text.trimmed();
       }
    }
@@ -1936,7 +1934,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
-         addType( current );
+         addType(current);
          current->appendData(EntryKey::Member_Type, " singleton ");
 
          current->setData(EntryKey::File_Name, yyFileName);
@@ -1946,10 +1944,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          BEGIN( CompoundName );
 
       } else   {
-         // TODO is addType right? just copy/pasted
-
          QString text = QString::fromUtf8(yytext);
-         addType( current );
+         addType(current);
          current->m_entryName = text.trimmed();
       }
    }
@@ -1974,7 +1970,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->m_traits.setTrait(Entry::Virtue::Optional,  isOptional);
          current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
 
-         addType( current );
+         addType(current);
          current->appendData(EntryKey::Member_Type, " interface");
 
          current->setData(EntryKey::File_Name, yyFileName);
@@ -1985,7 +1981,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          BEGIN( CompoundName );
 
       } else {
-         addType( current );
+         addType(current);
          current->m_entryName = text.trimmed();
       }
    }
@@ -2205,7 +2201,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Interface);
 
-      addType( current );
+      addType(current);
       current->appendData(EntryKey::Member_Type, " interface class");
 
       current->setData(EntryKey::File_Name, yyFileName);
@@ -2272,7 +2268,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
       current->m_traits.setTrait(Entry::Virtue::Inline, isInline);
 
-      addType( current );
+      addType(current);
 
       if (isConst) {
          current->appendData(EntryKey::Member_Type, " const");
@@ -2427,6 +2423,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       QString text = QString::fromUtf8(yytext);
 
       isTypedef = text.indexOf("typedef") != -1;
+
       bool isStrongEnum = text.indexOf("struct") != -1 || text.indexOf("class") != -1 || insideCSharp;
       bool isEnumStruct = text.indexOf("struct") != -1;
 
@@ -2441,7 +2438,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       }
 
-      addType( current );
+      addType(current);
       current->appendData(EntryKey::Member_Type, " enum");
 
       if (isStrongEnum) {
@@ -2783,7 +2780,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{SCOPENAME}{BN}*"<>"   {
       // guided template decl
       QString text = QString::fromUtf8(yytext);
-      addType( current );
+      addType(current);
       current->m_entryName = text.left(text.length() - 2);
    }
 
@@ -2795,7 +2792,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       lineCount();
 
-      addType( current );
+      addType(current);
       current->m_entryName = text;
       current->m_entryName = current->m_entryName.trimmed();
 
@@ -2920,7 +2917,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_entryName += text[0];
 
       if (roundCount > 0) {
-         roundCount--;
+         --roundCount;
       }
    }
 
@@ -3601,7 +3598,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       } else if (insideCSharp && text == "this") {
          // C# indexer
-         addType( current ) ;
+         addType(current);
          current->m_entryName = "this";
          BEGIN(CSIndexer);
 
@@ -4009,7 +4006,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       QString text = QString::fromUtf8(yytext);
 
       if (insideCli) {
-          addType( current );
+          addType(current);
           current->m_entryName = text;
       } else {
          REJECT;
@@ -4019,7 +4016,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>[*&]+         {
       QString text = QString::fromUtf8(yytext);
       current->m_entryName += text;
-      addType( current );
+      addType(current);
    }
 
 <FindMembers,MemberSpec,Function,NextSemi,EnumBaseType,BitFields,ReadInitializer,OldStyleArgs>";"{BN}*("/**"|"//!"|"/*!"|"///")"<" {
@@ -4055,7 +4052,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          startCommentBlock(true);
          BEGIN(DocLine);
 
-      } else    {
+      } else {
          startCommentBlock(false);
          BEGIN(DocBlock);
       }
@@ -4808,7 +4805,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <GCopySquare>.               {
       QString text = QString::fromUtf8(yytext);
-      addToOutput(s_squareGEntry, s_squareGEnum, text[0]);;
+      addToOutput(s_squareGEntry, s_squareGEnum, text[0]);
    }
 
 
@@ -4982,7 +4979,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>":"        {
       if (current->getData(EntryKey::Member_Type).isEmpty() && current->m_entryName == "enum")  {
-         // see bug 69041, C++11 style anon enum: 'enum : unsigned int {...}'
+         // C++11 style anon enum: 'enum : unsigned int {...}'
 
          current->section     = Entry::ENUM_SEC;
          current->m_entryName = "";
@@ -5033,7 +5030,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
 
       if (isTypedef && ! tmpType.startsWith("typedef ")) {
-       tmpType.prepend("typedef ");
+         tmpType.prepend("typedef ");
       }
 
       bool needNewCurrent = false;
@@ -5049,7 +5046,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             current->m_traits.clear();
          }
 
-         current->section     = Entry::VARIABLE_SEC;
+         current->section = Entry::VARIABLE_SEC;
 
          current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyBegLineNr;
@@ -5069,13 +5066,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             initEntry();
           }
 
-         current->stat = stat;         // the static attribute holds for all variables
+         current->stat = stat;         // static attribute holds for all variables
 
          current->m_entryName = "";
          current->setData(EntryKey::Member_Args,      "");
-         current->setData(EntryKey::Brief_Docs,        "");
+         current->setData(EntryKey::Brief_Docs,       "");
          current->setData(EntryKey::Main_Docs,        "");
-         current->setData(EntryKey::Initial_Value,      "");
+         current->setData(EntryKey::Initial_Value,    "");
          current->setData(EntryKey::Member_Bitfields, "");
 
          int i = oldType.length();
@@ -5384,7 +5381,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>"<"             {
       QString text = QString::fromUtf8(yytext);
 
-      addType( current );
+      addType(current);
       current->appendData(EntryKey::Member_Type, text);
 
       BEGIN( Sharp );
@@ -5458,7 +5455,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
 
             if (! isEnum) {
-               current->setData(EntryKey::Member_Type,   "@");           // enum marker
+               current->setData(EntryKey::Member_Type, "@");           // enum marker
             }
 
             current->setData(EntryKey::Member_Args, current->getData(EntryKey::Member_Args).simplified());
@@ -5490,14 +5487,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
 
          if (! isEnum) {
-            // enum marker (this might be Java-style enums
+            // enum marker, might be Java-style enum
             current->setData(EntryKey::Member_Type,   "@");
          }
 
          current->section = Entry::VARIABLE_SEC;
          current->m_entryName = current->m_entryName.trimmed();
 
-         current->setData(EntryKey::Member_Args,  current->getData(EntryKey::Member_Args).simplified());
+         current->setData(EntryKey::Member_Args, current->getData(EntryKey::Member_Args).simplified());
 
          // add enum value to the enum data type
          current_root->addSubEntry(current);
@@ -5506,7 +5503,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          if (! insideCSharp && ! insideJava && ! isStrong)  {
             // for C# and Java 1.5+ enum values always have to be explicitly qualified,
-            // same for C++11 style enums (enum class Name {})
+            // same for C++ enums (enum class Name {})
 
             current = QMakeShared<Entry>(*current);
 
@@ -5517,7 +5514,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current = QMakeShared<Entry>();
          initEntry();
 
-      }  else  {
+      } else {
          // probably a redundant ","
          current->reset();
          initEntry();
@@ -6447,7 +6444,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       // save the current documentation block
       s_briefBackup = current->getData(EntryKey::Brief_Docs);
-      s_mainBackup   = current->getData(EntryKey::Main_Docs);
+      s_mainBackup  = current->getData(EntryKey::Main_Docs);
 
       // go back to the saved state
       BEGIN(currentArgumentContext);
@@ -7092,7 +7089,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FuncQual>{ID}               {
-      // typically a K&R style C function
       QString text = QString::fromUtf8(yytext);
 
       if (insideCSharp && text == "where") {
@@ -7713,14 +7709,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <CompoundName>":"                      {
-      // for "class : public base {} var;" construct, see bug 608359
+      // for "class : public base {} var;" construct
       unput(':');
       BEGIN(ClassVar);
    }
 
 <CompoundName>";"                      {
-      current->m_entryName     = "";
-      current->section = Entry::EMPTY_SEC;
+      current->m_entryName = "";
+      current->section     = Entry::EMPTY_SEC;
 
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
@@ -7947,8 +7943,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <AlignAs>"("      {
-      roundCount=0;
-      BEGIN( AlignAsEnd );
+      roundCount = 0;
+      BEGIN(AlignAsEnd);
    }
 
 <AlignAs>\n       {
@@ -7957,11 +7953,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <AlignAs>.
 <AlignAsEnd>"("  {
-      roundCount++;
+      ++roundCount;
    }
 
 <AlignAsEnd>")"  {
-      if (--roundCount <0 ) {
+      if (--roundCount < 0) {
        BEGIN( lastAlignAsContext );
       }
    }
@@ -8101,7 +8097,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          if (current->section == Entry::ENUM_SEC) {
             // found "enum a b" -> variable
-            current->section = Entry::VARIABLE_SEC ;
+            current->section = Entry::VARIABLE_SEC;
          }
 
          current->appendData(EntryKey::Member_Type, " " + current->m_entryName);
@@ -8242,15 +8238,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <ClassVar>":"           {
       if (current->section == Entry::VARIABLE_SEC) {
-         // enum A B:2, see bug 748208
+         // enum A B:2
 
          current->appendData(EntryKey::Member_Bitfields, ":");
          current->setData(EntryKey::Member_Args,         "" );
          BEGIN(BitFields);
 
       } else if (current->section == Entry::ENUM_SEC) {
-         // enum E:2, see bug 313527,
-         // or C++11 style enum: 'E : unsigned int {...}'
+         // enum E:2 or C++11 style enum: 'E : unsigned int {...}'
 
          current->setData(EntryKey::Member_Args, "");
          BEGIN(EnumBaseType);
@@ -9174,6 +9169,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlock += text;
 
       handleCommentBlock(s_docBlock, current->getData(EntryKey::Brief_Docs).isEmpty());
+
       BEGIN( s_docBlockContext );
    }
 
@@ -10082,6 +10078,7 @@ static void parsePrototype(const QString &text)
    s_lexInit = true;
 
    current->m_entryName = current->m_entryName.trimmed();
+
    if (current->section == Entry::MEMBERDOC_SEC && current->getData(EntryKey::Member_Args).isEmpty()) {
       current->section = Entry::VARIABLEDOC_SEC;
    }

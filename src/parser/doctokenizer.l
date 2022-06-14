@@ -182,7 +182,7 @@ static int computeIndent(const QString &str, int length)
          indent = 0;
 
       } else {
-         indent++;
+         ++indent;
       }
    }
 
@@ -226,7 +226,7 @@ static void handleHtmlTag()
 
    if (len > 1 && tagText.at(1) == '/') {
       g_token->endTag = true;
-      startNamePos++;
+      ++startNamePos;
    }
 
    // parse the name portion
@@ -456,7 +456,7 @@ static QString stripEmptyLines(const QString &s)
             break;
          }
 
-         p++;
+         ++p;
       }
 
       if (p < end && s[p] == '\n') {
@@ -471,14 +471,14 @@ static QString stripEmptyLines(const QString &s)
    // skip trailing empty lines
    p = end - 1;
    if (p >= start && s.at(p) == '\n') {
-      p--;
+      --p;
    }
 
    while (p >= start) {
       QChar c;
 
       while ((c = s[p]) != 0  && (c == ' ' || c == '\t')) {
-         p--;
+         --p;
       }
 
       if (s[p] == '\n') {
@@ -487,7 +487,7 @@ static QString stripEmptyLines(const QString &s)
          break;
       }
 
-      p--;
+      --p;
    }
 
    return s.mid(start, end - start);
@@ -1662,7 +1662,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_IntRef>[A-Z_a-z0-9.:/#\-\+\(\)]+ {
       g_token->name = QString::fromUtf8(yytext);
       return TK_WORD;
-      }
+   }
 
 <St_IntRef>{BLANK}+"\"" {
       BEGIN(St_Ref2);
@@ -1684,12 +1684,12 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
 <St_SetScopeEnd>"<"    {
       g_token->name += QString::fromUtf8(yytext);
-      s_sharpCount++;
+      ++s_sharpCount;
    }
 
 <St_SetScopeEnd>">"    {
       g_token->name += QString::fromUtf8(yytext);
-      s_sharpCount--;
+      --s_sharpCount;
 
       if (s_sharpCount <= 0) {
          return TK_WORD;
@@ -1725,6 +1725,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       QString text      = QString::fromUtf8(yytext);
       g_token->name     = text.mid(1);
       g_token->paramDir = TokenInfo::Unspecified;
+
       return TK_COMMAND_SEL();
    }
 

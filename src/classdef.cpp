@@ -2470,7 +2470,8 @@ bool ClassDef::isLinkableInProject() const
       return m_templateMaster->isLinkableInProject();
 
    } else {
-      return ! name().isEmpty() && ! isArtificial() && ! isHidden() && ! isAnonymous() && protectionLevelVisible(m_prot) &&
+      return ! name().isEmpty() && ! isArtificial() && ! isHidden() && ! isAnonymous()
+             && protectionLevelVisible(m_prot) &&
              (! m_isLocal  || extractLocal)  && (hasDocumentation() || ! hideUndoc) &&
              (! m_isStatic || extractStatic) && ! isReference();
    }
@@ -2895,7 +2896,7 @@ void ClassDef::mergeCategory(QSharedPointer<ClassDef> category)
 
          // copy the member(s) from the category to this class
 
-         for (auto &mi : *srcMni )   {
+         for (auto &mi : *srcMni)  {
             Protection prot = mi.prot;
 
             // deepCopy() is in memberDef.cpp

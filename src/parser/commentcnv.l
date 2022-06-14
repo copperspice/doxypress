@@ -195,7 +195,7 @@ static inline void copyToOutput(const QString &s, int len)
          switch (s[i].unicode()) {
             case '\n':
                s_col = 0;
-               s_lineNr++;
+               ++s_lineNr;
                break;
 
             case '\t':
@@ -203,13 +203,12 @@ static inline void copyToOutput(const QString &s, int len)
                break;
 
             default:
-               s_col++;
+               ++s_col;
                break;
          }
       }
    }
 }
-
 
 static void startCondSection(const QString &sectId);
 static void endCondSection();
@@ -1058,12 +1057,12 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
    }
 
 <CondLine>. {
-      // forgot section id?
+      // forgot section id
       QString text = QString::fromUtf8(yytext);
       handleCondSectionId(" ");
 
       if (text[0] == '\n') {
-         s_lineNr++;
+         ++s_lineNr;
       }
    }
 

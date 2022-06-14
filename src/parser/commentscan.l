@@ -4076,8 +4076,8 @@ static bool handleCopyBrief(const QString &str, const QStringList &list)
    if (current->getData(EntryKey::Brief_Docs).isEmpty() && current->getData(EntryKey::Main_Docs).isEmpty()) {
 
       // if we do not have a brief or detailed description yet,
-      // then the @copybrief should end up in the brief description.
-      // otherwise it will be copied inline (see bug691315 & bug700788)
+      // then the @copybrief should end up in the brief description,
+      // otherwise it will be copied inline
 
       setOutput(OutputBrief);
    }

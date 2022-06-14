@@ -270,17 +270,22 @@ void FormulaList::generateBitmaps(const QString &path)
                uint i, x, y, ix, iy;
                f.read(data, imageX * imageY * 3);
 
-               Image srcImage(imageX, imageY), filteredImage(imageX, imageY), dstImage(imageX / 4, imageY / 4);
+               Image srcImage(imageX, imageY);
+               Image filteredImage(imageX, imageY);
+               Image dstImage(imageX / 4, imageY / 4);
+
                uchar *ps = srcImage.getData();
 
                // convert image to black (1) and white (0) index.
                for (i = 0; i < imageX * imageY; i++) {
-                  *ps++ = (data[i * 3] == 0 ? 1 : 0);
+                  *ps = (data[i * 3] == 0 ? 1 : 0);
+                  ++ps;
                }
 
                // apply a simple box filter to the image
                static int filterMask[] = {1, 2, 1, 2, 8, 2, 1, 2, 1};
                for (y = 0; y < srcImage.getHeight(); y++) {
+
                   for (x = 0; x < srcImage.getWidth(); x++) {
                      int color = 0;
 
