@@ -2428,6 +2428,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       isTypedef = text.indexOf("typedef") != -1;
       bool isStrongEnum = text.indexOf("struct") != -1 || text.indexOf("class") != -1 || insideCSharp;
+      bool isEnumStruct = text.indexOf("struct") != -1;
 
       if (insideJava) {
          current->section = Entry::CLASS_SEC;
@@ -2445,6 +2446,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       if (isStrongEnum) {
          current->m_traits.setTrait(Entry::Virtue::Strong);
+      }
+
+      if (isEnumStruct) {
+         current->m_traits.setTrait(Entry::Virtue::Strong);
+         current->m_traits.setTrait(Entry::Virtue::EnumStruct);
       }
 
       current->setData(EntryKey::File_Name, yyFileName);

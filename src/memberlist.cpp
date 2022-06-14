@@ -427,6 +427,16 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   }
 
                   ol.writeString("enum ");
+
+                  if (md->getLanguage() == SrcLangExt_Cpp && md->isStrong()) {
+                     if (md->isEnumStruct()) {
+                        ol.writeString("struct ");
+
+                     } else {
+                        ol.writeString("class ");
+
+                     }
+                  }
                   ol.insertMemberAlign();
                   md->writeEnumDeclaration(ol, cd, nd, fd, gd);
 

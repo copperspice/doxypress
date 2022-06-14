@@ -169,6 +169,7 @@ class MemberDef : public Definition
    bool isRetain() const;
    bool isWeak() const;
    bool isStrong() const;
+   bool isEnumStruct() const;
    bool isUnretained() const;
    bool isNew() const;
    bool isSealed() const;

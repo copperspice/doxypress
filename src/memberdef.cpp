@@ -1388,7 +1388,18 @@ bool MemberDef::isBriefSectionVisible() const
 
 QString MemberDef::getDeclType() const
 {
+   const SrcLangExt lang = getLanguage();
+
    QString retval(m_impl->m_type);
+
+   if (lang == SrcLangExt_Cpp && isEnumerate() && isStrong())  {
+      if (isEnumStruct()) {
+         retval += " struct";
+
+      } else {
+         retval += " class";
+      }
+   }
 
    if (m_impl->m_memberType == MemberDefType::Typedef) {
       retval.prepend("typedef ");
@@ -2872,6 +2883,15 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
          }
 
       } else {
+         if (lang == SrcLangExt_Cpp) {
+            if (isEnumStruct())  {
+               ldef.prepend("struct ");
+
+            } else if (isStrong()) {
+               ldef.prepend("class ");
+            }
+         }
+
          ldef.prepend("enum ");
       }
 
@@ -4920,6 +4940,11 @@ bool MemberDef::isWeak() const
 bool MemberDef::isStrong() const
 {
    return m_impl->m_memberTraits.hasTrait(Entry::Virtue::Strong);
+}
+
+bool MemberDef::isEnumStruct() const
+{
+   return m_impl->m_memberTraits.hasTrait(Entry::Virtue::EnumStruct);
 }
 
 bool MemberDef::isStrongEnumValue() const

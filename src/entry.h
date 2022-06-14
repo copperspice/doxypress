@@ -178,6 +178,7 @@ class Entry : public EnableSharedFromThis
       Ref,
       SealedClass,
       Struct,
+      EnumStruct,
       Template,
       Union,
       Value,
