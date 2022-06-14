@@ -211,6 +211,8 @@ void LatexDocVisitor::visit(DocWhiteSpace *w)
 
 void LatexDocVisitor::visit(DocSymbol *s)
 {
+   static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+
    if (m_hide) {
       return;
    }
@@ -220,10 +222,20 @@ void LatexDocVisitor::visit(DocSymbol *s)
    if (! res.isEmpty()) {
 
       if (((s->symbol() == DocSymbol::Sym_lt) || (s->symbol() == DocSymbol::Sym_Less)) && (! m_insidePre)) {
-         m_t << "$<$";
+         if (pdfHyperlinks) {
+            m_t << "\\texorpdfstring{$<$}{<}";
+
+         } else {
+            m_t << "$<$";
+         }
 
       } else if (((s->symbol() == DocSymbol::Sym_gt) || (s->symbol() == DocSymbol::Sym_Greater)) && (! m_insidePre)) {
-         m_t << "$>$";
+         if (pdfHyperlinks) {
+            m_t << "\\texorpdfstring{$>$}{>}";
+
+         } else {
+            m_t << "$>$";
+         }
 
       } else {
          m_t << res;
