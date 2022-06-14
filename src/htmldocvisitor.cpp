@@ -2507,7 +2507,7 @@ void HtmlDocVisitor::visitPre(DocHtmlBlockQuote *b)
       m_t << "<blockquote" << getDirHtmlClassOfNode(textDirection(b), "doxtable") << ">\n";
    } else {
       m_t << "<blockquote" << getDirHtmlClassOfNode(textDirection(b))
-          << htmlAttribsToString(b->attribs()) << ">\n";
+          << attrs << ">\n";
    }
 }
 
