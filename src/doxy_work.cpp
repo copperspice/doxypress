@@ -4828,7 +4828,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         md = item;
 
                         // merge argument lists
-                        mergeArguments(mdTempArgList, root->argList, ! root->proto);
+                        mergeArguments(mdTempArgList, root->argList, ! root->getData(EntryKey::Main_Docs).isEmpty());
 
                         // merge documentation
                         if (item->documentation().isEmpty() && ! root->getData(EntryKey::Main_Docs).isEmpty()) {
@@ -6333,10 +6333,10 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
    ArgumentList &mdArgList = md->getArgumentList();
 
    if (! argList.listEmpty()) {
-      mergeArguments(mdArgList, argList, ! root->proto);
+      mergeArguments(mdArgList, argList, ! root->getData(EntryKey::Main_Docs).isEmpty());
 
    } else if (matchArguments2(md->getOuterScope(), md->getFileDef(), mdArgList, rscope, rfd, root->argList, true)) {
-      mergeArguments(mdArgList, root->argList, ! root->proto);
+      mergeArguments(mdArgList, root->argList, ! root->getData(EntryKey::Main_Docs).isEmpty());
 
    }
 
