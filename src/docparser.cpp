@@ -3290,8 +3290,9 @@ DocDotFile::DocDotFile(DocNode *parent, const QString &name, const QString &cont
    m_parent = parent;
 }
 
-void DocDotFile::parse()
+bool DocDotFile::parse()
 {
+   bool ok = false;
    defaultHandleTitleAndSize(CMD_DOTFILE, this, m_children, m_width, m_height);
 
    bool ambig;
@@ -3304,6 +3305,7 @@ void DocDotFile::parse()
 
    if (fd) {
       m_file = fd->getFilePath();
+      ok = true;
 
    } else if (ambig) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dot file name %s is ambiguous.\n"
@@ -3313,6 +3315,8 @@ void DocDotFile::parse()
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dot file %s was not found "
                   "in any of the paths specified via DOTFILE_DIRS", csPrintable(m_name));
    }
+
+   return ok;
 }
 
 DocMscFile::DocMscFile(DocNode *parent, const QString &name, const QString &context) :
@@ -3321,8 +3325,9 @@ DocMscFile::DocMscFile(DocNode *parent, const QString &name, const QString &cont
    m_parent = parent;
 }
 
-void DocMscFile::parse()
+bool DocMscFile::parse()
 {
+   bool ok = false;
    defaultHandleTitleAndSize(CMD_MSCFILE, this, m_children, m_width, m_height);
 
    bool ambig;
@@ -3335,6 +3340,7 @@ void DocMscFile::parse()
 
    if (fd) {
       m_file = fd->getFilePath();
+      ok = true;
 
    } else if (ambig) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Included msc file name %s is ambiguous.\n"
@@ -3345,6 +3351,8 @@ void DocMscFile::parse()
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Included msc file %s was not found "
                   "in any of the paths specified via MSCFILE DIRS", csPrintable(m_name));
    }
+
+   return ok;
 }
 
 DocDiaFile::DocDiaFile(DocNode *parent, const QString &name, const QString &context) :
@@ -3353,8 +3361,9 @@ DocDiaFile::DocDiaFile(DocNode *parent, const QString &name, const QString &cont
    m_parent = parent;
 }
 
-void DocDiaFile::parse()
+bool DocDiaFile::parse()
 {
+   bool ok = false;
    defaultHandleTitleAndSize(CMD_DIAFILE, this, m_children, m_width, m_height);
 
    bool ambig;
@@ -3367,6 +3376,7 @@ void DocDiaFile::parse()
 
    if (fd) {
       m_file = fd->getFilePath();
+      ok = true;
 
    } else if (ambig) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dia file name %s is ambiguous.\n"
@@ -3377,6 +3387,8 @@ void DocDiaFile::parse()
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Included dia file %s was not found "
                   "in any of the paths specified via DIAFILE DIRS", csPrintable(m_name));
    }
+
+   return ok;
 }
 
 DocImage::DocImage(DocNode *parent, HtmlAttribList attribs, const QString &name, Type t,
@@ -5990,8 +6002,14 @@ void DocPara::handleFile(const QString &cmdName)
    QString name = g_token->name;
 
    T *df = new T(this, name, s_context);
-   m_children.append(df);
-   df->parse();
+
+   if (df->parse()) {
+    m_children.append(df);
+
+   } else {
+    delete df;
+
+   }
 }
 
 void DocPara::handleLink(const QString &cmdName, bool isJavaLink)

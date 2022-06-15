@@ -1295,7 +1295,7 @@ class DocDotFile : public CompAccept<DocDotFile>, public DocNode
  public:
    DocDotFile(DocNode *parent, const QString &name, const QString &context);
 
-   void parse();
+   bool parse();
 
    Kind kind() const  override {
       return Kind_DotFile;
@@ -1347,7 +1347,7 @@ class DocMscFile : public CompAccept<DocMscFile>, public DocNode
 {
  public:
    DocMscFile(DocNode *parent, const QString &name, const QString &context);
-   void parse();
+   bool parse();
 
    Kind kind() const override {
       return Kind_MscFile;
@@ -1400,7 +1400,7 @@ class DocDiaFile : public CompAccept<DocDiaFile>, public DocNode
  public:
    DocDiaFile(DocNode *parent, const QString &name, const QString &context);
 
-   void parse();
+   bool parse();
 
    Kind kind() const override {
       return Kind_DiaFile;
