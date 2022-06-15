@@ -2493,7 +2493,7 @@ bool ClassDef::isVisibleInHierarchy() const
    static const bool hideUndocClasses = Config::getBool("hide-undoc-classes");
    static const bool extractStatic    = Config::getBool("extract-static");
 
-   bool retval =  (allExternals || hasNonReferenceSuperClass());
+   bool retval =  ((allExternals && ! isArtificial()) || hasNonReferenceSuperClass());
 
    if (retval && ! isAnonymous() && protectionLevelVisible(m_prot)) {
 

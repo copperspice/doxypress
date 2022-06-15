@@ -5861,7 +5861,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                   // see bug531637 for an example where this would otherwise hang the program
 
                   if (baseClassTypeDef == 0) {
-                     findTemplateInstanceRelation(root, context, baseClass, templSpec, templateNames, isArtificial);
+                     findTemplateInstanceRelation(root, context, baseClass, templSpec, templateNames, baseClass->isArtificial());
                   }
 
                } else if (mode == DocumentedOnly || mode == Undocumented) {
