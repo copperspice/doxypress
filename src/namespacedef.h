@@ -112,7 +112,9 @@ class NamespaceDef : public Definition
    void addInnerCompound(QSharedPointer<Definition> d) override;
 
    void addListReferences();
+
    void setFileName(const QString &fn);
+   void setName(const QString &name) override;
 
    bool subGrouping() const {
       return m_subGrouping;
@@ -140,6 +142,8 @@ class NamespaceDef : public Definition
    const NamespaceSDict &getNamespaceSDict() const {
       return m_namespaceSDict;
    }
+
+   bool isAnonymous() const;
 
    QString title() const;
    QString compoundTypeString() const;
@@ -169,6 +173,7 @@ class NamespaceDef : public Definition
    bool m_subGrouping;
    bool m_isPublished;
    bool m_inlineNS;
+   bool m_isAnonymous;
 
    QString  fileName;
    FileList files;

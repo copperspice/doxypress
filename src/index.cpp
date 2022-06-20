@@ -1614,7 +1614,7 @@ static void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToInd
 static void writeNamespaceTree(const NamespaceSDict &nsDict, FTVHelp *ftv, bool rootOnly, bool showClasses, bool addToIndex)
 {
    for (auto &nd : nsDict) {
-      if (nd->localName().indexOf('@') == -1 && (! rootOnly || nd->getOuterScope() == Doxy_Globals::globalScope)) {
+      if (! nd->isAnonymous() && (! rootOnly || nd->getOuterScope() == Doxy_Globals::globalScope)) {
 
          bool hasChildren = namespaceHasVisibleChild(nd, showClasses);
          bool isLinkable  = nd->isLinkableInProject();

@@ -62,10 +62,18 @@ NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &nam
       m_type = NAMESPACE;
 
    }
+
+   m_isAnonymous = name.isEmpty() || name.startsWith('@') || name.contains("::@");
 }
 
 NamespaceDef::~NamespaceDef()
 {
+}
+
+void NamespaceDef::setName(const QString &name)
+{
+   m_isAnonymous = name.isEmpty() || name.startsWith('@') || name.contains("::@");
+   Definition::setName(name);
 }
 
 void NamespaceDef::setFileName(const QString &fn)
@@ -1105,6 +1113,11 @@ void NamespaceDef::writeMemberDocumentation(OutputList &ol, MemberListType lt, c
    }
 }
 
+bool NamespaceDef::isAnonymous() const
+{
+   return m_isAnonymous;
+}
+
 bool NamespaceDef::isLinkableInProject() const
 {
   static const bool extractAnonNameSpace = Config::getBool("extract-anon-namespaces");
@@ -1170,7 +1183,7 @@ QString NamespaceDef::title() const
 QString NamespaceDef::compoundTypeString() const
 {
    SrcLangExt lang = getLanguage();
-   QString retval;
+   QString retval = "namespace";
 
    if (lang == SrcLangExt_Java) {
       retval = "package";

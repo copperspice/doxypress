@@ -8348,7 +8348,7 @@ QChar charToUpper(const QString &s, int index)
 bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClasses)
 {
    for (auto &item : nd->getNamespaceSDict()) {
-      if (item->isLinkableInProject() && item->localName().indexOf('@') == -1) {
+      if (item->isLinkableInProject() && ! item->isAnonymous()) {
          return true;
 
       } else if (namespaceHasVisibleChild(item, includeClasses)) {

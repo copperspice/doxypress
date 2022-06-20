@@ -823,7 +823,8 @@ MemberDef::MemberDef(const QString &defFileName, int defLine, int defColumn, con
 
    m_usingDeclaration = false;
 
-   m_isAnonymous = memberName.isEmpty() || memberName.startsWith('@') || memberName.contains("::@");
+   QString name  = removeRedundantWhiteSpace(memberName);
+   m_isAnonymous = name.isEmpty() || name.startsWith('@') || name.contains("::@");
 }
 
 MemberDef::MemberDef(const MemberDef &md)
@@ -1002,7 +1003,7 @@ QString MemberDef::getOutputFileBase() const
       }
 
    } else if (m_impl->nspace && (m_impl->nspace->isLinkable() ||
-         m_impl->nspace->name().isEmpty() || m_impl->nspace->name().startsWith('@'))) {
+         m_impl->nspace->name().isEmpty() || m_impl->nspace->isAnonymous())) {
       baseName = m_impl->nspace->getOutputFileBase();
 
    } else if (m_impl->fileDef) {

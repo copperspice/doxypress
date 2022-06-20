@@ -1403,7 +1403,7 @@ static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
 static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
 {
    for (const auto &nd : nl) {
-      if (! nd->isHidden() && nd->name().indexOf('@') == -1) {
+      if (! nd->isHidden() && ! nd->isAnonymous()) {
          // skip anonymous scopes
          t << "    <innernamespace refid=\"" << nd->getOutputFileBase()
            << "\"" << (nd->isInlineNS() ? " inline=\"yes\"" : "")

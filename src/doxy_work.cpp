@@ -3586,7 +3586,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    QString def;
 
    // determine the definition of the global variable
-   if (nd != nullptr && ! nd->name().isEmpty() && ! nd->name().startsWith('@') && ! hideScopeNames)   {
+   if (nd != nullptr && ! nd->isAnonymous() && ! hideScopeNames)   {
       // variable is inside a namespace, so put the scope before the name
 
       SrcLangExt lang = nd->getLanguage();
@@ -3736,7 +3736,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    addMemberToGroups(root, md);
 
    md->setRefItems(root->m_specialLists);
-   if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
+
+   if (nd != nullptr && ! nd->isAnonymous()) {
       md->setNamespace(nd);
       nd->insertMember(md);
    }
@@ -4973,7 +4974,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md->enableReferencesRelation(root->referencesRelation);
                md->setRefItems(root->m_specialLists);
 
-               if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
+               if (nd != nullptr && ! nd->isAnonymous()) {
                   // add member to namespace
                   md->setNamespace(nd);
                   nd->insertMember(md);
@@ -8087,7 +8088,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          mnsd = &Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
+      } else if (nd != nullptr) {
          // found enum inside namespace
 
          mnsd = &Doxy_Globals::functionNameSDict;
@@ -8139,7 +8140,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
             baseType.prepend(" : ");
          }
 
-         if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
+         if (nd != nullptr) {
 
             if (isRelated || hideScopeNames) {
                md->setDefinition(name + baseType);
@@ -8155,7 +8156,7 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          // even if we have already added the enum to a namespace, we still
          // also want to add it to other appropriate places such as file or class
 
-         if (isGlobal && (nd == nullptr || (! nd->name().isEmpty() && ! nd->name().startsWith('@')))) {
+         if (isGlobal && (nd == nullptr || ! nd->isAnonymous())) {
 
             if (! defSet) {
                md->setDefinition(name + baseType);
@@ -8283,7 +8284,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
          mnsd = &Doxy_Globals::memberNameSDict;
          isGlobal = false;
 
-      } else if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
+      } else if (nd != nullptr && ! nd->isAnonymous()) {
          // found enum inside namespace
 
          mnsd = &Doxy_Globals::functionNameSDict;
@@ -8348,11 +8349,12 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                               child->getData(EntryKey::Member_Args), QString(), child->protection, Specifier::Normal,
                               child->stat, Relationship::Member, MemberDefType::EnumValue, ArgumentList(), ArgumentList());
 
+                           QSharedPointer<NamespaceDef> tmp = md->getNamespaceDef();
                            if (md->getClassDef()) {
                               fmd->setMemberClass(md->getClassDef());
 
-                           } else if (md->getNamespaceDef()) {
-                              fmd->setNamespace(md->getNamespaceDef());
+                           } else if (tmp != nullptr && (tmp->isLinkable() || tmp->isAnonymous())) {
+                              fmd->setNamespace(tmp);
 
                            } else if (md->getFileDef()) {
                               fmd->setFileDef(md->getFileDef());
@@ -8425,7 +8427,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                               if (fmd->isEnumValue() && fmd->getOuterScope() == md->getOuterScope()) {
                                  // in same scope
 
-                                 if (nd && ! nd->name().isEmpty() && ! nd->name().startsWith('@')) {
+                                 if (nd != nullptr && ! nd->isAnonymous()) {
                                     QSharedPointer<NamespaceDef> fnd = fmd->getNamespaceDef();
 
                                     if (fnd == nd) {
