@@ -1218,7 +1218,7 @@ void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPo
    QString n   = name();
 
    if (! hideScopeNames) {
-      if (m_impl->enumScope && m_impl->livesInsideEnum) {
+      if (m_impl->enumScope && m_impl->livesInsideEnum && getGroupDef() != nullptr) {
          n.prepend(m_impl->enumScope->displayName() + sep);
       }
 
@@ -2896,13 +2896,13 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
          ldef.prepend("enum ");
       }
 
-   } else if (isEnumValue() && ! ldef.isEmpty()) {
+   } else if (isEnumValue()) {
 
       if (ldef.at(0) == '@') {
          ldef = ldef.mid(2);
       }
 
-   } else if (isFunction()) {
+   } else if (isFunction() && ! isObjCMethod()) {
       title += "()";
 
    }
