@@ -8318,23 +8318,21 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                      bool isStrong   = ptrEntry->m_traits.hasTrait(Entry::Virtue::Strong);
 
                      if (isJavaLike || isStrong) {
-                        // Unlike C/C++ enums, C++11, C# & Java enum values are only
-                        // visible inside the enum scope, must create them here and only add them to the enum
 
+                        // strong enum values are only visible inside the enum scope
+                        // create here as a child, add them to the enum
 
                         QSharedPointer<Entry> child = e->entry();
-                        QString qualifiedName = substitute(ptrEntry->m_entryName,"::",".");
+                        QString qualifiedName = ptrEntry->m_entryName;
 
-                        if (! scope.isEmpty() && ! ptrEntry->m_tagInfo.isEmpty()) {
-                           qualifiedName = substitute(scope,"::",".") + "." + qualifiedName;
+                        if (isJavaLike) {
+                           qualifiedName = substitute(qualifiedName, ".", "::");
                         }
 
-                        // TODO: add function to get canonical representation
+                        if (md->qualifiedName() == qualifiedName) {
 
-                        if (substitute(md->qualifiedName(), "::", ".") == qualifiedName) {
-
-                           // enum value scope matches that of the enum
-                           // be less strict for tag files as members can have incomplete scope
+                           // enum value scope matches the enum class
+                           // less strict for tag files since members can have incomplete scope
 
                            QString fileName = child->getData(EntryKey::File_Name);
 
