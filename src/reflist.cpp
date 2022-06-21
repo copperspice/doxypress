@@ -176,12 +176,19 @@ void RefList::generatePage()
    }
 
    //
-   QString doc;
-   doc += "<dl class=\"reflist\">";
+   QString doc = "<dl class=\"reflist\">";
+
+   int cnt = 0;
 
    for (auto list : titleMap) {
 
       RefItem &item = list.first();
+
+      if (item.name.isEmpty())  {
+         continue;
+      }
+
+      ++cnt;
 
       doc += " <dt>";
       doc += "\n";
@@ -234,7 +241,9 @@ void RefList::generatePage()
    }
 
    doc += "</dl>\n";
+   if (cnt > 0) {
 
-   addRelatedPage(m_listName, m_pageTitle, doc, m_fileName, 1, 1, QVector<ListItemInfo>(),
+      addRelatedPage(m_listName, m_pageTitle, doc, m_fileName, 1, 1, QVector<ListItemInfo>(),
                   QSharedPointer<GroupDef>(), TagInfo(), true);
+   }
 }
