@@ -85,6 +85,7 @@ void FormulaList::generateBitmaps(const QString &path)
       t << "\\usepackage[utf8]{inputenc}\n";     // some older distributions with newunicode package 1.1 need this option
 
       writeExtraLatexPackages(t);
+      writeLatexSpecialFormulaChars(t);
 
       t << "\\pagestyle{empty}\n";
       t << "\\begin{document}\n";

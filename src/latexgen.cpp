@@ -702,6 +702,7 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
      "\n";
 
    writeExtraLatexPackages(t_stream);
+   writeLatexSpecialFormulaChars(t_stream);
 
    // Hyperlinks
    if (pdfHyperlinks) {
