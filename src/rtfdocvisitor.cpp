@@ -795,7 +795,7 @@ void RTFDocVisitor::visitPre(DocAutoList *l)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocAutoList)}\n");
 
-   m_t << "{" << endl;
+   m_t << "{\n";
    rtf_listItemInfo[m_indentLevel].isEnum = l->isEnumList();
    rtf_listItemInfo[m_indentLevel].number = 1;
    m_lastIsPara = false;
@@ -829,17 +829,17 @@ void RTFDocVisitor::visitPre(DocAutoListItem *)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocAutoListItem)}\n");
    if (!m_lastIsPara) {
-      m_t << "\\par" << endl;
+      m_t << "\\par\n";
    }
 
    m_t << rtf_Style_Reset;
    if (rtf_listItemInfo[m_indentLevel].isEnum) {
-      m_t << getStyle("ListEnum") << endl;
+      m_t << getStyle("ListEnum") << "\n";
       m_t << rtf_listItemInfo[m_indentLevel].number << ".\\tab ";
       rtf_listItemInfo[m_indentLevel].number++;
 
    } else {
-      m_t << getStyle("ListBullet") << endl;
+      m_t << getStyle("ListBullet") << "\n";
    }
 
    incIndentLevel();
@@ -885,7 +885,7 @@ void RTFDocVisitor::visitPre(DocRoot *r)
       incIndentLevel();
    }
 
-   m_t << "{" << rtf_Style["BodyText"].m_reference << endl;
+   m_t << "{" << rtf_Style["BodyText"].m_reference << "\n";
 }
 
 void RTFDocVisitor::visitPost(DocRoot *r)
@@ -917,14 +917,14 @@ void RTFDocVisitor::visitPre(DocSimpleSect *s)
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSimpleSect)}\n");
 
    if (! m_lastIsPara) {
-      m_t << "\\par" << endl;
+      m_t << "\\par\n";
    }
 
    m_t << "{";
 
    // start desc
 
-   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
+   m_t << "{" << rtf_Style["Heading5"].m_reference << "\n";
 
    switch (s->type()) {
       case DocSimpleSect::See:
@@ -1061,7 +1061,7 @@ void RTFDocVisitor::visitPre(DocSimpleList *)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSimpleSect)}\n");
 
-   m_t << "{" << endl;
+   m_t << "{\n";
    rtf_listItemInfo[m_indentLevel].isEnum = false;
    m_lastIsPara = false;
 }
@@ -1088,7 +1088,8 @@ void RTFDocVisitor::visitPre(DocSimpleListItem *)
       return;
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSimpleListItem)}\n");
-   m_t << "\\par" << rtf_Style_Reset << getStyle("ListBullet") << endl;
+
+   m_t << "\\par" << rtf_Style_Reset << getStyle("ListBullet") << "\n";
    m_lastIsPara = false;
    incIndentLevel();
 }
@@ -1106,10 +1107,12 @@ void RTFDocVisitor::visitPre(DocSection *s)
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSection)}\n");
    if (!m_lastIsPara) {
-      m_t << "\\par" << endl;
+      m_t << "\\par\n" ;
    }
-   m_t << "{\\bkmkstart " << rtfFormatBmkStr(s->file() + "_" + s->anchor()) << "}" << endl;
-   m_t << "{\\bkmkend " << rtfFormatBmkStr(s->file() + "_" + s->anchor()) << "}" << endl;
+
+   m_t << "{\\bkmkstart " << rtfFormatBmkStr(s->file() + "_" + s->anchor()) << "}\n";
+   m_t << "{\\bkmkend " << rtfFormatBmkStr(s->file() + "_" + s->anchor()) << "}\n";
+
    m_t << "{{" // start section
        << rtf_Style_Reset;
 
@@ -1119,15 +1122,16 @@ void RTFDocVisitor::visitPre(DocSection *s)
    heading = QString("Heading%1").formatArg(level);
 
    // set style
-   m_t << rtf_Style[heading].m_reference << endl;
+   m_t << rtf_Style[heading].m_reference << "\n";
 
    // make table of contents entry
 
    filter(s->title());
-   m_t << endl << "\\par" << "}" << endl;
+
+   m_t << "\n\\par}\n";
    m_t << "{\\tc\\tcl" << level << " \\v ";
    filter(s->title());
-   m_t << "}" << endl;
+   m_t << "}\n";
    m_lastIsPara = true;
 }
 
@@ -1147,7 +1151,8 @@ void RTFDocVisitor::visitPre(DocHtmlList *l)
       return;
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlList)}\n");
-   m_t << "{" << endl;
+
+   m_t << "{\n";
    rtf_listItemInfo[m_indentLevel].isEnum = l->type() == DocHtmlList::Ordered;
    rtf_listItemInfo[m_indentLevel].number = 1;
    m_lastIsPara = false;
@@ -1169,14 +1174,14 @@ void RTFDocVisitor::visitPre(DocHtmlListItem *)
       return;
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlListItem)}\n");
-   m_t << "\\par" << endl;
+   m_t << "\\par\n";
    m_t << rtf_Style_Reset;
    if (rtf_listItemInfo[m_indentLevel].isEnum) {
-      m_t << getStyle("ListEnum") << endl;
+      m_t << getStyle("ListEnum") << "\n";
       m_t << rtf_listItemInfo[m_indentLevel].number << ".\\tab ";
       rtf_listItemInfo[m_indentLevel].number++;
    } else {
-      m_t << getStyle("ListBullet") << endl;
+      m_t << getStyle("ListBullet") << "\n";
    }
    incIndentLevel();
    m_lastIsPara = false;
@@ -1218,7 +1223,7 @@ void RTFDocVisitor::visitPre(DocHtmlDescTitle *)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlDescTitle)}\n");
 
-   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
+   m_t << "{" << rtf_Style["Heading5"].m_reference << "\n";
    m_lastIsPara = false;
 }
 
@@ -1262,7 +1267,7 @@ void RTFDocVisitor::visitPre(DocHtmlTable *t)
    }
 
    if (! m_lastIsPara) {
-      m_t << "\\par" << endl;
+      m_t << "\\par\n";
    }
    m_lastIsPara = true;
 
@@ -1271,8 +1276,8 @@ void RTFDocVisitor::visitPre(DocHtmlTable *t)
       m_t << "\\pard \\qc \\b";
 
       if (!c ->file().isEmpty()) {
-         m_t << "{\\bkmkstart " << rtfFormatBmkStr(stripPath(c->file()) + "_" + c->anchor())   << "}" << endl;
-         m_t << "{\\bkmkend "   << rtfFormatBmkStr(stripPath(c->file())   + "_" + c->anchor()) << "}" << endl;
+         m_t << "{\\bkmkstart " << rtfFormatBmkStr(stripPath(c->file()) + "_" + c->anchor()) << "}\n";
+         m_t << "{\\bkmkend "   << rtfFormatBmkStr(stripPath(c->file()) + "_" + c->anchor()) << "}\n";
       }
 
       m_t << "{Table \\field\\flddirty{\\*\\fldinst { SEQ Table \\\\*Arabic }}{\\fldrslt {\\noproof 1}} ";
@@ -1316,7 +1321,7 @@ void RTFDocVisitor::visitPre(DocHtmlRow *r)
        "\\trbrdrb\\brdrs\\brdrw10 "
        "\\trbrdrr\\brdrs\\brdrw10 "
        "\\trbrdrh\\brdrs\\brdrw10 "
-       "\\trbrdrv\\brdrs\\brdrw10 " << endl;
+       "\\trbrdrv\\brdrs\\brdrw10 " << "\n";
 
    for (i = 0; i < r->numCells(); i++) {
       if (r->isHeading()) {
@@ -1327,9 +1332,10 @@ void RTFDocVisitor::visitPre(DocHtmlRow *r)
           "\\clbrdrb\\brdrs\\brdrw10 "
           "\\clbrdrr \\brdrs\\brdrw10 "
           "\\cltxlrtb "
-          "\\cellx" << ((i + 1)*columnWidth) << endl;
+             "\\cellx" << ((i + 1)*columnWidth) << "\n";
    }
-   m_t << "\\pard \\widctlpar\\intbl\\adjustright" << endl;
+
+   m_t << "\\pard \\widctlpar\\intbl\\adjustright" << "\n";
    m_lastIsPara = false;
 }
 
@@ -1651,10 +1657,11 @@ void RTFDocVisitor::visitPre(DocSecRefList *)
 
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSecRefList)}\n");
 
-   m_t << "{" << endl;
+   m_t << "{\n";
    incIndentLevel();
-   m_t << rtf_Style_Reset << getStyle("LatexTOC") << endl;
-   m_t << "\\par" << endl;
+
+   m_t << rtf_Style_Reset << getStyle("LatexTOC") << "\n";
+   m_t << "\\par\n";
    m_lastIsPara = true;
 }
 
@@ -1705,13 +1712,13 @@ void RTFDocVisitor::visitPre(DocParamSect *s)
    m_t << "{";
 
    if (! m_lastIsPara) {
-      m_t << "\\par" << endl;
+      m_t << "\\par\n";
    }
 
    // start bold
    // m_t << "{\\b ";
 
-   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
+   m_t << "{" << rtf_Style["Heading5"].m_reference << "\n";
 
    switch (s->type()) {
       case DocParamSect::Param:
@@ -1735,7 +1742,7 @@ void RTFDocVisitor::visitPre(DocParamSect *s)
    }
 
    m_t << "\\par";
-   m_t << "}" << endl;
+   m_t << "}\n";
 
    bool useTable = s->type() == DocParamSect::Param ||
                    s->type() == DocParamSect::RetVal ||
@@ -1817,16 +1824,17 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
           "\\trbrdrb\\brdrs\\brdrw10\\brdrcf15 "
           "\\trbrdrr\\brdrs\\brdrw10\\brdrcf15 "
           "\\trbrdrh\\brdrs\\brdrw10\\brdrcf15 "
-          "\\trbrdrv\\brdrs\\brdrw10\\brdrcf15 " << endl;
+             "\\trbrdrv\\brdrs\\brdrw10\\brdrcf15 " << "\n";
       for (i = 0; i < columnPos[config][0]; i++) {
          m_t << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10\\brdrcf15 "
              "\\clbrdrl\\brdrs\\brdrw10\\brdrcf15 "
              "\\clbrdrb\\brdrs\\brdrw10\\brdrcf15 "
              "\\clbrdrr \\brdrs\\brdrw10\\brdrcf15 "
              "\\cltxlrtb "
-             "\\cellx" << (rtf_pageWidth * columnPos[config][i + 1] / 100) << endl;
+                "\\cellx" << (rtf_pageWidth * columnPos[config][i + 1] / 100) << "\n";
       }
-      m_t << "\\pard \\widctlpar\\intbl\\adjustright" << endl;
+
+      m_t << "\\pard \\widctlpar\\intbl\\adjustright\n";
    }
 
    if (sect && sect->hasInOutSpecifier()) {
@@ -1943,7 +1951,7 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocXRefItem)}\n");
 
    if ( ! m_lastIsPara)   {
-      m_t << "\\par" << endl;
+      m_t << "\\par\n";
       m_lastIsPara = true;
    }
 
@@ -1952,7 +1960,7 @@ void RTFDocVisitor::visitPre(DocXRefItem *x)
    // start param list
    // m_t << "{\\b "; // start bold
 
-   m_t << "{" << rtf_Style["Heading5"].m_reference << endl;
+   m_t << "{" << rtf_Style["Heading5"].m_reference << "\n";
 
    if (Config::getBool("rtf-hyperlinks") && ! anonymousEnum) {
       QString refName;
@@ -2064,7 +2072,7 @@ void RTFDocVisitor::visitPre(DocHtmlBlockQuote *)
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlBlockQuote)}\n");
    if (!m_lastIsPara) {
-      m_t << "\\par" << endl;
+      m_t << "\\par\n" ;
    }
    m_t << "{"; // start desc
    incIndentLevel();

@@ -689,7 +689,8 @@ void XmlDocVisitor::visitPost(DocPara *)
    if (m_hide) {
       return;
    }
-   m_t << "</para>";
+
+   m_t << "</para>\n";
 }
 
 void XmlDocVisitor::visitPre(DocRoot *)
@@ -831,15 +832,17 @@ void XmlDocVisitor::visitPre(DocSection *s)
    if (!s->anchor().isEmpty()) {
       m_t << "_1" << s->anchor();
    }
-   m_t << "\">" << endl;
+
+   m_t << "\">\n";
    m_t << "<title>";
+
    filter(convertCharEntities(s->title()));
-   m_t << "</title>" << endl;
+   m_t << "</title>\n";
 }
 
 void XmlDocVisitor::visitPost(DocSection *s)
 {
-   m_t << "</sect" << s->level() << ">\n";
+   m_t << "</sect" << s->level() << ">" << endl;
 }
 
 void XmlDocVisitor::visitPre(DocHtmlList *s)
@@ -1237,7 +1240,8 @@ void XmlDocVisitor::visitPre(DocSecRefList *)
    if (m_hide) {
       return;
    }
-   m_t << "<toclist>" << endl;
+
+   m_t << "<toclist>\n";
 }
 
 void XmlDocVisitor::visitPost(DocSecRefList *)
@@ -1299,8 +1303,8 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
       return;
    }
 
-   m_t << "<parameteritem>" << endl;
-   m_t << "<parameternamelist>" << endl;
+   m_t << "<parameteritem>\n";
+   m_t << "<parameternamelist>\n";
 
    for (auto param : pl->parameters()) {
 
@@ -1314,12 +1318,12 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
                visit((DocLinkedWord *)type);
 
             } else if (type->kind() == DocNode::Kind_Sep) {
-               m_t << "</parametertype>" << endl;
+               m_t << "</parametertype>\n";
                m_t << "<parametertype>";
             }
          }
 
-         m_t << "</parametertype>" << endl;
+         m_t << "</parametertype>\n";
       }
 
       m_t << "<parametername";
@@ -1343,11 +1347,12 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
       } else if (param->kind() == DocNode::Kind_LinkedWord) {
          visit((DocLinkedWord *)param);
       }
-      m_t << "</parametername>" << endl;
+
+      m_t << "</parametername>\n";
    }
 
-   m_t << "</parameternamelist>" << endl;
-   m_t << "<parameterdescription>" << endl;
+   m_t << "</parameternamelist>\n";
+   m_t << "<parameterdescription>\n";
 }
 
 void XmlDocVisitor::visitPost(DocParamList *)

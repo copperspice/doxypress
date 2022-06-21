@@ -79,15 +79,15 @@ void FormulaList::generateBitmaps(const QString &path)
          t << "\\batchmode" << endl;
       }
 
-      t << "\\documentclass{article}" << endl;
-      t << "\\usepackage{ifthen}" << endl;
-      t << "\\usepackage{epsfig}" << endl;          // include images
-      t << "\\usepackage[utf8]{inputenc}" << endl;  // some older distributions with newunicode package 1.1 need this option
+      t << "\\documentclass{article}\n";
+      t << "\\usepackage{ifthen}\n";
+      t << "\\usepackage{epsfig}\n";             // include images
+      t << "\\usepackage[utf8]{inputenc}\n";     // some older distributions with newunicode package 1.1 need this option
 
       writeExtraLatexPackages(t);
 
-      t << "\\pagestyle{empty}" << endl;
-      t << "\\begin{document}" << endl;
+      t << "\\pagestyle{empty}\n";
+      t << "\\begin{document}\n";
 
       int page = 0;
 
