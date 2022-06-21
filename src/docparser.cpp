@@ -2254,11 +2254,8 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Empty anchor label");
    }
 
-   if (newAnchor) {
-      // found <a name="label">
-      m_anchor = id;
 
-   } else if (id.left(CiteConsts::anchorPrefix.length()) == CiteConsts::anchorPrefix) {
+  if (id.left(CiteConsts::anchorPrefix.length()) == CiteConsts::anchorPrefix) {
       QString citeValue = Doxy_Globals::citeDict.find(id.mid(CiteConsts::anchorPrefix.length()));
 
       if (citeValue.isEmpty()) {
@@ -2271,6 +2268,10 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
          m_anchor = "invalid";
 
       }
+
+   } else if (newAnchor) {
+      // found <a name="label">
+      m_anchor = id;
 
    } else {
       // found \anchor label
