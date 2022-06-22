@@ -3639,18 +3639,13 @@ void MemberDef::warnIfUndocumented()
    QString type;
 
    if (cd) {
-      type = "class";
+      type = cd->compoundTypeString();
       def  = cd;
 
    } else if (nd) {
+      type = nd->compoundTypeString();
+      def  = nd;
 
-      if (nd->getLanguage() == SrcLangExt_Fortran) {
-         type = "module";
-      } else {
-         type = "namespace";
-      }
-
-      def = nd;
 
    } else if (gd) {
       type = "group";
