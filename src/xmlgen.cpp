@@ -1049,10 +1049,10 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    QSharedPointer<MemberList> rbml = md->reimplementedBy();
 
    if (rbml) {
-      for (auto rmd : *rbml) {
+      for (auto itemRmd : *rbml) {
          t << "        <reimplementedby refid=\""
-           << memberOutputFileBase(rmd) << "_1" << rmd->anchor() << "\">"
-           << convertToXML(rmd->name()) << "</reimplementedby>" << endl;
+           << memberOutputFileBase(itemRmd) << "_1" << itemRmd->anchor() << "\">"
+           << convertToXML(itemRmd->name()) << "</reimplementedby>" << endl;
       }
    }
 
@@ -2227,15 +2227,15 @@ void generateXML_output()
       }
 
       if (iter != iter_endA) {
-         QString tmp(iter, iter_endA);
+         QString tmpStr(iter, iter_endA);
 
          QTextStream t(&f);
 
-         if (tmp.indexOf("<!-- Automatically insert here the HTML entities -->") != -1) {
+         if (tmpStr.indexOf("<!-- Automatically insert here the HTML entities -->") != -1) {
             HtmlEntityMapper::instance()->writeXMLSchema(t);
 
          } else {
-            t << tmp;
+            t << tmpStr;
          }
       }
 

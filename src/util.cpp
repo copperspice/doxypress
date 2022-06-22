@@ -3931,8 +3931,8 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
          if (members.count() > 0) { // at least one match
             if (currentFile) {
 
-               for (auto md : members) {
-                  if (md->getFileDef() && md->getFileDef()->name() == currentFile->name()) {
+               for (auto itemMd : members) {
+                  if (itemMd->getFileDef() && itemMd->getFileDef()->name() == currentFile->name()) {
                      break; // found match in the current file
                   }
                }
@@ -4276,14 +4276,14 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
 
    } else if (pd = Doxy_Globals::pageSDict.find(linkRef)) {
       // link to a page
-      QSharedPointer<GroupDef> gd = pd->getGroupDef();
+      QSharedPointer<GroupDef> itemGd = pd->getGroupDef();
 
-      if (gd) {
+      if (itemGd) {
          if (! pd->name().isEmpty()) {
             si = Doxy_Globals::sectionDict.find(pd->name());
          }
 
-         *resContext = gd;
+         *resContext = itemGd;
          if (si) {
             resAnchor = si->label;
          }
@@ -7090,8 +7090,8 @@ QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, 
          if (distance != -1 && distance < minDistance) {
             minDistance = distance;
 
-            QSharedPointer<Definition> def = sharedFrom(iter.value());
-            QSharedPointer<MemberDef> md   = def.dynamicCast<MemberDef>();
+            QSharedPointer<Definition> tmpDef = sharedFrom(iter.value());
+            QSharedPointer<MemberDef> md      = tmpDef.dynamicCast<MemberDef>();
             bestMatch = md;
          }
       }

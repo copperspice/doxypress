@@ -49,8 +49,6 @@ bool ClassSDict::declVisible(const enum CompoundType *filter) const
    static const bool extractLocalClasses = Config::getBool("extract-local-classes");
 
    if (count() > 0) {
-      QSharedPointer<ClassDef> cd;
-
       for (auto cd : *this) {
 
          if (! cd->isAnonymous() && (filter == 0 || *filter == cd->compoundType()) ) {
@@ -71,7 +69,6 @@ void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filte
    static const bool extractPrivate = Config::getBool("extract-private");
 
    if (count() > 0) {
-      QSharedPointer<ClassDef> cd;
       bool found = false;
 
       for (auto cd : *this) {

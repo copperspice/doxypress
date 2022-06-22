@@ -2817,8 +2817,6 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
    bool inFile  = def->definitionType() == Definition::TypeFile;
    bool hasDocs = isDetailedSectionVisible(inGroup, inFile);
 
-   QSharedPointer<ClassDef> cd = getClassDef();
-
    if (! hasDocs) {
       return;
    }
@@ -4155,9 +4153,9 @@ void MemberDef::writeTagFile(QTextStream &tagFile)
                tagFile << "      <enumvalue file=\"" << convertToXML(getOutputFileBase() + Doxy_Globals::htmlFileExtension);
                tagFile << "\" anchor=\"" << convertToXML(fmd->anchor());
 
-               QString idStr = fmd->id();
-               if (! idStr.isEmpty()) {
-                  tagFile << "\" clangid=\"" << convertToXML(idStr);
+               QString fileId = fmd->id();
+               if (! fileId.isEmpty()) {
+                  tagFile << "\" clangid=\"" << convertToXML(fileId);
                }
 
                tagFile  << "\">" << convertToXML(fmd->name()) << "</enumvalue>" << endl;

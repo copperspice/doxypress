@@ -2902,7 +2902,6 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
 
       for (auto ccd : dict) {
          QString label;
-         QString s;
 
          bool first    = true;
          int count     = 0;

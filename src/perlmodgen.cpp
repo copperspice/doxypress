@@ -2068,8 +2068,8 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    if (rbml) {
       m_output.openList("reimplemented_by");
 
-      for (auto rmd : *rbml) {
-         m_output.openHash().addFieldQuotedString("name", rmd->name()).closeHash();
+      for (auto itemRmd : *rbml) {
+         m_output.openHash().addFieldQuotedString("name", itemRmd->name()).closeHash();
       }
 
       m_output.closeList();
@@ -2106,14 +2106,14 @@ void PerlModGenerator::addListOfAllMembers(QSharedPointer<ClassDef> cd)
 
    for (auto mni : cd->memberNameInfoSDict()) {
 
-      for (auto mi : *mni) {
+      for (const auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
 
-         QSharedPointer<ClassDef>   cd  = md->getClassDef();
+         QSharedPointer<ClassDef>   mcd = md->getClassDef();
          QSharedPointer<Definition> def = md->getGroupDef();
 
-         if (def == 0) {
-            def = cd;
+         if (def == nullptr) {
+            def = mcd;
          }
 
          m_output.openHash().addFieldQuotedString("name", md->name())
@@ -2124,7 +2124,7 @@ void PerlModGenerator::addListOfAllMembers(QSharedPointer<ClassDef> cd)
             m_output.addFieldQuotedString("ambiguity_scope", mi.ambiguityResolutionScope);
          }
 
-         m_output.addFieldQuotedString("scope", cd->name()).closeHash();
+         m_output.addFieldQuotedString("scope", mcd->name()).closeHash();
       }
    }
 
@@ -2196,8 +2196,8 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
    if (cl.count() > 0) {
       m_output.openList("inner");
 
-      for (auto cd : cl) {
-         m_output.openHash().addFieldQuotedString("name", cd->name()).closeHash();
+      for (auto item : cl) {
+         m_output.openHash().addFieldQuotedString("name", item->name()).closeHash();
       }
 
       m_output.closeList();
@@ -2317,8 +2317,8 @@ void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> 
    if (! nl.isEmpty()) {
       m_output.openList("namespaces");
 
-      for (auto &nd : nl) {
-         m_output.openHash().addFieldQuotedString("name", nd->name()).closeHash();
+      for (const auto &item : nl) {
+         m_output.openHash().addFieldQuotedString("name", item->name()).closeHash();
       }
 
       m_output.closeList();

@@ -2845,9 +2845,9 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
          return;
       }
 
-      DocNode *n = para->children().at(nodeIndex);
+      DocNode *childNode = para->children().at(nodeIndex);
 
-      if (mustBeOutsideParagraph(n)) {
+      if (mustBeOutsideParagraph(childNode)) {
          // previous node already outside paragraph context
          return;
 
@@ -2903,9 +2903,9 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
       }
 
       if (nodeIndex < numNodes) {
-         DocNode *n = para->children().at(nodeIndex);
+         DocNode *childNode = para->children().at(nodeIndex);
 
-         if (mustBeOutsideParagraph(n)) {
+         if (mustBeOutsideParagraph(childNode)) {
             return;
          }
 
