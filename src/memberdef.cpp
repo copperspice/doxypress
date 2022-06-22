@@ -609,7 +609,7 @@ class MemberDefImpl
    QSharedPointer<ClassDef> accessorClass;        // class that this member accesses (for anonymous types)
 
    QString m_args;          // function arguments/variable array specifiers
-   QString def;             // member definition in code (fully qualified name)
+   QString m_def;           // member definition in code (fully qualified name)
    QString anc;             // HTML anchor name
 
    Specifier virt;          // normal/virtual/pure virtual
@@ -3909,7 +3909,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
          ArgumentList(), ArgumentList());
 
    imd->setArgumentList(actualArgList);
-   imd->setDefinition(substituteTemplateArgumentsInString(m_impl->def, formalArgs, actualArgs));
+   imd->setDefinition(substituteTemplateArgumentsInString(m_impl->m_def, formalArgs, actualArgs));
    imd->setBodyDef(getBodyDef());
    imd->setBodySegment(getStartBodyLine(), getEndBodyLine());
 
@@ -4545,7 +4545,7 @@ QString MemberDef::declaration() const
 
 QString MemberDef::definition() const
 {
-   return m_impl->def;
+   return m_impl->m_def;
 }
 
 QString MemberDef::extraTypeChars() const
@@ -5230,7 +5230,7 @@ void MemberDef::setMemberType(MemberDefType t)
 
 void MemberDef::setDefinition(const QString &d)
 {
-   m_impl->def = d;
+   m_impl->m_def = d;
 }
 
 void MemberDef::setFileDef(QSharedPointer<FileDef> fd)
