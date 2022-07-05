@@ -6434,7 +6434,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       addToArgs(text[0]);
       fullArgString  += text[0];
 
-      current->argList = stringToArgumentList(fullArgString, current->argList);
+      QString dummy;
+      current->argList = stringToArgumentList(language, dummy, fullArgString, current->argList);
 
       if (insideJS) {
          fixArgumentListForJavaScript(current->argList);
@@ -6462,7 +6463,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             unput(yytext[i]);
          }
 
-         current->argList = stringToArgumentList(fullArgString, current->argList);
+         QString dummy;
+         current->argList = stringToArgumentList(language, dummy, fullArgString, current->argList);
+
          handleParametersCommentBlocks(current->argList);
          BEGIN(currentArgumentContext);
 
@@ -6530,7 +6533,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          addToArgs(text[0]);
          fullArgString  += text[0];
 
-         current->argList = stringToArgumentList(fullArgString, current->argList);
+         QString dummy;
+         current->argList = stringToArgumentList(language, dummy, fullArgString, current->argList);
+
          handleParametersCommentBlocks(current->argList);
          BEGIN( currentArgumentContext );
 
@@ -6660,7 +6665,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       addToArgs(text[0]);
       fullArgString += text[0];
 
-      *currentArgumentList = stringToArgumentList(fullArgString, *currentArgumentList);
+      QString dummy;
+      *currentArgumentList = stringToArgumentList(language, dummy, fullArgString, *currentArgumentList);
 
       BEGIN( currentArgumentContext );
    }

@@ -19,11 +19,11 @@
 #ifndef DEFARGS_H
 #define DEFARGS_H
 
-#include <QByteArray>
+#include <QString>
 
 #include <arguments.h>
 
-ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &argList = ArgumentList());
-ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &argList, QString &extraTypeChars);
+ArgumentList stringToArgumentList(SrcLangExt lang, QString &extraTypeChars,
+      const QString &argsString, const ArgumentList &argList = ArgumentList());
 
 #endif

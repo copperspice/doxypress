@@ -2243,7 +2243,8 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       if ((root->m_srcLang == SrcLangExt_CSharp || root->m_srcLang == SrcLangExt_Java) && (i = fullName.indexOf('<')) != -1) {
          // a Java/C# generic class looks like a C++ specialization, split the name and template arguments here
 
-         tArgList = stringToArgumentList(fullName.mid(i) );
+         QString dummy;
+         tArgList = stringToArgumentList(root->m_srcLang, dummy, fullName.mid(i));
          fullName = fullName.left(i);
 
       } else {
@@ -4834,7 +4835,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         // merge documentation
                         if (item->documentation().isEmpty() && ! root->getData(EntryKey::Main_Docs).isEmpty()) {
 
-                           const ArgumentList &argList = stringToArgumentList(root->getData(EntryKey::Member_Args));
+                           QString dummy;
+                           const ArgumentList &argList = stringToArgumentList(root->m_srcLang, dummy, root->getData(EntryKey::Member_Args));
 
                            if (root->proto) {
                               item->setDeclArgumentList(argList);
@@ -5536,7 +5538,8 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
       QSharedPointer<Entry> template_root = Doxy_Globals::g_classEntries.value(templateClass->name());
 
       if (template_root) {
-         const ArgumentList &templArgs = stringToArgumentList(templSpec);
+         QString dummy;
+         const ArgumentList &templArgs = stringToArgumentList(root->m_srcLang, dummy, templSpec);
 
          findBaseClassesForClass(template_root, context, templateClass, instanceClass,
                                  TemplateInstances, isArtificial, templArgs, templateNames);
@@ -6161,7 +6164,8 @@ void Doxy_Work::computeTemplateClassRelations()
             Debug::print(Debug::Classes, 0, "    Template instance %s : \n", csPrintable(item.value()->name()) );
             QString templSpec = item.key();
 
-            const ArgumentList &templArgs = stringToArgumentList(templSpec);
+            QString dummy;
+            const ArgumentList &templArgs = stringToArgumentList(item.value()->getLanguage(), dummy, templSpec);
 
             QVector<BaseInfo> &baseList = ptrEntry->extends;
 

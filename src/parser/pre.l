@@ -1669,7 +1669,9 @@ static void addDefine()
    if (! s_defArgsStr.isEmpty()) {
       ArgumentList argList;
 
-      argList = stringToArgumentList(s_defArgsStr);
+      QString dummy;
+      argList = stringToArgumentList(SrcLangExt_Cpp, dummy, s_defArgsStr);
+
       md->setArgumentList(argList);
    }
 

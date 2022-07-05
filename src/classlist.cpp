@@ -125,7 +125,9 @@ void GenericsSDict::insert(const QString &key, QSharedPointer<ClassDef> cd)
    }
 
    ArgumentList argList;
-   argList = stringToArgumentList(key.mid(i));
+
+   QString dummy;
+   argList = stringToArgumentList(SrcLangExt_CSharp, dummy, key.mid(i));
 
    int c = argList.count();
 
@@ -165,7 +167,9 @@ QSharedPointer<ClassDef> GenericsSDict::find(const QString &key)
 
       if (collection) {
          ArgumentList argList;
-         argList = stringToArgumentList(key.mid(i));
+
+         QString dummy;
+         argList = stringToArgumentList(SrcLangExt_CSharp, dummy, key.mid(i));
 
          int c = argList.count();
          return collection->value(c);

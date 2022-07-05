@@ -1229,7 +1229,8 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInf
       me->setData(EntryKey::Member_Args, tmi.arglist);
 
       if (! tmi.arglist.isEmpty()) {
-         me->argList = stringToArgumentList(tmi.arglist);
+         QString dummy;
+         me->argList = stringToArgumentList(SrcLangExt_Cpp, dummy, tmi.arglist);
       }
 
       if (tmi.enumValues.count() > 0) {

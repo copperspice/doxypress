@@ -1339,7 +1339,9 @@ static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<const Definit
 
    if (! strippedTemplateParams.isEmpty()) {
       // template part which was stripped
-      actTemplParams = stringToArgumentList(strippedTemplateParams);
+
+      QString dummy;
+      actTemplParams = stringToArgumentList(scope->getLanguage(), dummy, strippedTemplateParams);
    }
 
    int qualifierIndex = computeQualifiedIndex(name);
@@ -3480,7 +3482,9 @@ static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QSt
 
          if (! md->isDefine() && ! args.isEmpty() && args != "()") {
             const ArgumentList &mdAl = md->getArgumentList();
-            argList = stringToArgumentList(args);
+
+            QString dummy;
+            argList = stringToArgumentList(md->getLanguage(), dummy, args);
 
             match = matchArguments2(md->getOuterScope(), fd, mdAl, Doxy_Globals::globalScope, fd, argList, checkCV);
          }
@@ -3597,7 +3601,8 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             ArgumentList argList;
 
             if (! args.isEmpty()) {
-               argList = stringToArgumentList(args);
+               QString dummy;
+               argList = stringToArgumentList(fcd->getLanguage(), dummy, args);
             }
 
             for (auto mmd : *mn) {
@@ -3711,7 +3716,8 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
       bool hasEmptyArgs = (args == "()");
 
       if (! args.isEmpty()) {
-         argList = stringToArgumentList(args);
+         QString dummy;
+         argList = stringToArgumentList(SrcLangExt_Cpp, dummy, args);
       }
 
       bool isFound = false;
@@ -3808,7 +3814,9 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
                   if (! args.isEmpty() && args != "()") {
                      const ArgumentList &mmdAl = mmd->getArgumentList();
 
-                     argList = stringToArgumentList(args);
+                     QString dummy;
+                     argList = stringToArgumentList(mmd->getLanguage(), dummy, args);
+
                      match   = matchArguments2(mmd->getOuterScope(), mmd->getFileDef(), mmdAl,
                                    fnd, mmd->getFileDef(), argList, checkCV);
                   }

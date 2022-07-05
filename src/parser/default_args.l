@@ -26,6 +26,7 @@
 static QString          s_inputString;
 static int              s_inputPosition;
 static ArgumentList     s_argList;
+static SrcLangExt       s_language;
 static QString         *s_copyArgValue;
 static QString          s_curArgTypeName;
 static QString          s_curArgDefValue;
@@ -737,40 +738,35 @@ static void yyunput(QChar c, char *yy_bp)
  *  \param[out] a reference to resulting argument list pointer.
  *  \param[out] extraTypeChars point to string to which trailing characters for complex types are written to
  */
-
-ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &al)
+ArgumentList stringToArgumentList(SrcLangExt lang, QString &extraTypeChars,
+      const QString &argsString, const ArgumentList &argList)
 {
-   QString dummy;
-   return stringToArgumentList(argsString, al, dummy);
-}
-
-ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList &al, QString &extraTypeChars)
-{
+   ArgumentList retval;
    if (argsString.isEmpty()) {
-      return ArgumentList();
+      return retval;
    }
 
-   printlex(yy_flex_debug, true, __FILE__, "");
+   s_inputString   = argsString;       // passed in value
+   s_inputPosition = 0;
+   s_argList       = argList;          // passed in value
+   s_language      = lang;             // passed in value
 
-   s_copyArgValue = 0;
-   s_curArgDocs.resize(0);
-   s_curArgAttrib.resize(0);
-   s_curArgArray.resize(0);
-   s_curTypeConstraint.resize(0);
-   s_extraTypeChars.resize(0);
+   s_copyArgValue  = nullptr;
+
+   s_curArgTypeName.clear();
+   s_curArgDefValue.clear();
+   s_curArgName.clear();
+   s_curArgDocs.clear();
+   s_curArgAttrib.clear();
+   s_curArgArray.clear();
+   s_curTypeConstraint.clear();
+   s_extraTypeChars.clear();
 
    s_argRoundCount = 0;
    s_argSharpCount = 0;
    s_argCurlyCount = 0;
+
    s_lastDocChar   = '\0';
-   s_inputString   = argsString;
-   s_inputPosition = 0;
-
-   s_curArgTypeName.resize(0);
-   s_curArgDefValue.resize(0);
-   s_curArgName.resize(0);
-
-   s_argList = al;
 
    yyrestart( yyin );
    BEGIN( Start );
@@ -778,7 +774,6 @@ ArgumentList stringToArgumentList(const QString &argsString, const ArgumentList 
 
    extraTypeChars = s_extraTypeChars;
 
-   printlex(yy_flex_debug, false, __FILE__, "");
-
-   return s_argList;
+   retval = s_argList;
+   return retval;
 }

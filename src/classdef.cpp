@@ -3324,7 +3324,9 @@ void ClassDef::addMembersToTemplateInstance(QSharedPointer<ClassDef> cd, const Q
       for (auto &mi : *mni) {
 
          ArgumentList actualArguments;
-         actualArguments = stringToArgumentList(templSpec);
+
+         QString dummy;
+         actualArguments = stringToArgumentList(getLanguage(), dummy, templSpec);
 
          QSharedPointer<MemberDef> md = mi.memberDef;
          QSharedPointer<MemberDef> imd(md->createTemplateInstanceMember(cd->getTemplateArgumentList(), actualArguments));

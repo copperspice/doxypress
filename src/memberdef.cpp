@@ -790,7 +790,7 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
    m_declArgList = ArgumentList();
 
    if (! m_args.isEmpty()) {
-      m_declArgList = stringToArgumentList(m_args, m_declArgList, extraTypeChars);
+      m_declArgList = stringToArgumentList(def->getLanguage(), extraTypeChars, m_args);
    }
 
    templateMaster = QSharedPointer<MemberDef>();
@@ -5591,7 +5591,8 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
             mdec->setDocumentation(mdef->documentation(), mdef->docFile(), mdef->docLine());
             mdec->setDocsForDefinition(mdef->isDocsForDefinition());
 
-            ArgumentList mdefAlComb = stringToArgumentList(mdef->argsString());
+            QString dummy;
+            ArgumentList mdefAlComb = stringToArgumentList(mdef->getLanguage(), dummy, mdef->argsString());
 
             transferArgumentDocumentation(mdefAl, mdefAlComb);
             mdec->setArgumentList(mdefAlComb);
@@ -5601,7 +5602,8 @@ void combineDeclarationAndDefinition(QSharedPointer<MemberDef> mdec, QSharedPoin
             mdef->setDocumentation(mdec->documentation(), mdec->docFile(), mdec->docLine());
             mdef->setDocsForDefinition(mdec->isDocsForDefinition());
 
-            ArgumentList mdecAlComb = stringToArgumentList(mdec->argsString());
+            QString dummy;
+            ArgumentList mdecAlComb = stringToArgumentList(mdec->getLanguage(), dummy, mdec->argsString());
 
             transferArgumentDocumentation(mdecAl, mdecAlComb);
             mdef->setDeclArgumentList(mdecAlComb);
