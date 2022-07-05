@@ -241,8 +241,18 @@ void RTFGenerator::beginRTFDocument()
    m_textStream << "\\red128\\green0\\blue0;";
    m_textStream << "\\red128\\green128\\blue0;";
    m_textStream << "\\red128\\green128\\blue128;";
-   m_textStream << "\\red192\\green192\\blue192;}" << endl;
+   m_textStream << "\\red192\\green192\\blue192;";
 
+   // code highlighting colors. Note order is important see also RTFGenerator::startFontClass
+   m_textStream << "\\red0\\green128\\blue0;";   // keyword = index 17
+   m_textStream << "\\red96\\green64\\blue32;";  // keywordtype
+   m_textStream << "\\rede0\\green128\\blue0;";  // keywordflow
+   m_textStream << "\\red128\\green0\\blue0;";   // comment
+   m_textStream << "\\red128\\green96\\blue32;"; // preprocessor
+   m_textStream << "\\red0\\green32\\blue128;";  // stringliteral
+   m_textStream << "\\red0\\green128\\blue128;"; // charliteral
+
+   m_textStream << "}\n";
    DBG_RTF(m_textStream << "{\\comment Beginning style list}\n")
 
    m_textStream << "{\\stylesheet\n";
@@ -2953,5 +2963,40 @@ void RTFGenerator::writeLabel(const QString &l, bool isLast)
 
 void RTFGenerator::endLabels()
 {
+}
+
+void RTFGenerator::startFontClass(const QString &name)
+{
+   int id = 2;
+
+   if (name == "keyword")  {
+      id = 17;
+
+   } else if (name == "keywordtype") {
+      id = 18;
+
+   } else if (name == "keywordflow") {
+      id = 19;
+
+   } else if (name == "comment") {
+      id = 20;
+
+   } else if (name == "preprocessor") {
+      id = 21;
+
+   } else if (name == "stringliteral") {
+      id = 22;
+
+   } else if (name == "charliteral") {
+      id = 23;
+
+   }
+
+   m_textStream << "{\\cf" << id << " ";
+}
+
+void RTFGenerator::endFontClass()
+{
+   m_textStream << "}";
 }
 

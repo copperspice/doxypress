@@ -349,8 +349,8 @@ class RTFGenerator : public OutputGenerator
    void writeLabel(const QString &l, bool isLast) override;
    void endLabels() override;
 
-   void startFontClass(const QString &) override {}
-   void endFontClass() override {}
+   void startFontClass(const QString &) override;
+   void endFontClass() override;
 
    void writeCodeAnchor(const QString &) override {}
    void setCurrentDoc(QSharedPointer<Definition> def, const QString &, bool) override {
