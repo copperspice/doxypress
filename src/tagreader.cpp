@@ -1545,8 +1545,10 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    for (auto tpi : m_tagFilePages) {
       QSharedPointer<Entry> pe = QMakeShared<Entry>();
 
+      QString baseName = stripExtensionGeneral(tpi.filename, getFileNameExtension(tpi.filename));
+
       // hard sets the section
-      if (tpi.filename == "index") {
+      if (baseName == "index") {
          pe->section = Entry::MAINPAGEDOC_SEC;
 
       } else {
