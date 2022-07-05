@@ -3101,7 +3101,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       // ++s_commentCount;
    }
 
-<SkipCComment>[\\@][\\@]("f{"|"f$"|"f[") {
+<SkipCComment>[\\@][\\@]("f{"|"f$"|"f[""f(") {
       QString text = QString::fromUtf8(yytext);
       outputArray(text, text.length());
    }
@@ -3300,7 +3300,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       }
    }
 
-<SkipVerbatim>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endrtfonly"|"endmanonly"|"enddot"|"endcode"|"f$"|"f]"|"f}") {
+<SkipVerbatim>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endrtfonly"|"endmanonly"|"enddot"|"endcode"|"f$"|"f]"|"f}""f}") {
       /* end of verbatim block */
 
       QString text = QString::fromUtf8(yytext);

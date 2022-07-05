@@ -6594,7 +6594,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(CopyArgVerbatim);
    }
 
-<CopyArgCommentLine>{CMD}("f$"|"f["|"f{")        {
+<CopyArgCommentLine>{CMD}("f$"|"f["|"f{"|"f(")       {
       QString text = QString::fromUtf8(yytext);
 
       s_docBlockName = text.mid(1);
@@ -6607,11 +6607,15 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          s_docBlockName.replace(1, 1, '}');
       }
 
+      if (s_docBlockName.at(1) == '(') {
+         s_docBlockName.replace(1, 1, ')');
+      }
+
       fullArgString += text;
       BEGIN(CopyArgVerbatim);
    }
 
-<CopyArgVerbatim>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endmanonly"|"enddot"|"endcode"|"f$"|"f]"|"f}")/[^a-z_A-Z0-9\-] {
+<CopyArgVerbatim>[\\@]("endverbatim"|"endlatexonly"|"endhtmlonly"|"endxmlonly"|"enddocbookonly"|"endmanonly"|"enddot"|"endcode"|"f$"|"f]"|"f}"|"f)")/[^a-z_A-Z0-9\-] {
       // end of verbatim block
       QString text = QString::fromUtf8(yytext);
       fullArgString += text;
@@ -9222,7 +9226,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlock += text;
    }
 
-<DocBlock>{CMD}("f$"|"f["|"f{")         {
+<DocBlock>{CMD}("f$"|"f["|"f{"|"f(")       {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
@@ -9351,7 +9355,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<DocCopyBlock>[\\@]("f$"|"f]"|"f}")       {
+<DocCopyBlock>[\\@]("f$"|"f]"|"f}"|"f)")        {
       QString text = QString::fromUtf8(yytext);
 
       s_docBlock += text;

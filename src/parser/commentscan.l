@@ -1047,6 +1047,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 %x InheritParam
 %x ExtendsParam
 %x ReadFormulaShort
+%x ReadFormulaRound
 %x ReadFormulaLong
 %x AnchorLabel
 %x HtmlComment
@@ -1356,10 +1357,18 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN(ReadFormulaShort);
    }
 
-<Comment>{B}*{CMD}"f["        {
-      // start of a block formula
+<Comment>{B}*{CMD}"f("        {
+      // start of a inline formula
+      formulaText     = QString();
+      formulaNewLines = 0;
 
-      // this command forces the end of brief description
+      BEGIN(ReadFormulaRound);
+   }
+
+<Comment>{B}*{CMD}"f["        {
+      // start of a block formula,
+
+      // command forces the end of brief description
       setOutput(OutputMainDoc);
 
       formulaText      = "\\[";
@@ -1658,6 +1667,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN(Comment);
    }
 
+<ReadFormulaRound>{CMD}"f)"       {
+      // end of inline formula
+      addToOutput(" " + addFormula());
+      BEGIN(Comment);
+   }
+
 <ReadFormulaLong>{CMD}"f]"       {
       // end of block formula
       formulaText += "\\]";
@@ -1673,13 +1688,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN(Comment);
    }
 
-<ReadFormulaLong,ReadFormulaShort>[^\\@\n]+ {
+<ReadFormulaLong,ReadFormulaShort,ReadFormulaRound>[^\\@\n]+ {
       // any non-special character
       QString text = QString::fromUtf8(yytext);
       formulaText += text;
    }
 
-<ReadFormulaLong,ReadFormulaShort>\n   {
+<ReadFormulaLong,ReadFormulaShort,ReadFormulaRound>\n   {
       // new line
       QString text = QString::fromUtf8(yytext);
 
@@ -1688,7 +1703,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       yyLineNr++;
    }
 
-<ReadFormulaLong,ReadFormulaShort>.     {
+<ReadFormulaLong,ReadFormulaShort,ReadFormulaRound>.     {
       // any other character
       QString text = QString::fromUtf8(yytext);
       formulaText += text[0];
@@ -4127,7 +4142,7 @@ static bool handleCopyDoc(const QString &str, const QStringList &list)
 
 static void checkFormula()
 {
-   if (YY_START == ReadFormulaShort || YY_START == ReadFormulaLong) {
+   if (YY_START == ReadFormulaShort || YY_START == ReadFormulaRound  || YY_START == ReadFormulaLong) {
       warn(yyFileName, yyLineNr, "End of comment block while inside formula.");
    }
 }

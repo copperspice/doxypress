@@ -574,7 +574,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       BEGIN(VerbatimCode);
    }
 
-<CComment,ReadLine>[\\@]("f$"|"f["|"f{") {
+<CComment,ReadLine>[\\@]("f$"|"f["|"f{"|"f(") {
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
@@ -585,6 +585,10 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 
       } else if (s_blockName.at(1) == '{')  {
          s_blockName.replace(1, 1, '}');
+
+      } else if (s_blockName.at(1) == '(') {
+         s_blockName.replace(1, 1, ')');
+
       }
 
       s_lastCommentContext = YY_START;
