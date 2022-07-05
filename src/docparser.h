@@ -1016,7 +1016,16 @@ class DocFormula : public DocNode
    }
 
    bool isInline() {
-      return m_text.length() > 0 ? m_text.at(0) != '\\' : true;
+
+      if (m_text.startsWith("\\[")) {
+         return false;
+      }
+
+      if (m_text.startsWith("\\begin{"))  {
+         return false;
+      }
+
+      return true;
    }
 
  private:
