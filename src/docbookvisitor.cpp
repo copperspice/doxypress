@@ -359,6 +359,7 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
    }
 
    static const QString docbookOutDir = Config::getString("docbook-output");
+   static const bool dotCleanUp       = Config::getBool("dot-cleanup");
 
    SrcLangExt langExt = getLanguageFromFileName(m_langExt);
 
@@ -413,6 +414,10 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          writeDotFile(baseName, s);
          m_t << "</para>" << endl;
+
+         if (dotCleanUp) {
+            file.remove();
+         }
       }
       break;
 
@@ -443,6 +448,10 @@ void DocbookDocVisitor::visit(DocVerbatim *s)
 
          writeMscFile(baseName,s);
          m_t << "</para>" << endl;
+
+         if (dotCleanUp) {
+            file.remove();
+         }
       }
       break;
 
