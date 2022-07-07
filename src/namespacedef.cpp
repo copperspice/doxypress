@@ -244,12 +244,12 @@ void NamespaceDef::insertMember(QSharedPointer<MemberDef> md)
          if (outerScope->definitionType() == Definition::TypeNamespace) {
             outerScope.dynamicCast<NamespaceDef>()->insertMember(md);
 
-            // emerald, may need to set a flag to mark this inlineNS
+            // emerald, may need to set a flag to mark this inlineNS (or ND is an alias)
 
          } else if (outerScope->definitionType() == Definition::TypeFile) {
             outerScope.dynamicCast<FileDef>()->insertMember(md);
 
-            // emerald, may need to set a flag to mark this inlineNS
+            // emerald, may need to set a flag to mark this inlineNS (or ND is an alias)
          }
       }
    }
@@ -905,19 +905,19 @@ void NamespaceDef::combineUsingRelations()
 
    visited = true;
 
-   for (auto nd : m_usingDirMap) {
+   for (const auto &nd : m_usingDirMap) {
       nd->combineUsingRelations();
    }
 
-   for (auto nd : m_usingDirMap) {
+   for (const auto &nd : m_usingDirMap) {
       // add used namespaces of namespace nd to this namespace
 
-      for (auto und : nd->getUsedNamespaces() ) {
+      for (const auto &und : nd->getUsedNamespaces() ) {
          addUsingDirective(und);
       }
 
       // add used classes of namespace nd to this namespace
-      for (auto ucd : nd->getUsedClasses() ) {
+      for (const auto &ucd : nd->getUsedClasses() ) {
          addUsingDeclaration(ucd);
       }
    }

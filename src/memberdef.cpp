@@ -731,16 +731,16 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
    memDec        = QSharedPointer<MemberDef>();
    group         = QSharedPointer<GroupDef>();
 
-   grpId             = -1;
-   livesInsideEnum   = false;
-   hasCallGraph      = false;
-   hasCallerGraph    = false;
+   grpId            = -1;
+   livesInsideEnum  = false;
+   hasCallGraph     = false;
+   hasCallerGraph   = false;
 
    hasReferencedByRelation = false;
    hasReferencesRelation   = false;
 
-   initLines         = 0;
-   m_type            = type;
+   initLines = 0;
+   m_type    = type;
 
    if (memberType == MemberDefType::Typedef) {
       m_type = stripPrefix(m_type, "typedef ");

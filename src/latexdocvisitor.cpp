@@ -273,7 +273,7 @@ void LatexDocVisitor::visit(DocURL *u)
       return;
    }
 
-   static bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
+   static const bool pdfHyperlinks = Config::getBool("latex-hyper-pdf");
 
    if (pdfHyperlinks) {
       m_t << "\\href{";

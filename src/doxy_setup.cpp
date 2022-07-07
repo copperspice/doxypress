@@ -672,7 +672,6 @@ QString getFileNameExtension(const QString &fileName)
    // get the filename extension, everything after the last dot
    retval = fi.suffix();
 
-
    return retval;
 }
 

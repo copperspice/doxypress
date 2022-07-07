@@ -89,8 +89,7 @@ class Definition_Private
 };
 
 Definition_Private::Definition_Private()
-   : partOfGroups(0), m_body_startLine(-1), m_body_endLine(-1), hidden(false),
-     isArtificial(false)
+   : partOfGroups(0), m_body_startLine(-1), m_body_endLine(-1), hidden(false), isArtificial(false)
 {
 }
 

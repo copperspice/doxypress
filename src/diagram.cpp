@@ -448,7 +448,7 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
    }
 
    if (count > 0 && (prot != Private || !doBases)) {
-      DiagramRow *row = 0;
+      DiagramRow *row = nullptr;
 
       if (diagram->count() <= level + 1) { /* add new row */
          row = new DiagramRow(diagram, level + 1);
@@ -564,7 +564,7 @@ void TreeDiagram::computeLayout()
    }
 
    if (row) {
-      DiagramItem *opi = 0;
+      DiagramItem *opi = nullptr;
 
       int delta  = 0;
       bool first = true;
@@ -625,7 +625,7 @@ uint TreeDiagram::computeRows()
 {
    int count = 0;
 
-   DiagramRow *row = 0;
+   DiagramRow *row = nullptr;
 
    for (auto item : *this) {
       if (item->first()->isInList())  {
@@ -640,7 +640,7 @@ uint TreeDiagram::computeRows()
       int maxListLen = 0;
       int curListLen = 0;
 
-      DiagramItem *opi = 0;
+      DiagramItem *opi = nullptr;
 
       for (auto di : *row) {
 
@@ -887,8 +887,13 @@ void TreeDiagram::drawConnectors(QTextStream &t, Image *image, bool doBase, bool
       if (di->isInList()) {
          // row consists of list connectors
 
-         int x = 0, y = 0, ys = 0;
-         float xf = 0.0f, yf = 0.0f, ysf = 0.0f;
+         int x = 0;
+         int y = 0;
+         int ys = 0;
+
+         float xf = 0.0f;
+         float yf = 0.0f;
+         float ysf = 0.0f;
 
          for (auto rit = dr->begin(); rit != dr->end(); ++rit) {
 

@@ -2102,7 +2102,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
                   }
                }
             }
-         } else { // not ambiguous
+
+         } else {
+            // not ambiguous
             found = true;
          }
       }
@@ -2115,6 +2117,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       char c = yyinput();
       QString t;
+
       t += c;
       g_code->codify(t);
 

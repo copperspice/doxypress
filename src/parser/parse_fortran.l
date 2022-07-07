@@ -104,9 +104,13 @@ static const QString directionParam[] =
 };
 
 struct CommentInPrepass {
+   CommentInPrepass(int commentCol, QString commentStr)
+      : column(commentCol), str(commentStr)
+   {
+   }
+
    int column;
    QString str;
-   CommentInPrepass(int column, QString str) : column(column), str(str) {}
 };
 
 QStack<YY_BUFFER_STATE> include_stack;
@@ -429,22 +433,29 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
  /*------ ignore simple comment (not documentation comments) */
 
 <*>"!"/[^<>\n]                         {
-      if (YY_START == String) { yyColNr -= yyleng; REJECT; } // "!" is ignored in strings
+      if (YY_START == String) {
+         // "!" is ignored in strings
+         yyColNr -= yyleng;
+         REJECT;
+      }
 
       // skip comment line (without docu comments "!>" "!<" )
-      /* ignore further "!" and ignore comments in Strings */
+      // ignore further "!" and ignore comments in Strings
 
       if ((YY_START != StrIgnore) && (YY_START != String)) {
          yy_push_state(YY_START);
          BEGIN(StrIgnore);
+
          debugStr = "*!";
-         DBG_CTX((stderr,"start comment %d\n",yyLineNr));
+         DBG_CTX((stderr,"start comment %d\n", yyLineNr));
       }
    }
 
-<StrIgnore>.?/\n                        {
-      yy_pop_state();       // comment ends with endline character
-      DBG_CTX((stderr,"end comment %d %s\n",yyLineNr,debugStr.data()));
+<StrIgnore>.?/\n                         {
+      // comment ends with endline character
+
+      yy_pop_state();
+      DBG_CTX((stderr,"end comment %d %s\n", yyLineNr, debugStr.data()));
    }
 
 <StrIgnore>.                            {
@@ -464,7 +475,6 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 <Use>{ID}                               {
       QString text = QString::fromUtf8(yytext);
 
-      DBG_CTX((stderr,"using dir %s\n", yytext));
       current->m_entryName = text;
       current->section     = Entry::USINGDIR_SEC;
 
@@ -632,8 +642,6 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
 <BlockData>^{BS}"end"({BS}(block{BS}data)({BS_}{ID})?)?{BS}/(\n|!) {
       // end block data
-      //  if (!endScope(current_root))
-      //  yyterminate();
 
       defaultProtection = Public;
       yy_pop_state();
@@ -943,7 +951,7 @@ private                                 {
       QString text = QString::fromUtf8(yytext);
 
       currentModifiers |= text.trimmed();
-      argType = "";
+      argType = QString();
       yy_push_state(YY_START);
       BEGIN( AttributeList ) ;
    }
@@ -1039,7 +1047,7 @@ private                                 {
          current->setData(EntryKey::Member_Type, argType);
 
          current->setData(EntryKey::File_Name, yyFileName);
-         current->startBodyLine = yyLineNr;                         // used for source reference
+         current->startBodyLine = yyLineNr;                  // used for source reference
          current->startLine     = yyLineNr;
 
          addCurrentEntry(1);
@@ -1138,8 +1146,8 @@ private                                 {
 
          // accumulated docs for argument should be cleared  because it is handled aother way
          // and these docsc can be unexpectedly passed to the next member
-         current->setData(EntryKey::Brief_Docs, "");
-         current->setData(EntryKey::Main_Docs,  "");
+         current->setData(EntryKey::Brief_Docs, QString());
+         current->setData(EntryKey::Main_Docs,  QString());
       }
    }
 
@@ -1178,8 +1186,10 @@ private                                 {
       currentModifiers = SymbolModifiers();
       yy_pop_state();                         // end variable declaration list
       docBlock.resize(0);
+
       s_inputStringSemi = " \n" + text.mid(1);
-      yyLineNr--;
+      --yyLineNr;
+
       pushBuffer(s_inputStringSemi);
    }
 
@@ -1534,7 +1544,7 @@ private                                 {
          yyterminate();
 
       } else if ( include_stack.isEmpty() ) {
-         if (YY_START!=INITIAL && YY_START != Start) {
+         if (YY_START != INITIAL && YY_START != Start) {
             DBG_CTX((stderr,"==== Error: EOF reached in wrong state (end missing)"));
             scanner_abort();
          }
@@ -2833,7 +2843,7 @@ static void startCommentBlock(bool brief)
 
 static void handleCommentBlock(const QString &doc, bool brief)
 {
-  static bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
+   static const bool hideInBodyDocs = Config::getBool("hide-in-body-docs");
 
    bool needsEntry = false;
    int position    = 0;
@@ -2843,7 +2853,6 @@ static void handleCommentBlock(const QString &doc, bool brief)
       return;
    }
 
-   DBG_CTX((stderr, "call parseCommentBlock [%s]\n", csPrintable(doc)));
    int lineNr = brief ? current->briefLine : current->docLine;
 
    while (parseCommentBlock(s_thisParser, docBlockInBody ? subrCurrent.first() : current,
@@ -2852,16 +2861,11 @@ static void handleCommentBlock(const QString &doc, bool brief)
          docBlockInBody ? false : docBlockJavaStyle,
          docBlockInBody, defaultProtection, position, needsEntry)) {
 
-         DBG_CTX((stderr, "parseCommentBlock position=%d [%s]  needsEntry = %d\n",
-                  position, csPrintable(doc) + position, needsEntry));
-
       if (needsEntry) {
          addCurrentEntry(0);
       }
    }
 
-   DBG_CTX((stderr, "parseCommentBlock position=%d [%s]  needsEntry = %d\n",
-                  position, csPrintable(doc) + position, needsEntry));
 
    if (needsEntry) {
       addCurrentEntry(0);
@@ -3045,7 +3049,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    defaultProtection      = Public;
    s_inputString          = fileBuf;
    s_inputPosition        = 0;
-   s_inputStringPrepass   = "";
+   s_inputStringPrepass   = QString();
    s_inputPositionPrepass = 0;
 
    mtype                  = MethodType::Method;

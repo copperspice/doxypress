@@ -757,7 +757,7 @@ static inline void addTillEndOfString(const QString &expr, QString *rest, uint &
  * length of the (unexpanded) argument list is stored in \a len.
  */
 static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, int &len,
-                  QSharedPointer<const A_Define> def, QString &result, int level)
+         QSharedPointer<const A_Define> def, QString &result, int level)
 {
    uint j = pos;
    len    = 0;
@@ -1771,7 +1771,7 @@ static void readIncludeFile(const QString &inc)
       QSharedPointer<FileDef> oldFileDef = s_yyFileDef;
       int oldLineNr = s_yyLineNr;
 
-      // absIncFileName avoids difficulties for incFileName starting with "../" (bug 641336)
+      // absIncFileName avoids difficulties for incFileName starting with "../"
       QString absIncFileName = incFileName;
       {
          QFileInfo fi(s_yyFileName);
@@ -2129,6 +2129,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       s_yyLineNr += text.count('\n');
       outputArray(text, text.length());
    }
+
 <CopyLine>{RAWBEGIN}        {
       QString text = QString::fromUtf8(yytext);
 

@@ -22,7 +22,6 @@
 
 #define YY_NO_INPUT 1
 
-
 static QString          s_inputString;
 static int              s_inputPosition;
 static ArgumentList     s_argList;
@@ -259,7 +258,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (text[0] == '(') {
          s_argRoundCount = 0;
-         BEGIN( CopyArgRound );
+         BEGIN(CopyArgRound);
 
       } else if (text[0] == '{') {
          s_argCurlyCount = 0;
@@ -270,7 +269,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
          s_argSharpCount = 0;
          s_argRoundCount = 0;
-         BEGIN( CopyArgSharp );
+         BEGIN(CopyArgSharp);
       }
    }
 
@@ -285,7 +284,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       *s_copyArgValue += text;
 
       if (s_argRoundCount > 0) {
-         s_argRoundCount--;
+         --s_argRoundCount;
 
       } else {
 
@@ -293,7 +292,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             *s_copyArgValue += " " + s_curArgName;
          }
 
-         BEGIN( s_readArgContext );
+         BEGIN(s_readArgContext);
       }
    }
 
@@ -302,10 +301,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       *s_copyArgValue += text[0];
 
       if (s_argRoundCount > 0) {
-         s_argRoundCount--;
+         --s_argRoundCount;
 
       } else {
-         BEGIN( s_readArgContext );
+         BEGIN(s_readArgContext);
 
       }
    }
@@ -337,7 +336,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
       if (s_argRoundCount == 0) {
-         s_argSharpCount++;
+         ++s_argSharpCount;
       }
 
       *s_copyArgValue += text[0];
@@ -351,30 +350,33 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          // do not count '<' inside '(' for code like: "< typename A = (i < 6) >"
 
       } else {
-         if (s_argSharpCount>0) {
+         if (s_argSharpCount > 0) {
             --s_argSharpCount;
          } else  {
-            BEGIN( s_readArgContext );
+            BEGIN(s_readArgContext);
          }
       }
    }
 
 <CopyArgSharp>"("                       {
       QString text = QString::fromUtf8(yytext);
-      ++s_argRoundCount;
+
       *s_copyArgValue += text[0];
+      ++s_argRoundCount;
    }
 
 <CopyArgSharp>")"                       {
       QString text = QString::fromUtf8(yytext);
-      --s_argRoundCount;
+
       *s_copyArgValue += text[0];
+      --s_argRoundCount;
    }
 
 <CopyArgCurly>"{"          {
       QString text = QString::fromUtf8(yytext);
-      ++s_argCurlyCount;
+
       *s_copyArgValue += text[0];
+      ++s_argCurlyCount;
    }
 
 <CopyArgCurly>"}"          {
@@ -382,10 +384,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       *s_copyArgValue += text[0];
 
       if (s_argCurlyCount > 0) {
-         s_argCurlyCount--;
+         --s_argCurlyCount;
 
       } else {
-         BEGIN( s_readArgContext );
+         BEGIN(s_readArgContext);
       }
    }
 
@@ -620,11 +622,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       s_curTypeConstraint += ' ';
    }
 
-<FuncQual>"const"                {
+<FuncQual>"const"               {
       s_argList.constSpecifier = true;
    }
 
-<FuncQual>"volatile"             {
+<FuncQual>"volatile"            {
       s_argList.volatileSpecifier = true;
    }
 

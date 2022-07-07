@@ -3527,12 +3527,12 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
       mapName += "dep";
    }
 
-   QString absBaseName = d.absolutePath() + "/" + baseName;
-   QString absDotName  = absBaseName + ".dot";
-   QString absMapName  = absBaseName + ".map";
-   QString absPdfName  = absBaseName + ".pdf";
-   QString absEpsName  = absBaseName + ".eps";
-   QString absImgName  = absBaseName + "." + imageExt;
+   const QString absBaseName = d.absolutePath() + "/" + baseName;
+   const QString absDotName  = absBaseName + ".dot";
+   const QString absMapName  = absBaseName + ".map";
+   const QString absPdfName  = absBaseName + ".pdf";
+   const QString absEpsName  = absBaseName + ".eps";
+   const QString absImgName  = absBaseName + "." + imageExt;
 
    bool regenerate = false;
    if (updateDotGraph(m_startNode, DotNode::Dependency, absBaseName, graphFormat, false, false,
@@ -3601,8 +3601,9 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
       } else {
          // bitmap graphics
 
-         out << "<div class=\"center\"><img src=\"" << relPath << baseName << "." << imageExt << "\" border=\"0\" usemap=\"#" << mapName << "\" alt=\"\"/>";
-         out << "</div>" << endl;
+         out << "<div class=\"center\"><img src=\"" << relPath << baseName << "." << imageExt
+             << "\" border=\"0\" usemap=\"#" << mapName << "\" alt=\"\"/>"
+             << "</div>" << endl;
 
          QString absMapName = absBaseName + ".map";
 
@@ -3614,12 +3615,15 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
          }
       }
 
-   } else if (graphFormat == GOF_EPS) { // encapsulated postscript
+   } else if (graphFormat == GOF_EPS) {
+      // encapsulated postscript
+
       if (regenerate || !writeVecGfxFigure(out, baseName, absBaseName)) {
          int figId = DotManager::instance()->addFigure(fileName, baseName, absBaseName, false);
          out << endl << "% FIG " << figId << endl;
       }
    }
+
    if (! regenerate) {
       removeDotGraph(absDotName);
    }

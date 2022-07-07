@@ -418,10 +418,10 @@ static void handleHtmlTag()
 
          opt.value = tagText.mid(startAttrib, endAttrib - startAttrib);
          if (opt.name == "align") {
-	    opt.value = opt.value.toLower();
+       opt.value = opt.value.toLower();
 
-	 } else if (opt.name == "valign") {
-	   opt.value = opt.value.toLower();
+    } else if (opt.name == "valign") {
+      opt.value = opt.value.toLower();
 
            if (opt.value == "center") {
 	      opt.value = "middle";
@@ -515,28 +515,28 @@ static int yyread(char *buf, int max_size)
 
 %}
 
-CMD       ("\\"|"@")
-WS        [ \t\r\n]
-NONWS     [^ \t\r\n]
-BLANK     [ \t\r]
 ID        "$"?[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*
-LABELID   [a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF\-]*
-PHPTYPE   [\\:a-z_A-Z0-9\x80-\xFF\-]+
-CITESCHAR [a-z_A-Z0-9\x80-\xFF\-\?]
-CITEECHAR [a-z_A-Z0-9\x80-\xFF\-\+:\/\?]
-CITEID    {CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*|"\""{CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*"\""
-MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z_A-Z0-9\-]+
-MAILWS    [\t a-z_A-Z0-9+-]
-MAILADDR2 {MAILWS}+{BLANK}+("at"|"AT"|"_at_"|"_AT_"){BLANK}+{MAILWS}+("dot"|"DOT"|"_dot_"|"_DOT_"){BLANK}+{MAILWS}+
+CMD         ("\\"|"@")
+WS          [ \t\r\n]
+NONWS       [^ \t\r\n]
+BLANK       [ \t\r]
+LABELID     [a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF\-]*
+PHPTYPE     [\\:a-z_A-Z0-9\x80-\xFF\-]+
+CITESCHAR   [a-z_A-Z0-9\x80-\xFF\-\?]
+CITEECHAR   [a-z_A-Z0-9\x80-\xFF\-\+:\/\?]
+CITEID      {CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*|"\""{CITESCHAR}{CITEECHAR}*("."{CITESCHAR}{CITEECHAR}*)*"\""
+MAILADR     ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z_A-Z0-9\-]+
+MAILWS      [\t a-z_A-Z0-9+-]
+MAILADDR2   {MAILWS}+{BLANK}+("at"|"AT"|"_at_"|"_AT_"){BLANK}+{MAILWS}+("dot"|"DOT"|"_dot_"|"_DOT_"){BLANK}+{MAILWS}+
 
-LISTITEM  {BLANK}*[-]("#")?{WS}
-MLISTITEM {BLANK}*[+*]{WS}
-OLISTITEM {BLANK}*[1-9][0-9]*"."{BLANK}
-ENDLIST   {BLANK}*"."{BLANK}*\n
-ATTRNAME  [a-z_A-Z\x80-\xFF][:a-z_A-Z0-9\x80-\xFF\-]*
-ATTRIB    {ATTRNAME}{WS}*("="{WS}*(("\""[^\"]*"\"")|("'"[^\']*"'")|[^ \t\r\n'"><]+))?
-URLCHAR   [a-z_A-Z0-9\!\~\,\:\;\'\$\?\@\&\%\#\.\-\+\/\=\x80-\xFF]
-URLMASK   ({URLCHAR}+([({]{URLCHAR}*[)}])?)+
+LISTITEM    {BLANK}*[-]("#")?{WS}
+MLISTITEM   {BLANK}*[+*]{WS}
+OLISTITEM   {BLANK}*[1-9][0-9]*"."{BLANK}
+ENDLIST     {BLANK}*"."{BLANK}*\n
+ATTRNAME    [a-z_A-Z\x80-\xFF][:a-z_A-Z0-9\x80-\xFF\-]*
+ATTRIB      {ATTRNAME}{WS}*("="{WS}*(("\""[^\"]*"\"")|("'"[^\']*"'")|[^ \t\r\n'"><]+))?
+URLCHAR     [a-z_A-Z0-9\!\~\,\:\;\'\$\?\@\&\%\#\.\-\+\/\=\x80-\xFF]
+URLMASK     ({URLCHAR}+([({]{URLCHAR}*[)}])?)+
 URLPROTOCOL ("http:"|"https:"|"ftp:"|"ftps:"|"sftp:"|"file:"|"news:"|"irc:"|"ircs:")
 FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+&#@]
 FILEECHAR [a-z_A-Z0-9\-\+&#@]
@@ -544,35 +544,36 @@ FILEECHAR [a-z_A-Z0-9\-\+&#@]
 HFILEMASK ("."{FILESCHAR}*{FILEECHAR}+)+
 FILEMASK  ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|{HFILEMASK}
 
-LINKMASK  [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)?
-VERBATIM  "verbatim"{BLANK}*
-SPCMD1    {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
-SPCMD2    {CMD}[\\@<>&$#%~".+=|-]
 SPCMD3    {CMD}form#[0-9]+
-SPCMD4    {CMD}"::"
-SPCMD5    {CMD}":"
-INOUT	    "in"|"out"|("in"{BLANK}*","?{BLANK}*"out")|("out"{BLANK}*","?{BLANK}*"in")
-PARAMIO   {CMD}param{BLANK}*"["{BLANK}*{INOUT}{BLANK}*"]"
-VARARGS   "..."
-TEMPCHAR  [a-z_A-Z0-9.,: \t\*\&\(\)\[\]]
 FUNCCHAR  [a-z_A-Z0-9,:\<\> \t\^\*\&\[\]]|{VARARGS}
-FUNCPART  {FUNCCHAR}*("("{FUNCCHAR}*")"{FUNCCHAR}*)?
-SCOPESEP  "::"|"#"|"."
 TEMPLPART "<"{TEMPCHAR}*">"
-ANONNS    "anonymous_namespace{"[^}]*"}"
-SCOPEPRE  (({ID}{TEMPLPART}?)|{ANONNS}){SCOPESEP}
-SCOPEKEYS ":"({ID}":")*
 
-SCOPECPP  {SCOPEPRE}*(~)?{ID}{TEMPLPART}?
-SCOPEOBJC {SCOPEPRE}?{ID}{SCOPEKEYS}?
-SCOPEMASK {SCOPECPP}|{SCOPEOBJC}
+LINKMASK    [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)?
+VERBATIM    "verbatim"{BLANK}*
+SPCMD1      {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
+SPCMD2      {CMD}[\\@<>&$#%~".+=|-]
+SPCMD4      {CMD}"::"
+SPCMD5      {CMD}":"
+INOUT       "in"|"out"|("in"{BLANK}*","?{BLANK}*"out")|("out"{BLANK}*","?{BLANK}*"in")
+PARAMIO     {CMD}param{BLANK}*"["{BLANK}*{INOUT}{BLANK}*"]"
+VARARGS     "..."
+TEMPCHAR    [a-z_A-Z0-9.,: \t\*\&\(\)\[\]]
+FUNCPART    {FUNCCHAR}*("("{FUNCCHAR}*")"{FUNCCHAR}*)?
+SCOPESEP    "::"|"#"|"."
+ANONNS      "anonymous_namespace{"[^}]*"}"
+SCOPEPRE    (({ID}{TEMPLPART}?)|{ANONNS}){SCOPESEP}
+SCOPEKEYS   ":"({ID}":")*
 
-FUNCARG   "("{FUNCPART}")"({BLANK}*("volatile"|"const"){BLANK})?
-FUNCARG2  "("{FUNCPART}")"({BLANK}*("volatile"|"const"))?
-OPNEW     {BLANK}+"new"({BLANK}*"[]")?
-OPDEL     {BLANK}+"delete"({BLANK}*"[]")?
+SCOPECPP    {SCOPEPRE}*(~)?{ID}{TEMPLPART}?
+SCOPEOBJC   {SCOPEPRE}?{ID}{SCOPEKEYS}?
+SCOPEMASK   {SCOPECPP}|{SCOPEOBJC}
 
-OPNORM    {OPNEW}|{OPDEL}|"+"|"-"|"*"|"/"|"%"|"^"|"&"|"|"|"~"|"!"|"="|"<"|">"|"+="|"-="|"*="|"/="|"%="|"^="|"&="|"|="|"<<"|">>"|"<<="|">>="|"=="|"!="|"<="|">="|"&&"|"||"|"++"|"--"|","|"->*"|"->"|"[]"|"()"|"<=>"
+FUNCARG     "("{FUNCPART}")"({BLANK}*("volatile"|"const"){BLANK})?
+FUNCARG2    "("{FUNCPART}")"({BLANK}*("volatile"|"const"))?
+OPNEW       {BLANK}+"new"({BLANK}*"[]")?
+OPDEL       {BLANK}+"delete"({BLANK}*"[]")?
+
+OPNORM      {OPNEW}|{OPDEL}|"+"|"-"|"*"|"/"|"%"|"^"|"&"|"|"|"~"|"!"|"="|"<"|">"|"+="|"-="|"*="|"/="|"%="|"^="|"&="|"|="|"<<"|">>"|"<<="|">>="|"=="|"!="|"<="|">="|"&&"|"||"|"++"|"--"|","|"->*"|"->"|"[]"|"()"|"<=>"
 
 OPCAST      {BLANK}+[^<(\r\n.,][^(\r\n.,]*
 OPMASK      ({BLANK}*{OPNORM}{FUNCARG})
@@ -966,10 +967,8 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       return TK_RCSTAG;
    }
 
-
 <St_Para,St_HtmlOnly,St_ManOnly,St_LatexOnly,St_RtfOnly,St_XmlOnly,St_DbOnly>"$("{ID}")"   |
 <St_Para,St_HtmlOnly,St_ManOnly,St_LatexOnly,St_RtfOnly,St_XmlOnly,St_DbOnly>"$("{ID}"("{ID}"))"   {
-
       /* environment variable */
       QString text = QString::fromUtf8(yytext);
 
@@ -1119,6 +1118,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       QString text = QString::fromUtf8(yytext);
 
       s_yyLineNum += text.count('\n');
+
       if (s_insidePre) {
           g_token->chars = text;
           return TK_WHITESPACE;
@@ -1147,7 +1147,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       g_token->name = g_token->name.mid(i + 1, g_token->name.length() - i - 2);
 
       BEGIN(St_Code);
-    }
+   }
 
 <St_CodeOpt>"\\internal_linebr" |
 <St_CodeOpt>\n                  |
@@ -1359,7 +1359,6 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_PlantUMLOpt>"\\internal_linebr" |
 <St_PlantUMLOpt>"\n"                |
 <St_PlantUMLOpt>.              {
-
       for (int i = yyleng - 1; i >= 0; --i) {
          unput(yytext[i]);
       }

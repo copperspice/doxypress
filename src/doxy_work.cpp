@@ -2584,7 +2584,7 @@ void Doxy_Work::resolveClassNestingRelations()
                      def = def->getOuterScope();
 
                      if (def) {
-                        // emerald, may need to set a flag to mark this inlineNS
+                        // emerald, may need to set a flag to mark this inlineNS (or ND is an alias)
 
                         QSharedPointer<ClassDef> aliasCd = cd;
 
@@ -2938,7 +2938,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
                      def = def->getOuterScope();
 
                      if (def) {
-                        // emerald, may need to set a flag to mark this inlineNS
+                        // emerald, may need to set a flag to mark this inlineNS (or ND is an alias)
 
                         QSharedPointer<NamespaceDef> aliasNd = nd;
                         def->addInnerCompound(aliasNd);
@@ -2993,7 +2993,7 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
 
          // see if the using statement was found inside a namespace or inside the global file scope
          if (ptrEntry->parent() && ptrEntry->parent()->section == Entry::NAMESPACE_SEC &&
-               (fd == 0 || fd->getLanguage() != SrcLangExt_Java) ) {
+               (fd == nullptr || fd->getLanguage() != SrcLangExt_Java) ) {
 
             // not a .java file
             nsName = stripAnonymousNamespaceScope(ptrEntry->parent()->m_entryName);
@@ -3020,22 +3020,22 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
 
             }
 
-         } while (scopeOffset >= 0 && usingNd == 0);
+         } while (scopeOffset >= 0 && usingNd == nullptr);
 
-         if (usingNd == 0 && nd)  {
+         if (usingNd == nullptr && nd != nullptr)  {
             // not found, try used namespaces in this scope
             // or in one of the parent namespace scopes
 
             QSharedPointer<NamespaceDef> pnd = nd;
 
-            while (pnd && usingNd == 0) {
+            while (pnd && usingNd == nullptr) {
                // also try with one of the used namespaces found earlier
                usingNd = findUsedNamespace(const_cast<NamespaceSDict *>(&pnd->getUsedNamespaces()), name);
 
                // goto the parent
                QSharedPointer<Definition> s = pnd->getOuterScope();
 
-               if (s && s->definitionType() == Definition::TypeNamespace) {
+               if (s != nullptr && s->definitionType() == Definition::TypeNamespace) {
                   pnd = s.dynamicCast<NamespaceDef>();
 
                } else {
@@ -3045,23 +3045,23 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
             }
          }
 
-         if (usingNd == 0 && fd) {
+         if (usingNd == nullptr && fd != nullptr) {
             // still nothing, also try used namespace in the global scope
             usingNd = findUsedNamespace(fd->getUsedNamespaces(), name);
          }
 
          // add the namespace the correct scope
-         if (usingNd) {
+         if (usingNd != nullptr) {
 
-            if (nd) {
+            if (nd != nullptr) {
                nd->addUsingDirective(usingNd);
 
-            } else if (fd) {
+            } else if (fd != nullptr) {
                fd->addUsingDirective(usingNd);
             }
 
          } else {
-            // unknown namespace, but add it anyway
+            // unknown namespace, add it anyway
 
             QSharedPointer<NamespaceDef> nd = QMakeShared<NamespaceDef>(root->getData(EntryKey::File_Name),
                      root->startLine, root->startColumn, name);
@@ -3086,7 +3086,7 @@ void Doxy_Work::findUsingDirectives(QSharedPointer<Entry> ptrEntry)
             }
 
             // insert the namespace in the file definition
-            if (fd) {
+            if (fd != nullptr) {
                fd->insertNamespace(nd);
                fd->addUsingDirective(nd);
             }
@@ -4885,6 +4885,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         if (item->isPrototype() && ! root->proto) {
                            item->setDeclFile(item->getDefFileName(), item->getDefLine(), item->getDefColumn());
                            item->setPrototype(false, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
+
                         } else if (!md->isPrototype() && root->proto) {
                            // if md is already the definition, then add the declaration info
                            md->setDeclFile(root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
@@ -5864,7 +5865,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                   // instantiate it, since typedefs are in a different namespace
                   // see bug531637 for an example where this would otherwise hang the program
 
-                  if (baseClassTypeDef == 0) {
+                  if (baseClassTypeDef == nullptr) {
                      findTemplateInstanceRelation(root, context, baseClass, templSpec, templateNames, baseClass->isArtificial());
                   }
 
@@ -5942,7 +5943,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
 
                         if (! sd || sd == Doxy_Globals::globalScope) {
                            // outer scope not found
-                           baseClass->setArtificial(true); // see bug678139
+                           baseClass->setArtificial(true);
                         }
                      }
                   }
@@ -5982,6 +5983,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
             // indicates a relation between a template class and a template
             // instance with the same name.
          }
+
          if (scopeOffset == 0) {
             scopeOffset = -1;
 
@@ -6900,7 +6902,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
    }
 
    // merge class and namespace scopes again
-   scopeName = "";
+   scopeName = QString();
 
    if (! namespaceName.isEmpty()) {
       if (className.isEmpty()) {
@@ -6921,7 +6923,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
    QString tempScopeName = scopeName;
    QSharedPointer<ClassDef> cd = getClass(scopeName);
 
-   if (cd) {
+   if (cd != nullptr) {
       if (funcSpec.isEmpty()) {
          int argListIndex = 0;
          tempScopeName = cd->qualifiedNameWithTemplateParameters(root->m_templateArgLists, &argListIndex);
@@ -7580,7 +7582,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                if (mn) {
                   auto iter = mn->begin();
-                  mdDefine = *iter;
+                  mdDefine  = *iter;
 
                   while (mdDefine && !isDefine) {
                      isDefine = isDefine || mdDefine->isDefine();
@@ -7665,12 +7667,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                // which do not have to do with those of the related class.
 
                ArgumentList tmpArgList1;
+               ArgumentList tmpArgList2;
 
                if (! root->m_templateArgLists.isEmpty()) {
                   tmpArgList1 = root->m_templateArgLists.last();
                }
-
-               ArgumentList tmpArgList2;
 
                if (! funcArgs.isEmpty())   {
                   tmpArgList2 = root->argList;

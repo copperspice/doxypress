@@ -243,7 +243,6 @@ static void startCommentBlock(bool brief)
 
 static void handleCommentBlock(const QString &doc, bool isBrief)
 {
-   // TODO: Fix this
    docBlockInBody = false;
 
    if (docBlockInBody && previous) {

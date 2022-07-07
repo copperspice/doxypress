@@ -111,6 +111,7 @@ void XmlDocVisitor::visit(DocWord *w)
    if (m_hide) {
       return;
    }
+
    filter(w->word());
 }
 
@@ -119,6 +120,7 @@ void XmlDocVisitor::visit(DocLinkedWord *w)
    if (m_hide) {
       return;
    }
+
    startLink(w->ref(), w->file(), w->anchor());
    filter(w->word());
    endLink();
@@ -592,6 +594,7 @@ void XmlDocVisitor::visit(DocFormula *f)
    if (m_hide) {
       return;
    }
+
    m_t << "<formula id=\"" << f->id() << "\">";
    filter(f->text());
    m_t << "</formula>";
@@ -602,19 +605,22 @@ void XmlDocVisitor::visit(DocIndexEntry *ie)
    if (m_hide) {
       return;
    }
+
    m_t << "<indexentry>"
-       "<primaryie>";
+          "<primaryie>";
+
    filter(ie->entry());
+
    m_t << "</primaryie>"
-       "<secondaryie></secondaryie>"
-       "</indexentry>";
+          "<secondaryie></secondaryie>"
+          "</indexentry>";
 }
 
 void XmlDocVisitor::visit(DocSimpleSectSep *sep)
 {
    if (sep->parent() && sep->parent()->kind() == DocNode::Kind_SimpleSect) {
       visitPost((DocSimpleSect *)sep->parent()); // end current section
-      visitPre((DocSimpleSect *)sep->parent()); // start new section
+      visitPre((DocSimpleSect *)sep->parent());  // start new section
    }
 }
 
@@ -623,10 +629,13 @@ void XmlDocVisitor::visit(DocCite *cite)
    if (m_hide) {
       return;
    }
+
    if (!cite->file().isEmpty()) {
       startLink(cite->ref(), cite->file(), cite->anchor());
    }
+
    filter(cite->text());
+
    if (!cite->file().isEmpty()) {
       endLink();
    }
@@ -665,6 +674,7 @@ void XmlDocVisitor::visitPre(DocAutoListItem *)
    if (m_hide) {
       return;
    }
+
    m_t << "<listitem>";
 }
 
@@ -673,6 +683,7 @@ void XmlDocVisitor::visitPost(DocAutoListItem *)
    if (m_hide) {
       return;
    }
+
    m_t << "</listitem>";
 }
 
@@ -681,6 +692,7 @@ void XmlDocVisitor::visitPre(DocPara *)
    if (m_hide) {
       return;
    }
+
    m_t << "<para>";
 }
 
@@ -708,7 +720,9 @@ void XmlDocVisitor::visitPre(DocSimpleSect *s)
    if (m_hide) {
       return;
    }
+
    m_t << "<simplesect kind=\"";
+
    switch (s->type()) {
       case DocSimpleSect::See:
          m_t << "see";
@@ -828,8 +842,10 @@ void XmlDocVisitor::visitPre(DocSection *s)
    if (m_hide) {
       return;
    }
+
    m_t << "<sect" << s->level() << " id=\"" << s->file();
-   if (!s->anchor().isEmpty()) {
+
+   if (! s->anchor().isEmpty()) {
       m_t << "_1" << s->anchor();
    }
 
@@ -850,6 +866,7 @@ void XmlDocVisitor::visitPre(DocHtmlList *s)
    if (m_hide) {
       return;
    }
+
    if (s->type() == DocHtmlList::Ordered) {
       m_t << "<orderedlist>\n";
    } else {
@@ -1192,6 +1209,7 @@ void XmlDocVisitor::visitPost(DocLink *)
    if (m_hide) {
       return;
    }
+
    endLink();
 }
 
@@ -1200,9 +1218,11 @@ void XmlDocVisitor::visitPre(DocRef *ref)
    if (m_hide) {
       return;
    }
+
    if (!ref->file().isEmpty()) {
       startLink(ref->ref(), ref->file(), ref->isSubPage() ? QString() : ref->anchor());
    }
+
    if (!ref->hasLinkText()) {
       filter(ref->targetTitle());
    }
@@ -1213,10 +1233,10 @@ void XmlDocVisitor::visitPost(DocRef *ref)
    if (m_hide) {
       return;
    }
-   if (!ref->file().isEmpty()) {
+
+   if (! ref->file().isEmpty()) {
       endLink();
    }
-   //m_t << " ";
 }
 
 void XmlDocVisitor::visitPre(DocSecRefItem *ref)
@@ -1224,6 +1244,7 @@ void XmlDocVisitor::visitPre(DocSecRefItem *ref)
    if (m_hide) {
       return;
    }
+
    m_t << "<tocitem id=\"" << ref->file() << "_1" << ref->anchor() << "\">";
 }
 
@@ -1232,6 +1253,7 @@ void XmlDocVisitor::visitPost(DocSecRefItem *)
    if (m_hide) {
       return;
    }
+
    m_t << "</tocitem>" << endl;
 }
 
@@ -1249,6 +1271,7 @@ void XmlDocVisitor::visitPost(DocSecRefList *)
    if (m_hide) {
       return;
    }
+
    m_t << "</toclist>" << endl;
 }
 
@@ -1314,6 +1337,7 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
          for (auto type : pl->paramTypes()) {
             if (type->kind() == DocNode::Kind_Word) {
                visit((DocWord *)type);
+
             } else if (type->kind() == DocNode::Kind_LinkedWord) {
                visit((DocLinkedWord *)type);
 
@@ -1370,14 +1394,18 @@ void XmlDocVisitor::visitPre(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
+
    m_t << "<xrefsect id=\"";
    m_t << x->file() << "_1" << x->anchor();
    m_t << "\">";
    m_t << "<xreftitle>";
+
    filter(x->title());
+
    m_t << "</xreftitle>";
    m_t << "<xrefdescription>";
 }
@@ -1408,6 +1436,7 @@ void XmlDocVisitor::visitPost(DocInternalRef *)
    if (m_hide) {
       return;
    }
+
    endLink();
    m_t << " ";
 }

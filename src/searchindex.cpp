@@ -238,10 +238,10 @@ void SearchIndex::addWord(const QString &word, bool hiPriority)
 
 static void writeInt(QFile &f, int index)
 {
-   f.putChar(((uint)index) >> 24);
-   f.putChar((((uint)index) >> 16) & 0xff);
-   f.putChar((((uint)index) >> 8) & 0xff);
-   f.putChar(((uint)index) & 0xff);
+   f.putChar( ((uint)index)  >> 24);
+   f.putChar( (((uint)index) >> 16) & 0xff);
+   f.putChar( (((uint)index) >> 8) & 0xff);
+   f.putChar( ((uint)index)  & 0xff);
 }
 
 static void writeString(QFile &file, const QString &str)
@@ -550,7 +550,7 @@ static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_
    QSharedPointer<FileDef>      fd;
    QSharedPointer<GroupDef>     gd;
 
-   if (isLinkable &&  (((cd = md->getClassDef()) && cd->isLinkable() && cd->templateMaster() == 0) ||
+   if (isLinkable &&  (((cd = md->getClassDef()) && cd->isLinkable() && cd->templateMaster() == nullptr) ||
                        ((gd = md->getGroupDef()) && gd->isLinkable())) ) {
 
       QString n = md->name();
@@ -938,7 +938,7 @@ void writeJavascriptSearchIndex()
                   ti << "'" << externalRef("../", d->getReference(), true)
                      << addHtmlExtensionIfMissing(d->getOutputFileBase());
 
-                  if (!anchor.isEmpty()) {
+                  if (! anchor.isEmpty()) {
                      ti << "#" << anchor;
                   }
                   ti << "',";
@@ -956,7 +956,7 @@ void writeJavascriptSearchIndex()
                   } else if (md) {
                      QSharedPointer<FileDef> fd = md->getBodyDef();
 
-                     if (fd == 0) {
+                     if (fd == nullptr) {
                         fd = md->getFileDef();
                      }
                      if (fd) {
@@ -1016,7 +1016,7 @@ void writeJavascriptSearchIndex()
                      ti << "'" << externalRef("../", d->getReference(), true)
                         << addHtmlExtensionIfMissing(d->getOutputFileBase());
 
-                     if (!anchor.isEmpty()) {
+                     if (! anchor.isEmpty()) {
                         ti << "#" << anchor;
                      }
                      ti << "',";
@@ -1029,7 +1029,7 @@ void writeJavascriptSearchIndex()
                      }
 
                      bool found = false;
-                     overloadedFunction = ((prevScope != 0 && scope == prevScope) || (scope && scope == nextScope))
+                     overloadedFunction = ((prevScope != nullptr && scope == prevScope) || (scope && scope == nextScope))
                                              && md && (md->isFunction() || md->isSlot());
 
                      QString prefix;
@@ -1040,12 +1040,16 @@ void writeJavascriptSearchIndex()
 
                      if (overloadedFunction) {
                         // overloaded member function
-                        prefix += convertToXML(md->argsString());
+
                         // show argument list to disambiguate overloaded functions
+                        prefix += convertToXML(md->argsString());
+
 
                      } else if (md) {
                         // unique member function
-                        prefix += "()"; // only to show it is a function
+
+                        // only to show it is a function
+                        prefix += "()";
                      }
 
                      QString name;
@@ -1059,13 +1063,13 @@ void writeJavascriptSearchIndex()
                         name  = convertToXML(d.dynamicCast<NamespaceDef>()->displayName());
                         found = true;
 
-                     } else if (scope == 0 || scope == Doxy_Globals::globalScope) {
+                     } else if (scope == nullptr || scope == Doxy_Globals::globalScope) {
                         // in global scope
 
                         if (md) {
                            QSharedPointer<FileDef> fd = md->getBodyDef();
 
-                           if (fd == 0) {
+                           if (fd == nullptr) {
                               fd = md->getFileDef();
                            }
 
@@ -1102,7 +1106,7 @@ void writeJavascriptSearchIndex()
                      ti << "'" << name << "'";
 
                      prevScope = scope;
-                     childCount++;
+                     ++childCount;
 
                   }
 

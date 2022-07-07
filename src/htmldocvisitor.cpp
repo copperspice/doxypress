@@ -940,7 +940,7 @@ void HtmlDocVisitor::visit(DocFormula *f)
          closeInline = true;
          text = text.mid(1, text.length() - 2);
          m_t << "\\(";
-      }  else if (!bDisplay && ! text.isEmpty()) {
+      }  else if (! bDisplay && ! text.isEmpty()) {
          closeInline = true;
          m_t << "\\(";
       }
@@ -2853,7 +2853,7 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
 
       }
 
-      nodeIndex--;
+      --nodeIndex;
       bool styleOutsideParagraph = insideStyleChange_OutsidePara(para, nodeIndex);
 
       bool isFirst;
@@ -2891,7 +2891,7 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
          return;
       }
 
-      nodeIndex++;
+      ++nodeIndex;
 
       if (nodeIndex == numNodes) {
          // last node

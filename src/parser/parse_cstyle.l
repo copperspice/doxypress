@@ -588,7 +588,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
             i--;
          }
 
-         i++;
+         ++i;
 
          if (i != len) {
             oldStyleArgType = tmpArgs.left(i);
@@ -1094,7 +1094,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->mtype       = MethodType::Property;
       current->protection  = protection = Public;
 
-      current->m_entryName = "";
+      current->m_entryName = QString();
       current->setData(EntryKey::Member_Type, "");
       current->setData(EntryKey::Member_Args, "");
       current->argList.clear();
@@ -4043,8 +4043,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlockTerm = ';';
 
       if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC) {
-         current->setData(EntryKey::Member_Bitfields,    ":" + current->getData(EntryKey::Member_Args));
-         current->setData(EntryKey::Member_Args,      "");
+         current->setData(EntryKey::Member_Bitfields, ":" + current->getData(EntryKey::Member_Args));
+         current->setData(EntryKey::Member_Args, "");
          current->section = Entry::VARIABLE_SEC;
       }
 
@@ -4076,8 +4076,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlockTerm = ',';
 
       if (YY_START == EnumBaseType && current->section == Entry::ENUM_SEC) {
-       current->setData(EntryKey::Member_Bitfields,   ":" + current->getData(EntryKey::Member_Args));
-       current->setData(EntryKey::Member_Args,     "");
+       current->setData(EntryKey::Member_Bitfields, ":" + current->getData(EntryKey::Member_Args));
+       current->setData(EntryKey::Member_Args, "");
 
        current->section = Entry::VARIABLE_SEC;
       }
@@ -4219,7 +4219,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_roundGEnum  = EntryKey::Initial_Value;
       roundCount    = 0;
 
-      current->appendData(EntryKey::Initial_Value,  text[0]);
+      current->appendData(EntryKey::Initial_Value, text[0]);
 
       BEGIN(GCopyRound);
    }
@@ -4290,7 +4290,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             BEGIN(lastInitializerContext);
 
       } else   {
-         current->appendData(EntryKey::Initial_Value,    text[0]);
+         current->appendData(EntryKey::Initial_Value, text[0]);
 
       }
    }
@@ -6401,7 +6401,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       addToOutput(s_rawEntry, EntryKey::User_Property, text, s_rawEnum);
 
-      fullArgString  += text;
+      fullArgString += text;
 
       BEGIN(RawString);
    }
@@ -6421,7 +6421,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       addToArgs(text[0]);
       fullArgString  += text[0];
-      argRoundCount  = 0;
+      argSquareCount  = 0;
 
       lastCopyArgContext = YY_START;
 
@@ -6658,14 +6658,17 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <ReadTempArgs>"<"           {
       QString text = QString::fromUtf8(yytext);
+
       addToArgs(text[0]);
-      fullArgString  += text[0];
-      argSharpCount   =  1;
+      fullArgString += text[0];
+      argSharpCount  = 1;
+
       BEGIN( CopyArgSharp );
    }
 
 <ReadTempArgs>">"           {
       QString text = QString::fromUtf8(yytext);
+
       addToArgs(text[0]);
       fullArgString += text[0];
 
@@ -6677,20 +6680,23 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <CopyArgRound>"("           {
       QString text = QString::fromUtf8(yytext);
-      argRoundCount++;
+
       addToArgs(text[0]);
-      fullArgString  += text[0];
+      fullArgString += text[0];
+
+      ++argRoundCount;
    }
 
 <CopyArgRound>")"           {
       QString text = QString::fromUtf8(yytext);
+
       addToArgs(text[0]);
       fullArgString += text[0];
 
       if (argRoundCount > 0) {
-         argRoundCount--;
+         --argRoundCount;
       } else {
-         BEGIN( lastCopyArgContext );
+         BEGIN(lastCopyArgContext);
       }
    }
 
@@ -6700,29 +6706,32 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       fullArgString += text[0];
       argRoundCount  = 0;
-      lastCopyArgContext = YY_START;
 
-      BEGIN( CopyArgRound );
+      lastCopyArgContext = YY_START;
+      BEGIN(CopyArgRound);
    }
 
 <CopyArgSharp>"<"           {
       QString text = QString::fromUtf8(yytext);
-      argSharpCount++;
+
       addToArgs(text[0]);
       fullArgString  += text[0];
+      ++argSharpCount;
    }
 
 <CopyArgSharp>">"           {
       QString text = QString::fromUtf8(yytext);
-      addToArgs(text[0]);
-      fullArgString  += text[0];
-      argSharpCount--;
 
-      if (argSharpCount>0) {
+      addToArgs(text[0]);
+      fullArgString += text[0];
+
+      --argSharpCount;
+
+      if (argSharpCount > 0) {
          //
 
       } else {
-         BEGIN( ReadTempArgs );
+         BEGIN(ReadTempArgs);
 
       }
    }
@@ -6977,6 +6986,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->argList.trailingReturnType += text;
       current->appendData(EntryKey::Member_Args, text);
    }
+
 <TrailingReturn>.                         {
       QString text = QString::fromUtf8(yytext);
 
@@ -7112,7 +7122,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       } else if (checkForKnRstyleC()) {
          current->setData(EntryKey::Member_Args, text);
-         oldStyleArgType.resize(0);
+         oldStyleArgType.clear();
          BEGIN(OldStyleArgs);
 
       } else {
@@ -7369,7 +7379,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          previous = current;
 
          current_root->addSubEntry(current);
-         current  = QMakeShared<Entry>();
+         current = QMakeShared<Entry>();
          initEntry();
 
          bool isOptional_Prev = previous->m_traits.hasTrait(Entry::Virtue::Optional);
@@ -10143,7 +10153,7 @@ void CPP_Parser::parseCode(CodeGenerator &outputX, const QString &scopeName, con
                   int startLine, int endLine, bool inlineFragment, QSharedPointer<MemberDef> memberDef,
                   bool showLineNumbers, QSharedPointer<Definition> searchCtx, bool collectXRefs )
 {
-   ::parseCCode(outputX, scopeName, input,lang, isExampleBlock, exampleName, fileDef, startLine, endLine,
+   ::parseCCode(outputX, scopeName, input, lang, isExampleBlock, exampleName, fileDef, startLine, endLine,
                   inlineFragment,memberDef, showLineNumbers, searchCtx, collectXRefs);
 }
 

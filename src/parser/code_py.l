@@ -654,7 +654,8 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
                return;
             }
 
-         } else { // check namespace as well
+         } else {
+            // check namespace as well
             QSharedPointer<NamespaceDef> mnd = getResolvedNamespace(scope);
 
             if (mnd) {

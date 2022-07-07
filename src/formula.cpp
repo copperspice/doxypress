@@ -230,7 +230,7 @@ void FormulaList::generateBitmaps(const QString &path)
 
          uint imageX = 0, imageY = 0;
 
-         // read the generated image again, to obtain the pixel data.
+         // read the generated image again, to obtain the pixel data
          if (f.open(QIODevice::ReadOnly)) {
             QTextStream t(&f);
             QString s;
@@ -337,7 +337,7 @@ void FormulaList::generateBitmaps(const QString &path)
 
                if (pngFile.open(QIODevice::WriteOnly)) {
 
-                  // parameter 1 is used as a temporary hack to select the right color palette
+                  // parameter 1 is used as a temporary to select the right color palette
                   QByteArray buffer = dstImage.convert(1);
 
                   pngFile.write(buffer);

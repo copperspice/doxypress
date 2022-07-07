@@ -364,7 +364,7 @@ QSharedPointer<Entry> tcl_entry_new()
    QSharedPointer<Entry> myEntry = QMakeShared<Entry>();
 
    myEntry->section     = Entry::EMPTY_SEC;
-   myEntry->m_entryName = "";
+   myEntry->m_entryName = QString();
    myEntry->protection  = Public;
    myEntry->m_srcLang   = SrcLangExt_Tcl;
 
@@ -1145,7 +1145,7 @@ static tcl_scan *tcl_scan_start(QChar type, const QString &content_t, const QStr
    }
 
    if (myScan->tclType != ' ') {
-      tcl_codify("", myScan->tclType);
+      tcl_codify(QString(), myScan->tclType);
       content = content.mid(1, content.length() - 2);
    }
 
@@ -1497,7 +1497,6 @@ static void tcl_comment(int what, const QString  &text)
       }
 
       yy_push_state(COMMENT);
-
       tcl.string_comment = "";
       tcl.comment = 0;
 
@@ -1524,7 +1523,6 @@ static void tcl_comment(int what, const QString  &text)
 
       } else {
          tcl.string_last = "";
-
       }
 
       yy_pop_state();
@@ -1536,7 +1534,7 @@ static void tcl_comment(int what, const QString  &text)
 
       if (tcl.this_parser && tcl.string_comment.length()) {
          int myPos  = 0;
-         bool myNew = 0;
+         bool myNew = false;
          int myLine = tcl.line_comment;
 
          QString myIn;
@@ -1562,7 +1560,7 @@ static void tcl_comment(int what, const QString  &text)
             QSharedPointer<Entry> myEntry;
             QSharedPointer<Entry> myEntry1;
 
-            if (tcl.listScan.length() > 0 ) {
+            if (tcl.listScan.length() > 0) {
                if (tcl.listScan.at(0)->entry_fn) {
                   myEntry1 = tcl.listScan.at(0)->entry_fn;
 
@@ -1607,7 +1605,7 @@ static void tcl_comment(int what, const QString  &text)
                myNew   = 0;
                myEntry = tcl_entry_new();
                parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
-                                 myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
+                     myLine0, false, tcl.config_autobrief, false, myProt, myPos0, myNew);
 
                tcl.entry_inside->addSubEntry(myEntry);
 
@@ -1618,15 +1616,16 @@ static void tcl_comment(int what, const QString  &text)
                }
 
                parseCommentBlock(tcl.this_parser, myEntry1, myDoc, tcl.file_name,
-                                 myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
+                     myLine0, false, tcl.config_autobrief, false, myProt, myPos0, myNew);
             }
+
          } else {
             // new entry
             tcl.entry_current = tcl_entry_new();
 
             while (parseCommentBlock(tcl.this_parser, tcl.entry_current, myDoc,
-                                     tcl.file_name, myLine, false, tcl.config_autobrief, FALSE,
-                                     myProt, myPos, myNew)) {
+                  tcl.file_name, myLine, false, tcl.config_autobrief, false,
+                  myProt, myPos, myNew)) {
                if (myNew) {
                   tcl.entry_inside->addSubEntry(tcl.entry_current);
                   tcl.entry_current = tcl_entry_new();
@@ -1660,7 +1659,7 @@ static void tcl_comment(int what, const QString  &text)
 // Parse given arglist .
 static void tcl_command_ArgList(QString &arglist)
 {
-   QString retval = "";
+   QString retval = QString();
 
    QStringList myArgs;
    myArgs = tcl_split_list(arglist);
@@ -2944,10 +2943,12 @@ static void tcl_command(int what, const QString &text)
                myState = 'b';
                myType << "keyword" << "NULL" << "script";
                i = tcl.listCommandwords.count();
+
             } else if (i == tcl.listCommandwords.count() - 1) {
                myState = 'b';
                myType << "script";
                i = tcl.listCommandwords.count();
+
             } else {
                myLine = __LINE__;
                goto command_warn;

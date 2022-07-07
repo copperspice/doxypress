@@ -1142,8 +1142,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // end of a .NET XML style detailed description
       QString text = QString::fromUtf8(yytext);
 
-      addToOutput(text);
       setOutput(OutputMainDoc);
+      addToOutput(text);
    }
 
 <Comment>"</remarks>"         {
@@ -1912,7 +1912,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <ConceptDocArg1>{SCOPENAME}   {
       // first argument, concept name
       QString text = QString::fromUtf8(yytext);
-      current->m_entryName = substitute(text,".","::");
+      current->m_entryName = substitute(text, ".", "::");
 
       BEGIN( Comment );
    }
@@ -1994,7 +1994,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <GroupDocArg2>{DOCNL}         {
       QString text = QString::fromUtf8(yytext);
 
-      if ( current->groupDocType == Entry::GROUPDOC_NORMAL && current->getData(EntryKey::Member_Type).isEmpty()) {
+      if (current->groupDocType == Entry::GROUPDOC_NORMAL && current->getData(EntryKey::Member_Type).isEmpty()) {
          // defgroup requires second argument
          warn(yyFileName, yyLineNr, "Missing title after \\defgroup %s", csPrintable(current->m_entryName) );
       }
@@ -2003,6 +2003,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       BEGIN( Comment );
    }
+
 <GroupDocArg2>.            {
       // title (stored in type)
       QString text = QString::fromUtf8(yytext);
@@ -2144,7 +2145,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       warn(yyFileName, yyLineNr, "Missing first argument of \\xrefitem");
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -2176,7 +2177,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       warn(yyFileName, yyLineNr, "Missing second argument of \\xrefitem");
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -2211,7 +2212,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       warn(yyFileName, yyLineNr,"Missing third argument of \\xrefitem");
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -2297,7 +2298,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       warn(yyFileName, yyLineNr, "\\section command has no label");
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -2386,7 +2387,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       warn(yyFileName, yyLineNr, "\\subpage command has no label");
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -2435,7 +2436,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       warn(yyFileName, yyLineNr, "\\anchor command has no label");
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -2484,7 +2485,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -2777,7 +2778,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
       unputString(text);
 
-      BEGIN( Comment );
+      BEGIN(Comment);
    }
 
 <NameParam>{LC}            {
@@ -2815,7 +2816,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
       unputString(text);
 
-      BEGIN( Comment );
+      BEGIN(Comment);
    }
 
 <InGroupParam>{LC}         {
@@ -2995,7 +2996,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
       }
    }
 

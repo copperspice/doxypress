@@ -230,21 +230,27 @@ void RTFDocVisitor::visit(DocURL *u)
 
    if (Config::getBool("rtf-hyperlinks")) {
       m_t << "{\\field "
-          "{\\*\\fldinst "
-          "{ HYPERLINK \"";
+             "{\\*\\fldinst "
+             "{ HYPERLINK \"";
+
       if (u->isEmail()) {
          m_t << "mailto:";
       }
+
       m_t << u->url();
       m_t <<  "\" }"
-          "{}";
-      m_t <<   "}"
-          "{\\fldrslt "
-          "{\\cs37\\ul\\cf2 ";
+              "{}";
+
+      m_t << "}"
+             "{\\fldrslt "
+             "{\\cs37\\ul\\cf2 ";
+
       filter(u->url());
-      m_t <<     "}"
-          "}"
-          "}" << endl;
+
+      m_t << "}"
+             "}"
+             "}" << endl;
+
    } else {
       m_t << "{\\f2 ";
       filter(u->url());
@@ -273,6 +279,7 @@ void RTFDocVisitor::visit(DocHorRuler *)
    }
 
    DBG_RTF("{\\comment RTFDocVisitor::visit(DocHorRuler)}\n");
+
    m_t << "{\\pard\\widctlpar\\brdrb\\brdrs\\brdrw5\\brsp20 \\adjustright \\par}" << endl;
    m_lastIsPara = true;
 }
@@ -447,9 +454,8 @@ void RTFDocVisitor::visit(DocVerbatim *s)
          m_t << rtf_Style_Reset << getStyle("CodeExample");
 
          Doxy_Globals::parserManager.getParser(lang)->parseCode(m_ci, s->context(),
-                  s->text(), langExt, s->isExample(), s->exampleFile());
+               s->text(), langExt, s->isExample(), s->exampleFile());
 
-         //m_t << "\\par" << endl;
          m_t << "}" << endl;
          break;
 
@@ -535,6 +541,7 @@ void RTFDocVisitor::visit(DocVerbatim *s)
       }
       break;
    }
+
    m_lastIsPara = false;
 }
 
@@ -780,7 +787,8 @@ void RTFDocVisitor::visit(DocCite *cite)
    }
 
    filter(cite->text());
-   if (!cite->file().isEmpty()) {
+
+   if (! cite->file().isEmpty()) {
       endLink(cite->ref());
    } else {
       m_t << "}";
@@ -833,10 +841,12 @@ void RTFDocVisitor::visitPre(DocAutoListItem *)
    }
 
    m_t << rtf_Style_Reset;
+
    if (rtf_listItemInfo[m_indentLevel].isEnum) {
       m_t << getStyle("ListEnum") << "\n";
       m_t << rtf_listItemInfo[m_indentLevel].number << ".\\tab ";
-      rtf_listItemInfo[m_indentLevel].number++;
+
+      ++rtf_listItemInfo[m_indentLevel].number;
 
    } else {
       m_t << getStyle("ListBullet") << "\n";
@@ -923,7 +933,6 @@ void RTFDocVisitor::visitPre(DocSimpleSect *s)
    m_t << "{";
 
    // start desc
-
    m_t << "{" << rtf_Style["Heading5"].m_reference << "\n";
 
    switch (s->type()) {
@@ -1087,6 +1096,7 @@ void RTFDocVisitor::visitPre(DocSimpleListItem *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocSimpleListItem)}\n");
 
    m_t << "\\par" << rtf_Style_Reset << getStyle("ListBullet") << "\n";
@@ -1125,11 +1135,11 @@ void RTFDocVisitor::visitPre(DocSection *s)
    m_t << rtf_Style[heading].m_reference << "\n";
 
    // make table of contents entry
-
    filter(s->title());
 
    m_t << "\n\\par}\n";
    m_t << "{\\tc\\tcl" << level << " \\v ";
+
    filter(s->title());
    m_t << "}\n";
    m_lastIsPara = true;
@@ -1140,7 +1150,9 @@ void RTFDocVisitor::visitPost(DocSection *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocSection)}\n");
+
    m_t << "\\par}" << endl; // end section
    m_lastIsPara = true;
 }
@@ -1150,6 +1162,7 @@ void RTFDocVisitor::visitPre(DocHtmlList *l)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlList)}\n");
 
    m_t << "{\n";
@@ -1163,7 +1176,9 @@ void RTFDocVisitor::visitPost(DocHtmlList *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlList)}\n");
+
    m_t << "\\par" << "}" << endl;
    m_lastIsPara = true;
 }
@@ -1173,16 +1188,21 @@ void RTFDocVisitor::visitPre(DocHtmlListItem *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlListItem)}\n");
    m_t << "\\par\n";
    m_t << rtf_Style_Reset;
+
    if (rtf_listItemInfo[m_indentLevel].isEnum) {
       m_t << getStyle("ListEnum") << "\n";
       m_t << rtf_listItemInfo[m_indentLevel].number << ".\\tab ";
-      rtf_listItemInfo[m_indentLevel].number++;
+
+      ++rtf_listItemInfo[m_indentLevel].number;
+
    } else {
       m_t << getStyle("ListBullet") << "\n";
    }
+
    incIndentLevel();
    m_lastIsPara = false;
 }
@@ -1198,7 +1218,9 @@ void RTFDocVisitor::visitPre(DocHtmlDescList *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlDescList)}\n");
+
    //m_t << "{" << endl;
    //m_t << rtf_Style_Reset << getStyle("ListContinue");
    //m_lastIsPara=false;
@@ -1209,7 +1231,9 @@ void RTFDocVisitor::visitPost(DocHtmlDescList *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlDescList)}\n");
+
    //m_t << "}" << endl;
    //m_t << "\\par" << endl;
    //m_lastIsPara=true;
@@ -1232,7 +1256,9 @@ void RTFDocVisitor::visitPost(DocHtmlDescTitle *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlDescTitle)}\n");
+
    m_t << "\\par" << endl;
    m_t << "}" << endl;
    m_lastIsPara = true;
@@ -1243,7 +1269,7 @@ void RTFDocVisitor::visitPre(DocHtmlDescData *)
    if (m_hide) {
       return;
    }
-   DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlDescData)}\n");
+
    incIndentLevel();
    m_t << "{" << rtf_Style_Reset << getStyle("DescContinue");
 }
@@ -1253,7 +1279,9 @@ void RTFDocVisitor::visitPost(DocHtmlDescData *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlDescData)}\n");
+
    m_t << "\\par";
    m_t << "}" << endl;
    decIndentLevel();
@@ -1269,13 +1297,14 @@ void RTFDocVisitor::visitPre(DocHtmlTable *t)
    if (! m_lastIsPara) {
       m_t << "\\par\n";
    }
+
    m_lastIsPara = true;
 
    if (t->hasCaption()) {
       DocHtmlCaption *c = t->caption();
       m_t << "\\pard \\qc \\b";
 
-      if (!c ->file().isEmpty()) {
+      if (! c->file().isEmpty()) {
          m_t << "{\\bkmkstart " << rtfFormatBmkStr(stripPath(c->file()) + "_" + c->anchor()) << "}\n";
          m_t << "{\\bkmkend "   << rtfFormatBmkStr(stripPath(c->file()) + "_" + c->anchor()) << "}\n";
       }
@@ -1297,12 +1326,10 @@ void RTFDocVisitor::visitPost(DocHtmlTable *)
 
 void RTFDocVisitor::visitPre(DocHtmlCaption *)
 {
-   DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlCaption)}\n");
 }
 
 void RTFDocVisitor::visitPost(DocHtmlCaption *)
 {
-   DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlCaption)}\n");
    m_t << "}\n\\par\n";
 }
 
@@ -1311,8 +1338,6 @@ void RTFDocVisitor::visitPre(DocHtmlRow *r)
    if (m_hide) {
       return;
    }
-
-   DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlRow)}\n");
 
    uint i, columnWidth = r->numCells() > 0 ? rtf_pageWidth / r->numCells() : 10;
    m_t << "\\trowd \\trgaph108\\trleft-108"
@@ -1327,11 +1352,12 @@ void RTFDocVisitor::visitPre(DocHtmlRow *r)
       if (r->isHeading()) {
          m_t << "\\clcbpat16"; // set cell shading to light gray (color 16 in the clut)
       }
+
       m_t << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10 "
-          "\\clbrdrl\\brdrs\\brdrw10 "
-          "\\clbrdrb\\brdrs\\brdrw10 "
-          "\\clbrdrr \\brdrs\\brdrw10 "
-          "\\cltxlrtb "
+             "\\clbrdrl\\brdrs\\brdrw10 "
+             "\\clbrdrb\\brdrs\\brdrw10 "
+             "\\clbrdrr \\brdrs\\brdrw10 "
+             "\\cltxlrtb "
              "\\cellx" << ((i + 1)*columnWidth) << "\n";
    }
 
@@ -1344,10 +1370,13 @@ void RTFDocVisitor::visitPost(DocHtmlRow *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlRow)}\n");
+
    m_t << endl;
    m_t << "\\pard \\widctlpar\\intbl\\adjustright" << endl;
    m_t << "{\\row }" << endl;
+
    m_lastIsPara = false;
 }
 
@@ -1356,7 +1385,9 @@ void RTFDocVisitor::visitPre(DocHtmlCell *c)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlCell)}\n");
+
    m_t << "{" << align(c);
    m_lastIsPara = false;
 }
@@ -1376,7 +1407,7 @@ void RTFDocVisitor::visitPre(DocInternal *)
    if (m_hide) {
       return;
    }
-   //DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocInternal)}\n");
+
    //m_t << "{"; // start desc
    //m_t << "{\\b "; // start bold
    //m_t << theTranslator->trForInternalUseOnly();
@@ -1392,7 +1423,7 @@ void RTFDocVisitor::visitPost(DocInternal *)
    if (m_hide) {
       return;
    }
-   //DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocInternal)}\n");
+
    //m_t << "\\par";
    //decIndentLevel();
    //m_t << "}"; // end desc
@@ -1404,16 +1435,17 @@ void RTFDocVisitor::visitPre(DocHRef *href)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHRef)}\n");
 
    if (Config::getBool("rtf-hyperlinks")) {
       m_t << "{\\field "
-          "{\\*\\fldinst "
-          "{ HYPERLINK \"" << href->url() << "\" "
-          "}{}"
-          "}"
-          "{\\fldrslt "
-          "{\\cs37\\ul\\cf2 ";
+             "{\\*\\fldinst "
+             "{ HYPERLINK \"" << href->url() << "\" "
+             "}{}"
+             "}"
+             "{\\fldrslt "
+             "{\\cs37\\ul\\cf2 ";
 
    } else {
       m_t << "{\\f2 ";
@@ -1600,7 +1632,9 @@ void RTFDocVisitor::visitPost(DocLink *lnk)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocLink)}\n");
+
    endLink(lnk->ref());
 }
 
@@ -1631,10 +1665,13 @@ void RTFDocVisitor::visitPost(DocRef *ref)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocRef)}\n");
+
    if (!ref->file().isEmpty()) {
       endLink(ref->ref());
    }
+
    //m_t << " ";
 }
 
@@ -1819,18 +1856,19 @@ void RTFDocVisitor::visitPre(DocParamList *pl)
    if (useTable) {
       int i;
       m_t << "\\trowd \\trgaph108\\trleft426\\tblind426"
-          "\\trbrdrt\\brdrs\\brdrw10\\brdrcf15 "
-          "\\trbrdrl\\brdrs\\brdrw10\\brdrcf15 "
-          "\\trbrdrb\\brdrs\\brdrw10\\brdrcf15 "
-          "\\trbrdrr\\brdrs\\brdrw10\\brdrcf15 "
-          "\\trbrdrh\\brdrs\\brdrw10\\brdrcf15 "
+             "\\trbrdrt\\brdrs\\brdrw10\\brdrcf15 "
+             "\\trbrdrl\\brdrs\\brdrw10\\brdrcf15 "
+             "\\trbrdrb\\brdrs\\brdrw10\\brdrcf15 "
+             "\\trbrdrr\\brdrs\\brdrw10\\brdrcf15 "
+             "\\trbrdrh\\brdrs\\brdrw10\\brdrcf15 "
              "\\trbrdrv\\brdrs\\brdrw10\\brdrcf15 " << "\n";
+
       for (i = 0; i < columnPos[config][0]; i++) {
          m_t << "\\clvertalt\\clbrdrt\\brdrs\\brdrw10\\brdrcf15 "
-             "\\clbrdrl\\brdrs\\brdrw10\\brdrcf15 "
-             "\\clbrdrb\\brdrs\\brdrw10\\brdrcf15 "
-             "\\clbrdrr \\brdrs\\brdrw10\\brdrcf15 "
-             "\\cltxlrtb "
+                "\\clbrdrl\\brdrs\\brdrw10\\brdrcf15 "
+                "\\clbrdrb\\brdrs\\brdrw10\\brdrcf15 "
+                "\\clbrdrr \\brdrs\\brdrw10\\brdrcf15 "
+                "\\cltxlrtb "
                 "\\cellx" << (rtf_pageWidth * columnPos[config][i + 1] / 100) << "\n";
       }
 
@@ -1914,22 +1952,24 @@ void RTFDocVisitor::visitPost(DocParamList *pl)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocParamList)}\n");
 
    DocParamSect::Type parentType = DocParamSect::Unknown;
-   //DocParamSect *sect = 0;
+
    if (pl->parent() && pl->parent()->kind() == DocNode::Kind_ParamSect) {
       parentType = ((DocParamSect *)pl->parent())->type();
-      //sect=(DocParamSect*)pl->parent();
    }
+
    bool useTable = parentType == DocParamSect::Param ||
                    parentType == DocParamSect::RetVal ||
                    parentType == DocParamSect::Exception ||
                    parentType == DocParamSect::TemplateParam;
+
    if (useTable) {
       m_t << "\\cell }" << endl;
-      //m_t << "\\pard \\widctlpar\\intbl\\adjustright" << endl;
       m_t << "{\\row }" << endl;
+
    } else {
       m_t << "\\par" << endl;
    }
@@ -2003,13 +2043,16 @@ void RTFDocVisitor::visitPost(DocXRefItem *x)
    if (m_hide) {
       return;
    }
+
    if (x->title().isEmpty()) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocXRefItem)}\n");
+
    m_t << "\\par" << endl;
    decIndentLevel();
-   m_t << "}" << endl; // end xref item
+   m_t << "}" << endl;       // end xref item
    m_lastIsPara = true;
 }
 
@@ -2071,9 +2114,11 @@ void RTFDocVisitor::visitPre(DocHtmlBlockQuote *)
       return;
    }
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocHtmlBlockQuote)}\n");
+
    if (!m_lastIsPara) {
       m_t << "\\par\n" ;
    }
+
    m_t << "{"; // start desc
    incIndentLevel();
    m_t << rtf_Style_Reset << getStyle("DescContinue");
@@ -2084,10 +2129,13 @@ void RTFDocVisitor::visitPost(DocHtmlBlockQuote *)
    if (m_hide) {
       return;
    }
+
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocHtmlBlockQuote)}\n");
+
    if (!m_lastIsPara) {
       m_t << "\\par" << endl;
    }
+
    decIndentLevel();
    m_t << "}"; // end desc
    m_lastIsPara = true;
@@ -2168,16 +2216,20 @@ void RTFDocVisitor::startLink(const QString &ref, const QString &file, const QSt
    } else {
       m_t << "{\\b ";
    }
+
    m_lastIsPara = false;
 }
 
 void RTFDocVisitor::endLink(const QString &ref)
 {
-   if (ref.isEmpty() && Config::getBool("rtf-hyperlinks")) {
+   static const bool rtfHyperLinks = Config::getBool("rtf-hyperlinks");
+
+   if (ref.isEmpty() && rtfHyperLinks) {
       m_t << "}}}";
    } else {
       m_t << "}";
    }
+
    m_lastIsPara = false;
 }
 

@@ -3936,7 +3936,8 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             }
          }
 
-         if (members.count() > 0) { // at least one match
+         if (members.count() > 0) {
+            // at least one match
             if (currentFile) {
 
                for (auto itemMd : members) {
@@ -6061,21 +6062,21 @@ int getScopeFragment(const QString &str, int p, int *l)
          case '<':
             // skip template specifier
             count = 1;
-            sp++;
+            ++sp;
 
             done = false;
 
-            while (sp < sl && !done) {
+            while (sp < sl && ! done) {
                // TODO: deal with << and >> operators!
                QChar c = str.at(sp++);
 
                switch (c.unicode()) {
                   case '<':
-                     count++;
+                     ++count;
                      break;
 
                   case '>':
-                     count--;
+                     --count;
 
                      if (count == 0) {
                         done = true;
@@ -6089,7 +6090,7 @@ int getScopeFragment(const QString &str, int p, int *l)
             break;
 
          default:
-            sp++;
+            ++sp;
             break;
       }
 

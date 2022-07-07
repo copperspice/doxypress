@@ -1546,19 +1546,19 @@ void FileDef::combineUsingRelations()
 
    visited = true;
 
-   for (auto nd : m_usingDirList) {
+   for (const auto &nd : m_usingDirList) {
       nd->combineUsingRelations();
    }
 
-   for (auto nd : m_usingDirList) {
+   for (const auto &nd : m_usingDirList) {
       // add used namespaces of namespace nd to this namespace
 
-      for (auto und : nd->getUsedNamespaces()) {
+      for (const auto &und : nd->getUsedNamespaces()) {
          addUsingDirective(und);
       }
 
       // add used classes of namespace nd to this namespace
-      for (auto ucd : nd->getUsedClasses()) {
+      for (const auto &ucd : nd->getUsedClasses()) {
          addUsingDeclaration(ucd);
       }
    }

@@ -32,6 +32,8 @@
 #include <message.h>
 #include <util.h>
 
+static void processInline(QString &out, QStringView processText, QString::const_iterator iter_size);
+
 struct LinkRef {
    LinkRef(const QString &l, const QString &t)
       : link(l), title(t)
@@ -55,9 +57,8 @@ static int                     g_lineNr;
 
 const int codeBlockIndent = 4;
 
-static void processInline(QString &out, QStringView processText, QString::const_iterator iter_size);
-
 // is character allowed before an emphasis section
+
 static bool isOpenEmphChar(const QChar &text)
 {
    bool retval = false;
@@ -841,8 +842,8 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    QString::const_iterator iter_titleStart;
    QString::const_iterator iter_titleEnd;
 
-   bool isImageLink = false;
-   bool isToc = false;
+   bool isImageLink   = false;
+   bool isToc         = false;
 
    int level   = 1;
    int nl      = 0;
@@ -3150,9 +3151,8 @@ static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
       if (level != 0) {
          title = QStringView(iter, iter_end - 1);
 
-
-
-         docs = "\n\n" + QStringView(iter_endB, iter_end);      // modify passed values
+         // modify passed values
+         docs = "\n\n" + QStringView(iter_endB, iter_end);
          id   = extractTitleId(title, 0);
 
          return title;
