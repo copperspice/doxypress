@@ -1118,6 +1118,12 @@ bool NamespaceDef::isAnonymous() const
    return m_isAnonymous;
 }
 
+bool NamespaceDef::isAlias() const
+{
+   // emerald, may need to set a flag to mark this inlineNS (or ND is an alias)
+   return false;
+}
+
 bool NamespaceDef::isLinkableInProject() const
 {
   static const bool extractAnonNameSpace = Config::getBool("extract-anon-namespaces");

@@ -101,8 +101,12 @@ class NamespaceDef : public Definition
       return LIBRARY == m_type;
    }
 
+   bool isAnonymous() const;
+   bool isAlias() const;
+
    bool isLinkableInProject() const override;
    bool isLinkable() const override;
+
    bool hasDetailedDescription() const;
    void addMembersToMemberGroup();
    void distributeMemberGroupDocumentation();
@@ -142,8 +146,6 @@ class NamespaceDef : public Definition
    const NamespaceSDict &getNamespaceSDict() const {
       return m_namespaceSDict;
    }
-
-   bool isAnonymous() const;
 
    QString title() const;
    QString compoundTypeString() const;

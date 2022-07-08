@@ -1267,7 +1267,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
          for (auto &nd : Doxy_Globals::namespaceSDict) {
 
-            if (nd->isLinkableInProject()) {
+            if (nd->isLinkableInProject() && ! nd->isAlias()) {
 
                if (! found) {
                   m_textStream << "}\n\\input{" << nd->getOutputFileBase() << "}\n";
