@@ -256,11 +256,11 @@ class HtmlGenerator : public OutputGenerator
    void endParamList() override;
 
    void startTitle() override {
-      m_textStream << "<div class=\"title\">";
+      m_textStream << "    <div class=\"title\">";
    }
 
    void endTitle() override {
-      m_textStream << "</div>";
+      m_textStream << "</div>\n";
    }
 
    void startSection(const QString &, const QString &, SectionInfo::SectionType) override;
