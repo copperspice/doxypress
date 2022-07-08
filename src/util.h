@@ -112,7 +112,10 @@ inline bool isId(QChar c)
    } else if (c >= 128) {
       return true;
 
-   } else if ( c.isLetterOrNumber() ) {
+   } else if (c.isLetterOrNumber()) {
+      return true;
+
+   } else if (c == '$') {
       return true;
 
    }
