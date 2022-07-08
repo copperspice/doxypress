@@ -59,6 +59,7 @@
 // #define INTERNAL_ASSERT(x) if (!(x)) DBG(("INTERNAL_ASSERT(%s) failed retval=0x%x: file=%s line=%d\n",#x,retval,__FILE__,__LINE__));
 
 static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &children, bool handleWord = true);
+static void handleImg(DocNode *parent, QList<DocNode *> &children, const HtmlAttribList &tagHtmlAttribs);
 
 static const QString sectionLevelToName[] = {
    "page",
@@ -2150,6 +2151,12 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   }
                   break;
 
+               case HTML_IMG:
+                  if (! g_token->endTag) {
+                     handleImg(parent, children, g_token->attribs);
+                  }
+                  break;
+
                default:
                   return false;
                   break;
@@ -2208,7 +2215,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
    return true;
 }
 
-static void handleImg(DocNode *parent, QList<DocNode *> &children, const HtmlAttribList &tagHtmlAttribs)
+void handleImg(DocNode *parent, QList<DocNode *> &children, const HtmlAttribList &tagHtmlAttribs)
 {
    bool found = false;
    int index = 0;
