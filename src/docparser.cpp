@@ -1614,6 +1614,130 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
    assert(n == parent);
 }
 
+static void handleImage(DocNode *parent, QList<DocNode *> &children)
+{
+   bool inlineImage = false;
+   QString anchorStr;
+
+   int tok = doctokenizerYYlex();
+
+   if (tok != TK_WHITESPACE) {
+
+      if (tok == TK_WORD) {
+
+         if (g_token->name == "{") {
+            doctokenizerYYsetStateOptions();
+            tok = doctokenizerYYlex();
+            doctokenizerYYsetStatePara();
+
+            QStringList optList = g_token->name.split(",");
+
+            for (const auto &opt : optList) {
+               if (opt.empty()) {
+                  continue;
+               }
+
+               QString locOpt    = opt.trimmed();
+               QString locOptLow = locOpt.toLower();
+
+               if (locOptLow == "inline") {
+                  inlineImage = true;
+
+               } else if (locOptLow.startsWith("anchor:")) {
+
+                  if (! anchorStr.isEmpty()) {
+                     warn_doc_error(s_fileName, getDoctokenLineNum(), "Multiple use of option 'anchor' for 'image' command, ignoring: %s",
+                        csPrintable(locOpt.mid(7)));
+
+                  } else {
+                     anchorStr = locOpt.mid(7);
+                  }
+
+               } else {
+                  warn_doc_error(s_fileName, getDoctokenLineNum(), "Unknown option '%s' specified for \\image command",
+                     csPrintable(locOpt));
+               }
+
+            }
+
+            tok = doctokenizerYYlex();
+
+            if (tok != TK_WHITESPACE) {
+               warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\image command");
+               return;
+            }
+         }
+
+      } else {
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\image command");
+         return;
+      }
+   }
+
+   tok = doctokenizerYYlex();
+
+   if (tok != TK_WORD && tok != TK_LNKWORD) {
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument for an \\image command",
+            csPrintable(tokToString(tok)));
+
+      return;
+   }
+
+   tok = doctokenizerYYlex();
+
+   if (tok != TK_WHITESPACE) {
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\image command");
+      return;
+   }
+
+   DocImage::Type t;
+   QString imgType = g_token->name.toLower();
+
+   if (imgType == "html") {
+      t = DocImage::Html;
+
+   } else if (imgType == "latex") {
+      t = DocImage::Latex;
+
+   } else if (imgType == "docbook") {
+      t = DocImage::DocBook;
+
+   } else if (imgType == "rtf") {
+      t = DocImage::Rtf;
+
+   } else if (imgType == "xml") {
+      t = DocImage::Xml;
+
+   } else    {
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Output format %s specified as the first argument of "
+         "\\image command is not valid", csPrintable(imgType));
+
+      return;
+   }
+
+   doctokenizerYYsetStateFile();
+   tok = doctokenizerYYlex();
+   doctokenizerYYsetStatePara();
+
+   if (tok != TK_WORD) {
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of an \\image command",
+         csPrintable(tokToString(tok)));
+
+      return;
+   }
+
+   if (! anchorStr.isEmpty()) {
+      DocAnchor *anchor = new DocAnchor(parent, anchorStr, true);
+      children.append(anchor);
+   }
+
+   HtmlAttribList attrList;
+
+   DocImage *img =  new DocImage(parent, attrList, findAndCopyImage(g_token->name, t), t , QString(), inlineImage);
+
+   children.append(img);
+   img->parse();
+}
 
 /* Helper function that deals with the most common tokens allowed in
  * title like sections.
@@ -1892,6 +2016,9 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                }
                break;
 
+              case CMD_IMAGE:
+                handleImage(parent, children);
+                break;
                default:
                   return false;
             }
@@ -5980,66 +6107,6 @@ void DocPara::handleIncludeOperator(const QString &cmdName, DocIncOperator::Type
    op->parse();
 }
 
-void DocPara::handleImage(const QString &cmdName)
-{
-   int tok = doctokenizerYYlex();
-
-   if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", csPrintable(cmdName));
-      return;
-   }
-
-   tok = doctokenizerYYlex();
-
-   if (tok != TK_WORD && tok != TK_LNKWORD) {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
-            csPrintable(tokToString(tok)), csPrintable(cmdName));
-      return;
-   }
-   tok = doctokenizerYYlex();
-   if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command",
-            csPrintable(cmdName));
-      return;
-   }
-
-   DocImage::Type t;
-   QString imgType = g_token->name.toLower();
-
-   if (imgType == "html") {
-      t = DocImage::Html;
-
-   } else if (imgType == "latex") {
-      t = DocImage::Latex;
-
-   } else if (imgType == "docbook") {
-      t = DocImage::DocBook;
-
-   } else if (imgType == "rtf") {
-      t = DocImage::Rtf;
-
-   } else {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "image type %s specified as the first argument of "
-            "%s is not valid", csPrintable(imgType), csPrintable(cmdName));
-      return;
-   }
-
-   doctokenizerYYsetStateFile();
-   tok = doctokenizerYYlex();
-   doctokenizerYYsetStatePara();
-
-   if (tok != TK_WORD) {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
-            csPrintable(tokToString(tok)), csPrintable(cmdName));
-      return;
-   }
-
-   HtmlAttribList attrList;
-   DocImage *img = new DocImage(this, attrList, findAndCopyImage(g_token->name, t), t);
-   m_children.append(img);
-   img->parse();
-}
-
 template<class T>
 void DocPara::handleFile(const QString &cmdName)
 {
@@ -6940,7 +7007,7 @@ int DocPara::handleCommand(const QString &cmdName)
          break;
 
       case CMD_IMAGE:
-         handleImage(cmdName);
+         handleImage(this, m_children);
          break;
 
       case CMD_DOTFILE:

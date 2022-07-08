@@ -2069,7 +2069,6 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    int handleXRefItem();
    int handleParamSection(const QString &cmdName, DocParamSect::Type t, bool xmlContext, int direction);
    void handleIncludeOperator(const QString &cmdName, DocIncOperator::Type t);
-   void handleImage(const QString &cmdName);
 
    template<class T>
    void handleFile(const QString &cmdName);
