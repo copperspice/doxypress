@@ -1371,16 +1371,23 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
       return;
    }
 
-   tagFile << "  <compound kind=\"" << compoundTypeString();
+   tagFile << "  <compound kind=\"";
+
+   if (getLanguage() == SrcLangExt_Fortran && (compoundTypeString() == "type")) {
+      tagFile << "struct";
+   } else {
+      tagFile << compoundTypeString();
+   }
+
    tagFile << "\"";
 
    if (isObjectiveC()) {
       tagFile << " objc=\"yes\"";
    }
 
-   tagFile << ">" << endl;
-   tagFile << "    <name>" << convertToXML(name()) << "</name>" << endl;
-   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
+   tagFile << ">\n";
+   tagFile << "    <name>" << convertToXML(name()) << "</name>\n";
+   tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>\n";
 
    if (! anchor().isEmpty()) {
       tagFile << "    <anchor>" << convertToXML(anchor()) << "</anchor>" << endl;
@@ -1392,7 +1399,13 @@ void ClassDef::writeTagFile(QTextStream &tagFile)
    }
 
    for (auto a : m_tempArgs) {
-      tagFile << "    <templarg>" << convertToXML(a.name) << "</templarg>" << endl;
+      tagFile << "    <templarg>" << convertToXML(a.type);
+
+      if (! a.name.isEmpty())  {
+         tagFile << " " << convertToXML(a.name);
+      }
+
+      tagFile << "</templarg>\n";
    }
 
    if (m_parents) {
