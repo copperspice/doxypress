@@ -786,7 +786,9 @@ class PrintDocVisitor : public DocVisitor
       printf("<image src=\"%s\" type=\"", csPrintable(img->name()));
 
       switch (img->type()) {
-         case DocImage::None:
+
+         case DocImage::DocBook:
+            printf("docbook");
             break;
 
          case DocImage::Html:
@@ -801,8 +803,11 @@ class PrintDocVisitor : public DocVisitor
             printf("rtf");
             break;
 
-         case DocImage::DocBook:
-            printf("docbook");
+         case DocImage::Xml:
+            printf("xml");
+            break;
+
+         case DocImage::None:
             break;
       }
 

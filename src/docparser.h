@@ -1234,7 +1234,14 @@ class DocXRefItem : public CompAccept<DocXRefItem>, public DocNode
 class DocImage : public CompAccept<DocImage>, public DocNode
 {
  public:
-   enum Type { None, Html, Latex, Rtf, DocBook };
+   enum Type {
+      None,
+      DocBook,
+      Html,
+      Latex,
+      Rtf,
+      Xml,
+   };
 
    DocImage(DocNode *parent, HtmlAttribList attribs, const QString &name, Type t,
          const QString &url = QString(), bool inlineImage = true);

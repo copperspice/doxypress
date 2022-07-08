@@ -260,7 +260,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
    static const bool generateRtf     = Config::getBool("generate-rtf");
    static const bool latexPdf        = Config::getBool("latex-pdf");
 
-   // static const bool generateXml   = Config::getBool("generate-xml");
+   static const bool generateXml       = Config::getBool("generate-xml");
 
    static const QString outputHtmlDir  = Config::getString("html-output");
    static const QString outputLatexDir = Config::getString("latex-output");
@@ -293,6 +293,13 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
          QString outputDir;
 
          switch (type) {
+            case DocImage::DocBook:
+               if (! generateDocbook) {
+                  return result;
+               }
+               outputDir = Config::getString("docbook-output");
+               break;
+
             case DocImage::Html:
 
                if (! generateHtml) {
@@ -308,19 +315,19 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
                outputDir = outputLatexDir;
                break;
 
-            case DocImage::DocBook:
-               if (! generateDocbook) {
-                  return result;
-               }
-               outputDir = Config::getString("docbook-output");
-               break;
-
             case DocImage::Rtf:
                if (! generateRtf) {
                   return result;
                }
                outputDir = Config::getString("rtf-output");
                break;
+
+             case DocImage::Xml:
+                if (! generateXml) {
+                  return result;
+                }
+                outputDir = Config::getString("xml-output");
+                break;
 
             case DocImage::None:
                break;

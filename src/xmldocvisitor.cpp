@@ -50,6 +50,11 @@ static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCapti
       t << " type=\"";
 
       switch(type)     {
+
+         case DocImage::DocBook:
+            t << "docbook";
+            break;
+
          case DocImage::Html:
             t << "html";
             break;
@@ -62,8 +67,8 @@ static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCapti
             t << "rtf";
             break;
 
-         case DocImage::DocBook:
-            t << "docbook";
+         case DocImage::Xml:
+            t << "xml";
             break;
 
          case DocImage::None:
