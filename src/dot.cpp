@@ -4859,7 +4859,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
 
       while (dir) {
 
-         if (dir != usedDir && dir->parent() == usedDir->parent() && ! usedDir->isParentOf(dd)) {
+         if (dir != usedDir && dir->parent() == usedDir->parent()) {
             // include if both have the same parent (or no parent)
 
             t << "  " << usedDir->getOutputFileBase() << " [shape=box label=\""
