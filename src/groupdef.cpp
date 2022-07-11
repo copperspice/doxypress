@@ -738,8 +738,6 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
 void GroupDef::writeBriefDescription(OutputList &ol)
 {
-   static const bool repeatBrief = Config::getBool("repeat-brief");
-
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
    if (hasBriefDescription()) {
@@ -760,7 +758,7 @@ void GroupDef::writeBriefDescription(OutputList &ol)
          ol.writeString(" \n");
          ol.enable(OutputGenerator::RTF);
 
-         if (repeatBrief || ! documentation().isEmpty() ) {
+         if (hasDetailedDescription()) {
             ol.disableAllBut(OutputGenerator::Html);
             ol.startTextLink(QString(), "details");
             ol.parseText(theTranslator->trMore());
@@ -1628,5 +1626,11 @@ void GroupDef::updateLanguage(QSharedPointer<const Definition> d)
 bool GroupDef::hasDetailedDescription() const
 {
    static const bool repeatBrief = Config::getBool("repeat-brief");
-   return ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty());
+
+   bool a = (! briefDescription().isEmpty() && repeatBrief);
+   bool b = (! documentation().isEmpty() || ! inbodyDocumentation().isEmpty());
+
+   bool retval  = (a || b) && (pageDict->count() != numDocMembers());
+
+   return retval;
 }
