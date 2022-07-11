@@ -175,21 +175,32 @@ static inline int computeIndent(const QString &str)
 
 static inline void copyToOutput(const QString &s, int len)
 {
+   static int tabSize = Config::getInt("tab-size");
+
    if (s_skip) {
       // only add newlines
 
       for (int i = 0; i < len; i++) {
-         if (s[i] == '\n') {
-            ADDCHAR('\n');
+         switch (s[i].unicode()) {
 
-            s_lineNr++;
+            case '\n':
+              ADDCHAR('\n');
+               ++s_lineNr;
+               s_col = 0;
+               break;
+
+            case '\t':
+               s_col += tabSize -(s_col % tabSize);
+               break;
+
+            default:
+               ++s_col;
+               break;
          }
       }
 
    } else if (len > 0) {
       s_outputString += s.mid(0, len);
-
-      static int tabSize = Config::getInt("tab-size");
 
       for (int i = 0; i < len; i++) {
          switch (s[i].unicode()) {
@@ -890,7 +901,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
             REJECT;
 
          } else {
-            copyToOutput(text, yyleng);
+            copyToOutput(text, text.length());
             BEGIN(Scan);
          }
 
