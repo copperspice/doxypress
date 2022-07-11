@@ -381,7 +381,7 @@ static void writeLineNumber(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint 
       d = fd->getSourceDefinition(line);
    }
 
-   if (d && d->isLinkable()) {
+   if (d != nullptr && fd->isLinkable()) {
       s_currentDefinition = d;
       g_currentLine = line;
 
