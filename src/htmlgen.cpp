@@ -190,31 +190,30 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings
 
-   static const QDir configDir   = Config::getConfigDir();
+   static const QDir configDir         = Config::getConfigDir();
+   static const QString projectName    = Config::getString("project-name");
+   static const QString projectVersion = Config::getString("project-version");
+   static const QString projectBrief   = Config::getString("project-brief");
+   static const QString projectLogo    = Config::getString("project-logo");
 
-   static QString projectName    = Config::getString("project-name");
-   static QString projectVersion = Config::getString("project-version");
-   static QString projectBrief   = Config::getString("project-brief");
-   static QString projectLogo    = Config::getString("project-logo");
+   static const bool timeStamp         = Config::getBool("html-timestamp");
+   static const bool treeView          = Config::getBool("generate-treeview");
+   static const bool searchEngine      = Config::getBool("html-search");
+   static const bool serverBasedSearch = Config::getBool("search-server-based");
 
-   static bool timeStamp         = Config::getBool("html-timestamp");
-   static bool treeView          = Config::getBool("generate-treeview");
-   static bool searchEngine      = Config::getBool("html-search");
-   static bool serverBasedSearch = Config::getBool("search-server-based");
-
-   static bool mathJax           = Config::getBool("use-mathjax");
-   static QString mathJaxFormat  = Config::getEnum("mathjax-format");
-   static bool disableIndex      = Config::getBool("disable-index");
+   static const bool mathJax           = Config::getBool("use-mathjax");
+   static QString mathJaxFormat         = Config::getEnum("mathjax-format");
+   static const bool disableIndex      = Config::getBool("disable-index");
 
    static const QStringList extraCssFile      = Config::getList("html-stylesheets");
    static const QStringList mathJaxExtensions = Config::getList("mathjax-extensions");
 
-   static bool hasProjectName    = ! projectName.isEmpty();
-   static bool hasProjectVersion = ! projectVersion.isEmpty();
-   static bool hasProjectBrief   = ! projectBrief.isEmpty();
-   static bool hasProjectLogo    = ! projectLogo.isEmpty();
+   static const bool hasProjectName    = ! projectName.isEmpty();
+   static const bool hasProjectVersion = ! projectVersion.isEmpty();
+   static const bool hasProjectBrief   = ! projectBrief.isEmpty();
+   static const bool hasProjectLogo    = ! projectLogo.isEmpty();
 
-   static bool titleArea = (hasProjectName || hasProjectBrief || hasProjectLogo || (disableIndex && searchEngine));
+   static const bool titleArea = (hasProjectName || hasProjectBrief || hasProjectLogo || (disableIndex && searchEngine));
 
    QString generatedBy;
    QString treeViewCssJs;
@@ -850,7 +849,7 @@ void HtmlGenerator::writeSearchData(const QString &dir)
    QFile f(fileName);
 
    if (f.open(QIODevice::WriteOnly)) {
-      static bool disableIndex = Config::getBool("disable-index");
+      static const bool disableIndex = Config::getBool("disable-index");
 
       QByteArray data;
 
@@ -950,8 +949,8 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
 
 void HtmlGenerator::writeSearchInfo(QTextStream &t_stream, const QString &relPath)
 {
-   static bool searchEngine      = Config::getBool("html-search");
-   static bool serverBasedSearch = Config::getBool("search-server-based");
+   static const bool searchEngine      = Config::getBool("html-search");
+   static const bool serverBasedSearch = Config::getBool("search-server-based");
 
    if (searchEngine && !serverBasedSearch) {
       (void)relPath;
@@ -980,11 +979,13 @@ void HtmlGenerator::writeSearchInfo()
 
 QString HtmlGenerator::writeLogoAsString(const QString &path)
 {
-   static bool timeStamp = Config::getBool("html-timestamp");
+   static const bool timeStamp      = Config::getBool("html-timestamp");
+   static const QString projectName = Config::getString("project-name");
+
    QString result;
 
    if (timeStamp) {
-      result += theTranslator->trGeneratedAt(dateToString(true), Config::getString("project-name"));
+      result += theTranslator->trGeneratedAt(dateToString(true), projectName);
 
    } else {
       result += theTranslator->trGeneratedBy();
@@ -1032,6 +1033,10 @@ void HtmlGenerator::endProjectNumber()
 
 void HtmlGenerator::writeStyleInfo(int part)
 {
+   static const QDir configDir           = Config::getConfigDir();
+   static const QStringList extraCssFile = Config::getList("html-stylesheets");
+   static const bool interactiveSVG      = Config::getBool("interactive-svg");
+
    if (part == 0) {
       // write default style sheet
 
@@ -1053,9 +1058,6 @@ void HtmlGenerator::writeStyleInfo(int part)
       Doxy_Globals::indexList.addStyleSheetFile("doxypress.css");
 
       // part two
-      static const QDir configDir           = Config::getConfigDir();
-      static const QStringList extraCssFile = Config::getList("html-stylesheets");
-
       for (auto fileName : extraCssFile) {
 
          if (! fileName.isEmpty()) {
@@ -1072,7 +1074,7 @@ void HtmlGenerator::writeStyleInfo(int part)
       Doxy_Globals::indexList.addStyleSheetFile("jquery.js");
       Doxy_Globals::indexList.addStyleSheetFile("dynsections.js");
 
-      if (Config::getBool("interactive-svg"))   {
+      if (interactiveSVG) {
          Doxy_Globals::indexList.addStyleSheetFile("svgpan.js");
       }
    }
@@ -1221,7 +1223,7 @@ void HtmlGenerator::endTextLink()
 
 void HtmlGenerator::startHtmlLink(const QString &url)
 {
-   static bool generateTreeView = Config::getBool("generate-treeview");
+   static const bool generateTreeView = Config::getBool("generate-treeview");
    m_textStream << "<a ";
 
    if (generateTreeView) {
@@ -1384,7 +1386,7 @@ void HtmlGenerator::writeChar(char c)
 
 static void startSectionHeader(QTextStream &t_stream, const QString &relPath, int sectionCount)
 {
-   static bool dynamicSections = Config::getBool("html-dynamic-sections");
+   static const bool dynamicSections = Config::getBool("html-dynamic-sections");
 
    if (dynamicSections) {
       t_stream << "<div id=\"dynsection-" << sectionCount << "\" "
@@ -1410,7 +1412,7 @@ static void endSectionHeader(QTextStream &t_stream)
 static void startSectionSummary(QTextStream &t_stream, int sectionCount)
 {
    // t_stream << "<!-- startSectionSummary -->";
-   static bool dynamicSections = Config::getBool("html-dynamic-sections");
+   static const bool dynamicSections = Config::getBool("html-dynamic-sections");
 
    if (dynamicSections) {
       t_stream << "<div id=\"dynsection-" << sectionCount << "-summary\" "
@@ -1422,7 +1424,7 @@ static void startSectionSummary(QTextStream &t_stream, int sectionCount)
 static void endSectionSummary(QTextStream &t_stream)
 {
    // t_stream << "<!-- endSectionSummary -->";
-   static bool dynamicSections = Config::getBool("html-dynamic-sections");
+   static const bool dynamicSections = Config::getBool("html-dynamic-sections");
 
    if (dynamicSections) {
       t_stream << "</div>" << endl;
@@ -1432,7 +1434,7 @@ static void endSectionSummary(QTextStream &t_stream)
 static void startSectionContent(QTextStream &t_stream, int sectionCount)
 {
    //t << "<!-- startSectionContent -->";
-   static bool dynamicSections = Config::getBool("html-dynamic-sections");
+   static const bool dynamicSections = Config::getBool("html-dynamic-sections");
 
    if (dynamicSections) {
       t_stream << "<div id=\"dynsection-" << sectionCount << "-content\" "
@@ -1871,8 +1873,8 @@ void HtmlGenerator::startDotGraph()
 
 void HtmlGenerator::endDotGraph(const DotClassGraph &g)
 {
-   bool generateLegend = Config::getBool("generate-legend");
-   bool umlLook = Config::getBool("uml-look");
+   bool const generateLegend = Config::getBool("generate-legend");
+   bool const umlLook = Config::getBool("uml-look");
 
    endSectionHeader(m_textStream);
    startSectionSummary(m_textStream, m_sectionCount);
@@ -2164,8 +2166,8 @@ static void endQuickIndexItem(QTextStream &t_stream, const QString &l)
 
 static bool quickLinkVisible(LayoutNavEntry::Kind kind)
 {
-   static bool showFiles      = Config::getBool("show-file-page");
-   static bool showNamespaces = Config::getBool("show-namespace-page");
+   static const bool showFiles      = Config::getBool("show-file-page");
+   static const bool showNamespaces = Config::getBool("show-namespace-page");
 
    switch (kind) {
       case LayoutNavEntry::None:
@@ -2290,8 +2292,8 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
          }
 
          if (hlEntry->parent() == LayoutDocManager::instance().rootNavEntry()) { // first row is special as it contains the search box
-            static bool searchEngine      = Config::getBool("html-search");
-            static bool serverBasedSearch = Config::getBool("search-server-based");
+            static const bool searchEngine      = Config::getBool("html-search");
+            static const bool serverBasedSearch = Config::getBool("search-server-based");
 
             if (searchEngine) {
                t_stream << "      <li>\n";
@@ -2480,7 +2482,7 @@ void HtmlGenerator::endQuickIndices()
 
 QString HtmlGenerator::writeSplitBarAsString(const QString &name, const QString &relpath)
 {
-   static bool generateTreeView = Config::getBool("generate-treeview");
+   static const bool generateTreeView = Config::getBool("generate-treeview");
    QString result;
 
    // write split bar
@@ -2545,11 +2547,10 @@ void HtmlGenerator::writeQuickLinks(bool compact, HighlightedItem hli, const QSt
 // PHP based search script
 void HtmlGenerator::writeSearchPage()
 {
-   static bool generateTreeView  = Config::getBool("generate-treeview");
-   static bool disableIndex      = Config::getBool("disable-index");
-
-   static QString projectName    = Config::getString("project-name");
-   static QString htmlOutput     = Config::getString("html-output");
+   static const bool generateTreeView  = Config::getBool("generate-treeview");
+   static const bool disableIndex      = Config::getBool("disable-index");
+   static const QString projectName    = Config::getString("project-name");
+   static const QString htmlOutput     = Config::getString("html-output");
 
    //
    QString configFileName = htmlOutput + "/search_config.php";
@@ -2600,7 +2601,7 @@ void HtmlGenerator::writeSearchPage()
         << "search\",false,'" << theTranslator->trSearch() << "');\n";
       t_stream << "</script>\n";
 
-      if (! Config::getBool("disable-index")) {
+      if (! disableIndex) {
          writeDefaultQuickLinks(t_stream, true, HLI_Search, QString(), QString());
 
       } else {
@@ -2634,8 +2635,13 @@ void HtmlGenerator::writeSearchPage()
 
 void HtmlGenerator::writeExternalSearchPage()
 {
-   static bool generateTreeView = Config::getBool("generate-treeview");
-   QString fileName = Config::getString("html-output") + "/search" + Doxy_Globals::htmlFileExtension;
+   static const bool disableIndex          = Config::getBool("disable-index");
+   static const bool generateTreeView      = Config::getBool("generate-treeview");
+   static const QString searchExternalUrl  = Config::getString("search-external-url");
+   static const QStringList searchMappings = Config::getList("search-mappings");
+   static const QString htmlOutput         = Config::getString("html-output");
+
+   QString fileName = htmlOutput + "/search" + Doxy_Globals::htmlFileExtension;
 
    QFile f(fileName);
 
@@ -2651,7 +2657,7 @@ void HtmlGenerator::writeExternalSearchPage()
         << "search\",false,'" << theTranslator->trSearch() << "');\n";
       t_stream << "</script>\n";
 
-      if (! Config::getBool("disable-index")) {
+      if (! disableIndex) {
          writeDefaultQuickLinks(t_stream, true, HLI_Search, QString(), QString());
 
          t_stream << "            <input type=\"text\" id=\"MSearchField\" name=\"query\" value=\"\" size=\"20\" accesskey=\"S\""
@@ -2691,7 +2697,7 @@ void HtmlGenerator::writeExternalSearchPage()
 
    }
 
-   QString scriptName = Config::getString("html-output") + "/search/search.js";
+   QString scriptName = htmlOutput + "/search/search.js";
    QFile sf(scriptName);
 
    if (sf.open(QIODevice::WriteOnly)) {
@@ -2702,14 +2708,12 @@ void HtmlGenerator::writeExternalSearchPage()
         << "\"" << theTranslator->trSearchResults(1) << "\","
         << "\"" << theTranslator->trSearchResults(2) << "\"];" << endl;
 
-      t_stream << "var serverUrl=\"" << Config::getString("search-external-url") << "\";" << endl;
+      t_stream << "var serverUrl=\"" << searchExternalUrl << "\";\n";
       t_stream << "var tagMap = {" << endl;
 
       bool first = true;
 
       // add search mappings
-      const QStringList searchMappings = Config::getList("search-mappings");
-
       for (auto mapLine : searchMappings) {
 
          int eqPos = mapLine.indexOf('=');
