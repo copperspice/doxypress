@@ -1237,8 +1237,8 @@ void replaceComment(int offset)
       } else {
          copyToOutput(" */", 3);
 
-         for (int i = yyleng - 1; i >= 0; i--) {
-            char tmp = yytext[i];
+         for (int pos = yyleng - 1; pos >= 0; --pos) {
+            char tmp = yytext[pos];
             unput(tmp);
          }
 

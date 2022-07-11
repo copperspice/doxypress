@@ -2091,14 +2091,14 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
                if (fn) {
                   // for each include name
-                  for (auto fd : *fn) {
+                  for (auto item : *fn) {
 
                      if (found) {
                         break;
                      }
 
-                     // see if this source file actually includes the file
-                     found = g_sourceFileDef->isIncluded(fd->getFilePath());
+                     // see if this source file actually includes the given file
+                     found = g_sourceFileDef->isIncluded(item->getFilePath());
                   }
                }
             }

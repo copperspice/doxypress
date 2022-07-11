@@ -278,16 +278,16 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   current->m_entryName += toQString(tStream.str());
 
                } else {
-                  clang::ClassTemplateSpecializationDecl *specialNode =
+                  clang::ClassTemplateSpecializationDecl *tmpSpecialNode =
                      llvm::dyn_cast<clang::ClassTemplateSpecializationDecl>(node);
 
-                  if (specialNode != nullptr) {
+                  if (tmpSpecialNode != nullptr) {
                      // full
 
                      std::string tString;
                      llvm::raw_string_ostream tStream(tString);
 
-                     specialNode->getNameForDiagnostic(tStream, m_policy, true);
+                     tmpSpecialNode->getNameForDiagnostic(tStream, m_policy, true);
                      current->m_entryName = toQString(tStream.str());
                   }
                }
@@ -295,7 +295,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                if (! isForwardDecl) {
                   // inheritance
                   for (auto &item : node->bases()) {
-                     QString name = toQString(item.getType());
+                     QString itemName = toQString(item.getType());
 
                      Protection protection = getAccessSpecifier(&item);
                      Specifier virtualType = Specifier::Normal;
@@ -304,7 +304,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                         virtualType = Specifier::Virtual;
                      }
 
-                     auto tmpBase = BaseInfo(name, protection, virtualType);
+                     auto tmpBase = BaseInfo(itemName, protection, virtualType);
                      current->extends.append(tmpBase);
                   }
                }
@@ -569,15 +569,15 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             clang::AttrVec attributes = node->getAttrs();
 
             for (clang::Attr *item : attributes) {
-               QByteArray name = item->getSpelling();
+               QByteArray itemName = item->getSpelling();
 
-               if (name == "deprecated") {
+               if (itemName == "deprecated") {
                   current->m_traits.setTrait(Entry::Virtue::Deprecated);
 
-               } else if (name == "nodiscard") {
+               } else if (itemName == "nodiscard") {
                   current->m_traits.setTrait(Entry::Virtue::NoDiscard);
 
-               } else if (name == "noreturn") {
+               } else if (itemName == "noreturn") {
                   current->m_traits.setTrait(Entry::Virtue::NoReturn);
 
                }
@@ -809,8 +809,8 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          clang::TemplateParameterList *list = node->getTemplateParameters();
 
          for (clang::NamedDecl *item : *list) {
-            QString currentUSR = getUSR_Decl(item);
-            s_conceptMap.insert(currentUSR, current);
+            QString usrDecl = getUSR_Decl(item);
+            s_conceptMap.insert(usrDecl, current);
          }
 
          s_current_root->addSubEntry(current);

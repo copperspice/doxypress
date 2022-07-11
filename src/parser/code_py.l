@@ -628,27 +628,27 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
          DBG_CTX(stderr, "scope=%s locName=%s mcd=%p\n", csPrintable(scope), csPrintable(locName), mcd.data());
 
          if (mcd) {
-            QSharedPointer<MemberDef> md = mcd->getMemberByName(locName);
+            QSharedPointer<MemberDef> itemMd = mcd->getMemberByName(locName);
 
-            if (md) {
-               s_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
-               writeMultiLineCodeLink(ol, md, clName);
+            if (itemMd != nullptr) {
+               s_theCallContext.setClass(stripClassName(itemMd->typeString(), itemMd->getOuterScope()) );
+               writeMultiLineCodeLink(ol, itemMd, clName);
                addToSearchIndex(className);
 
                QSharedPointer<Definition> d;
 
-               if (md->getOuterScope() == Doxy_Globals::globalScope) {
-                  d = md->getBodyDef();
+               if (itemMd->getOuterScope() == Doxy_Globals::globalScope) {
+                  d = itemMd->getBodyDef();
                } else {
-                  d = md->getOuterScope();
+                  d = itemMd->getOuterScope();
                }
 
-               if (md->getGroupDef()) {
-                  d = md->getGroupDef();
+               if (itemMd->getGroupDef()) {
+                  d = itemMd->getGroupDef();
                }
 
-               if (d && d->isLinkable() && md->isLinkable() && s_currentMemberDef && s_collectXRefs) {
-                  addDocCrossReference(s_currentMemberDef, md);
+               if (d && d->isLinkable() && itemMd->isLinkable() && s_currentMemberDef && s_collectXRefs) {
+                  addDocCrossReference(s_currentMemberDef, itemMd);
                }
 
                return;
@@ -659,29 +659,29 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
             QSharedPointer<NamespaceDef> mnd = getResolvedNamespace(scope);
 
             if (mnd) {
-               QSharedPointer<MemberDef> md = mnd->getMemberByName(locName);
+               QSharedPointer<MemberDef> itemMd = mnd->getMemberByName(locName);
 
-               if (md) {
-                  s_theCallContext.setClass(stripClassName(md->typeString(), md->getOuterScope()) );
-                  writeMultiLineCodeLink(ol, md, clName);
+               if (itemMd != nullptr) {
+                  s_theCallContext.setClass(stripClassName(itemMd->typeString(), itemMd->getOuterScope()) );
+                  writeMultiLineCodeLink(ol, itemMd, clName);
                   addToSearchIndex(className);
 
                   QSharedPointer<Definition> d;
 
-                  if (md->getOuterScope() == Doxy_Globals::globalScope) {
-                     d = md->getBodyDef();
+                  if (itemMd->getOuterScope() == Doxy_Globals::globalScope) {
+                     d = itemMd->getBodyDef();
 
                   } else {
-                     d = md->getOuterScope();
+                     d = itemMd->getOuterScope();
 
                   }
 
-                  if (md->getGroupDef()) {
-                     d = md->getGroupDef();
+                  if (itemMd->getGroupDef()) {
+                     d = itemMd->getGroupDef();
                   }
 
-                  if (d && d->isLinkable() && md->isLinkable() && s_currentMemberDef && s_collectXRefs) {
-                     addDocCrossReference(s_currentMemberDef, md);
+                  if (d && d->isLinkable() && itemMd->isLinkable() && s_currentMemberDef && s_collectXRefs) {
+                     addDocCrossReference(s_currentMemberDef, itemMd);
                   }
 
                   return;

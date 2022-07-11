@@ -803,13 +803,13 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
 
          if (c == '(') {
             // argument is a function => search for matching )
-            int level = 1;
+            int roundLevel = 1;
             arg += c;
 
             //char term='\0';
 
             while ((cc = getNextChar(expr, rest, j)) != EOF && cc != 0) {
-               char c = (char)cc;
+               c = (char)cc;
 
                if (c == '\'' || c == '\"') {
                   // skip ('s and )'s inside strings
@@ -818,15 +818,15 @@ static bool replaceFunctionMacro(const QString &expr, QString *rest, int pos, in
                }
 
                if (c == ')') {
-                  --level;
+                  --roundLevel;
                   arg += c;
 
-                  if (level == 0) {
+                  if (roundLevel == 0) {
                      break;
                   }
 
                } else if (c == '(') {
-                  ++level;
+                  ++roundLevel;
                   arg += c;
 
                } else {
@@ -1773,32 +1773,32 @@ static void readIncludeFile(const QString &inc)
 
       // absIncFileName avoids difficulties for incFileName starting with "../"
       QString absIncFileName = incFileName;
+
       {
-         QFileInfo fi(s_yyFileName);
+         QFileInfo fi1(s_yyFileName);
 
-         if (fi.exists()) {
-            QString absName = fi.absolutePath() + "/" + incFileName;
+         if (fi1.exists()) {
+            QString absName_1 = fi1.absolutePath() + "/" + incFileName;
 
-            QFileInfo fi2(absName);
+            QFileInfo fi2(absName_1);
             if (fi2.exists()) {
                absIncFileName = fi2.absoluteFilePath();
 
             } else if (searchIncludes) {
                const QStringList includePath = Config::getList("include-path");
 
-               for (auto s : includePath) {
+               for (auto item : includePath) {
 
-                  QFileInfo fi(s);
+                  QFileInfo fi3(item);
 
-                  if (fi.exists() && fi.isDir()) {
-                     QString absName = fi.absoluteFilePath() + "/" + incFileName;
+                  if (fi3.exists() && fi3.isDir()) {
+                     QString absName_3 = fi3.absoluteFilePath() + "/" + incFileName;
 
-                     QFileInfo fi2(absName);
-                     if (fi2.exists()) {
-                        absIncFileName = fi2.absoluteFilePath();
+                     QFileInfo fi4(absName_3);
+                     if (fi4.exists()) {
+                        absIncFileName = fi4.absoluteFilePath();
                         break;
                      }
-
                   }
 
                }

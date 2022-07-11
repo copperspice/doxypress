@@ -409,8 +409,8 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
             } else  {
                // else search in used modules
 
-               QString moduleName = nspace->name();
-               UseEntry *ue = usedict->find(moduleName);
+               QString usedModuleName = nspace->name();
+               UseEntry *ue = usedict->find(usedModuleName);
 
                if (ue)  {
                   // check if only-list exists and if current entry exists is this list

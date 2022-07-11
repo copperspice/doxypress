@@ -777,8 +777,8 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       // show warnings the compiler found
       uint diagCnt = clang_getNumDiagnostics(p->tu);
 
-      for (uint i = 0; i != diagCnt; i++) {
-         CXDiagnostic diag = clang_getDiagnostic(p->tu, i);
+      for (uint index = 0; index != diagCnt; ++index) {
+         CXDiagnostic diag = clang_getDiagnostic(p->tu, index);
          CXString diagMsg  = clang_formatDiagnostic(diag, clang_defaultDiagnosticDisplayOptions());
 
          err("%s\n", clang_getCString(diagMsg));
@@ -993,9 +993,9 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                uint bracket = 0;
 
                while (index < p->numTokens) {
-                  CXTokenKind tokenKind = clang_getTokenKind(p->tokens[index]);
+                  CXTokenKind tokenKind_A = clang_getTokenKind(p->tokens[index]);
 
-                  if (tokenKind != CXToken_Punctuation && bracket == 0) {
+                  if (tokenKind_A != CXToken_Punctuation && bracket == 0) {
                      // might be another comment
                      break;
                   }
@@ -1081,9 +1081,9 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                uint bracket = 0;
 
                while (index < p->numTokens) {
-                  CXTokenKind tokenKind = clang_getTokenKind(p->tokens[index]);
+                  CXTokenKind tokenKind_B = clang_getTokenKind(p->tokens[index]);
 
-                  if (tokenKind != CXToken_Punctuation && bracket == 0) {
+                  if (tokenKind_B != CXToken_Punctuation && bracket == 0) {
                      // might be another comment
                      break;
                   }
@@ -1136,9 +1136,9 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
                while (tmpIndex < p->numTokens)  {
                   // is the next cursor a comment?
-                  CXTokenKind tokenKind = clang_getTokenKind(p->tokens[tmpIndex]);
+                  CXTokenKind tokenKind_C = clang_getTokenKind(p->tokens[tmpIndex]);
 
-                  if (tokenKind == CXToken_Comment) {
+                  if (tokenKind_C == CXToken_Comment) {
                      ++tmpIndex;
 
                   } else {
@@ -1171,9 +1171,9 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
                uint bracket = 0;
 
                while (tmpIndex < p->numTokens) {
-                  CXTokenKind tokenKind = clang_getTokenKind(p->tokens[tmpIndex]);
+                  CXTokenKind tokenKind_D = clang_getTokenKind(p->tokens[tmpIndex]);
 
-                  if (tokenKind != CXToken_Punctuation && bracket == 0) {
+                  if (tokenKind_D != CXToken_Punctuation && bracket == 0) {
                      break;
                   }
 

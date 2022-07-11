@@ -9879,9 +9879,9 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          yyrestart( yyin );
 
-         bool isEnum = ce->m_traits.hasTrait(Entry::Virtue::Enum);
+         bool isEnumTrait = ce->m_traits.hasTrait(Entry::Virtue::Enum);
 
-         if (ce->section == Entry::ENUM_SEC || isEnum) {
+         if (ce->section == Entry::ENUM_SEC || isEnumTrait) {
             BEGIN(FindFields);
          } else {
             BEGIN(FindMembers);
@@ -9900,7 +9900,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          initEntry();
 
          // copy group list from parent
-         if (groupNested && ce->section != Entry::ENUM_SEC && ! isEnum) {
+         if (groupNested && ce->section != Entry::ENUM_SEC && ! isEnumTrait) {
             for (auto &g : rt->m_groups) {
                ce->m_groups.append(g);
             }

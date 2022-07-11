@@ -904,20 +904,20 @@ void writeJavascriptSearchIndex()
             int itemCount   = 0;
 
             for (auto dl : *sl) {
-               QSharedPointer<Definition> d = dl->first();
+               QSharedPointer<Definition> def = dl->first();
 
                if (! firstEntry) {
                   ti << "," << endl;
                }
                firstEntry = false;
 
-               QString dispName = d->localName();
+               QString dispName = def->localName();
 
-               if (d->definitionType() == Definition::TypeGroup) {
-                  dispName = d.dynamicCast<GroupDef>()->groupTitle();
+               if (def->definitionType() == Definition::TypeGroup) {
+                  dispName = def.dynamicCast<GroupDef>()->groupTitle();
 
-               } else if (d->definitionType() == Definition::TypePage) {
-                  dispName = d.dynamicCast<PageDef>()->title();
+               } else if (def->definitionType() == Definition::TypePage) {
+                  dispName = def.dynamicCast<PageDef>()->title();
 
                }
 
@@ -928,15 +928,15 @@ void writeJavascriptSearchIndex()
                   // item with a unique name
                   QSharedPointer<MemberDef> md;
 
-                  bool isMemberDef = d->definitionType() == Definition::TypeMember;
+                  bool isMemberDef = def->definitionType() == Definition::TypeMember;
                   if (isMemberDef) {
-                     md = d.dynamicCast<MemberDef>();
+                     md = def.dynamicCast<MemberDef>();
                   }
 
-                  QString anchor = d->anchor();
+                  QString anchor = def->anchor();
 
-                  ti << "'" << externalRef("../", d->getReference(), true)
-                     << addHtmlExtensionIfMissing(d->getOutputFileBase());
+                  ti << "'" << externalRef("../", def->getReference(), true)
+                     << addHtmlExtensionIfMissing(def->getOutputFileBase());
 
                   if (! anchor.isEmpty()) {
                      ti << "#" << anchor;
@@ -944,14 +944,14 @@ void writeJavascriptSearchIndex()
                   ti << "',";
 
                   static bool extLinksInWindow = Config::getBool("external-links-in-window");
-                  if (!extLinksInWindow || d->getReference().isEmpty()) {
+                  if (! extLinksInWindow || def->getReference().isEmpty()) {
                      ti << "1,";
                   } else {
                      ti << "0,";
                   }
 
-                  if (d->getOuterScope() != Doxy_Globals::globalScope) {
-                     ti << "'" << convertToXML(d->getOuterScope()->name()) << "'";
+                  if (def->getOuterScope() != Doxy_Globals::globalScope) {
+                     ti << "'" << convertToXML(def->getOuterScope()->name()) << "'";
 
                   } else if (md) {
                      QSharedPointer<FileDef> fd = md->getBodyDef();
@@ -979,8 +979,8 @@ void writeJavascriptSearchIndex()
 
                   auto nextIter = dl->begin();
 
-                  for (auto d : *dl)  {
-                     QSharedPointer<Definition> scope = d->getOuterScope();
+                  for (auto item : *dl)  {
+                     QSharedPointer<Definition> scope = item->getOuterScope();
 
                      if (nextIter != dl->end()) {
                         ++nextIter;
@@ -997,24 +997,24 @@ void writeJavascriptSearchIndex()
                      QSharedPointer<Definition> nextScope;
                      QSharedPointer<MemberDef>  md;
 
-                     bool isMemberDef = d->definitionType() == Definition::TypeMember;
+                     bool isMemberDef = item->definitionType() == Definition::TypeMember;
 
                      if (isMemberDef) {
-                        md = d.dynamicCast<MemberDef>();
+                        md = item.dynamicCast<MemberDef>();
                      }
 
                      if (next) {
                         nextScope = next->getOuterScope();
                      }
 
-                     QString anchor = d->anchor();
+                     QString anchor = item->anchor();
 
                      if (childCount > 0) {
                         ti << "],[";
                      }
 
-                     ti << "'" << externalRef("../", d->getReference(), true)
-                        << addHtmlExtensionIfMissing(d->getOutputFileBase());
+                     ti << "'" << externalRef("../", item->getReference(), true)
+                        << addHtmlExtensionIfMissing(item->getOutputFileBase());
 
                      if (! anchor.isEmpty()) {
                         ti << "#" << anchor;
@@ -1022,7 +1022,7 @@ void writeJavascriptSearchIndex()
                      ti << "',";
 
                      static bool extLinksInWindow = Config::getBool("external-links-in-window");
-                     if (! extLinksInWindow || d->getReference().isEmpty()) {
+                     if (! extLinksInWindow || item->getReference().isEmpty()) {
                         ti << "1,";
                      } else {
                         ti << "0,";
@@ -1053,14 +1053,14 @@ void writeJavascriptSearchIndex()
                      }
 
                      QString name;
-                     if (d->definitionType() == Definition::TypeClass) {
+                     if (item->definitionType() == Definition::TypeClass) {
 
-                        name  = convertToXML(d.dynamicCast<ClassDef>()->displayName());
+                        name  = convertToXML(item.dynamicCast<ClassDef>()->displayName());
                         found = true;
 
-                     } else if (d->definitionType() == Definition::TypeNamespace) {
+                     } else if (item->definitionType() == Definition::TypeNamespace) {
 
-                        name  = convertToXML(d.dynamicCast<NamespaceDef>()->displayName());
+                        name  = convertToXML(item.dynamicCast<NamespaceDef>()->displayName());
                         found = true;
 
                      } else if (scope == nullptr || scope == Doxy_Globals::globalScope) {
@@ -1086,7 +1086,7 @@ void writeJavascriptSearchIndex()
                         // member in class or namespace scope
 
                         SrcLangExt lang = md->getLanguage();
-                        name = convertToXML(d->getOuterScope()->qualifiedName())
+                        name = convertToXML(item->getOuterScope()->qualifiedName())
                                + getLanguageSpecificSeparator(lang) + prefix;
 
                         found = true;

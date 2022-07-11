@@ -3610,14 +3610,14 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
             if (ml) {
                for (auto md : *ml) {
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
-                  bool isDir = enumList != 0 && md->isEnumerate();
+                  bool isEnum = (enumList != nullptr && md->isEnumerate());
 
                   if (md->isVisible() && ! md->isAnonymous()) {
-                     Doxy_Globals::indexList.addContentsItem(isDir, md->name(), md->getReference(), md->getOutputFileBase(),
+                     Doxy_Globals::indexList.addContentsItem(isEnum, md->name(), md->getReference(), md->getOutputFileBase(),
                            md->anchor(), addToIndex, md);
                   }
 
-                  if (isDir) {
+                  if (isEnum) {
                      Doxy_Globals::indexList.incContentsDepth();
 
                      for (auto emd : *enumList) {
@@ -3677,24 +3677,24 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                   si = Doxy_Globals::sectionDict.find(pd->name());
                }
 
-               bool hasSubPages = pd->hasSubPages();
-               bool hasSections = pd->hasSections();
+               bool pageHasSubPages = pd->hasSubPages();
+               bool pageHasSections = pd->hasSections();
 
-               Doxy_Globals::indexList.addContentsItem( hasSubPages || hasSections, convertToHtml(pd->title(), true),
-                     gd->getReference(), gd->getOutputFileBase(), si ? si->label : "", true);
+               Doxy_Globals::indexList.addContentsItem( pageHasSubPages || pageHasSections, convertToHtml(pd->title(), true),
+                     gd->getReference(), gd->getOutputFileBase(), si ? si->label : QString(), true);
 
                // addToNavIndex
-               if (hasSections || hasSubPages) {
+               if (pageHasSections || pageHasSubPages) {
                   Doxy_Globals::indexList.incContentsDepth();
                }
 
-               if (hasSections) {
+               if (pageHasSections) {
                   // always add these sections
                   pd->addSectionsToIndex(true);
                }
 
-               writePages(pd, 0);
-               if (hasSections || hasSubPages) {
+               writePages(pd, nullptr);
+               if (pageHasSections || pageHasSubPages) {
                   Doxy_Globals::indexList.decContentsDepth();
                }
             }
@@ -4065,15 +4065,15 @@ static void writeIndex(OutputList &ol)
                ol.disable(OutputGenerator::Latex);
             }
 
-            QString title = pd->title();
-            if (title.isEmpty()) {
-               title = pd->name();
+            QString pageTitle = pd->title();
+            if (pageTitle.isEmpty()) {
+               pageTitle = pd->name();
             }
 
             ol.disable(OutputGenerator::Docbook);
 
             ol.startIndexSection(isPageDocumentation);
-            ol.parseText(title);
+            ol.parseText(pageTitle);
             ol.endIndexSection(isPageDocumentation);
 
             ol.enable(OutputGenerator::Docbook);
@@ -4083,7 +4083,7 @@ static void writeIndex(OutputList &ol)
             ol.disableAllBut(OutputGenerator::RTF);
 
             ol.startIndexSection(isPageDocumentation2);
-            ol.parseText(title);
+            ol.parseText(pageTitle);
             ol.endIndexSection(isPageDocumentation2);
 
             ol.popGeneratorState();

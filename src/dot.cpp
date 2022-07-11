@@ -1123,37 +1123,36 @@ bool DotFilePatcher::run()
       t << substitute(svgZoomFooter, "$orgname", stripPath(orgName));
       fo.close();
 
-      // keep original SVG file so we can refer to it, we do need to replace
-      // dummy link by real ones
-      QFile fi(tmpName);
-      QFile fo(orgName);
+      // keep original SVG file so we can refer to it, need to replace dummy link with real one
+      QFile fileIn(tmpName);
+      QFile fileOut(orgName);
 
-      if (! fi.open(QIODevice::ReadOnly)) {
-         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(tmpName), fi.error());
+      if (! fileIn.open(QIODevice::ReadOnly)) {
+         err("Unable to open file %s for reading, OS Error #: %d\n", csPrintable(tmpName), fileIn.error());
          return false;
       }
 
-      if (! fo.open(QIODevice::WriteOnly)) {
-         err("Unable to open file %s for writing, OS error #: %d\n", csPrintable(orgName), fi.error());
+      if (! fileOut.open(QIODevice::WriteOnly)) {
+         err("Unable to open file %s for writing, OS error #: %d\n", csPrintable(orgName), fileOut.error());
          return false;
       }
 
-      QTextStream t(&fo);
+      QTextStream t_stream(&fileOut);
 
-      while (! fi.atEnd()) {
+      while (! fileIn.atEnd()) {
 
-         QByteArray line = fi.readLine();
+         QByteArray line = fileIn.readLine();
 
          if (line.isEmpty()) {
             break;
          }
 
          Map map = m_maps[0]; // there is only one 'map' for a SVG file
-         t << replaceRef(line, map.relPath, map.urlOnly, map.context, "_top");
+         t_stream << replaceRef(line, map.relPath, map.urlOnly, map.context, "_top");
       }
 
-      fi.close();
-      fo.close();
+      fileIn.close();
+      fileOut.close();
    }
 
    // remove temporary file
@@ -3605,7 +3604,6 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
              << "\" border=\"0\" usemap=\"#" << mapName << "\" alt=\"\"/>"
              << "</div>" << endl;
 
-         QString absMapName = absBaseName + ".map";
 
          if (regenerate || ! insertMapFile(out, absMapName, relPath, mapName)) {
             int mapId = DotManager::instance()->addMap(fileName, absMapName, relPath,

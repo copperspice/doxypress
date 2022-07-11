@@ -2920,10 +2920,10 @@ static void tcl_command(int what, const QString &text)
       char myState = 'x'; // last word: e'x'pr 't'hen 'b'ody 'e'lse else'i'f..
 
       for (unsigned int i = 4; i < tcl.listCommandwords.count(); i = i + 2) {
-         QString myStr = tcl.listCommandwords.at(i);
+         QString word = tcl.listCommandwords.at(i);
 
          if (myState == 'x') {
-            if (myStr == "then") {
+            if (word == "then") {
                myState = 't';
                myType << "keyword" << "NULL";
             } else {
@@ -2936,10 +2936,11 @@ static void tcl_command(int what, const QString &text)
             myType << "script" << "NULL";
 
          } else if (myState == 'b') {
-            if (myStr == "elseif") {
+            if (word == "elseif") {
                myState = 'i';
                myType << "keyword" << "NULL";
-            } else if (myStr == "else" && i == tcl.listCommandwords.count() - 3) {
+
+            } else if (word == "else" && i == tcl.listCommandwords.count() - 3) {
                myState = 'b';
                myType << "keyword" << "NULL" << "script";
                i = tcl.listCommandwords.count();

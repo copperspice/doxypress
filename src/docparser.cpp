@@ -2977,17 +2977,18 @@ void DocSecRefList::parse()
 
          switch (Mappers::cmdMapper->map(g_token->name)) {
             case CMD_SECREFITEM: {
-               int tok = doctokenizerYYlex();
-               if (tok != TK_WHITESPACE) {
+               int nextToken = doctokenizerYYlex();
+
+               if (nextToken != TK_WHITESPACE) {
                   warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\refitem command");
                   break;
                }
 
-               tok = doctokenizerYYlex();
+               nextToken = doctokenizerYYlex();
 
-               if (tok != TK_WORD && tok != TK_LNKWORD) {
+               if (nextToken != TK_WORD && nextToken != TK_LNKWORD) {
                   warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of \\refitem",
-                                 csPrintable(tokToString(tok)));
+                        csPrintable(tokToString(nextToken)));
                   break;
                }
 
@@ -4675,19 +4676,19 @@ int DocHtmlDescTitle::parse()
 
                switch (Mappers::cmdMapper->map(cmdName)) {
                   case CMD_REF: {
-                     int tok = doctokenizerYYlex();
+                     int nextToken = doctokenizerYYlex();
 
-                     if (tok != TK_WHITESPACE) {
+                     if (nextToken != TK_WHITESPACE) {
                         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command",
                               csPrintable(g_token->name));
 
                      } else {
                         doctokenizerYYsetStateRef();
-                        tok = doctokenizerYYlex();       // get the reference id
+                        nextToken = doctokenizerYYlex();       // get the reference id
 
-                        if (tok != TK_WORD) {
+                        if (nextToken != TK_WORD) {
                            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
-                                          csPrintable(tokToString(tok)), csPrintable(cmdName));
+                                 csPrintable(tokToString(nextToken)), csPrintable(cmdName));
 
                         } else {
                            // add the name
@@ -4705,18 +4706,19 @@ int DocHtmlDescTitle::parse()
                      [[fallthrough]];
 
                   case CMD_LINK: {
-                     int tok = doctokenizerYYlex();
-                     if (tok != TK_WHITESPACE) {
+                     int nextToken = doctokenizerYYlex();
+
+                     if (nextToken != TK_WHITESPACE) {
                         warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \%s command",
-                                       csPrintable(cmdName));
+                              csPrintable(cmdName));
 
                      } else {
                         doctokenizerYYsetStateLink();
-                        tok = doctokenizerYYlex();
+                        nextToken = doctokenizerYYlex();
 
-                        if (tok != TK_WORD) {
+                        if (nextToken != TK_WORD) {
                            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
-                                          csPrintable(tokToString(tok)), csPrintable(cmdName));
+                                 csPrintable(tokToString(nextToken)), csPrintable(cmdName));
 
                         } else {
                            doctokenizerYYsetStatePara();
@@ -4892,7 +4894,7 @@ int DocHtmlDescList::parse()
 
          if (retval == RetVal_DescTitle) {
 
-            DocHtmlDescTitle *dt = new DocHtmlDescTitle(this, g_token->attribs);
+            dt = new DocHtmlDescTitle(this, g_token->attribs);
             m_children.append(dt);
             retval = dt->parse();
 
