@@ -338,14 +338,14 @@ class MemberIndexList : public QList<QSharedPointer<MemberDef>>
    ~MemberIndexList()
    { }
 
-   int compareValues(const QSharedPointer<MemberDef> md1, const QSharedPointer<MemberDef> md2) const {
+   static bool compareValues(const QSharedPointer<MemberDef> md1, const QSharedPointer<MemberDef> md2) {
       int result = md1->name().compare(md2->name(), Qt::CaseInsensitive);
 
       if (result == 0) {
          result = md1->qualifiedName().compare(md2->qualifiedName(), Qt::CaseInsensitive);
       }
 
-      return result;
+      return result < 0;
    }
 
    void insertDef(QSharedPointer<MemberDef> data) {
@@ -2228,7 +2228,6 @@ static QString writeClassLink(OutputList &ol, QSharedPointer<MemberDef> md, cons
 
          ol.docify(separator);
          ol.writeObjectLink(md->getReference(), md->getOutputFileBase(), md->anchor(), tName);
-         ol.writeString("\n");
       }
    }
 
@@ -2405,7 +2404,7 @@ static QString writeNamespaceLink(OutputList &ol, QSharedPointer<MemberDef> md, 
 }
 
 static void writeMemberList(OutputList &ol, bool useSections, int page,
-                  const LetterToIndexMap<MemberIndexList> &memberLists, DefinitionIntf::DefType definitionType)
+         const LetterToIndexMap<MemberIndexList> &memberLists, DefinitionIntf::DefType definitionType)
 {
    QString prevName;
    QString prevDefName;
@@ -2414,11 +2413,21 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
    bool firstSection = true;
    bool firstItem    = true;
 
-   for (QSharedPointer<MemberIndexList> ml : memberLists) {
+   QSharedPointer<MemberIndexList> ml;
+   for (const auto &list : memberLists) {
 
       if (page != -1) {
+         // specific page mode
          ml = memberLists[page];
+
+      } else {
+         // do all pages
+         ml = list;
+
       }
+
+      // sort container
+      std::sort(ml->begin(), ml->end(), &MemberIndexList::compareValues);
 
       if (ml == nullptr || ml->count() == 0) {
          continue;
@@ -2427,7 +2436,7 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
       for (auto md : *ml) {
          QString sep;
 
-      bool isFunc = ! md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isSignal());
+         bool isFunc = ! md->isObjCMethod() && (md->isFunction() || md->isSlot() || md->isSignal());
 
          QString name   = md->name();
          int startIndex = getPrefixIndex(name);
@@ -2490,7 +2499,6 @@ static void writeMemberList(OutputList &ol, bool useSections, int page,
          } else {
             // same entry, link to class for other members with the same name
             sep = ", ";
-
          }
 
          // write the link for the specific list type
