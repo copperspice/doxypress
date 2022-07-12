@@ -2382,8 +2382,7 @@ void MemberDef::writeReimplements(OutputList &ol)
 
             if (bmd->isLinkable()) {
                // replace marker with link
-
-               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName());
+               ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bmd->qualifiedName() + "()" );
 
                if ( bmd->isLinkableInProject() ) {
                   writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());
@@ -2480,7 +2479,7 @@ void MemberDef::writeReimplementedBy(OutputList &ol)
 
                if (bcd && bmd) {
                   // write link for marker
-                  ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bcd->displayName());
+                  ol.writeObjectLink(bmd->getReference(), bmd->getOutputFileBase(), bmd->anchor(), bmd->qualifiedName() + "()");
 
                   if (bmd->isLinkableInProject() ) {
                      writePageRef(ol, bmd->getOutputFileBase(), bmd->anchor());

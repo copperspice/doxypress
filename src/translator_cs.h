@@ -755,14 +755,8 @@ class Translator_Cs : public Translator
          // order is left to right, @0, @1, @2, and @3
 
          if (i != numEntries - 1) {
-            // not at the last entry, add separator
-
-            if (i < numEntries - 2) {     // in the middle of the list
-               result += ", ";
-
-            } else {                      // at the second to last entry
-               result += QCoreApplication::translate("doxy-text", ", and ");
-            }
+            // add separator between values
+            result += ", ";
          }
       }
 
@@ -771,24 +765,24 @@ class Translator_Cs : public Translator
 
    // used in class docs to produce a list of base classes,  if class diagrams are disabled.
    QString trInheritsList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Inherits %1.").formatArg(trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Inherits %1").formatArg(trWriteList(numEntries));
    }
 
    /*! used in class docs to produce a list of super classes,
     *  if class diagrams are disabled.
     */
    QString trInheritedByList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Inherited by %1.").formatArg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Inherited by %1").formatArg( trWriteList(numEntries));
    }
 
    // used in member docs to produce a list of members that are hidden by this one
    QString trReimplementedFromList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Reimplemented from %1.").formatArg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Reimplemented from %1").formatArg( trWriteList(numEntries));
    }
 
    // used in member docs to produce a list of all member that overwrite the implementation of this member
    QString trReimplementedInList(int numEntries)  override {
-      return QCoreApplication::translate("doxy-text", "Reimplemented in %1.").formatArg( trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Reimplemented in %1").formatArg( trWriteList(numEntries));
    }
 
    /*! This is put above each page as a link to all members of namespaces. */
@@ -1389,12 +1383,12 @@ class Translator_Cs : public Translator
 
    // used in member documentation to produce a list of members whcih are implemented by this one
    QString trImplementedFromList(int numEntries) override {
-     return QCoreApplication::translate("doxy-text", "Implements %1.").formatArg(trWriteList(numEntries));
+     return QCoreApplication::translate("doxy-text", "Implements %1").formatArg(trWriteList(numEntries));
    }
 
    // used in member documentation to produce a list of all members which implement this abstract member
    QString trImplementedInList(int numEntries) override {
-      return QCoreApplication::translate("doxy-text", "Implemented in %1.").formatArg(trWriteList(numEntries));
+      return QCoreApplication::translate("doxy-text", "Implemented in %1").formatArg(trWriteList(numEntries));
    }
 
    // used in RTF documentation as a heading for the Table  of Contents
