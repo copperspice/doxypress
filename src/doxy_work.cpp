@@ -2206,8 +2206,8 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
          // happens if a template class is declared before the actual definition or
          // if a forward declaration has different template parameter names
 
-         ArgumentList tArgList = getTemplateArgumentsFromName(cd->name(), root->m_templateArgLists);
-         cd->setTemplateArgumentList(tArgList);
+         ArgumentList tmpArgList = getTemplateArgumentsFromName(cd->name(), root->m_templateArgLists);
+         cd->setTemplateArgumentList(tmpArgList);
       }
 
       cd->setCompoundType(convertToCompoundType(root->section, root->m_traits));
@@ -2237,18 +2237,18 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
          }
       }
 
-      ArgumentList tArgList;
+      ArgumentList tmpArgList;
       int i;
 
       if ((root->m_srcLang == SrcLangExt_CSharp || root->m_srcLang == SrcLangExt_Java) && (i = fullName.indexOf('<')) != -1) {
          // a Java/C# generic class looks like a C++ specialization, split the name and template arguments here
 
          QString dummy;
-         tArgList = stringToArgumentList(root->m_srcLang, dummy, fullName.mid(i));
+         tmpArgList = stringToArgumentList(root->m_srcLang, dummy, fullName.mid(i));
          fullName = fullName.left(i);
 
       } else {
-         tArgList = getTemplateArgumentsFromName(fullName, root->m_templateArgLists);
+         tmpArgList = getTemplateArgumentsFromName(fullName, root->m_templateArgLists);
 
       }
 
@@ -2271,7 +2271,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       cd->setRequires(root->getData(EntryKey::Requires_Clause));
 
       cd->setTypeConstraints(root->typeConstr);
-      cd->setTemplateArgumentList(tArgList);
+      cd->setTemplateArgumentList(tmpArgList);
 
       cd->setProtection(root->protection);
       cd->setIsStatic(root->stat);
@@ -3415,8 +3415,8 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
                }
             }
 
-            ArgumentList tmp;
-            addMemberDocs(ptrEntry, md, def, tmp, false);
+            ArgumentList tmpArgList;
+            addMemberDocs(ptrEntry, md, def, tmpArgList, false);
 
             return md;
          }
@@ -3429,17 +3429,17 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
       fileName = ptrEntry->m_tagInfo.tag_Name;
    }
 
-   ArgumentList tmpList;
+   ArgumentList tmpArgList;
 
    if (! ptrEntry->m_templateArgLists.isEmpty()) {
-      tmpList = ptrEntry->m_templateArgLists.last();
+      tmpArgList = ptrEntry->m_templateArgLists.last();
    }
 
    // new member variable, typedef, enum value, or property
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, ptrEntry->startLine, ptrEntry->startColumn,
             ptrEntry->getData(EntryKey::Member_Type), name, ptrEntry->getData(EntryKey::Member_Args),
             ptrEntry->getData(EntryKey::Exception_Spec), prot, Normal, ptrEntry->stat, related, memberType,
-            tmpList, ArgumentList() );
+            tmpArgList, ArgumentList() );
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);                         // also sets outer scope (i.e. getOuterScope())
@@ -3665,9 +3665,9 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
 
             if (md->getFileDef() && ! isPHPArray && ! staticsInDifferentFiles) {
                // not a php array or variable
-               ArgumentList tmp;
+               ArgumentList tmpArgList;
 
-               addMemberDocs(ptrEntry, md, def, tmp, false);
+               addMemberDocs(ptrEntry, md, def, tmpArgList, false);
                md->setRefItems(root->m_specialLists);
 
                // if md is a variable forward declaration and root is the definition
@@ -3697,17 +3697,17 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
       fileName = ptrEntry->m_tagInfo.tag_Name;
    }
 
-   ArgumentList tmpList;
+   ArgumentList tmpArgList;
 
    if (! root->m_templateArgLists.isEmpty()) {
-      tmpList = root->m_templateArgLists.last();
+      tmpArgList = root->m_templateArgLists.last();
    }
 
    // new global variable, enum value, or typedef
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
             root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args), QString(),
             root->protection, Specifier::Normal, root->stat, Relationship::Member, memberType,
-            tmpList, root->argList);
+            tmpArgList, root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberTraits(root->m_traits);
@@ -4523,10 +4523,10 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
       fileName = ptrEntry->m_tagInfo.tag_Name;
    }
 
-   ArgumentList tmpList;
+   ArgumentList tmpArgList;
 
    if (! ptrEntry->m_templateArgLists.isEmpty()) {
-      tmpList = ptrEntry->m_templateArgLists.last();
+      tmpArgList = ptrEntry->m_templateArgLists.last();
    }
 
    // adding class member
@@ -4549,7 +4549,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, ptrEntry->startLine, ptrEntry->startColumn,
                ptrEntry->getData(EntryKey::Member_Type), name, ptrEntry->getData(EntryKey::Member_Args),
                ptrEntry->getData(EntryKey::Exception_Spec), ptrEntry->protection, ptrEntry->virt,
-               (ptrEntry->stat && ptrEntry->relatesType != MemberOf), tRelation, memberType, tmpList, ptrEntry->argList);
+               (ptrEntry->stat && ptrEntry->relatesType != MemberOf), tRelation, memberType, tmpArgList, ptrEntry->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
@@ -4900,10 +4900,10 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                Debug::print(Debug::Functions, 0, "  --> new function %s found\n", csPrintable(rname));
 
                // new global function
-               ArgumentList tArgList;
+               ArgumentList tmpArgList;
 
                if (! root->m_templateArgLists.isEmpty()) {
-                  tArgList = root->m_templateArgLists.last();
+                  tmpArgList = root->m_templateArgLists.last();
                }
 
                QString name = removeRedundantWhiteSpace(rname);
@@ -4911,7 +4911,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                   root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args),
                   root->getData(EntryKey::Exception_Spec), root->protection, root->virt, root->stat, Relationship::Member,
-                  MemberDefType::Function, tArgList, root->argList);
+                  MemberDefType::Function, tmpArgList, root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
                md->setLanguage(root->m_srcLang);
@@ -7231,8 +7231,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      }
 
                      if (matching) {
-                        ArgumentList tmp;
-                        addMemberDocs(ptrEntry, md, funcDecl, tmp, overloaded);
+                        ArgumentList tmpArgList;
+                        addMemberDocs(ptrEntry, md, funcDecl, tmpArgList, overloaded);
 
                         ++count;
                         memFound = true;
@@ -7316,16 +7316,16 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         // did not find a full signature match on arguments, however there is only one member
                         // with this name in the scope, use the found match
 
-                        ArgumentList tmp;
-                        addMemberDocs(ptrEntry, maybe_md, funcDecl, tmp, overloaded);
+                        ArgumentList tmpArgList;
+                        addMemberDocs(ptrEntry, maybe_md, funcDecl, tmpArgList, overloaded);
                         return;
 
                      } else if (candidates > 1 && exact_cd != nullptr && exact_md != nullptr) {
                         // did not find a unique match using type resolution however one of the matches
                         // has the exact same signature, use it
 
-                        ArgumentList tmp;
-                        addMemberDocs(ptrEntry, exact_md, funcDecl, tmp, overloaded);
+                        ArgumentList tmpArgList;
+                        addMemberDocs(ptrEntry, exact_md, funcDecl, tmpArgList, overloaded);
                         return;
                      }
                   }
@@ -7628,8 +7628,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                if (! newMember && rmd) {
                   // member already exists as rmd -> add docs
 
-                  ArgumentList tmp;
-                  addMemberDocs(ptrEntry, rmd, funcDecl, tmp, overloaded);
+                  ArgumentList tmpArgList;
+                  addMemberDocs(ptrEntry, rmd, funcDecl, tmpArgList, overloaded);
                }
             }
 
