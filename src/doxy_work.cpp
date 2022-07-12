@@ -5528,7 +5528,6 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
    instanceClass->setLanguage(root->m_srcLang);
 
    if (freshInstance) {
-      Debug::print(Debug::Classes, 0, "      found fresh instance '%s'\n", csPrintable(instanceClass->name()));
       Doxy_Globals::classSDict.insert(instanceClass->name(), instanceClass);
 
       if (! templateNames.isEmpty()) {
@@ -5536,9 +5535,11 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
       }
 
       // search for new template instances caused by base classes of instanceClass
-      QSharedPointer<Entry> template_root = Doxy_Globals::g_classEntries.value(templateClass->name());
+      auto range = Doxy_Globals::g_classEntries.equal_range(templateClass->name());
 
-      if (template_root) {
+      for (auto iter = range.first ; iter != range.second; ++iter) {
+         QSharedPointer<Entry> template_root = iter.value();
+
          QString dummy;
          const ArgumentList &templArgs = stringToArgumentList(root->m_srcLang, dummy, templSpec);
 
@@ -5549,8 +5550,6 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
                                  isArtificial, templArgs, templateNames);
       }
 
-   } else {
-      Debug::print(Debug::Classes, 0, "      instance already exists\n");
    }
 
    return true;

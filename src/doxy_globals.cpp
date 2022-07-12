@@ -111,7 +111,7 @@ int Doxy_Globals::subpageNestingLevel;
 
 QDateTime Doxy_Globals::dateTime;
 
-QHash<QString, QSharedPointer<Entry>> Doxy_Globals::g_classEntries;
+QMultiHash<QString, QSharedPointer<Entry>> Doxy_Globals::g_classEntries;
 
 QStringList               Doxy_Globals::g_inputFiles;
 QSet<QString>             Doxy_Globals::g_compoundKeywordDict;      // keywords recognised as compounds
