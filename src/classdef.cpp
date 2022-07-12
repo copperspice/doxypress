@@ -3275,13 +3275,14 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileNam
 
       QString tcname = removeRedundantWhiteSpace(localName() + templSpec);
 
-      QSharedPointer<ClassDef> temp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, CompoundType::Class);
+      QSharedPointer<ClassDef> tmp = QMakeShared<ClassDef>(fileName, startLine, startColumn, tcname, CompoundType::Class);
 
-      temp->setTemplateMaster(self);
-      temp->setOuterScope(getOuterScope());
-      temp->setHidden(isHidden());
+      tmp->setTemplateMaster(self);
+      tmp->setOuterScope(getOuterScope());
+      tmp->setHidden(isHidden());
+      tmp->setArtificial(isArtificial());
 
-      m_templateInstances.insert(templSpec, temp);
+      m_templateInstances.insert(templSpec, tmp);
       freshInstance = true;
 
       templateClass = m_templateInstances.find(templSpec);
