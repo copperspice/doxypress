@@ -769,7 +769,7 @@ void HtmlGenerator::init()
          t << resource;
 
          if (sourceCode && toolTips) {
-            t << endl <<
+            t << "\n" <<
               "$(document).ready(function() {\n"
               "  $('.code,.codeRef').each(function() {\n"
               "    $(this).data('powertip',$('#a'+$(this).attr('href').replace(/.*\\//,'').replace(/[^a-z_A-Z0-9]/g,'_')).html());\n"
@@ -900,7 +900,7 @@ void HtmlGenerator::writeHeaderFile(QFile &file)
 {
    QTextStream t(&file);
 
-   t << "<!-- HTML header for DoxyPress " << versionString << "-->" << endl;
+   t << "<!-- HTML header for DoxyPress " << versionString << "-->\n";
    t << ResourceMgr::instance().getAsString("html/header.html");
 }
 
@@ -908,7 +908,7 @@ void HtmlGenerator::writeFooterFile(QFile &file)
 {
    QTextStream t(&file);
 
-   t << "<!-- HTML footer for DoxyPress " << versionString << "-->" <<  endl;
+   t << "<!-- HTML footer for DoxyPress " << versionString << "-->\n";
    t << ResourceMgr::instance().getAsString("html/footer.html");
 }
 
@@ -933,7 +933,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
 
    m_lastFile = fileName;
    m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
-   m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->" << endl;
+   m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->\n";
 
    if (searchEngine /*&& ! generateTreeView*/) {
       m_textStream << "<script type=\"text/javascript\">\n";
@@ -1097,10 +1097,10 @@ void HtmlGenerator::endDoxyAnchor(const QString &, const QString &)
 void HtmlGenerator::startParagraph(const QString &className)
 {
    if (className.isEmpty()) {
-      m_textStream << endl << "<p>";
+      m_textStream << "\n<p>";
 
    } else {
-      m_textStream << endl << "<p class=\"" << className << "\">";
+      m_textStream << "\n<p class=\"" << className << "\">";
    }
 }
 
@@ -1392,13 +1392,13 @@ static void startSectionHeader(QTextStream &t_stream, const QString &relPath, in
       t_stream << "<div id=\"dynsection-" << sectionCount << "\" "
         "onclick=\"return toggleVisibility(this)\" "
         "class=\"dynheader closed\" "
-        "style=\"cursor:pointer;\">" << endl;
+        "style=\"cursor:pointer;\">\n";
 
       t_stream << "  <img id=\"dynsection-" << sectionCount << "-trigger\" src=\""
         << relPath << "closed.png\" alt=\"+\"/> ";
 
    } else {
-      t_stream << "<div class=\"dynheader\">" << endl;
+      t_stream << "<div class=\"dynheader\">\n";
 
    }
 }
@@ -1417,7 +1417,7 @@ static void startSectionSummary(QTextStream &t_stream, int sectionCount)
    if (dynamicSections) {
       t_stream << "<div id=\"dynsection-" << sectionCount << "-summary\" "
          "class=\"dynsummary\" "
-         "style=\"display:block;\">" << endl;
+         "style=\"display:block;\">\n";
    }
 }
 
@@ -1439,10 +1439,10 @@ static void startSectionContent(QTextStream &t_stream, int sectionCount)
    if (dynamicSections) {
       t_stream << "<div id=\"dynsection-" << sectionCount << "-content\" "
         "class=\"dyncontent\" "
-        "style=\"display:none;\">" << endl;
+        "style=\"display:none;\">\n";
 
    } else {
-      t_stream << "<div class=\"dyncontent\">" << endl;
+      t_stream << "<div class=\"dyncontent\">\n";
    }
 }
 
@@ -1472,15 +1472,15 @@ void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname,
 
    if (! imgData.isEmpty()) {
 
-      m_textStream << " <div class=\"center\">" << endl;
+      m_textStream << " <div class=\"center\">\n";
       m_textStream << "  <img src=\"";
       m_textStream << m_relativePath << fname << ".png\" usemap=\"#" << convertToId(name);
 
-      m_textStream << "_map\" alt=\"\"/>" << endl;
+      m_textStream << "_map\" alt=\"\"/>\n";
       m_textStream << "  <map id=\"" << convertToId(name);
 
       m_textStream << "_map\" name=\"" << convertToId(name);
-      m_textStream << "_map\">" << endl;
+      m_textStream << "_map\">\n";
 
       m_textStream << imgData;
 
@@ -1488,7 +1488,7 @@ void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname,
       m_textStream << " </div>";
 
    } else {
-      m_textStream << " <div class=\"center\">" << endl;
+      m_textStream << " <div class=\"center\">\n";
       m_textStream << "  <img src=\"";
       m_textStream << m_relativePath << fname << ".png\" alt=\"\"/>" << endl;
       m_textStream << " </div>";
@@ -1500,12 +1500,12 @@ void HtmlGenerator::endClassDiagram(const ClassDiagram &d, const QString &fname,
 
 void HtmlGenerator::startMemberList()
 {
-   DBG_HTML(m_textStream << "<!-- startMemberList -->" << endl)
+   DBG_HTML(m_textStream << "<!-- startMemberList -->\n")
 }
 
 void HtmlGenerator::endMemberList()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberList -->" << endl)
+   DBG_HTML(m_textStream << "<!-- endMemberList -->\n")
 }
 
 // anonymous type:
@@ -1515,7 +1515,7 @@ void HtmlGenerator::endMemberList()
 void HtmlGenerator::startMemberItem(const QString &anchor, int annoType, const QString &inheritId, bool deprecated)
 {
    if (m_emptySection) {
-      m_textStream << "<table class=\"memberdecls\">" << endl;
+      m_textStream << "<table class=\"memberdecls\">\n";
       m_emptySection = false;
    }
 
@@ -1589,7 +1589,7 @@ void HtmlGenerator::insertMemberAlignLeft(int annoType, bool alignLeft)
 void HtmlGenerator::startMemberDescription(const QString &anchor, const QString &inheritId, bool type)
 {
    if (m_emptySection) {
-      m_textStream << "<table class=\"memberdecls\">" << endl;
+      m_textStream << "<table class=\"memberdecls\">\n";
       m_emptySection = false;
    }
 
@@ -1610,13 +1610,13 @@ void HtmlGenerator::startMemberDescription(const QString &anchor, const QString 
 
 void HtmlGenerator::endMemberDescription()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberDescription -->" << endl)
+   DBG_HTML(m_textStream << "<!-- endMemberDescription -->\n")
    m_textStream << "<br /></td></tr>" << endl;
 }
 
 void HtmlGenerator::startMemberSections()
 {
-   DBG_HTML(m_textStream << "<!-- startMemberSections -->" << endl)
+   DBG_HTML(m_textStream << "<!-- startMemberSections -->\n")
    m_emptySection = true;
 
    // postpone writing <table> until we actually
@@ -1625,7 +1625,7 @@ void HtmlGenerator::startMemberSections()
 
 void HtmlGenerator::endMemberSections()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberSections -->" << endl)
+   DBG_HTML(m_textStream << "<!-- endMemberSections -->\n")
 
    if (! m_emptySection) {
       m_textStream << "</table>" << endl;
@@ -1634,7 +1634,7 @@ void HtmlGenerator::endMemberSections()
 
 void HtmlGenerator::startMemberHeader(const QString &anchor, int type)
 {
-   DBG_HTML(m_textStream << "<!-- startMemberHeader -->" << endl)
+   DBG_HTML(m_textStream << "<!-- startMemberHeader -->\n")
 
    if (! m_emptySection) {
       m_textStream << "</table>";
@@ -1642,14 +1642,14 @@ void HtmlGenerator::startMemberHeader(const QString &anchor, int type)
    }
 
    if (m_emptySection) {
-      m_textStream << "<table class=\"memberdecls\">" << endl;
+      m_textStream << "<table class=\"memberdecls\">\n";
       m_emptySection = false;
    }
 
    m_textStream << "<tr class=\"heading\"><td colspan=\"" << type << "\"><h2 class=\"groupheader\">";
 
    if (! anchor.isEmpty()) {
-      m_textStream << "<a name=\"" << anchor << "\"></a>" << endl;
+      m_textStream << "<a name=\"" << anchor << "\"></a>\n";
    }
 }
 
@@ -1670,7 +1670,7 @@ void HtmlGenerator::endMemberSubtitle()
 
 void HtmlGenerator::startIndexList()
 {
-   m_textStream << "<table>"  << endl;
+   m_textStream << "<table>\n";
 }
 
 void HtmlGenerator::endIndexList()
@@ -1702,12 +1702,12 @@ void HtmlGenerator::endIndexValue(const QString &, bool)
 
 void HtmlGenerator::startMemberDocList()
 {
-   DBG_HTML(m_textStream << "<!-- startMemberDocList -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- startMemberDocList -->\n")
 }
 
 void HtmlGenerator::endMemberDocList()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberDocList -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endMemberDocList -->\n")
 }
 
 void HtmlGenerator::startMemberDoc(const QString &, const QString &, const QString &, const QString &,
@@ -1717,41 +1717,41 @@ void HtmlGenerator::startMemberDoc(const QString &, const QString &, const QStri
    (void) memTotal;
 
    // (emerald) bypass 'tab' above docs
-   m_textStream << "\n<div class=\"memitem\">" << endl;
-   m_textStream << "<div class=\"memproto\">" << endl;
+   m_textStream << "\n<div class=\"memitem\">\n";
+   m_textStream << "<div class=\"memproto\">\n";
 }
 
 void HtmlGenerator::startMemberDocPrefixItem()
 {
-   DBG_HTML(m_textStream << "<!-- startMemberDocPrefixItem -->" << endl;)
-   m_textStream << "<div class=\"memtemplate\">" << endl;
+   DBG_HTML(m_textStream << "<!-- startMemberDocPrefixItem -->\n")
+   m_textStream << "<div class=\"memtemplate\">\n";
 }
 
 void HtmlGenerator::endMemberDocPrefixItem()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberDocPrefixItem -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endMemberDocPrefixItem -->\n")
    m_textStream << "</div>" << endl;
 }
 
 void HtmlGenerator::startMemberDocName(bool /*align*/)
 {
-   DBG_HTML(m_textStream << "<!-- startMemberDocName -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- startMemberDocName -->\n")
 
-   m_textStream << "      <table class=\"memname\">" << endl;
+   m_textStream << "      <table class=\"memname\">\n";
 
-   m_textStream << "        <tr>" << endl;
+   m_textStream << "        <tr>\n";
    m_textStream << "          <td class=\"memname\">";
 }
 
 void HtmlGenerator::endMemberDocName()
 {
-   DBG_HTML(m_textStream << "<!-- endMemberDocName -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endMemberDocName -->\n")
    m_textStream << "</td>" << endl;
 }
 
 void HtmlGenerator::startParameterList(bool openBracket)
 {
-   DBG_HTML(m_textStream << "<!-- startParameterList -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- startParameterList -->\n")
 
    m_textStream << "          <td>";
 
@@ -1759,87 +1759,91 @@ void HtmlGenerator::startParameterList(bool openBracket)
       m_textStream << "(";
    }
 
-   m_textStream << "</td>" << endl;
+   m_textStream << "</td>\n";
 }
 
 void HtmlGenerator::startParameterType(bool first, const QString &key)
 {
    if (first) {
-      DBG_HTML(m_textStream << "<!-- startFirstParameterType -->" << endl;)
+      DBG_HTML(m_textStream << "<!-- startFirstParameterType -->\n")
       m_textStream << "          <td class=\"paramtype\">";
 
    } else {
-      DBG_HTML(m_textStream << "<!-- startParameterType -->" << endl;)
-      m_textStream << "        <tr>" << endl;
+      DBG_HTML(m_textStream << "<!-- startParameterType -->\n")
+      m_textStream << "        <tr>\n";
       m_textStream << "          <td class=\"paramkey\">";
 
       if (! key.isEmpty()) {
          m_textStream << key;
       }
 
-      m_textStream << "</td>" << endl;
-      m_textStream << "          <td></td>" << endl;
+      m_textStream << "</td>\n";
+      m_textStream << "          <td></td>\n";
       m_textStream << "          <td class=\"paramtype\">";
    }
 }
 
 void HtmlGenerator::endParameterType()
 {
-   DBG_HTML(m_textStream << "<!-- endParameterType -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endParameterType -->\n")
    m_textStream << "&#160;</td>" << endl;
 }
 
 void HtmlGenerator::startParameterName(bool /*oneArgOnly*/)
 {
-   DBG_HTML(m_textStream << "<!-- startParameterName -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- startParameterName -->\n")
    m_textStream << "          <td class=\"paramname\">";
 }
 
 void HtmlGenerator::endParameterName(bool last, bool emptyList, bool closeBracket)
 {
-   DBG_HTML(m_textStream << "<!-- endParameterName -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endParameterName -->\n")
 
    if (last) {
       if (emptyList) {
          if (closeBracket) {
             m_textStream << "</td><td>)";
          }
-         m_textStream << "</td>" << endl;
+
+         m_textStream << "</td>\n";
          m_textStream << "          <td>";
 
       } else {
-         m_textStream << "&#160;</td>" << endl;
-         m_textStream << "        </tr>" << endl;
-         m_textStream << "        <tr>" << endl;
-         m_textStream << "          <td></td>" << endl;
+         m_textStream << "&#160;</td>\n";
+         m_textStream << "        </tr>\n";
+         m_textStream << "        <tr>\n";
+         m_textStream << "          <td></td>\n";
          m_textStream << "          <td>";
+
          if (closeBracket) {
             m_textStream << ")";
          }
+
          m_textStream << "</td>" << endl;
          m_textStream << "          <td></td><td>";
       }
 
    } else {
-      m_textStream << "</td>" << endl;
+      m_textStream << "</td>\n";
       m_textStream << "        </tr>" << endl;
    }
 }
 
 void HtmlGenerator::endParameterList()
 {
-   DBG_HTML(m_textStream << "<!-- endParameterList -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endParameterList -->\n")
 
-   m_textStream << "</td>" << endl;
+   m_textStream << "</td>\n";
    m_textStream << "        </tr>" << endl;
 }
 
 void HtmlGenerator::exceptionEntry(const QString &prefix, bool closeBracket)
 {
-   DBG_HTML(m_textStream << "<!-- exceptionEntry -->" << endl;)
-   m_textStream << "</td>" << endl;
-   m_textStream << "        </tr>" << endl;
-   m_textStream << "        <tr>" << endl;
+   DBG_HTML(m_textStream << "<!-- exceptionEntry -->\n")
+
+   m_textStream << "</td>\n";
+   m_textStream << "        </tr>\n";
+   m_textStream << "        <tr>\n";
    m_textStream << "          <td align=\"right\">";
 
    // colspan 2 so it gets both parameter type and parameter name columns
@@ -1857,7 +1861,7 @@ void HtmlGenerator::exceptionEntry(const QString &prefix, bool closeBracket)
 
 void HtmlGenerator::endMemberDoc(bool hasArgs)
 {
-   DBG_HTML(m_textStream << "<!-- endMemberDoc -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endMemberDoc -->\n")
 
    if (! hasArgs) {
       m_textStream << "        </tr>" << endl;
@@ -1878,6 +1882,7 @@ void HtmlGenerator::endDotGraph(const DotClassGraph &g)
 
    endSectionHeader(m_textStream);
    startSectionSummary(m_textStream, m_sectionCount);
+
    endSectionSummary(m_textStream);
    startSectionContent(m_textStream, m_sectionCount);
 
@@ -2009,7 +2014,7 @@ void HtmlGenerator::startIndent()
 
 void HtmlGenerator::endIndent()
 {
-   m_textStream << endl << "</div>" << endl << "</div>" << endl;
+   m_textStream << "\n</div>\n" << "</div>" << endl;
 }
 
 void HtmlGenerator::addIndexItemName(const QString &, const QString &)
@@ -2025,7 +2030,7 @@ void HtmlGenerator::writeNonBreakableSpace(int n)
 
 void HtmlGenerator::startDescTable(const QString &title)
 {
-   m_textStream << "<table class=\"fieldtable\">" << endl
+   m_textStream << "<table class=\"fieldtable\">\n"
                 << "<tr><th colspan=\"2\">" << title << "</th></tr>";
 }
 
@@ -2520,7 +2525,7 @@ void HtmlGenerator::writeNavigationPath(const QString &s)
 
 void HtmlGenerator::startContents()
 {
-   m_textStream << "<div class=\"contents\">" << endl;
+   m_textStream << "<div class=\"contents\">\n";
 }
 
 void HtmlGenerator::endContents()
@@ -2595,7 +2600,8 @@ void HtmlGenerator::writeSearchPage()
       t_stream << substituteHtmlKeywords(g_header, "Search");
 
       t_stream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress "
-        << versionString << " -->" << endl;
+        << versionString << " -->\n";
+
       t_stream << "<script type=\"text/javascript\">\n";
       t_stream << "var searchBox = new SearchBox(\"searchBox\", \""
         << "search\",false,'" << theTranslator->trSearch() << "');\n";
@@ -2651,7 +2657,8 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << substituteHtmlKeywords(g_header, "Search");
 
       t_stream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress "
-        << versionString << " -->" << endl;
+        << versionString << " -->\n";
+
       t_stream << "<script type=\"text/javascript\">\n";
       t_stream << "var searchBox = new SearchBox(\"searchBox\", \""
         << "search\",false,'" << theTranslator->trSearch() << "');\n";
@@ -2672,22 +2679,22 @@ void HtmlGenerator::writeExternalSearchPage()
          t_stream << "</div>\n";
 
       } else {
-         t_stream << "</div>" << endl;
+         t_stream << "</div>\n";
       }
 
       t_stream << writeSplitBarAsString("search", QString());
-      t_stream << "<div class=\"header\">" << endl;
-      t_stream << "  <div class=\"headertitle\">" << endl;
-      t_stream << "    <div class=\"title\">" << theTranslator->trSearchResultsTitle() << "</div>" << endl;
-      t_stream << "  </div>" << endl;
-      t_stream << "</div>" << endl;
-      t_stream << "<div class=\"contents\">" << endl;
+      t_stream << "<div class=\"header\">\n";
+      t_stream << "  <div class=\"headertitle\">\n";
+      t_stream << "    <div class=\"title\">" << theTranslator->trSearchResultsTitle() << "</div>\n";
+      t_stream << "  </div>\n";
+      t_stream << "</div>\n";;
+      t_stream << "<div class=\"contents\">\n";
 
-      t_stream << "<div id=\"searchresults\"></div>" << endl;
-      t_stream << "</div>" << endl;
+      t_stream << "<div id=\"searchresults\"></div>\n";
+      t_stream << "</div>\n";
 
       if (generateTreeView) {
-         t_stream << "</div><!-- doc-content -->" << endl;
+         t_stream << "</div><!-- doc-content -->\n";
       }
 
       writePageFooter(t_stream, "Search", QString(), QString());
@@ -2706,10 +2713,10 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << "var searchResultsText=["
         << "\"" << theTranslator->trSearchResults(0) << "\","
         << "\"" << theTranslator->trSearchResults(1) << "\","
-        << "\"" << theTranslator->trSearchResults(2) << "\"];" << endl;
+        << "\"" << theTranslator->trSearchResults(2) << "\"];\n";
 
       t_stream << "var serverUrl=\"" << searchExternalUrl << "\";\n";
-      t_stream << "var tagMap = {" << endl;
+      t_stream << "var tagMap = {\n";
 
       bool first = true;
 
@@ -2725,8 +2732,8 @@ void HtmlGenerator::writeExternalSearchPage()
             QString destName = mapLine.right(mapLine.length() - eqPos - 1).trimmed();
 
             if (! tagName.isEmpty()) {
-               if (!first) {
-                  t_stream << "," << endl;
+               if (! first) {
+                  t_stream << ",\n";
                }
 
                t_stream << "  \"" << tagName << "\": \"" << destName << "\"";
@@ -2740,18 +2747,19 @@ void HtmlGenerator::writeExternalSearchPage()
          t_stream << endl;
       }
 
-      t_stream << "};" << endl << endl;
+      t_stream << "};\n\n";
       t_stream << ResourceMgr::instance().getAsString("html/extsearch.js");
       t_stream << endl;
-      t_stream << "$(document).ready(function() {" << endl;
-      t_stream << "  var query = trim(getURLParameter('query'));" << endl;
-      t_stream << "  if (query) {" << endl;
-      t_stream << "    searchFor(query,0,20);" << endl;
-      t_stream << "  } else {" << endl;
-      t_stream << "    var results = $('#results');" << endl;
-      t_stream << "    results.html('<p>" << theTranslator->trSearchResults(0) << "</p>');" << endl;
-      t_stream << "  }" << endl;
-      t_stream << "});" << endl;
+
+      t_stream << "$(document).ready(function() {\n";
+      t_stream << "  var query = trim(getURLParameter('query'));\n";
+      t_stream << "  if (query) {\n";
+      t_stream << "    searchFor(query,0,20);\n";
+      t_stream << "  } else {\n";
+      t_stream << "    var results = $('#results');\n";
+      t_stream << "    results.html('<p>" << theTranslator->trSearchResults(0) << "</p>');\n";
+      t_stream << "  }\n";
+      t_stream << "});\n";
 
    } else {
       err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(scriptName), sf.error());
@@ -2760,10 +2768,10 @@ void HtmlGenerator::writeExternalSearchPage()
 
 void HtmlGenerator::startConstraintList(const QString &header)
 {
-   m_textStream << "<div class=\"typeconstraint\">" << endl;
-   m_textStream << "<dl><dt><b>" << header << "</b></dt>" << endl;
+   m_textStream << "<div class=\"typeconstraint\">\n";
+   m_textStream << "<dl><dt><b>" << header << "</b></dt>\n";
    m_textStream << "<dd>" << endl;
-   m_textStream << "<table border=\"0\" cellspacing=\"2\" cellpadding=\"0\">" << endl;
+   m_textStream << "<table border=\"0\" cellspacing=\"2\" cellpadding=\"0\">\n";
 }
 
 void HtmlGenerator::startConstraintParam()
@@ -2798,9 +2806,9 @@ void HtmlGenerator::endConstraintDocs()
 
 void HtmlGenerator::endConstraintList()
 {
-   m_textStream << "</table>" << endl;
-   m_textStream << "</dd>" << endl;
-   m_textStream << "</dl>" << endl;
+   m_textStream << "</table>\n";
+   m_textStream << "</dd>\n";
+   m_textStream << "</dl>\n";
    m_textStream << "</div>" << endl;
 }
 
@@ -2816,12 +2824,12 @@ void HtmlGenerator::lineBreak(const QString &style)
 
 void HtmlGenerator::startHeaderSection()
 {
-   m_textStream << "<div class=\"header\">" << endl;
+   m_textStream << "<div class=\"header\">\n" ;
 }
 
 void HtmlGenerator::startTitleHead(const QString &)
 {
-   m_textStream << "  <div class=\"headertitle\">" << endl;
+   m_textStream << "  <div class=\"headertitle\">\n";
    startTitle();
 }
 
@@ -2840,7 +2848,7 @@ void HtmlGenerator::endHeaderSection()
 void HtmlGenerator::startInlineHeader()
 {
    if (m_emptySection) {
-      m_textStream << "<table class=\"memberdecls\">" << endl;
+      m_textStream << "<table class=\"memberdecls\">\n";
       m_emptySection = false;
    }
 
@@ -2854,10 +2862,10 @@ void HtmlGenerator::endInlineHeader()
 
 void HtmlGenerator::startMemberDocSimple(bool isEnum)
 {
-   m_textStream << "<table class=\"fieldtable\">" << endl;
+   m_textStream << "<table class=\"fieldtable\">\n";
    m_textStream << "<tr><th colspan=\"" << (isEnum ? "2" : "3") << "\">";
    m_textStream << (isEnum ? theTranslator->trEnumerationValues() : theTranslator->trCompoundMembers())
-                << "</th></tr>" << endl;
+                << "</th></tr>\n";
 }
 
 void HtmlGenerator::endMemberDocSimple(bool isEnum)
@@ -2868,61 +2876,61 @@ void HtmlGenerator::endMemberDocSimple(bool isEnum)
 
 void HtmlGenerator::startInlineMemberType()
 {
-   m_textStream << "<tr><td class=\"fieldtype\">" << endl;
+   m_textStream << "<tr><td class=\"fieldtype\">\n";
 }
 
 void HtmlGenerator::endInlineMemberType()
 {
-   DBG_HTML(m_textStream << "<!-- endInlineMemberType -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endInlineMemberType -->\n")
    m_textStream << "</td>" << endl;
 }
 
 void HtmlGenerator::startInlineMemberName()
 {
-   DBG_HTML(m_textStream << "<!-- startInlineMemberName -->" << endl;)
-   m_textStream << "<td class=\"fieldname\">" << endl;
+   DBG_HTML(m_textStream << "<!-- startInlineMemberName -->\n")
+   m_textStream << "<td class=\"fieldname\">\n";
 }
 
 void HtmlGenerator::endInlineMemberName()
 {
-   DBG_HTML(m_textStream << "<!-- endInlineMemberName -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endInlineMemberName -->\n")
    m_textStream << "</td>" << endl;
 }
 
 void HtmlGenerator::startInlineMemberDoc()
 {
-   DBG_HTML(m_textStream << "<!-- startInlineMemberDoc -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- startInlineMemberDoc -->\n")
    m_textStream << "<td class=\"fielddoc\">" << endl;
 }
 
 void HtmlGenerator::endInlineMemberDoc()
 {
-   DBG_HTML(m_textStream << "<!-- endInlineMemberDoc -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endInlineMemberDoc -->\n")
    m_textStream << "</td></tr>" << endl;
 }
 
 void HtmlGenerator::startLabels()
 {
-   DBG_HTML(m_textStream << "<!-- startLabels -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- startLabels -->\n")
    m_textStream << "<span class=\"mlabels\">";
 }
 
 void HtmlGenerator::writeLabel(const QString &l, bool)
 {
-   DBG_HTML(m_textStream << "<!-- writeLabel(" << l << ") -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- writeLabel(" << l << ") -->\n")
    m_textStream << "<span class=\"mlabel\">" << l << "</span>";
 }
 
 void HtmlGenerator::endLabels()
 {
-   DBG_HTML(m_textStream << "<!-- endLabels -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- endLabels -->\n")
    m_textStream << "</span>";
 }
 
-void HtmlGenerator::writeInheritedSectionTitle(const QString &id, const QString &ref, const QString &file, const QString &anchor,
-                                               const QString &title, const QString &name)
+void HtmlGenerator::writeInheritedSectionTitle(const QString &id, const QString &ref, const QString &file,
+         const QString &anchor, const QString &title, const QString &name)
 {
-   DBG_HTML(m_textStream << "<!-- writeInheritedSectionTitle -->" << endl;)
+   DBG_HTML(m_textStream << "<!-- writeInheritedSectionTitle -->\n")
    QString a = anchor;
 
    if (! a.isEmpty()) {
