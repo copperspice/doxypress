@@ -357,7 +357,7 @@ QString portable_commandExtension()
 #ifdef Q_OS_WIN
    return QString(".exe");
 #else
-   return QString("");
+   return QString();
 #endif
 }
 

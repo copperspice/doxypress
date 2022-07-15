@@ -29,7 +29,7 @@ CPPValue parseOctal()
    QString tmp = g_strToken;
 
    static QRegularExpression regExp("[A-Za-z]");
-   tmp.replace(regExp, "");
+   tmp.replace(regExp, QString());
 
    long retval = g_strToken.toInteger<long>(nullptr, 8);
 
@@ -41,7 +41,7 @@ CPPValue parseDecimal()
    QString tmp = g_strToken;
 
    static QRegularExpression regExp("[A-Za-z]");
-   tmp.replace(regExp, "");
+   tmp.replace(regExp, QString());
 
    long retval = tmp.toInteger<long>(nullptr, 10);
 
@@ -53,7 +53,7 @@ CPPValue parseHexadecimal()
    QString tmp = g_strToken;
 
    static QRegularExpression regExp("[A-Za-z]");
-   tmp.replace(regExp, "");
+   tmp.replace(regExp, QString());
 
    long retval = g_strToken.toInteger<long>(nullptr, 16);
 
@@ -65,7 +65,7 @@ CPPValue parseFloat()
    QString tmp = g_strToken;
 
    static QRegularExpression regExp("[A-Za-z]");
-   tmp.replace(regExp, "");
+   tmp.replace(regExp, QString());
 
    double retval = g_strToken.toDouble();
 

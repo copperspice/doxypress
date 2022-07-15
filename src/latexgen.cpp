@@ -2338,7 +2338,7 @@ void LatexGenerator::exceptionEntry(const QString &prefix, bool closeBracket)
 void LatexGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> )
 {
    LatexDocVisitor *visitor = new LatexDocVisitor(m_textStream, *m_codeGen, ctx ? ctx->getDefFileExtension()
-      : QString(""), m_insideTabbing);
+      : QString(), m_insideTabbing);
 
    n->accept(visitor);
    delete visitor;

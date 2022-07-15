@@ -406,21 +406,21 @@ void XmlDocVisitor::visit(DocVerbatim *s)
          break;
 
       case DocVerbatim::Dot:
-         visitPreStart(m_t, "dot", s->hasCaption(), this, s->children(), QString(""), false,
+         visitPreStart(m_t, "dot", s->hasCaption(), this, s->children(), QString(), false,
                      DocImage::Html, s->width(), s->height());
          filter(s->text());
          visitPostEnd(m_t, "dot");
          break;
 
       case DocVerbatim::Msc:
-         visitPreStart(m_t, "msc", s->hasCaption(), this, s->children(),  QString(""), false,
+         visitPreStart(m_t, "msc", s->hasCaption(), this, s->children(), QString(), false,
                      DocImage::Html, s->width(), s->height());
          filter(s->text());
          visitPostEnd(m_t, "msc");
          break;
 
       case DocVerbatim::PlantUML:
-         visitPreStart(m_t, "plantuml", s->hasCaption(), this, s->children(),  QString(""), false,
+         visitPreStart(m_t, "plantuml", s->hasCaption(), this, s->children(), QString(), false,
                      DocImage::Html, s->width(), s->height());
          filter(s->text());
          visitPostEnd(m_t, "plantuml");

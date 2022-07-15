@@ -1245,7 +1245,7 @@ QString Definition::qualifiedName() const
 
    if (! m_private->outerScope) {
       if (m_private->localName == "<globalScope>") {
-         return QString("");
+         return QString();
 
       } else {
          return m_private->localName;
@@ -1692,7 +1692,7 @@ QString abbreviate(const QString &brief, const QString &name)
       } else if (prefix.contains("<")) {
          // brief has no <T> where as className does
          static QRegularExpression regexp("<.*>");
-         prefix.replace(regexp, "");
+         prefix.replace(regexp, QString());
 
          if (result.startsWith(prefix)) {
             result = result.mid(prefix.length());

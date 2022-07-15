@@ -330,7 +330,7 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    void startCompound(const QXmlAttributes &attrib) {
-      m_curString = "";
+      m_curString = QString();
 
       QString kind   = attrib.value("kind");
       QString isObjC = attrib.value("objc");
@@ -525,7 +525,7 @@ class TagFileParser : public QXmlDefaultHandler
 
    void startEnumValue( const QXmlAttributes &attrib) {
       if (m_state == InMember) {
-         m_curString = "";
+         m_curString = QString();
          m_curEnumValue = new TagEnumValueInfo;
          m_curEnumValue->file    = attrib.value("file");
          m_curEnumValue->anchor  = attrib.value("anchor");
@@ -672,13 +672,13 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    void startStringValue(const QXmlAttributes &) {
-      m_curString = "";
+      m_curString = QString();
    }
 
    void startDocAnchor(const QXmlAttributes &attrib ) {
       m_fileName = attrib.value("file");
       m_title = attrib.value("title");
-      m_curString = "";
+      m_curString = QString();
    }
 
    void endType() {
@@ -722,7 +722,7 @@ class TagFileParser : public QXmlDefaultHandler
    }
 
    void startBase(const QXmlAttributes &attrib ) {
-      m_curString = "";
+      m_curString = QString();
 
       if (m_state == InClass && m_curClass) {
          QString protStr = attrib.value("protection");
@@ -774,7 +774,7 @@ class TagFileParser : public QXmlDefaultHandler
          tagWarn("Unexpected '<includes>' found in tag file.\n");
       }
 
-      m_curString = "";
+      m_curString = QString();
    }
 
    void endIncludes() {
@@ -1069,7 +1069,7 @@ class TagFileErrorHandler : public QXmlErrorHandler
    }
 
    QString errorString() const override {
-      return QString("");
+      return QString();
    }
 
  private:

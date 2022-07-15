@@ -50,7 +50,7 @@ void MakeFileParser::parseCode(CodeGenerator &codeOutIntf, const QString &scopeN
    g_code = &codeOutIntf;
    g_sourceFileDef = fileDef;
 
-   g_currentFontClass = "";
+   g_currentFontClass = QString();
    g_yyLineNr = 1;
 
    QStringList lines = QString(input).split("\n");
@@ -90,7 +90,7 @@ void MakeFileParser::endFontClass()
 {
    if (! g_currentFontClass.isEmpty()) {
       g_code->endFontClass();
-      g_currentFontClass = "";
+      g_currentFontClass = QString();
    }
 }
 

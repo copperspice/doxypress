@@ -562,7 +562,7 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
 static QString extractTrailingComment(const QString &s)
 {
    if (s.isEmpty()) {
-      return QString("");
+      return QString();
    }
 
    int i = s.length() - 1;
@@ -607,13 +607,13 @@ static QString extractTrailingComment(const QString &s)
             break;
 
          default:
-            return QString("");
+            return QString();
       }
 
       --i;
    }
 
-   return QString("");
+   return QString();
 }
 
 static int getNextChar(const QString &expr, QString *rest, uint &pos);

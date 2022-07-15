@@ -102,19 +102,19 @@ void CiteDict::writeLatexBibliography(QTextStream &t)
 
 void CiteDict::insert(const QString &label)
 {
-   m_entries.insert(label, "");
+   m_entries.insert(label, QString());
 }
 
 QString CiteDict::find(const QString &label) const
 {
    if (label.isEmpty())  {
-      return QString("");
+      return QString();
 
    } else {
       auto entry = m_entries.find(label);
 
       if (entry == m_entries.end()) {
-        return QString("");
+        return QString();
 
       } else {
         return entry.value();
@@ -183,7 +183,7 @@ void CiteDict::generatePage() const
    // (bibtex does not support paths or filenames with spaces)
 
    QString bibOutputDir   = outputDir + QDir::separator() + bibTmpDir;
-   QString bibOutputFiles = "";
+   QString bibOutputFiles = QString();
 
    QDir thisDir;
 

@@ -174,7 +174,7 @@ static QString removeEmptyLines(const QString &s)
             retval.append(line);
          }
 
-         line = "";
+         line = QString();
        }
    }
 

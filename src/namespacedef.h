@@ -53,7 +53,7 @@ class NamespaceDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const override {
-      return QString("");
+      return QString();
    }
 
    void insertUsedFile(QSharedPointer<FileDef> fd);

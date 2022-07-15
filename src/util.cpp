@@ -667,7 +667,7 @@ static QString substTypedef(QSharedPointer<const Definition> scopeDef, QSharedPo
 
    if (iter == Doxy_Globals::glossary().end()) {
       // could not find a matching def
-      return QString("");
+      return QString();
    }
 
    int minDistance = 10000;    // init at "infinite"
@@ -793,7 +793,7 @@ static QSharedPointer< const Definition> followPath(QSharedPointer<const Definit
 }
 
 bool accessibleViaUsingClass(const StringMap<QSharedPointer<Definition>> *cl, QSharedPointer<const FileDef> fileScope,
-                             QSharedPointer<const Definition> item, const QString &explicitScopePart = QString(""))
+                             QSharedPointer<const Definition> item, const QString &explicitScopePart = QString())
 {
    if (cl != nullptr) {
       // see if the class was imported via a using statement
@@ -1277,7 +1277,7 @@ static void getResolvedSymbol(QSharedPointer<const Definition> scope, QSharedPoi
 
                         bestMatch     = QSharedPointer<ClassDef>();
                         bestTypedef   = enumType;
-                        bestTemplSpec = "";
+                        bestTemplSpec = QString();
                         bestResolvedType = enumType->qualifiedName();
 
                      } else if (md->isReference()) {
@@ -1308,7 +1308,7 @@ static void getResolvedSymbol(QSharedPointer<const Definition> scope, QSharedPoi
                   minDistance   = distance;
                   bestMatch     = QSharedPointer<ClassDef>();
                   bestTypedef   = md;
-                  bestTemplSpec = "";
+                  bestTemplSpec = QString();
                   bestResolvedType = md->qualifiedName();
                }
             }
@@ -2275,7 +2275,7 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
    }
 
    // no match
-   return QString("");
+   return QString();
 }
 
 /*  looks for a filter for the file \a name.  Returns the name of the filter
@@ -2285,7 +2285,7 @@ static QString getFilterFromList(const QString &name, const QStringList &filterL
 QString getFileFilter(const QString &name, bool isSourceCode)
 {
    if (name.isEmpty()) {
-      return QString("");
+      return QString();
    }
 
    static const QStringList filterSrcList = Config::getList("filter-source-patterns");
@@ -2376,7 +2376,7 @@ QString fileToString(const QString &name, bool filter, bool isSourceCode)
 
       if (! fi.exists() || ! fi.isFile()) {
          err("Unable to find file '%s'\n", csPrintable(fi.absoluteFilePath()));
-         return QString("");
+         return QString();
       }
 
       QString fileContents;
@@ -3079,7 +3079,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
       // resolves to a known class type
 
       if (cd == d && tSpec) {
-         *tSpec = "";
+         *tSpec = QString();
       }
 
       if (mType && mType->isTypedef()) {
@@ -3089,10 +3089,10 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
       } else {
          if (isTemplInst) {
             // spec is already part of class type
-            templSpec = "";
+            templSpec = QString();
 
             if (tSpec) {
-               *tSpec = "";
+               *tSpec = QString();
             }
 
          } else if (! ts.isEmpty() && templSpec.isEmpty()) {
@@ -3114,12 +3114,12 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
             }
 
             // template class, so remove the template part (it is part of the class name)
-            *tSpec = "";
+            *tSpec = QString();
 
          } else if (ts.isEmpty() && ! templSpec.isEmpty() && cd && !cd->isTemplate() && tSpec) {
             // obscure case where a class is used as a template, but DoxyPress thinks it is not
             // (could happen when loading the class from a tag file).
-            *tSpec = "";
+            *tSpec = QString();
          }
       }
 
@@ -3386,12 +3386,12 @@ void mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool for
 
       if (srcArg.name == "const" || srcArg.name == "volatile") {
          srcArg.type += " " + srcArg.name;
-         srcArg.name = "";
+         srcArg.name = QString();
       }
 
       if (dst_iter->name == "const" || dst_iter->name == "volatile") {
          dst_iter->type += " " + dst_iter->name;
-         dst_iter->name = "";
+         dst_iter->name = QString();
       }
 
       if (srcArg.type == dst_iter->type) {
@@ -3564,7 +3564,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
 
    // handle special case where both scope name and member scope are equal
    if (mScope == scopeName) {
-      scopeName = "";
+      scopeName = QString();
    }
 
    QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict.find(mName);
@@ -5483,7 +5483,7 @@ QString convertToHtml(const QString &str, bool keepEntities)
 QString convertToJSString(const QString &s, bool applyTextDir)
 {
    if (s.isEmpty()) {
-      return QString("");
+      return QString();
    }
 
    QString retval = s;
@@ -6837,7 +6837,7 @@ QString renameNS_Aliases(const QString &scope, bool fromTo)
             // not used, to can not be empty at this time
 
             QStringList list = retval.split(" ");
-            retval = "";
+            retval = QString();
 
             for (auto str : list) {
 
@@ -6845,7 +6845,7 @@ QString renameNS_Aliases(const QString &scope, bool fromTo)
                   str.replace(0, from.length() + 2, to);
 
                } else if (str == from) {
-                  str = "";
+                  str = QString();
 
                }
 
@@ -6860,7 +6860,7 @@ QString renameNS_Aliases(const QString &scope, bool fromTo)
 
          } else {
             QStringList list = retval.split(" ");
-            retval = "";
+            retval = QString();
 
             for (auto str : list) {
                if (str.startsWith(from + "::") || str == from) {
@@ -6885,7 +6885,7 @@ QString renameNS_Aliases(const QString &scope, bool fromTo)
 
          } else {
             QStringList list = retval.split(" ");
-            retval = "";
+            retval = QString();
 
             for (auto str : list) {
                if (str.startsWith(to + "::") || str == to) {
@@ -7470,7 +7470,7 @@ QString extractAliasArgs(const QString &args, int pos)
       }
    }
 
-   return QString("");
+   return QString();
 }
 
 QString resolveAliasCmd(const QString &aliasCmd)
@@ -7866,7 +7866,7 @@ QString externalLinkTarget()
       return QString("target=\"_blank\" ");
 
    } else {
-      return QString("");
+      return QString();
    }
 }
 

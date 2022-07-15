@@ -42,7 +42,7 @@ bool Htags::execute(const QString &htmldir)
    static const bool quiet              = Config::getBool("quiet");
    static const bool warnings           = Config::getBool("warnings");
 
-   static QString htagsOptions  = "";     // Config::getString("htags-options");
+   static QString htagsOptions;     // Config::getString("htags-options");
 
    if (inputSource.isEmpty()) {
       g_inputDir.setPath(QDir::currentPath());

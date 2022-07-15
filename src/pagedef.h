@@ -51,7 +51,7 @@ class PageDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const  override{
-      return QString("");
+      return QString();
    }
 
    void findSectionsInDocumentation();

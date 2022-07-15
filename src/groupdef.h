@@ -53,7 +53,7 @@ class GroupDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const  override {
-      return QString("");
+      return QString();
    }
 
    QString displayName(bool = true) const override {

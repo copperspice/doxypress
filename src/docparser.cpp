@@ -474,10 +474,10 @@ static void checkArgumentName(const QString &name, bool isParam)
          if (! scope.isEmpty()) {
             scope += "::";
          } else {
-            scope = "";
+            scope = QString();
          }
 
-         QString inheritedFrom = "";
+         QString inheritedFrom;
 
          QString docFile = s_memberDef->docFile();
          int docLine     = s_memberDef->docLine();
@@ -842,8 +842,8 @@ static QSharedPointer<Definition> findDocsForMemberOrCompound(QString commandNam
       return retval;
    }
 
-   doc   = "";
-   brief = "";
+   doc   = QString();
+   brief = QString();
 
    QString cmdArg = commandName;
 
@@ -3806,7 +3806,7 @@ int DocIndexEntry::parse()
    }
 
    doctokenizerYYsetStateTitle();
-   m_entry = "";
+   m_entry = QString();
 
    while ((tok = doctokenizerYYlex())) {
       switch (tok) {
@@ -9120,7 +9120,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
       }
 
    } else {
-      s_context = "";
+      s_context = QString();
    }
 
    s_scope = ctx;
@@ -9137,11 +9137,11 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
       }
 
    } else {
-      s_searchUrl = "";
+      s_searchUrl = QString();
    }
 
    s_fileName = fileName;
-   s_relPath  = (! linkFromIndex && ctx) ? QString(relativePathToRoot(ctx->getOutputFileBase())) : "";
+   s_relPath  = (! linkFromIndex && ctx) ? QString(relativePathToRoot(ctx->getOutputFileBase())) : QString();
 
    s_memberDef = md;
 
@@ -9205,9 +9205,9 @@ DocText *validatingParseText(const QString &input)
    // store parser state so we can re-enter this function if needed
    docParserPushContext();
 
-   s_context  = "";
+   s_context  = QString();
    s_fileName = "<parseText>";
-   s_relPath  = "";
+   s_relPath  = QString();
 
    s_memberDef = QSharedPointer<MemberDef>();
 
@@ -9222,12 +9222,12 @@ DocText *validatingParseText(const QString &input)
    s_includeFileOffset = 0;
    s_includeFileLength = 0;
    s_isExample         = false;
-   s_exampleName       = "";
+   s_exampleName       = QString();
    s_hasParamCommand   = false;
    s_hasReturnCommand  = false;
 
    s_paramsFound.clear();
-   s_searchUrl = "";
+   s_searchUrl = QString();
 
    DocText *txt = new DocText;
 

@@ -451,7 +451,8 @@ static void unsetDotFontPath()
    } else {
       portable_setenv("DOTFONTPATH", g_dotFontPath);
    }
-   g_dotFontPath = "";
+
+   g_dotFontPath = QString();
 }
 
 static bool readBoundingBox(const QString &fileName, int *width, int *height, bool isEps)
@@ -1546,7 +1547,7 @@ void DotNode::setDistance(int distance)
 
 static QString convertLabel(const QString &label)
 {
-   QString retval = "";
+   QString retval;
 
    if (label.isEmpty()) {
       return retval;
@@ -1653,7 +1654,7 @@ static QString convertLabel(const QString &label)
 static QString escapeTooltip(const QString &tooltip)
 {
    if (tooltip.isEmpty()) {
-      return QString("");
+      return QString();
    }
 
    QString result = tooltip;
@@ -2477,7 +2478,7 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
                }
 
             } else {
-               QString tmp_url = "";
+               QString tmp_url;
 
                if (bClass->isLinkable() && !bClass->isHidden()) {
                   tmp_url = bClass->getReference() + "$" + bClass->getOutputFileBase();
@@ -2511,7 +2512,7 @@ void DotGfxHierarchyTable::addClassList(ClassSDict *cl)
 
       if (! hasVisibleRoot(cd->baseClasses()) && cd->isVisibleInHierarchy() ) {
          // root node in the forest
-         QString tmp_url = "";
+         QString tmp_url;
 
          if (cd->isLinkable() && !cd->isHidden()) {
             tmp_url = cd->getReference() + "$" + cd->getOutputFileBase();
@@ -2973,7 +2974,7 @@ DotClassGraph::DotClassGraph(QSharedPointer<ClassDef> cd, DotNode::GraphType t)
 
    m_graphType = t;
 
-   QString tmp_url = "";
+   QString tmp_url;
 
    if (cd->isLinkable() && !cd->isHidden()) {
       tmp_url = cd->getReference() + "$" + cd->getOutputFileBase();
@@ -3353,7 +3354,7 @@ void DotInclDepGraph::buildGraph(DotNode *n, QSharedPointer<FileDef> fd, int dis
          }
 
          if (doc || src || ! Config::getBool("hide-undoc-relations")) {
-            QString url = "";
+            QString url;
 
             if (bfd) {
                url = bfd->getOutputFileBase();
@@ -4373,7 +4374,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
             m_usedNodes->insert(d->name(), nnode );
          }
 
-         tmp_url = "";
+         tmp_url = QString();
          addEdge( nnode, m_rootNode, DotGroupCollaboration::thierarchy, tmp_url, tmp_url );
       }
    }
@@ -4395,7 +4396,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
             m_usedNodes->insert(def->name(), nnode );
          }
 
-         tmp_url = "";
+         tmp_url = QString();
          addEdge( m_rootNode, nnode, DotGroupCollaboration::thierarchy, tmp_url, tmp_url);
       }
    }

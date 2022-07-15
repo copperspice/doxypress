@@ -56,9 +56,9 @@ struct TagInfo {
    }
 
    void clear() {
-      tag_Name     = "";
-      tag_FileName = "";
-      tag_Anchor   = "";
+      tag_Name     = QString();
+      tag_FileName = QString();
+      tag_Anchor   = QString();
    }
 
    QString tag_Name;

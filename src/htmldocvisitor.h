@@ -137,7 +137,7 @@ class HtmlDocVisitor : public DocVisitor
    void filterQuotedCdataAttr(const QString &str);
 
    void startLink(const QString &ref, const QString &file, const QString &relPath, const QString &anchor,
-                  const QString &tooltip = QString(""));
+                  const QString &tooltip = QString());
 
    void endLink();
 

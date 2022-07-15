@@ -74,7 +74,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    static const bool latexPdf                = Config::getBool("latex-pdf");
 
    QString pumlExe  = "java";
-   QString pumlArgs = "";
+   QString pumlArgs = QString();
 
    if (! plantumlIncPath.isEmpty()) {
       pumlArgs += "-Dplantuml.include.path=\"";

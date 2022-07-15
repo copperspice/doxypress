@@ -1575,7 +1575,7 @@ void PerlModDocVisitor::visitPre(DocParamList *pl)
 
       }
 
-      QString dir        = "";
+      QString dir;
       DocParamSect *sect = nullptr;
 
       if (pl->parent()->kind() == DocNode::Kind_ParamSect) {

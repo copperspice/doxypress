@@ -1175,7 +1175,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void endNavIndex() {
-      m_scope = "";
+      m_scope = QString();
 
       if (m_rootNav && ! m_rootNav->find(LayoutNavEntry::MainPage)) {
 
@@ -1660,7 +1660,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void endClass() {
-      m_scope = "";
+      m_scope = QString();
       m_part = -1;
    }
 
@@ -1671,7 +1671,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void endNamespace() {
-      m_scope = "";
+      m_scope = QString();
       m_part = -1;
    }
 
@@ -1682,8 +1682,8 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void endFile() {
-      m_scope = "";
-      m_part = -1;
+      m_scope = QString();
+      m_part  = -1;
    }
 
    void startGroup(const QXmlAttributes &) {
@@ -1693,7 +1693,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void endGroup() {
-      m_scope = "";
+      m_scope = QString();
       m_part = -1;
    }
 
@@ -1704,7 +1704,7 @@ class LayoutParser : public QXmlDefaultHandler
    }
 
    void endDirectory() {
-      m_scope = "";
+      m_scope = QString();
       m_part = -1;
    }
 
@@ -1834,7 +1834,7 @@ class LayoutErrorHandler : public QXmlErrorHandler
    }
 
    QString errorString() const override {
-      return QString("");
+      return QString();
    }
 
  private:
@@ -1849,7 +1849,7 @@ static QString getLayout_Default()
 
    if (! f.open(QFile::ReadOnly | QFile::Text)) {
       err("Unable to open file %s, error: %d\n", csPrintable(fileName), f.error());
-      return QString("");
+      return QString();
    }
 
    return f.readAll();

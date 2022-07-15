@@ -2694,7 +2694,7 @@ void RTFGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedP
 {
    (void) md;
 
-   RTFDocVisitor *visitor = new RTFDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString(""));
+   RTFDocVisitor *visitor = new RTFDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString());
    n->accept(visitor);
    delete visitor;
 

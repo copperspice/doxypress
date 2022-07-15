@@ -3703,8 +3703,8 @@ void ClassDef::getTitleForMemberListType(MemberListType type, QString &title, QS
       }
    }
 
-   title    = "";
-   subtitle = "";
+   title    = QString();
+   subtitle = QString();
 }
 
 int ClassDef::countAdditionalInheritedMembers()

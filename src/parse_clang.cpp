@@ -449,7 +449,7 @@ static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<FileDef> fd
          ol.startCodeLine(true);
          writeLineNumber(ol, fd, line);
 
-         tmp = "";
+         tmp = QString();
 
       } else {
          column++;

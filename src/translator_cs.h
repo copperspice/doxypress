@@ -45,7 +45,7 @@ class Translator_Cs : public Translator
       QString retval = QCoreApplication::translate("latexSupport", "remove-value");
 
       if (retval == "remove-value") {
-         retval = "";
+         retval = QString();
       }
 
       return retval;

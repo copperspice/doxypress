@@ -172,11 +172,11 @@ void HtmlHelpIndex::writeFields(QTextStream &t)
             nextLevel1 = fnext->name.left(fnext->name.indexOf('?'));
 
             if (level1 != nextLevel1) {
-               level2 = "";
+               level2 = QString();
             }
 
          } else {
-            level2 = "";
+            level2 = QString();
 
          }
 

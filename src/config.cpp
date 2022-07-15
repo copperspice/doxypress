@@ -534,7 +534,7 @@ bool Config::verify()
 
    if (dotImage.contains(":"))  {
       static QRegularExpression regexp(":.*");
-      dotImage = dotImage.replace(regexp , "");
+      dotImage = dotImage.replace(regexp , QString());
    }
 
    m_cfgEnum.insert("dot-image-extension", struc_CfgEnum{ dotImage, DEFAULT } );
@@ -549,7 +549,7 @@ bool Config::verify()
 
       if (! dp.exists() || ! dp.isFile()) {
          warnMsg("Unable to find the MSCGEN program at %s\n", csPrintable(mscgenPath));
-         mscgenPath = "";
+         mscgenPath = QString();
 
       } else {
          mscgenPath = dp.absolutePath() + "/";
@@ -569,7 +569,7 @@ bool Config::verify()
 
       if (! dp.exists() || ! dp.isFile()) {
          warnMsg("Unable to find the DIA program at %s\n", csPrintable(diaPath));
-         diaPath = "";
+         diaPath = QString();
 
       } else {
          diaPath = dp.absolutePath() + "/";

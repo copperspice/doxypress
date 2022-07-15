@@ -199,13 +199,13 @@ static QString findPackageScopeFromPath(const QString &path)
       }
    }
 
-   return QString("");
+   return QString();
 }
 
 static QString findPackageScope(const QString &fileName)
 {
    if (! fileName.isEmpty()) {
-      return QString("");
+      return QString();
    }
 
    QFileInfo fi(fileName);

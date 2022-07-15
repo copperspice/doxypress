@@ -369,7 +369,7 @@ void Qhp::setPrevSection(const QString &title, const QString &basename, const QS
 
 void Qhp::clearPrevSection()
 {
-   m_prevSectionTitle = "";
+   m_prevSectionTitle = QString();
    m_prevSectionBaseName.resize(0);
    m_prevSectionAnchor.resize(0);
 }

@@ -562,7 +562,7 @@ static void stripQualifiers(QString &typeStr)
          typeStr = stripPrefix(typeStr, "volatile ");
 
       } else if (typeStr == "virtual") {
-         typeStr = "";
+         typeStr = QString();
 
       } else {
          done = true;

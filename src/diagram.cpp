@@ -146,7 +146,7 @@ class TreeDiagram : public QList<DiagramRow *>
    void computeExtremes(uint *labelWidth, uint *xpos);
 
    void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
-                  uint cellWidth, uint cellHeight, QString relPath = QString(""), bool generateMap = true);
+                  uint cellWidth, uint cellHeight, QString relPath = QString(), bool generateMap = true);
 
    void drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap,
                        uint baseRows, uint superRows, uint cellWidth, uint cellheight);
@@ -464,7 +464,7 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
          QSharedPointer<ClassDef> ccd = bcd->classDef;
 
          if (ccd && ccd->isVisibleInHierarchy()) {
-            row->insertClass(di, ccd, doBases, bcd->prot, doBases ? bcd->virt : Normal, doBases ? bcd->templSpecifiers : QString("") );
+            row->insertClass(di, ccd, doBases, bcd->prot, doBases ? bcd->virt : Normal, doBases ? bcd->templSpecifiers : QString() );
          }
       }
    }
@@ -477,7 +477,7 @@ TreeDiagram::TreeDiagram(QSharedPointer<ClassDef> root, bool doBases)
    DiagramRow *row = new DiagramRow(this, 0);
    append(row);
 
-   row->insertClass(0, root, doBases, Public, Normal, QString(""));
+   row->insertClass(0, root, doBases, Public, Normal, QString());
 }
 
 TreeDiagram::~TreeDiagram()

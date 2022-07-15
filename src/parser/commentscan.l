@@ -880,7 +880,7 @@ static void addAnchor(const QString &anchorName)
 
    } else {
       // title is empty, level is zero
-      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorName, QString(""), SectionInfo::Anchor, 0);
+      si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, anchorName, QString(), SectionInfo::Anchor, 0);
       si->dupAnchor_fName = yyFileName;
 
       Doxy_Globals::sectionDict.insert(anchorName, si);

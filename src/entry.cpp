@@ -137,7 +137,7 @@ void Entry::reset()
    localToc         = LocalToc();
 
    // string
-   m_entryName      = "";
+   m_entryName      = QString();
 
    m_templateArgLists.clear();
    extends.clear();

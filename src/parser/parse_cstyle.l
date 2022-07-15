@@ -1095,8 +1095,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->protection  = protection = Public;
 
       current->m_entryName = QString();
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1105,10 +1106,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"k_dcop"{BN}*":"{BN}*    {
       current->mtype       = mtype = MethodType::DCOP;
       current->protection  = protection = Public;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1117,10 +1118,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*("signals"|"Q_SIGNALS"){BN}*":"{BN}* {
       current->mtype       = mtype = MethodType::Signal;
       current->protection  = protection = Public ;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1129,10 +1130,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"public"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
       current->mtype       = mtype = MethodType::Slot;
       current->protection  = protection = Public ;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1141,10 +1142,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"protected"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
       current->protection  = protection = Protected ;
       current->mtype       = mtype = MethodType::Slot;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1153,10 +1154,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"private"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
       current->protection  = protection = Private ;
       current->mtype       = mtype = MethodType::Slot;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1165,10 +1166,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*("public"|"methods"|"__published"){BN}*":"{BN}* {
       current->protection  = protection = Public ;
       current->mtype       = mtype = MethodType::Method;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1180,9 +1181,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->protection  = protection = Package ;
          current->mtype       = mtype = MethodType::Method;
 
-         current->m_entryName = "";
-         current->setData(EntryKey::Member_Type, "");
-         current->setData(EntryKey::Member_Args, "");
+         current->m_entryName = QString();
+
+         current->setData(EntryKey::Member_Type, QString());
+         current->setData(EntryKey::Member_Args, QString());
          current->argList.clear();
 
          lineCount();
@@ -1195,10 +1197,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"protected"{BN}*":"{BN}* {
       current->protection  = protection = Protected ;
       current->mtype       = mtype = MethodType::Method;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1207,10 +1209,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"private"{BN}*":"{BN}*   {
       current->protection  = protection = Private ;
       current->mtype       = mtype = MethodType::Method;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1315,10 +1317,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"@private"{BN}+      {
       current->protection  = protection = Private ;
       current->mtype       = mtype = MethodType::Method;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1327,10 +1329,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"@protected"{BN}+  {
       current->protection = protection = Protected;
       current->mtype        = mtype = MethodType::Method;
+      current->m_entryName = QString();
 
-      current->m_entryName  = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1339,10 +1341,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"@public"{BN}+  {
       current->protection  = protection = Public;
       current->mtype       = mtype = MethodType::Method;
+      current->m_entryName = QString();
 
-      current->m_entryName = "";
-      current->setData(EntryKey::Member_Type, "");
-      current->setData(EntryKey::Member_Args, "");
+      current->setData(EntryKey::Member_Type, QString());
+      current->setData(EntryKey::Member_Args, QString());
       current->argList.clear();
 
       lineCount();
@@ -1373,9 +1375,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->stat  = (text[0]=='+');
          current->mtype = mtype = MethodType::Method;
 
-         current->m_entryName = "";
-         current->setData(EntryKey::Member_Type, "");
-         current->setData(EntryKey::Member_Args, "");
+         current->m_entryName   = QString();
+
+         current->setData(EntryKey::Member_Type, QString());
+         current->setData(EntryKey::Member_Args, QString());
          current->argList.clear();
 
          BEGIN( ObjCMethod );

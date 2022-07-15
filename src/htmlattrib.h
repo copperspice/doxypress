@@ -53,7 +53,7 @@ class HtmlAttribList : public QList<HtmlAttrib>
             return item.value;
          }
       }
-      return QString("");
+      return QString();
    }
 
    QString toString() const {

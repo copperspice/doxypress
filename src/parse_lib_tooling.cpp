@@ -84,7 +84,7 @@ static Protection getAccessSpecifier(const clang::CXXBaseSpecifier *node)
 
 static QString getName(const clang::NamedDecl *node)
 {
-   QString retval = "";
+   QString retval;
 
    if (node->getDeclName().isIdentifier()) {
 

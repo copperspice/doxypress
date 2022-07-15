@@ -851,7 +851,7 @@ class DocInclude : public DocNode
       if (i != -1) {
          return m_file.right(m_file.length() - i);
       } else {
-         return QString("");
+         return QString();
       }
    }
 

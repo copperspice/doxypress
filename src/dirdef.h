@@ -47,7 +47,7 @@ class DirDef : public Definition
    QString getOutputFileBase() const override;
 
    QString anchor() const override {
-      return QString("");
+      return QString();
    }
 
    bool isLinkableInProject() const override;

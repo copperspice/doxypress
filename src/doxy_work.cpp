@@ -7154,15 +7154,15 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         memType  = stripPrefix(memType, "static ");
 
                         if (memType == "class") {
-                           memType = "";
+                           memType = QString();
                         }
 
                         if (memType == "virtual") {
-                           memType = "";
+                           memType = QString();
                         }
 
                         if (memType == "explicit") {
-                           memType = "";
+                           memType = QString();
                         }
 
                         // remove myClass<T>, or myClass, etc

@@ -812,7 +812,7 @@ void ManGenerator::writeDoc(DocNode *n, QSharedPointer<Definition> ctx, QSharedP
 {
    (void) md;
 
-   ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString(""));
+   ManDocVisitor *visitor = new ManDocVisitor(m_textStream, *this, ctx ? ctx->getDefFileExtension() : QString());
    n->accept(visitor);
    delete visitor;
 

@@ -194,7 +194,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
       } else {
          // no template specifier
-         cName = "";
+         cName = QString();
       }
    }
 
@@ -1415,7 +1415,7 @@ QString MemberDef::getDeclType() const
 
    if (retval == "@") {
       // rename type from enum values
-      retval = "";
+      retval = QString();
 
    } else {
       if (isObjCMethod()) {
@@ -3183,7 +3183,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
 
          QPair<QString, QString> tmp;
          tmp.first  = key;
-         tmp.second = "";
+         tmp.second = QString();
 
          if (key == "read")  {
             tmp.second = getPropertyRead();
@@ -5501,7 +5501,7 @@ void MemberDef::copyArgumentNames(QSharedPointer<MemberDef> bmd)
 static void invalidateCachedTypesInArgumentList(ArgumentList &al)
 {
    for (auto &a : al) {
-      a.canType = "";
+      a.canType = QString();
    }
 }
 
