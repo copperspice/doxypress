@@ -2020,31 +2020,31 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
          }
 
          if (! found && getDefs(scopeName, matchWord, "", md, cd, fd, nd, gd)) {
-            bool ok;
+            bool ok_1;
 
             if (external) {
-               ok = md->isLinkable();
+               ok_1 = md->isLinkable();
             } else {
-               ok = md->isLinkableInProject();
+               ok_1 = md->isLinkableInProject();
             }
 
-            if (ok) {
+            if (ok_1) {
                if (md != def && (def == nullptr || md->name() != def->name()) ) {
                   // name check is needed for overloaded members, where getDefs returns one
 
                   if (word.contains("(")) {
                      // ensure word refers to a method name, (added 01/2016)
-                     bool ok = true;
+                     bool ok_2 = true;
 
                      if (scope != nullptr && scope->getLanguage() == SrcLangExt_Fortran) {
                         // if Fortran scope and the variable is a non Fortran variable, do not link
 
                        if (md->isVariable() && (md->getLanguage() != SrcLangExt_Fortran)) {
-                          ok = false;
+                          ok_2 = false;
                        }
                      }
 
-                     if (ok) {
+                     if (ok_2) {
                         out.writeLink(md->getReference(), md->getOutputFileBase(), md->anchor(), word);
                         found = true;
                      }
@@ -3924,14 +3924,14 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
          if (members.count() != 1 && ! args.isEmpty() && args == "()") {
             // no exact match found, but if args="()" an arbitrary member will do
 
-            for (auto md : *mn) {
-               fd = md->getFileDef();
-               gd = md->getGroupDef();
+            for (auto itemMd : *mn) {
+               fd = itemMd->getFileDef();
+               gd = itemMd->getGroupDef();
 
-               QSharedPointer<MemberDef> tmd = md->getEnumScope();
+               QSharedPointer<MemberDef> tmd = itemMd->getEnumScope();
 
                if ((gd && gd->isLinkable()) || (fd && fd->isLinkable()) || (tmd && tmd->isStrong())) {
-                  members.append(md);
+                  members.append(itemMd);
                }
             }
          }
@@ -4962,23 +4962,24 @@ void createSubDirs(QDir &d)
       int level_2;
 
       for (level_1 = 0; level_1 < 16; ++level_1) {
-         QString tmp = QString("d%1").formatArg(level_1, 0, 16);
+         QString tmp1 = QString("d%1").formatArg(level_1, 0, 16);
 
-         if (! d.exists(tmp)) {
-            bool ok = d.mkdir(tmp);
+         if (! d.exists(tmp1)) {
+            bool ok = d.mkdir(tmp1);
 
             if (! ok) {
-               err("Failed to create output directory '%s'\n", csPrintable(tmp));
+               err("Failed to create output directory '%s'\n", csPrintable(tmp1));
             }
          }
 
          for (level_2 = 0; level_2 < 256; ++level_2) {
-            QString tmp = QString("d%1/d%2").formatArg(level_1, 0, 16).formatArg(level_2, 2, 16, QChar('0'));
-            if (! d.exists(tmp)) {
-               bool ok = d.mkdir(tmp);
+            QString tmp2 = QString("d%1/d%2").formatArg(level_1, 0, 16).formatArg(level_2, 2, 16, QChar('0'));
+
+            if (! d.exists(tmp2)) {
+               bool ok = d.mkdir(tmp2);
 
                if (! ok) {
-                  err("Failed to create output directory '%s'\n", csPrintable(tmp));
+                  err("Failed to create output directory '%s'\n", csPrintable(tmp2));
                }
             }
 
@@ -6068,9 +6069,10 @@ int getScopeFragment(const QString &str, int p, int *l)
 
             while (sp < sl && ! done) {
                // TODO: deal with << and >> operators!
-               QChar c = str.at(sp++);
+               QChar ch = str.at(sp);
+               ++sp;
 
-               switch (c.unicode()) {
+               switch (ch.unicode()) {
                   case '<':
                      ++count;
                      break;
