@@ -625,9 +625,9 @@ static int processNmdash(QString &out, QStringView data, QString::const_iterator
       ++count;
    }
 
-   if (count == 2 && pristineChars8.endsWith("<!")) {
+   if (count >= 2 && pristineChars8.endsWith("<!")) {
       // start HTML comment
-      return 0;
+      return 1 - count;
    }
 
    if (count == 2 && (*iter_i == '>')) {
@@ -1521,8 +1521,12 @@ static void processInline(QString &out, const QStringView processText, QString::
             break;
       }
 
-      if (skipCount == 0) {
-         iter_i  = iter_index;
+      if (skipCount < 0) {
+         iter_i = iter_index;
+         iter_index += 1 - skipCount;
+
+      } else if (skipCount == 0) {
+         iter_i = iter_index;
          ++iter_index;
 
       } else {
