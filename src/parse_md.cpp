@@ -58,7 +58,6 @@ static int                     g_lineNr;
 const int codeBlockIndent = 4;
 
 // is character allowed before an emphasis section
-
 static bool isOpenEmphChar(const QChar &text)
 {
    bool retval = false;
@@ -374,9 +373,8 @@ static QString isBlockCommand(QStringView data, QString::const_iterator size, QS
    return retval;
 }
 
-/** looks for the next emph char, skipping other constructs, and
- *  stopping when either it is found, or we are at the end of a paragraph
- */
+// looks for the next emph char, skipping other constructs, and
+// stopping when either it is found, or we are at the end of a paragraph
 static int findEmphasisChar(QStringView data, QChar c, int c_size)
 {
    QString::const_iterator iter_i    = data.constBegin() + 1;
@@ -670,17 +668,23 @@ static int processNmdash(QString &out, QStringView data, QString::const_iterator
    QString::const_iterator iter_i = data.constBegin() + 1;
    int count = 1;
 
-   if (iter_i != iter_size && *iter_i == '-') {    // found --
+   if (iter_i != iter_size && *iter_i == '-') {
+      // found --
+
       ++count;
       ++iter_i;
    }
 
-   if (iter_i != iter_size && *iter_i == '-') {    // found ---
+   if (iter_i != iter_size && *iter_i == '-') {
+      // found ---
+
       ++count;
       ++iter_i;
    }
 
-   if (iter_i != iter_size && *iter_i == '-') {    // found ----
+   if (iter_i != iter_size && *iter_i == '-') {
+      // found ----
+
       ++count;
    }
 
@@ -1048,6 +1052,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
       // one newline allowed here
       ++iter_i;
       ++nl;
+
       // skip more whitespace
       while (iter_i != iter_size && *iter_i == ' ') {
          ++iter_i;
@@ -1235,7 +1240,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
       return 0;
    }
 
-  nlCount += nl;
+   nlCount += nl;
   nl = 0;
 
    if (isToc) {
@@ -1381,7 +1386,7 @@ static int processCodeSpan(QString &out, QStringView data, QString::const_iterat
 
       } else if (*iter_end == '\n') {
          iter_i  = data.constBegin();
-         nl++;
+         ++nl;
 
       } else if (*iter_end == '\'' && iter_nb == data.constBegin() + 1 &&
                   ( iter_end == iter_size - 1 || (iter_end < iter_size - 1 && ! isIdChar(iter_end[1]))))    {
@@ -1946,7 +1951,7 @@ static QString extractTitleId(QString &title, int level)
 
 static int isAtxHeader(QStringView data, int size, QString &header, QString &id)
 {
-   int i      = 0;
+   int i = 0;
    int end;
 
    int level  = 0;
@@ -2160,7 +2165,7 @@ static bool isFencedCodeBlock(QStringView data, int refIndent, QString &lang,
 
    while (iter_i < iter_size && *iter_i == tildaChar) {
       ++startTildes;
-      ++iter_i;;
+      ++iter_i;
    }
 
    if (startTildes < 3) {
@@ -2286,6 +2291,7 @@ QString::const_iterator findTableColumns(QStringView data, QString::const_iterat
       ++n;
    }
    iter_start = iter_i;
+
 
    // find end character of the table line
    while (iter_i < iter_size && *iter_i != '\n') {
@@ -2650,7 +2656,7 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
       }
 
    } else {
-      // nothing interesting, just output the line
+      // simply just output the line
       QStringView tmp = QStringView(data.constBegin(), iter_size);
       out += tmp;
 
@@ -2812,7 +2818,7 @@ static int writeCodeBlock(QString &out, QStringView data, int refIndent)
 // start searching for the end of the line start at offset iter_i
 // keeping track of possible blocks that need to to skipped
 static void findEndOfLine(QString &out, QStringView data, QString::const_iterator &iter_prev,
-                  QString::const_iterator &iter_i, QString::const_iterator &iter_end)
+      QString::const_iterator &iter_i, QString::const_iterator &iter_end)
 {
    // find end of the line
 
@@ -2954,7 +2960,6 @@ static void writeFencedCodeBlock(QString &out, QStringView data, const QString &
       data = data.mid(1);
    }
 
-
    out += "@code";
 
    if (! lang.isEmpty()) {
@@ -3094,14 +3099,15 @@ static QString processBlocks(QStringView str, int indent)
             }
 
             QString header = QStringView(iter_prev, iter_i - 1);
+
+            // header can be modified
             id = extractTitleId(header, level);
 
             if (! header.isEmpty()) {
 
                if (! id.isEmpty()) {
                   retval += level == 1 ? "@section " : "@subsection ";
-                  retval += id;
-                  retval += " ";
+                  retval += id + " ";
                   retval += header;
                   retval += "\n\n";
 
@@ -3205,7 +3211,6 @@ static QString processBlocks(QStringView str, int indent)
    return retval;
 }
 
-// returns TRUE if text starts with \@page or \@mainpage command
 static bool isExplicitPage(QStringView text)
 {
    if (! text.isEmpty())  {
@@ -3238,7 +3243,6 @@ static bool isExplicitPage(QStringView text)
 
 static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
 {
-   // first non-empty line
    QString title;
 
    QString::const_iterator iter      = docs.constBegin();
@@ -3303,6 +3307,7 @@ static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
       }
 
    } else {
+      // modify passed value
       id = extractTitleId(title, 0);
 
    }
@@ -3382,9 +3387,9 @@ QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointe
 {
    g_linkRefs.clear();
 
-   g_current  = e;
-   g_fileName = fileName;
-   g_lineNr   = lineNr;
+   g_fileName    = fileName;
+   g_lineNr      = lineNr;
+   g_current     = e;
 
    if (input.isEmpty()) {
       return input;
@@ -3434,6 +3439,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    (void) useClang;
 
    static const QString mdfileAsMainPage = Config::getString("mdfile-mainpage");
+
    QSharedPointer<Entry> current = QMakeShared<Entry>();
 
    current->setData(EntryKey::File_Name, fileName);
@@ -3441,8 +3447,8 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    current->docLine   = 1;
    current->m_srcLang = SrcLangExt_Markdown;
 
+   QString docs  = fileBuf;      // parse docs
    QString id;
-   QString docs    = fileBuf;
    int prepend     = 0;       // number of empty lines in front
    QString title   = extractPageTitle(docs, id, prepend).trimmed();
 
@@ -3502,7 +3508,7 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    bool needsEntry = false;
    Protection prot = Public;
 
-   while (parseCommentBlock(this, current, docs, fileName,lineNr,
+   while (parseCommentBlock(this, current, docs, fileName, lineNr,
              false, false, false, prot, position, needsEntry)) {
 
       if (needsEntry) {
@@ -3529,7 +3535,7 @@ void MarkdownFileParser::parseCode(CodeGenerator &codeOutIntf, const QString &sc
                   const QString &input, SrcLangExt lang, bool isExampleBlock, const QString &exampleName,
                   QSharedPointer<FileDef> fileDef, int startLine, int endLine, bool inlineFragment,
                   QSharedPointer<MemberDef> memberDef, bool showLineNumbers, QSharedPointer<Definition> searchCtx,
-                  bool collectXRefs )
+                  bool collectXRefs)
 {
    ParserInterface *pIntf = Doxy_Globals::parserManager.getParser("*.cpp");
 
