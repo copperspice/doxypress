@@ -63,8 +63,8 @@ static bool isOpenEmphChar(const QChar &text)
 {
    bool retval = false;
 
-   if (text == '\n' || text ==' ' || text =='\'' || text =='<' || text =='{'  ||text =='(' ||
-       text == '['  || text ==',' || text ==':'  || text ==';') {
+   if (text == '\n' || text ==' ' || text =='\'' || text == '<' || text =='>' ||
+       text == '{'  || text =='(' || text == '[' || text ==','  || text ==':' || text ==';') {
 
       retval = true;
    }
