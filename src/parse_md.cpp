@@ -169,6 +169,30 @@ static QString escapeSpecialChars(QStringView text)
             retval += "@";
             break;
 
+         case '#':
+            if (! insideQuote) {
+               retval += '\\';
+            }
+
+            retval += "#";
+            break;
+
+         case '$':
+            if (! insideQuote) {
+               retval += '\\';
+            }
+
+            retval += "$";
+            break;
+
+         case '&':
+            if (! insideQuote) {
+               retval += '\\';
+            }
+
+            retval += "&";
+            break;
+
          default:
             retval += c;
             break;
