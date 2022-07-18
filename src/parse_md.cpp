@@ -113,6 +113,38 @@ static bool extraChar(const QChar &text)
    return retval;
 }
 
+// escape double quotes in string
+static QString escapeDoubleQuotes(const QString &text)
+{
+   QString retval;
+
+   if (text.isEmpty()) {
+      return text;
+   }
+
+   QChar prevChar;
+
+   for (auto c : text) {
+      switch (c.unicode()) {
+         case '"':
+            if (prevChar != '\\')  {
+               retval += '\\';
+            }
+
+            retval += c;
+            break;
+
+         default:
+            retval += c;
+            break;
+      }
+
+      prevChar = c;
+   }
+
+   return retval;
+}
+
 // escape characters that have a special meaning later on
 static QString escapeSpecialChars(QStringView text)
 {
@@ -221,6 +253,33 @@ static Alignment markersToAlignment(bool leftMarker, bool rightMarker)
    }
 }
 
+/** parse the image attributes and return attributes for given format */
+static QString getImageAttributes(const QString &format, const QString &attrs)
+{
+  QStringList list = attrs.split(",");
+
+  for (const auto &item : list)  {
+    QString retval = item.trimmed();
+    int i = retval.indexOf(':');
+
+    if (i > 0) {
+      // has format
+      QString tmp = retval.left(i).trimmed().toLower();
+
+      if (format == tmp) {
+         // matching format, keep part after :
+         return retval.mid(i + 1);
+      }
+
+    } else {
+      // option that applies to all formats
+
+      return retval;
+    }
+  }
+
+  return QString();
+}
 
 // Check if data contains a block command, if so returned the command which ends the block.
 // If not an empty string is returned. Note When offset > 0 character position -1 will be inspected.
@@ -856,6 +915,49 @@ static int processEmphasis(QString &out, QStringView data, QString::const_iterat
    }
 
    return 0;
+}
+
+static void writeMarkdownImage(QString &out, const QString &fmt, bool isInline, bool explicitTitle, const QString &title,
+   const QString &content, const QString &link, const QString &attrs, QSharedPointer<FileDef> fd)
+{
+   QString attributes = getImageAttributes(fmt, attrs);
+   out += "@image";
+
+   if (isInline) {
+    out += "{inline}";
+   }
+
+   out += " ";
+   out += fmt;
+   out += " ";
+
+   if (fd == nullptr) {
+      out += link.mid(5);
+   } else {
+      out += link;
+   }
+
+   if (! explicitTitle && ! content.isEmpty()) {
+      out += " \"";
+      out += escapeDoubleQuotes(content);
+      out += "\"";
+
+   } else if ((content.isEmpty() || explicitTitle) && ! title.isEmpty()) {
+      out += " \"";
+      out += escapeDoubleQuotes(title);
+      out += "\"";
+
+   } else {
+      out += " ";     // line break will not be part of the image name
+   }
+
+   if (! attributes.isEmpty()) {
+      out += " ";
+      out += attributes;
+      out += " ";
+   }
+
+   out += "\\internal_linebr ";
 }
 
 static int processLink(QString &out, QStringView data, QString::const_iterator iter_size)
