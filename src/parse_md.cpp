@@ -3241,14 +3241,14 @@ static bool isExplicitPage(QStringView text)
    return false;
 }
 
-static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
+static QString extractPageTitle(QString &docs, QString &id, int &prefix)
 {
    QString title;
 
    QString::const_iterator iter      = docs.constBegin();
    QString::const_iterator iter_end  = docs.constEnd();
 
-   maxLen = 0;
+   prefix = 0;
 
    while (iter != iter_end) {
       QChar c = *iter;
@@ -3257,7 +3257,7 @@ static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
          // do nothing
 
       } else if (c == '\n') {
-         ++maxLen;
+         ++prefix;
 
       } else {
          break;
@@ -3268,7 +3268,8 @@ static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
    }
 
    if (iter == iter_end) {
-      return QString();
+      docs = QString();
+      return docs;
    }
 
    QString::const_iterator iter_endA = iter + 1;
@@ -3289,10 +3290,10 @@ static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
       int level = isHeaderline(QStringView(iter_endA, iter_end));
 
       if (level != 0) {
-         title = QStringView(iter, iter_end - 1);
+         title = QStringView(iter, iter_endA - 1);
 
          // modify passed values
-         docs = "\n\n" + QStringView(iter_endB, iter_end);
+         docs = "\n\n" + QString(iter_endB, iter_end);
          id   = extractTitleId(title, 0);
 
          return title;
@@ -3302,8 +3303,14 @@ static QString extractPageTitle(QString &docs, QString &id, int &maxLen)
    if (iter < iter_endA) {
       int level = isAtxHeader(QStringView(iter, iter_end), (iter_endA - iter), title, id);
 
+      // modify passed values
       if (level > 0) {
-         docs = QStringView(iter_endA, iter_end);               // modify passed values
+         docs = "\n" + QString(iter_endA, iter_end);
+
+      } else {
+         // modify passed value
+         id = extractTitleId(title, 0);
+
       }
 
    } else {
