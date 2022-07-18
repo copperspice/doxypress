@@ -231,6 +231,7 @@ static Alignment markersToAlignment(bool leftMarker, bool rightMarker)
 // \code  .. \endcode
 // \msc   .. \endmsc
 // \f$    .. \f$
+// \f(..\f)
 // \f[    .. \f]
 // \f{    .. \f}
 // \verbatim  .. \endverbatim
@@ -275,8 +276,10 @@ static QString isBlockCommand(QStringView data, QString::const_iterator size, QS
    if (blockName == "code" && openBracket) {
       retval = "}";
 
+   } else if (blockName == "code") {
+      retval = "end" + blockName;
+
    } else if (blockName == "dot"         ||
-              blockName == "code"        ||
               blockName == "msc"         ||
               blockName == "verbatim"    ||
               blockName == "latexonly"   ||
@@ -296,6 +299,9 @@ static QString isBlockCommand(QStringView data, QString::const_iterator size, QS
 
       if (c == '$') {
          retval = "f$";
+
+      } else if (c == '(') {
+         retval = "f)";
 
       } else if (c == '[') {
          retval = "f]";
