@@ -32,6 +32,13 @@
 #include <message.h>
 #include <util.h>
 
+enum class PageCommand
+{
+  explicitPage,
+  explicitMainPage,
+  notExplicit,
+};
+
 static void processInline(QString &out, QStringView processText, QString::const_iterator iter_size);
 
 struct LinkRef {
@@ -49,6 +56,7 @@ static QHash<QString, LinkRef> g_linkRefs;
 static QSharedPointer<Entry>   g_current;
 static QString                 g_fileName;
 static int                     g_lineNr;
+static int                     s_indentLevel;
 
 // If a markdown page starts with a level1 header, this header is used as a title of the page.
 // This makes it a level0 header. So the level of all other sections will need to be corrected.
@@ -3227,7 +3235,7 @@ static QString processBlocks(QStringView str, int indent)
    return retval;
 }
 
-static bool isExplicitPage(QStringView text)
+static PageCommand isExplicitPage(QStringView text)
 {
    if (! text.isEmpty())  {
 
@@ -3247,14 +3255,18 @@ static bool isExplicitPage(QStringView text)
          if (c == '\\' || c == '@') {
             QStringView tmp = QStringView(iter_i + 1, iter_end);
 
-            if (tmp.startsWith("page ") || tmp.startsWith("mainpage")) {
-               return true;
+            if (tmp.startsWith("page ")) {
+               return PageCommand::explicitPage;
+            }
+
+            if (tmp.startsWith("mainpage")) {
+               return PageCommand::explicitMainPage;
             }
          }
       }
    }
 
-   return false;
+   return PageCommand::notExplicit;
 }
 
 static QString extractPageTitle(QString &docs, QString &id, int &prefix)
@@ -3470,13 +3482,20 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
    current->docLine   = 1;
    current->m_srcLang = SrcLangExt_Markdown;
 
+   int prefix    = 0;            // number of empty lines in front
+
    QString docs  = fileBuf;      // parse docs
    QString id;
-   int prepend     = 0;       // number of empty lines in front
-   QString title   = extractPageTitle(docs, id, prepend).trimmed();
+   QString title = extractPageTitle(docs, id, prefix).trimmed();
 
    if (id.startsWith("autotoc_md")) {
       id.clear();
+   }
+
+   if (title.isEmpty()) {
+      s_indentLevel = 0;
+   } else {
+      s_indentLevel = -1;
    }
 
    QString titleFn = QFileInfo(fileName).baseName();
@@ -3487,38 +3506,47 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
       id = markdownFileNameToId(fileName);
    }
 
-   if (! isExplicitPage(docs))  {
+   switch (isExplicitPage(docs))  {
+      case PageCommand::notExplicit:
 
-      if (! mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage ||
-                  QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) )  {
+         if (! mdfileAsMainPage.isEmpty() && (fn == mdfileAsMainPage ||
+                     QFileInfo(fileName).absoluteFilePath() == QFileInfo(mdfileAsMainPage).absoluteFilePath()) )  {
 
-         // tag option set to use md file as mainpage
-         docs.prepend("@anchor " + id + "\\internal_linebr ");
-         docs.prepend("@mainpage " + title + "\\internal_linebr ");
+            // tag option set to use md file as mainpage
+            docs.prepend("@anchor " + id + "\\internal_linebr ");
+            docs.prepend("@mainpage " + title + "\\internal_linebr ");
 
-      } else if (id == "mainpage" || id == "index") {
+         } else if (id == "mainpage" || id == "index") {
 
-         if (title.isEmpty()) {
-            title = titleFn;
+            if (title.isEmpty()) {
+               title = titleFn;
+            }
+
+            docs.prepend("@anchor " + id + "\\internal_linebr ");
+            docs.prepend("@mainpage " + title + "\\internal_linebr ");
+
+         } else {
+            if (title.isEmpty()) {
+               title  = titleFn;
+               prefix = 0;
+            }
+
+            if (! wasEmpty) {
+               docs.prepend("@anchor " + markdownFileNameToId(fileName) + "\\internal_linebr ");
+            }
+
+            docs.prepend("@page " + id + " " + title + "\\internal_linebr ");
          }
 
-         docs.prepend("@anchor " + id + "\\internal_linebr ");
-         docs.prepend("@mainpage " + title + "\\internal_linebr ");
+         docs.prepend(QString(prefix, '\n'));
+         break;
 
-      } else {
-         if (title.isEmpty()) {
-            title   = titleFn;
-            prepend = 0;
-         }
+      case PageCommand::explicitPage:
+         break;
 
-         if (! wasEmpty) {
-            docs.prepend("@anchor " + markdownFileNameToId(fileName) + "\\internal_linebr ");
-         }
 
-         docs.prepend("@page " + id + " " + title + "\\internal_linebr ");
-      }
-
-      docs.prepend(QString('\n', prepend));
+      case PageCommand::explicitMainPage:
+         break;
    }
 
    int lineNr   = 1;
