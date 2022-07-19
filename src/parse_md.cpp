@@ -112,6 +112,26 @@ static bool extraChar(const QChar &text)
    return retval;
 }
 
+// test if the next characters in data represent a new line (which can be character \n or string \ilinebr).
+// returns 0 if no newline is found, or the number of characters that make up the newline if found.
+static int isNewline(const QStringView data)
+{
+   // normal newline
+   if (data.startsWith('\n')) {
+      return 1;
+   }
+
+   // artificial new line from ^^ in ALIASES
+   if (data.startsWith("\\internal_linebr "))  {
+      return 17;
+
+   } else if (data.startsWith("\\internal_linebr"))  {
+      return 16;
+   }
+
+   return 0;
+}
+
 // escape double quotes in string
 static QString escapeDoubleQuotes(const QString &text)
 {
@@ -2297,11 +2317,19 @@ QString::const_iterator findTableColumns(QStringView data, QString::const_iterat
 
 
    // find end character of the table line
-   while (iter_i < iter_size && *iter_i != '\n') {
+  int newLineSize = 0;
+
+   while (iter_i < iter_size) {
+      newLineSize = isNewline(QStringView(iter_i, iter_size));
+
+      if (newLineSize != 0) {
+         break;
+      }
+
       ++iter_i;
    }
 
-   iter_eol = iter_i + 1;
+   iter_eol = iter_i + newLineSize;
 
    if (iter_i != data.constBegin()) {
       --iter_i;
@@ -2828,7 +2856,15 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
    iter_end = iter_i + 1;
    int nb   = 0;
 
-   while (iter_end <= data.constEnd() && iter_end[-1] != '\n') {
+   int newLineSize = 0;
+
+   while (iter_end <= data.constEnd()) {
+      newLineSize = isNewline(QStringView(iter_end - 1, data.constEnd()));
+
+      if (newLineSize != 0) {
+         break;
+      }
+
       // while looking for the end of the line we might encounter a block
       // that needs to be passed unprocessed.
 
