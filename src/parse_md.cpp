@@ -2194,7 +2194,7 @@ static bool isFencedCodeBlock(QStringView data, int refIndent, QString &lang,
 
       if (*iter_i == tildaChar) {
 
-         iter_end = iter_i - 1;
+         iter_end = iter_i;
          int endTildes = 0;
 
          while (iter_i < iter_size && *iter_i == tildaChar) {
@@ -2207,8 +2207,11 @@ static bool isFencedCodeBlock(QStringView data, int refIndent, QString &lang,
          }
 
          if (iter_i == iter_size || *iter_i == '\n') {
-            offset = iter_i - data.constBegin();
-            return endTildes == startTildes;
+
+            if (endTildes == startTildes) {
+               offset = iter_i - data.constBegin();
+               return true;
+            }
          }
       }
 
