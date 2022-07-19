@@ -2622,27 +2622,27 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
 
       if (level < 5 && ! id.isEmpty()) {
 
-         SectionInfo::SectionType type = SectionInfo::Anchor;
+         // SectionInfo::SectionType type = SectionInfo::Anchor;
 
          switch (level) {
             case 1:
                out += "@section ";
-               type = SectionInfo::Section;
+               // type = SectionInfo::Section;
                break;
 
             case 2:
                out += "@subsection ";
-               type = SectionInfo::Subsection;
+               // type = SectionInfo::Subsection;
                break;
 
             case 3:
                out += "@subsubsection ";
-               type = SectionInfo::Subsubsection;
+               // type = SectionInfo::Subsubsection;
                break;
 
             default:
                out += "@paragraph ";
-               type = SectionInfo::Paragraph;
+               // type = SectionInfo::Paragraph;
                break;
          }
 
@@ -2650,28 +2650,6 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
          out += " ";
          out += header;
          out += "\n";
-
-         QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(id);
-
-         if (si) {
-            if (si->lineNr != -1) {
-               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s, line %d)",
-                   csPrintable(header), csPrintable(si->fileName), si->lineNr);
-
-            } else {
-               warn(g_fileName, g_lineNr, "Multiple use of section label '%s', (first occurrence: %s)",
-                    csPrintable(header), csPrintable(si->fileName));
-            }
-
-         } else {
-            si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header, type, level));
-
-            if (g_current) {
-               g_current->m_anchors.append(*si);
-            }
-
-            Doxy_Globals::sectionDict.insert(id, si);
-         }
 
       } else {
          if (! id.isEmpty()) {
