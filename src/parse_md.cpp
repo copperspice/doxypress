@@ -1728,7 +1728,7 @@ static bool isBlockQuote(QStringView data, QString::const_iterator iter_size, in
       }
 
       // last characters should be a space or newline, so a line starting with >= does not match
-      return level > 0 && iter_i < iter_size && (iter_i[-1] == ' ' || *iter_i == '\n');
+      return (level > 0 && iter_i < iter_size && (iter_i[-1] == ' ' || *iter_i == '\n')) || (level > 1);
 
    } else {
       // too much indentation -> code block
