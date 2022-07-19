@@ -1949,9 +1949,8 @@ static QString extractTitleId(QString &title, int level)
 
       if (tmp1.isEmpty()) {
          // found {#id} style id
-
          retval = QStringView(match.capturedStart() + 2, match.capturedEnd() - 1);
-         title  = QStringView(title.constBegin(), match.capturedStart());
+         title  = QString(title.constBegin(), match.capturedStart());
 
          return retval;
       }
