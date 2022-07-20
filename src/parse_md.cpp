@@ -2724,21 +2724,27 @@ static QString::const_iterator writeBlockQuote(QString &out, QStringView data)
       if (iter_j > data.constBegin() && iter_j[-1] == '>' && ! (iter_j == iter_size || *iter_j == '\n')) {
          // disqualify last > if not followed by space
          --iter_indent;
+         --level;
          --iter_j;
+      }
+
+      if (level == 0 && iter_j[-1] != '\n') {
+         level = curLevel;
       }
 
       if (level > curLevel) {
          // quote level increased => add start markers
 
-         for (int l = curLevel; l < level; l++) {
-           out += "<blockquote>\n";
+         for (int x = curLevel; x < level -1; x++) {
+           out += "<blockquote>";
          }
+         out += "<blockquote>&zwj;";   // empty blockquotes are also shown
 
       } else if (level < curLevel) {
          // quote level decreased => add end markers
 
-         for (int l = level; l < curLevel; l++) {
-            out += "</blockquote>\n";
+         for (int x = level; x < curLevel; x++) {
+            out += "</blockquote>";
          }
       }
 
@@ -2757,7 +2763,7 @@ static QString::const_iterator writeBlockQuote(QString &out, QStringView data)
 
    // end of comment within blockquote => add end markers
    for (int l = 0; l < curLevel; l++) {
-      out += "</blockquote>\n";
+      out += "</blockquote>";
    }
 
    return iter_i;
