@@ -3599,8 +3599,15 @@ QString markdownFileNameToId(const QString &fileName)
       baseFn = baseFn.left(i);
    }
 
-   QString baseName = substitute(substitute(substitute(baseFn, " ", "_"), "/", "_"), ":","_");
+   QString baseName;
+   for (QChar ch : baseFn) {
 
+      if (isId(ch)) {
+         baseName.append(ch);
+      } else {
+         baseName.append("_");
+      }
+   }
    return "md_" + baseName;
 }
 
