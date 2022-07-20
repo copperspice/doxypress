@@ -1072,13 +1072,17 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
 
    ++iter_i;    // skip over ]
 
+   bool whiteSpace = false;
+
    // skip whitespace
    while (iter_i != iter_size && *iter_i == ' ') {
+      whiteSpace = true;
       ++iter_i;
    }
 
    if (iter_i != iter_size && *iter_i == '\n') {
       // one newline allowed here
+      whiteSpace = true;
       ++iter_i;
       ++nl;
 
@@ -1091,6 +1095,9 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    nlCount += nl;
    nl = 0;
 
+   if (whiteSpace && iter_i != iter_size && (*iter_i == '(' || *iter_i =='['))  {
+      return 0;
+   }
    bool explicitTitle = false;
 
    if (iter_i != iter_size && *iter_i == '(') {
@@ -1101,8 +1108,11 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          ++iter_i;
       }
 
+      bool uriFormat = false;
+
       if (iter_i != iter_size && *iter_i == '<') {
          ++iter_i;
+         uriFormat = true;
       }
 
       iter_linkStart = iter_i;
@@ -1146,7 +1156,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          return 0;
       }
 
-      if (link.last() == '>') {
+      if (uriFormat && link.last() == '>') {
          link.chop(1);
       }
 
@@ -1194,6 +1204,21 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          if (*iter_titleEnd == c) {
             // found it
             title = QStringView(iter_titleStart, iter_titleEnd);
+            explicitTitle = true;
+
+            while (iter_i != iter_size) {
+               if (*iter_i  == ' ') {
+                  // remove space after the closing quote and the closing bracket
+                  ++iter_i;
+
+               } else if (*iter_i == ')')  {
+                 // the end bracket
+                 break;
+
+               } else {
+                  return 0;
+               }
+            }
 
          } else {
            return 0;
@@ -1278,6 +1303,91 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    }
 
    nlCount += nl;
+
+   // search for optional image attributes
+   QString attributes;
+
+   if (isImageLink) {
+      auto iter_j = iter_i;
+
+      // skip over whitespace
+      while (iter_j != iter_size && *iter_j == ' ') {
+         ++iter_j;
+      }
+
+      if (iter_j != iter_size && *iter_j == '{')  {
+         // we have attributes
+
+         iter_i = iter_j;
+
+         // skip over '{'
+         ++iter_i;
+         auto iter_attributesStart = iter_i;
+
+         nl = 0;
+
+         // find the matching '}'
+         while (iter_i != iter_size)  {
+
+            if (iter_i[-1] == '\\') {
+              // skip escaped characters
+
+            } else if (*iter_i =='{') {
+               ++level;
+
+            } else if (*iter_i =='}') {
+               --level;
+
+               if (level <= 0)  {
+                  break;
+               }
+
+            } else if (*iter_i == '\n') {
+               ++nl;
+
+               if (nl > 1) {
+                  // only allow one newline in the content
+                  return 0;
+               }
+            }
+
+            ++iter_i;
+         }
+
+         nlCount += nl;
+
+         if (iter_i >= iter_size) {
+            return 0;      // premature end of comment -> no attributes
+         }
+
+         auto iter_attributesEnd = iter_i;
+         attributes = QStringView(iter_attributesStart, iter_attributesEnd);
+
+         ++iter_i;              // skip over '}'
+      }
+
+      if (! isImageInline) {
+         // if there is non-whitespace after the image within the scope of two new lines, the image
+         // is considered inlined, i.e. the image is not followed by an empty line
+
+         int numNLsNeeded = 2;
+         auto iter_pos = iter_i;
+
+         while (iter_pos != iter_size && numNLsNeeded > 0) {
+            if (*iter_pos == '\n') {
+               --numNLsNeeded;
+
+            } else if (*iter_pos != ' ') {
+               // found non-whitespace, stop searching
+
+               isImageInline = true;
+               break;
+            }
+
+            ++iter_pos;
+         }
+      }
+   }
 
    if (isToc) {
       // special case for [TOC]
