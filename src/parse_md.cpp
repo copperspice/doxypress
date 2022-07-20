@@ -1006,6 +1006,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    QString::const_iterator iter_titleStart;
    QString::const_iterator iter_titleEnd;
 
+   bool isImageInline = false;
    bool isImageLink   = false;
    bool isToc         = false;
 
@@ -1158,7 +1159,7 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          iter_titleStart = iter_i;
          nl = 0;
 
-         while (iter_i != iter_size && *iter_i != ')') {
+         while (iter_i != iter_size) {
 
             if (*iter_i == '\n') {
                if (nl > 1) {
@@ -1166,6 +1167,14 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
                }
 
                ++nl;
+
+            } else if (*iter_i == '\\') {
+               // escaped char in string
+               ++iter_i;
+
+            } else if (*iter_i == c) {
+               ++iter_i;
+               break;
             }
 
             ++iter_i;
@@ -1272,28 +1281,28 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
 
    if (isToc) {
       // special case for [TOC]
-      out += "@tableofcontents";
+      static const int tocIncHeaders = Config::getInt("toc-include-headers");
+
+      if (tocIncHeaders > 0 && tocIncHeaders <= 5) {
+         out += "@tableofcontents{html:";
+         out += QString::number(tocIncHeaders);
+         out += "}";
+      }
 
    } else if (isImageLink) {
       bool ambig;
       QSharedPointer<FileDef> fd;
 
-      if (link.contains("@ref ") || link.contains("\\ref ") || (fd = findFileDef(&Doxy_Globals::imageNameDict, link, ambig))) {
+      if (link.contains("@ref ") || link.contains("\\ref ") || (fd = findFileDef(&Doxy_Globals::imageNameDict,
+            link, ambig))) {
          // assume DoxyPress symbol link or local image link
 
-         out += "@image html ";
-         out += link.mid(fd ? 0 : 5);
-
-         if (! explicitTitle && ! content.isEmpty()) {
-            out += " \"";
-            out += content;
-            out += "\"";
-
-         } else if ((content.isEmpty() || explicitTitle) && ! title.isEmpty()) {
-            out += " \"";
-            out += title;
-            out += "\"";
-         }
+         // verify handling is needed per format
+         writeMarkdownImage(out, "html",    isImageInline, explicitTitle, title, content, link, attributes, fd);
+         writeMarkdownImage(out, "latex",   isImageInline, explicitTitle, title, content, link, attributes, fd);
+         writeMarkdownImage(out, "rtf",     isImageInline, explicitTitle, title, content, link, attributes, fd);
+         writeMarkdownImage(out, "docbook", isImageInline, explicitTitle, title, content, link, attributes, fd);
+         writeMarkdownImage(out, "xml",     isImageInline, explicitTitle, title, content, link, attributes, fd);
 
       } else {
          out += "<img src=\"";
@@ -1348,35 +1357,47 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
          out += " \"";
 
          if (explicitTitle && ! title.isEmpty()) {
-            out += title;
+            out += substitute(title, "\"", "&quot;");
 
          } else {
-            out += content;
+            out += substitute(content, "\"", "&quot;");
+
          }
 
          out += "\"";
 
       } else if (link.contains('/') || link.contains('.') || link.contains('#')) {
          // file/url link
-         out += "<a href=\"";
-         out += link;
-         out += "\"";
-
-         for (int count = 0; count < nlCount; ++count) {
-            out += "\n";
-         }
-         if (! title.isEmpty()) {
-            out += " title=\"";
-            out += substitute(title.simplified(), "\"", "&quot;");
+         if (link.at(0) == '#') {
+            out += "@ref ";
+            out += link.mid(1);
+            out += " \"";
+            out += substitute(content.simplified(), "\"", "&quot;");
             out += "\"";
+         } else {
+            out += "<a href=\"";
+            out += link;
+            out += "\"";
+
+            for (int count = 0; count < nlCount; ++count) {
+               out += "\n";
+            }
+
+            if (! title.isEmpty()) {
+               out += " title=\"";
+               out += substitute(title.simplified(), "\"", "&quot;");
+               out += "\"";
+            }
+
+            out += " ";
+            out += externalLinkTarget();
+            out += ">";
+
+            content = substitute(content.simplified(), "\"", "\\\"");
+            processInline(out, content, content.constEnd());
+
+            out += "</a>";
          }
-
-         out += ">";
-
-         content = content.simplified();
-         processInline(out, content, content.constEnd());
-
-         out += "</a>";
 
       } else {
          // avoid link to e.g. F[x](y)
