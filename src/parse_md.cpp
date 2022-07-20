@@ -2826,7 +2826,7 @@ static int writeCodeBlock(QString &out, QStringView data, int refIndent)
       }
    }
 
-   out += "@endverbatim\n";
+   out += "@endverbatim\\internal_linebr ";
 
    while (emptyLines > 0) {
       // write skipped empty lines, add empty line
@@ -2916,7 +2916,8 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
 
       } else if (nb == 0 && prevCh_1 == '<' && (prevCh_2 != '\\' && prevCh_2 != '@')) {
 
-         if (4 <= data.constEnd() - iter_end && QStringView(iter_end, iter_end + 4).toLower() == "pre>") {
+         if (4 <= data.constEnd() - iter_end && (QStringView(iter_end, iter_end + 4).toLower() == "pre>" ||
+               QStringView(iter_end, iter_end + 4).toLower() == "pre ")) {
             // <pre> tag
 
             if (iter_prev != data.constEnd()) {
@@ -2971,6 +2972,9 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
          break;
       }
    }
+  if (newLineSize > 0) {
+    iter_end += newLineSize - 1;
+  }
 }
 
 static void writeFencedCodeBlock(QString &out, QStringView data, const QString &lang_t,
