@@ -992,7 +992,7 @@ static void writeMarkdownImage(QString &out, const QString &fmt, bool isInline, 
    out += "\\internal_linebr ";
 }
 
-static int processLink(QString &out, QStringView data, QString::const_iterator iter_size)
+static int processLink(QString &out, QStringView data, QString::const_iterator iter_size, QStringView pristineCharsX)
 {
    QString content;
    QString link;
@@ -1021,6 +1021,26 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
 
       if (iter_i == iter_size || *iter_i != '[') {
          return 0;
+      }
+
+      // if there is non-whitespace before the ![ within the scope of two new lines, the image
+      // is considered inlined, i.e. the image is not preceded by an empty line
+
+      int numNLsNeeded = 2;
+      QString::const_iterator iter_pos = pristineCharsX.constEnd();
+
+      while (iter_pos != pristineCharsX.constBegin() && numNLsNeeded > 0) {
+         --iter_pos;
+
+         if (*iter_pos == '\n') {
+            --numNLsNeeded;
+
+         } else if (*iter_pos != ' ') {
+            // found non-whitespace, stop searching
+
+            isImageInline = true;
+            break;
+         }
       }
    }
 
@@ -1684,7 +1704,7 @@ static int processSpecialCommand(QString &out, QStringView data, QString::const_
    return 0;
 }
 
-static void processInline(QString &out, const QStringView processText, QString::const_iterator iter_size)
+void processInline(QString &out, QStringView processText, QString::const_iterator iter_size)
 {
    QString::const_iterator iter_i      = processText.constBegin();
    QString::const_iterator iter_index  = processText.constBegin();
@@ -1764,11 +1784,13 @@ static void processInline(QString &out, const QStringView processText, QString::
             break;
 
          case '[':
-            skipCount = processLink(out, s1, iter_size);
+            // last one is passing pristineCharsX
+            skipCount = processLink(out, s1, iter_size, QStringView(processText.constBegin(), iter_index));
             break;
 
          case '!':
-            skipCount = processLink(out, s1, iter_size);
+            // last one is passing pristineCharsX
+            skipCount = processLink(out, s1, iter_size, QStringView(processText.constBegin(), iter_index));
             break;
 
          case '<':
