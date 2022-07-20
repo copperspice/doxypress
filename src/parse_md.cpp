@@ -1269,7 +1269,6 @@ static int processLink(QString &out, QStringView data, QString::const_iterator i
    }
 
    nlCount += nl;
-  nl = 0;
 
    if (isToc) {
       // special case for [TOC]
@@ -3001,7 +3000,6 @@ static void writeFencedCodeBlock(QString &out, QStringView data, const QString &
    }
 
    out += QStringView(iter_blockStart, iter_blockEnd);
-   out += "\n";
    out += "@endcode";
 }
 
@@ -3144,29 +3142,6 @@ static QString processBlocks(QStringView str, int indent)
                   retval += id + " ";
                   retval += header;
                   retval += "\n\n";
-
-                  QSharedPointer<SectionInfo> si (Doxy_Globals::sectionDict.find(id));
-
-                  if (si != nullptr) {
-                     if (si->lineNr != -1) {
-                        warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s, line %d)",
-                             csPrintable(header), csPrintable(si->fileName), si->lineNr);
-
-                     } else {
-                        warn(g_fileName, g_lineNr, "multiple use of section label '%s', (first occurrence: %s)",
-                             csPrintable(header), csPrintable(si->fileName));
-                     }
-
-                  } else {
-                     si = QSharedPointer<SectionInfo> (new SectionInfo(g_fileName, g_lineNr, id, header,
-                                          level == 1 ? SectionInfo::Section : SectionInfo::Subsection, level));
-
-                     if (g_current) {
-                        g_current->m_anchors.append(*si);
-                     }
-
-                     Doxy_Globals::sectionDict.insert(id, si);
-                  }
 
                } else {
                   retval += level == 1 ? "<h1>" : "<h2>";
