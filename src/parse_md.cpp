@@ -3585,13 +3585,15 @@ static QString detab(QStringView str, int &refIndent)
    return retval;
 }
 
-QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointer<Entry> e, const QString &input)
+QString processMarkdown(const QString &fileName, const int lineNr, QSharedPointer<Entry> e,
+      const QString &input, int indentLevel)
 {
    g_linkRefs.clear();
 
    g_fileName    = fileName;
    g_lineNr      = lineNr;
    g_current     = e;
+   s_indentLevel = indentLevel;
 
    if (input.isEmpty()) {
       return input;
