@@ -1824,7 +1824,7 @@ void processInline(QString &out, QStringView processText, QString::const_iterato
 }
 
 /** returns whether the line is a text-style hdr underline */
-static int isHeaderline(QStringView data)
+static int isHeaderline(QStringView data, bool allowAdjustLevel)
 {
    QString::const_iterator iter = data.constBegin();
    int cnt = 0;
@@ -1844,7 +1844,15 @@ static int isHeaderline(QStringView data)
          ++iter;
       }
 
-      return (cnt > 1 && (iter == data.constEnd() || *iter == '\n')) ? 1 : 0;
+      int level = (cnt > 1 && (iter == data.constEnd() || *iter == '\n')) ? 1 : 0;
+
+      if (allowAdjustLevel && level == 1 && s_indentLevel == -1)   {
+         // in case a page starts with a header line, use it as the title promote to a page
+
+         s_indentLevel = 0;
+      }
+
+      return s_indentLevel + level;
    }
 
    // test of level 2 header
@@ -1858,7 +1866,7 @@ static int isHeaderline(QStringView data)
          ++iter;
       }
 
-      return (cnt > 1 && (iter == data.constEnd() || *iter == '\n')) ? 2 : 0;
+      return (cnt > 1 && (iter == data.constEnd() || *iter == '\n')) ? s_indentLevel + 2 : 0;
    }
 
    return 0;
@@ -2128,7 +2136,7 @@ static QString extractTitleId(QString &title, int level)
    return retval;
 }
 
-static int isAtxHeader(QStringView data, int size, QString &header, QString &id)
+static int isAtxHeader(QStringView data, int size, QString &header, QString &id, bool allowAdjustLevel)
 {
    int i = 0;
    int end;
@@ -2183,9 +2191,13 @@ static int isAtxHeader(QStringView data, int size, QString &header, QString &id)
       }
 
       header = header.left(i + 1);
+      if (allowAdjustLevel && level == 1 && s_indentLevel ==-1 ) {
+         s_indentLevel = 0;
+      }
+
    }
 
-   return level;
+   return level + s_indentLevel;
 }
 
 // compute the indent from the start of the input, excluding list markers
@@ -2777,7 +2789,7 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
    if (isHRuler(data, size)) {
       out += "<hr>\n";
 
-   } else if ((level = isAtxHeader(data, size, header, id))) {
+   } else if ((level = isAtxHeader(data, size, header, id, true))) {
       QString hTag;
 
       if (level < 5 && ! id.isEmpty()) {
@@ -2813,7 +2825,7 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
 
       } else {
          if (! id.isEmpty()) {
-            out += "\\anchor " + id + "\n";
+            out += "\\anchor " + id + "\\internal_linebr ";
          }
 
          hTag = QString("h%1").formatArg(level);
@@ -2823,13 +2835,30 @@ void writeOneLineHeaderOrRuler(QString &out, QStringView data, QString::const_it
          out += "</" + hTag + ">\n";
       }
 
-   } else {
+   } else if (size > 0) {
       // simply just output the line
+      bool endsWithNewLine = false;
+      bool hadBreak = false;
+
       QStringView tmp = QStringView(data.constBegin(), iter_size);
-      out += tmp;
 
       if (hasLineBreak(tmp)) {
-         out += "<br>\n";
+         hadBreak = true;
+      }
+
+      if (tmp.endsWith('\n')) {
+         tmp.chop(1);
+         endsWithNewLine = true;
+      }
+
+      out += tmp;
+
+      if (hadBreak) {
+         out += "<br>";
+      }
+
+      if (endsWithNewLine) {
+         out += '\n';
       }
    }
 }
@@ -3275,7 +3304,7 @@ static QString processBlocks(QStringView str, int indent)
          QStringView s1 = QStringView(iter_prev, str.constEnd());
          QStringView s2 = QStringView(iter_i,    str.constEnd());
 
-         level = isHeaderline(QStringView(iter_i, str.constEnd()));
+         level = isHeaderline(QStringView(iter_i, str.constEnd()), true);
 
          if (level > 0) {
 
@@ -3303,7 +3332,7 @@ static QString processBlocks(QStringView str, int indent)
                }
 
             } else {
-               retval += "<hr>\n";
+               retval += "\n<hr>\n";
             }
 
             iter_prev = str.constEnd();
@@ -3453,7 +3482,7 @@ static QString extractPageTitle(QString &docs, QString &id, int &prefix)
          ++iter_endB;
       }
 
-      int level = isHeaderline(QStringView(iter_endA, iter_end));
+      int level = isHeaderline(QStringView(iter_endA, iter_end), false);
 
       if (level != 0) {
          title = QStringView(iter, iter_endA - 1);
@@ -3467,7 +3496,7 @@ static QString extractPageTitle(QString &docs, QString &id, int &prefix)
    }
 
    if (iter < iter_endA) {
-      int level = isAtxHeader(QStringView(iter, iter_end), (iter_endA - iter), title, id);
+      int level = isAtxHeader(QStringView(iter, iter_end), (iter_endA - iter), title, id, false);
 
       // modify passed values
       if (level > 0) {
