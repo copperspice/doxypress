@@ -1,0 +1,163 @@
+# ************************************************************************
+# Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+#
+# bash script used to compile lex files and generate cpp files
+# required bash utilities: flex, cp, rm, sed
+# ************************************************************************
+
+echo "Compile cstyle"
+   flex -Pcode_cstyle_YY     -L -t  code_cstyle.l  > code_cstyle.cpp
+   cp  code_cstyle.cpp       ../generated/code_cstyle.cpp
+   rm  code_cstyle.cpp
+
+   flex -Pparse_cstyle_YY    -L -t  parse_cstyle.l  > parse_cstyle.cpp
+   cp  parse_cstyle.cpp      ../generated/parse_cstyle.cpp
+   rm  parse_cstyle.cpp
+
+
+echo "Compile fortran"
+   flex -Pcode_fortran_YY    -L -t  code_fortran.l  > code_fortran.cpp
+   cp  code_fortran.cpp      ../generated/code_fortran.cpp
+   rm  code_fortran.cpp
+
+   flex -Pparse_fortran_YY   -L -t  parse_fortran.l  > parse_fortran.cpp
+   cp  parse_fortran.cpp     ../generated/parse_fortran.cpp
+   rm  parse_fortran.cpp
+
+
+echo "Compile python"
+   flex -Pcode_py_YY         -L -t  code_py.l  > code_py.cpp
+   cp  code_py.cpp           ../generated/code_py.cpp
+   rm  code_py.cpp
+
+   flex -Pparse_py_YY        -L -t  parse_py.l  > parse_py.cpp
+   cp  parse_py.cpp          ../generated/parse_py.cpp
+   rm  parse_py.cpp
+
+
+echo "Compile tcl"
+   flex -Pparse_tcl_YY       -L -t  parse_tcl.l  > parse_tcl.cpp
+   cp  parse_tcl.cpp         ../generated/parse_tcl.cpp
+   rm  parse_tcl.cpp
+
+
+echo "Compile xml code"
+   flex -Pcode_xmlYY         -L -t  code_xml.l  > code_xml.cpp
+   cp  code_xml.cpp          ../generated/code_xml.cpp
+   rm  code_xml.cpp
+
+
+echo "Compile comment cnv"
+   flex -PcommentcnvYY       -L -t  commentcnv.l  > commentcnv.cpp
+   cp  commentcnv.cpp        ../generated/commentcnv.cpp
+   rm  commentcnv.cpp
+
+
+echo "Compile comment scan"
+   flex -PcommentscanYY      -L -t  commentscan.l  > commentscan.cpp
+   cp  commentscan.cpp       ../generated/commentscan.cpp
+   rm  commentscan.cpp
+
+echo "Compile pre"
+   flex -PpreYY              -L -t  pre.l  > pre.cpp
+   cp  pre.cpp               ../generated/pre.cpp
+   rm  pre.cpp
+
+
+echo "Compile doctokenizer"
+   flex -PdoctokenizerYY     -L -t  doctokenizer.l  > doctokenizer.cpp
+   cp  doctokenizer.cpp      ../generated/doctokenizer.cpp
+   rm  doctokenizer.cpp
+
+
+echo "Compile constexp, declinfo, default_args"
+   echo
+
+   flex -PconstexpYY         -L -t  constexp.l  > constexp.cpp
+   cp  constexp.cpp          ../generated/constexp.cpp
+   rm  constexp.cpp
+
+   flex -PdeclinfoYY         -L -t  declinfo.l  > declinfo.cpp
+   cp  declinfo.cpp          ../generated/declinfo.cpp
+   rm  declinfo.cpp
+
+   flex -Pdefault_argsYY     -L -t  default_args.l  > default_args.cpp
+   cp  default_args.cpp      ../generated/default_args.cpp
+   rm  default_args.cpp
+
+
+echo "Add comment, adjust buffer size"
+echo "Adjust read buffer size, remove register keyword"
+
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/code_cstyle.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/parse_cstyle.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/code_fortran.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/parse_fortran.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/code_py.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/parse_py.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/parse_tcl.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/code_xml.cpp
+
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/commentcnv.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/commentscan.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/doctokenizer.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/pre.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/constexp.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/declinfo.cpp
+sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/default_args.cpp
+
+#
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/code_cstyle.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/parse_cstyle.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/code_fortran.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/parse_fortran.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/code_py.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/parse_py.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/parse_tcl.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/code_xml.cpp
+
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/commentcnv.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/commentscan.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/doctokenizer.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/pre.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/constexp.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/declinfo.cpp
+sed -e 's/#define YY_BUF_SIZE 16384/#define YY_BUF_SIZE 262144/g' -i ../generated/default_args.cpp
+
+
+#
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/code_cstyle.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/parse_cstyle.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/code_fortran.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/parse_fortran.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/code_py.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/parse_py.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/parse_tcl.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/code_xml.cpp
+
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/commentcnv.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/commentscan.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/doctokenizer.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/pre.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/constexp.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/declinfo.cpp
+sed -e 's/#define YY_READ_BUF_SIZE 8192/#define YY_READ_BUF_SIZE 196608/g' -i ../generated/default_args.cpp
+
+
+#
+sed -e 's/register //g' -i ../generated/code_cstyle.cpp
+sed -e 's/register //g' -i ../generated/parse_cstyle.cpp
+sed -e 's/register //g' -i ../generated/code_fortran.cpp
+sed -e 's/register //g' -i ../generated/parse_fortran.cpp
+sed -e 's/register //g' -i ../generated/code_py.cpp
+sed -e 's/register //g' -i ../generated/parse_py.cpp
+sed -e 's/register //g' -i ../generated/parse_tcl.cpp
+sed -e 's/register //g' -i ../generated/code_xml.cpp
+
+sed -e 's/register //g' -i ../generated/commentcnv.cpp
+sed -e 's/register //g' -i ../generated/commentscan.cpp
+sed -e 's/register //g' -i ../generated/doctokenizer.cpp
+sed -e 's/register //g' -i ../generated/pre.cpp
+sed -e 's/register //g' -i ../generated/constexp.cpp
+sed -e 's/register //g' -i ../generated/declinfo.cpp
+sed -e 's/register //g' -i ../generated/default_args.cpp
