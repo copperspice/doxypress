@@ -46,6 +46,7 @@ static int              lastSkipRoundContext;
 static int              lastStringContext;
 static int              lastCurlyContext;
 static int              lastRoundContext;
+static int              lastSharpContext;
 static int              lastSquareContext;
 static int              lastInitializerContext;
 static int              lastClassTemplSpecContext;
@@ -121,6 +122,7 @@ static bool             insideCppQuote     = false;
 static bool             insideProtocolList = false;
 
 static int              argRoundCount;
+static int              argSquareCount;
 static int              argSharpCount;
 static int              currentArgumentContext;
 static int              lastCopyArgStringContext;
@@ -155,6 +157,9 @@ static EntryKey               s_roundEnum;         // which enum in EntryKey
 
 static QSharedPointer<Entry>  s_curlyEntry;        // which entry
 static EntryKey               s_curlyEnum;         // which enum in EntryKey
+
+static QSharedPointer<Entry>  s_sharpEntry;        // which entry
+static EntryKey               s_sharpEnum;         // which enum in EntryKey
 
 static QSharedPointer<Entry>  s_rawEntry;          // which entry
 static WhichString            s_rawEnum;           // which enum in WhichString
@@ -746,7 +751,7 @@ CMD           ("\\"|"@")
 BN            [ \t\n\r]
 BL            [ \t\r]*"\n"
 B             [ \t]
-ID            "$"?[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*
+ID            [$a-z_A-Z\x80-\xFF][$a-z_A-Z0-9\x80-\xFF]*
 SCOPENAME     "$"?(({ID}?{BN}*"::"{BN}*)*)(((~|!){BN}*)?{ID})
 TSCOPE        {ID}("<"[a-z_A-Z0-9 \t\*\&,:]*">")?
 CSSCOPENAME   (({ID}?{BN}*"."{BN}*)*)((~{BN}*)?{ID})
@@ -909,6 +914,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 %x CopyGString
 %x CopyPHPGString
 %x CopyRound
+%x CopySharp
 %x CopyCurly
 %x GCopyRound
 %x GCopySquare
@@ -925,6 +931,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 %x CopyArgString
 %x CopyArgPHPString
 %x CopyArgRound
+%x CopyArgSquare
 %x CopyArgSharp
 %x CopyArgComment
 %x CopyArgCommentLine
@@ -2874,7 +2881,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
       current->m_entryName += '>';
 
-      if (roundCount == 0 && --sharpCount <= 0) {
+      --sharpCount;
+      if (roundCount == 0 && sharpCount <= 0) {
 
          current->startBodyLine = yyLineNr;
          current->setData(EntryKey::Member_Args, "(");
@@ -2887,6 +2895,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          currentArgumentContext = FuncQual;
 
          BEGIN( ReadFuncArgType );
+      } else {
+         current->m_entryName += "(";
+         ++roundCount;
       }
    }
 
@@ -4658,7 +4669,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<CopyRound>[^"'()\n]+         {
+<CopyRound>[^"'()\n,]+         {
       QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundEntry, s_roundEnum, text);
    }
@@ -4668,7 +4679,78 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       addToOutput(s_roundEntry, s_roundEnum, text[0]);
    }
 
-  /* generic round bracket list copy rules for growable strings */
+  /* generic sharp bracket list copy rules */
+<CopySharp>\"                           {
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
+
+      s_quotedEntry = s_sharpEntry;
+      s_quotedEnum  = s_sharpEnum;
+
+      lastStringContext = YY_START;
+      BEGIN(CopyString);
+   }
+
+<CopySharp>"<"                          {
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
+
+      ++sharpCount;
+   }
+
+<CopySharp>">"                          {
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
+
+      if (--sharpCount < 0) {
+        BEGIN(lastSharpContext);
+      }
+   }
+
+<CopySharp>\n                           {
+      QString text = QString::fromUtf8(yytext);
+
+      lineCount();
+      addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
+   }
+
+<CopySharp>\'                           {
+      QString text = QString::fromUtf8(yytext);
+
+      if (insidePHP) {
+        current->appendData(EntryKey::Initial_Value, text);
+
+        s_quotedEntry = s_sharpEntry;
+        s_quotedEnum  = s_sharpEnum;
+
+        lastStringContext = YY_START;
+        BEGIN(CopyPHPString);
+
+      } else {
+         addToOutput(s_sharpEntry, s_sharpEnum, text);
+      }
+   }
+
+<CopySharp>{CHARLIT}                    {
+      if (insidePHP) {
+        REJECT;
+      } else {
+         QString text = QString::fromUtf8(yytext);
+         addToOutput(s_sharpEntry, s_sharpEnum, text);
+      }
+   }
+
+<CopySharp>[^"'<>\n,]+                  {
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(s_sharpEntry, s_sharpEnum, text);
+   }
+
+<CopySharp>.     {
+      QString text = QString::fromUtf8(yytext);
+      addToOutput(s_sharpEntry, s_sharpEnum, text[0]);
+   }
+
+ /* generic round bracket list copy rules for growable strings */
 <GCopyRound>\"               {
       QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundGEntry, s_roundGEnum, text[0]);
@@ -4728,7 +4810,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<GCopyRound>[^"'()\n/]+      {
+<GCopyRound>[^"'()\n\/,]+      {
       QString text = QString::fromUtf8(yytext);
       addToOutput(s_roundGEntry, s_roundGEnum, text);
    }
@@ -4801,7 +4883,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<GCopySquare>[^"\[\]\n/]+    {
+<GCopySquare>[^"\[\]\n\/,]+    {
       QString text = QString::fromUtf8(yytext);
       addToOutput(s_squareGEntry, s_squareGEnum, text);
    }
@@ -4863,7 +4945,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<CopyCurly>[^"'{}\/\n]+           {
+<CopyCurly>[^"'{}\/\n,]+           {
       QString text = QString::fromUtf8(yytext);
       addToOutput(s_curlyEntry, s_curlyEnum, text);
    }
@@ -6385,13 +6467,19 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       fullArgString  += text;
    }
 
+<CopyArgSquare>[^\/\n\]\[\"\']+          {
+      QString text = QString::fromUtf8(yytext);
+
+      addToArgs(text);
+      fullArgString += text;
+   }
 <ReadFuncArgType,ReadTempArgs>{BN}*      {
       addToArgs(" ");
-      fullArgString  += " ";
+      fullArgString += " ";
       lineCount();
    }
 
-<ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>{RAWBEGIN}   {
+<ReadFuncArgType,CopyArgRound,CopyArgSquare,CopyArgSharp,ReadTempArgs>{RAWBEGIN}      {
       QString text = QString::fromUtf8(yytext);
 
       s_delimiter = text.mid(2);
@@ -6409,7 +6497,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(RawString);
    }
 
-<ReadFuncArgType,CopyArgRound,CopyArgSharp,ReadTempArgs>\"  {
+<ReadFuncArgType,CopyArgRound,CopyArgSquare,CopyArgSharp,ReadTempArgs>\"      {
       QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
@@ -6419,7 +6507,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(CopyArgString);
    }
 
-<ReadFuncArgType,ReadTempArgs>"("   {
+<ReadFuncArgType>"["       {
+      if (! insidePHP) {
+         REJECT;
+      }
+
       QString text = QString::fromUtf8(yytext);
 
       addToArgs(text[0]);
@@ -6427,7 +6519,17 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       argSquareCount  = 0;
 
       lastCopyArgContext = YY_START;
+      BEGIN(CopyArgSquare);
+   }
 
+<ReadFuncArgType,ReadTempArgs>"("   {
+      QString text = QString::fromUtf8(yytext);
+
+      addToArgs(text[0]);
+      fullArgString += text[0];
+      argRoundCount = 0;
+
+      lastCopyArgContext = YY_START;
       BEGIN(CopyArgRound);
    }
 
@@ -6703,10 +6805,33 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
+<CopyArgSquare>"["     {
+      QString text = QString::fromUtf8(yytext);
+
+      addToArgs(text[0]);
+      fullArgString += text[0];
+
+      ++argSquareCount;
+   }
+
+<CopyArgSquare>"]"      {
+      QString text = QString::fromUtf8(yytext);
+
+      addToArgs(text[0]);
+      fullArgString += text[0];
+
+      if (argSquareCount > 0) {
+         --argSquareCount;
+      } else {
+         BEGIN(lastCopyArgContext);
+      }
+   }
+
+
 <CopyArgSharp>"("                         {
       QString text = QString::fromUtf8(yytext);
-      addToArgs(text[0]);
 
+      addToArgs(text[0]);
       fullArgString += text[0];
       argRoundCount  = 0;
 
@@ -6759,7 +6884,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( lastCopyArgStringContext );
    }
 
-<ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>{CHARLIT}       {
+<ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSquare,CopyArgSharp>{CHARLIT}       {
       QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
@@ -6770,7 +6895,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSharp>\'     {
+<ReadFuncArgType,ReadTempArgs,CopyArgRound,CopyArgSquare,CopyArgSharp>\'     {
       QString text = QString::fromUtf8(yytext);
       addToArgs(text);
       fullArgString  += text;
@@ -6781,14 +6906,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>\n  {
+<ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSquare,CopyArgSharp>\n  {
       QString text = QString::fromUtf8(yytext);
       lineCount();
       addToArgs(text[0]);
       fullArgString  += text[0];
    }
 
-<ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSharp>.    {
+<ReadFuncArgType,ReadTempArgs,CopyArgString,CopyArgPHPString,CopyArgRound,CopyArgSquare,CopyArgSharp>.    {
       QString text = QString::fromUtf8(yytext);
       addToArgs(text[0]);
       fullArgString  += text[0];
