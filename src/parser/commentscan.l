@@ -430,6 +430,7 @@ static QString          s_spaceBeforeIf;
 static QString          s_copyDocArg;
 static QString          s_guardExpr;
 static int              s_roundCount;
+static int              s_htmlDetails;
 static bool             s_insideParBlock;
 
 static int              s_openCount;
@@ -438,6 +439,9 @@ static QString          s_memberGroupHeader;
 static QString          s_memberGroupDocs;
 static QString          s_memberGroupRelates;
 static QString          s_compoundName;
+
+static QString          s_htmlAnchor;
+static bool             s_isHtmlAnchor;
 
 static bool             s_internalDocs;
 static bool             s_processInternalDocs = false;
@@ -981,12 +985,17 @@ CODE            [cC][oO][dD][eE]
 CAPTION         [cC][aA][pP][tT][iI][oO][nN]
 CENTER          [cC][eE][nN][tT][eE][rR]
 DIV             [dD][iI][vV]
+DETAILS         [dD][eE][tT][aA][iI][lL][sS]
 DETAILEDHTML    {CENTER}|{DIV}|{PRE}|{UL}|{TABLE}|{OL}|{DL}|{P}|[Hh][1-6]|{IMG}|{HR}|{PARA}
 DETAILEDHTMLOPT {CODE}
+SUMMARY         [sS][uU][mM][mM][aA][rR][yY]
+REMARKS         [rR][eE][mM][aA][rR][kK][sS]
+ANCHORHTML      [aA]{BN}*
+ANCHORID        ([iI][dD]|[nN][aA][mM][eE])"="("\""{LABELID}"\""|"'"{LABELID}"'"|{LABELID})
 BN              [ \t\n\r]
 BL              [ \t\r]*"\n"
 B               [ \t]
-BS              ^(({B}*"//")?)(({B}*"*"+)?){B}*
+BS              ^(({B}*"/""/")?)(({B}*"*"+)?){B}*
 ATTR            ({B}+[^>\n]*)?
 DOCNL           "\n"|"\\internal_linebr"
 LC              "\\"{B}*"\n"
@@ -994,7 +1003,7 @@ NW              [^a-z_A-Z0-9]
 FILESCHAR       [a-z_A-Z0-9\x80-\xFF\\:\\\/\-\+@&#]
 FILEECHAR       [a-z_A-Z0-9\x80-\xFF\-\+@&#]
 FILE            ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|("\""[^\n\"]*"\"")
-ID              "$"?[a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF]*
+ID              [$a-z_A-Z\x80-\xFF][$a-z_A-Z0-9\x80-\xFF]*
 LABELID         [a-z_A-Z\x80-\xFF][a-z_A-Z0-9\x80-\xFF\-]*
 CITESCHAR       [a-z_A-Z0-9\x80-\xFF\-\?]
 CITEECHAR       [a-z_A-Z0-9\x80-\xFF\-\+:\/\?]*
@@ -1051,6 +1060,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 %x ReadFormulaLong
 %x AnchorLabel
 %x HtmlComment
+%x HtmlAnchor
 %x SkipLang
 %x CiteLabel
 %x CopyDoc
@@ -1124,34 +1134,147 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       REJECT;
    }
 
-<Comment>"<summary>"          {
-      // start of a .NET XML style brief description
+<Comment>"<"{DETAILS}{ATTR}">"          {
+      // start of a HTML style details description
       QString text = QString::fromUtf8(yytext);
-      setOutput(OutputBrief);
+
+      ++s_htmlDetails;
+
+      setOutput(OutputMainDoc);
       addToOutput(text);
    }
 
-<Comment>"<remarks>"          {
+<Comment>"</"{DETAILS}">"               {
+      // end of a HTML style details description
+      QString text = QString::fromUtf8(yytext);
+
+      if (s_htmlDetails != 0) {
+         --s_htmlDetails;
+      }
+
+      addToOutput(text);
+   }
+
+<Comment>"<"{ANCHORHTML}                     {
+   // potential start of HTML anchor
+   QString text = QString::fromUtf8(yytext);
+
+   s_htmlAnchor   = text;
+   s_isHtmlAnchor = false;
+   BEGIN(HtmlAnchor);
+}
+
+<HtmlAnchor>{ANCHORID}                        {
+   // only labels that can be converted to doxypress anchor
+   QString text = QString::fromUtf8(yytext);
+   s_htmlAnchor += text;
+
+   QString tag(text);
+
+   int pos  = tag.indexOf("=");
+   QChar ch = tag[pos + 1];
+
+   QString id;
+
+   if (ch == '\'' || ch == '"')  {
+      // valid start
+
+     int end = tag.indexOf(ch, pos + 2);
+
+     if (end != -1) {
+         // found matching end, extract id
+         id = tag.mid(pos + 2, end - pos - 2);
+         addAnchor(id);
+     }
+
+   } else {
+     id = tag.mid(pos + 1);
+     addAnchor(id);
+   }
+
+   if (! id.isEmpty() && ! s_isHtmlAnchor) {
+     // only use first analogous to what is in docparser
+     addToOutput("@anchor ");
+     addToOutput(id);
+     addToOutput(" ");
+
+     s_isHtmlAnchor = true;
+   }
+ }
+
+<HtmlAnchor>("\""[^\n\"]*"\""|"'"[^\n']*"'") {
+   QString text = QString::fromUtf8(yytext);
+   s_htmlAnchor += text;
+}
+
+<HtmlAnchor>">"|"/>"       {
+   QString text = QString::fromUtf8(yytext);
+
+   if (! s_isHtmlAnchor) {
+     addToOutput(s_htmlAnchor);
+     addToOutput(text);
+
+   } else if (text.length() == 1) {
+     // to keep <a></a> pairs, otherwise single </a> present
+     addToOutput("<a>");
+
+   }
+
+   BEGIN(Comment);
+ }
+
+<HtmlAnchor>{DOCNL}   {
+   // newline
+   QString text = QString::fromUtf8(yytext);
+
+   s_htmlAnchor += text;
+
+   if (text[0] == '\n')  {
+      ++yyLineNr;
+   }
+}
+
+<HtmlAnchor>.         {
+   // catch-all for anything else
+   QString text = QString::fromUtf8(yytext);
+   s_htmlAnchor += text;
+}
+
+<Comment>"<"{REMARKS}">"          {
       // start of a .NET XML style detailed description
       QString text = QString::fromUtf8(yytext);
       setOutput(OutputMainDoc);
       addToOutput(text);
    }
 
-<Comment>"</summary>"          {
-      // end of a .NET XML style detailed description
+<Comment>"</"{REMARKS}">"        {
+      // end of a brief or detailed description
       QString text = QString::fromUtf8(yytext);
 
       setOutput(OutputMainDoc);
       addToOutput(text);
    }
 
-<Comment>"</remarks>"         {
-      // end of a brief or detailed description
+<Comment>"<"{SUMMARY}">"         {
+      // start of a .NET XML style brief description
       QString text = QString::fromUtf8(yytext);
 
-      setOutput(OutputMainDoc);
+      if (s_htmlDetails == 0) {
+         setOutput(OutputBrief);
+      }
+
       addToOutput(text);
+   }
+
+<Comment>"</"{SUMMARY}">"        {
+      // end of a .NET XML style detailed description
+      QString text = QString::fromUtf8(yytext);
+
+      addToOutput(text);
+
+      if (s_htmlDetails == 0) {
+         setOutput(OutputMainDoc);
+      }
    }
 
 <Comment>"<"{CAPTION}{ATTR}">"          {
@@ -1225,6 +1348,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       if (! current->m_entryName.isEmpty()) {
          current->m_traits.setTrait(Entry::Virtue::BypassUndocWarn);
       }
+   }
+
+<Comment>{B}*{CMD}"force_output"{B}* {
+      // simulate calling addToOutPut()
+      QString text = QString::fromUtf8(yytext);
+      s_docsEntry->appendData(EntryKey::Main_Docs, text);
    }
 
 <Comment>{B}*{CMD}"sortid"{B}+[0-9]+    {
@@ -2069,10 +2198,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <ParamArg1>{ID}/{B}*","   {
       QString text = QString::fromUtf8(yytext);
 
-      if (text[0] == '_' && Doxy_Globals::markdownSupport) {
-         addToOutput('\\');
-      }
-
       addToOutput(text);
    }
 
@@ -2080,12 +2205,18 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput(" , ");
    }
 
-<ParamArg1>{ID}  {
+<ParamArg1>{DOCNL}  {
       QString text = QString::fromUtf8(yytext);
 
-      if (text[0] == '_' && Doxy_Globals::markdownSupport) {
-         addToOutput('\\');
+      if (text[0] == '\n') {
+         ++yyLineNr;
       }
+
+      addToOutput(" ");
+    }
+
+<ParamArg1>{ID}  {
+      QString text = QString::fromUtf8(yytext);
 
       addToOutput(text);
       BEGIN( Comment );
