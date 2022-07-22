@@ -89,7 +89,7 @@ static QString      currentClass;                 // name of the current enclosi
 static UseSDict     *useMembers = nullptr;        // info about used modules
 static UseEntry     *useEntry   = nullptr;        // current use statement info
 
-static QString str = "";                         // contents of fortran string
+static QString      s_outputStr = QString();      // contents of fortran string
 
 static CodeGenerator *s_code;
 
@@ -1354,28 +1354,18 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
    }
 
  /*------ strings --------------------------------------------------*/
-<*>"\\\\"                               {
-      QString text = QString::fromUtf8(yytext);
-      str += text; /* ignore \\  */
-   }
-
-<*>"\\\""|\\\'                          {
-      QString text = QString::fromUtf8(yytext);
-      str += text; /* ignore \"  */
-   }
-
 <String>\n                              {
       QString text = QString::fromUtf8(yytext);
 
       // string with \n inside
       ++s_contLineNr;
-      str += text;
+      s_outputStr += text;
 
       startFontClass("stringliteral");
-      codifyLines(str);
+      codifyLines(s_outputStr);
       endFontClass();
 
-      str = "";
+      s_outputStr = QString();
       YY_FTN_RESET
    }
 
@@ -1387,16 +1377,16 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
          YY_FTN_REJECT;                      // single vs double quote
       }
 
-      str += text;
+      s_outputStr += text;
       startFontClass("stringliteral");
-      codifyLines(str);
+      codifyLines(s_outputStr);
       endFontClass();
       yy_pop_state();
    }
 
 <String>.                               {
       QString text = QString::fromUtf8(yytext);
-      str += text;
+      s_outputStr += text;
    }
 
 <*>\"|\'                                {
@@ -1411,7 +1401,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       yy_push_state(YY_START);
       s_stringStartSymbol = text[0];    // single or double quote
       BEGIN(String);
-      str = text;
+      s_outputStr = text;
    }
 
 <*>\n                        {

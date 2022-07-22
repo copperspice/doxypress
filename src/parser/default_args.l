@@ -531,12 +531,12 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             if (alen > 2 && arg.array.at(0) == '(' && arg.array.at(alen-1) == ')') {
                // fix-up for int *(a[10])
 
-               int i     = arg.array.indexOf('[') - 1;
+               int pos     = arg.array.indexOf('[') - 1;
                arg.array = arg.array.mid(1, alen - 2);
 
-               if (i > 0 && arg.name.isEmpty()) {
-                  arg.name  = arg.array.left(i).trimmed();
-                  arg.array = arg.array.mid(i);
+               if (pos > 0 && arg.name.isEmpty()) {
+                  arg.name  = arg.array.left(pos).trimmed();
+                  arg.array = arg.array.mid(pos);
                }
 
             }

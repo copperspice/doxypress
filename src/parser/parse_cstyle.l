@@ -579,7 +579,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
          int i  = len - 1;
          int j;
 
-         QChar c;
+         QChar ch;
 
          // look for start of name in "type *name"
          while (i >= 0 && isId(tmpArgs.at(i))) {
@@ -589,7 +589,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
          j = i + 1;
 
          // look for start of *'s
-         while (i >= 0 && ((c = tmpArgs.at(i)) == '*' || c.isSpace() )) {
+         while (i >= 0 && ((ch = tmpArgs.at(i)) == '*' || ch.isSpace() )) {
             i--;
          }
 
@@ -6081,8 +6081,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                varEntry->prependData(EntryKey::Member_Type, "typedef ");
             }
 
-            bool isUnion   = current->m_traits.hasTrait(Entry::Virtue::Union);
-            bool isStruct = current->m_traits.hasTrait(Entry::Virtue::Struct);
+            isUnion  = current->m_traits.hasTrait(Entry::Virtue::Union);
+            isStruct = current->m_traits.hasTrait(Entry::Virtue::Struct);
 
             if (typedefHidesStruct && isTypedef && (isUnion || isStruct) && memspecEntry) {
                // case 1: use S_t as type for pS_t in "typedef struct _S {} S_t, *pS_t;"
@@ -7435,14 +7435,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       bool isVariable = (! tmpType.isEmpty() && (! isFunction || tmpType.startsWith("typedef ")));
 
       if (text[0] !=';' || (current_root->section&Entry::COMPOUND_MASK) ) {
-         QString tempName;
-         int tempArg = current->m_entryName.indexOf('<');
+         QString tmpName;
+         int argPos = current->m_entryName.indexOf('<');
 
-         if (tempArg == -1) {
-            tempName = current->m_entryName;
+         if (argPos == -1) {
+            tmpName = current->m_entryName;
 
          } else {
-            tempName = current->m_entryName.left(tempArg);
+            tmpName = current->m_entryName.left(argPos);
 
          }
 
@@ -7530,16 +7530,16 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          lastCurlyContext = FindMembers;
 
          if (text[0] == ',' ) {
-            QString tmpType = previous->getData(EntryKey::Member_Type);
+            QString memberType = previous->getData(EntryKey::Member_Type);
 
-            // strip any trailing * and & (see bugs 623023 and 649103 for test cases)
-            int i = tmpType.length();
+            // strip any trailing * and &
+            int i = memberType.length();
 
-            while (i > 0 && (tmpType[i-1] == '*' || tmpType[i-1] == '&' || tmpType[i-1] == ' ')) {
+            while (i > 0 && (memberType[i-1] == '*' || memberType[i-1] == '&' || memberType[i-1] == ' ')) {
                i--;
             }
 
-            current->setData(EntryKey::Member_Type, tmpType.left(i));
+            current->setData(EntryKey::Member_Type, memberType.left(i));
          }
 
          if (text[0] == '{' ) {

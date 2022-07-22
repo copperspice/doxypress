@@ -2083,17 +2083,17 @@ static void copyEntry(QSharedPointer<Entry> dest, QSharedPointer<Entry> src)
     corresponding module subprogs
     @TODO: handle procedures in used modules
 */
-void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures, QSharedPointer<Entry> current_root)
+void resolveModuleProcedures(QList<QSharedPointer<Entry>> &procedureList, QSharedPointer<Entry> root)
 {
-   if (moduleProcedures.isEmpty()) {
+   if (procedureList.isEmpty()) {
       return;
    }
 
    // for all module procedures
-   for (auto ce1 : moduleProcedures)   {
+   for (auto ce1 : procedureList)   {
 
       // for procedures in current module
-      for (auto ce2 : current_root->children() ) {
+      for (auto ce2 : root->children() ) {
 
          if (ce1->m_entryName == ce2->m_entryName) {
             copyEntry(ce1, ce2);
@@ -2101,7 +2101,7 @@ void resolveModuleProcedures(QList<QSharedPointer<Entry>> &moduleProcedures, QSh
       }
    }
 
-   moduleProcedures.clear();
+   procedureList.clear();
 }
 
 /* Extracts string which resides within parentheses of provided string. */
