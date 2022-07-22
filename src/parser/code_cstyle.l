@@ -518,7 +518,7 @@ static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition>
                   const QString &text)
 
 {
-   static bool sourceTooltips = Config::getBool("source-tooltips");
+   static const bool sourceTooltips = Config::getBool("source-tooltips");
 
    TooltipManager::instance()->addTooltip(d);
 

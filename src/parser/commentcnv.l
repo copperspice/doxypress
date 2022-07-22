@@ -175,7 +175,7 @@ static inline int computeIndent(const QString &str)
 
 static inline void copyToOutput(const QString &s, int len)
 {
-   static int tabSize = Config::getInt("tab-size");
+   static const int tabSize = Config::getInt("tab-size");
 
    if (s_skip) {
       // only add newlines

@@ -333,7 +333,7 @@ static void initEntry()
 
 static void lineCount()
 {
-  static int tabSize = Config::getInt("tab-size");
+  static const int tabSize = Config::getInt("tab-size");
   const char *p;
 
   for (p = yytext; *p; ++p) {
@@ -355,7 +355,7 @@ static void lineCount()
 
 static int computeIndent(const QString &str, int startIndent)
 {
-   static int tabSize = Config::getInt("tab-size");
+   static const int tabSize = Config::getInt("tab-size");
    int col = startIndent;
 
    for (auto c : str) {
@@ -2722,8 +2722,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlockContext = UsingAliasEnd;
       s_docBlockInBody  = false;
 
-      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       QChar tmpChar = text[text.length() - 2];
       s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
@@ -4038,8 +4038,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       QString text = QString::fromUtf8(yytext);
 
-      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       if (current->startBodyLine == -1) {
          current->startBodyLine = yyLineNr;
@@ -4078,8 +4078,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlockContext = YY_START;
       s_docBlockInBody  = false;
 
-      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       QChar tmpChar = text[text.length() - 2];
       s_docBlockAutoBrief = (tmpChar == '*' && javadoc_auto_brief) || (tmpChar == '!' && qt_auto_brief);
@@ -4114,10 +4114,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->startBodyLine = yyLineNr;
       }
 
+      static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+
       s_docBlockContext   = YY_START;
       s_docBlockInBody    = false;
-      s_docBlockAutoBrief = ( text[text.length() - 2] == '*' && Config::getBool("javadoc-auto-brief") ) ||
-                            ( text[text.length() - 2] == '!' && Config::getBool("qt-auto-brief") );
+
+      QChar tmpChar = text[text.length() - 2];
+      s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
 
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
 
@@ -4171,8 +4175,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             s_docBlockContext = YY_START;
             s_docBlockInBody  = false;
 
-            static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-            static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+            static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+            static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
             QChar tmpChar = text[text.length() - 2];
             s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
@@ -6045,7 +6049,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          //    && msName != current->m_entryName )
          // skip typedef T {} T;, removed due to bug608493
 
-         static bool typedefHidesStruct =    Config::getBool("use-typedef-name");
+         static const bool typedefHidesStruct = Config::getBool("use-typedef-name");
 
          // case 1: typedef struct _S { ... } S_t;
          // -> omit typedef and use S_t as the struct name
@@ -7649,8 +7653,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          s_docBlockContext  = SkipCurlyEndDoc;
          s_docBlockInBody   = false;
 
-         static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-         static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+         static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+         static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
          QChar tmpChar = text[text.length() - 2];
          s_docBlockAutoBrief = ( tmpChar == '*' && javadoc_auto_brief ) || ( tmpChar == '!' && qt_auto_brief );
@@ -7674,8 +7678,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // desc is followed by another one
       QString text = QString::fromUtf8(yytext);
 
-      static bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
-      static bool qt_auto_brief      = Config::getBool("qt-auto-brief");
+      static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+      static const bool qt_auto_brief      = Config::getBool("qt-auto-brief");
 
       s_docBlockContext = SkipCurlyEndDoc;
       s_docBlockInBody  = false;
@@ -9043,7 +9047,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_docBlockContext = YY_START;
       s_docBlockInBody  = YY_START == SkipCurly;
 
-      static bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
+      static const bool javadocAutoBrief = Config::getBool("javadoc-auto-brief");
       s_docBlockAutoBrief = javadocAutoBrief;
 
       s_docBlock = QString(computeIndent(text, s_column), QChar(' '));

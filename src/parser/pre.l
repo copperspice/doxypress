@@ -1737,7 +1737,7 @@ static inline void outputArray(const QString &a, int len)
 
 static void readIncludeFile(const QString &inc)
 {
-   static bool searchIncludes = Config::getBool("search-includes");
+   static const bool searchIncludes = Config::getBool("search-includes");
    uint i = 0;
 
    // find the start of the include file name
@@ -1785,7 +1785,7 @@ static void readIncludeFile(const QString &inc)
                absIncFileName = fi2.absoluteFilePath();
 
             } else if (searchIncludes) {
-               const QStringList includePath = Config::getList("include-path");
+               static const QStringList includePath = Config::getList("include-path");
 
                for (auto item : includePath) {
 
@@ -2099,7 +2099,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       // function list macro with one (...) argument, e.g. for K_GLOBAL_STATIC_WITH_ARGS
       // function like macro
 
-      static bool skipFuncMacros = Config::getBool("skip-function-macros");
+      static const bool skipFuncMacros = Config::getBool("skip-function-macros");
 
       QString name = QString::fromUtf8(yytext);
       name = name.left(name.indexOf('(')).trimmed();
@@ -3108,7 +3108,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCComment>^({B}*"*"+)?{B}{0,3}"~~~"[~]*   {
-      static bool markdown = Config::getBool("markdown");
+      static const bool markdown = Config::getBool("markdown");
 
       if (! markdown) {
          REJECT;
@@ -3123,7 +3123,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
    }
 
 <SkipCComment>^({B}*"*"+)?{B}{0,3}"```"[`]*            {
-      static bool markdown = Config::getBool("markdown");
+      static const bool markdown = Config::getBool("markdown");
 
       if (! markdown) {
          REJECT;
@@ -3856,7 +3856,7 @@ QString preprocessFile(const QString &fileName, const QString &input)
 
    if (firstTime)  {
       // add predefined macros
-      static QStringList const preDefinedMacros = Config::getList("predefined-macros");
+      static const QStringList preDefinedMacros = Config::getList("predefined-macros");
 
       for (const auto &definedMacro : preDefinedMacros) {
 

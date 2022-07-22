@@ -407,7 +407,7 @@ static void endFontClass()
  */
 static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition> d, const QString &text)
 {
-   static bool sourceTooltips = Config::getBool("source-tooltips");
+   static const bool sourceTooltips = Config::getBool("source-tooltips");
    TooltipManager::instance()->addTooltip(d);
 
    QString ref    = d->getReference();
@@ -1487,7 +1487,9 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
       // comment block ends at the end of this line
       // remove special comment (default config)
 
-      if (Config::getBool("strip-code-comments"))  {
+      static const bool stripCodeComments = Config::getBool("strip-code-comments");
+
+      if (stripCodeComments)  {
          s_yyLineNr   += s_docBlock.count('\n');
          s_endComment = true;
 
@@ -1560,9 +1562,11 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
 <*><<EOF>>                     {
+      static const bool stripCodeComments = Config::getBool("strip-code-comments");
+
       if (YY_START == DocBlock) {
 
-         if (! Config::getBool("strip-code-comments"))  {
+         if (! stripCodeComments)  {
             startFontClass("comment");
             codifyLines(s_docBlock);
             endFontClass();
