@@ -6550,8 +6550,8 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
             ptrEntry->getData(EntryKey::Member_Type) != "friend union" && ptrEntry->getData(EntryKey::Member_Type) != "friend" &&
             (! useTypedefName || ptrEntry->getData(EntryKey::Member_Type).indexOf("typedef ") == -1)) {
 
-         warn(ptrEntry->getData(EntryKey::File_Name), ptrEntry->startLine, "Documented symbol \"%s\" was not declared or defined",
-             csPrintable(decl) );
+         warn(ptrEntry->getData(EntryKey::File_Name), ptrEntry->startLine, "Documentation found for a member which was not declared:\n  %s",
+             csPrintable(decl));
       }
    }
 
@@ -7333,11 +7333,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   QString warnMsg;
 
                   if (noMatchCount < 1) {
-                     warnMsg = "documentation found, for a class member which was not found: \n";
+                     warnMsg = "Documentation found for a class member which was not found: \n";
 
                   } else {
                      if (root->m_templateArgLists.isEmpty()) {
-                        warnMsg = "documentation found, for a class member which was not found: \n";
+                        warnMsg = "Documentation found for a class member which was not found: \n";
                      } else {
                         warnMsg = "no class member or template specialization found for: \n";
                      }
@@ -8615,7 +8615,8 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
          }
 
          if (! found) {
-            warn(root->getData(EntryKey::File_Name), root->startLine, "Documentation for undefined enum `%s' found.", csPrintable(name) );
+            warn(ptrEntry->getData(EntryKey::File_Name), ptrEntry->startLine,
+               "Documentation for undefined enum `%s' found.", csPrintable(name) );
          }
       }
 
@@ -9526,14 +9527,15 @@ void Doxy_Work::findMainPage(QSharedPointer<Entry> ptrEntry)
 
          if (si) {
             if (si->lineNr != -1) {
-               warn(root->getData(EntryKey::File_Name), root->startLine, "multiple use of section label '%s' for main page, "
+               warn(root->getData(EntryKey::File_Name), root->startLine,
+                  "Multiple use of section label '%s' for main page, "
                   "(first occurrence: %s, line %d)", csPrintable(Doxy_Globals::mainPage->name()),
                    csPrintable(si->fileName), si->lineNr);
 
             } else {
                warn(root->getData(EntryKey::File_Name), root->startLine,
-                    "Multiple use of section label '%s' for main page, (first occurrence: %s)",
-                    csPrintable(Doxy_Globals::mainPage->name()), csPrintable(si->fileName));
+                  "Multiple use of section label '%s' for main page, (first occurrence: %s)",
+                  csPrintable(Doxy_Globals::mainPage->name()), csPrintable(si->fileName));
             }
 
          } else {
@@ -9698,7 +9700,7 @@ void Doxy_Work::generatePageDocs()
    for (auto &pd : Doxy_Globals::pageSDict) {
 
       if (! pd->getGroupDef() && ! pd->isReference()) {
-         msg("Generating docs for page %s\n", csPrintable(pd->name()));
+         msg("Generating docs for page: %s\n", csPrintable(pd->name()));
 
          Doxy_Globals::insideMainPage = true;
          pd->writeDocumentation(Doxy_Globals::outputList);
