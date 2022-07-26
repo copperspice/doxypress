@@ -59,14 +59,18 @@ static QString getSectionName(int level)
 }
 
 static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &name,
-         const QString &width, const QString &height)
+         const QString &width, const QString &height, bool inlineImage = false)
 {
-    if (hasCaption) {
-      t << "\n\\begin{DoxyImage}\n";
-
+   if (inlineImage) {
+      t << "\n\\begin{DoxyInlineImage}\n";
     } else {
-      t << "\n\\begin{DoxyImageNoCaption}\n"
-             "  \\mbox{";
+       if (hasCaption) {
+         t << "\n\\begin{DoxyImage}\n";
+
+       } else {
+         t << "\n\\begin{DoxyImageNoCaption}\n"
+                "  \\mbox{";
+       }
     }
 
     t << "\\includegraphics";
@@ -89,7 +93,13 @@ static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &
 
     if (width.isEmpty() && height.isEmpty()) {
       /* default setting */
-      t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
+      if (inlineImage) {
+         t << "[height=\\baselineskip,keepaspectratio=true]";
+
+      } else {
+         t << "[width=\\textwidth,height=\\textheight/2,keepaspectratio=true]";
+
+      }
 
     } else {
       t << "]";
@@ -98,20 +108,31 @@ static void visitPreStart(QTextStream &t, const bool hasCaption, const QString &
     t << "{" << name << "}";
 
     if (hasCaption) {
-      t << "\n\\doxyfigcaption{";
+      if (! inlineImage) {
+          t << "\n\\doxyfigcaption{";
+
+       } else {
+         // to catch the caption
+         t << "%";
+      }
     }
 }
 
-static void visitPostEnd(QTextStream &t, const bool hasCaption)
+static void visitPostEnd(QTextStream &t, const bool hasCaption, bool inlineImage = false)
 {
-   // end mbox or caption
-   t << "}\n";
+   if (inlineImage) {
+      t << "\n\\end{DoxyInlineImage}\n";
 
-   if (hasCaption) {
-      t << "\\end{DoxyImage}\n";
+   } else {
+      // end mbox or caption
+      t << "}\n";
 
-   } else{
-      t << "\\end{DoxyImageNoCaption}\n";
+      if (hasCaption) {
+         t << "\\end{DoxyImage}\n";
+
+      } else {
+         t << "\\end{DoxyImageNoCaption}\n";
+      }
    }
 }
 
@@ -1582,7 +1603,7 @@ void LatexDocVisitor::visitPre(DocImage *img)
          gfxName = gfxName.left(gfxName.length() - 4);
       }
 
-      visitPreStart(m_t, img->hasCaption(), gfxName, img->width(), img->height());
+      visitPreStart(m_t, img->hasCaption(), gfxName, img->width(), img->height(), img->isInlineImage());
 
    } else {
       // other format -> skip
@@ -1598,7 +1619,7 @@ void LatexDocVisitor::visitPost(DocImage *img)
          return;
       }
 
-      visitPostEnd(m_t, img->hasCaption());
+      visitPostEnd(m_t, img->hasCaption(), img->isInlineImage());
 
    } else {
       // other format

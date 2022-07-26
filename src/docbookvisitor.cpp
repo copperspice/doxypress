@@ -1338,7 +1338,7 @@ void DocbookDocVisitor::visitPost(DocImage *img)
          return;
       }
 
-      visitPostEnd(m_t, img->hasCaption());
+      visitPostEnd(m_t, img->hasCaption(), img->isInlineImage());
 
       QString baseName = img->name();
       int i;

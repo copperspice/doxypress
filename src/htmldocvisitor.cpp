@@ -2029,8 +2029,13 @@ void HtmlDocVisitor::visitPre(DocImage *img)
       if (isImageSvg && ! inlineImage) {
          m_t << "<object type=\"image/svg+xml\" data=\"" << convertToHtml(src)
              << "\"" << sizeAttribs << attrs;
+         if (inlineImage) {
+            // skip closing tag
 
-         m_t << ">" << alt << "</object>" << endl;
+         } else {
+
+            m_t << ">" << alt << "</object>" << endl;
+         }
 
       } else {
          m_t << "<img src=\"" << convertToHtml(src) << "\" alt=\"" << alt << "\"" << sizeAttribs << attrs;

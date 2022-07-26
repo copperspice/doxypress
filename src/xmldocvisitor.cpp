@@ -42,7 +42,7 @@ static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
 
 static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCaption, XmlDocVisitor *parent,
                   QList<DocNode *> children, const QString &name, bool writeType, DocImage::Type type,
-                  const QString &width, const QString &height)
+                  const QString &width, const QString &height, bool inlineImage = false)
 {
    t << "<" << cmd;
 
@@ -89,7 +89,9 @@ static void visitPreStart(QTextStream &t, const QString &cmd, const bool doCapti
    if (! height.isEmpty()) {
       t << " height=\"" << convertToXML(height, false) << "\"";
    }
-
+   if (inlineImage) {
+      t << " inline=\"yes\"";
+   }
    if (doCaption) {
       t << " caption=\"";
       visitCaption(parent, children);
@@ -1112,7 +1114,7 @@ void XmlDocVisitor::visitPre(DocImage *img)
       baseName = correctURL(url, img->relPath());
    }
 
-   visitPreStart(m_t, "image", false, this, img->children(), baseName, true, img->type(), img->width(), img->height());
+   visitPreStart(m_t, "image", false, this, img->children(), baseName, true, img->type(), img->width(), img->height(), img->isInlineImage());
 
    // copy the image to the output dir
    QSharedPointer<FileDef> fd;

@@ -145,8 +145,8 @@ class RTFDocVisitor : public DocVisitor
    void pushEnabled();
    void popEnabled();
 
-   void includePicturePreRTF(const QString name, const bool isTypeRTF, const bool hasCaption);
-   void includePicturePostRTF(const bool isTypeRTF, const bool hasCaption);
+   void includePicturePreRTF(const QString &name, const bool isTypeRTF, const bool hasCaption, bool inlineImage = false);
+   void includePicturePostRTF(const bool isTypeRTF, const bool hasCaption, bool inlineImage = false);
 
    void writeDotFile(const QString &fileName, const bool hasCaption);
    void writeDotFile(DocDotFile *);

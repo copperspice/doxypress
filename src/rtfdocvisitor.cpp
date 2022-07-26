@@ -1520,31 +1520,47 @@ void RTFDocVisitor::visitPre(DocImage *img)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPre(DocImage)}\n");
 
-   includePicturePreRTF(img->name(), img->type() == DocImage::Rtf, img->hasCaption());
+   includePicturePreRTF(img->name(), img->type() == DocImage::Rtf, img->hasCaption(), img->isInlineImage());
 }
 
-void RTFDocVisitor::includePicturePreRTF(const QString name, const bool isTypeRTF, const bool hasCaption)
+void RTFDocVisitor::includePicturePreRTF(const QString &name, const bool isTypeRTF, const bool hasCaption, bool inlineImage)
 {
    if (isTypeRTF) {
-      m_t << "\\par" << endl;
-      m_t << "{" << endl;
-      m_t << rtf_Style_Reset << endl;
 
-      if (hasCaption || m_lastIsPara) {
+      if (! inlineImage) {
+
          m_t << "\\par" << endl;
+         m_t << "{" << endl;
+         m_t << rtf_Style_Reset << endl;
+
+         if (hasCaption || m_lastIsPara) {
+            m_t << "\\par" << endl;
+
+         }
+
+         m_t << "\\pard \\qc ";
       }
 
-      m_t << "\\pard \\qc { \\field\\flddirty {\\*\\fldinst  INCLUDEPICTURE \"";
+      m_t << "{ \\field\\flddirty {\\*\\fldinst  INCLUDEPICTURE \"";
       m_t << name;
       m_t << "\" \\\\d \\\\*MERGEFORMAT}{\\fldrslt Image}}" << endl;
-      m_t << "\\par" << endl;
+      if (! inlineImage) {
+         m_t << "\\par" << endl;
 
-      if (hasCaption) {
-         m_t << "\\pard \\qc \\b";
-         m_t << "{Image \\field\\flddirty{\\*\\fldinst { SEQ Image \\\\*Arabic }}{\\fldrslt {\\noproof 1}} ";
+         if (hasCaption) {
+            m_t << "\\pard \\qc \\b";
+            m_t << "{Image \\field\\flddirty{\\*\\fldinst { SEQ Image \\\\*Arabic }}{\\fldrslt {\\noproof 1}} ";
+         }
+
+         m_lastIsPara = true;
+
+      } else {
+
+         if (hasCaption) {
+            // to prevent caption to be shown
+            m_t << "{\\comment ";
+         }
       }
-
-      m_lastIsPara = true;
 
    } else {
       // other format -> skip
@@ -1557,22 +1573,31 @@ void RTFDocVisitor::includePicturePreRTF(const QString name, const bool isTypeRT
 void RTFDocVisitor::visitPost(DocImage *img)
 {
    DBG_RTF("{\\comment RTFDocVisitor::visitPost(DocImage)}\n");
-   includePicturePostRTF(img->type()==DocImage::Rtf, img->hasCaption());
+   includePicturePostRTF(img->type() == DocImage::Rtf, img->hasCaption(), img->isInlineImage());
 }
 
-void RTFDocVisitor::includePicturePostRTF(const bool isTypeRTF, const bool hasCaption)
+void RTFDocVisitor::includePicturePostRTF(const bool isTypeRTF, const bool hasCaption, bool inlineImage)
 {
    if (isTypeRTF) {
       if (m_hide) {
          return;
       }
 
-      if (hasCaption) {
-         m_t << "}" <<endl;
-         m_t << "\\par}" <<endl;
+      if (inlineImage) {
+         if (hasCaption) {
+            m_t << " }";
+         }
 
       } else {
-         m_t << "}" <<endl;
+
+         if (hasCaption) {
+
+            m_t << "}" <<endl;
+            m_t << "\\par}" <<endl;
+
+         } else {
+            m_t << "}" <<endl;
+         }
       }
 
    } else {
