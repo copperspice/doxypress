@@ -220,6 +220,25 @@ static bool isInvisibleNode(DocNode *node)
          (node->kind() == DocNode::Kind_IncOperator && ! isDocIncOperatorVisible((DocIncOperator*)node));
 }
 
+static void mergeHtmlAttributes(const HtmlAttribList &attribs, HtmlAttribList &mergeInto)
+{
+   for (const auto &att : attribs) {
+
+      auto iter = std::find_if(mergeInto.begin(), mergeInto.end(),
+            [&att](const auto &opt) { return opt.name == att.name; });
+
+      if (iter != mergeInto.end()) {
+         // attribute name already in mergeInto
+
+         iter->value = iter->value + " " + att.value;
+
+      } else {
+         // attribute name not yet in mergeInto
+         mergeInto.append(att);
+      }
+   }
+}
+
 static QString htmlAttribsToString(const HtmlAttribList &attribs, QString *altValue = nullptr)
 {
 
@@ -2016,8 +2035,10 @@ void HtmlDocVisitor::visitPre(DocImage *img)
       }
 
       QString alt;
+      mergeHtmlAttributes(img->attribs(), extraAttribs);
+
+      QString attrs = htmlAttribsToString(extraAttribs, &alt);
       QString src;
-      QString attrs;
 
       if (url.isEmpty()) {
          src = img->relPath() + img->name();
