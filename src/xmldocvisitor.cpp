@@ -1015,10 +1015,50 @@ void XmlDocVisitor::visitPre(DocHtmlCell *c)
    }
 
    if (c->isHeading()) {
-      m_t << "<entry thead=\"yes\">";
+      m_t << "<entry thead=\"yes\"";
    } else {
-      m_t << "<entry thead=\"no\">";
+      m_t << "<entry thead=\"no\"";
    }
+
+   for (const auto &opt : c->attribs()) {
+
+      if (opt.name == "colspan" || opt.name == "rowspan") {
+         m_t << " " << opt.name << "=\"" << opt.value.toInteger<int>() << "\"";
+
+      } else if (opt.name == "align" && (opt.value == "right" || opt.value == "left" || opt.value == "center")) {
+         m_t << " align=\"" << opt.value << "\"";
+
+      } else if (opt.name ==" valign" && (opt.value == "bottom" || opt.value == "top" || opt.value == "middle")) {
+         m_t << " valign=\"" << opt.value << "\"";
+
+      } else if (opt.name == "width") {
+         m_t << " width=\"" << opt.value << "\"";
+
+      } else if (opt.name == "class") {
+         // handle markdown generated attributes
+
+         if (opt.value.startsWith("markdownTable")) {
+            // handle markdown generated attributes
+
+           if (opt.value.endsWith("Right")) {
+             m_t << " align='right'";
+
+           } else if (opt.value.endsWith("Left")) {
+             m_t << " align='left'";
+
+           } else if (opt.value.endsWith("Center")) {
+             m_t << " align='center'";
+           }
+
+           // skip 'markdownTable*' value ending with "None"
+
+         } else if (! opt.value.isEmpty())      {
+           m_t << " class=\"" << convertToXML(opt.value) << "\"";
+
+         }
+      }
+   }
+   m_t << ">";
 }
 
 void XmlDocVisitor::visitPost(DocHtmlCell *)
