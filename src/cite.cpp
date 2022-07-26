@@ -260,8 +260,6 @@ void CiteDict::generatePage() const
       } else if (line.indexOf("<!-- END BIBLIOGRAPH") != -1) {
          insideBib = false;
 
-      } else if (insideBib) {
-         doc += line + "\n";
       }
 
       int pos;
@@ -274,13 +272,17 @@ void CiteDict::generatePage() const
          if (j != -1 && k != -1) {
             QString label  = line.mid(pos + 14, j - pos - 14);
             QString number = line.mid(j + 2, k - j - 1);
-
+            line = line.left(pos + 14) + label + line.right(line.length() - j);
             auto iter = m_entries.find(label);
 
             if (iter != m_entries.end()) {
                iter.value() = number;
             }
          }
+      }
+
+      if (insideBib) {
+         doc += line + "\n";
       }
    }
 
