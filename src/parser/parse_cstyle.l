@@ -60,9 +60,6 @@ static int              lastDefineContext;
 static int              lastAlignAsContext;
 static int              lastCppAttributeContext;
 
-static Protection       protection;
-static Protection       baseProt;
-
 static int sharpCount   = 0;
 static int roundCount   = 0;
 static int curlyCount   = 0;
@@ -85,11 +82,14 @@ static int anonCount    = 0;
 static int anonNSCount  = 0;
 
 static QString          yyFileName;
-static MethodType       mtype;
-static bool             gstat;
 static bool             removeSlashes;
-static Specifier        virt;
-static Specifier        baseVirt;
+
+static MethodType       s_methodType;
+static bool             s_static;
+static Specifier        s_virtual;
+static Specifier        s_baseVirtual;
+static Protection       s_protection;
+static Protection       s_baseProtect;
 
 static QString          msType;
 static QString          msName;
@@ -251,16 +251,16 @@ static void initParser()
    baseName.resize(0);
    formulaText.resize(0);
 
-   protection  = Public;
-   baseProt    = Public;
    sharpCount  = 0;
    roundCount  = 0;
    curlyCount  = 0;
-   mtype       = MethodType::Method;
-   gstat       = false;
-   virt        = Normal;
-   baseVirt    = Normal;
    isTypedef   = false;
+   s_methodType  = MethodType::Method;
+   s_static      = false;
+   s_virtual     = Specifier::Normal;
+   s_baseVirtual = Specifier::Normal;
+   s_protection  = Protection::Public;
+   s_baseProtect = Protection::Public;
 
    autoGroupStack.clear();
 
@@ -282,13 +282,13 @@ static void initEntry()
       bool isEnum      = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
       bool isInterface = current_root->m_traits.hasTrait(Entry::Virtue::Interface);
 
-      protection = (isEnum || isInterface) ? Public : Package;
+      s_protection = (isEnum || isInterface) ? Protection::Public : Protection::Package;
   }
 
-  current->protection = protection;
-  current->mtype      = mtype;
-  current->virt       = virt;
-  current->stat       = gstat;
+  current->protection = s_protection;
+  current->stat       = s_static;
+  current->mtype      = s_methodType;
+  current->virt       = s_virtual;
   current->m_srcLang  = language;
 
   initGroupInfo(current);
@@ -1097,10 +1097,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*("properties"){BN}*":"{BN}*    {
       // IDL or Borland C++ builder property
 
-      mtype                = MethodType::Property;
+      s_methodType         = MethodType::Property;
       current->mtype       = MethodType::Property;
-      current->protection  = protection = Public;
-
+      s_protection         = Protection::Public;
+      current->protection  = Protection::Public;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1111,8 +1111,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"k_dcop"{BN}*":"{BN}*    {
-      current->mtype       = mtype = MethodType::DCOP;
-      current->protection  = protection = Public;
+      s_methodType         = MethodType::DCOP;
+      current->mtype       = MethodType::DCOP;
+      s_protection         = Protection::Public;
+      current->protection  = Protection::Public;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1123,8 +1125,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*("signals"|"Q_SIGNALS"){BN}*":"{BN}* {
-      current->mtype       = mtype = MethodType::Signal;
-      current->protection  = protection = Public ;
+      s_methodType         = MethodType::Signal;
+      current->mtype       = MethodType::Signal;
+      s_protection         = Protection::Public;
+      current->protection  = Protection::Public;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1135,8 +1139,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"public"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-      current->mtype       = mtype = MethodType::Slot;
-      current->protection  = protection = Public ;
+      s_methodType         = MethodType::Slot;
+      current->mtype       = MethodType::Slot;
+      s_protection         = Protection::Public;
+      current->protection  = Protection::Public;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1147,8 +1153,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"protected"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-      current->protection  = protection = Protected ;
-      current->mtype       = mtype = MethodType::Slot;
+      s_methodType         = MethodType::Slot;
+      current->mtype       = MethodType::Slot;
+      s_protection         = Protection::Protected;
+      current->protection  = Protection::Protected;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1159,8 +1167,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"private"{BN}*("slots"|"Q_SLOTS"){BN}*":"{BN}* {
-      current->protection  = protection = Private ;
-      current->mtype       = mtype = MethodType::Slot;
+      s_methodType         = MethodType::Slot;
+      current->mtype       = MethodType::Slot;
+      s_protection         = Protection::Private;
+      current->protection  = Protection::Private;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1171,8 +1181,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*("public"|"methods"|"__published"){BN}*":"{BN}* {
-      current->protection  = protection = Public ;
-      current->mtype       = mtype = MethodType::Method;
+      s_methodType         = MethodType::Method;
+      current->mtype       = MethodType::Method;
+      s_protection         = Protection::Public;
+      current->protection  = Protection::Public;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1185,9 +1197,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"internal"{BN}*":"{BN}* {
       // for now treat C++/CLI's internal as package
       if (insideCli) {
-         current->protection  = protection = Package ;
-         current->mtype       = mtype = MethodType::Method;
-
+         s_methodType         = MethodType::Method;
+         current->mtype       = MethodType::Method;
+         s_protection         = Protection::Package;
+         current->protection  = Protection::Package;
          current->m_entryName = QString();
 
          current->setData(EntryKey::Member_Type, QString());
@@ -1202,8 +1215,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"protected"{BN}*":"{BN}* {
-      current->protection  = protection = Protected ;
-      current->mtype       = mtype = MethodType::Method;
+      s_methodType         = MethodType::Method;
+      current->mtype       = MethodType::Method;
+      s_protection         = Protection::Protected;
+      current->protection  = Protection::Protected;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1214,8 +1229,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"private"{BN}*":"{BN}*   {
-      current->protection  = protection = Private ;
-      current->mtype       = mtype = MethodType::Method;
+      s_methodType         = MethodType::Method;
+      current->mtype       = MethodType::Method;
+      s_protection         = Protection::Private;
+      current->protection  = Protection::Private;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1230,9 +1247,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          // C++/CLI event
          lineCount();
 
-         current->mtype         = mtype = MethodType::Event;
-         current->startBodyLine = yyLineNr;
+         s_methodType   = MethodType::Event;
+         current->mtype = MethodType::Event;
 
+         current->startBodyLine = yyLineNr;
          curlyCount = 0;
 
          BEGIN( CliPropertyType );
@@ -1240,7 +1258,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       } else if (insideCSharp) {
          lineCount();
 
-         current->mtype         = MethodType::Event;
+         current->mtype = MethodType::Event;
+
          current->startBodyLine = yyLineNr;
 
       } else {
@@ -1252,9 +1271,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (insideCli) {
          // C++/CLI property
          lineCount();
-         current->mtype         = mtype = MethodType::Property;
-         current->startBodyLine = yyLineNr;
 
+         s_methodType   = MethodType::Property;
+         current->mtype = MethodType::Property;
+
+         current->startBodyLine = yyLineNr;
          curlyCount = 0;
 
          BEGIN( CliPropertyType );
@@ -1315,15 +1336,17 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (! current->getData(EntryKey::Member_Type).isEmpty()) {
          REJECT;
     } else {
-         current->mtype = mtype = MethodType::Property;
+         current->mtype = s_methodType = MethodType::Property;
          lineCount();
     }
    }
   */
 
 <FindMembers>{B}*"@private"{BN}+      {
-      current->protection  = protection = Private ;
-      current->mtype       = mtype = MethodType::Method;
+      s_methodType         = MethodType::Method;
+      current->mtype       = MethodType::Method;
+      s_protection         = Protection::Private;
+      current->protection  = Protection::Private;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1334,8 +1357,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"@protected"{BN}+  {
-      current->protection = protection = Protected;
-      current->mtype        = mtype = MethodType::Method;
+      s_methodType         = MethodType::Method;
+      current->mtype       = MethodType::Method;
+      s_protection         = Protection::Protected;
+      current->protection  = Protection::Protected;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1346,8 +1371,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"@public"{BN}+  {
-      current->protection  = protection = Public;
-      current->mtype       = mtype = MethodType::Method;
+      s_methodType         = MethodType::Method;
+      current->mtype       = MethodType::Method;
+      s_protection         = Protection::Public;
+      current->protection  = Protection::Public;
       current->m_entryName = QString();
 
       current->setData(EntryKey::Member_Type, QString());
@@ -1372,16 +1399,18 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          current->startBodyLine = yyLineNr;
          current->section       = Entry::FUNCTION_SEC;
-         current->protection    = protection = Public;
 
          language               = SrcLangExt_ObjC;
          current->m_srcLang     = SrcLangExt_ObjC;
          insideObjC             = true;
 
-         current->virt  = Specifier::Virtual;
-         current->stat  = (text[0]=='+');
-         current->mtype = mtype = MethodType::Method;
+         current->virt          = Specifier::Virtual;
+         current->stat          = (text[0] == '+');
 
+         s_methodType           = MethodType::Method;
+         current->mtype         = MethodType::Method;
+         s_protection           = Protection::Public;
+         current->protection    = Protection::Public;
          current->m_entryName   = QString();
 
          current->setData(EntryKey::Member_Type, QString());
@@ -1551,8 +1580,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       } else if (text.startsWith("@property")) {
          // ObjC 2.0 property
 
-         current->mtype      = mtype = MethodType::Property;
-         current->protection = Public;
+         s_methodType         = MethodType::Property;
+         current->mtype       = MethodType::Property;
+         //  s_protection     = Protection::Public;      // not set for some reason
+         current->protection  = Protection::Public;
 
          current->m_traits.setTrait(Entry::Virtue::Readable);
          current->m_traits.setTrait(Entry::Virtue::Writable);
@@ -1631,8 +1662,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }  else if (text == "@property") {
          // ObjC 2.0 property
 
-         current->mtype = mtype = MethodType::Property;
-         current->protection    = Public;
+         s_methodType         = MethodType::Property;
+         current->mtype       = MethodType::Property;
+         //  s_protection     = Protection::Public;      // not set for some reason
+         current->protection  = Protection::Public;
+
          current->m_traits.setTrait(Entry::Virtue::Readable);
          current->m_traits.setTrait(Entry::Virtue::Writable);
 
@@ -1721,7 +1755,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>{B}*"virtual"{BN}+     {
       current->appendData(EntryKey::Member_Type, " virtual ");
-      current->virt = Virtual;
+      current->virt = Specifier::Virtual;
       lineCount();
    }
 
@@ -1747,7 +1781,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->appendData(EntryKey::Member_Type, " abstract ");
 
          if (! insideJava) {
-            current->virt = Pure;
+            current->virt = Specifier::Pure;
 
          } else {
             current->m_traits.setTrait(Entry::Virtue::Abstract);
@@ -2009,7 +2043,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_srcLang  = SrcLangExt_ObjC;
       insideObjC          = true;
 
-      current->protection = protection = Public;
+      s_protection        = Protection::Public;
+      current->protection = Protection::Public;
 
       addType(current);
       current->appendData(EntryKey::Member_Type, " implementation");
@@ -2036,7 +2071,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          insideObjC         = true;
       }
 
-      current->protection   = protection = Public;
+      s_protection        = Protection::Public;
+      current->protection = Protection::Public;
 
       addType(current);
       current->appendData(EntryKey::Member_Type, " interface");
@@ -2063,7 +2099,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_srcLang   = SrcLangExt_ObjC;
       insideObjC           = true;
 
-      current->protection = protection = Public;
+      s_protection        = Protection::Public;
+      current->protection = Protection::Public;
 
       addType(current);
       current->appendData(EntryKey::Member_Type, " protocol");
@@ -3033,7 +3070,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>"Q_PROPERTY"  {
       // Q_property
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->setData(EntryKey::Member_Type, "");
 
@@ -3175,7 +3212,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_READ"     {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Readable);
       current->setData(EntryKey::Member_Type, "");
@@ -3204,7 +3241,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_WRITE"          {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Writable);
       current->setData(EntryKey::Member_Type, "");
@@ -3234,7 +3271,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>"CS_PROPERTY_RESET"       {
       QString text = QString::fromUtf8(yytext);
 
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Reset);
       current->setData(EntryKey::Member_Type, "");
@@ -3261,8 +3298,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_NOTIFY"      {
-      current->protection  = Public;
-      current->mtype        = MethodType::Property;
+      current->protection = Protection::Public;
+      current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Notify);
       current->setData(EntryKey::Member_Type, "");
 
@@ -3288,7 +3325,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_REVISION"          {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Revision);
       current->setData(EntryKey::Member_Type, "");
@@ -3297,7 +3334,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_DESIGNABLE"      {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Designable);
       current->setData(EntryKey::Member_Type, "");
@@ -3306,7 +3343,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_SCRIPTABLE"      {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Scriptable);
       current->setData(EntryKey::Member_Type, "");
@@ -3315,7 +3352,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_STORED"      {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Stored);
       current->setData(EntryKey::Member_Type, "");
@@ -3324,7 +3361,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_USER"        {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::User);
       current->setData(EntryKey::Member_Type, "");
@@ -3333,7 +3370,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_CONSTANT"    {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Constant);
       current->setData(EntryKey::Member_Type, "");
@@ -3342,7 +3379,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>"CS_PROPERTY_FINAL"       {
-      current->protection = Public;
+      current->protection = Protection::Public;
       current->mtype      = MethodType::Property;
       current->m_traits.setTrait(Entry::Virtue::Final_Property);
       current->setData(EntryKey::Member_Type, "");
@@ -3638,16 +3675,16 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          bool javaLike = ( insideJava || insideCSharp || insideD || insidePHP || insideJS );
 
          if (javaLike && text == "public") {
-            current->protection = Public;
+            current->protection = Protection::Public;
 
          } else if (javaLike && text == "protected") {
-            current->protection = Protected;
+            current->protection = Protection::Protected;
 
          } else if ((insideCSharp || insideD || insidePHP || insideJS) && text == "internal") {
-            current->protection = Package;
+            current->protection = Protection::Package;
 
          } else if (javaLike && text == "private") {
-            current->protection = Private;
+            current->protection = Protection::Private;
 
          } else if (javaLike && text == "static") {
 
@@ -5176,8 +5213,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->setData(EntryKey::Member_Type, oldType.left(i));
 
       } else {
-         mtype = MethodType::Method;
-         virt  = Normal;
+         s_methodType = MethodType::Method;
+         s_virtual    = Specifier::Normal;
 
          if (needNewCurrent) {
             current = QMakeShared<Entry>();
@@ -5200,7 +5237,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          lastSquareContext = YY_START;
          idlAttr.resize(0);
          idlProp.resize(0);
-         current->mtype = mtype;
+
+         current->mtype = s_methodType;
 
          if (Config::getBool("idl-support") && current->mtype == MethodType::Property) {
             // inside the properties section of a dispinterface
@@ -6977,7 +7015,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FuncQual>{BN}*"abstract"{BN}*          {
       // pure virtual member function
       lineCount() ;
-      current->virt = Pure;
+      current->virt = Specifier::Pure;
       current->appendData(EntryKey::Member_Args, " override ");
    }
 
@@ -7065,7 +7103,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // pure virtual member function
       lineCount() ;
       current->appendData(EntryKey::Member_Args, " = 0");
-      current->virt = Pure;
+      current->virt = Specifier::Pure;
       current->argList.pureSpecifier = true;
 
       BEGIN(FuncQual);
@@ -8234,9 +8272,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       } else if ((insideJava || insidePHP || insideJS) && (text == "implements" || text =="extends") ) {
           current->setData(EntryKey::Member_Type, "");
-          baseProt = Public;
-          baseVirt = Normal;
-          baseName.resize(0);
+          s_baseProtect = Protection::Public;
+          s_baseVirtual = Specifier::Normal;
+          baseName.clear();
+
           BEGIN( BasesProt );
 
       } else if (insideCSharp && text == "where")  {
@@ -8425,15 +8464,15 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          if (isInterface || isStruct || isRef || isValue ||
                insidePHP || insideCSharp || insideD || insideObjC || insideIDL) {
 
-            baseProt = Public;
+            s_baseProtect = Protection::Public;
 
          } else {
-            baseProt = Private;
+            s_baseProtect = Protection::Private;
 
          }
 
-         baseVirt = Normal;
-         baseName.resize(0);
+         s_baseVirtual = Specifier::Normal;
+         baseName.clear();
 
          BEGIN( BasesProt );
       }
@@ -8578,17 +8617,17 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <BasesProt>"virtual"{BN}+              {
       lineCount();
-      baseVirt = Virtual;
+      s_baseVirtual = Specifier::Virtual;
    }
 
 <BasesProt>"public"{BN}+               {
       lineCount();
-      baseProt = Public;
+      s_baseProtect = Protection::Public;
    }
 
 <BasesProt>"protected"{BN}+            {
       lineCount();
-      baseProt = Protected;
+      s_baseProtect = Protection::Protected;
    }
 
 <BasesProt>"internal"{BN}+             {
@@ -8597,12 +8636,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
 
       lineCount();
-      baseProt = Package;
+      s_baseProtect = Protection::Package;
    }
 
 <BasesProt>"private"{BN}+              {
       lineCount();
-      baseProt = Private;
+      s_baseProtect = Protection::Private;
    }
 
 <BasesProt>{BN}         {
@@ -8888,7 +8927,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_entryName = removeRedundantWhiteSpace(current->m_entryName);
 
       if (! baseName.isEmpty()) {
-         current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
+         current->extends.append(BaseInfo(baseName, s_baseProtect, s_baseVirtual));
       }
 
       bool isInterface = current->m_traits.hasTrait(Entry::Virtue::Interface);
@@ -8897,14 +8936,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if ( isInterface || isStruct || insideJava || insidePHP || insideCSharp ||
                insideD || insideObjC || insideIDL) {
 
-         baseProt = Public;
+         s_baseProtect = Protection::Public;
 
       } else {
-         baseProt = Private;
+         s_baseProtect = Protection::Private;
       }
 
-      baseVirt=Normal;
-      baseName.resize(0);
+      s_baseVirtual = Specifier::Normal;
+      baseName.clear();
 
       if (text[0] == '>') {
          // end of a ObjC protocol list
@@ -8937,7 +8976,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_entryName = removeRedundantWhiteSpace(current->m_entryName);
 
       if (! baseName.isEmpty()) {
-         current->extends.append(BaseInfo(baseName, baseProt, baseVirt));
+         current->extends.append(BaseInfo(baseName, s_baseProtect, s_baseVirtual));
       }
 
       curlyCount = 0;
@@ -9135,12 +9174,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          if (containsWord(tmpType, "event")) {
             // event
+            s_methodType   = MethodType::Event;
             current->mtype = MethodType::Event;
-            mtype          = MethodType::Event;
 
          } else {
             // property
-            current->mtype = mtype = MethodType::Property;
+            s_methodType   = MethodType::Property;
+            current->mtype = MethodType::Property;
+
          }
 
          current->startBodyLine = yyLineNr;
@@ -9192,9 +9233,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
        REJECT;
 
       } else {
-
-         mtype = MethodType::Method;
-         virt  = Normal;
+         s_methodType = MethodType::Method;
+         s_virtual    = Specifier::Normal;
 
          // default value
          unput('=');
@@ -9208,8 +9248,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          curlyCount--;
 
       } else {
-         mtype = MethodType::Method;
-         virt  = Normal;
+         s_methodType = MethodType::Method;
+         s_virtual    = Specifier::Normal;
+
          unput(';');
          BEGIN(FindMembers);
       }
@@ -9739,7 +9780,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <PrototypeQual>{B}*"="{B}*"0"{B}*   {
       current->appendData(EntryKey::Member_Args, " = 0");
-      current->virt = Pure;
+      current->virt = Specifier::Pure;
       current->argList.pureSpecifier = true;
    }
 
@@ -9939,7 +9980,7 @@ static void handleCommentBlock(const QString &doc, bool brief)
 
    while (parseCommentBlock(s_thisParser, docEntry, stripIndentation(doc), yyFileName,
                   lineNum, isBrief, isJavaDocStyle, s_docBlockInBody,
-                  protection, position, needsEntry) ) {                   // last 3 are passed by reference
+                  s_protection, position, needsEntry) ) {                   // last 3 are passed by reference
 
       if (needsEntry) {
          QString docFile = current->getData(EntryKey::MainDocs_File);
@@ -9986,7 +10027,7 @@ static void handleParametersCommentBlocks(ArgumentList &argList)
          current->setData(EntryKey::Main_Docs,  "");
 
          while (parseCommentBlock(s_thisParser, current, a.docs, yyFileName, current->docLine,
-                   false, false, false, protection, position, needsEntry ) ) {
+                   false, false, false, s_protection, position, needsEntry ) ) {
 
             if (needsEntry) {
                newEntry();
@@ -10043,7 +10084,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          insideObjC  = (ce->m_srcLang == SrcLangExt_ObjC);
 
          current = QMakeShared<Entry>();
-         gstat = false;
+         s_static = false;
 
          initEntry();
 
@@ -10074,45 +10115,54 @@ static void parseCompounds(QSharedPointer<Entry> rt)
             bool isUnion     = ce->m_traits.hasTrait(Entry::Virtue::Union);
 
             if (insidePHP || insideD || insideJS || insideIDL) {
-               current->protection = protection = Public ;
+               s_protection        = Protection::Public;
+               current->protection = Protection::Public;
 
             } else if (insideJava) {
-               protection = (isEnum || isInterface) ? Public : Package;
-               current->protection = protection;
+               s_protection = (isEnum || isInterface) ? Protection::Public : Protection::Package;
+               current->protection = s_protection;
 
             } else if (isInterface || isRef || isValue || isStruct || isUnion) {
 
                if (ce->m_srcLang == SrcLangExt_ObjC) {
-                  current->protection = protection = Protected;
+                  s_protection        = Protection::Protected;
+                  current->protection = Protection::Protected;
 
                } else {
-                  current->protection = protection = Public;
+                  s_protection        = Protection::Public;
+                  current->protection = Protection::Public;
                }
 
             } else {
-               current->protection = protection = Private;
+               s_protection        = Protection::Private;
+               current->protection = Protection::Private;
             }
 
          } else if (ce->section == Entry::ENUM_SEC) {
             // enum
-            current->protection = protection = ce->protection;
+            s_protection        = ce->protection;
+            current->protection = ce->protection;
 
          } else if (! ce->m_entryName.isEmpty() && ce->m_entryName.at(ni) == '@') {
             // unnamed union or namespace
 
             if (ce->section == Entry::NAMESPACE_SEC ) {
                // unnamed namespace
-               current->stat = gstat = true;
+               s_static      = true;
+               current->stat = true;
             }
-            current->protection = protection = ce->protection;
+
+            s_protection        = ce->protection;
+            current->protection = ce->protection;
 
          } else {
             // named struct, union, protocol, category
-            current->protection = protection = Public;
+            s_protection        = Protection::Public;
+            current->protection = Protection::Public;
          }
 
-         mtype = MethodType::Method;
-         virt  = Normal;
+         s_methodType = MethodType::Method;
+         s_virtual    = Specifier::Normal;
 
          groupEnterCompound(yyFileName, yyLineNr, ce->m_entryName);
 
