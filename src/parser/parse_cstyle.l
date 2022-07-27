@@ -347,8 +347,8 @@ static void lineCount()
          s_column += tabSize - (s_column % tabSize);
 
       } else {
-         s_column++;
-         yyColNr++;
+         ++s_column;
+         ++yyColNr;
       }
    }
 }
@@ -367,7 +367,7 @@ static int computeIndent(const QString &str, int startIndent)
          col = 0;
 
       } else {
-         col++;
+         ++col;
 
       }
   }
@@ -557,7 +557,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
          int pos = iter_bi1 - tmpArgs.constBegin();
 
          oldStyleArgType = tmpArgs.left(pos);
-         pos++;
+         ++pos;
 
          int i = pos + 1;
          while (i < lenArgs && ((c = tmpArgs.at(i)) == '*' || c.isSpace() )) {
@@ -576,7 +576,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
       } else {
          // normal "int *var"
          int len = lenArgs;
-         int i  = len - 1;
+         int i   = len - 1;
          int j;
 
          QChar ch;
@@ -608,7 +608,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
    } else {
       // continuation like *arg2 in "int *args,*arg2"
       int len = lenArgs;
-      int j    = 0;
+      int j   = 0;
 
       QChar c;
 
@@ -1183,7 +1183,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FindMembers>{B}*"internal"{BN}*":"{BN}* {
-      // for now treat C++/CLI's internal as package...
+      // for now treat C++/CLI's internal as package
       if (insideCli) {
          current->protection  = protection = Package ;
          current->mtype       = mtype = MethodType::Method;
@@ -1406,6 +1406,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
 
       current->m_entryName = text;
+
       if (insideCpp || insideObjC) {
          current->setData(EntryKey::Clang_Id, ClangParser::instance()->lookup(yyLineNr, text));
       }
@@ -1538,11 +1539,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>"@"({ID}".")*{ID}{BN}*"("      {
       QString text = QString::fromUtf8(yytext);
+
       if (insideJava) {
          // Java annotation
          lineCount();
          lastSkipRoundContext = YY_START;
          roundCount = 0;
+
          BEGIN( SkipRound );
 
       } else if (text.startsWith("@property")) {
@@ -5191,7 +5194,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>"["        {
       QString text = QString::fromUtf8(yytext);
 
-      if (! insideCSharp && (current->m_entryName.isEmpty() ||    current->m_entryName == "typedef"))  {
+      if (! insideCSharp && (current->m_entryName.isEmpty() ||  current->m_entryName == "typedef"))  {
          // IDL function property
          squareCount = 1;
          lastSquareContext = YY_START;
@@ -5648,6 +5651,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <ReadBody,ReadNSBody,ReadBodyIntf>@\"  {
       QString text = QString::fromUtf8(yytext);
+
       current->appendData(EntryKey::Source_Text, text);
 
       s_skipVerbEntry = current;
@@ -5703,6 +5707,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Source_Text, text);
       ++yyLineNr;
       lastContext = YY_START;
+
       BEGIN( Comment );
    }
 
@@ -6454,19 +6459,21 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <ReadFuncArgType>[^ \/\r\t\n\)\(\"\'#]+ {
       QString text = QString::fromUtf8(yytext);
-      addToArgs(text);
 
+      addToArgs(text);
       fullArgString  += text;
    }
 
 <CopyArgString,CopyArgPHPString>[^\n\\\"\']+        {
       QString text = QString::fromUtf8(yytext);
+
       addToArgs(text);
       fullArgString  += text;
    }
 
 <CopyArgRound>[^\/\n\)\(\"\']+      {
       QString text = QString::fromUtf8(yytext);
+
       addToArgs(text);
       fullArgString  += text;
    }
@@ -6923,6 +6930,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       fullArgString  += text[0];
    }
 
+   /*------------------------------------------------------------------------*/
+
+
 <FuncRound>"("               {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Member_Args,   text[0]);
@@ -7253,6 +7263,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          BEGIN( CSConstraintName );
 
       } else if (checkForKnRstyleC()) {
+         // typically a K&R style C function
+
          current->setData(EntryKey::Member_Args, text);
          oldStyleArgType.clear();
          BEGIN(OldStyleArgs);
@@ -8919,7 +8931,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::Source_Text, QString());
 
       current->setData(EntryKey::File_Name, yyFileName);
-      current->startLine    = yyLineNr;
+      current->startLine   = yyLineNr;
       current->startColumn = yyColNr;
 
       current->m_entryName = removeRedundantWhiteSpace(current->m_entryName);
@@ -8951,11 +8963,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
-<SkipUnionSwitch>.
+<SkipUnionSwitch>.   {
+      // no code
+   }
+
 <Comment>{BN}+               {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
-      lineCount() ;
+      lineCount();
    }
 
 <Comment>"/*"           {
@@ -8988,6 +9003,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <Comment>"*/"           {
       QString text = QString::fromUtf8(yytext);
+
       current->appendData(EntryKey::Source_Text, text);
 
       if (! insideCode) {
@@ -9167,7 +9183,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <CSAccessorDecl>"{"         {
-      curlyCount++;
+      ++curlyCount;
    }
 
 <CSAccessorDecl>"}"{BN}*"="   {
@@ -10100,7 +10116,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          groupEnterCompound(yyFileName, yyLineNr, ce->m_entryName);
 
-         yylex() ;
+         yylex();
          s_lexInit = true;
 
          groupLeaveCompound(yyFileName, yyLineNr, ce->m_entryName);

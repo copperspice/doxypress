@@ -1098,7 +1098,7 @@ STARTDOCSYMS      "##"
 
    {B}"("        {
       s_funcParamsEnd = false;
-      current->startBodyLine  = yyLineNr;
+      current->startBodyLine = yyLineNr;
       BEGIN( FunctionParams );
    }
 

@@ -1250,35 +1250,35 @@ class DocImage : public CompAccept<DocImage>, public DocNode
       return Kind_Image;
    }
 
-   Type type() const           {
+   Type type() const {
       return m_type;
    }
 
-   QString name() const       {
+   QString name() const {
       return m_name;
    }
 
-   bool hasCaption() const     {
+   bool hasCaption() const {
       return !m_children.isEmpty();
    }
 
-   QString width() const      {
+   QString width() const {
       return m_width;
    }
 
-   QString height() const     {
+   QString height() const {
       return m_height;
    }
 
-   QString relPath() const    {
+   QString relPath() const {
       return m_relPath;
    }
 
-   QString url() const        {
+   QString url() const {
       return m_url;
    }
 
-   bool isInlineImage() const  {
+   bool isInlineImage() const {
       return m_inlineImage;
    }
 
@@ -1669,7 +1669,7 @@ class DocHtmlHeader : public CompAccept<DocHtmlHeader>, public DocNode
    int parse();
 
  private:
-   int           m_level;
+   int m_level;
    HtmlAttribList m_attribs;
 };
 

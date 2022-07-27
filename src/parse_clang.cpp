@@ -387,7 +387,7 @@ static void writeLineNumber(CodeGenerator &ol, QSharedPointer<FileDef> fd, uint 
 
       QSharedPointer<MemberDef> md = fd->getSourceMember(line);
 
-      if (md && md->isLinkable()) {
+      if (md != nullptr && md->isLinkable()) {
          // link to member
 
          if (s_currentMemberDef != md) {

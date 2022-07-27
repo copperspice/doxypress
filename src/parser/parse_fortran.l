@@ -1590,9 +1590,9 @@ static void extractPrefix(QString &text)
 #endif
 
 static void newLine() {
-   yyLineNr++;
-   yyLineNr += s_lineCountPrepass;
+   yyLineNr += s_lineCountPrepass + 1;
    s_lineCountPrepass = 0;
+
    comments.clear();
 }
 

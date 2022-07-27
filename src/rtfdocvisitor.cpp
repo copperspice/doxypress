@@ -98,7 +98,7 @@ void RTFDocVisitor::incIndentLevel()
 void RTFDocVisitor::decIndentLevel()
 {
    if (m_indentLevel > 0) {
-      m_indentLevel--;
+      --m_indentLevel;
    }
 }
 

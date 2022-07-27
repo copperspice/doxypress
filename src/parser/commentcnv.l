@@ -225,8 +225,8 @@ static void startCondSection(const QString &sectId);
 static void endCondSection();
 static void handleCondSectionId(const QString &expression);
 
-//  copies string s with length len to the output
-//  while replacing any alias commands found in the string
+// copies string s with length len to the output
+// while replacing any alias commands found in the string
 static void replaceAliases(const QString &s)
 {
    QString result = resolveAliasCmd(s);
@@ -402,28 +402,28 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 <Scan>("///"[/]*)/[^/].*\n[ \t]*"//"[\/!][^\/] {   /* start C++ style special comment block */
       // */ (editor syntax fix)
 
-      if (s_mlBrief)      {
+      if (s_mlBrief) {
          REJECT;             // bail out if we do not need to convert
 
       } else {
-      int i = 3;
+         int i = 3;
 
-      QString text = QString::fromUtf8(yytext);
+         QString text = QString::fromUtf8(yytext);
 
-      if (text[2] == '/') {
-         while (i < text.length() && text[i] == '/') {
-            i++;
+         if (text[2] == '/') {
+            while (i < text.length() && text[i] == '/') {
+               i++;
+            }
          }
-      }
 
-      s_blockHeadCol = s_col;
-      copyToOutput("/**",3);      // */ (editor syntax fix)
+         s_blockHeadCol = s_col;
+         copyToOutput("/**",3);      // */ (editor syntax fix)
 
-      replaceAliases(text.mid(i));
-      s_inSpecialComment = true;
+         replaceAliases(text.mid(i));
+         s_inSpecialComment = true;
 
-      s_readLineCtx = SComment;
-      BEGIN(ReadLine);
+         s_readLineCtx = SComment;
+         BEGIN(ReadLine);
       }
    }
 
@@ -446,7 +446,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
    }
 
 <Scan>"//"[!\/]/.*\n[ \t]*"//"[|\/][ \t]*[@\\]"}" {
-      // next line contains an end marker, see bug 752712
+      // next line contains an end marker
       QString text = QString::fromUtf8(yytext);
 
       s_inSpecialComment = text[2] == '/' || text[2] == '!';
@@ -468,7 +468,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
    }
 
 <Scan>"/**/"      {
-      /* avoid matching next rule for empty C comment, see bug 711723 */
+      /* avoid matching next rule for empty C comment */
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
    }
@@ -1100,7 +1100,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
    }
 
 <ReadAliasArgs>^[ \t]*"//"[/!]/[^\n]+   {
-      // skip leading special comments (see bug 618079)
+      // skip leading special comments
    }
 
 <ReadAliasArgs>"*/"        {
@@ -1157,7 +1157,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       s_aliasString += QString::fromUtf8(yytext);
 
       if (! s_lastEscaped) {
-         s_blockCount--;
+         --s_blockCount;
       }
 
       if (s_blockCount == 0) {

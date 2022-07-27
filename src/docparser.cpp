@@ -255,13 +255,12 @@ static void unescapeCRef(QString &value)
  */
 static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bool dowarn = true)
 {
-   static const bool generateHtml    = Config::getBool("generate-html");
-   static const bool generateLatex   = Config::getBool("generate-latex");
-   static const bool generateDocbook = Config::getBool("generate-docbook");
-   static const bool generateRtf     = Config::getBool("generate-rtf");
-   static const bool latexPdf        = Config::getBool("latex-pdf");
-
+   static const bool generateDocbook   = Config::getBool("generate-docbook");
+   static const bool generateHtml      = Config::getBool("generate-html");
+   static const bool generateLatex     = Config::getBool("generate-latex");
+   static const bool generateRtf       = Config::getBool("generate-rtf");
    static const bool generateXml       = Config::getBool("generate-xml");
+   static const bool latexPdf          = Config::getBool("latex-pdf");
 
    static const QString outputHtmlDir  = Config::getString("html-output");
    static const QString outputLatexDir = Config::getString("latex-output");
@@ -279,6 +278,7 @@ static QString findAndCopyImage(const QString &fileName, DocImage::Type type, bo
 
          warn_doc_error(s_fileName, getDoctokenLineNum(), text);
       }
+
       QString inputFile = fd->getFilePath();
       QFile inImage(inputFile);
 
@@ -1135,8 +1135,8 @@ static int handleAHref(DocNode *parent, QList<DocNode *> &children, const HtmlAt
             warn_doc_error(s_fileName, getDoctokenLineNum(), "Found <a> tag with name option but without a value");
          }
 
-      } else if (opt.name == "href") { // <a href=url>..</a> tag
-         // copy attributes
+      } else if (opt.name == "href") {
+         // <a href=url>..</a> tag, copy attributes
          HtmlAttribList attrList = tagHtmlAttribs;
 
          // and remove the href attribute
@@ -2128,7 +2128,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
                   break;
 
                case HTML_SUP:
-                  if (!g_token->endTag) {
+                  if (! g_token->endTag) {
                      handleStyleEnter(parent, children, DocStyleChange::Superscript, &g_token->attribs);
                   } else {
                      handleStyleLeave(parent, children, DocStyleChange::Superscript, tokenName);
@@ -2220,7 +2220,7 @@ void handleImg(DocNode *parent, QList<DocNode *> &children, const HtmlAttribList
    bool found = false;
    int index = 0;
 
-   for (auto opt : tagHtmlAttribs) {
+   for (const auto &opt : tagHtmlAttribs) {
 
       if (opt.name == "src" && ! opt.value.isEmpty()) {
          // copy attributes
@@ -3616,6 +3616,7 @@ int DocHtmlHeader::parse()
                   if (!g_token->endTag) {
                      handleAHref(this, m_children, g_token->attribs);
                   }
+
                } else if (tagId == HTML_BR) {
                   DocLineBreak *lb = new DocLineBreak(this);
                   m_children.append(lb);
@@ -7140,7 +7141,8 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
    int tagId  = Mappers::htmlTagMapper->map(tagName);
 
    if (g_token->emptyTag && ! (tagId & XML_CmdMask) &&
-         tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR && tagId != HTML_HR && tagId != HTML_P) {
+            tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR && tagId != HTML_HR && tagId != HTML_P) {
+
       warn_doc_error(s_fileName, getDoctokenLineNum(),
             "HTML tag '<%s/>' may not use the 'empty tag' XHTML syntax", csPrintable(tagName));
    }
@@ -7637,7 +7639,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
          break;
 
       default:
-         // we should not get here
+         // should not get here
          assert(0);
          break;
    }

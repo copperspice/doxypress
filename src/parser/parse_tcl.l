@@ -2926,6 +2926,7 @@ static void tcl_command(int what, const QString &text)
             if (word == "then") {
                myState = 't';
                myType << "keyword" << "NULL";
+
             } else {
                myState = 'b';
                myType << "script" << "NULL";

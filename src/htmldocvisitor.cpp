@@ -244,7 +244,7 @@ static QString htmlAttribsToString(const HtmlAttribList &attribs, QString *altVa
 
    QString result;
 
-   for (auto att : attribs) {
+   for (const auto &att : attribs) {
       if (! att.value.isEmpty())  {
          // ignore attribute without values as they are not XHTML compliant
          // with the exception of the alt attribute with the img tag
@@ -1676,6 +1676,7 @@ void HtmlDocVisitor::visitPre(DocSection *s)
    }
 
    forceEndParagraph(s);
+
    m_t << "<h" << s->level() << getDirHtmlClassOfNode(textDirection(s->title())) << ">";
    m_t << "<a class=\"anchor\" id=\"" << s->anchor();
    m_t << "\"></a>" << endl;
@@ -2075,6 +2076,7 @@ void HtmlDocVisitor::visitPre(DocImage *img)
          } else {
             m_t << "<div class=\"caption\">" << endl;
          }
+
       } else if (inlineImage) {
          m_t << "/>";
 

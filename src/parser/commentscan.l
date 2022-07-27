@@ -277,7 +277,7 @@ static DocCmdMap docCmdMap[] =
   { "xmlinclude",      0,                               false },
   { "xmlonly",         &handleFormatBlock,              false },
   { "xrefitem",        &handleXRefItem,                 false },
-  { nullptr,          0,                               false }
+  { nullptr,           0,                               false }
 };
 
 //  Maps a command name (as found in a comment block) onto a specific handler function
@@ -365,7 +365,8 @@ class GuardedSection
 {
  public:
    GuardedSection(bool enabled, bool parentVisible)
-      : m_enabled(enabled), m_parentVisible(parentVisible) {}
+      : m_enabled(enabled), m_parentVisible(parentVisible)
+   { }
 
    bool isEnabled() const {
       return m_enabled;
@@ -645,7 +646,6 @@ static QString addFormula()
       formLabel += "@_fakenl";   // add fake newlines to
    }
 
-   // keep the warnings correctly aligned
    return formLabel;
 }
 
@@ -662,14 +662,15 @@ static void addSection()
 {
    QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(s_sectionLabel);
 
-   if (si) {
+   if (si != nullptr) {
       if (si->lineNr != -1) {
+
          warn(yyFileName, yyLineNr, "Multiple use of section label '%s' while adding section, (first occurrence: %s, line %d)",
-                  csPrintable(s_sectionLabel), csPrintable(si->fileName), si->lineNr);
+               csPrintable(s_sectionLabel), csPrintable(si->fileName), si->lineNr);
 
       } else {
          warn(yyFileName, yyLineNr, "Multiple use of section label '%s' while adding section, (first occurrence: %s)",
-                  csPrintable(s_sectionLabel), csPrintable(si->fileName));
+               csPrintable(s_sectionLabel), csPrintable(si->fileName));
       }
 
    } else {
@@ -677,7 +678,7 @@ static void addSection()
       s_sectionTitle += QString::fromUtf8(yytext).trimmed();
 
       si = QMakeShared<SectionInfo>(yyFileName, yyLineNr, s_sectionLabel, s_sectionTitle,
-                  sectionLevelToType(s_sectionLevel), s_sectionLevel);
+               sectionLevelToType(s_sectionLevel), s_sectionLevel);
 
       // add section to this entry
       current->m_anchors.append(*si);
@@ -685,8 +686,8 @@ static void addSection()
       // add section to the global dictionary
       Doxy_Globals::sectionDict.insert(s_sectionLabel, si);
 
-      // for a section the si->fileName is the physical file name. this will be replaced with the section name
-      // in doctokenizer processSection()
+      // for a section the si->fileName is the physical file name, this will be replaced with the
+      // section name in doctokenizer processSection()
    }
 }
 
@@ -2416,6 +2417,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       s_sectionLabel = text;
+
       addToOutput(text);
       s_sectionTitle.clear();
 
@@ -2450,15 +2452,16 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addSection();
       addToOutput(text);
 
-      BEGIN( Comment );
+      BEGIN(Comment);
    }
 
 <SectionTitle>[^\n@\\]*/"\\internal_linebr"     {
       // end of section title
       QString text = QString::fromUtf8(yytext);
+
       addSection();
       addToOutput(text);
-      BEGIN( Comment );
+      BEGIN(Comment);
    }
 
 <SectionTitle>{LC}         {
@@ -2470,6 +2473,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <SectionTitle>[^\n@\\]*          {
       // any character without special meaning
       QString text = QString::fromUtf8(yytext);
+
       s_sectionTitle += text;
       addToOutput(text);
    }
@@ -3736,6 +3740,7 @@ static bool handleSection(const QString &str, const QStringList &list)
 
    setOutput(OutputMainDoc);
    addToOutput("@" + str + " ");
+
    BEGIN(SectionLabel);
 
    if (str == "section") {
@@ -4293,6 +4298,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    if (Doxy_Globals::markdownSupport) {
+
       s_inputString = processMarkdown(fileName, lineNr, QSharedPointer<Entry>(), comment);
 
       QStringView tmp(s_inputString);
@@ -4310,6 +4316,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
       }
 
       s_inputString = QString(tmp);
+
 
    } else {
       s_inputString  = comment;
@@ -4355,7 +4362,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
 
    if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
       // separate detailed doc fragments
-      current->appendData(EntryKey::Main_Docs,  "\n\n");
+      current->appendData(EntryKey::Main_Docs, "\n\n");
    }
 
    if (! current->getData(EntryKey::Inbody_Docs).isEmpty() && isInbody) {
@@ -4364,7 +4371,7 @@ bool parseCommentBlock(ParserInterface *parser, QSharedPointer<Entry> curEntry, 
    }
 
    yyrestart(yyin);
-   BEGIN( Comment );
+   BEGIN(Comment);
    yylex();
 
    setOutput(OutputMainDoc);

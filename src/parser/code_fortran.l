@@ -376,16 +376,14 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
    // search for function
    QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(memberName);
 
-   if (! mn) {
+   if (mn == nullptr) {
       mn = Doxy_Globals::memberNameSDict.find(memberName);
    }
 
-   if (mn) {
+   if (mn != nullptr) {
       // name is known
 
-      for (auto item : *mn) {
-         md = item;
-
+      for (const auto &md : *mn) {
          // all found functions with given name
          QSharedPointer<FileDef>  fd = md->getFileDef();
          QSharedPointer<GroupDef> gd = md->getGroupDef();
@@ -412,7 +410,7 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
                QString usedModuleName = nspace->name();
                UseEntry *ue = usedict->find(usedModuleName);
 
-               if (ue)  {
+               if (ue != nullptr)  {
                   // check if only-list exists and if current entry exists is this list
 
                   QStringList &only = ue->onlyNames;
@@ -431,9 +429,8 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
                   }
                }
             }
-         } // if linkable
-
-      } // for
+         }
+      }
    }
 
    return false;
@@ -461,7 +458,7 @@ static bool getLink(UseSDict *usedict, const QString &memberText, CodeGenerator 
    if (getFortranDefs(memberName, currentModule, md, usedict) && md->isLinkable())  {
 
       if (md->isVariable() && (md->getLanguage() != SrcLangExt_Fortran)) {
-         // Non Fortran variables are not handled at this time
+         // non Fortran variables are not handled at this time
          return false;
       }
 
@@ -1250,8 +1247,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       ++s_contLineNr;
 
       if (stripCodeComments) {
-         s_yyLineNr += docBlock.count('\n');
-         s_yyLineNr += 1;
+         s_yyLineNr += docBlock.count('\n') + 1;
          endCodeLine();
 
          if (s_yyLineNr < s_inputLines) {

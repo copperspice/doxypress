@@ -2687,7 +2687,7 @@ void HtmlGenerator::writeExternalSearchPage()
       t_stream << "  <div class=\"headertitle\">\n";
       t_stream << "    <div class=\"title\">" << theTranslator->trSearchResultsTitle() << "</div>\n";
       t_stream << "  </div>\n";
-      t_stream << "</div>\n";;
+      t_stream << "</div>\n";
       t_stream << "<div class=\"contents\">\n";
 
       t_stream << "<div id=\"searchresults\"></div>\n";

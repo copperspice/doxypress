@@ -111,7 +111,6 @@ XmlDocVisitor::XmlDocVisitor(QTextStream &t, CodeGenerator &ci)
 {
 }
 
-// visitor functions for leaf nodes
 
 void XmlDocVisitor::visit(DocWord *w)
 {
@@ -138,6 +137,7 @@ void XmlDocVisitor::visit(DocWhiteSpace *w)
    if (m_hide) {
       return;
    }
+
    if (m_insidePre) {
       m_t << w->chars();
    } else {
@@ -898,6 +898,7 @@ void XmlDocVisitor::visitPre(DocHtmlListItem *)
    if (m_hide) {
       return;
    }
+
    m_t << "<listitem>\n";
 }
 
@@ -930,6 +931,7 @@ void XmlDocVisitor::visitPre(DocHtmlDescTitle *)
    if (m_hide) {
       return;
    }
+
    m_t << "<varlistentry><term>";
 }
 
@@ -938,6 +940,7 @@ void XmlDocVisitor::visitPost(DocHtmlDescTitle *)
    if (m_hide) {
       return;
    }
+
    m_t << "</term></varlistentry>\n";
 }
 
@@ -946,6 +949,7 @@ void XmlDocVisitor::visitPre(DocHtmlDescData *)
    if (m_hide) {
       return;
    }
+
    m_t << "<listitem>";
 }
 
@@ -954,6 +958,7 @@ void XmlDocVisitor::visitPost(DocHtmlDescData *)
    if (m_hide) {
       return;
    }
+
    m_t << "</listitem>\n";
 }
 
@@ -965,12 +970,14 @@ void XmlDocVisitor::visitPre(DocHtmlTable *t)
 
    m_t << "<table rows=\"" << t->numRows()
        << "\" cols=\"" << t->numColumns() << "\"";
-  for (const auto &opt : t->attribs()) {
+
+   for (const auto &opt : t->attribs()) {
     if (opt.name == "width") {
       m_t << " " << opt.name << "=\"" << opt.value << "\"";
     }
   }
   m_t << ">";
+
   if (t->hasCaption()) {
     DocHtmlCaption *c = t->caption();
     m_t << "<caption";
@@ -1066,6 +1073,7 @@ void XmlDocVisitor::visitPost(DocHtmlCell *)
    if (m_hide) {
       return;
    }
+
    m_t << "</entry>";
 }
 
@@ -1222,6 +1230,7 @@ void XmlDocVisitor::visitPost(DocMscFile *)
    if (m_hide) {
       return;
    }
+
    visitPostEnd(m_t, "mscfile");
 }
 
@@ -1248,6 +1257,7 @@ void XmlDocVisitor::visitPre(DocLink *lnk)
    if (m_hide) {
       return;
    }
+
    startLink(lnk->ref(), lnk->file(), lnk->anchor());
 }
 
@@ -1266,11 +1276,11 @@ void XmlDocVisitor::visitPre(DocRef *ref)
       return;
    }
 
-   if (!ref->file().isEmpty()) {
+   if (! ref->file().isEmpty()) {
       startLink(ref->ref(), ref->file(), ref->isSubPage() ? QString() : ref->anchor());
    }
 
-   if (!ref->hasLinkText()) {
+   if (! ref->hasLinkText()) {
       filter(ref->targetTitle());
    }
 }
@@ -1339,23 +1349,29 @@ void XmlDocVisitor::visitPre(DocParamSect *s)
    if (m_hide) {
       return;
    }
+
    m_t << "<parameterlist kind=\"";
    switch (s->type()) {
       case DocParamSect::Param:
          m_t << "param";
          break;
+
       case DocParamSect::RetVal:
          m_t << "retval";
          break;
+
       case DocParamSect::Exception:
          m_t << "exception";
          break;
+
       case DocParamSect::TemplateParam:
          m_t << "templateparam";
          break;
+
       default:
          assert(0);
    }
+
    m_t << "\">";
 }
 
@@ -1364,6 +1380,7 @@ void XmlDocVisitor::visitPost(DocParamSect *)
    if (m_hide) {
       return;
    }
+
    m_t << "</parameterlist>" << endl;
 }
 
@@ -1493,6 +1510,7 @@ void XmlDocVisitor::visitPre(DocCopy *c)
    if (m_hide) {
       return;
    }
+
    m_t << "<copydoc link=\"" << convertToXML(c->link()) << "\">";
 }
 
@@ -1501,6 +1519,7 @@ void XmlDocVisitor::visitPost(DocCopy *)
    if (m_hide) {
       return;
    }
+
    m_t << "</copydoc>" << endl;
 }
 
@@ -1525,6 +1544,7 @@ void XmlDocVisitor::visitPost(DocHtmlBlockQuote *)
    if (m_hide) {
       return;
    }
+
    m_t << "</blockquote>";
 }
 
@@ -1533,6 +1553,7 @@ void XmlDocVisitor::visitPre(DocParBlock *)
    if (m_hide) {
       return;
    }
+
    m_t << "<parblock>";
 }
 

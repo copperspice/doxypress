@@ -207,6 +207,7 @@ static void processSection()
    QSharedPointer<SectionInfo> si;
 
    if ((si = Doxy_Globals::sectionDict.find(s_secLabel))) {
+
       si->fileName = file;
       si->type     = s_secType;
    }
@@ -221,7 +222,7 @@ static void handleHtmlTag()
    g_token->endTag   = false;
    g_token->emptyTag = false;
 
-   // Check for end tag
+   // check for end tag
    int startNamePos = 1;
 
    if (len > 1 && tagText.at(1) == '/') {
@@ -230,9 +231,9 @@ static void handleHtmlTag()
    }
 
    // parse the name portion
-   int i = startNamePos;
+   int i;
 
-   for (i = startNamePos; i < len; i++) {
+   for (i = startNamePos; i < len; ++i) {
       // check for valid HTML/XML name chars (including namespaces)
       QChar c = tagText.at(i);
 
@@ -243,8 +244,8 @@ static void handleHtmlTag()
 
    g_token->name = tagText.mid(startNamePos, i - startNamePos);
 
-   // Parse the attributes. Each attribute is a name, value pair
-   // The result is stored in g_token->attribs
+   // parse the attributes. Each attribute is a name, value pair
+   // result is stored in g_token->attribs
 
    int startName;
    int endName;
@@ -850,6 +851,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
       g_token->name     = text.mid(1).trimmed();
       g_token->paramDir = TokenInfo::Unspecified;
+
       return TK_COMMAND_SEL();
    }
 
@@ -994,7 +996,6 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_Para,St_Text>"&"{ID}";" {
       /* special symbol */
       g_token->name = QString::fromUtf8(yytext);
-
       return TK_SYMBOL;
    }
 
@@ -1002,9 +1003,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
   /********* patterns for linkable words ******************/
 
 <St_Para>{ID}/"<"{HTMLKEYW}">"         {
-      // this rule is to prevent opening html
-      // tag to be recognized as a templated classes
-
+      // prevent opening html tag to be recognized as a templated classes
       g_token->name = QString::fromUtf8(yytext);
       return TK_LNKWORD;
    }
@@ -1044,7 +1043,6 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       if (text.startsWith('%')) {
          // strip % if present
          g_token->name = text.mid(1);
-
       } else {
          g_token->name = text;
       }
@@ -1933,6 +1931,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
                s_secType  = SectionInfo::Table;
                s_secLabel = tag.mid(s + 4, e - s - 4);   // extract id
+
                processSection();
             }
          }

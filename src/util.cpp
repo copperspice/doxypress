@@ -6108,8 +6108,8 @@ int getScopeFragment(const QString &str, int p, int *l)
 }
 
 QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
-                  const QString &fileName, int docLine, int startLine, const QVector<ListItemInfo> &list,
-                  QSharedPointer<GroupDef> gd, const TagInfo &tagInfo, bool xref, SrcLangExt lang)
+      const QString &fileName, int docLine, int startLine, const QVector<ListItemInfo> &list,
+      QSharedPointer<GroupDef> gd, const TagInfo &tagInfo, bool xref, SrcLangExt lang)
 {
    static int id = 1;
 
@@ -6138,6 +6138,7 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
       }
 
       QString title = ptitle.trimmed();
+
       pd = QMakeShared<PageDef>(fileName, docLine, baseName, doc, title);
       pd->setBodySegment(startLine, -1);
 

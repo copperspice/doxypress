@@ -34,8 +34,8 @@
 #include <docparser.h>
 #include <docsets.h>
 #include <dot.h>
-#include <doxy_setup.h>
 #include <doxy_globals.h>
+#include <doxy_setup.h>
 #include <eclipsehelp.h>
 #include <ftvhelp.h>
 #include <htags.h>
@@ -7457,10 +7457,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
          } else if (overloaded) {
             // check if this function belongs to only one class
-            // for unique overloaded member we allow the class to be omitted
-            // can be error prone, try to bypass
+            // for unique overloaded member allow the class to be omitted
+            // can be error prone
 
             bool unique = true;
+
             auto iter = mn->begin();
 
             QSharedPointer<MemberDef> md = *iter;
@@ -7567,9 +7568,9 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             className = root->getData(EntryKey::Related_Class);
          }
 
-         QSharedPointer<ClassDef> cd;
+         cd = getClass(scopeName);
 
-         if ((cd = getClass(scopeName))) {
+         if (cd != nullptr) {
             bool newMember = true;          // assume we have a new member
             bool newMemberName = false;
 
@@ -7809,7 +7810,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
       } else if (ptrEntry->parent() && ptrEntry->parent()->section == Entry::OBJCIMPL_SEC) {
 
-         localObjCMethod:
+localObjCMethod:
 
          QSharedPointer<ClassDef> cd;
 
@@ -8529,11 +8530,11 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
       if (! name.isEmpty()) {
          bool found = false;
 
-         if (cd) {
+         if (cd != nullptr) {
             QString className = cd->name();
             QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict.find(name);
 
-            if (mn) {
+            if (mn != nullptr) {
                for (auto md : *mn) {
                   if (found) {
                      break;
@@ -9698,7 +9699,6 @@ void Doxy_Work::generatePageDocs()
    }
 
    for (auto &pd : Doxy_Globals::pageSDict) {
-
       if (! pd->getGroupDef() && ! pd->isReference()) {
          msg("Generating docs for page: %s\n", csPrintable(pd->name()));
 

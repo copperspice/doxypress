@@ -2427,7 +2427,7 @@ void MemberDef::writeReimplementedBy(OutputList &ol)
 
 
          if ( bmd->isLinkable() && bcd->isLinkable() ) {
-            count++;
+            ++count;
          }
       }
 
@@ -2490,7 +2490,7 @@ void MemberDef::writeReimplementedBy(OutputList &ol)
             ++iter_bmd;
 
             iter_i = match.capturedEnd();
-            match = regExp_marker.match(reimplInLine, iter_i);
+            match  = regExp_marker.match(reimplInLine, iter_i);
          }
 
          ol.parseText(QStringView(iter_i, reimplInLine.constEnd()));
@@ -3654,7 +3654,7 @@ void MemberDef::warnIfUndocumented()
 
    }
 
-   if ( m_impl->m_memberTraits.hasTrait(Entry::Virtue::BypassUndocWarn) ) {
+   if (m_impl->m_memberTraits.hasTrait(Entry::Virtue::BypassUndocWarn) ) {
       // suppress warning of undocumented method, user wants to bypass this warning
 
    } else if ((! hasUserDocumentation() && ! extractAll) && ! isFriendClass() && ! isAnonymous() &&
@@ -4488,6 +4488,7 @@ QString MemberDef::qualifiedName() const
       } else {
          qm = "-";
       }
+
       qm += "[";
       qm += m_impl->classDef->name() + " ";
       qm += name();
