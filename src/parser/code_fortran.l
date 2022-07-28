@@ -632,7 +632,7 @@ ARGS_L2   "("({ARGS_L0}|[^()]|{ARGS_L1a}|{ARGS_L1})*")"
 ARGS      {BS}({ARGS_L0}|{ARGS_L1}|{ARGS_L2})
 
 NUM_TYPE  (complex|integer|logical|real)
-LOs_OPER  (\.and\.|\.eq\.|\.eqv\.|\.ge\.|\.gt\.|\.le\.|\.lt\.|\.ne\.|\.neqv\.|\.or\.|\.not\.)
+LOG_OPER  (\.and\.|\.eq\.|\.eqv\.|\.ge\.|\.gt\.|\.le\.|\.lt\.|\.ne\.|\.neqv\.|\.or\.|\.not\.)
 KIND      {ARGS}
 CHAR      (CHARACTER{ARGS}?|CHARACTER{BS}"*"({BS}[0-9]+|{ARGS}))
 
@@ -1440,7 +1440,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       }
    }
 
-<*>{LOs_OPER}                           {
+<*>{LOG_OPER}                           {
       // Fortran logical comparison keywords
       QString text = QString::fromUtf8(yytext);
       s_code->codify(text);
