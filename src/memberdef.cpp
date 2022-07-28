@@ -1003,7 +1003,8 @@ QString MemberDef::getOutputFileBase() const
       }
 
    } else if (m_impl->nspace && (m_impl->nspace->isLinkable() ||
-         m_impl->nspace->name().isEmpty() || m_impl->nspace->isAnonymous())) {
+         m_impl->nspace->isAnonymous())) {
+
       baseName = m_impl->nspace->getOutputFileBase();
 
    } else if (m_impl->fileDef) {
