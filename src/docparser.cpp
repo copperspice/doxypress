@@ -8327,47 +8327,65 @@ int DocSection::parse()
       lastPar->markLast();
    }
 
-   if (retval == RetVal_Subsection && m_level == Doxy_Globals::subpageNestingLevel + 1) {
-      // then parse any number of nested sections
+   while (true) {
+      if (retval == RetVal_Subsection && m_level <= Doxy_Globals::subpageNestingLevel + 1) {
+         // then parse any number of nested sections
 
-      while (retval == RetVal_Subsection) { // more sections follow
-         // SectionInfo *sec = Doxy_Globals::sectionDict[g_token->sectionId];
+         while (retval == RetVal_Subsection) {
+            // more sections follow
 
-         DocSection *s = new DocSection(this, qMin(2 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
-         m_children.append(s);
-         retval = s->parse();
+            DocSection *s = new DocSection(this, qMin(2 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
+            m_children.append(s);
+            retval = s->parse();
+         }
+         break;
+
+      } else if (retval == RetVal_Subsubsection && m_level <= Doxy_Globals::subpageNestingLevel + 2) {
+         if ((m_level <= 1 + Doxy_Globals::subpageNestingLevel) && ! g_token->sectionId.startsWith("autotoc_md")) {
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected subsubsection command found inside %s",
+                  csPrintable(sectionLevelToName[m_level]) );
+         }
+
+
+
+         // then parse any number of nested sections
+
+         while (retval == RetVal_Subsubsection) {
+            // more sections follow
+
+            DocSection *s = new DocSection(this, qMin(3 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
+            m_children.append(s);
+            retval = s->parse();
+         }
+         if (! (retval == RetVal_Subsection && m_level < Doxy_Globals::subpageNestingLevel + 2)) {
+            break;
+         }
+
+      } else if (retval == RetVal_Paragraph && m_level <= qMin(5, Doxy_Globals::subpageNestingLevel + 3)) {
+
+         if ((m_level <= 2 + Doxy_Globals::subpageNestingLevel) && ! g_token->sectionId.startsWith("autotoc_md")) {
+
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected paragraph command found inside %s",
+                  csPrintable(sectionLevelToName[m_level]) );
+         }
+
+         // then parse any number of nested sections
+
+         while (retval == RetVal_Paragraph) {
+            // more sections follow
+            DocSection *s = new DocSection(this, qMin(4 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
+            m_children.append(s);
+            retval = s->parse();
+         }
+
+         if (! ((retval == RetVal_Subsection || retval == RetVal_Subsubsection) && m_level < Doxy_Globals::subpageNestingLevel + 3)) {
+            break;
+         }
+
+      } else {
+         break;
+
       }
-
-   } else if (retval == RetVal_Subsubsection && m_level == Doxy_Globals::subpageNestingLevel + 2) {
-      // then parse any number of nested sections
-
-      while (retval == RetVal_Subsubsection) { // more sections follow
-         // SectionInfo *sec = Doxy_Globals::sectionDict[g_token->sectionId];
-
-         DocSection *s = new DocSection(this, qMin(3 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
-         m_children.append(s);
-         retval = s->parse();
-      }
-
-   } else if (retval == RetVal_Paragraph && m_level == qMin(5, Doxy_Globals::subpageNestingLevel + 3)) {
-      // then parse any number of nested sections
-
-      while (retval == RetVal_Paragraph) { // more sections follow
-         // SectionInfo *sec = Doxy_Globals::sectionDict[g_token->sectionId];
-
-         DocSection *s = new DocSection(this, qMin(4 + Doxy_Globals::subpageNestingLevel, 5), g_token->sectionId);
-         m_children.append(s);
-         retval = s->parse();
-      }
-
-   } else if ((m_level <= 1 + Doxy_Globals::subpageNestingLevel && retval == RetVal_Subsubsection) ||
-              (m_level <= 2 + Doxy_Globals::subpageNestingLevel && retval == RetVal_Paragraph)) {
-      int level = (retval == RetVal_Subsubsection) ? 3 : 4;
-
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected %s command found inside %s",
-                     csPrintable(sectionLevelToName[level]), csPrintable(sectionLevelToName[m_level]) );
-
-      retval = 0; // stop parsing
    }
 
    INTERNAL_ASSERT(retval == 0 ||
