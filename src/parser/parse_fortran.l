@@ -135,12 +135,7 @@ static QString          docBlock;
 static bool             docBlockInBody = false;
 static bool             docBlockJavaStyle;
 
-static bool             gstat;
-
-static MethodType       mtype;
-static Specifier        virt;
 static Argument         *s_parameter;                    // element of parameter list
-
 static ScanVar          v_type  = V_IGNORE;              // type of parsed variable
 static InterfaceType    ifType  = IF_NONE;
 
@@ -296,7 +291,6 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
  /** comment parsing states */
 %x    DocBlock
 %x    DocBackLine
-%x    EndDoc
 %x    BlockData
 
 /** prototype parsing */
@@ -370,21 +364,6 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
 
  /*------ ignore strings that are not initialization strings */
-<*>"\\\\"            {
-      if (yy_top_state() == Initialization || yy_top_state() == ArrayInitializer) {
-         QString text = QString::fromUtf8(yytext);
-         initializer += text;
-      }
-   }
-
-<*>"\\\""|\\\'                          {
-      QString text = QString::fromUtf8(yytext);
-
-      if (yy_top_state() == Initialization || yy_top_state() == ArrayInitializer) {
-         initializer += text;
-      }
-   }
-
 <String>\"|\'                           {
       // string ends with next quote without previous backspace
       QString text = QString::fromUtf8(yytext);
@@ -900,36 +879,6 @@ private                                 {
       argType = text.simplified().toLower();
       yy_push_state(AttributeList);
    }
-
-  /*  macro expansion should already be done during preprocessing not here
-^{BS}{PP_ID}{KIND}?        {
-      // check for preprocessor symbol expand to type
-      QString text = QString::fromUtf8(yytext);
-
-      QString str = text;
-      str = str.stripWhiteSpace();
-
-      //DefineDict* defines = getGlobalDefineDict();
-      QString name;
-      int index = str.find("(");
-
-      if (index != -1) {
-         name = str.left(index).stripWhiteSpace();
-      } else {
-         name = str;
-      }
-
-      Define *define = 0; //(*defines)[name];
-      if (define != 0 && isTypeName(define->definition)) {
-         argType = str;
-         yy_push_state(AttributeList);
-
-      } else {
-         yyColNr -= yyleng;
-         REJECT;
-      }
-   }
-  */
 
 {EXTERNAL_STMT}/({BS}"::"|{BS_}{ID})   {
       /* external can be a "type" or an attribute */
@@ -2684,10 +2633,11 @@ static void initEntry()
       current->protection = defaultProtection;
    }
 
-   current->mtype = mtype;
-   current->virt  = virt;
-   current->stat  = gstat;
-   current->m_srcLang  = SrcLangExt_Fortran;
+   current->mtype = MethodType::Method;
+   current->virt  = Specifier::Normal;
+   current->stat  = false;
+   current->m_srcLang = SrcLangExt_Fortran;
+
    initGroupInfo(current);
 }
 
@@ -3052,9 +3002,6 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
    s_inputStringPrepass   = QString();
    s_inputPositionPrepass = 0;
 
-   mtype                  = MethodType::Method;
-   gstat                  = false;
-   virt                   = Normal;
    current_root           = rt;
    global_root            = rt;
 

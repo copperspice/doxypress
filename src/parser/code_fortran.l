@@ -663,9 +663,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 
 %x Start
 %x SubCall
-%x FuncDef
 %x ClassName
-%x ClassVar
 %x Subprog
 %x DocBlock
 %x Use
@@ -674,7 +672,6 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 %x Declaration
 %x DeclarationBinding
 %x DeclContLine
-%x Parameterlist
 %x String
 %x Subprogend
 
@@ -783,10 +780,6 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 
       // append module name to use dict
       useEntry = new UseEntry();
-
-      // useEntry->module = text;
-      // useMembers->append(yytext, useEntry);
-      // addUse(text);
 
       useEntry->module = tmp;
       useMembers->insert(tmp, useEntry);
@@ -908,8 +901,6 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
    }
 
 <Start>^{BS}"end"({BS_}"type").*        {
-      // just reset currentClass, rest is done in following rule
-      currentClass = "";
       YY_FTN_REJECT;
    }
 

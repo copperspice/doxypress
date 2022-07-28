@@ -1029,7 +1029,6 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 %x ClassDocArg3
 %x CategoryDocArg1
 %x ConceptDocArg1
-%x ConceptDocArg2
 %x XRefItemParam1
 %x XRefItemParam2
 %x XRefItemParam3

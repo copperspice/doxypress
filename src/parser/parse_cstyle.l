@@ -82,7 +82,6 @@ static int anonCount    = 0;
 static int anonNSCount  = 0;
 
 static QString          yyFileName;
-static bool             removeSlashes;
 
 static MethodType       s_methodType;
 static bool             s_static;
@@ -96,9 +95,6 @@ static QString          msName;
 static QString          msArgs;
 
 static bool             isTypedef;
-static int              tmpDocType;
-static QString          sectionLabel;
-static QString          sectionTitle;
 static QString          funcPtrType;
 static QString          aliasName;
 static QString          baseName;
@@ -246,8 +242,6 @@ static void unputString(const QString &str) {
 
 static void initParser()
 {
-   sectionLabel.resize(0);
-   sectionTitle.resize(0);
    baseName.resize(0);
    formulaText.resize(0);
 
@@ -9060,9 +9054,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
-      removeSlashes = (text[1] == '/');
-      tmpDocType    = -1;
-
       if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
          current->appendData(EntryKey::Main_Docs, "\n\n");
       }
@@ -9092,7 +9083,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
-      removeSlashes  = (text[1] == '/');
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
@@ -9119,7 +9109,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers,FindFields,MemberSpec,SkipCurly,FuncQual,Operator,ClassVar,Bases,OldStyleArgs>"//!" {
       QString text = QString::fromUtf8(yytext);
 
-      tmpDocType     = -1;
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
@@ -9139,7 +9128,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers,FindFields,MemberSpec,SkipCurly,FuncQual,Operator,ClassVar,Bases,OldStyleArgs>"///"/[^/] {
       QString text = QString::fromUtf8(yytext);
 
-      tmpDocType     = -1;
       lastDocContext = YY_START;
 
       if (current_root->section & Entry::SCOPE_MASK) {
