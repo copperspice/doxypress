@@ -65,6 +65,7 @@ CommandMap cmdMap[] = {
    { "endverbatim",     CMD_ENDVERBATIM },
    { "endxmlonly",      CMD_ENDXMLONLY },
    { "exception",       CMD_EXCEPTION },
+   { "force_output",    CMD_FORCE_OUTPUT },
    { "form",            CMD_FORMULA },
    { "htmlinclude",     CMD_HTMLINCLUDE },
    { "htmlonly",        CMD_HTMLONLY },

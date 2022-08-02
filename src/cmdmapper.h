@@ -144,6 +144,7 @@ enum CommandType {
    CMD_XMLINCLUDE      = 115,
    CMD_XMLONLY         = 116,
    CMD_XREFITEM        = 117 | SIMPLESECT_BIT,
+   CMD_FORCE_OUTPUT    = 118,      // cs
 };
 
 enum HtmlTagType {

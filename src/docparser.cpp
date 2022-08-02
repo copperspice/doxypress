@@ -7101,6 +7101,10 @@ int DocPara::handleCommand(const QString &cmdName)
          handleSortId();
          break;
 
+      case CMD_FORCE_OUTPUT:
+         // do nothing
+         break;
+
       default:
          // should not get here
          warn(s_fileName, getDoctokenLineNum(), "Invalid state, command = %d\n", cmdId);
