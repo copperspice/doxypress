@@ -135,7 +135,6 @@ static QString          docBlock;
 static bool             docBlockInBody = false;
 static bool             docBlockJavaStyle;
 
-static Argument         *s_parameter;                    // element of parameter list
 static ScanVar          v_type  = V_IGNORE;              // type of parsed variable
 static InterfaceType    ifType  = IF_NONE;
 
@@ -1003,13 +1002,13 @@ private                                 {
 
       } else if (! argType.isEmpty()) {
          // declaration of parameter list: add type for corr. parameter
-         s_parameter = getParameter(argName);
+         Argument *argData = getParameter(argName);
 
-         if (s_parameter) {
+         if (argData) {
             v_type= V_PARAMETER;
 
             if (! argType.isEmpty()) {
-               s_parameter->type = argType.trimmed();
+               argData->type = argType.trimmed();
             }
 
             if (! docBlock.isEmpty()) {
@@ -1018,7 +1017,7 @@ private                                 {
          }
 
          // save, it may be function return type
-         if (s_parameter) {
+         if (argData) {
             modifiers[current_root][text].type = argType;
 
          } else {
