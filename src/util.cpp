@@ -3992,12 +3992,13 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
 static bool getScopeDefs(const QString &docScope, const QString &scope,
                   QSharedPointer<ClassDef> &cd, QSharedPointer<NamespaceDef> &nd)
 {
+   cd = QSharedPointer<ClassDef>();
+   nd = QSharedPointer<NamespaceDef>();
+
    if (scope.isEmpty()) {
       return false;
    }
 
-   cd = QSharedPointer<ClassDef>();
-   nd = QSharedPointer<NamespaceDef>();
 
    QString docScopeName = docScope;
    QString scopeName    = scope;
@@ -4006,10 +4007,15 @@ static bool getScopeDefs(const QString &docScope, const QString &scope,
 
    if (scopeName.startsWith("::")) {
       scopeName = scopeName.right(scopeName.length() - 2);
+      if (scopeName.isEmpty()) {
+         return false;
+      }
 
    } else {
       scopeOffset = docScopeName.length();
+
    }
+
 
    do {
       // for each possible docScope (from largest to and including empty)
@@ -6180,11 +6186,11 @@ QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitl
 
          if (si) {
             if (si->lineNr != -1) {
-               warn(oldFile, line, "multiple use of section label '%s', (first occurrence: %s, line %d)",
+               warn(oldFile, line, "Multiple use of section label '%s' in related page, (first occurrence: %s, line %d)",
                     csPrintable(pd->name()), csPrintable(si->fileName), si->lineNr);
 
             } else {
-               warn(oldFile, line, "multiple use of section label '%s', (first occurrence: %s)",
+               warn(oldFile, line, "Multiple use of section label '%s' in related page, (first occurrence: %s)",
                     csPrintable(pd->name()), csPrintable(si->fileName));
             }
 
@@ -7367,33 +7373,35 @@ static QString expandAliasRec(const QString &str, bool allowRecursion)
          cmd = cmd + QString("{%1}").formatArg(numArgs);    // alias name + {n}
       }
 
-      QString aliasText = Doxy_Globals::cmdAliasDict.value(cmd);
+      auto iter = Doxy_Globals::cmdAliasDict.find(cmd);
 
-      if (numArgs > 1 &&  aliasText.isEmpty()) {
+      if (numArgs > 1 && iter == Doxy_Globals::cmdAliasDict.end()) {
          // in case there is no command with numArgs parameters, but there is a command with 1 parameter
          // we also accept all text as the argument of that command (so you do not have to escape commas)
 
-         aliasText = Doxy_Globals::cmdAliasDict.value(cmdNoArgs + "{1}");
+         iter = Doxy_Globals::cmdAliasDict.find(cmdNoArgs + "{1}");
 
-         if (! aliasText.isEmpty()) {
+         if (iter != Doxy_Globals::cmdAliasDict.end()) {
             cmd  = cmdNoArgs + "{1}";
             args = escapeCommas(args);    // everything is seen as one argument
          }
       }
 
-      if ((allowRecursion || ! s_aliasesProcessed.contains(cmd)) && ! aliasText.isEmpty()) {
+      if ((allowRecursion || ! s_aliasesProcessed.contains(cmd)) && iter != Doxy_Globals::cmdAliasDict.end()) {
          // expand the alias
 
          if (! allowRecursion) {
             s_aliasesProcessed.insert(cmd);
          }
 
-         QString val = aliasText;
+         QString aliasText = iter.value();
+
          if (hasArgs) {
-            val = replaceAliasArguments(val, args);
+            aliasText = replaceAliasArguments(aliasText, args);
          }
 
-         result += expandAliasRec(val);
+         result += expandAliasRec(aliasText);
+
          if (! allowRecursion) {
             s_aliasesProcessed.remove(cmd);
          }
