@@ -144,7 +144,7 @@ static QString          result;                          // function result
 
 static QString          argType;                         // fortran type of an argument of a parameter list
 static QString          argName;                         // last identifier name in variable list
-static QString          initializer;                     // initial value of a variable
+static QString          s_initializer;                   // initial value of a variable
 static int              initializerArrayScope;           // number if nested array scopes in initializer
 static int              initializerScope;                // number if nested function calls in initializer
 static QString          useModuleName;                   // name of module in the use statement
@@ -171,7 +171,7 @@ static QSharedPointer<Entry>	current_root;
 static QSharedPointer<Entry>	global_root;
 static QSharedPointer<Entry>	file_root;
 static QSharedPointer<Entry>	current;
-static QSharedPointer<Entry>	last_entry;
+static QSharedPointer<Entry>	s_last_entry;
 
 static QList<QSharedPointer<Entry>>  moduleProcedures;   // list of all interfaces which contain unresolved
 static QList<QSharedPointer<Entry>>  subrCurrent;
@@ -376,7 +376,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
       }
 
       if (yy_top_state() == Initialization || yy_top_state() == ArrayInitializer) {
-         initializer += text;
+         s_initializer += text;
       }
 
       yy_pop_state();
@@ -385,7 +385,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 <String>.                               {
       if (yy_top_state() == Initialization || yy_top_state() == ArrayInitializer) {
          QString text = QString::fromUtf8(yytext);
-         initializer += text;
+         s_initializer += text;
       }
    }
 
@@ -402,7 +402,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
       yy_push_state(YY_START);
 
       if (yy_top_state() == Initialization || yy_top_state() == ArrayInitializer) {
-         initializer += text;
+         s_initializer += text;
       }
 
       stringStartSymbol = text[0]; // single or double quote
@@ -533,14 +533,14 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
       text = text.trimmed();
       text = text.right(text.length() - 9).trimmed().toLower();
       addInterface(text, ifType);
-      startScope(last_entry);
+      startScope(s_last_entry);
    }
 }
 
 <InterfaceBody>^{BS}end{BS}interface({BS_}{ID})? {
       // end scope only if GENERIC interface
       if (ifType == IF_GENERIC)  {
-         last_entry->parent()->endBodyLine = yyLineNr - 1;
+         s_last_entry->parent()->endBodyLine = yyLineNr - 1;
       }
 
       if (ifType == IF_GENERIC && ! endScope(current_root)) {
@@ -561,7 +561,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
       if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
          addInterface(text, ifType);
-         startScope(last_entry);
+         startScope(s_last_entry);
       }
 
       current->section     = Entry::FUNCTION_SEC ;
@@ -739,7 +739,7 @@ private                                 {
       }
 
       addCurrentEntry(1);
-      startScope(last_entry);
+      startScope(s_last_entry);
       BEGIN(TypedefBody);
    }
 }
@@ -789,7 +789,7 @@ private                                 {
 {BS}"=>"[^(\n|\!)]*                     {
       /* Specific bindings come after the ID. */
       QString text = QString::fromUtf8(yytext);
-      last_entry->setData(EntryKey::Member_Args, text.toLower());
+      s_last_entry->setData(EntryKey::Member_Args, text.toLower());
    }
 
 "\n"                                    {
@@ -804,7 +804,7 @@ private                                 {
 
 ^{BS}"end"{BS}"type"({BS_}{ID})?{BS}/(\n|!|;) {
       // end type definition
-      last_entry->parent()->endBodyLine = yyLineNr;
+      s_last_entry->parent()->endBodyLine = yyLineNr;
 
       if (! endScope(current_root)) {
          yyterminate();
@@ -818,7 +818,7 @@ private                                 {
 ^{BS}"end"{BS}/(\n|!|;) {
       // incorrect end type definition
       warn(yyFileName, yyLineNr, "Found 'END' instead of 'END TYPE'");
-      last_entry->parent()->endBodyLine = yyLineNr;
+      s_last_entry->parent()->endBodyLine = yyLineNr;
 
       if (! endScope(current_root)) {
          yyterminate();
@@ -839,7 +839,7 @@ private                                 {
 
       if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
          endScope(current_root);
-         last_entry->endBodyLine = yyLineNr - 1;
+         s_last_entry->endBodyLine = yyLineNr - 1;
       }
 
       current_root->endBodyLine = yyLineNr - 1;
@@ -1117,7 +1117,7 @@ private                                 {
 
 <Variable>{BS}"="                       {
       yy_push_state(YY_START);
-      initializer = "= ";
+      s_initializer         = "=";
       initializerScope = initializerArrayScope = 0;
       BEGIN(Initialization);
    }
@@ -1156,16 +1156,16 @@ private                                 {
 <Initialization,ArrayInitializer>"["    |
 <Initialization,ArrayInitializer>"(/"   {
       QString text = QString::fromUtf8(yytext);
-      initializer += text;
       initializerArrayScope++;
+      s_initializer += text;
       BEGIN(ArrayInitializer);                // initializer may contain comma
    }
 
 <ArrayInitializer>"]"                   |
 <ArrayInitializer>"/)"                  {
       QString text = QString::fromUtf8(yytext);
-      initializer += text;
       initializerArrayScope--;
+      s_initializer += text;
 
       if (initializerArrayScope <= 0) {
          initializerArrayScope = 0;           // just in case
@@ -1175,19 +1175,19 @@ private                                 {
 
 <ArrayInitializer>.        {
       QString text = QString::fromUtf8(yytext);
-      initializer += text;
+      s_initializer += text;
    }
 
 <Initialization>"("        {
       QString text = QString::fromUtf8(yytext);
       initializerScope++;
-      initializer += text;
+      s_initializer += text;
    }
 
 <Initialization>")"        {
       QString text = QString::fromUtf8(yytext);
       initializerScope--;
-      initializer += text;
+      s_initializer += text;
    }
 
 <Initialization>{COMMA}    {
@@ -1195,20 +1195,20 @@ private                                 {
          updateVariablePrepassComment(yyColNr - yyleng, yyColNr);
          yy_pop_state();                      // end initialization
 
-         if (v_type == V_VARIABLE) {
-            last_entry->setData(EntryKey::Initial_Value, initializer);
+            if (v_type == V_VARIABLE) {
+               s_last_entry->setData(EntryKey::Initial_Value, s_initializer);
          }
 
       } else {
-         initializer += ", ";
+         s_initializer += ", ";
       }
    }
 
 <Initialization>"\n"|"!"                {
       yy_pop_state();                         // end initialization
 
-      if (v_type == V_VARIABLE)  {
-         last_entry->setData(EntryKey::Initial_Value, initializer);
+         if (v_type == V_VARIABLE)  {
+            s_last_entry->setData(EntryKey::Initial_Value, s_initializer);
       }
 
       yyColNr -= 1;
@@ -1217,7 +1217,7 @@ private                                 {
 
 <Initialization>.                       {
       QString text = QString::fromUtf8(yytext);
-      initializer += text;
+      s_initializer += text;
    }
 
  /*------ fortran subroutine/function handling --------- */
@@ -1228,7 +1228,7 @@ private                                 {
 
       if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
          addInterface("$interface$", ifType);
-         startScope(last_entry);
+         startScope(s_last_entry);
       }
 
       // TYPE_SPEC is for old function style function result
@@ -1259,7 +1259,7 @@ private                                 {
       v_type = V_IGNORE;
       if (ifType == IF_ABSTRACT || ifType == IF_SPECIFIC) {
          addInterface("$interface$", ifType);
-         startScope(last_entry);
+         startScope(s_last_entry);
       }
 
       result = text.trimmed();
@@ -1298,7 +1298,7 @@ private                                 {
       current->setData(EntryKey::Member_Args, tmpArgs);
 
       addCurrentEntry(1);
-      startScope(last_entry);
+      startScope(s_last_entry);
       BEGIN(SubprogBody);
    }
 
@@ -1330,7 +1330,7 @@ private                                 {
 <Parameterlist>{NOARGS}                {
       newLine();
       addCurrentEntry(1);
-      startScope(last_entry);
+      startScope(s_last_entry);
       BEGIN(SubprogBody);
    }
 
@@ -1401,7 +1401,7 @@ private                                 {
       if (v_type == V_VARIABLE) {
          QSharedPointer<Entry> tmp_entry = current;
 
-         current = last_entry;                // temporarily switch to the previous entry
+            current = s_last_entry;
          handleCommentBlock(docBlock, true);
          current = tmp_entry;
 
@@ -1564,7 +1564,7 @@ static void updateVariablePrepassComment(int from, int to) {
    CommentInPrepass *c = locatePrepassComment(from, to);
 
    if (c != nullptr && v_type == V_VARIABLE) {
-      last_entry->setData(EntryKey::Brief_Docs, c->str);
+      s_last_entry->setData(EntryKey::Brief_Docs, c->str);
 
    } else if (c != nullptr && v_type == V_PARAMETER) {
       Argument *parameter = getParameter(argName);
@@ -2622,7 +2622,7 @@ static int yyread(char *buf, int max_size)
 
 static void initParser()
 {
-   last_entry = QSharedPointer<Entry>();
+   s_last_entry = QSharedPointer<Entry>();
 }
 
 static void initEntry()
@@ -2651,7 +2651,7 @@ static void addCurrentEntry(int case_insens)
    }
 
    current_root->addSubEntry(current);
-   last_entry = current;
+   s_last_entry = current;
 
    current = QMakeShared<Entry>();
    initEntry();
@@ -2690,7 +2690,7 @@ static void addModule(const QString &name, bool isModule)
    current->protection    = Public;
 
    addCurrentEntry(1);
-   startScope(last_entry);
+   startScope(s_last_entry);
 }
 
 static void addSubprogram(const QString &text)
