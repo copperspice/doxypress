@@ -8500,23 +8500,23 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
 // find the documentation blocks for the enumerations
 void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
 {
-   if (ptrEntry->section == Entry::ENUMDOC_SEC && ! ptrEntry->m_entryName.isEmpty() && ptrEntry->m_entryName.at(0) != '@') {
+   if (ptrEntry->section == Entry::ENUMDOC_SEC && ! ptrEntry->m_entryName.isEmpty() && ! ptrEntry->m_entryName.startsWith('@')) {
       // skip anonymous enums
-      QSharedPointer<Entry> root = ptrEntry->entry();
 
-      int i;
       QString name;
       QString scope;
 
-      if ((i = root->m_entryName.lastIndexOf("::")) != -1) {
+      int i = ptrEntry->m_entryName.lastIndexOf("::");
+
+      if (i != -1) {
          // scope is specified as part of the name
 
-         name  = root->m_entryName.right(root->m_entryName.length() - i - 2); // extract name
-         scope = root->m_entryName.left(i); // extract scope
+         name  = ptrEntry->m_entryName.right(ptrEntry->m_entryName.length() - i - 2); // extract name
+         scope = ptrEntry->m_entryName.left(i); // extract scope
 
       } else {
          // just the name
-         name = root->m_entryName;
+         name = ptrEntry->m_entryName;
       }
 
       if (( ptrEntry->parent()->section & Entry::SCOPE_MASK ) && ! ptrEntry->parent()->m_entryName.isEmpty()) {
@@ -8548,29 +8548,31 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
                   if (cd && cd->name() == className && md->isEnumerate()) {
                      // documentation outside a compound overrides the documentation inside it
 
-                     md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
-                     md->setDocsForDefinition(! root->proto);
+                     md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File),
+                           ptrEntry->docLine);
+                     md->setDocsForDefinition(! ptrEntry->proto);
 
                      // brief descriptions inside a compound override the documentation outside it
-                     md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
+                     md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File),
+                           ptrEntry->briefLine);
 
                      if (md->inbodyDocumentation().isEmpty() || ! ptrEntry->parent()->m_entryName.isEmpty()) {
-                        md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File),
-                           root->inbodyLine);
+                        md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs),
+                           ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
                      }
 
-                     if (root->mGrpId != -1 && md->getMemberGroupId() == -1) {
-                        md->setMemberGroupId(root->mGrpId);
+                     if (ptrEntry->mGrpId != -1 && md->getMemberGroupId() == -1) {
+                        md->setMemberGroupId(ptrEntry->mGrpId);
                      }
 
-                     md->addSectionsToDefinition(root->m_anchors);
-                     md->setRefItems(root->m_specialLists);
+                     md->addSectionsToDefinition(ptrEntry->m_anchors);
+                     md->setRefItems(ptrEntry->m_specialLists);
 
                      QSharedPointer<GroupDef> gd = md->getGroupDef();
 
-                     if (gd == 0 && ! root->m_groups.isEmpty()) {
+                     if (gd == nullptr && ! ptrEntry->m_groups.isEmpty()) {
                         // member not grouped but out-of-line documentation is
-                        addMemberToGroups(root, md);
+                        addMemberToGroups(ptrEntry, md);
                      }
 
                      found = true;
@@ -8598,18 +8600,18 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
                   }
 
                   if (md->isEnumerate()) {
-                     md->setDocsForDefinition(! root->proto);
-                     md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
-                     md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-                     md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
-                     md->addSectionsToDefinition(root->m_anchors);
-                     md->setMemberGroupId(root->mGrpId);
+                     md->setDocsForDefinition(! ptrEntry->proto);
+                     md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
+                     md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
+                     md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs), ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
+                     md->addSectionsToDefinition(ptrEntry->m_anchors);
+                     md->setMemberGroupId(ptrEntry->mGrpId);
 
                      QSharedPointer<GroupDef> gd = md->getGroupDef();
 
-                     if (gd == 0 && ! root->m_groups.isEmpty()) {
+                     if (gd == nullptr && ! ptrEntry->m_groups.isEmpty()) {
                          // member not grouped but out-of-line documentation is
-                        addMemberToGroups(root, md);
+                        addMemberToGroups(ptrEntry, md);
                      }
 
                      found = true;
