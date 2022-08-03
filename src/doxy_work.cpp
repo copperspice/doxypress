@@ -34,6 +34,7 @@
 #include <docparser.h>
 #include <docsets.h>
 #include <dot.h>
+#include <doxy_build_info.h>
 #include <doxy_globals.h>
 #include <doxy_setup.h>
 #include <eclipsehelp.h>
@@ -10607,8 +10608,8 @@ void Doxy_Work::writeTagFile()
    }
 
    QTextStream tagFile(&tag);
-   tagFile << "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>" << endl;
-   tagFile << "<tagfile>" << endl;
+   tagFile << "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>\n";
+   tagFile << "<tagfile doxypress_version=\"" << versionString << "\">\n";
 
    // for each file
    for (auto &fn : Doxy_Globals::inputNameList) {
