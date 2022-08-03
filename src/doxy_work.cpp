@@ -8543,9 +8543,9 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
                      break;
                   }
 
-                  QSharedPointer<ClassDef> cd = md->getClassDef();
+                  QSharedPointer<ClassDef> memberCd = md->getClassDef();
 
-                  if (cd && cd->name() == className && md->isEnumerate()) {
+                  if (memberCd != nullptr && memberCd->name() == className && md->isEnumerate()) {
                      // documentation outside a compound overrides the documentation inside it
 
                      md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File),
