@@ -5156,6 +5156,9 @@ void Doxy_Work::transferFunctionReferences()
          } else if (md->isVariable() && !md->isExternal() && !md->isStatic()) {
             mdef = md;
          }
+         if (mdef != nullptr && mdec != nullptr) {
+            break;
+         }
       }
 
       if (mdef && mdec) {
