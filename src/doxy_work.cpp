@@ -7812,55 +7812,57 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
       } else if (ptrEntry->parent() && ptrEntry->parent()->section == Entry::OBJCIMPL_SEC) {
 
 localObjCMethod:
+         static const bool extractLocalMethods = Config::getBool("extract-local-methods");
 
-         QSharedPointer<ClassDef> cd;
+         QSharedPointer<ClassDef> objc_cd;
 
-         if (Config::getBool("extract-local-methods") && (cd = getClass(scopeName))) {
+         if (extractLocalMethods && (objc_cd = getClass(scopeName))) {
             Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [11]  method %s"
-                         "   scopeName= %s   className= %s\n", csPrintable(root->m_entryName),
+                         "   scopeName= %s   className= %s\n", csPrintable(ptrEntry->m_entryName),
                          csPrintable(scopeName), csPrintable(className));
 
-            QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine,
-               root->startColumn, funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat,
-               Relationship::Member, MemberDefType::Function, ArgumentList(), root->argList);
+            QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(ptrEntry->getData(EntryKey::File_Name),
+               ptrEntry->startLine, ptrEntry->startColumn, funcType, funcName, funcArgs, exceptions,
+               ptrEntry->protection, ptrEntry->virt, ptrEntry->stat, Relationship::Member,
+               MemberDefType::Function, ArgumentList(), ptrEntry->argList);
 
             md->setTagInfo(ptrEntry->m_tagInfo);
-            md->setLanguage(root->m_srcLang);
-            md->setId(root->getData(EntryKey::Clang_Id));
+            md->setLanguage(ptrEntry->m_srcLang);
+            md->setId(ptrEntry->getData(EntryKey::Clang_Id));
             md->makeImplementationDetail();
-            md->setMemberClass(cd);
+            md->setMemberClass(objc_cd);
             md->setDefinition(funcDecl);
-            md->enableCallGraph(root->callGraph);
-            md->enableCallerGraph(root->callerGraph);
-            md->enableReferencedByRelation(root->referencedByRelation);
-            md->enableReferencesRelation(root->referencesRelation);
+            md->enableCallGraph(ptrEntry->callGraph);
+            md->enableCallerGraph(ptrEntry->callerGraph);
+            md->enableReferencedByRelation(ptrEntry->referencedByRelation);
+            md->enableReferencesRelation(ptrEntry->referencesRelation);
 
-            md->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
-            md->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-            md->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs), root->getData(EntryKey::Inbody_File), root->inbodyLine);
-            md->setDocsForDefinition(!root->proto);
-            md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
-            md->addSectionsToDefinition(root->m_anchors);
-            md->setBodySegment(root->startBodyLine, root->endBodyLine);
+            md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
+            md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
+            md->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs), ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
+            md->setDocsForDefinition(! ptrEntry->proto);
+            md->setPrototype(ptrEntry->proto, ptrEntry->getData(EntryKey::File_Name), ptrEntry->startLine, ptrEntry->startColumn);
+            md->addSectionsToDefinition(ptrEntry->m_anchors);
+            md->setBodySegment(ptrEntry->startBodyLine, ptrEntry->endBodyLine);
 
             QSharedPointer<FileDef> fd = ptrEntry->fileDef();
             md->setBodyDef(fd);
-            md->setMemberTraits(root->m_traits);
-            md->setMemberGroupId(root->mGrpId);
-            cd->insertMember(md);
-            cd->insertUsedFile(fd);
-            md->setRefItems(root->m_specialLists);
+            md->setMemberTraits(ptrEntry->m_traits);
+            md->setMemberGroupId(ptrEntry->mGrpId);
+            objc_cd->insertMember(md);
+            objc_cd->insertUsedFile(fd);
+            md->setRefItems(ptrEntry->m_specialLists);
 
-            mn = Doxy_Globals::memberNameSDict.find(root->m_entryName);
+            mn = Doxy_Globals::memberNameSDict.find(ptrEntry->m_entryName);
 
             if (mn) {
                mn->append(md);
 
             } else {
-               mn = QMakeShared<MemberName>(root->m_entryName);
+               mn = QMakeShared<MemberName>(ptrEntry->m_entryName);
                mn->append(md);
 
-               Doxy_Globals::memberNameSDict.insert(root->m_entryName, mn);
+               Doxy_Globals::memberNameSDict.insert(ptrEntry->m_entryName, mn);
             }
 
          } else {
