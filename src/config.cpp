@@ -1073,6 +1073,10 @@ QStringList Config::getFilePatterns()
    list.append("*.for");
    list.append("*.f");
    list.append("*.f90");
+   list.append("*.f95");
+   list.append("*.f03");
+   list.append("*.f08");
+   list.append("*.f18");
    list.append("*.h");
    list.append("*.hh");
    list.append("*.hxx");

@@ -622,6 +622,7 @@ void initDefaultLangMapping()
    updateLanguageMapping(".f95",      "fortran");
    updateLanguageMapping(".f03",      "fortran");
    updateLanguageMapping(".f08",      "fortran");
+   updateLanguageMapping(".f18",      "fortran");
    updateLanguageMapping(".tcl",      "tcl");
    updateLanguageMapping(".md",       "md");
    updateLanguageMapping(".markdown", "md");
