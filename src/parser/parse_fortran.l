@@ -205,6 +205,7 @@ static QString extractBind(const QString &name);
 static CommentInPrepass *locatePrepassComment(int from, int to);
 static void updateVariablePrepassComment(int from, int to);
 static void newLine();
+static void initEntry();
 
 #undef   YY_INPUT
 #define  YY_INPUT(buf, result, max_size) result = yyread(buf, max_size);
@@ -2624,7 +2625,7 @@ static void initParser()
    s_last_entry = QSharedPointer<Entry>();
 }
 
-static void initEntry()
+void initEntry()
 {
    if (typeMode) {
       current->protection = typeProtection;
