@@ -183,7 +183,7 @@ static void handleCommentBlock(const QString &doc, bool brief);
 static void subrHandleCommentBlock(const QString &doc, bool brief);
 static void subrHandleCommentBlockResult(const QString &doc, bool brief);
 static void addCurrentEntry(int case_insens);
-static void addModule(const QString &name, bool isModule = false);
+static void addModule(const QString &name = QString(), bool isModule = false);
 static void addSubprogram(const QString &text);
 static void addInterface(const QString &name, InterfaceType type);
 
@@ -444,7 +444,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
 <Start,ModuleBody,SubprogBody>"use"{BS_} {
       if(YY_START == Start) {
-         addModule(QString());
+         addModule();
          yy_push_state(ModuleBody); //anon program
       }
       yy_push_state(Use);
@@ -581,7 +581,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
  /*-- Contains handling ---------------------------------*/
 <Start>^{BS}{CONTAINS}/({BS}|\n|!)      {
       if (YY_START == Start) {
-         addModule(QString());
+         addModule();
          yy_push_state(ModuleBodyContains);       //anon program
       }
    }
@@ -674,7 +674,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
 <Start,ModuleBody>^{BS}type/[^a-z0-9_]   {
       if(YY_START == Start) {
-         addModule(QString());
+         addModule();
          yy_push_state(ModuleBody); //anon program
       }
 
@@ -871,8 +871,8 @@ private                                 {
 
       /* variable declaration starts */
       if(YY_START == Start) {
-         addModule(QString());
          yy_push_state(ModuleBody); //anon program
+         addModule();
       }
 
       argType = text.simplified().toLower();
@@ -884,7 +884,7 @@ private                                 {
       QString text = QString::fromUtf8(yytext);
 
       if(YY_START == Start) {
-         addModule(QString());
+         addModule();
          yy_push_state(ModuleBody);    // anon program
       }
 
@@ -2723,7 +2723,7 @@ static void addSubprogram(const QString &text)
 static void addInterface(const QString &name, InterfaceType type)
 {
    if (YY_START == Start) {
-     addModule(QString());
+     addModule();
      yy_push_state(ModuleBody);             // anon program
    }
 
