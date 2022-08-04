@@ -182,7 +182,7 @@ static void startCommentBlock(bool);
 static void handleCommentBlock(const QString &doc, bool brief);
 static void subrHandleCommentBlock(const QString &doc, bool brief);
 static void subrHandleCommentBlockResult(const QString &doc, bool brief);
-static void addCurrentEntry(int case_insens);
+static void addCurrentEntry(bool caseInsensitive);
 static void addModule(const QString &name = QString(), bool isModule = false);
 static void addSubprogram(const QString &text);
 static void addInterface(const QString &name, InterfaceType type);
@@ -566,7 +566,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
       current->section     = Entry::FUNCTION_SEC ;
       current->m_entryName = text;
       moduleProcedures.append(current);
-      addCurrentEntry(1);
+      addCurrentEntry(true);
    }
 
 <ModuleProcedure>"\n"                   {
@@ -737,7 +737,7 @@ private                                 {
          current->m_entryName = current_root->m_entryName + "::" + current->m_entryName;
       }
 
-      addCurrentEntry(1);
+      addCurrentEntry(true);
       startScope(s_last_entry);
       BEGIN(TypedefBody);
    }
@@ -782,7 +782,7 @@ private                                 {
       current->startBodyLine = yyLineNr;
       current->startLine     = yyLineNr;
 
-      addCurrentEntry(1);
+      addCurrentEntry(true);
    }
 
 {BS}"=>"[^(\n|\!)]*                     {
@@ -998,7 +998,7 @@ private                                 {
          current->startBodyLine = yyLineNr;                  // used for source reference
          current->startLine     = yyLineNr;
 
-         addCurrentEntry(1);
+            addCurrentEntry(true);
 
       } else if (! argType.isEmpty()) {
          // declaration of parameter list: add type for corr. parameter
@@ -1296,7 +1296,7 @@ private                                 {
       tmpArgs = removeRedundantWhiteSpace(tmpArgs);
       current->setData(EntryKey::Member_Args, tmpArgs);
 
-      addCurrentEntry(1);
+      addCurrentEntry(true);
       startScope(s_last_entry);
       BEGIN(SubprogBody);
    }
@@ -1328,7 +1328,7 @@ private                                 {
 
 <Parameterlist>{NOARGS}                {
       newLine();
-      addCurrentEntry(1);
+      addCurrentEntry(true);
       startScope(s_last_entry);
       BEGIN(SubprogBody);
    }
@@ -2643,9 +2643,9 @@ static void initEntry()
 /**
   adds current entry to current_root and creates new current
 */
-static void addCurrentEntry(int case_insens)
+static void addCurrentEntry(bool caseInsensitive)
 {
-   if (case_insens) {
+   if (caseInsensitive) {
       current->m_entryName = current->m_entryName.toLower();
    }
 
@@ -2688,7 +2688,7 @@ static void addModule(const QString &name, bool isModule)
    current->startLine     = yyLineNr;
    current->protection    = Public;
 
-   addCurrentEntry(1);
+   addCurrentEntry(true);
    startScope(s_last_entry);
 }
 
@@ -2758,7 +2758,7 @@ static void addInterface(const QString &name, InterfaceType type)
    current->startBodyLine = yyLineNr;
    current->startLine     = yyLineNr;
 
-   addCurrentEntry(1);
+   addCurrentEntry(true);
 }
 
 
@@ -2811,13 +2811,13 @@ static void handleCommentBlock(const QString &doc, bool brief)
          docBlockInBody, defaultProtection, position, needsEntry)) {
 
       if (needsEntry) {
-         addCurrentEntry(0);
+         addCurrentEntry(false);
       }
    }
 
 
    if (needsEntry) {
-      addCurrentEntry(0);
+      addCurrentEntry(false);
    }
 
    docBlockInBody = false;
