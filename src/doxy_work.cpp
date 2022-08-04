@@ -3229,33 +3229,27 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
                      QSharedPointer<MemberDef> md = mi.memberDef;
 
                      if (md && md->protection() != Private) {
+                        QString fileName = ptrEntry->getData(EntryKey::File_Name);
 
-                        QSharedPointer<Entry>root = ptrEntry->entry();
-                        QSharedPointer<MemberDef> newMd;
-
-                        {
-                           QString fileName = root->getData(EntryKey::File_Name);
-
-                           if (fileName.isEmpty() && ! ptrEntry->m_tagInfo.isEmpty()) {
-                              fileName = ptrEntry->m_tagInfo.tag_Name;
-                           }
-
-                           const ArgumentList &templateArgList = md->getTemplateArgumentList();
-                           const ArgumentList &arglist = md->getArgumentList();
-
-                           newMd = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn, md->typeString(),
-                              memName, md->argsString(), md->excpString(), root->protection, root->virt, md->isStatic(),
-                              Relationship::Member, md->memberType(), templateArgList, arglist);
+                        if (fileName.isEmpty() && ! ptrEntry->m_tagInfo.isEmpty()) {
+                           fileName = ptrEntry->m_tagInfo.tag_Name;
                         }
+
+                        const ArgumentList &templateArgList = md->getTemplateArgumentList();
+                        const ArgumentList &arglist = md->getArgumentList();
+
+                        QSharedPointer<MemberDef> newMd = QMakeShared<MemberDef>(fileName, ptrEntry->startLine, ptrEntry->startColumn, md->typeString(),
+                           memName, md->argsString(), md->excpString(), ptrEntry->protection, ptrEntry->virt, md->isStatic(),
+                           Relationship::Member, md->memberType(), templateArgList, arglist);
 
                         newMd->setMemberClass(cd);
                         cd->insertMember(newMd);
 
-                        if (! root->getData(EntryKey::Main_Docs).isEmpty() || ! root->getData(EntryKey::Brief_Docs).isEmpty()) {
-                           newMd->setDocumentation(root->getData(EntryKey::Main_Docs), root->getData(EntryKey::MainDocs_File), root->docLine);
-                           newMd->setBriefDescription(root->getData(EntryKey::Brief_Docs), root->getData(EntryKey::Brief_File), root->briefLine);
-                           newMd->setInbodyDocumentation(root->getData(EntryKey::Inbody_Docs),
-                                    root->getData(EntryKey::Inbody_File), root->inbodyLine);
+                        if (! ptrEntry->getData(EntryKey::Main_Docs).isEmpty() || ! ptrEntry->getData(EntryKey::Brief_Docs).isEmpty()) {
+                           newMd->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
+                           newMd->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
+                           newMd->setInbodyDocumentation(ptrEntry->getData(EntryKey::Inbody_Docs),
+                                    ptrEntry->getData(EntryKey::Inbody_File), ptrEntry->inbodyLine);
 
                         } else {
                            newMd->setDocumentation(md->documentation(), md->docFile(), md->docLine());
@@ -3265,21 +3259,21 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
 
                         newMd->setUsingDeclaration(true);
                         newMd->setDefinition(md->definition());
-                        newMd->enableCallGraph(root->callGraph);
-                        newMd->enableCallerGraph(root->callerGraph);
-                        newMd->enableReferencedByRelation(root->referencedByRelation);
-                        newMd->enableReferencesRelation(root->referencesRelation);
+                        newMd->enableCallGraph(ptrEntry->callGraph);
+                        newMd->enableCallerGraph(ptrEntry->callerGraph);
+                        newMd->enableReferencedByRelation(ptrEntry->referencedByRelation);
+                        newMd->enableReferencesRelation(ptrEntry->referencesRelation);
 
                         newMd->setBitfields(md->bitfieldString());
-                        newMd->addSectionsToDefinition(root->m_anchors);
+                        newMd->addSectionsToDefinition(ptrEntry->m_anchors);
                         newMd->setBodySegment(md->getStartBodyLine(), md->getEndBodyLine());
                         newMd->setBodyDef(md->getBodyDef());
                         newMd->setInitializer(md->initializer());
                         newMd->setMaxInitLines(md->initializerLines());
-                        newMd->setMemberGroupId(root->mGrpId);
+                        newMd->setMemberGroupId(ptrEntry->mGrpId);
                         newMd->setMemberTraits(md->getMemberTraits());
-                        newMd->setLanguage(root->m_srcLang);
-                        newMd->setId(root->getData(EntryKey::Clang_Id));
+                        newMd->setLanguage(ptrEntry->m_srcLang);
+                        newMd->setId(ptrEntry->getData(EntryKey::Clang_Id));
                      }
                   }
                }
