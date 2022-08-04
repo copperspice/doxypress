@@ -454,9 +454,8 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 <Use>{ID}                               {
       QString text = QString::fromUtf8(yytext);
 
-      current->m_entryName = text;
       current->section     = Entry::USINGDIR_SEC;
-
+      current->m_entryName = text.toLower();
       current->setData(EntryKey::File_Name, yyFileName);
 
       current_root->addSubEntry(current);
@@ -481,9 +480,8 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 <UseOnly>{ID}                           {
       QString text = QString::fromUtf8(yytext);
 
-      current->m_entryName = useModuleName + "::" + text;
       current->section     = Entry::USINGDECL_SEC;
-
+      current->m_entryName = (useModuleName + "::" + text).toLower();
       current->setData(EntryKey::File_Name, yyFileName);
 
       current_root->addSubEntry(current);
@@ -945,7 +943,7 @@ private                                 {
       QString text = QString::fromUtf8(yytext);
       QChar chr    = text[text.length() - 1];
 
-      if (chr.isLetter() || chr.isDigit() || (chr == '_')) {
+      if (isId(chr)) {
          yyColNr -= yyleng;
          REJECT;
 
