@@ -72,12 +72,9 @@ class Compare
 class Scope
 {
  public:
-   Scope()
-   {
-   }
-
    QStringList useNames;                      // names of used modules
    std::set<QString, Compare> localVars;      // names of local variables
+   std::set<QString, Compare> externalVars;   // names of external variables
 };
 
 static const int fixedCommentAfter = 72;
@@ -108,6 +105,7 @@ static bool         s_needsTermination;
 
 static bool         s_collectXRefs;
 static bool         s_isFixedForm;
+static bool         s_isExternal;
 
 static bool         s_insideBody;                 // inside subprog/program body? => create links
 static QString      s_currentFontClass;
@@ -359,17 +357,18 @@ static bool getFortranTypeDefs(const QString &tname, const QString &moduleName,
   @param usedict array of data of USE-statement
   @returns true, if found
 */
-static bool getFortranDefs(const QString &memberName, const QString &moduleName,
-                  QSharedPointer<MemberDef> &md, UseSDict *usedict = nullptr)
+static QSharedPointer<MemberDef> getFortranDefs(const QString &memberName, const QString &moduleName, UseSDict *usedict = nullptr)
 {
    if (memberName.isEmpty()) {
-      return false;
+      return QSharedPointer<MemberDef>();
    }
 
    // look in local variables
    for (auto scope : s_scopeStack) {
-      if (scope->localVars.count(memberName) != 0) {
-         return false;
+      QString lowerMemberName = memberName.toLower();
+
+      if ((scope->localVars.count(memberName) != 0) && (scope->externalVars.count(lowerMemberName) == 0)) {
+         return QSharedPointer<MemberDef>();
       }
    }
 
@@ -397,33 +396,31 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
 
                if (cd == nullptr) {
                   // skip if bound to type
-                  return true;
+                  return md;
                }
 
             } else if (moduleName == nspace->name()) {
                // found in local scope
-               return true;
+               return md;
 
             } else  {
                // else search in used modules
-
                QString usedModuleName = nspace->name();
                UseEntry *ue = usedict->find(usedModuleName);
 
                if (ue != nullptr)  {
                   // check if only-list exists and if current entry exists is this list
-
                   QStringList &only = ue->onlyNames;
 
                   if (only.isEmpty()) {
-                     return true; // whole module used
+                     // whole module used
+                     return md;
 
                   } else {
-
-                     for (auto it = only.begin(); it != only.end(); ++it) {
-
-                        if (memberName == (*it)) {
-                           return true; // found in ONLY-part of use list
+                     for ( const auto &item : only) {
+                        if (memberName == item) {
+                           // found in ONLY-part of use list
+                           return md;
                         }
                      }
                   }
@@ -433,7 +430,7 @@ static bool getFortranDefs(const QString &memberName, const QString &moduleName,
       }
    }
 
-   return false;
+   return QSharedPointer<MemberDef>();
 }
 
 /**
@@ -452,10 +449,11 @@ static bool getGenericProcedureLink(const QSharedPointer<ClassDef> cd,
 
 static bool getLink(UseSDict *usedict, const QString &memberText, CodeGenerator &ol, const QString &text)
 {
-   QSharedPointer<MemberDef> md;
-   QString memberName = removeRedundantWhiteSpace(memberText);
 
-   if (getFortranDefs(memberName, currentModule, md, usedict) && md->isLinkable())  {
+   QString memberName = removeRedundantWhiteSpace(memberText);
+   QSharedPointer<MemberDef> md = getFortranDefs(memberName, currentModule, usedict);
+
+   if (md != nullptr && md->isLinkable())  {
 
       if (md->isVariable() && (md->getLanguage() != SrcLangExt_Fortran)) {
          // non Fortran variables are not handled at this time
@@ -593,7 +591,12 @@ static void addUse(const QString &moduleName)
 static void addLocalVar(const QString &varName)
 {
    if (! s_scopeStack.isEmpty()) {
-      s_scopeStack.last()->localVars.insert(varName);
+      QString lowerMemberName = varName.toLower();
+      s_scopeStack.last()->localVars.insert(lowerMemberName);
+
+      if (s_isExternal) {
+         s_scopeStack.last()->externalVars.insert(lowerMemberName);
+      }
    }
 }
 
@@ -1029,6 +1032,12 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 
 <Start>{ATTR_SPEC}                     {
       QString text = QString::fromUtf8(yytext);
+      if (text == "external") {
+        yy_push_state(YY_START);
+        BEGIN(Declaration);
+
+        s_isExternal = true;
+      }
       startFontClass("keywordtype");
       s_code->codify(text);
       endFontClass();
@@ -1037,6 +1046,10 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 <Declaration>({TYPE_SPEC}|{ATTR_SPEC})/[,:( ] {
       // variable declaration
       QString text = QString::fromUtf8(yytext);
+
+      if (text == "external") {
+         s_isExternal = true;
+      }
 
       startFontClass("keywordtype");
       s_code->codify(text);
@@ -1137,6 +1150,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       s_contLineNr++;
 
       if (! (! s_hasContLine.empty() && s_hasContLine[s_contLineNr - 1])) {
+         s_isExternal = false;
          yy_pop_state();
       }
       YY_FTN_RESET
