@@ -749,7 +749,8 @@ static void writeDefaultHeaderPart1(QTextStream &t_stream)
    // End of preamble, now comes the document contents
    t_stream << "%===== C O N T E N T S =====\n"
      "\n"
-     "\\begin{document}\n";
+     "\\begin{document}\n"
+     "\\raggedbottom\n";
 
    // set to the indicated language
    if (! outputLanguage.isEmpty() && outputLanguage != "english") {
