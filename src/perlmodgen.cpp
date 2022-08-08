@@ -2037,10 +2037,10 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
    if (md->memberType() == MemberDefType::Enumeration) {
       QSharedPointer<MemberList> enumFields = md->enumFieldList();
 
-      if (enumFields) {
+      if (enumFields != nullptr) {
          m_output.openList("values");
 
-         for (auto emd : *enumFields) {
+         for (const auto &emd : *enumFields) {
             m_output.openHash().addFieldQuotedString("name", emd->name());
 
             if (! emd->initializer().isEmpty()) {
@@ -2057,6 +2057,15 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       }
    }
 
+   if (md->memberType() == MemberDefType::Variable && ! md->bitfieldString().isEmpty()) {
+      QString bitfield = md->bitfieldString();
+
+      if (bitfield.startsWith(":")) {
+         bitfield = bitfield.mid(1);
+      }
+
+      m_output.addFieldQuotedString("bitfield", bitfield);
+   }
    QSharedPointer<MemberDef> rmd = md->reimplements();
 
    if (rmd) {
@@ -2065,10 +2074,10 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
 
    QSharedPointer<MemberList> rbml = md->reimplementedBy();
 
-   if (rbml) {
+   if (rbml != nullptr) {
       m_output.openList("reimplemented_by");
 
-      for (auto itemRmd : *rbml) {
+      for (const auto &itemRmd : *rbml) {
          m_output.openHash().addFieldQuotedString("name", itemRmd->name()).closeHash();
       }
 
@@ -2165,10 +2174,10 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 
    m_output.addFieldQuotedString("kind", cd->compoundTypeString());
 
-   if (cd->baseClasses()) {
+   if (cd->baseClasses() != nullptr) {
       m_output.openList("base");
 
-      for (auto bcd : *cd->baseClasses()) {
+      for (const auto &bcd : *cd->baseClasses()) {
          m_output.openHash()
          .addFieldQuotedString("name", bcd->classDef->displayName())
          .addFieldQuotedString("virtualness", getVirtualnessName(bcd->virt))
