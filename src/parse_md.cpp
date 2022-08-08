@@ -3717,9 +3717,22 @@ void MarkdownFileParser::parseInput(const QString &fileName, const QString &file
          docs.prepend(QString(prefix, '\n'));
          break;
 
-      case PageCommand::explicitPage:
-         break;
+      case PageCommand::explicitPage: {
+         // look for `@page label My Title\n` and capture `label` (match[1]) and ` My Title` (match[2])
 
+         static const QRegularExpression regexp(R"([\\@]page\s+(\a[\w-]*)(\s*[^\n]*)\n)");
+         QRegularExpressionMatch match = regexp.match(docs);
+
+         if (match.hasMatch()) {
+            QString orgLabel = match.captured(1);
+            QString newLabel = markdownFileNameToId(fileName);
+
+            docs = QString(docs.begin(), match.capturedStart(1)) + newLabel +
+               match.captured(2) + "\\internal_linebr @anchor " + orgLabel + "\n" +
+               QString(match.capturedEnd(2), docs.end());
+         }
+      }
+      break;
 
       case PageCommand::explicitMainPage:
          break;
