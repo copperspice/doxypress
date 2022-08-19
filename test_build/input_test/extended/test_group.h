@@ -22,6 +22,7 @@
   * The following notation will translate 'code' to behave like it says <code>true</code>
 */
 
+
 class test_Group1
 {
    public:
@@ -52,13 +53,13 @@ class test_Group2
 {
    public:
    //! This is a comment applied to each member of the group
-   //@{
+   ///@{
    int groupA()
       { return 35; }
 
    int groupB()
       { return 42; }
-   //@}
+   ///@}
 
 }
 

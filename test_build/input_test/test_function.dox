@@ -1,0 +1,33 @@
+/************************************************************************
+*
+* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+*
+* DoxyPress is free software: you can redistribute it and/or
+* modify it under the terms of the GNU General Public License version 2
+* as published by the Free Software Foundation.
+*
+* DoxyPress is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*
+* Documents produced by DoxyPress are derivative works derived from the
+* input used in their production; they are not affected by this license.
+*
+*************************************************************************/
+
+/**
+\page function-test Global Funtion Test
+
+This test a global function and a template function, both have the same name.
+
+*/
+
+
+/**
+\fn void global_A (  )
+\brief .
+
+Documentation for this global function is located in the dox file. The brief docs for the header file
+are located in the h file.
+
+*/

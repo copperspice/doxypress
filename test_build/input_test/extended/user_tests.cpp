@@ -15,6 +15,8 @@
 *
 *************************************************************************/
 
+#include "user_tests.h"
+
 testTypeDef::myTypeDef testTypeDef::someMethod()
 {
    /// empty method is ok, does this cause a return type mismatch?
@@ -22,7 +24,7 @@ testTypeDef::myTypeDef testTypeDef::someMethod()
 
 
 /**
-Documenting class TagTest.
+Documenting class test_Tag.
 
 \if MY_TAG
 This text should not appear in the output since MY_TAG would need to be true, and it is not set.  BAD
@@ -31,7 +33,7 @@ This text should not appear in the output since MY_TAG would need to be true, an
 This text will appear in the output since MY_TAG is false.  ( GOOD, this should show up in the output )
 \endif
 */
-class TagTest
+class test_Tag
 {
 };
 

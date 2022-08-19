@@ -98,11 +98,9 @@ Removes all items from the map.
 */
 
 
-
 /**
 \fn bool QMap::contains ( const Key & key ) const
 
-Returns true if the map contains an item with key \a key, otherwise it returns false.
+Returns true if the map contains an item with the given \a key, otherwise it returns false.
 
 */
-

@@ -41,7 +41,7 @@ class test_Enum
       allspice,
       cinnamon,
       ginger,
-      red_pepper,     ///< using New Mexico red peppers gives a better flavor
+      red_pepper,     ///< Using New Mexico red peppers gives a better flavor
       thyme
    };
 
@@ -62,12 +62,27 @@ class test_Enum
  */
 
 
-/*! \var test_Enum::CajunSpices  test_Enum::CajunSpices::thyme
- * use dried thyme
+/*! \var test_Enum::CajunSpices  test_Enum::thyme
+ * Use dried thyme
  */
 
 
 /*! \var test_Enum::MoroccanSpices  test_Enum::MoroccanSpices::thyme
- * use French thyme if available
+ * Use French thyme if available
  */
 
+
+/*! \var test_Enum::MoroccanSpices  test_Enum::MoroccanSpices::thyme
+ * MORE Docs for Thyme
+ */
+
+
+
+/*! \var test_Enum::MoroccanSpices  thyme
+ * Use French thyme - Syntax not allow (A)
+ */
+
+
+/*! \var test_Enum  thyme
+ * Use French thyme - Syntax not allow (B)
+ */

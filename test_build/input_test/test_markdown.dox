@@ -17,8 +17,8 @@
 
 /**
 \page markdown Markdown Test
-
-This page contains samples of how DoxyPress handles Markdown. To view syntax the elements open the <tt>test_markdown.dox</tt> file.
+ This page contains samples of how DoxyPress handles Markdown. To view the syntax for these elements open the
+<tt>test_markdown.dox</tt> file.
 
 
 <div class="md">Block Quotes Examples</div>
@@ -54,6 +54,7 @@ This is a level 2 header
 
    1. Apples - Green apples are nice for cooking. You can uses apples in a pie or simply cook them with a bit of brown sugar
 and raisins. Red apples are good for eating but they are too soft for cooking.
+      1. More information about apples.
 
    2. Peaches - Excellent for pies and cobblers. A great topping for cooked peaches is a mixture of flour, white and brown sugar,
 butter, and a good amount of vanilla.
@@ -93,20 +94,19 @@ ______
 
 <div class="md">Inline Links</div>
 
-   [Link text A](https://www.copperspice.com/)
+   [Link to CopperSpice](https://www.copperspice.com/)
 
-   [Link text B](https://www.copperspice.com/ "Hover Link Title B")
+   [Link to CopperSpice with Hover Link](https://www.copperspice.com/ "Hover Link")
 
-   [Link text C](/relative/path/to/index.html "Hover Link Title C")
-
-   [Link text D](somefile.html)
+   [Link to relative page with hover](/relative/path/to/index.html "Hover Link, relatvie page")
 
 
+<div class="md">Reference Link</div>
 
-   [link name E]: https://www.copperspice.com "Optional Title"
+   [Reference link to CS Journal][1]
 
-   [Link text E][link name E]
-
+   [link name cs]: https://www.copperspice.com "Text here for hoever"
+   [Link to CopperSpice, using reference][link name cs]
 
 
 <div class="md">Fenced Code Blocks</div>
@@ -119,6 +119,10 @@ ______
 
 
 <br>
+
+
+[1]: https://journal.copperspice.com
+
 
 */
 
