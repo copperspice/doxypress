@@ -6449,7 +6449,53 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
 
       for (const auto &md : *memberName) {
          QSharedPointer<NamespaceDef> nd = md->getNamespaceDef();
-         QSharedPointer<FileDef> fd      = ptrEntry->fileDef();
+
+         // special case for strong enums
+         int enumNamePos = 0;
+
+         if (nd != nullptr && md->isEnumValue() && (enumNamePos = namespaceName.lastIndexOf("::")) != -1) {
+            // md part of a strong enum in a namespace
+
+            QString enumName = namespaceName.mid(enumNamePos + 2);
+
+            if (namespaceName.left(enumNamePos) == nd->name())  {
+               QSharedPointer<MemberName> enumMn = Doxy_Globals::functionNameSDict.find(enumName);
+
+               if (enumMn) {
+                  for (const auto &emd : *enumMn) {
+                     found = emd->isStrong() && md->getEnumScope() == emd;
+
+                     if (found) {
+                        ArgumentList tmpArgList;
+                        addMemberDocs(ptrEntry, md, decl, tmpArgList, false);
+                        break;
+                     }
+                  }
+               }
+            }
+
+            if (found) {
+               break;
+            }
+
+         } else if (nd == nullptr && md->isEnumValue()) {
+            // md part of global strong enum?
+            QSharedPointer<MemberName> enumMn = Doxy_Globals::functionNameSDict.find(namespaceName);
+
+            if (enumMn) {
+               for (const auto &emd : *enumMn) {
+                  found = emd->isStrong() && md->getEnumScope() == emd;
+
+                  if (found) {
+                     ArgumentList tmpArgList;
+                     addMemberDocs(ptrEntry, md, decl, tmpArgList, false);
+                     break;
+                  }
+               }
+            }
+         }
+
+         QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
          const NamespaceSDict *nl = fd ? fd->getUsedNamespaces() : nullptr;
 
@@ -6996,6 +7042,29 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
    if (! funcName.isEmpty()) {
       // function name is valid
 
+      // check if 'className' is actually a scoped enum, process as a global
+      bool strongEnum = false;
+
+      QSharedPointer<MemberName> tmpMn;
+
+      if (! className.isEmpty() && (tmpMn = Doxy_Globals::functionNameSDict.find(className))) {
+
+         for (const auto &md : *tmpMn) {
+
+            if (md != nullptr && md->isEnumerate() && md->isStrong()) {
+               strongEnum = true;
+
+               // pass the scope name as a 'namespace' to findGlobalMember()
+               if (! namespaceName.isEmpty()) {
+                  namespaceName += "::" + className;
+
+               } else {
+                  namespaceName = className;
+               }
+            }
+         }
+      }
+
       if (funcName.startsWith("operator ")) {
          // strip class scope from cast operator
          funcName = substitute(funcName, className + "::", "");
@@ -7011,7 +7080,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
          mn = Doxy_Globals::memberNameSDict.find(funcName);
       }
 
-      if (! isRelated && mn != nullptr) {
+      if (! isRelated && ! strongEnum && mn != nullptr) {
          // function name already found
 
          Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [2] member name exists "
@@ -7040,28 +7109,61 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                for (auto md : *mn) {
 
+                  QSharedPointer<ClassDef> memberCd  = md->getClassDef();
+
+                  // if the member we are searching for is an enum value which is part of
+                  // a "strong" enum, we need to look into the fields of the enum for a match
+                  int enumNamePos = 0;
+
+                  if (md->isEnumValue() && (enumNamePos = className.lastIndexOf("::")) != -1) {
+                     QString enumName  = className.mid(enumNamePos + 2);
+                     QString fullScope = className.left(enumNamePos);
+
+                     if (! namespaceName.isEmpty()) {
+                        fullScope.prepend(namespaceName + "::");
+                     }
+
+                     if (fullScope == memberCd->name()) {
+                        QSharedPointer<MemberName> enumMn = Doxy_Globals::memberNameSDict.find(enumName);
+
+                        if (enumMn != nullptr) {
+
+                           for (const auto &emd : *enumMn) {
+                              memFound = emd->isStrong() && md->getEnumScope() == emd;
+
+                              if (memFound) {
+                                 ArgumentList tmpArgList;
+                                 addMemberDocs(ptrEntry, md, funcDecl, tmpArgList, overloaded);
+                                 ++count;
+
+                                 break;
+                              }
+                           }
+                        }
+                     }
+                  }
+
                   if (memFound) {
                      break;
                   }
 
-                  QSharedPointer<ClassDef> cd  = md->getClassDef();
                   QSharedPointer<ClassDef> tcd = tcd_hold;
 
-                  if (tcd == nullptr && cd && stripAnonymousNamespaceScope(cd->name()) == scopeName) {
+                  if (tcd == nullptr && memberCd != nullptr && stripAnonymousNamespaceScope(memberCd->name()) == scopeName) {
                      // could be an anonymous scope
-                     tcd = cd;
+                     tcd = memberCd;
                   }
 
-                  if (cd != nullptr && tcd == cd) {
+                  if (memberCd != nullptr && tcd == memberCd) {
                      // found the class this funcDecl (member) belongs to
 
                      Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [4] class definition: %s\n",
-                        csPrintable(cd->name()));
+                        csPrintable(memberCd->name()));
 
                      // get the template parameter lists found in the member declaration
                      QVector<ArgumentList> declTemplArgs;
 
-                     cd->getTemplateParameterLists(declTemplArgs);
+                     memberCd->getTemplateParameterLists(declTemplArgs);
                      const ArgumentList &templAl = md->getTemplateArgumentList();
 
                      if (! templAl.listEmpty()) {
@@ -7112,7 +7214,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                            // matching remains false
 
                         } else if (matchArguments2(md->getClassDef(), md->getFileDef(), argList,
-                              cd, fd, root->argList, true)) {
+                              memberCd, fd, root->argList, true)) {
                            matching = true;
                         }
                      }
@@ -7222,7 +7324,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                               ptrEntry->stat       = md->isStatic();
                               ptrEntry->virt       = md->virtualness();
 
-                              addMethodToClass(ptrEntry, cd, md->name(), isFriend);
+                              addMethodToClass(ptrEntry, memberCd, md->name(), isFriend);
                               return;
                            }
                         }
@@ -7236,7 +7338,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         memFound = true;
                      }
 
-                  } else if (cd && cd != tcd) {
+                  } else if (memberCd != nullptr && memberCd != tcd) {
                      // searching for funcDecl, found a different class which has a method of the same name
                      ++noMatchCount;
                   }
