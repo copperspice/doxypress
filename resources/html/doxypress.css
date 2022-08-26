@@ -473,7 +473,7 @@ img.footer
 }
 
 
-/* soruce code colorization */
+/* source code colorization */
 span.keyword
 {
    color: #0000FF            /* blue  */
@@ -1599,6 +1599,7 @@ span.emoji {
    -khtml-user-select: none;
    -moz-user-select: none;
    -ms-user-select: none;
+   user-select: none;
 }
 
 .inherit_header td
@@ -1627,7 +1628,7 @@ tr.heading h2
 #powerTip
 {
    cursor: default;
-   white-space: nowrap;
+   /* white-space: nowrap; */
    background-color: white;
    border: 1px solid gray;
    border-radius: 4px 4px 4px 4px;
