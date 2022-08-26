@@ -7678,7 +7678,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             bool isDefine = false;
 
             {
-               QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(funcName);
+               mn = Doxy_Globals::functionNameSDict.find(funcName);
 
                if (mn) {
                   auto iter = mn->begin();
@@ -8580,9 +8580,8 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
 
             // add deferred members
             for (auto &item : extraMembers) {
-
-               QSharedPointer<MemberName> mn = mnsd->find(item.first);
-               mn->append(std::move(item.second));
+               QSharedPointer<MemberName> tmp_mn = mnsd->find(item.first);
+               tmp_mn->append(std::move(item.second));
             }
          }
       }
