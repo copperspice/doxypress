@@ -7507,21 +7507,21 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             } else if (cd) {
                // member specialization
                QSharedPointer<MemberDef> declMd;
-               QSharedPointer<MemberDef> md;
 
-               for (auto md : *mn) {
-                  if (md->getClassDef() == cd) {
-                     // TODO: should probably also check for matching arguments
-                     declMd = md;
+               for (auto item : *mn) {
+                  if (item->getClassDef() == cd) {
+                     // should probably also check for matching arguments
+                     declMd = item;
                      break;
                   }
                }
 
                MemberDefType memberType = MemberDefType::Function;
 
-               md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn, funcType,
-                        funcName, funcArgs, exceptions, declMd ? declMd->protection() : root->protection, root->virt, root->stat,
-                        Relationship::Member, memberType, ArgumentList(), root->argList);
+               QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine,
+                     root->startColumn, funcType, funcName, funcArgs, exceptions,
+                     declMd ? declMd->protection() : root->protection, root->virt, root->stat,
+                     Relationship::Member, memberType, ArgumentList(), root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
                md->setLanguage(root->m_srcLang);
