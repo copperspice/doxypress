@@ -124,7 +124,7 @@ static int              argSharpCount;
 static int              currentArgumentContext;
 static int              lastCopyArgStringContext;
 static int              lastCopyArgContext;
-
+static int              requiresContext;
 static QString          fullArgString;
 static QString          tmpRawString;
 static ArgumentList     *currentArgumentList;
@@ -438,6 +438,13 @@ static bool nameIsOperator(QString &name)
    // case TEXToperatorTEXT
 
   return false;
+}
+
+static bool startOfRequiresExpression(const QString &data)
+{
+  QString retval = data.trimmed();
+
+  return retval.isEmpty() || retval.endsWith("&&") || retval.endsWith("||");
 }
 
 static void setContext(const QString &fileName)
@@ -956,6 +963,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 %x DocBlock
 %x DocCopyBlock
 
+%x RequiresClause
+%x RequiresExpression
+%x ConceptName
 %%
 
 <NextSemi>"{"  {
@@ -2508,6 +2518,30 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( CompoundName ) ;
    }
 
+<FindMembers>{B}*"concept"{BN}+         {
+      // C++ concept
+
+      if (insideJava) {
+         REJECT;
+      }
+
+      isTypedef = false;
+      current->section = Entry::CONCEPTDOC_SEC;
+      addType(current);
+
+      current->appendData(EntryKey::Member_Type, " concept");
+
+      current->setData(EntryKey::File_Name, yyFileName);
+
+      current->startLine     = yyLineNr;
+      current->startColumn   = yyColNr;
+      current->startBodyLine = yyLineNr;
+
+      lineCount();
+
+      BEGIN( ConceptName );
+   }
+
 <Operator>"("{BN}*")"({BN}*"<"[^>]*">"){BN}*/"("  {
       // A::operator()<int>(int arg)
       lineCount();
@@ -3593,6 +3627,164 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       QString text = QString::fromUtf8(yytext);
       current->m_entryName = text;
       BEGIN(FindMembers);
+   }
+
+<FindMembers>"requires"                 {
+      if (insideJava) {
+         REJECT;
+      }
+
+      current->setData(EntryKey::Requires_Clause, QString());
+      requiresContext = YY_START;
+
+      BEGIN(RequiresClause);
+   }
+
+<RequiresClause>"requires"{BN}*/"{"     {
+      // requires requires { ... }
+
+      if (insideJava) {
+         REJECT;
+      }
+
+      QString text = QString::fromUtf8(yytext);
+
+      lineCount();
+      current->appendData(EntryKey::Requires_Clause, text);
+      BEGIN( RequiresExpression );
+   }
+
+<RequiresClause>"requires"{BN}*"("      {
+      // requires requires(T x) { ... }
+      if (insideJava) {
+         REJECT;
+      }
+
+      QString text = QString::fromUtf8(yytext);
+
+      lineCount();
+
+      current->appendData(EntryKey::Requires_Clause, text);
+      lastRoundContext = RequiresExpression;
+
+      s_roundEntry = current;
+      s_roundEnum  = EntryKey::Requires_Clause;
+
+      roundCount = 0;
+
+      BEGIN( CopyRound );
+   }
+
+<RequiresExpression>"{"                 {
+      QString text = QString::fromUtf8(yytext);
+
+      current->appendData(EntryKey::Requires_Clause, text);
+      lastCurlyContext = RequiresClause;
+
+      s_curlyEntry = current;
+      s_curlyEnum  = EntryKey::Requires_Clause;
+
+      curlyCount = 0;
+
+      BEGIN( CopyCurly );
+   }
+
+<RequiresExpression>\n                  {
+      current->appendData(EntryKey::Requires_Clause, " ");
+      lineCount();
+   }
+
+<RequiresExpression>.                   {
+      QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Requires_Clause, text);
+   }
+
+<RequiresClause>"("                     {
+      // requires "(A && B)"
+      QString text = QString::fromUtf8(yytext);
+
+      current->appendData(EntryKey::Requires_Clause, text);
+      lastRoundContext = RequiresClause;
+
+      s_roundEntry = current;
+      s_roundEnum  = EntryKey::Requires_Clause;
+
+      roundCount = 0;
+
+      BEGIN( CopyRound );
+   }
+
+<RequiresClause>{ID}                    {
+      // something like "requires true"
+      QString text = QString::fromUtf8(yytext);
+
+      if (startOfRequiresExpression(current->getData(EntryKey::Requires_Clause))) {
+         current->setData(EntryKey::Requires_Clause, text);
+         BEGIN(requiresContext);
+
+      } else {
+        REJECT;
+      }
+   }
+
+<RequiresClause>{SCOPENAME}{BN}*"("   {
+      // "requires func(x)"
+      QString text = QString::fromUtf8(yytext);
+
+      if (startOfRequiresExpression(current->getData(EntryKey::Requires_Clause))) {
+        current->appendData(EntryKey::Requires_Clause, text);
+        lastRoundContext = RequiresClause;
+
+        s_roundEntry = current;
+        s_roundEnum  = EntryKey::Requires_Clause;
+
+        roundCount = 0;
+
+        BEGIN( CopyRound );
+
+      } else {
+        REJECT;
+      }
+   }
+
+<RequiresClause>{SCOPENAME}{BN}*"<"   {
+      // "requires C<S,T>"
+      QString text = QString::fromUtf8(yytext);
+
+      if (startOfRequiresExpression(current->getData(EntryKey::Requires_Clause))) {
+        current->appendData(EntryKey::Requires_Clause, text);
+        lastSharpContext = RequiresClause;
+
+        s_sharpEntry = current;
+        s_sharpEnum  = EntryKey::Requires_Clause;
+
+        sharpCount = 0;
+
+        BEGIN( CopySharp );
+      } else {
+        REJECT
+      }
+   }
+
+<RequiresClause>"||"|"&&"             {
+      // "requires A || B" or "requires A && B"
+      QString text = QString::fromUtf8(yytext);
+      current->appendData(EntryKey::Requires_Clause, text);
+   }
+
+<RequiresClause>{BN}+                   {
+      current->appendData(EntryKey::Requires_Clause, " ");
+      lineCount();
+   }
+
+<RequiresClause>.                       {
+
+      unput(*yytext);
+
+      QString tmp = current->getData(EntryKey::Requires_Clause);
+      current->setData(EntryKey::Requires_Clause, tmp.simplified());
+
+      BEGIN(requiresContext);
    }
 
 <FindMembers,FindMemberName>{SCOPENAME}   {
@@ -7144,6 +7336,18 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       unput(*yytext);
       BEGIN(FuncQual);
    }
+
+<TrailingReturn>"requires"{BN}+         {
+      if (insideJava) {
+         REJECT;
+      }
+
+      requiresContext = FuncQual;
+      current->appendData(EntryKey::Requires_Clause, " ");
+
+      BEGIN(RequiresClause);
+   }
+
 <TrailingReturn>"("                    {
       QString text = QString::fromUtf8(yytext);
 
@@ -7291,7 +7495,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FuncQual>{ID}               {
       QString text = QString::fromUtf8(yytext);
 
-      if (insideCSharp && text == "where") {
+      if (insideCpp && text == "requires") {
+         // trailing requires clause
+
+         requiresContext = YY_START;
+         current->appendData(EntryKey::Requires_Clause, " ");
+         BEGIN(RequiresClause);
+
+      } else if (insideCSharp && text == "where") {
          // type constraint for a method
 
          current->typeConstr = ArgumentList();
@@ -8169,6 +8380,21 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <AlignAsEnd>.
+<ConceptName>{ID}  {
+      QString text = QString::fromUtf8(yytext);
+      current->m_entryName = text;
+   }
+
+<ConceptName>"="    {
+      current->startBodyLine   = yyLineNr;
+      current->setData(EntryKey::Initial_Value, "");
+
+      lastInitializerContext = FindMembers;
+      initBracketCount = 0;
+
+      BEGIN(ReadInitializer);
+   }
+
 <CompoundName>{SCOPENAME}/{BN}*","  {
       // multiple forward declarations on one line
       // e.g. @protocol A,B;
