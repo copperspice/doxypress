@@ -5385,7 +5385,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       bool needNewCurrent = false;
 
-      if (! current->m_entryName.isEmpty() && current->section != Entry::ENUM_SEC) {
+      if (current->section == Entry::CONCEPTDOC_SEC) {
+         // C++ concept
+
+         current_root->addSubEntry(current);
+         needNewCurrent = true;
+
+      } else if (! current->m_entryName.isEmpty() && current->section != Entry::ENUM_SEC) {
          tmpType = tmpType.simplified();
 
          current->setData(EntryKey::Member_Args, removeRedundantWhiteSpace(current->getData(EntryKey::Member_Args)));
@@ -6721,7 +6727,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
   /* Function argument reading rules */
 
-<ReadFuncArgType>[^ \/\r\t\n\)\(\"\'#]+ {
+<ReadFuncArgType>[^ \/\r\t\n\[\]\)\(\"\'#]+ {
       QString text = QString::fromUtf8(yytext);
 
       addToArgs(text);
@@ -8151,6 +8157,10 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
+<SkipString>"[["                       {
+      // no code
+   }
+
 <SkipString,SkipPHPString>.            {
       // no code
    }
@@ -9324,13 +9334,16 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Source_Text, text[0]);
    }
 
-<FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,SkipC11Inits,CppAttribute,Bases,OldStyleArgs>("//"{B}*)?"/*!" {
+<FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,SkipC11Inits,CppAttribute,Bases,OldStyleArgs>("//"{B}*)?"/\*!" {
 
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
       if (! current->getData(EntryKey::Main_Docs).isEmpty()) {
          current->appendData(EntryKey::Main_Docs, "\n\n");
+      } else {
+         current->setData(EntryKey::File_Name, yyFileName);
+         current->docLine = yyLineNr;
       }
 
       lastDocContext = YY_START;
@@ -9407,6 +9420,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       if (current_root->section & Entry::SCOPE_MASK) {
          current->setData(EntryKey::Class_Name, current_root->m_entryName + "::");
       }
+
+      current->setData(EntryKey::File_Name, yyFileName);
+      current->docLine = yyLineNr;
 
       s_docBlockContext = YY_START;
       s_docBlockInBody  = YY_START == SkipCurly;
@@ -9558,6 +9574,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          s_methodType = MethodType::Method;
          s_virtual    = Specifier::Normal;
 
+         current->endBodyLine = yyLineNr;
          unput(';');
          BEGIN(FindMembers);
       }
