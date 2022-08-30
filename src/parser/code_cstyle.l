@@ -2820,6 +2820,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN(FuncCall);
    }
 
+<Body>"\\)"|"\\("    {
+      QString text = QString::fromUtf8(yytext);
+      g_code->codify(text);
+   }
+
 <Body>[\\|\)\+\-\/\%\~\!]     {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
@@ -2952,11 +2957,12 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{SCOPENAME}/{BN}*[:;,)\]]      {
       // "int var;" or "var, var2" or "debug(f) macro" , or int var : 5;
       QString text = QString::fromUtf8(yytext);
+
+      if (text.startsWith("typedef")) {
+         REJECT;
+      }
+
       addType();
-
-      // changed to generateFunctionLink
-      // generateClassOrGlobalLink(*g_code,yytext,false,true);
-
       generateFunctionLink(*g_code, text);
       g_name += text;
    }
@@ -2964,6 +2970,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>{SCOPENAME}/{B}*  {
       // p->func()
       QString text = QString::fromUtf8(yytext);
+
+      if (text.startsWith("typedef")) {
+         REJECT;
+      }
+
       addType();
       generateClassOrGlobalLink(*g_code, text);
       g_name += yytext;
