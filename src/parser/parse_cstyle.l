@@ -896,6 +896,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 %x CsSignalSlot2Close
 
 %x ReadInitializer
+%x ReadInitializerPtr
 %x UNOIDLAttributeBlock
 %x GetCallType
 %x CppQuote
@@ -4260,7 +4261,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       addType(current);
    }
 
-<FindMembers,MemberSpec,Function,NextSemi,EnumBaseType,BitFields,ReadInitializer,OldStyleArgs>";"{BN}*("/**"|"//!"|"/*!"|"///")"<" {
+<FindMembers,MemberSpec,Function,NextSemi,EnumBaseType,BitFields,ReadInitializer,ReadInitializerPtr,OldStyleArgs,DefinePHPEnd>";"{BN}*("/**"|"//!"|"/*!"|"///")"<" {
       // */ (editor syntax fix)  comment found after a member
 
       QString text = QString::fromUtf8(yytext);
@@ -4299,7 +4300,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<MemberSpec,FindFields,FindMembers,NextSemi,EnumBaseType,BitFields,ReadInitializer,OldStyleArgs>","{BN}*("/**"|"//!"|"/*!"|"///")"<" {
+<MemberSpec,FindFields,FindMembers,NextSemi,EnumBaseType,BitFields,ReadInitializer,ReadInitializerPtr,OldStyleArgs>","{BN}*("/**"|"//!"|"/*!"|"///")"<" {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
       s_docBlockContext = YY_START;
@@ -4333,7 +4334,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<DefineEnd,FindFields,FindFieldArg,ReadInitializer,OldStyleArgs>{BN}*("/**"|"//!"|"/*!"|"///")"<" {
+<DefineEnd,FindFields,FindFieldArg,ReadInitializer,ReadInitializerPtr,OldStyleArgs>{BN}*("/**"|"//!"|"/*!"|"///")"<" {
       // */ (editor syntax fix)
 
       QString text = QString::fromUtf8(yytext);
@@ -4421,15 +4422,39 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<FindMembers,FindFields,ReadInitializer>"//"([!/]){B}*{CMD}"}".*|"/*"([!*]){B}*{CMD}"}"[^*]*"*/"    {
+<FindMembers,FindFields,ReadInitializer,ReadInitializerPtr>"//"([!/]){B}*{CMD}"}".*|"/*"([!*]){B}*{CMD}"}"[^*]*"*/"    {
       bool insideEnum = YY_START == FindFields ||
-            (YY_START == ReadInitializer && lastInitializerContext == FindFields);
+            ((YY_START == ReadInitializer || YY_START == ReadInitializerPtr) &&
+            lastInitializerContext == FindFields);
 
       closeGroup(current, yyFileName, yyLineNr, insideEnum);
       lineCount();
    }
 
-<FindMembers>"="                                {
+<FindMembers>"=>"                      {
+      if (! insideCSharp) {
+         REJECT;
+      }
+
+      QString text = QString::fromUtf8(yytext);
+
+      current->startBodyLine = yyLineNr;
+   // current->bodyColumn    = yyColNr;
+
+      current->setData(EntryKey::Initial_Value, text);
+
+      lastInitializerContext = YY_START;
+      initBracketCount       = 0;
+
+      s_methodType   = MethodType::Property;
+      current->mtype = MethodType::Property;
+
+      current->m_traits.setTrait(Entry::Virtue::Gettable);
+
+      BEGIN(ReadInitializerPtr);
+   }
+
+<FindMembers>"="                       {
       // in PHP code this could also be due to "<?="
       QString text = QString::fromUtf8(yytext);
 
@@ -4455,7 +4480,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
   /* Read initializer rules */
-<ReadInitializer>"("           {
+<ReadInitializer,ReadInitializerPtr>"("           {
       QString text = QString::fromUtf8(yytext);
 
       lastRoundContext = YY_START;
@@ -4469,7 +4494,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(GCopyRound);
    }
 
-<ReadInitializer>"["           {
+<ReadInitializer,ReadInitializerPtr>"["           {
       if (! insidePHP) {
          REJECT;
       }
@@ -4487,7 +4512,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(GCopySquare);
    }
 
-<ReadInitializer>"{"           {
+<ReadInitializer,ReadInitializerPtr>"{"           {
       QString text = QString::fromUtf8(yytext);
 
       lastCurlyContext  = YY_START;
@@ -4501,7 +4526,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN(GCopyCurly);
    }
 
-<ReadInitializer>[;,]         {
+<ReadInitializer,ReadInitializerPtr>[;,]         {
       QString text = QString::fromUtf8(yytext);
 
       bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
@@ -4526,12 +4551,21 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             // initBracketCount == 0 was added for bug 665778
 
             unput(*yytext);
+            if (YY_START == ReadInitializerPtr) {
+               current->setData(EntryKey::Initial_Value, QString());
+            }
+
             BEGIN(lastInitializerContext);
 
          } else if (text[0] == ',' && initBracketCount == 0) {
             // for "int a=0,b=0"
 
             unput(*yytext);
+
+            if (YY_START == ReadInitializerPtr) {
+               current->setData(EntryKey::Initial_Value, QString());
+            }
+
             BEGIN(lastInitializerContext);
 
       } else   {
@@ -4540,7 +4574,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<ReadInitializer>{RAWBEGIN}            {
+<ReadInitializer,ReadInitializerPtr>{RAWBEGIN}            {
       // C++11 raw string
       QString text = QString::fromUtf8(yytext);
 
@@ -4625,7 +4659,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
-<ReadInitializer>\"        {
+<ReadInitializer,ReadInitializerPtr>\"        {
       QString text = QString::fromUtf8(yytext);
 
     if (insideIDL && insideCppQuote) {
@@ -4642,34 +4676,34 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<ReadInitializer>"->"         {
+<ReadInitializer,ReadInitializerPtr>"->"         {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
    }
 
-<ReadInitializer>"<<"         {
+<ReadInitializer,ReadInitializerPtr>"<<"         {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
    }
 
-<ReadInitializer>">>"         {
+<ReadInitializer,ReadInitializerPtr>">>"         {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
    }
 
-<ReadInitializer>[<\[{(]      {
+<ReadInitializer,ReadInitializerPtr>[<\[{(]      {
       QString text = QString::fromUtf8(yytext);
       initBracketCount++;
       current->appendData(EntryKey::Initial_Value, text[0]);
    }
 
-<ReadInitializer>[>\]})]      {
+<ReadInitializer,ReadInitializerPtr>[>\]})]      {
       QString text = QString::fromUtf8(yytext);
       initBracketCount--;
       current->appendData(EntryKey::Initial_Value, text[0]);
    }
 
-<ReadInitializer>\'        {
+<ReadInitializer,ReadInitializerPtr>\'        {
       QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
@@ -4687,7 +4721,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<ReadInitializer>{CHARLIT}                {
+<ReadInitializer,ReadInitializerPtr>{CHARLIT}                {
       QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
@@ -4697,13 +4731,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<ReadInitializer>\n        {
+<ReadInitializer,ReadInitializerPtr>\n        {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text[0]);
       lineCount();
    }
 
-<ReadInitializer>"@\""        {
+<ReadInitializer,ReadInitializerPtr>"@\""        {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value, text);
 
@@ -4749,7 +4783,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       addToOutput(s_skipVerbEntry, s_skipVerbEnum, text[0]);
    }
 
-<ReadInitializer>"?>"         {
+<ReadInitializer,ReadInitializerPtr>"?>"         {
       QString text = QString::fromUtf8(yytext);
 
       if (insidePHP) {
@@ -4759,7 +4793,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
    }
 
-<ReadInitializer>.         {
+<ReadInitializer,ReadInitializerPtr>.         {
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Initial_Value,    text[0]);
    }
@@ -5930,7 +5964,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( Comment );
    }
 
-<ReadBody,ReadNSBody,ReadBodyIntf>"/*"{BL}      {
+<ReadBody,ReadNSBody,ReadBodyIntf>"/\*"{BL}      {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
@@ -7987,7 +8021,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
-<SkipCurly,SkipCurlyCpp>"<<<"              {
+<SkipCurly,SkipCurlyCpp,ReadInitializer,ReadInitializerPtr>"<<<"              {
       if (! insidePHP) {
          REJECT;
       } else {
