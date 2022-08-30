@@ -116,6 +116,7 @@ static bool             insideCpp    = true;          // processing C/C++ code
 
 static bool             insideCppQuote     = false;
 static bool             insideProtocolList = false;
+static bool             s_doxyComment      = false;
 
 static int              argRoundCount;
 static int              argSquareCount;
@@ -5723,7 +5724,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( CopyGString );
    }
 
-<ReadBody,ReadNSBody,ReadBodyIntf>"/*"{B}*      {
+<ReadBody,ReadNSBody,ReadBodyIntf>("/\*!"|"/\**")  {
+      s_doxyComment = true;
+      REJECT;
+   }
+
+<ReadBody,ReadNSBody,ReadBodyIntf>"/\*"{B}*      {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
@@ -9006,7 +9012,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       lineCount();
    }
 
-<Comment>"/*"           {
+<Comment>"/\*"           {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
       current->appendData(EntryKey::Source_Text, text);
@@ -9019,13 +9025,21 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <Comment>{CMD}("code"|"verbatim")   {
       QString text = QString::fromUtf8(yytext);
-      insideCode   = true;
+
+      if (s_doxyComment) {
+         insideCode = true;
+      }
+
       current->appendData(EntryKey::Source_Text, text);
    }
 
 <Comment>{CMD}("endcode"|"endverbatim")   {
       QString text = QString::fromUtf8(yytext);
-      insideCode  = false;
+
+      if (s_doxyComment) {
+         insideCode = false;
+      }
+
       current->appendData(EntryKey::Source_Text, text);
    }
 
@@ -9040,6 +9054,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Source_Text, text);
 
       if (! insideCode) {
+         s_doxyComment = false;
          BEGIN(lastContext);
       }
    }
@@ -9079,7 +9094,51 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       BEGIN( DocBlock );
    }
 
-<FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,Bases,OldStyleArgs>("//"{B}*)?"/**"/[^/*] {
+<FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,Bases,OldStyleArgs>"/\*""*"[*]+{BL} {
+      QString text = QString::fromUtf8(yytext);
+
+      // static const bool javadocBanner = Config::getBool("javadoc-banner");
+      static const bool javadocBanner = false;
+
+      lineCount();
+
+      if (javadocBanner) {
+         lastDocContext = YY_START;
+
+         if (current_root->section & Entry::SCOPE_MASK) {
+            current->setData(EntryKey::Class_Name, current_root->m_entryName + "::");
+         }
+
+         current->setData(EntryKey::File_Name, yyFileName);
+         current->docLine = yyLineNr;
+
+         s_docBlockContext  = YY_START;
+         s_docBlockInBody   = (YY_START == SkipCurly);
+
+         static const bool javadoc_auto_brief = Config::getBool("javadoc-auto-brief");
+         s_docBlockAutoBrief = javadoc_auto_brief;
+
+         s_docBlock = QString(computeIndent(text, s_column), QChar(' '));
+
+         if (s_docBlockAutoBrief) {
+            current->setData(EntryKey::Brief_File, yyFileName);
+            current->briefLine = yyLineNr;
+         }
+
+         startCommentBlock(false);
+         BEGIN(DocBlock);
+
+      } else {
+         current->appendData(EntryKey::Source_Text, text);
+         lastContext = YY_START;
+
+         s_doxyComment = true;
+
+         BEGIN(Comment);
+      }
+   }
+
+<FindMembers,FindFields,MemberSpec,FuncQual,SkipCurly,Operator,ClassVar,SkipInits,Bases,OldStyleArgs>("//"{B}*)?"/\**"/[^/\*] {
       // */ (editor syntax fix)
       QString text = QString::fromUtf8(yytext);
 
