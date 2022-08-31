@@ -1704,13 +1704,14 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
    }
 
 <St_Ref2>"\""         {
-   /* closing quote */
+      /* closing quote */
       return 0;
    }
 
 <St_Ref2>"\n"|"\\internal_linebr"         {
       QString text = QString::fromUtf8(yytext);
-      s_yyLineNum += text.count('\n');
+
+      s_yyLineNum   += text.count('\n');
       g_token->name = " ";
 
       return TK_WORD;
@@ -1720,6 +1721,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_Ref2>{SPCMD2}                      {
       /* special command */
       QString text      = QString::fromUtf8(yytext);
+
       g_token->name     = text.mid(1);
       g_token->paramDir = TokenInfo::Unspecified;
 

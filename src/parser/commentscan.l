@@ -2465,7 +2465,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <SectionTitle>{LC}         {
       // line continuation
-      yyLineNr++;
+      ++yyLineNr;
       addToOutput('\n');
    }
 
@@ -3162,7 +3162,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <CiteLabel>.            {
       // invalid character for cite label
-      warn(yyFileName,yyLineNr, "Invalid or missing cite label");
+      warn(yyFileName, yyLineNr, "Invalid or missing cite label");
       BEGIN(Comment);
    }
 
@@ -3172,8 +3172,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 <CopyDoc><<EOF>>        |
 <CopyDoc>{DOCNL}        {
       QString text = QString::fromUtf8(yytext);
-      if (text[0] == '\n')   {
-         yyLineNr++;
+      if (text[0] == '\n') {
+         ++yyLineNr;
       }
 
       addToOutput('\n');
@@ -3195,6 +3195,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <CopyDoc>.           {
       QString text = QString::fromUtf8(yytext);
+
       s_copyDocArg += text;
       addToOutput(text);
    }

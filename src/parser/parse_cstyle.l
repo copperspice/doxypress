@@ -127,7 +127,7 @@ static int              lastCopyArgContext;
 static int              requiresContext;
 static QString          fullArgString;
 static QString          tmpRawString;
-static ArgumentList     *currentArgumentList;
+static ArgumentList    *currentArgumentList;
 static QChar            lastCopyArgChar;
 
 enum class ArgKey {
@@ -246,10 +246,10 @@ static void initParser()
    baseName.resize(0);
    formulaText.resize(0);
 
-   sharpCount  = 0;
-   roundCount  = 0;
-   curlyCount  = 0;
-   isTypedef   = false;
+   sharpCount    = 0;
+   roundCount    = 0;
+   curlyCount    = 0;
+
    s_methodType  = MethodType::Method;
    s_static      = false;
    s_virtual     = Specifier::Normal;
@@ -259,10 +259,10 @@ static void initParser()
 
    autoGroupStack.clear();
 
+   isTypedef      = false;
    insideTryBlock = false;
    insideFormula  = false;
    insideCode     = false;
-
    insideCli      = Config::getBool("cpp-cli-support");
 
    previous          = QSharedPointer<Entry>();
@@ -1957,8 +1957,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          addType(current);
 
          current->appendData(EntryKey::Member_Type, " service");
-         current->setData(EntryKey::File_Name, yyFileName);
 
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine     = yyLineNr;
          current->startBodyLine = yyLineNr;
 
@@ -2101,9 +2101,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Protocol);
 
-      language             = SrcLangExt_ObjC;
-      current->m_srcLang   = SrcLangExt_ObjC;
-      insideObjC           = true;
+      language            = SrcLangExt_ObjC;
+      current->m_srcLang  = SrcLangExt_ObjC;
+      insideObjC          = true;
 
       s_protection        = Protection::Public;
       current->protection = Protection::Public;
@@ -3498,7 +3498,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <CsSlotProtection>{ID}       {
       QString text = QString::fromUtf8(yytext);
       Protection visibility = getProtection(text);
-      current->protection = visibility;
+      current->protection   = visibility;
    }
 
 <CsSlotProtection>","           {
@@ -8440,8 +8440,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <CompoundName>{SCOPENAME}/{BN}*","  {
-      // multiple forward declarations on one line
-      // e.g. @protocol A,B;
+      // multiple forward declarations on one line, @protocol A,B
       current->reset();
       initEntry();
    }
@@ -9551,9 +9550,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <CSAccessorDecl>"}"{BN}*"="   {
-
       if (curlyCount != 0) {
-       REJECT;
+         REJECT;
 
       } else {
          s_methodType = MethodType::Method;
@@ -9568,7 +9566,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <CSAccessorDecl>"}"         {
       if (curlyCount != 0) {
-         curlyCount--;
+         --curlyCount;
 
       } else {
          s_methodType = MethodType::Method;

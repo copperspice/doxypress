@@ -229,8 +229,8 @@ static void handleCondSectionId(const QString &expression);
 // while replacing any alias commands found in the string
 static void replaceAliases(const QString &s)
 {
-   QString result = resolveAliasCmd(s);
-   copyToOutput(result, result.length());
+   QString retval = resolveAliasCmd(s);
+   copyToOutput(retval, retval.length());
 }
 
 #undef  YY_INPUT
@@ -931,7 +931,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
    }
 
 <SComment>\n[ \t]*"//"[\/!]("<")?[ \t]*[\\@]"}".*\n {
-      /* See Bug 752712: end the multiline comment when finding a @} or \} command */
+      /* end the multiline comment when finding a @} or \} command */
 
       QString text = QString::fromUtf8(yytext);
 
