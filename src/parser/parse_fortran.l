@@ -160,6 +160,7 @@ static SymbolModifiers  currentModifiers;
 
 // holds program scope->symbol name->symbol modifiers
 static QMap<QSharedPointer<Entry>, QMap<QString, SymbolModifiers>> modifiers;
+static int s_anonCount = 0;
 
 static ParserInterface        *s_thisParser;
 
@@ -171,6 +172,7 @@ static QSharedPointer<Entry>	global_root;
 static QSharedPointer<Entry>	file_root;
 static QSharedPointer<Entry>	current;
 static QSharedPointer<Entry>	s_last_entry;
+static QSharedPointer<Entry>	s_last_enum;
 
 static QList<QSharedPointer<Entry>>  moduleProcedures;   // list of all interfaces which contain unresolved
 static QList<QSharedPointer<Entry>>  subrCurrent;
@@ -239,21 +241,20 @@ LOG_OPER  (\.and\.|\.eq\.|\.eqv\.|\.ge\.|\.gt\.|\.le\.|\.lt\.|\.ne\.|\.neqv\.|\.
 KIND      {ARGS}
 CHAR      (CHARACTER{ARGS}?|CHARACTER{BS}"*"({BS}[0-9]+|{ARGS}))
 
-TYPE_SPEC (({NUM_TYPE}({BS}"*"{BS}[0-9]+)?)|({NUM_TYPE}{KIND})|DOUBLE{BS}COMPLEX|DOUBLE{BS}PRECISION|{CHAR}|TYPE{ARGS}|CLASS{ARGS}|PROCEDURE{ARGS}?)
+TYPE_SPEC (({NUM_TYPE}({BS}"*"{BS}[0-9]+)?)|({NUM_TYPE}{KIND})|DOUBLE{BS}COMPLEX|DOUBLE{BS}PRECISION|ENUMERATOR|{CHAR}|TYPE{ARGS}|CLASS{ARGS}|PROCEDURE{ARGS}?)
 
-INTENT_SPEC  intent{BS}"("{BS}(in|out|in{BS}out){BS}")"
-ATTR_SPEC   (EXTERNAL|ALLOCATABLE|DIMENSION{ARGS}|{INTENT_SPEC}|INTRINSIC|OPTIONAL|PARAMETER|POINTER|PROTECTED|PRIVATE|PUBLIC|SAVE|TARGET|NOPASS|PASS{ARGS}?|DEFERRED|NON_OVERRIDABLE|CONTIGUOUS|VOLATILE|VALUE)
+INTENT_SPEC   intent{BS}"("{BS}(in|out|in{BS}out){BS}")"
+ATTR_SPEC     (EXTERNAL|ALLOCATABLE|DIMENSION{ARGS}|{INTENT_SPEC}|INTRINSIC|OPTIONAL|PARAMETER|POINTER|PROTECTED|PRIVATE|PUBLIC|SAVE|TARGET|NOPASS|PASS{ARGS}?|DEFERRED|NON_OVERRIDABLE|CONTIGUOUS|VOLATILE|VALUE)
 
-ACCESS_SPEC         (PRIVATE|PUBLIC)
+ACCESS_SPEC   (PRIVATE|PUBLIC)
 LANGUAGE_BIND_SPEC BIND{BS}"("{BS}C{BS}((,{BS}NAME{BS}"="{BS}"\""(.*)"\""{BS})|(,{BS}NAME{BS}"="{BS}"'"(.*)"'"{BS}))?")"
 
 /* Assume that attribute statements are almost the same as attributes. */
-ATTR_STMT           {ATTR_SPEC}|DIMENSION|{ACCESS_SPEC}
-EXTERNAL_STMT       (EXTERNAL)
-CONTAINS            CONTAINS
-SCOPENAME           ({ID}{BS}"::"{BS})*
-
-PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((NON_)?RECURSIVE|IMPURE|PURE|ELEMENTAL)?
+ATTR_STMT          {ATTR_SPEC}|DIMENSION|{ACCESS_SPEC}
+EXTERNAL_STMT      (EXTERNAL)
+CONTAINS           CONTAINS
+PREFIX             ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((NON_)?RECURSIVE|IMPURE|PURE|ELEMENTAL)?
+SCOPENAME          ({ID}{BS}"::"{BS})*
 
 %option caseless
 %option case-insensitive
@@ -277,6 +278,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 %x    Variable
 %x    Initialization
 %x    ArrayInitializer
+%x    Enum
 %x    Typedef
 %x    TypedefBody
 %x    TypedefBodyContains
@@ -446,7 +448,7 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 <Start,ModuleBody,SubprogBody>"use"{BS_} {
       if(YY_START == Start) {
          addModule();
-         yy_push_state(ModuleBody); //anon program
+         yy_push_state(ModuleBody);       // anon program
       }
       yy_push_state(Use);
    }
@@ -578,22 +580,22 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
    }
 
  /*-- Contains handling ---------------------------------*/
-<Start>^{BS}{CONTAINS}/({BS}|\n|!)      {
+<Start>^{BS}{CONTAINS}/({BS}|\n|!|;)      {
       if (YY_START == Start) {
          addModule();
-         yy_push_state(ModuleBodyContains);       //anon program
+         yy_push_state(ModuleBodyContains);       // anon program
       }
    }
 
-<ModuleBody>^{BS}{CONTAINS}/({BS}|\n|!)   {
+<ModuleBody>^{BS}{CONTAINS}/({BS}|\n|!|;)   {
       BEGIN(ModuleBodyContains);
    }
 
-<SubprogBody>^{BS}{CONTAINS}/({BS}|\n|!)  {
+<SubprogBody>^{BS}{CONTAINS}/({BS}|\n|!|;)  {
       BEGIN(SubprogBodyContains);
    }
 
-<TypedefBody>^{BS}{CONTAINS}/({BS}|\n|!)  {
+<TypedefBody>^{BS}{CONTAINS}/({BS}|\n|!|;)  {
       BEGIN(TypedefBodyContains);
    }
 
@@ -617,14 +619,14 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
       defaultProtection = Public;
    }
 
-<BlockData>^{BS}"end"({BS}(block{BS}data)({BS_}{ID})?)?{BS}/(\n|!) {
+<BlockData>^{BS}"end"({BS}(block{BS}data)({BS_}{ID})?)?{BS}/(\n|!|;) {
       // end block data
 
       defaultProtection = Public;
       yy_pop_state();
    }
 
-<Start,ModuleBody,ModuleBodyContains>^{BS}"end"({BS}(module|program)({BS_}{ID})?)?{BS}/(\n|!) {
+<Start,ModuleBody,ModuleBodyContains>"end"({BS}(module|program)({BS_}{ID})?)?{BS}/(\n|!|;) {
       // end module
       resolveModuleProcedures(moduleProcedures, current_root);
       if (! endScope(current_root)) {
@@ -671,10 +673,14 @@ PREFIX        ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}(
 
  /*------- type definition  ---------------------------- */
 
+<ModuleBody>^{BS}type{BS}"="            {
+      // no code
+   }
+
 <Start,ModuleBody>^{BS}type/[^a-z0-9_]   {
       if(YY_START == Start) {
          addModule();
-         yy_push_state(ModuleBody); //anon program
+         yy_push_state(ModuleBody);       // anon program
       }
 
       yy_push_state(Typedef);
@@ -860,21 +866,26 @@ private                                 {
 
 }
 
-<Start,ModuleBody,TypedefBody,SubprogBody>{
-
+<Start,ModuleBody,TypedefBody,SubprogBody,Enum>{
 ^{BS}{TYPE_SPEC}/{SEPARATE}             {
       QString text = QString::fromUtf8(yytext);
 
+      s_last_enum.reset();
+
+      if (YY_START == Enum) {
+         argType = "@";       // enum marker
+      } else {
+         argType = text.simplified().toLower();
+      }
       current->startBodyLine = yyLineNr + 1;
       current->endBodyLine   = yyLineNr + s_lineCountPrepass;
 
-      /* variable declaration starts */
-      if(YY_START == Start) {
-         yy_push_state(ModuleBody); //anon program
+      // variable declaration starts
+      if (YY_START == Start) {
          addModule();
+         yy_push_state(ModuleBody);       // anon program
       }
 
-      argType = text.simplified().toLower();
       yy_push_state(AttributeList);
    }
 
@@ -997,7 +1008,21 @@ private                                 {
          current->startBodyLine = yyLineNr;                  // used for source reference
          current->startLine     = yyLineNr;
 
+         if (argType == "@") {
+           QSharedPointer<Entry> tmpCopy = QMakeShared<Entry>(*current);
+           current_root->addSubEntry(tmpCopy);
+
+           // add to the scope surrounding the enum
+           s_last_enum = current;
+
+           current_root->parent()->addSubEntry(current);
+
+           current = QMakeShared<Entry>();
+           initEntry();
+
+         } else {
             addCurrentEntry(true);
+         }
 
       } else if (! argType.isEmpty()) {
          // declaration of parameter list: add type for corr. parameter
@@ -1116,7 +1141,8 @@ private                                 {
 <Variable>{BS}"="                       {
       yy_push_state(YY_START);
       s_initializer         = "=";
-      initializerScope = initializerArrayScope = 0;
+      initializerScope      = 0;
+      initializerArrayScope = 0;
       BEGIN(Initialization);
    }
 
@@ -1143,27 +1169,40 @@ private                                 {
 <*>";".*"\n"                            {
       QString text = QString::fromUtf8(yytext);
 
-      if (YY_START == Variable) REJECT;       // Just be on the safe side
-      if (YY_START == String) REJECT;         // ";" ignored in strings
-      if (YY_START == StrIgnore) REJECT;      // ";" ignored in regular comments
+      if (YY_START == Variable) {
+         REJECT;       // Just be on the safe side
+      }
+
+      if (YY_START == String) {
+         REJECT;       // ";" ignored in strings
+      }
+
+      if (YY_START == StrIgnore) {
+         REJECT;      // ";" ignored in regular comments
+      }
+
       s_inputStringSemi = " \n" + text.mid(1);
-      yyLineNr--;
+      --yyLineNr;
+
       pushBuffer(s_inputStringSemi);
    }
 
 <Initialization,ArrayInitializer>"["    |
 <Initialization,ArrayInitializer>"(/"   {
       QString text = QString::fromUtf8(yytext);
-      initializerArrayScope++;
+
       s_initializer += text;
+      ++initializerArrayScope;
+
       BEGIN(ArrayInitializer);                // initializer may contain comma
    }
 
 <ArrayInitializer>"]"                   |
 <ArrayInitializer>"/)"                  {
       QString text = QString::fromUtf8(yytext);
-      initializerArrayScope--;
+
       s_initializer += text;
+      --initializerArrayScope;
 
       if (initializerArrayScope <= 0) {
          initializerArrayScope = 0;           // just in case
@@ -1178,13 +1217,13 @@ private                                 {
 
 <Initialization>"("        {
       QString text = QString::fromUtf8(yytext);
-      initializerScope++;
+      ++initializerScope;
       s_initializer += text;
    }
 
 <Initialization>")"        {
       QString text = QString::fromUtf8(yytext);
-      initializerScope--;
+      --initializerScope;
       s_initializer += text;
    }
 
@@ -1192,9 +1231,13 @@ private                                 {
       if (initializerScope == 0) {
          updateVariablePrepassComment(yyColNr - yyleng, yyColNr);
          yy_pop_state();                      // end initialization
+         if (s_last_enum) {
+            s_last_enum->setData(EntryKey::Initial_Value, s_initializer);
 
+         } else {
             if (v_type == V_VARIABLE) {
                s_last_entry->setData(EntryKey::Initial_Value, s_initializer);
+            }
          }
 
       } else {
@@ -1205,8 +1248,15 @@ private                                 {
 <Initialization>"\n"|"!"                {
       yy_pop_state();                         // end initialization
 
+      if (s_last_enum) {
+         s_last_enum->setData(EntryKey::Initial_Value, s_initializer);
+
+
+      } else {
+
          if (v_type == V_VARIABLE)  {
             s_last_entry->setData(EntryKey::Initial_Value, s_initializer);
+         }
       }
 
       yyColNr -= 1;
@@ -1216,6 +1266,53 @@ private                                 {
 <Initialization>.                       {
       QString text = QString::fromUtf8(yytext);
       s_initializer += text;
+   }
+
+<*>{BS}"enum"{BS}","{BS}"bind"{BS}"("{BS}"c"{BS}")"{BS} {
+      QString text = QString::fromUtf8(yytext);
+
+      if (YY_START == Start) {
+        addModule();
+        yy_push_state(ModuleBody);     // anon program
+      }
+
+      yy_push_state(Enum);
+      current->protection = defaultProtection;
+      typeProtection      = defaultProtection;
+      typeMode            = true;
+
+      current->m_traits.setTrait(Entry::Virtue::Struct);
+      current->setData(EntryKey::Member_Args, QString());
+
+      current->m_entryName = QString("@%1").formatArg(s_anonCount);
+      ++s_anonCount;
+
+      current->section = Entry::ENUM_SEC;
+
+      current->setData(EntryKey::File_Name, yyFileName);
+      current->startLine     = yyLineNr;
+      current->startBodyLine = yyLineNr;
+
+      if ((current_root) &&
+          (current_root->section == Entry::CLASS_SEC ||
+           current_root->section == Entry::NAMESPACE_SEC)) {
+        current->m_entryName = current_root->m_entryName + "::" + current->m_entryName;
+      }
+
+      addCurrentEntry(true);
+      startScope(s_last_entry);
+      BEGIN(Enum);
+   }
+
+<Enum>"end"{BS}"enum"                   {
+      s_last_entry->parent()->endBodyLine = yyLineNr;
+
+      if (! endScope(current_root)) {
+        yyterminate();
+      }
+
+      typeMode = false;
+      yy_pop_state();
    }
 
  /*------ fortran subroutine/function handling --------- */
@@ -1399,8 +1496,16 @@ private                                 {
       if (v_type == V_VARIABLE) {
          QSharedPointer<Entry> tmp_entry = current;
 
+         // temporarily switch to the previous entry
+         if (s_last_enum) {
+            current = s_last_enum;
+         } else {
             current = s_last_entry;
+         }
+
          handleCommentBlock(docBlock, true);
+
+         // switch back
          current = tmp_entry;
 
       } else if (v_type == V_PARAMETER) {
@@ -1408,13 +1513,14 @@ private                                 {
 
       } else if (v_type == V_RESULT) {
          subrHandleCommentBlockResult(docBlock,true);
+
       }
 
       yy_pop_state();
       docBlock.resize(0);
 }
 
-<Start,SubprogBody,ModuleBody,TypedefBody,InterfaceBody,ModuleBodyContains,SubprogBodyContains,TypedefBodyContains>"!>"  {
+<Start,SubprogBody,ModuleBody,TypedefBody,InterfaceBody,ModuleBodyContains,SubprogBodyContains,TypedefBodyContains,Enum>"!>"  {
       static const bool javaAutoBrief = Config::getBool("javadoc-auto-brief");
 
       yy_push_state(YY_START);
@@ -1751,13 +1857,6 @@ bool recognizeFixedForm(const QString &contents, FortranFormat format)
   return false;
 }
 
-/* function assumes that contents has at least size=length+1 */
-static void insertCharacter(QString &contents, int length, int pos, QChar c)
-{
-   contents.erase(length, 1);
-   contents.insert(pos, c);
-}
-
 /* change comments and bring line continuation character to previous line */
 QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 {
@@ -1766,24 +1865,51 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
    int prevLineAmpOrExclIndex = -1;
 
    int curLine = 1;
+   int skipped = 0;
 
-   QChar prevQuote      = '\0';
-   QChar thisQuote      = '\0';
+   QChar prevQuote  = '\0';
+   QChar thisQuote  = '\0';
 
-   bool emptyLabel      = true;
-   bool commented       = false;
-   bool inSingle        = false;
-   bool inDouble        = false;
-   bool inBackslash     = false;
-   bool fullCommentLine = true;
+   bool emptyLabel        = true;
+   bool commented         = false;
+   bool inSingle          = false;
+   bool inDouble          = false;
+   bool inBackslash       = false;
+   bool fullCommentLine   = true;
+   bool artificialComment = false;
+   bool spaces            = true;
 
    QString newContents;
 
-   for (int i = 0, j = 0;  true; i++, j++) {
+   for (int i = 0, pos = -1; true; ++i) {
 
-      column++;
+      ++column;
       QChar c = contents[i];
+      if (artificialComment && c != '\n') {
 
+         if (c == '!' && spaces) {
+
+            newContents += c;
+            ++pos;
+
+            artificialComment = false;
+            spaces            = false;
+            skipped           = 0;
+
+            continue;
+
+         } else if (c == ' ' || c == '\t')  {
+            continue;
+
+         } else {
+           spaces = false;
+           ++skipped;
+
+           continue;
+         }
+      }
+
+      ++pos;
       switch (c.unicode()) {
          case '\n':
             if (! fullCommentLine) {
@@ -1795,6 +1921,11 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
                   prevLineAmpOrExclIndex = column - 1;
                }
 
+               if (skipped) {
+                  prevLineAmpOrExclIndex = -1;
+                  skipped = 0;
+                }
+
             } else {
                prevLineLength += column;
 
@@ -1805,14 +1936,17 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
                }
             }
 
-            fullCommentLine  = true;
-            column           = 0;
-            emptyLabel       = true;
-            commented        = false;
-            prevQuote        = thisQuote;
+            artificialComment = false;
+            spaces            = true;
+            fullCommentLine   = true;
+            emptyLabel        = true;
+            commented         = false;
+            prevQuote         = thisQuote;
 
             newContents += c;
-            curLine++;
+
+            column = 0;
+            ++curLine;
             break;
 
          case ' ':
@@ -1877,6 +2011,7 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
             inBackslash = false;
             [[fallthrough]];
 
+         case '#':
          case 'C':
          case 'c':
          case '*':
@@ -1907,8 +2042,9 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 
          default:
             if (! commented && (column < 6) && c.isDigit()) {
-               // remove numbers from the first 5 positions
-               newContents.replace(j, 1, ' ');
+               // remove any numbers in the first 5 positions
+
+               newContents += ' ';
 
             } else if (column == 6 && emptyLabel) {
                // continuation
@@ -1923,21 +2059,24 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 
                   if (prevLineAmpOrExclIndex == -1) {
                      // add & just before end of previous line
-
                      // first line is not a continuation line in code, just in snippets etc.
+
                      if (curLine != 1) {
-                        insertCharacter(newContents, j+1, (j+1)-6-1, '&');
+                        newContents.insert(pos - 6, '&');
                      }
-                     j++;
+                     ++pos;
 
                   } else {
                      // add & just before end of previous line comment
-
                      // first line is not a continuation line in code, just in snippets etc
                      if (curLine != 1) {
-                        insertCharacter(newContents, j+1, (j+1)-6-prevLineLength+prevLineAmpOrExclIndex, '&');
+                        int location = pos - 5 - prevLineLength + prevLineAmpOrExclIndex + skipped;
+
+                        newContents.insert(location, '&');
                      }
-                     j++;
+
+                     skipped = 0;
+                     ++pos;
                   }
 
                   if (! hasContLine.empty()) {
@@ -1945,7 +2084,7 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
                   }
 
                } else {
-                  // just handle like space
+                  // handle like space
                   newContents += c;
 
                }
@@ -1954,17 +2093,24 @@ QString prepassFixedForm(const QString &contents, QVector<int> &hasContLine)
 
             } else if ((column > fixedCommentAfter) && ! commented) {
                // first non commented non blank character after position fixedCommentAfter
+               if (c == '&') {
+                  newContents +=' ';
 
-               if (c != '!') {
+               } else if (c != '!') {
                   // not a possible start of a comment
 
-                  newContents += '!';
-                  newContents +=' ';    // so that '<' and '>' as first character are not converted to a doxypress comment
-                  j += 2;
-               }
+                  newContents +=' ';
 
-               newContents += c;
-               commented    = true;
+                  artificialComment = true;
+                  spaces            = true;
+
+                  skipped = 0;
+
+               } else {
+
+                  newContents += c;
+                  commented    = true;
+               }
 
             } else {
                if (! commented) {
@@ -2801,10 +2947,10 @@ static void handleCommentBlock(const QString &doc, bool brief)
       return;
    }
 
-   int lineNr = brief ? current->briefLine : current->docLine;
+   int lineNum = brief ? current->briefLine : current->docLine;
 
    while (parseCommentBlock(s_thisParser, docBlockInBody ? subrCurrent.first() : current,
-         doc, yyFileName, lineNr,
+         doc, yyFileName, lineNum,
          docBlockInBody ? false : brief,
          docBlockInBody ? false : docBlockJavaStyle,
          docBlockInBody, defaultProtection, position, needsEntry)) {
