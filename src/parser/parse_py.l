@@ -245,11 +245,17 @@ static void handleCommentBlock(const QString &doc, bool isBrief)
 {
    docBlockInBody = false;
 
-   if (docBlockInBody && previous) {
-      QString tmpDocs = previous->getData(EntryKey::Main_Docs);
+   QString currentDocs = current->getData(EntryKey::Main_Docs);
 
-      if (! tmpDocs.isEmpty()) {
-         previous->setData(EntryKey::Main_Docs, tmpDocs.trimmed() + "\n\n");
+   if (! currentDocs.isEmpty()) {
+      current->setData(EntryKey::Main_Docs, currentDocs.trimmed() + "\n\n");
+   }
+
+   if (docBlockInBody && previous) {
+      QString prevDocs = previous->getData(EntryKey::Main_Docs);
+
+      if (! prevDocs.isEmpty()) {
+         previous->setData(EntryKey::Main_Docs, prevDocs.trimmed() + "\n\n");
       }
    }
 
@@ -913,7 +919,7 @@ STARTDOCSYMS      "##"
 }
 
 <FunctionBody>{
-   \n{B}/{IDENTIFIER}{BB}  {
+   \n{B}/{IDENTIFIER}[^{LETTER}{DIGIT}_]  {
       DBG_CTX((stderr, "indent %d <= %d\n", computeIndent(text.mid(1)), s_indent));
 
       QString text = QString::fromUtf8(yytext);
