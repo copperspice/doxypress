@@ -347,6 +347,7 @@ static int          s_inputPosition;
 
 static int          s_roundCount;
 static bool         s_quoteArg;
+static bool         s_idStart;
 
 static int          s_findDefArgContext;
 static bool         s_expectGuard;
@@ -2028,6 +2029,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 %x    CopyString
 %x    CopyStringCs
 %x    CopyStringFtn
+%x    CopyStringFtnDouble
 %x    CopyRawString
 %x    Include
 %x    IncludeID
@@ -2191,7 +2193,12 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <CopyLine>\"            {
       QString text = QString::fromUtf8(yytext);
       outputChar(text[0]);
-      BEGIN( CopyString );
+
+      if (getLanguageFromFileName(s_yyFileName) != SrcLangExt_Fortran) {
+         BEGIN(CopyString);
+      } else {
+         BEGIN(CopyStringFtnDouble);
+      }
    }
 
 <CopyLine>\'            {
@@ -2224,6 +2231,22 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
       outputChar(text[0]);
       BEGIN( CopyLine );
+   }
+
+<CopyStringFtnDouble>[^\"\\\r\n]+       {
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
+   }
+
+<CopyStringFtnDouble>\\.                {
+      QString text = QString::fromUtf8(yytext);
+      outputArray(text, text.length());
+   }
+
+<CopyStringFtnDouble>\"                 {
+      QString text = QString::fromUtf8(yytext);
+      outputChar(text[0]);
+      BEGIN(CopyLine);
    }
 
 <CopyStringFtn>[^\'\\\r\n]+      {
@@ -2316,6 +2339,11 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 
 <CopyLine>"\\"\r?/\n    {
       //  strip line continuation characters
+
+      if (getLanguageFromFileName(s_yyFileName) == SrcLangExt_Fortran)  {
+         QString text = QString::fromUtf8(yytext);
+         outputChar(text[0]);
+      }
    }
 
 <CopyLine>\\.           {
@@ -3448,10 +3476,11 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
 <RemoveCPPComment>"//"
 <RemoveCPPComment>[^\x06\n]+
 <RemoveCPPComment>.
-<DefineText>"#"            {
+<DefineText>"#"/{IDSTART}              {
       // */ (editor syntax fix)
 
       s_quoteArg   = true;
+      s_idStart    = true;
       s_defLitText += QString::fromUtf8(yytext);
    }
 
@@ -3475,6 +3504,12 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
             s_defText += numStr;
 
          } else {
+
+            if (s_idStart) {
+               warn(s_yyFileName, s_yyLineNr, "# character must appear before a macro parameter %s: %s",
+                  csPrintable(s_defName), csPrintable(s_defLitText.trimmed()));
+            }
+
             s_defText += text;
 
          }
@@ -3488,6 +3523,7 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       }
 
       s_quoteArg = false;
+      s_idStart  = false;
    }
 
 <CopyCComment>.            {
@@ -3511,6 +3547,20 @@ CHARLIT   (("'"\\[0-7]{1,3}"'")|("'"\\."'")|("'"[^'\\\n]{1,4}"'"))
       QString text = QString::fromUtf8(yytext);
 
       QString comment = extractTrailingComment(s_defLitText);
+      s_defText = s_defText.trimmed();
+
+      if (s_defText.startsWith("##")) {
+         warn(s_yyFileName, s_yyLineNr, "## characters can not occur at the beginning of a macro definition %s: %s",
+             csPrintable(s_defName), csPrintable(s_defLitText.trimmed()));
+
+      } else if (s_defText.endsWith("##")) {
+         warn(s_yyFileName, s_yyLineNr, "## characters can not occur at the end of a macro definition %s: %s",
+             csPrintable(s_defName), csPrintable(s_defLitText.trimmed()));
+
+      } else if (s_defText.endsWith("#")) {
+         warn(s_yyFileName, s_yyLineNr, "Expected formal parameter after # character in macro definition %s: %s",
+             csPrintable(s_defName), csPrintable(s_defLitText.trimmed()));
+      }
       s_defLitText += text;
 
       if (! comment.isEmpty()) {
