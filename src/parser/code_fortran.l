@@ -100,9 +100,9 @@ static int          s_inputLines;                 // number of line in the code 
 static int          s_yyLineNr;                   // current line number
 
 static int          s_contLineNr;                // current, local, line number for continuation determination
-static QVector<int> s_hasContLine;              // does a line have a continuation line (fixed source)
-static bool         s_needsTermination;
+static QVector<int> s_hasContLine;               // does a line have a continuation line (fixed source)
 
+static bool         s_needsTermination;
 static bool         s_collectXRefs;
 static bool         s_isFixedForm;
 static bool         s_isExternal;
@@ -639,11 +639,11 @@ LOG_OPER  (\.and\.|\.eq\.|\.eqv\.|\.ge\.|\.gt\.|\.le\.|\.lt\.|\.ne\.|\.neqv\.|\.
 KIND      {ARGS}
 CHAR      (CHARACTER{ARGS}?|CHARACTER{BS}"*"({BS}[0-9]+|{ARGS}))
 
-TYPE_SPEC (({NUM_TYPE}({BS}"*"{BS}[0-9]+)?)|({NUM_TYPE}{KIND})|DOUBLE{BS}COMPLEX|DOUBLE{BS}PRECISION|{CHAR}|TYPE|CLASS|PROCEDURE|ENUMERATOR)
+TYPE_SPEC    (({NUM_TYPE}({BS}"*"{BS}[0-9]+)?)|({NUM_TYPE}{KIND})|DOUBLE{BS}COMPLEX|DOUBLE{BS}PRECISION|{CHAR}|TYPE|CLASS|PROCEDURE|ENUMERATOR)
 
 INTENT_SPEC  intent{BS}"("{BS}(in|out|in{BS}out){BS}")"
 
-ATTR_SPEC (IMPLICIT|ALLOCATABLE|DIMENSION{ARGS}|EXTERNAL|{INTENT_SPEC}|INTRINSIC|OPTIONAL|PARAMETER|POINTER|PROTECTED|PRIVATE|PUBLIC|SAVE|TARGET|(NON_)?RECURSIVE|PURE|IMPURE|ELEMENTAL|VALUE|NOPASS|DEFERRED|CONTIGUOUS|VOLATILE)
+ATTR_SPEC    (IMPLICIT|ALLOCATABLE|DIMENSION{ARGS}|EXTERNAL|{INTENT_SPEC}|INTRINSIC|OPTIONAL|PARAMETER|POINTER|PROTECTED|PRIVATE|PUBLIC|SAVE|TARGET|(NON_)?RECURSIVE|PURE|IMPURE|ELEMENTAL|VALUE|NOPASS|DEFERRED|CONTIGUOUS|VOLATILE)
 
 ACCESS_SPEC  (PROTECTED|PRIVATE|PUBLIC)
 
@@ -652,9 +652,10 @@ ATTR_STMT    {ATTR_SPEC}|DIMENSION
 FLOW         (DO|SELECT|CASE|SELECT{BS}(CASE|TYPE)|WHERE|IF|THEN|ELSE|WHILE|FORALL|ELSEWHERE|ELSEIF|RETURN|CONTINUE|EXIT|GO{BS}TO)
 
 COMMANDS     (FORMAT|CONTAINS|MODULE{BS_}PROCEDURE|WRITE|READ|ALLOCATE|ALLOCATED|ASSOCIATED|PRESENT|DEALLOCATE|NULLIFY|SIZE|INQUIRE|OPEN|CLOSE|FLUSH|DATA|COMMON)
-
 IGNORE       (CALL)
 PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((NON_)?RECURSIVE|IMPURE|PURE|ELEMENTAL)?
+
+LANGUAGE_BIND_SPEC   BIND{BS}"("{BS}C{BS}(,{BS}NAME{BS}"="{BS}"\""(.*)"\""{BS})?")"
 
 %option caseless
 %option case-insensitive
@@ -819,6 +820,11 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 
 <*>"import"{BS}/"\n"   |
 <*>"import"{BS_}                        {
+      if(YY_START == String) {
+         // ignore in strings
+         YY_FTN_REJECT;
+      }
+
       QString text = QString::fromUtf8(yytext);
 
       startFontClass("keywordtype");
@@ -862,6 +868,32 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       }
    }
 
+
+<Start>("enum")/{BS_}|{BS}{COMMA}{BS}{LANGUAGE_BIND_SPEC}|\n {
+      QString text = QString::fromUtf8(yytext);
+
+      startScope();
+      startFontClass("keyword");
+      codifyLines(text);
+      endFontClass();
+
+      yy_push_state(YY_START);
+      BEGIN(ClassName);
+   }
+
+<*>{LANGUAGE_BIND_SPEC}                 {
+      if (YY_START == String) {
+         YY_FTN_REJECT;
+      }
+
+      QString text = QString::fromUtf8(yytext);
+
+      // ignore in strings
+      startFontClass("keyword");
+      codifyLines(text);
+      endFontClass();
+   }
+
 <Start>("type")/{BS_}|({COMMA}({ACCESS_SPEC}|ABSTRACT|EXTENDS))|\n {
       QString text = QString::fromUtf8(yytext);
 
@@ -900,6 +932,10 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
 <ClassName>\n           {
       // interface may be without name
       yy_pop_state();
+      YY_FTN_REJECT;
+   }
+
+<Start>^{BS}"end"({BS_}"enum").*        {
       YY_FTN_REJECT;
    }
 
@@ -967,7 +1003,7 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       YY_FTN_RESET
    }
 
-<Start>^{BS}"end"{BS}("block"{BS}"data"|{SUBPROG}|"module"|"program"|"type"|"interface")?{BS}     {
+<Start>"end"{BS}("block"{BS}"data"|{SUBPROG}|"module"|"program"|"enum"|"type"|"interface")?{BS}     {
       // Fortran subroutine or function ends
       QString text = QString::fromUtf8(yytext);
 
@@ -980,13 +1016,13 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       BEGIN(Subprogend);
    }
 
-<Subprogend>{ID}/{BS}(\n|!)            {
+<Subprogend>{ID}/{BS}(\n|!|;)           {
       QString text = QString::fromUtf8(yytext);
       generateLink(*s_code, text);
       yy_pop_state();
    }
 
-<Start>^{BS}"end"{BS}("block"{BS}"data"|{SUBPROG}|"module"|"program"|"type"|"interface"){BS}/(\n|!) {
+<Start>"end"{BS}("block"{BS}"data"|{SUBPROG}|"module"|"program"|"enum"|"type"|"interface"){BS}/(\n|!|;) {  // Fortran subroutine or function ends
       // Fortran subroutine or function ends
       QString text = QString::fromUtf8(yytext);
 
@@ -1065,9 +1101,9 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
          s_code->codify(text);
          endFontClass();
 
-      }  else if (s_currentMemberDef != nullptr && ((s_currentMemberDef->isFunction() &&
-                 (s_currentMemberDef->typeString() != "subroutine" || s_inTypeDecl)) || s_currentMemberDef->isVariable())) {
-
+      }  else if (s_currentMemberDef != nullptr && ( (s_currentMemberDef->isFunction() &&
+                 (s_currentMemberDef->typeString() != "subroutine" || s_inTypeDecl) ) ||
+                  s_currentMemberDef->isVariable() || s_currentMemberDef->isEnumValue() )) {
          generateLink(*s_code, text);
 
       } else {
@@ -1186,6 +1222,16 @@ PREFIX       ((NON_)?RECURSIVE{BS_}|IMPURE{BS_}|PURE{BS_}|ELEMENTAL{BS_}){0,4}((
       if (s_isFixedForm && yy_my_start == 6) {
          // fixed form continuation line
          YY_FTN_REJECT;
+      } else if (text.trimmed().toLower() == "type") {
+        yy_push_state(YY_START);
+        BEGIN(Declaration);
+
+        startFontClass("keywordtype");
+        s_code->codify(text.trimmed());
+        endFontClass();
+
+        s_code->codify(text.mid(4));
+
       } else {
          s_insideBody = true;
          generateLink(*s_code, text);
