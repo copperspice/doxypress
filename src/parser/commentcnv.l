@@ -756,7 +756,12 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 <SkipString>\\.               {
       /* escaped character in string */
       QString text = QString::fromUtf8(yytext);
-      copyToOutput(text, text.length());
+      if (s_lang == SrcLangExt_Fortran) {
+         unput(yytext[1]);
+         copyToOutput(text, 1);
+      } else {
+         copyToOutput(text, text.length());
+      }
    }
 
 <SkipString>"\""              {
@@ -782,7 +787,12 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 <SkipChar>\\.                  {
       /* escaped character */
       QString text = QString::fromUtf8(yytext);
-      copyToOutput(text, text.length());
+      if (s_lang == SrcLangExt_Fortran) {
+         unput(yytext[1]);
+         copyToOutput(text, 1);
+      } else {
+         copyToOutput(text, text.length());
+      }
    }
 
 <SkipChar>'                    {
@@ -843,6 +853,13 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       if (s_lang == SrcLangExt_Fortran) {
          BEGIN(Scan);
       }
+   }
+
+<CComment,CNComment>"/""/"+/"*/"  {
+      /* already in C comment, not a start of a nested comment but the end */
+
+      QString text = QString::fromUtf8(yytext);
+      copyToOutput(text, text.length());
    }
 
 <CComment,CNComment>"/"+"*"  {
@@ -1002,7 +1019,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 
       s_inSpecialComment = false;
       s_inRoseComment    = false;
-
+      s_readLineCtx      = Scan;
       BEGIN(Scan);
    }
 
@@ -1071,6 +1088,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       handleCondSectionId(" ");
    }
 
+<CondLine>\n	|
 <CondLine>. {
       // forgot section id
       QString text = QString::fromUtf8(yytext);
@@ -1078,6 +1096,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
 
       if (text[0] == '\n') {
          ++s_lineNr;
+         copyToOutput("\n", 1);
       }
    }
 

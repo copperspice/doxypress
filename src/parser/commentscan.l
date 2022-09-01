@@ -420,7 +420,7 @@ static Protection       s_protection;
 
 static bool             xrefAppendFlag;
 static bool             inGroupParamFound;
-static int              braceCount;
+static int              s_braceCount;
 static bool             insidePre;
 static bool             s_parseMore;
 
@@ -622,28 +622,28 @@ static void addXRefItem(const QString &listName, const QString &itemTitle, const
 static QString addFormula()
 {
    QString formLabel;
-   QString fText = formulaText.simplified();
 
-   auto f = Doxy_Globals::formulaDict.find(fText);
+   auto f = Doxy_Globals::formulaDict.find(formulaText);
 
    if (f == Doxy_Globals::formulaDict.end()) {
-      Formula temp = Formula(fText);
+      Formula tmp = Formula(formulaText);
 
-      Doxy_Globals::formulaList.append(temp);
-      Doxy_Globals::formulaDict.insert(fText, temp);
+      Doxy_Globals::formulaList.append(tmp);
+      Doxy_Globals::formulaDict.insert(formulaText, tmp);
 
-      formLabel = QString("\\form#%1").formatArg(temp.getId());
+      formLabel = QString("\\form#%1").formatArg(tmp.getId());
 
-      Doxy_Globals::formulaNameDict.insert(formLabel, temp);
-      f = Doxy_Globals::formulaDict.find(fText);
+      Doxy_Globals::formulaNameDict.insert(formLabel, tmp);
+      f = Doxy_Globals::formulaDict.find(formulaText);
 
    } else {
       formLabel = QString("\\form#%1").formatArg(f->getId());
 
    }
 
-   for (int i = 0; i < formulaNewLines; i++) {
-      formLabel += "@_fakenl";   // add fake newlines to
+   for (int i = 0; i < formulaNewLines; ++i) {
+      // add fake newlines to keep the warnings correctly aligned
+      formLabel += "@_fakenl";
    }
 
    return formLabel;
@@ -1627,8 +1627,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       addToOutput(text[2]);
    }
 
-<Comment>".,"           {
-      // . with comma such as "e.g.,"
+<Comment>"."[,:;]         {
+      // . with some syntax like "e.g.," or "e.g.:"
       QString text = QString::fromUtf8(yytext);
       addToOutput(text);
    }
@@ -1662,8 +1662,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
                ++i;
 
             } else if (text.mid(i) == "\\internal_linebr")  {
-               addToOutput('\n');
-               i += 8;
+               addToOutput("\\internal_linebr");
+               i += 16;
 
             } else  {
                ++i;
@@ -1678,8 +1678,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
                i++;
 
             } else if (text.mid(i) == "\\internal_linebr")  {
-                addToOutput('\n');
-                i += 8;
+               addToOutput("\\internal_linebr");
+               i += 16;
 
             } else  {
                i++;
@@ -2056,12 +2056,8 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
 
       warn(yyFileName, yyLineNr, "Missing argument after \\concept");
+      unputString(text);
 
-      if (text[0] == '\n') {
-         yyLineNr++;
-      }
-
-      addToOutput('\n');
       BEGIN( Comment );
    }
 
@@ -2529,6 +2525,11 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN( Comment );
    }
 
+<SubpageLabel>.      {
+      unput(yytext[0]);
+      BEGIN( Comment );
+   }
+
 <SubpageTitle>{DOCNL}         {
       // no title, end command
       QString text = QString::fromUtf8(yytext);
@@ -2972,7 +2973,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       // end of fn declaration, pass to langParser as a "prototype"
       QString text = QString::fromUtf8(yytext);
 
-      if (braceCount == 0) {
+      if (s_braceCount == 0) {
          unputString(text);
 
          if (langParser != nullptr) {
@@ -2997,12 +2998,12 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
 <FnParam>"("            {
       s_functionProto += QString::fromUtf8(yytext);
-      braceCount++;
+      ++s_braceCount;
    }
 
 <FnParam>")"            {
       s_functionProto += QString::fromUtf8(yytext);
-      braceCount--;
+      --s_braceCount;
    }
 
 <FnParam>.           {
@@ -3169,17 +3170,9 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
 
   /* ----- handle argument of the copydoc command ------- */
 
-<CopyDoc><<EOF>>        |
-<CopyDoc>{DOCNL}        {
-      QString text = QString::fromUtf8(yytext);
-      if (text[0] == '\n') {
-         ++yyLineNr;
-      }
-
-      addToOutput('\n');
-
+<CopyDoc><<EOF>>        {
       setOutput(OutputMainDoc);
-      addToOutput(" \\copydetails ");
+      addToOutput(" \\ilinebr\\ilinebr\\copydetails ");
       addToOutput(s_copyDocArg);
 
       addToOutput("\n");
@@ -3187,10 +3180,52 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN(Comment);
    }
 
-<CopyDoc>[^\n\\]+          {
+<CopyDoc>{DOCNL}        {
       QString text = QString::fromUtf8(yytext);
+      if (text[0] == '\n') {
+         ++yyLineNr;
+      }
+
+      if (s_braceCount == 0) {
+
+         setOutput(OutputMainDoc);
+         addToOutput(" \\ilinebr\\ilinebr\\copydetails ");
+         addToOutput(s_copyDocArg);
+
+         addToOutput("\n");
+
+         BEGIN(Comment);
+      }
+   }
+
+<CopyDoc>{LC}              {
+      // line continuation
+      ++yyLineNr;
+   }
+
+<CopyDoc>[^@\\\n()]+          {
+      QString text = QString::fromUtf8(yytext);
+
       s_copyDocArg += text;
       addToOutput(text);
+   }
+
+<CopyDoc>"("                  {
+      QString text = QString::fromUtf8(yytext);
+
+      s_copyDocArg += text;
+      addToOutput(text);
+
+      ++s_braceCount;
+   }
+
+<CopyDoc>")"                  {
+      QString text = QString::fromUtf8(yytext);
+
+      s_copyDocArg += text;
+      addToOutput(text);
+
+      --s_braceCount;
    }
 
 <CopyDoc>.           {
@@ -3218,7 +3253,7 @@ static bool handleProperty(const QString &str, const QStringList &list)
 
    bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
    s_functionProto.clear();
-   braceCount = 0;
+   s_braceCount = 0;
    BEGIN(FnParam);
 
    current->mtype = MethodType::Property;
@@ -3233,7 +3268,7 @@ static bool handleFn(const QString &str, const QStringList &list)
 
    bool stop = makeStructuralIndicator(Entry::MEMBERDOC_SEC);
    s_functionProto.clear();
-   braceCount = 0;
+   s_braceCount = 0;
    BEGIN(FnParam);
 
    return stop;
