@@ -913,11 +913,15 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
       // not a local variable
       QSharedPointer<Definition> d = g_currentDefinition;
 
-      cd = getResolvedClass(d, g_sourceFileDef, className, &md);
-      int i;
+      int i = className.indexOf('<');
+      QString bareName = className;
 
-      if (cd == nullptr && md == nullptr && (i = className.indexOf('<')) != -1) {
-         QString bareName = className.left(i);
+      if (i != -1) {
+         bareName = className.left(i);
+      }
+      cd = getResolvedClass(d, g_sourceFileDef, className, &md);
+
+      if (cd == nullptr && md == nullptr && ! bareName.isEmpty()) {
 
          if (bareName != className) {
             // try unspecialized version
@@ -2699,7 +2703,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body,FuncCall>"$"?"this"("->"|".")    {
       QString text = QString::fromUtf8(yytext);
-      g_code->codify(text);                      // "this->" for C++   "this." for C#
+      g_code->codify(text);                      // "this->" for C++ "this." for C#
       s_prefix_this = true;
    }
 
@@ -3858,6 +3862,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <CallEnd>"try"             {
       // function-try-block
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       g_code->codify(text);
       endFontClass();
@@ -3972,6 +3977,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       generateClassOrGlobalLink(*g_code, text.leftView(len));
       g_code->codify(text.midView(len));
    }
+
 <SkipInits>{ID}            {
       QString text = QString::fromUtf8(yytext);
       generateClassOrGlobalLink(*g_code, text);
@@ -4619,7 +4625,7 @@ void parseCCode(CodeGenerator &outputX, const QString &className, const QString 
 
    if (fd == nullptr) {
       // create a dummy filedef for the example
-      g_sourceFileDef  = QMakeShared<FileDef>("", (! exName.isEmpty() ? exName : "generated"));
+      g_sourceFileDef  = QMakeShared<FileDef>(QString(), (! exName.isEmpty() ? exName : "generated"));
       cleanupSourceDef = true;
    }
 
@@ -4633,7 +4639,12 @@ void parseCCode(CodeGenerator &outputX, const QString &className, const QString 
       setCurrentDoc("l00001");
    }
 
-   g_currentDefinition = QSharedPointer<Definition>();
+   if (searchCtx == nullptr) {
+       g_currentDefinition = getResolvedNamespace(className);
+   } else {
+       g_currentDefinition = searchCtx;
+   }
+
    g_currentMemberDef  = QSharedPointer<MemberDef>();
 
    g_searchingForBody  = exBlock;
