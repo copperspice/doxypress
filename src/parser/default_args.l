@@ -36,6 +36,7 @@ static QString          s_curArgArray;
 static QString          s_curTypeConstraint;
 static QString          s_extraTypeChars;
 static int              s_argRoundCount;
+static int              s_argSquareCount;
 static int              s_argSharpCount;
 static int              s_argCurlyCount;
 static int              s_readArgContext;
@@ -122,6 +123,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 %x    CopyRawString
 %x    CopyArgRound
 %x    CopyArgRound2
+%x    CopyArgSquare
 %x    CopyArgSharp
 %x    CopyArgCurly
 %x    ReadFuncArgType
@@ -242,7 +244,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       s_curArgTypeName += text;
    }
 
-<ReadFuncArgType,ReadFuncArgDef>[({<]  {
+<ReadFuncArgType,ReadFuncArgDef>[({<\[]  {
       QString text = QString::fromUtf8(yytext);
 
       if (YY_START == ReadFuncArgType) {
@@ -259,6 +261,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       if (text[0] == '(') {
          s_argRoundCount = 0;
          BEGIN(CopyArgRound);
+
+      } else if (text[0] == '[') {
+         s_argSquareCount = 0;
+         BEGIN(CopyArgSquare);
 
       } else if (text[0] == '{') {
          s_argCurlyCount = 0;
@@ -308,6 +314,35 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       }
    }
+
+<CopyArgSquare>"["   {
+      QString text = QString::fromUtf8(yytext);
+      *s_copyArgValue += text[0];
+      ++s_argSquareCount;
+   }
+
+<CopyArgSquare>"]"({B}*{ID})* {
+      QString text = QString::fromUtf8(yytext);
+      *s_copyArgValue += text;
+
+      if (s_argSquareCount > 0) {
+         --s_argRoundCount;
+      } else {
+         BEGIN(s_readArgContext);
+      }
+   }
+
+<CopyArgSquare>"]"/{B}*                  {
+      QString text = QString::fromUtf8(yytext);
+      *s_copyArgValue += text[0];
+
+      if (s_argSquareCount > 0)  {
+         --s_argSquareCount;
+      } else {
+         BEGIN(s_readArgContext);
+      }
+   }
+
 
 <CopyArgSharp>"<<"                      {
       QString text = QString::fromUtf8(yytext);
@@ -565,7 +600,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
    }
 
 <ReadFuncArgType,ReadFuncArgPtr>"extends" {
-      s_curTypeConstraint.resize(0);
+      if (s_language != SrcLangExt_Java) {
+         REJECT;
+      }
+
+      s_curTypeConstraint.clear();
       s_lastExtendsContext = YY_START;
       BEGIN(ReadTypeConstraint);
    }
@@ -598,12 +637,12 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       s_curArgDefValue += text[0];
    }
 
-<CopyArgRound,CopyArgRound2,CopyArgSharp,CopyArgCurly>{ID}  {
+<CopyArgRound,CopyArgRound2,CopyArgSquare,CopyArgSharp,CopyArgCurly>{ID}  {
       QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text;
    }
 
-<CopyArgRound,CopyArgRound2,CopyArgSharp,CopyArgCurly>.  {
+<CopyArgRound,CopyArgRound2,CopyArgSquare,CopyArgSharp,CopyArgCurly>.  {
       QString text = QString::fromUtf8(yytext);
       *s_copyArgValue += text[0];
    }
@@ -628,6 +667,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <FuncQual>"volatile"            {
       s_argList.volatileSpecifier = true;
+   }
+
+<FuncQual>"override"            {
    }
 
 <FuncQual>"&"                   {
