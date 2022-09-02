@@ -105,6 +105,33 @@ bool doctokenizerYYpopContext()
    return TRUE;
 }
 
+QString extractTextAfterNewLine(const QString &text)
+{
+   auto iter_1 = text.indexOfFast('\n');
+   auto iter_2 = text.indexOfFast("\\internal_linebr");
+
+   if (iter_1 != text.end() && iter_1 < iter_2) {
+      return QString(iter_1 + 1, text.end());
+   }
+
+   if (iter_2 != text.end()) {
+      iter_2 = iter_2 + 16;
+
+      if (iter_2 != text.end()) {
+
+         if (*iter_2 == ' ') {
+            // skip space after \\internal_linebr
+            ++iter_2;
+         }
+      }
+
+      return QString(iter_2, text.end());
+   }
+
+   return text;
+}
+
+
 QString tokToString(int token)
 {
    QString retval = "ERROR";
@@ -425,9 +452,9 @@ static void handleHtmlTag()
       opt.value = opt.value.toLower();
 
            if (opt.value == "center") {
-	      opt.value = "middle";
-	   }
-	}
+         opt.value = "middle";
+      }
+   }
       } else {
          // start next option
 
@@ -539,28 +566,29 @@ ATTRIB      {ATTRNAME}{WS}*("="{WS}*(("\""[^\"]*"\"")|("'"[^\']*"'")|[^ \t\r\n'"
 URLCHAR     [a-z_A-Z0-9\!\~\,\:\;\'\$\?\@\&\%\#\.\-\+\/\=\x80-\xFF]
 URLMASK     ({URLCHAR}+([({]{URLCHAR}*[)}])?)+
 URLPROTOCOL ("http:"|"https:"|"ftp:"|"ftps:"|"sftp:"|"file:"|"news:"|"irc:"|"ircs:")
-FILESCHAR [a-z_A-Z0-9\\:\\\/\-\+&#@]
-FILEECHAR [a-z_A-Z0-9\-\+&#@]
+FILE_I_CHAR [a-z_A-Z0-9\\:\\\/\-\+=&#@]
+FILE_E_CHAR [a-z_A-Z0-9\-\+=&#@]
+FILE_CHARS  {FILE_I_CHAR}*{FILE_E_CHAR}+
 
-HFILEMASK ("."{FILESCHAR}*{FILEECHAR}+)+
-FILEMASK  ({FILESCHAR}*{FILEECHAR}+("."{FILESCHAR}*{FILEECHAR}+)*)|{HFILEMASK}
-
-SPCMD3    {CMD}form#[0-9]+
-FUNCCHAR  [a-z_A-Z0-9,:\<\> \t\^\*\&\[\]]|{VARARGS}
-TEMPLPART "<"{TEMPCHAR}*">"
+H_FILEMASK  {FILE_I_CHAR}*("."{FILE_I_CHAR}+)+{FILE_CHARS}*
+V_FILEMASK  {FILE_CHARS}("."{FILE_CHARS})*
+FILEMASK    {V_FILEMASK}|{H_FILEMASK}
 
 LINKMASK    [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLANK}+)?
 VERBATIM    "verbatim"{BLANK}*
 SPCMD1      {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
 SPCMD2      {CMD}[\\@<>&$#%~".+=|-]
+SPCMD3      {CMD}_form#[0-9]+
 SPCMD4      {CMD}"::"
 SPCMD5      {CMD}":"
 INOUT       "in"|"out"|("in"{BLANK}*","?{BLANK}*"out")|("out"{BLANK}*","?{BLANK}*"in")
 PARAMIO     {CMD}param{BLANK}*"["{BLANK}*{INOUT}{BLANK}*"]"
 VARARGS     "..."
 TEMPCHAR    [a-z_A-Z0-9.,: \t\*\&\(\)\[\]]
+FUNCCHAR    [a-z_A-Z0-9,:\<\> \t\n\^\*\&\[\]]|{VARARGS}|"\\internal_linebr"
 FUNCPART    {FUNCCHAR}*("("{FUNCCHAR}*")"{FUNCCHAR}*)?
 SCOPESEP    "::"|"#"|"."
+TEMPLPART   "<"{TEMPCHAR}*("<"{TEMPCHAR}*("<"{TEMPCHAR}*">")?">")?">"
 ANONNS      "anonymous_namespace{"[^}]*"}"
 SCOPEPRE    (({ID}{TEMPLPART}?)|{ANONNS}){SCOPESEP}
 SCOPEKEYS   ":"({ID}":")*
@@ -586,14 +614,14 @@ LNKWORD1    ("::"|"#")?{SCOPEMASK}
 LNKWORD2    (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
 LNKWORD3    ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
 
-ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")|("%"{ID}"<"{TEMPCHAR}*">"("::"{ID})?)
-CHARWORDQ1  [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
-CHARWORDQ2  [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
+ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")
+CHARWORD1   [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
+CHARWORD2   [^ \-+0-9\t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
 
-WORD1       {ESCWORD}|{CHARWORDQ2}{CHARWORDQ1}*|"{"|"}"|"'\"'"|("\""([^"\n]*(\\\")?\n?)*[^"\n]*"\"")
+WORD1       {ESCWORD}|{CHARWORD2}{CHARWORD1}*|"{"|"}"|"'\"'"|("\""([^"\n]*(\\\"|\n)?)*[^"\n]*"\"")
 WORD2       "."|","|"("|")"|"["|"]"|"::"|":"|";"|"\?"|"="|"'"
 
-WORD1NQ     {ESCWORD}|{CHARWORDQ1}+|"{"|"}"
+WORD1NQ     {ESCWORD}|{CHARWORD1}+|"{"|"}"
 WORD2NQ     "."|","|"("|")"|"["|"]"|"::"|":"|";"|"\?"|"="|"'"
 CAPTION     [cC][aA][pP][tT][iI][oO][nN]
 HTMLTAG     "<"(("/")?){ID}({WS}+{ATTRIB})*{WS}*(("/")?)">"
@@ -731,9 +759,9 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_Para>{BLANK}*(\n|"\\internal_linebr"){LISTITEM}     {
       /* list item on next line */
       QString text = QString::fromUtf8(yytext);
-      s_yyLineNum += text.count('\n');
 
-      text = text.right(text.length() - text.indexOf('\n') - 1);
+      s_yyLineNum += text.count('\n');
+      text        = extractTextAfterNewLine(text);
       int dashPos = text.lastIndexOf('-');
 
       g_token->isEnumList = text.at(dashPos + 1) == '#';
@@ -750,9 +778,9 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
       } else {
          QString text = QString::fromUtf8(yytext);
-         s_yyLineNum += text.count('\n');
 
-         text = text.right(text.length() - text.indexOf('\n') - 1);
+         s_yyLineNum += text.count('\n');
+         text = extractTextAfterNewLine(text);
 
          static QRegularExpression regExp("^.*[*+]");
          QRegularExpressionMatch match = regExp.match(text);
@@ -776,11 +804,9 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
       } else {
          QString text = QString::fromUtf8(yytext);
-         s_yyLineNum += text.count('\n');
 
-         int nl  = text.lastIndexOf('\n');
-         int len = text.length();
-         text    = text.right(len - nl - 1);
+         s_yyLineNum += text.count('\n');
+         text        = extractTextAfterNewLine(text);
 
          static QRegularExpression regExp("([1-9]+)");
          QRegularExpressionMatch match = regExp.match(text);
@@ -809,17 +835,22 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_Para>{BLANK}*(\n|"\\internal_linebr"){ENDLIST}      {
       /* end list on next line */
       QString text = QString::fromUtf8(yytext);
-      s_yyLineNum += text.count('\n');
 
-      text = text.right(text.length() - text.indexOf('\n') - 1);
-      int dotPos = text.lastIndexOf('.');
+      s_yyLineNum += text.count('\n');
+      text        = extractTextAfterNewLine(text);
+      int dotPos  = text.lastIndexOf('.');
 
       g_token->indent = computeIndent(text,dotPos);
 
       return TK_ENDLIST;
    }
 
-<St_Para>"{"{BLANK}*"@link"/{BLANK}+ {
+<St_Para>"{"{BLANK}*"@linkplain"/{WS}+ {
+      g_token->name = "javalinkplain";
+      return TK_COMMAND_AT;
+   }
+
+<St_Para>"{"{BLANK}*"@link"/{WS}+ {
       g_token->name = "javalink";
       return TK_COMMAND_AT;
    }
@@ -1027,11 +1058,14 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
   /********* patterns for normal words ******************/
 
-<St_Para,St_Text>[0-9]+       |
-<St_Para,St_Text>[\-+]        |
-<St_Para,St_Text>{WORD1}      |
+<St_Para,St_Text>[0-9]+    |
+<St_Para,St_Text>[\-+]     |
+<St_Para,St_Text>{WORD1}/("<"{BLANK}*{HTMLKEYW}{BLANK}*">")?  |
+<St_Para,St_Text>{WORD1}("<"{BLANK}*{ID}+{BLANK}*">")?        |
+<St_Para,St_Text>{WORD1}   |
 <St_Para,St_Text>{WORD2}               {
       // function call, rule resolves multiple digit numbers
+      // matches MyClass<int> but not MyClass<i>
       QString text = QString::fromUtf8(yytext);
 
       if (text.contains("\\internal_linebr")) {
@@ -1580,11 +1614,14 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
 <St_Cite>{CITEID}      {
       // label to cite
-      g_token->name = QString::fromUtf8(yytext);
+      QString text = QString::fromUtf8(yytext);
 
-      if (g_token->name.startsWith('"')) {
-         g_token->name = g_token->name.mid(1);
+
+      if (text.startsWith('"')) {
+         g_token->name = text.mid(1);
          g_token->name.chop(1);
+      } else {
+         g_token->name = text;
       }
 
       return TK_WORD;
@@ -1809,6 +1846,13 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 
 <St_Options>{ID}       {
       g_token->name += QString::fromUtf8(yytext);
+   }
+
+<St_Options>{WS}*":"{WS}* {
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum += text.count('\n');
+
+      g_token->name += ":";
    }
 
 <St_Options>{WS}*","{WS}*
@@ -2332,6 +2376,7 @@ void doctokenizerYYsetStateAnchor()
 
 void doctokenizerYYsetStateSnippet()
 {
+   g_token->name = "";
    BEGIN(St_Snippet);
 }
 
