@@ -3379,10 +3379,10 @@ static bool handleClass(const QString &str, const QStringList &list)
 
 static bool handleConcept(const QString &str, const QStringList &list)
 {
-   (void) str;
    (void) list;
 
    bool stop = makeStructuralIndicator(Entry::CONCEPTDOC_SEC);
+   s_currentCommand = str;
    BEGIN( ConceptDocArg1 );
 
    return stop;

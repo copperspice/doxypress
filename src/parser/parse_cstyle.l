@@ -116,6 +116,7 @@ static bool             insideCpp    = true;          // processing C/C++ code
 
 static bool             insideCppQuote     = false;
 static bool             insideProtocolList = false;
+static bool             insideConstraint   = false;
 static bool             s_doxyComment      = false;
 
 static int              argRoundCount;
@@ -4507,7 +4508,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_squareGEnum  = EntryKey::Initial_Value;
       squareCount    = 0;
 
-      current->appendData(EntryKey::Initial_Value,    text[0]);
+      current->appendData(EntryKey::Initial_Value, text[0]);
 
       BEGIN(GCopySquare);
    }
@@ -4521,7 +4522,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       s_curlyGEnum  = EntryKey::Initial_Value;
       curlyCount    = 0;
 
-      current->appendData(EntryKey::Initial_Value,    text[0]);
+      current->appendData(EntryKey::Initial_Value, text[0]);
 
       BEGIN(GCopyCurly);
    }
@@ -4555,6 +4556,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                current->setData(EntryKey::Initial_Value, QString());
             }
 
+            if (insideConstraint) {
+               current->setData(EntryKey::Constraint, current->getData(EntryKey::Initial_Value));
+               current->setData(EntryKey::Initial_Value, QString());
+
+               insideConstraint = false;
+            }
+
             BEGIN(lastInitializerContext);
 
          } else if (text[0] == ',' && initBracketCount == 0) {
@@ -4564,6 +4572,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
             if (YY_START == ReadInitializerPtr) {
                current->setData(EntryKey::Initial_Value, QString());
+            }
+
+            if (insideConstraint) {
+               current->setData(EntryKey::Constraint, current->getData(EntryKey::Initial_Value));
+               current->setData(EntryKey::Initial_Value, QString());
+
+               insideConstraint = false;
             }
 
             BEGIN(lastInitializerContext);
@@ -8431,10 +8446,11 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <ConceptName>"="    {
       current->startBodyLine   = yyLineNr;
-      current->setData(EntryKey::Initial_Value, "");
 
+      current->setData(EntryKey::Initial_Value, QString());
       lastInitializerContext = FindMembers;
       initBracketCount = 0;
+      insideConstraint = true;
 
       BEGIN(ReadInitializer);
    }

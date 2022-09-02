@@ -180,7 +180,7 @@ void ConceptDef::writeDocumentation(OutputList &ol)
 
    writeBriefDescription(ol);
    writeIncludeFiles(ol);
-   writeDetailedDescription(ol, theTranslator->trDetailedDescription(), "SOME ANCHOR");
+   writeDetailedDescription(ol, theTranslator->trDetailedDescription(), QString());
 
    ol.endContents();
    endFileWithNavPath(self, ol);
@@ -228,7 +228,7 @@ void ConceptDef::writeDetailedDescription(OutputList &ol, const QString &title, 
 
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
-      ol.writeAnchor("", anchor.isEmpty() ? QString("details") : anchor);
+      ol.writeAnchor(QString(), anchor.isEmpty() ? QString("details") : anchor);
       ol.popGeneratorState();
 
       if (! anchor.isEmpty()) {

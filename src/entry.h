@@ -114,6 +114,7 @@ class Entry : public EnableSharedFromThis
    enum Sections {
       CLASS_SEC        = 0x00000001,
       NAMESPACE_SEC    = 0x00000010,
+      CONCEPT_SEC      = 0x00000020,
       COMPOUND_MASK    = CLASS_SEC,
       SCOPE_MASK       = COMPOUND_MASK | NAMESPACE_SEC,
 

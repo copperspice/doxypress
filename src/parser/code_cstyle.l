@@ -2631,6 +2631,16 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_sharpCount = 0;
    }
 
+<Body>"concept"{BN}+                {
+      QString text = QString::fromUtf8(yytext);
+
+      startFontClass("keyword");
+      codifyLines(text);
+      endFontClass();
+
+      BEGIN(ConceptName);
+   }
+
 <Body>"using"{BN}+"namespace"{BN}+  {
       QString text = QString::fromUtf8(yytext);
 
@@ -2641,15 +2651,37 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       BEGIN(UsingName);
    }
 
+<Body>"using"{BN}+            {
+      QString text = QString::fromUtf8(yytext);
+
+      startFontClass("keyword");
+      codifyLines(text);
+      endFontClass();
+
+      BEGIN(UsingName);
+   }
+
+<ConceptName>{ID}("::"{ID})*   {
+      QString text = QString::fromUtf8(yytext);
+      generateClassOrGlobalLink(*g_code, text);
+   }
+
+<ConceptName>"="        {
+      QString text = QString::fromUtf8(yytext);
+
+      codifyLines(text);
+      BEGIN(Body);
+   }
+
 <UsingName>{ID}("::"{ID})*       {
       QString text = QString::fromUtf8(yytext);
-      addUsingDirective(text);
-      generateClassOrGlobalLink(*g_code, text);
 
-      DBG_CTX((stderr,"** scope stack push CLASSBLOCK\n"));
+      addUsingDirective(substitute(text, ".", "::"));
+      generateClassOrGlobalLink(*g_code, text);
 
       g_scopeStack.push(CLASSBLOCK);
       pushScope(text);
+
       BEGIN(Body);
    }
 
@@ -3830,6 +3862,14 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
       endFontClass();
       g_inFunctionTryBlock = true;
+   }
+
+<CallEnd>"requires"        {
+      QString text = QString::fromUtf8(yytext);
+
+      startFontClass("keyword");
+      g_code->codify(text);
+      endFontClass();
    }
 
 <CallEnd>{ID}           {
