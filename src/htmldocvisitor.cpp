@@ -2072,6 +2072,7 @@ void HtmlDocVisitor::visitPre(DocImage *img)
       if (img->hasCaption()) {
          if (inlineImage) {
             m_t << " title=\"";
+            // m_insideTitle = true;
 
          } else {
             m_t << "<div class=\"caption\">" << endl;
@@ -2101,6 +2102,7 @@ void HtmlDocVisitor::visitPost(DocImage *img)
       if (img->hasCaption()) {
          if (inlineImage) {
             m_t << "\"/>";
+            // m_insideTitle = false;
 
          } else {
             m_t << "</div>";

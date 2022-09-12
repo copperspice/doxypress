@@ -1071,7 +1071,7 @@ QSharedPointer<Entry> tcl_entry_new()
    QSharedPointer<Entry> myEntry = QMakeShared<Entry>();
 
    myEntry->section     = Entry::EMPTY_SEC;
-   myEntry->m_entryName = "";
+   myEntry->m_entryName = QString();
    myEntry->protection  = Public;
    myEntry->m_srcLang   = SrcLangExt_Tcl;
 
@@ -3316,7 +3316,7 @@ static tcl_scan *tcl_scan_start(QChar type, const QString &content_t, const QStr
    }
 
    if (myScan->tclType != ' ') {
-      tcl_codify("", myScan->tclType);
+      tcl_codify(QString(), myScan->tclType);
       content = content.mid(1, content.length() - 2);
    }
 
@@ -3668,7 +3668,6 @@ static void tcl_comment(int what, const QString  &text)
       }
 
       yy_push_state(COMMENT);
-
       tcl.string_comment = "";
       tcl.comment = 0;
 
@@ -3695,7 +3694,6 @@ static void tcl_comment(int what, const QString  &text)
 
       } else {
          tcl.string_last = "";
-
       }
 
       yy_pop_state();
@@ -3707,7 +3705,7 @@ static void tcl_comment(int what, const QString  &text)
 
       if (tcl.this_parser && tcl.string_comment.length()) {
          int myPos  = 0;
-         bool myNew = 0;
+         bool myNew = false;
          int myLine = tcl.line_comment;
 
          QString myIn;
@@ -3733,7 +3731,7 @@ static void tcl_comment(int what, const QString  &text)
             QSharedPointer<Entry> myEntry;
             QSharedPointer<Entry> myEntry1;
 
-            if (tcl.listScan.length() > 0 ) {
+            if (tcl.listScan.length() > 0) {
                if (tcl.listScan.at(0)->entry_fn) {
                   myEntry1 = tcl.listScan.at(0)->entry_fn;
 
@@ -3746,6 +3744,9 @@ static void tcl_comment(int what, const QString  &text)
             myPos0  = myPos;
             myLine0 = myLine;
 
+            // emerald replace myDoc with processDoc
+            // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine);
+
             while (parseCommentBlock(tcl.this_parser, myEntry0, myDoc, tcl.file_name,
                                      myLine, FALSE, tcl.config_autobrief, FALSE, myProt, myPos, myNew)) {
 
@@ -3753,6 +3754,8 @@ static void tcl_comment(int what, const QString  &text)
                   // we need a new entry in this case
                   myNew = 0;
                   myEntry = tcl_entry_new();
+                  // emerald repalce myDoc with processDoc
+                  // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine0);
 
                   parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                                     myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
@@ -3764,6 +3767,9 @@ static void tcl_comment(int what, const QString  &text)
                   if (! myEntry1 && tcl.listScan.length() > 0) {
                      myEntry1 = tcl_entry_namespace(tcl.listScan.at(0)->ns);
                   }
+
+                  // emerald repalce myDoc with processDoc
+                  // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine0);
 
                   parseCommentBlock(tcl.this_parser, myEntry1, myDoc, tcl.file_name,
                                     myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
@@ -3777,8 +3783,12 @@ static void tcl_comment(int what, const QString  &text)
                // we need a new entry
                myNew   = 0;
                myEntry = tcl_entry_new();
+
+               // emerald repalce myDoc with processDoc
+               // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine0);
+
                parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
-                                 myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
+                     myLine0, false, tcl.config_autobrief, false, myProt, myPos0, myNew);
 
                tcl.entry_inside->addSubEntry(myEntry);
 
@@ -3789,15 +3799,19 @@ static void tcl_comment(int what, const QString  &text)
                }
 
                parseCommentBlock(tcl.this_parser, myEntry1, myDoc, tcl.file_name,
-                                 myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
+                     myLine0, false, tcl.config_autobrief, false, myProt, myPos0, myNew);
             }
+
          } else {
             // new entry
             tcl.entry_current = tcl_entry_new();
 
+            // emerald repalce myDoc with processDoc
+            // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine);
+
             while (parseCommentBlock(tcl.this_parser, tcl.entry_current, myDoc,
-                                     tcl.file_name, myLine, false, tcl.config_autobrief, FALSE,
-                                     myProt, myPos, myNew)) {
+                  tcl.file_name, myLine, false, tcl.config_autobrief, false,
+                  myProt, myPos, myNew)) {
                if (myNew) {
                   tcl.entry_inside->addSubEntry(tcl.entry_current);
                   tcl.entry_current = tcl_entry_new();
@@ -3831,7 +3845,7 @@ static void tcl_comment(int what, const QString  &text)
 // Parse given arglist .
 static void tcl_command_ArgList(QString &arglist)
 {
-   QString retval = "";
+   QString retval = QString();
 
    QStringList myArgs;
    myArgs = tcl_split_list(arglist);
@@ -5092,12 +5106,13 @@ static void tcl_command(int what, const QString &text)
       char myState = 'x'; // last word: e'x'pr 't'hen 'b'ody 'e'lse else'i'f..
 
       for (unsigned int i = 4; i < tcl.listCommandwords.count(); i = i + 2) {
-         QString myStr = tcl.listCommandwords.at(i);
+         QString word = tcl.listCommandwords.at(i);
 
          if (myState == 'x') {
-            if (myStr == "then") {
+            if (word == "then") {
                myState = 't';
                myType << "keyword" << "NULL";
+
             } else {
                myState = 'b';
                myType << "script" << "NULL";
@@ -5108,17 +5123,20 @@ static void tcl_command(int what, const QString &text)
             myType << "script" << "NULL";
 
          } else if (myState == 'b') {
-            if (myStr == "elseif") {
+            if (word == "elseif") {
                myState = 'i';
                myType << "keyword" << "NULL";
-            } else if (myStr == "else" && i == tcl.listCommandwords.count() - 3) {
+
+            } else if (word == "else" && i == tcl.listCommandwords.count() - 3) {
                myState = 'b';
                myType << "keyword" << "NULL" << "script";
                i = tcl.listCommandwords.count();
+
             } else if (i == tcl.listCommandwords.count() - 1) {
                myState = 'b';
                myType << "script";
                i = tcl.listCommandwords.count();
+
             } else {
                myLine = __LINE__;
                goto command_warn;
