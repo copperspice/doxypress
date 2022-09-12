@@ -10,8 +10,8 @@ endif()
 project(doxypress)
 
 set(BUILD_MAJOR "1")
-set(BUILD_MINOR "4")
-set(BUILD_MICRO "2")
+set(BUILD_MINOR "5")
+set(BUILD_MICRO "0")
 
 set(BUILD_COMPONENTS "doxypress")
 
