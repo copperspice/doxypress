@@ -34,7 +34,13 @@ static int compItems(const QSharedPointer<ClassDef> &c1, const QSharedPointer<Cl
       return c1->name().compare(c2->name(), Qt::CaseInsensitive);
 
    } else {
-      return c1->className().compare(c2->className(), Qt::CaseInsensitive);
+      int compareResult = c1->className().compare(c2->className(), Qt::CaseInsensitive);
+
+      if (compareResult == 0) {
+         return c1->name().compare(c2->name(), Qt::CaseInsensitive);
+      } else {
+         return compareResult;
+      }
    }
 }
 
