@@ -1149,21 +1149,57 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
    isFirst = false;
    isLast  = false;
 
-   if (p && p->parent()) {
+   if (p != nullptr && p->parent()) {
 
       switch (p->parent()->kind()) {
-         case DocNode::Kind_ParBlock: {
-            // hierarchy: node N -> para -> parblock -> para
-            // adapt return value to kind of N
 
+         case DocNode::Kind_Root: {
+            const auto &kids = ((DocRoot *)p->parent())->children();
+
+            for (auto iter = kids.begin(); iter != kids.end(); ++iter) {
+
+               if (*iter == p) {
+                  if (iter != kids.begin()) {
+                     const DocStyleChange *sc = dynamic_cast<DocStyleChange *>(*(iter-1));
+
+                     if (sc != nullptr) {
+                        if (sc->style() == DocStyleChange::Div) {
+                           isFirst = true;
+                        }
+                     }
+                  }
+
+                  if (iter+1 != kids.end()) {
+                     const DocStyleChange *sc = dynamic_cast<DocStyleChange *>(*(iter+1));
+
+                     if (sc != nullptr) {
+                        if (sc->style() == DocStyleChange::Div) {
+                           isLast = true;
+                        }
+                     }
+                  }
+
+                  break;
+               }
+            }
+
+            if (isFirst == true && isLast == true) {
+               t = ContextState::None;
+            }
+
+            break;
+         }
+
+         case DocNode::Kind_ParBlock: {
             DocNode::Kind kind = DocNode::Kind_Para;
-            if ( p->parent()->parent() && p->parent()->parent()->parent() ) {
+
+            if (p->parent()->parent() && p->parent()->parent()->parent()) {
                kind = p->parent()->parent()->parent()->kind();
             }
 
             isFirst = isFirstChildNode((DocParBlock *)p->parent(), p);
-            isLast = isLastChildNode ((DocParBlock *)p->parent(), p);
-            t = ContextState::None;
+            isLast  = isLastChildNode ((DocParBlock *)p->parent(), p);
+            t       = ContextState::None;
 
             if (isFirst) {
                if (kind == DocNode::Kind_HtmlListItem || kind == DocNode::Kind_SecRefItem) {
@@ -1358,7 +1394,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
 
    bool needsTag = false;
 
-   if (p && p->parent()) {
+   if (p != nullptr && p->parent()) {
       switch (p->parent()->kind()) {
          case DocNode::Kind_Section:
          case DocNode::Kind_Internal:
@@ -1389,40 +1425,42 @@ void HtmlDocVisitor::visitPre(DocPara *p)
    // paragraph and we don't need to do it here
 
    bool paragraphAlreadyStarted = false;
-   uint nodeIndex = 0;
 
-   if (p && nodeIndex < p->children().count()) {
+   if (p != nullptr && ! p->children().empty()) {
 
-      while (nodeIndex < p->children().count() && isInvisibleNode(p->children().at(nodeIndex))) {
-         nodeIndex++;
-      }
+      for (auto n : p->children()) {
 
-      if (nodeIndex < p->children().count()) {
-         DocNode *n = p->children().at(nodeIndex);
+         if (isInvisibleNode(n)) {
+            continue;
+         }
 
          if (mustBeOutsideParagraph(n)) {
             paragraphAlreadyStarted = true;
             needsTag = false;
          }
+
+         break;
       }
    }
 
    // check if this paragraph is the first or last child of a <li> or <dd>.
    // this allows us to mark the tag with a special class so we can
    // fix the otherwise ugly spacing.
-   int t;
+   int t = 0;
 
    bool isFirst;
    bool isLast;
 
-   t = getParagraphContext(p, isFirst, isLast);
+   if (needsTag) {
+      t = getParagraphContext(p, isFirst, isLast);
 
-   if (isFirst && isLast) {
-      needsTag = false;
+      if (isFirst && isLast) {
+         needsTag = false;
+      }
    }
 
    // write the paragraph tag (if needed)
-   if (needsTag) {
+   if (needsTag || p->forceTag()) {
       m_t << "<p" << getDirHtmlClassOfNode(textDirection(p), contexts[t])
           << htmlAttribsToString(p->attribs()) << ">";
 
@@ -1468,30 +1506,34 @@ void HtmlDocVisitor::visitPost(DocPara *p)
    // the paragraph (<ul>,<dl>,<table>) then that will already have ended the
    // paragraph and we don't need to do it here
 
-   int nodeIndex = p->children().count() - 1;
+   if (p != nullptr && ! p->children().empty()) {
 
-   if (p && nodeIndex >= 0) {
-      while (nodeIndex >= 0 && isInvisibleNode(p->children().at(nodeIndex))) {
-         nodeIndex--;
-      }
-      if (nodeIndex >= 0) {
-         DocNode *n = p->children().at(nodeIndex);
-         if (mustBeOutsideParagraph(n)) {
+      for (auto iter = p->children().rbegin(); iter != p->children().rend(); ++iter) {
+
+         if (isInvisibleNode(*iter)) {
+            continue;
+         }
+
+         if (mustBeOutsideParagraph(*iter)) {
             needsTag = false;
          }
+
+         break;
       }
    }
 
    bool isFirst;
    bool isLast;
 
-   getParagraphContext(p, isFirst, isLast);
+   if (needsTag) {
+      getParagraphContext(p, isFirst, isLast);
 
-   if (isFirst && isLast) {
-      needsTag = false;
+      if (isFirst && isLast) {
+         needsTag = false;
+      }
    }
 
-   if (needsTag) {
+   if (needsTag || p->forceTag()) {
       m_t << "</p>\n";
    }
 }
@@ -1624,7 +1666,7 @@ void HtmlDocVisitor::visitPre(DocSimpleList *sl)
    }
 
    forceEndParagraph(sl);
-   m_t << "<ul>";
+   m_t << "\n<ul>";
 
    if (! sl->isPreformatted()) {
       m_t << "\n";

@@ -2027,8 +2027,8 @@ class DocParamSect : public CompAccept<DocParamSect>, public DocNode
 class DocPara : public CompAccept<DocPara>, public DocNode
 {
  public:
-   explicit DocPara(DocNode *parent) :
-      m_isFirst(false), m_isLast(false) {
+   explicit DocPara(DocNode *parent)
+      : m_isFirst(false), m_isLast(false), m_forceTag(false) {
       m_parent = parent;
    }
 
@@ -2060,6 +2060,10 @@ class DocPara : public CompAccept<DocPara>, public DocNode
 
    bool isLast() const         {
       return m_isLast;
+   }
+
+   bool forceTag() const {
+      return m_forceTag;
    }
 
    int handleCommand(const QString &cmdName);
@@ -2096,6 +2100,7 @@ class DocPara : public CompAccept<DocPara>, public DocNode
    QString m_sectionId;
    bool m_isFirst;
    bool m_isLast;
+   bool m_forceTag;
    HtmlAttribList m_attribs;
 };
 

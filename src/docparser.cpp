@@ -7909,6 +7909,8 @@ int DocPara::parse(bool skipParse, int token)
    int tok;
    int retval = 0;
 
+   bool isDone = false;
+
    while (true)  {
 
       if (skipParse) {
@@ -7985,7 +7987,8 @@ int DocPara::parse(bool skipParse, int token)
                   // new item at the same or lower indent level
 
                   retval = TK_LISTITEM;
-                  goto endparagraph;
+                  isDone = true;
+                  break;
                }
             }
 
@@ -8040,7 +8043,8 @@ int DocPara::parse(bool skipParse, int token)
             } else if (retval == TK_ENDLIST) {
                if (al->indent() > g_token->indent) {
                   // end list
-                  goto endparagraph;
+                  isDone = true;
+                  break;
 
                } else {
                   // continue with current paragraph
@@ -8049,7 +8053,8 @@ int DocPara::parse(bool skipParse, int token)
 
             } else {
                // paragraph ended due to TK_NEWPARA, TK_LISTITEM, or EOF
-               goto endparagraph;
+               isDone = true;
+               break;
             }
          }
          break;
@@ -8064,7 +8069,8 @@ int DocPara::parse(bool skipParse, int token)
                if (al->indent() >= g_token->indent) {
                   // end of list marker ends this paragraph
                   retval = TK_ENDLIST;
-                  goto endparagraph;
+                  isDone = true;
+                  break;
 
                } else {
                   warn_doc_error(s_fileName, getDoctokenLineNum(),
@@ -8094,8 +8100,10 @@ int DocPara::parse(bool skipParse, int token)
                   // simple section can not start in this paragraph, need to unwind the stack and remember the command
 
                   g_token->simpleSectName = g_token->name;
+
                   retval = RetVal_SimpleSec;
-                  goto endparagraph;
+                  isDone = true;
+                  break;
                }
             }
 
@@ -8109,7 +8117,8 @@ int DocPara::parse(bool skipParse, int token)
             if (n) {
                if (cmd == CMD_LI) {
                   retval = RetVal_ListItem;
-                  goto endparagraph;
+                  isDone = true;
+                  break;
                }
             }
 
@@ -8153,7 +8162,8 @@ int DocPara::parse(bool skipParse, int token)
                // end of file, end of paragraph, start or end of section
                // or some auto list marker
 
-               goto endparagraph;
+               isDone = true;
+               break;
             }
          }
          break;
@@ -8164,12 +8174,28 @@ int DocPara::parse(bool skipParse, int token)
                // found a start tag
                retval = handleHtmlStartTag(g_token->name, g_token->attribs);
 
+               if (retval == TK_NEWPARA && this->isEmpty()) {
+                  m_forceTag = true;
+                  continue;
+               }
+
             } else {
                // found an end tag
 
-               if (g_token->name == "div"  && s_styleStack.isEmpty() )  {
-                  // let DocRoot add the closing <div>
-                  retval = RetVal_EndDiv;
+               if (g_token->name == "div" && s_styleStack.isEmpty() )  {
+
+                  if (this->isEmpty()) {
+                     // since this node is empty, DocRoot can not close the <div>
+
+                     DocStyleChange *sc = new DocStyleChange(this, 0, DocStyleChange::Div, false);
+                     m_children.append(sc);
+
+                     retval = RetVal_OK;
+
+                  } else {
+                     // let DocRoot add the closing <div>
+                     retval = RetVal_EndDiv;
+                  }
 
                } else {
                   retval = handleHtmlEndTag(g_token->name);
@@ -8183,7 +8209,8 @@ int DocPara::parse(bool skipParse, int token)
                retval = 0;
 
             } else {
-               goto endparagraph;
+               isDone = true;
+               break;
             }
          }
          break;
@@ -8203,7 +8230,8 @@ int DocPara::parse(bool skipParse, int token)
 
          case TK_NEWPARA:
             retval = TK_NEWPARA;
-            goto endparagraph;
+            isDone = true;
+            break;
 
          case TK_RCSTAG: {
             DocNode *n = parent();
@@ -8219,8 +8247,10 @@ int DocPara::parse(bool skipParse, int token)
 
                g_token->simpleSectName = "rcs:" + g_token->name;
                g_token->simpleSectText = g_token->text;
+
                retval = RetVal_SimpleSec;
-               goto endparagraph;
+               isDone = true;
+               break;
             }
 
             // see if we are in a simple list
@@ -8234,11 +8264,16 @@ int DocPara::parse(bool skipParse, int token)
             warn_doc_error(s_fileName, getDoctokenLineNum(), "Found unexpected token (id=%x)\n", tok);
             break;
       }
+
+      if (isDone) {
+         break;
+      }
    }
 
-   retval = 0;
+   if (! isDone) {
+      retval = 0;
+   }
 
-endparagraph:
    handlePendingStyleCommands(this, m_children);
 
    if (! s_nodeStack.isEmpty() ) {
