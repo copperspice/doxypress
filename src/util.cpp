@@ -3570,7 +3570,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
    QSharedPointer<MemberName> mn = Doxy_Globals::memberNameSDict.find(mName);
 
    if ((! forceEmptyScope || scopeName.isEmpty()) && mn && ! (scopeName.isEmpty() && mScope.isEmpty())) {
-      // this was changed for bug638856, forceEmptyScope, empty scopeName
+      // forceEmptyScope, empty scopeName
 
       int scopeOffset = scopeName.length();
 
@@ -3616,10 +3616,10 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
                      QSharedPointer<ClassDef> mcd = mmd->getClassDef();
 
                      if (mcd) {
-                        int m = minClassDistance(fcd, mcd);
+                        int delta = minClassDistance(fcd, mcd);
 
-                        if (m < mdist && mcd->isLinkable()) {
-                           mdist = m;
+                        if (delta < mdist && mcd->isLinkable()) {
+                           mdist = delta;
                            cd    = mcd;
                            md    = mmd;
                         }
@@ -3629,16 +3629,16 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             }
 
             if (mdist == maxInheritanceDepth && args == "()") {
-               // no exact match found, but if args="()" an arbitrary member will do
+               // no exact match found, if args="()" then any member with docs is a good match
 
                for (auto mmd : *mn) {
                   QSharedPointer<ClassDef> mcd = mmd->getClassDef();
 
                   if (mcd) {
-                     int m = minClassDistance(fcd, mcd);
+                     int delta = minClassDistance(fcd, mcd);
 
-                     if (m < mdist) {
-                        mdist = m;
+                     if (delta < mdist && mmd->isLinkable()) {
+                        mdist = delta;
                         cd = mcd;
                         md = mmd;
                      }
@@ -3694,7 +3694,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             }
          }
 
-         /* go to the parent scope */
+         // go to the parent scope
          if (scopeOffset == 0) {
             scopeOffset = -1;
 
@@ -3707,7 +3707,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
    }
 
    if (mn && scopeName.isEmpty() && mScope.isEmpty()) {
-      // Maybe a related function?
+      // could this be a related function
 
       QSharedPointer<MemberDef> temp;
       QSharedPointer<MemberDef> fuzzy_mmd;
@@ -3767,7 +3767,6 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
       // name is known
       QSharedPointer<NamespaceDef> fnd;
       int scopeOffset = scopeName.length();
-
 
       do {
          QString namespaceName = scopeName.left(scopeOffset);
@@ -3916,8 +3915,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
          findMembersWithSpecificName(mn, args, true, currentFile, checkCV, forceTagFile, members);
 
          if (members.count() == 0) {
-            // nothing found
-            // search again without strict static checking
+            // nothing found, search again without strict static checking
             findMembersWithSpecificName(mn, args, false, currentFile, checkCV, forceTagFile, members);
          }
 

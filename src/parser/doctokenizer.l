@@ -271,7 +271,7 @@ static void handleHtmlTag()
 
    g_token->name = tagText.mid(startNamePos, i - startNamePos);
 
-   // parse the attributes. Each attribute is a name, value pair
+   // parse the attributes, each attribute consists of a name and a value
    // result is stored in g_token->attribs
 
    int startName;
@@ -445,16 +445,19 @@ static void handleHtmlTag()
          }
 
          opt.value = tagText.mid(startAttrib, endAttrib - startAttrib);
+
          if (opt.name == "align") {
-       opt.value = opt.value.toLower();
+            opt.value = opt.value.toLower();
 
-    } else if (opt.name == "valign") {
-      opt.value = opt.value.toLower();
+         } else if (opt.name == "valign") {
+            opt.value = opt.value.toLower();
 
-           if (opt.value == "center") {
-         opt.value = "middle";
-      }
-   }
+            if (opt.value == "center") {
+               opt.value = "middle";
+            }
+
+         }
+
       } else {
          // start next option
 
@@ -1053,6 +1056,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       g_token->name.chop(1);
 
       unput(yytext[doctokenizerYYleng - 1]);
+
       return TK_LNKWORD;
    }
 
@@ -1095,6 +1099,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       // avoid interpretation as "operator <"
 
       g_token->name = QString::fromUtf8(yytext);
+
       return TK_WORD;
    }
 

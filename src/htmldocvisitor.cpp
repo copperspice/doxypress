@@ -107,35 +107,37 @@ static bool mustBeOutsideParagraph(DocNode *n)
       case DocNode::Kind_HtmlTable:
          return true;
 
-      /* <h?> */
+      // <h?>
       case DocNode::Kind_Section:
       case DocNode::Kind_HtmlHeader:
          return true;
 
-      /* \internal */
+      // \internal
       case DocNode::Kind_Internal:
          return true;
 
-      /* <div> */
+      // <div>
       case DocNode::Kind_Include:
       case DocNode::Kind_SecRefList:
          return true;
 
-      /* <hr> */
+      // <hr>
       case DocNode::Kind_HorRuler:
-         // CopyDoc gets paragraph markers from the wrapping DocPara node,
-         // but needs to insert them for all documentation being copied to preserve formatting
+         // CopyDoc gets paragraph markers from the wrapping DocPara node but needs
+         // to insert them for all documentation being copied to preserve formatting
          return true;
 
       case DocNode::Kind_Copy:
-         // <blockquote>
          return true;
 
+      // <blockquote>
       case DocNode::Kind_HtmlBlockQuote:
-         // \parblock
          return true;
 
+      // \parblock
       case DocNode::Kind_ParBlock:
+         return true;
+
       case DocNode::Kind_IncOperator:
          return true;
 
@@ -146,8 +148,8 @@ static bool mustBeOutsideParagraph(DocNode *n)
 
       case DocNode::Kind_StyleChange:
          return ((DocStyleChange *)n)->style() == DocStyleChange::Preformatted ||
-                ((DocStyleChange *)n)->style() == DocStyleChange::Div ||
-                ((DocStyleChange *)n)->style() == DocStyleChange::Center;
+                 ((DocStyleChange *)n)->style() == DocStyleChange::Div ||
+                 ((DocStyleChange *)n)->style() == DocStyleChange::Center;
 
       case DocNode::Kind_Formula:
          return ! ((DocFormula *)n)->isInline();
@@ -785,7 +787,6 @@ void HtmlDocVisitor::visit(DocInclude *inc)
          forceEndParagraph(inc);
          m_ci.startCodeFragment("DoxyCode");
 
-
          Doxy_Globals::parserManager.getParser(inc->extension())->parseCode(m_ci, inc->context(),
                      inc->text(), langExt, inc->isExample(), inc->exampleFile(),
                      QSharedPointer<FileDef>(), -1, -1, true, QSharedPointer<MemberDef>(), false, m_ctx);
@@ -1206,12 +1207,10 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
                   t = ContextState::StartLi;
 
                } else if (kind == DocNode::Kind_HtmlDescData ||
-                          kind == DocNode::Kind_XRefItem ||
-                          kind == DocNode::Kind_SimpleSect) {
+                     kind == DocNode::Kind_XRefItem || kind == DocNode::Kind_SimpleSect) {
                   t = ContextState::StartDd;
 
-               } else if (kind == DocNode::Kind_HtmlCell ||
-                          kind == DocNode::Kind_ParamList) {
+               } else if (kind == DocNode::Kind_HtmlCell || kind == DocNode::Kind_ParamList) {
                   t = ContextState::StartTd;
                }
             }
@@ -1221,24 +1220,23 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
                   t = ContextState::EndLi;
 
                } else if (kind == DocNode::Kind_HtmlDescData ||
-                          kind == DocNode::Kind_XRefItem ||
-                          kind == DocNode::Kind_SimpleSect) {
+                     kind == DocNode::Kind_XRefItem || kind == DocNode::Kind_SimpleSect) {
                   t = ContextState::EndDd;
 
-               } else if (kind == DocNode::Kind_HtmlCell ||
-                          kind == DocNode::Kind_ParamList) {
+               } else if (kind == DocNode::Kind_HtmlCell || kind == DocNode::Kind_ParamList) {
                   t = ContextState::EndTd;
                }
             }
-            if (! isFirst && ! isLast) {
-               if (kind==DocNode::Kind_HtmlListItem || kind==DocNode::Kind_SecRefItem) {
-                  t = ContextState::InterLi;
-               } else if (kind==DocNode::Kind_HtmlDescData ||
-                          kind==DocNode::Kind_XRefItem ||
-                          kind==DocNode::Kind_SimpleSect)  {
-                  t = ContextState::InterDd;
-               } else if (kind==DocNode::Kind_HtmlCell || kind == DocNode::Kind_ParamList) {
 
+            if (! isFirst && ! isLast) {
+               if (kind == DocNode::Kind_HtmlListItem || kind == DocNode::Kind_SecRefItem) {
+                  t = ContextState::InterLi;
+
+               } else if (kind == DocNode::Kind_HtmlDescData ||
+                     kind == DocNode::Kind_XRefItem || kind == DocNode::Kind_SimpleSect)  {
+                  t = ContextState::InterDd;
+
+               } else if (kind == DocNode::Kind_HtmlCell || kind == DocNode::Kind_ParamList) {
                   t = ContextState::InterTd;
                }
             }
@@ -1249,24 +1247,24 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
          case DocNode::Kind_AutoListItem:
             isFirst = isFirstChildNode((DocAutoListItem *)p->parent(), p);
             isLast  = isLastChildNode ((DocAutoListItem *)p->parent(), p);
-            t = ContextState::StartLi;  // not used
+            t       = ContextState::StartLi;  // not used
             break;
 
          case DocNode::Kind_SimpleListItem:
             isFirst = true;
             isLast  = true;
-            t = ContextState::StartLi;  // not used
+            t       = ContextState::StartLi;  // not used
             break;
 
          case DocNode::Kind_ParamList:
             isFirst = true;
             isLast  = true;
-            t = ContextState::StartLi;  // not used
+            t       = ContextState::StartLi;  // not used
             break;
 
          case DocNode::Kind_HtmlListItem:
             isFirst = isFirstChildNode((DocHtmlListItem *)p->parent(), p);
-            isLast = isLastChildNode ((DocHtmlListItem *)p->parent(), p);
+            isLast  = isLastChildNode ((DocHtmlListItem *)p->parent(), p);
 
             if (isFirst) {
                t = ContextState::StartLi;
@@ -1284,7 +1282,8 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 
          case DocNode::Kind_SecRefItem:
             isFirst = isFirstChildNode((DocSecRefItem *)p->parent(), p);
-            isLast = isLastChildNode ((DocSecRefItem *)p->parent(), p);
+            isLast  = isLastChildNode ((DocSecRefItem *)p->parent(), p);
+
             if (isFirst) {
                t = ContextState::StartLi;
             }
@@ -1301,7 +1300,7 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 
          case DocNode::Kind_HtmlDescData:
             isFirst = isFirstChildNode((DocHtmlDescData *)p->parent(), p);
-            isLast = isLastChildNode ((DocHtmlDescData *)p->parent(), p);
+            isLast  = isLastChildNode ((DocHtmlDescData *)p->parent(), p);
 
             if (isFirst) {
                t = ContextState::StartDd;
@@ -1319,7 +1318,7 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 
          case DocNode::Kind_XRefItem:
             isFirst = isFirstChildNode((DocXRefItem *)p->parent(), p);
-            isLast = isLastChildNode ((DocXRefItem *)p->parent(), p);
+            isLast  = isLastChildNode ((DocXRefItem *)p->parent(), p);
 
             if (isFirst) {
                t = ContextState::StartDd;
@@ -1349,9 +1348,10 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 
             if (isSeparatedParagraph((DocSimpleSect *)p->parent(), p)) {
                // if the paragraph is enclosed with separators it will
-               // be included in <dd>..</dd> so avoid addition paragraph markers
+               // be included in <dd>..</dd>, avoids additional paragraph markers
 
-               isFirst = isLast = true;
+               isFirst = true;
+               isLast  = true;
             }
 
             if (! isFirst && ! isLast) {
@@ -1362,7 +1362,7 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
 
          case DocNode::Kind_HtmlCell:
             isFirst = isFirstChildNode((DocHtmlCell *)p->parent(), p);
-            isLast = isLastChildNode ((DocHtmlCell *)p->parent(), p);
+            isLast  = isLastChildNode ((DocHtmlCell *)p->parent(), p);
 
             if (isFirst) {
                t = ContextState::StartTd;
@@ -1383,6 +1383,7 @@ static int getParagraphContext(DocPara *p, bool &isFirst, bool &isLast)
       }
 
    }
+
    return t;
 }
 
@@ -1420,10 +1421,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
       }
    }
 
-   // if the first element of a paragraph is something that should be outside of
-   // the paragraph (<ul>,<dl>,<table>,..) then that will already started the
-   // paragraph and we don't need to do it here
-
+   // if the first visible child of a DocPara does not belong in a <p> tag then do not emit the <p>
    bool paragraphAlreadyStarted = false;
 
    if (p != nullptr && ! p->children().empty()) {
@@ -1443,9 +1441,8 @@ void HtmlDocVisitor::visitPre(DocPara *p)
       }
    }
 
-   // check if this paragraph is the first or last child of a <li> or <dd>.
-   // this allows us to mark the tag with a special class so we can
-   // fix the otherwise ugly spacing.
+   // check if this paragraph is the first or last child of an <li> or <dd>
+   // allows us to mark the tag with a special class so we can fix the spacing
    int t = 0;
 
    bool isFirst;
@@ -1494,7 +1491,7 @@ void HtmlDocVisitor::visitPost(DocPara *p)
             break;
 
          case DocNode::Kind_Root:
-            needsTag = !((DocRoot *)p->parent())->singleLine();
+            needsTag = ! ((DocRoot *)p->parent())->singleLine();
             break;
 
          default:
@@ -1502,9 +1499,7 @@ void HtmlDocVisitor::visitPost(DocPara *p)
       }
    }
 
-   // if the last element of a paragraph is something that should be outside of
-   // the paragraph (<ul>,<dl>,<table>) then that will already have ended the
-   // paragraph and we don't need to do it here
+   // if the first visible child of a DocPara does not belong in a <p> tag then do not emit the <p>
 
    if (p != nullptr && ! p->children().empty()) {
 
@@ -1671,7 +1666,6 @@ void HtmlDocVisitor::visitPre(DocSimpleList *sl)
    if (! sl->isPreformatted()) {
       m_t << "\n";
    }
-
 }
 
 void HtmlDocVisitor::visitPost(DocSimpleList *sl)
@@ -2922,7 +2916,6 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
       if (mustBeOutsideParagraph(childNode)) {
          // previous node already outside paragraph context
          return;
-
       }
 
       --nodeIndex;
@@ -2945,9 +2938,9 @@ void HtmlDocVisitor::forceEndParagraph(DocNode *n)
    }
 }
 
-/** Used for items found inside a paragraph, which due to XHTML restrictions
+/** Used for items found inside a paragraph which due to XHTML restrictions
  *  have to be outside of the paragraph. This method will force the start of
- *  the paragraph, that was previously ended by forceEndParagraph().
+ *  the paragraph that was previously ended by forceEndParagraph().
  */
 void HtmlDocVisitor::forceStartParagraph(DocNode *n)
 {
@@ -2971,7 +2964,7 @@ void HtmlDocVisitor::forceStartParagraph(DocNode *n)
       }
 
       while (nodeIndex < numNodes && isInvisibleNode(para->children().at(nodeIndex))) {
-         nodeIndex++;
+         ++nodeIndex;
       }
 
       if (nodeIndex < numNodes) {

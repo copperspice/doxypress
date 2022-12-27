@@ -2472,7 +2472,8 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
             if ((bn = m_usedNodes->value(bClass->name()))) {
                // node already present
 
-               if (n->m_children == 0 || n->m_children->indexOf(bn) == -1) { // no arrow yet
+               if (n->m_children == 0 || n->m_children->indexOf(bn) == -1) {
+                  // no arrow yet
                   n->addChild(bn, bcd->prot);
                   bn->addParent(n);
                }
@@ -2480,9 +2481,9 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
             } else {
                QString tmp_url;
 
-               if (bClass->isLinkable() && !bClass->isHidden()) {
+               if (bClass->isLinkable() && ! bClass->isHidden()) {
                   tmp_url = bClass->getReference() + "$" + bClass->getOutputFileBase();
-                  if (!bClass->anchor().isEmpty()) {
+                  if (! bClass->anchor().isEmpty()) {
                      tmp_url += "#" + bClass->anchor();
                   }
                }

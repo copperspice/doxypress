@@ -1285,7 +1285,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       if (resolveRef(s_context, tName, s_inSeeBlock, &compound, &member, false, fd, true)) {
          partA = true;
 
-      } else if ( ! s_context.isEmpty() )  {
+      } else if ( ! s_context.isEmpty())  {
          // tried once with s_context now try again with "" looking for a global scope
 
          if (resolveRef(QString(), tName, s_inSeeBlock, &compound, &member, true, QSharedPointer<FileDef>(), true))  {
@@ -1327,10 +1327,9 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
          }
 
       } else if (compound->definitionType() == Definition::TypeFile && compound.dynamicCast<FileDef>()->generateSourceFile() ) {
-
          // undocumented file that has source code we can link to
          children.append(new DocLinkedWord(parent, g_token->name, compound->getReference(), compound->getSourceFileBase(),
-                  QString(), compound->briefDescriptionAsTooltip() ) );
+               QString(), compound->briefDescriptionAsTooltip() ) );
 
       } else {
          // not linkable
@@ -1348,13 +1347,13 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       // special case: the token name is not a class, but could be a Obj-C protocol
 
       children.append(new DocLinkedWord(parent, name, cd->getReference(), cd->getOutputFileBase(),
-                  cd->anchor(), cd->briefDescriptionAsTooltip()));
+               cd->anchor(), cd->briefDescriptionAsTooltip()));
 
    } else {
       // normal non-linkable word
 
       if (g_token->name.startsWith("#") || g_token->name.startsWith("::")) {
-         warn_doc_error(s_fileName, getDoctokenLineNum(), "Explicit link request to '%s' could not be resolved",
+         warn_doc_error(s_fileName, getDoctokenLineNum(), "Explicit link to '%s' could not be resolved",
                csPrintable(name));
 
          children.append(new DocWord(parent, g_token->name));
@@ -1595,8 +1594,9 @@ static void defaultHandleTitleAndSize(const int cmd, DocNode *parent, QList<DocN
             height = g_token->chars;
 
          } else {
-            warn_doc_error(s_fileName, getDoctokenLineNum(), "Unknown option %s after \\%s command, expected 'width' or 'height'",
-                     csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)));
+            warn_doc_error(s_fileName, getDoctokenLineNum(),
+                  "Unknown option %s after \\%s command, expected 'width' or 'height'",
+                  csPrintable(g_token->name), csPrintable(Mappers::cmdMapper->map(cmd)));
 
             break;
          }
@@ -2020,6 +2020,7 @@ static bool defaultHandleToken(DocNode *parent, int tok, QList<DocNode *> &child
               case CMD_IMAGE:
                 handleImage(parent, children);
                 break;
+
                default:
                   return false;
             }
@@ -7589,7 +7590,8 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
                }
             }
 
-            if (!ss) { // start new section
+            if (! ss) {
+               // start new section
                ss = new DocSimpleSect(this, DocSimpleSect::See);
                m_children.append(ss);
             }
@@ -7955,13 +7957,12 @@ int DocPara::parse(bool skipParse, int token)
                      ! m_children.isEmpty()  &&
 
                      // and whitespace after certain constructs
-                     (k = m_children.last()->kind()) != DocNode::Kind_HtmlDescList &&
+                    (k = m_children.last()->kind()) != DocNode::Kind_HtmlDescList &&
                      k != DocNode::Kind_HtmlTable &&
                      k != DocNode::Kind_HtmlList &&
                      k != DocNode::Kind_SimpleSect &&
                      k != DocNode::Kind_AutoList &&
                      k != DocNode::Kind_SimpleList &&
-                     /*k!=DocNode::Kind_Verbatim &&*/
                      k != DocNode::Kind_HtmlHeader &&
                      k != DocNode::Kind_HtmlBlockQuote &&
                      k != DocNode::Kind_ParamSect &&
@@ -7972,8 +7973,6 @@ int DocPara::parse(bool skipParse, int token)
          break;
 
          case TK_LISTITEM: {
-            DBG(("Found list item at %d parent = %d\n", g_token->indent, parent()->kind()));
-
             DocNode *n = parent();
             while (n && n->kind() != DocNode::Kind_AutoList) {
                n = n->parent();
@@ -7981,7 +7980,6 @@ int DocPara::parse(bool skipParse, int token)
 
             if (n) { // we found an auto list up in the hierarchy
                DocAutoList *al = (DocAutoList *)n;
-               DBG(("previous list item at %d\n", al->indent()));
 
                if (al->indent() >= g_token->indent) {
                   // new item at the same or lower indent level
@@ -8033,7 +8031,6 @@ int DocPara::parse(bool skipParse, int token)
                } else {
                   // other section
                   tok = TK_COMMAND_BS;
-
                }
 
                DBG(("reparsing command %s\n", csPrintable(g_token->name)));
@@ -8096,8 +8093,8 @@ int DocPara::parse(bool skipParse, int token)
             if (cmd & SIMPLESECT_BIT) {
 
                if (n) {
-                  // already in a simple section
-                  // simple section can not start in this paragraph, need to unwind the stack and remember the command
+                  // already in a simple section, end this paragraph
+                  // need to unwind the stack and remember the command
 
                   g_token->simpleSectName = g_token->name;
 
@@ -8125,8 +8122,6 @@ int DocPara::parse(bool skipParse, int token)
             // handle the command
             retval = handleCommand(g_token->name);
 
-            DBG(("handleCommand returns %x\n", retval));
-
             // check the return value
             if (retval == RetVal_SimpleSec) {
                // Reparse the token which ended the section at this level
@@ -8139,6 +8134,7 @@ int DocPara::parse(bool skipParse, int token)
                   // RCS section
                   g_token->name = g_token->name.mid(4);
                   g_token->text = g_token->simpleSectText;
+
                   tok = TK_RCSTAG;
 
                } else {
@@ -8146,7 +8142,6 @@ int DocPara::parse(bool skipParse, int token)
                   tok = TK_COMMAND_BS;
                }
 
-               DBG(("reparsing command %s\n", csPrintable(g_token->name)));
                goto reparsetoken;
 
             } else if (retval == RetVal_OK) {
@@ -8169,7 +8164,6 @@ int DocPara::parse(bool skipParse, int token)
          break;
 
          case TK_HTMLTAG: {
-
             if (! g_token->endTag) {
                // found a start tag
                retval = handleHtmlStartTag(g_token->name, g_token->attribs);
@@ -8199,13 +8193,11 @@ int DocPara::parse(bool skipParse, int token)
 
                } else {
                   retval = handleHtmlEndTag(g_token->name);
-
                }
-
             }
 
             if (retval == RetVal_OK) {
-               // the command ended normally, keep scanner for new tokens
+               // command ended normally, keep scanner for new tokens
                retval = 0;
 
             } else {
@@ -8282,11 +8274,6 @@ int DocPara::parse(bool skipParse, int token)
 
       assert(n == this);
    }
-
-   DBG(("DocPara::parse() end retval=%x\n", retval));
-
-   INTERNAL_ASSERT(retval == 0 || retval == TK_NEWPARA || retval == TK_LISTITEM ||
-         retval == TK_ENDLIST || retval > RetVal_OK );
 
    return retval;
 }
@@ -8396,6 +8383,7 @@ int DocSection::parse()
             m_children.append(s);
             retval = s->parse();
          }
+
          if (! (retval == RetVal_Subsection && m_level < Doxy_Globals::subpageNestingLevel + 2)) {
             break;
          }
@@ -8417,7 +8405,8 @@ int DocSection::parse()
             retval = s->parse();
          }
 
-         if (! ((retval == RetVal_Subsection || retval == RetVal_Subsubsection) && m_level < Doxy_Globals::subpageNestingLevel + 3)) {
+         if (! ((retval == RetVal_Subsection || retval == RetVal_Subsubsection) &&
+               m_level < Doxy_Globals::subpageNestingLevel + 3)) {
             break;
          }
 
@@ -8599,6 +8588,7 @@ void DocRoot::parse()
 
             if (! g_token->endTag) {
                sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, true, g_token->attribs);
+
             } else {
                sc = new DocStyleChange(this, s_nodeStack.count(), DocStyleChange::Div, false);
             }
@@ -8925,8 +8915,8 @@ static QString processCopyDoc(const QString &data, uint &len)
 
                } else {
                   warn_doc_error(s_fileName, getDoctokenLineNum(),
-                                 "Found recursive @copy%s or @copydoc relation for argument '%s'.\n",
-                                 isBrief ? "brief" : "details", csPrintable(id) );
+                        "Found recursive @copy%s or @copydoc relation for argument '%s'.\n",
+                        isBrief ? "brief" : "details", csPrintable(id) );
                }
 
             } else {

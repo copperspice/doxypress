@@ -4533,7 +4533,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       bool isEnum = current_root->m_traits.hasTrait(Entry::Virtue::Enum);
 
       if (text[0] == ';' && isEnum) {
-         current->setData(EntryKey::File_Name,  yyFileName);
+         current->setData(EntryKey::File_Name, yyFileName);
          current->startLine   = yyLineNr;
          current->startColumn = yyColNr;
 
@@ -4549,7 +4549,6 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          BEGIN(FindMembers);
 
          } else if (text[0] == ';' || (lastInitializerContext == FindFields && initBracketCount==0))  {
-            // initBracketCount == 0 was added for bug 665778
 
             unput(*yytext);
             if (YY_START == ReadInitializerPtr) {
@@ -8939,7 +8938,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <Bases>("\\")?({ID}"\\")*{ID}        {
-      // PHP namespace token, not sure if interspacing is allowed but it gives problems (see bug 640847)
+      // PHP namespace token, not sure if interspacing is allowed but it gives problems
       QString text = QString::fromUtf8(yytext);
 
       if (! insidePHP) {
@@ -9937,7 +9936,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <DocCopyBlock>^{B}*"*"+/({ID}|"(")  {
-      // Assume *var or *(... is part of source code (see bug723516)
+      // Assume *var or *(... is part of source code
       QString text = QString::fromUtf8(yytext);
 
       if (s_docBlockName == "code") {

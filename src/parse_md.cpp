@@ -3153,9 +3153,10 @@ static void findEndOfLine(QString &out, QStringView data, QString::const_iterato
          break;
       }
    }
-  if (newLineSize > 0) {
-    iter_end += newLineSize - 1;
-  }
+
+   if (newLineSize > 0) {
+      iter_end += newLineSize - 1;
+   }
 }
 
 static void writeFencedCodeBlock(QString &out, QStringView data, const QString &lang_t,

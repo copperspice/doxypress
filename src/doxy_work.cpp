@@ -7297,7 +7297,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                            ((classOrMdIsTemplate && !rootIsTemplate) || (! classOrMdIsTemplate && rootIsTemplate))) {
 
                         // Method with template return type does not match method without return type
-                        // even if the parameters are the same. See also bug709052
+                        // even if the parameters are the same
 
                         Debug::print(Debug::FindMembers, 0,
                               "\nDebug: findMember() [7] comparing return types: template with non-template\n");
@@ -7684,7 +7684,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                   auto iter = mn->begin();
                   mdDefine  = *iter;
 
-                  while (mdDefine && !isDefine) {
+                  while (mdDefine && ! isDefine) {
                      isDefine = isDefine || mdDefine->isDefine();
 
                      if (! isDefine) {

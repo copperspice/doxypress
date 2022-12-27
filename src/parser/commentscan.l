@@ -2859,7 +2859,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       s_condCount--;
 
       if (s_condCount < 0 )   {
-         // handle conditional section around \internal, see bug607743
+         // handle conditional section around \internal
 
          unput('\\');
          BEGIN(Comment);
