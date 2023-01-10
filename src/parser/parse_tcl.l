@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  * Copyright (c) 2010      Rene Zaumseil
 
@@ -1604,6 +1604,7 @@ static void tcl_comment(int what, const QString  &text)
                // we need a new entry
                myNew   = 0;
                myEntry = tcl_entry_new();
+
                parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                      myLine0, false, tcl.config_autobrief, false, myProt, myPos0, myNew);
 

@@ -1,6 +1,6 @@
 /*************************************************************************
  *
- * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  *
 *************************************************************************/
@@ -663,6 +663,7 @@ static void addSection()
    QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(s_sectionLabel);
 
    if (si != nullptr) {
+
       if (si->lineNr != -1) {
 
          warn(yyFileName, yyLineNr, "Multiple use of section label '%s' while adding section, (first occurrence: %s, line %d)",

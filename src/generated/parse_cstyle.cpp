@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -13556,7 +13556,7 @@ goto find_rule; \
 char *parse_cstyle_YYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
 
 *************************************************************************/
@@ -19068,7 +19068,6 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       current->startBodyLine = yyLineNr;
-   // current->bodyColumn    = yyColNr;
       current->setData(EntryKey::Initial_Value, text);
 
       lastInitializerContext = YY_START;
@@ -24520,7 +24519,7 @@ YY_RULE_SETUP
 case 737:
 YY_RULE_SETUP
 {
-      // PHP namespace token, not sure if interspacing is allowed but it gives problems (see bug 640847)
+      // PHP namespace token, not sure if interspacing is allowed but it gives problems
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       if (! insidePHP) {
@@ -25777,7 +25776,7 @@ YY_RULE_SETUP
 case 837:
 YY_RULE_SETUP
 {
-      // Assume *var or *(... is part of source code (see bug723516)
+      // Assume *var or *(... is part of source code
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
 
       if (s_docBlockName == "code") {

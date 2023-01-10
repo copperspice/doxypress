@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -709,7 +709,7 @@ static int yy_more_len = 0;
 char *parse_tcl_YYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  * Copyright (c) 2010      Rene Zaumseil
 
@@ -3744,9 +3744,6 @@ static void tcl_comment(int what, const QString  &text)
             myPos0  = myPos;
             myLine0 = myLine;
 
-            // emerald replace myDoc with processDoc
-            // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine);
-
             while (parseCommentBlock(tcl.this_parser, myEntry0, myDoc, tcl.file_name,
                                      myLine, FALSE, tcl.config_autobrief, FALSE, myProt, myPos, myNew)) {
 
@@ -3754,8 +3751,6 @@ static void tcl_comment(int what, const QString  &text)
                   // we need a new entry in this case
                   myNew = 0;
                   myEntry = tcl_entry_new();
-                  // emerald repalce myDoc with processDoc
-                  // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine0);
 
                   parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                                     myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
@@ -3767,9 +3762,6 @@ static void tcl_comment(int what, const QString  &text)
                   if (! myEntry1 && tcl.listScan.length() > 0) {
                      myEntry1 = tcl_entry_namespace(tcl.listScan.at(0)->ns);
                   }
-
-                  // emerald repalce myDoc with processDoc
-                  // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine0);
 
                   parseCommentBlock(tcl.this_parser, myEntry1, myDoc, tcl.file_name,
                                     myLine0, FALSE, tcl.config_autobrief, FALSE, myProt, myPos0, myNew);
@@ -3783,9 +3775,6 @@ static void tcl_comment(int what, const QString  &text)
                // we need a new entry
                myNew   = 0;
                myEntry = tcl_entry_new();
-
-               // emerald repalce myDoc with processDoc
-               // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine0);
 
                parseCommentBlock(tcl.this_parser, myEntry, myDoc, tcl.file_name,
                      myLine0, false, tcl.config_autobrief, false, myProt, myPos0, myNew);
@@ -3805,9 +3794,6 @@ static void tcl_comment(int what, const QString  &text)
          } else {
             // new entry
             tcl.entry_current = tcl_entry_new();
-
-            // emerald repalce myDoc with processDoc
-            // processedDoc = processMarkdownForCommentBlock(myDoc, tcl.file_name, myLine);
 
             while (parseCommentBlock(tcl.this_parser, tcl.entry_current, myDoc,
                   tcl.file_name, myLine, false, tcl.config_autobrief, false,

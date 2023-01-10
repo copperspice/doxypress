@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -531,7 +531,7 @@ int code_xmlYY_flex_debug = 0;
 char *code_xmlYYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  * Copyright (c) Weston Thayer
 

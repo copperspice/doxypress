@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -13352,7 +13352,7 @@ goto find_rule; \
 char *code_cstyle_YYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  *
 *************************************************************************/
@@ -14287,20 +14287,6 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
          writeMultiLineCodeLink(*g_code, nd, tmpClassName);
          return;
       }
-
-/*    emerald - do not commit
-
-      const ConceptDef *conceptDef = getResolvedConcept(d, bareName);
-
-      if (conceptDef && conceptDef->isLinkable()) {
-         yyextra->theCallContext.setScope(ScopedTypeVariant(conceptDef));
-         addToSearchIndex(className);
-         writeMultiLineCodeLink(*g_code, conceptDef, clName);
-
-         return;
-      }
-
-*/
 
       if (cd == nullptr && md == nullptr) {
          // also see if it is variable or enum or enum value

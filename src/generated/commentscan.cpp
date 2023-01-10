@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -4132,7 +4132,7 @@ goto find_rule; \
 char *commentscanYYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  *
 *************************************************************************/
@@ -4793,15 +4793,6 @@ static void addSection()
    QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(s_sectionLabel);
 
    if (si != nullptr) {
-
-/*    if (! si->ref().isEmpty()) {
-         // emerald - from a tag file ( do not check in )
-
-         // create a new section element
-
-         // add section to this entry
-      }
-*/
 
       if (si->lineNr != -1) {
 
@@ -7724,7 +7715,7 @@ YY_RULE_SETUP
       s_condCount--;
 
       if (s_condCount < 0 )   {
-         // handle conditional section around \internal, see bug607743
+         // handle conditional section around \internal
 
          unput('\\');
          BEGIN(Comment);
