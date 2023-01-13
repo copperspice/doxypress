@@ -3609,8 +3609,10 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
                if (! mmd->isStrongEnumValue()) {
                   const ArgumentList &mmdAl = mmd->getArgumentList();
 
-                  bool match = (args.isEmpty() || matchArguments2(mmd->getOuterScope(), mmd->getFileDef(),
-                                    mmdAl, fcd, fcd->getFileDef(), argList, checkCV));
+                  bool match_1 = args.isEmpty();
+                  bool match_2 = matchArguments2(mmd->getOuterScope(), mmd->getFileDef(), mmdAl, fcd, fcd->getFileDef(), argList, checkCV);
+
+                  bool match = match_1 || match_2;
 
                   if (match) {
                      QSharedPointer<ClassDef> mcd = mmd->getClassDef();
