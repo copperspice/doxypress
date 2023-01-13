@@ -1041,6 +1041,18 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_Para>{ID}/"<"{HTMLKEYW}">"         {
       // prevent opening html tag to be recognized as a templated classes
       g_token->name = QString::fromUtf8(yytext);
+
+      return TK_LNKWORD;
+   }
+
+<St_Para>{LNKWORD1}               |
+<St_Para>{LNKWORD1}{FUNCARG1}                      {
+      g_token->name = QString::fromUtf8(yytext);
+
+      if (g_token->name.startsWith("operator<")) {
+         REJECT;
+      }
+
       return TK_LNKWORD;
    }
 
