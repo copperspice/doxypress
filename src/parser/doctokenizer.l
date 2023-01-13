@@ -600,22 +600,24 @@ SCOPECPP    {SCOPEPRE}*(~)?{ID}{TEMPLPART}?
 SCOPEOBJC   {SCOPEPRE}?{ID}{SCOPEKEYS}?
 SCOPEMASK   {SCOPECPP}|{SCOPEOBJC}
 
-FUNCARG     "("{FUNCPART}")"({BLANK}*("volatile"|"const"){BLANK})?
+FUNCARG1    "("{FUNCPART}")"({BLANK}*("volatile"|"const"){BLANK})?
 FUNCARG2    "("{FUNCPART}")"({BLANK}*("volatile"|"const"))?
+
 OPNEW       {BLANK}+"new"({BLANK}*"[]")?
 OPDEL       {BLANK}+"delete"({BLANK}*"[]")?
-
 OPNORM      {OPNEW}|{OPDEL}|"+"|"-"|"*"|"/"|"%"|"^"|"&"|"|"|"~"|"!"|"="|"<"|">"|"+="|"-="|"*="|"/="|"%="|"^="|"&="|"|="|"<<"|">>"|"<<="|">>="|"=="|"!="|"<="|">="|"&&"|"||"|"++"|"--"|","|"->*"|"->"|"[]"|"()"|"<=>"
 
 OPCAST      {BLANK}+[^<(\r\n.,][^(\r\n.,]*
-OPMASK      ({BLANK}*{OPNORM}{FUNCARG})
-OPMASKOPT   ({BLANK}*{OPNORM}{FUNCARG}?)|({OPCAST}{FUNCARG})
-OPMASKOP2   ({BLANK}*{OPNORM}{FUNCARG2}?)|({OPCAST}{FUNCARG2})
+OPMASK      ({BLANK}*{OPNORM}{FUNCARG1})
+OPMASK_OP1  ({BLANK}*{OPNORM}{FUNCARG1}?)|({OPCAST}{FUNCARG1})
+OPMASK_OP2  ({BLANK}*{OPNORM}{FUNCARG2}?)|({OPCAST}{FUNCARG2})
 
 CVSPEC      {BLANK}*("const"|"volatile")
 LNKWORD1    ("::"|"#")?{SCOPEMASK}
-LNKWORD2    (({SCOPEPRE}*"operator"{OPMASK})|({SCOPEPRE}"operator"{OPMASKOPT})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOPT})){CVSPEC}?
-LNKWORD3    ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
+LNKWORD2    ({SCOPEPRE}*"operator"{OPMASK}){CVSPEC}?
+LNKWORD3    ({SCOPEPRE}"operator"{OPMASK_OP1}){CVSPEC}?
+LNKWORD4    (("::"|"#"){SCOPEPRE}*"operator"{OPMASK_OP1}){CVSPEC}?
+LNKWORD5    ([0-9a-z_A-Z\-]+("/"|"\\"))*[0-9a-z_A-Z\-]+("."[0-9a-z_A-Z]+)+
 
 ESCWORD     ("%"{ID}(("::"|"."){ID})*)|("%'")
 CHARWORD1   [^ \t\n\r\\@<>()\[\]:;\?{}&%$#,."=']
@@ -638,7 +640,7 @@ REFWORD2_PRE   ("#"|"::")?((({ID}{TEMPLPART}?)|{ANONNS})("."|"#"|"::"|"-"|"/"))*
 REFWORD2       {REFWORD2_PRE}{FUNCARG2}?
 REFWORD2_NOCV  {REFWORD2_PRE}("("{FUNCPART}")")?
 REFWORD3       ({ID}":")*{ID}":"?
-REFWORD4_NOCV  (({SCOPEPRE}*"operator"{OPMASKOP2})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASKOP2}))
+REFWORD4_NOCV  (({SCOPEPRE}*"operator"{OPMASK_OP2})|(("::"|"#"){SCOPEPRE}*"operator"{OPMASK_OP2}))
 REFWORD4       {REFWORD4_NOCV}{CVSPEC}?
 REFWORD        {FILEMASK}|{LABELID}|{REFWORD2}|{REFWORD3}|{REFWORD4}
 REFWORD_NOCV   {FILEMASK}|{LABELID}|{REFWORD2_NOCV}|{REFWORD3}|{REFWORD4_NOCV}
@@ -1042,16 +1044,17 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       return TK_LNKWORD;
    }
 
-<St_Para>{LNKWORD1}/"<br>"    | // prevent <br> html tag to be parsed as template arguments
-<St_Para>{LNKWORD1}           |
-<St_Para>{LNKWORD1}{FUNCARG}  |
-<St_Para>{LNKWORD2}           |
-<St_Para>{LNKWORD3}                    {
+<St_Para>{LNKWORD1}/"<br>"     | // prevent <br> html tag to be parsed as template arguments
+<St_Para>{LNKWORD2}            |
+<St_Para>{LNKWORD3}            |
+<St_Para>{LNKWORD4}            |
+<St_Para>{LNKWORD5}                {
       g_token->name = QString::fromUtf8(yytext);
+
       return TK_LNKWORD;
    }
 
-<St_Para>{LNKWORD1}{FUNCARG}{CVSPEC}[^a-z_A-Z0-9] {
+<St_Para>{LNKWORD1}{FUNCARG1}{CVSPEC}[^a-z_A-Z0-9] {
       g_token->name = QString::fromUtf8(yytext);
       g_token->name.chop(1);
 
