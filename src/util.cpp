@@ -3035,7 +3035,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
                   const QString &word, QString *tSpec, int count = 0)
 {
    if (count > 10) {
-      return word;   // recursion
+      return word;      // recursion
    }
 
    QString result;
@@ -3043,7 +3043,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
    QString tmpName;
    QString templSpec;
 
-   if (tSpec && ! tSpec->isEmpty()) {
+   if (tSpec != nullptr && ! tSpec->isEmpty()) {
       templSpec = stripDeclKeywords(getCanonicalTemplateSpec(d, fs, *tSpec));
    }
 
@@ -3070,20 +3070,21 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
       cd = getResolvedClass(d, fs, word, &mType, &ts, true, true, &resolvedType);
    }
 
-   if (cd && cd->isUsedOnly()) {
+   if (cd != nullptr && cd->isUsedOnly()) {
       // ignore types introduced by usage relations
       cd = QSharedPointer<ClassDef>();
    }
 
-   if (cd) {
+   if (cd != nullptr) {
       // resolves to a known class type
 
-      if (cd == d && tSpec) {
-         *tSpec = QString();
-      }
+      // emerald - prevents overloads in the current class from being documented
+      // if (cd == d && tSpec != nullptr) {
+      //    *tSpec = QString();
+      // }
 
-      if (mType && mType->isTypedef()) {
-         // via a typedef, + ts was added for bug 685125
+      if (mType != nullptr && mType->isTypedef()) {
+         // typedef
          result = resolvedType + ts;
 
       } else {
@@ -3113,12 +3114,12 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
 
             }
 
-            // template class, so remove the template part (it is part of the class name)
+            // template class, remove the template part since it is part of the class name
             *tSpec = QString();
 
-         } else if (ts.isEmpty() && ! templSpec.isEmpty() && cd && !cd->isTemplate() && tSpec) {
-            // obscure case where a class is used as a template, but DoxyPress thinks it is not
-            // (could happen when loading the class from a tag file).
+         } else if (ts.isEmpty() && ! templSpec.isEmpty() && cd && ! cd->isTemplate() && tSpec) {
+            // obscure case where a class is used as a template but DoxyPress thinks it is not
+            // (can happen when loading the class from a tag file).
             *tSpec = QString();
          }
       }
@@ -3130,14 +3131,19 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
    } else if (mType && mType->isTypedef()) {
       // typedef
 
-      if (word != mType->typeString()) {
-         result = getCanonicalTypeForIdentifier(d, fs, mType->typeString(), tSpec, count + 1);
+      QString type = mType->typeString();
+      if (word != type) {
+         if (type.startsWith("typename ")) {
+            type = stripPrefix(type, "typename ");
+            type = stripTemplateSpecifiersFromScope(type, false);
+         }
+
+         result = getCanonicalTypeForIdentifier(d, fs, type, tSpec, count + 1);
 
       } else {
-         result = mType->typeString();
+         result = type;
 
       }
-
 
    } else {
       // fallback
@@ -3189,7 +3195,7 @@ static QString extractCanonicalType(QSharedPointer<Definition> def, QSharedPoint
 
       // if ct is empty it means that "word" represents scope "d"
       // and this does not need to be added to the canonical type
-      // (it is redundant), so we skip it
+      // it is redundant so we skip it
 
       if (ct.isEmpty() && type.mid(p, 2) == "::") {
          p += 2;
@@ -3218,6 +3224,7 @@ static QString extractCanonicalType(QSharedPointer<Definition> def, QSharedPoint
          }
 
          canType += QStringView(iter_last, templSpec.constEnd());
+
       }
 
       pp = p;
@@ -3320,6 +3327,7 @@ bool matchArguments2(QSharedPointer<Definition> srcScope, QSharedPointer<FileDef
       return true;
    }
 */
+
 
    if (srcArgList.count() != dstArgList.count()) {
       return false;
@@ -5633,7 +5641,7 @@ void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict &me
 
 /*  Extracts a (sub-)string from type starting at pos that could form a class.
  *  The index of the match is returned and the found class name and a template argument
- *  list \a templSpec. If -1 is returned there are no more matches.
+ *  list templSpec. If -1 is returned there are no more matches.
  */
 int extractClassNameFromType(const QString &type, int &pos, QString &name, QString &templSpec, SrcLangExt lang)
 {
@@ -5659,7 +5667,7 @@ int extractClassNameFromType(const QString &type, int &pos, QString &name, QStri
 
          }
 
-         if (type.left(4).toLower() == "type") {
+         if (type.startsWith("type", Qt::CaseInsensitive)) {
             regExp = re_norm;
 
          } else {
@@ -5689,6 +5697,7 @@ int extractClassNameFromType(const QString &type, int &pos, QString &name, QStri
          }
 
          if (iter_ts != type.constEnd() && *iter_ts == '<') {
+
             // assume template instance, locate end of template
             iter_te = iter_ts + 1;
             int brCount = 1;
