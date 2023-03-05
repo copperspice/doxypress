@@ -143,7 +143,7 @@ class HtmlDocVisitor : public DocVisitor
 
    void writeDotFile(const QString &fileName, const QString &relPath, const QString &context);
    void writeMscFile(const QString &fileName, const QString &relPath, const QString &context);
-   void writeDiaFile(const QString &fileName, const QString &relPath, const QString &context);
+   void writeDiaFile(DocDiaFile *);
    void writePlantUMLFile(const QString &fileName, const QString &relPath, const QString &context);
 
    void pushEnabled();
