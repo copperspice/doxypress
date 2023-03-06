@@ -617,14 +617,19 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          }
 
          // noexcept
+         QString argNoExcept;
+
          const clang::FunctionProtoType *protoType = node->getType()->getAs<clang::FunctionProtoType>();
          clang::ExceptionSpecificationType noExceptValue = protoType->getExceptionSpecType();
 
          switch (noExceptValue) {
 
-           case clang::ExceptionSpecificationType::EST_NoThrow:
-               args += " noexcept ";
+            case clang::ExceptionSpecificationType::EST_NoThrow:
+            case clang::ExceptionSpecificationType::EST_BasicNoexcept:
+            case clang::ExceptionSpecificationType::EST_NoexceptTrue:
+               argNoExcept += " noexcept ";
                current->m_traits.setTrait(Entry::Virtue::NoExcept);
+
                break;
 
            case clang::ExceptionSpecificationType::EST_DependentNoexcept: {
@@ -634,22 +639,20 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                llvm::raw_string_ostream tStream(tString);
                tExpr->printPretty(tStream, 0, m_policy);
 
-               args += " noexcept(" + toQString(tStream.str()) + ")";
+               argNoExcept += " noexcept(" + toQString(tStream.str()) + ")";
                current->m_traits.setTrait(Entry::Virtue::NoExcept);
 
                break;
-           }
+            }
 
-           case clang::ExceptionSpecificationType::EST_None:
-           case clang::ExceptionSpecificationType::EST_DynamicNone:
-           case clang::ExceptionSpecificationType::EST_Dynamic:
-           case clang::ExceptionSpecificationType::EST_MSAny:
-           case clang::ExceptionSpecificationType::EST_BasicNoexcept:
-           case clang::ExceptionSpecificationType::EST_NoexceptFalse:
-           case clang::ExceptionSpecificationType::EST_NoexceptTrue:
-           case clang::ExceptionSpecificationType::EST_Unevaluated:
-           case clang::ExceptionSpecificationType::EST_Uninstantiated:
-           case clang::ExceptionSpecificationType::EST_Unparsed:
+            case clang::ExceptionSpecificationType::EST_None:
+            case clang::ExceptionSpecificationType::EST_DynamicNone:
+            case clang::ExceptionSpecificationType::EST_Dynamic:
+            case clang::ExceptionSpecificationType::EST_MSAny:
+            case clang::ExceptionSpecificationType::EST_NoexceptFalse:
+            case clang::ExceptionSpecificationType::EST_Unevaluated:
+            case clang::ExceptionSpecificationType::EST_Uninstantiated:
+            case clang::ExceptionSpecificationType::EST_Unparsed:
                break;
          }
 
@@ -657,6 +660,9 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          if (methodDecl == nullptr) {
             // function
+
+            // noexcept
+            args += argNoExcept;
 
             current->section     = Entry::FUNCTION_SEC;
             current->m_entryName = name;
@@ -703,6 +709,19 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             }
 
+            // const qualifier
+            if (methodDecl->isConst())  {
+               args += " const ";
+               argList.constSpecifier = true;
+            }
+
+            clang::Qualifiers qualifiers = methodDecl->getMethodQualifiers();
+
+            if (qualifiers.hasVolatile())  {
+               args += " volatile ";
+               argList.volatileSpecifier = true;
+            }
+
             // value quaifiers
             if (methodDecl->getRefQualifier() == clang::RQ_RValue) {
                args  += " && ";
@@ -713,29 +732,19 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                argList.refSpecifier = RefType::LValueRef;
             }
 
-            // const qualifier
-            if (methodDecl->isConst())  {
-               args += " const ";
-               argList.constSpecifier = true;
-            }
-
             // override qualifier
             if (methodDecl->size_overridden_methods() != 0)  {
                args += " override ";
                current->m_traits.setTrait(Entry::Virtue::Override);
             }
 
-            clang::Qualifiers qualifiers = methodDecl->getMethodQualifiers();
-
             if (qualifiers.hasRestrict())  {
                args += " restrict ";
                // not used - argList.restrictSpecifier = true;
             }
 
-            if (qualifiers.hasVolatile())  {
-               args += " volatile ";
-               argList.volatileSpecifier = true;
-            }
+            // noexcept
+            args += argNoExcept;
 
             current->section     = Entry::FUNCTION_SEC;
             current->m_entryName = name;
