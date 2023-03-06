@@ -7336,12 +7336,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <FuncQual>{BN}*"&"   {
-      current->appendData(EntryKey::Member_Args, " &");
+      current->appendData(EntryKey::Member_Args, " & ");
       current->argList.refSpecifier = RefType::LValueRef;
    }
 
 <FuncQual>{BN}*"&&"  {
-      current->appendData(EntryKey::Member_Args, " &&");
+      current->appendData(EntryKey::Member_Args, " && ");
       current->argList.refSpecifier = RefType::RValueRef;
    }
 
