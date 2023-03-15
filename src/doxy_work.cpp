@@ -7366,6 +7366,14 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         QSharedPointer<ClassDef> ccd  = md->getClassDef();
                         QSharedPointer<MemberDef> cmd = md;
 
+                        if (md->isFriend() == (ptrEntry->m_entryName.startsWith("friend"))) {
+                           // do nothing
+
+                        } else {
+                           // not a match
+                           continue;
+                        }
+
                         if (ccd != nullptr && rightScopeMatch(ccd->name(), className)) {
 
                            const ArgumentList &md_tArgList = md->getTemplateArgumentList();
