@@ -452,7 +452,13 @@ void HtmlCodeGenerator::codify(const QString &str)
             m_col++;
             break;
       }
+   }
 
+   if (isBackSlash) {
+      // end of input string, owe user one more backslash
+
+      m_streamCode << "\\";
+      ++m_col;
    }
 }
 
