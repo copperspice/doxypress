@@ -27,7 +27,7 @@
 
 static const int maxCmdLine = 40960;
 
-void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, DiaOutputFormat format)
+void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, DiaOutputFormat format, const QString width, const QString heigth)
 {
    static const QString diaPath = Config::getString("dia-path");
 
@@ -44,13 +44,25 @@ void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const Q
 
    diaArgs += "-n ";
 
-   if (format == DIA_BITMAP) {
-      diaArgs += "-t png-libart";
-      extension = ".png";
-
-   } else if (format == DIA_EPS) {
-      diaArgs += "-t eps";
-      extension = ".eps";
+   switch(format) {
+      case DIA_BITMAP:
+         diaArgs += "-t png-libart";
+         extension = ".png";
+         // png is the only format that suports heigth and width
+         if(!width.isEmpty() || !heigth.isEmpty()) {
+            diaArgs += " -s "+width+"x"+heigth;
+         }
+         break;
+      case DIA_EPS:
+         diaArgs += "-t eps";
+         extension = ".eps";
+         break;
+      case DIA_SVG:
+         diaArgs += "-t svg";
+         extension = ".svg";
+         break;
+      default:
+		 break;
    }
 
    diaArgs += " -e \"";

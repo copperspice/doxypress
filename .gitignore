@@ -8,3 +8,4 @@ error.log
 /do-*
 /build/
 /deploy/
+clang_lib/

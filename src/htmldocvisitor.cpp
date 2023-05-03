@@ -2215,7 +2215,7 @@ void HtmlDocVisitor::visitPre(DocDiaFile *df)
    }
 
    m_t << "<div class=\"diagraph\">" << endl;
-   writeDiaFile(df->file(), df->relPath(), df->context());
+   writeDiaFile(df);
 
    if (df->hasCaption()) {
       m_t << "<div class=\"caption\">" << endl;
@@ -2797,11 +2797,15 @@ void HtmlDocVisitor::writeMscFile(const QString &fileName, const QString &relPat
    writeMscImageMapFromFile(m_t, fileName, htmlOutput, relPath, baseName, context, mscFormat);
 }
 
-void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPath, const QString &)
+void HtmlDocVisitor::writeDiaFile(DocDiaFile * df)
 {
    static const QString htmlOutput  = Config::getString("html-output");
+   QString imageExt   = Config::getEnum("dot-image-extension");
 
-   QString baseName = fileName;
+   QString baseName = df->file();
+   QString relPath = df->context();
+   QString htmlArgs;
+
    int i;
 
    if ((i = baseName.lastIndexOf('/')) != -1) {
@@ -2816,9 +2820,21 @@ void HtmlDocVisitor::writeDiaFile(const QString &fileName, const QString &relPat
 
    baseName.prepend("dia_");
 
-   writeDiaGraphFromFile(fileName, htmlOutput, baseName, DIA_BITMAP);
+   if (imageExt == "svg") {
+      writeDiaGraphFromFile(df->file(), htmlOutput, baseName, DIA_SVG);
+   } else {
+      writeDiaGraphFromFile(df->file(), htmlOutput, baseName, DIA_BITMAP,df->width(),df->height());
+      imageExt="png";
 
-   m_t << "<img src=\"" << relPath << baseName << ".png" << "\" />" << endl;
+   }
+      if(!df->width().isEmpty()){
+         htmlArgs+=" width=\""+df->width()+"\" ";
+      }
+      if(!df->height().isEmpty()){
+         htmlArgs+=" height=\""+df->height()+"\" ";
+      }
+
+   m_t << "<img src=\"" << relPath << baseName << "." << imageExt << "\""<< htmlArgs << "/>" << endl;
 }
 
 void HtmlDocVisitor::writePlantUMLFile(const QString &fileName, const QString &relPath, const QString &)
