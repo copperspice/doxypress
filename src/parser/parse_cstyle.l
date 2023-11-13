@@ -7052,7 +7052,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <CopyArgComment>{CMD}("brief"|"short"){B}+ {
       QString text = QString::fromUtf8(yytext);
-      warn(yyFileName, yyLineNr, "Ignoring %c brief command inside argument documentation", csPrintable(text[0]) );
+      warn(yyFileName, yyLineNr, "Ignoring %c brief command inside argument documentation", text[0].toLatin1());
       fullArgString += ' ';
    }
 

@@ -22214,7 +22214,7 @@ case 563:
 YY_RULE_SETUP
 {
       QString text = QString::fromUtf8(parse_cstyle_YYtext);
-      warn(yyFileName, yyLineNr, "Ignoring %c brief command inside argument documentation", csPrintable(text[0]) );
+      warn(yyFileName, yyLineNr, "Ignoring %c brief command inside argument documentation", text[0].toLatin1());
       fullArgString += ' ';
    }
 	YY_BREAK

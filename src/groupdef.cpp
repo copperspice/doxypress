@@ -391,7 +391,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
 
       default:
          err("GroupDef::insertMember(): Member `%s' (typeid = %d) with scope `%s' inserted in group scope `%s'\n",
-             csPrintable(md->name()), csPrintable(md->memberType()),
+             csPrintable(md->name()), md->memberType(),
              md->getClassDef() ? csPrintable(md->getClassDef()->name()) : "", csPrintable(name()) );
    }
 

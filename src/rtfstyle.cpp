@@ -551,7 +551,7 @@ void loadStylesheet(const QString &name, QHash<QString, StyleData> &dict)
 
       if (! dict.contains(key)) {
          // not a valid style sheet name
-         warn(name, lineNr, "Invalid style sheet name %s ignored.\n", csPrintable(key));
+         warn(name, lineNr, "Invalid style sheet name %s ignored.\n", csPrintable(key.toString()));
          continue;
       }
 

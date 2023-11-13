@@ -5951,8 +5951,7 @@ void DocPara::handleCite()
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command",
-            csPrintable("cite"));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", "cite");
       return;
    }
 
@@ -5961,12 +5960,12 @@ void DocPara::handleCite()
 
    if (tok == 0) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
-            "argument of command %s\n", csPrintable("cite"));
+            "argument of command %s\n", "cite");
       return;
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
-            csPrintable(tokToString(tok)), csPrintable("cite"));
+            csPrintable(tokToString(tok)), "cite");
       return;
    }
 
@@ -5983,8 +5982,7 @@ void DocPara::handleSortId()
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command",
-            csPrintable("sortid"));
+      warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \\%s command", "sortid");
       return;
    }
 
@@ -5992,12 +5990,12 @@ void DocPara::handleSortId()
 
    if (tok == 0) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected end of comment block while parsing the "
-            "argument of command %s\n", csPrintable("sortid"));
+            "argument of command %s\n", "sortid");
       return;
 
    } else if (tok != TK_WORD && tok != TK_LNKWORD) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
-            csPrintable(tokToString(tok)), csPrintable("sortid"));
+            csPrintable(tokToString(tok)), "sortid");
       return;
    }
 
@@ -6015,8 +6013,7 @@ void DocPara::handleEmoji()
    int tok = doctokenizerYYlex();
 
    if (tok != TK_WHITESPACE) {
-      warn_doc_error(s_fileName,getDoctokenLineNum(),"Expected whitespace after \\%s command",
-            csPrintable("emoji"));
+      warn_doc_error(s_fileName,getDoctokenLineNum(),"Expected whitespace after \\%s command", "emoji");
       return;
    }
 
@@ -6025,12 +6022,12 @@ void DocPara::handleEmoji()
 
    if (tok == 0) {
     warn_doc_error(s_fileName, getDoctokenLineNum(), "Unnexpected end of comment block while parsing the "
-           "argument of command %s\n", csPrintable("emoji"));
+           "argument of command %s\n", "emoji");
     return;
 
    } else if (tok != TK_WORD) {
       warn_doc_error(s_fileName, getDoctokenLineNum(), "Unexpected token %s as the argument of %s",
-            csPrintable(tokToString(tok)), csPrintable("emoji"));
+            csPrintable(tokToString(tok)), "emoji");
       return;
    }
 
