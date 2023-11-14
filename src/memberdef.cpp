@@ -686,7 +686,7 @@ class MemberDefImpl
    Relationship m_related;   // relationship of this to the class
 
    bool stat;                // is it a static function?
-   bool proto;               // is it a prototype;
+   bool proto;               // is it a prototype
    bool docEnumValues;       // is an enum with documented enum values
    bool annScope;            // member is part of an anonymous scope
    bool annUsed;
@@ -1968,7 +1968,6 @@ bool MemberDef::isDetailedSectionLinkable() const
 
    docFilter = ( docFilter || temp_a || temp_b || temp_c || (isAttribute || isProperty) || Doxy_Globals::userComments);
 
-   // not a global static or global statics should be extracted
    bool staticFilter = getClassDef() != nullptr || ! isStatic() || extractStatic;
 
    // only include members which are non-private unless extract_private is set or the member is part of a group
@@ -2735,7 +2734,7 @@ QString MemberDef::displayDefinition() const
       }
 
       if (pos > 0) {
-         // insert braches around the type
+         // insert branches around the type
          QString tmp("(" + ldef.left(pos + 1) + ")" + ldef.mid(pos + 1));
          ldef = tmp;
       }

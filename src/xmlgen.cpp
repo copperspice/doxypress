@@ -607,7 +607,6 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    }
 
    // group members are only visible in their group
-   // if (def->definitionType()!=Definition::TypeGroup && md->getGroupDef()) return;
 
    QString memType;
    bool isFunc = false;
@@ -1714,13 +1713,6 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
 
 static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream &ti)
 {
-   // + contained class definitions
-   // + contained namespace definitions
-   // + member groups
-   // + normal members
-   // + brief desc
-   // + detailed desc
-   // + location
    // - files containing (parts of) the namespace definition
 
    if (nd->isReference() || nd->isHidden()) {
@@ -1904,18 +1896,6 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
 
 static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
 {
-   // + members
-   // + member groups
-   // + files
-   // + classes
-   // + namespaces
-   // - packages
-   // + pages
-   // + child groups
-   // - examples
-   // + brief description
-   // + detailed description
-
    static const QString outputDirectory = Config::getString("xml-output");
 
    if (gd->isReference()) {
@@ -2183,13 +2163,6 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
 
 void generateXML_output()
 {
-   // + classes
-   // + namespaces
-   // + files
-   // + groups
-   // + related pages
-   // - examples
-
    static const QString outputDirectory = Config::getString("xml-output");
    QDir xmlDir(outputDirectory);
 

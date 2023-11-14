@@ -652,7 +652,7 @@ void processFiles()
    buildConceptList(root);
    Doxy_Globals::infoLog_Stat.end();
 
-   // build list of using declarations here (global list)
+   // build list of using declarations (global list)
    buildListOfUsingDecls(root);
    Doxy_Globals::infoLog_Stat.end();
 
@@ -2400,8 +2400,7 @@ void Doxy_Work::addConceptToContext(QSharedPointer<Entry> ptrEntry)
       conceptDef->setBodySegment(root->startBodyLine, root->endBodyLine);
       conceptDef->setBodyDef(fd);
 
-      // is the concept is found inside a namespace
-      //   conceptDef->insertUsedFile(fd);
+      // is the concept inside a namespace
 
       // add concept to the list
       Doxy_Globals::conceptSDict.insert(fullName, conceptDef);
@@ -4891,7 +4890,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
             }
 
             if (! found) {
-               /* global function is unique with respect to the file */
+               // global function is unique with respect to the file
                Debug::print(Debug::Functions, 0, "  --> new function %s found\n", csPrintable(rname));
 
                // new global function
@@ -5002,7 +5001,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
 
                if (root->relatesType == Simple)  {
                   // if this is a relatesalso command allow find Member to pick it up
-                   // Otherwise we have finished with this entry
+                  // Otherwise we have finished with this entry
 
                    ptrEntry->setSection(Entry::EMPTY_SEC);
                }
@@ -6345,7 +6344,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
    }
 
    if (overload) {
-      // the \overload keyword was used
+      // the overload keyword was used
 
       QString doc = theTranslator->trOverloadText();
       if (! root->getData(EntryKey::Main_Docs).isEmpty()) {
@@ -6503,7 +6502,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
          bool viaUsingDirective = nl && nd && nl->find(nd->qualifiedName()) != nullptr;
 
          if ((namespaceName.isEmpty() && nd == nullptr) || (nd && nd->name() == namespaceName) || viaUsingDirective) {
-            // not in a namespace, or in the same namespace, memeber in "using' namespace
+            // not in a namespace, or in the same namespace, member in "using' namespace
 
             Debug::print(Debug::FindMembers, 0, "\nDebug: findGlobalMember() attempting to add member %s to scope %s\n",
                   csPrintable(md->name()), csPrintable(namespaceName));
@@ -6546,7 +6545,7 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
                matching = false;
             }
 
-            // for template member, check the return type
+            // for template member, check the return type and requires
             const ArgumentList &tmpList = md->getTemplateArgumentList();
 
             if (! ptrEntry->m_templateArgLists.isEmpty()) {
@@ -6952,7 +6951,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
          scopeName = namespaceName;
 
       } else if (! root->getData(EntryKey::Related_Class).isEmpty() || ! getClass(className)) {
-         // relates command with explicit scopem, class name only exists in a namespace
+         // relates command with explicit scope, class name only exists in a namespace
          scopeName = namespaceName + "::" + className;
 
       } else {
@@ -6989,11 +6988,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
       } else {
          if (isFunc) {
-            // a function => we use argList for the arguments
+            // a function -> use argList for the arguments
             funcDecl = tempScopeName + "::" + funcName + funcTemplateArgs;
 
          } else {
-            // variable => add 'argument' list
+            // variable -> add 'argument' list
             funcDecl = tempScopeName + "::" + funcName + funcArgs;
          }
       }
@@ -7083,9 +7082,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
       if (! isRelated && ! strongEnum && mn != nullptr) {
          // function name already found
 
-         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [2] member name exists "
-                  "(%d members with this name)\n", mn->count());
-
          if (! className.isEmpty()) {
             // class name is valid
 
@@ -7156,9 +7152,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                   if (memberCd != nullptr && tcd == memberCd) {
                      // found the class this funcDecl (member) belongs to
-
-                     Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [4] class definition: %s\n",
-                        csPrintable(memberCd->name()));
 
                      // get the template parameter lists found in the member declaration
                      QVector<ArgumentList> declTemplArgs;
@@ -8687,7 +8680,7 @@ void Doxy_Work::findEnumDocumentation(QSharedPointer<Entry> ptrEntry)
             }
 
          } else {
-            // enum outside class, most likley in a namaspace
+            // enum outside class, most likely in a namespace
 
             QSharedPointer<MemberName> mn = Doxy_Globals::functionNameSDict.find(name);
 

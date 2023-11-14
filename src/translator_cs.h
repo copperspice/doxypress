@@ -318,7 +318,7 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Here is a list of all modules:");
    }
 
-   /*! This is an introduction for  concepts */
+   /*! This is an introduction for concepts */
    QString trConcepts() override {
       return QCoreApplication::translate("doxy-text", "Concepts");
    }
@@ -1381,7 +1381,7 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "References");
    }
 
-   // used in member documentation to produce a list of members whcih are implemented by this one
+   // used in member documentation to produce a list of members which are implemented by this one
    QString trImplementedFromList(int numEntries) override {
      return QCoreApplication::translate("doxy-text", "Implements %1").formatArg(trWriteList(numEntries));
    }

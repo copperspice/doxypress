@@ -819,7 +819,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
             llvm::cl::OptionCategory category("doxypress");
             clang::tooling::CommonOptionsParser options(argc, &argv[0], category);
 
-            // pass the main file name seperately
+            // pass the main file name separately
             std::vector<std::string> sourceList;
             sourceList.push_back(stdFName);
 
@@ -846,7 +846,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
 
             clang::tooling::FixedCompilationDatabase options(".", argTmp);
 
-            // pass the main file name seperately
+            // pass the main file name separately
             std::vector<std::string> sourceList;
             sourceList.push_back(stdFName);
 

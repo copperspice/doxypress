@@ -457,7 +457,7 @@ class TagFileParser : public QXmlDefaultHandler
             break;
 
          default:
-            tagWarn("Unexpected '<compound>' found in the tag file.\n");
+            tagWarn("Unexpected '<compound>' found in the tag file\n");
       }
    }
 
@@ -608,7 +608,7 @@ class TagFileParser : public QXmlDefaultHandler
             m_curPackage->classList.append(m_curString);
             break;
          default:
-            tagWarn("Unexpected '<class>'  found in the tag file.\n");
+            tagWarn("Unexpected '<class>' found in the tag file");
             break;
       }
    }
@@ -628,7 +628,7 @@ class TagFileParser : public QXmlDefaultHandler
             break;
 
          default:
-            tagWarn("Unexpected '<namespace>' found in the tag file.\n");
+            tagWarn("Unexpected '<namespace>' found in the tag file\n");
             break;
       }
    }
@@ -642,7 +642,7 @@ class TagFileParser : public QXmlDefaultHandler
             m_curDir->fileList.append(m_curString);
             break;
          default:
-            tagWarn("Unexpected '<file>' found in the tag file.\n");
+            tagWarn("Unexpected '<file>' found in the tag file\n");
             break;
       }
    }
@@ -654,7 +654,7 @@ class TagFileParser : public QXmlDefaultHandler
             break;
 
          default:
-            tagWarn("Unexpected '<page>' found in the tag file.\n");
+            tagWarn("Unexpected '<page>' found in the tag file.n");
             break;
       }
    }
@@ -746,7 +746,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_curClass->bases.append(BaseInfo(m_curString, prot, virt));
 
       } else {
-         tagWarn("Unexpected '<base>' found in the tag file.\n");
+         tagWarn("Unexpected '<base>' found in the tag file\n");
       }
    }
 
@@ -755,7 +755,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_curClass->bases.last().name = m_curString;
 
       } else {
-         tagWarn("Unexpected '<base>' found in the tag file.\n");
+         tagWarn("Unexpected '<base>' found in the tag file\n");
       }
    }
 
@@ -786,7 +786,7 @@ class TagFileParser : public QXmlDefaultHandler
          m_curClass->templateArguments.append(m_curString);
 
       } else {
-         tagWarn("Unexpected '<templarg>' found in tag file.\n");
+         tagWarn("Unexpected '<templarg>' found in tag file\n");
       }
    }
 
@@ -975,7 +975,7 @@ class TagFileParser : public QXmlDefaultHandler
          handler(attrib);
 
       } else {
-         tagWarn("Unknown '<%s>' found in the tag file.\n", name);
+         tagWarn("Unknown '<%s>' found in the tag file", name);
 
       }
 

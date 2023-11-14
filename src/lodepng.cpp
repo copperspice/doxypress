@@ -448,9 +448,9 @@ static void Coin_sort(Coin *data, size_t amount) /*combsort*/
 typedef struct HuffmanTree {
    uivector tree2d;
    uivector tree1d;
-   uivector lengths; /*the lengths of the codes of the 1d-tree*/
-   unsigned maxbitlen; /*maximum number of bits a single code can get*/
-   unsigned numcodes; /*number of symbols in the alphabet = number of codes*/
+   uivector lengths;    // length of the codes of the 1d-tree
+   unsigned maxbitlen;  // maximum number of bits a single code can get
+   unsigned numcodes;   // number of symbols in the alphabet = number of codes
 } HuffmanTree;
 
 /*function used for debug purposes*/
@@ -1214,7 +1214,8 @@ static void addLengthDistance(uivector *values, size_t length, size_t distance)
 static unsigned encodeLZ77_brute(uivector *out, const unsigned char *in, size_t size, unsigned windowSize)
 {
    size_t pos;
-   /*using pointer instead of vector for input makes it faster when NOT using optimization when compiling; no influence if optimization is used*/
+   // using pointer instead of vector for input makes it faster when NOT using optimization
+   // when compiling; no influence if optimization is used
 
    for (pos = 0; pos < size; pos++) {
       /*Phase 1: doxypress images often have long runs of the same color, try to find them*/
@@ -1514,7 +1515,7 @@ static unsigned deflateDynamic(ucvector *out, const unsigned char *data, size_t 
    after the BFINAL and BTYPE, the dynamic block consists out of the following:
    - 5 bits HLIT, 5 bits HDIST, 4 bits HCLEN
    - (HCLEN+4)*3 bits code lengths of code length alphabet
-   - HLIT + 257 code lenghts of lit/length alphabet (encoded using the code length alphabet, + possible repetition codes 16, 17, 18)
+   - HLIT + 257 code length of lit/length alphabet (encoded using the code length alphabet, + possible repetition codes 16, 17, 18)
    - HDIST + 1 code lengths of distance alphabet (encoded using the code length alphabet, + possible repetition codes 16, 17, 18)
    - compressed data
    - 256 (end code)
@@ -2953,7 +2954,7 @@ unsigned LodePNG_convert(unsigned char *out, const unsigned char *in, LodePNG_In
    return 0;
 }
 
-/*Paeth predicter, used by PNG filter type 4*/
+/*Path predicter, used by PNG filter type 4*/
 static int paethPredictor(int a, int b, int c)
 {
    int p = a + b - c;
@@ -3246,7 +3247,7 @@ static unsigned postProcessScanlines(unsigned char *out, unsigned char *in, cons
 {
    /*
    This function converts the filtered-padded-interlaced data into pure 2D image buffer with the PNG's colortype. Steps:
-   *) if no Adam7: 1) unfilter 2) remove padding bits (= posible extra bits per scanline if bpp < 8)
+   *) if no Adam7: 1) unfilter 2) remove padding bits (= possible extra bits per scanline if bpp < 8)
    *) if adam7: 1) 7x unfilter 2) 7x remove padding bits 3) Adam7_deinterlace
    NOTE: the in buffer will be overwritten with intermediate data!
    */
@@ -3266,7 +3267,7 @@ static unsigned postProcessScanlines(unsigned char *out, unsigned char *in, cons
          }
          removePaddingBits(out, in, w * bpp, ((w * bpp + 7) / 8) * 8, h);
       } else {
-         error = unfilter(out, in, w, h, bpp);   /*we can immediatly filter into the out buffer, no other steps needed*/
+         error = unfilter(out, in, w, h, bpp);   /*we can immediately filter into the out buffer, no other steps needed*/
       }
    } else { /*interlaceMethod is 1 (Adam7)*/
       unsigned passw[7], passh[7];
@@ -4411,7 +4412,7 @@ static unsigned preProcessScanlines(unsigned char **out, size_t *outsize, const 
 {
    /*
    This function converts the pure 2D image with the PNG's colortype, into filtered-padded-interlaced data. Steps:
-   *) if no Adam7: 1) add padding bits (= posible extra bits per scanline if bpp < 8) 2) filter
+   *) if no Adam7: 1) add padding bits (= possible extra bits per scanline if bpp < 8) 2) filter
    *) if adam7: 1) Adam7_interlace 2) 7x add padding bits 3) 7x filter
    */
    unsigned bpp = LodePNG_InfoColor_getBpp(&infoPng->color);
@@ -4439,7 +4440,7 @@ static unsigned preProcessScanlines(unsigned char **out, size_t *outsize, const 
             }
             ucvector_cleanup(&padded);
          } else {
-            error = filter(*out, in, w, h, &infoPng->color);   /*we can immediatly filter into the out buffer, no other steps needed*/
+            error = filter(*out, in, w, h, &infoPng->color);   /*we can immediately filter into the out buffer, no other steps needed*/
          }
       }
    } else { /*interlaceMethod is 1 (Adam7)*/

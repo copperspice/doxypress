@@ -746,7 +746,7 @@ static bool findMemberLink(CodeGenerator &ol, QSharedPointer<Definition> def, co
       DBG_CTX(stderr, "cd=%s thisCd=%s\n", cd ? csPrintable(cd->name()) : "<none>",
                   thisCd ? csPrintable(thisCd->name()) : "<none>");
 
-      // TODO: find the nearest base class in case cd is a base class of thisCd
+      // may want to find the nearest base class in case cd is a base class of thisCd
 
       if (cd == thisCd || (thisCd && thisCd->isBaseClass(cd, true))) {
          writeMultiLineCodeLink(ol, def, name);
@@ -1259,7 +1259,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 
    ""/({NONEMPTY}|{EXPCHAR})  {
-      // Default rule; matches yhe empty string, assuming real text starts here.
+      // Default rule, matches the empty string, assuming real text starts here.
       // Just go straight to Body
       adjustScopesAndSuites(0);
    }
@@ -1402,7 +1402,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
   /*
 <*>({NONEMPTY}|{EXPCHAR}|{BB})           {
-      // This should go one character at a time.
+      // This should go one character at a time
       QString text = QString::fromUtf8(yytext);
       codify(text);
 

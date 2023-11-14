@@ -149,7 +149,6 @@ void NamespaceDef::addInnerCompound(QSharedPointer<Definition> d)
 
 void NamespaceDef::insertClass(QSharedPointer<ClassDef> cd)
 {
-   // added 12/2015
    if (cd->isHidden()) {
       return;
    }
@@ -999,7 +998,8 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
          SrcLangExt lang = nd->getLanguage();
 
          if (lang == SrcLangExt_IDL && (isConstantGroup != nd->isConstantGroup())) {
-            continue;   // will be output in another pass, see layout_default.xml
+            // will be output in another pass, see layout_default.xml
+            continue;
          }
 
          ol.startMemberDeclaration();

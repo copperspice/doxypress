@@ -212,7 +212,7 @@ class Entry : public EnableSharedFromThis
       PrivateSettable,         // C# private setter
       ProtectedSettable,       // C# protected setter
 
-      // atrributes
+      // attributes
       NoDiscard,
       NoReturn,
 
@@ -426,11 +426,11 @@ class Entry : public EnableSharedFromThis
    LocalToc localToc;
 
    bool stat;                      // static ?
-   bool explicitExternal;          // explicitly defined as external ?
-   bool proto;                     // prototype ?
-   bool subGrouping;               // automatically group class members ?
-   bool callGraph;                 // do we need to draw the call graph ?
-   bool callerGraph;               // do we need to draw the caller graph ?
+   bool explicitExternal;          // explicitly defined as external
+   bool proto;                     // prototype
+   bool subGrouping;               // automatically group class members
+   bool callGraph;                 // do we need to draw the call graph
+   bool callerGraph;               // do we need to draw the caller graph
    bool hidden;                    // does this represent an entity that is hidden from the output
    bool artificial;                // artificially introduced item
 

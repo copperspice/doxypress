@@ -70,7 +70,7 @@ struct StyleData {
 
    unsigned int m_index;         // index in style-sheet, i.e. number in s-clause
    QString      m_reference;     // everything required to apply the style
-   QString      m_definition;    // aditional tags like \snext and style name
+   QString      m_definition;    // additional tags like \snext and style name
 
    StyleData(const QString &reference, const QString &definition);
    StyleData();

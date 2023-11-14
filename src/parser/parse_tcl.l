@@ -1961,7 +1961,7 @@ static void tcl_command_SWITCH()
       myScan = tcl_command_ARG(myScan, lastOptionIndex + 2, false);
       myScan = tcl_command_ARG(myScan, lastOptionIndex + 3, false);
 
-      // walk trough the list step by step
+      // walk through the list step by step
       // this way we can preserve whitespace
 
       bool inBraces = false;

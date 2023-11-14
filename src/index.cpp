@@ -2391,7 +2391,6 @@ static QString writeNamespaceLink(OutputList &ol, QSharedPointer<MemberDef> md, 
       if (prevName != tName) {
          retval = tName;
 
-         // added 01/2016
          tName = renameNS_Aliases(tName);
 
          ol.docify(separator);
@@ -3562,7 +3561,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
       return;
    }
 
-   // Some groups should appear twice under different parent-groups. Do not check if it was visted
+   // Some groups should appear twice under different parent-groups. Do not check if it was visited
    if ( (! gd->isASubGroup() || level > 0) && gd->isVisible() &&
         (! gd->isReference() || Config::getBool("external-groups")) ) {
 
@@ -4133,7 +4132,7 @@ static void writeIndex(OutputList &ol)
 
       if (s_annotatedClassesPrinted > 0) {
          ol.startIndexSection(isCompoundIndex);
-         ol.parseText(/*projPrefix+*/
+         ol.parseText(
             (optimizeFortran ? theTranslator->trCompoundIndexFortran() : theTranslator->trCompoundIndex()));
          ol.endIndexSection(isCompoundIndex);
       }
@@ -4142,7 +4141,7 @@ static void writeIndex(OutputList &ol)
          // enabled from build options, file command
 
          ol.startIndexSection(isFileIndex);
-         ol.parseText(/*projPrefix+*/theTranslator->trFileIndex());
+         ol.parseText(theTranslator->trFileIndex());
          ol.endIndexSection(isFileIndex);
       }
    }
@@ -4151,31 +4150,31 @@ static void writeIndex(OutputList &ol)
 
    if (s_documentedGroups > 0) {
       ol.startIndexSection(isModuleDocumentation);
-      ol.parseText(/*projPrefix+*/theTranslator->trModuleDocumentation());
+      ol.parseText(theTranslator->trModuleDocumentation());
       ol.endIndexSection(isModuleDocumentation);
    }
 
    if (s_documentedNamespaces > 0) {
       ol.startIndexSection(isNamespaceDocumentation);
-      ol.parseText(/*projPrefix+*/(optimizeFortran ? theTranslator->trModuleDocumentation() : theTranslator->trNamespaceDocumentation()));
+      ol.parseText((optimizeFortran ? theTranslator->trModuleDocumentation() : theTranslator->trNamespaceDocumentation()));
       ol.endIndexSection(isNamespaceDocumentation);
    }
 
    if (s_annotatedClassesPrinted > 0) {
       ol.startIndexSection(isClassDocumentation);
-      ol.parseText(/*projPrefix+*/(optimizeFortran ? theTranslator->trTypeDocumentation() : theTranslator->trClassDocumentation()));
+      ol.parseText((optimizeFortran ? theTranslator->trTypeDocumentation() : theTranslator->trClassDocumentation()));
       ol.endIndexSection(isClassDocumentation);
    }
 
    if (Doxy_Globals::documentedFiles > 0) {
       ol.startIndexSection(isFileDocumentation);
-      ol.parseText(/*projPrefix+*/theTranslator->trFileDocumentation());
+      ol.parseText(theTranslator->trFileDocumentation());
       ol.endIndexSection(isFileDocumentation);
    }
 
    if (Doxy_Globals::exampleSDict.count() > 0) {
       ol.startIndexSection(isExampleDocumentation);
-      ol.parseText(/*projPrefix+*/theTranslator->trExampleDocumentation());
+      ol.parseText(theTranslator->trExampleDocumentation());
       ol.endIndexSection(isExampleDocumentation);
    }
 
@@ -4330,7 +4329,7 @@ static void writeIndexHierarchyEntries(OutputList &ol, const QList<LayoutNavEntr
 
                   if (LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::Files) != lne) {
                      // for backward compatibility with old layout file
-                     msg("Generating file index\n");
+                     msg("Generating file index (older style layout)\n");
                      writeFileIndex(ol);
                   }
                }

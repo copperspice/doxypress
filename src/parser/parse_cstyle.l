@@ -1459,7 +1459,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <ObjCReturnType>[^)]*         {
-      // TODO: check if nested braches are possible.
+      // TODO: check if nested branches are possible
       QString text = QString::fromUtf8(yytext);
       current->setData(EntryKey::Member_Type, text);
    }

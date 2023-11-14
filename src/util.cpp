@@ -1315,7 +1315,7 @@ static void getResolvedSymbol(QSharedPointer<const Definition> scope, QSharedPoi
          }
 
       } else {
-         //  mot accessible
+         //  not accessible
 
       }
    }
@@ -1986,7 +1986,7 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
             if (external ? cd->isLinkable() : cd->isLinkableInProject()) {
 
                if (cd == def || (scope && cd->name() == scope->name()) ) {
-                  // do not link to the current scope (added 01/2016)
+                  // do not link to the current scope
 
                } else {
                   // add link to the result
@@ -2033,7 +2033,7 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
                   // name check is needed for overloaded members, where getDefs returns one
 
                   if (word.contains("(")) {
-                     // ensure word refers to a method name, (added 01/2016)
+                     // ensure word refers to a method name
                      bool ok_2 = true;
 
                      if (scope != nullptr && scope->getLanguage() == SrcLangExt_Fortran) {
@@ -7861,7 +7861,7 @@ bool patternMatch(const QFileInfo &fi, const QStringList &patList)
          }
 
          // input-patterns
-         // possilbe issue if the pattern has something other than a wildcard for the name
+         // possible issue if the pattern has something other than a wildcard for the name
          // found = re.indexIn(fn) != -1 || re.indexIn(fp) != -1 || re.indexIn(afp) != -1;
 
          found = fn.contains(regExp) || fp.contains(regExp) || afp.contains(regExp);
@@ -7974,7 +7974,7 @@ QString replaceColorMarkers(const QString &str)
    return result;
 }
 
-// copys the contents of src to the newly created file dest
+// copies the contents of src to the newly created file dest
 bool copyFile(const QString &src, const QString &dest)
 {
    QFile sf(src);

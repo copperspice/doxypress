@@ -397,7 +397,8 @@ void FileDef::writeIncludeFiles(OutputList &ol)
                // Objective-C include
                ol.docify("#import ");
 
-            } else { // C/C++ include
+            } else {
+               // C/C++ include
                ol.docify("#include ");
             }
 
@@ -1158,7 +1159,6 @@ void FileDef::insertClass(QSharedPointer<ClassDef> cd)
    m_classSDict.insert(cd->name(), cd);
 }
 
-/*! Adds namespace definition \a nd to the list of all compounds of this file */
 void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 {
    if (nd->isHidden()) {

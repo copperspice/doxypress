@@ -2382,8 +2382,8 @@ void ClassDef::setTemplateArgumentList(const ArgumentList &al)
    m_tempArgs = al;
 }
 
-/*! Returns \c true if this class or a class inheriting from this class
- *  is \e not defined in an external tag file.
+/*! Returns true if this class or a class inheriting from this class
+ *  is not defined in an external tag file.
  */
 bool ClassDef::hasNonReferenceSuperClass() const
 {

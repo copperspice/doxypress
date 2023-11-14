@@ -93,7 +93,7 @@ class ConceptDef : public Definition
       // Include information about the header file
       IncludeInfo m_incInfo;
 
-      //  LocalToc m_localToc;
+      // LocalToc m_localToc;
 };
 
 #endif

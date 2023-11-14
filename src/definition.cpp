@@ -47,7 +47,7 @@ class Definition_Private
    void setDefFileName(const QString &df);
 
    SectionDict m_sectionDict;                             // dictionary of all sections
-   QVector<QSharedPointer <SectionInfo>> m_sectionList;   // list of sections, definiton order
+   QVector<QSharedPointer <SectionInfo>> m_sectionList;   // list of sections, definition order
 
    MemberSDict m_sourceRefByDict;
    MemberSDict m_sourceRefsDict;

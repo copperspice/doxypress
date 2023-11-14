@@ -1029,10 +1029,8 @@ void PerlModDocVisitor::visitPre(DocPara *)
 
 void PerlModDocVisitor::visitPost(DocPara *)
 {
-   /*
-   closeSubBlock();
-   closeItem();
-   */
+   // closeSubBlock();
+   // closeItem();
 }
 
 void PerlModDocVisitor::visitPre(DocRoot *)
@@ -1855,19 +1853,6 @@ class PerlModGenerator
 
 void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QSharedPointer<Definition> def)
 {
-   // + declaration/definition arg lists
-   // + reimplements
-   // + reimplementedBy
-   // + exceptions
-   // + const/volatile specifiers
-   // - examples
-   // - source definition
-   // - source references
-   // - source referenced by
-   // - body code
-   // - template arguments
-   //     (templateArguments(), definitionTemplateParameterLists())
-
    (void) def;
 
    QString memType;
@@ -2142,21 +2127,6 @@ void PerlModGenerator::addListOfAllMembers(QSharedPointer<ClassDef> cd)
 
 void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 {
-   // + brief description
-   // + detailed description
-   // + template argument list(s)
-   // - include file
-   // + member groups
-   // + inheritance diagram
-   // + list of direct super classes
-   // + list of direct sub classes
-   // + list of inner classes
-   // + collaboration diagram
-   // + list of all members
-   // + user defined member sections
-   // + standard member sections
-   // + detailed member documentation
-   // - examples using the class
 
    if (cd->isReference()) {
       return;   // skip external references
@@ -2294,14 +2264,6 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 
 void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> nd)
 {
-   // + contained class definitions
-   // + contained namespace definitions
-   // + member groups
-   // + normal members
-   // + brief desc
-   // + detailed desc
-   // + location
-   // - files containing (parts of) the namespace definition
 
    if (nd->isReference()) {
       return;   // skip external references
@@ -2356,20 +2318,6 @@ void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> 
 
 void PerlModGenerator::generatePerlModForFile(QSharedPointer<FileDef> fd)
 {
-   // + includes files
-   // + includedby files
-   // - include graph
-   // - included by graph
-   // - contained class definitions
-   // - contained namespace definitions
-   // - member groups
-   // + normal members
-   // + brief desc
-   // + detailed desc
-   // - source code
-   // - location
-   // - number of lines
-
    if (fd->isReference()) {
       return;
    }
@@ -2423,18 +2371,6 @@ void PerlModGenerator::generatePerlModForFile(QSharedPointer<FileDef> fd)
 
 void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
 {
-   // + members
-   // + member groups
-   // + files
-   // + classes
-   // + namespaces
-   // - packages
-   // + pages
-   // + child groups
-   // - examples
-   // + brief description
-   // + detailed description
-
    if (gd->isReference()) {
       return;   // skip external references
    }
@@ -2516,10 +2452,6 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
 
 void PerlModGenerator::generatePerlModForPage(QSharedPointer<PageDef> pd)
 {
-   // + name
-   // + title
-   // + documentation
-
    if (pd->isReference()) {
       return;
    }

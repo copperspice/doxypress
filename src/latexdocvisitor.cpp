@@ -276,7 +276,7 @@ void LatexDocVisitor::visit(DocEmoji *s)
    QString result = EmojiEntityMapper::instance()->name(s->index());
 
    if (! result.isEmpty()) {
-      // stip the :
+      // strip :
       QString imageName = result.mid(1, result.length() - 2);
 
       m_t << "\\doxyemoji{";

@@ -1362,8 +1362,9 @@ void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGr
             warn(root->getData(EntryKey::File_Name), root->startLine, "Refusing to add group %s to itself", csPrintable(gd->name()));
 
          } else if (subGroup->findGroup(gd)) {
-            warn(root->getData(EntryKey::File_Name), root->startLine, "Refusing to add group %s to group %s, since the latter is already a "
-                 "subgroup of the former\n", csPrintable(subGroup->name()), csPrintable(gd->name()));
+            warn(root->getData(EntryKey::File_Name), root->startLine,
+                  "Refusing to add group %s to group %s, since the latter is already a "
+                  "subgroup of the former\n", csPrintable(subGroup->name()), csPrintable(gd->name()));
 
          } else if (! gd->findGroup(subGroup)) {
             gd->addGroup(subGroup);
@@ -1373,7 +1374,6 @@ void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGr
    }
 }
 
-/*! Add a member to the group with the highest priority */
 void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 {
    // Search entry's group list for group with highest pri.
@@ -1429,7 +1429,8 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
                        "Member documentation for %s found several times in %s groups\n"
                        "%s:%d: The member will remain in group %s, and will not be put into group %s",
                        csPrintable(md->name()), csPrintable(Grouping::getGroupPriName(pri)),
-                       csPrintable(root->getData(EntryKey::File_Name)), root->startLine, csPrintable(mgd->name()), csPrintable(fgd->name()) );
+                       csPrintable(root->getData(EntryKey::File_Name)), root->startLine,
+                       csPrintable(mgd->name()), csPrintable(fgd->name()) );
                }
             }
          }

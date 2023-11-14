@@ -1128,9 +1128,9 @@ static int getNextId(const QString &expr, int p, int *l)
    return -1;
 }
 
-/*! preforms recursive macro expansion on the string expr starting at position pos.
- *  May read additional characters from the input while re-scanning
- *  If expandAll is true then all macros in the expression are expanded, otherwise only the first is expanded
+/*! performs recursive macro expansion on the string expr starting at position pos
+ *  may read additional characters from the input while re-scanning
+ *  if expandAll is true then all macros in the expression are expanded, otherwise only the first is expanded
  */
 static bool expandExpression(QString &expr, QString *rest, int pos, int level)
 {

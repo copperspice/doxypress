@@ -595,8 +595,6 @@ void DirDef::addUsesDependency(QSharedPointer<DirDef> dir, QSharedPointer<FileDe
    }
 }
 
-/** Computes the dependencies between directories
- */
 void DirDef::computeDependencies()
 {
    for (const auto &fd : m_fileList) {
@@ -709,8 +707,6 @@ bool DirDef::matchPath(const QString &path, const QStringList &list)
    return false;
 }
 
-/*! strip part of \a path if it matches one of the paths in the list
- */
 QSharedPointer<DirDef> DirDef::mergeDirectoryInTree(const QString &path)
 {
    static const QStringList stripFromPath = Config::getList("strip-from-path");

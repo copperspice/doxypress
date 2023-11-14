@@ -225,7 +225,7 @@ void CiteDict::generatePage() const
       errAll("Issue with Perl or BibTeX. Verify 'perl --version' works from a Windows or Shell command line.\n\n");
 
    } else if (exitCode != 0) {
-      errAll("Issue with Perl or BibTeX. \n       Verify messages appearing afer 'Generating citations page' in your "
+      errAll("Issue with Perl or BibTeX. \n       Verify messages appearing after 'Generating citations page' in your "
                   "DoxyPress UI output. Exit Code: %d\n\n", exitCode);
    }
 
@@ -306,7 +306,7 @@ void CiteDict::generatePage() const
 
          if (fi.exists()) {
             if (! bibFile.isEmpty()) {
-               // suffix added to accomodate files with the same name
+               // suffix added to accommodate files with the same name
                copyFile(bibFile, latexOutputDir + bibTmpFile + QString::number(count) + ".bib");
                ++count;
             }

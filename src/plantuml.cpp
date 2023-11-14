@@ -101,7 +101,7 @@ void generatePlantUMLOutput(const QString &baseName, const QString &outDir, Plan
    pumlArgs += "\" ";
 
    // strip path from basename contains path to create the image file
-   // includ in the index.qhp (Qt help index file)
+   // include in the index.qhp (Qt help index file)
 
    QString imgName = baseName;
    int pos;

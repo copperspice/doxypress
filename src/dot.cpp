@@ -655,7 +655,7 @@ static void checkDotResult(const QString &imgName)
          if (fread(data, 1, 4, f) == 4) {
 
             if (! (data[1] == 'P' && data[2] == 'N' && data[3] == 'G')) {
-               err("Image `%s' produced by dot is not a valid PNG formate\n"
+               err("Image `%s' produced by dot is not a valid PNG format\n"
                    "Select a different format in 'DOT IMAGE FORMAT' or install a more "
                    "recent version of graphviz (1.7+)\n", csPrintable(imgName));
             }

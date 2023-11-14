@@ -869,7 +869,7 @@ bool Config::verify()
       temp = iterString.value().value;
 
       if (temp.isEmpty()) {
-         errAll("When Generate QtHelp is set, QHP Virtual Folder can not be empty. Setting to the defualt of 'doc'\n");
+         errAll("When Generate QtHelp is set, QHP virtual folder can not be empty. Setting to the default of 'doc'\n");
 
          iterString.value().value = "doc";
       }

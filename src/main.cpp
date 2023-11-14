@@ -72,7 +72,7 @@ void loadTranslationFile()
       QCoreApplication::installTranslator(translator);
 
    } else {
-      fprintf(stderr, "\nWarning: Problem occured while loading the '%s' translation file\n\n", csPrintable(transFile) );
+      fprintf(stderr, "\nWarning: Problem occurred while loading the '%s' translation file\n\n", csPrintable(transFile) );
 
    }
 

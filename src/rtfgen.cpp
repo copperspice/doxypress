@@ -2252,11 +2252,11 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
 
    QByteArray lineBuf;
 
-   // scan until find end of header, this works becasue the first line of the rtf file
+   // scan until find end of header, this works because the first line of the rtf file
    // before the body, ALWAYS contains "{\comment begin body}"
 
    while (true) {
-      // retriev header from refman.rtf and copy to combined.rtf
+      // retrieve header from refman.rtf and copy to combined.rtf
       // skip over the header for all other files
 
       lineBuf = f.readLine();
@@ -2316,7 +2316,7 @@ static bool preProcessFile_RTF(QString &input_FName, QTextStream &t_stream, bool
                lineBuf.truncate(bracePos);
 
             } else {
-               err("Last charactor of %s was not a '}' as expected.\n", csPrintable(input_FName) );
+               err("Last character of %s was not a '}' as expected.\n", csPrintable(input_FName) );
 
             }
 

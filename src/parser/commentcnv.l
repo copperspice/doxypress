@@ -1412,7 +1412,7 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
       }
 
       tmp += ")";
-      warn(s_fileName, s_lineNr, "Reached end of file while still inside a (nested) comment. "
+      warn(s_fileName, s_lineNr, "Reached end of file while inside a (nested) comment. "
            "\nNesting level %d %s", s_nestingCount, csPrintable(tmp) );
 
       // add one for "normal" expected end of comment

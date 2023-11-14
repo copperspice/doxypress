@@ -97,7 +97,7 @@ static void writeServerSearchBox(QTextStream &t, const QString &relPath, bool hi
    }
 }
 
-/// Clear a text block \a s from \a begin to \a end markers
+// Clear a text block \a s from \a begin to \a end markers
 QString clearBlock(const QString &output, const QString &begin, const QString &end)
 {
    QString retval = output;
