@@ -25,8 +25,6 @@
 #include <portable.h>
 #include <message.h>
 
-static const int maxCmdLine = 40960;
-
 QString writePlantUMLSource(const QString &outDir, const QString &fileName, const QString &content)
 {
    QString baseName;

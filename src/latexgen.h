@@ -73,7 +73,6 @@ class LatexCodeGenerator : public CodeGenerator
       QString m_relPath;
       QString m_sourceFileName;
 
-      bool m_streamSet  = false;
       bool m_prettyCode       = false;
       bool m_doxyCodeLineOpen = false;
 

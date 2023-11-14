@@ -28,8 +28,6 @@
 #include <portable.h>
 #include <util.h>
 
-static const int maxCmdLine = 40960;
-
 static bool convertMapFile(QTextStream &t, const QString &mapName, const QString &relPath, const QString &context)
 {
    static int logCount = 0;

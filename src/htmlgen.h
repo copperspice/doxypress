@@ -65,7 +65,6 @@ class HtmlCodeGenerator : public CodeGenerator
 
    QTextStream &m_streamCode;
 
-   bool m_streamSet;
    bool m_lineOpen;
 
    int m_col;

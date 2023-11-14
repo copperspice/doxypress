@@ -377,7 +377,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
 }
 
 HtmlCodeGenerator::HtmlCodeGenerator(QTextStream &t, const QString &relPath)
-   : m_streamCode(t), m_streamSet(false), m_lineOpen(false), m_col(0), m_relPath(relPath)
+   : m_streamCode(t), m_lineOpen(false), m_col(0), m_relPath(relPath)
 {
 }
 

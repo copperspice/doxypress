@@ -25,8 +25,6 @@
 #include <portable.h>
 #include <util.h>
 
-static const int maxCmdLine = 40960;
-
 void writeDiaGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, DiaOutputFormat format)
 {
    static const QString diaPath = Config::getString("dia-path");
