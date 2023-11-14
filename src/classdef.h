@@ -39,11 +39,11 @@
 #include <types.h>
 
 class ClassDef;
-
-class ConstraintClassDef;
 class ClassDict;
 class FileDef;
 class StringDict;
+
+struct ConstraintClassDef;
 
 // Class that contains information about a usage relation.
 class UsesClassDef

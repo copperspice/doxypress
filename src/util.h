@@ -38,7 +38,6 @@
 #include <ctype.h>
 #include <types.h>
 
-class BaseClassDef;
 class Definition;
 class FileNameDict;
 class MemberList;
@@ -46,6 +45,7 @@ class MemberDef;
 class NamespaceDef;
 class TextGenerator;
 
+struct BaseClassDef;
 struct ListItemInfo;
 struct SectionInfo;
 struct TagInfo;

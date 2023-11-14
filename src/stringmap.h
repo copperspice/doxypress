@@ -29,12 +29,10 @@
 #include <config.h>
 #include <types.h>
 
-class Definition;
-
 class ClassDef;
 class ConceptDef;
+class Definition;
 class DirDef;
-class Example;
 class FileNameList;
 class FilePair;
 class GroupDef;
@@ -46,10 +44,11 @@ class NamespaceDef;
 class OutputList;
 class PageDef;
 class SearchDefinitionList;
-class SectionInfo;
 class UseEntry;
 
+struct Example;
 struct IndexField;
+struct SectionInfo;
 
 // Ordered dictionary of elements of type T Internally uses a QMap<T>
 class StringCompare {

@@ -19,7 +19,6 @@
 #ifndef DIA_H
 #define DIA_H
 
-class QByteArray;
 
 enum DiaOutputFormat { DIA_BITMAP , DIA_EPS };
 

@@ -24,7 +24,6 @@
 
 #include <sortedlist_fwd.h>
 
-class BaseClassDef;
 class ClassDef;
 class DirDef;
 class DotNode;
@@ -32,8 +31,10 @@ class FileDef;
 class FileNameList;
 class GroupDef;
 class MemberDef;
-class NavIndexEntry;
- 
+
+struct BaseClassDef;
+struct NavIndexEntry;
+
 // default value for flag is false
 
 template <class T, bool flag>
