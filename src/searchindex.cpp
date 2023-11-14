@@ -714,7 +714,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index classes
-   for (auto cd : Doxy_Globals::classSDict) {
+   for (const auto &cd : Doxy_Globals::classSDict) {
 
       QChar letter = charToLower(cd->localName(), 0);
 
@@ -728,7 +728,7 @@ void writeJavascriptSearchIndex()
    }
 
    // index namespaces
-   for (auto &nd : Doxy_Globals::namespaceSDict) {
+   for (const auto &nd : Doxy_Globals::namespaceSDict) {
       QChar letter = charToLower(nd->name(), 0);
 
       if (nd->isLinkable() && isId(letter)) {

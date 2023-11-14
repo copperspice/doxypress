@@ -225,7 +225,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
    QString cssFile      = "doxypress.css";
    QString extraCssText;
 
-   for (auto fileName : extraCssFile) {
+   for (const auto &fileName : extraCssFile) {
 
       if (! fileName.isEmpty()) {
          QFileInfo fi(configDir, fileName);
@@ -307,7 +307,7 @@ static QString substituteHtmlKeywords(const QString &output, const QString &titl
                   "  MathJax.Hub.Config({\n"
                   "    extensions: [\"tex2jax.js\"";
 
-      for (auto item : mathJaxExtensions) {
+      for (const auto &item : mathJaxExtensions) {
          mathJaxJs += ", \"" + item + ".js\"";
       }
 
@@ -1064,7 +1064,7 @@ void HtmlGenerator::writeStyleInfo(int part)
       Doxy_Globals::indexList.addStyleSheetFile("doxypress.css");
 
       // part two
-      for (auto fileName : extraCssFile) {
+      for (const auto &fileName : extraCssFile) {
 
          if (! fileName.isEmpty()) {
             QFileInfo fi(configDir, fileName);
@@ -2240,7 +2240,7 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
 {
    int count = 0;
 
-   for (auto entry : root->children()) {
+   for (const auto &entry : root->children()) {
       if (entry->visible() && quickLinkVisible(entry->kind())) {
          count++;
       }
@@ -2250,7 +2250,7 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
       // at least one item is visible
       startQuickIndexList(t_stream, false);
 
-      for (auto entry : root->children()) {
+      for (const auto &entry : root->children()) {
          if (entry->visible() && quickLinkVisible(entry->kind())) {
             QString url = entry->url();
 
@@ -2280,7 +2280,7 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
      bool topLevel = hlEntry->parent()->parent() == 0;
      int count = 0;
 
-      for (auto entry : hlEntry->parent()->children()) {
+      for (const auto &entry : hlEntry->parent()->children()) {
          if (entry->visible() && quickLinkVisible(entry->kind())) {
             count++;
          }
@@ -2290,7 +2290,7 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
          // at least one item is visible
          startQuickIndexList(t_stream, true, topLevel);
 
-         for (auto entry : hlEntry->parent()->children()) {
+         for (const auto &entry : hlEntry->parent()->children()) {
             if (entry->visible() && quickLinkVisible(entry->kind())) {
                QString url = entry->url();
 
@@ -2727,7 +2727,7 @@ void HtmlGenerator::writeExternalSearchPage()
       bool first = true;
 
       // add search mappings
-      for (auto mapLine : searchMappings) {
+      for (const auto &mapLine : searchMappings) {
 
          int eqPos = mapLine.indexOf('=');
 

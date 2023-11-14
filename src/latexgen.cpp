@@ -1266,7 +1266,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       case isNamespaceDocumentation: {
          bool found = false;
 
-         for (auto &nd : Doxy_Globals::namespaceSDict) {
+         for (const auto &nd : Doxy_Globals::namespaceSDict) {
 
             if (nd->isLinkableInProject() && ! nd->isAlias()) {
 
@@ -1286,7 +1286,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
       case isClassDocumentation: {
          bool found = false;
 
-         for (auto cd : Doxy_Globals::classSDict) {
+         for (const auto &cd : Doxy_Globals::classSDict) {
 
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope()) {
 

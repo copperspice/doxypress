@@ -3613,7 +3613,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
                argList = stringToArgumentList(fcd->getLanguage(), dummy, args);
             }
 
-            for (auto mmd : *mn) {
+            for (const auto &mmd : *mn) {
                if (! mmd->isStrongEnumValue()) {
                   const ArgumentList &mmdAl = mmd->getArgumentList();
 
@@ -3641,7 +3641,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             if (mdist == maxInheritanceDepth && args == "()") {
                // no exact match found, if args="()" then any member with docs is a good match
 
-               for (auto mmd : *mn) {
+               for (const auto &mmd : *mn) {
                   QSharedPointer<ClassDef> mcd = mmd->getClassDef();
 
                   if (mcd) {
@@ -3685,7 +3685,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             QSharedPointer<MemberList> tml = tmd->enumFieldList();
 
             if (tml) {
-               for (auto emd : *tml) {
+               for (const auto &emd : *tml) {
                   if (emd->localName() == mName) {
                      if (emd->isLinkable()) {
                         cd = tmd->getClassDef();
@@ -3791,7 +3791,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
          if (! namespaceName.isEmpty() && (fnd = Doxy_Globals::namespaceSDict.find(namespaceName)) && fnd->isLinkable()) {
             bool found = false;
 
-            for (auto mmd : *mn) {
+            for (const auto &mmd : *mn) {
 
                if (found) {
                   break;

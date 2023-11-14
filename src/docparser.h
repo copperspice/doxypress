@@ -2167,7 +2167,7 @@ class DocParamList : public DocNode
    void accept(DocVisitor *v) override {
       v->visitPre(this);
 
-      for (auto n : m_paragraphs)  {
+      for (const auto &n : m_paragraphs)  {
          n->accept(v);
       }
 

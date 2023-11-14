@@ -1049,7 +1049,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    QSharedPointer<MemberList> rbml = md->reimplementedBy();
 
    if (rbml) {
-      for (auto itemRmd : *rbml) {
+      for (const auto &itemRmd : *rbml) {
          t << "        <reimplementedby refid=\""
            << memberOutputFileBase(itemRmd) << "_1" << itemRmd->anchor() << "\">"
            << convertToXML(itemRmd->name()) << "</reimplementedby>" << endl;
@@ -1154,7 +1154,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
       if (enumFields) {
 
-         for (auto emd : *enumFields) {
+         for (const auto &emd : *enumFields) {
 
             ti << "    <member refid=\"" << memberOutputFileBase(md)
                << "_1" << emd->anchor() << "\" kind=\"enumvalue\"><name>"
@@ -1243,13 +1243,13 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    const MemberSDict &mdict_1 = md->getReferencesMembers();
 
-   for (auto &item : mdict_1) {
+   for (const auto &item : mdict_1) {
       writeMemberReference(t, def, item, "references");
    }
 
    const MemberSDict &mdict_2 = md->getReferencedByMembers();
 
-   for (auto &item : mdict_2) {
+   for (const auto &item : mdict_2) {
       writeMemberReference(t, def, item, "referencedby");
    }
 
@@ -1274,7 +1274,7 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
 
    int count = 0;
 
-   for (auto md : *ml) {
+   for (const auto &md : *ml) {
       if (memberVisible(d, md) && (md->memberType() != MemberDefType::EnumValue) && ! md->isHidden()) {
          ++count;
       }
@@ -1296,7 +1296,7 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
       t << "</description>" << endl;
    }
 
-   for (auto md : *ml) {
+   for (const auto &md : *ml) {
       if (memberVisible(d, md)) {
          generateXMLForMember(md, ti, t, d);
       }
@@ -1309,9 +1309,9 @@ static void writeListOfAllMembers(QSharedPointer<ClassDef> cd, QTextStream &t)
 {
    t << "    <listofallmembers>" << endl;
 
-   for (auto mni : cd->memberNameInfoSDict()) {
+   for (const auto &mni : cd->memberNameInfoSDict()) {
 
-     for (auto &mi : *mni) {
+     for (const auto &mi : *mni) {
          QSharedPointer<MemberDef> md = mi.memberDef;
 
          if (! md->isAnonymous()) {
@@ -1372,7 +1372,7 @@ static void writeListOfAllMembers(QSharedPointer<ClassDef> cd, QTextStream &t)
 
 static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
 {
-   for (auto cd : cl) {
+   for (const auto &cd : cl) {
       if (! cd->isHidden() && ! cd->isAnonymous()) {
          // skip anonymous scopes
          t << "    <innerclass refid=\"" << classOutputFileBase(cd) << "\" prot=\"";
@@ -1423,7 +1423,7 @@ static void writeInnerFiles(const FileList &fl, QTextStream &t)
 static void writeInnerPages(const PageSDict *pl, QTextStream &t)
 {
    if (pl != nullptr) {
-     for (const auto pd : *pl) {
+     for (const auto &pd : *pl) {
          t << "    <innerpage refid=\"" << pd->getOutputFileBase();
          if (pd->getGroupDef()) {
             t << "_" << pd->name();
@@ -1535,7 +1535,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
 
    if (cd->baseClasses()) {
 
-      for (auto &bcd : *cd->baseClasses()) {
+      for (const auto &bcd : *cd->baseClasses()) {
          t << "    <basecompoundref ";
          if (bcd->classDef->isLinkable()) {
             t << "refid=\"" << classOutputFileBase(bcd->classDef) << "\" ";
@@ -1588,7 +1588,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
 
    if (cd->subClasses()) {
 
-      for (auto &bcd : *cd->subClasses()) {
+      for (const auto &bcd : *cd->subClasses()) {
 
          t << "    <derivedcompoundref refid=\""
            << classOutputFileBase(bcd->classDef)
@@ -1656,11 +1656,11 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    writeInnerClasses(cd->getClassSDict(), t);
    writeTemplateList(cd, t);
 
-   for (auto &mg : cd->getMemberGroupSDict() ) {
+   for (const auto &mg : cd->getMemberGroupSDict() ) {
       generateXMLSection(cd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
-   for (auto &ml : cd->getMemberLists() ) {
+   for (const auto &ml : cd->getMemberLists() ) {
       if ((ml->listType() & MemberListType_detailedLists) == 0) {
          generateXMLSection(cd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
@@ -1757,11 +1757,11 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
    writeInnerClasses(nd->getClassSDict(), t);
    writeInnerNamespaces(nd->getNamespaceSDict(), t);
 
-   for (auto &mg : nd->getMemberGroupSDict()) {
+   for (const auto &mg : nd->getMemberGroupSDict()) {
       generateXMLSection(nd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
-   for (auto &ml : nd->getMemberLists()) {
+   for (const auto &ml : nd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateXMLSection(nd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
@@ -1821,7 +1821,7 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
 
    if (fd->includeFileList()) {
 
-      for (auto &inc : *fd->includeFileList()) {
+      for (const auto &inc : *fd->includeFileList()) {
          t << "    <includes";
 
          if (inc.fileDef && ! inc.fileDef->isReference()) {
@@ -1837,7 +1837,7 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
 
    if (fd->includedByFileList()) {
 
-      for (auto &inc : *fd->includedByFileList())   {
+      for (const auto &inc : *fd->includedByFileList())   {
          t << "    <includedby";
          if (inc.fileDef && ! inc.fileDef->isReference()) {
             // TODO: support external references
@@ -1872,11 +1872,11 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       writeInnerNamespaces(fd->getNamespaceSDict(), t);
    }
 
-   for (auto &mg : fd->getMemberGroupSDict() ) {
+   for (const auto &mg : fd->getMemberGroupSDict() ) {
       generateXMLSection(fd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
-   for (auto &ml : fd->getMemberLists()) {
+   for (const auto &ml : fd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
          generateXMLSection(fd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
@@ -1949,11 +1949,11 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
    writeInnerPages(gd->getPages(), t);
    writeInnerGroups(gd->getSubGroups(), t);
 
-   for (auto &mg : gd->getMemberGroupSDict()) {
+   for (const auto &mg : gd->getMemberGroupSDict()) {
       generateXMLSection(gd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
-   for (auto &ml : gd->getMemberLists()) {
+   for (const auto &ml : gd->getMemberLists()) {
       if ((ml->listType() & MemberListType_declarationLists) != 0) {
          generateXMLSection(gd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
@@ -2093,7 +2093,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
       bool activeLevel[5] = { false, false, false, false, false };
       int maxLevel = pd->localToc().xmlLevel();
 
-      for (auto si : sectionDict) {
+      for (const auto &si : sectionDict) {
          if (si->type == SectionInfo::Section || si->type == SectionInfo::Subsection ||
                   si->type == SectionInfo::Subsubsection || si->type == SectionInfo::Paragraph) {
 
@@ -2262,38 +2262,38 @@ void generateXML_output()
    t << "xml:lang=\"" << theTranslator->trLanguageId() << "\"";
    t << ">" << endl;
 
-   for (auto &cd : Doxy_Globals::classSDict) {
+   for (const auto &cd : Doxy_Globals::classSDict) {
        generateXMLForClass(cd, t);
    }
 
-   for (auto &nd : Doxy_Globals::namespaceSDict) {
+   for (const auto &nd : Doxy_Globals::namespaceSDict) {
       msg("Generating XML output for namespace %s\n", csPrintable(nd->name()));
       generateXMLForNamespace(nd, t);
    }
 
-   for (auto &fn : Doxy_Globals::inputNameList) {
-      for (auto fd : *fn) {
+   for (const auto &fn : Doxy_Globals::inputNameList) {
+      for (const auto &fd : *fn) {
          msg("Generating XML output for file %s\n", csPrintable(fd->name()));
          generateXMLForFile(fd, t);
       }
    }
 
-   for (auto &gd : Doxy_Globals::groupSDict) {
+   for (const auto &gd : Doxy_Globals::groupSDict) {
       msg("Generating XML output for group %s\n", csPrintable(gd->name()));
       generateXMLForGroup(gd, t);
    }
 
-   for (auto &pd : Doxy_Globals::pageSDict) {
+   for (const auto &pd : Doxy_Globals::pageSDict) {
       msg("Generating XML output for page %s\n", csPrintable(pd->name()));
       generateXMLForPage(pd, t, false);
    }
 
-   for (auto dir : Doxy_Globals::directories) {
+   for (const auto &dir : Doxy_Globals::directories) {
       msg("Generating XML output for dir %s\n", csPrintable(dir->name()));
       generateXMLForDir(dir, t);
    }
 
-   for (auto &pd : Doxy_Globals::exampleSDict) {
+   for (const auto &pd : Doxy_Globals::exampleSDict) {
       msg("Generating XML output for example %s\n", csPrintable(pd->name()));
       generateXMLForPage(pd, t, true);
    }

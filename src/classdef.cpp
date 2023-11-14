@@ -677,7 +677,7 @@ static void writeTemplateSpec(OutputList &ol, QSharedPointer<Definition> d, cons
       // class has template scope specifiers
       ol.startSubsubsection();
 
-      for (auto al : specs ) {
+      for (const auto &al : specs) {
          ol.docify("template<");
 
          auto nextItem = al.begin();

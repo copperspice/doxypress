@@ -292,7 +292,7 @@ QSharedPointer<ClassDef> VariableContext::findVariable(const QString &name)
    QString key = name;
 
    // search from inner to outer scope
-   for (auto scope : m_scopes) {
+   for (const auto &scope : m_scopes) {
       result = scope->find(key);
 
       if (result) {
@@ -1158,7 +1158,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
          }
 
          if (vcd->baseClasses()) {
-            for (auto item : *vcd->baseClasses()) {
+            for (const auto &item : *vcd->baseClasses()) {
                if (getLink(item->classDef->name(), memName, ol)) {
                   return;
                }
@@ -1186,7 +1186,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
 
                if (vmn) {
 
-                  for (auto vmd : *vmn)  {
+                  for (const auto &vmd : *vmn)  {
                      if (vmd->getClassDef() == jcd) {
 
                         QSharedPointer<ClassDef> mcd = stripClassName(vmd->typeString(), vmd->getOuterScope());
@@ -1203,7 +1203,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
          }
 
          if (vmn) {
-            for (auto vmd : *vmn) {
+            for (const auto &vmd : *vmn) {
                if (vmd->getClassDef() == vcd) {
                   QSharedPointer<ClassDef> mcd = stripClassName(vmd->typeString(), vmd->getOuterScope() );
 
@@ -1308,7 +1308,7 @@ static void generateFunctionLink(CodeGenerator &ol, const QString &funcName)
    if (! fullScope.isEmpty() && (ccd = g_codeClassSDict.find(fullScope))) {
 
       if (ccd->baseClasses()) {
-         for (auto item : *ccd->baseClasses()) {
+         for (const auto &item : *ccd->baseClasses()) {
             if (getLink(item->classDef->name(), locFunc, ol, funcName)) {
                goto exit;
             }
@@ -1320,7 +1320,7 @@ static void generateFunctionLink(CodeGenerator &ol, const QString &funcName)
 
       if (ccd->baseClasses()) {
 
-         for (auto item : *ccd->baseClasses()) {
+         for (const auto &item : *ccd->baseClasses()) {
             if (getLink(item->classDef->name(), funcWithScope, ol, funcName)) {
                goto exit;
             }
@@ -1572,7 +1572,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                         if (bcd) { // get direct base class (there should be only one)
 
-                           for (auto bclass : *bcd) {
+                           for (const auto &bclass : *bcd) {
                               if (bclass->classDef->compoundType() != CompoundType::Protocol) {
                                  ctx->objectType = bclass->classDef;
 
@@ -2095,7 +2095,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
                if (fn) {
                   // for each include name
-                  for (auto item : *fn) {
+                  for (const auto &item : *fn) {
 
                      if (found) {
                         break;
@@ -2474,7 +2474,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             g_codeClassSDict.insert(g_curClassName, ncd);
 
             // insert base classes
-            for (auto str : g_curClassBases) {
+            for (const auto &str : g_curClassBases) {
                QSharedPointer<ClassDef> bcd;
                bcd = g_codeClassSDict.find(str);
 

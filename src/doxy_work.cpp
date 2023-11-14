@@ -9158,7 +9158,7 @@ void Doxy_Work::generateClassDocs()
 // generate the documentation of all concepts
 void Doxy_Work::generateConceptDocs()
 {
-   for (auto conceptDef : Doxy_Globals::conceptSDict) {
+   for (const auto &conceptDef : Doxy_Globals::conceptSDict)  {
 
       if (conceptDef) {
          if (conceptDef->isLinkableInProject()) {
@@ -9280,19 +9280,19 @@ void Doxy_Work::findSectionsInDocumentation()
 {
 
    // for each class
-   for (auto &cd : Doxy_Globals::classSDict) {
+   for (const auto &cd : Doxy_Globals::classSDict) {
       cd->findSectionsInDocumentation();
    }
 
    // for each file
-   for (auto &fn : Doxy_Globals::inputNameList) {
+   for (const auto &fn : Doxy_Globals::inputNameList) {
      for (auto fd : *fn) {
          fd->findSectionsInDocumentation();
       }
    }
 
    // for each namespace
-   for (auto &nd : Doxy_Globals::namespaceSDict) {
+   for (const auto &nd : Doxy_Globals::namespaceSDict) {
       nd->findSectionsInDocumentation();
    }
 

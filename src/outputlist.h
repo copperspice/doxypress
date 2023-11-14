@@ -842,7 +842,7 @@ class OutputList : public TextGenerator
    }
 
    void startPlainFile(const QString &name) {
-      for (auto item : m_outputs) {
+      for (const auto &item : m_outputs) {
          if (item->isEnabled()) {
             (item->startPlainFile)(name);
          }
@@ -850,7 +850,7 @@ class OutputList : public TextGenerator
    }
 
    void endPlainFile() {
-      for (auto item : m_outputs) {
+      for (const auto &item : m_outputs) {
          if (item->isEnabled()) {
             (item->endPlainFile)();
          }
@@ -864,7 +864,7 @@ class OutputList : public TextGenerator
    template<class BaseClass, class... Args, class... Ts>
    void forall( void (BaseClass::*func)(Args...), Ts&&... vs)  {
 
-      for (auto item : m_outputs ) {
+      for (const auto &item : m_outputs ) {
          if (item->isEnabled()) {
             std::invoke(func, *item, std::forward<Args>(vs)...);
          }

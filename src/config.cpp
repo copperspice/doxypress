@@ -347,7 +347,7 @@ bool Config::verify()
    // **
    const QStringList extMaps = Config::getList("language-mapping");
 
-   for (auto mapStr : extMaps) {
+   for (const auto &mapStr : extMaps) {
       int i = mapStr.indexOf('=');
 
       if (i != -1) {
@@ -394,7 +394,7 @@ bool Config::verify()
 
    } else {
 
-      for (auto item : inputSource) {
+      for (const auto &item : inputSource) {
          QFileInfo fi(item.trimmed());
 
          if (! fi.exists()) {
@@ -498,7 +498,7 @@ bool Config::verify()
    iterList = m_cfgList.find("include-path");
    QStringList includePath = iterList.value().value;
 
-   for (auto item : includePath) {
+   for (const auto &item : includePath) {
       QFileInfo fi(item.trimmed());
 
       if (fi.exists()) {
@@ -943,7 +943,7 @@ bool Config::verify()
    // **
    const QStringList expandAsDefinedList = Config::getList("expand-as-defined");
 
-   for (auto item : expandAsDefinedList) {
+   for (const auto &item : expandAsDefinedList) {
       if (! Doxy_Globals::expandAsDefinedDict.contains(item)) {
          Doxy_Globals::expandAsDefinedDict.insert(item);
       }
@@ -1177,7 +1177,7 @@ void Config::loadCmd_Aliases()
    // add aliases to a dictionary
    const QStringList list = Config::getList("aliases");
 
-   for (auto item : list) {
+   for (const auto &item : list) {
 
       if (! Doxy_Globals::cmdAliasDict.contains(item)) {
          int i = item.indexOf('=');
@@ -1242,7 +1242,7 @@ void Config::loadRenameNS_Aliases()
    // add aliases to a dictionary
    const QStringList list = Config::getList("ns-alias");
 
-   for (auto item : list) {
+   for (const auto &item : list) {
 
       int i = item.indexOf('=');
 

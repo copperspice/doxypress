@@ -636,7 +636,7 @@ static void splitKnRArg(QString &oldStyleArgPtr, QString &oldStyleArgName)
  */
 static void addKnRArgInfo(const QString &type, const QString &name, const QString &brief, const QString &docs)
 {
-   for (auto a : current->argList) {
+   for (auto &a : current->argList) {
       if (a.type == name) {
          a.type = type.trimmed();
 
@@ -6395,12 +6395,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             varEntry->setData(EntryKey::Initial_Value,   current->getData(EntryKey::Initial_Value));
 
             // copy group list
-            for (auto &g : current->m_groups) {
+            for (const auto &g : current->m_groups) {
                varEntry->m_groups.append(g);
             }
 
             // copy special list items
-            for (auto &lii : current->m_specialLists) {
+            for (const auto &lii : current->m_specialLists) {
                varEntry->addSpecialListItem(lii.type, lii.itemId);
             }
 
@@ -7935,7 +7935,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          if (! current->m_specialLists.isEmpty() && previous) {
             // copy special list items
 
-            for (auto &lii : current->m_specialLists) {
+            for (const auto &lii : current->m_specialLists) {
                previous->addSpecialListItem(lii.type, lii.itemId);
             }
 
@@ -10393,7 +10393,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
    // safter to make a temp copy
    const QVector<QSharedPointer<Entry>> tmpChildren = rt->children();
 
-   for (auto ce : tmpChildren) {
+   for (const auto &ce : tmpChildren) {
 
       if (! ce->getData(EntryKey::Source_Text).isEmpty()) {
 
@@ -10427,7 +10427,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
          // copy group list from parent
          if (groupNested && ce->section != Entry::ENUM_SEC && ! isEnumTrait) {
-            for (auto &g : rt->m_groups) {
+            for (const auto &g : rt->m_groups) {
                ce->m_groups.append(g);
             }
          }

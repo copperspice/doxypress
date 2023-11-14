@@ -583,7 +583,7 @@ static void visitPostCaption(QTextStream &t, DocVerbatim *s)
 
 static void visitCaption(HtmlDocVisitor *parent, QList<DocNode *> children)
 {
-   for (auto n : children) {
+   for (const auto &n : children) {
       n->accept(parent);
    }
 }
@@ -1426,7 +1426,7 @@ void HtmlDocVisitor::visitPre(DocPara *p)
 
    if (p != nullptr && ! p->children().empty()) {
 
-      for (auto n : p->children()) {
+      for (const auto &n : p->children()) {
 
          if (isInvisibleNode(n)) {
             continue;
@@ -2429,7 +2429,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
    if (sect && sect->hasTypeSpecifier()) {
       m_t << "<td class=\"paramtype\">";
 
-      for (auto type : pl->paramTypes()) {
+      for (const auto &type : pl->paramTypes()) {
 
          if (type->kind() == DocNode::Kind_Word) {
             visit((DocWord *)type);
@@ -2450,7 +2450,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
 
    bool first = true;
 
-   for (auto param : pl->parameters()) {
+   for (const auto &param : pl->parameters()) {
       if (! first) {
          m_t << ",";
 

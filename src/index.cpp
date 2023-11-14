@@ -194,7 +194,7 @@ static int countConcepts()
 {
    int count = 0;
 
-   for (auto conceptdef : Doxy_Globals::conceptSDict) {
+   for (const auto &conceptdef : Doxy_Globals::conceptSDict) {
       if (conceptdef->isLinkableInProject()) {
          ++count;
       }
@@ -207,7 +207,7 @@ static int countDirs()
 {
    int count = 0;
 
-   for (auto dd : Doxy_Globals::directories) {
+   for (const auto &dd : Doxy_Globals::directories) {
       if (dd->isLinkableInProject()) {
          dd->visited = false;
          ++count;
@@ -221,7 +221,7 @@ static int countGroups()
 {
    int count = 0;
 
-   for (auto gd : Doxy_Globals::groupSDict)  {
+   for (const auto &gd : Doxy_Globals::groupSDict)  {
       if (! gd->isReference()) {
          gd->visited = false;
          ++count;
@@ -235,7 +235,7 @@ static int countNamespaces()
 {
    int count = 0;
 
-   for (auto &nd : Doxy_Globals::namespaceSDict) {
+   for (const auto &nd : Doxy_Globals::namespaceSDict) {
       if (nd->isLinkableInProject()) {
          ++count;
       }
@@ -572,7 +572,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
    int numClasses = 0;
    const ClassSDict &classes = def->getClassSDict();
 
-   for (auto cd : classes) {
+   for (const auto &cd : classes) {
       if (cd->isLinkable()) {
          numClasses++;
       }
@@ -582,7 +582,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
 
       Doxy_Globals::indexList.incContentsDepth();
 
-      for (auto lde : LayoutDocManager::instance().docEntries(part)) {
+      for (const auto &lde : LayoutDocManager::instance().docEntries(part)) {
 
          if (lde->kind() == LayoutDocEntry::MemberDef) {
             LayoutDocEntryMemberDef *lmd  = (LayoutDocEntryMemberDef *)lde;
@@ -592,7 +592,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                // do not add members to the navtree
 
             } else if (ml) {
-               for (auto md : *ml) {
+               for (const auto &md : *ml) {
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
 
                   bool isDir = (enumList != 0 && md->isEnumerate());
@@ -647,7 +647,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
          } else if (lde->kind() == LayoutDocEntry::NamespaceClasses || lde->kind() == LayoutDocEntry::FileClasses ||
                     lde->kind() == LayoutDocEntry::ClassNestedClasses ) {
 
-            for (auto cd : classes ) {
+            for (const auto &cd : classes ) {
                if (cd->isLinkable() && (cd->partOfGroups() == 0 || def->definitionType() == Definition::TypeGroup)) {
 
                   bool separateIndex = (preventSeparateIndex || cd->isEmbeddedInOuterScope());
@@ -764,7 +764,7 @@ static bool dirHasVisibleChildren(QSharedPointer<DirDef> dd)
       return true;
    }
 
-   for (const auto fd : dd->getFiles() ) {
+   for (const auto &fd : dd->getFiles() ) {
 
       if (docFileVisibleInIndex(fd)) {
          return true;
@@ -775,7 +775,7 @@ static bool dirHasVisibleChildren(QSharedPointer<DirDef> dd)
       }
    }
 
-   for (const auto subdd : dd->subDirs() ) {
+   for (const auto &subdd : dd->subDirs() ) {
       if (dirHasVisibleChildren(subdd)) {
          return true;
       }
@@ -825,7 +825,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
    if (dd->subDirs().count() > 0) {
       startIndexHierarchy(ol, level + 1);
 
-      for (const auto subdd : dd->subDirs()) {
+      for (const auto &subdd : dd->subDirs()) {
          writeDirTreeNode(ol, subdd, level + 1, ftv, addToIndex, category);
       }
       endIndexHierarchy(ol, level + 1);
@@ -836,7 +836,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
 
    if (fileList.count() > 0) {
 
-      for (const auto fd : fileList) {
+      for (const auto &fd : fileList) {
          bool doc = docFileVisibleInIndex(fd);
          bool src = srcFileVisibleInIndex(fd);
 
@@ -851,7 +851,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
       if (fileCount > 0) {
          startIndexHierarchy(ol, level + 1);
 
-         for (auto fd : fileList) {
+         for (const auto &fd : fileList) {
             bool doc = docFileVisibleInIndex(fd);
             bool src = srcFileVisibleInIndex(fd);
 
@@ -897,7 +897,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
 
       if (fileCount > 0) {
 
-         for (auto fd : fileList) {
+         for (const auto &fd : fileList) {
             bool doc = docFileVisibleInIndex(fd);
             bool src = srcFileVisibleInIndex(fd);
 
@@ -935,7 +935,7 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
    startIndexHierarchy(ol, 0);
 
    if (fullPathNames) {
-      for (auto dd : Doxy_Globals::directories) {
+      for (const auto &dd : Doxy_Globals::directories) {
          if (dd->getOuterScope() == Doxy_Globals::globalScope) {
             writeDirTreeNode(ol, dd, 0, ftv, addToIndex, category);
          }
@@ -944,9 +944,9 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
 
    if (ftv) {
 
-      for (auto &fn : Doxy_Globals::inputNameList) {
+      for (const auto &fn : Doxy_Globals::inputNameList) {
 
-         for (auto fd : *fn) {
+         for (const auto &fd : *fn) {
 
             if (! mainPageName.isEmpty() && fd->getFilePath() == mainPageName) {
                // do not include the mainPage in the File List
@@ -1322,9 +1322,9 @@ static void writeFileIndex(OutputList &ol)
 
    if (Config::getBool("full-path-names")) {
 
-      for (auto &fn : Doxy_Globals::inputNameList ) {
+      for (const auto &fn : Doxy_Globals::inputNameList ) {
 
-         for (auto fd : *fn) {
+         for (const auto &fd : *fn) {
             QString path = fd->getPath();
 
             if (path.isEmpty()) {
@@ -1351,8 +1351,8 @@ static void writeFileIndex(OutputList &ol)
 
    if (Config::getBool("full-path-names")) {
 
-      for (auto fl : outputNameMap) {
-         for (auto fd : *fl) {
+      for (const auto &fl : outputNameMap) {
+         for (const auto &fd : *fl) {
             writeSingleFileIndex(ol, fd);
          }
       }
@@ -1361,7 +1361,7 @@ static void writeFileIndex(OutputList &ol)
       // show minimal file name on files.html
 
       for (auto &fn : Doxy_Globals::inputNameList) {
-         for (auto fd : *fn) {
+         for (const auto &fd : *fn) {
             writeSingleFileIndex(ol, fd);
          }
       }
@@ -2242,7 +2242,7 @@ static bool conceptVisibleInIndex(QSharedPointer<ConceptDef> conceptDef)
 
 static void writeConceptTree(const ConceptSDict &conceptDict, FTVHelp *ftv, bool addToIndex, bool globalOnly)
 {
-   for (auto conceptDef : conceptDict) {
+   for (const auto &conceptDef : conceptDict) {
 
       if (! globalOnly || conceptDef->getOuterScope() == 0 || conceptDef->getOuterScope() == Doxy_Globals::globalScope ) {
 
@@ -3608,7 +3608,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
          ol.endTypewriter();
       }
 
-      for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
+      for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
 
          if (lde->kind() == LayoutDocEntry::MemberDef && addToIndex) {
 
@@ -3643,7 +3643,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
          } else if (lde->kind() == LayoutDocEntry::GroupClasses && addToIndex) {
 
-            for (auto cd : gd->getClasses()) {
+            for (const auto &cd : gd->getClasses()) {
                 if (cd->isVisible()) {
                   addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), true, addToIndex);
                }
@@ -3660,7 +3660,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
          } else if (lde->kind() == LayoutDocEntry::GroupFiles && addToIndex) {
 
-            for (const auto fd : gd->getFiles()) {
+            for (const auto &fd : gd->getFiles()) {
                if (fd->isVisible()) {
                   Doxy_Globals::indexList.addContentsItem(false, fd->displayName(), fd->getReference(),
                         fd->getOutputFileBase(), QString(), false, fd);
@@ -3669,7 +3669,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
          } else if (lde->kind() == LayoutDocEntry::GroupDirs && addToIndex) {
 
-            for (const auto dd : *gd->getDirs()) {
+            for (const auto &dd : *gd->getDirs()) {
                if (dd->isVisible()) {
                   Doxy_Globals::indexList.addContentsItem(false, dd->shortName(), dd->getReference(),
                         dd->getOutputFileBase(), QString(), false, dd);
@@ -3678,7 +3678,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
          } else if (lde->kind() == LayoutDocEntry::GroupPageDocs && addToIndex) {
 
-            for (auto pd : *gd->getPages()) {
+            for (const auto &pd : *gd->getPages()) {
                QSharedPointer<SectionInfo> si;
 
                if (! pd->name().isEmpty()) {

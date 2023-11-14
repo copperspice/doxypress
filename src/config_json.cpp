@@ -599,7 +599,7 @@ bool Config::read_ProjectFile(const QString &fName)
                QJsonArray jsonArray = tmpObj.toArray();
                QStringList listData;
 
-               for (auto item : jsonArray) {
+               for (const auto &item : jsonArray) {
                   QString tmp = item.toString();
 
                   if (! tmp.isEmpty()) {

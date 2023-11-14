@@ -35,7 +35,7 @@
 
 static void visitCaption(XmlDocVisitor *parent, QList<DocNode *> children)
 {
-   for (auto n : children) {
+   for (const auto &n : children) {
       n->accept(parent);
    }
 }
@@ -1393,12 +1393,12 @@ void XmlDocVisitor::visitPre(DocParamList *pl)
    m_t << "<parameteritem>\n";
    m_t << "<parameternamelist>\n";
 
-   for (auto param : pl->parameters()) {
+   for (const auto &param : pl->parameters()) {
 
       if (pl->paramTypes().count() > 0) {
          m_t << "<parametertype>";
 
-         for (auto type : pl->paramTypes()) {
+         for (const auto &type : pl->paramTypes()) {
             if (type->kind() == DocNode::Kind_Word) {
                visit((DocWord *)type);
 

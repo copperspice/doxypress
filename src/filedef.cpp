@@ -189,12 +189,12 @@ void FileDef::writeTagFile(QTextStream &tagFile)
       }
    }
 
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
+   for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
       switch (lde->kind())  {
 
          case LayoutDocEntry::FileClasses:
          {
-            for (auto cd : m_classSDict) {
+            for (const auto &cd : m_classSDict) {
                if (cd->isLinkableInProject()) {
                   tagFile << "    <class kind=\"" << cd->compoundTypeString() <<
                           "\">" << convertToXML(cd->name()) << "</class>" << endl;
@@ -206,7 +206,7 @@ void FileDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::FileNamespaces:
          {
-            for (auto nd : m_namespaceSDict) {
+            for (const auto &nd : m_namespaceSDict) {
                if (nd->isLinkableInProject()) {
                   tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
                }
@@ -608,7 +608,8 @@ void FileDef::writeSummaryLinks(OutputList &ol)
    bool first = true;
    SrcLangExt lang = getLanguage();
 
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
+   for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
+
 
       if ((lde->kind() == LayoutDocEntry::FileClasses && m_classSDict.declVisible()) ||
             (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict.declVisible()) ) {

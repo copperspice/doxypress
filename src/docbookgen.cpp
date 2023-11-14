@@ -526,7 +526,7 @@ void DocbookGenerator::endIndexSection(IndexSections is)
       case isModuleDocumentation: {
          m_textStream << "</title>" << endl;
 
-         for (auto &gd : Doxy_Globals::groupSDict) {
+         for (const auto &gd : Doxy_Globals::groupSDict) {
             if (! gd->isReference()) {
                m_textStream << "    <xi:include href=\"" << gd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
@@ -539,7 +539,7 @@ void DocbookGenerator::endIndexSection(IndexSections is)
       case isDirDocumentation: {
          m_textStream<< "</title>" << endl;
 
-         for (auto &dd : Doxy_Globals::directories) {
+         for (const auto &dd : Doxy_Globals::directories) {
             if (dd->isLinkableInProject()) {
                m_textStream << "    <xi:include href=\"" << dd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
@@ -552,7 +552,7 @@ void DocbookGenerator::endIndexSection(IndexSections is)
       case isNamespaceDocumentation: {
          m_textStream << "</title>" << endl;
 
-         for (auto &nd : Doxy_Globals::namespaceSDict) {
+         for (const auto &nd : Doxy_Globals::namespaceSDict) {
             if (nd->isLinkableInProject()) {
                m_textStream << "<xi:include href=\"" << nd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
@@ -565,7 +565,7 @@ void DocbookGenerator::endIndexSection(IndexSections is)
       case isClassDocumentation: {
          m_textStream << "</title>" << endl;
 
-         for (auto &cd : Doxy_Globals::classSDict) {
+         for (const auto &cd : Doxy_Globals::classSDict) {
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && !cd->isEmbeddedInOuterScope()) {
                m_textStream << "    <xi:include href=\"" << cd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
@@ -609,7 +609,7 @@ void DocbookGenerator::endIndexSection(IndexSections is)
       case isExampleDocumentation: {
          m_textStream << "</title>" << endl;
 
-         for (auto &pd : Doxy_Globals::exampleSDict) {
+         for (const auto &pd : Doxy_Globals::exampleSDict) {
             m_textStream << "    <xi:include href=\"" << pd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
          }
       }
@@ -629,7 +629,7 @@ void DocbookGenerator::endIndexSection(IndexSections is)
 
 void DocbookGenerator::writePageLink(const QString &name, bool)
 {
-   for (auto &pd : Doxy_Globals::pageSDict) {
+   for (const auto &pd : Doxy_Globals::pageSDict) {
 
       if (! pd->getGroupDef() && ! pd->isReference() && pd->name() == stripPath(name)) {
          m_textStream << "<chapter>\n";

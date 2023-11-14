@@ -2856,7 +2856,7 @@ void DotClassGraph::buildGraph(QSharedPointer<ClassDef> cd, DotNode *n, bool bas
       SortedList<BaseClassDef *> *bcl = base ? cd->baseClasses() : cd->subClasses();
 
       if (bcl != nullptr) {
-         for (const auto bcd : *bcl) {
+         for (const auto &bcd : *bcl) {
             addClass(bcd->classDef, n, bcd->prot, QString(), bcd->usedName, bcd->templSpecifiers, base, distance);
          }
       }
@@ -4362,7 +4362,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    SortedList<QSharedPointer<GroupDef>> *groups = gd->partOfGroups();
 
    if (groups != nullptr) {
-      for (const auto d : *groups) {
+      for (const auto &d : *groups) {
          DotNode *nnode = m_usedNodes->value(d->name());
 
          if ( !nnode ) {
@@ -4383,7 +4383,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add subgroups
    if ( gd->getSubGroups() && gd->getSubGroups()->count() ) {
 
-      for (const auto def : *gd->getSubGroups()) {
+      for (const auto &def : *gd->getSubGroups()) {
          DotNode *nnode = m_usedNodes->value(def->name());
 
          if ( ! nnode ) {
@@ -4409,7 +4409,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    QString htmlEntenstion = Doxy_Globals::htmlFileExtension;
 
    // Add classes
-   for (const auto def : gd->getClasses()) {
+   for (const auto &def : gd->getClasses()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
 
       if (! def->anchor().isEmpty()) {
@@ -4426,7 +4426,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    }
 
    // Add files
-   for (const auto def : gd->getFiles()) {
+   for (const auto &def : gd->getFiles()) {
       tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
       addCollaborationMember(def, tmp_url, DotGroupCollaboration::tfile);
    }
@@ -4434,7 +4434,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add pages
    if (gd->getPages()) {
 
-      for (const auto def : *gd->getPages()) {
+      for (const auto &def : *gd->getPages()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tpages);
       }
@@ -4443,7 +4443,7 @@ void DotGroupCollaboration::buildGraph(QSharedPointer<GroupDef> gd)
    // Add directories
    if (gd->getDirs()) {
 
-      for (const auto def : *gd->getDirs()) {
+      for (const auto &def : *gd->getDirs()) {
          tmp_url = def->getReference() + "$" + def->getOutputFileBase() + htmlEntenstion;
          addCollaborationMember(def, tmp_url, DotGroupCollaboration::tdir);
       }
@@ -4456,7 +4456,7 @@ void DotGroupCollaboration::addMemberList(QSharedPointer<MemberList> ml)
       return;
    }
 
-   for (auto def : *ml) {
+   for (const auto &def : *ml) {
       QString tmpUrl = def->getReference() + "$" + def->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + def->anchor();
       addCollaborationMember(def, tmpUrl, DotGroupCollaboration::tmember );
    }
@@ -4822,7 +4822,7 @@ void writeDotDirDepGraph(QTextStream &t, QSharedPointer<DirDef> dd)
         << dd->shortName() << "\"];\n";
 
       // add nodes for sub directories
-      for (const auto sdir : dd->subDirs()) {
+      for (const auto &sdir : dd->subDirs()) {
          t << "    " << sdir->getOutputFileBase() << " [shape=box label=\""
            << sdir->shortName() << "\"";
 

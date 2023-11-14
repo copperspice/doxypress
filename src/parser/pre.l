@@ -542,7 +542,7 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
       return QSharedPointer<FileState>();
    }
 
-   for (auto &s : s_pathList) {
+   for (const auto &s : s_pathList) {
       QString absName = s + "/" + fileName;
 
       QSharedPointer<FileState> fs = checkAndOpenFile(absName, alreadyIncluded);
@@ -1788,8 +1788,7 @@ static void readIncludeFile(const QString &inc)
             } else if (searchIncludes) {
                static const QStringList includePath = Config::getList("include-path");
 
-               for (auto item : includePath) {
-
+               for (const auto &item : includePath) {
                   QFileInfo fi3(item);
 
                   if (fi3.exists() && fi3.isDir()) {

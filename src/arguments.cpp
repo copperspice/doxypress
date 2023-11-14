@@ -23,7 +23,7 @@
 // the argument list is documented if one of its arguments is documented
 bool ArgumentList::hasDocumentation() const
 {
-   for (auto &item : *this)  {
+   for (const auto &item : *this)  {
 
       if (item.hasDocumentation()) {
          return true;

@@ -254,7 +254,7 @@ void ConceptDef::writeDetailedDescription(OutputList &ol, const QString &title, 
 
       int count = argList.size();
 
-      for (auto &item : argList) {
+      for (const auto &item : argList) {
          ol.docify(item.type);
 
          if (! item.name.isEmpty()) {

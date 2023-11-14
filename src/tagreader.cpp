@@ -1008,7 +1008,7 @@ class TagFileParser : public QXmlDefaultHandler
    void addIncludes();
 
  private:
-   void buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInfo> &members);
+   void buildMemberList(QSharedPointer<Entry> ce, const QList<TagMemberInfo> &members);
    void addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoList &l);
 
    QList<TagClassInfo>        m_tagFileClasses;
@@ -1219,7 +1219,7 @@ void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoLi
    }
 }
 
-void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, QList<TagMemberInfo> &members)
+void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, const QList<TagMemberInfo> &members)
 {
    for (auto tmi : members) {
       QSharedPointer<Entry> me = QMakeShared<Entry>();
@@ -1354,7 +1354,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 {
 
    // build class list
-   for (auto &tci : m_tagFileClasses) {
+   for (const auto &tci : m_tagFileClasses) {
       QSharedPointer<Entry> ce = QMakeShared<Entry>();
       ce->section = Entry::CLASS_SEC;
 
@@ -1427,8 +1427,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       ce->m_srcLang      = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
 
       // transfer base class list
-      ce->extends = std::move(tci.bases);
-      tci.bases   = QVector<BaseInfo>();
+      ce->extends = tci.bases;
 
       if (! tci.templateArguments.isEmpty())  {
          ArgumentList al;
@@ -1448,7 +1447,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    }
 
    // build file list
-   for (auto tfi : m_tagFileFiles) {
+   for (const auto &tfi : m_tagFileFiles) {
       QSharedPointer<Entry> fe = QMakeShared<Entry>();
 
       fe->section = determineSection(tfi.name);
@@ -1542,7 +1541,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
    }
 
    // build page list
-   for (auto tpi : m_tagFilePages) {
+   for (const auto &tpi : m_tagFilePages) {
       QSharedPointer<Entry> pe = QMakeShared<Entry>();
 
       QString baseName = stripExtensionGeneral(tpi.filename, getFileNameExtension(tpi.filename));

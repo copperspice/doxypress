@@ -93,7 +93,7 @@ QString GroupDef::pathFragment_Internal() const
 
 void GroupDef::distributeMemberGroupDocumentation()
 {
-   for (auto mg : m_memberGroupSDict) {
+   for (const auto &mg : m_memberGroupSDict) {
       mg->distributeMemberGroupDocumentation();
    }
 }
@@ -103,11 +103,11 @@ void GroupDef::findSectionsInDocumentation()
    QSharedPointer<GroupDef> self = sharedFrom(this);
    docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
 
-   for (auto mg : m_memberGroupSDict) {
+   for (const auto &mg : m_memberGroupSDict) {
       mg->findSectionsInDocumentation();
    }
 
-   for (auto ml : m_memberLists) {
+   for (const auto &ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
          ml->findSectionsInDocumentation();
       }
@@ -207,13 +207,13 @@ void GroupDef::addMembersToMemberGroup()
 {
    QSharedPointer<GroupDef> self = sharedFrom(this);
 
-   for (auto ml : m_memberLists) {
+   for (const auto &ml : m_memberLists) {
       if (ml->listType() & MemberListType_declarationLists) {
          ::addMembersToMemberGroup(ml, m_memberGroupSDict, self);
       }
    }
 
-   for (auto mg : m_memberGroupSDict) {
+   for (const auto &mg : m_memberGroupSDict) {
       mg->setInGroup(true);
    }
 }
@@ -231,7 +231,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
    if ((mni = (*allMemberNameInfoSDict)[md->name()])) {
       // member with this name already found
 
-      for (auto &srcMi : *mni) {
+      for (const auto &srcMi : *mni) {
          QSharedPointer<MemberDef> srcMd = srcMi.memberDef;
 
          if (srcMd == md) {
@@ -517,7 +517,7 @@ bool GroupDef::findGroup(QSharedPointer<const GroupDef> def) const
 
    } else if (groupList) {
 
-      for (auto gd : *groupList) {
+      for (const auto &gd : *groupList) {
          if (gd->findGroup(def)) {
             return true;
          }
@@ -540,12 +540,12 @@ bool GroupDef::isASubGroup() const
 
 void GroupDef::countMembers()
 {
-   for (auto &ml : m_memberLists) {
+   for (const auto &ml : m_memberLists) {
       ml->countDecMembers();
       ml->countDocMembers();
    }
 
-   for (auto &mg : m_memberGroupSDict) {
+   for (const auto &mg : m_memberGroupSDict) {
       mg->countDecMembers();
       mg->countDocMembers();
    }
@@ -570,12 +570,12 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
    tagFile << "    <title>" << convertToXML(m_title) << "</title>" << endl;
    tagFile << "    <filename>" << convertToXML(getOutputFileBase()) << Doxy_Globals::htmlFileExtension << "</filename>" << endl;
 
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
+   for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
       switch (lde->kind()) {
 
          case LayoutDocEntry::GroupClasses:
          {
-            for (const auto cd : m_classSDict) {
+            for (const auto &cd : m_classSDict) {
                if (cd->isLinkableInProject()) {
                   tagFile << "    <class kind=\"" << cd->compoundTypeString()
                           << "\">" << convertToXML(cd->name()) << "</class>" << endl;
@@ -598,7 +598,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::GroupFiles:
          {
-            for (const auto item : fileList)  {
+            for (const auto &item : fileList)  {
                if (item->isLinkableInProject()) {
                   tagFile << "    <file>" << convertToXML(item->name()) << "</file>" << endl;
                }
@@ -609,7 +609,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          case LayoutDocEntry::GroupPageDocs:
          {
             if (pageDict != nullptr) {
-               for (const auto item : *pageDict)  {
+               for (const auto &item : *pageDict)  {
                   QString pageName = item->getOutputFileBase();
 
                   if (item->isLinkableInProject()) {
@@ -623,7 +623,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          case LayoutDocEntry::GroupDirs:
          {
             if (dirList) {
-               for (const auto item : *dirList)  {
+               for (const auto &item : *dirList)  {
                   if (item->isLinkableInProject()) {
                      tagFile << "    <dir>" << convertToXML(item->displayName()) << "</dir>" << endl;
                   }
@@ -635,7 +635,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          case LayoutDocEntry::GroupNestedGroups:
          {
             if (groupList != nullptr) {
-               for (const auto item : *groupList)  {
+               for (const auto &item : *groupList)  {
                   if (item->isVisible()) {
                      tagFile << "    <subgroup>" << convertToXML(item->name()) << "</subgroup>" << endl;
                   }
@@ -656,7 +656,7 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
 
          case LayoutDocEntry::MemberGroups: {
 
-            for (const auto mg : m_memberGroupSDict) {
+            for (const auto &mg : m_memberGroupSDict) {
                mg->writeTagFile(tagFile);
             }
          }
@@ -808,7 +808,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
       ol.endMemberHeader();
       ol.startMemberList();
 
-      for (auto item : fileList) {
+      for (const auto &item : fileList) {
 
          if (! item->hasDocumentation()) {
             continue;
@@ -851,7 +851,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
    int count = 0;
 
    if (groupList->count() > 0) {
-      for (auto gd : *groupList) {
+      for (const auto &gd : *groupList) {
          if (gd->isVisible()) {
             count++;
          }
@@ -868,7 +868,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
          groupList->sort();
       }
 
-      for (auto gd : *groupList) {
+      for (const auto &gd : *groupList) {
          if (gd->isVisible()) {
 
             if (! gd->hasDocumentation()) {
@@ -907,7 +907,7 @@ void GroupDef::writeDirs(OutputList &ol, const QString &title)
       ol.endMemberHeader();
       ol.startMemberList();
 
-      for (const auto dd : *dirList ) {
+      for (const auto &dd : *dirList ) {
 
          if (! dd->hasDocumentation()) {
             continue;
@@ -948,7 +948,7 @@ void GroupDef::writeInlineClasses(OutputList &ol)
 
 void GroupDef::writePageDocumentation(OutputList &ol)
 {
-   for (auto pd : *pageDict) {
+   for (const auto &pd : *pageDict) {
       if (! pd->isReference()) {
          QSharedPointer<SectionInfo> si;
 
@@ -975,7 +975,7 @@ void GroupDef::writeMemberGroups(OutputList &ol)
 
    // write user defined member groups
 
-   for (auto mg : m_memberGroupSDict) {
+   for (const auto &mg : m_memberGroupSDict) {
       mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(),
                  QSharedPointer<FileDef>(), self);
    }
@@ -1032,7 +1032,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
    bool first = true;
    SrcLangExt lang = getLanguage();
 
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group) ) {
+   for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group) ) {
 
       if ((lde->kind() == LayoutDocEntry::GroupClasses && m_classSDict.declVisible()) ||
             (lde->kind() == LayoutDocEntry::GroupNamespaces   && m_namespaceSDict.declVisible()) ||
@@ -1132,7 +1132,7 @@ void GroupDef::writeDocumentation(OutputList &ol)
 
    SrcLangExt lang = getLanguage();
 
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
+   for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group)) {
       switch (lde->kind()) {
          case LayoutDocEntry::BriefDesc:
             writeBriefDescription(ol);
@@ -1266,7 +1266,7 @@ void GroupDef::writeMemberPages(OutputList &ol)
    ol.pushGeneratorState();
    ol.disableAllBut(OutputGenerator::Html);
 
-   for (auto ml : m_memberLists) {
+   for (const auto &ml : m_memberLists) {
       if (ml->listType() & MemberListType_documentationLists) {
          ml->writeDocumentationPage(ol, name(), self);
       }
@@ -1282,7 +1282,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> c
    ol.writeString("      <div class=\"navtab\">\n");
    ol.writeString("        <table>\n");
 
-   for (auto md : *allMemberList) {
+   for (const auto &md : *allMemberList) {
 
       if (md->getGroupDef() == this && md->isLinkable() && !md->isEnumValue()) {
          ol.writeString("          <tr><td class=\"navtab\">");
@@ -1315,7 +1315,7 @@ void GroupDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> c
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
 {
-    for (auto &g : root->m_groups) {
+   for (const auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
@@ -1328,7 +1328,7 @@ void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
 
 void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd)
 {
-   for (auto &g : root->m_groups) {
+   for (const auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
@@ -1341,7 +1341,7 @@ void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDe
 
 void addDirToGroups(QSharedPointer<Entry> root, QSharedPointer<DirDef> dd)
 {
-   for (auto &g : root->m_groups) {
+   for (const auto &g : root->m_groups) {
        QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
@@ -1353,7 +1353,7 @@ void addDirToGroups(QSharedPointer<Entry> root, QSharedPointer<DirDef> dd)
 
 void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGroup)
 {
-   for (auto &g : root->m_groups) {
+   for (const auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
@@ -1381,7 +1381,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
    Grouping::GroupPri_t pri = Grouping::GROUPING_LOWEST;
    QSharedPointer<GroupDef> fgd;
 
-   for (auto &g : root->m_groups) {
+   for (const auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname)) && g.pri >= pri) {
@@ -1458,7 +1458,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 
 void addExampleToGroups(Entry *root, QSharedPointer<PageDef> eg)
 {
-   for (auto &g : root->m_groups) {
+   for (const auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
       if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
@@ -1498,11 +1498,11 @@ void GroupDef::addListReferences()
    addRefItem(xrefItems, getOutputFileBase(), title, getOutputFileBase(),
             name(), QString(), QSharedPointer<Definition>() );
 
-   for (auto mg : m_memberGroupSDict) {
+   for (const auto &mg : m_memberGroupSDict) {
       mg->addListReferences(self);
    }
 
-   for (auto ml : m_memberLists) {
+   for (const auto &ml : m_memberLists) {
       if (ml->listType() & MemberListType_documentationLists) {
          ml->addListReferences(self);
       }
@@ -1511,7 +1511,7 @@ void GroupDef::addListReferences()
 
 QSharedPointer<MemberList> GroupDef::createMemberList(MemberListType lt)
 {
-   for (auto ml : m_memberLists) {
+   for (const auto &ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
@@ -1550,7 +1550,7 @@ void GroupDef::addMemberToList(MemberListType lt, QSharedPointer<MemberDef> md)
 
 QSharedPointer<MemberList> GroupDef::getMemberList(MemberListType lt)
 {
-   for (auto ml : m_memberLists) {
+   for (const auto &ml : m_memberLists) {
       if (ml->listType() == lt) {
          return ml;
       }
@@ -1601,7 +1601,7 @@ bool GroupDef::isLinkable() const
    }
 
    // no documentation, check if there are classes
-   for (auto cd : m_classSDict) {
+   for (const auto &cd : m_classSDict) {
 
       if (! cd->name().isEmpty()) {
          return true;

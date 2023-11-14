@@ -901,7 +901,7 @@ class PrintDocVisitor : public DocVisitor
       if (! pl->parameters().isEmpty()) {
          printf("<param>");
 
-         for (auto param : pl->parameters()) {
+         for (const auto &param : pl->parameters()) {
 
             if (param->kind() == DocNode::Kind_Word) {
                visit((DocWord *)param);

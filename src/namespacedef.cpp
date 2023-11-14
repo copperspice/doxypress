@@ -288,7 +288,7 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
          case LayoutDocEntry::NamespaceNestedNamespaces:
          {
 
-            for (auto &nd : m_namespaceSDict) {
+            for (const auto &nd : m_namespaceSDict) {
                if (nd->isLinkableInProject()) {
                   tagFile << "    <namespace>" << convertToXML(nd->name()) << "</namespace>" << endl;
                }
@@ -510,7 +510,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
 
    SrcLangExt lang = getLanguage();
 
-   for (auto lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
+   for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
 
       if ((lde->kind() == LayoutDocEntry::NamespaceClasses && m_classSDict.count() > 0 && m_classSDict.declVisible()) ||
             (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && ! m_namespaceSDict.isEmpty() &&
@@ -930,7 +930,7 @@ int NamespaceSDict::compareMapValues(const QSharedPointer<NamespaceDef> &item1, 
 
 bool NamespaceSDict::declVisible() const
 {
-   for (auto nd : *this) {
+   for (const auto &nd : *this) {
       if (nd->isLinkable()) {
          return true;
       }
@@ -992,7 +992,7 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
    ol.endMemberHeader();
    ol.startMemberList();
 
-   for (auto nd : *this) {
+   for (const auto &nd : *this) {
 
       if (nd->isLinkable() && nd->hasDocumentation()) {
 

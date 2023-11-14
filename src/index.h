@@ -109,7 +109,7 @@ class IndexList : public IndexIntf
                   DirType category = DirType::None) override {
 
       if (m_enabled)  {
-         for (auto item : m_intfs) {
+         for (const auto &item : m_intfs) {
             item->addContentsItem(isDir, name, ref, file, anchor, addToNavIndex, def, category);
          }
       }
@@ -119,7 +119,7 @@ class IndexList : public IndexIntf
                   const QString &sectionAnchor = QString(), const QString &title = QString()) override {
 
       if (m_enabled) {
-         for (auto item : m_intfs) {
+         for (const auto &item : m_intfs) {
             item->addIndexItem(context, md, sectionAnchor, title);
          }
 
@@ -146,14 +146,14 @@ class IndexList : public IndexIntf
 
  private:
    void call_forEach(void (IndexIntf::*methodPtr)()) {
-      for (auto item : m_intfs) {
+      for (const auto &item : m_intfs) {
          ((*item).*methodPtr)();
       }
    }
 
    template<typename A1>
    void call_forEach(void (IndexIntf::*methodPtr)(A1), A1 a1) {
-       for (auto item : m_intfs) {
+       for (const auto &item : m_intfs) {
          ((*item).*methodPtr)(a1);
       }
    }
