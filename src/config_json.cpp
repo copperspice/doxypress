@@ -287,7 +287,7 @@ void Config::load_Defaults()
    // tab 2 - clang
    m_cfgBool.insert("clang-parsing",              struc_CfgBool   { false,           DEFAULT } );
    m_cfgString.insert("clang-compilation-path",   struc_CfgString { QString(),       DEFAULT } );
-   m_cfgString.insert("clang-dialect",            struc_CfgString { "--std=c++14",   DEFAULT } );
+   m_cfgString.insert("clang-dialect",            struc_CfgString { "--std=c++17",   DEFAULT } );
    m_cfgBool.insert("clang-use-headers",          struc_CfgBool   { true,            DEFAULT } );
    m_cfgBool.insert("clang-include-input-source", struc_CfgBool   { true,            DEFAULT } );
    m_cfgList.insert("clang-flags",                struc_CfgList   { QStringList(),   DEFAULT } );
