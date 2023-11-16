@@ -469,14 +469,14 @@ bool openOutputFile(const QString &outFile, QFile &f)
          // create a backup
 
          QDir dir = fi.dir();
-         QFileInfo backup(fi.fileName() + ".bak");
+         QFileInfo backup(fi.filePath() + ".bak");
 
          if (backup.exists()) {
             // remove existing backup
-            dir.remove(backup.fileName());
+            dir.remove(backup.filePath());
          }
 
-         dir.rename(fi.fileName(), fi.fileName() + ".bak");
+         dir.rename(fi.filePath(), fi.filePath() + ".bak");
       }
 
       f.setFileName(outFile);
