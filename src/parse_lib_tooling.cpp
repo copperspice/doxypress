@@ -693,7 +693,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             if (methodDecl->isStatic())  {
                returnType.prepend("static ");
-               current->stat = true;
+               current->m_static = true;
             }
 
             if (methodDecl->isPure())  {
@@ -1074,7 +1074,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          if (node->getStorageClass() == clang::SC_Static) {
             current->prependData(EntryKey::Member_Type,  "static ");
-            current->stat     = true;
+            current->m_static   = true;
          }
 
          if (node->isInline())  {

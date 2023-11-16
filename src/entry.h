@@ -425,7 +425,7 @@ class Entry : public EnableSharedFromThis
 
    LocalToc localToc;
 
-   bool stat;                      // static ?
+   bool m_static;                  // static
    bool explicitExternal;          // explicitly defined as external
    bool proto;                     // prototype
    bool subGrouping;               // automatically group class members

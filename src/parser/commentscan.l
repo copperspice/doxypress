@@ -4105,7 +4105,7 @@ static bool handleStatic(const QString &str, const QStringList &list)
    (void) list;
 
    endBrief();
-   current->stat = true;
+   current->m_static = true;
 
    return false;
 }

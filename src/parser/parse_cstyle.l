@@ -282,7 +282,7 @@ static void initEntry()
   }
 
   current->protection = s_protection;
-  current->stat       = s_static;
+  current->m_static   = s_static;
   current->mtype      = s_methodType;
   current->virt       = s_virtual;
   current->m_srcLang  = language;
@@ -1412,7 +1412,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          insideObjC             = true;
 
          current->virt          = Specifier::Virtual;
-         current->stat          = (text[0] == '+');
+         current->m_static      = (text[0] == '+');
 
          s_methodType           = MethodType::Method;
          current->mtype         = MethodType::Method;
@@ -1737,13 +1737,13 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>{B}*"static"{BN}+      {
       current->appendData(EntryKey::Member_Type, " static ");
-      current->stat = true;
+      current->m_static = true;
 
       lineCount();
    }
 
 <FindMembers>{B}*"extern"{BN}+      {
-      current->stat = false;
+      current->m_static = false;
       current->explicitExternal = true;
       lineCount();
    }
@@ -1751,7 +1751,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>{B}*"const"{BN}+  {
       if (insideCSharp) {
          current->appendData(EntryKey::Member_Type, " const ");
-         current->stat = true;
+         current->m_static = true;
 
          lineCount();
 
@@ -3883,7 +3883,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
                current->m_entryName += text;
             }
 
-            current->stat = true;
+            current->m_static = true;
 
          } else {
 
@@ -3894,7 +3894,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             }
 
             if (current->m_entryName.startsWith("static ")) {
-               current->stat = true;
+               current->m_static = true;
                current->m_entryName = current->m_entryName.mid(7);
 
             } else if (current->m_entryName.startsWith("inline "))  {
@@ -5429,14 +5429,14 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->setData(EntryKey::Member_Type, tmpType);
 
       if (text[0] == ',') {
-         bool stat = current->stat;
 
          if (needNewCurrent) {
+            bool save_stat        = current->m_static;
             current = QMakeShared<Entry>(*current);
             initEntry();
-          }
 
-         current->stat = stat;         // static attribute holds for all variables
+            current->m_static   = save_stat;  // static attribute holds for all variables
+         }
 
          current->m_entryName = "";
          current->setData(EntryKey::Member_Args,      "");
@@ -6359,7 +6359,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             varEntry->protection  = current->protection;
             varEntry->mtype       = current->mtype;
             varEntry->virt        = current->virt;
-            varEntry->stat        = current->stat;
+            varEntry->m_static    = current->m_static;
             varEntry->section     = Entry::VARIABLE_SEC;
             varEntry->m_entryName = msName.trimmed();
 
@@ -9537,7 +9537,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             // static Java initializer
             needsSemi = false;
 
-            if (current->stat) {
+            if (current->m_static) {
                current->m_entryName = "[static initializer]";
                current->setData(EntryKey::Member_Type, "");
             } else {
@@ -10485,8 +10485,8 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 
             if (ce->section == Entry::NAMESPACE_SEC ) {
                // unnamed namespace
-               s_static      = true;
-               current->stat = true;
+               s_static = true;
+               current->m_static = true;
             }
 
             s_protection        = ce->protection;

@@ -2779,7 +2779,7 @@ void initEntry()
 
    current->mtype = MethodType::Method;
    current->virt  = Specifier::Normal;
-   current->stat  = false;
+   current->m_static = false;
    current->m_srcLang = SrcLangExt_Fortran;
 
    initGroupInfo(current);

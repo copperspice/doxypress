@@ -2275,7 +2275,7 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
       cd->setTemplateArgumentList(tmpArgList);
 
       cd->setProtection(root->protection);
-      cd->setIsStatic(root->stat);
+      cd->setIsStatic(root->m_static);
 
       // file definition containing the class cd
       cd->setBodySegment(root->startBodyLine, root->endBodyLine);
@@ -3432,7 +3432,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToClass(QSharedPointer<Entry> pt
    // new member variable, typedef, enum value, or property
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, ptrEntry->startLine, ptrEntry->startColumn,
             ptrEntry->getData(EntryKey::Member_Type), name, ptrEntry->getData(EntryKey::Member_Args),
-            ptrEntry->getData(EntryKey::Exception_Spec), prot, Normal, ptrEntry->stat, related, memberType,
+            ptrEntry->getData(EntryKey::Exception_Spec), prot, Normal, ptrEntry->m_static, related, memberType,
             tmpArgList, ArgumentList() );
 
    md->setTagInfo(ptrEntry->m_tagInfo);
@@ -3655,7 +3655,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
                isPHPArray = true;
             }
 
-            bool staticsInDifferentFiles = root->stat && md->isStatic() && (root->getData(EntryKey::File_Name) != md->getDefFileName());
+            bool staticsInDifferentFiles = root->m_static && md->isStatic() && (root->getData(EntryKey::File_Name) != md->getDefFileName());
 
             if (md->getFileDef() && ! isPHPArray && ! staticsInDifferentFiles) {
                // not a php array or variable
@@ -3700,7 +3700,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
    // new global variable, enum value, or typedef
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
             root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args), QString(),
-            root->protection, Specifier::Normal, root->stat, Relationship::Member, memberType,
+            root->protection, Specifier::Normal, root->m_static, Relationship::Member, memberType,
             tmpArgList, root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
@@ -4308,7 +4308,7 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    }
 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
-         root->getData(EntryKey::Member_Type), rname, "", "", root->protection, root->virt, root->stat,
+         root->getData(EntryKey::Member_Type), rname, "", "", root->protection, root->virt, root->m_static,
          Relationship::Member, type, ArgumentList(), root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
@@ -4543,7 +4543,7 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, ptrEntry->startLine, ptrEntry->startColumn,
                ptrEntry->getData(EntryKey::Member_Type), name, ptrEntry->getData(EntryKey::Member_Args),
                ptrEntry->getData(EntryKey::Exception_Spec), ptrEntry->protection, ptrEntry->virt,
-               (ptrEntry->stat && ptrEntry->relatesType != MemberOf), tRelation, memberType, tmpArgList, ptrEntry->argList);
+               (ptrEntry->m_static && ptrEntry->relatesType != MemberOf), tRelation, memberType, tmpArgList, ptrEntry->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
@@ -4793,7 +4793,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                      }
                   }
 
-                  bool staticsInDifferentFiles = root->stat && item->isStatic() &&
+                  bool staticsInDifferentFiles = root->m_static && item->isStatic() &&
                            root->getData(EntryKey::File_Name) != item->getDefFileName();
 
                   bool tmp = matchArguments2(item->getOuterScope(), mfd, mdArgList,
@@ -4904,7 +4904,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
 
                md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                   root->getData(EntryKey::Member_Type), name, root->getData(EntryKey::Member_Args),
-                  root->getData(EntryKey::Exception_Spec), root->protection, root->virt, root->stat, Relationship::Member,
+                  root->getData(EntryKey::Exception_Spec), root->protection, root->virt, root->m_static, Relationship::Member,
                   MemberDefType::Function, tmpArgList, root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
@@ -7314,7 +7314,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                               // In this case we add it to the class even though the member arguments do not match.
 
                               ptrEntry->protection = md->protection();
-                              ptrEntry->stat       = md->isStatic();
+                              ptrEntry->m_static   = md->isStatic();
                               ptrEntry->virt       = md->virtualness();
 
                               addMethodToClass(ptrEntry, memberCd, md->name(), isFriend);
@@ -7375,7 +7375,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                               if (root->m_templateArgLists.last().count() <= md_tArgList.count()) {
                                  ptrEntry->protection = md->protection();
-                                 ptrEntry->stat       = md->isStatic();
+                                 ptrEntry->m_static   = md->isStatic();
                                  ptrEntry->virt       = md->virtualness();
 
                                  addMethodToClass(ptrEntry, ccd, md->name(), isFriend);
@@ -7521,7 +7521,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine,
                      root->startColumn, funcType, funcName, funcArgs, exceptions,
-                     declMd ? declMd->protection() : root->protection, root->virt, root->stat,
+                     declMd ? declMd->protection() : root->protection, root->virt, root->m_static,
                      Relationship::Member, memberType, ArgumentList(), root->argList);
 
                md->setTagInfo(ptrEntry->m_tagInfo);
@@ -7604,7 +7604,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                QSharedPointer<MemberDef> newMd = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name),
                      root->startLine, root->startColumn,
-                     funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->stat,
+                     funcType, funcName, funcArgs, exceptions, root->protection, root->virt, root->m_static,
                      Relationship::Related, memberType, tArgList, root->argList);
 
                newMd->setTagInfo(ptrEntry->m_tagInfo);
@@ -7793,7 +7793,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine,
                      root->startColumn, funcType, funcName, funcArgs, exceptions, root->protection, root->virt,
-                     root->stat && ! isMemberOf, tRelation, memberType, tmpArgList1, tmpArgList2);
+                     root->m_static && ! isMemberOf, tRelation, memberType, tmpArgList1, tmpArgList2);
 
                if (isDefine && mdDefine) {
                   md->setInitializer(mdDefine->initializer());
@@ -7923,7 +7923,7 @@ localObjCMethod:
 
             QSharedPointer<MemberDef>md = QMakeShared<MemberDef>(ptrEntry->getData(EntryKey::File_Name),
                ptrEntry->startLine, ptrEntry->startColumn, funcType, funcName, funcArgs, exceptions,
-               ptrEntry->protection, ptrEntry->virt, ptrEntry->stat, Relationship::Member,
+               ptrEntry->protection, ptrEntry->virt, ptrEntry->m_static, Relationship::Member,
                MemberDefType::Function, ArgumentList(), ptrEntry->argList);
 
             md->setTagInfo(ptrEntry->m_tagInfo);
@@ -8453,7 +8453,7 @@ void Doxy_Work::addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry)
                            QSharedPointer<MemberDef> fmd = QMakeShared<MemberDef>(fileName, child->startLine,
                               child->startColumn, child->getData(EntryKey::Member_Type), child->m_entryName,
                               child->getData(EntryKey::Member_Args), QString(), child->protection, Specifier::Normal,
-                              child->stat, Relationship::Member, MemberDefType::EnumValue, ArgumentList(), ArgumentList());
+                              child->m_static, Relationship::Member, MemberDefType::EnumValue, ArgumentList(), ArgumentList());
 
                            QSharedPointer<NamespaceDef> tmp = md->getNamespaceDef();
                            if (md->getClassDef()) {

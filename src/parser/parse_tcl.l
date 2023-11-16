@@ -2580,15 +2580,15 @@ static void tcl_command_Variable(int inclass)
    if (myNs.length()) {
       // qualified variables go into namespace
       myEntry = tcl_entry_namespace(myNs);
-      tcl.entry_current->stat = true;
+      tcl.entry_current->m_static = true;
 
    } else {
       if (inclass) {
          myEntry = myScan->entry_cl;
-         tcl.entry_current->stat = false;
+         tcl.entry_current->m_static = false;
       } else {
          myEntry = tcl_entry_namespace(myScan->ns);
-         tcl.entry_current->stat = true;
+         tcl.entry_current->m_static = true;
       }
    }
    tcl.entry_current->section       = Entry::VARIABLE_SEC;

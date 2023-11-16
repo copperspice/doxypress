@@ -57,7 +57,7 @@ Entry::Entry(const Entry &e)
    localToc         = e.localToc;
 
    // bool
-   stat             = e.stat;
+   m_static         = e.m_static;
    explicitExternal = e.explicitExternal;
    proto            = e.proto;
    subGrouping      = e.subGrouping;
@@ -125,7 +125,7 @@ void Entry::reset()
    startColumn   = 1;
 
    // bool
-   stat             = false;
+   m_static         = false;
    explicitExternal = false;
    proto            = false;
    subGrouping      = true;

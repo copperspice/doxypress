@@ -1257,7 +1257,7 @@ void TagFileParser::buildMemberList(QSharedPointer<Entry> ce, const QList<TagMem
 
       me->protection = tmi.prot;
       me->virt       = tmi.virt;
-      me->stat       = tmi.isStatic;
+      me->m_static   = tmi.isStatic;
 
       me->setData(EntryKey::File_Name,  ce->getData(EntryKey::File_Name));
       me->setData(EntryKey::Clang_Id,   tmi.clangId);

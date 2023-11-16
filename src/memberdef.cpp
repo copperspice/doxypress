@@ -685,7 +685,7 @@ class MemberDefImpl
 
    Relationship m_related;   // relationship of this to the class
 
-   bool stat;                // is it a static function?
+   bool m_static;            // is member static
    bool proto;               // is it a prototype
    bool docEnumValues;       // is an enum with documented enum values
    bool annScope;            // member is part of an anonymous scope
@@ -759,7 +759,7 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
    virt         = v;
    prot         = p;
    m_related    = r;
-   stat         = s;
+   m_static     = s;
    m_memberType = memberType;
    exception    = e;
    proto        = false;
@@ -811,11 +811,11 @@ void MemberDefImpl::init(Definition *def, const QString &type, const QString &a,
 }
 
 MemberDef::MemberDef(const QString &defFileName, int defLine, int defColumn, const QString &type, const QString &memberName,
-                     const QString &a, const QString &e, Protection p, Specifier v, bool s,
+                     const QString &a, const QString &e, Protection p, Specifier v, bool isMemberStatic,
                      Relationship r, MemberDefType memberType, const ArgumentList &tal, const ArgumentList &al)
    : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(memberName)), visited(false), m_impl(new MemberDefImpl)
 {
-   m_impl->init(this, type, a, e, p, v, s, r, memberType, tal, al);
+   m_impl->init(this, type, a, e, p, v, isMemberStatic, r, memberType, tal, al);
 
    m_isLinkableCached    = 0;
    m_isConstructorCached = 0;
@@ -1143,7 +1143,7 @@ void MemberDef::computeLinkableInProject() const
       return;
    }
 
-   if (m_impl->stat && m_impl->classDef == nullptr && ! extractStatic) {
+   if (m_impl->m_static && m_impl->classDef == nullptr && ! extractStatic) {
       m_isLinkableCached = 1;    // hidden due to staticness
       return;
    }
@@ -3902,7 +3902,7 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
    QSharedPointer<MemberDef> imd = QMakeShared<MemberDef>(getDefFileName(), getDefLine(), getDefColumn(),
          substituteTemplateArgumentsInString(m_impl->m_type, formalArgs, actualArgs), methodName,
          substituteTemplateArgumentsInString(m_impl->m_args, formalArgs, actualArgs),
-         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->stat, m_impl->m_related, m_impl->m_memberType,
+         m_impl->exception, m_impl->prot, m_impl->virt, m_impl->m_static, m_impl->m_related, m_impl->m_memberType,
          ArgumentList(), ArgumentList());
 
    imd->setArgumentList(actualArgList);
@@ -4733,7 +4733,7 @@ bool MemberDef::isForeign() const
 
 bool MemberDef::isStatic() const
 {
-   return m_impl->stat;
+   return m_impl->m_static;
 }
 
 bool MemberDef::isInline() const

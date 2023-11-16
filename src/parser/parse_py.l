@@ -53,7 +53,7 @@ static Protection        protection;
 static MethodType        mtype;
 static Specifier         virt;
 
-static bool              gstat;
+static bool              s_static;
 
 static int               docBlockContext;
 static QString           docBlock;
@@ -90,8 +90,8 @@ static void initParser()
 {
    protection = Public;
    mtype = MethodType::Method;
-   gstat = false;
    virt  = Normal;
+   s_static = false;
 
    previous = QSharedPointer<Entry>();
    s_packageCommentAllowed = true;
@@ -102,13 +102,13 @@ static void initEntry()
    current->protection = protection;
    current->mtype      = mtype;
    current->virt       = virt;
-   current->stat       = gstat;
+   current->m_static   = s_static;
    current->m_srcLang  = SrcLangExt_Python;
 
    current->setParent(current_root);
 
    initGroupInfo(current);
-   gstat = false;
+   s_static = false;
 }
 
 static void newEntry()
@@ -129,7 +129,7 @@ static void newVariable()
 
    if (current_root->section & Entry::COMPOUND_MASK) {
       // mark as class variable
-      current->stat = true;
+      current->m_static = true;
    }
 
    newEntry();
@@ -345,7 +345,7 @@ static void searchFoundDef()
    current->section   = Entry::FUNCTION_SEC;
    current->m_srcLang = SrcLangExt_Python;
    current->virt      = Normal;
-   current->stat      = gstat;
+   current->m_static  = s_static;
    current->mtype     = (mtype = MethodType::Method);
 
    current->m_entryName.resize(0);
@@ -354,7 +354,7 @@ static void searchFoundDef()
    current->argList.clear();
 
    s_packageCommentAllowed = false;
-   gstat = false;
+   s_static = false;
 }
 
 static void searchFoundClass()
@@ -628,7 +628,7 @@ STARTDOCSYMS      "##"
    }
 
    "@staticmethod"  {
-      gstat = true;
+      s_static = true;
    }
 
    {SCRIPTCOMMENT}   {
@@ -2262,7 +2262,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
    protection      = Public;
    mtype           = MethodType::Method;
-   gstat           = false;
+   s_static        = false;
    virt            = Normal;
 
    current_root    = rt;
