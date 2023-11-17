@@ -586,6 +586,10 @@ void initDefaultLangMapping()
    updateLanguageMapping(".cxx",      "c");
    updateLanguageMapping(".cpp",      "c");
    updateLanguageMapping(".c++",      "c");
+   updateLanguageMapping(".ccm",      "c");
+   updateLanguageMapping(".cppm",     "c");
+   updateLanguageMapping(".cxxm",     "c");
+   updateLanguageMapping(".c++m",     "c");
    updateLanguageMapping(".ii",       "c");
    updateLanguageMapping(".ixx",      "c");
    updateLanguageMapping(".ipp",      "c");
@@ -614,6 +618,7 @@ void initDefaultLangMapping()
    updateLanguageMapping(".m",        "objective-c");
    updateLanguageMapping(".M",        "objective-c");
    updateLanguageMapping(".mm",       "objective-c");
+   updateLanguageMapping(".mpp",      "c");
    updateLanguageMapping(".py",       "python");
    updateLanguageMapping(".pyw",      "python");
    updateLanguageMapping(".f",        "fortran");
