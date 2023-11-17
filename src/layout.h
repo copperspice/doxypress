@@ -71,7 +71,9 @@ struct LayoutDocEntry {
 /** @brief Represents of a piece of a documentation page without configurable parts */
 struct LayoutDocEntrySimple : LayoutDocEntry {
  public:
-   LayoutDocEntrySimple(Kind k) : m_kind(k) {}
+   LayoutDocEntrySimple(Kind k)
+      : m_kind(k)
+   { }
 
    Kind kind() const override {
       return m_kind;
@@ -83,7 +85,8 @@ struct LayoutDocEntrySimple : LayoutDocEntry {
 
 struct LayoutDocEntrySection: public LayoutDocEntrySimple {
    LayoutDocEntrySection(Kind k, const QString &tl)
-      : LayoutDocEntrySimple(k), m_title(tl) {}
+      : LayoutDocEntrySimple(k), m_title(tl)
+   { }
 
    QString title(SrcLangExt lang) const;
 
@@ -139,6 +142,7 @@ struct LayoutNavEntry {
       Namespaces,
       NamespaceList,
       NamespaceMembers,
+
       Classes,
       ClassList,
       ClassIndex,

@@ -905,6 +905,7 @@ class PrintDocVisitor : public DocVisitor
 
             if (param->kind() == DocNode::Kind_Word) {
                visit((DocWord *)param);
+
             } else if (param->kind() == DocNode::Kind_LinkedWord) {
                visit((DocLinkedWord *)param);
 

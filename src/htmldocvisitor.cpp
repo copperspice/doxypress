@@ -2416,13 +2416,16 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
          m_t << "[";
          if (pl->direction() == DocParamSect::In) {
             m_t << "in";
+
          } else if (pl->direction() == DocParamSect::Out) {
             m_t << "out";
+
          } else if (pl->direction() == DocParamSect::InOut) {
             m_t << "in,out";
          }
          m_t << "]";
       }
+
       m_t << "</td>";
    }
 

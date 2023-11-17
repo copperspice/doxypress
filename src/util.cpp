@@ -3132,6 +3132,7 @@ static QString getCanonicalTypeForIdentifier(QSharedPointer<Definition> d, QShar
       // typedef
 
       QString type = mType->typeString();
+
       if (word != type) {
          if (type.startsWith("typename ")) {
             type = stripPrefix(type, "typename ");
@@ -3473,8 +3474,8 @@ void mergeArguments(ArgumentList &srcArgList, ArgumentList &dstArgList, bool for
 }
 
 static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QString &args, bool checkStatics,
-                  QSharedPointer<FileDef> currentFile, bool checkCV, const QString &forceTagFile,
-                  QList<QSharedPointer<MemberDef>> &members)
+      QSharedPointer<FileDef> currentFile, bool checkCV, const QString &forceTagFile,
+      QList<QSharedPointer<MemberDef>> &members)
 {
    for (auto md : *mn) {
       QSharedPointer<FileDef> fd  = md->getFileDef();
@@ -6296,7 +6297,7 @@ void addGroupListToTitle(OutputList &ol, QSharedPointer<Definition> d)
 }
 
 void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, bool insidePre,
-                  bool insideItem, bool insideTable, bool keepSpaces)
+      bool insideItem, bool insideTable, bool keepSpaces)
 {
    static bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
 
@@ -6354,7 +6355,6 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                t << "\\$";
                break;
 
-
             case '"':
                t << "\"{}";
                break;
@@ -6396,6 +6396,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
             case '#':
                t << "\\#";
                break;
+
             case '$':
                t << "\\$";
                break;
@@ -6463,6 +6464,7 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
                if (! insideTabbing) {
                   t << "\\+";
                }
+
                t << "\\_";
 
                if (! insideTabbing) {
@@ -8188,7 +8190,7 @@ bool isURL(const QString &url)
   return tmpUrl.startsWith("http:")  || tmpUrl.startsWith("https:") ||
          tmpUrl.startsWith("ftp:")   || tmpUrl.startsWith("ftps:")  ||
          tmpUrl.startsWith("sftp:")  || tmpUrl.startsWith("file:")  ||
-         tmpUrl.startsWith("news:")  || tmpUrl.startsWith("irc:")   ||  tmpUrl.startsWith("ircs:");
+         tmpUrl.startsWith("news:")  || tmpUrl.startsWith("irc:")   || tmpUrl.startsWith("ircs:");
 }
 
 /** Corrects URL \a url according to the relative path \a relPath.

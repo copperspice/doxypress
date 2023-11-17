@@ -308,25 +308,26 @@ QSharedPointer<ClassDef> getClass(const QString &key);
 QSharedPointer<ConceptDef> getConcept(const QString &key);
 
 QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<const Definition> scope,
-                  QSharedPointer<const FileDef> fileScope, const QString &key,
-                  QSharedPointer<MemberDef> *pTypeDef = nullptr, QString *pTemplSpec = nullptr, bool mayBeUnlinkable = false,
-                  bool mayBeHidden = false, QString *pResolvedType = nullptr );
+      QSharedPointer<const FileDef> fileScope, const QString &key,
+      QSharedPointer<MemberDef> *pTypeDef = nullptr, QString *pTemplSpec = nullptr, bool mayBeUnlinkable = false,
+      bool mayBeHidden = false, QString *pResolvedType = nullptr );
+
+
+QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &key);
 
 QSharedPointer<FileDef> findFileDef(const FileNameDict *fnDict, const QString &name, bool &ambig);
 
 QSharedPointer<MemberDef> getMemberFromSymbol(QSharedPointer<Definition> scope, QSharedPointer<FileDef> fileScope,
-                   const QByteArray &name);
-
-QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &key);
+      const QByteArray &name);
 
 QSharedPointer<PageDef> addRelatedPage(const QString &name, const QString &ptitle, const QString &doc,
-                  const QString &fileName, int docLine, int startLine, const QVector<ListItemInfo> &list,
-                  QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
-                  const TagInfo &tagInfo = TagInfo(), bool xref = false, SrcLangExt lang = SrcLangExt_Unknown);
+      const QString &fileName, int docLine, int startLine, const QVector<ListItemInfo> &list,
+      QSharedPointer<GroupDef> gd = QSharedPointer<GroupDef>(),
+      const TagInfo &tagInfo = TagInfo(), bool xref = false, SrcLangExt lang = SrcLangExt_Unknown);
 
 QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileScope, QSharedPointer<MemberDef> md,
-                  QSharedPointer<MemberDef> *pMemType = nullptr, QString *pTemplSpec = nullptr, QString *pResolvedType = nullptr,
-                  ArgumentList *actTemplParams = nullptr);
+      QSharedPointer<MemberDef> *pMemType = nullptr, QString *pTemplSpec = nullptr, QString *pResolvedType = nullptr,
+      ArgumentList *actTemplParams = nullptr);
 
 Protection getProtection(const QString &data);
 

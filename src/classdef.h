@@ -80,8 +80,8 @@ class ClassDef : public Definition
 {
  public:
    ClassDef(const QString &fileName, int startLine, int startColumn, const QString &fullName,
-                  enum CompoundType ct, const QString &tag = QString(), const QString &tagFileName = QString(),
-                  bool isSymbol = true, bool isJavaEnum = false);
+         enum CompoundType ct, const QString &tag = QString(), const QString &tagFileName = QString(),
+         bool isSymbol = true, bool isJavaEnum = false);
 
    ~ClassDef();
 

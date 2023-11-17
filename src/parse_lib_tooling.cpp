@@ -227,7 +227,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current = s_entryMap.value(currentUSR);
 
-         // bool newEntry      = false;
+         // bool newEntry   = false;
          bool isForwardDecl = false;
 
          if (current == nullptr) {

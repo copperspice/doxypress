@@ -977,7 +977,7 @@ void GroupDef::writeMemberGroups(OutputList &ol)
 
    for (const auto &mg : m_memberGroupSDict) {
       mg->writeDeclarations(ol, QSharedPointer<ClassDef>(), QSharedPointer<NamespaceDef>(),
-                 QSharedPointer<FileDef>(), self);
+            QSharedPointer<FileDef>(), self);
    }
 }
 
@@ -1445,7 +1445,9 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
          bool success = fgd->insertMember(md);
 
          if (success) {
-            md->setGroupDef(fgd, pri, root->getData(EntryKey::File_Name), root->startLine, ! root->getData(EntryKey::Main_Docs).isEmpty());
+            md->setGroupDef(fgd, pri, root->getData(EntryKey::File_Name), root->startLine,
+                  ! root->getData(EntryKey::Main_Docs).isEmpty());
+
             QSharedPointer<ClassDef> cd = md->getClassDefOfAnonymousType();
 
             if (cd) {

@@ -187,16 +187,16 @@ class FileDef : public Definition
    }
 
    /* user defined member groups */
+   const ClassSDict &getClassSDict()  {
+      return m_classSDict;
+   }
+
    const MemberGroupSDict &getMemberGroupSDict() {
       return m_memberGroupSDict;
    }
 
    const NamespaceSDict &getNamespaceSDict() {
       return m_namespaceSDict;
-   }
-
-   const ClassSDict &getClassSDict()  {
-      return m_classSDict;
    }
 
    QString title() const;
@@ -225,6 +225,7 @@ class FileDef : public Definition
    void finishParsing();
 
    friend void generatedFileNames();
+
    void insertMember(QSharedPointer<MemberDef> md);
    void insertClass(QSharedPointer<ClassDef> cd);
    void insertNamespace(QSharedPointer<NamespaceDef> nd);
@@ -309,9 +310,9 @@ class FileDef : public Definition
    QSharedPointer<DirDef> m_dir;
    QList<QSharedPointer<MemberList>> m_memberLists;
 
+   ClassSDict         m_classSDict;
    MemberGroupSDict   m_memberGroupSDict;
    NamespaceSDict     m_namespaceSDict;
-   ClassSDict         m_classSDict;
 
    bool               m_subGrouping;
 };

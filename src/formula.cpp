@@ -35,8 +35,9 @@
 Formula::Formula(const QString &text)
 {
    static int count = 0;
+
    number = count++;
-   form = text;
+   form   = text;
 }
 
 int Formula::getId()

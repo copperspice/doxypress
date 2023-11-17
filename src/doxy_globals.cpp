@@ -77,7 +77,7 @@ QSharedPointer<SearchIndex_Base> Doxy_Globals::searchIndexBase;
 QSet<QString>             Doxy_Globals::inputPaths;
 QSet<QString>             Doxy_Globals::expandAsDefinedDict;                  // all macros which should be expanded
 
-QHash<QString, QString>   Doxy_Globals::nsRenameOrig;                         // rename namespaces ( orignal, alias  )
+QHash<QString, QString>   Doxy_Globals::nsRenameOrig;                         // rename namespaces ( original, alias  )
 QHash<QString, QString>   Doxy_Globals::nsRenameAlias;                        // rename namespaces ( alias, original )
 
 QHash<QString, RefList>   Doxy_Globals::xrefLists;                            // cross-referenced item --todo, test, bug, deprecated
@@ -113,14 +113,14 @@ QDateTime Doxy_Globals::dateTime;
 
 QMultiHash<QString, QSharedPointer<Entry>> Doxy_Globals::g_classEntries;
 
-QStringList               Doxy_Globals::g_inputFiles;
-QSet<QString>             Doxy_Globals::g_compoundKeywordDict;      // keywords recognised as compounds
 QHash<QString, FileDef>   Doxy_Globals::g_usingDeclarations;        // used classes
-QSet<QString>             Doxy_Globals::g_pathsVisited;
+QStringList   Doxy_Globals::g_inputFiles;
+QSet<QString> Doxy_Globals::g_compoundKeywordDict;                             // keywords recognized as compounds
+QSet<QString> Doxy_Globals::g_pathsVisited;
 
-QMap<QString, QString>    Doxy_Globals::g_moduleHint;               // experimental
+QMap<QString, QString>                  Doxy_Globals::g_moduleHint;            // experimental
 
-QMultiHash<QString, Definition *>  &Doxy_Globals::glossary()
+QMultiHash<QString, Definition *> &Doxy_Globals::glossary()
 {
    static QMultiHash<QString, Definition *> data;
    return data;

@@ -44,7 +44,7 @@ struct DocInfo {
 
    DocInfo()
       : line(1)
-   {};
+   {}
 
    int line;
    QString doc;
@@ -56,7 +56,7 @@ struct BriefInfo {
 
    BriefInfo()
       : line(1)
-   {};
+   {}
 
    int line;
    QString doc;
@@ -296,7 +296,7 @@ class Definition : public DefinitionIntf
    void setReference(const QString &r);
 
    // concepts
-   const QString & getRequires() const {
+   const QString &getRequires() const {
       return m_requires;
    }
 
@@ -304,7 +304,7 @@ class Definition : public DefinitionIntf
       m_requires = std::move(text);
    }
 
-   const QString & getConstraint() const {
+   const QString &getConstraint() const {
       return m_constraint;
    }
 

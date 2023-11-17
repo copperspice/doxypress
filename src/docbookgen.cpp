@@ -528,7 +528,8 @@ void DocbookGenerator::endIndexSection(IndexSections is)
 
          for (const auto &gd : Doxy_Globals::groupSDict) {
             if (! gd->isReference()) {
-               m_textStream << "    <xi:include href=\"" << gd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+               m_textStream << "    <xi:include href=\"" << gd->getOutputFileBase()
+                            << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
          }
       }
@@ -541,7 +542,8 @@ void DocbookGenerator::endIndexSection(IndexSections is)
 
          for (const auto &dd : Doxy_Globals::directories) {
             if (dd->isLinkableInProject()) {
-               m_textStream << "    <xi:include href=\"" << dd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+               m_textStream << "    <xi:include href=\"" << dd->getOutputFileBase()
+                            << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
          }
       }
@@ -567,7 +569,8 @@ void DocbookGenerator::endIndexSection(IndexSections is)
 
          for (const auto &cd : Doxy_Globals::classSDict) {
             if (cd->isLinkableInProject() && cd->templateMaster() == 0 && !cd->isEmbeddedInOuterScope()) {
-               m_textStream << "    <xi:include href=\"" << cd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+               m_textStream << "    <xi:include href=\"" << cd->getOutputFileBase()
+                            << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
          }
       }
@@ -584,18 +587,22 @@ void DocbookGenerator::endIndexSection(IndexSections is)
             for (const auto &fd : *fn) {
                if (fd->isLinkableInProject()) {
                   if (isFirst) {
-                     m_textStream << "    <xi:include href=\"" << fd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+                     m_textStream << "    <xi:include href=\"" << fd->getOutputFileBase()
+                                  << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
                      if (sourceCode && m_prettyCode && fd->generateSourceFile()) {
-                        m_textStream << "    <xi:include href=\"" << fd->getSourceFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+                        m_textStream << "    <xi:include href=\"" << fd->getSourceFileBase()
+                                     << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
                      }
                      isFirst = false;
 
                   } else {
-                     m_textStream << "    <xi:include href=\"" << fd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+                     m_textStream << "    <xi:include href=\"" << fd->getOutputFileBase()
+                                  << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
 
                      if (sourceCode && m_prettyCode && fd->generateSourceFile()) {
-                        m_textStream << "    <xi:include href=\"" << fd->getSourceFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+                        m_textStream << "    <xi:include href=\"" << fd->getSourceFileBase()
+                                     << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
                      }
                   }
                }
@@ -610,7 +617,8 @@ void DocbookGenerator::endIndexSection(IndexSections is)
          m_textStream << "</title>" << endl;
 
          for (const auto &pd : Doxy_Globals::exampleSDict) {
-            m_textStream << "    <xi:include href=\"" << pd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+            m_textStream << "    <xi:include href=\"" << pd->getOutputFileBase()
+                         << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
          }
       }
 
@@ -636,11 +644,14 @@ void DocbookGenerator::writePageLink(const QString &name, bool)
 
          if (pd->hasTitle()) {
             m_textStream << "    <title>" << convertToDocBook(pd->title()) << "</title>" << endl;
+
          } else {
             m_textStream << "    <title>" << convertToDocBook(pd->name()) << "</title>" << endl;
          }
 
-         m_textStream << "    <xi:include href=\"" << pd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+         m_textStream << "    <xi:include href=\"" << pd->getOutputFileBase()
+                      << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+
          m_textStream << "</chapter>\n";
       }
    }

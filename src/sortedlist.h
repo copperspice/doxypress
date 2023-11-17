@@ -55,26 +55,26 @@ bool SortedList<T, flag>::contains(const U &data)
    for (const auto &item : *this) {
       if (item == data) {
          return true;
-      }      
+      }
    }
 
    return false;
 }
-   
+
 template <class T, bool flag>
 void SortedList<T, flag>::inSort(const T &data)
 {
-   typename QList<T>::iterator location;   
-   location = std::lower_bound(this->begin(), this->end(), data, 
+   typename QList<T>::iterator location;
+   location = std::lower_bound(this->begin(), this->end(), data,
                   [](const T &temp1, const T &temp2) { return compareListValues(temp1, temp2, flag) < 0; } );
 
-   this->insert(location, data);  
+   this->insert(location, data);
 }
 
 template <class T, bool flag>
 void SortedList<T, flag>::sort()
 {
-   std::sort(this->begin(), this->end(), 
+   std::sort(this->begin(), this->end(),
                   [](const T &temp1, const T &temp2) { return  compareListValues(temp1, temp2, flag) < 0; } );
 }
 
@@ -83,10 +83,10 @@ int compareListValues(const DotNode *item1,       const DotNode *item2, bool fla
 int compareListValues(const NavIndexEntry *item1, const NavIndexEntry *item2, bool flag);
 
 int compareListValues(const QSharedPointer<ClassDef>      &item1, const QSharedPointer<ClassDef>      &item2, bool flag);
-int compareListValues(const QSharedPointer<DirDef>        &item1, const QSharedPointer<DirDef>        &item2, bool flag); 
+int compareListValues(const QSharedPointer<DirDef>        &item1, const QSharedPointer<DirDef>        &item2, bool flag);
 int compareListValues(const QSharedPointer<FileDef>       &item1, const QSharedPointer<FileDef>       &item2, bool flag);
 int compareListValues(const QSharedPointer<FileNameList>  &item1, const QSharedPointer<FileNameList>  &item2, bool flag);
-int compareListValues(const QSharedPointer<GroupDef>      &item1, const QSharedPointer<GroupDef>      &item2, bool flag); 
+int compareListValues(const QSharedPointer<GroupDef>      &item1, const QSharedPointer<GroupDef>      &item2, bool flag);
 int compareListValues(const QSharedPointer<MemberDef>     &item1, const QSharedPointer<MemberDef>     &item2, bool flag);
 
 #endif

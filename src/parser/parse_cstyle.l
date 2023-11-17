@@ -2318,12 +2318,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       // can be a struct nested in an interface so keep insideObjC state
 
       bool isPublished = current->m_traits.hasTrait(Entry::Virtue::Published);
-      bool isInline  = current->m_traits.hasTrait(Entry::Virtue::Inline);
+      bool isInline    = current->m_traits.hasTrait(Entry::Virtue::Inline);
 
       current->m_traits.clear();
       current->m_traits.setTrait(Entry::Virtue::Struct);
       current->m_traits.setTrait(Entry::Virtue::Published, isPublished);
-      current->m_traits.setTrait(Entry::Virtue::Inline, isInline);
+      current->m_traits.setTrait(Entry::Virtue::Inline,    isInline);
 
       addType(current);
 
@@ -3774,13 +3774,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       current->appendData(EntryKey::Requires_Clause, text);
    }
 
-<RequiresClause>{BN}+                   {
+<RequiresClause>{BN}+            {
       current->appendData(EntryKey::Requires_Clause, " ");
       lineCount();
    }
 
-<RequiresClause>.                       {
-
+<RequiresClause>.                {
       unput(*yytext);
 
       QString tmp = current->getData(EntryKey::Requires_Clause);
@@ -4548,7 +4547,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
          BEGIN(FindMembers);
 
-         } else if (text[0] == ';' || (lastInitializerContext == FindFields && initBracketCount==0))  {
+         } else if (text[0] == ';' || (lastInitializerContext == FindFields && initBracketCount == 0))  {
 
             unput(*yytext);
             if (YY_START == ReadInitializerPtr) {
@@ -8388,7 +8387,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
          current->prependData(EntryKey::Member_Type, "typedef");
       }
 
-      BEGIN( FindMembers );
+         BEGIN( FindMembers );
    }
 
 <CompoundName>{SCOPENAME}/{BN}*"("  {
@@ -8444,7 +8443,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <ConceptName>"="    {
-      current->startBodyLine   = yyLineNr;
+      current->startBodyLine  = yyLineNr;
 
       current->setData(EntryKey::Initial_Value, QString());
       lastInitializerContext = FindMembers;
@@ -10175,7 +10174,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       }
 
       lastCppAttributeContext = YY_START;
-      BEGIN( CppAttribute );
+      BEGIN(CppAttribute);
    }
 
 <*>\n       {
@@ -10233,17 +10232,17 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <*>"/*"                          {
       // */ (editor syntax fix)
-      lastCContext = YY_START ;
-      BEGIN( SkipComment );
+      lastCContext = YY_START;
+      BEGIN(SkipComment);
    }
 
 <SkipComment>{B}*"*/"            {
-      BEGIN( lastCContext );
+      BEGIN(lastCContext);
    }
 
 <*>"//"                          {
       lastCContext = YY_START;
-      BEGIN( SkipCxxComment );
+      BEGIN(SkipCxxComment);
    }
 %%
 
@@ -10400,7 +10399,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          padCount = 0;
          s_column = 0;
 
-         s_inputString  = ce->getData(EntryKey::Source_Text);
+         s_inputString   = ce->getData(EntryKey::Source_Text);
          s_inputPosition = 0;
 
          yyrestart( yyin );
@@ -10414,11 +10413,11 @@ static void parseCompounds(QSharedPointer<Entry> rt)
          }
 
          current_root = ce;
-         yyFileName  = ce->getData(EntryKey::File_Name);
+         yyFileName   = ce->getData(EntryKey::File_Name);
 
-         yyLineNr    = ce->startLine;
-         yyColNr     = ce->startColumn;
-         insideObjC  = (ce->m_srcLang == SrcLangExt_ObjC);
+         yyLineNr     = ce->startLine;
+         yyColNr      = ce->startColumn;
+         insideObjC   = (ce->m_srcLang == SrcLangExt_ObjC);
 
          current = QMakeShared<Entry>();
          s_static = false;

@@ -555,7 +555,7 @@ void ManGenerator::endSubsection()
 
 void ManGenerator::startSubsubsection()
 {
-   if (!firstCol) {
+   if (! firstCol) {
       m_textStream << endl;
    }
 

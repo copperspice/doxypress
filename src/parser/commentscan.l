@@ -2044,7 +2044,7 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       QString text = QString::fromUtf8(yytext);
       current->m_entryName = substitute(text, ".", "::");
 
-      BEGIN( Comment );
+      BEGIN(Comment);
    }
 
 <ConceptDocArg1>{LC}          {

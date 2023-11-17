@@ -2631,7 +2631,7 @@ void ClassDef::mergeMembers()
 
    if (baseClasses()) {
 
-      for (auto bcd : *baseClasses() ) {
+      for (auto bcd : *baseClasses()) {
          QSharedPointer<ClassDef> bClass = bcd->classDef;
 
          // merge the members in the base class of this inheritance branch first

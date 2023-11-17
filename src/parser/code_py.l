@@ -1400,16 +1400,18 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
    }
 }
 
+
   /*
 <*>({NONEMPTY}|{EXPCHAR}|{BB})           {
       // This should go one character at a time
       QString text = QString::fromUtf8(yytext);
       codify(text);
 
-      //endFontClass();
+      // endFontClass();
       BEGIN(Body);
-   }
+  }
   */
+
 
 <*>{STRINGPREFIX}?{TRISINGLEQUOTE} {
       QString text = QString::fromUtf8(yytext);

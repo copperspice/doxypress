@@ -186,7 +186,7 @@ static QString removeEmptyLines(const QString &s)
 }
 
 static QString substituteHtmlKeywords(const QString &output, const QString &title,
-                  const QString &relPath = QString(), const QString &navPath = QString())
+      const QString &relPath = QString(), const QString &navPath = QString())
 {
    // Build CSS/Javascript tags depending on treeview, search engine settings
 
@@ -533,13 +533,13 @@ void HtmlCodeGenerator::writeLineNumber(const QString &ref, const QString &filen
 }
 
 void HtmlCodeGenerator::writeCodeLink(const QString &ref, const QString &f, const QString &anchor,
-                  const QString &name, const QString &tooltip)
+      const QString &name, const QString &tooltip)
 {
    writeCodeLinkHtml("code", ref, f, anchor, name, tooltip);
 }
 
 void HtmlCodeGenerator::writeCodeLinkHtml(const QString &className, const QString &ref, const QString &f,
-                  const QString &anchor, const QString &name, const QString &tooltip)
+      const QString &anchor, const QString &name, const QString &tooltip)
 {
    if (! ref.isEmpty()) {
       m_streamCode << "<a class=\"" << className << "Ref\" ";
@@ -2269,16 +2269,17 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
 }
 
 static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath, LayoutNavEntry *hlEntry,
-                  LayoutNavEntry::Kind kind, bool highlightParent, bool highlightSearch)
+      LayoutNavEntry::Kind kind, bool highlightParent, bool highlightSearch)
 {
    if (hlEntry->parent()) {
       // first draw the tabs for the parent of hlEntry
       renderQuickLinksAsTabs(t_stream, relPath, hlEntry->parent(), kind, highlightParent, highlightSearch);
    }
 
-   if (hlEntry->parent() && hlEntry->parent()->children().count() > 0) { // draw tabs for row containing hlEntry
-     bool topLevel = hlEntry->parent()->parent() == 0;
-     int count = 0;
+   if (hlEntry->parent() && hlEntry->parent()->children().count() > 0) {
+      // draw tabs for row containing hlEntry
+      bool topLevel = hlEntry->parent()->parent() == 0;
+      int count = 0;
 
       for (const auto &entry : hlEntry->parent()->children()) {
          if (entry->visible() && quickLinkVisible(entry->kind())) {
@@ -2295,14 +2296,16 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
                QString url = entry->url();
 
                startQuickIndexItem(t_stream, url, entry == hlEntry  &&
-                                   (entry->children().count() > 0 || (entry->kind() == kind && ! highlightParent) ), true, relPath);
+                     (entry->children().count() > 0 || (entry->kind() == kind && ! highlightParent) ), true, relPath);
 
                t_stream << fixSpaces(entry->title());
                endQuickIndexItem(t_stream, url);
             }
          }
 
-         if (hlEntry->parent() == LayoutDocManager::instance().rootNavEntry()) { // first row is special as it contains the search box
+         if (hlEntry->parent() == LayoutDocManager::instance().rootNavEntry()) {
+            // first row is special as it contains the search box
+
             static const bool searchEngine      = Config::getBool("html-search");
             static const bool serverBasedSearch = Config::getBool("search-server-based");
 

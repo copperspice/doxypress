@@ -266,7 +266,7 @@ void DirDef::writeSubDirList(OutputList &ol)
                ol.startMemberDescription(dd->getOutputFileBase());
 
                ol.generateDoc(briefFile(), briefLine(), dd, QSharedPointer<MemberDef>(), dd->briefDescription(),
-                              false, false, QString(), true, true);
+                     false, false, QString(), true, true);
 
                ol.endMemberDescription();
             }
@@ -332,7 +332,7 @@ void DirDef::writeFileList(OutputList &ol)
                ol.startMemberDescription(fd->getOutputFileBase());
 
                ol.generateDoc(briefFile(), briefLine(), fd, QSharedPointer<MemberDef>(), fd->briefDescription(),
-                              false, false, "", true, true);
+                     false, false, QString(), true, true);
 
                ol.endMemberDescription();
             }
@@ -617,7 +617,6 @@ void DirDef::computeDependencies()
          }
       }
    }
-
 }
 
 bool DirDef::isParentOf(QSharedPointer<DirDef> dir) const

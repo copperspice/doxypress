@@ -1285,7 +1285,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
       if (resolveRef(s_context, tName, s_inSeeBlock, &compound, &member, false, fd, true)) {
          partA = true;
 
-      } else if ( ! s_context.isEmpty())  {
+      } else if (! s_context.isEmpty())  {
          // tried once with s_context now try again with "" looking for a global scope
 
          if (resolveRef(QString(), tName, s_inSeeBlock, &compound, &member, true, QSharedPointer<FileDef>(), true))  {
@@ -7143,7 +7143,7 @@ int DocPara::handleHtmlStartTag(const QString &tagName, const HtmlAttribList &ta
    int tagId  = Mappers::htmlTagMapper->map(tagName);
 
    if (g_token->emptyTag && ! (tagId & XML_CmdMask) &&
-            tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR && tagId != HTML_HR && tagId != HTML_P) {
+         tagId != HTML_UNKNOWN && tagId != HTML_IMG && tagId != HTML_BR && tagId != HTML_HR && tagId != HTML_P) {
 
       warn_doc_error(s_fileName, getDoctokenLineNum(),
             "HTML tag '<%s/>' may not use the 'empty tag' XHTML syntax", csPrintable(tagName));

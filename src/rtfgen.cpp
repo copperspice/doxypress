@@ -825,7 +825,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             ++iter;
          }
 
-         while (iter !=  Doxy_Globals::namespaceSDict.end()) {
+         while (iter != Doxy_Globals::namespaceSDict.end()) {
 
             if ((*iter)->isLinkableInProject()) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;

@@ -332,7 +332,7 @@ bool Config::verify()
    iterList = m_cfgList.find("aliases");
    QStringList aliasList = iterList.value().value;
 
-   for (auto alias: aliasList) {
+   for (auto alias : aliasList) {
       static QRegularExpression reg1("[a-z_A-Z][a-z_A-Z0-9]*[ \t]*=");               // alias without argument
       static QRegularExpression reg2("[a-z_A-Z][a-z_A-Z0-9]*\\{[0-9]*\\}[ \t]*=");   // alias with argument
 

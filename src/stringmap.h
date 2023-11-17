@@ -352,21 +352,21 @@ class LongMap
 /** A sorted dictionary of ClassDef objects. */
 class ClassSDict : public StringMap<QSharedPointer<ClassDef>>
 {
- public:
+   public:
    ClassSDict(Qt::CaseSensitivity isCase = Qt::CaseSensitive)
-      : StringMap<QSharedPointer<ClassDef>>(isCase)
-   {}
+         : StringMap<QSharedPointer<ClassDef>>(isCase)
+      {}
 
-   ~ClassSDict() {}
+      ~ClassSDict() {}
 
-   void writeDeclaration(OutputList &ol, const enum CompoundType *filter = nullptr,
-            const QString &header = QString(), bool localNames = false);
+      void writeDeclaration(OutputList &ol, const enum CompoundType *filter = nullptr,
+               const QString &header = QString(), bool localNames = false);
 
-   void writeDocumentation(OutputList &ol, QSharedPointer<Definition> container = QSharedPointer<Definition>());
-   bool declVisible(const enum CompoundType *filter = nullptr) const;
+      void writeDocumentation(OutputList &ol, QSharedPointer<Definition> container = QSharedPointer<Definition>());
+      bool declVisible(const enum CompoundType *filter = nullptr) const;
 
- private:
-   int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
+   private:
+      int compareMapValues(const QSharedPointer<ClassDef> &item1, const QSharedPointer<ClassDef> &item2) const override;
 };
 
 

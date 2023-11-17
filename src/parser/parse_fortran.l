@@ -2777,8 +2777,8 @@ void initEntry()
       current->protection = defaultProtection;
    }
 
-   current->mtype = MethodType::Method;
-   current->virt  = Specifier::Normal;
+   current->mtype    = MethodType::Method;
+   current->virt     = Specifier::Normal;
    current->m_static = false;
    current->m_srcLang = SrcLangExt_Fortran;
 

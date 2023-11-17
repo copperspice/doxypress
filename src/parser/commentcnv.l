@@ -550,7 +550,6 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       BEGIN(VerbatimCode);
    }
 
-
 <CComment,ReadLine>^[ \t]*("```"[`]*|"~~~"[~]*) {
       /* start of markdown code block */
 
@@ -603,6 +602,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       }
 
       s_lastCommentContext = YY_START;
+
       BEGIN(Verbatim);
    }
 
@@ -868,6 +868,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       if (s_lang == SrcLangExt_Python || s_lang == SrcLangExt_Tcl || s_lang == SrcLangExt_Markdown) {
          REJECT;
       }
+
       QString text = QString::fromUtf8(yytext);
 
       ++s_nestingCount;

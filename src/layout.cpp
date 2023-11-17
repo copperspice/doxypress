@@ -137,7 +137,8 @@ class LayoutParser : public QXmlDefaultHandler
 
        public:
          StartElement(LayoutParser *parent, Handler h)
-            : m_parent(parent), m_handler(h) {}
+            : m_parent(parent), m_handler(h)
+         { }
 
          virtual ~StartElement() {}
 
@@ -146,21 +147,25 @@ class LayoutParser : public QXmlDefaultHandler
          }
 
        protected:
-         StartElement() : m_parent(0), m_handler(0) {}
+         StartElement()
+            : m_parent(0), m_handler(0)
+         { }
 
        private:
          LayoutParser *m_parent;
          Handler m_handler;
       };
 
-      class StartElementKind : public StartElement
+      class StartElementKind
+         : public StartElement
       {
 
        typedef void (LayoutParser::*Handler)(LayoutDocEntry::Kind kind, const QXmlAttributes &attrib);
 
        public:
          StartElementKind(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h)
-            : m_parent(parent), m_kind(k), m_handler(h) {}
+            : m_parent(parent), m_kind(k), m_handler(h)
+         { }
 
          void operator()(const QXmlAttributes &attrib) override {
             (m_parent->*m_handler)(m_kind, attrib);
@@ -178,7 +183,8 @@ class LayoutParser : public QXmlDefaultHandler
 
         public:
          StartElementSection(LayoutParser *parent, LayoutDocEntry::Kind k, Handler h, const QString &title)
-            : m_parent(parent), m_kind(k), m_handler(h), m_title(title) {}
+            : m_parent(parent), m_kind(k), m_handler(h), m_title(title)
+         { }
 
          void operator()(const QXmlAttributes &attrib) override {
             (m_parent->*m_handler)(m_kind, attrib, m_title);
@@ -198,8 +204,9 @@ class LayoutParser : public QXmlDefaultHandler
 
         public:
           StartElementMember(LayoutParser *parent, Handler h, MemberListType type,
-                     const QString &tl, const QString &ss = QString() )
-            : m_parent(parent), m_handler(h), m_type(type), m_title(tl), m_subscript(ss) {}
+                const QString &tl, const QString &ss = QString() )
+            : m_parent(parent), m_handler(h), m_type(type), m_title(tl), m_subscript(ss)
+          { }
 
           void operator()(const QXmlAttributes &attrib) override {
              (m_parent->*m_handler)(attrib, m_type, m_title, m_subscript);
@@ -215,12 +222,12 @@ class LayoutParser : public QXmlDefaultHandler
 
       class StartElementNavEntry : public StartElement
       {
-
         typedef void (LayoutParser::*Handler)(LayoutNavEntry::Kind kind, const QXmlAttributes &attrib, const QString &title);
 
         public:
            StartElementNavEntry(LayoutParser *parent, LayoutNavEntry::Kind kind, Handler h, const QString &tl )
-              : m_parent(parent), m_kind(kind), m_handler(h), m_title(tl) {}
+              : m_parent(parent), m_kind(kind), m_handler(h), m_title(tl)
+           { }
 
            void operator()(const QXmlAttributes &attrib) override {
               (m_parent->*m_handler)(m_kind, attrib, m_title);
@@ -265,14 +272,14 @@ class LayoutParser : public QXmlDefaultHandler
       // bool javaOpt    = Config::getBool("optimize-java");
 
       // start & end
-      m_sHandler.insert("doxypress-layout",          QMakeShared<StartElement>(this, &LayoutParser::startLayout));
-      m_eHandler.insert("doxypress-layout",          QMakeShared<EndElement>(this,   &LayoutParser::endLayout));
+      m_sHandler.insert("doxypress-layout",     QMakeShared<StartElement>(this, &LayoutParser::startLayout));
+      m_eHandler.insert("doxypress-layout",     QMakeShared<EndElement>(this,   &LayoutParser::endLayout));
 
       // main navindex layout
-      m_sHandler.insert("navindex",                  QMakeShared<StartElement>(this, &LayoutParser::startNavIndex));
-      m_sHandler.insert("navindex/tab",              QMakeShared<StartElement>(this, &LayoutParser::startNavEntry));
-      m_eHandler.insert("navindex/tab",              QMakeShared<EndElement>(this,   &LayoutParser::endNavEntry));
-      m_eHandler.insert("navindex",                  QMakeShared<EndElement>(this,   &LayoutParser::endNavIndex));
+      m_sHandler.insert("navindex",             QMakeShared<StartElement>(this, &LayoutParser::startNavIndex));
+      m_sHandler.insert("navindex/tab",         QMakeShared<StartElement>(this, &LayoutParser::startNavEntry));
+      m_eHandler.insert("navindex/tab",         QMakeShared<EndElement>(this,   &LayoutParser::endNavEntry));
+      m_eHandler.insert("navindex",             QMakeShared<EndElement>(this,   &LayoutParser::endNavIndex));
 
       // class layout
       m_sHandler.insert("class",
@@ -285,8 +292,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       m_sHandler.insert("class/detaileddescription",
                QMakeShared<StartElementSection>
-               (this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry,
-               theTranslator->trDetailedDescription()));
+               (this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry, theTranslator->trDetailedDescription()));
 
       m_sHandler.insert("class/authorsection",
                QMakeShared<StartElementKind>
@@ -399,7 +405,7 @@ class LayoutParser : public QXmlDefaultHandler
                (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proSlots, theTranslator->trProtectedSlots()));
 
-     m_sHandler.insert("class/memberdecl/protectedsignals",
+      m_sHandler.insert("class/memberdecl/protectedsignals",
                QMakeShared<StartElementMember>
                (this, &LayoutParser::startMemberDeclEntry,
                MemberListType_proSignals, theTranslator->trProtectedSignals()));
@@ -1762,7 +1768,7 @@ class LayoutParser : public QXmlDefaultHandler
 
       } else {
          err("Unable to process layout file, XML tag '%s' was found in scope: '%s', \n",
-                     csPrintable(name), csPrintable(m_scope));
+               csPrintable(name), csPrintable(m_scope));
       }
 
       return true;

@@ -480,15 +480,14 @@ PerlModDocVisitor::PerlModDocVisitor(PerlModOutput &output)
 void PerlModDocVisitor::finish()
 {
    leaveText();
-   m_output.closeList()
-   .add(m_other);
+   m_output.closeList().add(m_other);
 }
 
 void PerlModDocVisitor::addLink(const QString &, const QString &file, const QString &anchor)
 {
    QString link = file;
 
-   if (!anchor.isEmpty()) {
+   if (! anchor.isEmpty()) {
       (link += "_1") += anchor;
    }
 
@@ -512,6 +511,7 @@ void PerlModDocVisitor::enterText()
    if (m_textmode) {
       return;
    }
+
    openItem("text");
    m_output.addField("content").add('\'');
    m_textmode = true;
@@ -519,13 +519,12 @@ void PerlModDocVisitor::enterText()
 
 void PerlModDocVisitor::leaveText()
 {
-   if (!m_textmode) {
+   if (! m_textmode) {
       return;
    }
+
    m_textmode = false;
-   m_output
-   .add('\'')
-   .closeHash();
+   m_output.add('\'').closeHash();
 }
 
 void PerlModDocVisitor::singleItem(const QString &name)
@@ -1049,33 +1048,43 @@ void PerlModDocVisitor::visitPre(DocSimpleSect *s)
       case DocSimpleSect::See:
          type = "see";
          break;
+
       case DocSimpleSect::Return:
          type = "return";
          break;
+
       case DocSimpleSect::Author:
          type = "author";
          break;
+
       case DocSimpleSect::Authors:
          type = "authors";
          break;
+
       case DocSimpleSect::Version:
          type = "version";
          break;
+
       case DocSimpleSect::Since:
          type = "since";
          break;
+
       case DocSimpleSect::Date:
          type = "date";
          break;
+
       case DocSimpleSect::Note:
          type = "note";
          break;
+
       case DocSimpleSect::Warning:
          type = "warning";
          break;
+
       case DocSimpleSect::Pre:
          type = "pre";
          break;
+
       case DocSimpleSect::Post:
          type = "post";
          break;
@@ -1085,18 +1094,23 @@ void PerlModDocVisitor::visitPre(DocSimpleSect *s)
       case DocSimpleSect::Invar:
          type = "invariant";
          break;
+
       case DocSimpleSect::Remark:
          type = "remark";
          break;
+
       case DocSimpleSect::Attention:
          type = "attention";
          break;
+
       case DocSimpleSect::User:
          type = "par";
          break;
+
       case DocSimpleSect::Rcs:
          type = "rcs";
          break;
+
       case DocSimpleSect::Unknown:
          err("Unknown simple section found\n");
          break;
@@ -1144,6 +1158,7 @@ void PerlModDocVisitor::visitPre(DocSimpleListItem *)
 {
    openSubBlock();
 }
+
 void PerlModDocVisitor::visitPost(DocSimpleListItem *)
 {
    closeSubBlock();
@@ -1181,6 +1196,7 @@ void PerlModDocVisitor::visitPre(DocHtmlListItem *)
 {
    openSubBlock();
 }
+
 void PerlModDocVisitor::visitPost(DocHtmlListItem *)
 {
    closeSubBlock();
@@ -1529,15 +1545,19 @@ void PerlModDocVisitor::visitPre(DocParamSect *s)
       case DocParamSect::Param:
          type = "params";
          break;
+
       case DocParamSect::RetVal:
          type = "retvals";
          break;
+
       case DocParamSect::Exception:
          type = "exceptions";
          break;
+
       case DocParamSect::TemplateParam:
          type = "templateparam";
          break;
+
       case DocParamSect::Unknown:
          err("Unknown parameter section found\n");
          break;
@@ -1730,7 +1750,7 @@ static void addTemplateList(QSharedPointer<ClassDef> cd, PerlModOutput &output)
 }
 
 static void addPerlModDocBlock(PerlModOutput &output, const QString &name, const QString &fileName, int lineNr,
-                               QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QString &text)
+      QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QString &text)
 {
    QString stext = text.trimmed();
 
@@ -1936,7 +1956,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       .addFieldQuotedString("kind", memType)
       .addFieldQuotedString("name", name)
       .addFieldQuotedString("virtualness", getVirtualnessName(md->virtualness()))
-      .addFieldQuotedString("protection", getProtectionName(md->protection()))
+      .addFieldQuotedString("protection",  getProtectionName(md->protection()))
       .addFieldBoolean("static", md->isStatic());
 
    addPerlModDocBlock(m_output, "brief",    md->getDefFileName(), md->getDefLine(), md->getOuterScope(), md, md->briefDescription());
@@ -2235,7 +2255,7 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 
 #if 0
    DotClassGraph inheritanceGraph(cd, DotClassGraph::Inheritance);
-   if (!inheritanceGraph.isTrivial()) {
+   if (! inheritanceGraph.isTrivial()) {
       t << "    <inheritancegraph>" << endl;
       inheritanceGraph.writePerlMod(t);
       t << "    </inheritancegraph>" << endl;
@@ -2444,8 +2464,11 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
    QSharedPointer<Definition> nullDef;
    QSharedPointer<MemberDef> nullMem;
 
-   addPerlModDocBlock(m_output, "brief",    gd->getDefFileName(), gd->getDefLine(), nullDef, nullMem, gd->briefDescription());
-   addPerlModDocBlock(m_output, "detailed", gd->getDefFileName(), gd->getDefLine(), nullDef, nullMem, gd->documentation());
+   addPerlModDocBlock(m_output, "brief",    gd->getDefFileName(), gd->getDefLine(),
+         nullDef, nullMem, gd->briefDescription());
+
+   addPerlModDocBlock(m_output, "detailed", gd->getDefFileName(), gd->getDefLine(),
+         nullDef, nullMem, gd->documentation());
 
    m_output.closeHash();
 }
@@ -2466,7 +2489,8 @@ void PerlModGenerator::generatePerlModForPage(QSharedPointer<PageDef> pd)
    QSharedPointer<Definition> nullDef;
    QSharedPointer<MemberDef> nullMem;
 
-   addPerlModDocBlock(m_output, "detailed", pd->docFile(), pd->docLine(), nullDef, nullMem, pd->documentation());
+   addPerlModDocBlock(m_output, "detailed", pd->docFile(), pd->docLine(),
+         nullDef, nullMem, pd->documentation());
 
    m_output.closeHash();
 }
@@ -2474,20 +2498,24 @@ void PerlModGenerator::generatePerlModForPage(QSharedPointer<PageDef> pd)
 bool PerlModGenerator::generatePerlModOutput()
 {
    QFile outputFile;
+
    if (! createOutputFile(outputFile, pathDoxyDocsPM)) {
       return false;
    }
 
    QTextStream outputTextStream(&outputFile);
    PerlModOutputStream outputStream(&outputTextStream);
+
    m_output.setPerlModOutputStream(&outputStream);
    m_output.add("$doxydocs=").openHash();
 
+   //
    m_output.openList("classes");
 
    for (const auto &cd : Doxy_Globals::classSDict) {
       generatePerlModForClass(cd);
    }
+
    m_output.closeList();
 
    m_output.openList("namespaces");
@@ -2495,8 +2523,10 @@ bool PerlModGenerator::generatePerlModOutput()
    for (const auto &nd : Doxy_Globals::namespaceSDict) {
       generatePerlModForNamespace(nd);
    }
+
    m_output.closeList();
 
+   //
    m_output.openList("files");
 
    for (const auto &fn : Doxy_Globals::inputNameList) {
@@ -2504,28 +2534,30 @@ bool PerlModGenerator::generatePerlModOutput()
          generatePerlModForFile(fd);
       }
    }
+
    m_output.closeList();
 
+   //
    m_output.openList("groups");
 
    for (const auto &gd : Doxy_Globals::groupSDict) {
       generatePerlModForGroup(gd);
    }
+
    m_output.closeList();
 
-
+   //
    m_output.openList("pages");
 
    for (const auto &pd : Doxy_Globals::pageSDict) {
       generatePerlModForPage(pd);
    }
 
-
    if (Doxy_Globals::mainPage) {
       generatePerlModForPage(Doxy_Globals::mainPage);
    }
-   m_output.closeList();
 
+   m_output.closeList();
 
    m_output.closeHash().add(";\n1;\n");
 
@@ -2565,13 +2597,15 @@ bool PerlModGenerator::createOutputDir(QDir &perlModDir)
       err("Unable to create perlmod directory in %s\n", csPrintable(outputDirectory));
       return false;
    }
+
    return true;
 }
 
 bool PerlModGenerator::generateDoxyStructurePM()
 {
    QFile doxyModelPM;
-   if (!createOutputFile(doxyModelPM, pathDoxyStructurePM)) {
+
+   if (! createOutputFile(doxyModelPM, pathDoxyStructurePM)) {
       return false;
    }
 

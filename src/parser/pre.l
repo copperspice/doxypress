@@ -1134,8 +1134,6 @@ static int getNextId(const QString &expr, int p, int *l)
  */
 static bool expandExpression(QString &expr, QString *rest, int pos, int level)
 {
-
-
    if (expr.isEmpty()) {
      return true;
    }

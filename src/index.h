@@ -191,8 +191,9 @@ enum HighlightedItem {
    HLI_Namespaces,
    HLI_NamespaceMembers,
    HLI_Hierarchy,
-   HLI_Classes,
    HLI_Annotated,
+
+   HLI_Classes,
    HLI_Concepts,
    HLI_Files,
    HLI_Functions,

@@ -478,7 +478,7 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 }
 
 static void writeExceptionListImpl(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> md,
-                  const QString &exception)
+      const QString &exception)
 {
    // this is an ordinary exception spec - there must be a '('
 
@@ -1206,7 +1206,7 @@ bool MemberDef::isLinkable() const
 }
 
 void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
-                          QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool onlyText)
+      QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool onlyText)
 {
    (void) cd;
    (void) nd;
@@ -1451,8 +1451,8 @@ int MemberDef::getDeclColumn() const
 }
 
 void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
-                  QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool inGroup,
-                  QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
+      QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool inGroup,
+      QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
 {
    // hide enum value since they appear already as part of the enum, unless they are explicitly grouped
    if (! inGroup && m_impl->m_memberType == MemberDefType::EnumValue) {
@@ -3461,6 +3461,7 @@ QString MemberDef::fieldType() const
    if (isTypedef()) {
       type.prepend("typedef ");
    }
+
    return simplifyTypeForTable(type);
 }
 
@@ -3528,15 +3529,16 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
       linkifyText(TextFragment(ol), getOuterScope(), getBodyDef(), self, argsString());
    }
 
-   if (! m_impl->bitfields.isEmpty()) { // add bitfields
+   if (! m_impl->bitfields.isEmpty()) {
+      // add bitfields
       linkifyText(TextFragment(ol), getOuterScope(), getBodyDef(), self, m_impl->bitfields);
    }
    ol.endInlineMemberName();
 
    ol.startInlineMemberDoc();
 
-   QString brief     = briefDescription();
-   QString detailed  = documentation();
+   QString brief    = briefDescription();
+   QString detailed = documentation();
 
    /* write brief description */
    if (! brief.isEmpty()) {
@@ -3915,13 +3917,14 @@ QSharedPointer<MemberDef> MemberDef::createTemplateInstanceMember(const Argument
 
 bool MemberDef::hasOneLineInitializer() const
 {
-   return !m_impl->initializer.isEmpty() && m_impl->initLines == 0 && // one line initializer
+   return ! m_impl->initializer.isEmpty() && m_impl->initLines == 0 && // one line initializer
           ((m_impl->maxInitLines > 0 && m_impl->userInitLines == -1) || m_impl->userInitLines > 0); // enabled by default or explicitly
 }
 
 bool MemberDef::hasMultiLineInitializer() const
 {
-   return m_impl->initLines > 0 &&  ((m_impl->initLines < m_impl->maxInitLines && m_impl->userInitLines == -1)
+
+   return m_impl->initLines > 0 && ((m_impl->initLines < m_impl->maxInitLines && m_impl->userInitLines == -1)
            || m_impl->initLines < m_impl->userInitLines );
 }
 
@@ -3953,7 +3956,7 @@ void MemberDef::addListReference(QSharedPointer<Definition> def)
    SrcLangExt lang = getLanguage();
 
    visited = true;
-   if (!isLinkableInProject()) {
+   if (! isLinkableInProject()) {
       return;
    }
 

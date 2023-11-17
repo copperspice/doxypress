@@ -89,9 +89,9 @@ static QString           s_argType       = QString();
 static void initParser()
 {
    protection = Public;
-   mtype = MethodType::Method;
-   virt  = Normal;
+   mtype    = MethodType::Method;
    s_static = false;
+   virt     = Normal;
 
    previous = QSharedPointer<Entry>();
    s_packageCommentAllowed = true;
@@ -857,7 +857,7 @@ STARTDOCSYMS      "##"
          current->protection = Private;
       }
 
-   newEntry();
+      newEntry();
                       }
    {TRIDOUBLEQUOTE}  {
       // start of a comment block

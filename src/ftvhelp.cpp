@@ -178,7 +178,7 @@ void FTVHelp::decContentsDepth()
  *  \param def            definition corresponding to this entry
  */
 void FTVHelp::addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, const QString &anchor,
-                              bool addToNavIndex, QSharedPointer<Definition> def, DirType category)
+      bool addToNavIndex, QSharedPointer<Definition> def, DirType category)
 {
    QList<FTVNode *> *nl = &m_indentNodes[m_indent];
 
@@ -210,7 +210,6 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const QString &re
          }
       }
    }
-
 }
 
 static QString node2URL(FTVNode *n, bool overruleFile = false, bool srcLink = false)

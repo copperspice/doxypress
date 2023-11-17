@@ -1536,7 +1536,7 @@ void ClangParser::linkIdentifier(CodeGenerator &ol, QSharedPointer<FileDef> fd,
 
    CXCursor t = clang_getSpecializedCursorTemplate(c);
 
-   if (! clang_Cursor_isNull(t) && !clang_equalCursors(t, c)) {
+   if (! clang_Cursor_isNull(t) && ! clang_equalCursors(t, c)) {
       // link to template
       c = t;
    }
