@@ -548,6 +548,8 @@ static bool dupOfParent(const FTVNode *n)
 
 static void generateJSLink(QTextStream &t, FTVNode *n)
 {
+   static const bool hideScopeNames = Config::getBool("hide-scope-names");
+
    if (n->file.isEmpty()) {
       // no link
 
@@ -556,7 +558,13 @@ static void generateJSLink(QTextStream &t, FTVNode *n)
    } else {
       // link into other page
 
-      t << "\"" << convertToJSString(n->name) << "\", \"";
+      QString result = n->name;
+      if (hideScopeNames) {
+        result = stripScope(result);
+      }
+
+
+      t << "\"" << convertToJSString(result) << "\", \"";
       t << externalRef("", n->ref, true);
       t << node2URL(n);
       t << "\", ";
