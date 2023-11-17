@@ -90,10 +90,14 @@ static QString buildFileName(const QString &name)
 {
    static const QString manExtension = "." + Config::getString("man-extension");
 
+   static int marker = 1;
+
    QString fname;
 
    if (name.isEmpty()) {
-      fname = "noname";
+      fname = "unknown_name_" + QString::number(marker);
+      ++marker;
+
       return fname;
    }
 
