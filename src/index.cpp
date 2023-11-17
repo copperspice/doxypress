@@ -574,7 +574,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
 
    for (const auto &cd : classes) {
       if (cd->isLinkable()) {
-         numClasses++;
+         ++numClasses;
       }
    }
 

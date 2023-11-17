@@ -115,12 +115,12 @@ static void replaceCommentMarker(const QString &s, int len)
 
       if (c == '/' || c == '!' || c == '#') {
 
-         blanks++;
+         ++blanks;
          ++iter;
 
          if (iter != iter_end && *iter == '<') {
             // comment-after-item marker
-            blanks++;
+            ++blanks;
             ++iter;
          }
 
@@ -160,7 +160,7 @@ static inline int computeIndent(const QString &str)
    for (auto c : str) {
 
       if (c == ' ') {
-         col++;
+         ++col;
 
       } else if (c == '\t') {
          col += tabSize - (col % tabSize);
@@ -643,7 +643,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
          REJECT;
 
       } else {
-         s_javaBlock++;
+         ++s_javaBlock;
 
          QString text = QString::fromUtf8(yytext);
          copyToOutput(text, text.length());
@@ -655,7 +655,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
          REJECT;
 
       } else {
-         s_javaBlock--;
+         --s_javaBlock;
 
          if (s_javaBlock == 0) {
             copyToOutput(" @endcode ", 10);
@@ -699,7 +699,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
          int len = 0;
 
          while (len < text.length() && (text[len] == ' ' || text[len] == '\t')) {
-            len++;
+            ++len;
          }
 
          copyToOutput(text, len);
@@ -1287,7 +1287,7 @@ static bool recognizeFixedForm(const QString &contents)
    bool skipLine = false;
 
    for (int i = 0; true; i++) {
-      column++;
+      ++column;
 
       switch (contents[i].unicode()) {
          case '\n':

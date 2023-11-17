@@ -7393,7 +7393,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                               exact_md = cmd;
                               maybe_md = cmd;
 
-                              candidates++;
+                              ++candidates;
                               break;
 
                            } else {
@@ -7403,7 +7403,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
                            }
 
-                           candidates++;
+                           ++candidates;
                         }
                      }
                   }

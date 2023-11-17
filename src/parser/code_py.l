@@ -425,7 +425,7 @@ static void writeMultiLineCodeLink(CodeGenerator &ol, QSharedPointer<Definition>
    for (auto c : text) {
 
       if (c == '\n') {
-         s_yyLineNr++;
+         ++s_yyLineNr;
 
          ol.writeCodeLink(ref, file, anchor, tmp, tooltip);
          nextCodeLine();
@@ -452,7 +452,7 @@ static void codifyLines(const QString &text)
    for (auto c : text) {
 
       if (c == '\n') {
-         s_yyLineNr++;
+         ++s_yyLineNr;
 
          s_code->codify(tmp);
          endCodeLine();

@@ -964,7 +964,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
 
          if (cd->addExample(anchor, g_exampleName, g_exampleFile)) {
             ol.writeCodeAnchor(anchor);
-            g_anchorCount++;
+            ++g_anchorCount;
          }
       }
 
@@ -2452,7 +2452,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
 
       if (g_insideBody) {
-         g_bodyCurlyCount++;
+         ++g_bodyCurlyCount;
       }
 
       if (! g_curClassName.isEmpty()) {

@@ -398,7 +398,7 @@ void HtmlCodeGenerator::codify(const QString &str)
          isBackSlash = false;
 
          m_streamCode << "\\";
-         m_col++;
+         ++m_col;
       }
 
       switch (c.unicode()) {
@@ -2242,7 +2242,7 @@ static void renderQuickLinksAsTree(QTextStream &t_stream, const QString &relPath
 
    for (const auto &entry : root->children()) {
       if (entry->visible() && quickLinkVisible(entry->kind())) {
-         count++;
+         ++count;
       }
    }
 
@@ -2283,7 +2283,7 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
 
       for (const auto &entry : hlEntry->parent()->children()) {
          if (entry->visible() && quickLinkVisible(entry->kind())) {
-            count++;
+            ++count;
          }
       }
 

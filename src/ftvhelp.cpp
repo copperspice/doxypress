@@ -90,7 +90,7 @@ int FTVNode::numNodesAtLevel(int level, int maxLevel) const
 
    if (level < maxLevel) {
       // this node
-      num++;
+      ++num;
 
       for (auto n : children) {
          num += n->numNodesAtLevel(level + 1, maxLevel);

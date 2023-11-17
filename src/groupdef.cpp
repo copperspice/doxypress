@@ -853,7 +853,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
    if (groupList->count() > 0) {
       for (const auto &gd : *groupList) {
          if (gd->isVisible()) {
-            count++;
+            ++count;
          }
       }
    }
