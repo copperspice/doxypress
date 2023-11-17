@@ -369,6 +369,8 @@ class Definition : public DefinitionIntf
 
  protected:
    Definition(const Definition &d);
+   Definition &operator=(const Definition &d) = delete;
+
    virtual QString pathFragment_Internal() const;
 
  private:

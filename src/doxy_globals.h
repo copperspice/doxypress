@@ -190,7 +190,8 @@ class Doxy_Globals
       static QStringList               g_inputFiles;
       static QSet<QString>             g_compoundKeywordDict;
       static QSet<QString>             g_pathsVisited;
-      static QHash<QString, FileDef>   g_usingDeclarations;
+
+      static QHash<QString, QSharedPointer<FileDef>> g_usingDeclarations;
       static QMap<QString,  QString>                 g_moduleHint;
 
       // must use a raw pointer since this method is called from a constructor

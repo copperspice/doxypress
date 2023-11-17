@@ -113,11 +113,11 @@ QDateTime Doxy_Globals::dateTime;
 
 QMultiHash<QString, QSharedPointer<Entry>> Doxy_Globals::g_classEntries;
 
-QHash<QString, FileDef>   Doxy_Globals::g_usingDeclarations;        // used classes
 QStringList   Doxy_Globals::g_inputFiles;
 QSet<QString> Doxy_Globals::g_compoundKeywordDict;                             // keywords recognized as compounds
 QSet<QString> Doxy_Globals::g_pathsVisited;
 
+QHash<QString, QSharedPointer<FileDef>> Doxy_Globals::g_usingDeclarations;     // used classes
 QMap<QString, QString>                  Doxy_Globals::g_moduleHint;            // experimental
 
 QMultiHash<QString, Definition *> &Doxy_Globals::glossary()

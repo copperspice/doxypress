@@ -2063,22 +2063,21 @@ QSharedPointer<Definition> Doxy_Work::findScopeFromQualifiedName(QSharedPointer<
          // therefore loop through all used classes and see if there is a right scope match between the
          // used class and nestedNameSpecifier.
 
-         auto item = Doxy_Globals::g_usingDeclarations.begin();
+         const auto iter_begin = Doxy_Globals::g_usingDeclarations.cbegin();
+         const auto iter_end   = Doxy_Globals::g_usingDeclarations.cend();
 
-         for (auto usedFd : Doxy_Globals::g_usingDeclarations)  {
+         for (auto iter = iter_begin; iter != iter_end; ++iter) {
 
-            if (rightScopeMatch(item.key(), nestedNameSpecifier)) {
-               // item.key()is the fully qualified name of nestedNameSpecifier
+            if (rightScopeMatch(iter.key(), nestedNameSpecifier)) {
+               // iter.key() is the fully qualified name of nestedNameSpecifier
 
-               QString fqn = item.key() + scope.right(scope.length() - p);
+               QString fqn = iter.key() + scope.right(scope.length() - p);
                resultScope = buildScopeFromQualifiedName(fqn, fqn.count("::"), startScope->getLanguage(), TagInfo());
 
                if (resultScope) {
                   return resultScope;
                }
             }
-
-            ++item;
          }
 
          return QSharedPointer<Definition>();
@@ -3121,7 +3120,7 @@ void Doxy_Work::buildListOfUsingDecls(QSharedPointer<Entry> ptrEntry)
          QSharedPointer<FileDef> fd = ptrEntry->fileDef();
 
          if (fd) {
-            Doxy_Globals::g_usingDeclarations.insert(name, *fd);
+            Doxy_Globals::g_usingDeclarations.insert(name, fd);
          }
       }
    }
