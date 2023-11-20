@@ -102,16 +102,6 @@ class PerlModOutput
       m_stream = os;
    }
 
-   inline PerlModOutput &openSave() {
-      internal_openSave();
-      return *this;
-   }
-
-   inline PerlModOutput &closeSave(QString &str) {
-      str = internal_closeSave();
-      return *this;
-   }
-
    inline PerlModOutput &continueBlock() {
       if (m_blockstart) {
          m_blockstart = false;
@@ -209,9 +199,6 @@ class PerlModOutput
    }
 
  protected:
-   void internal_openSave();
-   QString internal_closeSave();
-
    void incIndent();
    void decIndent();
 
@@ -228,25 +215,8 @@ class PerlModOutput
    int m_indentation;
    bool m_blockstart;
 
-   QStack<PerlModOutputStream *> m_saved;
    char m_spaces[PERLOUTPUT_MAX_INDENTATION * 2 + 2];
 };
-
-void PerlModOutput::internal_openSave()
-{
-   m_saved.push(m_stream);
-   m_stream = new PerlModOutputStream();
-}
-
-QString PerlModOutput::internal_closeSave()
-{
-   QString retval = m_stream->m_s;
-
-   delete m_stream;
-   m_stream = m_saved.pop();
-
-   return retval;
-}
 
 void PerlModOutput::incIndent()
 {
@@ -462,8 +432,6 @@ class PerlModDocVisitor : public DocVisitor
    void singleItem(const QString &);
    void openSubBlock(const QString & = QString());
    void closeSubBlock();
-   void openOther();
-   void closeOther();
 
    PerlModOutput &m_output;
    bool m_textmode;
@@ -544,28 +512,6 @@ void PerlModDocVisitor::closeSubBlock()
 {
    leaveText();
    m_output.closeList();
-}
-
-void PerlModDocVisitor::openOther()
-{
-   // Using a secondary text stream will corrupt the perl file. Instead of
-   // printing doc => [ data => [] ], it will print doc => [] data => [].
-   /*
-   leaveText();
-   m_output.openSave();
-   */
-}
-
-void PerlModDocVisitor::closeOther()
-{
-   // Using a secondary text stream will corrupt the perl file. Instead of
-   // printing doc => [ data => [] ], it will print doc => [] data => [].
-   /*
-   QString other;
-   leaveText();
-   m_output.closeSave(other);
-   m_other += other;
-   */
 }
 
 void PerlModDocVisitor::visit(DocWord *w)
@@ -867,26 +813,9 @@ void PerlModDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines:
-
-#if 0
-      {
-         m_t << "<div class=\"fragment\"><pre>";
-         QFileInfo cfi( inc->file() );
-         FileDef fd( cfi.path(), cfi.fileName() );
-         parseCode(m_ci, inc->context(), inc->text().latin1(), inc->isExample(), inc->exampleFile(), &fd);
-         m_t << "</pre></div>";
-      }
-      break;
-#endif
-
       return;
 
       case DocInclude::Include:
-#if 0
-         m_output.add("<programlisting>");
-         parseCode(m_ci, inc->context(), inc->text(), false, 0);
-         m_output.add("</programlisting>");
-#endif
          return;
 
       case DocInclude::DontInclude:
@@ -1118,14 +1047,12 @@ void PerlModDocVisitor::visitPre(DocSimpleSect *s)
 
    leaveText();
    m_output.openHash();
-   openOther();
    openSubBlock(type);
 }
 
 void PerlModDocVisitor::visitPost(DocSimpleSect *)
 {
    closeSubBlock();
-   closeOther();
    m_output.closeHash();
 }
 
@@ -1565,15 +1492,12 @@ void PerlModDocVisitor::visitPre(DocParamSect *s)
 
    m_output.openHash();
 
-   openOther();
    openSubBlock(type);
 }
 
 void PerlModDocVisitor::visitPost(DocParamSect *)
 {
    closeSubBlock();
-   closeOther();
-
    m_output.closeHash();
 }
 
