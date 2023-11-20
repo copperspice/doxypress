@@ -91,48 +91,48 @@ class PerlModOutput
 
    bool m_pretty;
 
-   inline PerlModOutput(bool pretty)
-      : m_pretty(pretty), m_stream(0), m_indentation(false), m_blockstart(true) {
-      m_spaces[0] = 0;
-   }
+   PerlModOutput(bool pretty)
+      : m_pretty(pretty), m_stream(0), m_indentation(false), m_blockstart(true)
+   { }
 
    virtual ~PerlModOutput() { }
 
-   inline void setPerlModOutputStream(PerlModOutputStream *os) {
+   void setPerlModOutputStream(PerlModOutputStream *os) {
       m_stream = os;
    }
 
-   inline PerlModOutput &continueBlock() {
+   PerlModOutput &continueBlock() {
       if (m_blockstart) {
          m_blockstart = false;
       } else {
          m_stream->add(',');
       }
+
       indent();
       return *this;
    }
 
-   inline PerlModOutput &add(char c) {
+   PerlModOutput &add(char c) {
       m_stream->add(c);
       return *this;
    }
 
-   inline PerlModOutput &add(QChar c) {
+   PerlModOutput &add(QChar c) {
       m_stream->add(c);
       return *this;
    }
 
-   inline PerlModOutput &add(const QString &s) {
+   PerlModOutput &add(const QString &s) {
       m_stream->add(s);
       return *this;
    }
 
-   inline PerlModOutput &add(int n) {
+   PerlModOutput &add(int n) {
       m_stream->add(n);
       return *this;
    }
 
-   inline PerlModOutput &add(unsigned int n) {
+   PerlModOutput &add(unsigned int n) {
       m_stream->add(n);
       return *this;
    }
@@ -142,58 +142,60 @@ class PerlModOutput
       return *this;
    }
 
-   inline PerlModOutput &indent() {
+   PerlModOutput &indent() {
       if (m_pretty) {
          m_stream->add('\n');
          m_stream->add(m_spaces);
       }
+
       return *this;
    }
 
-   inline PerlModOutput &open(QChar c, const QString &s = QString()) {
+   PerlModOutput &open(QChar c, const QString &s = QString()) {
       iopen(c, s);
       return *this;
    }
 
-   inline PerlModOutput &close(char c = 0) {
+   PerlModOutput &close(char c = 0) {
       iclose(c);
       return *this;
    }
 
-   inline PerlModOutput &addField(const QString &s) {
+   PerlModOutput &addField(const QString &s) {
       iaddField(s);
       return *this;
    }
 
-   inline PerlModOutput &addFieldQuotedChar(const QString &field, QChar content) {
+   PerlModOutput &addFieldQuotedChar(const QString &field, QChar content) {
       iaddFieldQuotedChar(field, content);
       return *this;
    }
 
-   inline PerlModOutput &addFieldQuotedString(const QString &field, const QString &content) {
+   PerlModOutput &addFieldQuotedString(const QString &field, const QString &content) {
       iaddFieldQuotedString(field, content);
       return *this;
    }
 
-   inline PerlModOutput &addFieldBoolean(const QString &field, bool content) {
+   PerlModOutput &addFieldBoolean(const QString &field, bool content) {
       return addFieldQuotedString(field, content ? QString("yes") : QString("no"));
    }
 
-   inline PerlModOutput &openList(const QString &s = QString()) {
+   PerlModOutput &openList(const QString &s = QString()) {
       open('[', s);
       return *this;
    }
 
-   inline PerlModOutput &closeList() {
+   PerlModOutput &closeList() {
       close(']');
       return *this;
    }
 
-   inline PerlModOutput &openHash(const QString &s = QString() ) {
+   PerlModOutput &openHash(const QString &s = QString() ) {
       open('{', s);
       return *this;
    }
-   inline PerlModOutput &closeHash() {
+
+   PerlModOutput &closeHash() {
       close('}');
       return *this;
    }
