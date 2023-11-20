@@ -2451,6 +2451,13 @@ RCSTAG          "$"{ID}":"[^\n$]+"$"
       BEGIN(Comment);
    }
 
+<SectionTitle>[^\n@\\]*"\\\\internal_linebr"      {
+      // escaped end of section title
+      QString text = QString::fromUtf8(yytext);
+
+      s_sectionTitle += text;
+   }
+
 <SectionTitle>[^\n@\\]*/"\\internal_linebr"     {
       // end of section title
       QString text = QString::fromUtf8(yytext);
@@ -3490,6 +3497,7 @@ static bool handleMainpage(const QString &str, const QStringList &list)
       current->m_entryName = "mainpage";
    }
 
+   setOutput(OutputMainDoc);
    BEGIN( PageDocArg2 );
 
    return stop;
