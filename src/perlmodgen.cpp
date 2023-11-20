@@ -200,26 +200,25 @@ class PerlModOutput
    int m_indentation;
    bool m_blockstart;
 
-   char m_spaces[PERLOUTPUT_MAX_INDENTATION * 2 + 2];
+   QString m_spaces;
 };
 
 void PerlModOutput::incIndent()
 {
    if (m_indentation < PERLOUTPUT_MAX_INDENTATION) {
-      char *s = &m_spaces[m_indentation * 2];
-      *s++ = ' ';
-      *s++ = ' ';
-      *s = 0;
+      m_spaces += "  ";
+
    }
 
-   m_indentation++;
+   ++m_indentation;
 }
 
 void PerlModOutput::decIndent()
 {
-   m_indentation--;
+   --m_indentation;
+
    if (m_indentation < PERLOUTPUT_MAX_INDENTATION) {
-      m_spaces[m_indentation * 2] = 0;
+      m_spaces.chop(2);
    }
 }
 
