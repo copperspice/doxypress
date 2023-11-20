@@ -44,8 +44,6 @@ static QString pathDoxyExec;
 class PerlModOutputStream
 {
  public:
-
-   QString m_s;
    QTextStream *m_t;
 
    PerlModOutputStream(QTextStream *t = 0) : m_t(t) { }
@@ -57,32 +55,17 @@ class PerlModOutputStream
 
 void PerlModOutputStream::add(char c)
 {
-   if (m_t != 0) {
-      (*m_t) << c;
-
-   } else {
-      m_s += c;
-   }
+   *m_t << c;
 }
 
 void PerlModOutputStream::add(QChar c)
 {
-   if (m_t != 0) {
-      (*m_t) << c;
-
-   } else {
-      m_s += c;
-   }
+   *m_t << c;
 }
 
 void PerlModOutputStream::add(const QString &s)
 {
-   if (m_t != 0) {
-      (*m_t) << s;
-
-   } else {
-      m_s += s;
-   }
+   *m_t << s;
 }
 
 class PerlModOutput
