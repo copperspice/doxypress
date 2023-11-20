@@ -123,8 +123,16 @@ static void newEntry()
 static void newVariable()
 {
    if (! current->m_entryName.isEmpty() && current->m_entryName.at(0) == '_') {
-      // mark as private
-      current->protection = Private;
+
+      if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+         // mark as private
+         current->protection = Private;
+
+      } else {
+        // mark as protected
+        current->protection = Protected;
+
+      }
    }
 
    if (current_root->section & Entry::COMPOUND_MASK) {
@@ -143,8 +151,16 @@ static void newFunction()
       current->protection = Public;
 
    } else if (current->m_entryName.at(0) == '_') {
-      current->protection = Private;
 
+      if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+         // mark as private
+         current->protection = Private;
+
+      } else {
+        // mark as protected
+        current->protection = Protected;
+
+      }
    }
 }
 
@@ -830,8 +846,16 @@ STARTDOCSYMS      "##"
          current->setData(EntryKey::Member_Type, "");
 
          if (current->m_entryName.at(0) == '_') {
-            // mark as private
-            current->protection = Private;
+
+            if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+               // mark as private
+               current->protection = Private;
+
+            } else {
+              // mark as protected
+              current->protection = Protected;
+
+            }
          }
 
          newEntry();
@@ -852,9 +876,17 @@ STARTDOCSYMS      "##"
 
       current->setData(EntryKey::Member_Type, "");
 
-      if (current->m_entryName.at(0)=='_') {
-         // mark as private
-         current->protection = Private;
+      if (current->m_entryName.at(0) == '_') {
+
+         if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+            // mark as private
+            current->protection = Private;
+
+         } else {
+           // mark as protected
+           current->protection = Protected;
+
+         }
       }
 
       newEntry();
