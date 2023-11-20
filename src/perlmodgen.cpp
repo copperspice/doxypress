@@ -46,7 +46,9 @@ class PerlModOutputStream
  public:
    QTextStream *m_t;
 
-   PerlModOutputStream(QTextStream *t = 0) : m_t(t) { }
+   PerlModOutputStream(QTextStream *t = nullptr)
+      : m_t(t)
+   { }
 
    void add(char c);
    void add(QChar c);
@@ -797,7 +799,7 @@ void PerlModDocVisitor::visit(DocInclude *inc)
 
    switch (inc->type()) {
       case DocInclude::IncWithLines:
-      return;
+         return;
 
       case DocInclude::Include:
          return;
@@ -901,7 +903,6 @@ void PerlModDocVisitor::visit(DocCite *cite)
    m_output.addFieldQuotedString("text", cite->text());
    closeItem();
 }
-
 
 //--------------------------------------
 // visitor functions for compound nodes
@@ -2194,7 +2195,8 @@ void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> 
 {
 
    if (nd->isReference()) {
-      return;   // skip external references
+      // skip external references
+      return;
    }
 
    m_output.openHash().addFieldQuotedString("name", nd->name());
@@ -2238,8 +2240,11 @@ void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> 
    QSharedPointer<Definition> nullDef;
    QSharedPointer<MemberDef> nullMem;
 
-   addPerlModDocBlock(m_output, "brief",    nd->getDefFileName(), nd->getDefLine(), nullDef, nullMem, nd->briefDescription());
-   addPerlModDocBlock(m_output, "detailed", nd->getDefFileName(), nd->getDefLine(), nullDef, nullMem, nd->documentation());
+   addPerlModDocBlock(m_output, "brief",    nd->getDefFileName(), nd->getDefLine(),
+         nullDef, nullMem, nd->briefDescription());
+
+   addPerlModDocBlock(m_output, "detailed", nd->getDefFileName(), nd->getDefLine(),
+         nullDef, nullMem, nd->documentation());
 
    m_output.closeHash();
 }
@@ -2300,7 +2305,8 @@ void PerlModGenerator::generatePerlModForFile(QSharedPointer<FileDef> fd)
 void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
 {
    if (gd->isReference()) {
-      return;   // skip external references
+      // skip external references
+      return;
    }
 
    m_output.openHash().addFieldQuotedString("name", gd->name()).addFieldQuotedString("title", gd->groupTitle());
@@ -2316,7 +2322,8 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
    m_output.closeList();
 
    const ClassSDict &cl = gd->getClasses();
-   if (cl.count() > 0) {
+
+   if (! cl.isEmpty()) {
       m_output.openList("classes");
 
       for (const auto &cd : cl) {
@@ -2327,12 +2334,14 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
    }
 
    const NamespaceSDict &nl = gd->getNamespaces();
+
    if (! nl.isEmpty()) {
       m_output.openList("namespaces");
 
       for (const auto &nd : nl) {
          m_output.openHash().addFieldQuotedString("name", nd->name()).closeHash();
       }
+
       m_output.closeList();
    }
 
@@ -2343,6 +2352,7 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
       for (const auto &pd : *pl) {
          m_output.openHash().addFieldQuotedString("title", pd->title()).closeHash();
       }
+
       m_output.closeList();
    }
 
@@ -2390,7 +2400,8 @@ void PerlModGenerator::generatePerlModForPage(QSharedPointer<PageDef> pd)
    m_output.openHash().addFieldQuotedString("name", pd->name());
 
    QSharedPointer<SectionInfo> si = Doxy_Globals::sectionDict.find(pd->name());
-   if (si) {
+
+   if (si != nullptr) {
       m_output.addFieldQuotedString("title4", filterTitle(si->title));
    }
 
@@ -2426,6 +2437,7 @@ bool PerlModGenerator::generatePerlModOutput()
 
    m_output.closeList();
 
+   //
    m_output.openList("namespaces");
 
    for (const auto &nd : Doxy_Globals::namespaceSDict) {
@@ -2518,179 +2530,180 @@ bool PerlModGenerator::generateDoxyStructurePM()
    }
 
    QTextStream doxyModelPMStream(&doxyModelPM);
+
    doxyModelPMStream <<
-                     "sub memberlist($) {\n"
-                     "    my $prefix = $_[0];\n"
-                     "    return\n"
-                     "\t[ \"hash\", $prefix . \"s\",\n"
-                     "\t  {\n"
-                     "\t    members =>\n"
-                     "\t      [ \"list\", $prefix . \"List\",\n"
-                     "\t\t[ \"hash\", $prefix,\n"
-                     "\t\t  {\n"
-                     "\t\t    kind => [ \"string\", $prefix . \"Kind\" ],\n"
-                     "\t\t    name => [ \"string\", $prefix . \"Name\" ],\n"
-                     "\t\t    static => [ \"string\", $prefix . \"Static\" ],\n"
-                     "\t\t    virtualness => [ \"string\", $prefix . \"Virtualness\" ],\n"
-                     "\t\t    protection => [ \"string\", $prefix . \"Protection\" ],\n"
-                     "\t\t    type => [ \"string\", $prefix . \"Type\" ],\n"
-                     "\t\t    parameters =>\n"
-                     "\t\t      [ \"list\", $prefix . \"Params\",\n"
-                     "\t\t\t[ \"hash\", $prefix . \"Param\",\n"
-                     "\t\t\t  {\n"
-                     "\t\t\t    declaration_name => [ \"string\", $prefix . \"ParamName\" ],\n"
-                     "\t\t\t    type => [ \"string\", $prefix . \"ParamType\" ],\n"
-                     "\t\t\t  },\n"
-                     "\t\t\t],\n"
-                     "\t\t      ],\n"
-                     "\t\t    detailed =>\n"
-                     "\t\t      [ \"hash\", $prefix . \"Detailed\",\n"
-                     "\t\t\t{\n"
-                     "\t\t\t  doc => [ \"doc\", $prefix . \"DetailedDoc\" ],\n"
-                     "\t\t\t  return => [ \"doc\", $prefix . \"Return\" ],\n"
-                     "\t\t\t  see => [ \"doc\", $prefix . \"See\" ],\n"
-                     "\t\t\t  params =>\n"
-                     "\t\t\t    [ \"list\", $prefix . \"PDBlocks\",\n"
-                     "\t\t\t      [ \"hash\", $prefix . \"PDBlock\",\n"
-                     "\t\t\t\t{\n"
-                     "\t\t\t\t  parameters =>\n"
-                     "\t\t\t\t    [ \"list\", $prefix . \"PDParams\",\n"
-                     "\t\t\t\t      [ \"hash\", $prefix . \"PDParam\",\n"
-                     "\t\t\t\t\t{\n"
-                     "\t\t\t\t\t  name => [ \"string\", $prefix . \"PDParamName\" ],\n"
-                     "\t\t\t\t\t},\n"
-                     "\t\t\t\t      ],\n"
-                     "\t\t\t\t    ],\n"
-                     "\t\t\t\t  doc => [ \"doc\", $prefix . \"PDDoc\" ],\n"
-                     "\t\t\t\t},\n"
-                     "\t\t\t      ],\n"
-                     "\t\t\t    ],\n"
-                     "\t\t\t},\n"
-                     "\t\t      ],\n"
-                     "\t\t  },\n"
-                     "\t\t],\n"
-                     "\t      ],\n"
-                     "\t  },\n"
-                     "\t];\n"
-                     "}\n"
-                     "\n"
-                     "$doxystructure =\n"
-                     "    [ \"hash\", \"Root\",\n"
-                     "      {\n"
-                     "\tfiles =>\n"
-                     "\t  [ \"list\", \"Files\",\n"
-                     "\t    [ \"hash\", \"File\",\n"
-                     "\t      {\n"
-                     "\t\tname => [ \"string\", \"FileName\" ],\n"
-                     "\t\ttypedefs => memberlist(\"FileTypedef\"),\n"
-                     "\t\tvariables => memberlist(\"FileVariable\"),\n"
-                     "\t\tfunctions => memberlist(\"FileFunction\"),\n"
-                     "\t\tdetailed =>\n"
-                     "\t\t  [ \"hash\", \"FileDetailed\",\n"
-                     "\t\t    {\n"
-                     "\t\t      doc => [ \"doc\", \"FileDetailedDoc\" ],\n"
-                     "\t\t    },\n"
-                     "\t\t  ],\n"
-                     "\t      },\n"
-                     "\t    ],\n"
-                     "\t  ],\n"
-                     "\tpages =>\n"
-                     "\t  [ \"list\", \"Pages\",\n"
-                     "\t    [ \"hash\", \"Page\",\n"
-                     "\t      {\n"
-                     "\t\tname => [ \"string\", \"PageName\" ],\n"
-                     "\t\tdetailed =>\n"
-                     "\t\t  [ \"hash\", \"PageDetailed\",\n"
-                     "\t\t    {\n"
-                     "\t\t      doc => [ \"doc\", \"PageDetailedDoc\" ],\n"
-                     "\t\t    },\n"
-                     "\t\t  ],\n"
-                     "\t      },\n"
-                     "\t    ],\n"
-                     "\t  ],\n"
-                     "\tclasses =>\n"
-                     "\t  [ \"list\", \"Classes\",\n"
-                     "\t    [ \"hash\", \"Class\",\n"
-                     "\t      {\n"
-                     "\t\tname => [ \"string\", \"ClassName\" ],\n"
-                     "\t\tpublic_typedefs => memberlist(\"ClassPublicTypedef\"),\n"
-                     "\t\tpublic_methods => memberlist(\"ClassPublicMethod\"),\n"
-                     "\t\tpublic_members => memberlist(\"ClassPublicMember\"),\n"
-                     "\t\tprotected_typedefs => memberlist(\"ClassProtectedTypedef\"),\n"
-                     "\t\tprotected_methods => memberlist(\"ClassProtectedMethod\"),\n"
-                     "\t\tprotected_members => memberlist(\"ClassProtectedMember\"),\n"
-                     "\t\tprivate_typedefs => memberlist(\"ClassPrivateTypedef\"),\n"
-                     "\t\tprivate_methods => memberlist(\"ClassPrivateMethod\"),\n"
-                     "\t\tprivate_members => memberlist(\"ClassPrivateMember\"),\n"
-                     "\t\tdetailed =>\n"
-                     "\t\t  [ \"hash\", \"ClassDetailed\",\n"
-                     "\t\t    {\n"
-                     "\t\t      doc => [ \"doc\", \"ClassDetailedDoc\" ],\n"
-                     "\t\t    },\n"
-                     "\t\t  ],\n"
-                     "\t      },\n"
-                     "\t    ],\n"
-                     "\t  ],\n"
-                     "\tgroups =>\n"
-                     "\t  [ \"list\", \"Groups\",\n"
-                     "\t    [ \"hash\", \"Group\",\n"
-                     "\t      {\n"
-                     "\t\tname => [ \"string\", \"GroupName\" ],\n"
-                     "\t\ttitle => [ \"string\", \"GroupTitle\" ],\n"
-                     "\t\tfiles =>\n"
-                     "\t\t  [ \"list\", \"Files\",\n"
-                     "\t\t    [ \"hash\", \"File\",\n"
-                     "\t\t      {\n"
-                     "\t\t        name => [ \"string\", \"Filename\" ]\n"
-                     "\t\t      }\n"
-                     "\t\t    ],\n"
-                     "\t\t  ],\n"
-                     "\t\tclasses  =>\n"
-                     "\t\t  [ \"list\", \"Classes\",\n"
-                     "\t\t    [ \"hash\", \"Class\",\n"
-                     "\t\t      {\n"
-                     "\t\t        name => [ \"string\", \"Classname\" ]\n"
-                     "\t\t      }\n"
-                     "\t\t    ],\n"
-                     "\t\t  ],\n"
-                     "\t\tnamespaces =>\n"
-                     "\t\t  [ \"list\", \"Namespaces\",\n"
-                     "\t\t    [ \"hash\", \"Namespace\",\n"
-                     "\t\t      {\n"
-                     "\t\t        name => [ \"string\", \"NamespaceName\" ]\n"
-                     "\t\t      }\n"
-                     "\t\t    ],\n"
-                     "\t\t  ],\n"
-                     "\t\tpages =>\n"
-                     "\t\t  [ \"list\", \"Pages\",\n"
-                     "\t\t    [ \"hash\", \"Page\","
-                     "\t\t      {\n"
-                     "\t\t        title => [ \"string\", \"PageName\" ]\n"
-                     "\t\t      }\n"
-                     "\t\t    ],\n"
-                     "\t\t  ],\n"
-                     "\t\tgroups =>\n"
-                     "\t\t  [ \"list\", \"Groups\",\n"
-                     "\t\t    [ \"hash\", \"Group\",\n"
-                     "\t\t      {\n"
-                     "\t\t        title => [ \"string\", \"GroupName\" ]\n"
-                     "\t\t      }\n"
-                     "\t\t    ],\n"
-                     "\t\t  ],\n"
-                     "\t\tfunctions => memberlist(\"GroupFunction\"),\n"
-                     "\t\tdetailed =>\n"
-                     "\t\t  [ \"hash\", \"GroupDetailed\",\n"
-                     "\t\t    {\n"
-                     "\t\t      doc => [ \"doc\", \"GroupDetailedDoc\" ],\n"
-                     "\t\t    },\n"
-                     "\t\t  ],\n"
-                     "\t      }\n"
-                     "\t    ],\n"
-                     "\t  ],\n"
-                     "      },\n"
-                     "    ];\n"
-                     "\n"
-                     "1;\n";
+      "sub memberlist($) {\n"
+      "    my $prefix = $_[0];\n"
+      "    return\n"
+      "\t[ \"hash\", $prefix . \"s\",\n"
+      "\t  {\n"
+      "\t    members =>\n"
+      "\t      [ \"list\", $prefix . \"List\",\n"
+      "\t\t[ \"hash\", $prefix,\n"
+      "\t\t  {\n"
+      "\t\t    kind => [ \"string\", $prefix . \"Kind\" ],\n"
+      "\t\t    name => [ \"string\", $prefix . \"Name\" ],\n"
+      "\t\t    static => [ \"string\", $prefix . \"Static\" ],\n"
+      "\t\t    virtualness => [ \"string\", $prefix . \"Virtualness\" ],\n"
+      "\t\t    protection => [ \"string\", $prefix . \"Protection\" ],\n"
+      "\t\t    type => [ \"string\", $prefix . \"Type\" ],\n"
+      "\t\t    parameters =>\n"
+      "\t\t      [ \"list\", $prefix . \"Params\",\n"
+      "\t\t\t[ \"hash\", $prefix . \"Param\",\n"
+      "\t\t\t  {\n"
+      "\t\t\t    declaration_name => [ \"string\", $prefix . \"ParamName\" ],\n"
+      "\t\t\t    type => [ \"string\", $prefix . \"ParamType\" ],\n"
+      "\t\t\t  },\n"
+      "\t\t\t],\n"
+      "\t\t      ],\n"
+      "\t\t    detailed =>\n"
+      "\t\t      [ \"hash\", $prefix . \"Detailed\",\n"
+      "\t\t\t{\n"
+      "\t\t\t  doc => [ \"doc\", $prefix . \"DetailedDoc\" ],\n"
+      "\t\t\t  return => [ \"doc\", $prefix . \"Return\" ],\n"
+      "\t\t\t  see => [ \"doc\", $prefix . \"See\" ],\n"
+      "\t\t\t  params =>\n"
+      "\t\t\t    [ \"list\", $prefix . \"PDBlocks\",\n"
+      "\t\t\t      [ \"hash\", $prefix . \"PDBlock\",\n"
+      "\t\t\t\t{\n"
+      "\t\t\t\t  parameters =>\n"
+      "\t\t\t\t    [ \"list\", $prefix . \"PDParams\",\n"
+      "\t\t\t\t      [ \"hash\", $prefix . \"PDParam\",\n"
+      "\t\t\t\t\t{\n"
+      "\t\t\t\t\t  name => [ \"string\", $prefix . \"PDParamName\" ],\n"
+      "\t\t\t\t\t},\n"
+      "\t\t\t\t      ],\n"
+      "\t\t\t\t    ],\n"
+      "\t\t\t\t  doc => [ \"doc\", $prefix . \"PDDoc\" ],\n"
+      "\t\t\t\t},\n"
+      "\t\t\t      ],\n"
+      "\t\t\t    ],\n"
+      "\t\t\t},\n"
+      "\t\t      ],\n"
+      "\t\t  },\n"
+      "\t\t],\n"
+      "\t      ],\n"
+      "\t  },\n"
+      "\t];\n"
+      "}\n"
+      "\n"
+      "$doxystructure =\n"
+      "    [ \"hash\", \"Root\",\n"
+      "      {\n"
+      "\tfiles =>\n"
+      "\t  [ \"list\", \"Files\",\n"
+      "\t    [ \"hash\", \"File\",\n"
+      "\t      {\n"
+      "\t\tname => [ \"string\", \"FileName\" ],\n"
+      "\t\ttypedefs => memberlist(\"FileTypedef\"),\n"
+      "\t\tvariables => memberlist(\"FileVariable\"),\n"
+      "\t\tfunctions => memberlist(\"FileFunction\"),\n"
+      "\t\tdetailed =>\n"
+      "\t\t  [ \"hash\", \"FileDetailed\",\n"
+      "\t\t    {\n"
+      "\t\t      doc => [ \"doc\", \"FileDetailedDoc\" ],\n"
+      "\t\t    },\n"
+      "\t\t  ],\n"
+      "\t      },\n"
+      "\t    ],\n"
+      "\t  ],\n"
+      "\tpages =>\n"
+      "\t  [ \"list\", \"Pages\",\n"
+      "\t    [ \"hash\", \"Page\",\n"
+      "\t      {\n"
+      "\t\tname => [ \"string\", \"PageName\" ],\n"
+      "\t\tdetailed =>\n"
+      "\t\t  [ \"hash\", \"PageDetailed\",\n"
+      "\t\t    {\n"
+      "\t\t      doc => [ \"doc\", \"PageDetailedDoc\" ],\n"
+      "\t\t    },\n"
+      "\t\t  ],\n"
+      "\t      },\n"
+      "\t    ],\n"
+      "\t  ],\n"
+      "\tclasses =>\n"
+      "\t  [ \"list\", \"Classes\",\n"
+      "\t    [ \"hash\", \"Class\",\n"
+      "\t      {\n"
+      "\t\tname => [ \"string\", \"ClassName\" ],\n"
+      "\t\tpublic_typedefs => memberlist(\"ClassPublicTypedef\"),\n"
+      "\t\tpublic_methods => memberlist(\"ClassPublicMethod\"),\n"
+      "\t\tpublic_members => memberlist(\"ClassPublicMember\"),\n"
+      "\t\tprotected_typedefs => memberlist(\"ClassProtectedTypedef\"),\n"
+      "\t\tprotected_methods => memberlist(\"ClassProtectedMethod\"),\n"
+      "\t\tprotected_members => memberlist(\"ClassProtectedMember\"),\n"
+      "\t\tprivate_typedefs => memberlist(\"ClassPrivateTypedef\"),\n"
+      "\t\tprivate_methods => memberlist(\"ClassPrivateMethod\"),\n"
+      "\t\tprivate_members => memberlist(\"ClassPrivateMember\"),\n"
+      "\t\tdetailed =>\n"
+      "\t\t  [ \"hash\", \"ClassDetailed\",\n"
+      "\t\t    {\n"
+      "\t\t      doc => [ \"doc\", \"ClassDetailedDoc\" ],\n"
+      "\t\t    },\n"
+      "\t\t  ],\n"
+      "\t      },\n"
+      "\t    ],\n"
+      "\t  ],\n"
+      "\tgroups =>\n"
+      "\t  [ \"list\", \"Groups\",\n"
+      "\t    [ \"hash\", \"Group\",\n"
+      "\t      {\n"
+      "\t\tname => [ \"string\", \"GroupName\" ],\n"
+      "\t\ttitle => [ \"string\", \"GroupTitle\" ],\n"
+      "\t\tfiles =>\n"
+      "\t\t  [ \"list\", \"Files\",\n"
+      "\t\t    [ \"hash\", \"File\",\n"
+      "\t\t      {\n"
+      "\t\t        name => [ \"string\", \"Filename\" ]\n"
+      "\t\t      }\n"
+      "\t\t    ],\n"
+      "\t\t  ],\n"
+      "\t\tclasses  =>\n"
+      "\t\t  [ \"list\", \"Classes\",\n"
+      "\t\t    [ \"hash\", \"Class\",\n"
+      "\t\t      {\n"
+      "\t\t        name => [ \"string\", \"Classname\" ]\n"
+      "\t\t      }\n"
+      "\t\t    ],\n"
+      "\t\t  ],\n"
+      "\t\tnamespaces =>\n"
+      "\t\t  [ \"list\", \"Namespaces\",\n"
+      "\t\t    [ \"hash\", \"Namespace\",\n"
+      "\t\t      {\n"
+      "\t\t        name => [ \"string\", \"NamespaceName\" ]\n"
+      "\t\t      }\n"
+      "\t\t    ],\n"
+      "\t\t  ],\n"
+      "\t\tpages =>\n"
+      "\t\t  [ \"list\", \"Pages\",\n"
+      "\t\t    [ \"hash\", \"Page\","
+      "\t\t      {\n"
+      "\t\t        title => [ \"string\", \"PageName\" ]\n"
+      "\t\t      }\n"
+      "\t\t    ],\n"
+      "\t\t  ],\n"
+      "\t\tgroups =>\n"
+      "\t\t  [ \"list\", \"Groups\",\n"
+      "\t\t    [ \"hash\", \"Group\",\n"
+      "\t\t      {\n"
+      "\t\t        title => [ \"string\", \"GroupName\" ]\n"
+      "\t\t      }\n"
+      "\t\t    ],\n"
+      "\t\t  ],\n"
+      "\t\tfunctions => memberlist(\"GroupFunction\"),\n"
+      "\t\tdetailed =>\n"
+      "\t\t  [ \"hash\", \"GroupDetailed\",\n"
+      "\t\t    {\n"
+      "\t\t      doc => [ \"doc\", \"GroupDetailedDoc\" ],\n"
+      "\t\t    },\n"
+      "\t\t  ],\n"
+      "\t      }\n"
+      "\t    ],\n"
+      "\t  ],\n"
+      "      },\n"
+      "    ];\n"
+      "\n"
+      "1;\n";
 
    return true;
 }
