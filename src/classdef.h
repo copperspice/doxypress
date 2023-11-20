@@ -375,7 +375,7 @@ class ClassDef : public Definition
 
  protected:
    void addUsedInterfaceClasses(QSharedPointer<MemberDef> md, const QString &typeStr);
-   bool hasNonReferenceSuperClass() const;
+   bool hasNonReferenceSuperClass(int level = 0) const;
    void showUsedFiles(OutputList &ol);
 
  private:

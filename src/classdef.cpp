@@ -2385,7 +2385,7 @@ void ClassDef::setTemplateArgumentList(const ArgumentList &al)
 /*! Returns true if this class or a class inheriting from this class
  *  is not defined in an external tag file.
  */
-bool ClassDef::hasNonReferenceSuperClass() const
+bool ClassDef::hasNonReferenceSuperClass(int level) const
 {
    bool found = (! isReference() && isLinkableInProject() && ! isHidden());
 
@@ -2394,7 +2394,7 @@ bool ClassDef::hasNonReferenceSuperClass() const
       return true;
    }
 
-   if (m_inheritedBy) {
+   if (m_inheritedBy != nullptr) {
 
       for (auto bcli : *m_inheritedBy) {
          if (found) {
@@ -2404,22 +2404,25 @@ bool ClassDef::hasNonReferenceSuperClass() const
          // for each super class
          QSharedPointer<ClassDef> bcd = bcli->classDef;
 
+         if (level > 256)   {
+            err("Possible recursive class relation while inside %s and looking for base class %s\n",
+                  csPrintable(name()), csPrintable(bcd->name()));
+            return false;
+         }
+
          // recurse into the super class branch
-         found = found || bcd->hasNonReferenceSuperClass();
+         found = found || bcd->hasNonReferenceSuperClass(level + 1);
 
          if (! found) {
             // look for template instances that might have non-reference super classes
-            const QHash<QString, QSharedPointer<ClassDef>> &cil = bcd->getTemplateInstances();
-
-            for (auto tidi : cil) {
+            for (const auto &item : bcd->getTemplateInstances()) {
                // for each template instance, recurse into the template instance branch
 
-               found = tidi->hasNonReferenceSuperClass();
+               found = item->hasNonReferenceSuperClass(level + 1);
 
                if (found) {
                   break;
                }
-
             }
 
          }
