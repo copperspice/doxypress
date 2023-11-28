@@ -2311,15 +2311,17 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
 
    m_output.openHash().addFieldQuotedString("name", gd->name()).addFieldQuotedString("title", gd->groupTitle());
 
-   FileList fl = gd->getFiles();
+   const FileList &fl = gd->getFiles();
 
-   m_output.openList("files");
+   if (! fl.isEmpty()) {
+      m_output.openList("files");
 
       for (const auto &fd : fl) {
-      m_output.openHash().addFieldQuotedString("name", fd->name()).closeHash();
-   }
+         m_output.openHash().addFieldQuotedString("name", fd->name()).closeHash();
+      }
 
-   m_output.closeList();
+      m_output.closeList();
+   }
 
    const ClassSDict &cl = gd->getClasses();
 
