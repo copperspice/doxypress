@@ -2363,7 +2363,8 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
    }
 
    PageSDict *pl = gd->getPages();
-   if (pl) {
+
+   if (pl != nullptr && ! pl->isEmpty()) {
       m_output.openList("pages");
 
       for (const auto &pd : *pl) {
@@ -2375,7 +2376,7 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
 
    SortedList<QSharedPointer<GroupDef>> *gl = gd->getSubGroups();
 
-   if (gl) {
+   if (gl != nullptr && ! gl->isEmpty()) {
       m_output.openList("groups");
 
       for (const auto &sgd : *gl) {
@@ -2727,15 +2728,17 @@ bool PerlModGenerator::generateDoxyStructurePM()
 
 bool PerlModGenerator::generateDoxyRules()
 {
+   static const bool perlmodLatex = Config::getBool("perl-latex");
+   static const QString prefix    = Config::getString("perl-prefix");
+
    QFile doxyRules;
+
    if (! createOutputFile(doxyRules, pathDoxyRules)) {
       return false;
    }
 
-   bool perlmodLatex = Config::getBool("perl-latex");
-   QString prefix = Config::getString("perl-prefix");
-
    QTextStream doxyRulesStream(&doxyRules);
+
    doxyRulesStream <<
                    prefix << "DOXY_EXEC_PATH = " << pathDoxyExec << "\n" <<
                    prefix << "DOXYFILE = " << pathDoxyfile << "\n" <<
@@ -3254,6 +3257,8 @@ void PerlModGenerator::generate()
 
 void generatePerl_output()
 {
-   PerlModGenerator pmg(Config::getBool("perl-pretty"));
+   static const bool perlPretty = Config::getBool("perl-pretty");
+
+   PerlModGenerator pmg(perlPretty);
    pmg.generate();
 }
