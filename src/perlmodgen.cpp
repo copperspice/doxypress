@@ -1760,6 +1760,7 @@ class PerlModGenerator
                   const QString &name, const QString &header = QString());
 
    void addListOfAllMembers(QSharedPointer<ClassDef> cd);
+   void addIncludeInfo(const IncludeInfo &includeInfo);
    void generatePerlModForClass(QSharedPointer<ClassDef> cd);
    void generatePerlModForNamespace(QSharedPointer<NamespaceDef> nd);
    void generatePerlModForFile(QSharedPointer<FileDef> fd);
@@ -2054,9 +2055,23 @@ void PerlModGenerator::addListOfAllMembers(QSharedPointer<ClassDef> cd)
    m_output.closeList();
 }
 
+void PerlModGenerator::addIncludeInfo(const IncludeInfo &includeInfo)
+{
+   QString nm = includeInfo.includeName;
+
+   if (nm.isEmpty() && includeInfo.fileDef) {
+      nm = includeInfo.fileDef->docName();
+   }
+
+   if (! nm.isEmpty()) {
+      m_output.openHash("includes");
+      m_output.addFieldBoolean("local", includeInfo.local).addFieldQuotedString("name", nm).closeHash();
+   }
+
+}
+
 void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
 {
-
    if (cd->isReference()) {
       return;   // skip external references
    }
