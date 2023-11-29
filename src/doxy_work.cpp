@@ -2785,7 +2785,7 @@ void Doxy_Work::findTagLessClasses(QSharedPointer<ClassDef> cd)
       }
    }
 
-   processTagLessClasses(cd, cd, cd, "", 0); // process tag less inner struct/classes (if any)
+   processTagLessClasses(cd, cd, cd, QString(), 0); // process tag less inner struct/classes (if any)
 }
 
 void Doxy_Work::findTagLessClasses()
@@ -2845,7 +2845,7 @@ void Doxy_Work::buildNamespaceList(QSharedPointer<Entry> ptrEntry)
             if (ptrEntry->m_tagInfo.isEmpty())  {
               // if we found the namespace in a tag file and also in a project file, then remove the tag file reference
 
-               nd->setReference("");
+               nd->setReference(QString());
                nd->setFileName(fullName);
              }
 
@@ -4308,8 +4308,8 @@ void Doxy_Work::addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> 
    }
 
    QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(fileName, root->startLine, root->startColumn,
-         root->getData(EntryKey::Member_Type), rname, "", "", root->protection, root->virt, root->m_static,
-         Relationship::Member, type, ArgumentList(), root->argList);
+         root->getData(EntryKey::Member_Type), rname, QString(), QString(), root->protection, root->virt,
+         root->m_static, Relationship::Member, type, ArgumentList(), root->argList);
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
@@ -6274,14 +6274,16 @@ void Doxy_Work::addListReferences()
       }
 
       const QVector<ListItemInfo> &xrefItems = pd->getRefItems();
-      addRefItem(xrefItems, name, theTranslator->trPage(true, true), name, pd->title(), "", QSharedPointer<Definition>());
+      addRefItem(xrefItems, name, theTranslator->trPage(true, true), name, pd->title(),
+            QString(), QSharedPointer<Definition>());
    }
 
    for (auto &dd : Doxy_Globals::directories) {
       QString name = dd->getOutputFileBase();
       const QVector<ListItemInfo> &xrefItems = dd->getRefItems();
 
-      addRefItem(xrefItems, name, theTranslator->trDir(true, true), name, dd->displayName(), "", QSharedPointer<Definition>());
+      addRefItem(xrefItems, name, theTranslator->trDir(true, true), name, dd->displayName(),
+            QString(), QSharedPointer<Definition>());
    }
 }
 
@@ -7066,7 +7068,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
 
       if (funcName.startsWith("operator ")) {
          // strip class scope from cast operator
-         funcName = substitute(funcName, className + "::", "");
+         funcName = substitute(funcName, className + "::", QString());
       }
 
       if (! funcTemplateArgs.isEmpty()) {
@@ -7223,8 +7225,8 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         QString memType = md->typeString();
 
                         memType  = stripPrefix(memType, "static ");
-                        funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", "");
-                        memType  = substitute(stripTemplateSpecifiersFromScope(memType, true), className + "::","");
+                        funcType = substitute(stripTemplateSpecifiersFromScope(funcType, true), className + "::", QString());
+                        memType  = substitute(stripTemplateSpecifiersFromScope(memType, true), className + "::", QString());
 
                         Debug::print(Debug::FindMembers, 0, "\nDebug: findMember() [6] comparing return types %s with %s"
                                      "#args %d with %d\n", csPrintable(md->typeString()), csPrintable(funcType),
@@ -7261,13 +7263,13 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                         // remove myClass<T>, or myClass, etc
                         if (memType.startsWith(className)) {
                            memType = stripTemplateSpecifiersFromScope(memType, true);
-                           memType = substitute(memType, className + "::", "");
+                           memType = substitute(memType, className + "::", QString());
                         }
 
                         // remove myClass<T>, or myClass, etc
                         if (funcType.startsWith(className)) {
                            funcType = stripTemplateSpecifiersFromScope(funcType, true);
-                           funcType = substitute(funcType, className + "::", "");
+                           funcType = substitute(funcType, className + "::", QString());
                         }
 
                         if (memType != funcType && memType != "auto" && funcType != "auto") {
@@ -8008,7 +8010,7 @@ void Doxy_Work::filterMemberDocumentation(QSharedPointer<Entry> ptrEntry)
    if (root->relatesType == Duplicate && ! root->getData(EntryKey::Related_Class).isEmpty()) {
       QString tmp = root->getData(EntryKey::Related_Class);
 
-      root->setData(EntryKey::Related_Class, "");
+      root->setData(EntryKey::Related_Class, QString());
       filterMemberDocumentation(ptrEntry);
       root->setData(EntryKey::Related_Class, tmp);
    }
@@ -8214,9 +8216,9 @@ void Doxy_Work::findEnums(QSharedPointer<Entry> ptrEntry)
          // new enum type
 
          md = QMakeShared<MemberDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
-                  "", name, "", "", root->protection, Specifier::Normal, false,
-                  isMemberOf ? Relationship::Foreign : isRelated ? Relationship::Related : Relationship::Member,
-                  MemberDefType::Enumeration, ArgumentList(), ArgumentList());
+               QString(), name, QString(), QString(), root->protection, Specifier::Normal, false,
+               isMemberOf ? Relationship::Foreign : isRelated ? Relationship::Related : Relationship::Member,
+               MemberDefType::Enumeration, ArgumentList(), ArgumentList());
 
          md->setTagInfo(ptrEntry->m_tagInfo);
          md->setLanguage(root->m_srcLang);
@@ -9393,7 +9395,7 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
 
          // define read from a tag file
          QSharedPointer<MemberDef> md = QMakeShared<MemberDef>(ptrEntry->m_tagInfo.tag_Name,
-                  1, 1, "#define", root->m_entryName, root->getData(EntryKey::Member_Args), "",
+                  1, 1, "#define", root->m_entryName, root->getData(EntryKey::Member_Args), QString(),
                   Protection::Public, Specifier::Normal, false, Relationship::Member, MemberDefType::Define,
                   ArgumentList(), ArgumentList());
 
@@ -9592,7 +9594,7 @@ void Doxy_Work::buildPageList(QSharedPointer<Entry> ptrEntry)
       }
 
       QString name = "index";
-      addRefItem(root->m_specialLists, name, "page", name, title, "", QSharedPointer<Definition>());
+      addRefItem(root->m_specialLists, name, "page", name, title, QString(), QSharedPointer<Definition>());
    }
 
    // recursive call

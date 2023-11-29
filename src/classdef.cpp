@@ -38,7 +38,7 @@
 
 ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const QString &fullName, CompoundType ct,
                    const QString &tag, const QString &tagFileName, bool isSymbol, bool isJavaEnum)
-   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(fullName), "", "", isSymbol)
+   : Definition(defFileName, defLine, defColumn, removeRedundantWhiteSpace(fullName), QString(), QString(), isSymbol)
 {
    setReference(tag);
 
@@ -826,7 +826,7 @@ void ClassDef::writeDetailedDescription(OutputList &ol, const QString &, bool ex
 
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
-      ol.writeAnchor("", anchor.isEmpty() ? QString("details") : anchor);
+      ol.writeAnchor(QString(), anchor.isEmpty() ? QString("details") : anchor);
       ol.popGeneratorState();
 
       if (! anchor.isEmpty()) {
@@ -1340,7 +1340,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
 
       if (lde->kind() == LayoutDocEntry::ClassNestedClasses && m_innerClasses.count() > 0 && m_innerClasses.declVisible()) {
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         ol.writeSummaryLink("", "nested-classes", ls->title(lang), first);
+         ol.writeSummaryLink(QString(), "nested-classes", ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::ClassAllMembersLink && m_allMemberNameInfoSDict.count() > 0 && ! optimizeC) {
@@ -1352,7 +1352,7 @@ void ClassDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink(QString(), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }
@@ -1721,7 +1721,7 @@ void ClassDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &
       if (! brief.isEmpty() && briefMemberDesc) {
 
          DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                                                brief, false, false, "", true, false);
+               brief, false, false, QString(), true, false);
 
          if (rootNode && ! rootNode->isEmpty()) {
             ol.startMemberDescription(anchor());

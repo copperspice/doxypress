@@ -259,7 +259,7 @@ void FileDef::writeDetailedDescription(OutputList &ol, const QString &title)
       ol.popGeneratorState();
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
-      ol.writeAnchor("", "details");
+      ol.writeAnchor(QString(), "details");
       ol.popGeneratorState();
       ol.startGroupHeader();
       ol.parseText(title);
@@ -625,7 +625,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml != nullptr && ml->declVisible()) {
-            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink(QString(), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }

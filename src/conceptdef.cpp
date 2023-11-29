@@ -152,7 +152,8 @@ void ConceptDef::writeDocumentation(OutputList &ol)
    QString manPageName = escapeCharsInString(name(), true, true);
 
    QString pageTitle = title();
-   startFile(ol, getOutputFileBase(), "", pageTitle, HLI_ConceptVisible, ! generateTreeView);
+
+   startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ConceptVisible, ! generateTreeView);
 
    if (! generateTreeView) {
       if (getOuterScope() != Doxy_Globals::globalScope) {
@@ -199,7 +200,7 @@ void ConceptDef::writeBriefDescription(OutputList &ol)
       ol.popGeneratorState();
 
       ol.generateDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                  briefDescription(), true, false, "", true, false);
+                  briefDescription(), true, false, QString(), true, false);
 
       ol.pushGeneratorState();
 

@@ -449,7 +449,7 @@ void MemberList::writePlainDeclarations(OutputList &ol, QSharedPointer<ClassDef>
                   if (! md->briefDescription().isEmpty() && briefMemberDesc) {
 
                      DocRoot *rootNode = validatingParseDoc(md->briefFile(), md->briefLine(),
-                                            cd, md, md->briefDescription(), true, false, "", true, false);
+                           cd, md, md->briefDescription(), true, false, QString(), true, false);
 
                      if (rootNode && ! rootNode->isEmpty()) {
                         ol.startMemberDescription(md->anchor());

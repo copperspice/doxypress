@@ -302,7 +302,7 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
             setTarget = true;
          }
 
-         t << result << externalRef("", n->ref, false);
+         t << result << externalRef(QString(), n->ref, false);
 
       } else {
          // local link
@@ -310,7 +310,7 @@ void FTVHelp::generateLink(QTextStream &t, FTVNode *n)
       }
 
       t << "href=\"";
-      t << externalRef("", n->ref, true);
+      t << externalRef(QString(), n->ref, true);
       t << node2URL(n);
 
       if (setTarget) {
@@ -339,7 +339,7 @@ static void generateBriefDoc(QTextStream &t, QSharedPointer<Definition> def)
 
    if (! brief.isEmpty()) {
       DocNode *root = validatingParseDoc(def->briefFile(), def->briefLine(),
-                  def, QSharedPointer<MemberDef>(), brief, false, false, "", true, true);
+                  def, QSharedPointer<MemberDef>(), brief, false, false, QString(), true, true);
 
       QString relPath = relativePathToRoot(def->getOutputFileBase());
 
@@ -565,7 +565,7 @@ static void generateJSLink(QTextStream &t, FTVNode *n)
 
 
       t << "\"" << convertToJSString(result) << "\", \"";
-      t << externalRef("", n->ref, true);
+      t << externalRef(QString(), n->ref, true);
       t << node2URL(n);
       t << "\", ";
    }
@@ -791,10 +791,10 @@ static void generateJSNavTree(QList<FTVNode *> &nodeList)
       t << "\"index" << Doxy_Globals::htmlFileExtension << "\", ";
 
       // add one special entry for index page
-      navIndex.inSort(new NavIndexEntry("index" + Doxy_Globals::htmlFileExtension, ""));
+      navIndex.inSort(new NavIndexEntry("index" + Doxy_Globals::htmlFileExtension, QString()));
 
       // add one special entry for related pages, written as a child of index.html
-      navIndex.inSort(new NavIndexEntry("pages" + Doxy_Globals::htmlFileExtension, ""));
+      navIndex.inSort(new NavIndexEntry("pages" + Doxy_Globals::htmlFileExtension, QString()));
 
       // adjust for display output
       reSortNodes(nodeList);

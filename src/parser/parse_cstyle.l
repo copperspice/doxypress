@@ -2833,8 +2833,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
       previous->setData(EntryKey::Brief_Docs, current->getData(EntryKey::Brief_Docs));
       previous->setData(EntryKey::Main_Docs,  current->getData(EntryKey::Main_Docs));
 
-      current->setData(EntryKey::Brief_Docs,  "");
-      current->setData(EntryKey::Main_Docs,   "");
+      current->setData(EntryKey::Brief_Docs,  QString());
+      current->setData(EntryKey::Main_Docs,   QString());
 
       unput(';');
       BEGIN(UsingAlias);
@@ -5437,12 +5437,12 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
             current->m_static   = save_stat;  // static attribute holds for all variables
          }
 
-         current->m_entryName = "";
-         current->setData(EntryKey::Member_Args,      "");
-         current->setData(EntryKey::Brief_Docs,       "");
-         current->setData(EntryKey::Main_Docs,        "");
-         current->setData(EntryKey::Initial_Value,    "");
-         current->setData(EntryKey::Member_Bitfields, "");
+         current->m_entryName = QString();
+         current->setData(EntryKey::Member_Args,      QString());
+         current->setData(EntryKey::Brief_Docs,       QString());
+         current->setData(EntryKey::Main_Docs,        QString());
+         current->setData(EntryKey::Initial_Value,    QString());
+         current->setData(EntryKey::Member_Bitfields, QString());
 
          int i = oldType.length();
 

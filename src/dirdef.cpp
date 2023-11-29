@@ -131,7 +131,7 @@ void DirDef::writeDetailedDescription(OutputList &ol, const QString &title)
       ol.popGeneratorState();
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
-      ol.writeAnchor("", "details");
+      ol.writeAnchor(QString(), "details");
       ol.popGeneratorState();
       ol.startGroupHeader();
       ol.parseText(title);

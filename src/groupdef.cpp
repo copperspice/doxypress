@@ -691,7 +691,7 @@ void GroupDef::writeDetailedDescription(OutputList &ol, const QString &title)
 
          ol.pushGeneratorState();
          ol.disableAllBut(OutputGenerator::Html);
-         ol.writeAnchor("", "details");
+         ol.writeAnchor(QString(), "details");
          ol.popGeneratorState();
 
       } else {
@@ -742,7 +742,7 @@ void GroupDef::writeBriefDescription(OutputList &ol)
 
    if (hasBriefDescription()) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                                             briefDescription(), true, false, "", true, false);
+            briefDescription(), true, false, QString(), true, false);
 
       if (rootNode && !rootNode->isEmpty()) {
          ol.startParagraph();
@@ -825,7 +825,7 @@ void GroupDef::writeFiles(OutputList &ol, const QString &title)
          if (! item->briefDescription().isEmpty() && briefMemberDesc) {
             ol.startMemberDescription(item->getOutputFileBase());
             ol.generateDoc(briefFile(), briefLine(), item, QSharedPointer<MemberDef>(),
-                           item->briefDescription(), false, false, "", true, false);
+                  item->briefDescription(), false, false, QString(), true, false);
 
             ol.endMemberDescription();
          }
@@ -885,7 +885,7 @@ void GroupDef::writeNestedGroups(OutputList &ol, const QString &title)
             if (! gd->briefDescription().isEmpty() && briefMemberDesc) {
                ol.startMemberDescription(gd->getOutputFileBase());
                ol.generateDoc(briefFile(), briefLine(), gd, QSharedPointer<MemberDef>(), gd->briefDescription(),
-                              false, false, "", true, false);
+                     false, false, QString(), true, false);
 
                ol.endMemberDescription();
             }
@@ -962,7 +962,7 @@ void GroupDef::writePageDocumentation(OutputList &ol)
 
          ol.startTextBlock();
          ol.generateDoc(pd->docFile(), pd->docLine(), pd, QSharedPointer<MemberDef>(),
-                  pd->documentation() + pd->inbodyDocumentation(), true, false, "", true, false);
+                  pd->documentation() + pd->inbodyDocumentation(), true, false, QString(), true, false);
 
          ol.endTextBlock();
       }
@@ -1060,7 +1060,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
             label = "dirs";
          }
 
-         ol.writeSummaryLink("", label, ls->title(lang), first);
+         ol.writeSummaryLink(QString(), label, ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -1069,7 +1069,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
          if (ml && ml->declVisible()) {
-            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+            ol.writeSummaryLink(QString(), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
       }

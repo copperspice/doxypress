@@ -348,7 +348,7 @@ void NamespaceDef::writeDetailedDescription(OutputList &ol, const QString &title
       ol.popGeneratorState();
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
-      ol.writeAnchor("", "details");
+      ol.writeAnchor(QString(), "details");
       ol.popGeneratorState();
       ol.startGroupHeader();
       ol.parseText(title);
@@ -385,7 +385,7 @@ void NamespaceDef::writeBriefDescription(OutputList &ol)
 
    if (hasBriefDescription()) {
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
-                                             briefDescription(), true, false, "", true, false);
+            briefDescription(), true, false, QString(), true, false);
 
       if (rootNode && ! rootNode->isEmpty()) {
          ol.startParagraph();
@@ -851,7 +851,7 @@ void NamespaceDef::addListReferences()
       prefix = theTranslator->trNamespace(true, true);
    }
 
-   addRefItem(xrefItems, qualifiedName(), prefix, getOutputFileBase(), displayName(), "", self);
+   addRefItem(xrefItems, qualifiedName(), prefix, getOutputFileBase(), displayName(), QString(), self);
 
    for (auto mg : m_memberGroupSDict) {
       mg->addListReferences(self);

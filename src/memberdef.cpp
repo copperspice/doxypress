@@ -1893,7 +1893,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    if (! briefDescription().isEmpty() && briefMemberDesc) {
 
       DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : d,
-                  self, briefDescription(), true, false, "", true, false);
+            self, briefDescription(), true, false, QString(), true, false);
 
       if (rootNode && ! rootNode->isEmpty()) {
          ol.startMemberDescription(anchor(), inheritId);
@@ -3285,7 +3285,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
       ol.startParagraph();
 
       ol.generateDoc(briefFile(), briefLine(), scopedContainer, self,
-                  brief, false, false, "", true, false);
+            brief, false, false, QString(), true, false);
 
       ol.endParagraph();
    }
@@ -3543,14 +3543,13 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
    /* write brief description */
    if (! brief.isEmpty()) {
       ol.generateDoc(briefFile(), briefLine(), getOuterScope() ? getOuterScope() : container, self,
-                     brief, false, false, "", true, false);
+                     brief, false, false, QString(), true, false);
    }
 
    /* write detailed description */
    if (! detailed.isEmpty()) {
       ol.generateDoc(docFile(), docLine(), getOuterScope() ? getOuterScope() : container, self,
-                     detailed + "\n", false, false, "", false, false);
-
+            detailed + "\n", false, false, QString(), false, false);
    }
 
    ol.endInlineMemberDoc();
