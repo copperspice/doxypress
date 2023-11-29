@@ -1382,6 +1382,7 @@ void FileDef::addListReferences()
    }
 }
 
+#if 0
 static int findMatchingPart(const QString &path, const QString dir)
 {
    int si1;
@@ -1407,7 +1408,9 @@ static int findMatchingPart(const QString &path, const QString dir)
 
    return 0;
 }
+#endif
 
+#if 0
 static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> root, const QString &name)
 {
    for (auto de : root->children()) {
@@ -1480,6 +1483,7 @@ static QSharedPointer<DirEntryTree> findDirNode(QSharedPointer<DirEntryTree> roo
       return newBranch;
    }
 }
+#endif
 
 #if 0
 static void mergeFileDef(QSharedPointer<DirEntryTree> root, QSharedPointer<FileDef> fd)
@@ -1497,6 +1501,7 @@ static void mergeFileDef(QSharedPointer<DirEntryTree> root, QSharedPointer<FileD
 }
 #endif
 
+#if 0
 static void addDirsAsGroups(QSharedPointer<DirEntryTree> root, QSharedPointer<GroupDef> parent, int level)
 {
    QSharedPointer<GroupDef> gd;
@@ -1520,6 +1525,7 @@ static void addDirsAsGroups(QSharedPointer<DirEntryTree> root, QSharedPointer<Gr
       }
    }
 }
+#endif
 
 #if 0
    void generateFileTree()
