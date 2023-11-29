@@ -3961,7 +3961,7 @@ QSharedPointer<ClassDef> ClassDef::templateMaster() const
    return m_templateMaster;
 }
 
-const IncludeInfo &ClassDef::includeInfo() const
+const IncludeInfo &ClassDef::getIncludeInfo() const
 {
    return m_incInfo;
 }

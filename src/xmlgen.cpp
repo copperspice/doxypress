@@ -1630,7 +1630,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
       }
    }
 
-   const IncludeInfo &item = cd->includeInfo();
+   const IncludeInfo &item = cd->getIncludeInfo();
 
    QString nm = item.includeName;
 

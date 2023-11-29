@@ -41,6 +41,10 @@ class ConceptDef : public Definition
          return ! isReference();
       }
 
+      const IncludeInfo &getIncludeInfo() const {
+         return m_incInfo;
+      }
+
       bool isLinkable() const override {
          return isLinkableInProject() || isReference();
       }

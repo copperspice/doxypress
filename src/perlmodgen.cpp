@@ -2126,7 +2126,7 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
       m_output.closeList();
    }
 
-   const IncludeInfo &item = cd->includeInfo();
+   const IncludeInfo &item = cd->getIncludeInfo();
 
    QString nm = item.includeName;
 

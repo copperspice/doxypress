@@ -188,7 +188,7 @@ class ClassDef : public Definition
    // Returns true if this class is a template
    bool isTemplate() const;
 
-   const IncludeInfo &includeInfo() const;
+   const IncludeInfo &getIncludeInfo() const;
 
    const QHash<QString, UsesClassDef> &usedImplementationClasses() const;
    const QHash<QString, UsesClassDef> &usedByImplementationClasses() const;

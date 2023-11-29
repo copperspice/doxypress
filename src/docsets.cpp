@@ -537,7 +537,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
          }
 
-         const IncludeInfo &item = cd->includeInfo();
+         const IncludeInfo &item = cd->getIncludeInfo();
          decl = item.includeName;
 
       } else if (nd) {
