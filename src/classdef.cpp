@@ -2646,7 +2646,7 @@ void ClassDef::mergeMembers()
          for (auto srcMni : srcMnd) {
             QSharedPointer<MemberNameInfo> dstMni;
 
-            if (dstMni = dstMnd.find(srcMni->memberName())) {
+            if ((dstMni = dstMnd.find(srcMni->memberName()))) {
                // a member with that name is already in the class
                // the member may hide or reimplement the one in the sub class
                // or there may be another path to the base class that is already
