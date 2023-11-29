@@ -75,7 +75,7 @@ class MemberDef : public Definition
    QString excpString() const;
    QString bitfieldString() const;
    QString extraTypeChars() const;
-   QString initializer() const;
+   QString getInitializer() const;
 
    int initializerLines() const;
    Entry::Traits getMemberTraits() const;

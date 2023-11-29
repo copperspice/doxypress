@@ -2692,7 +2692,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
          imd->setInbodyDocumentation(md->inbodyDocumentation(), md->inbodyFile(), md->inbodyLine());
          imd->setMemberTraits(md->getMemberTraits());
          imd->setMemberGroupId(md->getMemberGroupId());
-         imd->setInitializer(md->initializer());
+         imd->setInitializer(md->getInitializer());
          imd->setMaxInitLines(md->initializerLines());
          imd->setBitfields(md->bitfieldString());
          imd->setLanguage(md->getLanguage());
@@ -3266,7 +3266,8 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
                         newMd->addSectionsToDefinition(ptrEntry->m_anchors);
                         newMd->setBodySegment(md->getStartBodyLine(), md->getEndBodyLine());
                         newMd->setBodyDef(md->getBodyDef());
-                        newMd->setInitializer(md->initializer());
+                        newMd->setInitializer(md->getInitializer());
+
                         newMd->setMaxInitLines(md->initializerLines());
                         newMd->setMemberGroupId(ptrEntry->mGrpId);
                         newMd->setMemberTraits(md->getMemberTraits());
@@ -6368,7 +6369,7 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
       }
    }
 
-   if (md->initializer().isEmpty() && ! root->getData(EntryKey::Initial_Value).isEmpty()) {
+   if (md->getInitializer().isEmpty() && ! root->getData(EntryKey::Initial_Value).isEmpty()) {
       md->setInitializer(root->getData(EntryKey::Initial_Value));
    }
 
@@ -7795,7 +7796,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                      root->m_static && ! isMemberOf, tRelation, memberType, tmpArgList1, tmpArgList2);
 
                if (isDefine && mdDefine) {
-                  md->setInitializer(mdDefine->initializer());
+                  md->setInitializer(mdDefine->getInitializer());
                }
 
                // MemberDef::writeDocumentation() writes the template argument list for the class

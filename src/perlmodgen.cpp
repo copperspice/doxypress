@@ -1941,8 +1941,8 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
       m_output.addFieldQuotedString("arguments", md->argsString());
    }
 
-   if (!md->initializer().isEmpty()) {
-      m_output.addFieldQuotedString("initializer", md->initializer());
+   if (! md->getInitializer().isEmpty()) {
+      m_output.addFieldQuotedString("initializer", md->getInitializer());
    }
 
    if (! md->excpString().isEmpty() ) {
@@ -1958,8 +1958,8 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
          for (const auto &emd : *enumFields) {
             m_output.openHash().addFieldQuotedString("name", emd->name());
 
-            if (! emd->initializer().isEmpty()) {
-               m_output.addFieldQuotedString("initializer", emd->initializer());
+            if (! emd->getInitializer().isEmpty()) {
+               m_output.addFieldQuotedString("initializer", emd->getInitializer());
             }
 
             addPerlModDocBlock(m_output, "brief",    emd->getDefFileName(), emd->getDefLine(), emd->getOuterScope(), emd, emd->briefDescription());

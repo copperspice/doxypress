@@ -189,7 +189,7 @@ void MemberList::countDecMembers()
 
             case MemberDefType::Define:
                if (extractAll || ! md->argsString().isEmpty() ||
-                      ! md->initializer().isEmpty() || md->hasDocumentation()) {
+                      ! md->getInitializer().isEmpty() || md->hasDocumentation()) {
                   // m_defCnt++;
                   ++m_numDecMembers;
                }

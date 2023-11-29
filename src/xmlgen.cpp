@@ -1134,7 +1134,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    if (md->hasOneLineInitializer() || md->hasMultiLineInitializer()) {
       t << "        <initializer>";
-      linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, md->initializer());
+      linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, md->getInitializer());
       t << "</initializer>" << endl;
    }
 
@@ -1182,9 +1182,9 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
             writeXMLString(t, emd->name());
 
             t << "</name>" << endl;
-            if (! emd->initializer().isEmpty()) {
+            if (! emd->getInitializer().isEmpty()) {
                t << "          <initializer>";
-               writeXMLString(t, emd->initializer());
+               writeXMLString(t, emd->getInitializer());
                t << "</initializer>" << endl;
             }
 

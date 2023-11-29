@@ -45,6 +45,10 @@ class ConceptDef : public Definition
          return m_incInfo;
       }
 
+      const QString &getInitializer() const {
+         return m_initializer;
+      }
+
       bool isLinkable() const override {
          return isLinkableInProject() || isReference();
       }
@@ -90,6 +94,7 @@ class ConceptDef : public Definition
 
       QString m_fileName;
       QString m_title;
+      QString m_initializer;
 
       // Template arguments for this concept
       ArgumentList m_templateArgs;

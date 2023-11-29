@@ -4352,7 +4352,7 @@ void MemberDef::writeEnumDeclaration(OutputList &typeDecl, QSharedPointer<ClassD
                   // typeDecl.writeString(" = ");
 
                   typeDecl.writeString(" ");
-                  typeDecl.parseText(fmd->initializer());
+                  typeDecl.parseText(fmd->getInitializer());
                }
             }
 
@@ -4574,7 +4574,7 @@ QString MemberDef::bitfieldString() const
    return m_impl->bitfields;
 }
 
-QString MemberDef::initializer() const
+QString MemberDef::getInitializer() const
 {
    return m_impl->initializer;
 }
