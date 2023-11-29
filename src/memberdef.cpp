@@ -1464,13 +1464,13 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
    assert (cd != 0 || nd != 0 || fd != 0 || gd != 0); // member should belong to something
 
-   if (cd) {
+   if (cd != nullptr) {
       d = cd;
 
-   } else if (nd) {
+   } else if (nd != nullptr) {
       d = nd;
 
-   } else if (fd) {
+   } else if (fd != nullptr) {
       d = fd;
 
    } else {
@@ -1481,13 +1481,13 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    if (d == gd)  {
       QSharedPointer<Definition> tmp;
 
-      if (tmp = getClassDef()) {
+      if ((tmp = getClassDef()) != nullptr) {
          d = tmp;
 
-      } else if (tmp = getNamespaceDef()) {
+      } else if ((tmp = getNamespaceDef()) != nullptr) {
          d = tmp;
 
-      } else if (tmp = getFileDef())   {
+      } else if ((tmp = getFileDef()) != nullptr)  {
          d = tmp;
 
       }
@@ -1758,7 +1758,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       }
 
-      linkifyText(TextFragment(ol), d, getBodyDef(), self, param5, m_impl->annMemb,
+      linkifyText(TextFragment(ol), d, getBodyDef(), self, param5, m_impl->annMemb != nullptr,
                   true, false, s_indentLevel); // different
    }
 

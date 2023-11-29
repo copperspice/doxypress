@@ -1763,7 +1763,7 @@ class LayoutParser : public QXmlDefaultHandler
       QString temp = m_scope + name;
       QSharedPointer<StartElement> handler = m_sHandler[temp];
 
-      if (handler) {
+      if (handler != nullptr) {
          (*handler)(attrib);
 
       } else {

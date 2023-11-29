@@ -624,7 +624,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
          LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
          QSharedPointer<MemberList> ml = getMemberList(lmd->type);
 
-         if (ml && ml->declVisible()) {
+         if (ml != nullptr && ml->declVisible()) {
             ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
             first = false;
          }
@@ -1165,7 +1165,7 @@ void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
       return;
    }
 
-   if (! nd->name().isEmpty() && m_namespaceSDict.find(nd->name()) == 0) {
+   if (! nd->name().isEmpty() && m_namespaceSDict.find(nd->name()) == nullptr) {
       m_namespaceSDict.insert(nd->name(), nd);
    }
 }

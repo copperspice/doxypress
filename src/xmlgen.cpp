@@ -1037,7 +1037,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    }
 
    QSharedPointer<MemberDef> rmd = md->reimplements();
-   if (rmd) {
+   if (rmd != nullptr) {
       t << "        <reimplements refid=\""
         << memberOutputFileBase(rmd) << "_1" << rmd->anchor() << "\">"
         << convertToXML(rmd->name()) << "</reimplements>" << endl;
@@ -1045,7 +1045,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    QSharedPointer<MemberList> rbml = md->reimplementedBy();
 
-   if (rbml) {
+   if (rbml != nullptr) {
       for (const auto &itemRmd : *rbml) {
          t << "        <reimplementedby refid=\""
            << memberOutputFileBase(itemRmd) << "_1" << itemRmd->anchor() << "\">"

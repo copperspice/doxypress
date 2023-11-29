@@ -591,7 +591,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
             if (hideNavtreeMembers) {
                // do not add members to the navtree
 
-            } else if (ml) {
+            } else if (ml != nullptr) {
                for (const auto &md : *ml) {
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
 
@@ -870,7 +870,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
                ol.endIndexItem(reference, outputBase);
                ol.endIndexListItem();
 
-               if (ftv) {
+               if (ftv != nullptr) {
                   ftv->addContentsItem(false, fd->displayName(), reference, outputBase, QString(), false, fd, category);
                }
 
@@ -881,7 +881,7 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
                ol.endIndexItem(reference, fd->getSourceFileBase());
                ol.endIndexListItem();
 
-               if (ftv) {
+               if (ftv != nullptr) {
                   ftv->addContentsItem(false, fd->displayName(), reference, fd->getSourceFileBase(), QString(),
                         false, fd, category);
                }
@@ -927,7 +927,7 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
    static const bool fullPathNames = Config::getBool("full-path-names");
    static QString mainPageName     = Config::getFullName(Config::getString("main-page-name"));
 
-   if (ftv) {
+   if (ftv != nullptr) {
       ol.pushGeneratorState();
       ol.disable(OutputGenerator::Html);
    }
@@ -942,7 +942,7 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
       }
    }
 
-   if (ftv) {
+   if (ftv != nullptr) {
 
       for (const auto &fn : Doxy_Globals::inputNameList) {
 
@@ -953,7 +953,7 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
                continue;
             }
 
-            if (! fullPathNames || fd->getDirDef() == 0) {
+            if (! fullPathNames || fd->getDirDef() == nullptr) {
                // top level file
                bool doc = docFileVisibleInIndex(fd);
                bool src = srcFileVisibleInIndex(fd);

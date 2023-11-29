@@ -208,7 +208,7 @@ static void startCodeLine()
       }
    }
 
-   s_code->startCodeLine(s_sourceFileDef);
+   s_code->startCodeLine(s_sourceFileDef != nullptr);
 
    if (! s_currentFontClass.isEmpty()) {
       s_code->startFontClass(s_currentFontClass);

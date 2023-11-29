@@ -1969,7 +1969,7 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
 
          cd = getResolvedClass(scope, fileScope, matchWord, &typeDef);
 
-         if (typeDef) {
+         if (typeDef != nullptr) {
             // first look at typedef then class
 
             if (external ? typeDef->isLinkable() : typeDef->isLinkableInProject()) {
@@ -3645,7 +3645,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
                for (const auto &mmd : *mn) {
                   QSharedPointer<ClassDef> mcd = mmd->getClassDef();
 
-                  if (mcd) {
+                  if (mcd != nullptr) {
                      int delta = minClassDistance(fcd, mcd);
 
                      if (delta < mdist && mmd->isLinkable()) {
@@ -3685,7 +3685,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             // scoped enum
             QSharedPointer<MemberList> tml = tmd->enumFieldList();
 
-            if (tml) {
+            if (tml != nullptr) {
                for (const auto &emd : *tml) {
                   if (emd->localName() == mName) {
                      if (emd->isLinkable()) {

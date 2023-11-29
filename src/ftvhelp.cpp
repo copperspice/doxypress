@@ -194,7 +194,7 @@ void FTVHelp::addContentsItem(bool isDir, const QString &name, const QString &re
    if (m_indent > 0) {
       QList<FTVNode *> &pnl = m_indentNodes[m_indent - 1];
 
-      if (def) {
+      if (def != nullptr) {
          // page, class, method, etc
          newNode->parent = pnl.last();
 

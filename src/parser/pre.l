@@ -291,7 +291,7 @@ void DefineManager::DefinesPerFile::collectDefines(DefineDict &dict, QSet<QStrin
       for (const auto &incFile : m_includedFiles) {
          QSharedPointer<DefinesPerFile> dpf = DefineManager::instance().find(incFile);
 
-         if (dpf && ! includeStack.contains(incFile)) {
+         if (dpf != nullptr && ! includeStack.contains(incFile)) {
             includeStack.insert(incFile);
             dpf->collectDefines(dict, includeStack);
          }

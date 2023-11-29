@@ -1295,7 +1295,7 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
    }
 
    if (partA) {
-      if (member && member->isLinkable()) {
+      if (member != nullptr && member->isLinkable()) {
 
          if (member->isObjCMethod()) {
             bool localLink = s_memberDef ? member->getClassDef() == s_memberDef->getClassDef() : false;

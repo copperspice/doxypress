@@ -1170,7 +1170,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
       // variable not in current context, maybe it is in a parent context
       vcd = getResolvedClass(g_currentDefinition, g_sourceFileDef, g_classScope);
 
-      if (vcd && vcd->isLinkable()) {
+      if (vcd != nullptr && vcd->isLinkable()) {
 
          QSharedPointer<MemberName> vmn = Doxy_Globals::memberNameSDict.find(varName);
 
@@ -1191,7 +1191,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
 
                         QSharedPointer<ClassDef> mcd = stripClassName(vmd->typeString(), vmd->getOuterScope());
 
-                        if (mcd && mcd->isLinkable()) {
+                        if (mcd != nullptr && mcd->isLinkable()) {
                            if (generateClassMemberLink(ol, mcd.staticCast<Definition>(), memName)) {
                               return;
                            }
@@ -1207,7 +1207,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
                if (vmd->getClassDef() == vcd) {
                   QSharedPointer<ClassDef> mcd = stripClassName(vmd->typeString(), vmd->getOuterScope() );
 
-                  if (mcd && mcd->isLinkable()) {
+                  if (mcd != nullptr && mcd->isLinkable()) {
                      if (generateClassMemberLink(ol, mcd.staticCast<Definition>(), memName)) {
                         return;
                      }
@@ -1570,7 +1570,8 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
                         SortedList<BaseClassDef *> *bcd = cd->baseClasses();
 
-                        if (bcd) { // get direct base class (there should be only one)
+                        if (bcd != nullptr) {
+                           // get direct base class (there should be only one)
 
                            for (const auto &bclass : *bcd) {
                               if (bclass->classDef->compoundType() != CompoundType::Protocol) {
@@ -2093,7 +2094,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
             if (! name.isEmpty() && g_sourceFileDef) {
                QSharedPointer<FileNameList> fn = Doxy_Globals::inputNameDict.find(name);
 
-               if (fn) {
+               if (fn != nullptr) {
                   // for each include name
                   for (const auto &item : *fn) {
 
