@@ -27,7 +27,8 @@
 
 class Definition;
 class MemberDef;
-class SearchDocEntry;
+
+struct SearchDocEntry;
 
 void initSearchIndexer();
 

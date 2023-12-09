@@ -2836,15 +2836,15 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
    if (def->definitionType() == TypeGroup) {
       QSharedPointer<Definition> tmp;
 
-      if (tmp = getClassDef()) {
+      if ((tmp = getClassDef()) != nullptr) {
          scopeName = tmp->displayName();
          scopedContainer = tmp;
 
-      } else if (tmp = getNamespaceDef()) {
+      } else if ((tmp = getNamespaceDef()) != nullptr) {
          scopeName = tmp->displayName();
          scopedContainer = tmp;
 
-      } else if (tmp = getFileDef()) {
+      } else if ((tmp = getFileDef()) != nullptr) {
          scopeName = tmp->displayName();
          scopedContainer = tmp;
 

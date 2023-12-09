@@ -4298,7 +4298,7 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
       // no reference name
       return false;
 
-   } else if (pd = Doxy_Globals::pageSDict.find(linkRef)) {
+   } else if ((pd = Doxy_Globals::pageSDict.find(linkRef)) != nullptr) {
       // link to a page
       QSharedPointer<GroupDef> itemGd = pd->getGroupDef();
 
@@ -4318,18 +4318,18 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
 
       return true;
 
-   } else if (si = Doxy_Globals::sectionDict.find(linkRef)) {
+   } else if ((si = Doxy_Globals::sectionDict.find(linkRef)) != nullptr) {
       *resContext = si->definition;
       resAnchor   = si->label;
       return true;
 
-   } else if (pd = Doxy_Globals::exampleSDict.find(linkRef)) {
+   } else if ((pd = Doxy_Globals::exampleSDict.find(linkRef)) != nullptr) {
       // link to an example
 
       *resContext = pd;
       return true;
 
-   } else if (gd = Doxy_Globals::groupSDict.find(linkRef)) {
+   } else if ((gd = Doxy_Globals::groupSDict.find(linkRef)) != nullptr) {
       // link to a group
 
       *resContext = gd;
@@ -4340,21 +4340,21 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
       *resContext = fd;
       return true;
 
-   } else if (cd = getClass(linkRef)) {
+   } else if ((cd = getClass(linkRef)) != nullptr)  {
       // class link
 
       *resContext = cd;
       resAnchor = cd->anchor();
       return true;
 
-   } else if ((cd = getClass(linkRefWithoutTemplates))) {
+   } else if ((cd = getClass(linkRefWithoutTemplates)) != nullptr) {
       // C#/Java generic class link
 
       *resContext = cd;
       resAnchor = cd->anchor();
       return true;
 
-   } else if (cd = getClass(linkRef + "-p")) {
+   } else if ((cd = getClass(linkRef + "-p")) != nullptr) {
       // Obj-C protocol link
 
       *resContext = cd;
@@ -4363,11 +4363,11 @@ bool resolveLink(const QString &scName, const QString &linkRef, bool xx, QShared
 
    }
 
-   else if ((nd = Doxy_Globals::namespaceSDict.find(linkRef))) {
+   else if ((nd = Doxy_Globals::namespaceSDict.find(linkRef)) != nullptr) {
       *resContext = nd;
       return true;
 
-   } else if ((dir = Doxy_Globals::directories.find(QFileInfo(linkRef).absoluteFilePath() + "/")) && dir->isLinkable()) {
+   } else if ((dir = Doxy_Globals::directories.find(QFileInfo(linkRef).absoluteFilePath() + "/")) != nullptr && dir->isLinkable()) {
       // TODO: make this location independent like filedefs
 
       *resContext = dir;

@@ -57,8 +57,7 @@ class XML_Parser : public ParserInterface
                   memberDef, showLineNumbers, searchCtx, collectXRefs);
     }
 
-   void resetCodeParserState()
-   {
+   void resetCodeParserState() override {
       resetXmlCodeParserState();
    }
 
