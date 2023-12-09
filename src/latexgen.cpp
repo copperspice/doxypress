@@ -990,7 +990,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
             m_textStream << "\\chapter";
          }
 
-         m_textStream << "{"; //Hierarchical Index}\n"
+         m_textStream << "{";
          break;
 
       case isCompoundIndex:
@@ -1083,7 +1083,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
                } else {
                   m_textStream << "\\chapter";
                }
-               m_textStream << "{"; // Namespace Documentation}\n":
+               m_textStream << "{";    // Namespace Documentation}\n":
                found = true;
             }
          }

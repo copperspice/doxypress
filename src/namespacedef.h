@@ -183,11 +183,11 @@ class NamespaceDef : public Definition
    StringMap<QSharedPointer<Definition>>  m_usingDeclMap;
    StringMap<QSharedPointer<Definition>>  m_innerCompounds;
 
+   ClassSDict        m_classSDict;
    NamespaceSDict    m_usingDirMap;
    NamespaceSDict    m_namespaceSDict;
    MemberSDict       m_allMembersDict;
    MemberGroupSDict  m_memberGroupSDict;
-   ClassSDict        m_classSDict;
 
    QList<QSharedPointer<MemberList>> m_memberLists;
 

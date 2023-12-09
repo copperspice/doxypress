@@ -2274,14 +2274,17 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <ClassName,ClassVar>[*&^%]+         {
       QString text = QString::fromUtf8(yytext);
+
       g_type = g_curClassName;
       g_name.resize(0);
       g_code->codify(text);
-      BEGIN( Body ); // variable of type struct *
+
+      BEGIN(Body); // variable of type struct *
    }
 
 <ClassName>"__declspec"{B}*"("{B}*{ID}{B}*")"   {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       g_code->codify(text);
       endFontClass();
@@ -2401,7 +2404,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       endFontClass();
 
       g_curClassBases.clear();
-      BEGIN( Bases );
+      BEGIN(Bases);
    }
 
 <ClassVar>("sealed"|"abstract")/{BN}*(":"|"{") {
@@ -2414,7 +2417,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       codifyLines(text);
       endFontClass();
 
-      BEGIN( CppCliTypeModifierFollowup );
+      BEGIN(CppCliTypeModifierFollowup);
    }
 
 <ClassVar>{ID}             {
@@ -2433,7 +2436,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       codifyLines(text);
       g_curClassBases.clear();
-      BEGIN( Bases );
+      BEGIN(Bases);
    }
 
 <PackageName>[ \t]*";"        |
@@ -2499,7 +2502,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_curClassName.resize(0);
       g_curClassBases.clear();
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <Bases>"virtual"|"public"|"protected"|"private"|"@public"|"@private"|"@protected" {
@@ -2525,7 +2528,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (! g_insideObjC) {
          g_sharpCount = 1;
-         BEGIN ( SkipSharp );
+         BEGIN (SkipSharp);
 
       } else {
          g_insideProtocolList = true;
@@ -2549,7 +2552,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
 
       if (--g_sharpCount <= 0) {
-         BEGIN ( Bases );
+         BEGIN (Bases);
       }
    }
 
@@ -2573,7 +2576,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_sharpCount = 1;
-      BEGIN ( SkipSharp );
+      BEGIN (SkipSharp);
    }
 
 <SkipSharp>"("   {
@@ -2585,8 +2588,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <SkipSharp>")"   {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
+
       if (--g_sharpCount <= 0) {
-         BEGIN ( Bases );
+         BEGIN (Bases);
       }
    }
 
@@ -2597,32 +2601,37 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>{SCOPEPREFIX}?"operator"{B}*"()"{B}*/"(" {
       QString text = QString::fromUtf8(yytext);
+
       addType();
       generateFunctionLink(*g_code, text);
       g_bracketCount = 0;
       g_args.resize(0);
       g_name += text;
+
       BEGIN( FuncCall );
    }
 
 <Body>{SCOPEPREFIX}?"operator"/"("      {
       QString text = QString::fromUtf8(yytext);
+
       addType();
       generateFunctionLink(*g_code, text);
       g_bracketCount = 0;
       g_args.resize(0);
       g_name += text;
-      BEGIN( FuncCall );
+
+      BEGIN(FuncCall);
    }
 
 <Body>{SCOPEPREFIX}?"operator"[^a-z_A-Z0-9\(\n]+/"(" {
       QString text = QString::fromUtf8(yytext);
+
       addType();
       generateFunctionLink(*g_code, text);
       g_bracketCount = 0;
       g_args.resize(0);
       g_name += text;
-      BEGIN( FuncCall );
+      BEGIN(FuncCall);
    }
 
 <Body,TemplDecl>("template"|"generic")/([^a-zA-Z0-9])       {

@@ -2802,8 +2802,8 @@ void MemberDef::writeGroupInclude(OutputList &ol, bool inGroup)
 
 /*! Writes the "detailed documentation" section of this member to all active output formats
  */
-void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, int memTotal, OutputList &ol, const QString &scName,
-                  QSharedPointer<Definition> def, bool inGroup, bool showEnumValues, bool showInline)
+void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, int memTotal, OutputList &ol,
+   const QString &scName, QSharedPointer<Definition> def, bool inGroup, bool showEnumValues, bool showInline)
 {
    QSharedPointer<MemberDef> self = sharedFrom(this);
 
@@ -3294,7 +3294,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
       // write detailed description and inbody docs
 
       ol.generateDoc(docFile(), docLine(), scopedContainer, self,
-                  detailed + "\n", true, false);
+            detailed + "\n", true, false);
 
       if (! inbodyDocumentation().isEmpty()) {
          ol.generateDoc(inbodyFile(), inbodyLine(), scopedContainer, self,

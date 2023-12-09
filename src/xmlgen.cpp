@@ -1715,7 +1715,8 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
    // - files containing (parts of) the namespace definition
 
    if (nd->isReference() || nd->isHidden()) {
-      return;   // skip external references
+      // skip external references
+      return;
    }
 
    ti << "  <compound refid=\"" << nd->getOutputFileBase()
@@ -1784,7 +1785,8 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    static const bool xmlProgramListing  = Config::getBool("xml-program-listing");
 
    if (fd->isReference()) {
-      return;   // skip external references
+      // skip external references
+      return;
    }
 
    ti << "  <compound refid=\"" << fd->getOutputFileBase()

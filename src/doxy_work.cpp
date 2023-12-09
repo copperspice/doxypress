@@ -200,10 +200,11 @@ namespace Doxy_Work{
    void addEnumValuesToEnums(QSharedPointer<Entry> ptrEntry);
 
    static void addIncludeFileClass(QSharedPointer<ClassDef> cd, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root);
-   static void addIncludeFileConcept(QSharedPointer<ConceptDef> conceptDef, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root);
+   static void addIncludeFileConcept(QSharedPointer<ConceptDef> conceptDef, QSharedPointer<FileDef> include_fd,
+         QSharedPointer<Entry> root);
 
    void addInterfaceOrServiceToServiceOrSingleton(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd,
-                  QString const &rname);
+         QString const &rname);
 
    void addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd, const QString &rname, bool isFriend);
 
@@ -211,7 +212,7 @@ namespace Doxy_Work{
    void addMembersToMemberGroup();
 
    void addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<MemberDef> md, const QString &funcDecl,
-                  ArgumentList &argList, bool overload);
+         ArgumentList &argList, bool overload);
 
    void addPageToContext(QSharedPointer<PageDef> pd, QSharedPointer<Entry> ptrEntry);
    void addListReferences();
@@ -224,16 +225,17 @@ namespace Doxy_Work{
    void addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr = -1);
 
    QSharedPointer<MemberDef> addVariableToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<ClassDef> cd,
-                  MemberDefType memberType, const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb,
-                  Protection prot, Relationship related);
+         MemberDefType memberType, const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb,
+         Protection prot, Relationship related);
 
    QSharedPointer<MemberDef> addVariableToFile(QSharedPointer<Entry> ptrEntry, MemberDefType memberType, const QString &scope,
-                  const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb);
+         const QString &name, bool fromAnnScope, QSharedPointer<MemberDef> fromAnnMemb);
 
    void buildClassList(QSharedPointer<Entry> ptrEntry);
    void buildClassDocList(QSharedPointer<Entry> ptrEntry);
 
    void buildConceptList(QSharedPointer<Entry> ptrEntry);
+   void buildConceptDocList(QSharedPointer<Entry> ptrEntry);
 
    void buildCompleteMemberLists();
    void buildFileList(QSharedPointer<Entry> ptrEntry);
@@ -246,7 +248,8 @@ namespace Doxy_Work{
    void buildNamespaceList(QSharedPointer<Entry> ptrEntry);
    void buildPageList(QSharedPointer<Entry> ptrEntry);
 
-   QSharedPointer<Definition> buildScopeFromQualifiedName(const QString name, int level, SrcLangExt lang, const TagInfo &tagInfo);
+   QSharedPointer<Definition> buildScopeFromQualifiedName(const QString name, int level, SrcLangExt lang,
+         const TagInfo &tagInfo);
 
    void buildTypedefList(QSharedPointer<Entry> ptrEntry);
    void buildVarList(QSharedPointer<Entry> ptrEntry);
@@ -273,7 +276,7 @@ namespace Doxy_Work{
    QString createOutputDirectory(const QString &baseDirName, const QString &formatDirOption, const QString &defaultDirName);
    void createTemplateInstanceMembersX();
    QSharedPointer<ClassDef> createTagLessInstance(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> templ,
-                   const QString &fieldName);
+         const QString &fieldName);
 
    void distributeMemberGroupDocumentation();
    void dumpPhrase(QTextStream &t, QSharedPointer<Definition> d);
@@ -283,16 +286,17 @@ namespace Doxy_Work{
 
    void filterMemberDocumentation(QSharedPointer<Entry> ptrEntry);
 
-   void findBaseClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
-                  QSharedPointer<ClassDef> instanceCd, FindBaseClassRelation_Mode mode, bool isArtificial,
-                  const ArgumentList &actualArgs = ArgumentList(), QHash<QString, int> templateNames = QHash<QString, int>());
+   void findBaseClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context,
+         QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef> instanceCd, FindBaseClassRelation_Mode mode,
+         bool isArtificial, const ArgumentList &actualArgs = ArgumentList(),
+         QHash<QString, int> templateNames = QHash<QString, int>());
 
    void findClassEntries(QSharedPointer<Entry> ptrEntry);
-   bool findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context, QSharedPointer<ClassDef> cd, BaseInfo *bi,
-                  QHash<QString, int> templateNames, FindBaseClassRelation_Mode mode, bool isArtificial);
+   bool findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context, QSharedPointer<ClassDef> cd,
+         BaseInfo *bi, QHash<QString, int> templateNames, FindBaseClassRelation_Mode mode, bool isArtificial);
 
    QSharedPointer<ClassDef> findClassWithinClassContext(QSharedPointer<Definition> context, QSharedPointer<ClassDef> cd,
-                  const QString &name);
+         const QString &name);
 
    void findDefineDocumentation(QSharedPointer<Entry> ptrEntry);
    void findDEV(const MemberNameSDict &mnsd);
@@ -307,7 +311,7 @@ namespace Doxy_Work{
    int findFunctionPtr(const QString &type, int lang, int *pLength = 0);
 
    bool findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &namespaceName, const QString &type, const QString &name,
-                  const QString &tempArg, const QString &decl);
+         const QString &tempArg, const QString &decl);
 
    void findGroupScope(QSharedPointer<Entry> ptrEntry);
    void findInheritedTemplateInstances();
@@ -320,7 +324,7 @@ namespace Doxy_Work{
    void findObjCMethodDefinitions(QSharedPointer<Entry> ptrEntry);
 
    QSharedPointer<Definition> findScopeFromQualifiedName(QSharedPointer<Definition> startScope, const QString &n,
-                  QSharedPointer<FileDef> fileScope, const TagInfo &tagInfo);
+         QSharedPointer<FileDef> fileScope, const TagInfo &tagInfo);
 
    void findSectionsInDocumentation();
 
@@ -328,14 +332,14 @@ namespace Doxy_Work{
    void findTagLessClasses(QSharedPointer<ClassDef> cd);
 
    bool findTemplateInstanceRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context,
-                  QSharedPointer<ClassDef> templateClass, const QString &templSpec, QHash<QString, int> templateNames,
-                  bool isArtificial);
+         QSharedPointer<ClassDef> templateClass, const QString &templSpec, QHash<QString, int> templateNames,
+         bool isArtificial);
 
    QSharedPointer<NamespaceDef> findUsedNamespace(const NamespaceSDict *unl, const QString &name);
 
-   void findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context, QSharedPointer<ClassDef> masterCd,
-                  QSharedPointer<ClassDef> instanceCd, bool isArtificial, const ArgumentList &actualArgs = ArgumentList(),
-                  QHash<QString, int> templateNames = QHash<QString, int>());
+   void findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<Definition> context,
+         QSharedPointer<ClassDef> masterCd, QSharedPointer<ClassDef> instanceCd, bool isArtificial,
+         const ArgumentList &actualArgs = ArgumentList(), QHash<QString, int> templateNames = QHash<QString, int>());
 
    void findUsedTemplateInstances();
 
@@ -373,13 +377,13 @@ namespace Doxy_Work{
    void organizeSubGroups(QSharedPointer<Entry> ptrEntry);
 
    void parseFile(ParserInterface *parser, QSharedPointer<Entry> ptrEntry,
-                  QSharedPointer<FileDef> fd, QString fileName, enum ParserMode mode, QStringList &filesInSameTu);
+         QSharedPointer<FileDef> fd, QString fileName, enum ParserMode mode, QStringList &filesInSameTu);
 
    void parseFiles(QSharedPointer<Entry> ptrEntry);
 
    void processFiles();
    void processTagLessClasses(QSharedPointer<ClassDef> rootCd, QSharedPointer<ClassDef> cd, QSharedPointer<ClassDef>tagParentCd,
-                  const QString &prefix, int count);
+         const QString &prefix, int count);
 
    void readFormulas(QString dir, bool compare);
 
@@ -631,7 +635,6 @@ void processFiles()
 
    Doxy_Globals::infoLog_Stat.begin("Building namespace list\n");
    buildNamespaceList(root);
-
    findUsingDirectives(root);
    Doxy_Globals::infoLog_Stat.end();
 
@@ -4547,8 +4550,6 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
 
    md->setTagInfo(ptrEntry->m_tagInfo);
    md->setMemberClass(cd);
-
-   md->setRequires(ptrEntry->getData(EntryKey::Requires_Clause));
    md->setDocumentation(ptrEntry->getData(EntryKey::Main_Docs), ptrEntry->getData(EntryKey::MainDocs_File), ptrEntry->docLine);
    md->setDocsForDefinition(! ptrEntry->proto);
    md->setBriefDescription(ptrEntry->getData(EntryKey::Brief_Docs), ptrEntry->getData(EntryKey::Brief_File), ptrEntry->briefLine);
@@ -4559,6 +4560,9 @@ void Doxy_Work::addMethodToClass(QSharedPointer<Entry> ptrEntry, QSharedPointer<
    md->setTypeConstraints(ptrEntry->typeConstr);
    md->setLanguage(ptrEntry->m_srcLang);
    md->setId(ptrEntry->getData(EntryKey::Clang_Id));
+
+   md->setRequires(ptrEntry->getData(EntryKey::Requires_Clause));
+
    md->setBodyDef(fd);
    md->setFileDef(fd);
    md->addSectionsToDefinition(ptrEntry->m_anchors);
@@ -5003,7 +5007,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                   // if this is a relatesalso command allow find Member to pick it up
                   // Otherwise we have finished with this entry
 
-                   ptrEntry->setSection(Entry::EMPTY_SEC);
+                  ptrEntry->setSection(Entry::EMPTY_SEC);
                }
 
             } else {
@@ -5843,7 +5847,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
             if (found) {
 
                Debug::print(Debug::Classes, 0, "    Documented base class `%s' templSpec=%s\n",
-                           csPrintable(biName), templSpec.isEmpty() ? "" : csPrintable(templSpec) );
+                     csPrintable(biName), templSpec.isEmpty() ? "" : csPrintable(templSpec) );
 
                // add base class to this class
 
@@ -7389,7 +7393,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                                       ccd, ptrEntry->fileDef(), ptrEntry->argList, true)) {
 
                               // exact argument list match
-
                               exact_cd = ccd;
                               maybe_cd = ccd;
 
@@ -7564,11 +7567,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
             // can be error prone
 
             bool unique = true;
-
-            auto iter = mn->begin();
+            auto iter   = mn->begin();
 
             QSharedPointer<MemberDef> md = *iter;
             QSharedPointer<ClassDef> firstCd = md->getClassDef();
+
 
             QString firstName = firstCd->name();
             ++iter;

@@ -63,11 +63,12 @@ static QSet<QString> s_aliasesProcessed;
 static QCache<QPair<const FileNameDict *, QString>, FindFileCacheElem> s_findFileDefCache;
 
 // forward declaration
-static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
-                  const QString &n, QSharedPointer<MemberDef> *pTypeDef, QString *pTemplSpec, QString *pResolvedType);
+static QSharedPointer<ClassDef> getResolvedClassRec(QSharedPointer<const Definition> scope,
+      QSharedPointer<const FileDef> fileScope, const QString &n, QSharedPointer<MemberDef> *pTypeDef,
+      QString *pTemplSpec, QString *pResolvedType);
 
 static int isAccessibleFromWithExpScope(QSharedPointer<const Definition> scope, QSharedPointer<const FileDef> fileScope,
-                  QSharedPointer<const Definition> item, const QString &explicitScopePart);
+      QSharedPointer<const Definition> item, const QString &explicitScopePart);
 
 #define HEXTONUM(x) (((x)>='0' && (x)<='9') ? ((x)-'0') :       \
                      ((x)>='a' && (x)<='f') ? ((x)-'a'+10) :    \

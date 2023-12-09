@@ -383,7 +383,6 @@ bool Config::verify()
 
    iterString.value().value = layoutFileName;
 
-
    // ** input
    iterList = m_cfgList.find("input-source");
    QStringList inputSource = iterList.value().value;

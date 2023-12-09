@@ -79,14 +79,14 @@ class Scope
 
 static const int fixedCommentAfter = 72;
 
-static QString      docBlock;                     // contents of all lines of a documentation bloc
+static QString      docBlock;                     // contents of all lines of a documentation block
 static QString      currentModule;                // name of the current enclosing module
 static QString      currentClass;                 // name of the current enclosing class
 
 static UseSDict     *useMembers = nullptr;        // info about used modules
 static UseEntry     *useEntry   = nullptr;        // current use statement info
 
-static QString      s_outputStr = QString();      // contents of fortran string
+static QString      s_outputStr = QString();      // contents of Fortran string
 
 static CodeGenerator *s_code;
 

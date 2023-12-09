@@ -33,13 +33,16 @@ class ConceptDef : public Definition
 
       ~ConceptDef();
 
+      QString anchor() const override {
+         return QString();
+      }
+
+      const ArgumentList &getTemplateArgumentList() const;
+
       DefType definitionType() const override {
          return TypeConcept;
       }
 
-      bool isLinkableInProject() const override {
-         return ! isReference();
-      }
 
       const IncludeInfo &getIncludeInfo() const {
          return m_incInfo;
@@ -49,18 +52,19 @@ class ConceptDef : public Definition
          return m_initializer;
       }
 
+      QString getOutputFileBase() const override;
+
       bool isLinkable() const override {
          return isLinkableInProject() || isReference();
       }
 
-      const ArgumentList &getTemplateArgumentList() const;
-      void setTemplateArgumentList(const ArgumentList &al);
-
-      QString getOutputFileBase() const override;
-
-      QString anchor() const override {
-         return QString();
+      bool isLinkableInProject() const override {
+         return ! isReference();
       }
+
+
+
+      void setTemplateArgumentList(const ArgumentList &al);
 
       QString title() const {
          return m_title;

@@ -130,9 +130,9 @@ class TagClassInfo
    QString clangId;
 
    TagAnchorInfoList     docAnchors;
-   QVector<BaseInfo>     bases;
-   QList<TagMemberInfo>  members;
-   QList<QString>        templateArguments;
+   QVector<BaseInfo> bases;
+   QList<TagMemberInfo> members;
+   QList<QString> templateArguments;
 
    QStringList classList;
    Kind kind;
@@ -194,8 +194,8 @@ class TagFileInfo
    { }
 
    QString name;
-   QString path;
    QString filename;
+   QString path;
 
    TagAnchorInfoList docAnchors;
 
@@ -215,8 +215,8 @@ class TagGroupInfo
    { }
 
    QString name;
-   QString title;
    QString filename;
+   QString title;
 
    TagAnchorInfoList docAnchors;
 
@@ -235,8 +235,9 @@ class TagPageInfo
 {
  public:
    QString name;
-   QString title;
    QString filename;
+   QString title;
+
 
    TagAnchorInfoList docAnchors;
 };
@@ -757,8 +758,8 @@ class TagFileParser : public QXmlDefaultHandler
          QString protStr = attrib.value("protection");
          QString virtStr = attrib.value("virtualness");
 
-         Protection prot = Public;
-         Specifier  virt = Normal;
+         Protection prot = Protection::Public;
+         Specifier  virt = Specifier::Normal;
 
          if (protStr == "protected") {
             prot = Protected;
@@ -1452,8 +1453,8 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
 
       ce->setData(EntryKey::Clang_Id, tci.clangId);
 
-      ce->m_tagInfo      = ti;
       ce->m_srcLang      = tci.isObjC ? SrcLangExt_ObjC : SrcLangExt_Unknown;
+      ce->m_tagInfo      = ti;
 
       // transfer base class list
       ce->extends = tci.bases;

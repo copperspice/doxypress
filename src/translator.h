@@ -90,10 +90,10 @@ class Translator
    virtual QString trCompoundIndex() = 0;
    virtual QString trFileIndex() = 0;
 
-   virtual QString trModuleDocumentation() = 0;
    virtual QString trClassDocumentation() = 0;
-   virtual QString trFileDocumentation() = 0;
    virtual QString trExampleDocumentation() = 0;
+   virtual QString trFileDocumentation() = 0;
+   virtual QString trModuleDocumentation() = 0;
    virtual QString trPageDocumentation() = 0;
 
    virtual QString trReferenceManual() = 0;

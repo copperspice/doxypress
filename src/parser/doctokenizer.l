@@ -1046,7 +1046,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
    }
 
 <St_Para>{LNKWORD1}               |
-<St_Para>{LNKWORD1}{FUNCARG1}                      {
+<St_Para>{LNKWORD1}{FUNCARG1}        {
       g_token->name = QString::fromUtf8(yytext);
 
       if (g_token->name.startsWith("operator<")) {
@@ -1060,7 +1060,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_Para>{LNKWORD2}            |
 <St_Para>{LNKWORD3}            |
 <St_Para>{LNKWORD4}            |
-<St_Para>{LNKWORD5}                {
+<St_Para>{LNKWORD5}                  {
       g_token->name = QString::fromUtf8(yytext);
 
       return TK_LNKWORD;

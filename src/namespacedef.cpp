@@ -18,8 +18,8 @@
 
 #include <namespacedef.h>
 
-#include <config.h>
 #include <classdef.h>
+#include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
 #include <language.h>
@@ -535,6 +535,7 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
    if (! first) {
       ol.writeString("  </div>\n");
    }
+
    ol.popGeneratorState();
 }
 

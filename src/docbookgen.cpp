@@ -556,7 +556,8 @@ void DocbookGenerator::endIndexSection(IndexSections is)
 
          for (const auto &nd : Doxy_Globals::namespaceSDict) {
             if (nd->isLinkableInProject()) {
-               m_textStream << "<xi:include href=\"" << nd->getOutputFileBase() << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+               m_textStream << "<xi:include href=\"" << nd->getOutputFileBase()
+                            << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }
          }
       }
