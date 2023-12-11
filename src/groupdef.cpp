@@ -957,6 +957,12 @@ void GroupDef::writeClasses(OutputList &ol, const QString &title)
    m_classSDict.writeDeclaration(ol, nullptr, title, false);
 }
 
+void GroupDef::writeConcepts(OutputList &ol, const QString &title)
+{
+  // write list of concepts
+  m_conceptSDict.writeDeclaration(ol, title, false);
+}
+
 void GroupDef::writeInlineClasses(OutputList &ol)
 {
    m_classSDict.writeDocumentation(ol);
@@ -1340,6 +1346,21 @@ void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
          }
       }
    }
+}
+
+void addConceptToGroups(QSharedPointer<Entry> root, QSharedPointer<ConceptDef> conceptDef)
+{
+   for (const auto &g : root->m_groups) {
+      QSharedPointer<GroupDef> gd;
+
+      if (! g.groupname.isEmpty()) {
+         gd = Doxy_Globals::groupSDict.find(g.groupname);
+      }
+
+      if (gd != nullptr && gd->addConcept(conceptDef)) {
+         conceptDef->makePartOfGroup(gd);
+      }
+  }
 }
 
 void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd)

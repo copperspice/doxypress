@@ -180,6 +180,7 @@ class GroupDef : public Definition
    void writeNestedGroups(OutputList &ol, const QString &title);
    void writeDirs(OutputList &ol, const QString &title);
    void writeClasses(OutputList &ol, const QString &title);
+   void writeConcepts(OutputList &ol, const QString &title);
    void writeInlineClasses(OutputList &ol);
    void writePageDocumentation(OutputList &ol);
    void writeDetailedDescription(OutputList &ol, const QString &title);
@@ -221,6 +222,7 @@ class GroupDef : public Definition
 };
 
 void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd);
+void addConceptToGroups(QSharedPointer<Entry> root, QSharedPointer<ConceptDef> conceptDef);
 void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDef> nd);
 void addGroupToGroups(QSharedPointer<Entry> root, QSharedPointer<GroupDef> subGroup);
 void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md);

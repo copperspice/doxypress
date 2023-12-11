@@ -18,6 +18,7 @@
 
 #include <conceptdef.h>
 
+#include <docparser.h>
 #include <doxy_globals.h>
 #include <language.h>
 #include <outputlist.h>
@@ -378,4 +379,75 @@ const ArgumentList &ConceptDef::getTemplateArgumentList() const
 void ConceptDef::setTemplateArgumentList(const ArgumentList &al)
 {
    m_templateArgs = al;
+}
+
+void ConceptDef::writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames)
+{
+   static const bool briefMemberDesc = Config::getBool("brief-member-desc");
+
+   QSharedPointer<ConceptDef> self = sharedFrom(this);
+
+   if (isLinkable()) {
+      if (! found) {
+         // first concept
+         ol.startMemberHeader("concepts");
+
+         if (! header.isEmpty()) {
+            ol.parseText(header);
+
+         } else {
+            theTranslator->trConcepts();
+         }
+
+         ol.endMemberHeader();
+         ol.startMemberList();
+
+         found = true;
+      }
+
+      ol.startMemberDeclaration();
+      ol.startMemberItem(anchor(), 0);
+      ol.writeString("concept ");
+
+      QString cname = displayName(! localNames);
+      ol.insertMemberAlign();
+
+      if (isLinkable()) {
+         ol.writeObjectLink(getReference(), getOutputFileBase(), anchor(), cname);
+
+      } else {
+         ol.startBold();
+         ol.docify(cname);
+         ol.endBold();
+      }
+
+      ol.endMemberItem();
+
+      // add the brief description if available
+      if (! briefDescription().isEmpty() && briefMemberDesc) {
+
+         DocRoot *rootNode = validatingParseDoc(briefFile(), briefLine(), self, QSharedPointer<MemberDef>(),
+               briefDescription(), false, false, QString(), true, false);
+
+         if (! rootNode->isEmpty()) {
+            ol.startMemberDescription(anchor());
+            ol.writeDoc(rootNode, self, QSharedPointer<MemberDef>());
+            ol.endMemberDescription();
+         }
+      }
+
+      ol.endMemberDeclaration(anchor(), QString());
+   }
+}
+
+void ConceptSDict::writeDeclaration(OutputList &ol, const QString &header, bool localNames)
+{
+   bool found = false;
+
+   for (const auto &conceptDef : *this) {
+      conceptDef->writeDeclarationLink(ol, found, header, localNames);
+   }
+   if (found) {
+      ol.endMemberList();
+   }
 }

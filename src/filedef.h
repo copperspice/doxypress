@@ -283,6 +283,7 @@ class FileDef : public Definition
    void writeSourceLink(OutputList &ol);
    void writeNamespaceDeclarations(OutputList &ol, const QString &title, bool isConstantGroup);
    void writeClassDeclarations(OutputList &ol, const QString &title);
+   void writeConcepts(OutputList &ol, const QString &title);
    void writeInlineClasses(OutputList &ol);
    void startMemberDeclarations(OutputList &ol);
    void endMemberDeclarations(OutputList &ol);

@@ -376,6 +376,7 @@ class ConceptSDict : public StringMap<QSharedPointer<ConceptDef>>
    public:
       ConceptSDict() : StringMap<QSharedPointer<ConceptDef>>() {}
 
+      void writeDeclaration(OutputList &ol, const QString &header = QString(), bool localNames = false);
       int compareMapValues(const QSharedPointer<ConceptDef> &item1, const QSharedPointer<ConceptDef> &item2) const override;
 };
 

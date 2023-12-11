@@ -19,7 +19,7 @@
 #include <QProcess>
 
 #include <filedef.h>
-
+#include <conceptdef.h>
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
@@ -525,6 +525,12 @@ void FileDef::writeClassDeclarations(OutputList &ol, const QString &title)
 {
    // write list of classes
    m_classSDict.writeDeclaration(ol, nullptr, title, false);
+}
+
+void FileDef::writeConcepts(OutputList &ol, const QString &title)
+{
+   // write list of classes
+   m_conceptSDict.writeDeclaration(ol, title, false);
 }
 
 void FileDef::writeInlineClasses(OutputList &ol)

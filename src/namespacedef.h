@@ -169,6 +169,7 @@ class NamespaceDef : public Definition
    void startMemberDeclarations(OutputList &ol);
    void endMemberDeclarations(OutputList &ol);
    void writeClassDeclarations(OutputList &ol, const QString &title);
+   void writeConcepts(OutputList &ol, const QString &title);
    void writeInlineClasses(OutputList &ol);
    void writeNamespaceDeclarations(OutputList &ol, const QString &title, bool isConstantGroup = false);
    void writeMemberGroups(OutputList &ol);

@@ -466,6 +466,13 @@ void NamespaceDef::writeClassDeclarations(OutputList &ol, const QString &title)
    }
 }
 
+void NamespaceDef::writeConcepts(OutputList &ol, const QString &title)
+{
+   if (m_conceptSDict.count() > 0) {
+      m_conceptSDict.writeDeclaration(ol, title, true);
+   }
+}
+
 void NamespaceDef::writeInlineClasses(OutputList &ol)
 {
    if (m_classSDict.count() > 0) {

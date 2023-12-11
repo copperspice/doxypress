@@ -71,6 +71,7 @@ class ConceptDef : public Definition
       }
 
       void setIncludeFile(QSharedPointer<FileDef> fd, const QString &incName, bool local, bool force);
+      void writeDeclarationLink(OutputList &ol, bool &found, const QString &header, bool localNames);
       void writeMoreLink(OutputList &ol, const QString &anchor);
 
 /*
