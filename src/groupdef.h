@@ -28,6 +28,7 @@
 #include <stringmap.h>
 
 class ClassDef;
+class ConceptDef;
 class DirDef;
 class Entry;
 class FileDef;
@@ -72,6 +73,7 @@ class GroupDef : public Definition
 
    void addFile(QSharedPointer<FileDef> def);
    bool addClass(QSharedPointer<ClassDef> cd);
+   bool addConcept(QSharedPointer<ConceptDef> conceptDef);
    bool addNamespace(QSharedPointer<NamespaceDef> def);
    void addGroup(QSharedPointer<GroupDef> def);
    void addPage(QSharedPointer<PageDef> def);
@@ -129,6 +131,10 @@ class GroupDef : public Definition
 
    const ClassSDict &getClasses() const {
       return m_classSDict;
+   }
+
+   const ConceptSDict &getConceptSDict() const {
+      return m_conceptSDict;
    }
 
    const NamespaceSDict &getNamespaces() const {
@@ -193,6 +199,7 @@ class GroupDef : public Definition
    QString fileName;                    // base name of the generated file
 
    ClassSDict      m_classSDict;        // list of classes in the group
+   ConceptSDict    m_conceptSDict;
    NamespaceSDict  m_namespaceSDict;    // list of namespaces in the group
    PageSDict      *pageDict;            // list of pages in the group
    PageSDict      *exampleDict;         // list of examples in the group

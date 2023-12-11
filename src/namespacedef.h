@@ -30,6 +30,7 @@
 
 class ClassDef;
 class ClassSDict;
+class ConceptDef;
 class MemberList;
 class MemberDef;
 class MemberGroupSDict;
@@ -64,6 +65,7 @@ class NamespaceDef : public Definition
    void writeTagFile(QTextStream &);
 
    void insertClass(QSharedPointer<ClassDef> cd);
+   void insertConcept(QSharedPointer<ConceptDef> cd);
    void insertNamespace(QSharedPointer<NamespaceDef> nd);
    void insertMember(QSharedPointer<MemberDef> md);
 
@@ -142,6 +144,10 @@ class NamespaceDef : public Definition
       return m_classSDict;
    }
 
+   const ConceptSDict &getConceptSDict() const {
+      return m_conceptSDict;
+   }
+
    /*! Returns the namespaces contained in this namespace */
    const NamespaceSDict &getNamespaceSDict() const {
       return m_namespaceSDict;
@@ -184,6 +190,7 @@ class NamespaceDef : public Definition
    StringMap<QSharedPointer<Definition>>  m_innerCompounds;
 
    ClassSDict        m_classSDict;
+   ConceptSDict      m_conceptSDict;
    NamespaceSDict    m_usingDirMap;
    NamespaceSDict    m_namespaceSDict;
    MemberSDict       m_allMembersDict;

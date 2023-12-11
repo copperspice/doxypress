@@ -1159,6 +1159,15 @@ void FileDef::insertClass(QSharedPointer<ClassDef> cd)
    m_classSDict.insert(cd->name(), cd);
 }
 
+void FileDef::insertConcept(QSharedPointer<ConceptDef> conceptDef)
+{
+   if (conceptDef->isHidden()) {
+      return;
+   }
+
+   m_conceptSDict.insert(conceptDef->name(), conceptDef);
+}
+
 void FileDef::insertNamespace(QSharedPointer<NamespaceDef> nd)
 {
    if (nd->isHidden()) {

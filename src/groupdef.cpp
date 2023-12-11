@@ -149,6 +149,22 @@ bool GroupDef::addClass(QSharedPointer<ClassDef> cd)
    return false;
 }
 
+bool GroupDef::addConcept(QSharedPointer<ConceptDef> conceptDef)
+{
+   if (conceptDef->isHidden()) {
+      return false;
+   }
+
+   QString key = conceptDef->name();
+
+   if (m_conceptSDict.find(key) == nullptr) {
+      m_conceptSDict.insert(key, conceptDef);
+      return true;
+   }
+
+   return false;
+}
+
 bool GroupDef::addNamespace(QSharedPointer<NamespaceDef> def)
 {
    if (def->isHidden()) {

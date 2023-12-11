@@ -19,6 +19,7 @@
 #include <namespacedef.h>
 
 #include <classdef.h>
+#include <conceptdef.h>
 #include <config.h>
 #include <docparser.h>
 #include <doxy_globals.h>
@@ -155,6 +156,13 @@ void NamespaceDef::insertClass(QSharedPointer<ClassDef> cd)
 
    if (m_classSDict.find(cd->name()) == nullptr) {
       m_classSDict.insert(cd->name(), cd);
+   }
+}
+
+void NamespaceDef::insertConcept(QSharedPointer<ConceptDef> conceptDef)
+{
+   if (m_conceptSDict.find(conceptDef->name()) == nullptr) {
+      m_conceptSDict.insert(conceptDef->name(), conceptDef);
    }
 }
 

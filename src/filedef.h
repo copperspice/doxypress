@@ -30,6 +30,7 @@
 #include <stringmap.h>
 
 class ClassDef;
+class ConceptDef;
 class DirDef;
 class DirEntryTree;
 class FileDef;
@@ -191,6 +192,10 @@ class FileDef : public Definition
       return m_classSDict;
    }
 
+   const ConceptSDict &getConceptSDict() {
+      return m_conceptSDict;
+   }
+
    const MemberGroupSDict &getMemberGroupSDict() {
       return m_memberGroupSDict;
    }
@@ -228,6 +233,7 @@ class FileDef : public Definition
 
    void insertMember(QSharedPointer<MemberDef> md);
    void insertClass(QSharedPointer<ClassDef> cd);
+   void insertConcept(QSharedPointer<ConceptDef> conceptDef);
    void insertNamespace(QSharedPointer<NamespaceDef> nd);
    void computeAnchors();
 
@@ -311,6 +317,7 @@ class FileDef : public Definition
    QList<QSharedPointer<MemberList>> m_memberLists;
 
    ClassSDict         m_classSDict;
+   ConceptSDict       m_conceptSDict;
    MemberGroupSDict   m_memberGroupSDict;
    NamespaceSDict     m_namespaceSDict;
 
