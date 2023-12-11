@@ -78,6 +78,38 @@ void ConceptDef::writeTagFile(QTextStream &tagFile)
 
 */
 
+QString ConceptDef::conceptDecl() const
+{
+   QString retval = "template<";
+
+   const ArgumentList &argList = getTemplateArgumentList();
+   int count = argList.size();
+
+   for (const auto &item : argList) {
+      retval += item.type;
+
+      if (! item.name.isEmpty()) {
+         retval += " " + item.name;
+      }
+
+      if (item.defval.length() != 0) {
+         retval += " = " + item.defval;
+      }
+
+      --count;
+      if (count != 0) {
+         retval += ", ";
+      }
+   }
+
+   retval += ">\n";
+
+   // line 2
+   retval += "concept " + name() +  " = " + getConstraint();
+
+   return retval;
+}
+
 void ConceptDef::setIncludeFile(QSharedPointer<FileDef> fd, const QString &includeName, bool local, bool force)
 {
    if ((! includeName.isEmpty() && m_incInfo.includeName.isEmpty()) || (fd != nullptr && m_incInfo.fileDef == nullptr) ) {
@@ -149,9 +181,7 @@ void ConceptDef::writeDocumentation(OutputList &ol)
 
    QSharedPointer<ConceptDef> self = sharedFrom(this);
 
-   QString pageName    = escapeCharsInString(name(), false, true);
-   QString manPageName = escapeCharsInString(name(), true, true);
-
+   QString pageName  = escapeCharsInString(name(), false, true);
    QString pageTitle = title();
 
    startFile(ol, getOutputFileBase(), name(), pageTitle, HLI_ConceptVisible, ! generateTreeView);
@@ -183,6 +213,8 @@ void ConceptDef::writeDocumentation(OutputList &ol)
    writeBriefDescription(ol);
    writeIncludeFiles(ol);
    writeDetailedDescription(ol, theTranslator->trDetailedDescription(), QString());
+
+   writeAuthorSection(ol);
 
    ol.endContents();
    endFileWithNavPath(self, ol);
@@ -230,6 +262,7 @@ void ConceptDef::writeDetailedDescription(OutputList &ol, const QString &title, 
 
       ol.pushGeneratorState();
       ol.disableAllBut(OutputGenerator::Html);
+
       ol.writeAnchor(QString(), anchor.isEmpty() ? QString("details") : anchor);
       ol.popGeneratorState();
 
@@ -245,13 +278,18 @@ void ConceptDef::writeDetailedDescription(OutputList &ol, const QString &title, 
       ol.parseText(title);
       ol.endGroupHeader();
 
-      // d->getRequires();
+      ol.pushGeneratorState();
+      ol.disable(OutputGenerator::Man);
+      ol.startSubsubsection();
+      ol.popGeneratorState();
+
+      ol.pushGeneratorState();
+      ol.disableAllBut(OutputGenerator::Man);
+      ol.startTextBlock();
+      ol.popGeneratorState();
 
       const ArgumentList &argList = getTemplateArgumentList();
 
-      ol.startSubsubsection();
-
-      //
       ol.docify("template<");
 
       int count = argList.size();
@@ -281,7 +319,17 @@ void ConceptDef::writeDetailedDescription(OutputList &ol, const QString &title, 
       //
       ol.docify("concept " + name() +  " = " + getConstraint());
       ol.lineBreak();
+
+      ol.pushGeneratorState();
+      ol.disable(OutputGenerator::Man);
       ol.endSubsubsection();
+      ol.popGeneratorState();
+
+      ol.pushGeneratorState();
+      ol.disableAllBut(OutputGenerator::Man);
+      ol.lineBreak();
+      ol.endTextBlock();
+      ol.popGeneratorState();
 
       writeDetailedDocumentationBody(ol);
    }
@@ -321,6 +369,26 @@ void ConceptDef::writeDetailedDocumentationBody(OutputList &ol)
    ol.endTextBlock();
 }
 
+void ConceptDef::writeTagFile(QTextStream &tagFile)
+{
+  tagFile << "  <compound kind=\"concept\">\n";
+  tagFile << "    <name>" << convertToXML(name()) << "</name>\n";
+
+  QString fn = getOutputFileBase();
+  addHtmlExtensionIfMissing(fn);
+
+  tagFile << "    <filename>" << convertToXML(fn) << "</filename>\n";
+
+  QString idStr = id();
+
+  if (! idStr.isEmpty()) {
+    tagFile << "    <clangid>" << convertToXML(idStr) << "</clangid>\n";
+  }
+
+  writeDocAnchorsToTagFile(tagFile);
+  tagFile << "  </compound>\n";
+}
+
 bool ConceptDef::hasDetailedDescription() const
 {
    static const bool repeatBrief = Config::getBool("repeat-brief");
@@ -329,6 +397,24 @@ bool ConceptDef::hasDetailedDescription() const
    return ((! briefDescription().isEmpty() && repeatBrief) || ! documentation().isEmpty() ||
            (sourceCode && getStartBodyLine() != -1 && getBodyDef()));
 }
+
+void ConceptDef::writeAuthorSection(OutputList &ol)
+{
+   static const QString projectName = Config::getString("project-name");
+
+   // write Author section (Man only)
+   ol.pushGeneratorState();
+   ol.disableAllBut(OutputGenerator::Man);
+
+   ol.writeString("\n");
+   ol.startGroupHeader();
+   ol.parseText(theTranslator->trAuthor(true, true));
+   ol.endGroupHeader();
+   ol.parseText(theTranslator->trGeneratedAutomatically(projectName));
+
+   ol.popGeneratorState();
+}
+
 
 void ConceptDef::writeMoreLink(OutputList &ol, const QString &anchor)
 {
@@ -438,6 +524,29 @@ void ConceptDef::writeDeclarationLink(OutputList &ol, bool &found, const QString
 
       ol.endMemberDeclaration(anchor(), QString());
    }
+}
+
+void ConceptDef::findSectionsInDocumentation()
+{
+   QSharedPointer<ConceptDef> self = sharedFrom(this);
+
+   docFindSections(briefDescription(), self, QSharedPointer<MemberGroup>(), docFile());
+   docFindSections(documentation(), self, QSharedPointer<MemberGroup>(), docFile());
+}
+
+bool ConceptSDict::declVisible() const
+{
+   static const bool hideUndocClasses = Config::getBool("hide-undoc-classes");
+
+   for (const auto &conceptDef : *this) {
+      bool isLink = conceptDef->isLinkable();
+
+      if (isLink || ! hideUndocClasses) {
+         return true;
+      }
+   }
+
+   return false;
 }
 
 void ConceptSDict::writeDeclaration(OutputList &ol, const QString &header, bool localNames)

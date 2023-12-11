@@ -37,12 +37,17 @@ class ConceptDef : public Definition
          return QString();
       }
 
+      QString conceptDecl() const;
+
       const ArgumentList &getTemplateArgumentList() const;
 
       DefType definitionType() const override {
          return TypeConcept;
       }
 
+      QSharedPointer<FileDef> getFileDef() const {
+         return m_fileDef;
+      }
 
       const IncludeInfo &getIncludeInfo() const {
          return m_incInfo;
@@ -62,7 +67,17 @@ class ConceptDef : public Definition
          return ! isReference();
       }
 
+      void setFileDef(QSharedPointer<FileDef> fd) {
+         m_fileDef = fd;
+      }
 
+      void setMemberGroupId(int id) {
+         m_groupId = id;
+      }
+
+      void setInitializer(const QString &str) {
+         m_initializer = str;
+      }
 
       void setTemplateArgumentList(const ArgumentList &al);
 
@@ -89,10 +104,13 @@ class ConceptDef : public Definition
    }
 
    void writeDocumentation(OutputList &ol);
+   void writeTagFile(QTextStream &tagFile);
+   void findSectionsInDocumentation();
    bool hasDetailedDescription() const;
 
    private:
       void writeBriefDescription(OutputList &ol);
+      void writeAuthorSection(OutputList &ol);
       void writeIncludeFiles(OutputList &ol);
       void writeDetailedDescription(OutputList &ol, const QString &title, const QString &anchor);
       void writeDetailedDocumentationBody(OutputList &ol);
@@ -101,8 +119,12 @@ class ConceptDef : public Definition
       QString m_title;
       QString m_initializer;
 
+      int m_groupId;
+
       // Template arguments for this concept
       ArgumentList m_templateArgs;
+
+      QSharedPointer<FileDef> m_fileDef;
 
       // Include information about the header file
       IncludeInfo m_incInfo;

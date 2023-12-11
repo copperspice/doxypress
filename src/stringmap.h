@@ -377,6 +377,10 @@ class ConceptSDict : public StringMap<QSharedPointer<ConceptDef>>
       ConceptSDict() : StringMap<QSharedPointer<ConceptDef>>() {}
 
       void writeDeclaration(OutputList &ol, const QString &header = QString(), bool localNames = false);
+
+      bool declVisible() const;
+
+   private:
       int compareMapValues(const QSharedPointer<ConceptDef> &item1, const QSharedPointer<ConceptDef> &item2) const override;
 };
 
@@ -386,6 +390,7 @@ class DirSDict : public StringMap<QSharedPointer<DirDef>>
    public:
       DirSDict() : StringMap<QSharedPointer<DirDef>>() {}
 
+   private:
       int compareMapValues(const QSharedPointer<DirDef> &item1, const QSharedPointer<DirDef> &item2) const override;
 };
 
