@@ -813,8 +813,11 @@ void FileDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::NamespaceNestedNamespaces:
          case LayoutDocEntry::NamespaceNestedConstantGroups:
          case LayoutDocEntry::NamespaceClasses:
+         case LayoutDocEntry::NamespaceConcepts:
          case LayoutDocEntry::NamespaceInlineClasses:
+         case LayoutDocEntry::ConceptDefinition:
          case LayoutDocEntry::GroupClasses:
+         case LayoutDocEntry::GroupConcepts:
          case LayoutDocEntry::GroupInlineClasses:
          case LayoutDocEntry::GroupNamespaces:
          case LayoutDocEntry::GroupDirs:

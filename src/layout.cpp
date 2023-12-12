@@ -588,6 +588,40 @@ class LayoutParser : public QXmlDefaultHandler
                QMakeShared<EndElement>
                (this, &LayoutParser::endClass));
 
+      // concept layout
+      m_sHandler.insert("concept",
+               QMakeShared<StartElement>
+               (this, &LayoutParser::startConcept));
+
+      m_sHandler.insert("concept/briefdescription",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::BriefDesc, &LayoutParser::startSimpleEntry));
+
+      m_sHandler.insert("concept/detaileddescription",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::DetailedDesc, &LayoutParser::startSectionEntry, theTranslator->trDetailedDescription()));
+
+      m_sHandler.insert("concept/authorsection",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::AuthorSection, &LayoutParser::startSimpleEntry));
+
+      m_sHandler.insert("concept/includes",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::ClassIncludes, &LayoutParser::startSimpleEntry));
+
+      m_sHandler.insert("concept/definition",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::ConceptDefinition, &LayoutParser::startSectionEntry, theTranslator->trConceptDefinition()));
+
+      m_sHandler.insert("concept/sourcelink",
+               QMakeShared<StartElementKind>
+               (this, LayoutDocEntry::FileSourceLink, &LayoutParser::startSimpleEntry));
+
+      m_eHandler.insert("concept",
+               QMakeShared<EndElement>
+               (this, &LayoutParser::endConcept));
+
+
       // namespace layout
       m_sHandler.insert("namespace",
                QMakeShared<StartElement>
@@ -627,6 +661,10 @@ class LayoutParser : public QXmlDefaultHandler
                (this, LayoutDocEntry::NamespaceClasses, &LayoutParser::startSectionEntry,
                buildMultiTitle(theTranslator->trCompounds(),
                SrcLangExt_Fortran, theTranslator->trDataTypes() )));
+
+      m_sHandler.insert("namespace/memberdecl/concepts",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::NamespaceConcepts, &LayoutParser::startSectionEntry, theTranslator->trConcepts()));
 
       m_sHandler.insert("namespace/memberdecl/membergroups",
                QMakeShared<StartElementKind>
@@ -743,6 +781,10 @@ class LayoutParser : public QXmlDefaultHandler
                QMakeShared<StartElementSection>
                (this, LayoutDocEntry::FileClasses, &LayoutParser::startSectionEntry,
                buildMultiTitle(theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes() )));
+
+      m_sHandler.insert("file/memberdecl/concepts",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::FileConcepts, &LayoutParser::startSectionEntry, theTranslator->trConcepts()));
 
       m_sHandler.insert("file/memberdecl/namespaces",
                QMakeShared<StartElementSection>
@@ -869,6 +911,10 @@ class LayoutParser : public QXmlDefaultHandler
                (this, LayoutDocEntry::GroupClasses,
                &LayoutParser::startSectionEntry,
                buildMultiTitle( theTranslator->trCompounds(), SrcLangExt_Fortran, theTranslator->trDataTypes() )));
+
+      m_sHandler.insert("group/memberdecl/concepts",
+               QMakeShared<StartElementSection>
+               (this, LayoutDocEntry::GroupConcepts, &LayoutParser::startSectionEntry, theTranslator->trConcepts()));
 
       m_sHandler.insert("group/memberdecl/namespaces",
                QMakeShared<StartElementSection>
@@ -1668,6 +1714,19 @@ class LayoutParser : public QXmlDefaultHandler
    void endClass() {
       m_scope = QString();
       m_part = -1;
+   }
+
+   void startConcept(const QXmlAttributes &)
+   {
+      LayoutDocManager::instance().clear(LayoutDocManager::Concept);
+      m_scope = "concept/";
+      m_part  = (int)LayoutDocManager::Concept;
+   }
+
+   void endConcept()
+   {
+      m_scope = QString();
+      m_part  = -1;
    }
 
    void startNamespace(const QXmlAttributes &) {

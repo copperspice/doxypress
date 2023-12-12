@@ -81,6 +81,7 @@ class Translator
    virtual QString trModulesDescription() = 0;
 
    virtual QString trConcepts() = 0;
+   virtual QString trConceptDefinition() = 0;
    virtual QString trConceptList() = 0;
    virtual QString trConceptListDescription() = 0;
 
@@ -91,6 +92,7 @@ class Translator
    virtual QString trFileIndex() = 0;
 
    virtual QString trClassDocumentation() = 0;
+   virtual QString trConceptDocumentation() = 0;
    virtual QString trExampleDocumentation() = 0;
    virtual QString trFileDocumentation() = 0;
    virtual QString trModuleDocumentation() = 0;

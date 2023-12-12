@@ -687,7 +687,9 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::ClassAllMembersLink:
          case LayoutDocEntry::ClassUsedFiles:
          case LayoutDocEntry::ClassInlineClasses:
+         case LayoutDocEntry::ConceptDefinition:
          case LayoutDocEntry::FileClasses:
+         case LayoutDocEntry::FileConcepts:
          case LayoutDocEntry::FileNamespaces:
          case LayoutDocEntry::FileConstantGroups:
          case LayoutDocEntry::FileIncludes:
@@ -696,6 +698,7 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::FileSourceLink:
          case LayoutDocEntry::FileInlineClasses:
          case LayoutDocEntry::GroupClasses:
+         case LayoutDocEntry::GroupConcepts:
          case LayoutDocEntry::GroupInlineClasses:
          case LayoutDocEntry::GroupNamespaces:
          case LayoutDocEntry::GroupDirs:

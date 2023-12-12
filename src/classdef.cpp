@@ -1884,8 +1884,11 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTit
          case LayoutDocEntry::NamespaceNestedNamespaces:
          case LayoutDocEntry::NamespaceNestedConstantGroups:
          case LayoutDocEntry::NamespaceClasses:
+         case LayoutDocEntry::NamespaceConcepts:
          case LayoutDocEntry::NamespaceInlineClasses:
+         case LayoutDocEntry::ConceptDefinition:
          case LayoutDocEntry::FileClasses:
+         case LayoutDocEntry::FileConcepts:
          case LayoutDocEntry::FileNamespaces:
          case LayoutDocEntry::FileConstantGroups:
          case LayoutDocEntry::FileIncludes:
@@ -1894,6 +1897,7 @@ void ClassDef::writeDocumentationContents(OutputList &ol, const QString &pageTit
          case LayoutDocEntry::FileSourceLink:
          case LayoutDocEntry::FileInlineClasses:
          case LayoutDocEntry::GroupClasses:
+         case LayoutDocEntry::GroupConcepts:
          case LayoutDocEntry::GroupInlineClasses:
          case LayoutDocEntry::GroupNamespaces:
          case LayoutDocEntry::GroupDirs:

@@ -323,6 +323,11 @@ class Translator_Cs : public Translator
       return QCoreApplication::translate("doxy-text", "Concepts");
    }
 
+   /*! This is the definition of a concept */
+   QString trConceptDefinition() override {
+      return QCoreApplication::translate("doxy-text", "Concept Definition");
+   }
+
    /*! This is an introduction to the page with the list of concepts */
    QString trConceptList() override {
       return QCoreApplication::translate("doxy-text", "Concept List");
@@ -377,6 +382,10 @@ class Translator_Cs : public Translator
       } else {
          return QCoreApplication::translate("doxy-text", "Class Documentation");
       }
+   }
+
+   QString trConceptDocumentation() override {
+      return QCoreApplication::translate("doxy-text", "Concept Documentation");
    }
 
    /*! This is used in LaTeX as the title of the chapter containing

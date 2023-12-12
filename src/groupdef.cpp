@@ -1251,8 +1251,11 @@ void GroupDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::NamespaceNestedNamespaces:
          case LayoutDocEntry::NamespaceNestedConstantGroups:
          case LayoutDocEntry::NamespaceClasses:
+         case LayoutDocEntry::NamespaceConcepts:
          case LayoutDocEntry::NamespaceInlineClasses:
+         case LayoutDocEntry::ConceptDefinition:
          case LayoutDocEntry::FileClasses:
+         case LayoutDocEntry::FileConcepts:
          case LayoutDocEntry::FileNamespaces:
          case LayoutDocEntry::FileConstantGroups:
          case LayoutDocEntry::FileIncludes:
