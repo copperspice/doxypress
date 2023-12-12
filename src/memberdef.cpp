@@ -276,6 +276,11 @@ static bool writeDefArgumentList(OutputList &ol, QSharedPointer<Definition> scop
 
             argType = renameNS_Aliases(argType);
 
+            QString sep = getLanguageSpecificSeparator(md->getLanguage(), true);
+
+            if (sep != "::") {
+               argType = substitute(argType, "::", sep);
+            }
             linkifyText(TextFragment(ol), scopeDef, md->getBodyDef(), md, argType);
          }
       }
@@ -545,31 +550,6 @@ static void writeExceptionList(OutputList &ol, QSharedPointer<ClassDef> cd, QSha
    }
 }
 
-static void writeTemplatePrefix(OutputList &ol, const ArgumentList &argList)
-{
-   ol.docify("template<");
-
-   auto nextItem = argList.begin();
-
-   for (auto &a : argList) {
-      ol.docify(a.type);
-      ol.docify(" ");
-      ol.docify(a.name);
-
-      if (a.defval.length() != 0) {
-         ol.docify(" = ");
-         ol.docify(a.defval);
-      }
-
-      ++nextItem;
-
-      if (nextItem != argList.end()) {
-         ol.docify(", ");
-      }
-   }
-
-   ol.docify("> ");
-}
 
 class MemberDefImpl
 {
@@ -1450,6 +1430,45 @@ int MemberDef::getDeclColumn() const
   return m_impl->m_declColumn;
 }
 
+void MemberDef::writeTemplatePrefix(OutputList &ol, QSharedPointer<Definition> def,
+      const ArgumentList &argList, bool showRequiresClause)
+{
+   QSharedPointer<MemberDef> self = sharedFrom(this);
+
+   ol.docify("template<");
+
+   auto nextItem = argList.begin();
+
+   for (auto &a : argList) {
+      linkifyText(TextFragment(ol), def, getFileDef(), self, a.type, false);
+
+      ol.docify(" ");
+      ol.docify(a.name);
+
+      if (a.defval.length()!=0) {
+         ol.docify(" = ");
+         ol.docify(a.defval);
+      }
+
+      ++nextItem;
+
+      if (nextItem != argList.end()) {
+         ol.docify(", ");
+      }
+   }
+
+   ol.docify("> ");
+
+   QString requiresClause = getRequires();
+
+   if (showRequiresClause && ! requiresClause.isEmpty()) {
+      ol.lineBreak();
+      ol.docify("requires ");
+
+      linkifyText(TextFragment(ol), def, getFileDef(), self, requiresClause, false);
+  }
+}
+
 void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
       QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd, bool inGroup,
       QSharedPointer<ClassDef> inheritedFrom, const QString &inheritId)
@@ -1564,7 +1583,8 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
          ol.startMemberTemplateParams();
       }
 
-      writeTemplatePrefix(ol, m_impl->m_templateArgList);
+      writeTemplatePrefix(ol, d, m_impl->m_templateArgList);
+
       if (! isAnonymousEntry) {
          ol.endMemberTemplateParams(anchor(), inheritId);
       }
@@ -3000,7 +3020,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
                   }
 
                   ol.startMemberDocPrefixItem();
-                  writeTemplatePrefix(ol, tal);
+                  writeTemplatePrefix(ol, scopedContainer, tal);
                   ol.endMemberDocPrefixItem();
                }
             }
@@ -3023,7 +3043,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
                      }
 
                      ol.startMemberDocPrefixItem();
-                     writeTemplatePrefix(ol, tal);
+                     writeTemplatePrefix(ol, scopedContainer, tal);
                      ol.endMemberDocPrefixItem();
                   }
                }
@@ -3033,7 +3053,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
                // function template prefix
 
                ol.startMemberDocPrefixItem();
-               writeTemplatePrefix(ol, m_impl->m_templateArgList);
+               writeTemplatePrefix(ol, scopedContainer, m_impl->m_templateArgList);
                ol.endMemberDocPrefixItem();
             }
          }
@@ -3533,6 +3553,12 @@ void MemberDef::writeMemberDocSimple(OutputList &ol, QSharedPointer<Definition> 
       // add bitfields
       linkifyText(TextFragment(ol), getOuterScope(), getBodyDef(), self, m_impl->bitfields);
    }
+
+   if (hasOneLineInitializer() && ! isDefine()) {
+      ol.writeString(" ");
+      linkifyText(TextFragment(ol), getOuterScope(), getBodyDef(), self, m_impl->initializer.simplified());
+   }
+
    ol.endInlineMemberName();
 
    ol.startInlineMemberDoc();
@@ -3829,6 +3855,12 @@ void MemberDef::setAnchor()
       memAnchor.prepend(tmp);
    }
 
+   QString requiresClause = getRequires();
+
+   if (! requiresClause.isEmpty()) {
+      memAnchor += " " + requiresClause;
+   }
+
    // convert to md5 hash
    QByteArray data = QCryptographicHash::hash(memAnchor.toUtf8(), QCryptographicHash::Md5).toHex();
    QString sigStr  = QString::fromLatin1(data);
@@ -3995,6 +4027,10 @@ void MemberDef::addListReference(QSharedPointer<Definition> def)
    }
 
    const QVector<ListItemInfo> &xrefItems = getRefItems();
+
+   if (sep != "::")  {
+      memName = substitute(memName, "::", sep);
+   }
 
    if (! xrefItems.isEmpty()) {
       // argsString is needed for overloaded functions

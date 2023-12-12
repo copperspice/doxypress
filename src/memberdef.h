@@ -431,6 +431,9 @@ class MemberDef : public Definition
    void findSectionsInDocumentation();
 
    // output generation
+   void writeTemplatePrefix(OutputList &ol, QSharedPointer<Definition> def,
+         const ArgumentList &al, bool writeRequiresClause = true);
+
    void writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPointer<NamespaceDef> nd,
                   QSharedPointer<FileDef> fd, QSharedPointer<GroupDef> gd,
                   bool inGroup, QSharedPointer<ClassDef> inheritFrom = QSharedPointer<ClassDef>(),

@@ -653,7 +653,7 @@ static void detectUndocumentedParams()
       bool isFortranSubroutine = (isFortran && returnType.contains("subroutine"));
       bool isVoidReturn        = (returnType == "void") || (returnType.endsWith(" void")); ;
 
-      if (! isVoidReturn && returnType == "auto")   {
+      if (! isVoidReturn && (returnType == "auto"|| returnType.endsWith(" auto")))  {
          const ArgumentList *defArgList;
 
          if (s_memberDef->isDocsForDefinition())  {
