@@ -438,7 +438,7 @@
   \the\LT@p@ftn
   \global\LT@p@ftn{}%
   \hfil}
-\def\LT@p@ftntext#1{%
+\long\def\LT@p@ftntext#1{%
   \edef\@tempa{\the\LT@p@ftn\noexpand\footnotetext[\the\c@footnote]}%
   \global\LT@p@ftn\expandafter{\@tempa{#1}}}%
 
