@@ -468,6 +468,13 @@ void FTVHelp::generateTree(QTextStream &t, const QList<FTVNode *> &nl, int level
          } else if (n->def && n->def->definitionType() == Definition::TypeClass) {
             t << "<span class=\"icona\"><span class=\"icon\">C</span></span>";
 
+
+         } else if (n->def && n->def->definitionType() == Definition::TypeConcept) {
+            t << "<span class=\"icona\"><span class=\"icon\">R</span></span>";
+
+         } else if (n->def && n->def->definitionType() == Definition::TypeDir) {
+            t << "<span class=\"iconfclosed\"></span>";
+
          } else {
             t << "<span class=\"icondoc\"></span>";
          }
