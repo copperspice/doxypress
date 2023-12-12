@@ -600,6 +600,17 @@ void GroupDef::writeTagFile(QTextStream &tagFile)
          }
          break;
 
+         case LayoutDocEntry::GroupConcepts:
+         {
+            for (const auto &conceptDef : m_conceptSDict) {
+               if (conceptDef->isLinkableInProject()) {
+                 tagFile << "    <concept>" << convertToXML(conceptDef->name())
+                         << "</concept>\n";
+               }
+            }
+         }
+         break;
+
          case LayoutDocEntry::GroupNamespaces:
          {
             for (const auto &nd : m_namespaceSDict) {
@@ -1057,6 +1068,7 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
    for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Group) ) {
 
       if ((lde->kind() == LayoutDocEntry::GroupClasses && m_classSDict.declVisible()) ||
+            (lde->kind() == LayoutDocEntry::GroupConcepts     && m_conceptSDict.declVisible()) ||
             (lde->kind() == LayoutDocEntry::GroupNamespaces   && m_namespaceSDict.declVisible()) ||
             (lde->kind() == LayoutDocEntry::GroupFiles        && fileList.count()   > 0) ||
             (lde->kind() == LayoutDocEntry::GroupNestedGroups && groupList->count() > 0) ||
@@ -1068,6 +1080,9 @@ void GroupDef::writeSummaryLinks(OutputList &ol)
 
          if (lde->kind() == LayoutDocEntry::GroupClasses) {
             label = "nested-classes";
+
+         } else if (lde->kind() == LayoutDocEntry::GroupConcepts) {
+             label = "concepts";
 
          } else if (lde->kind() == LayoutDocEntry::GroupNamespaces)  {
             label = "namespaces";
@@ -1167,6 +1182,12 @@ void GroupDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::GroupClasses: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeClasses(ol, ls->title(lang));
+         }
+         break;
+
+         case LayoutDocEntry::GroupConcepts: {
+           LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
+           writeConcepts(ol, ls->title(lang));
          }
          break;
 
@@ -1343,10 +1364,12 @@ void addClassToGroups(QSharedPointer<Entry> root, QSharedPointer<ClassDef> cd)
    for (const auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
-         if (gd->addClass(cd)) {
-            cd->makePartOfGroup(gd);
-         }
+      if (! g.groupname.isEmpty()) {
+         gd = Doxy_Globals::groupSDict.find(g.groupname);
+      }
+
+      if (gd != nullptr && gd->addClass(cd)) {
+         cd->makePartOfGroup(gd);
       }
    }
 }
@@ -1371,10 +1394,12 @@ void addNamespaceToGroups(QSharedPointer<Entry> root, QSharedPointer<NamespaceDe
    for (const auto &g : root->m_groups) {
       QSharedPointer<GroupDef> gd;
 
-      if (! g.groupname.isEmpty() && (gd = Doxy_Globals::groupSDict.find(g.groupname))) {
-         if (gd->addNamespace(nd)) {
-            nd->makePartOfGroup(gd);
-         }
+      if (! g.groupname.isEmpty()) {
+         gd = Doxy_Globals::groupSDict.find(g.groupname);
+      }
+
+      if (gd != nullptr && gd->addNamespace(nd)) {
+         nd->makePartOfGroup(gd);
       }
    }
 }

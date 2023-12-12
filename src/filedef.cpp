@@ -204,6 +204,17 @@ void FileDef::writeTagFile(QTextStream &tagFile)
          }
          break;
 
+         case LayoutDocEntry::FileConcepts:
+         {
+            for (const auto &conceptDef : m_conceptSDict) {
+               if (conceptDef->isLinkableInProject()) {
+                  tagFile << "    <concept>" << convertToXML(conceptDef->name()) << "</concept>\n";
+               }
+            }
+         }
+         break;
+
+
          case LayoutDocEntry::FileNamespaces:
          {
             for (const auto &nd : m_namespaceSDict) {
@@ -617,13 +628,25 @@ void FileDef::writeSummaryLinks(OutputList &ol)
 
    for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::File)) {
 
-
-      if ((lde->kind() == LayoutDocEntry::FileClasses && m_classSDict.declVisible()) ||
-            (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict.declVisible()) ) {
+      if (lde->kind() == LayoutDocEntry::FileClasses && m_classSDict.declVisible()) {
 
          LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         QString label = lde->kind() == LayoutDocEntry::FileClasses ? QString("nested-classes") : QString("namespaces");
-         ol.writeSummaryLink("", label, ls->title(lang), first);
+
+         ol.writeSummaryLink(QString(), "nested-classes", ls->title(lang), first);
+         first = false;
+
+      } else if (lde->kind() == LayoutDocEntry::FileNamespaces && m_namespaceSDict.declVisible()) {
+
+         LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
+
+         ol.writeSummaryLink(QString(), "namespaces", ls->title(lang), first);
+         first = false;;
+
+      } else if (lde->kind() == LayoutDocEntry::FileConcepts && m_conceptSDict.declVisible()) {
+
+         LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
+
+         ol.writeSummaryLink(QString(), "concepts", ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
@@ -640,6 +663,7 @@ void FileDef::writeSummaryLinks(OutputList &ol)
    if (! first) {
       ol.writeString("  </div>\n");
    }
+
    ol.popGeneratorState();
 }
 
@@ -649,6 +673,7 @@ void FileDef::writeDocumentation(OutputList &ol)
 {
    static const bool generateTreeView    = Config::getBool("generate-treeview");
    static const bool separateMemberPages = Config::getBool("separate-member-pages");
+   static const bool fullPathNames       = Config::getBool("full-path-names");
 
    QSharedPointer<FileDef> self = sharedFrom(this);
 
@@ -680,7 +705,12 @@ void FileDef::writeDocumentation(OutputList &ol)
       ol.disable(OutputGenerator::Html);
 
       // other output formats
-      ol.parseText(pageTitle);
+      if (fullPathNames) {
+         ol.parseText(pageTitle);
+      } else {
+         ol.parseText(pageTitleShort);
+      }
+
       ol.popGeneratorState();
 
       addGroupListToTitle(ol, self);
@@ -746,6 +776,12 @@ void FileDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::FileClasses: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeClassDeclarations(ol, ls->title(lang));
+         }
+         break;
+
+         case LayoutDocEntry::FileConcepts: {
+           LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
+           writeConcepts(ol, ls->title(lang));
          }
          break;
 

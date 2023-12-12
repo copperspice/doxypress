@@ -31,7 +31,7 @@
 #include <util.h>
 
 NamespaceDef::NamespaceDef(const QString &df, int dl, int dc, const QString &name,
-                  const QString &lref, QString fName, const QString &type, bool isPublished)
+      const QString &lref, QString fName, const QString &type, bool isPublished)
    : Definition(df, dl, dc, name), m_isPublished(isPublished)
 {
    static const bool allowSubGrouping = Config::getBool("allow-sub-grouping");
@@ -145,6 +145,12 @@ void NamespaceDef::addInnerCompound(QSharedPointer<Definition> d)
       assert(cd);
 
       insertClass(cd);
+
+   } else if (d->definitionType() == Definition::TypeConcept) {
+      QSharedPointer<ConceptDef> conceptDef = d.dynamicCast<ConceptDef>();
+      assert(conceptDef);
+
+      insertConcept(conceptDef);
    }
 }
 
@@ -491,7 +497,6 @@ void NamespaceDef::writeNamespaceDeclarations(OutputList &ol, const QString &tit
 
 void NamespaceDef::writeMemberGroups(OutputList &ol)
 {
-   /* write user defined member groups */
   QSharedPointer<NamespaceDef> self = sharedFrom(this);
 
   for (auto mg : m_memberGroupSDict) {
@@ -526,23 +531,30 @@ void NamespaceDef::writeSummaryLinks(OutputList &ol)
 
    for (const auto &lde : LayoutDocManager::instance().docEntries(LayoutDocManager::Namespace)) {
 
-      if ((lde->kind() == LayoutDocEntry::NamespaceClasses && m_classSDict.count() > 0 && m_classSDict.declVisible()) ||
-            (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && ! m_namespaceSDict.isEmpty() &&
-             m_namespaceSDict.declVisible())) {
+      const LayoutDocEntrySection *ls = dynamic_cast<const LayoutDocEntrySection *>(lde);
 
-         LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
-         QString label = lde->kind() == LayoutDocEntry::NamespaceClasses ? QString("nested-classes") : QString("namespaces");
+      if (lde->kind() == LayoutDocEntry::NamespaceClasses && m_classSDict.declVisible() && ls) {
+         ol.writeSummaryLink(QString(), "nested-classes", ls->title(lang), first);
+         first = false;
 
-         ol.writeSummaryLink("", label, ls->title(lang), first);
+      } else if (lde->kind() == LayoutDocEntry::NamespaceNestedNamespaces && m_namespaceSDict.declVisible() && ls) {
+         ol.writeSummaryLink(QString(), "namespaces", ls->title(lang), first);
+         first = false;
+
+      } else if (lde->kind() == LayoutDocEntry::NamespaceConcepts && m_conceptSDict.declVisible() && ls) {
+         ol.writeSummaryLink(QString(),"concepts", ls->title(lang), first);
          first = false;
 
       } else if (lde->kind() == LayoutDocEntry::MemberDecl) {
-         LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
-         QSharedPointer<MemberList> ml = getMemberList(lmd->type);
+         const LayoutDocEntryMemberDecl *lmd = dynamic_cast<const LayoutDocEntryMemberDecl *>(lde);
 
-         if (ml && ml->declVisible()) {
-            ol.writeSummaryLink("", MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
-            first = false;
+         if (lmd != nullptr) {
+            QSharedPointer<MemberList> ml = getMemberList(lmd->type);
+
+            if (ml && ml->declVisible()) {
+               ol.writeSummaryLink(QString(), MemberList::listTypeAsString(ml->listType()), lmd->title(lang), first);
+               first = false;
+            }
          }
       }
    }
@@ -621,6 +633,13 @@ void NamespaceDef::writeDocumentation(OutputList &ol)
          case LayoutDocEntry::NamespaceClasses: {
             LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
             writeClassDeclarations(ol, ls->title(lang));
+         }
+         break;
+
+         case LayoutDocEntry::NamespaceConcepts:
+         {
+            LayoutDocEntrySection *ls = (LayoutDocEntrySection *)lde;
+            writeConcepts(ol, ls->title(lang));
          }
          break;
 
@@ -773,6 +792,7 @@ void NamespaceDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDe
                if (createSubDirs) {
                   ol.writeString("../../");
                }
+
                ol.writeString(md->getOutputFileBase() + Doxy_Globals::htmlFileExtension + "#" + md->anchor());
                ol.writeString("\">");
                ol.writeString(convertToHtml(md->localName()));
@@ -894,7 +914,6 @@ QString NamespaceDef::displayName(bool includeScope) const
       retval = substitute(retval, "::", sep);
    }
 
-   // added 01/2016
    retval = renameNS_Aliases(retval);
 
    return retval;
@@ -909,7 +928,6 @@ QString NamespaceDef::localName() const
       retval = retval.mid(i + 2);
    }
 
-   // added 01/2016
    retval = renameNS_Aliases(retval);
 
    return retval;
@@ -1004,7 +1022,13 @@ void NamespaceSDict::writeDeclaration(OutputList &ol, const QString &title, bool
    }
 
    // write list of namespaces
-   ol.startMemberHeader("namespaces");
+   if (isConstantGroup) {
+      ol.startMemberHeader("constantgroups");
+
+   } else {
+      ol.startMemberHeader("namespaces");
+
+   }
 
    ol.parseText(title);
    ol.endMemberHeader();
@@ -1118,7 +1142,8 @@ void NamespaceDef::writeMemberDeclarations(OutputList &ol, MemberListType lt, co
    QSharedPointer<MemberList> ml     = getMemberList(lt);
 
    if (ml) {
-      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), self, QSharedPointer<FileDef>(), QSharedPointer<GroupDef>(), title, QString());
+      ml->writeDeclarations(ol, QSharedPointer<ClassDef>(), self,
+            QSharedPointer<FileDef>(), QSharedPointer<GroupDef>(), title, QString());
    }
 }
 
@@ -1195,7 +1220,7 @@ QString NamespaceDef::title() const
    } else if (lang == SrcLangExt_IDL) {
 
       pageTitle = isConstantGroup() ? theTranslator->trConstantGroupReference(tempDisplay)
-                  : theTranslator->trModuleReference(tempDisplay);
+            : theTranslator->trModuleReference(tempDisplay);
 
    } else {
       pageTitle = theTranslator->trNamespaceReference(tempDisplay);
