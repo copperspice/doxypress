@@ -558,18 +558,16 @@ void endFileWithNavPath(QSharedPointer<Definition> d, OutputList &ol)
 }
 
 template<class T>
-void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part, const QString &name, const QString &anchor,
-                       bool preventSeparateIndex = false, bool addToIndex = true, DirType category = DirType::None)
+void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part, const QString &name,
+      const QString &anchor, bool preventSeparateIndex = false, bool addToIndex = true,
+      DirType category = DirType::None, const ConceptSDict &concepts = ConceptSDict())
 {
    static bool inlineSimpleStructs = Config::getBool("inline-simple-struct");
    static bool hideNavtreeMembers  = Config::getBool("hide-navtree-members");
 
-   bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict().count() > 0;
+   int numClasses  = 0;
+   int numConcepts = 0;
 
-   Doxy_Globals::indexList.addContentsItem(hasMembers, name, def->getReference(), def->getOutputFileBase(), anchor,
-                  addToIndex, def, category);
-
-   int numClasses = 0;
    const ClassSDict &classes = def->getClassSDict();
 
    for (const auto &cd : classes) {
@@ -578,14 +576,26 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
       }
    }
 
-   if (hasMembers || numClasses > 0) {
+   for (const auto &cd : concepts) {
+      if (cd->isLinkable())  {
+         ++numConcepts;
+      }
+   }
 
+   bool hasMembers = def->getMemberLists().count() > 0 || def->getMemberGroupSDict().count() > 0 ||
+         numClasses > 0 || numConcepts > 0;
+
+   Doxy_Globals::indexList.addContentsItem(hasMembers, name, def->getReference(), def->getOutputFileBase(), anchor,
+                  addToIndex, def, category);
+
+   if (hasMembers || numClasses > 0 || numConcepts > 0) {
       Doxy_Globals::indexList.incContentsDepth();
 
       for (const auto &lde : LayoutDocManager::instance().docEntries(part)) {
 
          if (lde->kind() == LayoutDocEntry::MemberDef) {
             LayoutDocEntryMemberDef *lmd  = (LayoutDocEntryMemberDef *)lde;
+
             QSharedPointer<MemberList> ml = def->getMemberList(lmd->type);
 
             if (hideNavtreeMembers) {
@@ -655,11 +665,25 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                   bool addToNavIndex = (addToIndex && (isNestedClass || (cd->isSimple() && inlineSimpleStructs)));
 
                   addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(),
-                           separateIndex, addToNavIndex);
+                        separateIndex, addToNavIndex);
+               }
+            }
+
+         } else if (lde->kind() == LayoutDocEntry::FileConcepts && numConcepts > 0) {
+
+            for (const auto &conceptDef : concepts) {
+               auto groupPtr = conceptDef->partOfGroups();
+
+               if (conceptDef->isLinkable() &&
+                     (groupPtr == nullptr || groupPtr->empty() || def->definitionType() == Definition::TypeGroup)) {
+
+                  Doxy_Globals::indexList.addContentsItem(false, conceptDef->displayName(), conceptDef->getReference(),
+                     conceptDef->getOutputFileBase(), QString(), addToIndex, conceptDef);
                }
             }
          }
       }
+
 
       Doxy_Globals::indexList.decContentsDepth();
    }
@@ -871,7 +895,8 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
                ol.endIndexListItem();
 
                if (ftv != nullptr) {
-                  ftv->addContentsItem(false, fd->displayName(), reference, outputBase, QString(), false, fd, category);
+                  ftv->addContentsItem(false, fd->displayName(), reference, outputBase, QString(),
+                        false, fd, category);
                }
 
             } else if (category == DirType::FileSource && src) {
@@ -902,9 +927,11 @@ static void writeDirTreeNode(OutputList &ol, QSharedPointer<DirDef> dd, int leve
             bool src = srcFileVisibleInIndex(fd);
 
             if (category == DirType::File && doc) {
-               addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QString(), true, true, category);
+               addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QString(),
+                     true, true, category, fd->getConceptSDict());
 
             } else if (category == DirType::FileSource && src) {
+
                Doxy_Globals::indexList.addContentsItem(false, convertToHtml(fd->name(), true), QString(),
                      fd->getSourceFileBase(), QString(), true, fd, category);
             }
@@ -971,7 +998,8 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
                   ftv->addContentsItem(false, fd->displayName(), reference, outputBase, QString(), false, fd, category);
 
                   if (addToIndex) {
-                     addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QString(), true, true, category);
+                     addMembersToIndex(fd, LayoutDocManager::File, fd->displayName(), QString(),
+                           true, true, category, fd->getConceptSDict());
                   }
 
                } else if (category == DirType::FileSource && src) {
@@ -979,7 +1007,7 @@ static void writeDirTree(OutputList &ol, FTVHelp *ftv, bool addToIndex, DirType 
 
                   if (addToIndex) {
                      Doxy_Globals::indexList.addContentsItem(false, convertToHtml(fd->name(), true),
-                        QString(), fd->getSourceFileBase(), QString(), true, fd, category);
+                           QString(), fd->getSourceFileBase(), QString(), true, fd, category);
                   }
 
                }
@@ -1276,6 +1304,8 @@ static void writeFileIndex(OutputList &ol)
 {
    // enabled from build options, file command
 
+   static const bool fullPathNames = Config::getBool("full-path-names");
+
    if (Doxy_Globals::documentedHtmlFiles == 0) {
       return;
    }
@@ -1320,7 +1350,7 @@ static void writeFileIndex(OutputList &ol)
 
    QMap<QString, QSharedPointer<FileList>> outputNameMap;
 
-   if (Config::getBool("full-path-names")) {
+   if (fullPathNames) {
 
       for (const auto &fn : Doxy_Globals::inputNameList ) {
 
@@ -1349,7 +1379,7 @@ static void writeFileIndex(OutputList &ol)
 
    ol.startIndexList();
 
-   if (Config::getBool("full-path-names")) {
+   if (fullPathNames) {
 
       for (const auto &fl : outputNameMap) {
          for (const auto &fd : *fl) {
@@ -2268,11 +2298,7 @@ static void writeConceptIndex(OutputList &ol)
 
    ol.pushGeneratorState();
    ol.disable(OutputGenerator::Man);
-
-   if (s_annotatedClassesPrinted == 0) {
-      ol.disable(OutputGenerator::Latex);
-      ol.disable(OutputGenerator::RTF);
-   }
+   ol.disable(OutputGenerator::Docbook);
 
    LayoutNavEntry *lne = LayoutDocManager::instance().rootNavEntry()->find(LayoutNavEntry::ConceptList);
 
@@ -3578,6 +3604,7 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
 
       numSubItems += gd->getNamespaces().count();
       numSubItems += gd->getClasses().count();
+      numSubItems += gd->getConceptSDict().count();
       numSubItems += gd->getFiles().count();
       numSubItems += gd->getDirs()->count();
       numSubItems += gd->getPages()->count();
@@ -3656,6 +3683,15 @@ static void writeGroupTreeNode(OutputList &ol, QSharedPointer<GroupDef> gd, int 
                         nd->getOutputFileBase(), QString(), false, nd);
                }
             }
+
+         } else if (lde->kind() == LayoutDocEntry::GroupConcepts && addToIndex) {
+
+            for (const auto &conceptDef : gd->getConceptSDict()) {
+               if (conceptDef->isVisible()) {
+                  Doxy_Globals::indexList.addContentsItem(false, conceptDef->displayName(), conceptDef->getReference(),
+                        conceptDef->getOutputFileBase(), QString(), false, conceptDef);
+                }
+             }
 
          } else if (lde->kind() == LayoutDocEntry::GroupFiles && addToIndex) {
 
@@ -4158,6 +4194,12 @@ static void writeIndex(OutputList &ol)
       ol.startIndexSection(isNamespaceDocumentation);
       ol.parseText((optimizeFortran ? theTranslator->trModuleDocumentation() : theTranslator->trNamespaceDocumentation()));
       ol.endIndexSection(isNamespaceDocumentation);
+   }
+
+   if (s_conceptCount > 0) {
+      ol.startIndexSection(isConceptDocumentation);
+      ol.parseText(theTranslator->trConceptDocumentation());
+      ol.endIndexSection(isConceptDocumentation);
    }
 
    if (s_annotatedClassesPrinted > 0) {
