@@ -55,18 +55,6 @@ class TagAnchorInfo
    QString title;
 };
 
-/** List of TagAnchorInfo objects. */
-class TagAnchorInfoList : public QList<TagAnchorInfo>
-{
- public:
-   TagAnchorInfoList()
-      : QList<TagAnchorInfo>()
-   {}
-
-   virtual ~TagAnchorInfoList()
-   {}
-};
-
 /** Container for enum values that are scoped within an enum */
 class TagEnumValueInfo
 {
@@ -82,7 +70,7 @@ class TagMemberInfo
 {
  public:
    TagMemberInfo()
-      : prot(Public), virt(Normal), isStatic(false)
+      : prot(Protection::Public), virt(Specifier::Normal), isStatic(false), lineNr(0)
    { }
 
    QString type;
@@ -93,13 +81,14 @@ class TagMemberInfo
    QString kind;
    QString clangId;
 
-   TagAnchorInfoList docAnchors;
+   QList<TagAnchorInfo> docAnchors;
    Protection prot;
    Specifier virt;
 
    bool isStatic;
 
    QList<TagEnumValueInfo> enumValues;
+   int lineNr;
 };
 
 /** Container for class specific info that can be read from a tagfile */
@@ -120,42 +109,65 @@ class TagClassInfo
       Singleton
    };
 
-   TagClassInfo() {
-      isObjC = false;
-      kind   = Kind::None;
-   }
+   TagClassInfo()
+      : kind(Kind::None), isObjC(false), lineNr(0)
+   { }
 
    QString name;
    QString filename;
    QString clangId;
+   QString anchor;
 
-   TagAnchorInfoList     docAnchors;
+   QList<TagAnchorInfo> docAnchors;
    QVector<BaseInfo> bases;
    QList<TagMemberInfo> members;
    QList<QString> templateArguments;
 
    QStringList classList;
+
    Kind kind;
    bool isObjC;
+
+   int lineNr = 0;
 };
 
+class TagConceptInfo
+{
+ public:
+   TagConceptInfo()
+      : lineNr(0)
+   { }
+
+   QString name;
+   QString filename;
+   QString clangId;
+
+   QList<TagAnchorInfo> docAnchors;
+   QList<TagMemberInfo> members;
+
+   int lineNr;
+};
 
 /** Container for namespace specific info that can be read from a tagfile */
 class TagNamespaceInfo
 {
  public:
    TagNamespaceInfo()
+      : lineNr(0)
    { }
 
    QString name;
    QString filename;
    QString clangId;
+
    QStringList classList;
+   QStringList conceptList;
    QStringList namespaceList;
 
-   TagAnchorInfoList docAnchors;
-
+   QList<TagAnchorInfo> docAnchors;
    QList<TagMemberInfo> members;
+
+   int lineNr;
 };
 
 /** Container for package specific info that can be read from a tagfile */
@@ -163,15 +175,18 @@ class TagPackageInfo
 {
  public:
    TagPackageInfo()
+      : lineNr(0)
    { }
 
    QString name;
    QString filename;
 
-   TagAnchorInfoList docAnchors;
+   QList<TagAnchorInfo> docAnchors;
    QList<TagMemberInfo> members;
 
    QStringList classList;
+
+   int lineNr;
 };
 
 /** Container for include info that can be read from a tagfile */
@@ -184,6 +199,7 @@ class TagIncludeInfo
 
    bool isLocal;
    bool isImported;
+   bool isObjC;
 };
 
 /** Container for file specific info that can be read from a tagfile */
@@ -191,20 +207,23 @@ class TagFileInfo
 {
  public:
    TagFileInfo()
+      : lineNr(0)
    { }
 
    QString name;
    QString filename;
    QString path;
 
-   TagAnchorInfoList docAnchors;
-
+   QList<TagAnchorInfo> docAnchors;
    QList<TagMemberInfo> members;
 
    QStringList classList;
+   QStringList conceptList;
    QStringList namespaceList;
 
    QList<TagIncludeInfo> includes;
+
+   int lineNr;
 };
 
 /** Container for group specific info that can be read from a tagfile */
@@ -212,46 +231,66 @@ class TagGroupInfo
 {
  public:
    TagGroupInfo()
+      : lineNr(0)
    { }
 
    QString name;
    QString filename;
    QString title;
 
-   TagAnchorInfoList docAnchors;
-
+   QList<TagAnchorInfo> docAnchors;
    QList<TagMemberInfo> members;
 
    QStringList subgroupList;
    QStringList classList;
+   QStringList conceptList;
    QStringList namespaceList;
    QStringList fileList;
    QStringList pageList;
    QStringList dirList;
+
+   int lineNr;
 };
 
 /** Container for page specific info that can be read from a tagfile */
 class TagPageInfo
 {
  public:
+   TagPageInfo()
+      : lineNr(0)
+   { }
+
    QString name;
    QString filename;
    QString title;
 
+   QList<TagAnchorInfo> docAnchors;
+   QList<TagMemberInfo> members;
 
-   TagAnchorInfoList docAnchors;
+   QStringList subpages;
+
+   int lineNr;
 };
 
 /** Container for directory specific info that can be read from a tagfile */
 class TagDirInfo
 {
  public:
+   TagDirInfo()
+      : lineNr(0)
+   { }
+
    QString name;
    QString filename;
    QString path;
+
+   QList<TagAnchorInfo> docAnchors;
+   QList<TagMemberInfo> members;
+
    QStringList subdirList;
    QStringList fileList;
-   TagAnchorInfoList docAnchors;
+
+   int lineNr;
 };
 
 /** Tag file parser.
@@ -315,6 +354,7 @@ class TagFileParser : public QXmlDefaultHandler
       : m_startElementHandlers(), m_endElementHandlers(), m_tagName(tagName)
    {
       m_curClass     = 0;
+      m_curConcept   = 0;
       m_curFile      = 0;
       m_curNamespace = 0;
       m_curPackage   = 0;
@@ -355,6 +395,10 @@ class TagFileParser : public QXmlDefaultHandler
          m_curClass = new TagClassInfo;
          m_curClass->kind = TagClassInfo::Class;
          m_state = InClass;
+
+      } else if (kind == "concept") {
+         m_curConcept = new TagConceptInfo;
+         m_state = InConcept;
 
       } else if (kind == "struct") {
          m_curClass = new TagClassInfo;
@@ -442,6 +486,11 @@ class TagFileParser : public QXmlDefaultHandler
             m_curClass = 0;
             break;
 
+         case InConcept:
+            m_tagFileConcepts.append(*m_curConcept);
+            m_curConcept = 0;
+            break;
+
          case InFile:
             m_tagFileFiles.append(*m_curFile);
             m_curFile = 0;
@@ -517,6 +566,10 @@ class TagFileParser : public QXmlDefaultHandler
             m_curClass->members.append(*m_curMember);
             break;
 
+         case InConcept:
+            m_curConcept->members.append(*m_curMember);
+            break;
+
          case InFile:
             m_curFile->members.append(*m_curMember);
             break;
@@ -570,6 +623,10 @@ class TagFileParser : public QXmlDefaultHandler
       switch (m_state) {
          case InClass:
             m_curClass->docAnchors.append(TagAnchorInfo(m_fileName, m_curString, m_title));
+            break;
+
+         case InConcept:
+            m_curConcept->docAnchors.append(TagAnchorInfo(m_fileName, m_curString, m_title));
             break;
 
          case InFile:
@@ -634,10 +691,30 @@ class TagFileParser : public QXmlDefaultHandler
       }
    }
 
+   void endConcept() {
+      switch(m_state) {
+         case InNamespace:
+            m_curNamespace->conceptList.append(m_curString);
+            break;
+
+         case InFile:
+            m_curFile->conceptList.append(m_curString);
+            break;
+
+         case InGroup:
+            m_curGroup->conceptList.append(m_curString);
+            break;
+
+         default:
+            tagWarn("Unexpected tag 'concept' found in the tag file");
+            break;
+       }
+    }
+
    void endNamespace() {
       switch (m_state) {
          case InNamespace:
-            m_curNamespace->classList.append(m_curString);
+            m_curNamespace->namespaceList.append(m_curString);
             break;
 
          case InFile:
@@ -717,6 +794,11 @@ class TagFileParser : public QXmlDefaultHandler
          case InClass:
             m_curClass->name     = m_curString;
             break;
+
+         case InConcept:
+            m_curConcept->name   = m_curString;
+            break;
+
          case InFile:
             m_curFile->name      = m_curString;
             break;
@@ -824,6 +906,10 @@ class TagFileParser : public QXmlDefaultHandler
       switch (m_state) {
          case InClass:
             m_curClass->filename     = m_curString;
+            break;
+
+         case InConcept:
+            m_curConcept->filename   = m_curString;
             break;
 
          case InNamespace:
@@ -938,6 +1024,7 @@ class TagFileParser : public QXmlDefaultHandler
       m_state = Invalid;
 
       m_curClass     = 0;
+      m_curConcept   = 0;
       m_curNamespace = 0;
       m_curFile      = 0;
       m_curGroup     = 0;
@@ -960,6 +1047,7 @@ class TagFileParser : public QXmlDefaultHandler
       m_startElementHandlers.insert("title",       StartElementHandler(this, &TagFileParser::startStringValue));
       m_startElementHandlers.insert("subgroup",    StartElementHandler(this, &TagFileParser::startStringValue));
       m_startElementHandlers.insert("class",       StartElementHandler(this, &TagFileParser::startStringValue));
+      m_startElementHandlers.insert("concept",     StartElementHandler(this, &TagFileParser::startStringValue));
       m_startElementHandlers.insert("namespace",   StartElementHandler(this, &TagFileParser::startStringValue));
       m_startElementHandlers.insert("file",        StartElementHandler(this, &TagFileParser::startStringValue));
       m_startElementHandlers.insert("dir",         StartElementHandler(this, &TagFileParser::startStringValue));
@@ -984,6 +1072,7 @@ class TagFileParser : public QXmlDefaultHandler
       m_endElementHandlers.insert("title",         EndElementHandler(this, &TagFileParser::endTitle));
       m_endElementHandlers.insert("subgroup",      EndElementHandler(this, &TagFileParser::endSubgroup));
       m_endElementHandlers.insert("class"   ,      EndElementHandler(this, &TagFileParser::endClass));
+      m_endElementHandlers.insert("concept",       EndElementHandler(this, &TagFileParser::endConcept));
       m_endElementHandlers.insert("namespace",     EndElementHandler(this, &TagFileParser::endNamespace));
       m_endElementHandlers.insert("file",          EndElementHandler(this, &TagFileParser::endFile));
       m_endElementHandlers.insert("dir",           EndElementHandler(this, &TagFileParser::endDir));
@@ -1039,9 +1128,10 @@ class TagFileParser : public QXmlDefaultHandler
 
  private:
    void buildMemberList(QSharedPointer<Entry> ce, const QList<TagMemberInfo> &members);
-   void addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoList &l);
+   void addDocAnchors(QSharedPointer<Entry> e, const QList<TagAnchorInfo> &list);
 
    QList<TagClassInfo>        m_tagFileClasses;
+   QList<TagConceptInfo>      m_tagFileConcepts;
    QList<TagFileInfo>         m_tagFileFiles;
    QList<TagNamespaceInfo>    m_tagFileNamespaces;
    QList<TagGroupInfo>        m_tagFileGroups;
@@ -1053,6 +1143,7 @@ class TagFileParser : public QXmlDefaultHandler
    QHash<QString, EndElementHandler>    m_endElementHandlers;
 
    TagClassInfo          *m_curClass;
+   TagConceptInfo        *m_curConcept;
    TagFileInfo           *m_curFile;
    TagNamespaceInfo      *m_curNamespace;
    TagPackageInfo        *m_curPackage;
@@ -1232,7 +1323,7 @@ void TagFileParser::dump()
    }
 }
 
-void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const TagAnchorInfoList &list)
+void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const QList<TagAnchorInfo> &list)
 {
    for (auto ta : list) {
       if (Doxy_Globals::sectionDict.find(ta.label) == 0) {
@@ -1449,7 +1540,11 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       TagInfo ti;
 
       ti.tag_Name        = m_tagName;
+
+      ti.tag_Anchor      = tci.anchor;
       ti.tag_FileName    = tci.filename;
+
+      ce->startLine      = tci.lineNr;
 
       ce->setData(EntryKey::Clang_Id, tci.clangId);
 
@@ -1494,6 +1589,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       QString fullName = m_tagName + ":" + tfi.path + stripPath_tag(tfi.name);
       fe->setData(EntryKey::File_Name, fullName);
 
+      fe->startLine = tfi.lineNr;
       QSharedPointer<FileDef> fd = QMakeShared<FileDef>(m_tagName + ":" + tfi.path, tfi.name, m_tagName, tfi.filename);
 
       QSharedPointer<FileNameList> mn (Doxy_Globals::inputNameDict.find(tfi.name));
@@ -1513,60 +1609,84 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       root->addSubEntry(fe);
    }
 
+   // build concept list
+   for (const auto &tagConcept : m_tagFileConcepts) {
+      QSharedPointer<Entry> ce = QMakeShared<Entry>();
+
+      ce->section     = Entry::CONCEPT_SEC;
+      ce->m_entryName = tagConcept.name;
+      addDocAnchors(ce, tagConcept.docAnchors);
+
+      TagInfo ti;
+      ti.tag_Name     = m_tagName;
+      ti.tag_FileName = tagConcept.filename;
+
+      ce->startLine   = tagConcept.lineNr;
+
+      ce->m_tagInfo   = ti;
+      ce->setData(EntryKey::Clang_Id, tagConcept.clangId);
+
+      root->addSubEntry(ce);
+   }
+
    // build namespace list
-   for (auto tni : m_tagFileNamespaces) {
+   for (const auto &tagNs : m_tagFileNamespaces) {
       QSharedPointer<Entry> ne = QMakeShared<Entry>();
 
       ne->section     = Entry::NAMESPACE_SEC;
-      ne->m_entryName = tni.name;
-      addDocAnchors(ne, tni.docAnchors);
+      ne->m_entryName = tagNs.name;
+      addDocAnchors(ne, tagNs.docAnchors);
 
       TagInfo ti;
-      ti.tag_Name         = m_tagName;
-      ti.tag_FileName     = tni.filename;
+      ti.tag_Name      = m_tagName;
+      ti.tag_FileName  = tagNs.filename;
+      ne->startLine    = tagNs.lineNr;
+      ne->m_tagInfo    = ti;
+      ne->setData(EntryKey::Clang_Id, tagNs.clangId);
 
-      ne->m_tagInfo       = ti;
-      ne->setData(EntryKey::Clang_Id, tni.clangId);
-
-      buildMemberList(ne, tni.members);
+      buildMemberList(ne, tagNs.members);
       root->addSubEntry(ne);
    }
 
    // build package list
-   for (auto tpgi : m_tagFilePackages) {
+   for (const auto &tagPkg : m_tagFilePackages) {
       QSharedPointer<Entry> pe = QMakeShared<Entry>();
 
       pe->section     = Entry::PACKAGE_SEC;
-      pe->m_entryName = tpgi.name;
-      addDocAnchors(pe, tpgi.docAnchors);
+      pe->m_entryName = tagPkg.name;
+      addDocAnchors(pe, tagPkg.docAnchors);
 
       TagInfo ti;
       ti.tag_Name     = m_tagName;
-      ti.tag_FileName = tpgi.filename;
+      ti.tag_FileName = tagPkg.filename;
+
+      pe->startLine   = tagPkg.lineNr;
 
       pe->m_tagInfo   = ti;
 
-      buildMemberList(pe, tpgi.members);
+      buildMemberList(pe, tagPkg.members);
       root->addSubEntry(pe);
    }
 
    // build group list
-   for (auto tgi : m_tagFileGroups) {
+   for (const auto &tagGroup : m_tagFileGroups) {
       QSharedPointer<Entry> ge = QMakeShared<Entry>();
 
       ge->section     = Entry::GROUPDOC_SEC;
-      ge->m_entryName = tgi.name;
-      ge->setData(EntryKey::Member_Type, tgi.title);
+      ge->m_entryName = tagGroup.name;
+      ge->setData(EntryKey::Member_Type, tagGroup.title);
 
-      addDocAnchors(ge, tgi.docAnchors);
+      addDocAnchors(ge, tagGroup.docAnchors);
 
       TagInfo ti;
       ti.tag_Name     = m_tagName;
-      ti.tag_FileName = tgi.filename;
+      ti.tag_FileName = tagGroup.filename;
+
+      ge->startLine   = tagGroup.lineNr;
 
       ge->m_tagInfo   = ti;
 
-      buildMemberList(ge, tgi.members);
+      buildMemberList(ge, tagGroup.members);
       root->addSubEntry(ge);
    }
 
@@ -1592,7 +1712,7 @@ void TagFileParser::buildLists(QSharedPointer<Entry> root)
       TagInfo ti;
       ti.tag_Name     = m_tagName;
       ti.tag_FileName = tpi.filename;
-
+      pe->startLine   = tpi.lineNr;
       pe->m_tagInfo   = ti;
 
       root->addSubEntry(pe);

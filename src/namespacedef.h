@@ -62,6 +62,9 @@ class NamespaceDef : public Definition
    void writeDocumentation(OutputList &ol);
    void writeMemberPages(OutputList &ol);
    void writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> currentMd) const override;
+
+   void writeClassesToTagFile(QTextStream &tagFile, QSharedPointer<ClassSDict> list);
+   void writeConceptsToTagFile(QTextStream &tagFile);
    void writeTagFile(QTextStream &);
 
    void insertClass(QSharedPointer<ClassDef> cd);

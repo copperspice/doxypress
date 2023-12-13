@@ -10735,6 +10735,13 @@ void Doxy_Work::writeTagFile()
       }
    }
 
+   // for each concept
+   for (auto conceptDef : Doxy_Globals::conceptSDict) {
+      if (conceptDef->isLinkableInProject()) {
+         conceptDef->writeTagFile(tagFile);
+      }
+   }
+
    // for each namespace
    for (auto &nd : Doxy_Globals::namespaceSDict) {
       if (nd->isLinkableInProject()) {

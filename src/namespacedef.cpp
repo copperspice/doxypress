@@ -321,6 +321,10 @@ void NamespaceDef::writeTagFile(QTextStream &tagFile)
          }
          break;
 
+         case LayoutDocEntry::NamespaceConcepts:
+            writeConceptsToTagFile(tagFile);
+            break;
+
          case LayoutDocEntry::MemberDecl:
          {
             LayoutDocEntryMemberDecl *lmd = (LayoutDocEntryMemberDecl *)lde;
@@ -576,6 +580,25 @@ void NamespaceDef::addNamespaceAttributes(OutputList &ol)
       ol.writeLabel("published", false);
       ol.endLabels();
       ol.popGeneratorState();
+   }
+}
+
+void NamespaceDef::writeClassesToTagFile(QTextStream &tagFile, QSharedPointer<ClassSDict> list)
+{
+   for (const auto &cd : *list) {
+      if (cd->isLinkableInProject()) {
+         tagFile << "    <class kind=\"" << cd->compoundTypeString()
+                 << "\">" << convertToXML(cd->name()) << "</class>\n";
+      }
+   }
+}
+
+void NamespaceDef::writeConceptsToTagFile(QTextStream &tagFile)
+{
+   for (const auto &conceptDef : m_conceptSDict) {
+      if (conceptDef->isLinkableInProject()) {
+         tagFile << "    <concept>" << convertToXML(conceptDef->name()) << "</concept>\n";
+      }
    }
 }
 
