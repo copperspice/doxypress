@@ -237,9 +237,9 @@ static void writeCombineScript()
      "</xsl:stylesheet>\n";
 }
 
-
+/* */
 void writeXMLLink(QTextStream &t, const QString &extRef, const QString &compoundId,
-                  const QString &anchorId, const QString &text, const QString &tooltip)
+      const QString &anchorId, const QString &text, const QString &tooltip)
 {
    t << "<ref refid=\"" << compoundId;
    if (! anchorId.isEmpty()) {
@@ -303,7 +303,7 @@ void XMLCodeGenerator::codify(const QString &text) {
 }
 
 void XMLCodeGenerator::writeCodeLink(const QString &ref, const QString &file, const QString &anchor,
-                   const QString &name, const QString &tooltip) {
+      const QString &name, const QString &tooltip) {
 
    XML_DB(("(writeCodeLink)\n"));
 
@@ -317,7 +317,7 @@ void XMLCodeGenerator::writeCodeLink(const QString &ref, const QString &file, co
 }
 
 void XMLCodeGenerator::writeTooltip(const QString &, const DocLinkInfo &, const QString &,
-                  const QString &, const SourceLinkInfo &, const SourceLinkInfo &) {
+      const QString &, const SourceLinkInfo &, const SourceLinkInfo &) {
    XML_DB(("(writeToolTip)\n"));
 }
 
@@ -417,13 +417,13 @@ void XMLCodeGenerator::endCodeFragment(const QString &)  {
 }
 
 void XMLCodeGenerator::finish() {
-      if (m_insideCodeLine) {
-         endCodeLine();
-      }
+   if (m_insideCodeLine) {
+      endCodeLine();
+   }
 }
 
 static void writeTemplateArgumentList(const ArgumentList &al, QTextStream &t, QSharedPointer<Definition> scope,
-                  QSharedPointer<FileDef> fileScope, int indent)
+      QSharedPointer<FileDef> fileScope, int indent)
 {
    QString indentStr;
    indentStr.fill(' ', indent);
@@ -473,7 +473,12 @@ static void writeMemberTemplateLists(QSharedPointer<MemberDef> md, QTextStream &
 
 static void writeTemplateList(QSharedPointer<ClassDef> cd, QTextStream &t)
 {
-   writeTemplateArgumentList(cd->getTemplateArgumentList(), t, cd, QSharedPointer<FileDef>(), 4);
+   writeTemplateArgumentList(cd->getTemplateArgumentList(), t, cd, cd->getFileDef(), 4);
+}
+
+static void writeTemplateList(QSharedPointer<ConceptDef> conceptDef, QTextStream &t)
+{
+  writeTemplateArgumentList(conceptDef->getTemplateArgumentList(), t, conceptDef, conceptDef->getFileDef(), 4);
 }
 
 static void writeXMLDocBlock(QTextStream &t, const QString &fileName, int lineNr,
@@ -513,14 +518,14 @@ void writeXMLCodeBlock(QTextStream &t, QSharedPointer<FileDef> fd)
    xmlGen->startCodeFragment("DoxyCode");
 
    pIntf->parseCode(*xmlGen, QString(), fileToString(fd->getFilePath(), Config::getBool("filter-source-files")),
-                    langExt, false, QString(), fd, -1, -1, false, QSharedPointer<MemberDef>(), true );
+         langExt, false, QString(), fd, -1, -1, false, QSharedPointer<MemberDef>(), true );
 
    xmlGen->endCodeFragment("DoxyCode");
    xmlGen->finish();
 }
 
 static void writeMemberReference(QTextStream &t, QSharedPointer<Definition> def,
-            QSharedPointer<MemberDef> rmd, const QString &tagName)
+      QSharedPointer<MemberDef> rmd, const QString &tagName)
 {
    QString scope = rmd->getScopeString();
    QString name  = rmd->name();
@@ -541,6 +546,14 @@ static void writeMemberReference(QTextStream &t, QSharedPointer<Definition> def,
    }
 
    t << ">" << convertToXML(name) << "</" << tagName << ">" << endl;
+}
+
+// examples '@3::A' -> '::A', 'A::@2::B' -> 'A::B', '@A' -> '@A'
+static void stripAnonymousMarkers(QString &text)
+{
+   static QRegularExpression regex = QRegularExpression("(::)?@[0-9]+");
+
+   text.replace(regex, QString());
 }
 
 static void stripQualifiers(QString &typeStr)
@@ -578,22 +591,9 @@ static QString memberOutputFileBase(QSharedPointer<MemberDef> md)
    return md->getOutputFileBase();
 }
 
-static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, QTextStream &t, QSharedPointer<Definition> def)
+static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &t_index,
+      QTextStream &t, QSharedPointer<Definition> def)
 {
-   // + declaration/definition arg lists
-   // + reimplements
-   // + reimplementedBy
-   // + exceptions
-   // + const/volatile specifiers
-   // - examples
-   // + source definition
-   // + source references
-   // + source referenced by
-   // - body code
-   // + template arguments
-   //     (templateArguments(), definitionTemplateParameterLists())
-   // - call graph
-
    // enum values are written as part of the enum
    if (md->memberType() == MemberDefType::EnumValue) {
       return;
@@ -604,6 +604,7 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
    }
 
    // group members are only visible in their group
+   bool groupMember = md->getGroupDef() && def->definitionType() != Definition::TypeGroup;
 
    QString memType;
    bool isFunc = false;
@@ -670,30 +671,32 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       memType.prepend("friend ");
    }
 
-   ti << "    <member refid=\"" << memberOutputFileBase(md)
-      << "_1" << md->anchor() << "\" kind=\"" << memType << "\"><name>"
-      << convertToXML(md->name()) << "</name></member>" << endl;
+   QString nameStr = md->name();
+   stripAnonymousMarkers(nameStr);
 
-   QString scopeName;
-   if (md->getClassDef()) {
-      scopeName = md->getClassDef()->name();
+   t_index << "    <member refid=\"" << memberOutputFileBase(md)
+           << "_1" << md->anchor() << "\" kind=\"" << memType << "\"><name>"
+           << convertToXML(nameStr) << "</name></member>" << endl;
 
-   } else if (md->getNamespaceDef()) {
-      scopeName = md->getNamespaceDef()->name();
-   }
+   if (groupMember)  {
+      t << "      <member refid=\""
+        << md->getGroupDef()->getOutputFileBase()
+        << "_1" << md->anchor() << "\" kind=\"" << memType << "\"><name>"
+        << convertToXML(nameStr) << "</name></member>\n";
 
-   t << "      <memberdef kind=\"";
-   //enum { define_t,variable_t,typedef_t,enum_t,function_t } xmlType = function_t;
-   t << memType << "\" id=\"";
+    return;
 
-   if (md->getGroupDef() && def->definitionType() == Definition::TypeGroup) {
-      t << md->getGroupDef()->getOutputFileBase();
    } else {
-      t << memberOutputFileBase(md);
-   }
+      t << "      <memberdef kind=\"";
 
-   t << "_1"      // encoded `:' character (see util.cpp:convertNameToFile)
-     << md->anchor();
+      //enum { define_t,variable_t,typedef_t,enum_t,function_t } xmlType = function_t;
+      t << memType << "\" id=\"";
+
+      t << memberOutputFileBase(md);
+
+      t << "_1"      // encoded `:' character (see util.cpp:convertNameToFile)
+        << md->anchor();
+   }
    t << "\" prot=\"";
 
    switch (md->protection()) {
@@ -728,6 +731,9 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << " constexpr=\"yes\"";
    }
 
+   if (md->isExternal())   {
+      t << " extern=\"yes\"";
+   }
    if (isFunc) {
       const ArgumentList &al = md->getArgumentList();
 
@@ -800,7 +806,6 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
          t << " volatile=\"yes\"";
       }
 
-
       t << " virt=\"";
       switch (md->virtualness()) {
          case Normal:
@@ -847,33 +852,43 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       if (md->isInitonly()) {
          t << " initonly=\"yes\"";
       }
+
       if (md->isAttribute()) {
          t << " attribute=\"yes\"";
       }
+
       if (md->isUNOProperty()) {
          t << " property=\"yes\"";
       }
+
       if (md->isReadonly()) {
          t << " readonly=\"yes\"";
       }
+
       if (md->isBound()) {
          t << " bound=\"yes\"";
       }
+
       if (md->isRemovable()) {
          t << " removable=\"yes\"";
       }
+
       if (md->isConstrained()) {
          t << " constrained=\"yes\"";
       }
+
       if (md->isTransient()) {
          t << " transient=\"yes\"";
       }
+
       if (md->isMaybeVoid()) {
          t << " maybevoid=\"yes\"";
       }
+
       if (md->isMaybeDefault()) {
          t << " maybedefault=\"yes\"";
       }
+
       if (md->isMaybeAmbiguous()) {
          t << " maybeambiguous=\"yes\"";
       }
@@ -998,13 +1013,24 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       writeMemberTemplateLists(md, t);
 
       QString typeStr = md->typeString();
+      stripAnonymousMarkers(typeStr);
+
       stripQualifiers(typeStr);
 
       t << "        <type>";
       linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, typeStr);
 
       t << "</type>" << endl;
-      t << "        <definition>" << convertToXML(md->definition()) << "</definition>" << endl;
+
+      // **
+      QString md_definition = md->definition();
+
+      if (md->isUsingDeclaration()) {
+         md_definition += " = " + md->getInitializer();
+      }
+
+      stripAnonymousMarkers(md_definition);
+      t << "        <definition>" << convertToXML(md_definition) << "</definition>" << endl;
       t << "        <argsstring>" << convertToXML(md->argsString()) << "</argsstring>" << endl;
    }
 
@@ -1014,7 +1040,13 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       t << "</type>" << endl;
    }
 
-   t << "        <name>" << convertToXML(md->name()) << "</name>" << endl;
+   QString qualifiedNameStr = md->qualifiedName();;
+   stripAnonymousMarkers(qualifiedNameStr);
+
+   t << "        <name>" << convertToXML(nameStr) << "</name>" << endl;
+   if (nameStr != qualifiedNameStr)  {
+    t << "        <qualifiedname>" << convertToXML(qualifiedNameStr) << "</qualifiedname>\n";
+   }
 
    if (md->memberType() == MemberDefType::Property) {
       if (md->isReadable()) {
@@ -1055,7 +1087,18 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
    auto mdType = md->memberType();
 
-   if (isFunc) {
+   if (md->isFriendClass())  {
+      // for friend classes show a link to the class as a "parameter"
+
+      t << "        <param>\n";
+      t << "          <type>";
+
+      linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, nameStr);
+
+      t << "</type>\n";
+      t << "        </param>\n";
+
+   } else if (isFunc)  {
       // function
       const ArgumentList &declAl = md->getDeclArgumentList();
       const ArgumentList &defAl  = md->getArgumentList();
@@ -1132,6 +1175,14 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
       }
    }
 
+   QString requiresClause = md->getRequires();
+
+   if (! requiresClause.isEmpty())  {
+      t << "    <requiresclause>";
+      linkifyText(TextFragmentXml(t), md, md->getFileDef(), md, requiresClause);
+      t << "    </requiresclause>" << endl;
+   }
+
    if (md->hasOneLineInitializer() || md->hasMultiLineInitializer()) {
       t << "        <initializer>";
       linkifyText(TextFragmentXml(t), def, md->getBodyDef(), md, md->getInitializer());
@@ -1152,9 +1203,9 @@ static void generateXMLForMember(QSharedPointer<MemberDef> md, QTextStream &ti, 
 
          for (const auto &emd : *enumFields) {
 
-            ti << "    <member refid=\"" << memberOutputFileBase(md)
-               << "_1" << emd->anchor() << "\" kind=\"enumvalue\"><name>"
-               << convertToXML(emd->name()) << "</name></member>" << endl;
+            t_index << "    <member refid=\"" << memberOutputFileBase(md)
+                    << "_1" << emd->anchor() << "\" kind=\"enumvalue\"><name>"
+                    << convertToXML(emd->name()) << "</name></member>" << endl;
 
             t << "        <enumvalue id=\"" << memberOutputFileBase(md) << "_1"
               << emd->anchor() << "\" prot=\"";
@@ -1262,8 +1313,8 @@ static bool memberVisible(QSharedPointer<Definition> def, QSharedPointer<MemberD
    return xmlIncludeNsMembers || def->definitionType() != Definition::TypeFile || md->getNamespaceDef() == nullptr;
 }
 
-static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QTextStream &t, QSharedPointer<MemberList> ml,
-                               const QString &kind, const QString &header = QString(), const QString &documentation = QString() )
+static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &t_index, QTextStream &t, QSharedPointer<MemberList> ml,
+      const QString &kind, const QString &header = QString(), const QString &documentation = QString() )
 {
    if (ml == nullptr) {
       return;
@@ -1295,7 +1346,7 @@ static void generateXMLSection(QSharedPointer<Definition> d, QTextStream &ti, QT
 
    for (const auto &md : *ml) {
       if (memberVisible(d, md)) {
-         generateXMLForMember(md, ti, t, d);
+         generateXMLForMember(md, t_index, t, d);
       }
 
    }
@@ -1394,7 +1445,16 @@ static void writeInnerClasses(const ClassSDict &cl, QTextStream &t)
          t << "\">" << convertToXML(cd->name()) << "</innerclass>" << endl;
       }
    }
+}
 
+static void writeInnerConcepts(const ConceptSDict &cl, QTextStream &t)
+{
+   for (const auto &cd : cl) {
+      if (cd->isHidden()) {
+         t << "    <innerconcept refid=\"" << cd->getOutputFileBase()
+           << "\">" << convertToXML(cd->name()) << "</innerconcept>\n";
+      }
+   }
 }
 
 static void writeInnerNamespaces(const NamespaceSDict &nl, QTextStream &t)
@@ -1451,7 +1511,29 @@ static void writeInnerDirs(const SortedList<QSharedPointer<DirDef>> dl, QTextStr
    }
 }
 
-static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
+static void writeIncludeInfo(const IncludeInfo &info, QTextStream &t)
+{
+   QString name = info.includeName;
+
+   if (name.isEmpty() && info.fileDef) {
+      name = info.fileDef->docName();
+   }
+
+   if (! name.isEmpty()) {
+      t << "    <includes";
+
+      if (info.fileDef && ! info.fileDef->isReference()) {
+         // TODO: support external references
+         t << " refid=\"" << info.fileDef->getOutputFileBase() << "\"";
+      }
+
+      t << " local=\"" << ((info.local) ? "yes" : "no") << "\">";
+      t << name;
+      t << "</includes>\n";
+   }
+}
+
+static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &t_index)
 {
    if (cd->isReference()) {
       return;   // skip external references
@@ -1475,9 +1557,9 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
 
    msg("Generating XML output for class %s\n", csPrintable(cd->name()));
 
-   ti << "  <compound refid=\"" << classOutputFileBase(cd)
-      << "\" kind=\"" << cd->compoundTypeString()
-      << "\"><name>" << convertToXML(cd->name()) << "</name>" << endl;
+   t_index << "  <compound refid=\"" << classOutputFileBase(cd)
+           << "\" kind=\"" << cd->compoundTypeString()
+           << "\"><name>" << convertToXML(cd->name()) << "</name>" << endl;
 
    static const QString xmlOutDir = Config::getString("xml-output");
    QString fileName = xmlOutDir + "/" + classOutputFileBase(cd) + ".xml";
@@ -1529,7 +1611,11 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
 
    t << "\">" << endl;
    t << "    <compoundname>";
-   writeXMLString(t, cd->name());
+
+   QString nameStr = cd->name();
+   stripAnonymousMarkers(nameStr);
+
+   writeXMLString(t, nameStr);
    t << "</compoundname>" << endl;
 
    if (cd->baseClasses()) {
@@ -1655,13 +1741,19 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    writeTemplateList(cd, t);
 
    for (const auto &mg : cd->getMemberGroupSDict() ) {
-      generateXMLSection(cd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
+      generateXMLSection(cd, t_index, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
    for (const auto &ml : cd->getMemberLists() ) {
       if ((ml->listType() & MemberListType_detailedLists) == 0) {
-         generateXMLSection(cd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
+         generateXMLSection(cd, t_index, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
+   }
+
+   if (! cd->getRequires().isEmpty()) {
+      t << "    <requiresclause>";
+      linkifyText(TextFragmentXml(t), cd, cd->getFileDef(), QSharedPointer<Definition>(), cd->getRequires());
+      t << "    </requiresclause>\n";
    }
 
    t << "    <briefdescription>" << endl;
@@ -1707,10 +1799,70 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &ti)
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
-   ti << "  </compound>" << endl;
+   t_index << "  </compound>" << endl;
 }
 
-static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream &ti)
+static void generateXMLForConcept(QSharedPointer<ConceptDef> conceptDef, QTextStream &t_index)
+{
+   if (conceptDef->isReference() || conceptDef->isHidden()) {
+      // skip external references
+      return;
+   }
+
+   t_index << "  <compound refid=\"" << conceptDef->getOutputFileBase()
+           << "\" kind=\"concept\"" << "><name>"
+           << convertToXML(conceptDef->name()) << "</name>\n";
+
+   static const QString xmlOutDir = Config::getString("xml-output");
+   QString fileName = xmlOutDir + "/" + conceptDef->getOutputFileBase() + ".xml";
+
+   QFile fi(fileName);
+
+   if (! fi.open(QIODevice::WriteOnly)) {
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), fi.error());
+      return;
+   }
+
+   QTextStream t(&fi);
+   writeXMLHeader(t);
+
+   t << "  <compounddef id=\"" << conceptDef->getOutputFileBase()
+     << "\" kind=\"concept\">\n";
+   t << "    <compoundname>";
+
+   QString nameStr = conceptDef->name();
+   stripAnonymousMarkers(nameStr);
+
+   writeXMLString(t, nameStr);
+
+   t << "</compoundname>\n";
+   writeIncludeInfo(conceptDef->getIncludeInfo(), t);
+   writeTemplateList(conceptDef, t);
+
+   t << "    <initializer>";
+   linkifyText(TextFragmentXml(t), conceptDef, conceptDef->getFileDef(), QSharedPointer<Definition>(), conceptDef->conceptDecl());
+   t << "</initializer>\n";
+
+   t << "    <briefdescription>\n";
+   writeXMLDocBlock(t, conceptDef->briefFile(), conceptDef->briefLine(), conceptDef, QSharedPointer<MemberDef>(), conceptDef->briefDescription());
+   t << "    </briefdescription>\n";
+
+   t << "    <detaileddescription>\n";
+   writeXMLDocBlock(t, conceptDef->docFile(), conceptDef->docLine(), conceptDef, QSharedPointer<MemberDef>(), conceptDef->documentation());
+   t << "    </detaileddescription>\n";
+
+   t << "    <location file=\""
+     << convertToXML(stripFromPath(conceptDef->getDefFileName())) << "\" line=\""
+     << conceptDef->getDefLine() << "\"" << " column=\""
+     << conceptDef->getDefColumn() << "\"/>\n" ;
+
+   t << "  </compounddef>\n";
+   t << "</doxypress>\n";
+
+   t_index << "  </compound>\n";
+}
+
+static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream &t_index)
 {
    // - files containing (parts of) the namespace definition
 
@@ -1719,9 +1871,9 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
       return;
    }
 
-   ti << "  <compound refid=\"" << nd->getOutputFileBase()
-      << "\" kind=\"namespace\"" << "><name>"
-      << convertToXML(nd->name()) << "</name>" << endl;
+   t_index << "  <compound refid=\"" << nd->getOutputFileBase()
+           << "\" kind=\"namespace\"" << "><name>"
+           << convertToXML(nd->name()) << "</name>" << endl;
 
    QString outputDirectory = Config::getString("xml-output");
    QString fileName = outputDirectory + "/" + nd->getOutputFileBase() + ".xml";
@@ -1744,19 +1896,23 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
      << langToString(nd->getLanguage()) << "\">" << endl;
    t << "    <compoundname>";
 
-   writeXMLString(t, nd->name());
+   QString nameStr = nd->name();
+   stripAnonymousMarkers(nameStr);
+
+   writeXMLString(t, nameStr);
    t << "</compoundname>" << endl;
 
    writeInnerClasses(nd->getClassSDict(), t);
+   writeInnerConcepts(nd->getConceptSDict(), t);
    writeInnerNamespaces(nd->getNamespaceSDict(), t);
 
    for (const auto &mg : nd->getMemberGroupSDict()) {
-      generateXMLSection(nd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
+      generateXMLSection(nd, t_index, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
    for (const auto &ml : nd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
-         generateXMLSection(nd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
+         generateXMLSection(nd, t_index, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
    }
 
@@ -1776,10 +1932,10 @@ static void generateXMLForNamespace(QSharedPointer<NamespaceDef> nd, QTextStream
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
-   ti << "  </compound>" << endl;
+   t_index << "  </compound>" << endl;
 }
 
-static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
+static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &t_index)
 {
    static const QString outputDirectory = Config::getString("xml-output");
    static const bool xmlProgramListing  = Config::getBool("xml-program-listing");
@@ -1789,9 +1945,9 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       return;
    }
 
-   ti << "  <compound refid=\"" << fd->getOutputFileBase()
-      << "\" kind=\"file\"><name>" << convertToXML(fd->name())
-      << "</name>" << endl;
+   t_index << "  <compound refid=\"" << fd->getOutputFileBase()
+           << "\" kind=\"file\"><name>" << convertToXML(fd->name())
+           << "</name>" << endl;
 
    QString fileName = outputDirectory + "/" + fd->getOutputFileBase() + ".xml";
 
@@ -1803,7 +1959,6 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    }
 
    QTextStream t(&f);
-   // t.setEncoding(QTextStream::UnicodeUTF8);
 
    writeXMLHeader(t);
 
@@ -1861,21 +2016,17 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
       t << "    </invincdepgraph>" << endl;
    }
 
-   if (! fd->getClassSDict().isEmpty()) {
-      writeInnerClasses(fd->getClassSDict(), t);
-   }
-
-   if (! fd->getNamespaceSDict().isEmpty() ) {
-      writeInnerNamespaces(fd->getNamespaceSDict(), t);
-   }
+   writeInnerClasses(fd->getClassSDict(), t);
+   writeInnerConcepts(fd->getConceptSDict(), t);
+   writeInnerNamespaces(fd->getNamespaceSDict(), t);
 
    for (const auto &mg : fd->getMemberGroupSDict() ) {
-      generateXMLSection(fd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
+      generateXMLSection(fd, t_index, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
    for (const auto &ml : fd->getMemberLists()) {
       if ((ml->listType()&MemberListType_declarationLists) != 0) {
-         generateXMLSection(fd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
+         generateXMLSection(fd, t_index, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
    }
 
@@ -1896,31 +2047,31 @@ static void generateXMLForFile(QSharedPointer<FileDef> fd, QTextStream &ti)
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
-   ti << "  </compound>" << endl;
+   t_index << "  </compound>" << endl;
 }
 
-static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
+static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &t_index)
 {
    static const QString outputDirectory = Config::getString("xml-output");
 
    if (gd->isReference()) {
-      return;   // skip external references
+      // skip external references
+      return;
    }
 
-   ti << "  <compound refid=\"" << gd->getOutputFileBase()
-      << "\" kind=\"group\"><name>" << convertToXML(gd->name()) << "</name>" << endl;
+   t_index << "  <compound refid=\"" << gd->getOutputFileBase()
+           << "\" kind=\"group\"><name>" << convertToXML(gd->name()) << "</name>" << endl;
 
    QString fileName = outputDirectory + "/" + gd->getOutputFileBase() + ".xml";
 
    QFile f(fileName);
 
    if (! f.open(QIODevice::WriteOnly)) {
-       err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
+      err("Unable to open file %s for writing, OS Error #: %d\n", csPrintable(fileName), f.error());
       return;
    }
 
    QTextStream t(&f);
-   //t.setEncoding(QTextStream::UnicodeUTF8);
 
    writeXMLHeader(t);
 
@@ -1931,17 +2082,18 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
 
    writeInnerFiles(gd->getFiles(), t);
    writeInnerClasses(gd->getClasses(), t);
+   writeInnerConcepts(gd->getConceptSDict(), t);
    writeInnerNamespaces(gd->getNamespaces(), t);
    writeInnerPages(gd->getPages(), t);
    writeInnerGroups(gd->getSubGroups(), t);
 
    for (const auto &mg : gd->getMemberGroupSDict()) {
-      generateXMLSection(gd, ti, t, mg->members(), "user-defined", mg->header(), mg->documentation());
+      generateXMLSection(gd, t_index, t, mg->members(), "user-defined", mg->header(), mg->documentation());
    }
 
    for (const auto &ml : gd->getMemberLists()) {
       if ((ml->listType() & MemberListType_declarationLists) != 0) {
-         generateXMLSection(gd, ti, t, ml, g_xmlSectionMapper.value(ml->listType()));
+         generateXMLSection(gd, t_index, t, ml, g_xmlSectionMapper.value(ml->listType()));
       }
    }
 
@@ -1956,10 +2108,10 @@ static void generateXMLForGroup(QSharedPointer<GroupDef> gd, QTextStream &ti)
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
-   ti << "  </compound>" << endl;
+   t_index << "  </compound>" << endl;
 }
 
-static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
+static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &t_index)
 {
    static const QString outputDirectory = Config::getString("xml-output");
 
@@ -1967,9 +2119,9 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
       return;   // skip external references
    }
 
-   ti << "  <compound refid=\"" << dd->getOutputFileBase()
-      << "\" kind=\"dir\"><name>" << convertToXML(dd->displayName())
-      << "</name>" << endl;
+   t_index << "  <compound refid=\"" << dd->getOutputFileBase()
+           << "\" kind=\"dir\"><name>" << convertToXML(dd->displayName())
+           << "</name>" << endl;
 
    QString fileName = outputDirectory + "/" + dd->getOutputFileBase() + ".xml";
 
@@ -1982,7 +2134,6 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
 
    QTextStream t(&f);
 
-   //t.setEncoding(QTextStream::UnicodeUTF8);
    writeXMLHeader(t);
 
    t << "  <compounddef id=\""
@@ -2002,10 +2153,10 @@ static void generateXMLForDir(QSharedPointer<DirDef> dd, QTextStream &ti)
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
-   ti << "  </compound>" << endl;
+   t_index << "  </compound>" << endl;
 }
 
-static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool isExample)
+static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &t_index, bool isExample)
 {
    static const QString outputDirectory = Config::getString("xml-output");
    static const QString projectName     = Config::getString("project-name");
@@ -2025,9 +2176,9 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
       pageName = "indexpage";   // to prevent overwriting the generated index page
    }
 
-   ti << "  <compound refid=\"" << pageName
-      << "\" kind=\"" << kindName << "\"><name>" << convertToXML(pd->name())
-      << "</name>" << endl;
+   t_index << "  <compound refid=\"" << pageName
+           << "\" kind=\"" << kindName << "\"><name>" << convertToXML(pd->name())
+           << "</name>" << endl;
 
    QString fileName = outputDirectory + "/" + pageName + ".xml";
 
@@ -2039,7 +2190,6 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    }
 
    QTextStream t(&f);
-   // t.setEncoding(QTextStream::UnicodeUTF8);
 
    writeXMLHeader(t);
 
@@ -2167,7 +2317,7 @@ static void generateXMLForPage(QSharedPointer<PageDef> pd, QTextStream &ti, bool
    t << "  </compounddef>" << endl;
    t << "</doxypress>" << endl;
 
-   ti << "  </compound>" << endl;
+   t_index << "  </compound>" << endl;
 }
 
 void generateXML_output()
@@ -2246,6 +2396,11 @@ void generateXML_output()
 
    for (const auto &cd : Doxy_Globals::classSDict) {
        generateXMLForClass(cd, t);
+   }
+
+   for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+      msg("Generating XML output for concept %s\n", csPrintable(conceptDef->name()));
+      generateXMLForConcept(conceptDef, t);
    }
 
    for (const auto &nd : Doxy_Globals::namespaceSDict) {
