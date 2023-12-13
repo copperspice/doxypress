@@ -464,6 +464,11 @@ void RTFGenerator::startIndexSection(IndexSections is)
          beginRTFChapter();
          break;
 
+      case isConceptIndex:
+         //Concept Index
+         beginRTFChapter();
+         break;
+
       case isClassHierarchyIndex:
          //Hierarchical Index
          DBG_RTF(m_textStream << "{\\comment start classhierarchy}\n")
@@ -535,6 +540,17 @@ void RTFGenerator::startIndexSection(IndexSections is)
             if (nd->isLinkableInProject()) {
                beginRTFChapter();
                found = true;
+            }
+         }
+      }
+      break;
+
+      case isConceptDocumentation: {
+         // Concept Documentation
+         for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+            if (conceptDef->isLinkableInProject()) {
+               beginRTFChapter();
+               break;
             }
          }
       }
@@ -745,6 +761,12 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
          m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"namespaces.rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
          break;
 
+      case isConceptIndex:
+         m_textStream  << "\\par " << rtf_Style_Reset << "\n";
+         m_textStream  << "{\\tc \\v " << theTranslator->trConceptList() << "}\n";
+         m_textStream  << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"concepts.rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
+         break;
+
       case isClassHierarchyIndex:
          m_textStream  << "\\par " << rtf_Style_Reset << endl;
          m_textStream  << "{\\tc \\v " << theTranslator->trHierarchicalIndex() << "}" << endl;
@@ -837,6 +859,27 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
             }
 
             ++iter;
+         }
+      }
+      break;
+
+      case isConceptDocumentation: {
+         bool first = true;
+
+         for (const auto &concepetDef : Doxy_Globals::conceptSDict) {
+            if (concepetDef->isLinkableInProject()) {
+               m_textStream << "\\par " << rtf_Style_Reset << "\n";
+
+               if (! first) {
+                  beginRTFSection();
+               }
+
+               first = false;
+
+               m_textStream << "{\\field\\fldedit{\\*\\fldinst INCLUDETEXT \"";
+               m_textStream << concepetDef->getOutputFileBase();
+               m_textStream << ".rtf\" \\\\*MERGEFORMAT}{\\fldrslt includedstuff}}\n";
+            }
          }
       }
       break;
