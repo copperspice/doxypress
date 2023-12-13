@@ -419,6 +419,7 @@ void DocbookGenerator::startIndexSection(IndexSections is)
       case isModuleIndex:
       case isDirIndex:
       case isNamespaceIndex:
+      case isConceptIndex:
       case isClassHierarchyIndex:
          break;
 
@@ -445,6 +446,11 @@ void DocbookGenerator::startIndexSection(IndexSections is)
          break;
 
       case isNamespaceDocumentation:
+         m_textStream << "<chapter>\n";
+         m_textStream << "    <title>";
+         break;
+
+      case isConceptDocumentation:
          m_textStream << "<chapter>\n";
          m_textStream << "    <title>";
          break;
@@ -504,6 +510,11 @@ void DocbookGenerator::endIndexSection(IndexSections is)
          // m_textStream << "</chapter>" << endl;
          break;
 
+      case isConceptIndex:
+         // m_textStream << "<xi:include href=\"concepts.xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>";
+         // m_textStream << "</chapter>\n";
+         break;
+
       case isClassHierarchyIndex:
          // m_textStream << "<xi:include href=\"hierarchy.xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>";
          // m_textStream<< "</chapter>" << endl;
@@ -558,6 +569,19 @@ void DocbookGenerator::endIndexSection(IndexSections is)
             if (nd->isLinkableInProject()) {
                m_textStream << "<xi:include href=\"" << nd->getOutputFileBase()
                             << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
+            }
+         }
+      }
+
+      m_textStream << "</chapter>\n";
+      break;
+      case isConceptDocumentation: {
+         m_textStream << "</title>\n";
+
+         for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+            if (conceptDef->isLinkableInProject()) {
+               m_textStream << "<xi:include href=\"" << conceptDef->getOutputFileBase()
+                            << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>\n";
             }
          }
       }
