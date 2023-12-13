@@ -371,45 +371,49 @@ static void writeMakeBat()
    }
 
    QTextStream t(&file);
-   t << "set Dir_Old=%cd%\n";
-   t << "cd /D %~dp0\n\n";
-   t << "del /s /f *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out *.brf *.blg *.bbl refman.pdf\n\n";
+
+   t << "pushd %~dp0\r\n";
+   t << "if not %errorlevel% == 0 goto :end\r\n";
+   t << "\r\n";
+
+   t << "del /s /f *.ps *.dvi *.aux *.toc *.idx *.ind *.ilg *.log *.out *.brf *.blg *.bbl refman.pdf\r\n\r\n";
+   t << "\r\n";
 
    if (! usePDFLatex) {
       // use plain old latex
 
-      t << "set LATEX_CMD=" << latex_command << "\n";
-      t << "%LATEX_CMD% refman.tex\n";
+      t << "set LATEX_CMD=" << latex_command << "\r\n";
+      t << "%LATEX_CMD% refman.tex\r\n";
 
-      t << "echo ----\n";
-      t << mkidx_command << " refman.idx\n";
+      t << "echo ----\r\n";
+      t << mkidx_command << " refman.idx\r\n";
 
       if (generateBib) {
-         t << "bibtex refman\n";
-         t << "echo ----\n";
-         t << "\t%LATEX_CMD% refman.tex\n";
+         t << "bibtex refman\r\n";
+         t << "echo ----\r\n";
+         t << "\t%LATEX_CMD% refman.tex\r\n";
       }
 
-      t << "setlocal enabledelayedexpansion\n";
-      t << "set count=8\n";
-      t << ":repeat\n";
-      t << "set content=X\n";
-      t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
+      t << "setlocal enabledelayedexpansion\r\n";
+      t << "set count=8\r\n";
+      t << ":repeat\r\n";
+      t << "set content=X\r\n";
+      t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\r\n";
 
       t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )"
-                  " do set content=\"%%~T\"\n";
+                  " do set content=\"%%~T\"\r\n";
 
-      t << "if !content! == X goto :skip\n";
-      t << "set /a count-=1\n";
-      t << "if !count! EQU 0 goto :skip\n\n";
-      t << "echo ----\n";
-      t << "%LATEX_CMD% refman.tex\n";
-      t << "goto :repeat\n";
-      t << ":skip\n";
-      t << "endlocal\n";
-      t << mkidx_command << " refman.idx\n";
-      t << "%LATEX_CMD% refman.tex\n";
-      t << "dvips -o refman.ps refman.dvi\n";
+      t << "if !content! == X goto :skip\r\n";
+      t << "set /a count-=1\r\n";
+      t << "if !count! EQU 0 goto :skip\r\n\r\n";
+      t << "echo ----\r\n";
+      t << "%LATEX_CMD% refman.tex\r\n";
+      t << "goto :repeat\r\n";
+      t << ":skip\r\n";
+      t << "endlocal\r\n";
+      t << mkidx_command << " refman.idx\r\n";
+      t << "%LATEX_CMD% refman.tex\r\n";
+      t << "dvips -o refman.ps refman.dvi\r\n";
 
       QString gsPath = QStandardPaths::findExecutable("gswin64c");
 
@@ -422,45 +426,48 @@ static void writeMakeBat()
       }
 
       t << gsPath + " -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite "
-        "-sOutputFile=refman.pdf -c save pop -f refman.ps\n";
+        "-sOutputFile=refman.pdf -c save pop -f refman.ps\r\n";
 
    } else {
       // use pdflatex
 
-      t << "set LATEX_CMD=" << latex_command << "\n";
-      t << "%LATEX_CMD% refman\n";
-      t << "echo ----\n";
-      t << mkidx_command << " refman.idx\n";
+      t << "set LATEX_CMD=" << latex_command << "\r\n";
+      t << "%LATEX_CMD% refman\r\n";
+      t << "echo ----\r\n";
+      t << mkidx_command << " refman.idx\r\n";
 
       if (generateBib) {
-         t << "bibtex refman" << endl;
-         t << "%LATEX_CMD% refman" << endl;
+         t << "bibtex refman\r\n";
+         t << "%LATEX_CMD% refman\r\n";
       }
 
-      t << "echo ----\n";
-      t << "%LATEX_CMD% refman\n\n";
-      t << "setlocal enabledelayedexpansion\n";
-      t << "set count=8\n";
-      t << ":repeat\n";
-      t << "set content=X\n";
-      t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\n";
+      t << "echo ----\r\n";
+      t << "%LATEX_CMD% refman\r\n\r\n";
+      t << "setlocal enabledelayedexpansion\r\n";
+      t << "set count=8\r\n";
+      t << ":repeat\r\n";
+      t << "set content=X\r\n";
+      t << "for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun LaTeX\" refman.log' ) do set content=\"%%~T\"\r\n";
 
       t << "if !content! == X for /F \"tokens=*\" %%T in ( 'findstr /C:\"Rerun to get cross-references right\" refman.log' )"
-               " do set content=\"%%~T\"\n";
+               " do set content=\"%%~T\"\r\n";
 
-      t << "if !content! == X goto :skip\n";
-      t << "set /a count-=1\n";
-      t << "if !count! EQU 0 goto :skip\n\n";
-      t << "echo ----\n";
-      t << "%LATEX_CMD% refman\n";
-      t << "goto :repeat\n";
-      t << ":skip\n";
-      t << "endlocal\n";
-      t << mkidx_command << " refman.idx\n";
-      t << "%LATEX_CMD% refman\n";
-      t << "cd /D %Dir_Old%\n";
-      t << "set Dir_Old=\n";
+      t << "if !content! == X goto :skip\r\n";
+      t << "set /a count-=1\r\n";
+      t << "if !count! EQU 0 goto :skip\r\n\r\n";
+      t << "echo ----\r\n";
+      t << "%LATEX_CMD% refman\r\n";
+      t << "goto :repeat\r\n";
+      t << ":skip\r\n";
+      t << "endlocal\r\n";
+      t << mkidx_command << " refman.idx\r\n";
+      t << "%LATEX_CMD% refman\r\n";
+
    }
+
+   t << "popd\r\n";
+   t << "\r\n";
+   t << ":end\r\n";
 #endif
 
 }
@@ -983,6 +990,17 @@ void LatexGenerator::startIndexSection(IndexSections is)
          m_textStream << "{"; //Namespace Index}\"
          break;
 
+      case isConceptIndex:
+         if (compactLatex) {
+            m_textStream << "\\doxysection";
+
+         } else {
+            m_textStream << "\\chapter";
+         }
+
+         m_textStream << "{";
+         break;
+
       case isClassHierarchyIndex:
          if (compactLatex) {
             m_textStream << "\\doxysection";
@@ -1085,6 +1103,24 @@ void LatexGenerator::startIndexSection(IndexSections is)
                }
                m_textStream << "{";    // Namespace Documentation}\n":
                found = true;
+            }
+         }
+      }
+      break;
+
+      case isConceptDocumentation:
+      {
+         for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+            if (conceptDef->isLinkableInProject()) {
+               if (compactLatex) {
+                  m_textStream << "\\doxysection";
+               } else {
+                  m_textStream << "\\chapter";
+               }
+
+               m_textStream << "{";    // Concept Documentation}\n":
+
+               break;
             }
          }
       }
@@ -1208,6 +1244,10 @@ void LatexGenerator::endIndexSection(IndexSections is)
          m_textStream << "}\n\\input{namespaces}\n";
          break;
 
+      case isConceptIndex:
+         m_textStream << "}\n\\input{concepts}\n";
+         break;
+
       case isClassHierarchyIndex:
          m_textStream << "}\n\\input{hierarchy}\n";
          break;
@@ -1278,6 +1318,24 @@ void LatexGenerator::endIndexSection(IndexSections is)
                   m_textStream << "\\input";
                   m_textStream << "{" << nd->getOutputFileBase() << "}\n";
                }
+            }
+         }
+      }
+      break;
+
+      case isConceptDocumentation:
+      {
+         bool found = false;
+
+         for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+            if (conceptDef->isLinkableInProject()) {
+
+               if (! found) {
+                  m_textStream << "}\n";
+                  found = true;
+               }
+
+               m_textStream << "\\input{" << conceptDef->getOutputFileBase() << "}\n";
             }
          }
       }
@@ -1641,10 +1699,23 @@ void LatexGenerator::startTitleHead(const QString &fileName)
 
 void LatexGenerator::endTitleHead(const QString &fileName, const QString &name)
 {
+   static const bool latexHyperPdf = Config::getBool("latex-hyper-pdf");
+   static const bool latextPdf     = Config::getBool("latex-pdf");
+
    m_textStream << "}" << endl;
 
+
+
+   if (latexHyperPdf && latextPdf && ! fileName.isEmpty()) {
+      m_textStream << "\\hypertarget{" << stripPath(fileName) << "}{}";
+   }
+   QString fn = stripPath(fileName);
+
+   if (! fn.isEmpty()) {
+      m_textStream << "\\label{" << fn << "}";
+   }
    if (! name.isEmpty()) {
-      m_textStream << "\\label{" << stripPath(fileName) << "}\\index{";
+      m_textStream << "\\index{";
       m_textStream << latexEscapeLabelName(name);
 
       m_textStream << "@{";
@@ -2026,7 +2097,6 @@ void LatexGenerator::endMemberTemplateParams(const QString &, const QString &)
 
 void LatexGenerator::startMemberItem(const QString &, int annoType, const QString &, bool)
 {
-
    if (! m_insideTabbing) {
       m_textStream << "\\item " << endl;
       m_templateMemberItem = (annoType == 3);
