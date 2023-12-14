@@ -290,7 +290,7 @@ bool srcFileVisibleInIndex(QSharedPointer<FileDef> fd);
 void setAnchors(QSharedPointer<MemberList> ml);
 
 QString transcodeToQString(const QByteArray &input);
-QString tempArgListToString(const ArgumentList &al, SrcLangExt lang);
+QString tempArgListToString(const ArgumentList &al, SrcLangExt lang, bool includeDefault = true);
 
 QString upperCaseFirstLetter(QString &&text);
 

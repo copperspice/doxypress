@@ -5512,7 +5512,7 @@ bool Doxy_Work::findTemplateInstanceRelation(QSharedPointer<Entry> root, QShared
    Debug::print(Debug::Classes, 0, "    derived from template %s with parameters %s\n",
                 csPrintable(templateClass->name()), csPrintable(templSpec));
 
-   bool existingClass = (templSpec == tempArgListToString(templateClass->getTemplateArgumentList(), root->m_srcLang) );
+   bool existingClass = (templSpec == tempArgListToString(templateClass->getTemplateArgumentList(), root->m_srcLang, false));
 
    if (existingClass) {
       return true;

@@ -2144,63 +2144,71 @@ QString argListToString(const ArgumentList &argList, bool useCanonicalType, bool
    return removeRedundantWhiteSpace(result);
 }
 
-QString tempArgListToString(const ArgumentList &argList, SrcLangExt lang)
+QString tempArgListToString(const ArgumentList &argList, SrcLangExt lang, bool includeDefault)
 {
-   QString result = "<";
+   QString result;
 
-   auto nextItem = argList.begin();
+   if (argList.listEmpty()) {
+      return result;
+   }
 
-   for (auto &arg : argList)  {
-      ++nextItem;
+   result = "<";
+   bool first = true;
 
-      if (! arg.name.isEmpty()) {
-         // add template argument name
+   for (const auto &arg : argList)  {
 
-         if (arg.type.left(4) == "out") {
-            // C# covariance
-            result += "out ";
-
-         } else if (arg.type.left(3) == "in") {
-            // C# contravariance
-            result += "in ";
+      if (arg.defval.isEmpty() || includeDefault) {
+         if (! first) {
+            result += ", ";
          }
 
-         if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
-            result += arg.type + " ";
-         }
+         if (! arg.name.isEmpty()) {
+            // add template argument name
 
-         result += arg.name;
+            if (arg.type.left(4) == "out") {
+               // C# covariance
+               result += "out ";
 
-      } else {
-         // extract name from type
-         int i = arg.type.length() - 1;
-
-         while (i >= 0 && isId(arg.type.at(i))) {
-            i--;
-         }
-
-         if (i > 0) {
-            result += arg.type.right(arg.type.length() - i - 1);
-
-            if (arg.type.contains("..."))   {
-               result += "...";
+            } else if (arg.type.left(3) == "in") {
+               // C# contravariance
+               result += "in ";
             }
 
+            if (lang == SrcLangExt_Java || lang == SrcLangExt_CSharp) {
+               result += arg.type + " ";
+            }
+
+            result += arg.name;
+
          } else {
-            // nothing found -> take whole name
-            result += arg.type;
+            // extract name from type
+            int i = arg.type.length() - 1;
+
+            while (i >= 0 && isId(arg.type.at(i))) {
+               --i;
+            }
+
+            if (i > 0) {
+               result += arg.type.right(arg.type.length() - i - 1);
+
+               if (arg.type.contains("..."))   {
+                  result += "...";
+               }
+
+            } else {
+               // nothing found -> take whole name
+               result += arg.type;
+            }
          }
-      }
 
-      if (! arg.typeConstraint.isEmpty() && lang == SrcLangExt_Java) {
-         // TODO: now Java specific, C# has where...
+         if (! arg.typeConstraint.isEmpty() && lang == SrcLangExt_Java) {
+            // TODO: now Java specific, C# has where
 
-         result += " extends ";
-         result += arg.typeConstraint;
-      }
+            result += " extends ";
+            result += arg.typeConstraint;
+         }
 
-      if (nextItem != argList.end()) {
-         result += ", ";
+         first = false;
       }
    }
 
