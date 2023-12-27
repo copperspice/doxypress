@@ -414,6 +414,10 @@ static QString definitionToName(QSharedPointer<Definition> ctx)
             retval = "namespace";
             break;
 
+         case Definition::TypeConcept:
+            retval = "concept";
+            break;
+
          case Definition::TypeGroup:
             retval = "group";
             break;
@@ -524,20 +528,22 @@ void SearchIndex_External::write(const QString &fileName)
 
 #define SEARCH_INDEX_ALL         0
 #define SEARCH_INDEX_CLASSES     1
-#define SEARCH_INDEX_NAMESPACES  2
-#define SEARCH_INDEX_FILES       3
-#define SEARCH_INDEX_FUNCTIONS   4
-#define SEARCH_INDEX_VARIABLES   5
-#define SEARCH_INDEX_TYPEDEFS    6
-#define SEARCH_INDEX_ENUMS       7
-#define SEARCH_INDEX_ENUMVALUES  8
-#define SEARCH_INDEX_PROPERTIES  9
-#define SEARCH_INDEX_EVENTS     10
-#define SEARCH_INDEX_RELATED    11
-#define SEARCH_INDEX_DEFINES    12
-#define SEARCH_INDEX_GROUPS     13
-#define SEARCH_INDEX_PAGES      14
-#define NUM_SEARCH_INDICES      15
+#define SEARCH_INDEX_CONCEPTS    2
+#define SEARCH_INDEX_NAMESPACES  3
+#define SEARCH_INDEX_FILES       4
+#define SEARCH_INDEX_FUNCTIONS   5
+#define SEARCH_INDEX_VARIABLES   6
+#define SEARCH_INDEX_TYPEDEFS    7
+#define SEARCH_INDEX_ENUMS       8
+#define SEARCH_INDEX_ENUMVALUES  9
+#define SEARCH_INDEX_PROPERTIES 10
+#define SEARCH_INDEX_EVENTS     11
+#define SEARCH_INDEX_RELATED    12
+#define SEARCH_INDEX_DEFINES    13
+#define SEARCH_INDEX_GROUPS     14
+#define SEARCH_INDEX_PAGES      15
+
+#define NUM_SEARCH_INDICES      16
 
 static void addMemberToSearchIndex(LetterToIndexMap<SearchIndexMap> symbols[NUM_SEARCH_INDICES],
                                    int symbolCount[NUM_SEARCH_INDICES], QSharedPointer<MemberDef> md)
@@ -659,12 +665,12 @@ static QString searchId(const QString &str)
 }
 
 static int g_searchIndexCount[NUM_SEARCH_INDICES];
-
 static LetterToIndexMap<SearchIndexMap> g_searchIndexSymbols[NUM_SEARCH_INDICES];
 
 static const QString g_searchIndexName[NUM_SEARCH_INDICES] = {
    "all",
    "classes",
+   "concepts",
    "namespaces",
    "files",
    "functions",
@@ -687,6 +693,7 @@ class SearchIndexCategoryMapping
    SearchIndexCategoryMapping() {
       categoryLabel[SEARCH_INDEX_ALL]        = theTranslator->trAll();
       categoryLabel[SEARCH_INDEX_CLASSES]    = theTranslator->trClasses();
+      categoryLabel[SEARCH_INDEX_CONCEPTS]   = theTranslator->trConcepts();
       categoryLabel[SEARCH_INDEX_NAMESPACES] = theTranslator->trNamespace(true, false);
       categoryLabel[SEARCH_INDEX_FILES]      = theTranslator->trFile(true, false);
       categoryLabel[SEARCH_INDEX_FUNCTIONS]  = theTranslator->trFunctions();
@@ -724,6 +731,20 @@ void writeJavascriptSearchIndex()
 
          g_searchIndexCount[SEARCH_INDEX_ALL]++;
          g_searchIndexCount[SEARCH_INDEX_CLASSES]++;
+      }
+   }
+
+   // index concepts
+   for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+
+      QChar letter = charToLower(conceptDef->localName(), 0);
+
+      if (conceptDef->isLinkable() && isId(letter)) {
+         g_searchIndexSymbols[SEARCH_INDEX_ALL].insertElement(letter, conceptDef);
+         g_searchIndexSymbols[SEARCH_INDEX_CONCEPTS].insertElement(letter, conceptDef);
+
+         g_searchIndexCount[SEARCH_INDEX_ALL]++;
+         g_searchIndexCount[SEARCH_INDEX_CONCEPTS]++;
       }
    }
 
