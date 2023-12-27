@@ -6582,8 +6582,9 @@ void filterLatexString(QTextStream &t, const QString &text, bool insideTabbing, 
 
             default:
                if (! insideTabbing) {
-                  if ( (c >= 'A' && c <= 'Z' && prev_c != ' ' && prev_c != '\0') ||
-                       (c == ':' && prev_c != ':') || (prev_c == '.' && isId(c)) ) {
+                  if ( (c >= 'A' && c <= 'Z' && prev_c != ' ' && prev_c != '\0' &&
+                     ! (prev_c >='A' && prev_c <= 'Z') ) ||
+                     (c == ':' && prev_c != ':') || (prev_c == '.' && isId(c)) ) {
                      t << "\\+";
                   }
                }
