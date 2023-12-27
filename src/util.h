@@ -312,6 +312,7 @@ QSharedPointer<ClassDef> getResolvedClass(QSharedPointer<const Definition> scope
       QSharedPointer<MemberDef> *pTypeDef = nullptr, QString *pTemplSpec = nullptr, bool mayBeUnlinkable = false,
       bool mayBeHidden = false, QString *pResolvedType = nullptr );
 
+QSharedPointer<ConceptDef> getResolvedConcept(QSharedPointer<const Definition> scope, const QString &name);
 
 QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &key);
 

@@ -29,6 +29,7 @@
 #include <util.h>
 
 #include <config.h>
+#include <conceptdef.h>
 #include <default_args.h>
 #include <doxy_globals.h>
 #include <doxy_build_info.h>
@@ -480,6 +481,25 @@ QSharedPointer<ConceptDef> getConcept(const QString &name)
    }
 
    return retval;
+}
+
+QSharedPointer<ConceptDef> getResolvedConcept(QSharedPointer<const Definition> scope, const QString &name)
+{
+   QSharedPointer<ConceptDef> conceptDef;
+
+   while (scope && scope != Doxy_Globals::globalScope) {
+      conceptDef = getConcept(scope->name() + "::" + name);
+
+      if (conceptDef != nullptr) {
+         return conceptDef;
+      }
+
+      scope = scope->getOuterScope();
+   }
+
+   conceptDef = getConcept(name);
+
+   return conceptDef;
 }
 
 QSharedPointer<NamespaceDef> getResolvedNamespace(const QString &name)
