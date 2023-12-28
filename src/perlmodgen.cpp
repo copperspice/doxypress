@@ -1658,6 +1658,11 @@ static void addTemplateList(QSharedPointer<ClassDef> cd, PerlModOutput &output)
    addTemplateArgumentList(cd->getTemplateArgumentList(), output);
 }
 
+static void addTemplateList(QSharedPointer<ConceptDef> conceptDef, PerlModOutput &output)
+{
+   addTemplateArgumentList(conceptDef->getTemplateArgumentList(), output);
+}
+
 static void addPerlModDocBlock(PerlModOutput &output, const QString &name, const QString &fileName, int lineNr,
       QSharedPointer<Definition> scope, QSharedPointer<MemberDef> md, const QString &text)
 {
@@ -1762,6 +1767,7 @@ class PerlModGenerator
    void addListOfAllMembers(QSharedPointer<ClassDef> cd);
    void addIncludeInfo(const IncludeInfo &includeInfo);
    void generatePerlModForClass(QSharedPointer<ClassDef> cd);
+   void generatePerlModForConcept(QSharedPointer<ConceptDef> conceptDef);
    void generatePerlModForNamespace(QSharedPointer<NamespaceDef> nd);
    void generatePerlModForFile(QSharedPointer<FileDef> fd);
    void generatePerlModForGroup(QSharedPointer<GroupDef> gd);
@@ -2206,9 +2212,33 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
    m_output.closeHash();
 }
 
+void PerlModGenerator::generatePerlModForConcept(QSharedPointer<ConceptDef> conceptDef)
+{
+   if (conceptDef->isReference()) {
+      // skip external references
+      return;
+   }
+
+   m_output.openHash().addFieldQuotedString("name", conceptDef->name());
+
+   QSharedPointer<Definition> nullDef;
+   QSharedPointer<MemberDef> nullMem;
+
+   addIncludeInfo(conceptDef->getIncludeInfo());
+   addTemplateList(conceptDef, m_output);
+   m_output.addFieldQuotedString("initializer", conceptDef->conceptDecl());
+
+   addPerlModDocBlock(m_output, "brief", conceptDef->getDefFileName(), conceptDef->getDefLine(),
+      nullDef, nullMem, conceptDef->briefDescription());
+
+   addPerlModDocBlock(m_output, "detailed", conceptDef->getDefFileName(), conceptDef->getDefLine(),
+      nullDef, nullMem, conceptDef->documentation());
+
+  m_output.closeHash();
+}
+
 void PerlModGenerator::generatePerlModForNamespace(QSharedPointer<NamespaceDef> nd)
 {
-
    if (nd->isReference()) {
       // skip external references
       return;
@@ -2350,6 +2380,18 @@ void PerlModGenerator::generatePerlModForGroup(QSharedPointer<GroupDef> gd)
       m_output.closeList();
    }
 
+   const ConceptSDict &conceptList = gd->getConceptSDict();
+
+   if (! conceptList.isEmpty()) {
+      m_output.openList("concepts");
+
+      for (const auto &conceptDef : conceptList) {
+         m_output.openHash().addFieldQuotedString("name", conceptDef->name()).closeHash();
+      }
+
+      m_output.closeList();
+   }
+
    const NamespaceSDict &nl = gd->getNamespaces();
 
    if (! nl.isEmpty()) {
@@ -2451,6 +2493,15 @@ bool PerlModGenerator::generatePerlModOutput()
 
    for (const auto &cd : Doxy_Globals::classSDict) {
       generatePerlModForClass(cd);
+   }
+
+   m_output.closeList();
+
+   //
+   m_output.openList("concepts");
+
+   for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+      generatePerlModForConcept(conceptDef);
    }
 
    m_output.closeList();
