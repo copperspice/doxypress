@@ -382,7 +382,7 @@ static bool skipLanguageKeywords(const QString &keyword)
 {
    static QSet<QString> non_cpp_keywords = {
      "__assume", "__super", "abstract", "function", "gcnew", "gcroot", "generic", "get",
-     "internal", "null", "pin_ptr", "raise", "remove", "self", "set", "transient",
+     "internal", "null", "pin_ptr", "raise", "remove", "self", "set", "transient", "sealed"
    };
 
    static QSet<QString> non_java_keywords = {
@@ -393,9 +393,10 @@ static bool skipLanguageKeywords(const QString &keyword)
       "decltype", "delete", "dynamic_cast", "explicit", "export", "extern",
       "friend", "inline", "mutable", "namespace", "noexcept", "not", "not_eq", "nullptr",
       "operator", "or", "or_eq", "reflexpr", "register", "reinterpret_cast", "requires",
-      "signed", "sizeof", "static_assert", "static_cast", "struct",
+      "signed", "sizeof", "static_assert", "_Static_assert", "static_cast", "struct",
       "template", "thread_local", "typedef", "typeid", "typename",
-      "union", "unsigned", "using", "virtual", "wchar_t", "xor", "xor_eq", "override",
+      "union", "unsigned", "using", "virtual", "wchar_t", "xor", "xor_eq",
+      "override", "sealed"
    };
 
    bool retval = false;

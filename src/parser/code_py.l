@@ -830,7 +830,7 @@ SHORTSTRINGCHAR   [^\\\n"]
 STRINGLITERAL     {STRINGPREFIX}?( {SHORTSTRING} | {LONGSTRING})
 STRINGPREFIX      ("r"|"u"|"ur"|"R"|"U"|"UR"|"Ur"|"uR")
 
-KEYWORD           ("lambda"|"import"|"class"|"assert"|"with"|"as"|"from"|"global"|"def"|"True"|"False")
+KEYWORD           ("lambda"|"import"|"class"|"assert"|"with"|"as"|"from"|"global"|"async"|"def"|"True"|"False")
 FLOWKW            ("or"|"and"|"is"|"not"|"print"|"for"|"in"|"if"|"try"|"except"|"yield"|"raise"|"break"|"continue"|"pass"|"if"|"return"|"while"|"elif"|"else"|"finally")
 
 QUOTES            ("\""[^"]*"\"")
