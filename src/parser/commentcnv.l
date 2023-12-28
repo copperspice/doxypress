@@ -629,7 +629,7 @@ MAILADR   ("mailto:")?[a-z_A-Z0-9.+-]+"@"[a-z_A-Z0-9-]+("."[a-z_A-Z0-9\-]+)+[a-z
       QString text = QString::fromUtf8(yytext);
       copyToOutput(text, text.length());
 
-      if (text.mid(1,1) == s_blockName) {
+      if (text.mid(1) == s_blockName) {
          // end of formula
          BEGIN(s_lastCommentContext);
 
@@ -1397,22 +1397,26 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
    }
 
    if (s_nestingCount > 0 && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran) {
-      QString tmp = "(probable line number : ";
+      QString tmp;
 
-      bool first = true;
+      if (! s_commentStack.isEmpty()) {
+         tmp = ", review line # ";
 
-      while (! s_commentStack.isEmpty()) {
-         CommentCtx ctx = s_commentStack.pop();
+         bool first = true;
 
-         if (! first) {
-            tmp += ", ";
+         while (! s_commentStack.isEmpty()) {
+            CommentCtx ctx = s_commentStack.pop();
+
+            if (first) {
+               first = false;
+            } else {
+               tmp += ", ";
+            }
+
+            tmp += QString::number(ctx.lineNr);
          }
-
-         tmp += QString::number(ctx.lineNr);
-         first = false;
       }
 
-      tmp += ")";
       warn(s_fileName, s_lineNr, "Reached end of file while inside a (nested) comment. "
            "\nNesting level %d %s", s_nestingCount, csPrintable(tmp) );
 
