@@ -1258,7 +1258,9 @@ static void handleUnclosedStyleCommands()
 
 static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool ignoreAutoLinkFlag = false)
 {
-   static const bool autolinkSupport = Config::getBool("auto-link");
+   static const bool autolinkSupport        = Config::getBool("auto-link");
+   static const bool warnSeeAlsoMissingLink = Config::getBool("warn-sa-missing-links");
+   static const QStringList ignoreWords     = Config::getList("warn-sa-ignore-words");
 
    QString name = linkToText(SrcLangExt_Unknown, g_token->name, true);
 
@@ -1357,6 +1359,16 @@ static void handleLinkedWord(DocNode *parent, QList<DocNode *> &children, bool i
                csPrintable(name));
 
          children.append(new DocWord(parent, g_token->name));
+
+      } else if (s_inSeeBlock && ! s_insideHtmlLink) {
+         // inside see also block, link failed
+
+         if (warnSeeAlsoMissingLink && ! ignoreWords.contains(name) ) {
+            warn_doc_error(s_fileName, getDoctokenLineNum(), "Link for '%s' could not be resolved in a 'See also'",
+                  csPrintable(name));
+         }
+
+         children.append(new DocWord(parent, name));
 
       } else {
          children.append(new DocWord(parent, name));

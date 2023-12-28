@@ -231,6 +231,8 @@ void Config::load_Defaults()
    m_cfgBool.insert("warn-doc-error",            struc_CfgBool   { true,            DEFAULT } );
    m_cfgBool.insert("warn-undoc-param",          struc_CfgBool   { false,           DEFAULT } );
    m_cfgBool.insert("warn-param-mismatch",       struc_CfgBool   { false,           DEFAULT } );
+   m_cfgBool.insert("warn-sa-missing-links",     struc_CfgBool   { false,           DEFAULT } );
+   m_cfgList.insert("warn-sa-ignore-words",      struc_CfgList   { QStringList(),   DEFAULT } );
    m_cfgString.insert("warn-format",             struc_CfgString { "$file:$line: $text", DEFAULT } );
    m_cfgString.insert("warn-logfile",            struc_CfgString { QString(),       DEFAULT } );
 
