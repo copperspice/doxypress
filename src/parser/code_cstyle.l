@@ -49,6 +49,8 @@ static int	         s_inputPosition;      // read offset during parsing
 static int           g_inputLines;         // number of line in the code fragment
 static int	         g_yyLineNr;           // current line number
 static int	         g_yyColNr;            // current column number
+
+static bool          g_skipCodify;
 static bool          g_needsTermination;
 
 static bool          g_exampleBlock;
@@ -939,6 +941,15 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
          return;
       }
 
+      QSharedPointer<ConceptDef> conceptDef = getResolvedConcept(d, bareName);
+
+      if (conceptDef && conceptDef->isLinkable()) {
+         setScopeCallContext(conceptDef);
+         addToSearchIndex(className);
+         writeMultiLineCodeLink(*g_code, conceptDef, tmpClassName);
+         return;
+       }
+
       if (cd == nullptr && md == nullptr) {
          // also see if it is variable or enum or enum value
 
@@ -1179,7 +1190,8 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
             int vi;
             QString vn = varName;
 
-            if ((vi = vn.lastIndexOf("::")) != -1 || (vi = vn.lastIndexOf('.')) != -1) { // explicit scope A::b(), probably static member
+            if ((vi = vn.lastIndexOf("::")) != -1 || (vi = vn.lastIndexOf('.')) != -1) {
+               // explicit scope A::b(), probably static member
                QSharedPointer<ClassDef> jcd = getClass(vn.left(vi));
 
                vn = vn.right(vn.length() - vi - 2);
@@ -1833,7 +1845,7 @@ KEYWORD_B   ("inline"|"internal"|"mutable"|"namespace"|"new"|"null"|"nullptr"|"o
 KEYWORD_C   ("raise"|"register"|"remove"|"self"|"sizeof"|"static"|"struct"|"__super"|"function"|"template"|"generic"|"this"|"true"|"typedef")
 KEYWORD_D   ("typeid"|"typename"|"union"|"using"|"virtual"|"volatile"|"abstract"|"final"|"import"|"synchronized")
 KEYWORD_E   ("transient"|"alignas"|"alignof"|"concept"|"requires"|"decltype"|"constexpr"|"consteval"|"constinit")
-KEYWORD_F   ("co_await"|"co_return"|"co_yield"|"static_assert"|"noexcept"|"thread_local"|"enum"{B}+("class"|"struct"))
+KEYWORD_F   ("co_await"|"co_return"|"co_yield"|"static_assert"|"_Static_assert"|"noexcept"|"thread_local"|"enum"{B}+("class"|"struct"))
 KEYWORD     {KEYWORD_A}|{KEYWORD_B}|{KEYWORD_C}|{KEYWORD_D}|{KEYWORD_E}|{KEYWORD_F}|{KEYWORD_OBJC}
 
 FLOWKW         ("break"|"catch"|"continue"|"default"|"do"|"else"|"finally"|"return"|"switch"|"throw"|"throws"|"@catch"|"@finally")
@@ -2268,9 +2280,18 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <ClassName,ClassVar>";"          {
       QString text = QString::fromUtf8(yytext);
-      g_code->codify(text);
-      g_searchingForBody = false;
-      BEGIN( Body );
+
+      if (g_insideCS) {
+         g_code->codify(text);
+         g_skipCodify = true;
+         unput('{');
+
+      } else {
+         g_code->codify(text);
+         g_searchingForBody = false;
+
+         BEGIN( Body );
+      }
    }
 
 <ClassName,ClassVar>[*&^%]+         {
@@ -2444,8 +2465,13 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Bases>^{B}*/"@"{ID}          |    // Objective-C interface
 <Bases,ClassName,ClassVar,CppCliTypeModifierFollowup>{B}*"{"{B}* {
       QString text = QString::fromUtf8(yytext);
+
       g_theVarContext.pushScope();
-      g_code->codify(text);
+
+      if (! g_skipCodify) {
+         g_code->codify(text);
+         g_skipCodify = false;
+      }
 
       if (YY_START == ClassVar && g_curClassName.isEmpty()) {
          g_curClassName = g_name;
