@@ -240,14 +240,15 @@ static void processSection()
    }
 }
 
-static void handleHtmlTag()
+static void handleHtmlTag(QString tagText)
 {
-   QString tagText = QString::fromUtf8(yytext);
    int len = tagText.length();
+
 
    g_token->attribs.clear();
    g_token->endTag   = false;
    g_token->emptyTag = false;
+   g_token->text     = tagText;
 
    // check for end tag
    int startNamePos = 1;
@@ -581,7 +582,7 @@ LINKMASK    [^ \t\n\r\\@<&${}]+("("[^\n)]*")")?({BLANK}*("const"|"volatile"){BLA
 VERBATIM    "verbatim"{BLANK}*
 SPCMD1      {CMD}([a-z_A-Z][a-z_A-Z0-9]*|{VERBATIM}|"--"|"---")
 SPCMD2      {CMD}[\\@<>&$#%~".+=|-]
-SPCMD3      {CMD}_form#[0-9]+
+SPCMD3      {CMD}form#[0-9]+
 SPCMD4      {CMD}"::"
 SPCMD5      {CMD}":"
 INOUT       "in"|"out"|("in"{BLANK}*","?{BLANK}*"out")|("out"{BLANK}*","?{BLANK}*"in")
@@ -1025,7 +1026,7 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       QString text = QString::fromUtf8(yytext);
       s_yyLineNum += text.count('\n');
 
-      handleHtmlTag();
+      handleHtmlTag(text);
       return TK_HTMLTAG;
    }
 
@@ -1042,6 +1043,12 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       // prevent opening html tag to be recognized as a templated classes
       g_token->name = QString::fromUtf8(yytext);
 
+      return TK_LNKWORD;
+   }
+
+<St_Para>{LNKWORD1}/"<tt>" {
+      // prevent <tt> html tag to be parsed as template arguments
+      g_token->name = QString::fromUtf8(yytext);
       return TK_LNKWORD;
    }
 
@@ -1471,6 +1478,9 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
 <St_TitleN>{HTMLTAG}                   {
       QString text = QString::fromUtf8(yytext);
       s_yyLineNum += text.count('\n');
+
+      handleHtmlTag(text);
+      return TK_HTMLTAG;
    }
 
 <St_TitleN>\n         {
@@ -1772,6 +1782,16 @@ RCSID          "$"("Author"|"Date"|"Header"|"Id"|"Locker"|"Log"|"Name"|"RCSfile"
       g_token->name = " ";
 
       return TK_WORD;
+   }
+
+<St_Ref2>{HTMLTAG}     {
+      /* html tag */
+
+      QString text = QString::fromUtf8(yytext);
+      s_yyLineNum   += text.count('\n');
+
+      handleHtmlTag(text);
+      return TK_HTMLTAG;
    }
 
 <St_Ref2>{SPCMD1}      |
