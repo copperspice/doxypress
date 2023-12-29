@@ -358,6 +358,7 @@ namespace Doxy_Work{
    void generateFileDocs();
    void generateSourceCode();
    void generateGroupDocs();
+   void generateNamespaceConceptDocs(const ConceptSDict &conceptList);
    void generateNamespaceDocs();
    void generatePageDocs();
    void generateXRefPages();
@@ -650,12 +651,18 @@ void processFiles()
 
    Doxy_Globals::infoLog_Stat.begin("Associating documentation with classes\n");
    buildClassDocList(root);
+   Doxy_Globals::infoLog_Stat.end();
 
    Doxy_Globals::infoLog_Stat.begin("Building concept list\n");
    buildConceptList(root);
    Doxy_Globals::infoLog_Stat.end();
 
+   Doxy_Globals::infoLog_Stat.begin("Associating documentation with concepts\n");
+   buildConceptDocList(root);
+   Doxy_Globals::infoLog_Stat.end();
+
    // build list of using declarations (global list)
+   Doxy_Globals::infoLog_Stat.begin("Building using list\n");
    buildListOfUsingDecls(root);
    Doxy_Globals::infoLog_Stat.end();
 
@@ -2213,6 +2220,10 @@ void Doxy_Work::addClassToContext(QSharedPointer<Entry> ptrEntry)
          cd->setTemplateArgumentList(tmpArgList);
       }
 
+      if (cd->getRequires().isEmpty() && ! root->getData(EntryKey::Requires_Clause).isEmpty()) {
+         cd->setRequires(root->getData(EntryKey::Requires_Clause));
+      }
+
       cd->setCompoundType(convertToCompoundType(root->section, root->m_traits));
 
    } else {
@@ -2362,6 +2373,10 @@ void Doxy_Work::addConceptToContext(QSharedPointer<Entry> ptrEntry)
    } else {
       // new cconcept
 
+      QString className;
+      QString namespaceName;
+      extractNamespaceName(fullName, className, namespaceName);
+
       QString tagName;
       QString tagFileName;
 
@@ -2394,8 +2409,11 @@ void Doxy_Work::addConceptToContext(QSharedPointer<Entry> ptrEntry)
       conceptDef->setLanguage(root->m_srcLang);
       conceptDef->setId(root->getData(EntryKey::Clang_Id));
 
+      conceptDef->setHidden(root->hidden);
+      conceptDef->setMemberGroupId(root->mGrpId);
       conceptDef->setTemplateArgumentList(templateArgList);
 
+      conceptDef->setInitializer(root->getData(EntryKey::Initial_Value));
       conceptDef->setRequires(root->getData(EntryKey::Requires_Clause));
       conceptDef->setConstraint(root->getData(EntryKey::Constraint));
 
@@ -2403,6 +2421,13 @@ void Doxy_Work::addConceptToContext(QSharedPointer<Entry> ptrEntry)
       conceptDef->setBodyDef(fd);
 
       // is the concept inside a namespace
+      QSharedPointer<Definition> def = findScopeFromQualifiedName(Doxy_Globals::globalScope,
+            qualifiedName, QSharedPointer<FileDef>(), tagInfo);
+
+      if (def != nullptr && def->definitionType() == Definition::TypeNamespace) {
+         def->addInnerCompound(conceptDef);
+         conceptDef->setOuterScope(def);
+      }
 
       // add concept to the list
       Doxy_Globals::conceptSDict.insert(fullName, conceptDef);
@@ -2410,9 +2435,19 @@ void Doxy_Work::addConceptToContext(QSharedPointer<Entry> ptrEntry)
 
    conceptDef->addSectionsToDefinition(root->m_anchors);
 
+   if (fd != nullptr) {
+      conceptDef->setFileDef(fd);
+      fd->insertConcept(conceptDef);
+   }
+
    if (conceptDef->hasDocumentation()) {
+      // populates ConceptDef member m_incInfo
       addIncludeFileConcept(conceptDef, fd, root);
    }
+
+   addConceptToGroups(root, conceptDef);
+   conceptDef->setRefItems(root->m_specialLists);
+
 }
 
 void Doxy_Work::addIncludeFileConcept(QSharedPointer<ConceptDef> conceptDef, QSharedPointer<FileDef> include_fd, QSharedPointer<Entry> root)
@@ -2550,6 +2585,21 @@ void Doxy_Work::buildConceptList(QSharedPointer<Entry> ptrEntry)
    for (auto item : ptrEntry->children() ) {
       buildConceptList(item);
    }
+}
+
+void Doxy_Work::buildConceptDocList(QSharedPointer<Entry> ptrEntry)
+{
+   if (ptrEntry->m_srcLang == SrcLangExt_Cpp) {
+      if ((ptrEntry->section == Entry::CONCEPTDOC_SEC) && ! ptrEntry->m_entryName.isEmpty()) {
+         addConceptToContext(ptrEntry);
+      }
+   }
+
+   // recursive call
+   for (auto item : ptrEntry->children() ) {
+      buildConceptDocList(item);
+   }
+
 }
 
 void Doxy_Work::resolveClassNestingRelations()
@@ -2696,6 +2746,9 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
          imd->setMemberTraits(md->getMemberTraits());
          imd->setMemberGroupId(md->getMemberGroupId());
          imd->setInitializer(md->getInitializer());
+
+         imd->setRequires(md->getRequires());
+
          imd->setMaxInitLines(md->initializerLines());
          imd->setBitfields(md->bitfieldString());
          imd->setLanguage(md->getLanguage());
@@ -3270,6 +3323,8 @@ void Doxy_Work::findUsingDeclImports(QSharedPointer<Entry> ptrEntry)
                         newMd->setBodySegment(md->getStartBodyLine(), md->getEndBodyLine());
                         newMd->setBodyDef(md->getBodyDef());
                         newMd->setInitializer(md->getInitializer());
+
+                        newMd->setRequires(md->getRequires());
 
                         newMd->setMaxInitLines(md->initializerLines());
                         newMd->setMemberGroupId(ptrEntry->mGrpId);
@@ -4785,6 +4840,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                   // for template functions, check if they have the same number of template parameters
                   bool sameNumTemplateArgs = true;
                   bool matchingReturnTypes = true;
+                  bool sameRequiresClause  = true;
 
                   if (! mdTempArgList.listEmpty() && ! root->m_templateArgLists.isEmpty()) {
 
@@ -4795,6 +4851,10 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                      if (item->typeString() != removeRedundantWhiteSpace(root->getData(EntryKey::Member_Type))) {
                         matchingReturnTypes = false;
                      }
+
+                     if (item->getRequires() != root->getData(EntryKey::Requires_Clause)) {
+                        sameRequiresClause = false;
+                     }
                   }
 
                   bool staticsInDifferentFiles = root->m_static && item->isStatic() &&
@@ -4803,7 +4863,8 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                   bool tmp = matchArguments2(item->getOuterScope(), mfd, mdArgList,
                            rnd ? rnd : Doxy_Globals::globalScope, rfd, root->argList, false);
 
-                  if (tmp && sameNumTemplateArgs && matchingReturnTypes && ! staticsInDifferentFiles) {
+                  if (tmp && sameNumTemplateArgs && matchingReturnTypes && sameRequiresClause &&
+                        ! staticsInDifferentFiles) {
 
                      QSharedPointer<GroupDef> gd;
 
@@ -4921,6 +4982,7 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                md->setPrototype(root->proto, root->getData(EntryKey::File_Name), root->startLine, root->startColumn);
                md->setDocsForDefinition(! root->proto);
                md->setTypeConstraints(root->typeConstr);
+               md->setRequires(root->getData(EntryKey::Requires_Clause));
 
                md->setBodySegment(root->startBodyLine, root->endBodyLine);
 
@@ -6379,6 +6441,10 @@ void Doxy_Work::addMemberDocs(QSharedPointer<Entry> ptrEntry, QSharedPointer<Mem
       md->setInitializer(root->getData(EntryKey::Initial_Value));
    }
 
+   if (md->getRequires().isEmpty() && ! root->getData(EntryKey::Requires_Clause).isEmpty()) {
+      md->setRequires(root->getData(EntryKey::Requires_Clause));
+   }
+
    md->setMaxInitLines(root->initLines);
 
    if (rfd) {
@@ -6556,7 +6622,8 @@ bool Doxy_Work::findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &
 
             if (! ptrEntry->m_templateArgLists.isEmpty()) {
 
-               if (tmpList.count() != ptrEntry->m_templateArgLists.last().count() || md->typeString() != type) {
+               if (tmpList.count() != ptrEntry->m_templateArgLists.last().count() || md->typeString() != type ||
+                     md->getRequires() != ptrEntry->getData(EntryKey::Requires_Clause)) {
                   matching = false;
                }
             }
@@ -6759,6 +6826,7 @@ ArgumentList Doxy_Work::substituteTemplatesInArgList(const QVector<ArgumentList>
    retval.volatileSpecifier  = srcList.volatileSpecifier;
    retval.pureSpecifier      = srcList.pureSpecifier;
    retval.refSpecifier       = srcList.refSpecifier;
+   retval.isDeleted          = srcList.isDeleted;
 
    retval.trailingReturnType = substituteTemplatesInString(srcTempArgLists, dstTempArgLists,
             funcTemplateArgList, srcList.trailingReturnType);
@@ -7054,8 +7122,11 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
       if (! className.isEmpty() && (tmpMn = Doxy_Globals::functionNameSDict.find(className))) {
 
          for (const auto &md : *tmpMn) {
+            QSharedPointer<Definition> mdScope;
 
-            if (md != nullptr && md->isEnumerate() && md->isStrong()) {
+            if (md != nullptr && md->isEnumerate() && md->isStrong() && (mdScope = md->getOuterScope()) &&
+               ((namespaceName.isEmpty() && mdScope == Doxy_Globals::globalScope) || (mdScope->name() == namespaceName))) {
+
                strongEnum = true;
 
                // pass the scope name as a 'namespace' to findGlobalMember()
@@ -9058,6 +9129,15 @@ void Doxy_Work::addSourceReferences()
       }
    }
 
+   // add source references for concept definitions
+   for (auto conceptDef : Doxy_Globals::conceptSDict) {
+      QSharedPointer<FileDef> fd = conceptDef->getBodyDef();
+
+      if (fd && conceptDef->isLinkableInProject() && conceptDef->getStartBodyLine() != -1) {
+         fd->addSourceRef(conceptDef->getStartBodyLine(), conceptDef, QSharedPointer<MemberDef>());
+      }
+   }
+
    // add source references for namespace definitions
    for (auto &nd : Doxy_Globals::namespaceSDict) {
       QSharedPointer<FileDef> fd = nd->getBodyDef();
@@ -9157,12 +9237,14 @@ void Doxy_Work::generateConceptDocs()
 {
    for (const auto &conceptDef : Doxy_Globals::conceptSDict)  {
 
-      if (conceptDef) {
-         if (conceptDef->isLinkableInProject()) {
-            msg("Generating docs for compound %s\n", csPrintable(conceptDef->name()));
+      if (conceptDef != nullptr && (conceptDef->getOuterScope() == nullptr ||
+            conceptDef->getOuterScope() == Doxy_Globals::globalScope) &&
+            ! conceptDef->isHidden() && conceptDef->isLinkableInProject()) {
 
-            conceptDef->writeDocumentation(Doxy_Globals::outputList);
-         }
+         // only look at global concepts
+         msg("Generating docs for concept %s\n", csPrintable(conceptDef->name()));
+
+         conceptDef->writeDocumentation(Doxy_Globals::outputList);
       }
    }
 }
@@ -9279,6 +9361,11 @@ void Doxy_Work::findSectionsInDocumentation()
    // for each class
    for (const auto &cd : Doxy_Globals::classSDict) {
       cd->findSectionsInDocumentation();
+   }
+
+   // for each concept
+   for (const auto &conceptDef : Doxy_Globals::conceptSDict) {
+      conceptDef->findSectionsInDocumentation();
    }
 
    // for each file
@@ -9444,8 +9531,13 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
 
                   md->setBodySegment(root->startBodyLine, root->endBodyLine);
                   md->setBodyDef(ptrEntry->fileDef());
+
                   md->addSectionsToDefinition(root->m_anchors);
                   md->setMaxInitLines(root->initLines);
+
+                  md->enableReferencedByRelation(root->referencedByRelation);
+                  md->enableReferencesRelation(root->referencesRelation);
+
                   md->setRefItems(root->m_specialLists);
 
                   if (root->mGrpId != -1) {
@@ -9479,7 +9571,12 @@ void Doxy_Work::findDefineDocumentation(QSharedPointer<Entry> ptrEntry)
 
                      md->setBodySegment(root->startBodyLine, root->endBodyLine);
                      md->setBodyDef(ptrEntry->fileDef());
+
                      md->addSectionsToDefinition(root->m_anchors);
+                     md->setMaxInitLines(root->initLines);
+
+                     md->enableReferencedByRelation(root->referencedByRelation);
+                     md->enableReferencesRelation(root->referencesRelation);
                      md->setRefItems(root->m_specialLists);
                      md->setLanguage(root->m_srcLang);
 
@@ -9919,6 +10016,19 @@ void Doxy_Work::generateGroupDocs()
 //}
 
 // generate module pages
+
+void Doxy_Work::generateNamespaceConceptDocs(const ConceptSDict &conceptList)
+{
+   // for each concept in the namespace
+   for (const auto &conceptDef : conceptList) {
+
+      if (conceptDef != nullptr && conceptDef->isLinkableInProject() && ! conceptDef->isHidden()) {
+         msg("Generating docs for concept %s\n", csPrintable(conceptDef->name()));
+         conceptDef->writeDocumentation(Doxy_Globals::outputList);
+       }
+   }
+}
+
 void Doxy_Work::generateNamespaceDocs()
 {
    // for each namespace
@@ -9944,6 +10054,8 @@ void Doxy_Work::generateNamespaceDocs()
 
          cd->writeDocumentationForInnerClasses(Doxy_Globals::outputList);
       }
+
+      generateNamespaceConceptDocs(nd->getConceptSDict());
    }
 }
 
@@ -11068,6 +11180,9 @@ void searchInputFiles()
    // sort now
    Doxy_Globals::inputNameList.sort();
 
+   if (Doxy_Globals::inputNameList.empty()) {
+      warn_uncond("No input files were found, review project configuration\n");
+   }
+
    Doxy_Globals::infoLog_Stat.end();
 }
-
