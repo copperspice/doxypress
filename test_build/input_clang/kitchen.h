@@ -75,7 +75,7 @@ class Clang_gameBase
 
 //! Documentation for a concept (brief)
 
-//! Documentation for a concept (full description)
+//! Documentation for a concept (full description). Refer to CS_Moveable for a longer description.
 template <typename T1, class T2>
 concept CS_IsClass = std::is_class_v<T1>;
 
