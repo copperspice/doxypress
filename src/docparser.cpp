@@ -1084,7 +1084,6 @@ static void handlePendingStyleCommands(DocNode *parent, QList<DocNode *> &childr
       DocStyleChange sc = s_styleStack.top();
 
       while (sc.position() >= s_nodeStack.count()) {
-
          // there are unclosed style modifiers in the paragraph
          children.append(new DocStyleChange(parent, s_nodeStack.count(), sc.style(), false));
 

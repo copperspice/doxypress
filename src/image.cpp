@@ -39,7 +39,7 @@ const int charSetWidth = 80;
 const int charHeight = 12;
 const int numChars = 96;
 
-unsigned short charPos[numChars]    = {
+const unsigned short charPos[numChars] = {
    0,  5,  8, 13, 20, 27, 38, 47,
    50, 54, 58, 65, 72, 76, 83, 87,
    91, 98, 105, 112, 119, 126, 133, 140,
@@ -54,7 +54,7 @@ unsigned short charPos[numChars]    = {
    594, 600, 607, 613, 617, 620, 624, 631
 };
 
-unsigned char charWidth[numChars] = {
+const unsigned char charWidth[numChars] = {
    5, 3, 5, 7, 7, 11, 9, 3,
    4, 4, 7, 7, 4, 7, 4, 4,
 
@@ -70,7 +70,7 @@ unsigned char charWidth[numChars] = {
    6, 7, 6, 4, 3, 4, 7, 5
 };
 
-unsigned char fontRaw[charSetWidth *charHeight] = {
+const unsigned char fontRaw[charSetWidth *charHeight] = {
    0x02, 0x50, 0x01, 0x06, 0x20, 0x60, 0xc6, 0x04, 0x00, 0x00, 0x00, 0x27,
    0x04, 0x1c, 0x38, 0x11, 0xf1, 0xc7, 0xc7, 0x0e, 0x00, 0x00, 0x00, 0x03,
    0x81, 0xf0, 0x10, 0x7c, 0x1e, 0x3e, 0x1f, 0x9f, 0x87, 0x88, 0x24, 0x09,
@@ -205,9 +205,9 @@ static Color palette3[] = {
 
 Image::Image(int w, int h)
 {
-   static int hue   = Config::getInt("html-colorstyle-hue");
-   static int sat   = Config::getInt("html-colorstyle-sat");
-   static int gamma = Config::getInt("html-colorstyle-gamma");
+   static const int hue   = Config::getInt("html-colorstyle-hue");
+   static const int sat   = Config::getInt("html-colorstyle-sat");
+   static const int gamma = Config::getInt("html-colorstyle-gamma");
 
    double red1, green1, blue1;
    double red2, green2, blue2;
@@ -232,7 +232,7 @@ Image::Image(int w, int h)
 
    data = new uchar[w * h];
    memset(data, 0, w * h);
-   width = w;
+   width  = w;
    height = h;
 }
 
@@ -338,8 +338,9 @@ void Image::drawHorzLine(int y, int xs, int xe, uchar colIndex, uint mask)
 
    for (int x = xs; x <= xe; x++, j++) {
       if (j & 1) {
-         i++;
+         ++i;
       }
+
       if (mask & (1 << (i & 0x1f))) {
          setPixel(x, y, colIndex);
       }
@@ -455,7 +456,7 @@ void ColoredImage::hsl2rgb(double h, double s, double l, double *pRed, double *p
       m       = l + l - v;
       sv      = (v - m ) / v;
       h      *= 6.0;
-      sextant = (int)h;
+      sextant = static_cast<int>(h);
       fract   = h - sextant;
       vsf     = v * sv * fract;
       mid1    = m + vsf;

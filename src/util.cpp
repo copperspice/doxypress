@@ -2011,6 +2011,7 @@ void linkifyText(const TextFragmentBase &out, QSharedPointer<const Definition> s
 
                } else {
                   // add link to the result
+
                   out.writeLink(cd->getReference(), cd->getOutputFileBase(), cd->anchor(), word);
                   found = true;
                }

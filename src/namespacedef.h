@@ -38,7 +38,6 @@ class NamespaceList;
 class NamespaceSDict;
 class OutputList;
 
-/** model of a namespace symbol */
 class NamespaceDef : public Definition
 {
  public:
@@ -137,12 +136,12 @@ class NamespaceDef : public Definition
 
    QSharedPointer<MemberDef> getMemberByName(const QString &) const;
 
-   /*! Returns the user defined member groups */
+   // Returns the user defined member groups
    const MemberGroupSDict &getMemberGroupSDict() const {
       return m_memberGroupSDict;
    }
 
-   /*! Returns the classes contained in this namespace */
+   // Returns the classes contained in this namespace
    const ClassSDict &getClassSDict() const {
       return m_classSDict;
    }
@@ -151,7 +150,7 @@ class NamespaceDef : public Definition
       return m_conceptSDict;
    }
 
-   /*! Returns the namespaces contained in this namespace */
+   // Returns the namespaces contained in this namespace
    const NamespaceSDict &getNamespaceSDict() const {
       return m_namespaceSDict;
    }

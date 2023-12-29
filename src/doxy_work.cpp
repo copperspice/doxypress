@@ -6907,7 +6907,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
          scopeName = mergeScopes(ptrEntry->parent()->m_entryName, scopeName);
       }
 
-
    } else {
       // see if we can prefix a namespace or class that is used from the file
       QSharedPointer<FileDef> fd = ptrEntry->fileDef();
