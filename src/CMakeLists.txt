@@ -468,7 +468,6 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
       ole32
       uuid
       version
-      z
       advapi32
 )
 endif()
