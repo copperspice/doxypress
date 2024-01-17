@@ -1,5 +1,5 @@
 # ************************************************************************
-# Copyright (c) 2014-2022 Barbara Geller & Ansel Sermersheim
+# Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
 #
 # bash script used to compile lex files and generate cpp files
 # required bash utilities: flex, cp, rm, sed
