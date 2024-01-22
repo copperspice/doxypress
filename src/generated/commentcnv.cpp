@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -1303,7 +1303,7 @@ goto find_rule; \
 char *commentcnvYYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
 
 *************************************************************************/
@@ -1416,12 +1416,12 @@ static void replaceCommentMarker(const QString &s, int len)
 
       if (c == '/' || c == '!' || c == '#') {
 
-         blanks++;
+         ++blanks;
          ++iter;
 
          if (iter != iter_end && *iter == '<') {
             // comment-after-item marker
-            blanks++;
+            ++blanks;
             ++iter;
          }
 
@@ -1461,7 +1461,7 @@ static inline int computeIndent(const QString &str)
    for (auto c : str) {
 
       if (c == ' ') {
-         col++;
+         ++col;
 
       } else if (c == '\t') {
          col += tabSize - (col % tabSize);
@@ -2279,6 +2279,7 @@ YY_RULE_SETUP
       }
 
       s_lastCommentContext = YY_START;
+
       BEGIN(Verbatim);
    }
 	YY_BREAK
@@ -2315,7 +2316,7 @@ YY_RULE_SETUP
       QString text = QString::fromUtf8(commentcnvYYtext);
       copyToOutput(text, text.length());
 
-      if (text.mid(1,1) == s_blockName) {
+      if (text.mid(1) == s_blockName) {
          // end of formula
          BEGIN(s_lastCommentContext);
 
@@ -2331,7 +2332,7 @@ YY_RULE_SETUP
          REJECT;
 
       } else {
-         s_javaBlock++;
+         ++s_javaBlock;
 
          QString text = QString::fromUtf8(commentcnvYYtext);
          copyToOutput(text, text.length());
@@ -2345,7 +2346,7 @@ YY_RULE_SETUP
          REJECT;
 
       } else {
-         s_javaBlock--;
+         --s_javaBlock;
 
          if (s_javaBlock == 0) {
             copyToOutput(" @endcode ", 10);
@@ -2395,7 +2396,7 @@ YY_RULE_SETUP
          int len = 0;
 
          while (len < text.length() && (text[len] == ' ' || text[len] == '\t')) {
-            len++;
+            ++len;
          }
 
          copyToOutput(text, len);
@@ -2607,6 +2608,7 @@ YY_RULE_SETUP
       if (s_lang == SrcLangExt_Python || s_lang == SrcLangExt_Tcl || s_lang == SrcLangExt_Markdown) {
          REJECT;
       }
+
       QString text = QString::fromUtf8(commentcnvYYtext);
 
       ++s_nestingCount;
@@ -4127,7 +4129,7 @@ static bool recognizeFixedForm(const QString &contents)
    bool skipLine = false;
 
    for (int i = 0; true; i++) {
-      column++;
+      ++column;
 
       switch (contents[i].unicode()) {
          case '\n':
@@ -4236,23 +4238,27 @@ QString convertCppComments(const QString &inBuf, const QString &fileName)
    }
 
    if (s_nestingCount > 0 && s_lang != SrcLangExt_Markdown && s_lang != SrcLangExt_Fortran) {
-      QString tmp = "(probable line number : ";
+      QString tmp;
 
-      bool first = true;
+      if (! s_commentStack.isEmpty()) {
+         tmp = ", review line # ";
 
-      while (! s_commentStack.isEmpty()) {
-         CommentCtx ctx = s_commentStack.pop();
+         bool first = true;
 
-         if (! first) {
-            tmp += ", ";
+         while (! s_commentStack.isEmpty()) {
+            CommentCtx ctx = s_commentStack.pop();
+
+            if (first) {
+               first = false;
+            } else {
+               tmp += ", ";
+            }
+
+            tmp += QString::number(ctx.lineNr);
          }
-
-         tmp += QString::number(ctx.lineNr);
-         first = false;
       }
 
-      tmp += ")";
-      warn(s_fileName, s_lineNr, "Reached end of file while still inside a (nested) comment. "
+      warn(s_fileName, s_lineNr, "Reached end of file while inside a (nested) comment. "
            "\nNesting level %d %s", s_nestingCount, csPrintable(tmp) );
 
       // add one for "normal" expected end of comment

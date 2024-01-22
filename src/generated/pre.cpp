@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -3121,7 +3121,7 @@ goto find_rule; \
 char *preYYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  *
 *************************************************************************/
@@ -3407,12 +3407,10 @@ DefineManager *DefineManager::theInstance = 0;
 void DefineManager::DefinesPerFile::collectDefines(DefineDict &dict, QSet<QString> &includeStack)
 {
    {
-      for (auto di : m_includedFiles) {
-         QString incFile = di;
-
+      for (const auto &incFile : m_includedFiles) {
          QSharedPointer<DefinesPerFile> dpf = DefineManager::instance().find(incFile);
 
-         if (dpf && ! includeStack.contains(incFile)) {
+         if (dpf != nullptr && ! includeStack.contains(incFile)) {
             includeStack.insert(incFile);
             dpf->collectDefines(dict, includeStack);
          }
@@ -3661,7 +3659,7 @@ static QSharedPointer<FileState> findFile(const QString &fileName, bool localInc
       return QSharedPointer<FileState>();
    }
 
-   for (auto &s : s_pathList) {
+   for (const auto &s : s_pathList) {
       QString absName = s + "/" + fileName;
 
       QSharedPointer<FileState> fs = checkAndOpenFile(absName, alreadyIncluded);
@@ -4246,13 +4244,12 @@ static int getNextId(const QString &expr, int p, int *l)
    return -1;
 }
 
-/*! preforms recursive macro expansion on the string expr starting at position pos.
- *  May read additional characters from the input while re-scanning
- *  If expandAll is true then all macros in the expression are expanded, otherwise only the first is expanded
+/*! performs recursive macro expansion on the string expr starting at position pos
+ *  may read additional characters from the input while re-scanning
+ *  if expandAll is true then all macros in the expression are expanded, otherwise only the first is expanded
  */
 static bool expandExpression(QString &expr, QString *rest, int pos, int level)
 {
-
    if (expr.isEmpty()) {
      return true;
    }
@@ -4903,8 +4900,7 @@ static void readIncludeFile(const QString &inc)
             } else if (searchIncludes) {
                static const QStringList includePath = Config::getList("include-path");
 
-               for (auto item : includePath) {
-
+               for (const auto &item : includePath) {
                   QFileInfo fi3(item);
 
                   if (fi3.exists() && fi3.isDir()) {

@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -1557,7 +1557,7 @@ goto find_rule; \
 char *parse_py_YYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
 
 *************************************************************************/
@@ -1608,7 +1608,7 @@ static Protection        protection;
 static MethodType        mtype;
 static Specifier         virt;
 
-static bool              gstat;
+static bool              s_static;
 
 static int               docBlockContext;
 static QString           docBlock;
@@ -1644,9 +1644,9 @@ static QString           s_argType       = QString();
 static void initParser()
 {
    protection = Public;
-   mtype = MethodType::Method;
-   gstat = false;
-   virt  = Normal;
+   mtype    = MethodType::Method;
+   s_static = false;
+   virt     = Normal;
 
    previous = QSharedPointer<Entry>();
    s_packageCommentAllowed = true;
@@ -1657,13 +1657,13 @@ static void initEntry()
    current->protection = protection;
    current->mtype      = mtype;
    current->virt       = virt;
-   current->stat       = gstat;
+   current->m_static   = s_static;
    current->m_srcLang  = SrcLangExt_Python;
 
    current->setParent(current_root);
 
    initGroupInfo(current);
-   gstat = false;
+   s_static = false;
 }
 
 static void newEntry()
@@ -1678,13 +1678,21 @@ static void newEntry()
 static void newVariable()
 {
    if (! current->m_entryName.isEmpty() && current->m_entryName.at(0) == '_') {
-      // mark as private
-      current->protection = Private;
+
+      if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+         // mark as private
+         current->protection = Private;
+
+      } else {
+        // mark as protected
+        current->protection = Protected;
+
+      }
    }
 
    if (current_root->section & Entry::COMPOUND_MASK) {
       // mark as class variable
-      current->stat = true;
+      current->m_static = true;
    }
 
    newEntry();
@@ -1698,8 +1706,16 @@ static void newFunction()
       current->protection = Public;
 
    } else if (current->m_entryName.at(0) == '_') {
-      current->protection = Private;
 
+      if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+         // mark as private
+         current->protection = Private;
+
+      } else {
+        // mark as protected
+        current->protection = Protected;
+
+      }
    }
 }
 
@@ -1900,7 +1916,7 @@ static void searchFoundDef()
    current->section   = Entry::FUNCTION_SEC;
    current->m_srcLang = SrcLangExt_Python;
    current->virt      = Normal;
-   current->stat      = gstat;
+   current->m_static  = s_static;
    current->mtype     = (mtype = MethodType::Method);
 
    current->m_entryName.resize(0);
@@ -1909,7 +1925,7 @@ static void searchFoundDef()
    current->argList.clear();
 
    s_packageCommentAllowed = false;
-   gstat = false;
+   s_static = false;
 }
 
 static void searchFoundClass()
@@ -2452,7 +2468,7 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 {
-      gstat = true;
+      s_static = true;
    }
 	YY_BREAK
 case 15:
@@ -2716,8 +2732,16 @@ YY_RULE_SETUP
          current->setData(EntryKey::Member_Type, "");
 
          if (current->m_entryName.at(0) == '_') {
-            // mark as private
-            current->protection = Private;
+
+            if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+               // mark as private
+               current->protection = Private;
+
+            } else {
+              // mark as protected
+              current->protection = Protected;
+
+            }
          }
 
          newEntry();
@@ -2740,12 +2764,20 @@ YY_RULE_SETUP
 
       current->setData(EntryKey::Member_Type, "");
 
-      if (current->m_entryName.at(0)=='_') {
-         // mark as private
-         current->protection = Private;
+      if (current->m_entryName.at(0) == '_') {
+
+         if (current->m_entryName.size() < 2 || current->m_entryName.at(1) == '_')  {
+            // mark as private
+            current->protection = Private;
+
+         } else {
+           // mark as protected
+           current->protection = Protected;
+
+         }
       }
 
-   newEntry();
+      newEntry();
                       }
 	YY_BREAK
 case 45:
@@ -5462,7 +5494,7 @@ static void parseMain(const QString &fileName, const QString &fileBuf, QSharedPo
 
    protection      = Public;
    mtype           = MethodType::Method;
-   gstat           = false;
+   s_static        = false;
    virt            = Normal;
 
    current_root    = rt;

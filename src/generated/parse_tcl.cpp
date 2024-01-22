@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -709,7 +709,7 @@ static int yy_more_len = 0;
 char *parse_tcl_YYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  * Copyright (c) 2010      Rene Zaumseil
 
@@ -4132,7 +4132,7 @@ static void tcl_command_SWITCH()
       myScan = tcl_command_ARG(myScan, lastOptionIndex + 2, false);
       myScan = tcl_command_ARG(myScan, lastOptionIndex + 3, false);
 
-      // walk trough the list step by step
+      // walk through the list step by step
       // this way we can preserve whitespace
 
       bool inBraces = false;
@@ -4751,15 +4751,15 @@ static void tcl_command_Variable(int inclass)
    if (myNs.length()) {
       // qualified variables go into namespace
       myEntry = tcl_entry_namespace(myNs);
-      tcl.entry_current->stat = true;
+      tcl.entry_current->m_static = true;
 
    } else {
       if (inclass) {
          myEntry = myScan->entry_cl;
-         tcl.entry_current->stat = false;
+         tcl.entry_current->m_static = false;
       } else {
          myEntry = tcl_entry_namespace(myScan->ns);
-         tcl.entry_current->stat = true;
+         tcl.entry_current->m_static = true;
       }
    }
    tcl.entry_current->section       = Entry::VARIABLE_SEC;

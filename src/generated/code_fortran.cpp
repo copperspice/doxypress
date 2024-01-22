@@ -1,6 +1,6 @@
 /************************************************************************
 *
-* Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+* Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
 * Copyright (c) 1997-2014 Dimitri van Heesch
 *
 * DoxyPress is free software: you can redistribute it and/or
@@ -34327,7 +34327,7 @@ goto find_rule; \
 char *code_fortran_YYtext;
 /*************************************************************************
  *
- * Copyright (c) 2014-2023 Barbara Geller & Ansel Sermersheim
+ * Copyright (c) 2014-2024 Barbara Geller & Ansel Sermersheim
  * Copyright (c) 1997-2014 Dimitri van Heesch
  * Copyright (c) Anke Visser
 
@@ -34403,14 +34403,14 @@ class Scope
 
 static const int fixedCommentAfter = 72;
 
-static QString      docBlock;                     // contents of all lines of a documentation bloc
+static QString      docBlock;                     // contents of all lines of a documentation block
 static QString      currentModule;                // name of the current enclosing module
 static QString      currentClass;                 // name of the current enclosing class
 
 static UseSDict     *useMembers = nullptr;        // info about used modules
 static UseEntry     *useEntry   = nullptr;        // current use statement info
 
-static QString      s_outputStr = QString();      // contents of fortran string
+static QString      s_outputStr = QString();      // contents of Fortran string
 
 static CodeGenerator *s_code;
 
@@ -34532,7 +34532,7 @@ static void startCodeLine()
       }
    }
 
-   s_code->startCodeLine(s_sourceFileDef);
+   s_code->startCodeLine(s_sourceFileDef != nullptr);
 
    if (! s_currentFontClass.isEmpty()) {
       s_code->startFontClass(s_currentFontClass);
