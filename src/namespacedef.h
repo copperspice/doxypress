@@ -19,21 +19,21 @@
 #ifndef NAMESPACEDEF_H
 #define NAMESPACEDEF_H
 
-#include <QHash>
-#include <QStringList>
-#include <QSharedPointer>
-#include <QTextStream>
-
 #include <definition.h>
 #include <filenamelist.h>
 #include <stringmap.h>
 
+#include <QHash>
+#include <QSharedPointer>
+#include <QStringList>
+#include <QTextStream>
+
 class ClassDef;
 class ClassSDict;
 class ConceptDef;
-class MemberList;
 class MemberDef;
 class MemberGroupSDict;
+class MemberList;
 class NamespaceList;
 class NamespaceSDict;
 class OutputList;

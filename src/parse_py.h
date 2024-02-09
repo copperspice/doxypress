@@ -19,14 +19,13 @@
 #ifndef PARSE_PY_H
 #define PARSE_PY_H
 
-#include <QByteArray>
-#include <QStringList>
-
-#include <types.h>
-
 #include <definition.h>
 #include <outputgen.h>
 #include <parse_base.h>
+#include <types.h>
+
+#include <QByteArray>
+#include <QStringList>
 
 /** Python Parser using state-based lexical scanning.
  *

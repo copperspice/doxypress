@@ -19,9 +19,9 @@
 #ifndef PAGEDEF_H
 #define PAGEDEF_H
 
-#include <QTextStream>
-
 #include <definition.h>
+
+#include <QTextStream>
 
 class PageSDict;
 class OutputList;

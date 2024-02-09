@@ -19,14 +19,14 @@
 #ifndef DIRDEF_H
 #define DIRDEF_H
 
-#include <QList>
-#include <QStringList>
-#include <QTextStream>
-
 #include <definition.h>
 #include <filenamelist.h>
 #include <sortedlist.h>
 #include <stringmap.h>
+
+#include <QList>
+#include <QStringList>
+#include <QTextStream>
 
 class ClassSDict;
 class OutputList;

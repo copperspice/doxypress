@@ -19,6 +19,8 @@
 #ifndef HTAGS_H
 #define HTAGS_H
 
+#include <QString>
+
 class QByteArray;
 
 /** This class is a namespace for HTAGS related functions */

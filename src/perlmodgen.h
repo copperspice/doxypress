@@ -19,7 +19,7 @@
 #ifndef PERLMODGEN_H
 #define PERLMODGEN_H
 
-class QByteArray;
+#include <QString>
 
 extern void setPerlModDoxyfile(const QString &);
 extern void generatePerl_output();

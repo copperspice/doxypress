@@ -7,6 +7,12 @@
 
 %{
 
+#include <condparser.h>
+#include <config.h>
+#include <doxy_globals.h>
+#include <message.h>
+#include <util.h>
+
 #include <QChar>
 #include <QStack>
 #include <QTextStream>
@@ -14,12 +20,6 @@
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#include <config.h>
-#include <condparser.h>
-#include <doxy_globals.h>
-#include <message.h>
-#include <util.h>
 
 #define YY_NO_INPUT 1
 

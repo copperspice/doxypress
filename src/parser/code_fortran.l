@@ -8,16 +8,6 @@
 
 %{
 
-#include <QDir>
-#include <QRegularExpression>
-#include <QStringList>
-
-#include <set>
-
-#include <assert.h>
-#include <ctype.h>
-#include <stdio.h>
-
 #include <config.h>
 #include <default_args.h>
 #include <doxy_globals.h>
@@ -30,6 +20,15 @@
 #include <outputlist.h>
 #include <tooltip.h>
 #include <util.h>
+
+#include <QDir>
+#include <QRegularExpression>
+#include <QStringList>
+
+#include <assert.h>
+#include <ctype.h>
+#include <set>
+#include <stdio.h>
 
 // Toggle for some debugging info
 // #define DBG_CTX(x) fprintf x

@@ -19,12 +19,12 @@
 #ifndef DOCSETS_H
 #define DOCSETS_H
 
+#include <index.h>
+#include <stringmap.h>
+
 #include <QFile>
 #include <QTextStream>
 #include <QSet>
-
-#include <index.h>
-#include <stringmap.h>
 
 class Definition;
 

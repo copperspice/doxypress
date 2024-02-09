@@ -16,10 +16,8 @@
 *
 *************************************************************************/
 
-#include <QDir>
-#include <QStandardPaths>
-
 #include <latexgen.h>
+
 #include <cite.h>
 #include <config.h>
 #include <diagram.h>
@@ -32,6 +30,9 @@
 #include <message.h>
 #include <resourcemgr.h>
 #include <util.h>
+
+#include <QDir>
+#include <QStandardPaths>
 
 #include <stdlib.h>
 

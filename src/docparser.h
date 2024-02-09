@@ -19,14 +19,14 @@
 #ifndef DOCPARSER_H
 #define DOCPARSER_H
 
-#include <QList>
-
-#include <stdio.h>
-
 #include <definition.h>
 #include <docvisitor.h>
 #include <htmlattrib.h>
 #include <membergroup.h>
+
+#include <QList>
+
+#include <stdio.h>
 
 class DocNode;
 class MemberDef;

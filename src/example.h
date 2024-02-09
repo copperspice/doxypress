@@ -19,7 +19,7 @@
 #ifndef EXAMPLE_H
 #define EXAMPLE_H
 
-#include <QByteArray>
+#include <QString>
 
 /** Data associated with an example. */
 struct Example {

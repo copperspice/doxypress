@@ -16,12 +16,6 @@
 *
 *************************************************************************/
 
-#include <QList>
-#include <QRegularExpression>
-
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <htmlhelp.h>
 
 #include <config.h>
@@ -30,6 +24,12 @@
 #include <message.h>
 #include <qtextcodec.h>
 #include <util.h>
+
+#include <QList>
+#include <QRegularExpression>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 HtmlHelp *HtmlHelp::theInstance = nullptr;
 

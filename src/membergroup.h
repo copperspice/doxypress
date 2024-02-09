@@ -19,19 +19,18 @@
 #ifndef MEMBERGROUP_H
 #define MEMBERGROUP_H
 
-#include <QTextStream>
-#include <QVector>
-
+#include <doxy_shared.h>
 #include <types.h>
 
-#include <doxy_shared.h>
+#include <QTextStream>
+#include <QVector>
 
 class ClassDef;
 class Definition;
 class FileDef;
 class GroupDef;
-class MemberList;
 class MemberDef;
+class MemberList;
 class NamespaceDef;
 class OutputList;
 

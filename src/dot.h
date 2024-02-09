@@ -19,28 +19,28 @@
 #ifndef DOT_H
 #define DOT_H
 
+#include <sortedlist.h>
+#include <stringmap.h>
+
 #include <QByteArray>
-#include <QList>
 #include <QHash>
+#include <QList>
 #include <QMutex>
 #include <QQueue>
 #include <QTextStream>
 #include <QThread>
 #include <QWaitCondition>
 
-#include <stringmap.h>
-#include <sortedlist.h>
-
 class ClassDef;
-class FileDef;
 class ClassSDict;
-class MemberDef;
-class MemberList;
 class Definition;
 class DirDef;
-class GroupDef;
 class DotGroupCollaboration;
 class DotRunnerQueue;
+class FileDef;
+class GroupDef;
+class MemberDef;
+class MemberList;
 
 enum GraphOutputFormat    { GOF_BITMAP, GOF_EPS };
 enum EmbeddedOutputFormat { EOF_Html, EOF_LaTeX, EOF_Rtf, EOF_DocBook };

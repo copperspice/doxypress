@@ -19,6 +19,7 @@
 #ifndef LOGOS_H
 #define LOGOS_H
 
+#include <QString>
 extern void writeLogo(const QString &dir);
 
 extern void writeSearchButton(const QString &dir);

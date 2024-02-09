@@ -16,14 +16,6 @@
 *
 *************************************************************************/
 
-#include <QDateTime>
-#include <QDir>
-#include <QRegularExpression>
-#include <QTextStream>
-
-#include <stdlib.h>
-#include <set>
-
 #include <index.h>
 
 #include <config.h>
@@ -39,6 +31,14 @@
 #include <outputlist.h>
 #include <sortedlist.h>
 #include <util.h>
+
+#include <QDateTime>
+#include <QDir>
+#include <QRegularExpression>
+#include <QTextStream>
+
+#include <set>
+#include <stdlib.h>
 
 #define MAX_ITEMS_BEFORE_MULTIPAGE_INDEX 200
 #define MAX_ITEMS_BEFORE_QUICK_INDEX     30

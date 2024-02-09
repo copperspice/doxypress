@@ -19,8 +19,8 @@
 #ifndef MESSAGE_H
 #define MESSAGE_H
 
-#include <QString>
 #include <QHash>
+#include <QString>
 
 #include <stdio.h>
 #include <stdarg.h>

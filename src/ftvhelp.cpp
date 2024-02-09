@@ -16,25 +16,25 @@
 *
 *************************************************************************/
 
-#include <QHash>
-#include <QFile>
-#include <QFileInfo>
-
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <ftvhelp.h>
 
 #include <config.h>
-#include <doxy_globals.h>
 #include <docparser.h>
-#include <htmlgen.h>
+#include <doxy_globals.h>
 #include <htmldocvisitor.h>
+#include <htmlgen.h>
 #include <language.h>
 #include <layout.h>
 #include <message.h>
 #include <resourcemgr.h>
 #include <util.h>
+
+#include <QFile>
+#include <QFileInfo>
+#include <QHash>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #define MAX_INDENT 1024
 

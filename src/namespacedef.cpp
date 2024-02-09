@@ -25,8 +25,8 @@
 #include <doxy_globals.h>
 #include <language.h>
 #include <layout.h>
-#include <message.h>
 #include <membergroup.h>
+#include <message.h>
 #include <outputlist.h>
 #include <util.h>
 

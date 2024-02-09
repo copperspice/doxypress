@@ -19,9 +19,9 @@
 #ifndef MEMBERNAME_H
 #define MEMBERNAME_H
 
-#include <QList>
-
 #include <memberdef.h>
+
+#include <QList>
 
 /** Class representing all MemberDef objects with the same name */
 class MemberName : public QList<QSharedPointer<MemberDef>>

@@ -19,16 +19,16 @@
 #ifndef PARSE_BASE_H
 #define PARSE_BASE_H
 
+#include <types.h>
+
 #include <QHash>
 #include <QStringList>
 
-#include <types.h>
-
+class CodeGenerator;
+class Definition;
 class Entry;
 class FileDef;
-class CodeGenerator;
 class MemberDef;
-class Definition;
 
 enum ParserMode {
    SOURCE_FILE,

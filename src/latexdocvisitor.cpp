@@ -16,8 +16,6 @@
 *
 *************************************************************************/
 
-#include <QFileInfo>
-
 #include <latexdocvisitor.h>
 
 #include <cite.h>
@@ -37,6 +35,8 @@
 #include <parse_base.h>
 #include <plantuml.h>
 #include <util.h>
+
+#include <QFileInfo>
 
 constexpr const int maxLevels = 5;
 

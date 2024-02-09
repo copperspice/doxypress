@@ -19,9 +19,9 @@
 #ifndef PARSE_LIB_TOOLING_H
 #define PARSE_LIB_TOOLING_H
 
-#include <QSharedPointer>
-
 #include <entry.h>
+
+#include <QSharedPointer>
 
 #include <clang/AST/ASTConsumer.h>
 #include <clang/AST/RecursiveASTVisitor.h>

@@ -16,8 +16,6 @@
 *
 *************************************************************************/
 
-#include <QRegularExpression>
-
 #include <memberlist.h>
 
 #include <config.h>
@@ -28,6 +26,8 @@
 #include <namespacedef.h>
 #include <outputlist.h>
 #include <util.h>
+
+#include <QRegularExpression>
 
 MemberList::MemberList()
    : m_listType(MemberListType_pubMethods)

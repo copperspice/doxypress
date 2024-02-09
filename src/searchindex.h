@@ -19,11 +19,11 @@
 #ifndef SEARCHINDEX_H
 #define SEARCHINDEX_H
 
+#include <stringmap.h>
+
 #include <QHash>
 #include <QList>
 #include <QVector>
-
-#include <stringmap.h>
 
 class Definition;
 class MemberDef;

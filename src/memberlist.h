@@ -19,14 +19,14 @@
 #ifndef MEMBERLIST_H
 #define MEMBERLIST_H
 
+#include <memberdef.h>
+#include <sortedlist.h>
+#include <types.h>
+
 #include <QList>
 #include <QTextStream>
 
 #include <cassert>
-
-#include <memberdef.h>
-#include <sortedlist.h>
-#include <types.h>
 
 class GroupDef;
 class MemberGroup;

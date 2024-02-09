@@ -19,13 +19,13 @@
 #ifndef HTMLGEN_H
 #define HTMLGEN_H
 
+#include <language.h>
+#include <outputgen.h>
+
 #include <QByteArray>
 #include <QFile>
 #include <QString>
 #include <QTextStream>
-
-#include <language.h>
-#include <outputgen.h>
 
 class HtmlCodeGenerator : public CodeGenerator
 {

@@ -20,8 +20,8 @@
 #define QHPXMLWRITER_H
 
 #include <QByteArray>
-#include <QString>
 #include <QFile>
+#include <QString>
 #include <QTextStream>
 
 class QhpXmlWriter{

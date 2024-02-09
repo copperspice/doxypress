@@ -19,9 +19,9 @@
 #ifndef DECLINFO_H
 #define DECLINFO_H
 
-#include <QByteArray>
-
 #include <types.h>
+
+#include <QString>
 
 #include <stdio.h>
 

@@ -16,8 +16,17 @@
 *
 *************************************************************************/
 
-#include <QHash>
+#include <tagreader.h>
+
+#include <arguments.h>
+#include <default_args.h>
+#include <doxy_globals.h>
+#include <entry.h>
+#include <message.h>
+#include <util.h>
+
 #include <QFileInfo>
+#include <QHash>
 #include <QList>
 #include <QStack>
 #include <QString>
@@ -32,15 +41,6 @@
 
 #include <stdio.h>
 #include <stdarg.h>
-
-#include <tagreader.h>
-
-#include <arguments.h>
-#include <default_args.h>
-#include <doxy_globals.h>
-#include <entry.h>
-#include <message.h>
-#include <util.h>
 
 /** Information about an linkable anchor */
 class TagAnchorInfo

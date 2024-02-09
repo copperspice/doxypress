@@ -19,10 +19,11 @@
 #ifndef DOCTOKENIZER_H
 #define DOCTOKENIZER_H
 
+#include <htmlattrib.h>
+
 #include <QList>
 
 #include <stdio.h>
-#include <htmlattrib.h>
 
 class Definition;
 class MemberGroup;

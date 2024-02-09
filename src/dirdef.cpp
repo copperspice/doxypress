@@ -16,19 +16,19 @@
 *
 *************************************************************************/
 
-#include <QCryptographicHash>
-
 #include <dirdef.h>
 
 #include <config.h>
 #include <docparser.h>
 #include <dot.h>
 #include <doxy_globals.h>
-#include <layout.h>
 #include <language.h>
+#include <layout.h>
 #include <message.h>
 #include <outputlist.h>
 #include <util.h>
+
+#include <QCryptographicHash>
 
 static int g_dirCount = 0;
 

@@ -16,25 +16,26 @@
 *
 *************************************************************************/
 
+#include <groupdef.h>
+
+#include <arguments.h>
+#include <classdef.h>
+#include <config.h>
+#include <docparser.h>
+#include <dot.h>
+#include <doxy_globals.h>
+#include <entry.h>
+#include <language.h>
+#include <layout.h>
+#include <membergroup.h>
+#include <membername.h>
+#include <message.h>
+#include <outputlist.h>
+#include <util.h>
+
 #include <QRegularExpression>
 
 #include <ctype.h>
-
-#include <arguments.h>
-#include <config.h>
-#include <classdef.h>
-#include <doxy_globals.h>
-#include <dot.h>
-#include <docparser.h>
-#include <entry.h>
-#include <groupdef.h>
-#include <language.h>
-#include <layout.h>
-#include <membername.h>
-#include <message.h>
-#include <membergroup.h>
-#include <outputlist.h>
-#include <util.h>
 
 GroupDef::GroupDef(const QString &df, int dl, const QString &g_name, const QString &t, QString refFileName)
                   : Definition(df, dl, 1, g_name)

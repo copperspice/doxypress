@@ -19,10 +19,10 @@
 #ifndef DOXY_SHARED_H
 #define DOXY_SHARED_H
 
-#include <cassert>
-
 #include <QMap>
 #include <QSharedPointer>
+
+#include <cassert>
 
 // ** part 1
 class EnableSharedFromThis : public QEnableSharedFromThis<EnableSharedFromThis>

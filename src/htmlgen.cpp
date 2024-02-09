@@ -16,14 +16,11 @@
 *
 *************************************************************************/
 
-#include <QDir>
-#include <QRegularExpression>
-
 #include <htmlgen.h>
 
 #include <config.h>
-#include <docparser.h>
 #include <diagram.h>
+#include <docparser.h>
 #include <dot.h>
 #include <doxy_build_info.h>
 #include <doxy_globals.h>
@@ -31,12 +28,15 @@
 #include <htmldocvisitor.h>
 #include <htmlhelp.h>
 #include <image.h>
+#include <language.h>
 #include <layout.h>
 #include <logos.h>
-#include <language.h>
 #include <message.h>
 #include <resourcemgr.h>
 #include <util.h>
+
+#include <QDir>
+#include <QRegularExpression>
 
 #include <stdlib.h>
 

@@ -8,6 +8,21 @@
 
 %{
 
+#include <parse_tcl.h>
+
+#include <arguments.h>
+#include <commentcnv.h>
+#include <commentscan.h>
+#include <config.h>
+#include <default_args.h>
+#include <doxy_globals.h>
+#include <entry.h>
+#include <language.h>
+#include <message.h>
+#include <outputlist.h>
+#include <pre.h>
+#include <util.h>
+
 #include <QFile>
 #include <QHash>
 #include <QRegularExpression>
@@ -15,24 +30,10 @@
 #include <QStringList>
 #include <QVector>
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-
-#include <arguments.h>
-#include <config.h>
-#include <commentcnv.h>
-#include <commentscan.h>
-#include <default_args.h>
-#include <doxy_globals.h>
-#include <entry.h>
-#include <language.h>
-#include <message.h>
-#include <outputlist.h>
-#include <parse_tcl.h>
-#include <pre.h>
-#include <util.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define YY_NO_INPUT 1
 

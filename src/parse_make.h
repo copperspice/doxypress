@@ -19,9 +19,9 @@
 #ifndef PARSE_MAKE_H
 #define PARSE_MAKE_H
 
-#include <QStringList>
-
 #include <parse_base.h>
+
+#include <QStringList>
 
 /** \brief Make Language parser using state-based lexical scanning.
  *

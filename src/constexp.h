@@ -19,9 +19,9 @@
 #ifndef CONSTEXP_H
 #define CONSTEXP_H
 
-#include <QByteArray>
-
 #include <cppvalue.h>
+
+#include <QString>
 
 extern bool parseconstexp(const QString &fileName, int line, const QString &s);
 extern int constexpYYparse();

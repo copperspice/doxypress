@@ -16,6 +16,16 @@
 *
 *************************************************************************/
 
+#include <layout.h>
+
+#include <config.h>
+#include <doxy_build_info.h>
+#include <doxy_globals.h>
+#include <doxy_setup.h>
+#include <language.h>
+#include <message.h>
+#include <util.h>
+
 #include <QFile>
 #include <QFileInfo>
 #include <QHash>
@@ -26,15 +36,6 @@
 #include <QXmlParseException>
 
 #include <assert.h>
-
-#include <layout.h>
-#include <config.h>
-#include <doxy_build_info.h>
-#include <doxy_globals.h>
-#include <doxy_setup.h>
-#include <language.h>
-#include <message.h>
-#include <util.h>
 
 static QString buildMultiTitle(const QString & titleA, enum SrcLangExt langId, const QString & titleB) {
    return titleA + "|" + QString::number(langId) + "=" + titleB;

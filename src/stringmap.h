@@ -19,15 +19,15 @@
 #ifndef STRINGMAP_H
 #define STRINGMAP_H
 
+#include <config.h>
+#include <types.h>
+
 #include <QList>
 #include <QHash>
 
-#include <typeinfo>
 #include <algorithm>
 #include <stdexcept>
-
-#include <config.h>
-#include <types.h>
+#include <typeinfo>
 
 class ClassDef;
 class ConceptDef;

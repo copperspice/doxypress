@@ -19,7 +19,7 @@
 #ifndef PORTABLE_H
 #define PORTABLE_H
 
-#include <qglobal.h>
+#include <QGlobal>
 #include <QString>
 
 #include <sys/types.h>

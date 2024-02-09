@@ -19,13 +19,13 @@
 #ifndef LAYOUT_H
 #define LAYOUT_H
 
-#include <QList>
-
 #include <types.h>
+
+#include <QList>
+#include <QTextStream>
 
 class LayoutParser;
 class MemberList;
-class QTextStream;
 
 /** @brief Base class representing a piece of a documentation page */
 struct LayoutDocEntry {

@@ -16,12 +16,6 @@
 *
 *************************************************************************/
 
-#include <QCryptographicHash>
-#include <QDir>
-#include <QFile>
-
-#include <stdlib.h>
-
 #include <dot.h>
 
 #include <config.h>
@@ -30,11 +24,17 @@
 #include <doxy_globals.h>
 #include <groupdef.h>
 #include <language.h>
-#include <message.h>
 #include <membergroup.h>
+#include <message.h>
 #include <portable.h>
 #include <sortedlist.h>
 #include <util.h>
+
+#include <QCryptographicHash>
+#include <QDir>
+#include <QFile>
+
+#include <stdlib.h>
 
 static QString g_dotFontPath;
 

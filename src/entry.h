@@ -19,16 +19,16 @@
 #ifndef ENTRY_H
 #define ENTRY_H
 
-#include <bitset>
+#include <arguments.h>
+#include <doxy_shared.h>
+#include <section.h>
+#include <types.h>
 
 #include <QFlatMap>
 #include <QString>
 #include <QVector>
 
-#include <types.h>
-#include <arguments.h>
-#include <doxy_shared.h>
-#include <section.h>
+#include <bitset>
 
 class FileDef;
 struct ListItemInfo;

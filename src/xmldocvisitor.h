@@ -19,11 +19,11 @@
 #ifndef XMLDOCVISITOR_H
 #define XMLDOCVISITOR_H
 
+#include <docvisitor.h>
+
 #include <QByteArray>
 #include <QStack>
 #include <QTextStream>
-
-#include <docvisitor.h>
 
 class CodeGenerator;
 

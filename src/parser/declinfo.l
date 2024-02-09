@@ -7,13 +7,14 @@
 
 %{
 
-#include <stdio.h>
-#include <assert.h>
-#include <ctype.h>
-
 #include <declinfo.h>
+
 #include <message.h>
 #include <util.h>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
 
 #define YY_NO_INPUT 1
 

@@ -16,6 +16,22 @@
 *
 *************************************************************************/
 
+#include <util.h>
+
+#include <conceptdef.h>
+#include <config.h>
+#include <default_args.h>
+#include <doxy_build_info.h>
+#include <doxy_globals.h>
+#include <entry.h>
+#include <example.h>
+#include <htmlentity.h>
+#include <image.h>
+#include <language.h>
+#include <message.h>
+#include <portable.h>
+#include <textdocvisitor.h>
+
 #include <QByteArray>
 #include <QCache>
 #include <QCryptographicHash>
@@ -26,25 +42,9 @@
 #include <QStringView>
 #include <QTextCodec>
 
-#include <util.h>
-
-#include <config.h>
-#include <conceptdef.h>
-#include <default_args.h>
-#include <doxy_globals.h>
-#include <doxy_build_info.h>
-#include <entry.h>
-#include <example.h>
-#include <htmlentity.h>
-#include <image.h>
-#include <language.h>
-#include <message.h>
-#include <portable.h>
-#include <textdocvisitor.h>
-
-#include <stdlib.h>
 #include <errno.h>
 #include <math.h>
+#include <stdlib.h>
 
 struct FindFileCacheElem {
    FindFileCacheElem(QSharedPointer<FileDef> fd, bool ambig)

@@ -16,22 +16,12 @@
 *
 *************************************************************************/
 
-#include <QFile>
-#include <QFileInfo>
-#include <QStack>
-#include <QHash>
-#include <QRegularExpression>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 #include <docparser.h>
 
 #include <arguments.h>
 #include <cite.h>
-#include <config.h>
 #include <cmdmapper.h>
+#include <config.h>
 #include <doctokenizer.h>
 #include <doxy_globals.h>
 #include <emoji_entity.h>
@@ -43,6 +33,16 @@
 #include <portable.h>
 #include <printdocvisitor.h>
 #include <util.h>
+
+#include <QFile>
+#include <QFileInfo>
+#include <QHash>
+#include <QRegularExpression>
+#include <QStack>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <ctype.h>
 
 #define TK_COMMAND_CHAR(token) ((token)==TK_COMMAND_AT ? '@' : '\\')
 // debug off

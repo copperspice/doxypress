@@ -19,11 +19,11 @@
 #ifndef LATEXDOCVISITOR_H
 #define LATEXDOCVISITOR_H
 
+#include <docvisitor.h>
+
 #include <QList>
 #include <QStack>
 #include <QTextStream>
-
-#include <docvisitor.h>
 
 class LatexCodeGenerator;
 

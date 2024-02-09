@@ -8,12 +8,7 @@
 
 %{
 
-#include <QString>
-
-#include <stdio.h>
-
-#include "code_xml.h"
-// #include "parse_xml.h"
+#include <code_xml.h>
 
 #include <config.h>
 #include <doxy_globals.h>
@@ -21,6 +16,10 @@
 #include <outputlist.h>
 #include <tooltip.h>
 #include <util.h>
+
+#include <QString>
+
+#include <stdio.h>
 
 static CodeGenerator *s_code;
 

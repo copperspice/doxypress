@@ -16,11 +16,6 @@
 *
 *************************************************************************/
 
-#include <QRegularExpression>
-
-#include <stdio.h>
-#include <assert.h>
-
 #include <memberdef.h>
 
 #include <arguments.h>
@@ -37,6 +32,11 @@
 #include <outputlist.h>
 #include <parse_base.h>
 #include <util.h>
+
+#include <QRegularExpression>
+
+#include <stdio.h>
+#include <assert.h>
 
 int MemberDef::s_indentLevel = 0;
 

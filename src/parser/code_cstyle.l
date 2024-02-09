@@ -7,12 +7,6 @@
 
 %{
 
-#include <QDir>
-
-#include <stdio.h>
-#include <assert.h>
-#include <ctype.h>
-
 #include <code_cstyle_internal.h>
 
 #include <arguments.h>
@@ -24,6 +18,12 @@
 #include <stringmap.h>
 #include <tooltip.h>
 #include <util.h>
+
+#include <QDir>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
 
 // Toggle for some debugging info
 // #define DBG_CTX(x) fprintf x

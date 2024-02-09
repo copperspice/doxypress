@@ -19,6 +19,8 @@
 #ifndef COMMENTCNV_H
 #define COMMENTCNV_H
 
+#include <QString>
+
 extern QString convertCppComments(const QString &inBuf, const QString &fileName);
 
 #endif

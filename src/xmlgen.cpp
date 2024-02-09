@@ -16,31 +16,31 @@
 *
 *************************************************************************/
 
+#include <xmlgen.h>
+
+#include <arguments.h>
+#include <config.h>
+#include <default_args.h>
+#include <docparser.h>
+#include <dot.h>
+#include <doxy_build_info.h>
+#include <doxy_globals.h>
+#include <htmlentity.h>
+#include <language.h>
+#include <membergroup.h>
+#include <message.h>
+#include <outputgen.h>
+#include <parse_base.h>
+#include <resourcemgr.h>
+#include <util.h>
+#include <xmldocvisitor.h>
+
 #include <QDir>
 #include <QFile>
 #include <QTextStream>
 #include <QHash>
 
 #include <stdlib.h>
-
-#include <xmlgen.h>
-
-#include <arguments.h>
-#include <config.h>
-#include <docparser.h>
-#include <doxy_build_info.h>
-#include <doxy_globals.h>
-#include <dot.h>
-#include <default_args.h>
-#include <htmlentity.h>
-#include <language.h>
-#include <message.h>
-#include <membergroup.h>
-#include <outputgen.h>
-#include <parse_base.h>
-#include <resourcemgr.h>
-#include <util.h>
-#include <xmldocvisitor.h>
 
 // no debug info
 #define XML_DB(x) do {} while(0)

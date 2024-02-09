@@ -19,15 +19,15 @@
 #ifndef DEFINITION_H
 #define DEFINITION_H
 
-#include <QHash>
-#include <QSharedPointer>
-#include <QTextStream>
-#include <QVector>
-
 #include <doxy_shared.h>
 #include <sortedlist.h>
 #include <stringmap.h>
 #include <types.h>
+
+#include <QHash>
+#include <QSharedPointer>
+#include <QTextStream>
+#include <QVector>
 
 class Definition_Private;
 class FileDef;

@@ -7,17 +7,9 @@
 
 %{
 
-#include <QFile>
-#include <QStack>
-#include <QVector>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <ctype.h>
+#include <commentscan.h>
 
 #include <cite.h>
-#include <commentscan.h>
 #include <condparser.h>
 #include <config.h>
 #include <default_args.h>
@@ -33,6 +25,15 @@
 #include <parse_cstyle.h>
 #include <parse_md.h>
 #include <util.h>
+
+#include <QFile>
+#include <QStack>
+#include <QVector>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define YY_NO_INPUT 1
 

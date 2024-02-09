@@ -16,15 +16,7 @@
 *
 *************************************************************************/
 
-#include <QByteArray>
-#include <QHash>
-#include <QSet>
-
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <parse_clang.h>
-#include <parse_lib_tooling.h>
 
 #include <commentscan.h>
 #include <config.h>
@@ -32,10 +24,18 @@
 #include <entry.h>
 #include <message.h>
 #include <outputgen.h>
+#include <parse_lib_tooling.h>
 #include <qfileinfo.h>
 #include <stringmap.h>
 #include <tooltip.h>
 #include <util.h>
+
+#include <QByteArray>
+#include <QHash>
+#include <QSet>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 static void handleCommentBlock(const QString &comment, bool brief, const QString &fileName, QSharedPointer<Entry> current);
 

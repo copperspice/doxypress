@@ -19,24 +19,24 @@
 #ifndef CLASSDEF_H
 #define CLASSDEF_H
 
-#include <QList>
-#include <QHash>
-#include <QSet>
-#include <QTextStream>
-
 #include <arguments.h>
 #include <definition.h>
 #include <entry.h>
 #include <filedef.h>
 #include <filenamelist.h>
 #include <groupdef.h>
-#include <memberlist.h>
 #include <membergroup.h>
+#include <memberlist.h>
 #include <membername.h>
 #include <outputlist.h>
-#include <stringmap.h>
 #include <sortedlist_fwd.h>
+#include <stringmap.h>
 #include <types.h>
+
+#include <QList>
+#include <QHash>
+#include <QSet>
+#include <QTextStream>
 
 class ClassDef;
 class ClassDict;

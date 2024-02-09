@@ -19,10 +19,10 @@
 #ifndef REFLIST_H
 #define REFLIST_H
 
+#include <sortedlist.h>
+
 #include <QHash>
 #include <QList>
-
-#include <sortedlist.h>
 
 class Definition;
 

@@ -19,6 +19,8 @@
 #ifndef PRE_H
 #define PRE_H
 
+#include <QString>
+
 void initPreprocessor();
 void removePreProcessor();
 void addSearchDir(const QString &dir);

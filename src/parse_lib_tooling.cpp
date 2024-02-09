@@ -19,8 +19,8 @@
 #include <parse_lib_tooling.h>
 
 #include <config.h>
-#include <doxy_globals.h>
 #include <default_args.h>
+#include <doxy_globals.h>
 #include <util.h>
 
 static QMap<QString, clang::DeclContext *>       s_parentNodeMap;

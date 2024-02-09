@@ -19,7 +19,7 @@
 #ifndef MSC_H
 #define MSC_H
 
-#include <QByteArray>
+#include <QString>
 #include <QTextStream>
 
 

@@ -19,13 +19,12 @@
 #ifndef TEXTDOCVISITOR_H
 #define TEXTDOCVISITOR_H
 
+#include <docparser.h>
+#include <docvisitor.h>
+
 #include <QByteArray>
 #include <QStack>
 #include <QTextStream>
-
-#include <docvisitor.h>
-#include <docparser.h>
-
 
 /*! @brief Concrete visitor implementation for TEXT output. */
 class TextDocVisitor : public DocVisitor

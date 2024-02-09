@@ -19,19 +19,19 @@
 #ifndef OUTPUTLIST_H
 #define OUTPUTLIST_H
 
-#include <QList>
-
 #include <index.h>
 #include <outputgen.h>
 #include <section.h>
 
+#include <QList>
+
 class ClassDiagram;
+class DocRoot;
 class DotClassGraph;
 class DotDirDeps;
-class DotInclDepGraph;
 class DotGfxHierarchyTable;
 class DotGroupCollaboration;
-class DocRoot;
+class DotInclDepGraph;
 
 class OutputList : public TextGenerator
 {

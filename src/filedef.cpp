@@ -16,24 +16,25 @@
 *
 *************************************************************************/
 
-#include <QProcess>
-
 #include <filedef.h>
+
 #include <conceptdef.h>
 #include <config.h>
 #include <docparser.h>
-#include <doxy_globals.h>
 #include <dot.h>
+#include <doxy_globals.h>
 #include <entry.h>
 #include <groupdef.h>
 #include <htags.h>
-#include <layout.h>
 #include <language.h>
+#include <layout.h>
 #include <message.h>
 #include <outputlist.h>
 #include <parse_base.h>
 #include <parse_clang.h>
 #include <util.h>
+
+#include <QProcess>
 
 class DevNullCodeDocInterface : public CodeGenerator
 {

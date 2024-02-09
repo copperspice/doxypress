@@ -16,11 +16,6 @@
 *
 *************************************************************************/
 
-#include <QDir>
-#include <QFile>
-#include <QTextStream>
-#include <QHash>
-
 #include <docbookgen.h>
 
 #include <arguments.h>
@@ -30,14 +25,19 @@
 #include <docbookvisitor.h>
 #include <docparser.h>
 #include <dot.h>
-#include <doxy_globals.h>
 #include <doxy_build_info.h>
+#include <doxy_globals.h>
 #include <groupdef.h>
 #include <language.h>
-#include <message.h>
 #include <membergroup.h>
+#include <message.h>
 #include <parse_base.h>
 #include <util.h>
+
+#include <QDir>
+#include <QFile>
+#include <QHash>
+#include <QTextStream>
 
 #include <stdlib.h>
 

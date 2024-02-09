@@ -19,9 +19,9 @@
 #ifndef DEFARGS_H
 #define DEFARGS_H
 
-#include <QString>
-
 #include <arguments.h>
+
+#include <QString>
 
 ArgumentList stringToArgumentList(SrcLangExt lang, QString &extraTypeChars,
       const QString &argsString, const ArgumentList &argList = ArgumentList());

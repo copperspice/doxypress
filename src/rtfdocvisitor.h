@@ -19,10 +19,10 @@
 #ifndef RTFDOCVISITOR_H
 #define RTFDOCVISITOR_H
 
+#include <docvisitor.h>
+
 #include <QStack>
 #include <QTextStream>
-
-#include <docvisitor.h>
 
 class CodeGenerator;
 

@@ -16,13 +16,6 @@
 *
 *************************************************************************/
 
-#include <errno.h>
-#include <locale.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <set>
-
 #include <arguments.h>
 #include <cmdmapper.h>
 #include <code_cstyle.h>
@@ -61,6 +54,13 @@
 #include <tagreader.h>
 #include <util.h>
 #include <xmlgen.h>
+
+#include <errno.h>
+#include <locale.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <set>
 
 #if ! defined(_WIN32) || defined(__CYGWIN__)
 #include <signal.h>

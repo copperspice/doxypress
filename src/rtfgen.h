@@ -19,9 +19,9 @@
 #ifndef RTFGEN_H
 #define RTFGEN_H
 
-#include <QFile>
-
 #include <outputgen.h>
+
+#include <QFile>
 
 /** Generator for RTF output. */
 class RTFGenerator : public OutputGenerator

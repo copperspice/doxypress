@@ -19,7 +19,7 @@
 #ifndef PLANTUML_H
 #define PLANTUML_H
 
-class QByteArray;
+#include <QString>
 
 /** Plant UML output image formats */
 enum PlantUMLOutputFormat { PUML_BITMAP, PUML_EPS, PUML_SVG };

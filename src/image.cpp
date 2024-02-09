@@ -16,14 +16,14 @@
 *
 *************************************************************************/
 
-#include <QFile>
-
-#include <math.h>
-
 #include <image.h>
 
 #include <config.h>
 #include <lodepng.h>
+
+#include <QFile>
+
+#include <math.h>
 
 typedef unsigned char  Byte;
 

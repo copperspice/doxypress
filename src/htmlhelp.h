@@ -19,16 +19,16 @@
 #ifndef HTMLHELP_H
 #define HTMLHELP_H
 
+#include <index.h>
+#include <stringmap.h>
+
 #include <QByteArray>
 #include <QFile>
 #include <QHash>
+#include <QSet>
 #include <QStringList>
 #include <QTextCodec>
 #include <QTextStream>
-#include <QSet>
-
-#include <index.h>
-#include <stringmap.h>
 
 class Definition;
 class HtmlHelp;

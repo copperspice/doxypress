@@ -25,12 +25,12 @@
 #ifndef FTVHELP_H
 #define FTVHELP_H
 
+#include <definition.h>
+#include <index.h>
+
 #include <QList>
 #include <QString>
 #include <QTextStream>
-
-#include <index.h>
-#include <definition.h>
 
 struct FTVNode;
 

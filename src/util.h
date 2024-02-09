@@ -19,29 +19,29 @@
 #ifndef UTIL_H
 #define UTIL_H
 
-#include <QList>
-#include <QDir>
-#include <QFileInfo>
-#include <QStringList>
-#include <QTextStream>
-
 #include <arguments.h>
 #include <classdef.h>
 #include <filedef.h>
 #include <groupdef.h>
 #include <membergroup.h>
-#include <pagedef.h>
 #include <outputlist.h>
-#include <stringmap.h>
+#include <pagedef.h>
 #include <sortedlist_fwd.h>
+#include <stringmap.h>
+
+#include <QDir>
+#include <QFileInfo>
+#include <QList>
+#include <QStringList>
+#include <QTextStream>
 
 #include <ctype.h>
 #include <types.h>
 
 class Definition;
 class FileNameDict;
-class MemberList;
 class MemberDef;
+class MemberList;
 class NamespaceDef;
 class TextGenerator;
 

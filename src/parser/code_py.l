@@ -7,11 +7,7 @@
 
 %{
 
-#include <QStack>
-#include <QSharedPointer>
-#include <QStringList>
-
-#include <stdio.h>
+#include <parse_py.h>
 
 #include <config.h>
 #include <doxy_globals.h>
@@ -19,9 +15,14 @@
 #include <message.h>
 #include <outputlist.h>
 #include <parse_cstyle.h>
-#include <parse_py.h>
 #include <tooltip.h>
 #include <util.h>
+
+#include <QSharedPointer>
+#include <QStack>
+#include <QStringList>
+
+#include <stdio.h>
 
 #define DBG_CTX(...)     do { } while(0)
 

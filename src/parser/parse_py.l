@@ -7,25 +7,26 @@
 
 %{
 
-#include <QFile>
-#include <QFileInfo>
-#include <QHash>
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <ctype.h>
+#include <parse_py.h>
 
 #include <arguments.h>
 #include <commentscan.h>
 #include <config.h>
-#include <doxy_globals.h>
 #include <default_args.h>
+#include <doxy_globals.h>
 #include <entry.h>
 #include <language.h>
 #include <message.h>
-#include <parse_py.h>
 #include <util.h>
+
+#include <QFile>
+#include <QFileInfo>
+#include <QHash>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 #define DBG_CTX(...)     do { } while(0)
 

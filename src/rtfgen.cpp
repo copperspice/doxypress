@@ -16,27 +16,27 @@
 *
 *************************************************************************/
 
+#include <rtfgen.h>
+
+#include <config.h>
+#include <diagram.h>
+#include <docparser.h>
+#include <dot.h>
+#include <doxy_build_info.h>
+#include <doxy_globals.h>
+#include <groupdef.h>
+#include <language.h>
+#include <message.h>
+#include <rtfdocvisitor.h>
+#include <rtfstyle.h>
+#include <util.h>
+
 #include <QDir>
 #include <QRegularExpression>
 #include <QTextCodec>
 #include <QTextStream>
 
 #include <stdlib.h>
-
-#include <rtfgen.h>
-
-#include <config.h>
-#include <diagram.h>
-#include <doxy_globals.h>
-#include <docparser.h>
-#include <dot.h>
-#include <doxy_build_info.h>
-#include <groupdef.h>
-#include <language.h>
-#include <message.h>
-#include <rtfstyle.h>
-#include <rtfdocvisitor.h>
-#include <util.h>
 
 #define DBG_RTF(x)
 

@@ -19,10 +19,10 @@
 #ifndef MANDOCVISITOR_H
 #define MANDOCVISITOR_H
 
+#include <docvisitor.h>
+
 #include <QStack>
 #include <QTextStream>
-
-#include <docvisitor.h>
 
 class CodeGenerator;
 

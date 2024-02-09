@@ -19,26 +19,26 @@
 #ifndef GROUPDEF_H
 #define GROUPDEF_H
 
-#include <QString>
-#include <QSharedPointer>
-#include <QTextStream>
-
 #include <definition.h>
 #include <filenamelist.h>
 #include <stringmap.h>
+
+#include <QSharedPointer>
+#include <QString>
+#include <QTextStream>
 
 class ClassDef;
 class ConceptDef;
 class DirDef;
 class Entry;
-class FileDef;
 class FTVHelp;
+class FileDef;
 class MemberDef;
 class MemberList;
 class NamespaceDef;
 class OutputList;
-class PageSDict;
 class PageDef;
+class PageSDict;
 
 /** A model of a group of symbols. */
 class GroupDef : public Definition

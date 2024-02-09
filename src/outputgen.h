@@ -19,24 +19,24 @@
 #ifndef OUTPUTGEN_H
 #define OUTPUTGEN_H
 
+#include <index.h>
+#include <section.h>
+
 #include <QFile>
 #include <QStack>
 #include <QTextStream>
 
-#include <index.h>
-#include <section.h>
-
 class ClassDiagram;
-class DotClassGraph;
-class DotInclDepGraph;
+class Definition;
+class DocNode;
 class DotCallGraph;
+class DotClassGraph;
 class DotDirDeps;
 class DotGfxHierarchyTable;
 class DotGroupCollaboration;
-class DocNode;
-class MemberDef;
+class DotInclDepGraph;
 class GroupDef;
-class Definition;
+class MemberDef;
 
 struct DocLinkInfo {
    QString name;

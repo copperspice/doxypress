@@ -7,22 +7,23 @@
 
 %{
 
-#include <QFile>
-#include <QString>
-#include <QStack>
-#include <QRegularExpression>
-
-#include <ctype.h>
-
 #include <doctokenizer.h>
-#include <config.h>
+
 #include <cmdmapper.h>
+#include <config.h>
 #include <definition.h>
 #include <doxy_globals.h>
-#include <message.h>
 #include <membergroup.h>
+#include <message.h>
 #include <portable.h>
 #include <util.h>
+
+#include <QFile>
+#include <QRegularExpression>
+#include <QStack>
+#include <QString>
+
+#include <ctype.h>
 
 #define YY_NO_INPUT 1
 

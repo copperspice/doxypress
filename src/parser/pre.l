@@ -7,33 +7,33 @@
 
 %{
 
-#include <stdio.h>
-#include <assert.h>
-#include <ctype.h>
-#include <errno.h>
+#include <pre.h>
+
+#include <a_define.h>
+#include <arguments.h>
+#include <condparser.h>
+#include <config.h>
+#include <constexp.h>
+#include <default_args.h>
+#include <doxy_globals.h>
+#include <entry.h>
+#include <membername.h>
+#include <message.h>
+#include <util.h>
 
 #include <QDir>
 #include <QFile>
 #include <QFileInfo>
 #include <QHash>
 #include <QRegularExpression>
-#include <QStringList>
 #include <QStack>
+#include <QStringList>
 #include <QVector>
 
-#include <pre.h>
-
-#include <a_define.h>
-#include <arguments.h>
-#include <constexp.h>
-#include <config.h>
-#include <condparser.h>
-#include <doxy_globals.h>
-#include <default_args.h>
-#include <entry.h>
-#include <message.h>
-#include <membername.h>
-#include <util.h>
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <stdio.h>
 
 // Toggle for some debugging info
 // #define DBG_CTX(x) fprintf x

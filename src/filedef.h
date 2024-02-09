@@ -19,15 +19,15 @@
 #ifndef FILEDEF_H
 #define FILEDEF_H
 
-#include <QList>
-#include <QHash>
-#include <QTextStream>
-
 #include <definition.h>
 #include <filenamelist.h>
 #include <index.h>
 #include <sortedlist.h>
 #include <stringmap.h>
+
+#include <QHash>
+#include <QList>
+#include <QTextStream>
 
 class ClassDef;
 class ConceptDef;

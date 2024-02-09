@@ -19,10 +19,10 @@
 #ifndef FILENAMELIST_H
 #define FILENAMELIST_H
 
+#include <sortedlist.h>
+
 #include <QString>
 #include <QSharedPointer>
-
-#include <sortedlist.h>
 
 class FileDef;
 

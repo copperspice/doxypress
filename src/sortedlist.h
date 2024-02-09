@@ -19,10 +19,10 @@
 #ifndef SORTEDLIST_H
 #define SORTEDLIST_H
 
+#include <sortedlist_fwd.h>
+
 #include <QList>
 #include <QSharedPointer>
-
-#include <sortedlist_fwd.h>
 
 class ClassDef;
 class DirDef;

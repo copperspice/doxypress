@@ -21,8 +21,8 @@
 
 #include <QByteArray>
 #include <QList>
-#include <QString>
 #include <QSharedPointer>
+#include <QString>
 
 enum class DirType {
    None,

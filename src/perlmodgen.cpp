@@ -16,14 +16,6 @@
 *
 *************************************************************************/
 
-#include <QDir>
-#include <QStack>
-#include <QHash>
-#include <QFile>
-#include <QTextStream>
-
-#include <stdlib.h>
-
 #include <perlmodgen.h>
 
 #include <arguments.h>
@@ -32,9 +24,17 @@
 #include <doxy_globals.h>
 #include <emoji_entity.h>
 #include <htmlentity.h>
-#include <message.h>
 #include <membergroup.h>
+#include <message.h>
 #include <util.h>
+
+#include <QDir>
+#include <QFile>
+#include <QHash>
+#include <QStack>
+#include <QTextStream>
+
+#include <stdlib.h>
 
 #define PERLOUTPUT_MAX_INDENTATION 40
 

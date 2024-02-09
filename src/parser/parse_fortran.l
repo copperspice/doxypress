@@ -8,28 +8,29 @@
 
 %{
 
+#include <parse_fortran.h>
+
+#include <arguments.h>
+#include <commentscan.h>
+#include <config.h>
+#include <default_args.h>
+#include <entry.h>
+#include <language.h>
+#include <message.h>
+#include <pre.h>
+#include <util.h>
+
 #include <QByteArray>
 #include <QFile>
 #include <QMap>
-#include <QStack>
 #include <QRegularExpression>
+#include <QStack>
 #include <QVector>
 
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <ctype.h>
-
-#include <arguments.h>
-#include <config.h>
-#include <entry.h>
-#include <message.h>
-#include <default_args.h>
-#include <language.h>
-#include <commentscan.h>
-#include <parse_fortran.h>
-#include <pre.h>
-#include <util.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 static const int fixedCommentAfter = 72;
 

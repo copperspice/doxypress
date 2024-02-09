@@ -19,11 +19,11 @@
 #ifndef MANGEN_H
 #define MANGEN_H
 
-#include <QFile>
-#include <QString>
-
 #include <language.h>
 #include <outputgen.h>
+
+#include <QFile>
+#include <QString>
 
 /** Generator for Man page output. */
 class ManGenerator : public OutputGenerator

@@ -19,6 +19,10 @@
 #ifndef TOOLTIP_H
 #define TOOLTIP_H
 
+#include <QHash>
+#include <QSharedPointer>
+#include <QString>
+
 class Definition;
 class CodeGenerator;
 

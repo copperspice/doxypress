@@ -19,11 +19,11 @@
 #ifndef HTML_ENTITY_H
 #define HTML_ENTITY_H
 
+#include <docparser.h>
+
 #include <QHash>
 #include <QString>
 #include <QTextStream>
-
-#include <docparser.h>
 
 class HtmlEntityMapper
 {

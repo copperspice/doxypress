@@ -19,11 +19,11 @@
 #ifndef DOCBOOKVISITOR_H
 #define DOCBOOKVISITOR_H
 
-#include <QStack>
-#include <QTextStream>
-
 #include <docparser.h>
 #include <docvisitor.h>
+
+#include <QStack>
+#include <QTextStream>
 
 class CodeGenerator;
 

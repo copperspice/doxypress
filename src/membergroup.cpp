@@ -16,17 +16,17 @@
 *
 *************************************************************************/
 
-#include <QCryptographicHash>
-
 #include <membergroup.h>
 
-#include <doxy_globals.h>
 #include <docparser.h>
+#include <doxy_globals.h>
 #include <entry.h>
 #include <groupdef.h>
 #include <language.h>
 #include <outputlist.h>
 #include <util.h>
+
+#include <QCryptographicHash>
 
 MemberGroup::MemberGroup()
 {

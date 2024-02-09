@@ -19,12 +19,12 @@
 #ifndef CLASSLIST_H
 #define CLASSLIST_H
 
-#include <QList>
-#include <QHash>
-
 #include <classdef.h>
 #include <definition.h>
 #include <stringmap.h>
+
+#include <QList>
+#include <QHash>
 
 /** An unsorted dictionary of ClassDef objects. */
 class ClassDict : public QHash<QString, ClassDef>

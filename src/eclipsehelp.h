@@ -27,12 +27,12 @@
 #ifndef ECLIPSEHELP_H
 #define ECLIPSEHELP_H
 
+#include <index.h>
+#include <definition.h>
+
 #include <QFile>
 #include <QString>
 #include <QTextStream>
-
-#include <index.h>
-#include <definition.h>
 
 /** Generator for Eclipse help files.
  *

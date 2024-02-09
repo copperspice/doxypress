@@ -19,18 +19,9 @@
 #ifndef DOXY_GLOBALS_H
 #define DOXY_GLOBALS_H
 
-#include <QByteArray>
-#include <QCache>
-#include <QHash>
-#include <QMultiHash>
-#include <QList>
-#include <QString>
-#include <QSharedPointer>
-#include <QTime>
-
+#include <cite.h>
 #include <classdef.h>
 #include <classlist.h>
-#include <cite.h>
 #include <conceptdef.h>
 #include <dirdef.h>
 #include <entry.h>
@@ -46,6 +37,15 @@
 #include <reflist.h>
 #include <searchindex.h>
 #include <stringmap.h>
+
+#include <QByteArray>
+#include <QCache>
+#include <QHash>
+#include <QList>
+#include <QMultiHash>
+#include <QSharedPointer>
+#include <QString>
+#include <QTime>
 
 struct LookupInfo {
    LookupInfo() {}

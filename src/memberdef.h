@@ -19,6 +19,10 @@
 #ifndef MEMBERDEF_H
 #define MEMBERDEF_H
 
+#include <definition.h>
+#include <entry.h>
+#include <types.h>
+
 #include <QCryptographicHash>
 #include <QList>
 #include <QStringList>
@@ -27,21 +31,17 @@
 
 #include <sys/types.h>
 
-#include <definition.h>
-#include <entry.h>
-#include <types.h>
-
-class ClassDef;
-class NamespaceDef;
-class GroupDef;
-class FileDef;
-class MemberList;
-class MemberGroup;
-class ExampleSDict;
-class OutputList;
-class GroupDef;
 class ArgumentList;
+class ClassDef;
+class ExampleSDict;
+class FileDef;
+class GroupDef;
+class GroupDef;
 class MemberDefImpl;
+class MemberGroup;
+class MemberList;
+class NamespaceDef;
+class OutputList;
 
 struct TagInfo;
 

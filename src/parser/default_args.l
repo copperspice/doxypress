@@ -7,18 +7,19 @@
 
 %{
 
-#include <QRegularExpression>
-#include <QStringList>
-
-#include <stdio.h>
-#include <assert.h>
-#include <ctype.h>
+#include <default_args.h>
 
 #include <arguments.h>
-#include <default_args.h>
 #include <entry.h>
 #include <message.h>
 #include <util.h>
+
+#include <QRegularExpression>
+#include <QStringList>
+
+#include <assert.h>
+#include <ctype.h>
+#include <stdio.h>
 
 #define YY_NO_INPUT 1
 

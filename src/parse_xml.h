@@ -19,8 +19,8 @@
 #ifndef PARSE_XML_H
 #define PARSE_XML_H
 
-#include <parse_base.h>
 #include <code_xml.h>
+#include <parse_base.h>
 
 // XML scanner, only supports syntax highlighting
 class XML_Parser : public ParserInterface
