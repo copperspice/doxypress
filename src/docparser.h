@@ -692,7 +692,7 @@ class DocSeparator : public DocNode
       m_parent = parent;
    }
 
-   Kind kind() const {
+   Kind kind() const override {
       return Kind_Sep;
    }
 
@@ -700,7 +700,8 @@ class DocSeparator : public DocNode
       return m_chars;
    }
 
-   void accept(DocVisitor *) { }
+   void accept(DocVisitor *) override {
+    }
 
   private:
     QString  m_chars;

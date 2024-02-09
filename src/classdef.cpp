@@ -3468,7 +3468,7 @@ QString ClassDef::className() const
    } else {
       return m_className;
    }
-};
+}
 
 void ClassDef::setClassName(const QString &name)
 {

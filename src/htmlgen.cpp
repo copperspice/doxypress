@@ -941,7 +941,7 @@ void HtmlGenerator::startFile(const QString &name, const QString &, const QStrin
    m_textStream << substituteHtmlKeywords(g_header, filterTitle(title), m_relativePath);
    m_textStream << "<!-- " << theTranslator->trGeneratedBy() << " DoxyPress " << versionString << " -->\n";
 
-   if (searchEngine /*&& ! generateTreeView*/) {
+   if (searchEngine) {
       m_textStream << "<script type=\"text/javascript\">\n";
 
       m_textStream << "var searchBox = new SearchBox(\"searchBox\", \""

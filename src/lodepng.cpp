@@ -70,7 +70,7 @@ static void vector_cleanup(void *p)
 {
    ((vector *)p)->size = ((vector *)p)->allocsize = 0;
    free(((vector *)p)->data);
-   ((vector *)p)->data = NULL;
+   ((vector *)p)->data = nullptr;
 }
 
 static void vector_cleanupd(vector *p, void dtor(void *)) /*clear and use destructor on elements*/
@@ -81,7 +81,7 @@ static void vector_cleanupd(vector *p, void dtor(void *)) /*clear and use destru
 
 static void vector_init(vector *p, unsigned typesize)
 {
-   p->data = NULL;
+   p->data = nullptr;
    p->size = p->allocsize = 0;
    p->typesize = typesize;
 }
@@ -121,7 +121,7 @@ static void uivector_cleanup(void *p)
 {
    ((uivector *)p)->size = ((uivector *)p)->allocsize = 0;
    free(((uivector *)p)->data);
-   ((uivector *)p)->data = NULL;
+   ((uivector *)p)->data = nullptr;
 }
 
 static unsigned uivector_resize(uivector *p, size_t size) /*returns 1 if success, 0 if failure ==> nothing done*/
@@ -156,7 +156,7 @@ static unsigned uivector_resizev(uivector *p, size_t size, unsigned value) /*res
 
 static void uivector_init(uivector *p)
 {
-   p->data = NULL;
+   p->data = nullptr;
    p->size = p->allocsize = 0;
 }
 
@@ -211,7 +211,7 @@ static void ucvector_cleanup(void *p)
 {
    ((ucvector *)p)->size = ((ucvector *)p)->allocsize = 0;
    free(((ucvector *)p)->data);
-   ((ucvector *)p)->data = NULL;
+   ((ucvector *)p)->data = nullptr;
 }
 
 static unsigned ucvector_resize(ucvector *p, size_t size) /*returns 1 if success, 0 if failure ==> nothing done*/
@@ -250,7 +250,7 @@ static unsigned ucvector_resizev(ucvector *p, size_t size, unsigned char value) 
 
 static void ucvector_init(ucvector *p)
 {
-   p->data = NULL;
+   p->data = nullptr;
    p->size = p->allocsize = 0;
 }
 
@@ -288,14 +288,14 @@ static unsigned string_resize(char **out, size_t size) /*returns 1 if success, 0
 
 static void string_init(char **out) /*init a {char*, size_t} pair for use as string*/
 {
-   *out = NULL;
+   *out = nullptr;
    string_resize(out, 0);
 }
 
 static void string_cleanup(char **out) /*free the above pair again*/
 {
    free(*out);
-   *out = NULL;
+   *out = nullptr;
 }
 
 static void string_set(char **out, const char *in)
@@ -2460,8 +2460,8 @@ unsigned LodePNG_UnknownChunks_copy(LodePNG_UnknownChunks *dest, const LodePNG_U
 void LodePNG_Text_init(LodePNG_Text *text)
 {
    text->num = 0;
-   text->keys = NULL;
-   text->strings = NULL;
+   text->keys = nullptr;
+   text->strings = nullptr;
 }
 
 void LodePNG_Text_cleanup(LodePNG_Text *text)
@@ -2522,11 +2522,11 @@ unsigned LodePNG_Text_add(LodePNG_Text *text, const char *key, const char *str)
 
 void LodePNG_IText_init(LodePNG_IText *text)
 {
-   text->num = 0;
-   text->keys = NULL;
-   text->langtags = NULL;
-   text->transkeys = NULL;
-   text->strings = NULL;
+   text->num       = 0;
+   text->keys      = nullptr;
+   text->langtags  = nullptr;
+   text->transkeys = nullptr;
+   text->strings   = nullptr;
 }
 
 void LodePNG_IText_cleanup(LodePNG_IText *text)

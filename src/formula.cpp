@@ -229,7 +229,8 @@ void FormulaList::generateBitmaps(const QString &path)
          portable_sysTimerStop();
          f.setFileName(formBase + ".pnm");
 
-         uint imageX = 0, imageY = 0;
+         uint imageX = 0;
+         uint imageY = 0;
 
          // read the generated image again, to obtain the pixel data
          if (f.open(QIODevice::ReadOnly)) {
@@ -259,7 +260,7 @@ void FormulaList::generateBitmaps(const QString &path)
                   }
                }
 
-               sscanf(s.toUtf8().constData(), "%d %d", &imageX, &imageY);
+               sscanf(s.toUtf8().constData(), "%u %u", &imageX, &imageY);
             }
 
             if (imageX > 0 && imageY > 0) {

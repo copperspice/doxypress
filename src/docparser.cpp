@@ -4722,7 +4722,7 @@ int DocHtmlDescTitle::parse()
                      int nextToken = doctokenizerYYlex();
 
                      if (nextToken != TK_WHITESPACE) {
-                        warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after \%s command",
+                        warn_doc_error(s_fileName, getDoctokenLineNum(), "Expected whitespace after %s command",
                               csPrintable(cmdName));
 
                      } else {

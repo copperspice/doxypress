@@ -129,9 +129,6 @@ class DocGenerator : public CodeGenerator
    virtual void startEmphasis() = 0;
    virtual void endEmphasis() = 0;
 
-   virtual void startCodeFragment(const QString &style) = 0;
-   virtual void endCodeFragment(const QString &style) = 0;
-
    virtual void startDescription() = 0;
    virtual void endDescription() = 0;
 
