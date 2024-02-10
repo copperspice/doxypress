@@ -171,7 +171,7 @@ class ParserManager
 
       ParserInterface *intf = m_extensions.value(ext);
 
-      if (intf == 0 && ext.length() > 4) {
+      if (intf == nullptr && ext.length() > 4) {
          intf = m_extensions.value(ext.left(4));
       }
 

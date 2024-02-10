@@ -207,7 +207,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
                std::string tString;
                llvm::raw_string_ostream tStream(tString);
-               tExpr->printPretty(tStream, 0, m_policy);
+               tExpr->printPretty(tStream, nullptr, m_policy);
 
                current->setData(EntryKey::Requires_Clause, toQString(tStream.str()));
             }
@@ -429,7 +429,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
                std::string tString;
                llvm::raw_string_ostream tStream(tString);
-               tExpr->printPretty(tStream, 0, m_policy);
+               tExpr->printPretty(tStream, nullptr, m_policy);
 
                current->setData(EntryKey::Requires_Clause, toQString(tStream.str()));
             }
@@ -547,7 +547,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
          	
                std::string tString;
                llvm::raw_string_ostream tStream(tString);
-               tExpr->printPretty(tStream, 0, m_policy);
+               tExpr->printPretty(tStream, nullptr, m_policy);
 
                tmpDefValue = toQString(tStream.str());
                args += "=" + tmpDefValue;
@@ -637,7 +637,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
                std::string tString;
                llvm::raw_string_ostream tStream(tString);
-               tExpr->printPretty(tStream, 0, m_policy);
+               tExpr->printPretty(tStream, nullptr, m_policy);
 
                argNoExcept += " noexcept(" + toQString(tStream.str()) + ")";
                current->m_traits.setTrait(Entry::Virtue::NoExcept);
@@ -795,7 +795,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          std::string tString;
          llvm::raw_string_ostream tStream(tString);
-         constraintExpr->printPretty(tStream, 0, m_policy);
+         constraintExpr->printPretty(tStream, nullptr, m_policy);
 
          QString constraintStr = toQString(tStream.str());
 
@@ -1005,7 +1005,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
       	
             std::string tString;
             llvm::raw_string_ostream tStream(tString);
-            tExpr->printPretty(tStream, 0, m_policy);
+            tExpr->printPretty(tStream, nullptr, m_policy);
 
             current->setData(EntryKey::Initial_Value, " = " + toQString(tStream.str()));
          }
@@ -1170,7 +1170,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             	
                   std::string tString;
                   llvm::raw_string_ostream tStream(tString);
-                  tExpr->printPretty(tStream, 0, m_policy);
+                  tExpr->printPretty(tStream, nullptr, m_policy);
 
                   tmpDefValue = toQString(tStream.str());
                   args += "=" + tmpDefValue;
@@ -1325,7 +1325,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
                std::string tString;
                llvm::raw_string_ostream tStream(tString);
-               expr->printPretty(tStream, 0, m_policy);
+               expr->printPretty(tStream, nullptr, m_policy);
 
                type = toQString(tStream.str());
             }

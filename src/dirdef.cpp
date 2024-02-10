@@ -896,7 +896,7 @@ void buildDirectories()
          if (fd->getReference().isEmpty() && fd->isDocumentationFile() ) {
             QSharedPointer<DirDef> dir;
 
-            if ((dir = Doxy_Globals::directories.find(fd->getPath())) == 0) {
+            if ((dir = Doxy_Globals::directories.find(fd->getPath())) == nullptr) {
                // new directory
                dir = DirDef::mergeDirectoryInTree(fd->getPath());
             }

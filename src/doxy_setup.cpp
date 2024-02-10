@@ -345,8 +345,8 @@ CommandLine parseCommandLine(QStringList argList)
             break;
 
          case OUTPUT_APP:
-            setvbuf(stdout, NULL, _IONBF, 0);
-            setvbuf(stderr, NULL, _IONBF, 0);
+            setvbuf(stdout, nullptr, _IONBF, 0);
+            setvbuf(stderr, nullptr, _IONBF, 0);
 
             Doxy_Globals::outputToApp = true;
             break;

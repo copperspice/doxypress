@@ -95,7 +95,7 @@ int TclFindElement(const QString &list, int listLength, int &elementIndex, int &
 
    elemStart = iter;
 
-   if (bracePtr != 0) {
+   if (bracePtr != nullptr) {
       *bracePtr = openBraces;
    }
 
@@ -207,7 +207,7 @@ done:
    elementIndex = elemStart - list.constBegin();
    nextIndex    = iter - list.constBegin();
 
-   if (sizePtr != 0) {
+   if (sizePtr != nullptr) {
       *sizePtr = size;
    }
 

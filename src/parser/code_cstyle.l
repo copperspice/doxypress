@@ -249,7 +249,7 @@ void VariableContext::addVariable(const QString &type, const QString &name)
       QString templateArgs(ltype.right(ltype.length() - i));
 
       if ( ( (varType = g_codeClassSDict.find(typeName)) ||
-             (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, typeName, 0, 0, true, true)) ) &&
+             (varType = getResolvedClass(g_currentDefinition, g_sourceFileDef, typeName, nullptr, nullptr, true, true)) ) &&
               ! varType->getTemplateArgumentList().listEmpty() ) {
 
          // look for class definitions inside the code block, otherwise look for global class definitions
@@ -647,11 +647,11 @@ static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<
          cd = getResolvedClass(d, g_sourceFileDef, g_classScope + "::" + clName);
       }
 
-      if (cd == 0) {
+      if (cd == nullptr) {
          cd = getResolvedClass(d, g_sourceFileDef, clName);
       }
 
-      if (cd) {
+      if (cd != nullptr) {
          return cd;
       }
    }
@@ -912,7 +912,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
 
    bool isLocal = false;
 
-   if (! s_prefix_this || (lcd = g_theVarContext.findVariable(className)) == 0) {
+   if (! s_prefix_this || (lcd = g_theVarContext.findVariable(className)) == nullptr) {
       // not a local variable
       QSharedPointer<Definition> d = g_currentDefinition;
 
@@ -1186,7 +1186,7 @@ static void generateMemberLink(CodeGenerator &ol, const QString &varName, const 
 
          QSharedPointer<MemberName> vmn = Doxy_Globals::memberNameSDict.find(varName);
 
-         if (vmn == 0) {
+         if (vmn == nullptr) {
             int vi;
             QString vn = varName;
 
@@ -1421,7 +1421,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
 
          QSharedPointer<ClassDef> cd = g_theVarContext.findVariable(ctx->objectTypeOrName);
 
-         if (cd == 0) {
+         if (cd == nullptr) {
             // not a local variable
             if (ctx->objectTypeOrName == "self") {
 
@@ -1437,7 +1437,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                // found class
                ctx->method = ctx->objectType->getMemberByName(ctx->methodName);
 
-            } else if (ctx->method == 0) {
+            } else if (ctx->method == nullptr) {
                // search for class variable with the same name
 
                if (g_currentDefinition && g_currentDefinition->definitionType() == Definition::TypeClass) {
@@ -1623,7 +1623,7 @@ static void writeObjCMethodCall(ObjCCallCtx *ctx)
                      QSharedPointer<ClassDef> cd = getResolvedClass(g_currentDefinition, g_sourceFileDef, *pObject);
 
                      if (cd && cd->isLinkable()) {
-                        if (ctx->objectType == 0) {
+                        if (ctx->objectType == nullptr) {
                            ctx->objectType = cd;
                         }
                         writeMultiLineCodeLink(*g_code, cd, *pObject);
@@ -2495,7 +2495,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          pushScope(g_curClassName);
          DBG_CTX((stderr, "***** g_curClassName=%s\n", csPrintable(g_curClassName)));
 
-         if (getResolvedClass(g_currentDefinition, g_sourceFileDef, g_curClassName) == 0) {
+         if (getResolvedClass(g_currentDefinition, g_sourceFileDef, g_curClassName) == nullptr) {
 
             DBG_CTX((stderr, "Adding new class %s\n", csPrintable(g_curClassName)));
 
@@ -3337,7 +3337,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          g_currentCtxId    = 0;
          g_currentNameId   = 0;
          g_currentObjId    = 0;
-         g_ObjC_currentCtx = 0;
+         g_ObjC_currentCtx = nullptr;
          g_braceCount      = 0;
 
          unput('[');
@@ -4554,7 +4554,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 static void saveObjCContext()
 {
-   if (g_ObjC_currentCtx) {
+   if (g_ObjC_currentCtx != nullptr) {
       g_ObjC_currentCtx->format += QString("$c%1").formatArg(g_currentCtxId);
 
       if (g_braceCount == 0 && YY_START == ObjCCall) {
@@ -4656,7 +4656,7 @@ void parseCCode(CodeGenerator &outputX, const QString &className, const QString 
    g_exampleBlock  = exBlock;
    g_exampleName   = exName;
    g_sourceFileDef = fd;
-   g_lineNumbers   = (fd != 0 && showLineNumbers);
+   g_lineNumbers   = (fd != nullptr && showLineNumbers);
 
    bool cleanupSourceDef = false;
 

@@ -477,7 +477,7 @@ TreeDiagram::TreeDiagram(QSharedPointer<ClassDef> root, bool doBases)
    DiagramRow *row = new DiagramRow(this, 0);
    append(row);
 
-   row->insertClass(0, root, doBases, Public, Normal, QString());
+   row->insertClass(nullptr, root, doBases, Public, Normal, QString());
 }
 
 TreeDiagram::~TreeDiagram()
@@ -1484,12 +1484,12 @@ void ClassDiagram::writeFigure(QTextStream &output, const QString &path, const Q
      << "boundx scalefactor div boundy scalefactor div scale\n";
 
    t << "\n% ----- classes -----\n\n";
-   base->drawBoxes(t, 0, true, false, baseRows, superRows, 0, 0);
-   super->drawBoxes(t, 0, false, false, baseRows, superRows, 0, 0);
+   base->drawBoxes(t, nullptr, true, false, baseRows, superRows, 0, 0);
+   super->drawBoxes(t, nullptr, false, false, baseRows, superRows, 0, 0);
 
    t << "\n% ----- relations -----\n\n";
-   base->drawConnectors(t, 0, true, false, baseRows, superRows, 0, 0);
-   super->drawConnectors(t, 0, false, false, baseRows, superRows, 0, 0);
+   base->drawConnectors(t, nullptr, true, false, baseRows, superRows, 0, 0);
+   super->drawConnectors(t, nullptr, false, false, baseRows, superRows, 0, 0);
 
    f1.close();
 

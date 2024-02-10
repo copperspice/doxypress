@@ -185,7 +185,7 @@ class PyCallContext
 {
    public:
       struct Ctx {
-         Ctx() : name(s_name), type(s_type), cd(0)
+         Ctx() : name(s_name), type(s_type), cd(nullptr)
          {}
 
          QString name;
@@ -304,7 +304,7 @@ static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<
          cd = getResolvedClass(d, s_sourceFileDef, s_classScope + "::" + clName);
       }
 
-      if (cd == 0) {
+      if (cd == nullptr) {
          cd = getResolvedClass(d, s_sourceFileDef, clName);
       }
 
@@ -561,7 +561,9 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
    // Member def that we may find
    QSharedPointer<MemberDef> md;
 
-   if ((lcd = s_theVarContext.findVariable(className)) == 0) { // not a local variable
+   if ((lcd = s_theVarContext.findVariable(className)) == nullptr) {
+      // not a local variable
+
       QSharedPointer<Definition> d = s_currentDefinition;
 
       QString scope = substitute(className, ".", "::");
@@ -573,7 +575,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
 
       DBG_CTX(stderr, "is found as a type %s\n", cd ? csPrintable(cd->name()) : "<null>");
 
-      if (cd == 0 && md == 0) {
+      if (cd == nullptr && md == nullptr) {
          // also see if it is variable or enum or enum value
          QSharedPointer<NamespaceDef> nd = getResolvedNamespace(scope);
 
@@ -1064,7 +1066,7 @@ TARGET               ({IDENTIFIER}|"("{TARGET_LIST}")"|"["{TARGET_LIST}"]"|{ATTR
 
          // Try to find class in global scope
 
-         if (baseDefToAdd == 0) {
+         if (baseDefToAdd == nullptr) {
             baseDefToAdd = getResolvedClass(s_currentDefinition, s_sourceFileDef, str);
          }
 

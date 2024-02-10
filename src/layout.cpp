@@ -149,7 +149,7 @@ class LayoutParser : public QXmlDefaultHandler
 
        protected:
          StartElement()
-            : m_parent(0), m_handler(0)
+            : m_parent(nullptr), m_handler(nullptr)
          { }
 
        private:
@@ -267,7 +267,7 @@ class LayoutParser : public QXmlDefaultHandler
    void init() {
 
       m_part    = -1;
-      m_rootNav = 0;
+      m_rootNav = nullptr;
 
       // bool fortranOpt = Config::getBool("optimize-fortran");
       // bool javaOpt    = Config::getBool("optimize-java");

@@ -690,7 +690,7 @@ class MemberDefImpl
 };
 
 MemberDefImpl::MemberDefImpl()
-   : enumFields(nullptr), redefinedBy(0), category(0), categoryRelation(0)
+   : enumFields(nullptr), redefinedBy(nullptr), category(nullptr), categoryRelation(nullptr)
 {
 }
 
@@ -893,7 +893,7 @@ void MemberDef::insertReimplementedBy(QSharedPointer<MemberDef> md)
       m_impl->templateMaster->insertReimplementedBy(md);
    }
 
-   if (m_impl->redefinedBy == 0) {
+   if (m_impl->redefinedBy == nullptr) {
       m_impl->redefinedBy = QMakeShared<MemberList>(MemberListType_redefinedBy);
    }
 
@@ -940,7 +940,7 @@ void MemberDef::insertEnumField(QSharedPointer<MemberDef> md)
 
 bool MemberDef::addExample(const QString &anchor, const QString &nameStr, const QString &file)
 {
-   if (m_impl->exampleSDict.find(nameStr) == 0) {
+   if (m_impl->exampleSDict.find(nameStr) == nullptr) {
       QSharedPointer<Example> e = QMakeShared<Example>();
 
       e->anchor = anchor;
@@ -1222,7 +1222,7 @@ void MemberDef::writeLink(OutputList &ol, QSharedPointer<ClassDef> cd, QSharedPo
    if (! onlyText && isLinkable()) {
       // write link
 
-      if (m_impl->m_memberType == MemberDefType::EnumValue && getGroupDef() == 0 &&      // enum value is not grouped
+      if (m_impl->m_memberType == MemberDefType::EnumValue && getGroupDef() == nullptr &&
             getEnumScope() && getEnumScope()->getGroupDef()) {
 
          // but its container is
@@ -1253,10 +1253,10 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
 
    QString cname;
 
-   if (getClassDef() != 0) {
+   if (getClassDef() != nullptr) {
       cname = getClassDef()->name();
 
-   } else if (getNamespaceDef() != 0) {
+   } else if (getNamespaceDef() != nullptr) {
       cname = getNamespaceDef()->name();
 
    }
@@ -1307,7 +1307,7 @@ QSharedPointer<ClassDef> MemberDef::getClassDefOfAnonymousType()
       }
 
       // if not found yet try without scope name
-      if (annoClassDef == 0) {
+      if (annoClassDef == nullptr) {
          QString ts   = stripAnonymousNamespaceScope(annName);
          annoClassDef = getClass(ts);
       }
@@ -1335,7 +1335,7 @@ bool MemberDef::isBriefSectionVisible() const
    bool hasDocs = hasDocumentation() || (m_impl->grpId != -1 && ! (info->doc.isEmpty() && info->header.isEmpty()));
 
    // only include static members with file/namespace scope if enabled in the project file
-   bool visibleIfStatic = ! (getClassDef() == 0 && isStatic() && ! extractStatic );
+   bool visibleIfStatic = ! (getClassDef() == nullptr && isStatic() && ! extractStatic );
 
    // only include members which are documented or HIDE_UNDOC_MEMBERS is NO in the project file
    bool visibleIfDocumented = (! hideUndocMembers || hasDocs || isDocumentedFriendClass() );
@@ -1481,7 +1481,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    QSharedPointer<MemberDef> self = sharedFrom(this);
    QSharedPointer<Definition> d;
 
-   assert (cd != 0 || nd != 0 || fd != 0 || gd != 0); // member should belong to something
+   assert (cd != nullptr || nd != nullptr || fd != nullptr || gd != nullptr); // member should belong to something
 
    if (cd != nullptr) {
       d = cd;
@@ -1548,7 +1548,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
    // only write anchors for member which have no details and are
    // rendered inside the group page or are not grouped at all
 
-   bool writeAnchor = (inGroup || m_impl->group == 0) && ! detailsVisible && ! m_impl->annMemb;
+   bool writeAnchor = (inGroup || m_impl->group == nullptr) && ! detailsVisible && ! m_impl->annMemb;
 
    if (writeAnchor) {
       QString doxyArgs = argsString();
@@ -1706,7 +1706,7 @@ void MemberDef::writeDeclaration(OutputList &ol, QSharedPointer<ClassDef> cd, QS
 
       if (! name().isEmpty() && (hasDocumentation() || isReference()) &&
             ! (m_impl->prot == Private && ! extractPrivate && ! isFriend()) &&
-            ! (isStatic() && m_impl->classDef == 0 && ! extractStatic)) {
+            ! (isStatic() && m_impl->classDef == nullptr && ! extractStatic)) {
 
          if (m_impl->annMemb) {
 
@@ -2009,11 +2009,11 @@ bool MemberDef::isDetailedSectionVisible(bool inGroup, bool inFile) const
    static const bool inlineSimpleStructs = Config::getBool("inline-simple-struct");
    static const bool hideUndocMembers    = Config::getBool("hide-undoc-members");
 
-   bool groupFilter = getGroupDef() == 0 || inGroup || separateMemPages;
-   bool fileFilter  = getNamespaceDef() == 0 || ! getNamespaceDef()->isLinkable() || ! inFile;
+   bool groupFilter = getGroupDef() == nullptr || inGroup || separateMemPages;
+   bool fileFilter  = getNamespaceDef() == nullptr || ! getNamespaceDef()->isLinkable() || ! inFile;
 
    bool simpleFilter = (hasBriefDescription() || ! hideUndocMembers) && inlineSimpleStructs &&
-                       getClassDef() != 0 && getClassDef()->isSimple();
+                       getClassDef() != nullptr && getClassDef()->isSimple();
 
    bool visible = isDetailedSectionLinkable() && groupFilter && fileFilter && ! isReference();
    bool result = visible || simpleFilter;
@@ -3330,7 +3330,7 @@ void MemberDef::writeDocumentation(QSharedPointer<MemberList> ml, int memCount, 
       }
    }
 
-   if (docArgList != 0 && docArgList->hasDocumentation()) {
+   if (docArgList != nullptr && docArgList->hasDocumentation()) {
       QString paramDocs;
 
       // convert the parameter documentation into a list of @param commands
@@ -3817,7 +3817,7 @@ void MemberDef::setMemberGroup(QSharedPointer<MemberGroup> grp)
 
 bool MemberDef::visibleMemberGroup(bool hideNoHeader)
 {
-   return m_impl->memberGroup != 0 && (! hideNoHeader || m_impl->memberGroup->header() != "[NOHEADER]");
+   return m_impl->memberGroup != nullptr && (! hideNoHeader || m_impl->memberGroup->header() != "[NOHEADER]");
 }
 
 QString MemberDef::getScopeString() const

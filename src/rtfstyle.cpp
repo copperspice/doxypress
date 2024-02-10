@@ -404,9 +404,9 @@ Rtf_Style_Default rtf_Style_Default[] = {
       "\\sbasedon0 \\snext99 \\sautoupd List Enum 9"
    },
    {
-      0,
-      0,
-      0
+      nullptr,
+      nullptr,
+      nullptr
    }
 };
 

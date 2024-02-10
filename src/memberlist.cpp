@@ -547,15 +547,15 @@ void MemberList::writeDeclarations(OutputList &ol, QSharedPointer<ClassDef> cd, 
 
    QSharedPointer<Definition> ctx = cd;
 
-   if (ctx == 0 && nd) {
+   if (ctx == nullptr && nd) {
       ctx = nd;
    }
 
-   if (ctx == 0 && gd) {
+   if (ctx == nullptr && gd) {
       ctx = gd;
    }
 
-   if (ctx == 0 && fd) {
+   if (ctx == nullptr && fd) {
       ctx = fd;
    }
 
@@ -832,7 +832,7 @@ void MemberList::addMemberGroup(QSharedPointer<MemberGroup> mg)
 void MemberList::addListReferences(QSharedPointer<Definition> def)
 {
    for (auto md : *this) {
-      if (md->getGroupDef() == 0 || def->definitionType() == Definition::TypeGroup) {
+      if (md->getGroupDef() == nullptr || def->definitionType() == Definition::TypeGroup) {
 
          md->addListReference(def);
          QSharedPointer<MemberList> enumFields = md->enumFieldList();

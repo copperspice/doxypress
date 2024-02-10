@@ -2404,7 +2404,7 @@ void HtmlDocVisitor::visitPre(DocParamList *pl)
    }
 
    m_t << "    <tr>";
-   DocParamSect *sect = 0;
+   DocParamSect *sect = nullptr;
 
    if (pl->parent()->kind() == DocNode::Kind_ParamSect) {
       sect = (DocParamSect *)pl->parent();

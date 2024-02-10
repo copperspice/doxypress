@@ -57,7 +57,7 @@ bool ClassSDict::declVisible(const enum CompoundType *filter) const
    if (count() > 0) {
       for (auto cd : *this) {
 
-         if (! cd->isAnonymous() && (filter == 0 || *filter == cd->compoundType()) ) {
+         if (! cd->isAnonymous() && (filter == nullptr || *filter == cd->compoundType()) ) {
             bool isLink = cd->isLinkable();
 
             if (isLink || (! hideUndocClasses && (! cd->isLocal() || extractLocalClasses) ) ) {
@@ -80,7 +80,7 @@ void ClassSDict::writeDeclaration(OutputList &ol, const enum CompoundType *filte
       for (auto cd : *this) {
 
          if (! cd->isAnonymous() && ! cd->isExtension() && (cd->protection() != Private || extractPrivate) &&
-               (filter == 0 || *filter == cd->compoundType()) ) {
+               (filter == nullptr || *filter == cd->compoundType()) ) {
             cd->writeDeclarationLink(ol, found, header, localNames);
          }
       }
@@ -106,12 +106,15 @@ void ClassSDict::writeDocumentation(OutputList &ol, QSharedPointer<Definition> c
 
       for (auto cd : *this) {
          if (! cd->isAnonymous() && cd->isLinkableInProject() && cd->isEmbeddedInOuterScope() &&
-               (container == 0 || cd->partOfGroups() == 0) ) {
+               (container == nullptr || cd->partOfGroups() == nullptr) ) {
 
             if (! found) {
                ol.writeRuler();
                ol.startGroupHeader();
-               ol.parseText(optimizeFortran ? theTranslator->trTypeDocumentation() : theTranslator->trClassDocumentation());
+
+               ol.parseText(optimizeFortran ? theTranslator->trTypeDocumentation()
+                     : theTranslator->trClassDocumentation());
+
                ol.endGroupHeader();
                found = true;
             }
@@ -143,7 +146,7 @@ void GenericsSDict::insert(const QString &key, QSharedPointer<ClassDef> cd)
 
    QSharedPointer<QHash<long, QSharedPointer<ClassDef>>> collection = m_dict.find(key.left(i));
 
-   if (collection == 0) {
+   if (collection == nullptr) {
       // new hash
       collection = QMakeShared<QHash<long, QSharedPointer<ClassDef>>>();
 

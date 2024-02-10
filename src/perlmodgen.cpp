@@ -77,7 +77,7 @@ class PerlModOutput
    bool m_pretty;
 
    PerlModOutput(bool pretty)
-      : m_pretty(pretty), m_stream(0), m_indentation(false), m_blockstart(true)
+      : m_pretty(pretty), m_stream(nullptr), m_indentation(false), m_blockstart(true)
    { }
 
    virtual ~PerlModOutput() { }
@@ -2011,7 +2011,7 @@ void PerlModGenerator::generatePerlModForMember(QSharedPointer<MemberDef> md, QS
 void PerlModGenerator::generatePerlModSection(QSharedPointer<Definition> d, QSharedPointer<MemberList> ml,
          const QString &name, const QString &header)
 {
-   if (ml == 0) {
+   if (ml == nullptr) {
       return;   // empty list
    }
 
@@ -2086,7 +2086,7 @@ void PerlModGenerator::generatePerlModForClass(QSharedPointer<ClassDef> cd)
       return;   // skip anonymous compounds
    }
 
-   if (cd->templateMaster() != 0) {
+   if (cd->templateMaster() != nullptr) {
       return;   // skip generated template instances.
    }
 

@@ -2349,7 +2349,7 @@ void LodePNG_InfoColor_init(LodePNG_InfoColor *info)
    info->key_r = info->key_g = info->key_b = 0;
    info->colorType = 6;
    info->bitDepth = 8;
-   info->palette = 0;
+   info->palette     = nullptr;
    info->palettesize = 0;
 }
 
@@ -2732,9 +2732,10 @@ unsigned LodePNG_convert(unsigned char *out, const unsigned char *in, LodePNG_In
 
    /*cases where in and out already have the same format*/
    if (LodePNG_InfoColor_equal(infoIn, infoOut)) {
-      size_t i, size = (w * h * LodePNG_InfoColor_getBpp(infoIn) + 7) / 8;
-      for (i = 0; i < size; i++) {
-         out[i] = in[i];
+      size_t maxSize = (w * h * LodePNG_InfoColor_getBpp(infoIn) + 7) / 8;
+
+      for (size_t j = 0; j < maxSize; ++j) {
+         out[j] = in[j];
       }
       return 0;
    }
@@ -3976,7 +3977,8 @@ static unsigned addChunk_IDAT(ucvector *out, const unsigned char *data, size_t d
 static unsigned addChunk_IEND(ucvector *out)
 {
    unsigned error = 0;
-   error = addChunk(out, "IEND", 0, 0);
+   error = addChunk(out, "IEND", nullptr, 0);
+
    return error;
 }
 
@@ -4220,7 +4222,8 @@ static unsigned filter(unsigned char *out, const unsigned char *in, unsigned w, 
    unsigned bpp = LodePNG_InfoColor_getBpp(info);
    size_t linebytes = (w * bpp + 7) / 8; /*the width of a scanline in bytes, not including the filter type*/
    size_t bytewidth = (bpp + 7) / 8; /*bytewidth is used for filtering, is 1 when bpp < 8, number of bytes per pixel otherwise*/
-   const unsigned char *prevline = 0;
+
+   const unsigned char *prevline = nullptr;
    unsigned x, y;
    unsigned heuristic;
    unsigned error = 0;
@@ -4560,11 +4563,11 @@ void LodePNG_encode(LodePNG_Encoder *encoder, unsigned char **out, size_t *outsi
 {
    LodePNG_InfoPng info;
    ucvector outv;
-   unsigned char *data = 0; /*uncompressed version of the IDAT chunk data*/
+   unsigned char *data = nullptr; /*uncompressed version of the IDAT chunk data*/
    size_t datasize = 0;
 
    // provide some proper output values if error will happen
-   *out     = 0;
+   *out     = nullptr;
    *outsize = 0;
    encoder->error = 0;
 
@@ -4858,7 +4861,7 @@ unsigned LodePNG_loadFile(unsigned char **out, size_t *outsize,const char *filen
    long size;
 
    /*provide some proper output values if error will happen*/
-   *out = 0;
+   *out     = nullptr;
    *outsize = 0;
 
    file = fopen(filename, "rb");

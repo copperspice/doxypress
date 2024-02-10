@@ -472,7 +472,7 @@ void NamespaceDef::endMemberDocumentation(OutputList &ol)
 void NamespaceDef::writeClassDeclarations(OutputList &ol, const QString &title)
 {
    if (m_classSDict.count() > 0) {
-      m_classSDict.writeDeclaration(ol, 0, title, true);
+      m_classSDict.writeDeclaration(ol, nullptr, title, true);
    }
 }
 
@@ -852,7 +852,7 @@ int NamespaceDef::numDocMembers() const
 
 void NamespaceDef::addUsingDirective(QSharedPointer<NamespaceDef> nd)
 {
-   if (m_usingDirMap.find(nd->qualifiedName()) == 0) {
+   if (m_usingDirMap.find(nd->qualifiedName()) == nullptr) {
       m_usingDirMap.insert(nd->qualifiedName(), nd);
    }
 }
@@ -864,7 +864,7 @@ const NamespaceSDict &NamespaceDef::getUsedNamespaces() const
 
 void NamespaceDef::addUsingDeclaration(QSharedPointer<Definition> d)
 {
-   if (m_usingDeclMap.find(d->qualifiedName()) == 0) {
+   if (m_usingDeclMap.find(d->qualifiedName()) == nullptr) {
       m_usingDeclMap.insert(d->qualifiedName(), d);
    }
 }

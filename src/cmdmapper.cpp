@@ -159,7 +159,7 @@ CommandMap cmdMap[] = {
    { "docbookinclude",  CMD_DOCBOOKINCLUDE },
    { "maninclude",      CMD_MANINCLUDE },
    { "xmlinclude",      CMD_XMLINCLUDE },
-   { 0,                 0 },
+   { nullptr,           0 },
 };
 
 CommandMap htmlTagMap[] = {
@@ -233,7 +233,7 @@ CommandMap htmlTagMap[] = {
    { "term",         XML_TERM },
    { "value",        XML_VALUE },
    { "inheritdoc",   XML_INHERITDOC },
-   { "",             0 }
+   { nullptr,        0 }
 };
 
 Mapper *Mappers::cmdMapper     = new Mapper(cmdMap, true);
@@ -291,10 +291,8 @@ QString Mapper::map(const int n)
 void Mappers::freeMappers()
 {
    delete cmdMapper;
-   cmdMapper = 0;
+   cmdMapper = nullptr;
 
    delete htmlTagMapper;
-   htmlTagMapper = 0;
+   htmlTagMapper = nullptr;
 }
-
-

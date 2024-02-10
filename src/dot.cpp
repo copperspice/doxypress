@@ -1217,7 +1217,7 @@ void DotWorkerThread::cleanup()
    }
 }
 
-DotManager *DotManager::m_theInstance = 0;
+DotManager *DotManager::m_theInstance = nullptr;
 
 DotManager *DotManager::instance()
 {
@@ -1389,7 +1389,7 @@ bool DotManager::run()
 
       // signal the workers we are done
       for (i = 0; i < m_workers.count(); i++) {
-         m_queue->enqueue(0); // add terminator for each worker
+         m_queue->enqueue(nullptr); // add terminator for each worker
       }
 
       // wait for the workers to finish
@@ -1449,10 +1449,9 @@ static void deleteNodes(DotNode *node)
 }
 
 DotNode::DotNode(int n, const QString &label, const QString &tip, const QString &url, bool isRoot, QSharedPointer<ClassDef> cd)
-   : m_subgraphId(-1), m_number(n), m_label(label), m_tooltip(tip), m_url(url), m_parents(0), m_children(0),
-     m_edgeInfo(0),  m_classDef(cd),
-     m_deleted(false), m_written(false), m_hasDoc(false), m_isRoot(isRoot), m_visible(false),
-     m_truncated(Unknown), m_distance(1000)
+   : m_subgraphId(-1), m_number(n), m_label(label), m_tooltip(tip), m_url(url), m_parents(nullptr), m_children(nullptr),
+     m_edgeInfo(nullptr),  m_classDef(cd), m_deleted(false), m_written(false), m_hasDoc(false), m_isRoot(isRoot),
+     m_visible(false), m_truncated(Unknown), m_distance(1000)
 {
 }
 
@@ -1466,7 +1465,7 @@ DotNode::~DotNode()
 void DotNode::addChild(DotNode *n, int edgeColor, int edgeStyle, const QString &edgeLab,
                   const QString &edgeURL, int edgeLabCol)
 {
-   if (m_children == 0) {
+   if (m_children == nullptr) {
       m_children = new QList<DotNode *>;
       m_edgeInfo = new QList<EdgeInfo *>;
    }
@@ -1518,7 +1517,7 @@ void DotNode::deleteNode(SortedList<DotNode *> &deletedList)
 
    m_deleted = true;
 
-   if (m_parents != 0) {
+   if (m_parents != nullptr) {
       // delete all parent nodes of this node
 
       for (auto pn : *m_parents) {
@@ -1526,7 +1525,7 @@ void DotNode::deleteNode(SortedList<DotNode *> &deletedList)
       }
    }
 
-   if (m_children != 0) {
+   if (m_children != nullptr) {
       // delete all child nodes of this node
 
       for (auto cn : *m_children) {
@@ -1672,7 +1671,7 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
       int totalCount = 0;
 
       for (auto mma : *ml) {
-         if (mma->getClassDef() == scope && (skipNames == 0 || ! skipNames->contains(mma->name()))) {
+         if (mma->getClassDef() == scope && (skipNames == nullptr || ! skipNames->contains(mma->name()))) {
             ++totalCount;
          }
       }
@@ -1680,7 +1679,7 @@ static void writeBoxMemberList(QTextStream &t, char prot, QSharedPointer<MemberL
       int count = 0;
 
       for (auto mma : *ml) {
-         if (mma->getClassDef() == scope && (skipNames == 0 || ! skipNames->contains(mma->name()))) {
+         if (mma->getClassDef() == scope && (skipNames == nullptr || ! skipNames->contains(mma->name()))) {
 
             if (limit > 0 && (totalCount > ((limit * 3) / 2) && count >= limit)) {
 
@@ -2254,7 +2253,7 @@ void DotNode::clearWriteFlag()
 {
    m_written = false;
 
-   if (m_parents != 0) {
+   if (m_parents != nullptr) {
       for (auto pn : *m_parents) {
          if (pn->m_written) {
             pn->clearWriteFlag();
@@ -2262,7 +2261,7 @@ void DotNode::clearWriteFlag()
       }
    }
 
-   if (m_children != 0) {
+   if (m_children != nullptr) {
      for (auto cn : *m_children) {
          if (cn->m_written) {
             cn->clearWriteFlag();
@@ -2337,7 +2336,7 @@ const DotNode *DotNode::findDocNode() const
       }
    }
 
-   return 0;
+   return nullptr;
 }
 
 void DotGfxHierarchyTable::writeGraph(QTextStream &out, const QString &path, const QString &fileName) const
@@ -2472,7 +2471,7 @@ void DotGfxHierarchyTable::addHierarchy(DotNode *n, QSharedPointer<ClassDef> cd,
             if ((bn = m_usedNodes->value(bClass->name()))) {
                // node already present
 
-               if (n->m_children == 0 || n->m_children->indexOf(bn) == -1) {
+               if (n->m_children == nullptr || n->m_children->indexOf(bn) == -1) {
                   // no arrow yet
                   n->addChild(bn, bcd->prot);
                   bn->addParent(n);
@@ -2583,7 +2582,7 @@ DotGfxHierarchyTable::DotGfxHierarchyTable()
 
             DotNode *dn = const_cast<DotNode *>(n->findDocNode());
 
-            if (dn != 0) {
+            if (dn != nullptr) {
                m_rootSubgraphs->inSort(dn);
 
             } else {
@@ -3014,9 +3013,9 @@ bool DotClassGraph::isTrivial() const
    static const bool umlLook = Config::getBool("uml-look");
 
    if (m_graphType == DotNode::Inheritance) {
-      return m_startNode->m_children == 0 && m_startNode->m_parents == 0;
+      return m_startNode->m_children == nullptr && m_startNode->m_parents == nullptr;
    } else {
-      return ! umlLook && m_startNode->m_children == 0;
+      return ! umlLook && m_startNode->m_children == nullptr;
    }
 }
 
@@ -3454,7 +3453,7 @@ DotInclDepGraph::DotInclDepGraph(QSharedPointer<FileDef> fd, bool inverse)
    static const int nodes = Config::getInt("dot-graph-max-nodes");
 
    m_inverse = inverse;
-   assert(fd != 0);
+   assert(fd != nullptr);
 
    m_diskName      = fd->getFileBase();
    QString tmp_url = fd->getReference() + "$" + fd->getFileBase();
@@ -3633,7 +3632,7 @@ QString DotInclDepGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFor
 
 bool DotInclDepGraph::isTrivial() const
 {
-   return m_startNode->m_children == 0;
+   return m_startNode->m_children == nullptr;
 }
 
 bool DotInclDepGraph::isTooBig() const
@@ -3932,7 +3931,7 @@ QString DotCallGraph::writeGraph(QTextStream &out, GraphOutputFormat graphFormat
 
 bool DotCallGraph::isTrivial() const
 {
-   return m_startNode->m_children == 0;
+   return m_startNode->m_children == nullptr;
 }
 
 bool DotCallGraph::isTooBig() const
@@ -4502,8 +4501,8 @@ void DotGroupCollaboration::addCollaborationMember(QSharedPointer<Definition> de
    for (auto d : *def->partOfGroups()) {
       DotNode *nnode = m_usedNodes->value(d->name());
 
-      if ( nnode != m_rootNode ) {
-         if ( nnode == 0 ) {
+      if (nnode != m_rootNode) {
+         if (nnode == nullptr) {
             // add node
             tmp_str = d->getReference() + "$" + d->getOutputFileBase();
 

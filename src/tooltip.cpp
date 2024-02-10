@@ -24,7 +24,7 @@
 #include <outputgen.h>
 #include <util.h>
 
-TooltipManager *TooltipManager::s_theInstance = 0;
+TooltipManager *TooltipManager::s_theInstance = nullptr;
 
 TooltipManager::TooltipManager()
 {

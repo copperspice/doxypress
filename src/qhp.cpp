@@ -219,7 +219,7 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
       // member
       static bool separateMemberPages = Config::getBool("separate-member-pages");
 
-      if (context == 0) {
+      if (context == nullptr) {
          // global member
 
          if (md->getGroupDef()) {
@@ -231,7 +231,7 @@ void Qhp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Member
          }
       }
 
-      if (context == 0) {
+      if (context == nullptr) {
          // should not happen
          return;
       }

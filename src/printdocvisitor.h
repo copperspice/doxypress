@@ -495,7 +495,7 @@ class PrintDocVisitor : public DocVisitor
    void visitPre(DocPara *node) override {
       // print the address of the paragraph
       indent_pre();
-      printf("<para> %p \n", node);
+      printf("<para> %p \n", static_cast<void *>(node));
    }
 
    void visitPost(DocPara *) override {

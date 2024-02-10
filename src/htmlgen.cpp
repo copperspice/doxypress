@@ -2278,7 +2278,7 @@ static void renderQuickLinksAsTabs(QTextStream &t_stream, const QString &relPath
 
    if (hlEntry->parent() && hlEntry->parent()->children().count() > 0) {
       // draw tabs for row containing hlEntry
-      bool topLevel = hlEntry->parent()->parent() == 0;
+      bool topLevel = (hlEntry->parent()->parent() == nullptr);
       int count = 0;
 
       for (const auto &entry : hlEntry->parent()->children()) {
@@ -2469,7 +2469,7 @@ static void writeDefaultQuickLinks(QTextStream &t_stream, bool compact, Highligh
          highlightParent = true;
          hlEntry = root->children().first();
 
-         if (hlEntry == 0) {
+         if (hlEntry == nullptr) {
             // argl, empty index
             return;
          }

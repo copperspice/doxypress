@@ -225,7 +225,7 @@ enum MemberListType {
    MemberListType_serviceMembers          = 83 + MemberListType_detailedLists,
 };
 
-enum MemberDefType {
+enum class MemberDefType {
    Define,
    Function,
    Variable,

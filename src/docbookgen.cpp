@@ -593,7 +593,7 @@ void DocbookGenerator::endIndexSection(IndexSections is)
          m_textStream << "</title>" << endl;
 
          for (const auto &cd : Doxy_Globals::classSDict) {
-            if (cd->isLinkableInProject() && cd->templateMaster() == 0 && !cd->isEmbeddedInOuterScope()) {
+            if (cd->isLinkableInProject() && cd->templateMaster() == nullptr && ! cd->isEmbeddedInOuterScope()) {
                m_textStream << "    <xi:include href=\"" << cd->getOutputFileBase()
                             << ".xml\" xmlns:xi=\"http://www.w3.org/2001/XInclude\"/>" << endl;
             }

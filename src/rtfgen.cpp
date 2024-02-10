@@ -279,7 +279,7 @@ void RTFGenerator::beginRTFDocument()
 
    // sort styles ascending by \s-number via an intermediate QArray
    QVector<const StyleData *> array(128);
-   array.fill(0);
+   array.fill(nullptr);
 
    for (auto iter = rtf_Style.begin(); iter != rtf_Style.end(); ++iter)  {
       unsigned index = iter->m_index;
@@ -288,11 +288,11 @@ void RTFGenerator::beginRTFDocument()
       if (index >= size) {
          // +1 to add at least one element, then align up to multiple of 8
          array.resize((index + 1 + 7) & ~7);
-         array.fill(0, size);
+         array.fill(nullptr, size);
          assert(index < array.size());
       }
 
-      if (array.at(index) != 0) {
+      if (array.at(index) != nullptr) {
          QString key(iter.key());
          msg("Style '%s' redefines \\s%d.\n", csPrintable(key), index);
       }
@@ -306,7 +306,7 @@ void RTFGenerator::beginRTFDocument()
    for (unsigned i = 0; i < size; i++) {
       const StyleData *style = array.at(i);
 
-      if (style != 0) {
+      if (style != nullptr) {
          m_textStream << "{" << style->m_reference << style->m_definition << ";}\n";
       }
    }
@@ -566,7 +566,7 @@ void RTFGenerator::startIndexSection(IndexSections is)
                break;
             }
 
-            if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope()) {
+            if (cd->isLinkableInProject() && cd->templateMaster() == nullptr && ! cd->isEmbeddedInOuterScope()) {
                beginRTFChapter();
                found = true;
             }
@@ -896,7 +896,7 @@ void RTFGenerator::endIndexSection(IndexSections indexSec)
 
          for (auto cd : Doxy_Globals::classSDict) {
 
-            if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope() ) {
+            if (cd->isLinkableInProject() && cd->templateMaster() == nullptr && ! cd->isEmbeddedInOuterScope() ) {
                m_textStream  << "\\par " << rtf_Style_Reset << endl;
 
                if (! firstTime) {

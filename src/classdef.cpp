@@ -57,9 +57,9 @@ ClassDef::ClassDef(const QString &defFileName, int defLine, int defColumn, const
 
    }
 
-   m_parents            = 0;
-   m_inheritedBy        = 0;;
-   m_taggedInnerClasses = 0;
+   m_parents            = nullptr;
+   m_inheritedBy        = nullptr;
+   m_taggedInnerClasses = nullptr;
 
    m_prot          = Public;
 
@@ -134,7 +134,7 @@ QString ClassDef::displayName(bool includeScope) const
 // inserts a base/super class in the inheritance list
 void ClassDef::insertBaseClass(QSharedPointer<ClassDef> cd, const QString &n, Protection p, Specifier s, const QString &t)
 {
-   if (m_parents == 0) {
+   if (m_parents == nullptr) {
       m_parents = new SortedList<BaseClassDef *>;
    }
 
@@ -151,7 +151,7 @@ void ClassDef::insertSubClass(QSharedPointer<ClassDef> cd, Protection p, Specifi
       return;
    }
 
-   if (m_inheritedBy == 0) {
+   if (m_inheritedBy == nullptr) {
       m_inheritedBy = new SortedList<BaseClassDef *>;
    }
 
@@ -2773,7 +2773,7 @@ void ClassDef::mergeMembers()
                      }
 
                      if (hidden) {
-                        if (srcMi.ambigClass == 0) {
+                        if (srcMi.ambigClass == nullptr) {
                            newMi.ambigClass = bClass;
                            newMi.ambiguityResolutionScope = bClass->name() + sep;
 
@@ -3142,7 +3142,7 @@ QString ClassDef::getOutputFileBase() const
    if (! Doxy_Globals::generatingXmlOutput) {
       QSharedPointer<Definition> scope;
 
-      if (inlineGroupedClasses && partOfGroups() != 0) {
+      if (inlineGroupedClasses && partOfGroups() != nullptr) {
          // point to the group that embeds this class
 
          SortedList<QSharedPointer<GroupDef>> *temp = partOfGroups();
@@ -3150,7 +3150,7 @@ QString ClassDef::getOutputFileBase() const
 
          return def->getOutputFileBase();
 
-      } else if (inlineSimpleClasses && m_isSimple && partOfGroups() != 0) {
+      } else if (inlineSimpleClasses && m_isSimple && partOfGroups() != nullptr) {
          // point to simple struct inside a group
 
          SortedList<QSharedPointer<GroupDef>> *temp = partOfGroups();
@@ -4163,10 +4163,10 @@ bool ClassDef::isEmbeddedInOuterScope() const
       ( (container == Doxy_Globals::globalScope && getFileDef() && getFileDef()->isLinkableInProject()) || container->isLinkableInProject() );
 
    // inline because of INLINE_GROUPED_CLASSES=YES ?
-   bool b1 = (inlineGroupedClasses && partOfGroups() != 0); // a grouped class
+   bool b1 = (inlineGroupedClasses && partOfGroups() != nullptr); // a grouped class
 
    // inline because of INLINE_SIMPLE_STRUCTS=YES ?
-   bool b2 = (inlineSimpleClasses && m_isSimple && (containerLinkable || partOfGroups() != 0   ) );
+   bool b2 = (inlineSimpleClasses && m_isSimple && (containerLinkable || partOfGroups() != nullptr));
 
    return b1 || b2;  // either reason will do
 }
@@ -4178,7 +4178,7 @@ const SortedList< QSharedPointer<ClassDef>> *ClassDef::taggedInnerClasses() cons
 
 void ClassDef::addTaggedInnerClass(QSharedPointer<ClassDef> cd)
 {
-   if (m_taggedInnerClasses == 0) {
+   if (m_taggedInnerClasses == nullptr) {
       m_taggedInnerClasses = new SortedList<QSharedPointer<ClassDef>>;
    }
 

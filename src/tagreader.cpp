@@ -353,20 +353,20 @@ class TagFileParser : public QXmlDefaultHandler
    TagFileParser(const QString &tagName)
       : m_startElementHandlers(), m_endElementHandlers(), m_tagName(tagName)
    {
-      m_curClass     = 0;
-      m_curConcept   = 0;
-      m_curFile      = 0;
-      m_curNamespace = 0;
-      m_curPackage   = 0;
-      m_curGroup     = 0;
-      m_curPage      = 0;
-      m_curDir       = 0;
-      m_curMember    = 0;
-      m_curEnumValue = 0;
-      m_curIncludes  = 0;
+      m_curClass     = nullptr;
+      m_curConcept   = nullptr;
+      m_curFile      = nullptr;
+      m_curNamespace = nullptr;
+      m_curPackage   = nullptr;
+      m_curGroup     = nullptr;
+      m_curPage      = nullptr;
+      m_curDir       = nullptr;
+      m_curMember    = nullptr;
+      m_curEnumValue = nullptr;
+      m_curIncludes  = nullptr;
 
       m_state   = Invalid;
-      m_locator = 0;
+      m_locator = nullptr;
    }
 
    void setDocumentLocator ( QXmlLocator *locator ) override {
@@ -483,42 +483,42 @@ class TagFileParser : public QXmlDefaultHandler
       switch (m_state) {
          case InClass:
             m_tagFileClasses.append(*m_curClass);
-            m_curClass = 0;
+            m_curClass = nullptr;
             break;
 
          case InConcept:
             m_tagFileConcepts.append(*m_curConcept);
-            m_curConcept = 0;
+            m_curConcept = nullptr;
             break;
 
          case InFile:
             m_tagFileFiles.append(*m_curFile);
-            m_curFile = 0;
+            m_curFile = nullptr;
             break;
 
          case InNamespace:
             m_tagFileNamespaces.append(*m_curNamespace);
-            m_curNamespace = 0;
+            m_curNamespace = nullptr;
             break;
 
          case InGroup:
             m_tagFileGroups.append(*m_curGroup);
-            m_curGroup = 0;
+            m_curGroup = nullptr;
             break;
 
          case InPage:
             m_tagFilePages.append(*m_curPage);
-            m_curPage = 0;
+            m_curPage = nullptr;
             break;
 
          case InDir:
             m_tagFileDirs.append(*m_curDir);
-            m_curDir = 0;
+            m_curDir = nullptr;
             break;
 
          case InPackage:
             m_tagFilePackages.append(*m_curPackage);
-            m_curPackage = 0;
+            m_curPackage = nullptr;
             break;
 
          default:
@@ -615,7 +615,7 @@ class TagFileParser : public QXmlDefaultHandler
 
       if (m_state == InMember) {
          m_curMember->enumValues.append(*m_curEnumValue);
-         m_curEnumValue = 0;
+         m_curEnumValue = nullptr;
       }
    }
 
@@ -1023,14 +1023,14 @@ class TagFileParser : public QXmlDefaultHandler
    bool startDocument() override {
       m_state = Invalid;
 
-      m_curClass     = 0;
-      m_curConcept   = 0;
-      m_curNamespace = 0;
-      m_curFile      = 0;
-      m_curGroup     = 0;
-      m_curPage      = 0;
-      m_curPackage   = 0;
-      m_curDir       = 0;
+      m_curClass     = nullptr;
+      m_curConcept   = nullptr;
+      m_curNamespace = nullptr;
+      m_curFile      = nullptr;
+      m_curGroup     = nullptr;
+      m_curPage      = nullptr;
+      m_curPackage   = nullptr;
+      m_curDir       = nullptr;
 
       m_startElementHandlers.insert("compound",    StartElementHandler(this, &TagFileParser::startCompound));
       m_startElementHandlers.insert("member",      StartElementHandler(this, &TagFileParser::startMember));
@@ -1326,7 +1326,7 @@ void TagFileParser::dump()
 void TagFileParser::addDocAnchors(QSharedPointer<Entry> e, const QList<TagAnchorInfo> &list)
 {
    for (auto ta : list) {
-      if (Doxy_Globals::sectionDict.find(ta.label) == 0) {
+      if (Doxy_Globals::sectionDict.find(ta.label) == nullptr) {
 
          QSharedPointer<SectionInfo> si (new SectionInfo(ta.fileName, -1, ta.label, ta.title, SectionInfo::Anchor, 0, m_tagName));
          Doxy_Globals::sectionDict.insert(ta.label, si);
@@ -1732,7 +1732,7 @@ void TagFileParser::addIncludes()
                for (auto item : tfi.includes) {
 
                   QSharedPointer<FileNameList> ifn (Doxy_Globals::inputNameDict.find(item.name));
-                  assert(ifn != 0);
+                  assert(ifn != nullptr);
 
                   if (ifn) {
                      for (auto ifd : *ifn) {

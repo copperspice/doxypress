@@ -106,7 +106,7 @@ bool ResourceMgr::copyResourceAs(const QString &fName, const QString &targetDir,
             images.width   = width;
             images.height  = height;
             images.content = p;
-            images.alpha   = 0;
+            images.alpha   = nullptr;
 
             writeColoredImgData(images);
             return true;

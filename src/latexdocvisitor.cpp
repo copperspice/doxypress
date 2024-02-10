@@ -1419,7 +1419,7 @@ void LatexDocVisitor::visitPre(DocHtmlCell *c)
       return;
    }
 
-   DocHtmlRow *row = 0;
+   DocHtmlRow *row = nullptr;
    if (c->parent() && c->parent()->kind() == DocNode::Kind_HtmlRow) {
       row = (DocHtmlRow *)c->parent();
    }
@@ -1870,7 +1870,7 @@ void LatexDocVisitor::visitPre(DocParamList *pl)
    }
 
    DocParamSect::Type parentType = DocParamSect::Unknown;
-   DocParamSect *sect = 0;
+   DocParamSect *sect = nullptr;
 
    if (pl->parent() && pl->parent()->kind() == DocNode::Kind_ParamSect) {
       parentType = ((DocParamSect *)pl->parent())->type();

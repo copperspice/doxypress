@@ -111,7 +111,7 @@ void EclipseHelp::finalize()
    m_tocstream << "</toc>" << endl;
 
    // close the content file
-   m_tocstream.setDevice(0);
+   m_tocstream.setDevice(nullptr);
 
    m_tocfile.close();
    m_tocfile.setFileName("");

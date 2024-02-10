@@ -605,7 +605,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                for (const auto &md : *ml) {
                   QSharedPointer<MemberList> enumList = md->enumFieldList();
 
-                  bool isDir = (enumList != 0 && md->isEnumerate());
+                  bool isDir = (enumList != nullptr && md->isEnumerate());
                   bool isAnonymous = md->isAnonymous();
 
                   static bool hideUndocMembers = Config::getBool("hide-undoc-members");
@@ -658,7 +658,7 @@ void addMembersToIndex(QSharedPointer<T> def, LayoutDocManager::LayoutPart part,
                     lde->kind() == LayoutDocEntry::ClassNestedClasses ) {
 
             for (const auto &cd : classes ) {
-               if (cd->isLinkable() && (cd->partOfGroups() == 0 || def->definitionType() == Definition::TypeGroup)) {
+               if (cd->isLinkable() && (cd->partOfGroups() == nullptr || def->definitionType() == Definition::TypeGroup)) {
 
                   bool separateIndex = (preventSeparateIndex || cd->isEmbeddedInOuterScope());
                   bool isNestedClass = (def->definitionType() == Definition::TypeClass);
@@ -1609,11 +1609,11 @@ static void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToInd
 {
    for (auto cd : clDict) {
 
-      if (! globalOnly || cd->getOuterScope() == 0 || cd->getOuterScope() == Doxy_Globals::globalScope ) {
+      if (! globalOnly || cd->getOuterScope() == nullptr || cd->getOuterScope() == Doxy_Globals::globalScope ) {
          int count = 0;
 
          for (auto ccd : cd->getClassSDict()) {
-            if (ccd->isLinkableInProject() && ccd->templateMaster() == 0) {
+            if (ccd->isLinkableInProject() && ccd->templateMaster() == nullptr) {
                count++;
             }
          }
@@ -1621,14 +1621,14 @@ static void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToInd
          // passing cd->displayName(false) will strip the template parameters on at least annotated.html
          // modify to show based on a new project tag (2/2/2016)
 
-         if (classVisibleInIndex(cd) && cd->templateMaster() == 0) {
+         if (classVisibleInIndex(cd) && cd->templateMaster() == nullptr) {
 
             ftv->addContentsItem(count > 0, cd->displayName(false), cd->getReference(),
                   cd->getOutputFileBase(), cd->anchor(), true, cd);
 
-            if (addToIndex && (cd->getOuterScope() == 0 || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
+            if (addToIndex && (cd->getOuterScope() == nullptr || cd->getOuterScope()->definitionType() != Definition::TypeClass)) {
 
-               bool tmp_addToIndex = cd->partOfGroups() == 0 && ! cd->isSimple();
+               bool tmp_addToIndex = cd->partOfGroups() == nullptr && ! cd->isSimple();
                addMembersToIndex(cd, LayoutDocManager::Class, cd->displayName(false), cd->anchor(), false, tmp_addToIndex);
             }
 
@@ -1927,7 +1927,7 @@ static void writeAlphabeticalClassList(OutputList &ol)
    int headerItems  = 0;
 
    for (auto cd : Doxy_Globals::classSDict) {
-      if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
+      if (cd->isLinkableInProject() && cd->templateMaster() == nullptr) {
          int index   = getPrefixIndex(cd->className());
          startLetter = charToLower(cd->className(), index);
 
@@ -2274,7 +2274,7 @@ static void writeConceptTree(const ConceptSDict &conceptDict, FTVHelp *ftv, bool
 {
    for (const auto &conceptDef : conceptDict) {
 
-      if (! globalOnly || conceptDef->getOuterScope() == 0 || conceptDef->getOuterScope() == Doxy_Globals::globalScope ) {
+      if (! globalOnly || conceptDef->getOuterScope() == nullptr || conceptDef->getOuterScope() == Doxy_Globals::globalScope ) {
 
          if (conceptVisibleInIndex(conceptDef)) {
 
@@ -2572,7 +2572,7 @@ void addClassMemberNameToIndex(QSharedPointer<MemberDef> md)
    static bool hideFriendCompounds = Config::getBool("hide-friend-compounds");
    QSharedPointer<ClassDef> cd;
 
-   if (md->isLinkableInProject() && (cd = md->getClassDef())  && cd->isLinkableInProject() && cd->templateMaster() == 0) {
+   if (md->isLinkableInProject() && (cd = md->getClassDef())  && cd->isLinkableInProject() && cd->templateMaster() == nullptr) {
       QString n = md->name();
 
       int index    = getPrefixIndex(n);
@@ -3493,7 +3493,7 @@ static void writePageIndex(OutputList &ol)
    FTVHelp *ftv = new FTVHelp(false);
 
    for (auto &pd : Doxy_Globals::pageSDict) {
-      if ((pd->getOuterScope() == 0 || pd->getOuterScope()->definitionType() != Definition::TypePage) && ! pd->isReference() ) {
+      if ((pd->getOuterScope() == nullptr || pd->getOuterScope()->definitionType() != Definition::TypePage) && ! pd->isReference() ) {
          writePages(pd, ftv);
       }
    }

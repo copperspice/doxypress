@@ -68,6 +68,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
    fullCmd += " " + args;
 
 #ifdef HAVE_FORK
+   (void) commandHasConsole;
 
    int pid;
    int status = 0;
@@ -85,7 +86,7 @@ int portable_system(const QString &command, const QString &args, bool commandHas
       argv[0] = "sh";
       argv[1] = "-c";
       argv[2] = fullCmd.constData();
-      argv[3] = 0;
+      argv[3] = nullptr;
 
       execve("/bin/sh", (char *const *)argv, environ);
       exit(127);
@@ -124,19 +125,19 @@ int portable_system(const QString &command, const QString &args, bool commandHas
          // wait till the process is done, do not display msg box if there is an error
          SEE_MASK_NOCLOSEPROCESS | SEE_MASK_FLAG_NO_UI,
 
-         NULL,               /* window handle */
-         NULL,               /* action to perform: open */
+         nullptr,            /* window handle */
+         nullptr,            /* action to perform: open */
          commandW.c_str(),   /* file to execute */
          argsW.c_str(),      /* argument list */
-         NULL,               /* use current working dir */
+         nullptr,            /* use current working dir */
          SW_HIDE,            /* minimize on start-up */
-         0,                  /* application instance handle */
-         NULL,               /* ignored: id list */
-         NULL,               /* ignored: class name */
-         NULL,               /* ignored: key class */
+         nullptr,            /* application instance handle */
+         nullptr,            /* ignored: id list */
+         nullptr,            /* ignored: class name */
+         nullptr,            /* ignored: key class */
          0,                  /* ignored: hot key */
-         NULL,               /* ignored: icon */
-         NULL                /* resulting application handle */
+         nullptr,            /* ignored: icon */
+         nullptr             /* resulting application handle */
       };
 
       if (! ShellExecuteExW(&sInfo)) {
@@ -194,14 +195,14 @@ void portable_setenv(const QString &name_T, const QString &value_T)
    SetEnvironmentVariableW(&name[0], &value[0]);
 
 #else
-   char **ep = 0;
+   char **ep = nullptr;
    size_t size;
 
    const size_t namelen = name_T.size_storage();
    const size_t vallen  = value_T.size_storage() + 1;
 
    size = 0;
-   if (environ != 0) {
+   if (environ != nullptr) {
 
       for (ep = environ; *ep; ++ep) {
          if (! qstrncmp (*ep, name_T.constData(), namelen) && (*ep)[namelen] == '=') {
@@ -212,11 +213,11 @@ void portable_setenv(const QString &name_T, const QString &value_T)
       }
    }
 
-   if (environ == 0 || *ep == 0) {
+   if (environ == nullptr || *ep == nullptr) {
       // add new string
       char **new_environ;
 
-      if (environ == last_environ && environ != 0) {
+      if (environ == last_environ && environ != nullptr) {
          // allocated this space, can extend it
          new_environ = (char **) realloc (last_environ, (size + 2) * sizeof (char *));
 
@@ -225,13 +226,13 @@ void portable_setenv(const QString &name_T, const QString &value_T)
 
       }
 
-      if (new_environ == 0) {
+      if (new_environ == nullptr) {
          // no more memory
          return;
       }
 
       new_environ[size] = (char *)malloc (namelen + 1 + vallen);
-      if (new_environ[size] == 0) {
+      if (new_environ[size] == nullptr) {
          free (new_environ);
          return;
       }
@@ -244,7 +245,7 @@ void portable_setenv(const QString &name_T, const QString &value_T)
       new_environ[size][namelen] = '=';
 
       memcpy(&new_environ[size][namelen + 1], value_T.constData(), vallen);
-      new_environ[size + 1] = 0;
+      new_environ[size + 1] = nullptr;
       last_environ = environ = new_environ;
 
    } else {
@@ -277,7 +278,7 @@ void portable_unsetenv(const QString &key)
    // windows only
 
    std::wstring tmp = key.toStdWString();
-   SetEnvironmentVariableW(&tmp[0], 0);
+   SetEnvironmentVariableW(&tmp[0], nullptr);
 
 #else
 

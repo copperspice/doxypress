@@ -146,7 +146,7 @@ class DocNode
 
    // Creates a new node
    DocNode()
-      : m_parent(0), m_insidePre(false)
+      : m_parent(nullptr), m_insidePre(false)
    { }
 
    // Destroys a node.

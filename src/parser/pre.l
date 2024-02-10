@@ -275,8 +275,7 @@ class DefineManager
    DefineDict m_contextDefines;
 };
 
-/** Singleton instance */
-DefineManager *DefineManager::theInstance = 0;
+DefineManager *DefineManager::theInstance = nullptr;
 
 /** Collects all defines for a file and all files that the file includes.
  *  This function will recursively call itself for each file.

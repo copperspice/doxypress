@@ -477,7 +477,7 @@ void SearchIndex_External::setCurrentDoc(QSharedPointer<Definition> ctx, const Q
 
 void SearchIndex_External::addWord(const QString &word, bool hiPriority)
 {
-   if (word.isEmpty() || ! isId(word[0]) || m_current == 0) {
+   if (word.isEmpty() || ! isId(word[0]) || m_current == nullptr) {
       return;
    }
 

@@ -915,7 +915,7 @@ void FileDef::writeQuickMemberLinks(OutputList &ol, QSharedPointer<MemberDef> cu
 
       for (auto md : *allMemberList) {
 
-         if (md->getFileDef() == this && md->getNamespaceDef() == 0 && md->isLinkable() && !md->isEnumValue()) {
+         if (md->getFileDef() == this && md->getNamespaceDef() == nullptr && md->isLinkable() && !md->isEnumValue()) {
             ol.writeString("          <tr><td class=\"navtab\">");
             if (md->isLinkableInProject()) {
                if (md == currentMd) { // selected item => highlight
@@ -1336,7 +1336,7 @@ void FileDef::addIncludedUsingDirectives()
             for (auto nd : unl) {
                // append each using directive found in a #include file
 
-               if (m_usingDirList.find(nd->qualifiedName()) == 0) {
+               if (m_usingDirList.find(nd->qualifiedName()) == nullptr) {
                   m_usingDirList.insert(nd->qualifiedName(), nd);
                }
             }
@@ -1345,7 +1345,7 @@ void FileDef::addIncludedUsingDirectives()
             StringMap<QSharedPointer<Definition>> &udl = incList.fileDef->m_usingDeclList;
 
             for (auto d : udl) {
-               if (m_usingDeclList.find(d->qualifiedName()) == 0) {
+               if (m_usingDeclList.find(d->qualifiedName()) == nullptr) {
                   m_usingDeclList.insert(d->qualifiedName(), d);
                }
             }

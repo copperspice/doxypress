@@ -484,7 +484,7 @@ void DocSets::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<Me
 
       QSharedPointer<MemberDef> declMd = md->memberDeclaration();
 
-      if (declMd == 0) {
+      if (declMd == nullptr) {
          declMd = md;
       }
 

@@ -29,7 +29,7 @@ class Definition;
 // struct represents an item in the list of references.
 struct RefItem {
    RefItem()
-      : scope(0)
+      : scope(nullptr)
    { }
 
    bool operator==(const RefItem &other) const {

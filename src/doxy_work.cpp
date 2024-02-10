@@ -88,108 +88,108 @@ struct STLInfo {
 };
 
 static STLInfo g_stlinfo[] = {
-   // className              baseClass1                      baseClass2             templType1     templName1     templType2, templName2, virtInheritance, iterators
+   // className              baseClass1                      baseClass2             templType1     templName1     templType2, templName2, virt inherit, iter
 
-   { "allocator",            0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "auto_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
-   { "smart_ptr",            0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
-   { "unique_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
-   { "shared_ptr",           0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
-   { "weak_ptr",             0,                              0,                     "T",           "ptr",         0,     0,             false,   false },
-   { "atomic",               0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
-   { "atomic_ref",           0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
-   { "lock_guard",           0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
-   { "unique_lock",          0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
-   { "shared_lock",          0,                              0,                     "T",           "ptr",         0,     0,             FALSE,   FALSE },
-   { "ios_base",             0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "error_code",           0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "error_category",       0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "system_error",         0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "error_condition",      0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "thread",               0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "jthread",              0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
-   { "mutex",                0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
-   { "timed_mutex",          0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
-   { "recursive_mutex",      0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
-   { "recursive_timed_mutex",0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
-   { "shared_mutex",         0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
-   { "shared_timed_mutex",   0,                              0,                     0,             0,             0,            0,      FALSE,   FALSE },
-   { "basic_ios",            "ios_base",                     0,                     "Char",        0,             0,     0,             false,   false },
-   { "basic_istream",        "basic_ios<Char>",              0,                     "Char",        0,             0,     0,             true,    false },
-   { "basic_ostream",        "basic_ios<Char>",              0,                     "Char",        0,             0,     0,             true,    false },
-   { "basic_iostream",       "basic_istream<Char>",          "basic_ostream<Char>", "Char",        0,             0,     0,             false,   false },
-   { "basic_ifstream",       "basic_istream<Char>",          0,                     "Char",        0,             0,     0,             false,   false },
-   { "basic_ofstream",       "basic_ostream<Char>",          0,                     "Char",        0,             0,     0,             false,   false },
-   { "basic_fstream",        "basic_iostream<Char>",         0,                     "Char",        0,             0,     0,             false,   false },
-   { "basic_istringstream",  "basic_istream<Char>",          0,                     "Char",        0,             0,     0,             false,   false },
-   { "basic_ostringstream",  "basic_ostream<Char>",          0,                     "Char",        0,             0,     0,             false,   false },
-   { "basic_stringstream",   "basic_iostream<Char>",         0,                     "Char",        0,             0,     0,             false,   false },
-   { "ios",                  "basic_ios<char>",              0,                     0,             0,             0,     0,             false,   false },
-   { "wios",                 "basic_ios<wchar_t>",           0,                     0,             0,             0,     0,             false,   false },
-   { "istream",              "basic_istream<char>",          0,                     0,             0,             0,     0,             false,   false },
-   { "wistream",             "basic_istream<wchar_t>",       0,                     0,             0,             0,     0,             false,   false },
-   { "ostream",              "basic_ostream<char>",          0,                     0,             0,             0,     0,             false,   false },
-   { "wostream",             "basic_ostream<wchar_t>",       0,                     0,             0,             0,     0,             false,   false },
-   { "ifstream",             "basic_ifstream<char>",         0,                     0,             0,             0,     0,             false,   false },
-   { "wifstream",            "basic_ifstream<wchar_t>",      0,                     0,             0,             0,     0,             false,   false },
-   { "ofstream",             "basic_ofstream<char>",         0,                     0,             0,             0,     0,             false,   false },
-   { "wofstream",            "basic_ofstream<wchar_t>",      0,                     0,             0,             0,     0,             false,   false },
-   { "fstream",              "basic_fstream<char>",          0,                     0,             0,             0,     0,             false,   false },
-   { "wfstream",             "basic_fstream<wchar_t>",       0,                     0,             0,             0,     0,             false,   false },
-   { "istringstream",        "basic_istringstream<char>",    0,                     0,             0,             0,     0,             false,   false },
-   { "wistringstream",       "basic_istringstream<wchar_t>", 0,                     0,             0,             0,     0,             false,   false },
-   { "ostringstream",        "basic_ostringstream<char>",    0,                     0,             0,             0,     0,             false,   false },
-   { "wostringstream",       "basic_ostringstream<wchar_t>", 0,                     0,             0,             0,     0,             false,   false },
-   { "stringstream",         "basic_stringstream<char>",     0,                     0,             0,             0,     0,             false,   false },
-   { "wstringstream",        "basic_stringstream<wchar_t>",  0,                     0,             0,             0,     0,             false,   false },
-   { "basic_string",         0,                              0,                     "Char",        0,             0,     0,             false,   true  },
-   { "string",               "basic_string<char>",           0,                     0,             0,             0,     0,             false,   true  },
-   { "wstring",              "basic_string<wchar_t>",        0,                     0,             0,             0,     0,             false,   true  },
-   { "u8string",             "basic_string<char8_t>",        0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "u16string",            "basic_string<char16_t>",       0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "u32string",            "basic_string<char32_t>",       0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "basic_string_view",    0,                              0,                     "Char",        0,             0,            0,      FALSE,   TRUE  },
-   { "string_view",          "basic_string_view<char>",      0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "wstring_view",         "basic_string_view<wchar_t>",   0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "u8string_view",        "basic_string_view<char8_t>",   0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "u16string_view",       "basic_string_view<char16_t>",  0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "u32string_view",       "basic_string_view<char32_t>",  0,                     0,             0,             0,            0,      FALSE,   TRUE  },
-   { "complex",              0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "bitset",               0,                              0,                     "Bits",        0,             0,     0,             false,   false },
-   { "deque",                0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
-   { "list",                 0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
-   { "forward_list",         0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
-   { "map",                  0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
-   { "unordered_map",        0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
-   { "multimap",             0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
-   { "unordered_multimap",   0,                              0,                     "K",           "keys",        "T",   "elements",    false,   true  },
-   { "set",                  0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
-   { "unordered_set",        0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
-   { "multiset",             0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
-   { "unordered_multiset",   0,                              0,                     "K",           "keys",        0,     0,             false,   true  },
-   { "array",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "vector",               0,                              0,                     "T",           "elements",    0,     0,             false,   true  },
-   { "span",                 0,                              0,                     "T",           "elements",    0,     0,             FALSE,   TRUE  },
-   { "queue",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "priority_queue",       0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "stack",                0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "valarray",             0,                              0,                     "T",           "elements",    0,     0,             false,   false },
-   { "exception",            0,                              0,                     0,             0,             0,     0,             false,   false },
-   { "bad_alloc",            "exception",                    0,                     0,             0,             0,     0,             false,   false },
-   { "bad_cast",             "exception",                    0,                     0,             0,             0,     0,             false,   false },
-   { "bad_typeid",           "exception",                    0,                     0,             0,             0,     0,             false,   false },
-   { "logic_error",          "exception",                    0,                     0,             0,             0,     0,             false,   false },
-   { "ios_base::failure",    "exception",                    0,                     0,             0,             0,     0,             false,   false },
-   { "runtime_error",        "exception",                    0,                     0,             0,             0,     0,             false,   false },
-   { "bad_exception",        "exception",                    0,                     0,             0,             0,     0,             false,   false },
-   { "domain_error",         "logic_error",                  0,                     0,             0,             0,     0,             false,   false },
-   { "invalid_argument",     "logic_error",                  0,                     0,             0,             0,     0,             false,   false },
-   { "length_error",         "logic_error",                  0,                     0,             0,             0,     0,             false,   false },
-   { "out_of_range",         "logic_error",                  0,                     0,             0,             0,     0,             false,   false },
-   { "range_error",          "runtime_error",                0,                     0,             0,             0,     0,             false,   false },
-   { "overflow_error",       "runtime_error",                0,                     0,             0,             0,     0,             false,   false },
-   { "underflow_error",      "runtime_error",                0,                     0,             0,             0,     0,             false,   false },
-   { 0,                      0,                              0,                     0,             0,             0,     0,             false,   false }
+   { "allocator",            nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   false },
+   { "auto_ptr",             nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "smart_ptr",            nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "unique_ptr",           nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "shared_ptr",           nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "weak_ptr",             nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "atomic",               nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "atomic_ref",           nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "lock_guard",           nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "unique_lock",          nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "shared_lock",          nullptr,                        nullptr,               "T",           "ptr",         nullptr, nullptr,   false,   false },
+   { "ios_base",             nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "error_code",           nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "error_category",       nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "system_error",         nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "error_condition",      nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "thread",               nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "jthread",              nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "mutex",                nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "timed_mutex",          nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "recursive_mutex",      nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "recursive_timed_mutex",nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "shared_mutex",         nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "shared_timed_mutex",   nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_ios",            "ios_base",                     nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_istream",        "basic_ios<Char>",              nullptr,               "Char",        nullptr,       nullptr, nullptr,   true,    false },
+   { "basic_ostream",        "basic_ios<Char>",              nullptr,               "Char",        nullptr,       nullptr, nullptr,   true,    false },
+   { "basic_iostream",       "basic_istream<Char>",          "basic_ostream<Char>", "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_ifstream",       "basic_istream<Char>",          nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_ofstream",       "basic_ostream<Char>",          nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_fstream",        "basic_iostream<Char>",         nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_istringstream",  "basic_istream<Char>",          nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_ostringstream",  "basic_ostream<Char>",          nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_stringstream",   "basic_iostream<Char>",         nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   false },
+   { "ios",                  "basic_ios<char>",              nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wios",                 "basic_ios<wchar_t>",           nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "istream",              "basic_istream<char>",          nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wistream",             "basic_istream<wchar_t>",       nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "ostream",              "basic_ostream<char>",          nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wostream",             "basic_ostream<wchar_t>",       nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "ifstream",             "basic_ifstream<char>",         nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wifstream",            "basic_ifstream<wchar_t>",      nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "ofstream",             "basic_ofstream<char>",         nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wofstream",            "basic_ofstream<wchar_t>",      nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "fstream",              "basic_fstream<char>",          nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wfstream",             "basic_fstream<wchar_t>",       nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "istringstream",        "basic_istringstream<char>",    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wistringstream",       "basic_istringstream<wchar_t>", nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "ostringstream",        "basic_ostringstream<char>",    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wostringstream",       "basic_ostringstream<wchar_t>", nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "stringstream",         "basic_stringstream<char>",     nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "wstringstream",        "basic_stringstream<wchar_t>",  nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "basic_string",         nullptr,                        nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   true  },
+   { "string",               "basic_string<char>",           nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "wstring",              "basic_string<wchar_t>",        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "u8string",             "basic_string<char8_t>",        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "u16string",            "basic_string<char16_t>",       nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "u32string",            "basic_string<char32_t>",       nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "basic_string_view",    nullptr,                        nullptr,               "Char",        nullptr,       nullptr, nullptr,   false,   true  },
+   { "string_view",          "basic_string_view<char>",      nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "wstring_view",         "basic_string_view<wchar_t>",   nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "u8string_view",        "basic_string_view<char8_t>",   nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "u16string_view",       "basic_string_view<char16_t>",  nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "u32string_view",       "basic_string_view<char32_t>",  nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   true  },
+   { "complex",              nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "bitset",               nullptr,                        nullptr,               "Bits",        nullptr,       nullptr, nullptr,   false,   false },
+   { "deque",                nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   true  },
+   { "list",                 nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   true  },
+   { "forward_list",         nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   true  },
+   { "map",                  nullptr,                        nullptr,               "K",           "keys",        "T",   "elements",  false,   true  },
+   { "unordered_map",        nullptr,                        nullptr,               "K",           "keys",        "T",   "elements",  false,   true  },
+   { "multimap",             nullptr,                        nullptr,               "K",           "keys",        "T",   "elements",  false,   true  },
+   { "unordered_multimap",   nullptr,                        nullptr,               "K",           "keys",        "T",   "elements",  false,   true  },
+   { "set",                  nullptr,                        nullptr,               "K",           "keys",        nullptr, nullptr,   false,   true  },
+   { "unordered_set",        nullptr,                        nullptr,               "K",           "keys",        nullptr, nullptr,   false,   true  },
+   { "multiset",             nullptr,                        nullptr,               "K",           "keys",        nullptr, nullptr,   false,   true  },
+   { "unordered_multiset",   nullptr,                        nullptr,               "K",           "keys",        nullptr, nullptr,   false,   true  },
+   { "array",                nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   false },
+   { "vector",               nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   true  },
+   { "span",                 nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   true  },
+   { "queue",                nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   false },
+   { "priority_queue",       nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   false },
+   { "stack",                nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   false },
+   { "valarray",             nullptr,                        nullptr,               "T",           "elements",    nullptr, nullptr,   false,   false },
+   { "exception",            nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "bad_alloc",            "exception",                    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "bad_cast",             "exception",                    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "bad_typeid",           "exception",                    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "logic_error",          "exception",                    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "ios_base::failure",    "exception",                    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "runtime_error",        "exception",                    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "bad_exception",        "exception",                    nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "domain_error",         "logic_error",                  nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "invalid_argument",     "logic_error",                  nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "length_error",         "logic_error",                  nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "out_of_range",         "logic_error",                  nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "range_error",          "runtime_error",                nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "overflow_error",       "runtime_error",                nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { "underflow_error",      "runtime_error",                nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false },
+   { nullptr,                nullptr,                        nullptr,               nullptr,       nullptr,       nullptr, nullptr,   false,   false }
 };
 
 namespace Doxy_Work{
@@ -308,7 +308,7 @@ namespace Doxy_Work{
    void findEnumDocumentation(QSharedPointer<Entry> ptrEntry);
 
    void findFriends();
-   int findFunctionPtr(const QString &type, int lang, int *pLength = 0);
+   int findFunctionPtr(const QString &type, int lang, int *pLength = nullptr);
 
    bool findGlobalMember(QSharedPointer<Entry> ptrEntry, const QString &namespaceName, const QString &type, const QString &name,
          const QString &tempArg, const QString &decl);
@@ -1393,10 +1393,10 @@ void distributeClassGroupRelations()
 
       QSharedPointer<GroupDef> gd = cd->partOfGroups()->at(0);
 
-      if (! cd->isVisited() && cd->partOfGroups() != 0) {
+      if (! cd->isVisited() && cd->partOfGroups() != nullptr) {
 
          for (auto ncd : cd->getClassSDict() ) {
-            if (ncd->partOfGroups() == 0) {
+            if (ncd->partOfGroups() == nullptr) {
                ncd->makePartOfGroup(gd);
                gd->addClass(ncd);
             }
@@ -2718,7 +2718,7 @@ QSharedPointer<ClassDef> Doxy_Work::createTagLessInstance(QSharedPointer<ClassDe
 
    SortedList<QSharedPointer<GroupDef>> *groups = rootCd->partOfGroups();
 
-   if (groups != 0) {
+   if (groups != nullptr) {
       for (auto item : *groups) {
          cd->makePartOfGroup(item);
          item->addClass(cd);
@@ -3220,11 +3220,11 @@ void Doxy_Work::findUsingDeclarations(QSharedPointer<Entry> ptrEntry)
          QString name = substitute(root->m_entryName, ".", "::"); //Java/C# scope->internal
          usingCd = getResolvedClass(nd, fd, name);
 
-         if (usingCd == 0) {
+         if (usingCd == nullptr) {
             usingCd = Doxy_Globals::hiddenClasses.find(name);
          }
 
-         if (usingCd == 0) {
+         if (usingCd == nullptr) {
             // definition not in the input => add an artificial class
             usingCd = QMakeShared<ClassDef>("<using>", 1, 1, name, CompoundType::Class);
 
@@ -3698,7 +3698,7 @@ QSharedPointer<MemberDef> Doxy_Work::addVariableToFile(QSharedPointer<Entry> ptr
       }
 
       for (auto md : *mn) {
-         if ( ((nd == nullptr && md->getNamespaceDef() == 0 && md->getFileDef() &&
+         if ( ((nd == nullptr && md->getNamespaceDef() == nullptr && md->getFileDef() &&
                   root->getData(EntryKey::File_Name) == md->getFileDef()->getFilePath()) ||
                  (nd != nullptr && md->getNamespaceDef() == nd) ) && !md->isDefine() && ! md->isEnumerate()  ) {
 
@@ -3904,10 +3904,10 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
       findAndRemoveWord(type, "static");
       findAndRemoveWord(type, "volatile");
 
-      typeIsClass = getResolvedClass(ctx, fd, type) != 0;
+      typeIsClass = getResolvedClass(ctx, fd, type) != nullptr;
 
       if (! typeIsClass && (ti = type.indexOf('<')) != -1) {
-         typeIsClass = getResolvedClass(ctx, fd, type.left(ti)) != 0;
+         typeIsClass = getResolvedClass(ctx, fd, type.left(ti)) != nullptr;
       }
 
       if (typeIsClass) {
@@ -3938,7 +3938,7 @@ bool Doxy_Work::isVarWithConstructor(QSharedPointer<Entry> ptrEntry)
                break;
             }
 
-            if (a.type.isEmpty() || getResolvedClass(ctx, fd, a.type) != 0) {
+            if (a.type.isEmpty() || getResolvedClass(ctx, fd, a.type) != nullptr) {
                // arg type is a known type
                result = false;
 
@@ -4148,7 +4148,7 @@ void Doxy_Work::addVariable(QSharedPointer<Entry> ptrEntry, int isFuncPtr)
       isRelated = true;
       isMemberOf = (root->relatesType == MemberOf);
 
-      if (getClass(root->getData(EntryKey::Related_Class)) == 0 && ! scope.isEmpty()) {
+      if (getClass(root->getData(EntryKey::Related_Class)) == nullptr && ! scope.isEmpty()) {
          scope = mergeScopes(scope, root->getData(EntryKey::Related_Class));
       } else {
          scope = root->getData(EntryKey::Related_Class);
@@ -4931,10 +4931,10 @@ void Doxy_Work::buildFunctionList(QSharedPointer<Entry> ptrEntry)
                         item->enableReferencesRelation(item->hasReferencesRelation() || root->referencesRelation);
 
                         // merge ingroup specifiers
-                        if (item->getGroupDef() == 0 && root->m_groups.size() > 0) {
+                        if (item->getGroupDef() == nullptr && root->m_groups.size() > 0) {
                            addMemberToGroups(root, item);
 
-                        } else if (item->getGroupDef() != 0 && root->m_groups.count() == 0) {
+                        } else if (item->getGroupDef() != nullptr && root->m_groups.count() == 0) {
                            root->m_groups.append(Grouping(item->getGroupDef()->name(), item->getGroupPri()));
 
                         }
@@ -5350,25 +5350,26 @@ QSharedPointer<ClassDef> Doxy_Work::findClassWithinClassContext(QSharedPointer<D
 {
    QSharedPointer<ClassDef> result = QSharedPointer<ClassDef>();
 
-   if (cd == 0) {
+   if (cd == nullptr) {
       return result;
    }
 
    QSharedPointer<FileDef> fd = cd->getFileDef();
 
    if (context && cd != context) {
-      result = getResolvedClass(context, QSharedPointer<FileDef>(), name, nullptr, 0, true, true);
+      result = getResolvedClass(context, QSharedPointer<FileDef>(), name, nullptr, nullptr, true, true);
    }
 
-   if (result == 0) {
-      result = getResolvedClass(cd, fd, name, 0, 0, true, true);
+   if (result == nullptr) {
+      result = getResolvedClass(cd, fd, name, nullptr, nullptr, true, true);
    }
 
-   if (result == 0) { // try direct class, needed for namespaced classes imported via tag files (see bug624095)
+   if (result == nullptr) {
+      // try direct class, needed for namespaced classes imported via tag files (see bug624095)
       result = getClass(name);
    }
 
-   if (result == 0 && (cd->getLanguage() == SrcLangExt_CSharp || cd->getLanguage() == SrcLangExt_Java) &&
+   if (result == nullptr && (cd->getLanguage() == SrcLangExt_CSharp || cd->getLanguage() == SrcLangExt_Java) &&
          name.indexOf('<') != -1) {
 
       result = Doxy_Globals::genericsSDict.find(name);
@@ -5414,7 +5415,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
 
                // find the type (if any) that matches usedClassName
                QSharedPointer<ClassDef> typeCd = getResolvedClass(masterCd,
-                     masterCd->getFileDef(), usedClassName, 0, 0, false, true);
+                     masterCd->getFileDef(), usedClassName, nullptr, nullptr, false, true);
 
                if (typeCd) {
                   usedClassName = typeCd->name();
@@ -5491,7 +5492,7 @@ void Doxy_Work::findUsedClassesForClass(QSharedPointer<Entry> ptrEntry, QSharedP
                // used class is not documented in any scope
                QSharedPointer<ClassDef> usedCd = Doxy_Globals::hiddenClasses.find(type);
 
-               if (usedCd == 0 && ! Config::getBool("hide-undoc-relations")) {
+               if (usedCd == nullptr && ! Config::getBool("hide-undoc-relations")) {
                   if (type.endsWith("(*") || type.endsWith("(^")) {
                      // type is a function pointer
                      type += md->argsString();
@@ -5799,13 +5800,13 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                si = 0;
             }
 
-            if (baseClass == 0 && (root->m_srcLang == SrcLangExt_CSharp || root->m_srcLang == SrcLangExt_Java)) {
+            if (baseClass == nullptr && (root->m_srcLang == SrcLangExt_CSharp || root->m_srcLang == SrcLangExt_Java)) {
                // for Java/C# strip the template part before looking for matching
 
                baseClass = Doxy_Globals::genericsSDict.find(baseClassName.left(i));
             }
 
-            if (baseClass == 0 && i != -1) {
+            if (baseClass == nullptr && i != -1) {
                // base class has template specifiers
 
                // TODO: try to find the correct template specialization
@@ -5828,7 +5829,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                   }
 
                   baseClass = getResolvedClass(tmpScope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
-                                 0, mode == Undocumented, true);
+                                 nullptr, mode == Undocumented, true);
                }
 
             } else if (baseClass && !templSpec.isEmpty())  {
@@ -5847,7 +5848,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                }
             }
 
-            bool found = baseClass != 0 && (baseClass != cd || mode == TemplateInstances);
+            bool found = (baseClass != nullptr) && (baseClass != cd || mode == TemplateInstances);
 
             if (! found && si != -1) {
                QString tmpTemplSpec;
@@ -5866,7 +5867,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                baseClass = getResolvedClass(tmpScope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
                                             &tmpTemplSpec, mode == Undocumented, true);
 
-               found = (baseClass != 0 && baseClass != cd);
+               found = (baseClass != nullptr) && (baseClass != cd);
 
                if (found) {
                   templSpec = tmpTemplSpec;
@@ -5875,7 +5876,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
 
             if (! found) {
                baseClass = findClassWithinClassContext(context, cd, baseClassName);
-               found = (baseClass != 0 && baseClass != cd);
+               found = (baseClass != nullptr) && (baseClass != cd);
 
             }
 
@@ -5888,7 +5889,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                   QString aliasName = Doxy_Globals::namespaceAliasDict[baseClassName];
 
                   baseClass = getClass(aliasName);
-                  found = baseClass != 0 && baseClass != cd;
+                  found = (baseClass != nullptr) && (baseClass != cd);
                }
             }
 
@@ -5969,7 +5970,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                if (isATemplateArgument) {
                   baseClass = Doxy_Globals::hiddenClasses.find(baseClassName);
 
-                  if (baseClass == 0) {
+                  if (baseClass == nullptr) {
                      baseClass = QMakeShared<ClassDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                                              baseClassName, CompoundType::Class);
 
@@ -5985,7 +5986,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                } else {
                   baseClass = Doxy_Globals::classSDict.find(baseClassName);
 
-                  if (baseClass == 0) {
+                  if (baseClass == nullptr) {
                      baseClass = QMakeShared<ClassDef>(root->getData(EntryKey::File_Name), root->startLine, root->startColumn,
                                              baseClassName, CompoundType::Class);
 
@@ -6055,7 +6056,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
 
       } while (scopeOffset >= 0);
 
-      if (parentNode == 0) {
+      if (parentNode == nullptr) {
          lastParent = true;
 
       } else {
@@ -6953,7 +6954,7 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
       isRelated  = true;
       isMemberOf = (root->relatesType == MemberOf);
 
-      if (getClass(root->getData(EntryKey::Related_Class)) == 0 && ! scopeName.isEmpty()) {
+      if (getClass(root->getData(EntryKey::Related_Class)) == nullptr && ! scopeName.isEmpty()) {
          scopeName = mergeScopes(scopeName, root->getData(EntryKey::Related_Class));
       } else {
          scopeName = root->getData(EntryKey::Related_Class);
@@ -8908,7 +8909,7 @@ void Doxy_Work::computeMemberRelations()
                                            md->getOuterScope(), md->getFileDef(), mdAl,true)) {
 
                            QSharedPointer<MemberDef> rmd;
-                           if ((rmd = md->reimplements()) == 0 ||
+                           if ((rmd = md->reimplements()) == nullptr ||
                                 minClassDistance(mcd, bmcd) < minClassDistance(mcd, rmd->getClassDef())) {
 
                               md->setReimplements(bmd);
@@ -9208,12 +9209,12 @@ void Doxy_Work::generateClassList(ClassSDict &classSDict)
 {
    for (auto cd : classSDict) {
 
-      if (cd && (cd->getOuterScope() == 0 || // <-- should not happen, but can if we read an old tag file
+      if (cd && (cd->getOuterScope() == nullptr ||       // <-- should not happen, but can if we read an old tag file
                  cd->getOuterScope() == Doxy_Globals::globalScope) && ! cd->isHidden() && ! cd->isEmbeddedInOuterScope()) {
 
          // skip external references, anonymous compounds and template instances
 
-         if ( cd->isLinkableInProject() && cd->templateMaster() == 0) {
+         if ( cd->isLinkableInProject() && cd->templateMaster() == nullptr) {
             msg("Generating docs for compound %s\n", csPrintable(cd->name()));
 
             cd->writeDocumentation(Doxy_Globals::outputList);
@@ -10265,7 +10266,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root)
          bool ambig;
 
          QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, fName, ambig);
-         assert(fd != 0);
+         assert(fd != nullptr);
 
          if (fd->isSource() && ! fd->isReference()) {
             QStringList includedFiles;
@@ -10311,7 +10312,7 @@ void Doxy_Work::parseFiles(QSharedPointer<Entry> root)
             bool ambig;
 
             QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::inputNameDict, fName, ambig);
-            assert(fd != 0);
+            assert(fd != nullptr);
 
             auto srcLang = fd->getLanguage();
 

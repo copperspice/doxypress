@@ -92,7 +92,7 @@ static bool convertMapFile(QTextStream &t, const QString &mapName, const QString
 
          if ( isRef ) {
             // handle DoxyPress \ref tag URL reference
-            DocRef *df = new DocRef( (DocNode *) 0, url, context );
+            DocRef *df = new DocRef( (DocNode *)nullptr, url, context );
             t << externalRef(relPath, df->ref(), true);
 
             if (!df->file().isEmpty()) {

@@ -169,7 +169,7 @@ class FileDef : public Definition
 
    QList<IncludeInfo> *includeFileList() {
       if (m_includeList.isEmpty()) {
-         return 0;
+         return nullptr;
       }
 
       return &m_includeList;
@@ -336,7 +336,8 @@ class DirEntry
    { }
 
    DirEntry(QSharedPointer<DirEntry> parent, QString name)
-      : m_parent(parent), m_name(name), m_kind(Dir), m_fd(0), m_isLast(false) { }
+      : m_parent(parent), m_name(name), m_kind(Dir), m_fd(nullptr), m_isLast(false)
+   { }
 
    virtual ~DirEntry() { }
 

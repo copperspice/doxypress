@@ -35,14 +35,13 @@ int compareListValues(const BaseClassDef *item1, const BaseClassDef *item2, bool
    QSharedPointer<const ClassDef> c1 = item1->classDef;
    QSharedPointer<const ClassDef> c2 = item2->classDef;
 
-   if (c1 == 0 || c2 == 0) {
+   if (c1 == nullptr || c2 == nullptr) {
       return false;
 
    } else {
       return c1->name().compare(c2->name(), Qt::CaseInsensitive);
    }
 }
-
 
 // ClassList --> SortedList<ClassDef *>
 int compareListValues(const QSharedPointer<ClassDef> item1, const QSharedPointer<ClassDef> item2, bool flag)

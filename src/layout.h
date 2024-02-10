@@ -213,7 +213,7 @@ struct LayoutNavEntry {
 
  private:
    LayoutNavEntry()
-      : m_parent(0), m_kind(Kind::None), m_visible(false)
+      : m_parent(nullptr), m_kind(Kind::None), m_visible(false)
    {}
 
    LayoutNavEntry *m_parent;

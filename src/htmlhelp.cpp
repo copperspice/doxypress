@@ -71,7 +71,7 @@ void HtmlHelpIndex::addItem(const QString &level1, const QString &level2, const 
       key_anchor += anchor;
    }
 
-   if (m_indexFieldDict.find(key_anchor) == 0) {
+   if (m_indexFieldDict.find(key_anchor) == nullptr) {
       // new key
       QSharedPointer<IndexField> tmp = QMakeShared<IndexField>();
 
@@ -486,7 +486,7 @@ void HtmlHelp::finalize()
    cts << "</UL>\n";
    cts << "</BODY>\n";
    cts << "</HTML>\n";
-   cts.setDevice(0);
+   cts.setDevice(nullptr);
 
    cf.close();
 
@@ -496,7 +496,7 @@ void HtmlHelp::finalize()
    kts << "</UL>\n";
    kts << "</BODY>\n";
    kts << "</HTML>\n";
-   kts.setDevice(0);
+   kts.setDevice(nullptr);
 
    kf.close();
 
@@ -617,7 +617,7 @@ void HtmlHelp::addIndexItem(QSharedPointer<Definition> context, QSharedPointer<M
    if (md) {
       static const bool separateMemberPages = Config::getBool("separate-member-pages");
 
-      if (context == 0) {
+      if (context == nullptr) {
          // global member
 
          if (md->getGroupDef()) {

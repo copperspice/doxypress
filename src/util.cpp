@@ -240,7 +240,7 @@ QString stripAnonymousNamespaceScope(const QString &s)
 
    while ((i = getScopeFragment(s, p, &l)) != -1) {
 
-      if (Doxy_Globals::namespaceSDict.find(s.left(i + l)) != 0) {
+      if (Doxy_Globals::namespaceSDict.find(s.left(i + l)) != nullptr) {
 
          if (s.at(i) != '@') {
             if (! newScope.isEmpty()) {
@@ -349,7 +349,7 @@ QString resolveTypeDef(QSharedPointer<Definition> context, const QString &qualif
 
    QSharedPointer<MemberDef> md;
 
-   while (mContext && md == 0) {
+   while (mContext && md == nullptr) {
       // step 1: get the right scope
       QSharedPointer<Definition> resScope = mContext;
 
@@ -372,7 +372,7 @@ QString resolveTypeDef(QSharedPointer<Definition> context, const QString &qualif
 
             resScope = resScope->findInnerCompound(qualScopePart);
 
-            if (resScope == 0) {
+            if (resScope == nullptr) {
                break;
             }
             ps = is + l;
@@ -401,7 +401,7 @@ QString resolveTypeDef(QSharedPointer<Definition> context, const QString &qualif
                if (tmd->isTypedef()) {
                   int dist = isAccessibleFrom(resScope, QSharedPointer<FileDef>(), tmd);
 
-                  if (dist != -1 && (md == 0 || dist < minDist)) {
+                  if (dist != -1 && (md == nullptr || dist < minDist)) {
                      md = tmd;
                      minDist = dist;
                   }
@@ -597,7 +597,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileSco
    }
 
    QSharedPointer<MemberDef> memTypeDef;
-   QSharedPointer<ClassDef>  result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, 0, pResolvedType);
+   QSharedPointer<ClassDef>  result = getResolvedClassRec(md->getOuterScope(), fileScope, type, &memTypeDef, nullptr, pResolvedType);
 
    // if type is a typedef then return what it resolves to.
    if (memTypeDef && memTypeDef->isTypedef()) {
@@ -608,7 +608,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileSco
       *pMemType = memTypeDef;
    }
 
-   if (result == 0) {
+   if (result == nullptr) {
       // try unspecialized version if type is template
       int si = type.lastIndexOf("::");
       int i  = type.indexOf('<');
@@ -618,7 +618,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileSco
             *pTemplSpec = type.mid(i);
          }
 
-         result = getResolvedClassRec(md->getOuterScope(), fileScope, type.left(i), 0, 0, pResolvedType);
+         result = getResolvedClassRec(md->getOuterScope(), fileScope, type.left(i), nullptr, nullptr, pResolvedType);
 
       } else if (si != -1) { // A::B
          i = type.indexOf('<', si);
@@ -635,7 +635,7 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileSco
          }
 
          result = getResolvedClassRec(md->getOuterScope(), fileScope,
-                     stripTemplateSpecifiersFromScope(type.left(i), false), 0, 0, pResolvedType);
+                     stripTemplateSpecifiersFromScope(type.left(i), false), nullptr, nullptr, pResolvedType);
       }
 
    }
@@ -774,7 +774,7 @@ static QSharedPointer< const Definition> followPath(QSharedPointer<const Definit
 
       QSharedPointer<const Definition> next = current->findInnerCompound(qualScopePart);
 
-      if (next == 0) {
+      if (next == nullptr) {
          // failed to follow the path
 
          if (current->definitionType() == Definition::TypeNamespace) {
@@ -796,7 +796,7 @@ static QSharedPointer< const Definition> followPath(QSharedPointer<const Definit
 
          current = next;
 
-         if (current == 0) {
+         if (current == nullptr) {
             break;
          }
 
@@ -2241,7 +2241,7 @@ QString tempArgListToString(const ArgumentList &argList, SrcLangExt lang, bool i
 // compute the HTML anchors for a list of members
 void setAnchors(QSharedPointer<MemberList> ml)
 {
-   if (ml == 0) {
+   if (ml == nullptr) {
       return;
    }
 
@@ -3248,7 +3248,7 @@ static QString extractCanonicalType(QSharedPointer<Definition> def, QSharedPoint
          while (match.hasMatch()) {
 
             canType += QStringView(iter_last, match.capturedStart());
-            canType += getCanonicalTypeForIdentifier(def, fs, match.captured(), 0);
+            canType += getCanonicalTypeForIdentifier(def, fs, match.captured(), nullptr);
 
             iter_last = match.capturedEnd();
             match = regExp.match(templSpec, iter_last);
@@ -3512,8 +3512,8 @@ static void findMembersWithSpecificName(QSharedPointer<MemberName> mn, const QSt
       QSharedPointer<GroupDef> gd = md->getGroupDef();
 
       if (((gd && gd->isLinkable()) || (fd && fd->isLinkable()) || md->isReference()) &&
-         md->getNamespaceDef() == 0 && md->isLinkable() &&
-         (! checkStatics || (!md->isStatic() && ! md->isDefine()) || currentFile == 0 || fd == currentFile) ) {
+         md->getNamespaceDef() == nullptr && md->isLinkable() &&
+         (! checkStatics || (!md->isStatic() && ! md->isDefine()) || currentFile == nullptr || fd == currentFile) ) {
 
          // statics must appear in the same file
          bool match = true;
@@ -3917,7 +3917,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
                QSharedPointer<MemberDef> tmd = mmd->getEnumScope();
 
                int ni = namespaceName.lastIndexOf("::");
-               bool notInNS = tmd && ni == -1 && tmd->getNamespaceDef() == 0 && (mScope.isEmpty() || mScope == tmd->name());
+               bool notInNS = tmd && ni == -1 && tmd->getNamespaceDef() == nullptr && (mScope.isEmpty() || mScope == tmd->name());
                bool sameNS  = tmd && tmd->getNamespaceDef() && namespaceName.left(ni) == tmd->getNamespaceDef()->name();
 
                if (tmd && tmd->isStrong() && (notInNS || sameNS) && namespaceName.length() > 0) {
@@ -3995,7 +3995,7 @@ bool getDefs(const QString &scName, const QString &mbName, const QString &args, 
             }
          }
 
-         if (md && (md->getEnumScope() == 0 || ! md->getEnumScope()->isStrong())) {
+         if (md && (md->getEnumScope() == nullptr || ! md->getEnumScope()->isStrong())) {
             // found a matching global member, that is not a scoped enum value (or uniquely matches)
 
             fd = md->getFileDef();
@@ -4150,7 +4150,7 @@ bool resolveRef(const QString &scName, const QString &tName, bool inSeeBlock, QS
 
          } else {
             // scope matches that of a namespace
-            assert(nd != 0);
+            assert(nd != nullptr);
             *resContext = nd;
          }
 
@@ -4657,14 +4657,14 @@ int getPrefixIndex(const QString &name)
 
 static void initBaseClassHierarchy(SortedList<BaseClassDef *> *bcl)
 {
-   if (bcl == 0) {
+   if (bcl == nullptr) {
       return;
    }
 
    for (auto item : *bcl) {
       QSharedPointer<ClassDef> cd = item->classDef;
 
-      if (cd->baseClasses() == 0) {
+      if (cd->baseClasses() == nullptr) {
          // no base classes => new root
          initBaseClassHierarchy(cd->baseClasses());
       }
@@ -4677,7 +4677,7 @@ bool classHasVisibleChildren(QSharedPointer<ClassDef> cd)
 {
    SortedList<BaseClassDef *> *bcl;
 
-   if (cd->subClasses() == 0) {
+   if (cd->subClasses() == nullptr) {
       return false;
    }
 
@@ -5043,7 +5043,7 @@ void extractNamespaceName(const QString &scopeName, QString &className, QString 
 
    QSharedPointer<NamespaceDef> nd;
 
-   if (! clName.isEmpty() && (nd = getResolvedNamespace(clName)) && getClass(clName) == 0) {
+   if (! clName.isEmpty() && (nd = getResolvedNamespace(clName)) && getClass(clName) == nullptr) {
       // the whole name is a namespace (and not a class)
       namespaceName = nd->name();
 
@@ -5056,7 +5056,7 @@ void extractNamespaceName(const QString &scopeName, QString &className, QString 
    while (p >= 0 && (i = clName.lastIndexOf("::", p)) != -1) {
       // see if the first part is a namespace (and not a class)
 
-      if (i > 0 && (nd = getResolvedNamespace(clName.left(i))) && getClass(clName.left(i)) == 0) {
+      if (i > 0 && (nd = getResolvedNamespace(clName.left(i))) && getClass(clName.left(i)) == nullptr) {
          //printf("found!\n");
          namespaceName = nd->name();
          className = clName.right(clName.length() - i - 2);
@@ -5094,7 +5094,7 @@ QString insertTemplateSpecifierInScope(const QString &scope, const QString &temp
       QSharedPointer<ClassDef> cd = QSharedPointer<ClassDef>();
 
       while ( (si = scope.indexOf("::", pi)) != -1 && ! getClass(scope.left(si) + templ) &&
-                  ((cd = getClass(scope.left(si))) == 0 || cd->getTemplateArgumentList().listEmpty()) ) {
+                  ((cd = getClass(scope.left(si))) == nullptr || cd->getTemplateArgumentList().listEmpty()) ) {
 
          pi = si + 2;
       }
@@ -5604,7 +5604,7 @@ QString convertCharEntities(const QString &str)
 
 void addMembersToMemberGroup(QSharedPointer<MemberList> ml, MemberGroupSDict &memberGroupSDict, QSharedPointer<Definition> context)
 {
-   assert(context != 0);
+   assert(context != nullptr);
 
    if (ml == nullptr) {
       return;
@@ -5993,7 +5993,7 @@ QString stripTemplateSpecifiersFromScope(const QString &fullName, bool parentOnl
 
       result += fullName.mid(p, i - p);
 
-      if (getClass(result + fullName.mid(i, e - i)) != 0) {
+      if (getClass(result + fullName.mid(i, e - i)) != nullptr) {
          result += fullName.mid(i, e - i);
 
       } else if (pLastScopeStripped) {
@@ -6266,7 +6266,7 @@ void addRefItem(const QVector<ListItemInfo> &list, const QString &key, const QSt
 
             // either not a built-in list or the list is enabled
             RefItem *item = refList->getRefItem(listItem.itemId);
-            assert(item != 0);
+            assert(item != nullptr);
 
             item->prefix = prefix;
             item->scope  = scope;
@@ -8420,7 +8420,7 @@ bool namespaceHasVisibleChild(QSharedPointer<NamespaceDef> nd, bool includeClass
 
    if (includeClasses) {
       for (auto cd : nd->getClassSDict()) {
-         if (cd->isLinkableInProject() && cd->templateMaster() == 0) {
+         if (cd->isLinkableInProject() && cd->templateMaster() == nullptr) {
             return true;
          }
       }

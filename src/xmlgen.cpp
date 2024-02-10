@@ -1547,7 +1547,7 @@ static void generateXMLForClass(QSharedPointer<ClassDef> cd, QTextStream &t_inde
       return;   // skip anonymous compounds
    }
 
-   if (cd->templateMaster() != 0) {
+   if (cd->templateMaster() != nullptr) {
       return;   // skip generated template instances
    }
 

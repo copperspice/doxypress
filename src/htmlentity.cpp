@@ -70,25 +70,25 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#160;",        "~",                      " ",          "\\~",                    { " ",          DocSymbol::Perl_char    }},
 
    { SYM(iexcl),      "\xc2\xa1",               "&iexcl;",    "<iexcl/>",
-     "&#161;",        "!`",                     NULL,         "\\'A1",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#161;",        "!`",                     nullptr,      "\\'A1",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(cent),       "\xc2\xa2",               "&cent;",     "<cent/>",
-     "&#162;",        "\\textcent{}",           NULL,         "\\'A2",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#162;",        "\\textcent{}",           nullptr,      "\\'A2",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(pound),      "\xc2\xa3",               "&pound;",    "<pound/>",
-     "&#163;",        "{$\\pounds$}",           NULL,         "\\'A3",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#163;",        "{$\\pounds$}",           nullptr,      "\\'A3",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(curren),     "\xc2\xa4",               "&curren;",   "<curren/>",
-     "&#164;",        "\\textcurrency{}",       NULL,         "\\'A4",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#164;",        "\\textcurrency{}",       nullptr,      "\\'A4",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(yen),        "\xc2\xa5",               "&yen;",      "<yen/>",
-     "&#165;",        "{$\\yen$}",              NULL,         "\\'A5",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#165;",        "{$\\yen$}",              nullptr,      "\\'A5",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(brvbar),     "\xc2\xa6",               "&brvbar;",   "<brvbar/>",
-     "&#166;",        "\\textbrokenbar{}",      NULL,         "\\'A6",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#166;",        "\\textbrokenbar{}",      nullptr,      "\\'A6",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(sect),       "\xc2\xa7",               "&sect;",     "<sect/>",
-     "<simplesect/>", "{$\\S$}",                NULL,         "\\'A7",                  { "sect",       DocSymbol::Perl_symbol  }},
+     "<simplesect/>", "{$\\S$}",                nullptr,      "\\'A7",                  { "sect",       DocSymbol::Perl_symbol  }},
 
    { SYM(uml),        "\xc2\xa8",               "&uml;",      "<umlaut/>",
      "&#168;",        "\\textasciidieresis{}",  " \\*(4",     "\\'A8",                  { " ",          DocSymbol::Perl_umlaut  }},
@@ -97,70 +97,70 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#169;",        "\\copyright{}",          "(C)",        "\\'A9",                  { "copyright",  DocSymbol::Perl_symbol  }},
 
    { SYM(ordf),       "\xc2\xaa",               "&ordf;",     "<ordf/>",
-     "&#170;",        "\\textordfeminine{}",    NULL,         "\\'AA",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#170;",        "\\textordfeminine{}",    nullptr,      "\\'AA",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(laquo),      "\xc2\xab",               "&laquo;",    "<laquo/>",
-     "&#171;",        "\\guillemotleft{}",      NULL,         "\\'AB",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#171;",        "\\guillemotleft{}",      nullptr,      "\\'AB",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(not),        "\xc2\xac",               "&not;",      "<not/>",
-     "&#172;",        "\\textlnot",             NULL,         "\\'AC",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#172;",        "\\textlnot",             nullptr,      "\\'AC",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(shy),        "\xc2\xad",               "&shy;",      "<shy/>",
-     "&#173;",        "{$\\-$}",                NULL,         "\\-",                    { NULL,         DocSymbol::Perl_unknown }},
+     "&#173;",        "{$\\-$}",                nullptr,      "\\-",                    { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(reg),        "\xc2\xae",               "&reg;",      "<registered/>",
      "&#174;",        "\\textregistered{}",     "(R)",        "\\'AE",                  { "registered", DocSymbol::Perl_symbol  }},
 
    { SYM(macr),       "\xc2\xaf",               "&macr;",     "<macr/>",
-     "&#175;",        "\\={}",                  NULL,         "\\'AF",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#175;",        "\\={}",                  nullptr,      "\\'AF",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(deg),        "\xc2\xb0",              "&deg;",       "<deg/>",
-     "&#176;",        "\\textdegree{}",         NULL,         "\\'B0",                  { "deg",        DocSymbol::Perl_symbol  }},
+     "&#176;",        "\\textdegree{}",         nullptr,      "\\'B0",                  { "deg",        DocSymbol::Perl_symbol  }},
 
    { SYM(plusmn),     "\xc2\xb1",              "&plusmn;",    "<plusmn/>",
-     "&#177;",        "{$\\pm$}",               NULL,         "\\'B1",                  { "+/-",        DocSymbol::Perl_string  }},
+     "&#177;",        "{$\\pm$}",               nullptr,      "\\'B1",                  { "+/-",        DocSymbol::Perl_string  }},
 
    { SYM(sup2),       "\xc2\xb2",               "&sup2;",     "<sup2/>",
-     "&#178;",        "\\texttwosuperior{}",    NULL,         "\\'B2",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#178;",        "\\texttwosuperior{}",    nullptr,      "\\'B2",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(sup3),       "\xc2\xb3",               "&sup3;",     "<sup3/>",
-     "&#179;",        "\\textthreesuperior{}",  NULL,         "\\'B3",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#179;",        "\\textthreesuperior{}",  nullptr,      "\\'B3",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(acute),      "\xc2\xb4",               "&acute;",    "<acute/>",
-     "&#180;",        "\\'{}",                  NULL,         "\\'B4",                  { " ",          DocSymbol::Perl_acute   }},
+     "&#180;",        "\\'{}",                  nullptr,      "\\'B4",                  { " ",          DocSymbol::Perl_acute   }},
 
    { SYM(micro),      "\xc2\xb5",               "&micro;",    "<micro/>",
-     "&#181;",        "{$\\mu$}",               NULL,         "\\'B5",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#181;",        "{$\\mu$}",               nullptr,      "\\'B5",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(para),       "\xc2\xb6",               "&para;",     "<para/>",
-     "&#182;",        "{$\\P$}",                NULL,         "\\'B6",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#182;",        "{$\\P$}",                nullptr,      "\\'B6",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(middot),     "\xc2\xb7",               "&middot;",   "<middot/>",
-     "&#183;",        "\\textperiodcentered{}", NULL,         "\\'B7",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#183;",        "\\textperiodcentered{}", nullptr,      "\\'B7",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(cedil),      "\xc2\xb8",               "&cedil;",    "<cedil/>",
      "&#184;",        "\\c{}",                  " \\*,",      "\\'B8",                  { " ",          DocSymbol::Perl_cedilla }},
 
    { SYM(sup1),       "\xc2\xb9",               "&sup1;",     "<sup1/>",
-     "&#185;",        "\\textonesuperior{}",    NULL,         "\\'B9",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#185;",        "\\textonesuperior{}",    nullptr,      "\\'B9",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(ordm),       "\xc2\xba",               "&ordm;",     "<ordm/>",
-     "&#186;",        "\\textordmasculine{}",   NULL,         "\\'BA",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#186;",        "\\textordmasculine{}",   nullptr,      "\\'BA",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(raquo),      "\xc2\xbb",               "&raquo;",    "<raquo/>",
-     "&#187;",        "\\guillemotright{}",     NULL,         "\\'BB",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#187;",        "\\guillemotright{}",     nullptr,      "\\'BB",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(frac14),     "\xc2\xbc",               "&frac14;",   "<frac14/>",
-     "&#188;",        "{$\\frac14$}",           "1/4",        "\\'BC",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#188;",        "{$\\frac14$}",           "1/4",        "\\'BC",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(frac12),     "\xc2\xbd",               "&frac12;",   "<frac12/>",
-     "&#189;",        "{$\\frac12$}",           "1/2",        "\\'BD",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#189;",        "{$\\frac12$}",           "1/2",        "\\'BD",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(frac34),     "\xc2\xbe",               "&frac34;",   "<frac34/>",
-     "&#190;",        "{$\\frac34$}",           "3/4",        "\\'BE",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#190;",        "{$\\frac34$}",           "3/4",        "\\'BE",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(iquest),     "\xc2\xbf",               "&iquest;",   "<iquest/>",
-     "&#191;",        "?`",                     NULL,         "\\'BF",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#191;",        "?`",                     nullptr,      "\\'BF",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(Agrave),     "\xc3\x80",               "&Agrave;",   "<Agrave/>",
      "&#192;",        "\\`{A}",                 "A\\*:",      "\\'C0",                  { "A",          DocSymbol::Perl_grave   }},
@@ -181,7 +181,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#197;",        "\\AA",                   "A\\*o",      "\\'C5",                  { "A",          DocSymbol::Perl_ring    }},
 
    { SYM(AElig),      "\xc3\x86",               "&AElig;",    "<AElig/>",
-     "&#198;",        "{\\AE}",                 NULL,         "\\'C6",                  { "AElig",      DocSymbol::Perl_symbol  }},
+     "&#198;",        "{\\AE}",                 nullptr,      "\\'C6",                  { "AElig",      DocSymbol::Perl_symbol  }},
 
    { SYM(Ccedil),     "\xc3\x87",               "&Ccedil;",   "<Ccedil/>",
      "&#199;",        "\\c{C}",                 "C\\*,",      "\\'C7",                  { "C",          DocSymbol::Perl_cedilla }},
@@ -211,7 +211,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#207;",        "\\\"{I}",                "I\\*(4",     "\\'CF",                  { "I",          DocSymbol::Perl_umlaut  }},
 
    { SYM(ETH),        "\xc3\x90",               "&ETH;",      "<ETH/>",
-     "&#208;",        "\\DH",                   NULL,         "\\'D0",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#208;",        "\\DH",                   nullptr,      "\\'D0",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(Ntilde),     "\xc3\x91",               "&Ntilde;",   "<Ntilde/>",
      "&#209;",        "\\~{N}",                 "N\\*~",      "\\'D1",                  { "N",          DocSymbol::Perl_tilde   }},
@@ -232,7 +232,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#214;",        "\\\"{O}",                "O\\*(4",     "\\'D6",                  { "O",          DocSymbol::Perl_umlaut  }},
 
    { SYM(times),      "\xc3\x97",               "&times;",    "<times/>",
-     "&#215;",        "{$\\times$}",            NULL,         "\\'D7",                  { "*",          DocSymbol::Perl_char    }},
+     "&#215;",        "{$\\times$}",            nullptr,      "\\'D7",                  { "*",          DocSymbol::Perl_char    }},
 
    { SYM(Oslash),     "\xc3\x98",               "&Oslash;",   "<Oslash/>",
      "&#216;",        "{\\O}",                  "O\x08/",     "\\'D8",                  { "O",          DocSymbol::Perl_slash   }},
@@ -253,7 +253,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#221;",        "\\'{Y}",                 "Y\\*(`",     "\\'DD",                  { "Y",          DocSymbol::Perl_acute   }},
 
    { SYM(THORN),      "\xc3\x9e",               "&THORN;",    "<THORN/>",
-     "&#222;",        "\\TH",                   NULL,         "\\'DE",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#222;",        "\\TH",                   nullptr,      "\\'DE",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(szlig),      "\xc3\x9f",               "&szlig;",    "<szlig/>",
      "&#223;",        "{\\ss}",                 "s\\*:",      "\\'DF",                  { "szlig",      DocSymbol::Perl_symbol  }},
@@ -277,7 +277,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#229;",        "\\aa",                   "a\\*o",      "\\'E5",                  { "a",          DocSymbol::Perl_ring    }},
 
    { SYM(aelig),      "\xc3\xa6",               "&aelig;",    "<aelig/>",
-     "&#230;",        "{\\ae}",                 NULL,         "\\'E6",                  { "aelig",      DocSymbol::Perl_symbol  }},
+     "&#230;",        "{\\ae}",                 nullptr,      "\\'E6",                  { "aelig",      DocSymbol::Perl_symbol  }},
 
    { SYM(ccedil),     "\xc3\xa7",               "&ccedil;",   "<ccedil/>",
      "&#231;",        "\\c{c}",                 "c\\*,",      "\\'E7",                  { "c",          DocSymbol::Perl_cedilla }},
@@ -307,7 +307,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#239;",        "\\\"{\\i}",              "i\\*(4",     "\\'EF",                  { "i",          DocSymbol::Perl_umlaut  }},
 
    { SYM(eth),        "\xc3\xb0",               "&eth;",      "<eth/>",
-     "&#240;",        "\\dh",                   NULL,         "\\'F0",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#240;",        "\\dh",                   nullptr,      "\\'F0",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(ntilde),     "\xc3\xb1",               "&ntilde;",   "<ntilde/>",
      "&#241;",        "\\~{n}",                 "n\\*~",      "\\'F1",                  { "n",          DocSymbol::Perl_tilde   }},
@@ -328,7 +328,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#246;",        "\\\"{o}",                "o\\*(4",     "\\'F6",                  { "o",          DocSymbol::Perl_umlaut  }},
 
    { SYM(divide),     "\xc3\xb7",               "&divide;",   "<divide/>",
-     "&#247;",        "{$\\div$}",              NULL,         "\\'F7",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#247;",        "{$\\div$}",              nullptr,      "\\'F7",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(oslash),     "\xc3\xb8",               "&oslash;",   "<oslash/>",
      "&#248;",        "{\\o}",                  "o\x08/",     "\\'F8",                  { "o",          DocSymbol::Perl_slash   }},
@@ -349,385 +349,385 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#253;",        "\\'{y}",                 "y\\*(`",     "\\'FD",                  { "y",          DocSymbol::Perl_acute   }},
 
    { SYM(thorn),      "\xc3\xbe",               "&thorn;",    "<thorn/>",
-     "&#254;",        "\\th",                   NULL,         "\\'FE",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#254;",        "\\th",                   nullptr,      "\\'FE",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(yuml),       "\xc3\xbf",               "&yuml;",     "<yumlaut/>",
      "&#255;",        "\\\"{y}",                "y\\*(4",     "\\'FF",                  { "y",          DocSymbol::Perl_umlaut  }},
 
    { SYM(fnof),       "\xc6\x92",               "&fnof;",     "<fnof/>",
-     "&#402;",        "\\textflorin",           NULL,         "\\'83",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#402;",        "\\textflorin",           nullptr,      "\\'83",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(Alpha),      "\xce\x91",               "&Alpha;",    "<Alpha/>",
-     "&#913;",        "A",                      NULL,         "\\u0913?",               { "A",          DocSymbol::Perl_char    }},
+     "&#913;",        "A",                      nullptr,      "\\u0913?",               { "A",          DocSymbol::Perl_char    }},
 
    { SYM(Beta),       "\xce\x92",               "&Beta;",     "<Beta/>",
-     "&#914;",        "B",                      NULL,         "\\u0914?",               { "B",          DocSymbol::Perl_char    }},
+     "&#914;",        "B",                      nullptr,      "\\u0914?",               { "B",          DocSymbol::Perl_char    }},
 
    { SYM(Gamma),      "\xce\x93",               "&Gamma;",    "<Gamma/>",
-     "&#915;",        "{$\\Gamma$}",            NULL,         "\\u0915?",               { "Gamma",      DocSymbol::Perl_symbol  }},
+     "&#915;",        "{$\\Gamma$}",            nullptr,      "\\u0915?",               { "Gamma",      DocSymbol::Perl_symbol  }},
 
    { SYM(Delta),      "\xce\x94",               "&Delta;",    "<Delta/>",
-     "&#916;",        "{$\\Delta$}",            NULL,         "\\u0916?",               { "Delta",      DocSymbol::Perl_symbol  }},
+     "&#916;",        "{$\\Delta$}",            nullptr,      "\\u0916?",               { "Delta",      DocSymbol::Perl_symbol  }},
 
    { SYM(Epsilon),    "\xce\x95",               "&Epsilon;",  "<Epsilon/>",
-     "&#917;",        "E",                      NULL,         "\\u0917?",               { "E",          DocSymbol::Perl_char    }},
+     "&#917;",        "E",                      nullptr,      "\\u0917?",               { "E",          DocSymbol::Perl_char    }},
 
    { SYM(Zeta),       "\xce\x96",               "&Zeta;",     "<Zeta/>",
-     "&#918;",        "Z",                      NULL,         "\\u0918?",               { "Z",          DocSymbol::Perl_char    }},
+     "&#918;",        "Z",                      nullptr,      "\\u0918?",               { "Z",          DocSymbol::Perl_char    }},
 
    { SYM(Eta),        "\xce\x97",               "&Eta;",      "<Eta/>",
-     "&#919;",        "H",                      NULL,         "\\u0919?",               { "H",          DocSymbol::Perl_char    }},
+     "&#919;",        "H",                      nullptr,      "\\u0919?",               { "H",          DocSymbol::Perl_char    }},
 
    { SYM(Theta),      "\xce\x98",               "&Theta;",    "<Theta/>",
-     "&#920;",        "{$\\Theta$}",            NULL,         "\\u0920?",               { "Theta",      DocSymbol::Perl_symbol  }},
+     "&#920;",        "{$\\Theta$}",            nullptr,      "\\u0920?",               { "Theta",      DocSymbol::Perl_symbol  }},
 
    { SYM(Iota),       "\xce\x99",               "&Iota;",     "<Iota/>",
-     "&#921;",        "I",                      NULL,         "\\u0921?",               { "I",          DocSymbol::Perl_char    }},
+     "&#921;",        "I",                      nullptr,      "\\u0921?",               { "I",          DocSymbol::Perl_char    }},
 
    { SYM(Kappa),      "\xce\x9a",               "&Kappa;",    "<Kappa/>",
-     "&#922;",        "K",                      NULL,         "\\u0922?",               { "K",          DocSymbol::Perl_char    }},
+     "&#922;",        "K",                      nullptr,      "\\u0922?",               { "K",          DocSymbol::Perl_char    }},
 
    { SYM(Lambda),     "\xce\x9b",               "&Lambda;",   "<Lambda/>",
-     "&#923;",        "{$\\Lambda$}",           NULL,         "\\u0923?",               { "Lambda",     DocSymbol::Perl_symbol  }},
+     "&#923;",        "{$\\Lambda$}",           nullptr,      "\\u0923?",               { "Lambda",     DocSymbol::Perl_symbol  }},
 
    { SYM(Mu),         "\xce\x9c",               "&Mu;",       "<Mu/>",
-     "&#924;",        "M",                      NULL,         "\\u0924?",               { "M",          DocSymbol::Perl_char    }},
+     "&#924;",        "M",                      nullptr,      "\\u0924?",               { "M",          DocSymbol::Perl_char    }},
 
    { SYM(Nu),         "\xce\x9d",               "&Nu;",       "<Nu/>",
-     "&#925;",        "N",                      NULL,         "\\u0925?",               { "N",          DocSymbol::Perl_char    }},
+     "&#925;",        "N",                      nullptr,      "\\u0925?",               { "N",          DocSymbol::Perl_char    }},
 
    { SYM(Xi),         "\xce\x9e",               "&Xi;",       "<Xi/>",
-     "&#926;",        "{$\\Xi$}",               NULL,         "\\u0926?",               { "Xi",         DocSymbol::Perl_symbol  }},
+     "&#926;",        "{$\\Xi$}",               nullptr,      "\\u0926?",               { "Xi",         DocSymbol::Perl_symbol  }},
 
    { SYM(Omicron),    "\xce\x9f",               "&Omicron;",  "<Omicron/>",
-     "&#927;",        "O",                      NULL,         "\\u0927?",               { "O",          DocSymbol::Perl_char    }},
+     "&#927;",        "O",                      nullptr,      "\\u0927?",               { "O",          DocSymbol::Perl_char    }},
 
    { SYM(Pi),         "\xce\xa0",               "&Pi;",       "<Pi/>",
-     "&#928;",        "{$\\Pi$}",               NULL,         "\\u0928?",               { "Pi",         DocSymbol::Perl_symbol  }},
+     "&#928;",        "{$\\Pi$}",               nullptr,      "\\u0928?",               { "Pi",         DocSymbol::Perl_symbol  }},
 
    { SYM(Rho),        "\xce\xa1",               "&Rho;",      "<Rho/>",
-     "&#929;",        "P",                      NULL,         "\\u0929?",               { "P",          DocSymbol::Perl_char    }},
+     "&#929;",        "P",                      nullptr,      "\\u0929?",               { "P",          DocSymbol::Perl_char    }},
 
    { SYM(Sigma),      "\xce\xa3",               "&Sigma;",    "<Sigma/>",
-     "&#931;",        "{$\\Sigma$}",            NULL,         "\\u0931?",               { "Sigma",      DocSymbol::Perl_symbol  }},
+     "&#931;",        "{$\\Sigma$}",            nullptr,      "\\u0931?",               { "Sigma",      DocSymbol::Perl_symbol  }},
 
    { SYM(Tau),        "\xce\xa4",               "&Tau;",      "<Tau/>",
-     "&#932;",        "T",                      NULL,         "\\u0932?",               { "T",          DocSymbol::Perl_char    }},
+     "&#932;",        "T",                      nullptr,      "\\u0932?",               { "T",          DocSymbol::Perl_char    }},
 
    { SYM(Upsilon),    "\xce\xa5",               "&Upsilon;",  "<Upsilon/>",
-     "&#933;",        "{$\\Upsilon$}",          NULL,         "\\u0933?",               { "Upsilon",    DocSymbol::Perl_symbol  }},
+     "&#933;",        "{$\\Upsilon$}",          nullptr,      "\\u0933?",               { "Upsilon",    DocSymbol::Perl_symbol  }},
 
    { SYM(Phi),        "\xce\xa6",               "&Phi;",      "<Phi/>",
-     "&#934;",        "{$\\Phi$}",              NULL,         "\\u0934?",               { "Phi",        DocSymbol::Perl_symbol  }},
+     "&#934;",        "{$\\Phi$}",              nullptr,      "\\u0934?",               { "Phi",        DocSymbol::Perl_symbol  }},
 
    { SYM(Chi),        "\xce\xa7",               "&Chi;",      "<Chi/>",
-     "&#935;",        "X",                      NULL,         "\\u0935?",               { "X",          DocSymbol::Perl_char    }},
+     "&#935;",        "X",                      nullptr,      "\\u0935?",               { "X",          DocSymbol::Perl_char    }},
 
    { SYM(Psi),        "\xce\xa8",               "&Psi;",      "<Psi/>",
-     "&#936;",        "{$\\Psi$}",              NULL,         "\\u0936?",               { "Psi",        DocSymbol::Perl_symbol  }},
+     "&#936;",        "{$\\Psi$}",              nullptr,      "\\u0936?",               { "Psi",        DocSymbol::Perl_symbol  }},
 
    { SYM(Omega),      "\xce\xa9",               "&Omega;",    "<Omega/>",
-     "&#937;",        "{$\\Omega$}",            NULL,         "\\u0937?",               { "Omega",      DocSymbol::Perl_symbol  }},
+     "&#937;",        "{$\\Omega$}",            nullptr,      "\\u0937?",               { "Omega",      DocSymbol::Perl_symbol  }},
 
    { SYM(alpha),      "\xce\xb1",               "&alpha;",    "<alpha/>",
-     "&#945;",        "{$\\alpha$}",            NULL,         "\\u0945?",               { "alpha",      DocSymbol::Perl_symbol  }},
+     "&#945;",        "{$\\alpha$}",            nullptr,      "\\u0945?",               { "alpha",      DocSymbol::Perl_symbol  }},
 
    { SYM(beta),       "\xce\xb2",               "&beta;",     "<beta/>",
-     "&#946;",        "{$\\beta$}",             NULL,         "\\u0946?",               { "beta",       DocSymbol::Perl_symbol  }},
+     "&#946;",        "{$\\beta$}",             nullptr,      "\\u0946?",               { "beta",       DocSymbol::Perl_symbol  }},
 
    { SYM(gamma),      "\xce\xb3",               "&gamma;",    "<gamma/>",
-     "&#947;",        "{$\\gamma$}",            NULL,         "\\u0947?",               { "gamma",      DocSymbol::Perl_symbol  }},
+     "&#947;",        "{$\\gamma$}",            nullptr,      "\\u0947?",               { "gamma",      DocSymbol::Perl_symbol  }},
 
    { SYM(delta),      "\xce\xb4",               "&delta;",    "<delta/>",
-     "&#948;",        "{$\\delta$}",            NULL,         "\\u0948?",               { "delta",      DocSymbol::Perl_symbol  }},
+     "&#948;",        "{$\\delta$}",            nullptr,      "\\u0948?",               { "delta",      DocSymbol::Perl_symbol  }},
 
    { SYM(epsilon),    "\xce\xb5",               "&epsilon;",  "<epsilon/>",
-     "&#949;",        "{$\\varepsilon$}",       NULL,         "\\u0949?",               { "epsilon",    DocSymbol::Perl_symbol  }},
+     "&#949;",        "{$\\varepsilon$}",       nullptr,      "\\u0949?",               { "epsilon",    DocSymbol::Perl_symbol  }},
 
    { SYM(zeta),       "\xce\xb6",               "&zeta;",     "<zeta/>",
-     "&#950;",        "{$\\zeta$}",             NULL,         "\\u0950?",               { "zeta",       DocSymbol::Perl_symbol  }},
+     "&#950;",        "{$\\zeta$}",             nullptr,      "\\u0950?",               { "zeta",       DocSymbol::Perl_symbol  }},
 
    { SYM(eta),        "\xce\xb7",               "&eta;",      "<eta/>",
-     "&#951;",        "{$\\eta$}",              NULL,         "\\u0951?",               { "eta",        DocSymbol::Perl_symbol  }},
+     "&#951;",        "{$\\eta$}",              nullptr,      "\\u0951?",               { "eta",        DocSymbol::Perl_symbol  }},
 
    { SYM(theta),      "\xce\xb8",               "&theta;",    "<theta/>",
-     "&#952;",        "{$\\theta$}",            NULL,         "\\u0952?",               { "theta",      DocSymbol::Perl_symbol  }},
+     "&#952;",        "{$\\theta$}",            nullptr,      "\\u0952?",               { "theta",      DocSymbol::Perl_symbol  }},
 
    { SYM(iota),       "\xce\xb9",               "&iota;",     "<iota/>",
-     "&#953;",        "{$\\iota$}",             NULL,         "\\u0953?",               { "iota",       DocSymbol::Perl_symbol  }},
+     "&#953;",        "{$\\iota$}",             nullptr,      "\\u0953?",               { "iota",       DocSymbol::Perl_symbol  }},
 
    { SYM(kappa),      "\xce\xba",               "&kappa;",    "<kappa/>",
-     "&#954;",        "{$\\kappa$}",            NULL,         "\\u0954?",               { "kappa",      DocSymbol::Perl_symbol  }},
+     "&#954;",        "{$\\kappa$}",            nullptr,      "\\u0954?",               { "kappa",      DocSymbol::Perl_symbol  }},
 
    { SYM(lambda),     "\xce\xbb",               "&lambda;",   "<lambda/>",
-     "&#955;",        "{$\\lambda$}",           NULL,         "\\u0955?",               { "lambda",     DocSymbol::Perl_symbol  }},
+     "&#955;",        "{$\\lambda$}",           nullptr,      "\\u0955?",               { "lambda",     DocSymbol::Perl_symbol  }},
 
    { SYM(mu),         "\xce\xbc",               "&mu;",       "<mu/>",
-     "&#956;",        "{$\\mu$}",               NULL,         "\\u0956?",               { "mu",         DocSymbol::Perl_symbol  }},
+     "&#956;",        "{$\\mu$}",               nullptr,      "\\u0956?",               { "mu",         DocSymbol::Perl_symbol  }},
 
    { SYM(nu),         "\xce\xbd",               "&nu;",       "<nu/>",
-     "&#957;",        "{$\\nu$}",               NULL,         "\\u0957?",               { "nu",         DocSymbol::Perl_symbol  }},
+     "&#957;",        "{$\\nu$}",               nullptr,      "\\u0957?",               { "nu",         DocSymbol::Perl_symbol  }},
 
    { SYM(xi),         "\xce\xbe",               "&xi;",       "<xi/>",
-     "&#958;",        "{$\\xi$}",               NULL,         "\\u0958?",               { "xi",         DocSymbol::Perl_symbol  }},
+     "&#958;",        "{$\\xi$}",               nullptr,      "\\u0958?",               { "xi",         DocSymbol::Perl_symbol  }},
 
    { SYM(omicron),    "\xce\xbf",               "&omicron;",  "<omicron/>",
-     "&#959;",        "{$\\omicron$}",          NULL,         "\\u0959?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#959;",        "{$\\omicron$}",          nullptr,      "\\u0959?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(pi),         "\xcf\x80",               "&pi;",       "<pi/>",
-     "&#960;",        "{$\\pi$}",               NULL,         "\\u0960?",               { "pi",         DocSymbol::Perl_symbol  }},
+     "&#960;",        "{$\\pi$}",               nullptr,      "\\u0960?",               { "pi",         DocSymbol::Perl_symbol  }},
 
    { SYM(rho),        "\xcf\x81",               "&rho;",      "<rho/>",
-     "&#961;",        "{$\\rho$}",              NULL,         "\\u0961?",               { "rho",        DocSymbol::Perl_symbol  }},
+     "&#961;",        "{$\\rho$}",              nullptr,      "\\u0961?",               { "rho",        DocSymbol::Perl_symbol  }},
 
    { SYM(sigmaf),     "\xcf\x82",               "&sigmaf;",   "<sigmaf/>",
-     "&#962;",        "{$\\varsigma$}",         NULL,         "\\u0962?",               { "sigma",      DocSymbol::Perl_symbol  }},
+     "&#962;",        "{$\\varsigma$}",         nullptr,      "\\u0962?",               { "sigma",      DocSymbol::Perl_symbol  }},
 
    { SYM(sigma),      "\xcf\x83",               "&sigma;",    "<sigma/>",
-     "&#963;",        "{$\\sigma$}",            NULL,         "\\u0963?",               { "sigma",      DocSymbol::Perl_symbol  }},
+     "&#963;",        "{$\\sigma$}",            nullptr,      "\\u0963?",               { "sigma",      DocSymbol::Perl_symbol  }},
 
    { SYM(tau),        "\xcf\x84",               "&tau;",      "<tau/>",
-     "&#964;",        "{$\\tau$}",              NULL,         "\\u0964?",               { "tau",        DocSymbol::Perl_symbol  }},
+     "&#964;",        "{$\\tau$}",              nullptr,      "\\u0964?",               { "tau",        DocSymbol::Perl_symbol  }},
 
    { SYM(upsilon),    "\xcf\x85",               "&upsilon;",  "<upsilon/>",
-     "&#965;",        "{$\\upsilon$}",          NULL,         "\\u0965?",               { "upsilon",    DocSymbol::Perl_symbol  }},
+     "&#965;",        "{$\\upsilon$}",          nullptr,      "\\u0965?",               { "upsilon",    DocSymbol::Perl_symbol  }},
 
    { SYM(phi),        "\xcf\x86",               "&phi;",      "<phi/>",
-     "&#966;",        "{$\\varphi$}",           NULL,         "\\u0966?",               { "phi",        DocSymbol::Perl_symbol  }},
+     "&#966;",        "{$\\varphi$}",           nullptr,      "\\u0966?",               { "phi",        DocSymbol::Perl_symbol  }},
 
    { SYM(chi),        "\xcf\x87",               "&chi;",      "<chi/>",
-     "&#967;",        "{$\\chi$}",              NULL,         "\\u0967?",               { "chi",        DocSymbol::Perl_symbol  }},
+     "&#967;",        "{$\\chi$}",              nullptr,      "\\u0967?",               { "chi",        DocSymbol::Perl_symbol  }},
 
    { SYM(psi),        "\xcf\x88",               "&psi;",      "<psi/>",
-     "&#968;",        "{$\\psi$}",              NULL,         "\\u0968?",               { "psi",        DocSymbol::Perl_symbol  }},
+     "&#968;",        "{$\\psi$}",              nullptr,      "\\u0968?",               { "psi",        DocSymbol::Perl_symbol  }},
 
    { SYM(omega),      "\xcf\x89",               "&omega;",    "<omega/>",
-     "&#969;",        "{$\\omega$}",            NULL,         "\\u0969?",               { "omega",      DocSymbol::Perl_symbol  }},
+     "&#969;",        "{$\\omega$}",            nullptr,      "\\u0969?",               { "omega",      DocSymbol::Perl_symbol  }},
 
    { SYM(thetasym),   "\xcf\x91",               "&thetasym;", "<thetasym/>",
-     "&#977;",        "{$\\vartheta$}",         NULL,         "\\u977?",                { NULL,         DocSymbol::Perl_unknown }},
+     "&#977;",        "{$\\vartheta$}",         nullptr,      "\\u977?",                { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(upsih),      "\xcf\x92",               "&upsih;",    "<upsih/>",
-     "&#978;",        "{$\\Upsilon$}",          NULL,         "\\u978?",                { NULL,         DocSymbol::Perl_unknown }},
+     "&#978;",        "{$\\Upsilon$}",          nullptr,      "\\u978?",                { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(piv),        "\xcf\x96",               "&piv;",      "<piv/>",
-     "&#982;",        "{$\\varpi$}",            NULL,         "\\u982?",                { NULL,         DocSymbol::Perl_unknown }},
+     "&#982;",        "{$\\varpi$}",            nullptr,      "\\u982?",                { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(bull),       "\xe2\x80\xa2",           "&bull;",     "<bull/>",
-     "&#8226;",       "\\textbullet{}",         NULL,         "\\'95",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8226;",       "\\textbullet{}",         nullptr,      "\\'95",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(hellip),     "\xe2\x80\xa6",           "&hellip;",   "<hellip/>",
-     "&#8230;",       "{$\\dots$}",             NULL,         "\\'85",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8230;",       "{$\\dots$}",             nullptr,      "\\'85",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(prime),      "\xe2\x80\xb2",           "&prime;",    "<prime/>",
-     "&#8242;",       "'",                      NULL,         "\\u8242?",               { "\\\'",       DocSymbol::Perl_string  }},
+     "&#8242;",       "'",                      nullptr,      "\\u8242?",               { "\\\'",       DocSymbol::Perl_string  }},
 
    { SYM(Prime),      "\xe2\x80\xb3",           "&Prime;",    "<Prime/>",
-     "&#8243;",       "''",                     NULL,         "\\u8243?",               { "\"",         DocSymbol::Perl_char    }},
+     "&#8243;",       "''",                     nullptr,      "\\u8243?",               { "\"",         DocSymbol::Perl_char    }},
 
    { SYM(oline),      "\xe2\x80\xbe",           "&oline;",    "<oline/>",
-     "&#8254;",       "{$\\overline{\\,}$}",    NULL,         "\\u8254?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8254;",       "{$\\overline{\\,}$}",    nullptr,      "\\u8254?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(frasl),      "\xe2\x81\x84",           "&frasl;",    "<frasl/>",
-     "&#8260;",       "/",                      NULL,         "\\u8260?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8260;",       "/",                      nullptr,      "\\u8260?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(weierp),     "\xe2\x84\x98",           "&weierp;",   "<weierp/>",
-     "&#8472;",       "{$\\wp$}",               NULL,         "\\u8472?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8472;",       "{$\\wp$}",               nullptr,      "\\u8472?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(image),      "\xe2\x84\x91",           "&image;",    "<imaginary/>",
-     "&#8465;",       "{$\\Im$}",               NULL,         "\\u8465?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8465;",       "{$\\Im$}",               nullptr,      "\\u8465?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(real),       "\xe2\x84\x9c",           "&real;",     "<real/>",
-     "&#8476;",       "{$\\Re$}",               NULL,         "\\u8476?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8476;",       "{$\\Re$}",               nullptr,      "\\u8476?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(trade),      "\xe2\x84\xa2",           "&trade;",    "<trademark/>",
      "&#8482;",       "\\texttrademark{}",      "(TM)",       "\\'99",                  { "trademark",  DocSymbol::Perl_symbol  }},
 
    { SYM(alefsym),    "\xe2\x85\xb5",           "&alefsym;",  "<alefsym/>",
-     "&#8501;",       "{$\\aleph$}",            NULL,         "\\u8501?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8501;",       "{$\\aleph$}",            nullptr,      "\\u8501?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(larr),       "\xe2\x86\x90",           "&larr;",     "<larr/>",
-     "&#8592;",       "{$\\leftarrow$}",        NULL,         "\\u8592?",               { "<-",         DocSymbol::Perl_string  }},
+     "&#8592;",       "{$\\leftarrow$}",        nullptr,      "\\u8592?",               { "<-",         DocSymbol::Perl_string  }},
 
    { SYM(uarr),       "\xe2\x86\x91",           "&uarr;",     "<uarr/>",
-     "&#8593;",       "{$\\uparrow$}",          NULL,         "\\u8593?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8593;",       "{$\\uparrow$}",          nullptr,      "\\u8593?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(rarr),       "\xe2\x86\x92",           "&rarr;",     "<rarr/>",
-     "&#8594;",       "{$\\rightarrow$}",       NULL,         "\\u8594?",               { "->",         DocSymbol::Perl_string  }},
+     "&#8594;",       "{$\\rightarrow$}",       nullptr,      "\\u8594?",               { "->",         DocSymbol::Perl_string  }},
 
    { SYM(darr),       "\xe2\x86\x93",           "&darr;",     "<darr/>",
-     "&#8595;",       "{$\\downarrow$}",        NULL,         "\\u8595?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8595;",       "{$\\downarrow$}",        nullptr,      "\\u8595?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(harr),       "\xe2\x86\x94",           "&harr;",     "<harr/>",
-     "&#8596;",       "{$\\leftrightarrow$}",   NULL,         "\\u8596?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8596;",       "{$\\leftrightarrow$}",   nullptr,      "\\u8596?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(crarr),      "\xe2\x86\xb5",           "&crarr;",    "<crarr/>",
-     "&#8629;",       "{$\\hookleftarrow$}",    NULL,         "\\u8629?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8629;",       "{$\\hookleftarrow$}",    nullptr,      "\\u8629?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(lArr),       "\xe2\x87\x90",           "&lArr;",     "<lArr/>",
-     "&#8656;",       "{$\\Leftarrow$}",        NULL,         "\\u8656?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8656;",       "{$\\Leftarrow$}",        nullptr,      "\\u8656?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(uArr),       "\xe2\x87\x91",           "&uArr;",     "<uArr/>",
-     "&#8657;",       "{$\\Uparrow$}",          NULL,         "\\u8657?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8657;",       "{$\\Uparrow$}",          nullptr,      "\\u8657?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(rArr),       "\xe2\x87\x92",           "&rArr;",     "<rArr/>",
-     "&#8658;",       "{$\\Rightarrow$}",       NULL,         "\\u8658?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8658;",       "{$\\Rightarrow$}",       nullptr,      "\\u8658?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(dArr),       "\xe2\x87\x93",           "&dArr;",     "<dArr/>",
-     "&#8659;",       "{$\\Downarrow$}",        NULL,         "\\u8659?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8659;",       "{$\\Downarrow$}",        nullptr,      "\\u8659?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(hArr),       "\xe2\x87\x94",           "&hArr;",     "<hArr/>",
-     "&#8660;",       "{$\\Leftrightarrow$}",   NULL,         "\\u8660?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8660;",       "{$\\Leftrightarrow$}",   nullptr,      "\\u8660?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(forall),     "\xe2\x88\x80",           "&forall;",   "<forall/>",
-     "&#8704;",       "{$\\forall$}",           NULL,         "\\u8704?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8704;",       "{$\\forall$}",           nullptr,      "\\u8704?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(part),       "\xe2\x88\x82",           "&part;",     "<part/>",
-     "&#8706;",       "{$\\partial$}",          NULL,         "\\u8706?",               { "partial",    DocSymbol::Perl_symbol  }},
+     "&#8706;",       "{$\\partial$}",          nullptr,      "\\u8706?",               { "partial",    DocSymbol::Perl_symbol  }},
 
    { SYM(exist),      "\xe2\x88\x83",           "&exist;",    "<exist/>",
-     "&#8707;",       "{$\\exists$}",           NULL,         "\\u8707?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8707;",       "{$\\exists$}",           nullptr,      "\\u8707?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(empty),      "\xe2\x88\x85",           "&empty;",    "<empty/>",
-     "&#8709;",       "{$\\emptyset$}",         NULL,         "\\u8709?",               { "empty",      DocSymbol::Perl_symbol  }},
+     "&#8709;",       "{$\\emptyset$}",         nullptr,      "\\u8709?",               { "empty",      DocSymbol::Perl_symbol  }},
 
    { SYM(nabla),      "\xe2\x88\x87",           "&nabla;",    "<nabla/>",
-     "&#8711;",       "{$\\nabla$}",            NULL,         "\\u8711?",               { "nabla",      DocSymbol::Perl_symbol  }},
+     "&#8711;",       "{$\\nabla$}",            nullptr,      "\\u8711?",               { "nabla",      DocSymbol::Perl_symbol  }},
 
    { SYM(isin),       "\xe2\x88\x88",           "&isin;",     "<isin/>",
-     "&#8712;",       "{$\\in$}",               NULL,         "\\u8712?",               { "in",         DocSymbol::Perl_symbol  }},
+     "&#8712;",       "{$\\in$}",               nullptr,      "\\u8712?",               { "in",         DocSymbol::Perl_symbol  }},
 
    { SYM(notin),      "\xe2\x88\x89",           "&notin;",    "<notin/>",
-     "&#8713;",       "{$\\notin$}",            NULL,         "\\u8713?",               { "notin",      DocSymbol::Perl_symbol  }},
+     "&#8713;",       "{$\\notin$}",            nullptr,      "\\u8713?",               { "notin",      DocSymbol::Perl_symbol  }},
 
    { SYM(ni),         "\xe2\x88\x8b",           "&ni;",       "<ni/>",
-     "&#8715;",       "{$\\ni$}",               NULL,         "\\u8715?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8715;",       "{$\\ni$}",               nullptr,      "\\u8715?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(prod),       "\xe2\x88\x8f",           "&prod;",     "<prod/>",
-     "&#8719;",       "{$\\prod$}",             NULL,         "\\u8719?",               { "prod",       DocSymbol::Perl_symbol  }},
+     "&#8719;",       "{$\\prod$}",             nullptr,      "\\u8719?",               { "prod",       DocSymbol::Perl_symbol  }},
 
    { SYM(sum),        "\xe2\x88\x91",           "&sum;",      "<sum/>",
-     "&#8721;",       "{$\\sum$}",              NULL,         "\\u8721?",               { "sum",        DocSymbol::Perl_symbol  }},
+     "&#8721;",       "{$\\sum$}",              nullptr,      "\\u8721?",               { "sum",        DocSymbol::Perl_symbol  }},
 
    { SYM(minus),      "\xe2\x88\x92",           "&minus;",    "<minus/>",
-     "&#8722;",       "-",                      NULL,         "\\u8722?",               { "-",          DocSymbol::Perl_char    }},
+     "&#8722;",       "-",                      nullptr,      "\\u8722?",               { "-",          DocSymbol::Perl_char    }},
 
    { SYM(lowast),     "\xe2\x88\x97",           "&lowast;",   "<lowast/>",
-     "&#8727;",       "{$\\ast$}",              NULL,         "\\u8727?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8727;",       "{$\\ast$}",              nullptr,      "\\u8727?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(radic),      "\xe2\x88\x9a",           "&radic;",    "<radic/>",
-     "&#8730;",       "{$\\surd$}",             NULL,         "\\u8730?",               { "sqrt",       DocSymbol::Perl_symbol  }},
+     "&#8730;",       "{$\\surd$}",             nullptr,      "\\u8730?",               { "sqrt",       DocSymbol::Perl_symbol  }},
 
    { SYM(prop),       "\xe2\x88\x9d",           "&prop;",     "<prop/>",
-     "&#8733;",       "{$\\propto$}",           NULL,         "\\u8733?",               { "propto",     DocSymbol::Perl_symbol  }},
+     "&#8733;",       "{$\\propto$}",           nullptr,      "\\u8733?",               { "propto",     DocSymbol::Perl_symbol  }},
 
    { SYM(infin),      "\xe2\x88\x9e",           "&infin;",    "<infin/>",
-     "&#8734;",       "{$\\infty$}",            NULL,         "\\u8734?",               { "inf",        DocSymbol::Perl_symbol  }},
+     "&#8734;",       "{$\\infty$}",            nullptr,      "\\u8734?",               { "inf",        DocSymbol::Perl_symbol  }},
 
    { SYM(ang),        "\xe2\x88\xa0",           "&ang;",      "<ang/>",
-     "&#8736;",       "{$\\angle$}",            NULL,         "\\u8736?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8736;",       "{$\\angle$}",            nullptr,      "\\u8736?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM( and ),        "\xe2\x88\xa7"          , "&and;",      "<and/>",
-     "&#8743;",       "{$\\wedge$}",            NULL,         "\\u8743?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8743;",       "{$\\wedge$}",            nullptr,      "\\u8743?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM( or ),         "\xe2\x88\xa8"          , "&or;",       "<or/>",
-     "&#8744;",       "{$\\vee$}",              NULL,         "\\u8744?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8744;",       "{$\\vee$}",              nullptr,      "\\u8744?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(cap),        "\xe2\x88\xa9",           "&cap;",      "<cap/>",
-     "&#8745;",       "{$\\cap$}",              NULL,         "\\u8745?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8745;",       "{$\\cap$}",              nullptr,      "\\u8745?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(cup),        "\xe2\x88\xaa",           "&cup;",      "<cup/>",
-     "&#8746;",       "{$\\cup$}",              NULL,         "\\u8746?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8746;",       "{$\\cup$}",              nullptr,      "\\u8746?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(int),        "\xe2\x88\xab",           "&int;",      "<int/>",
-     "&#8747;",       "{$\\int$}",              NULL,         "\\u8747?",               { "int",        DocSymbol::Perl_symbol  }},
+     "&#8747;",       "{$\\int$}",              nullptr,      "\\u8747?",               { "int",        DocSymbol::Perl_symbol  }},
 
    { SYM(there4),     "\xe2\x88\xb4",           "&there4;",   "<there4/>",
-     "&#8756;",       "{$\\therefore$}",        NULL,         "\\u8756?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8756;",       "{$\\therefore$}",        nullptr,      "\\u8756?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(sim),        "\xe2\x88\xbc",           "&sim;",      "<sim/>",
-     "&#8764;",       "{$\\sim$}",              NULL,         "\\u8764?",               { "~",          DocSymbol::Perl_char    }},
+     "&#8764;",       "{$\\sim$}",              nullptr,      "\\u8764?",               { "~",          DocSymbol::Perl_char    }},
 
    { SYM(cong),       "\xe2\x89\x85",           "&cong;",     "<cong/>",
-     "&#8773;",       "{$\\cong$}",             NULL,         "\\u8773?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8773;",       "{$\\cong$}",             nullptr,      "\\u8773?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(asymp),      "\xe2\x89\x88",           "&asymp;",    "<asymp/>",
-     "&#8776;",       "{$\\approx$}",           NULL,         "\\u8776?",               { "approx",     DocSymbol::Perl_symbol  }},
+     "&#8776;",       "{$\\approx$}",           nullptr,      "\\u8776?",               { "approx",     DocSymbol::Perl_symbol  }},
 
    { SYM(ne),         "\xe2\x89\xa0",           "&ne;",       "<ne/>",
-     "&#8800;",       "{$\\ne$}",               NULL,         "\\u8800?",               { "!=",         DocSymbol::Perl_string  }},
+     "&#8800;",       "{$\\ne$}",               nullptr,      "\\u8800?",               { "!=",         DocSymbol::Perl_string  }},
 
    { SYM(equiv),      "\xe2\x89\xa1",           "&equiv;",    "<equiv/>",
-     "&#8801;",       "{$\\equiv$}",            NULL,         "\\u8801?",               { "equiv",      DocSymbol::Perl_symbol  }},
+     "&#8801;",       "{$\\equiv$}",            nullptr,      "\\u8801?",               { "equiv",      DocSymbol::Perl_symbol  }},
 
    { SYM(le),         "\xe2\x89\xa4",           "&le;",       "<le/>",
-     "&#8804;",       "{$\\le$}",               NULL,         "\\u8804?",               { "<=",         DocSymbol::Perl_string  }},
+     "&#8804;",       "{$\\le$}",               nullptr,      "\\u8804?",               { "<=",         DocSymbol::Perl_string  }},
 
    { SYM(ge),         "\xe2\x89\xa5",           "&ge;",       "<ge/>",
-     "&#8805;",       "{$\\ge$}",               NULL,         "\\u8805?",               { ">=",         DocSymbol::Perl_string  }},
+     "&#8805;",       "{$\\ge$}",               nullptr,      "\\u8805?",               { ">=",         DocSymbol::Perl_string  }},
 
    { SYM(sub),        "\xe2\x8a\x82",           "&sub;",      "<sub/>",
-     "&#8834;",       "{$\\subset$}",           NULL,         "\\u8834?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8834;",       "{$\\subset$}",           nullptr,      "\\u8834?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(sup),        "\xe2\x8a\x83",           "&sup;",      "<sup/>",
-     "&#8835;",       "{$\\supset$}",           NULL,         "\\u8835?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8835;",       "{$\\supset$}",           nullptr,      "\\u8835?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(nsub),       "\xe2\x8a\x84",           "&nsub;",     "<nsub/>",
-     "&#8836;",       "{$\\not\\subset$}",      NULL,         "\\u8836?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8836;",       "{$\\not\\subset$}",      nullptr,      "\\u8836?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(sube),       "\xe2\x8a\x86",           "&sube;",     "<sube/>",
-     "&#8838;",       "{$\\subseteq$}",         NULL,         "\\u8838?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8838;",       "{$\\subseteq$}",         nullptr,      "\\u8838?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(supe),       "\xe2\x8a\x87",           "&supe;",     "<supe/>",
-     "&#8839;",       "{$\\supseteq$}",         NULL,         "\\u8839?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8839;",       "{$\\supseteq$}",         nullptr,      "\\u8839?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(oplus),      "\xe2\x8a\x95",           "&oplus;",    "<oplus/>",
-     "&#8853;",       "{$\\oplus$}",            NULL,         "\\u8853?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8853;",       "{$\\oplus$}",            nullptr,      "\\u8853?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(otimes),     "\xe2\x8a\x97",           "&otimes;",   "<otimes/>",
-     "&#8855;",       "{$\\otimes$}",           NULL,         "\\u8855?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#8855;",       "{$\\otimes$}",           nullptr,      "\\u8855?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(perp),       "\xe2\x8a\xa5",           "&perp;",     "<perp/>",
-     "&#8869;",       "{$\\perp$}",             NULL,         "\\u8869?",               { "perp",       DocSymbol::Perl_symbol  }},
+     "&#8869;",       "{$\\perp$}",             nullptr,      "\\u8869?",               { "perp",       DocSymbol::Perl_symbol  }},
 
    { SYM(sdot),       "\xe2\x8b\x85",           "&sdot;",     "<sdot/>",
-     "&#8901;",       "{$\\cdot$}",             NULL,         "\\u8901?",               { ".",          DocSymbol::Perl_char    }},
+     "&#8901;",       "{$\\cdot$}",             nullptr,      "\\u8901?",               { ".",          DocSymbol::Perl_char    }},
 
    { SYM(lceil),      "\xe2\x8c\x88",           "&lceil;",    "<lceil/>",
-     "&#8968;",       "{$\\lceil$}",            NULL,         "\\u8968?",               { "lceil",      DocSymbol::Perl_symbol  }},
+     "&#8968;",       "{$\\lceil$}",            nullptr,      "\\u8968?",               { "lceil",      DocSymbol::Perl_symbol  }},
 
    { SYM(rceil),      "\xe2\x8c\x89",           "&rceil;",    "<rceil/>",
-     "&#8969;",       "{$\\rceil$}",            NULL,         "\\u8969?",               { "rceil",      DocSymbol::Perl_symbol  }},
+     "&#8969;",       "{$\\rceil$}",            nullptr,      "\\u8969?",               { "rceil",      DocSymbol::Perl_symbol  }},
 
    { SYM(lfloor),     "\xe2\x8c\x8a",           "&lfloor;",   "<lfloor/>",
-     "&#8970;",       "{$\\lfloor$}",           NULL,         "\\u8970?",               { "lfloor",     DocSymbol::Perl_symbol  }},
+     "&#8970;",       "{$\\lfloor$}",           nullptr,      "\\u8970?",               { "lfloor",     DocSymbol::Perl_symbol  }},
 
    { SYM(rfloor),     "\xe2\x8c\x8b",           "&rfloor;",   "<rfloor/>",
-     "&#8971;",       "{$\\rfloor$}",           NULL,         "\\u8971?",               { "rfloor",     DocSymbol::Perl_symbol  }},
+     "&#8971;",       "{$\\rfloor$}",           nullptr,      "\\u8971?",               { "rfloor",     DocSymbol::Perl_symbol  }},
 
    { SYM(lang),       "\xe2\x8c\xa9",           "&lang;",     "<lang/>",
-     "&#9001;",       "{$\\langle$}",           NULL,         "\\u9001?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#9001;",       "{$\\langle$}",           nullptr,      "\\u9001?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(rang),       "\xe2\x8c\xaa",           "&rang;",     "<rang/>",
-     "&#9002;",       "{$\\rangle$}",           NULL,         "\\u9002?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#9002;",       "{$\\rangle$}",           nullptr,      "\\u9002?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(loz),        "\xe2\x97\x8a",           "&loz;",      "<loz/>",
-     "&#9674;",       "{$\\lozenge$}",          NULL,         "\\u9674?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#9674;",       "{$\\lozenge$}",          nullptr,      "\\u9674?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(spades),     "\xe2\x99\xa0",           "&spades;",   "<spades/>",
-     "&#9824;",       "{$\\spadesuit$}",        NULL,         "\\u9824?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#9824;",       "{$\\spadesuit$}",        nullptr,      "\\u9824?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(clubs),      "\xe2\x99\xa3",           "&clubs;",    "<clubs/>",
-     "&#9827;",       "{$\\clubsuit$}",         NULL,         "\\u9827?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#9827;",       "{$\\clubsuit$}",         nullptr,      "\\u9827?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(hearts),     "\xe2\x99\xa5",           "&hearts;",   "<hearts/>",
-     "&#9829;",       "{$\\heartsuit$}",        NULL,         "\\u9829?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#9829;",       "{$\\heartsuit$}",        nullptr,      "\\u9829?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(diams),      "\xe2\x99\xa6",           "&diams;",    "<diams/>",
-     "&#9830;",       "{$\\diamondsuit$}",      NULL,         "\\u9830?",               { NULL,         DocSymbol::Perl_unknown }},
+     "&#9830;",       "{$\\diamondsuit$}",      nullptr,      "\\u9830?",               { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(quot),       "\"",                     "&quot;",     "\"",
-     "&quot;",        "\"{}",                     "\"",         "\"",                   { "\"",         DocSymbol::Perl_char    }},
+     "&quot;",        "\"{}",                   "\"",         "\"",                     { "\"",         DocSymbol::Perl_char    }},
 
    { SYM(amp),        "&",                      "&amp;",      "&amp;",
      "&amp;",         "\\&",                    "&",          "&",                      { "&",          DocSymbol::Perl_char    }},
@@ -739,46 +739,46 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&gt;",          ">",                      ">",          ">",                      { ">",          DocSymbol::Perl_char    }},
 
    { SYM(OElig),      "\xc5\x92",               "&OElig;",    "<OElig/>",
-     "&#338;",        "\\OE",                   NULL,         "\\'8C",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#338;",        "\\OE",                   nullptr,      "\\'8C",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(oelig),      "\xc5\x93",               "&oelig;",    "<oelig/>",
-     "&#339;",        "\\oe",                   NULL,         "\\'9C",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#339;",        "\\oe",                   nullptr,      "\\'9C",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(Scaron),     "\xc5\xa0",               "&Scaron;",   "<Scaron/>",
-     "&#352;",        "\\v{S}",                 NULL,         "\\'8A",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#352;",        "\\v{S}",                 nullptr,      "\\'8A",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(scaron),     "\xc5\xa1",               "&scaron;",   "<scaron/>",
-     "&#353;",        "\\v{s}",                 NULL,         "\\'9A",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#353;",        "\\v{s}",                 nullptr,      "\\'9A",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(Yuml),       "\xc5\xb8",               "&Yuml;",     "<Yumlaut/>",
      "&#376;",        "\\\"{Y}",                "Y\\*(4",     "\\'9F",                  { "Y",          DocSymbol::Perl_umlaut  }},
 
    { SYM(circ),       "\xcb\x86",               "&circ;",     "<circ/>",
-     "&#710;",        "{$\\circ$}",             NULL,         "\\'88",                  { " ",          DocSymbol::Perl_circ    }},
+     "&#710;",        "{$\\circ$}",             nullptr,      "\\'88",                  { " ",          DocSymbol::Perl_circ    }},
 
    { SYM(tilde),      "\xcb\x9c",               "&tilde;",    "<tilde/>",
      "&#732;",        "\\~{}",                  "~",          "\\'98",                  { " ",          DocSymbol::Perl_tilde   }},
 
    { SYM(ensp),       "\xe2\x80\x82",           "&ensp;",     "<ensp/>",
-     "&#8194;",       "\\enskip{}",             NULL,         "{\\enspace}",            { NULL,         DocSymbol::Perl_unknown }},
+     "&#8194;",       "\\enskip{}",             nullptr,      "{\\enspace}",            { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(emsp),       "\xe2\x80\x83",           "&emsp;",     "<emsp/>",
-     "&#8195;",       "\\quad{}",               NULL,         "{\\emspace}",            { NULL,         DocSymbol::Perl_unknown }},
+     "&#8195;",       "\\quad{}",               nullptr,      "{\\emspace}",            { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(thinsp),     "\xe2\x80\x89",           "&thinsp;",   "<thinsp/>",
-     "&#8201;",       "\\,",                    NULL,         "{\\qmspace}",            { NULL,         DocSymbol::Perl_unknown }},
+     "&#8201;",       "\\,",                    nullptr,      "{\\qmspace}",            { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(zwnj),       "\xe2\x80\x8c",           "&zwnj;",     "<zwnj/>",
-     "&#8204;",       "{}",                     NULL,         "\\zwnj",                 { NULL,         DocSymbol::Perl_unknown }},
+     "&#8204;",       "{}",                     nullptr,      "\\zwnj",                 { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(zwj),        "\xe2\x80\x8d",           "&zwj;",      "<zwj/>",
-     "&#8205;",       "",                       NULL,         "\\zwj",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8205;",       "",                       nullptr,      "\\zwj",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(lrm),        "\xe2\x80\x8e",           "&lrm;",      "<lrm/>",
-     "&#8206;",       "",                       NULL,         "\\ltrmark",              { NULL,         DocSymbol::Perl_unknown }},
+     "&#8206;",       "",                       nullptr,      "\\ltrmark",              { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(rlm),        "\xe2\x80\x8f",           "&rlm;",      "<rlm/>",
-     "&#8207;",       "",                       NULL,         "\\rtlmark",              { NULL,         DocSymbol::Perl_unknown }},
+     "&#8207;",       "",                       nullptr,      "\\rtlmark",              { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(ndash),      "\xe2\x80\x93",           "&ndash;",    "<ndash/>",
      "&#8211;",       "--",                     "--",         "\\'96",                  { "-",          DocSymbol::Perl_char    }},
@@ -793,7 +793,7 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#8217;",       "'",                      "'",          "\\'92",                  { "\\\'",       DocSymbol::Perl_string  }},
 
    { SYM(sbquo),      "\xe2\x80\x9a",           "&sbquo;",    "<sbquo/>",
-     "&#8218;",       "\\quotesinglbase{}",     NULL,         "\\'82",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8218;",       "\\quotesinglbase{}",     nullptr,      "\\'82",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(ldquo),      "\xe2\x80\x9c",           "&ldquo;",    "<ldquo/>",
      "&#8220;",       "``",                     "``",         "\\'93",                  { "\"",         DocSymbol::Perl_char    }},
@@ -802,25 +802,25 @@ static struct htmlEntityInfo g_htmlEntities[] = {
      "&#8221;",       "''",                     "''",         "\\'94",                  { "\"",         DocSymbol::Perl_char    }},
 
    { SYM(bdquo),      "\xe2\x80\x9e",           "&bdquo;",    "<bdquo/>",
-     "&#8222;",       "\\quotedblbase{}",       NULL,         "\\'84",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8222;",       "\\quotedblbase{}",       nullptr,      "\\'84",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(dagger),     "\xe2\x80\xa0",           "&dagger;",   "<dagger/>",
-     "&#8224;",       "{$\\dagger$}",           NULL,         "\\'86",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8224;",       "{$\\dagger$}",           nullptr,      "\\'86",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(Dagger),     "\xe2\x80\xa1",           "&Dagger;",   "<Dagger/>",
-     "&#8225;",       "{$\\ddagger$}",          NULL,         "\\'87",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8225;",       "{$\\ddagger$}",          nullptr,      "\\'87",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(permil),     "\xe2\x80\xb0",           "&permil;",   "<permil/>",
-     "&#8240;",       "{$\\permil{}$}",         NULL,         "\\'89",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8240;",       "{$\\permil{}$}",         nullptr,      "\\'89",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(lsaquo),     "\xe2\x80\xb9",           "&lsaquo;",   "<lsaquo/>",
-     "&#8249;",       "\\guilsinglleft{}",      NULL,         "\\'8B",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8249;",       "\\guilsinglleft{}",      nullptr,      "\\'8B",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(rsaquo),     "\xe2\x80\xba",           "&rsaquo;",   "<rsaquo/>",
-     "&#8250;",       "\\guilsinglright{}",     NULL,         "\\'9B",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8250;",       "\\guilsinglright{}",     nullptr,      "\\'9B",                  { nullptr,      DocSymbol::Perl_unknown }},
 
    { SYM(euro),       "\xe2\x82\xac",           "&euro;",     "<euro/>",
-     "&#8364;",       "\\texteuro{}",           NULL,         "\\'80",                  { NULL,         DocSymbol::Perl_unknown }},
+     "&#8364;",       "\\texteuro{}",           nullptr,      "\\'80",                  { nullptr,      DocSymbol::Perl_unknown }},
 
 
 

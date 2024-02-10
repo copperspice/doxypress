@@ -1136,7 +1136,7 @@ void LatexGenerator::startIndexSection(IndexSections is)
                break;
             }
 
-            if (cd->isLinkableInProject() && cd->templateMaster() == 0 && !cd->isEmbeddedInOuterScope()) {
+            if (cd->isLinkableInProject() && cd->templateMaster() == nullptr && !cd->isEmbeddedInOuterScope()) {
                if (compactLatex) {
                   m_textStream << "\\doxysection";
                } else {
@@ -1347,7 +1347,7 @@ void LatexGenerator::endIndexSection(IndexSections is)
 
          for (const auto &cd : Doxy_Globals::classSDict) {
 
-            if (cd->isLinkableInProject() && cd->templateMaster() == 0 && ! cd->isEmbeddedInOuterScope()) {
+            if (cd->isLinkableInProject() && cd->templateMaster() == nullptr && ! cd->isEmbeddedInOuterScope()) {
 
                if (! found) {
                   m_textStream << "}\n\\input{" << cd->getOutputFileBase() << "}\n";

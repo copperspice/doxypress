@@ -2691,7 +2691,7 @@ static bool endScope(QSharedPointer<Entry> scope, bool isGlobalRoot)
 
             Argument *arg = findArgument(scope->parent(), ce->m_entryName, true);
 
-            if (arg != 0) {
+            if (arg != nullptr) {
                // set type of dummy procedure argument to interface
                arg->name = arg->type;
                arg->type = scope->m_entryName;

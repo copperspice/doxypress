@@ -60,7 +60,7 @@ class ClangParser::Private
 
    Private()
       : sources(nullptr), numFiles(0), numTokens(0), curLine(0), curToken(0),
-        tu(0), tokens(nullptr), cursors(nullptr), ufs(nullptr), detectedLang(Detected_Cpp)
+        tu(nullptr), tokens(nullptr), cursors(nullptr), ufs(nullptr), detectedLang(Detected_Cpp)
    {
    }
 
@@ -99,7 +99,7 @@ int ClangParser::Private::getCurrentTokenLine()
    }
 
    CXSourceLocation start = clang_getTokenLocation(tu, tokens[curToken]);
-   clang_getSpellingLocation(start, 0, &retval, &c, 0);
+   clang_getSpellingLocation(start, nullptr, &retval, &c, nullptr);
 
    return retval;
 }
@@ -767,7 +767,7 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
    // num of unsaved files, clang flag indicating full preprocessing, translation unit structure
 
    // libClang - used to set up the tokens for comments
-   CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, 0, &argv[0], argc, p->ufs, numUnsavedFiles,
+   CXErrorCode errorCode = clang_parseTranslationUnit2(p->index, nullptr, &argv[0], argc, p->ufs, numUnsavedFiles,
                   CXTranslationUnit_DetailedPreprocessingRecord, &(p->tu) );
 
    if (p->tu) {
@@ -1251,9 +1251,9 @@ void ClangParser::start(const QString &fileName, const QString &fileBuffer, QStr
       }
 
    } else {
-      p->tokens    = 0;
+      p->tokens    = nullptr;
       p->numTokens = 0;
-      p->cursors   = 0;
+      p->cursors   = nullptr;
 
       if (errorCode == CXError_InvalidArguments ) {
          err("libClang failed to parse file %s, invalid arguments", csPrintable(fileName));
@@ -1279,9 +1279,9 @@ void ClangParser::finish()
       clang_disposeIndex(p->index);
 
       p->fileMapping.clear();
-      p->tokens    = 0;
+      p->tokens    = nullptr;
       p->numTokens = 0;
-      p->cursors   = 0;
+      p->cursors   = nullptr;
    }
 
    for (uint i = 0; i < p->numFiles; i++) {
@@ -1291,10 +1291,10 @@ void ClangParser::finish()
    delete[] p->ufs;
    delete[] p->sources;
 
-   p->ufs       = 0;
-   p->sources   = 0;
+   p->ufs       = nullptr;
+   p->sources   = nullptr;
    p->numFiles  = 0;
-   p->tu        = 0;
+   p->tu        = nullptr;
 }
 
 static void handleCommentBlock(const QString &comment, bool brief, const QString &fileName, QSharedPointer<Entry> current)
@@ -1574,9 +1574,9 @@ void ClangParser::switchToFile(const QString &fileName)
 
       clang_disposeTokens(p->tu, p->tokens, p->numTokens);
 
-      p->tokens    = 0;
+      p->tokens    = nullptr;
       p->numTokens = 0;
-      p->cursors   = 0;
+      p->cursors   = nullptr;
 
       QFileInfo fi(fileName);
       CXFile f = clang_getFile(p->tu, fileName.toUtf8().constData());
@@ -1634,7 +1634,7 @@ void ClangParser::writeSources(CodeGenerator &ol, QSharedPointer<FileDef> fd)
       uint t_line;
       uint t_col;
 
-      clang_getSpellingLocation(start, 0, &t_line, &t_col, 0);
+      clang_getSpellingLocation(start, nullptr, &t_line, &t_col, nullptr);
 
       if (t_line > line) {
          column = 1;

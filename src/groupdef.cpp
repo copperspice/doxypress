@@ -174,7 +174,7 @@ bool GroupDef::addNamespace(QSharedPointer<NamespaceDef> def)
 
    updateLanguage(def);
 
-   if (m_namespaceSDict.find(def->name()) == 0) {
+   if (m_namespaceSDict.find(def->name()) == nullptr) {
       m_namespaceSDict.insert(def->name(), def);
       return true;
    }
@@ -273,7 +273,7 @@ bool GroupDef::insertMember(QSharedPointer<MemberDef> md, bool docOnly)
                      md->getFileDef(), mdAl, true);
 
             if (ok && sameScope) {
-               if (srcMd->getGroupAlias() == 0) {
+               if (srcMd->getGroupAlias() == nullptr) {
                   md->setGroupAlias(srcMd);
 
                } else if (md != srcMd->getGroupAlias()) {
@@ -552,7 +552,7 @@ void GroupDef::addGroup(QSharedPointer<GroupDef> def)
 bool GroupDef::isASubGroup() const
 {
    SortedList<QSharedPointer<GroupDef>> *groups = partOfGroups();
-   return groups != 0 && groups->count() != 0;
+   return groups != nullptr && groups->count() != 0;
 }
 
 void GroupDef::countMembers()
@@ -987,7 +987,7 @@ void GroupDef::writePageDocumentation(OutputList &ol)
          QSharedPointer<SectionInfo> si;
 
          if (! pd->title().isEmpty() && ! pd->name().isEmpty() &&
-                  (si = Doxy_Globals::sectionDict.find(pd->name())) != 0) {
+                  (si = Doxy_Globals::sectionDict.find(pd->name())) != nullptr) {
 
             ol.startSection(si->label, si->title, SectionInfo::Subsection);
             ol.docify(si->title);
@@ -1470,7 +1470,7 @@ void addMemberToGroups(QSharedPointer<Entry> root, QSharedPointer<MemberDef> md)
 
       bool insertit = false;
 
-      if (mgd == 0) {
+      if (mgd == nullptr) {
          insertit = true;
 
       } else if (mgd != fgd) {

@@ -128,7 +128,7 @@ class LatexGenerator : public OutputGenerator
    }
 
    OutputGenerator *get(OutputType o)  override {
-      return (o == Latex) ? this : 0;
+      return (o == Latex) ? this : nullptr;
    }
 
    void codify(const QString &text) override {

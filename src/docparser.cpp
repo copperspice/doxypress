@@ -2439,7 +2439,7 @@ DocAnchor::DocAnchor(DocNode *parent, const QString &id, bool newAnchor)
          m_file   = sec->fileName;
          m_anchor = sec->label;
 
-         if (s_sectionDict && s_sectionDict->find(id) == 0) {
+         if (s_sectionDict && s_sectionDict->find(id) == nullptr) {
             // insert in dictionary
             s_sectionDict->insert(id, sec);
          }
@@ -2950,7 +2950,7 @@ void DocSecRefItem::parse()
          m_file   = sec->fileName;
          m_anchor = sec->label;
 
-         if (s_sectionDict && s_sectionDict->find(m_target) == 0) {
+         if (s_sectionDict && s_sectionDict->find(m_target) == nullptr) {
             s_sectionDict->insert(m_target, sec);
          }
 
@@ -3535,7 +3535,7 @@ bool DocDiaFile::parse()
    bool ambig;
    QSharedPointer<FileDef> fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name, ambig);
 
-   if (fd == 0 && ! m_name.endsWith(".dia")) {
+   if (fd == nullptr && ! m_name.endsWith(".dia")) {
       // try with .dia extension as well
       fd = findFileDef(&Doxy_Globals::diaFileNameDict, m_name + ".dia", ambig);
    }
@@ -4014,7 +4014,7 @@ DocHtmlCaption::DocHtmlCaption(DocNode *parent, HtmlAttribList attribs)
             m_anchor = sec->label;
             m_hasCaptionId = true;
 
-            if (s_sectionDict && s_sectionDict->find(item.value) == 0) {
+            if (s_sectionDict && s_sectionDict->find(item.value) == nullptr) {
                s_sectionDict->insert(item.value, sec);
             }
 
@@ -6109,16 +6109,29 @@ void DocPara::handleIncludeOperator(const QString &cmdName, DocIncOperator::Type
    }
 
    // no last node, last node is not operator or whitespace, previous not is not operator
-   bool isFirst = n1 == 0 ||  (n1->kind() != DocNode::Kind_IncOperator && n1->kind() != DocNode::Kind_WhiteSpace) ||
-         (n1->kind() == DocNode::Kind_WhiteSpace && n2 != 0 && n2->kind() != DocNode::Kind_IncOperator);
+   bool isFirst = false;
+
+   if (n1 == nullptr) {
+      isFirst = true;
+
+   } else if ((n1->kind() != DocNode::Kind_IncOperator) && (n1->kind() != DocNode::Kind_WhiteSpace)) {
+      isFirst = true;
+
+   } else if (n2 != nullptr) {
+      bool partC = (n1->kind() == DocNode::Kind_WhiteSpace) && (n2->kind() != DocNode::Kind_IncOperator);
+
+      if (partC) {
+         isFirst = true;
+      }
+   }
 
    op->markFirst(isFirst);
    op->markLast(true);
 
-   if (n1 != 0 && n1->kind() == DocNode::Kind_IncOperator) {
+   if (n1 != nullptr && n1->kind() == DocNode::Kind_IncOperator) {
       ((DocIncOperator *)n1)->markLast(false);
 
-   } else if (n1 != 0 && n1->kind() == DocNode::Kind_WhiteSpace && n2 != 0 && n2->kind() == DocNode::Kind_IncOperator) {
+   } else if (n1 != nullptr && n1->kind() == DocNode::Kind_WhiteSpace && n2 != nullptr && n2->kind() == DocNode::Kind_IncOperator) {
       ((DocIncOperator *)n2)->markLast(false);
    }
 
@@ -8306,7 +8319,7 @@ int DocSection::parse()
             m_title = sec->label;
          }
 
-         if (s_sectionDict && s_sectionDict->find(m_id) == 0) {
+         if (s_sectionDict && s_sectionDict->find(m_id) == nullptr) {
             s_sectionDict->insert(m_id, sec);
          }
       }
@@ -9219,7 +9232,7 @@ DocRoot *validatingParseDoc(const QString &fileName, int startLine, QSharedPoint
    s_hasReturnCommand  = false;
 
    s_paramsFound.clear();
-   s_sectionDict = 0;
+   s_sectionDict = nullptr;
 
    setDoctokenLineNum(startLine);
    uint inputLen = input.length();

@@ -502,7 +502,7 @@ void ColoredImage::hsl2rgb(double h, double s, double l, double *pRed, double *p
 
 ColoredImage::ColoredImage(int width, int height, const uchar *greyLevels, const uchar *alphaLevels, int saturation, int hue, int gamma)
 {
-   m_hasAlpha = alphaLevels != 0;
+   m_hasAlpha = alphaLevels != nullptr;
    m_width    = width;
    m_height   = height;
    m_data     = (uchar *)malloc(width * height * 4);

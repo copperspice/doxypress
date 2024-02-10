@@ -69,7 +69,7 @@ class ManGenerator : public OutputGenerator
    }
 
    OutputGenerator *get(OutputType o) override {
-      return (o == Man) ? this : 0;
+      return (o == Man) ? this : nullptr;
    }
 
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;
