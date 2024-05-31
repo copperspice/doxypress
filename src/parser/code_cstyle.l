@@ -3768,10 +3768,18 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       --g_bracketCount;
 
       if (g_bracketCount <= 0)  {
-         if (g_name.isEmpty()) {
-            BEGIN( Body );
+         bool isCsMacro = false;
+
+         if (g_name.contains("CS_SIGNAL_") || g_name.contains("CS_SLOT_") ||
+               g_name.contains("CS_PROPERTY_") || g_name.contains("CS_INVOKABLE_")) {
+            isCsMacro = true;
+         }
+
+         if (g_name.isEmpty() || isCsMacro) {
+            BEGIN(Body);
+
          } else {
-            BEGIN( CallEnd );
+            BEGIN(CallEnd);
          }
       }
    }
