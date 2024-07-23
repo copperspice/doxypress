@@ -361,7 +361,7 @@ CommandLine parseCommandLine(QStringList argList)
 
          case DVERSION:
             printf("\nDoxyPress Version: %s\n", csPrintable(versionString));
-            printf("email: info@copperspice.com\n");
+            printf("info@copperspice.com\n\n");
             exit(0);
       }
    }
@@ -415,7 +415,7 @@ void readConfiguration(struct CommandLine cmdArgs)
    // step 1
    if (! Config::parseConfig(cmdArgs.configName) ) {
       printf("\n\nUnable to parse the project file, please verify the syntax. \n"
-             "For additional assistance submit a report to the developers.\nEmail: info@copperspice.com\n\n");
+             "For additional assistance submit a report to info@copperspice.com\n\n");
       exit(1);
    }
 
@@ -685,9 +685,9 @@ void Doxy_Setup::usage()
 {
    printf("\n");
    printf("DoxyPress: Version %s\n", csPrintable(versionString));
-   printf("email: info@copperspice.com\n");
+   printf("info@copperspice.com\n\n");
 
-   printf("\n\n");
+   printf("\n");
    printf("Usage: doxypress [OPTIONS] [project file name]\n");
 
    printf("\n");

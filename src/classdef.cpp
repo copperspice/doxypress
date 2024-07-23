@@ -3278,7 +3278,8 @@ QSharedPointer<ClassDef> ClassDef::insertTemplateInstance(const QString &fileNam
    auto templateClass = m_templateInstances.find(templSpec);
 
    if (templateClass == m_templateInstances.end()) {
-      Debug::print(Debug::Classes, 0, "      New template instance class `%s'`%s'\n", csPrintable(name()), csPrintable(templSpec));
+      Debug::print(Debug::Classes, 0, "      New template instance class `%s'`%s'\n",
+            csPrintable(name()), csPrintable(templSpec));
 
       QString tcname = removeRedundantWhiteSpace(localName() + templSpec);
 
