@@ -21,7 +21,10 @@
 
 #include <QString>
 
-enum DiaOutputFormat { DIA_BITMAP, DIA_EPS };
+enum DiaOutputFormat {
+   DIA_BITMAP,
+   DIA_EPS
+};
 
 void writeDiaGraphFromFile(const QString &inFile, const QString &outDir,
       const QString &outFile, DiaOutputFormat format);

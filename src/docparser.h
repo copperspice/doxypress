@@ -151,7 +151,7 @@ class DocNode
 
    // Destroys a node.
    virtual ~DocNode()
-   {}
+   { }
 
    // Returns the kind of node. Provides runtime type information
    virtual Kind kind() const = 0;

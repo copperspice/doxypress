@@ -48,7 +48,8 @@
 
 struct FindFileCacheElem {
    FindFileCacheElem(QSharedPointer<FileDef> fd, bool ambig)
-      : fileDef(fd), isAmbig(ambig) {}
+      : fileDef(fd), isAmbig(ambig)
+   { }
 
    QSharedPointer<FileDef> fileDef;
    bool isAmbig;
@@ -613,7 +614,9 @@ QSharedPointer<ClassDef> newResolveTypedef(QSharedPointer<const FileDef> fileSco
       int si = type.lastIndexOf("::");
       int i  = type.indexOf('<');
 
-      if (si == -1 && i != -1) { // typedef of a template => try the unspecialized version
+      if (si == -1 && i != -1) {
+         // typedef of a template => try the unspecialized version
+
          if (pTemplSpec) {
             *pTemplSpec = type.mid(i);
          }
@@ -4703,7 +4706,6 @@ void initClassHierarchy(ClassSDict *cl)
 bool hasVisibleRoot(SortedList<BaseClassDef *> *bcl)
 {
    if (bcl) {
-
       for (auto item : *bcl) {
          QSharedPointer<ClassDef> cd = item->classDef;
 

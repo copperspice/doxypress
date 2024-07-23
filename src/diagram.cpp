@@ -39,7 +39,9 @@
 class DiagramItem
 {
  public:
-   DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection prot, Specifier virt, const QString &ts);
+   DiagramItem(DiagramItem *p, int number, QSharedPointer<ClassDef> cd, Protection prot,
+      Specifier virt, const QString &ts);
+
    ~DiagramItem();
 
    QString label() const;
@@ -114,7 +116,9 @@ class DiagramItem
 class DiagramRow : public QList<DiagramItem *>
 {
  public:
-   DiagramRow(TreeDiagram *d, int l) : QList<DiagramItem *>() {
+   DiagramRow(TreeDiagram *d, int l)
+      : QList<DiagramItem *>()
+   {
       diagram = d;
       level = l;
    }
@@ -146,10 +150,10 @@ class TreeDiagram : public QList<DiagramRow *>
    void computeExtremes(uint *labelWidth, uint *xpos);
 
    void drawBoxes(QTextStream &t, Image *image, bool doBase, bool bitmap, uint baseRows, uint superRows,
-                  uint cellWidth, uint cellHeight, QString relPath = QString(), bool generateMap = true);
+         uint cellWidth, uint cellHeight, QString relPath = QString(), bool generateMap = true);
 
    void drawConnectors(QTextStream &t, Image *image, bool doBase, bool bitmap,
-                       uint baseRows, uint superRows, uint cellWidth, uint cellheight);
+         uint baseRows, uint superRows, uint cellWidth, uint cellheight);
 
  private:
    bool layoutTree(DiagramItem *root, int row);
@@ -473,7 +477,6 @@ void DiagramRow::insertClass(DiagramItem *parent, QSharedPointer<ClassDef> cd, b
 // **
 TreeDiagram::TreeDiagram(QSharedPointer<ClassDef> root, bool doBases)
 {
-
    DiagramRow *row = new DiagramRow(this, 0);
    append(row);
 

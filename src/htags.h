@@ -31,4 +31,4 @@ struct Htags {
    static bool execute(const QString &htmldir);
 };
 
-#endif 
+#endif

@@ -588,7 +588,7 @@ static void addParmType()
    }
 
    if (!g_parmType.isEmpty()) {
-      g_parmType += ' ' ;
+      g_parmType += ' ';
    }
 
    g_parmType += g_parmName;
@@ -643,7 +643,7 @@ static QSharedPointer<ClassDef> stripClassName(const QString &s, QSharedPointer<
       QString clName = className + templSpec;
       QSharedPointer<ClassDef> cd;
 
-      if (!g_classScope.isEmpty()) {
+      if (! g_classScope.isEmpty()) {
          cd = getResolvedClass(d, g_sourceFileDef, g_classScope + "::" + clName);
       }
 
@@ -1000,7 +1000,7 @@ static void generateClassOrGlobalLink(CodeGenerator &ol, const QString &clName, 
          }
 
          if (d && d->isLinkable() && md->isLinkable() && g_currentMemberDef && g_collectXRefs) {
-            addDocCrossReference(g_currentMemberDef, md) ;
+            addDocCrossReference(g_currentMemberDef, md);
          }
       }
 
@@ -1914,7 +1914,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       startFontClass("preprocessor");
       g_code->codify(text);
-      BEGIN( ReadInclude );
+      BEGIN(ReadInclude);
    }
 
 <Body>("@interface"|"@implementation"|"@protocol")[ \t\n]+ {
@@ -1926,7 +1926,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       endFontClass();
 
       if (! g_insideTemplate)  {
-         BEGIN( ClassName );
+         BEGIN(ClassName);
       }
    }
 
@@ -1940,7 +1940,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
-      BEGIN( ClassName );
+      BEGIN(ClassName);
    }
 
 <Body>"property"|"event"/{BN}*         {
@@ -1963,7 +1963,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       endFontClass();
 
       if (! g_insideTemplate) {
-         BEGIN( ClassName );
+         BEGIN(ClassName);
       }
    }
 
@@ -1974,7 +1974,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       codifyLines(text);
       endFontClass();
 
-      BEGIN( PackageName );
+      BEGIN(PackageName);
    }
 
 <ClassVar>\n            {
@@ -2140,7 +2140,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(t);
 
       endFontClass();
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <Body,Bases>^[ \t]*"#"        {
@@ -2150,7 +2150,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_lastSkipCppContext = YY_START;
       g_code->codify(text);
 
-      BEGIN( SkipCPP ) ;
+      BEGIN(SkipCPP);
    }
 
 <SkipCPP>\"          {
@@ -2159,7 +2159,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
       g_lastStringContext = YY_START;
 
-      BEGIN( SkipString );
+      BEGIN(SkipString);
    }
 
 <SkipCPP>.               {
@@ -2204,7 +2204,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <Body,FuncCall,MemberCall,MemberCall2>"}"    {
@@ -2290,7 +2290,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          g_code->codify(text);
          g_searchingForBody = false;
 
-         BEGIN( Body );
+         BEGIN(Body);
       }
    }
 
@@ -2329,11 +2329,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          g_code->codify(text);
          endFontClass();
 
-         BEGIN( AlignAs );
+         BEGIN(AlignAs);
 
       } else {
          generateClassOrGlobalLink(*g_code, text);
-         BEGIN( ClassVar );
+         BEGIN(ClassVar);
       }
    }
 
@@ -2341,7 +2341,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       g_bracketCount = 1;
       g_code->codify(text);
-      BEGIN( AlignAsEnd );
+      BEGIN(AlignAsEnd);
    }
 
 <AlignAs>\n                             {
@@ -2374,7 +2374,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <AlignAsEnd>\n                   {
       QString text = QString::fromUtf8(yytext);
-      g_yyLineNr++;
+      ++g_yyLineNr;
       codifyLines(text);
    }
 
@@ -2386,23 +2386,27 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <ClassName>{ID}("\\"{ID})*       {
       // PHP namespace
       QString text = QString::fromUtf8(yytext);
+
       g_curClassName = substitute(text, "\\", "::");
       g_scopeStack.push(CLASSBLOCK);
       pushScope(g_curClassName);
       addType();
       generateClassOrGlobalLink(*g_code, text);
-      BEGIN( ClassVar );
+
+      BEGIN(ClassVar);
    }
 
 <ClassName>{ID}{B}*"("{ID}")"           {
       // Obj-C category
       QString text = QString::fromUtf8(yytext);
+
       g_curClassName = removeRedundantWhiteSpace(text);
       g_scopeStack.push(CLASSBLOCK);
       pushScope(g_curClassName);
       addType();
       generateClassOrGlobalLink(*g_code,  text);
-      BEGIN( ClassVar );
+
+      BEGIN(ClassVar);
    }
 
 <PackageName>{ID}("."{ID})*      {
@@ -2414,7 +2418,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <ClassVar>"="           {
       unput(*yytext);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <ClassVar>("extends"|"implements")  {
@@ -2635,7 +2639,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_args.resize(0);
       g_name += text;
 
-      BEGIN( FuncCall );
+      BEGIN(FuncCall);
    }
 
 <Body>{SCOPEPREFIX}?"operator"/"("      {
@@ -2796,6 +2800,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <FuncCall>"in"/{BN}*          {
       QString text = QString::fromUtf8(yytext);
+
       if (! g_inForEachExpression) {
          REJECT;
       }
@@ -2814,6 +2819,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>{FLOWKW}/{BN}*"("          {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -2868,6 +2874,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <Body>{FLOWKW}/{B}*           {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keywordflow");
       codifyLines(text);
       endFontClass();
@@ -2885,8 +2892,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <Body>"*"{B}*")"              {
       // end of cast?
       QString text = QString::fromUtf8(yytext);
+
       g_code->codify(text);
       popCallContext();
+
       --g_bracketCount;
       g_parmType = g_name;
 
@@ -2907,6 +2916,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       if (text[0] == ')') {
          popCallContext();
          --g_bracketCount;
+
          BEGIN(FuncCall);
       }
    }
@@ -2969,10 +2979,11 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <TemplCast>">"             {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
-      BEGIN( g_lastTemplCastContext );
+      BEGIN(g_lastTemplCastContext);
    }
 
 <TemplCast>{ID}("::"{ID})*       {
@@ -3091,7 +3102,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_bracketCount = 0;
       g_args.resize(0);
       g_name += text;
-      BEGIN( FuncCall );
+      BEGIN(FuncCall);
    }
 
 <FuncCall,Body,MemberCall,MemberCall2,SkipInits,InlineInit>{RAWBEGIN}   {
@@ -3107,7 +3118,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_delimiter = text.mid(i + 2);
       g_delimiter = g_delimiter.left(g_delimiter.length() - 1);
 
-      BEGIN( RawString );
+      BEGIN(RawString);
    }
 
 <FuncCall,Body,MemberCall,MemberCall2,SkipInits,InlineInit>\"  {
@@ -3116,7 +3127,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
       g_lastStringContext   = YY_START;
       g_inForEachExpression = false;
-      BEGIN( SkipString );
+      BEGIN(SkipString);
    }
 
 <FuncCall,Body,MemberCall,MemberCall2,SkipInits,InlineInit>\'  {
@@ -3125,7 +3136,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
       g_lastStringContext   = YY_START;
       g_inForEachExpression = false;
-      BEGIN( SkipStringS );
+      BEGIN(SkipStringS);
    }
 
 <SkipString>[^\"\\\r\n]*      {
@@ -3150,7 +3161,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastStringContext );
+      BEGIN(g_lastStringContext);
    }
 
 <SkipStringS>\'            {
@@ -3158,7 +3169,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastStringContext );
+      BEGIN(g_lastStringContext);
    }
 
 <SkipString,SkipStringS>\\.      {
@@ -3173,9 +3184,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString delimiter = text.mid(1);
       delimiter = delimiter.left(delimiter.length() - 1);
 
-      if (delimiter == g_delimiter)
-      {
-         BEGIN( g_lastStringContext );
+      if (delimiter == g_delimiter) {
+         BEGIN(g_lastStringContext);
       }
    }
 
@@ -3208,9 +3218,10 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <SkipVerbString>\"         {
       // end of string
       QString text = QString::fromUtf8(yytext);
+
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastVerbStringContext );
+      BEGIN(g_lastVerbStringContext);
    }
 
 <SkipVerbString>.          {
@@ -3267,7 +3278,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_code->codify(text);
       g_memCallContext = YY_START;
-      BEGIN( MemberCall );
+      BEGIN(MemberCall);
    }
 
 <MemberCall>{SCOPETNAME}/{BN}*"("   {
@@ -3608,8 +3619,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (skipLanguageKeywords(text)) {
-         REJECT;      }
-
+         REJECT;
+      }
 
       startFontClass("keyword");
       g_code->codify(text);
@@ -3662,7 +3673,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       g_inForEachExpression = false;
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <MemberCall2,FuncCall>,          {
@@ -3680,6 +3691,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          g_code->codify(text);
          g_skipInlineInitContext = YY_START;
          g_curlyCount = 0;
+
          BEGIN(InlineInit);
 
       } else {
@@ -3714,10 +3726,13 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
 <MemberCall2,FuncCall>"("     {
       QString text = QString::fromUtf8(yytext);
+
       g_parmType.resize(0);
       g_parmName.resize(0);
       g_code->codify(text);
-      g_bracketCount++;
+
+      ++g_bracketCount;
+
       pushCallContext();
 
       if (YY_START == FuncCall && ! g_insideBody) {
@@ -3744,7 +3759,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
 
       if (text[0] == ')') {
-         // no a pointer cast
+         // not a pointer cast
 
          if (g_parmType.isEmpty()) {
             g_parmType = g_parmName;
@@ -3820,16 +3835,17 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
          g_name.resize(0);
          g_type.resize(0);
-         BEGIN( Body );
+         BEGIN(Body);
 
       } else {
          g_bracketCount = 0;
-         BEGIN( SkipInits );
+         BEGIN(SkipInits);
       }
    }
 
 <CallEnd>("const"|"volatile"|"sealed"|"override")({BN}+("const"|"volatile"|"sealed"|"override"))*/{BN}*(";"|"="|"throw"{BN}*"(") {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("keyword");
       codifyLines(text);
       endFontClass();
@@ -3901,7 +3917,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <CallEnd>"try"             {
@@ -3959,7 +3975,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       startFontClass("preprocessor");
       g_lastSkipCppContext = Body;
       g_code->codify(text);
-      BEGIN( SkipCPP );
+      BEGIN(SkipCPP);
    }
 
 <CallEnd>.           {
@@ -3973,7 +3989,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_args.resize(0);
       g_parmType.resize(0);
       g_parmName.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <SkipInits>";"             {
@@ -3981,7 +3997,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       g_code->codify(text);
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <SkipInits>"{"             {
@@ -4009,7 +4025,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_type.resize(0);
       g_name.resize(0);
-      BEGIN( Body );
+      BEGIN(Body);
    }
 
 <SkipInits>{ID}{B}*"{"  {
@@ -4037,7 +4053,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       g_name = text;
       generateClassOrGlobalLink(*g_code, text);
-      BEGIN( MemberCall2 );
+      BEGIN(MemberCall2);
    }
 
 <FuncCall,MemberCall2>("("{B}*("*"{B}*)+{ID}+{B}*")"{B}*)/("."|"->") {
@@ -4057,7 +4073,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
 
       g_name = text.mid(s, e - s + 1);
-      BEGIN( MemberCall2 );
+      BEGIN(MemberCall2);
    }
 
 <MemberCall2>{ID}/([ \t\n]*"(")         {
@@ -4070,7 +4086,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       }
 
       g_args.resize(0);
-      BEGIN( FuncCall );
+      BEGIN(FuncCall);
    }
 
 <MemberCall2>{ID}/([ \t\n]*("."|"->"))  {
@@ -4079,7 +4095,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       QString text = QString::fromUtf8(yytext);
       g_name = text;
       generateClassOrGlobalLink(*g_code, text);
-      BEGIN( MemberCall2 );
+      BEGIN(MemberCall2);
    }
 
 <MemberCall2>"->"|"."         {
@@ -4092,14 +4108,14 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       g_code->codify(text);
       g_memCallContext = YY_START;
-      BEGIN( MemberCall );
+      BEGIN(MemberCall);
    }
 
 <SkipComment>"/*"("!"?)"*/"      {
       QString text = QString::fromUtf8(yytext);
       g_code->codify(text);
       endFontClass();
-      BEGIN( g_lastCContext ) ;
+      BEGIN(g_lastCContext);
    }
 
 <SkipComment>"//"|"/*"        {
@@ -4121,7 +4137,8 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       if (g_lastCContext == SkipCPP) {
          startFontClass("preprocessor");
       }
-      BEGIN( g_lastCContext );
+
+      BEGIN(g_lastCContext);
    }
 
 <SkipCxxComment>[^\r\n]*"\\"[\r]?\n    {
@@ -4139,7 +4156,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 <SkipCxxComment>\n         {
       unput('\n');
       endFontClass();
-      BEGIN( g_lastCContext );
+      BEGIN(g_lastCContext);
    }
 
 <SkipCxxComment>.          {
@@ -4161,9 +4178,9 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
          // force end of C++ comment here
          nextCodeLine();
          endFontClass();
-         BEGIN( g_lastCContext );
-      } else {
+         BEGIN(g_lastCContext);
 
+      } else {
          if (text.endsWith('\n'))  {
             --g_yyLineNr;
             unput('\n');
@@ -4223,7 +4240,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (YY_START == SkipCxxComment) {
          endFontClass();
-         BEGIN( g_lastCContext );
+         BEGIN(g_lastCContext);
       }
    }
 
@@ -4231,7 +4248,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       endFontClass();
       unput('\n');
 
-      BEGIN( g_lastSkipCppContext );
+      BEGIN(g_lastSkipCppContext);
    }
 
 <*>\n{B}*"//@"[{}].*\n        {
@@ -4250,7 +4267,7 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
 
       if (YY_START == SkipCxxComment) {
          endFontClass();
-         BEGIN( g_lastCContext );
+         BEGIN(g_lastCContext);
       }
    }
 
@@ -4490,26 +4507,31 @@ RAWEND    ")"[^ \t\(\)\\]{0,16}\"
       // check is to prevent getting stuck in skipping C++ comments
 
       if (YY_START != SkipComment && YY_START != SkipCxxComment) {
-         g_lastCContext = YY_START ;
+         g_lastCContext = YY_START;
       }
-      BEGIN( SkipComment );
+
+      BEGIN(SkipComment);
    }
 
 <*>@\"               {
       // C# verbatim string
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("stringliteral");
       g_code->codify(text);
       g_lastVerbStringContext = YY_START;
+
       BEGIN(SkipVerbString);
    }
 
 <*>"//"              {
       QString text = QString::fromUtf8(yytext);
+
       startFontClass("comment");
       g_code->codify(text);
       g_lastCContext = YY_START;
-      BEGIN( SkipCxxComment );
+
+      BEGIN(SkipCxxComment);
    }
 
 <*>"("|"["              {
@@ -4585,7 +4607,7 @@ static void saveObjCContext()
    g_ObjC_currentCtx = temp;
 
    g_braceCount = 0;
-   g_currentCtxId++;
+   ++g_currentCtxId;
 }
 
 static void restoreObjCContext()
@@ -4714,7 +4736,7 @@ void parseCCode(CodeGenerator &outputX, const QString &className, const QString 
    }
 
    yyrestart( yyin );
-   BEGIN( Body );
+   BEGIN(Body);
    yylex();
 
    g_lexInit = true;

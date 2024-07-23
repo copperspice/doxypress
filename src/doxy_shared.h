@@ -28,32 +28,32 @@
 class EnableSharedFromThis : public QEnableSharedFromThis<EnableSharedFromThis>
 {
    public:
-      virtual ~EnableSharedFromThis() 
-      {    
+      virtual ~EnableSharedFromThis()
+      {
       };
 };
 
 template<class T>
 QSharedPointer<typename std::enable_if<std::is_base_of<EnableSharedFromThis, T>::value, T>::type> sharedFrom(T *ptr)
-{ 
+{
    QSharedPointer<T> retval;
 
    QSharedPointer<EnableSharedFromThis> tmp = ptr->sharedFromThis();
    retval = tmp.dynamicCast<T>();
-     
-   return retval;   
+
+   return retval;
 }
 
 
 template<class T>
 QSharedPointer<const typename std::enable_if<std::is_base_of<EnableSharedFromThis, T>::value, T>::type> sharedFrom(const T *ptr)
-{ 
+{
    QSharedPointer<const T> retval;
 
    QSharedPointer<const EnableSharedFromThis> tmp = ptr->sharedFromThis();
    retval = tmp.dynamicCast<const T>();
-     
-   return retval;   
+
+   return retval;
 }
 
 

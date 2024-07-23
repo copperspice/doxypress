@@ -20,8 +20,8 @@
 #define LOGOS_H
 
 #include <QString>
-extern void writeLogo(const QString &dir);
 
+extern void writeLogo(const QString &dir);
 extern void writeSearchButton(const QString &dir);
 extern void writeDoxFont(const QString &dir);
 extern void removeDoxFont(const QString &dir);

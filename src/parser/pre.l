@@ -53,7 +53,8 @@ struct CondCtx
 
 struct FileState {
    FileState(int size) : lineNr(1), curlyCount(0), fileBuf(size),
-      oldFileBuf(""), oldFileBufPos(0), bufState(0) {}
+      oldFileBuf(QString()), oldFileBufPos(0), bufState(nullptr)
+   { }
 
    int       lineNr;
    int       curlyCount;

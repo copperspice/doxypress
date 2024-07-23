@@ -1614,7 +1614,7 @@ static void writeClassTree(const ClassSDict &clDict, FTVHelp *ftv, bool addToInd
 
          for (auto ccd : cd->getClassSDict()) {
             if (ccd->isLinkableInProject() && ccd->templateMaster() == nullptr) {
-               count++;
+               ++count;
             }
          }
 

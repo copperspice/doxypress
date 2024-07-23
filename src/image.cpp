@@ -25,7 +25,7 @@
 
 #include <math.h>
 
-typedef unsigned char  Byte;
+using Byte = unsigned char;
 
 /** Helper struct representing a RGBA color */
 struct Color {

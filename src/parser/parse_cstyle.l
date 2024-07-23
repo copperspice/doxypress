@@ -339,7 +339,8 @@ static void lineCount()
   for (p = yytext; *p; ++p) {
 
       if (*p == '\n') {
-         yyLineNr++;
+         ++yyLineNr;
+
          s_column = 0;
          yyColNr  = 1;
 
@@ -3544,6 +3545,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <FindMembers>"CS_SLOT_1"      {
       current->mtype = MethodType::Slot;
       current->setData(EntryKey::Member_Type, "");
+
       BEGIN(CsSlot);
    }
 
@@ -3620,9 +3622,9 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
       currentArgumentContext = FindMembers;
       current_root->addSubEntry(current);
+
       current = QMakeShared<Entry>();
       initEntry();
-
       BEGIN(FindMembers);
    }
 
@@ -3667,7 +3669,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 <CsSignalSlot2Extra>{ID}               {
    }
 
-<CsSignalSlot2Name,CsSignalSlot2Extra>")"          {
+<CsSignalSlot2Name,CsSignalSlot2Extra>")"   {
       // end of signal2 or slot2 or overload
       --roundCount;
 

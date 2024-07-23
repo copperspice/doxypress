@@ -43,7 +43,7 @@ class FileNameList : public SortedList<QSharedPointer<FileDef>, true>
 
    void generateDiskNames();
 
- private:  
+ private:
    QString name;
    QString fName;
 };

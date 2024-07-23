@@ -22,7 +22,7 @@
  * Created: 7.11.2009
  * Author: ondrej
  *
- */
+*/
 
 #ifndef ECLIPSEHELP_H
 #define ECLIPSEHELP_H
@@ -50,11 +50,11 @@ class EclipseHelp : public IndexIntf
    void finalize() override;
    void incContentsDepth() override;
    void decContentsDepth() override;
-   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file, 
-                  const QString &anchor, bool unused, QSharedPointer<Definition> def, DirType category) override;
-  
-   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor, 
-                  const QString &title) override;
+   void addContentsItem(bool isDir, const QString &name, const QString &ref, const QString &file,
+         const QString &anchor, bool unused, QSharedPointer<Definition> def, DirType category) override;
+
+   void addIndexItem(QSharedPointer<Definition> context, QSharedPointer<MemberDef> md, const QString &sectionAnchor,
+         const QString &title) override;
 
    void addIndexFile(const QString &name) override;
    void addImageFile(const QString &name) override;

@@ -48,7 +48,8 @@
 #include <QTime>
 
 struct LookupInfo {
-   LookupInfo() {}
+   LookupInfo()
+   { }
 
    LookupInfo(QSharedPointer<ClassDef> cd, QSharedPointer<MemberDef> td, QString ts, QString rt)
       : classDef(cd), typeDef(td), templSpec(ts), resolvedType(rt)

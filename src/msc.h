@@ -22,15 +22,20 @@
 #include <QString>
 #include <QTextStream>
 
+enum MscOutputFormat {
+   MSC_BITMAP,
+   MSC_EPS,
+   MSC_SVG
+};
 
-enum MscOutputFormat { MSC_BITMAP , MSC_EPS, MSC_SVG };
+void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile,
+      MscOutputFormat format);
 
-void writeMscGraphFromFile(const QString &inFile, const QString &outDir, const QString &outFile, MscOutputFormat format);
-
-QString getMscImageMapFromFile(const QString &nFile, const QString &outDir, const QString &relPath, const QString &contxt);
+QString getMscImageMapFromFile(const QString &nFile, const QString &outDir, const QString &relPath,
+      const QString &contxt);
 
 void writeMscImageMapFromFile(QTextStream &t, const QString &inFile, const QString &outDir, const QString &relPath,
-                  const QString &baseName, const QString &context, MscOutputFormat format );
+      const QString &baseName, const QString &context, MscOutputFormat format );
 
 #endif
 

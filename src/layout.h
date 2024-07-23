@@ -29,7 +29,8 @@ class MemberList;
 
 /** @brief Base class representing a piece of a documentation page */
 struct LayoutDocEntry {
-   virtual ~LayoutDocEntry() {}
+   virtual ~LayoutDocEntry()
+   { }
 
    enum Kind {
       // Generic items for all pages 0
@@ -214,7 +215,7 @@ struct LayoutNavEntry {
  private:
    LayoutNavEntry()
       : m_parent(nullptr), m_kind(Kind::None), m_visible(false)
-   {}
+   { }
 
    LayoutNavEntry *m_parent;
    Kind m_kind;

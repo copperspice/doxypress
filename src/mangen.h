@@ -75,8 +75,12 @@ class ManGenerator : public OutputGenerator
    void writeDoc(DocNode *, QSharedPointer<Definition> ctx, QSharedPointer<MemberDef> md) override;
 
    void startFile(const QString &name, const QString &manName, const QString &title) override;
-   void writeSearchInfo() override {}
-   void writeFooter(const QString &) override {}
+   void writeSearchInfo() override {
+   }
+
+   void writeFooter(const QString &) override {
+   }
+
    void endFile() override;
 
    void clearBuffer();

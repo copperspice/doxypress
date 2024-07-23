@@ -5346,7 +5346,8 @@ QHash<QString, int> Doxy_Work::getTemplateArgumentsInName(const ArgumentList &te
 /*! Searches a class from within \a context and \a cd and returns its
  *  definition if found (otherwise 0 is returned).
  */
-QSharedPointer<ClassDef> Doxy_Work::findClassWithinClassContext(QSharedPointer<Definition> context, QSharedPointer<ClassDef>cd, const QString &name)
+QSharedPointer<ClassDef> Doxy_Work::findClassWithinClassContext(QSharedPointer<Definition> context,
+      QSharedPointer<ClassDef>cd, const QString &name)
 {
    QSharedPointer<ClassDef> result = QSharedPointer<ClassDef>();
 
@@ -5865,7 +5866,7 @@ bool Doxy_Work::findClassRelation(QSharedPointer<Entry> ptrEntry, QSharedPointer
                }
 
                baseClass = getResolvedClass(tmpScope, cd->getFileDef(), baseClassName, &baseClassTypeDef,
-                                            &tmpTemplSpec, mode == Undocumented, true);
+                     &tmpTemplSpec, mode == Undocumented, true);
 
                found = (baseClass != nullptr) && (baseClass != cd);
 
@@ -7181,7 +7182,6 @@ void Doxy_Work::findMember(QSharedPointer<Entry> ptrEntry, QString funcDecl, boo
                QSharedPointer<ClassDef> tcd_hold = getResolvedClass(nd, fd, scopeName, nullptr, nullptr, true, true);
 
                for (auto md : *mn) {
-
                   QSharedPointer<ClassDef> memberCd  = md->getClassDef();
 
                   // if the member we are searching for is an enum value which is part of
