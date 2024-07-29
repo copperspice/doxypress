@@ -24,7 +24,7 @@
 #include <QString>
 
 // used for table column width calculation
-const int rtf_pageWidth = 8748;
+static constexpr const int rtf_pageWidth = 8748;
 
 extern QString rtf_title;
 extern QString rtf_subject;
