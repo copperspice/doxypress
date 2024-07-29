@@ -3,8 +3,8 @@
         "clang-compilation-path": "",
         "clang-dialect": "-std=c++20",
         "clang-flags": [
-            "-Ic:\\MinGW_64_7.3\\lib\\gcc\\x86_64-w64-mingw32\\7.3.0\\include\\c++\\x86_64-w64-mingw32\\",
-            "-Ic:\\MinGW_64_7.3\\lib\\gcc\\x86_64-w64-mingw32\\7.3.0\\include\\c++\\"
+            "-Ic:\\MinGW_64_10.5\\lib\\gcc\\x86_64-w64-mingw32\\10.5.0\\include\\c++\\x86_64-w64-mingw32\\",
+            "-Ic:\\MinGW_64_10.5\\lib\\gcc\\x86_64-w64-mingw32\\10.5.0\\include\\c++\\"
         ],
         "clang-include-input-source": true,
         "clang-parsing": true,
@@ -242,6 +242,10 @@
         "warn-format": "$file:$line: $text",
         "warn-logfile": "clang_warn.log",
         "warn-param-mismatch": false,
+        "warn-sa-ignore-words": [
+            ""
+        ],
+        "warn-sa-missing-links": false,
         "warn-undoc": true,
         "warn-undoc-param": true,
         "warnings": true

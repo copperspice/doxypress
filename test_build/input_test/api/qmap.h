@@ -18,6 +18,9 @@
 #ifndef QMAP_H
 #define QMAP_H
 
+#include <qglobal.h>
+#include <qstring8.h>
+
 #include <map>
 
 template <typename Key, typename Val, typename C>

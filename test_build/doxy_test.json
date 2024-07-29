@@ -243,6 +243,10 @@
         "warn-format": "$file:$line: $text",
         "warn-logfile": "error_log.txt",
         "warn-param-mismatch": false,
+        "warn-sa-ignore-words": [
+            ""
+        ],
+        "warn-sa-missing-links": false,
         "warn-undoc": true,
         "warn-undoc-param": false,
         "warnings": true

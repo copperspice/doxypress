@@ -15,6 +15,9 @@
 *
 *************************************************************************/
 
+#ifndef KITCHEN_H
+#define KITCHEN_H
+
 /* Following lines are includes */
 #include <string>
 #include <utility>
@@ -417,3 +420,5 @@ show more details about this concept.
 \sa Clang_eventTimed
 
 */
+
+#endif

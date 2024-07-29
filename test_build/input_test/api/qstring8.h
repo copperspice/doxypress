@@ -18,6 +18,9 @@
 #ifndef QSTRING8_H
 #define QSTRING8_H
 
+#include <cs_string.h>
+#include <qglobal.h>
+
 class QString8
 {
    public:
