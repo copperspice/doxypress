@@ -3671,6 +3671,8 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <CsSignalSlot2Name,CsSignalSlot2Extra>")"   {
       // end of signal2 or slot2 or overload
+      lineCount();
+
       --roundCount;
 
       if (roundCount == 0)    {
