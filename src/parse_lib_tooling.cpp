@@ -696,7 +696,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                current->m_static = true;
             }
 
-            if (methodDecl->isPure())  {
+            if (methodDecl->isPureVirtual())  {
                returnType.prepend(" virtual ");
                current->virt = Specifier::Pure;
 
