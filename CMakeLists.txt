@@ -45,7 +45,7 @@ endif()
 set(CLANG_PATH "../clang_lib")
 
 # lib clang hdr
-set(CLANG_INC ${CLANG_PATH}/include/10.0.1)
+set(CLANG_INC ${CLANG_PATH}/include/18)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 
@@ -60,7 +60,8 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
    # lib clang dll
    list(APPEND CLANG_LIBS
       ${CLANG_PATH}/lib/libclang.so
-      ${CLANG_PATH}/lib/libclang.so.10
+      ${CLANG_PATH}/lib/libclang.so.18.1
+      ${CLANG_PATH}/lib/libclang.so.18.1.8
    )
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")

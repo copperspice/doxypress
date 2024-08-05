@@ -346,37 +346,50 @@ if (CMAKE_SYSTEM_NAME MATCHES "Darwin")
       CopperSpice::CsXml
 
       -L${CLANG_LIB_DIR}
+      -lclang
+      -lclangAPINotes
       -lclangAST
+      -lclangASTMatchers
+      -lclangAnalysis
       -lclangBasic
-      -lclangTooling
-      -lclangStaticAnalyzerFrontend
-      -lclangFrontend
       -lclangDriver
-      -lclangParse
-      -lclangIndex
-      -lLLVMBitstreamReader
-      -lLLVMDemangle
-      -lLLVMFrontendOpenMP
-      -lLLVMMCParser
-      -lLLVMProfileData
-      -lLLVMRemarks
-      -lclangSerialization
-      -lclangSema
       -lclangEdit
-      -lLLVMBitReader
-      -lLLVMOption
+      -lclangFrontend
+      -lclangIndex
+      -lclangLex
+      -lclangParse
+      -lclangSema
+      -lclangSerialization
       -lclangStaticAnalyzerCheckers
       -lclangStaticAnalyzerCore
-      -lclangAnalysis
-      -lclangAST
+      -lclangStaticAnalyzerFrontend
+      -lclangSupport
+      -lclangTooling
       -lclangToolingCore
-      -lclangLex
-      -lclangBasic
-      -lLLVMCore
+
+      -lLLVMAnalysis
+      -lLLVMAsmParser
       -lLLVMBinaryFormat
+      -lLLVMBitReader
+      -lLLVMBitstreamReader
+      -lLLVMCore
+      -lLLVMDebugInfoDWARF
+      -lLLVMDemangle
+      -lLLVMFrontendOffloading
+      -lLLVMFrontendOpenMP
+      -lLLVMIRReader
       -lLLVMMC
+      -lLLVMMCParser
+      -lLLVMObject
+      -lLLVMOption
+      -lLLVMProfileData
+      -lLLVMRemarks
+      -lLLVMScalarOpts
       -lLLVMSupport
-      -lclang
+      -lLLVMTextAPI
+      -lLLVMTargetParser
+      -lLLVMTransformUtils
+      -lLLVMWindowsDriver
    )
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
@@ -389,38 +402,51 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "(Linux|OpenBSD|FreeBSD|NetBSD|DragonFly)")
 
       -L${CLANG_LIB_DIR}
       -Wl,--start-group
+      -lclang
+      -lclangAPINotes
       -lclangAST
+      -lclangASTMatchers
+      -lclangAnalysis
       -lclangBasic
-      -lclangTooling
-      -lclangStaticAnalyzerFrontend
-      -lclangFrontend
       -lclangDriver
-      -lclangParse
-      -lclangIndex
-      -lLLVMBitstreamReader
-      -lLLVMDemangle
-      -lLLVMFrontendOpenMP
-      -lLLVMMCParser
-      -lLLVMProfileData
-      -lLLVMRemarks
-      -lclangSerialization
-      -lclangSema
       -lclangEdit
-      -lLLVMBitReader
-      -lLLVMOption
+      -lclangFrontend
+      -lclangIndex
+      -lclangLex
+      -lclangParse
+      -lclangSema
+      -lclangSerialization
       -lclangStaticAnalyzerCheckers
       -lclangStaticAnalyzerCore
-      -lclangAnalysis
-      -lclangAST
+      -lclangStaticAnalyzerFrontend
+      -lclangSupport
+      -lclangTooling
       -lclangToolingCore
-      -lclangLex
-      -lclangBasic
-      -lLLVMCore
+
+      -lLLVMAnalysis
+      -lLLVMAsmParser
       -lLLVMBinaryFormat
+      -lLLVMBitReader
+      -lLLVMBitstreamReader
+      -lLLVMCore
+      -lLLVMDebugInfoDWARF
+      -lLLVMDemangle
+      -lLLVMFrontendOffloading
+      -lLLVMFrontendOpenMP
+      -lLLVMIRReader
       -lLLVMMC
+      -lLLVMMCParser
+      -lLLVMObject
+      -lLLVMOption
+      -lLLVMProfileData
+      -lLLVMRemarks
+      -lLLVMScalarOpts
       -lLLVMSupport
+      -lLLVMTextAPI
+      -lLLVMTargetParser
+      -lLLVMTransformUtils
+      -lLLVMWindowsDriver
       -Wl,--end-group
-      -lclang
    )
 
 elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -432,43 +458,57 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "Windows")
 
       -L${CLANG_LIB_DIR}
       -Wl,--start-group
+      -lclang
+      -lclangAPINotes
       -lclangAST
+      -lclangASTMatchers
+      -lclangAnalysis
       -lclangBasic
-      -lclangTooling
-      -lclangStaticAnalyzerFrontend
-      -lclangFrontend
       -lclangDriver
-      -lclangParse
-      -lclangIndex
-      -lLLVMBitstreamReader
-      -lLLVMDemangle
-      -lLLVMFrontendOpenMP
-      -lLLVMMCParser
-      -lLLVMProfileData
-      -lLLVMRemarks
-      -lclangSerialization
-      -lclangSema
       -lclangEdit
-      -lLLVMBitReader
-      -lLLVMOption
+      -lclangFrontend
+      -lclangIndex
+      -lclangLex
+      -lclangParse
+      -lclangSema
+      -lclangSerialization
       -lclangStaticAnalyzerCheckers
       -lclangStaticAnalyzerCore
-      -lclangAnalysis
-      -lclangAST
+      -lclangStaticAnalyzerFrontend
+      -lclangSupport
+      -lclangTooling
       -lclangToolingCore
-      -lclangLex
-      -lclangBasic
-      -lLLVMCore
+
+      -lLLVMAnalysis
+      -lLLVMAsmParser
       -lLLVMBinaryFormat
+      -lLLVMBitReader
+      -lLLVMBitstreamReader
+      -lLLVMCore
+      -lLLVMDebugInfoDWARF
+      -lLLVMDemangle
+      -lLLVMFrontendOffloading
+      -lLLVMFrontendOpenMP
+      -lLLVMIRReader
       -lLLVMMC
+      -lLLVMMCParser
+      -lLLVMObject
+      -lLLVMOption
+      -lLLVMProfileData
+      -lLLVMRemarks
+      -lLLVMScalarOpts
       -lLLVMSupport
+      -lLLVMTextAPI
+      -lLLVMTargetParser
+      -lLLVMTransformUtils
+      -lLLVMWindowsDriver
       -Wl,--end-group
-      -llibclang
 
       ole32
       uuid
       version
       advapi32
+      ws2_32
 )
 endif()
 
