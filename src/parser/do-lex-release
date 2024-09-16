@@ -86,8 +86,8 @@ echo "Compile constexp, declinfo, default_args"
    rm  default_args.cpp
 
 
-echo "Add comment, adjust buffer size"
-echo "Adjust read buffer size, remove register keyword"
+echo "Add correct software license"
+echo "Adjust buffer size, read buffer size, change null to nullptr"
 
 sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/code_cstyle.cpp
 sed -e "1r license.txt" -e "1d" -e 's/#line 3 "<stdout>"//' -i ../generated/parse_cstyle.cpp

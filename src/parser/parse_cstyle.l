@@ -2526,7 +2526,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
 
 <FindMembers>{B}*{TYPEDEFPREFIX}{IDLATTR}?"enum"({BN}+("class"|"struct"))?"{" |
 <FindMembers>{B}*{TYPEDEFPREFIX}{IDLATTR}?"enum"({BN}+("class"|"struct"))?{BN}+ {
-      // for IDL: typedef [something] enum
+      // if this is IDL can match typedef [something] enum
       QString text = QString::fromUtf8(yytext);
 
       isTypedef = text.indexOf("typedef") != -1;
@@ -6312,7 +6312,7 @@ CS_MACRO       ("CS_OBJECT_MULTIPLE"|"CS_OBJECT_INTERNAL"|"CS_GADGET"|"CS_GADGET
    }
 
 <TypedefName>";"        {
-      /* typedef of anonymous type */
+      // typedef of anonymous type
       current->m_entryName = QString("@%1").formatArg(anonCount);
       ++anonCount;
 
@@ -10512,7 +10512,7 @@ static void parseCompounds(QSharedPointer<Entry> rt)
 {
    static const bool groupNested = Config::getBool("group-nested-compounds");
 
-   // safter to make a temp copy
+   // safer to make a temp copy
    const QVector<QSharedPointer<Entry>> tmpChildren = rt->children();
 
    for (const auto &ce : tmpChildren) {
