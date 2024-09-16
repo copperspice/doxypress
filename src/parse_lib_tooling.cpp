@@ -227,25 +227,29 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
          current = s_entryMap.value(currentUSR);
 
-         // bool newEntry   = false;
+         bool newEntry      = true;
          bool isForwardDecl = false;
 
-         if (current == nullptr) {
+         if (node->isClass() && ! node->isCompleteDefinition()) {
+            isForwardDecl = true;
+         }
+
+         if (isForwardDecl) {
+            current = QMakeShared<Entry>();
+
+         } else if (current == nullptr) {
             current = QMakeShared<Entry>();
             s_entryMap.insert(currentUSR, current);
 
-            // newEntry = true;
+         } else {
+            newEntry = false;
+
          }
 
          clang::FullSourceLoc location = m_context->getFullLoc(node->getBeginLoc());
          QString name = getName(node);
 
          if (node->isClass() ) {
-
-            if (! node->isCompleteDefinition())  {
-               isForwardDecl = true;
-            }
-
             current->section     = Entry::CLASS_SEC;
             current->m_entryName = name;
 
@@ -259,7 +263,7 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
             current->startBodyLine = current->startLine;
             current->endBodyLine   = m_context->getFullLoc(node->getEndLoc()).getSpellingLineNumber();
 
-            if (true) {    //  (! isForwardDecl) {
+            if (true) {
                if (node->hasAttr<clang::FinalAttr>())  {
                   current->m_traits.setTrait(Entry::Virtue::Final);
                }
@@ -292,8 +296,12 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
                   }
                }
 
-               if (! isForwardDecl) {
+               if (isForwardDecl) {
+                  current->m_traits.setTrait(Entry::Virtue::ForwardDecl);
+
+               } else {
                   // inheritance
+
                   for (auto &item : node->bases()) {
                      QString itemName = toQString(item.getType());
 
@@ -312,9 +320,9 @@ class DoxyVisitor : public clang::RecursiveASTVisitor<DoxyVisitor>
 
             if (parentUSR.isEmpty() || parentUSR == "TranslationUnit")  {
 
-//             if (newEntry) {
+               if (newEntry) {
                   s_current_root->addSubEntry(current);
-//             }
+               }
 
             } else {
                // nested class
