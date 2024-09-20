@@ -421,7 +421,7 @@
         "project-brief": "Sample files to test the functionality of DoxyPress",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Test",
-        "project-version": "1.6.0"
+        "project-version": "1.7.0"
     },
     "source": {
         "inline-source": true,

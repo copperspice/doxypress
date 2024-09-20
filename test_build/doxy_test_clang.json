@@ -416,7 +416,7 @@
         "project-brief": "",
         "project-logo": "images/cslogo-32.png",
         "project-name": "DoxyPress Clang Parsing",
-        "project-version": "1.4.1"
+        "project-version": "1.7.0"
     },
     "source": {
         "inline-source": true,
